@@ -1,68 +1,62 @@
 package form_template.income.f7_8.v2012
 
+import com.aplana.sbrf.taxaccounting.model.Cell
+import com.aplana.sbrf.taxaccounting.model.DataRow
+import com.aplana.sbrf.taxaccounting.model.FormData
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import groovy.transform.Field
 
 import java.math.RoundingMode
 import java.text.SimpleDateFormat
 
 /**
- * Скрипт для Ф-7.8 (f7_8.groovy).
  * (Ф 7.8) Реестр совершенных операций с ценными бумагами по продаже и погашению, а также по открытию-закрытию
  * короткой позиции
  * formTemplateId=362
  *
- * Версия ЧТЗ: 57
- *
  * @author vsergeev
- *
- * Графы:
- * 1    balanceNumber                   Номер балансового счёта Справочник 29 Атрибут 152 BALANCE_ACCOUNT
- * 2    operationType                   Вид операции (продажа, погашение, открытие \закрытие короткой позиции)
- *                                      Справочник 87 Атрибут 824 OPERATION_TYPE
- * 3    signContractor                  Признак контрагента: 3 - эмитент ценной бумаги, 4 - организатор торговли,
- *                                      5 - прочие Справочник 88 Атрибут 825 CODE
- * 4    contractorName                  Наименование контрагента
- * 5    securityName                    Наименование ценной бумаги (включая наименование эмитента)
- * 6    series                          Серия (выпуск)
- * 7    securityKind                    Вид ценной бумаги: 1 - купонная облигация, 2 - дисконтная облигация, 3 - акция
- *                                      Справочник 89 Атрибут 827 CODE
- * 8    signSecurity                    Признак ценной бумаги: «+» - обращающаяся на ОРЦБ; «-» - необращающаяся на ОРЦБ
- *                                      Справочник 62 Атрибут 621 CODE
- * 9    currencyCode                    Код валюты бумаги (номинала) Справочник 15 Атрибут 65 CODE_2
- * 10   currencyName                    Наименование валюты бумаги (номинала) Справочник 15 Атрибут 66 NAME
- * 11   nominal                         Номинал одной бумаги (ед. вал.)
- * 12   amount                          Количество ценных бумаг (шт.)
- * 13   acquisitionDate                 Дата приобретения, закрытия короткой позиции
- * 14   tradeDate                       Дата совершения сделки
- * 15   currencyCodeTrade               Код валюты расчётов по сделке Справочник 15 Атрибут 65 CODE_2
- * 16   currencyNameTrade               Наименование валюты расчётов по сделке Справочник 15 Атрибут 66 NAME
- * 17   costWithoutNKD                  Стоимость покупки без НКД, рублей (по курсу на дату приобретения)
- * 18   loss                            Расходы банка, связанные с приобретением, рублей (по курсу на дату приобретения)
- * 19   marketPriceInPerc               % к номиналу (руб.)
- * 20   marketPriceInRub                в рублях (по курсу на дату приобретения)
- * 21   costAcquisition                 Стоимость приобретения без НКД в целях налогообложения (руб. по курсу на
- *                                      дату приобретения)
- * 22   realizationDate                 Дата реализации (погашения), открытия короткой позиции
- * 23   tradeDate2                      Дата совершения сделки
- * 24   repaymentWithoutNKD             Стоимость погашения без НКД, рублей (по курсу на дату признания дохода)
- * 25   realizationPriceInPerc          % к номиналу (руб.)
- * 26   realizationPriceInRub           в рублях (по курсу на дату признания дохода)
- * 27   marketPriceRealizationInPerc    % к номиналу (руб.)
- * 28   marketPriceRealizationInRub     в рублях (по курсу на дату признания дохода)
- * 29   costRealization                 Стоимость реализации (выбытия) без НКД в целях налогообложения (руб. по курсу на
- *                                      дату признания дохода)
- * 30   lossRealization                 Расходы банка, связанные с реализацией (руб. по курсу на дату признания дохода)
- * 31   totalLoss                       Всего расходы по реализации
- * 32   averageWeightedPrice            Средневзвешенная цена одной бумаги на дату, когда выпуск ценных бумаг признан
- *                                      размещённым (ед. вал.)
- * 33   termIssue                       Срок обращения согласно условиям выпуска (дни) (для дисконтных облигаций)
- * 34   termHold                        Срок владения ценной бумагой (дни) (для дисконтных облигаций)
- * 35   interestIncomeCurrency          ед. валюты
- * 36   interestIncomeInRub             в рублях (по курсу на дату признания дохода)
- * 37   realizationResult               Прибыль (убыток) от реализации (погашения) для дисконтных и купонных
- *                                      облигаций и акций
- * 38   excessSellingPrice              Превышение цены реализации для целей налогообложения над ценой реализации (руб.)
  */
+
+// графа    - fix
+// графа 1  - balanceNumber                 - абсолютное значение - атрибут 152 - BALANCE_ACCOUNT - «Номер балансового счёта», справочник 29 «Классификатор соответствия счетов бухгалтерского учёта кодам налогового учёта»
+// графа 2  - operationType                 - атрибут 824 - OPERATION_TYPE - «Виды операций», справочник 87 «Виды операций»
+// графа 3  - signContractor                - атрибут 825 - CODE - «Код признака контрагента», справочник 88 «Признак контрагента»
+// графа 4  - contractorName
+// графа 5  - securityName                  - атрибут 809 - ISSUER - «Эмитент», справочник 84 «Ценные бумаги»
+// графа 6  - series                        - зависит от графы 5 - атрибут 812 - SHORTNAME - «Краткое название ценной бумаги / Выпуск», справочник 84 «Ценные бумаги»
+// графа 7  - securityKind                  - зависит от графы 5 - атрибут 815 - TYPE - «Тип (вид) ценной бумаги», справочник 84 «Ценные бумаги»
+// графа 8  - signSecurity                  - зависит от графы 5 - атрибут 869 - SIGN - «Признак ценной бумаги», справочник 84 «Ценные бумаги»
+// графа 9  - currencyCode                  - зависит от графы 5 - атрибут 810 - CODE_CUR - «Цифровой код валюты выпуска», справочник 84 «Ценные бумаги»
+// графа 10 - currencyName                  - зависит от графы 5 - атрибут 810 - CODE_CUR - «Цифровой код валюты выпуска», справочник 84 «Ценные бумаги»
+// графа 11 - nominal
+// графа 12 - amount
+// графа 13 - acquisitionDate
+// графа 14 - tradeDate
+// графа 15 - currencyCodeTrade             - атрибут 65 CODE_2 - «Код валюты. Буквенный», справочник 15 «Единый справочник валют»
+// графа 16 - currencyNameTrade             - зависит от графы 15 - атрибут 66 NAME - «Наименование валюты», справочник 15 «Единый справочник валют»
+// графа 17 - costWithoutNKD
+// графа 18 - loss
+// графа 19 - marketPriceInPerc
+// графа 20 - marketPriceInRub
+// графа 21 - costAcquisition
+// графа 22 - realizationDate
+// графа 23 - tradeDate2
+// графа 24 - repaymentWithoutNKD
+// графа 25 - realizationPriceInPerc
+// графа 26 - realizationPriceInRub
+// графа 27 - marketPriceRealizationInPerc
+// графа 28 - marketPriceRealizationInRub
+// графа 29 - costRealization
+// графа 30 - lossRealization
+// графа 31 - totalLoss
+// графа 32 - averageWeightedPrice
+// графа 33 - termIssue
+// графа 34 - termHold
+// графа 35 - interestIncomeCurrency
+// графа 36 - interestIncomeInRub
+// графа 37 - realizationResult
+// графа 38 - excessSellingPrice
+
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
@@ -91,7 +85,6 @@ switch (formDataEvent) {
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED: // после принятия из подготовлена
         logicCheck()
         break
-// обобщить
     case FormDataEvent.COMPOSE:
         consolidation()
         calc()
@@ -134,16 +127,16 @@ def totalColumns = ['amount', 'costWithoutNKD', 'loss', 'marketPriceInRub', 'cos
 
 // Редактируемые атрибуты
 @Field
-def editableColumns = ['balanceNumber', 'operationType', 'signContractor', 'contractorName', 'securityName', 'series',
-        'securityKind', 'signSecurity', 'currencyCode', 'nominal', 'amount', 'acquisitionDate',
+def editableColumns = ['balanceNumber', 'operationType', 'signContractor', 'contractorName', 'securityName',
+        'nominal', 'amount', 'acquisitionDate',
         'tradeDate', 'currencyCodeTrade', 'costWithoutNKD', 'loss', 'marketPriceInPerc',
         'marketPriceInRub', 'realizationDate', 'tradeDate2', 'repaymentWithoutNKD', 'realizationPriceInPerc',
         'realizationPriceInRub', 'marketPriceRealizationInPerc', 'marketPriceRealizationInRub', 'costRealization', 'lossRealization']
 
 // Обязательно заполняемые атрибуты
 @Field
-def nonEmptyColumns = ['balanceNumber', 'operationType', 'signContractor', 'contractorName', 'securityName', 'series',
-        'securityKind', 'signSecurity', 'currencyCode', 'nominal', 'amount', 'acquisitionDate',
+def nonEmptyColumns = ['balanceNumber', 'operationType', 'signContractor', 'contractorName', 'securityName',
+        'nominal', 'amount', 'acquisitionDate',
         'tradeDate', 'currencyCodeTrade', 'costWithoutNKD', 'loss', 'realizationDate',
         'tradeDate2', 'marketPriceRealizationInPerc', 'marketPriceRealizationInRub', 'costRealization', 'realizationResult',
         'excessSellingPrice']
@@ -157,7 +150,7 @@ def arithmeticCheckAlias = ['marketPriceInPerc', 'marketPriceInRub', 'costAcquis
 def fixedDate = new SimpleDateFormat('dd.MM.yyyy').parse('01.01.2010')
 
 @Field
-def reportPeriodEndDate
+def reportPeriodEndDate = null
 
 //// Обертки методов
 
@@ -165,12 +158,22 @@ def reportPeriodEndDate
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
                       def boolean required = true) {
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
-            reportPeriodEndDate, rowIndex, colIndex, logger, required)
+            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
 }
 
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
+}
+
+// Поиск записи в справочнике по значению (для импорта)
+def getRecordImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+                    def boolean required = true) {
+    if (value == null || value == '') {
+        return null
+    }
+    return formDataService.getRefBookRecordImport(refBookId, recordCache, providerCache, refBookCache, alias, value,
+            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
 }
 
 //// Кастомные методы
@@ -328,7 +331,6 @@ void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     def dataProvider29 = refBookFactory.getDataProvider(29)
-    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
 
     // 5.
     if (formData.periodOrder != 1 && getFormDataPrev() == null) {
@@ -382,7 +384,7 @@ void logicCheck() {
         }
         checkCalc(row, arithmeticCheckAlias, values, logger, true)
 
-        def record = dataProvider29.getRecords(reportPeriodEndDate, null, "BALANCE_ACCOUNT = '$row.balanceNumber'", null)
+        def record = dataProvider29.getRecords(getReportPeriodEndDate(), null, "BALANCE_ACCOUNT = '$row.balanceNumber'", null)
         if (record.size() == 0) {
             logger.error(errorMsg + "Значение графы «Номер балансового счета» отсутствует в справочнике «Классификатор соответствия счетов бухгалтерского учёта кодам налогового учёта»")
         }
@@ -534,22 +536,22 @@ BigDecimal getGraph35(def row) {
 }
 
 BigDecimal getGraph36(def row) {
-    if (row.currencyCode == null) {
+    if (row.securityName == null) {
         return null
     }
-    if (getRefBookValue(15, row.currencyCode)?.CODE?.stringValue in ['810', '643']) {
+    def currencyCode = getCurrencyCode(row.securityName)
+    if (currencyCode in ['810', '643']) {
         return row.interestIncomeCurrency
     }
     if (!isDiscountBond(row)) {
         return null
     }
     if (row.interestIncomeCurrency != null) {
-        def String cellName = getColumnName(row, 'currencyCode')
-        def record = formDataService.getRefBookRecord(22, recordCache, providerCache, refBookCache, 'CODE_NUMBER', "${row.currencyCode}",
-                row.maturityDateCurrent, row.getIndex(), cellName, logger, true)
-
-        def rate = record?.RATE?.numberValue
-        return row.interestIncomeCurrency * rate ?: 0
+        def rate = getRate(row, row.realizationDate)
+        if (rate == null) {
+            return null
+        }
+        return round(row.interestIncomeCurrency * rate ?: 0)
     }
     return null
 }
@@ -580,7 +582,7 @@ BigDecimal getGraph38(def row) {
  * @return Если «графа 7» == «2» тогда {@value true} иначе {@value false}
  */
 boolean isDiscountBond(def row) {
-    getSecurityKind(row.securityKind) == 2
+    getSecurityKind(row.securityName) == 2
 }
 
 /**
@@ -588,7 +590,8 @@ boolean isDiscountBond(def row) {
  * @return Если «графа 7» == «1» || «графа 7» == «3» тогда {@value true} иначе {@value false}
  */
 boolean isCouponBound(def row) {
-    getSecurityKind(row.securityKind) == 1 || getSecurityKind(row.securityKind) == 3
+    def securityKind = getSecurityKind(row.securityName)
+    return securityKind == 1 || securityKind == 3
 }
 
 def getBalanceNumber(def id) {
@@ -603,18 +606,27 @@ def getSignContractor(def id) {
     return getRefBookValue(88, id)?.CODE?.numberValue
 }
 
-def getSecurityKind(def id) {
-    return getRefBookValue(89, id)?.CODE?.numberValue
+def getSecurityKind(def record84Id) {
+    def record89Id = getRefBookValue(84, record84Id?.toLong())?.TYPE?.value
+    return getRefBookValue(89, record89Id)?.CODE?.value
 }
 
-def getSignSecurity(def id) {
-    return getRefBookValue(62, id)?.CODE?.stringValue
+/** Получить признак ценной бумаги. */
+def getSignSecurity(def record84Id) {
+    def signId = getRefBookValue(84, record84Id)?.SIGN?.value
+    return getRefBookValue(62, signId)?.CODE?.value
+}
+
+/** Получить буквенный код валюты. */
+def getCurrencyCode(def record84Id) {
+    def record15Id = getRefBookValue(84, record84Id?.toLong())?.CODE_CUR?.value
+    return getRefBookValue(15, record15Id)?.CODE?.value
 }
 
 def getCompareList(DataRow row) {
     return [row.balanceNumber,
-            getSignSecurity(row.signSecurity),
-            getSecurityKind(row.securityKind),
+            getSignSecurity(row.securityName),
+            getSecurityKind(row.securityName),
             getSignContractor(row.signContractor),
             getOperationType(row.operationType)]
 }
@@ -683,7 +695,6 @@ void importData() {
 
 // Заполнить форму данными
 void addData(def xml, int headRowCount) {
-    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
@@ -745,31 +756,62 @@ void addData(def xml, int headRowCount) {
         newRow.contractorName = row.cell[indexCell].text()
         indexCell++
 
-        // графа 5
-        newRow.securityName = row.cell[indexCell].text()
-        indexCell++
+        // графа 5 - атрибут 809 - ISSUER - «Эмитент», справочник 84 «Ценные бумаги»
+        indexCell = 5
+        def record100 = getRecordImport(100, 'FULL_NAME', row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset)
+        // TODO (Ramil Timerbaev) могут быть проблемы с нахождением записи,
+        // если в справочнике 84 есть несколько записей с одинаковыми значениями в поле ISSUER
+        def record84 = getRecordImport(84, 'ISSUER', record100?.record_id?.value?.toString(), xlsIndexRow, indexCell + colOffset)
+        newRow.securityName = record84?.record_id?.value
 
-        // графа 6
-        newRow.series = row.cell[indexCell].text()
-        indexCell++
+        if (record84 != null) {
+            // графа 6 - зависит от графы 5 - атрибут 812 - SHORTNAME - «Краткое название ценной бумаги / Выпуск», справочник 84 «Ценные бумаги»
+            indexCell = 6
+            def value1 = record84?.SHORTNAME?.value
+            def value2 = row.cell[indexCell].text()
+            formDataService.checkReferenceValue(84, value1, value2, xlsIndexRow, indexCell + colOffset, logger, true)
 
-        // графа 7
-        newRow.securityKind = getRecordIdImport(89, 'CODE', row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset)
-        indexCell++
+            // графа 7 - зависит от графы 5 - атрибут 815 - TYPE - «Тип (вид) ценной бумаги», справочник 84 «Ценные бумаги»
+            indexCell = 7
+            def record89 = getRecordImport(89, 'CODE', row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset)
+            if (record89 != null) {
+                value1 = record89?.record_id?.value?.toString()
+                value2 = record84?.TYPE?.value?.toString()
+                formDataService.checkReferenceValue(84, value1, value2, xlsIndexRow, indexCell + colOffset, logger, true)
+            }
 
-        // графа 8
-        newRow.signSecurity = getRecordIdImport(62, 'CODE', row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset)
-        indexCell++
+            // графа 8 - зависит от графы 5 - атрибут 869 - SIGN - «Признак ценной бумаги», справочник 84 «Ценные бумаги»
+            indexCell = 8
+            def record62 = getRecordImport(62, 'CODE', row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset)
+            if (record62 != null) {
+                value1 = record62?.record_id?.value?.toString()
+                value2 = record84?.SIGN?.value?.toString()
+                formDataService.checkReferenceValue(84, value1, value2, xlsIndexRow, indexCell + colOffset, logger, true)
+            }
 
-        // графа 9
-        newRow.currencyCode = getRecordIdImport(15, 'CODE_2', row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset)
-        indexCell++
+            // графа 9 - зависит от графы 5 - атрибут 810 - CODE_CUR - «Цифровой код валюты выпуска», справочник 84 «Ценные бумаги»
+            indexCell = 9
+            def record15 = getRecordImport(15, 'CODE', row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset)
+            if (record15 != null) {
+                value1 = record15?.record_id?.value?.toString()
+                value2 = record84?.CODE_CUR?.value?.toString()
+                formDataService.checkReferenceValue(84, value1, value2, xlsIndexRow, indexCell + colOffset, logger, true)
+            }
 
-        // графа 10
-        // зависимая
-        indexCell++
+            // графа 10 - зависит от графы 5 - атрибут 810 - CODE_CUR - «Цифровой код валюты выпуска», справочник 84 «Ценные бумаги»
+            indexCell = 10
+            // TODO (Ramil Timerbaev) могут быть проблемы с нахождением записи,
+            // если в справочнике 15 есть несколько записей с одинаковыми значениями в поле NAME
+            record15 = getRecordImport(15, 'NAME', row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset)
+            if (record15 != null) {
+                value1 = record15?.record_id?.value?.toString()
+                value2 = record84?.CODE_CUR?.value?.toString()
+                formDataService.checkReferenceValue(84, value1, value2, xlsIndexRow, indexCell + colOffset, logger, true)
+            }
+        }
 
         // графа 11
+        indexCell = 11
         newRow.nominal = parseNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, logger, true)
         indexCell++
 
@@ -785,12 +827,17 @@ void addData(def xml, int headRowCount) {
         newRow.tradeDate = parseDate(row.cell[indexCell].text(), "dd.MM.yyyy", xlsIndexRow, indexCell + colOffset, logger, true)
         indexCell++
 
-        // графа 15
-        newRow.currencyCodeTrade = getRecordIdImport(15, 'CODE_2', row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset)
+        // графа 15 - атрибут 65 CODE_2 - «Код валюты. Буквенный», справочник 15 «Единый справочник валют»
+        record15 = getRecordImport(15, 'CODE_2', row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset)
+        newRow.securityName = record15?.record_id?.value
         indexCell++
 
-        // графа 16
-        // зависимая
+        // графа 16 - зависит от графы 15 - атрибут 66 NAME - «Наименование валюты», справочник 15 «Единый справочник валют»
+        if (record15 != null) {
+            def value1 = record15?.NAME?.value
+            def value2 = row.cell[indexCell].text()
+            formDataService.checkReferenceValue(84, value1, value2, xlsIndexRow, indexCell + colOffset, logger, true)
+        }
         indexCell++
 
         // графа 17
@@ -885,4 +932,25 @@ void updateIndexes(def dataRows) {
     dataRows.eachWithIndex { row, i ->
         row.setIndex(i + 1)
     }
+}
+
+// Получить курс валюты по id записи из справочнкиа ценной бумаги (84)
+def getRate(def row, def Date date) {
+    if (row.securityName == null) {
+        return null
+    }
+    // получить запись (поле Цифровой код валюты выпуска) из справочника ценные бумаги (84) по id записи
+    def code = getRefBookValue(84, row.securityName)?.CODE_CUR?.value
+
+    // получить запись (поле курс валюты) из справочника курс валют (22) по цифровому коду валюты
+    def record22 = formDataService.getRefBookRecord(22, recordCache, providerCache, refBookCache,
+            'CODE_NUMBER', code?.toString(), date, row.getIndex(), getColumnName(row, 'currencyCode'), logger, true)
+    return record22?.RATE?.value
+}
+
+def getReportPeriodEndDate() {
+    if (reportPeriodEndDate == null) {
+        reportPeriodEndDate = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder).time
+    }
+    return reportPeriodEndDate
 }
