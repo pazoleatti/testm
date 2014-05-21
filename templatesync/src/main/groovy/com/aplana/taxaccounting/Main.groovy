@@ -61,6 +61,9 @@ class Main {
                            color: #FF0000;
                            cursor: pointer;
                         }
+                        .er td {
+                            color: #BEBEBE;
+                        }
                         .hdr {
                             color: #0C183D;
                             font-weight: bold;
@@ -425,7 +428,7 @@ class Main {
             version.data_headers = it.data_headers?.characterStream?.text
             version.version = it.version
             version.status = it.status
-            version.script = it.script?.characterStream?.text
+            version.script = it.script?.characterStream?.text?.trim()?.replaceAll("\r", "")
             version.monthly = it.monthly as Integer
             map1[type_id].put(it.version, version)
             if (!allVersions.containsKey(type_id)) {
@@ -486,7 +489,7 @@ class Main {
             version.data_headers = it.data_headers?.characterStream?.text
             version.version = it.version
             version.status = it.status
-            version.script = it.script?.characterStream?.text
+            version.script = it.script?.characterStream?.text?.trim()?.replaceAll("\r", "")
             version.monthly = it.monthly as Integer
             map2[type_id].put(it.version, version)
             if (!allVersions.containsKey(type_id)) {
@@ -714,7 +717,7 @@ class Main {
                                     def columnsC = colDiff == null ? '+' : '—'
                                     def monthlyC = tmp1?.monthly == tmp2?.monthly ? '+' : '—'
 
-                                    tr {
+                                    tr(class: ((tmp1?.id != null && tmp2?.id != null) ? 'nr' : 'er')) {
                                         td type_id
                                         td name
                                         td version
