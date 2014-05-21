@@ -163,6 +163,6 @@ public class RefBookIncome102DaoImpl extends AbstractDao implements RefBookIncom
 
 	@Override
 	public void deleteRecords(List<Long> uniqueRecordIds) {
-		getJdbcTemplate().update("delete from income_102 where id in " + SqlUtils.transformToSqlInStatement(uniqueRecordIds));
+		getJdbcTemplate().update("delete from income_102 where " + SqlUtils.transformToSqlInStatement("id", uniqueRecordIds));
 	}
 }
