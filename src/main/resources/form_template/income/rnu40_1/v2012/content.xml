@@ -1,13 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
-    <type>
-        <id>338</id>
-        <name>(РНУ-40.1) Регистр налогового учёта начисленного процентного дохода по прочим дисконтным облигациям. Отчёт
-            1
-        </name>
-        <status>NORMAL</status>
-        <taxType>INCOME</taxType>
-    </type>
     <fixedRows>false</fixedRows>
     <name>(РНУ-40.1) Регистр налогового учёта начисленного процентного дохода по прочим дисконтным облигациям. Отчёт 1
     </name>
@@ -18,24 +10,25 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>fix</alias>
         <checking>false</checking>
-        <id>18980</id>
         <name>fix</name>
         <order>1</order>
         <width>0</width>
         <maxLength>150</maxLength>
+        <prevLength>0</prevLength>
     </columns>
-    <columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>number</alias>
         <checking>false</checking>
-        <id>16890</id>
         <name>Номер территориального банка</name>
         <order>2</order>
         <width>10</width>
+        <parentAlias>name</parentAlias>
+        <refBookAttributeId>166</refBookAttributeId>
+        <refBookAttributeId2>0</refBookAttributeId2>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>name</alias>
         <checking>false</checking>
-        <id>16891</id>
         <name>Наименование территориального банка / подразделения Центрального аппарата</name>
         <order>3</order>
         <width>20</width>
@@ -43,29 +36,29 @@
         <nameAttributeId>161</nameAttributeId>
         <refBookAttributeId>161</refBookAttributeId>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>issuer</alias>
         <checking>false</checking>
-        <id>16892</id>
         <name>Эмитент</name>
         <order>4</order>
         <width>8</width>
-        <hierarchical>false</hierarchical>
-        <nameAttributeId>809</nameAttributeId>
+        <parentAlias>registrationNumber</parentAlias>
         <refBookAttributeId>809</refBookAttributeId>
+        <refBookAttributeId2>868</refBookAttributeId2>
     </columns>
-    <columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>registrationNumber</alias>
         <checking>false</checking>
-        <id>16893</id>
         <name>Номер государственной регистрации</name>
         <order>5</order>
         <width>10</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>813</nameAttributeId>
+        <refBookAttributeId>813</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>buyDate</alias>
         <checking>false</checking>
-        <id>16894</id>
         <name>Дата приобретения</name>
         <order>6</order>
         <width>8</width>
@@ -74,7 +67,6 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>cost</alias>
         <checking>false</checking>
-        <id>16895</id>
         <name>Номинальная стоимость, ед. вал.</name>
         <order>7</order>
         <width>8</width>
@@ -84,7 +76,6 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>bondsCount</alias>
         <checking>false</checking>
-        <id>16896</id>
         <name>Количество облигаций, шт.</name>
         <order>8</order>
         <width>8</width>
@@ -94,7 +85,6 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>upCost</alias>
         <checking>false</checking>
-        <id>16897</id>
         <name>Средневзвешенная цена одной бумаги на дату размещения, ед.вал.</name>
         <order>9</order>
         <width>10</width>
@@ -104,7 +94,6 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>circulationTerm</alias>
         <checking>false</checking>
-        <id>16898</id>
         <name>Срок обращения условиям выпуска, дни</name>
         <order>10</order>
         <width>8</width>
@@ -114,27 +103,27 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>percent</alias>
         <checking>false</checking>
-        <id>16899</id>
         <name>Процентный доход, руб.коп.</name>
         <order>11</order>
-        <width>10</width>
+        <width>8</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
-    <columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>currencyCode</alias>
         <checking>false</checking>
-        <id>16900</id>
         <name>Код валюты номинала</name>
         <order>12</order>
         <width>10</width>
+        <parentAlias>registrationNumber</parentAlias>
+        <refBookAttributeId>810</refBookAttributeId>
+        <refBookAttributeId2>64</refBookAttributeId2>
     </columns>
     <styles>
         <alias>Автозаполняемая</alias>
         <backColor>WHITE</backColor>
         <bold>true</bold>
         <fontColor>DARK_GREEN</fontColor>
-        <id>11320</id>
         <italic>false</italic>
     </styles>
     <styles>
@@ -142,7 +131,6 @@
         <backColor>BLUE</backColor>
         <bold>false</bold>
         <fontColor>BLACK</fontColor>
-        <id>11080</id>
         <italic>false</italic>
     </styles>
     <styles>
@@ -150,7 +138,6 @@
         <backColor>LIGHT_BROWN</backColor>
         <bold>true</bold>
         <fontColor>BLACK</fontColor>
-        <id>11081</id>
         <italic>false</italic>
     </styles>
     <styles>
@@ -158,7 +145,6 @@
         <backColor>LIGHT_YELLOW</backColor>
         <bold>true</bold>
         <fontColor>BLACK</fontColor>
-        <id>11082</id>
         <italic>false</italic>
     </styles>
     <styles>
@@ -166,7 +152,6 @@
         <backColor>LIGHT_BLUE</backColor>
         <bold>false</bold>
         <fontColor>BLACK</fontColor>
-        <id>11083</id>
         <italic>false</italic>
     </styles>
 </formTemplateContent>

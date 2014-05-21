@@ -15,6 +15,7 @@
         <order>1</order>
         <width>0</width>
         <maxLength>150</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>number</alias>
@@ -43,8 +44,8 @@
         <order>4</order>
         <width>10</width>
         <hierarchical>false</hierarchical>
-        <nameAttributeId>66</nameAttributeId>
-        <refBookAttributeId>64</refBookAttributeId>
+        <nameAttributeId>810</nameAttributeId>
+        <refBookAttributeId>810</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>cost</alias>
@@ -69,7 +70,7 @@
         <checking>false</checking>
         <name>Процентный доход, руб. коп.</name>
         <order>7</order>
-        <width>10</width>
+        <width>8</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>

@@ -1,7 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.formDestinationsDialog;
 
 import com.aplana.gwt.client.dialog.Dialog;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.FormTypeKind;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
@@ -17,6 +20,7 @@ import com.gwtplatform.mvp.client.PopupView;
 import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -47,6 +51,8 @@ public class FormDestinationsPresenter extends PresenterWidget<FormDestinationsP
         void setFilterForFormTypes(String filter);
         // обновлели надписей в зависимости от вида налога
         void updateLabel(TaxType taxType);
+        // фильтр типа налоговой формы
+        void prepareFormDataKind(List<FormDataKind> types);
     }
 
 
@@ -131,9 +137,20 @@ public class FormDestinationsPresenter extends PresenterWidget<FormDestinationsP
     }
 
     public void initAndShowDialog(final HasPopupSlot slotForMe, TaxType taxType) {
-        getView().prepareCreationForm();
-        getView().updateLabel(taxType);
-        slotForMe.addToPopupSlot(FormDestinationsPresenter.this);
+        FillFormTypesAction action = new FillFormTypesAction();
+        action.setTaxType(taxType);
+        dispatchAsync.execute(action, CallbackUtils.defaultCallback(
+                new AbstractCallback<FillFormTypesResult>() {
+                    @Override
+                    public void onSuccess(FillFormTypesResult result) {
+                        List<FormDataKind> dataKinds = new ArrayList<FormDataKind>();
+                        dataKinds.addAll(result.getFormTypes());
+                        getView().prepareFormDataKind(dataKinds);
+                        getView().prepareCreationForm();
+                        getView().updateLabel(result.getTaxType());
+                        slotForMe.addToPopupSlot(FormDestinationsPresenter.this);
+                    }
+                }, this));
     }
 
     public void initAndShowEditDialog(final HasPopupSlot slotForMe, List<FormTypeKind> formTypeKinds){

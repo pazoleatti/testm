@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.web.widget.departmentpicker;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
 import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.MultiSelectTree;
-import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.MultiSelectTreeItem;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -15,9 +14,12 @@ import java.util.*;
  *
  * @author dloshkarev
  */
-public class DepartmentTreeWidget extends MultiSelectTree<List<DepartmentPair>> implements PairDepartmentPicker {
+public class DepartmentTreeWidget extends MultiSelectTree<List<DepartmentPair>, DepartmentTreeItem> implements PairDepartmentPicker {
+
+    public static String RED_STAR_SPAN = "<span style=\"color: #ff0000;\">*</span>";
 
     private List<Integer> availableValuesList = new LinkedList<Integer>();
+    private boolean showDisabledDepartment = false;
 
     /** Дерево для выбора подразделения. */
     public DepartmentTreeWidget(String header, boolean multiSelection) {
@@ -105,9 +107,9 @@ public class DepartmentTreeWidget extends MultiSelectTree<List<DepartmentPair>> 
     @Override
     public List<DepartmentPair> getValue() {
         List<DepartmentPair> result = new ArrayList<DepartmentPair>();
-        for (MultiSelectTreeItem item : getItems()) {
+         for (DepartmentTreeItem item : getItems()) {
             if (item.getValue()) {
-                result.add(((DepartmentTreeItem)item).getItemValue());
+                result.add(item.getItemValue());
             }
         }
         return result;
@@ -132,6 +134,22 @@ public class DepartmentTreeWidget extends MultiSelectTree<List<DepartmentPair>> 
             list.add(departmentPair);
         }
         setValue(list, fireEvents);
+    }
+
+    public void setShowDisabledDepartment(boolean showDisabledDepartment) {
+        if(this.showDisabledDepartment != showDisabledDepartment){
+            for (DepartmentTreeItem departmentTreeItem : getAllChild(null)) {
+                if(!departmentTreeItem.isActive()){
+                    if(showDisabledDepartment){
+                        departmentTreeItem.setVisible(true);
+                    } else {
+                        departmentTreeItem.setVisible(false);
+                        departmentTreeItem.setValue(false, true);
+                    }
+                }
+            }
+            this.showDisabledDepartment = showDisabledDepartment;
+        }
     }
 
     /**
@@ -175,7 +193,14 @@ public class DepartmentTreeWidget extends MultiSelectTree<List<DepartmentPair>> 
 
         for (Department department : departments) {
             DepartmentTreeItem newItem = new DepartmentTreeItem(department, multiSelection);
-
+            if (!newItem.isActive()) {
+                // если подразделение недействующее то добавляем звездочку
+                newItem.deactivate();
+            }
+            if (!showDisabledDepartment && !newItem.isActive()) {
+                // Если не устанвовлен флаг показа недейств. то скрывает недествительные сразу
+                newItem.setVisible(false);
+            }
             if (availableDepartments != null && !availableDepartments.contains(department.getId()) &&
                     newItem.getWidget() instanceof CheckBox) {
                 ((CheckBox) newItem.getWidget()).setEnabled(false);

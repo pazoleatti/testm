@@ -68,6 +68,9 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
     @UiField
     LinkButton pickAll;
 
+    @UiField
+    CheckBox showDisabled;
+
     private boolean multiSelect;
 
     /* Значения id  */
@@ -95,7 +98,7 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
                 int size = tree.getValue().size();
                 ok.setEnabled(size > 0);
                 if (isMultiSelect()) {
-                    pickAll.setText(size == tree.getItemsWithFilter().size() ? WidgetUtils.UNPICK_ALL: WidgetUtils.PICK_ALL);
+                    updateSelectAllLabel();
                     countItems.setText(String.valueOf(size));
                 }
             }
@@ -116,6 +119,15 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
                 open();
             }
         });
+
+        showDisabled.setHTML("Отображать " + DepartmentTreeWidget.RED_STAR_SPAN + "недействующие подразделения");
+        showDisabled.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> event) {
+                tree.setShowDisabledDepartment(event.getValue());
+                updateSelectAllLabel();
+            }
+        });
     }
 
     @UiHandler("selectButton")
@@ -126,7 +138,12 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
     private void open(){
         tree.setValueById(value, false);
         countItems.setText(String.valueOf(tree.getValue().size()));
+        updateSelectAllLabel();
         popupPanel.center();
+    }
+
+    private void updateSelectAllLabel(){
+        pickAll.setText(tree.getValue().size() == tree.getItemsWithFilter().size() ? WidgetUtils.UNPICK_ALL: WidgetUtils.PICK_ALL);
     }
 
     @UiHandler("clearButton")
@@ -182,7 +199,7 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
 
     private void find(){
         tree.filter(filter.getText().trim());
-        pickAll.setText(tree.getValue().size() == tree.getItemsWithFilter().size() ? WidgetUtils.UNPICK_ALL: WidgetUtils.PICK_ALL);
+        updateSelectAllLabel();
     }
 
     @Override

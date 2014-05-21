@@ -1,0 +1,52 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:d="urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker"
+             xmlns:dw="urn:import:com.aplana.gwt.client">
+
+    <ui:style>
+
+        .footerPanel {
+            background-color: #E8E1CF;
+        }
+
+        .footerButton {
+            margin: 8px 10px 8px 0 !important;
+        }
+
+        .typicalFormBody {
+            border: solid 1px #aeaeac;
+            padding: 0 5px 5px 5px;
+            margin: 10px;
+        }
+
+    </ui:style>
+
+
+    <dw:ModalWindow ui:field="deadlineDialog" title="Период применения изменений в печатных формах" width="380px">
+        <g:VerticalPanel width="100%" addStyleNames="aplana-ModalWindow-contentBackWhite">
+            <g:cell>
+                <g:VerticalPanel spacing="5" addStyleNames="{style.typicalFormBody}">
+                    <g:Label text="Укажите, в течение какого периода печатные
+                                        формы должны содержать новое наименование подразделения."/>
+                    <g:HorizontalPanel spacing="5" verticalAlignment="middle">
+                        <g:Label text="C"/>
+                        <d:DateMaskBoxPicker ui:field="dateFrom"/>
+                        <g:Label text="по"/>
+                        <d:DateMaskBoxPicker ui:field="dateTo"/>
+                    </g:HorizontalPanel>
+                </g:VerticalPanel>
+            </g:cell>
+            <g:cell horizontalAlignment="ALIGN_RIGHT">
+                <g:HorizontalPanel width="100%" height="38px" addStyleNames="{style.footerPanel}">
+                    <g:cell horizontalAlignment="ALIGN_RIGHT">
+                        <g:Button ui:field="okButton" text="Выполнить" width="85px"
+                                  addStyleNames="{style.footerButton}"/>
+                    </g:cell>
+                </g:HorizontalPanel>
+            </g:cell>
+        </g:VerticalPanel>
+
+    </dw:ModalWindow>
+
+</ui:UiBinder>

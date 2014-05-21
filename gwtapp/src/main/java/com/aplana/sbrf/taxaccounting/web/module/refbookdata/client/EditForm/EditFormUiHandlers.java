@@ -6,7 +6,7 @@ import com.gwtplatform.mvp.client.UiHandlers;
 public interface EditFormUiHandlers extends UiHandlers {
 	void onSaveClicked();
 	void onCancelClicked();
-	void valueChanged();
+	void valueChanged(String alias, Object value);
     void setMode(FormMode mode);
     void updateHistory();
 }

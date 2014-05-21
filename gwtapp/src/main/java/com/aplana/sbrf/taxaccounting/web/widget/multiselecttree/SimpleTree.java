@@ -8,7 +8,7 @@ import java.util.List;
  *
  * @author rtimerbaev
  */
-public class SimpleTree extends MultiSelectTree<List<Integer>> {
+public class SimpleTree extends MultiSelectTree<List<Integer>, MultiSelectTreeItem> {
 
     /** Дерево множественного выбора (с идентификаторами). */
     public SimpleTree() {

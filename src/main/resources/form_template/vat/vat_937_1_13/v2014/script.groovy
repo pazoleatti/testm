@@ -1,10 +1,10 @@
-package form_template.vat.vat_973_1_14.v2014
+package form_template.vat.vat_937_1_13.v2014
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import groovy.transform.Field
 
 /**
- *  (937.1.14) Расшифровка графы 14 «Расхождение» формы 937.1
+ *  (937.1.13) Расшифровка графы 14 «Расхождение» формы 937.1
  *
  *  formTemplateId=607
  */

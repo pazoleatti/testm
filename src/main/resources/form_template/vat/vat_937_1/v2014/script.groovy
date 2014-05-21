@@ -20,9 +20,8 @@ import groovy.transform.Field
  * 9    deal_10_Nds В том числе (руб.). Покупки, облагаемые налогом по ставке. 10%. Сумма НДС
  * 10   deal_0      В том числе (руб.). Покупки, облагаемые налогом по ставке. 0%
  * 11   deal        В том числе (руб.). Покупки, освобождаемые от налога
- * 12   ndsBank     Сумма НДС, отнесенная на расходы Банка (руб.)
- * 13   ndsPre      Сумма НДС, начисленная с авансов и предоплаты засчитываемая в налоговом периоде при реализации (руб.)
- * 14   diff        Расхождение (руб.)
+ * 12   nds         Сумма НДС, подлежащая вычету (руб.)
+ * 13   diff        Расхождение (руб.)
  */
 
 switch (formDataEvent) {
@@ -61,12 +60,12 @@ switch (formDataEvent) {
 
 @Field
 def allColumns = ['period', 'bill', 'dealNds', 'deal_20', 'deal_20_Nds', 'deal_18', 'deal_18_Nds',
-                  'deal_10', 'deal_10_Nds', 'deal_0', 'deal', 'ndsBank', 'ndsPre', 'diff']
+                  'deal_10', 'deal_10_Nds', 'deal_0', 'deal', 'nds', 'diff']
 @Field
 def calcColumns = ['bill', 'dealNds', 'deal_20', 'deal_20_Nds', 'deal_18', 'deal_18_Nds',
                    'deal_10', 'deal_10_Nds', 'deal_0', 'deal']
 @Field
-def totalAEditableColumns = ['bill', 'dealNds', 'deal_20', 'deal_20_Nds', 'deal_18', 'deal_18_Nds', 'deal_10', 'deal_10_Nds', 'ndsBank', 'ndsPre']
+def totalAEditableColumns = ['bill', 'dealNds', 'deal_20', 'deal_20_Nds', 'deal_18', 'deal_18_Nds', 'deal_10', 'deal_10_Nds', 'nds']
 
 // Дата начала отчетного периода
 @Field
@@ -112,7 +111,7 @@ void calc() {
 
     // строка 2 «Графа 14» = По строке 2 («Графа 12» + «Графа 13» - «Графа 5» - «Графа 7» - «Графа 9»)
     totalA.with {
-        diff = (ndsBank ?: 0) + (ndsPre ?: 0) - (deal_20_Nds ?: 0) - (deal_18_Nds ?: 0) - (deal_10_Nds ?: 0)
+        diff = (nds ?: 0) - (deal_20_Nds ?: 0) - (deal_18_Nds ?: 0) - (deal_10_Nds ?: 0)
     }
     // строка 6 графы с 2 по 11
     calcColumns.each {
@@ -166,8 +165,8 @@ void logicCheck() {
     }
     // 7. По строке 2:
     // «Графа 14» = «Графа 12» + «Графа 13» - «Графа 5» - «Графа 7» - «Графа 9»
-    if (totalA.ndsBank != null && totalA.ndsPre != null && totalA.deal_20_Nds != null && totalA.deal_18_Nds != null && totalA.deal_10_Nds != null &&
-            totalA.diff != totalA.ndsBank + totalA.ndsPre - totalA.deal_20_Nds - totalA.deal_18_Nds - totalA.deal_10_Nds) {
+    if (totalA.nds != null && totalA.deal_20_Nds != null && totalA.deal_18_Nds != null && totalA.deal_10_Nds != null &&
+            totalA.diff != totalA.nds - totalA.deal_20_Nds - totalA.deal_18_Nds - totalA.deal_10_Nds) {
         logger.error("Строка ${totalA.getIndex()}: " + "Неверно рассчитана графа «Расхождение (руб.)»!")
     }
     // 8. Если существует экземпляр налоговой формы 937.1.14, чье подразделение и  налоговый период,
@@ -186,7 +185,7 @@ void logicCheck() {
                 logger.warn("Сумма расхождения не соответствует расшифровке! ")
             }
         }
-    } else {
+    } else if (totalA.diff != 0) {
         logger.warn("Экземпляр налоговой формы 937.1.14 «Расшифровка графы 14» за период %s - %s не существует (отсутствуют первичные данные для проверки)!",
                 getReportPeriodStartDate().format(dateFormat), getReportPeriodEndDate().format(dateFormat))
     }
@@ -267,9 +266,9 @@ def getReportPeriodEndDate() {
 }
 
 void importData() {
-    def xml = getXML(ImportInputStream, importService, UploadFileName, 'Налоговый период', null, 14, 4)
+    def xml = getXML(ImportInputStream, importService, UploadFileName, 'Налоговый период', null, 13, 4)
 
-    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 14, 4)
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 13, 4)
 
     def headerMapping = [
             (xml.row[0].cell[0]) : 'Налоговый период',
@@ -354,14 +353,10 @@ void addData(def xml, int headRowCount) {
 
         // графа 12
         xmlIndexCol = 11
-        dataRows[i - 1].ndsBank = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        dataRows[i - 1].nds = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
 
         // графа 13
         xmlIndexCol = 12
-        dataRows[i - 1].ndsPre = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-
-        // графа 14
-        xmlIndexCol = 13
         dataRows[i - 1].diff = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
     }
 }

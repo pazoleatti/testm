@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared;
+package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model;
 
 import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.LazyTreeItem;
 

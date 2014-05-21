@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.event.RollbackTableRowSelection;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.exception.BadValueException;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.renameDialog.RenameDialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.FormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataTokens;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
@@ -27,10 +28,7 @@ import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView> implements EditFormUiHandlers {
 	private final PlaceManager placeManager;
@@ -49,6 +47,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
     private boolean isVersionMode = false;
     /** Режим показа формы */
     private FormMode mode;
+    private Map<String, Object> modifiedFields = new HashMap<String, Object>();
 
     public void setNeedToReload() {
         getView().setNeedToReload(true);
@@ -75,11 +74,15 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
         void updateRefBookPickerPeriod();
     }
 
+    protected final RenameDialogPresenter renameDialogPresenter;
+
 	@Inject
-	public EditFormPresenter(final EventBus eventBus, final MyView view, final DispatchAsync dispatchAsync, PlaceManager placeManager) {
+	public EditFormPresenter(final EventBus eventBus, final MyView view, final DispatchAsync dispatchAsync,
+                             PlaceManager placeManager, RenameDialogPresenter renameDialogPresenter) {
 		super(eventBus, view);
 		this.placeManager = placeManager;
 		this.dispatchAsync = dispatchAsync;
+        this.renameDialogPresenter = renameDialogPresenter;
 		getView().setUiHandlers(this);
         mode = FormMode.VIEW;
         getView().updateMode(mode);
@@ -234,6 +237,20 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                 action.setVersionFrom(getView().getVersionFrom());
                 action.setVersionTo(getView().getVersionTo());
 
+//                // TODO заменить, сделано для примера
+//                if (currentRefBookId == 30) {
+//                    if(modifiedFields.containsKey("NAME")){
+//                        renameDialogPresenter.open(new ConfirmButtonClickHandler() {
+//                            @Override
+//                            public void onClick(Date dateFrom, Date dateTo) {
+//                                // тут дальнейшая обработка по сценаарию постановки
+//                                Dialog.infoMessage("Переименовываем с " + WidgetUtils.getDateString(dateFrom) +
+//                                        " по " + WidgetUtils.getDateString(dateTo) + "на имя \"" + modifiedFields.get("NAME") + "\"");
+//                            }
+//                        });
+//                    }
+//                }
+
                 final RecordChanges recordChanges = fillRecordChanges(currentUniqueRecordId, map, action.getVersionFrom(), action.getVersionTo());
                 dispatchAsync.execute(action,
                         CallbackUtils.defaultCallback(
@@ -266,11 +283,6 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                 }
                             }, this));
         }
-    }
-
-    public void clearAndDisableForm(){
-        getView().fillInputFields(null);
-        setMode(FormMode.READ);
     }
 
     private RecordChanges fillRecordChanges(Long recordId, Map<String, RefBookValueSerializable> map, Date start, Date end) {
@@ -313,7 +325,8 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 	}
 
 	@Override
-	public void valueChanged() {
+	public void valueChanged(String alias, Object value) {
+        modifiedFields.put(alias, value);
         setIsFormModified(true);
 	}
 
@@ -322,6 +335,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
         if (isFormModified) {
             placeManager.setOnLeaveConfirmation("Вы подтверждаете отмену изменений?");
         } else {
+            modifiedFields.clear();
             placeManager.setOnLeaveConfirmation(null);
         }
     }
