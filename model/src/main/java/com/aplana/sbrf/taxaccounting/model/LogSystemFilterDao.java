@@ -8,8 +8,6 @@ import java.util.List;
  */
 public class LogSystemFilterDao {
     private List<Long> userIds;
-    List<Long> formDataIds;
-    List<Long> declarationDataIds;
     private Date fromSearchDate;
     private Date toSearchDate;
     private String reportPeriodName;
@@ -20,6 +18,74 @@ public class LogSystemFilterDao {
     /*Стартовый индекс списка записей */
     private int startIndex;
 
+    private List<Integer> reportPeriodIds;
+
+    private List<Integer> departmentIds;
+
+    private List<Long> formTypeIds;
+
+    private List<FormDataKind> formDataKinds;
+
+    private List<TaxType> taxTypes;
+
+    private Integer auditFormTypeId;
+    private Integer declarationTypeId;
+
+    public Integer getDeclarationTypeId() {
+        return declarationTypeId;
+    }
+
+    public void setDeclarationTypeId(Integer declarationTypeId) {
+        this.declarationTypeId = declarationTypeId;
+    }
+
+    public Integer getAuditFormTypeId() {
+        return auditFormTypeId;
+    }
+
+    public void setAuditFormTypeId(Integer auditFormTypeId) {
+        this.auditFormTypeId = auditFormTypeId;
+    }
+
+    public List<Integer> getReportPeriodIds() {
+        return reportPeriodIds;
+    }
+
+    public void setReportPeriodIds(List<Integer> reportPeriodIds) {
+        this.reportPeriodIds = reportPeriodIds;
+    }
+
+    public List<Integer> getDepartmentIds() {
+        return departmentIds;
+    }
+
+    public void setDepartmentIds(List<Integer> departmentIds) {
+        this.departmentIds = departmentIds;
+    }
+
+    public List<Long> getFormTypeIds() {
+        return formTypeIds;
+    }
+
+    public void setFormTypeIds(List<Long> formTypeIds) {
+        this.formTypeIds = formTypeIds;
+    }
+
+    public List<FormDataKind> getFormDataKinds() {
+        return formDataKinds;
+    }
+
+    public void setFormDataKinds(List<FormDataKind> formDataKinds) {
+        this.formDataKinds = formDataKinds;
+    }
+
+    public List<TaxType> getTaxTypes() {
+        return taxTypes;
+    }
+
+    public void setTaxTypes(List<TaxType> taxTypes) {
+        this.taxTypes = taxTypes;
+    }
 
     public List<Long> getUserIds() {
         return userIds;
@@ -67,22 +133,6 @@ public class LogSystemFilterDao {
 
     public void setCountOfRecords(int countOfRecords) {
         this.countOfRecords = countOfRecords;
-    }
-
-    public List<Long> getFormDataIds() {
-        return formDataIds;
-    }
-
-    public void setFormDataIds(List<Long> formDataIds) {
-        this.formDataIds = formDataIds;
-    }
-
-    public List<Long> getDeclarationDataIds() {
-        return declarationDataIds;
-    }
-
-    public void setDeclarationDataIds(List<Long> declarationDataIds) {
-        this.declarationDataIds = declarationDataIds;
     }
 
     public Date getFromSearchDate() {

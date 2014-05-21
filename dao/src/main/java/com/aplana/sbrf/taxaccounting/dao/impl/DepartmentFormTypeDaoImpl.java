@@ -292,17 +292,19 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
 
     @Override
     public List<Long> getByPerformerId(int performerDepId, TaxType taxType, List<FormDataKind> kinds) {
-        Object[] sqlParams = new Object[kinds.size()  + 1];
+        Object[] sqlParams = new Object[kinds.size() + 2];
         int cnt = 0;
+        sqlParams[cnt] = performerDepId;
+        cnt++;
         for (FormDataKind kind : kinds) {
             sqlParams[cnt] = kind.getId();
             cnt++;
         }
-        sqlParams[cnt] = performerDepId;
+        sqlParams[cnt] = String.valueOf(taxType.getCode());
         return getJdbcTemplate().queryForList(
                 "select dft.form_type_id from department_form_type dft where performer_dep_id = ? " +
-                " and dft.kind in (" + SqlUtils.preparePlaceHolders(kinds.size()) +")" +
-                " and exists (select 1 from form_type ft where ft.id = dft.form_type_id and ft.tax_type = ?)",
+                        " and dft.kind in (" + SqlUtils.preparePlaceHolders(kinds.size()) + ")" +
+                        " and exists (select 1 from form_type ft where ft.id = dft.form_type_id and ft.tax_type = ?)",
                 Long.class,
                 sqlParams
         );

@@ -175,8 +175,6 @@ public class AuditDaoTest {
     public void testGetLogBusiness(){
         Calendar calendar = Calendar.getInstance();
         LogSystemFilterDao filterDao = new LogSystemFilterDao();
-        filterDao.setDeclarationDataIds(Arrays.asList(1l));
-        filterDao.setFormDataIds(Arrays.asList(1l, 11l, 13l));
         calendar.set(2013, Calendar.JANUARY, 1);
         filterDao.setFromSearchDate(calendar.getTime());
         calendar.set(2014, Calendar.DECEMBER, 31);

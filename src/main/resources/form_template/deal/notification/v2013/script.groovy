@@ -227,6 +227,7 @@ void generateXML() {
                             СвПредмСд(
                                     ТипПредСд: dealType
                             ) {
+                                def String dealSubjectCode1 = row.dealSubjectCode1 != null ? getRefBookValue(73, row.dealSubjectCode1)?.CODE.numberValue : null
                                 def String dealSubjectCode2 = row.dealSubjectCode2 != null ? getRefBookValue(68, row.dealSubjectCode2)?.CODE.numberValue : null
                                 def String dealSubjectCode3 = row.dealSubjectCode3 != null ? getRefBookValue(34, row.dealSubjectCode3)?.CODE.stringValue : null
                                 def String countryCode = row.countryCode != null ? getRefBookValue(10, row.countryCode)?.CODE?.stringValue : null
@@ -234,6 +235,7 @@ void generateXML() {
                                 def String okeiCode = row.okeiCode != null ? getRefBookValue(12, row.okeiCode)?.CODE?.stringValue : null
                                 ПерПредСд(
                                         [НаимПредСд: row.dealSubjectName] +
+                                                (dealSubjectCode1 != null ? [ТНВЭД: dealSubjectCode1] : [:]) +
                                                 (dealSubjectCode2 != null ? [ОКП: dealSubjectCode2] : [:]) +
                                                 (dealSubjectCode3 != null ? [ОКВЭД: dealSubjectCode3] : [:]) +
                                                 [НомУчСд: row.otherNum] +
@@ -293,7 +295,7 @@ void generateXML() {
                                             (organKPP != null ? [КПП: organKPP] : [:]) +
                                             (organRegNum != null ? [РегНомИн: organRegNum] : [:]) +
                                             (taxpayerCode != null ? [КодНПРег: taxpayerCode] : [:]) +
-                                            (address != null ? [АдрИнТекст: address] : [:])
+                                            ((address != null && organInfo != '1') ? [АдрИнТекст: address] : [:])
                             )
                         }
                     }
