@@ -25,15 +25,15 @@ public class ResourceUtils {
                 if (!destinationUri.startsWith("file:")) {
                     destinationUri = "file:///" + destinationUri ;
                 }
-                destinationUri = URLDecoder.decode(destinationUri, "UTF-8");
-                URL url = new URL(destinationUri);
 
+                URL url = new URL(destinationUri);
                 URI uri = null;
                 try {
-                    uri = url.toURI();
+                    uri = new URI(url.getProtocol(), url.getUserInfo(), url.getHost(), url.getPort(), url.getPath(), url.getQuery(), url.getRef());
                     if(uri.getAuthority() != null && uri.getAuthority().length() > 0) {
                         // Hack for UNC Path
-                        uri = (new URL("file://" + destinationUri.substring("file:".length()))).toURI();
+                        url = new URL("file://" + destinationUri.substring("file:".length()));
+                        uri = new URI(url.getProtocol(), url.getUserInfo(), url.getHost(), url.getPort(), url.getPath(), url.getQuery(), url.getRef());
                     }
                 } catch (URISyntaxException e) {
                     throw new ServiceException("Ошибка при попытке доступа к ресурсу.");
@@ -67,10 +67,11 @@ public class ResourceUtils {
                 URL url = new URL(destinationUri);
                 URI uri = null;
                 try {
-                    uri = url.toURI();
+                    uri = new URI(url.getProtocol(), url.getUserInfo(), url.getHost(), url.getPort(), url.getPath(), url.getQuery(), url.getRef());
                     if(uri.getAuthority() != null && uri.getAuthority().length() > 0) {
                         // Hack for UNC Path
-                        uri = (new URL("file://" + destinationUri.substring("file:".length()))).toURI();
+                        url = new URL("file://" + destinationUri.substring("file:".length()));
+                        uri = new URI(url.getProtocol(), url.getUserInfo(), url.getHost(), url.getPort(), url.getPath(), url.getQuery(), url.getRef());
                     }
                 } catch (URISyntaxException e) {
                     throw new ServiceException("Ошибка при попытке доступа к ресурсу.");
