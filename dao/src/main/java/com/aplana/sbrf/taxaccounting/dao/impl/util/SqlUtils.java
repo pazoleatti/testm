@@ -78,6 +78,15 @@ public final class SqlUtils {
         return transformToSqlInStatement(prefix, collection, IN_CAUSE_LIMIT);
 	}
 
+    public static String transformToSqlInStatementForString(String prefix, Collection<String> collection) {
+        List<String> strings = new ArrayList<String>();
+        for (String s : collection) {
+            strings.add("'" + s + "'");
+        }
+
+        return transformToSqlInStatement(prefix, strings, IN_CAUSE_LIMIT);
+    }
+
     /**
      * Метод разбивает коллекцию на коллекции определенного размера
      * @param data
