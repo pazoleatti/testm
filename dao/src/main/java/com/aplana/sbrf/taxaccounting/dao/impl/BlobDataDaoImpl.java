@@ -81,8 +81,7 @@ public class BlobDataDaoImpl extends AbstractDao implements BlobDataDao {
     public void delete(List<String> uuidStrings) {
         try {
             HashMap<String, Object> valuesMap = new HashMap<String, Object>();
-            valuesMap.put("uuids", uuidStrings);
-            getNamedParameterJdbcTemplate().update("DELETE FROM blob_data WHERE id in (:uuids)",
+            getNamedParameterJdbcTemplate().update(String.format("DELETE FROM blob_data WHERE %s", SqlUtils.transformToSqlInStatementForString("id", uuidStrings)),
                     valuesMap);
         } catch (DataAccessException e){
             logger.error(String.format("Не удалось удалить записи с id = %s", uuidStrings), e);
