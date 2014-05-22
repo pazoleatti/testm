@@ -34,7 +34,7 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 
 	public interface MyView extends View, HasUiHandlers<SourcesUiHandlers> {
 
-		void init(TaxType taxType, AppointmentType type, int year, List<PeriodInfo> periods,
+		void init(TaxType taxType,List<AppointmentType> types, AppointmentType type, int year, List<PeriodInfo> periods,
                   boolean isForm, Integer selectedReceiverId, Integer selectedSourceId);
 		void setDepartments(List<Department> departments, Set<Integer> availableDepartments);
 
@@ -76,11 +76,11 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
         int getYearFrom();
         int getYearTo();
 
-        Map<Integer, FormType> getSourcesFormTypes();
+        Map<Integer, FormType> getRightFormTypes();
 
-        Map<Integer, FormType> getReceiversFormTypes();
+        Map<Integer, FormType> getLeftFormTypes();
 
-        Map<Integer, DeclarationType> getReceiversDeclarationTypes();
+        Map<Integer, DeclarationType> getLeftDecTypes();
     }
 
 	private final DispatchAsync dispatcher;
@@ -122,7 +122,7 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
                     @Override
                     public void onSuccess(InitSourcesResult result) {
                         getView().setDepartments(result.getDepartments(), result.getAvailableDepartments());
-                        getView().init(taxType, AppointmentType.SOURCES, result.getYear(),
+                        getView().init(taxType, Arrays.asList(AppointmentType.values()), AppointmentType.SOURCES, result.getYear(),
                                 result.getPeriods(), isForm, selectedReceiverId, selectedSourceId);
                     }
                 }, this).addCallback(new ManualRevealCallback<InitSourcesResult>(SourcesPresenter.this)));
@@ -222,13 +222,6 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
     @Override
     public TaxType getTaxType() {
         return taxType;
-    }
-
-    @Override
-	public void showAssignErrorMessage() {
-        // TODO Заменить на http://jira.aplana.com/browse/SBRFACCTAX-5398 по готовности
-        Dialog.warningMessage("Выбранное назначение налоговой формы уже является источником " +
-                "для выбранного приемника!");
     }
 
 	@Override

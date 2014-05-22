@@ -17,8 +17,7 @@ import com.gwtplatform.dispatch.shared.ActionException;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
-public class GetCurrentSourcesForDeclaratonHandler
-		extends
+public class GetCurrentSourcesForDeclaratonHandler	extends
 		AbstractActionHandler<GetCurrentSourcesForDeclaratonAction, GetCurrentSourcesResult> {
 
 	@Autowired
@@ -32,15 +31,12 @@ public class GetCurrentSourcesForDeclaratonHandler
 	}
 
 	@Override
-	public GetCurrentSourcesResult execute(
-			GetCurrentSourcesForDeclaratonAction action, ExecutionContext context)
+	public GetCurrentSourcesResult execute(GetCurrentSourcesForDeclaratonAction action, ExecutionContext context)
 			throws ActionException {
 		GetCurrentSourcesResult result = new GetCurrentSourcesResult();
 		List<DepartmentFormType> departmentFormTypes = departmentFormTypeService
-				.getDFTSourceByDDT(action.getDepartmentId(),
-						action.getDeclarationTypeId());
-		result.setCurrentSources(deparmentFormTypeAssembler
-				.assemble(departmentFormTypes));
+				.getDFTSourceByDDT(action.getDepartmentId(), action.getDeclarationTypeId());
+		result.setCurrentSources(deparmentFormTypeAssembler.assemble(departmentFormTypes));
 		return result;
 	}
 

@@ -13,7 +13,6 @@
 
         .sp {
             border-bottom: #277E55 dashed 1px;
-            padding-right: 2px;
             margin-left: 4px;
         }
     </ui:style>
