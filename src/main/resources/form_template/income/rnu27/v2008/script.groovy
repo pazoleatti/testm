@@ -657,7 +657,7 @@ BigDecimal calc8(DataRow row, def dataPrevRows) {
  * @author ivildanov
  */
 BigDecimal calc11(DataRow row) {
-    if (getCurrency(row.currency)?.contains("RUR")) {
+    if (getCurrency(row.currency) in ["RUR", "RUB"]) {
         return null
     }
     return row.marketQuotation
@@ -667,7 +667,7 @@ BigDecimal calc11(DataRow row) {
  * Расчет графы 12
  */
 BigDecimal calc12(DataRow row) {
-    if (getCurrency(row.currency)?.contains("RUR")) {
+    if (getCurrency(row.currency) in ["RUR", "RUB"]) {
         return null
     }
     return row.rubCourse
