@@ -1427,7 +1427,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "  join form_column fc on fc.id = nv.column_id\n" +
             "  join ref_book_attribute a on a.id = fc.attribute_id\n" +
             "  join ref_book_record r on r.id = nv.value\n" +
-            "  where nv.value in %s\n" +
+            "  where %s\n" +
             ")" +
             "select distinct f.kind as formKind, t.name as formType, d.path as departmentPath, d.type as departmentType, rp.name as reportPeriodName, tp.year as year from forms f \n" +
             "join (select d.id, d.type, substr(sys_connect_by_path(name,'/'), 2) as path \n" +
@@ -1439,7 +1439,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "join report_period rp on rp.id = f.report_period_id\n" +
             "join tax_period tp on tp.id = rp.tax_period_id";
 
-    private static final String CHECK_USAGES_IN_DEPARTMENT_CONFIG = "select * from (with checkRecords as (select * from ref_book_record r where r.id in %s),\n" +
+    private static final String CHECK_USAGES_IN_DEPARTMENT_CONFIG = "select * from (with checkRecords as (select * from ref_book_record r where %s),\n" +
             "periodCodes as (select a.alias, v.* from ref_book_value v, ref_book_attribute a where v.attribute_id=a.id and a.ref_book_id=8),\n" +
             "usages as (select r.* from ref_book_value v, ref_book_record r, checkRecords cr " +
             "where v.attribute_id in (select id from ref_book_attribute where ref_book_id in (31,33,37) and id not in (170,192,180)) and v.reference_value = cr.id and r.id=v.record_id)\n" +   //170,192,180 - ссылки на подразделения
@@ -1490,6 +1490,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
         try {
             //Проверка использования в налоговых формах
+            in = SqlUtils.transformToSqlInStatement("nv.value", uniqueRecordIds);
             sql = String.format(CHECK_USAGES_IN_FORMS, in);
             params.clear();
             params.put("refBookId", refBookId);
@@ -1521,6 +1522,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
         try {
             //Проверка использования в настройках подразделений
+            in = SqlUtils.transformToSqlInStatement("r.id", uniqueRecordIds);
             sql = String.format(CHECK_USAGES_IN_DEPARTMENT_CONFIG, in);
             params.clear();
             if (!isValuesChanged) {
