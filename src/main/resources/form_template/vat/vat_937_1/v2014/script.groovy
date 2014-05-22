@@ -142,13 +142,13 @@ void logicCheck() {
     for (def row in [totalA, totalPeriod, totalAnnul]) {
         def errorMsg = "Строка ${row.getIndex()}: "
         if (row.deal_20 != null && row.deal_20_Nds != row.deal_20 * 0.2) {
-            logger.warn(errorMsg + "Сумма НДС, облагаемая по ставке 20%% неверная!")
+            logger.warn(errorMsg + "Сумма НДС, облагаемая по ставке 20%%, неверная!")
         }
         if (row.deal_18 != null && row.deal_18_Nds != row.deal_18 * 0.18) {
-            logger.warn(errorMsg + "Сумма НДС, облагаемая по ставке 18%% неверная!")
+            logger.warn(errorMsg + "Сумма НДС, облагаемая по ставке 18%%, неверная!")
         }
         if (row.deal_10 != null && row.deal_10_Nds != row.deal_10 * 0.1) {
-            logger.warn(errorMsg + "Сумма НДС, облагаемая по ставке 10%% неверная!")
+            logger.warn(errorMsg + "Сумма НДС, облагаемая по ставке 10%%, неверная!")
         }
     }
     // 5. По строке 2:
@@ -169,19 +169,20 @@ void logicCheck() {
             totalA.diff != totalA.nds - totalA.deal_20_Nds - totalA.deal_18_Nds - totalA.deal_10_Nds) {
         logger.error("Строка ${totalA.getIndex()}: " + "Неверно рассчитана графа «Расхождение (руб.)»!")
     }
-    // 8. Если существует экземпляр налоговой формы 937.1.14, чье подразделение и  налоговый период,
+    // 8. Если существует экземпляр налоговой формы 937.1.13, чье подразделение и  налоговый период,
     // соответствуют подразделению и налоговому периоду формы 937.1, то:
-    //      a.	Выполняется проверка: «Графа 14» строки 2 формы 937.1 = «Графа 3» итоговой строки – «Графа 3» строки 13 (форма 937.1.14).
-    //      b.	Если результат данной проверки неуспешный, то выдается сообщение об ошибке
-    // Иначе если экземпляр налоговой формы 937.1.14, чье подразделение и  налоговый период,
-    // соответствуют подразделению и налоговому периоду формы 937.1, не существует, то выдается сообщение об ошибке
+    //      a.	Выполняется проверка: «Графа 13» строки 2 формы 937.1 = «Графа 3» итоговой строки – «Графа 3» строки 2 (форма 937.1.13).
+    //      b.	Если результат данной проверки неуспешный, то выдается сообщение об ошибке №2
+    // Иначе если «Графа 13» (форма 937.1) <> 0 и экземпляр налоговой формы 937.1.13,
+    // чье подразделение и  налоговый период, соответствуют подразделению и налоговому периоду формы 937.1,
+    // не существует, то выдается сообщение об ошибке №1
     def appFormData = formDataService.find(607, formData.kind, formData.departmentId, formData.reportPeriodId)
     if (appFormData) {
         def appDataRows = formDataService.getDataRowHelper(appFormData)?.allCached
         if (appDataRows) {
-            def appR13Row = getDataRow(appDataRows, 'R13')
+            def appOtherRow = getDataRow(appDataRows, 'R2')
             def appTotalRow = getDataRow(appDataRows, 'total')
-            if (totalA.diff != (appTotalRow.sum - appR13Row.sum)) {
+            if (totalA.diff != (appTotalRow.sum - appOtherRow.sum)) {
                 logger.warn("Сумма расхождения не соответствует расшифровке! ")
             }
         }

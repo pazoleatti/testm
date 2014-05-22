@@ -18,7 +18,7 @@
         <checking>false</checking>
         <name>Всего счетов-фактур (шт.)</name>
         <order>2</order>
-        <width>5</width>
+        <width>9</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -27,7 +27,7 @@
         <checking>false</checking>
         <name>Всего покупок, включая НДС (руб.)</name>
         <order>3</order>
-        <width>5</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -36,7 +36,7 @@
         <checking>false</checking>
         <name>В том числе (руб.). Покупки, облагаемые налогом по ставке. 20%. Стоимость без НДС</name>
         <order>4</order>
-        <width>5</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -45,7 +45,7 @@
         <checking>false</checking>
         <name>В том числе (руб.). Покупки, облагаемые налогом по ставке. 20%. Сумма НДС</name>
         <order>5</order>
-        <width>5</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -54,7 +54,7 @@
         <checking>false</checking>
         <name>В том числе (руб.). Покупки, облагаемые налогом по ставке. 18%. Стоимость без НДС</name>
         <order>6</order>
-        <width>5</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -63,7 +63,7 @@
         <checking>false</checking>
         <name>В том числе (руб.). Покупки, облагаемые налогом по ставке. 18%. Сумма НДС</name>
         <order>7</order>
-        <width>5</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -72,7 +72,7 @@
         <checking>false</checking>
         <name>В том числе (руб.). Покупки, облагаемые налогом по ставке. 10%. Стоимость без НДС</name>
         <order>8</order>
-        <width>5</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -81,7 +81,7 @@
         <checking>false</checking>
         <name>В том числе (руб.). Покупки, облагаемые налогом по ставке. 10%. Сумма НДС</name>
         <order>9</order>
-        <width>5</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -90,7 +90,7 @@
         <checking>false</checking>
         <name>В том числе (руб.). Покупки, облагаемые налогом по ставке. 0%</name>
         <order>10</order>
-        <width>5</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -99,26 +99,16 @@
         <checking>false</checking>
         <name>В том числе (руб.). Покупки, освобождаемые от налога</name>
         <order>11</order>
-        <width>5</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>ndsBank</alias>
+        <alias>nds</alias>
         <checking>false</checking>
-        <name>Сумма НДС, отнесенная на расходы Банка (руб.)</name>
+        <name>Сумма НДС, подлежащая вычету (руб.)</name>
         <order>12</order>
-        <width>5</width>
-        <maxLength>17</maxLength>
-        <precision>2</precision>
-    </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>ndsPre</alias>
-        <checking>false</checking>
-        <name>Сумма НДС, начисленная с авансов и предоплаты засчитываемая в налоговом периоде при реализации (руб.)
-        </name>
-        <order>13</order>
-        <width>5</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -126,8 +116,8 @@
         <alias>diff</alias>
         <checking>false</checking>
         <name>Расхождение (руб.)</name>
-        <order>14</order>
-        <width>5</width>
+        <order>13</order>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>

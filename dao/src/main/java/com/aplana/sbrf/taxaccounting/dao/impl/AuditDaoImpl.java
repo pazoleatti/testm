@@ -5,8 +5,8 @@ import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -21,7 +21,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.*;
 
 @Repository
 public class AuditDaoImpl extends AbstractDao implements AuditDao {
@@ -119,18 +124,15 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 
     @Override
     public PagingResult<LogSearchResultItem> getLogsBusiness(LogSystemFilterDao filter) {
-        if (filter.getFormDataIds().isEmpty() && filter.getDeclarationDataIds().isEmpty())
-            return  new PagingResult<LogSearchResultItem>(new ArrayList<LogSearchResultItem>(), 0);
 
         Map<String, Object> names = new HashMap<String, Object>();
         names.put("fromDate", filter.getFromSearchDate());
         names.put("endDate", filter.getToSearchDate());
-        names.put("formDataIds", filter.getFormDataIds());
-        names.put("declarationDataIds", filter.getDeclarationDataIds());
         names.put("number", filter.getCountOfRecords());
         names.put("rpName", "%" + filter.getReportPeriodName() + "%");
         names.put("startIdx", filter.getStartIndex() + 1);
         names.put("endIdx", filter.getStartIndex() + filter.getCountOfRecords());
+        names.put("userIds", filter.getUserIds());
 
         StringBuilder sql = new StringBuilder();
         appendWithClause(sql, filter);
@@ -421,21 +423,33 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 
     private void appendWithClause(StringBuilder sql, LogSystemFilterDao filterDao){
         sql.append("WITH");
-        if (!filterDao.getFormDataIds().isEmpty()){
-            sql.append(" fdSelection as (SELECT department_id, ftype.id AS form_type_id, kind, report_period_id FROM form_data fd ");
-            sql.append(" LEFT JOIN form_template ft ON ft.id = fd.form_template_id ");
-            sql.append(" LEFT JOIN form_type ftype ON ftype.id = ft.type_id ");
-            sql.append(" WHERE fd.id in (:formDataIds)),");
+        switch (filterDao.getAuditFormTypeId() != null ? filterDao.getAuditFormTypeId() : 0){
+            case 1:
+                sql.append(" fdSelection as (SELECT department_id, ftype.id AS form_type_id, kind, report_period_id FROM form_data fd ");
+                sql.append(" LEFT JOIN form_template ft ON ft.id = fd.form_template_id ");
+                sql.append(" LEFT JOIN form_type ftype ON ftype.id = ft.type_id ");
+                sql.append(" WHERE fd.id in (").append(appendFromAndWhereClauseFD(filterDao)).append("))");
+                break;
+            case 2:
+                sql.append(" ddSelection as(SELECT department_id, dtype.id AS declaration_type_id, report_period_id FROM declaration_data dd");
+                sql.append(" LEFT JOIN declaration_template dt ON dt.id = dd.declaration_template_id");
+                sql.append(" LEFT JOIN declaration_type dtype ON dtype.id = dt.declaration_type_id");
+                sql.append(" WHERE dd.id in (").append(appendFromAndWhereClauseDD(filterDao)).append("))");
+                break;
+            default:
+                sql.append(" fdSelection as (SELECT department_id, ftype.id AS form_type_id, kind, report_period_id FROM form_data fd ");
+                sql.append(" LEFT JOIN form_template ft ON ft.id = fd.form_template_id ");
+                sql.append(" LEFT JOIN form_type ftype ON ftype.id = ft.type_id ");
+                sql.append(" WHERE fd.id in (").append(appendFromAndWhereClauseFD(filterDao)).append(")),");
+
+                sql.append(" ddSelection as(SELECT department_id, dtype.id AS declaration_type_id, report_period_id FROM declaration_data dd");
+                sql.append(" LEFT JOIN declaration_template dt ON dt.id = dd.declaration_template_id");
+                sql.append(" LEFT JOIN declaration_type dtype ON dtype.id = dt.declaration_type_id");
+                sql.append(" WHERE dd.id in (").append(appendFromAndWhereClauseDD(filterDao)).append("))");
         }
-        if (!filterDao.getDeclarationDataIds().isEmpty()){
-            sql.append(" ddSelection as(SELECT department_id, dtype.id AS declaration_type_id, report_period_id FROM declaration_data dd");
-            sql.append(" LEFT JOIN declaration_template dt ON dt.id = dd.declaration_template_id");
-            sql.append(" LEFT JOIN declaration_type dtype ON dtype.id = dt.declaration_type_id");
-            sql.append(" WHERE dd.id in (:declarationDataIds)),");
-        }
-        sql.replace(sql.length() - 1, sql.length(), " ");
     }
 
+    //Формирует запрос для поиска связей для корректого вывода имен
     private void appendJoinWhereClause(StringBuilder sql, LogSystemFilterDao filterDao){
         boolean isEventColumn = filterDao.getSearchOrdering() == HistoryBusinessSearchOrdering.EVENT;
         if (isEventColumn) {
@@ -448,14 +462,21 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
             getJdbcTemplate().execute(insertEventTitles());
         }
 
-        sql.append(!filterDao.getFormDataIds().isEmpty() ?
-                " LEFT JOIN fdSelection fds ON ls.form_type_id = fds.form_type_id AND ls.form_kind_id = fds.kind" : "");
-        sql.append(!filterDao.getDeclarationDataIds().isEmpty() ?
-                " LEFT JOIN ddSelection dds ON ls.declaration_type_id = dds.declaration_type_id" : "");
-        sql.append(!filterDao.getFormDataIds().isEmpty() && !filterDao.getDeclarationDataIds().isEmpty()?
-                " LEFT JOIN report_period rp ON rp.id = fds.report_period_id OR rp.id = dds.report_period_id" :
-                !filterDao.getFormDataIds().isEmpty() ? " LEFT JOIN report_period rp ON rp.id = fds.report_period_id" :
-                        " LEFT JOIN report_period rp ON rp.id = dds.report_period_id");
+        switch (filterDao.getAuditFormTypeId() != null ? filterDao.getAuditFormTypeId() : 0){
+            case 1:
+                sql.append(" LEFT JOIN fdSelection fds ON ls.form_type_id = fds.form_type_id AND ls.form_kind_id = fds.kind");
+                sql.append(" LEFT JOIN report_period rp ON rp.id = fds.report_period_id");
+                break;
+            case 2:
+                sql.append(" LEFT JOIN ddSelection dds ON ls.declaration_type_id = dds.declaration_type_id");
+                sql.append(" LEFT JOIN report_period rp ON rp.id = dds.report_period_id");
+                break;
+            default:
+                sql.append(" LEFT JOIN fdSelection fds ON ls.form_type_id = fds.form_type_id AND ls.form_kind_id = fds.kind");
+                sql.append(" LEFT JOIN ddSelection dds ON ls.declaration_type_id = dds.declaration_type_id");
+                sql.append(" LEFT JOIN report_period rp ON rp.id = fds.report_period_id OR rp.id = dds.report_period_id");
+        }
+
         sql.append(" LEFT JOIN tax_period tp ON tp.id = rp.tax_period_id");
         sql.append(" left join form_type ft on ls.form_type_id=ft.\"ID\" ");
         sql.append(" left join sec_user su on ls.user_id=su.\"ID\" ");
@@ -466,7 +487,9 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         sql.append(filterDao.getDepartmentName() != null && !filterDao.getDepartmentName().isEmpty() ?
                 " AND lower(ls.department_name) LIKE lower(\'%" + filterDao.getDepartmentName() + "%\')" : "");
         sql.append(filterDao.getReportPeriodName() != null && !filterDao.getReportPeriodName().isEmpty() ?
-                " AND ls.report_period_name = :rpName ":"");
+                "AND ls.report_period_name LIKE :rpName ":"");
+        sql.append(filterDao.getUserIds() != null && !filterDao.getUserIds().isEmpty() ?
+                "AND ls.user_id in (:userIds) ":"");
         sql.append(filterDao.getFromSearchDate() != null && filterDao.getToSearchDate() != null ?
                 " AND ls.log_date between :fromDate AND :endDate + interval '1' day" : "");
     }
@@ -486,5 +509,60 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
             logger.error("Ошибка при формировании списка имен периодов.", e);
             throw new DaoException("Ошибка при формировании списка имен периодов.", e);
         }
+    }
+
+    //Поиск доступных налоговых форм для пользователя
+    private String appendFromAndWhereClauseFD(LogSystemFilterDao filter) {
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT fd.ID as form_data_id");
+        sql.append(" FROM form_data fd, form_type ft, department dp, report_period rp, tax_period tp")
+                .append(" WHERE EXISTS (SELECT 1 FROM FORM_TEMPLATE t WHERE t.id = fd.form_template_id AND t.type_id = ft.id)")
+                .append(" AND dp.id = fd.department_id AND rp.id = fd.report_period_id AND tp.id=rp.tax_period_id");
+
+        if (filter.getFormTypeIds() != null && !filter.getFormTypeIds().isEmpty()) {
+            sql.append(" AND ").append(transformToSqlInStatement("ft.id in", filter.getFormTypeIds()));
+        }
+
+        if (filter.getTaxTypes() != null && !filter.getTaxTypes().isEmpty()) {
+            sql.append(" AND ft.tax_type in ").append(transformTaxTypeToSqlInStatement(filter.getTaxTypes()));
+        }
+
+        if (filter.getReportPeriodIds() != null && !filter.getReportPeriodIds().isEmpty()) {
+            sql.append(" AND ").append(transformToSqlInStatement("rp.id in", filter.getReportPeriodIds()));
+        }
+
+        if (filter.getDepartmentIds() != null && !filter.getDepartmentIds().isEmpty()) {
+            sql.append(" AND ").append(transformToSqlInStatement("fd.department_id in", filter.getDepartmentIds()));
+        }
+
+        if (filter.getFormDataKinds() != null && !filter.getFormDataKinds().isEmpty()) {
+            sql.append(" AND fd.kind in ").append(transformFormKindsToSqlInStatement(filter.getFormDataKinds()));
+        }
+        return sql.toString();
+    }
+
+    private String appendFromAndWhereClauseDD(LogSystemFilterDao filterDao) {
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT dec.ID as declaration_data_id");
+        sql.append(" FROM declaration_data dec, declaration_type dectype, department dp, report_period rp, tax_period tp")
+                .append(" WHERE EXISTS (SELECT 1 FROM DECLARATION_TEMPLATE dectemp WHERE dectemp.id = dec.declaration_template_id AND dectemp.declaration_type_id = dectype.id)")
+                .append(" AND dp.id = dec.department_id AND rp.id = dec.report_period_id AND tp.id=rp.tax_period_id");
+
+        if (filterDao.getTaxTypes() != null && !filterDao.getTaxTypes().isEmpty()) {
+            sql.append(" AND dectype.tax_type in ").append(transformTaxTypeToSqlInStatement(filterDao.getTaxTypes()));
+        }
+
+        if (filterDao.getReportPeriodIds() != null && !filterDao.getReportPeriodIds().isEmpty()) {
+            sql.append(" AND ").append(transformToSqlInStatement("rp.id in", filterDao.getReportPeriodIds()));
+        }
+
+        if (filterDao.getDepartmentIds() != null && !filterDao.getDepartmentIds().isEmpty()) {
+            sql.append(" AND ").append(transformToSqlInStatement("dec.department_id in", filterDao.getDepartmentIds()));
+        }
+
+        if (filterDao.getDeclarationTypeId() != null) {
+            sql.append(" AND dectype.id = ").append(filterDao.getDeclarationTypeId());
+        }
+        return sql.toString();
     }
 }

@@ -22,23 +22,24 @@
         <maxLength>500</maxLength>
         <prevLength>0</prevLength>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>baseAccName</alias>
         <checking>false</checking>
         <name>Данные бухгалтерского учета. Налоговая база. Наименование балансового счета</name>
         <order>3</order>
         <width>20</width>
-        <maxLength>255</maxLength>
-        <prevLength>0</prevLength>
+        <parentAlias>baseAccNum</parentAlias>
+        <refBookAttributeId>249</refBookAttributeId>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>baseAccNum</alias>
         <checking>false</checking>
         <name>Данные бухгалтерского учета. Налоговая база. Номер балансового счета</name>
         <order>4</order>
         <width>10</width>
-        <maxLength>22</maxLength>
-        <prevLength>0</prevLength>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>250</nameAttributeId>
+        <refBookAttributeId>250</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>baseSum</alias>

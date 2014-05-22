@@ -12,6 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
+import static java.util.Arrays.asList;
+
 @Service
 @Transactional(readOnly = true)
 public class AuditServiceImpl implements AuditService {
@@ -23,11 +25,11 @@ public class AuditServiceImpl implements AuditService {
     @Autowired
 	private DeclarationTypeDao declarationTypeDao;
     @Autowired
-    private FormDataSearchService formDataSearchService;
-    @Autowired
-    private DeclarationDataSearchService declarationDataSearchService;
-    @Autowired
     private PeriodService periodService;
+    @Autowired
+    private FormDataAccessService formDataAccessService;
+    @Autowired
+    private SourceService sourceService;
 
 	@Override
 	public PagingResult<LogSearchResultItem> getLogsByFilter(LogSystemFilter filter) {
@@ -113,64 +115,10 @@ public class AuditServiceImpl implements AuditService {
 
     @Override
     public PagingResult<LogSearchResultItem> getLogsBusiness(LogSystemFilter filter, TAUserInfo userInfo) {
-        List<Long> formDataIds = new ArrayList<Long>(0);
-        List<Long> declarationDataIds = new ArrayList<Long>(0);
-        FormDataFilter formDataFilter = new FormDataFilter();
-        DeclarationDataFilter declarationDataFilter = new DeclarationDataFilter();
         LogSystemFilterDao filterDao = new LogSystemFilterDao();
 
-        switch (filter.getAuditFormTypeId() != null ? filter.getAuditFormTypeId() : 0){
-            case 1:
-                formDataFilter.setTaxType(filter.getTaxType());
-                if ((filter.getFormKind() != null)){
-                    formDataFilter.setFormDataKind(Arrays.asList((long) filter.getFormKind().getId()));
-                }
-                if ((filter.getFormTypeId() != null)){
-                    formDataFilter.setFormTypeId(Arrays.asList(Long.valueOf(filter.getFormTypeId())));
-                }
-                /*formDataFilter.setReportPeriodIds(filter.getReportPeriodIds());*/
-                formDataIds = formDataSearchService.findDataIdsByUserAndFilter(userInfo, formDataFilter);
-                if(formDataIds.isEmpty())
-                    return new PagingResult<LogSearchResultItem>(new ArrayList<LogSearchResultItem>(), 0);
-                break;
-            case 2:
-                declarationDataFilter.setDepartmentIds(departmentService.getTaxFormDepartments(userInfo.getUser(),
-                        filter.getTaxType() != null ? Arrays.asList(filter.getTaxType()) : Arrays.asList(TaxType.values())));
-                declarationDataFilter.setTaxType(filter.getTaxType());
-                /*declarationDataFilter.setReportPeriodIds(filter.getReportPeriodIds());*/
-                declarationDataFilter.setDeclarationTypeId(filter.getDeclarationTypeId());
-                declarationDataIds =
-                        declarationDataSearchService.getDeclarationIds(declarationDataFilter, DeclarationDataSearchOrdering.ID, false);
-                if(declarationDataIds.isEmpty())
-                    return new PagingResult<LogSearchResultItem>(new ArrayList<LogSearchResultItem>(), 0);
-                break;
-            default:
-                formDataFilter.setTaxType(filter.getTaxType());
-                formDataFilter.setFormDataKind(filter.getFormKind() != null ?
-                        Arrays.asList((long)filter.getFormKind().getId()) : null);
-                if ((filter.getFormTypeId() != null)){
-                    formDataFilter.setFormTypeId(Arrays.asList(Long.valueOf(filter.getFormTypeId())));
-                }
-                /*formDataFilter.setReportPeriodIds(filter.getReportPeriodIds());*/
-                formDataIds = formDataSearchService.findDataIdsByUserAndFilter(userInfo, formDataFilter);
-
-                //Проставляю доступные подразделения для пользователя, подразделение не выбрано в фильтре
-                //Т.к. перешли на хранение полного имени подразделения, то поиск по имени конкретного подразделению
-                //уже в ЖА.
-                declarationDataFilter.setDepartmentIds(departmentService.getTaxFormDepartments(userInfo.getUser(),
-                        filter.getTaxType() != null ? Arrays.asList(filter.getTaxType()) : Arrays.asList(TaxType.values())));
-                declarationDataFilter.setTaxType(filter.getTaxType());
-                declarationDataFilter.setDeclarationTypeId(filter.getDeclarationTypeId());
-                declarationDataIds =
-                        declarationDataSearchService.getDeclarationIds(declarationDataFilter, DeclarationDataSearchOrdering.ID, false);
-                if (formDataIds.isEmpty() && declarationDataIds.isEmpty()){
-                    return new PagingResult<LogSearchResultItem>(new ArrayList<LogSearchResultItem>(), 0);
-                }
-
-
-        }
-        filterDao.setFormDataIds(formDataIds);
-        filterDao.setDeclarationDataIds(declarationDataIds);
+        filterDao.setAuditFormTypeId(filter.getAuditFormTypeId());
+        filterDao.setDeclarationTypeId(filter.getDeclarationTypeId());
         filterDao.setFromSearchDate(filter.getFromSearchDate());
         filterDao.setToSearchDate(filter.getToSearchDate());
         filterDao.setCountOfRecords(filter.getCountOfRecords());
@@ -178,11 +126,70 @@ public class AuditServiceImpl implements AuditService {
         filterDao.setSearchOrdering(filter.getSearchOrdering());
         filterDao.setAscSorting(filter.isAscSorting());
         filterDao.setStartIndex(filter.getStartIndex());
+        filterDao.setUserIds(filter.getUserIds());
+        createFormDataDaoFilter(userInfo, filter, filterDao);
         filterDao.setDepartmentName(filter.getDepartmentName());
         try {
             return auditDao.getLogsBusiness(filterDao);
         } catch (DaoException e){
             throw new ServiceException("Поиск по НФ/декларациям.", e);
         }
+    }
+
+    private LogSystemFilterDao createFormDataDaoFilter(TAUserInfo userInfo, LogSystemFilter logSystemFilter, LogSystemFilterDao logSystemFilterDao) {
+
+        // Подразделения (могут быть не заданы - тогда все доступные по выборке 40 - http://conf.aplana.com/pages/viewpage.action?pageId=11380670)
+        List<Integer> departments;
+        if (logSystemFilter.getDepartmentName() == null) {
+            departments = departmentService.getTaxFormDepartments(userInfo.getUser(),
+                    logSystemFilter.getTaxType() != null ? asList(logSystemFilter.getTaxType()) : asList(TaxType.values()));
+        } else
+            departments = departmentService.getDepartmentsByName(logSystemFilter.getDepartmentName());
+
+        logSystemFilterDao.setDepartmentIds(departments);
+        // Отчетные периоды
+        logSystemFilterDao.setReportPeriodName(logSystemFilter.getReportPeriodName());
+        // Типы форм
+        if (logSystemFilter.getFormKind() != null) {
+            logSystemFilterDao.setFormDataKinds(Arrays.asList(logSystemFilter.getFormKind()));
+        } else {
+            logSystemFilterDao.setFormDataKinds(formDataAccessService.getAvailableFormDataKind(userInfo, asList(logSystemFilter.getTaxType())));
+        }
+        // Виды форм
+        TAUser tAUser = userInfo.getUser();
+        List<Long> formTypes = logSystemFilter.getFormTypeId() != null ?
+                Arrays.asList(Long.valueOf(logSystemFilter.getFormTypeId())) : new ArrayList<Long>(0);
+        if (formTypes.isEmpty()) {
+            if (!tAUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+                if (tAUser.hasRole(TARole.ROLE_CONTROL_NS) || tAUser.hasRole(TARole.ROLE_CONTROL)) {
+                    formTypes = sourceService.getDFTFormTypeBySource(tAUser.getDepartmentId(), logSystemFilter.getTaxType(), logSystemFilterDao.getFormDataKinds());
+                } else {
+                    formTypes = sourceService.getDFTByPerformerDep(tAUser.getDepartmentId(), logSystemFilter.getTaxType(), logSystemFilterDao.getFormDataKinds());
+                }
+                List<Department> departments10 = new ArrayList<Department>();
+                if (tAUser.hasRole(TARole.ROLE_CONTROL_NS)) {
+                    departments10 = departmentService.getBADepartments(tAUser);
+                } else {
+                    departments10.addAll(departmentService.getAllChildren(tAUser.getDepartmentId()));
+                }
+                List<DepartmentFormType> departmentFormTypeList = new ArrayList<DepartmentFormType>();
+                for (Department department : departments10) {
+                    departmentFormTypeList.addAll(sourceService.getDFTByDepartment(department.getId(), logSystemFilter.getTaxType()));
+                }
+                for(DepartmentFormType departmentFormType : departmentFormTypeList) {
+                    formTypes.add((long)departmentFormType.getFormTypeId());
+                }
+                Set<Long> tFormTypes =  new HashSet<Long>(formTypes);
+                formTypes.clear();
+                formTypes.addAll(tFormTypes);
+            }
+        }
+        logSystemFilterDao.setFormTypeIds(formTypes);
+
+        // Вид налога
+        if (logSystemFilter.getTaxType() != null) {
+            logSystemFilterDao.setTaxTypes(asList(logSystemFilter.getTaxType()));
+        }
+        return logSystemFilterDao;
     }
 }

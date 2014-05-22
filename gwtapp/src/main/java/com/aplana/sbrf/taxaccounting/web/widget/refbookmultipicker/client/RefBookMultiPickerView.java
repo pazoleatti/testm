@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.PickerState;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.RefBookItem;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
+import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.*;
@@ -12,6 +14,8 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.regexp.shared.RegExp;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.*;
@@ -31,6 +35,8 @@ import static com.google.gwt.view.client.DefaultSelectionEventManager.*;
 public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPickerUiHandlers>
         implements RefBookMultiPickerPresenter.MyView, RefBookView {
 
+
+
     interface Binder extends UiBinder<Widget, RefBookMultiPickerView> {
     }
 
@@ -49,6 +55,7 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
 
     private HandlerRegistration selectionHandlerRegistration;
     private HashMap<RefBookItemTextColumn, Integer> sortColumns = new HashMap<RefBookItemTextColumn, Integer>();
+    private String filterText;
 
     private SetSelectionModel<RefBookItem> selectionModel;
     private AsyncDataProvider<RefBookItem> dataProvider =
@@ -206,6 +213,7 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
     @Override
     public void find(String searchPattern) {
         getUiHandlers().find(searchPattern);
+        filterText = searchPattern;
         refresh(true);
     }
 
@@ -257,7 +265,18 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
 
         int i = 0;
         for (Map.Entry<String, Integer> entry : headers.entrySet()) {
-            RefBookItemTextColumn refBookItemTextColumn = new RefBookItemTextColumn(i, true);
+            Cell<String> cell = new AbstractCell<String>() {
+                @Override
+                public void render(Context context, String value, SafeHtmlBuilder sb) {
+                    if (filterText != null && !filterText.isEmpty()) {
+                        String link = RegExp.compile(filterText, "gi").replace(value, "<span style=\"color: #ff0000;\">$&</span>");
+                        sb.appendHtmlConstant(link);
+                    } else {
+                        sb.appendHtmlConstant(value);
+                    }
+                }
+            };
+            RefBookItemTextColumn refBookItemTextColumn = new RefBookItemTextColumn(i, true, cell);
             sortColumns.put(refBookItemTextColumn, i);
             cellTable.addResizableColumn(refBookItemTextColumn, entry.getKey());
             cellTable.setColumnWidth(refBookItemTextColumn, entry.getValue(), Style.Unit.PC);
