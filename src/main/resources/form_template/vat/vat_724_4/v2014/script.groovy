@@ -11,19 +11,19 @@ import groovy.transform.Field
  * formTemplateId=603
  *
  * TODO:
- *      - графа 2, 3, 5 - непонятно графа строковая или спавочная
- *      - графа 7 пока не справочный, а строковый, потому что нет справочника "ставки ндс"
  *      - логическая провека 5 и 6: не понятно какое название графы выводить: оба или одно
+ *      - графа 3 и 2 - справочник «План счетов бухгалтерского учета», но он пока не сделан, временно указал другой справочник (38), потом надо поменять
  */
 
 // графа 1 - rowNum
 // графа   - fix
-// графа 2 - name
-// графа 3 - number
+// TODO (Ramil Timerbaev) как будет готов справочник «План счетов бухгалтерского учета», поменять на него
+// графа 2 - name       - зависит от графы 3 - атрибут 000 - NAME - «Наименование счета», справочник 00 «План счетов бухгалтерского учета»
+// графа 3 - number     - атрибут 000 - NAME - «Номер счета», справочник 00 «План счетов бухгалтерского учета»
 // графа 4 - sum
 // графа 5 - number2
 // графа 6 - sum2
-// графа 7 - nds        - атрибут 000 - ???? - «Ставка», справочник ?? «Ставки НДС» // TODO (Ramil Timerbaev) пока нет этого справочника
+// графа 7 - nds
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
@@ -64,21 +64,29 @@ switch (formDataEvent) {
         break
 }
 
+//// Кэши и константы
+@Field
+def providerCache = [:]
+@Field
+def recordCache = [:]
+@Field
+def refBookCache = [:]
+
 // все атрибуты
 @Field
 def allColumns = ['rowNum', 'fix', 'name', 'number', 'sum', 'number2', 'sum2', 'nds']
 
-// Редактируемые атрибуты (графа 2, 3..7) // TODO (Ramil Timerbaev) графу 2 потом возможно надо будет убрать
+// Редактируемые атрибуты (графа 3..7)
 @Field
-def editableColumns = ['name', 'number', 'sum', 'number2', 'sum2', 'nds']
+def editableColumns = ['number', 'sum', 'number2', 'sum2', 'nds']
 
 // Автозаполняемые атрибуты
 @Field
 def autoFillColumns = allColumns - editableColumns
 
-// Проверяемые на пустые значения атрибуты (графа 1..4, 6)
+// Проверяемые на пустые значения атрибуты (графа 1, 3, 4, 6)
 @Field
-def nonEmptyColumns = ['rowNum', 'name', 'number', 'sum', 'sum2']
+def nonEmptyColumns = ['rowNum', 'number', 'sum', 'sum2']
 
 // Атрибуты итоговых строк для которых вычисляются суммы (графа 4, 6)
 @Field
@@ -91,6 +99,20 @@ def sortColumns = ['number', 'number2']
 // список алиасов подразделов
 @Field
 def sections = ['1', '2']
+
+// Дата окончания отчетного периода
+@Field
+def endDate = null
+
+// Поиск записи в справочнике по значению (для импорта)
+def getRecordImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+                    def boolean required = true) {
+    if (value == null || value == '') {
+        return null
+    }
+    return formDataService.getRefBookRecordImport(refBookId, recordCache, providerCache, refBookCache, alias, value,
+            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
+}
 
 // Получение числа из строки при импорте
 def getNumber(def value, def indexRow, def indexCol) {
@@ -360,32 +382,31 @@ void addData(def xml, int headRowCount) {
 
         def newRow = getNewRow()
         def int xlsIndexRow = xmlIndexRow + rowOffset
-        def xmlIndexCol = 1
 
-        // графа 2
-        xmlIndexCol++
-        newRow.name = row.cell[xmlIndexCol].text()
+        // TODO (Ramil Timerbaev) справочник «План счетов бухгалтерского учета» не готов, потом поменять на правильный справочник
+        // Графа 3 - атрибут 000 - NAME - «Номер балансового счета», справочник 00 «План счетов бухгалтерского учета»
+        record = getRecordImport(38, 'VALUE', row.cell[3].text(), xlsIndexRow, 3 + colOffset)
+        newRow.number = record?.record_id?.value
 
-        // графа 3
-        xmlIndexCol++
-        newRow.number = row.cell[xmlIndexCol].text()
+        // TODO (Ramil Timerbaev) справочник «План счетов бухгалтерского учета» не готов, потом поменять на правильный справочник
+        // Графа 2 - зависит от графы 3 - атрибут 000 - NAME - «Наименование балансового счета», справочник 00 «План счетов бухгалтерского учета»
+        if (record != null) {
+            def value1 = record?.CODE?.value?.toString()
+            def value2 = row.cell[2].text()
+            formDataService.checkReferenceValue(38, value1, value2, xlsIndexRow, 2 + colOffset, logger, true)
+        }
 
         // графа 4
-        xmlIndexCol++
-        newRow.sum = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        newRow.sum = getNumber(row.cell[4].text(), xlsIndexRow, 4 + colOffset)
 
         // графа 5
-        xmlIndexCol++
-        newRow.number2 = row.cell[xmlIndexCol].text()
+        newRow.number2 = row.cell[5].text()
 
         // графа 6
-        xmlIndexCol++
-        newRow.sum2 = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        newRow.sum2 = getNumber(row.cell[6].text(), xlsIndexRow, 6 + colOffset)
 
-        // TODO (Ramil Timerbaev) это графа пока строковая, должна быть справочной, справочник пока не готов
         // графа 7
-        xmlIndexCol++
-        newRow.nds = row.cell[xmlIndexCol].text()
+        newRow.nds = row.cell[7].text()
 
         mapRows[sectionIndex].add(newRow)
     }
@@ -419,4 +440,11 @@ def getTotalRow(sectionsRows) {
         }
     }
     return newRow
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
 }
