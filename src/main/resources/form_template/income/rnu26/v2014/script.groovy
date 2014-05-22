@@ -276,35 +276,6 @@ void logicCheck() {
     // данные предыдущего отчетного периода
     def prevDataRows = getPrevDataRows()
 
-    // 3. Проверка на полноту отражения данных предыдущих отчетных периодов (графа 15) в текущем отчетном периоде
-    if (prevDataRows) {
-        def missContract = []
-        def severalContract = []
-        prevDataRows.each { prevRow ->
-            if (prevRow.getAlias() == null && prevRow.reserveCalcValue > 0) {
-                def count = 0
-                dataRows.each { row ->
-                    if (row.tradeNumber == prevRow.tradeNumber) {
-                        count++
-                    }
-                }
-                if (count == 0) {
-                    missContract.add(prevRow.tradeNumber)
-                } else if (count > 1) {
-                    severalContract.add(prevRow.tradeNumber)
-                }
-            }
-        }
-        if (!missContract.isEmpty()) {
-            def message = missContract.join(', ')
-            logger.warn("Отсутствуют строки с номерами сделок: $message!")
-        }
-        if (!severalContract.isEmpty()) {
-            def message = severalContract.join(', ')
-            logger.warn("Существует несколько строк с номерами сделок: $message!")
-        }
-    }
-
     for (def row : dataRows) {
         if (row.getAlias() != null) {
             continue
@@ -431,7 +402,7 @@ void logicCheck() {
         try {
             subTotalRow = getDataRow(dataRows, totalRowAlias)
         } catch(IllegalArgumentException e) {
-            def issuerName = getRefBookValue(100, group.toLong())
+            def issuerName = getRefBookValue(100, group.toLong())?.FULL_NAME?.value
             loggerError("Итоговые значения по эмитенту $issuerName не рассчитаны! Необходимо рассчитать данные формы.")
             continue
         }
@@ -440,7 +411,7 @@ void logicCheck() {
 
         // сравнить строки
         if (isDiffRow(subTotalRow, tmpRow, totalColumns)) {
-            def issuerName = getRefBookValue(100, group.toLong())
+            def issuerName = getRefBookValue(100, group.toLong())?.FULL_NAME?.value
             loggerError("Итоговые значения по эмитенту $issuerName рассчитаны неверно!")
         }
     }
@@ -472,6 +443,35 @@ void logicCheck() {
     // 19. Проверка итогового значений по всей форме
     if (totalRow != null) {
         checkTotalSum(dataRows, totalColumns, logger, !getBalancePeriod())
+    }
+
+    // 3. Проверка на полноту отражения данных предыдущих отчетных периодов (графа 15) в текущем отчетном периоде
+    if (prevDataRows) {
+        def missContract = []
+        def severalContract = []
+        prevDataRows.each { prevRow ->
+            if (prevRow.getAlias() == null && prevRow.reserveCalcValue > 0) {
+                def count = 0
+                dataRows.each { row ->
+                    if (row.tradeNumber == prevRow.tradeNumber) {
+                        count++
+                    }
+                }
+                if (count == 0) {
+                    missContract.add(prevRow.tradeNumber)
+                } else if (count > 1) {
+                    severalContract.add(prevRow.tradeNumber)
+                }
+            }
+        }
+        if (!missContract.isEmpty()) {
+            def message = missContract.join(', ')
+            logger.warn("Отсутствуют строки с номерами сделок: $message!")
+        }
+        if (!severalContract.isEmpty()) {
+            def message = severalContract.join(', ')
+            logger.warn("Существует несколько строк с номерами сделок: $message!")
+        }
     }
 }
 
