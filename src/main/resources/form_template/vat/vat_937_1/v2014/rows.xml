@@ -13,8 +13,7 @@
         <cell alias="deal_10_Nds" colSpan="1" rowSpan="1"/>
         <cell alias="deal_0" colSpan="1" rowSpan="1"/>
         <cell alias="deal" colSpan="1" rowSpan="1"/>
-        <cell alias="ndsBank" colSpan="1" rowSpan="1"/>
-        <cell alias="ndsPre" colSpan="1" rowSpan="1"/>
+        <cell alias="nds" colSpan="1" rowSpan="1"/>
         <cell alias="diff" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="totalA">
@@ -29,8 +28,7 @@
         <cell alias="deal_10_Nds" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="deal_0" colSpan="1" rowSpan="1"/>
         <cell alias="deal" colSpan="1" rowSpan="1"/>
-        <cell alias="ndsBank" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="ndsPre" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
+        <cell alias="nds" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="diff" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="B">
@@ -46,8 +44,7 @@
         <cell alias="deal_10_Nds" colSpan="1" rowSpan="1"/>
         <cell alias="deal_0" colSpan="1" rowSpan="1"/>
         <cell alias="deal" colSpan="1" rowSpan="1"/>
-        <cell alias="ndsBank" colSpan="1" rowSpan="1"/>
-        <cell alias="ndsPre" colSpan="1" rowSpan="1"/>
+        <cell alias="nds" colSpan="1" rowSpan="1"/>
         <cell alias="diff" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="totalPeriod">
@@ -62,8 +59,7 @@
         <cell alias="deal_10_Nds" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="deal_0" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="deal" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="ndsBank" colSpan="1" rowSpan="1"/>
-        <cell alias="ndsPre" colSpan="1" rowSpan="1"/>
+        <cell alias="nds" colSpan="1" rowSpan="1"/>
         <cell alias="diff" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="totalAnnul">
@@ -78,8 +74,7 @@
         <cell alias="deal_10_Nds" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="deal_0" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="deal" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="ndsBank" colSpan="1" rowSpan="1"/>
-        <cell alias="ndsPre" colSpan="1" rowSpan="1"/>
+        <cell alias="nds" colSpan="1" rowSpan="1"/>
         <cell alias="diff" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="totalB">
@@ -94,8 +89,7 @@
         <cell alias="deal_10_Nds" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
         <cell alias="deal_0" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
         <cell alias="deal" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
-        <cell alias="ndsBank" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
-        <cell alias="ndsPre" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="nds" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
         <cell alias="diff" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
     </row>
 </rows>
