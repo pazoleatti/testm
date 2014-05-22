@@ -151,7 +151,6 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
         phone.setEnabled(!readOnlyMode);
         buttonPanel.setVisible(!readOnlyMode);
         directionPanel.setVisible(!readOnlyMode);
-        cancelButton.setText("Закрыть");
         saveButton.setVisible(!readOnlyMode);
         departmentPicker.setEnabled(!readOnlyMode);
         initTable(readOnlyMode);
