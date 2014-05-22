@@ -114,7 +114,13 @@ void logicCheck() {
                 if (row.getCell(column).value != null
                         && rowOld.getCell(column).value != null
                         && row.getCell(column).value < rowOld.getCell(column).value) {
-                    logger.warn("Процентный (купонный) доход по «${row.securitiesType}» уменьшился!")
+                    def msg = "Процентный (купонный) доход по «${getColumnName(row, column)}» уменьшился!"
+                    // нефатальная для графы 5, 9, 10, 11
+                    if (column in ['governmentBonds', 'ovgvz', 'eurobondsRF', 'itherEurobonds']) {
+                        logger.warn(msg)
+                    } else {
+                        logger.error(msg)
+                    }
                 }
             }
         }
