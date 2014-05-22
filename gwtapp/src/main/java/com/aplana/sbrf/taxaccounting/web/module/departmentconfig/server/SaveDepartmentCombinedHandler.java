@@ -158,7 +158,7 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
             boolean needEdit = false;
 
             // Поиск версий настроек для указанного подразделения. Если они есть - создаем новую версию с существующим record_id, иначе создаем новый record_id (по сути элемент справочника)
-            String filter = DepartmentParamAliases.DEPARTMENT_ID.name() + " = " + action.getDepartmentCombined().getDepartmentId();
+            String filter = DepartmentParamAliases.DEPARTMENT_ID.name() + " = " + action.getDepartmentCombined().getDepartmentId().get(0);
             List<Pair<Long, Long>> recordPairs = provider.checkRecordExistence(null, filter);
             if (recordPairs.size() != 0) {
                 //Проверяем, к одному ли элементу относятся версии
