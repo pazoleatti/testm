@@ -532,7 +532,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         }
 
         if (filter.getDepartmentIds() != null && !filter.getDepartmentIds().isEmpty()) {
-            sql.append(" AND ").append(transformToSqlInStatement("fd.department_id in", filter.getDepartmentIds()));
+            sql.append(" AND ").append(transformToSqlInStatement("fd.department_id", filter.getDepartmentIds()));
         }
 
         if (filter.getFormDataKinds() != null && !filter.getFormDataKinds().isEmpty()) {
@@ -553,11 +553,11 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         }
 
         if (filterDao.getReportPeriodIds() != null && !filterDao.getReportPeriodIds().isEmpty()) {
-            sql.append(" AND ").append(transformToSqlInStatement("rp.id in", filterDao.getReportPeriodIds()));
+            sql.append(" AND ").append(transformToSqlInStatement("rp.id", filterDao.getReportPeriodIds()));
         }
 
         if (filterDao.getDepartmentIds() != null && !filterDao.getDepartmentIds().isEmpty()) {
-            sql.append(" AND ").append(transformToSqlInStatement("dec.department_id in", filterDao.getDepartmentIds()));
+            sql.append(" AND ").append(transformToSqlInStatement("dec.department_id", filterDao.getDepartmentIds()));
         }
 
         if (filterDao.getDeclarationTypeId() != null) {
