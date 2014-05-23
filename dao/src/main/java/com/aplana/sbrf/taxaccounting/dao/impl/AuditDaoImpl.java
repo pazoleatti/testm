@@ -242,12 +242,12 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                     .append("%").append(filter.getReportPeriodName()).append("%\'");
 		}
 
-		if (filter.getFormKind() != null && filter.getFormKind().getId() != 0) {
-			sql.append(String.format(" AND %sform_kind_id = ", prefix)).append(filter.getFormKind().getId());
+		if (filter.getFormKind() != null && !filter.getFormKind().isEmpty()) {
+			sql.append(" AND ").append(SqlUtils.transformToSqlInStatement(String.format(" %sform_kind_id  ", prefix),filter.getFormKind()));
 		}
 
-		if (filter.getFormTypeId() != null) {
-			sql.append(String.format(" AND %sform_type_id = ", prefix)).append(filter.getFormTypeId());
+		if (filter.getFormTypeId() != null && !filter.getFormTypeId().isEmpty()) {
+			sql.append(" AND ").append(SqlUtils.transformToSqlInStatement(String.format(" %sform_type_id ", prefix), filter.getFormTypeId()));
 		}
 
 		if (filter.getDeclarationTypeId() != null) {
@@ -268,8 +268,8 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
             sql.append(" AND ft.tax_type in ").append(transformTaxTypeToSqlInStatement(Arrays.asList(filter.getTaxType())));
         }
 
-		if (filter.getDepartmentId() != null) {
-            sql.append(String.format(" AND %sdepartment_id = ", prefix)).append(filter.getDepartmentId());
+		if (filter.getDepartmentIds() != null && !filter.getDepartmentIds().isEmpty()) {
+            sql.append(" AND ").append(SqlUtils.transformToSqlInStatement(String.format(" %sdepartment_id ", prefix), filter.getDepartmentIds()));
 		}
 	}
 

@@ -13,12 +13,12 @@ public class LogSystemFilter implements Serializable {
 
     private List<Long> userIds;
     private String reportPeriodName;
-    private FormDataKind formKind;
+    private List<Long> formKind;
     private TaxType taxType;
     private Integer declarationTypeId;
     private Integer auditFormTypeId;
-    private Integer formTypeId;
-    private Integer departmentId;
+    private List<Long> formTypeId;
+    private List<Integer> departmentIds;
     private Date fromSearchDate;
     private Date toSearchDate;
 
@@ -57,11 +57,11 @@ public class LogSystemFilter implements Serializable {
         this.reportPeriodName = reportPeriodName;
     }
 
-    public FormDataKind getFormKind() {
+    public List<Long> getFormKind() {
         return formKind;
     }
 
-    public void setFormKind(FormDataKind formKind) {
+    public void setFormKind(List<Long> formKind) {
         this.formKind = formKind;
     }
 
@@ -73,20 +73,20 @@ public class LogSystemFilter implements Serializable {
         this.declarationTypeId = declarationTypeId;
     }
 
-    public Integer getFormTypeId() {
+    public List<Long> getFormTypeId() {
         return formTypeId;
     }
 
-    public void setFormTypeId(Integer formTypeId) {
+    public void setFormTypeId(List<Long> formTypeId) {
         this.formTypeId = formTypeId;
     }
 
-    public Integer getDepartmentId() {
-        return departmentId;
+    public List<Integer> getDepartmentIds() {
+        return departmentIds;
     }
 
-    public void setDepartmentId(Integer departmentId) {
-        this.departmentId = departmentId;
+    public void setDepartmentIds(List<Integer> departmentIds) {
+        this.departmentIds = departmentIds;
     }
 
     public Date getFromSearchDate() {

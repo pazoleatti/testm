@@ -6,6 +6,8 @@ import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.*;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Transformer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -136,29 +138,35 @@ public class AuditServiceImpl implements AuditService {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private LogSystemFilterDao createFormDataDaoFilter(TAUserInfo userInfo, LogSystemFilter logSystemFilter, LogSystemFilterDao logSystemFilterDao) {
 
         // Подразделения (могут быть не заданы - тогда все доступные по выборке 40 - http://conf.aplana.com/pages/viewpage.action?pageId=11380670)
         List<Integer> departments;
-        if (logSystemFilter.getDepartmentId() == null) {
+        if (logSystemFilter.getDepartmentIds() == null || logSystemFilter.getDepartmentIds().isEmpty()) {
             departments = departmentService.getTaxFormDepartments(userInfo.getUser(),
                     logSystemFilter.getTaxType() != null ? asList(logSystemFilter.getTaxType()) : asList(TaxType.values()));
         } else
-            departments = Arrays.asList(logSystemFilter.getDepartmentId());
+            departments = logSystemFilter.getDepartmentIds();
 
         logSystemFilterDao.setDepartmentIds(departments);
         // Отчетные периоды
         logSystemFilterDao.setReportPeriodName(logSystemFilter.getReportPeriodName());
         // Типы форм
-        if (logSystemFilter.getFormKind() != null) {
-            logSystemFilterDao.setFormDataKinds(Arrays.asList(logSystemFilter.getFormKind()));
+        if (logSystemFilter.getFormKind() != null && !logSystemFilter.getFormKind().isEmpty()) {
+            logSystemFilterDao.setFormDataKinds(new ArrayList<FormDataKind>(CollectionUtils.collect(logSystemFilter.getFormKind(), new Transformer() {
+                @Override
+                public Object transform(Object input) {
+                    return FormDataKind.fromId((Integer)input);
+                }
+            })));
         } else {
             logSystemFilterDao.setFormDataKinds(formDataAccessService.getAvailableFormDataKind(userInfo, asList(logSystemFilter.getTaxType())));
         }
         // Виды форм
         TAUser tAUser = userInfo.getUser();
         List<Long> formTypes = logSystemFilter.getFormTypeId() != null ?
-                Arrays.asList(Long.valueOf(logSystemFilter.getFormTypeId())) : new ArrayList<Long>(0);
+                logSystemFilter.getFormTypeId() : new ArrayList<Long>(0);
         if (formTypes.isEmpty()) {
             if (!tAUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
                 if (tAUser.hasRole(TARole.ROLE_CONTROL_NS) || tAUser.hasRole(TARole.ROLE_CONTROL)) {
