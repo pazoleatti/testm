@@ -329,12 +329,12 @@ public class RefBookUtils extends AbstractDao {
     }
 
 
-    private final static String CHECK_REFERENCE_VERSIONS_START = "select id from %s where VERSION < ? and ID in (%s)";
+    private final static String CHECK_REFERENCE_VERSIONS_START = "select id from %s where VERSION < ? and %s";
 
     private final static String CHECK_REFERENCE_VERSIONS_IN_PERIOD = "select id from (\n" +
             "  select r.id, r.version as versionStart, (select min(version) - interval '1' day from %s rn where rn.ref_book_id = r.ref_book_id and rn.record_id = r.record_id and rn.version > r.version) as versionEnd \n" +
             "  from %s r\n" +
-            "  where id in (%s)\n" +
+            "  where %s\n" +
             ") where (:versionTo is not null and :versionTo < versionStart) or (versionEnd is not null and versionEnd < :versionFrom)";
 
     /**
@@ -346,7 +346,7 @@ public class RefBookUtils extends AbstractDao {
      */
     public void isReferenceValuesCorrect(Logger logger, String tableName, @NotNull Date versionFrom, Date versionTo, @NotNull List<RefBookAttribute> attributes, List<RefBookRecord> records) {
         if (attributes.size() > 0) {
-            StringBuilder in = new StringBuilder();
+            List<Long> in = new ArrayList<Long>();
             Map<Long, String> attributeIds = new HashMap<Long, String>();
             for (RefBookRecord record : records) {
                 Map<String, RefBookValue> values = record.getValues();
@@ -356,15 +356,14 @@ public class RefBookUtils extends AbstractDao {
                             !attribute.getAlias().equals("DEPARTMENT_ID")) {       //Подразделения не версионируются и их нет смысла проверять
                         Long id = values.get(attribute.getAlias()).getReferenceValue();
                         attributeIds.put(id, attribute.getName());
-                        in.append(id).append(",");
+                        in.add(id);
                     }
                 }
             }
 
-            if (in.length() != 0) {
-                in.deleteCharAt(in.length()-1);
+            if (in.size() != 0) {
                 /** Проверяем пересекаются ли периоды ссылочных атрибутов с периодом текущей записи справочника */
-                String sql = String.format(CHECK_REFERENCE_VERSIONS_IN_PERIOD, tableName, tableName, in);
+                String sql = String.format(CHECK_REFERENCE_VERSIONS_IN_PERIOD, tableName, tableName, SqlUtils.transformToSqlInStatement("id", in));
                 Map<String, Object> params = new HashMap<String, Object>();
                 params.put("versionFrom", versionFrom);
                 params.put("versionTo", versionTo);
@@ -384,7 +383,7 @@ public class RefBookUtils extends AbstractDao {
                 }
 
                 /** Проверяем не начинается ли период актуальности ссылочного атрибута раньше чем период актуальности текущей записи справочника */
-                sql = String.format(CHECK_REFERENCE_VERSIONS_START, tableName, in);
+                sql = String.format(CHECK_REFERENCE_VERSIONS_START, tableName, SqlUtils.transformToSqlInStatement("id", in));
                 result = getJdbcTemplate().query(sql, new RowMapper<Long>() {
                     @Override
                     public Long mapRow(ResultSet rs, int rowNum) throws SQLException {

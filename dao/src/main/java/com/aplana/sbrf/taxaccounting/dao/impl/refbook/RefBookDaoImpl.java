@@ -1501,7 +1501,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "periodCodes as (select a.alias, v.* from ref_book_value v, ref_book_attribute a where v.attribute_id=a.id and a.ref_book_id=8),\n" +
             "usages as (select r.* from ref_book_value v, ref_book_record r, checkRecords cr " +
             "where v.attribute_id in (select id from ref_book_attribute where ref_book_id in (31,33,37,98,99) and id not in (170,192,180)) and v.reference_value = cr.id and r.id=v.record_id)\n" +   //170,192,180 - ссылки на подразделения
-            "select distinct d.name as departmentName, pn.string_value as periodName, t.number_value as isT, i.number_value as isI, d.number_value as isD,\n" +
+            "select distinct d.name as departmentName, pn.string_value as periodName, nt.number_value as isT, ni.number_value as isI, nd.number_value as isD, nv.number_value as isV, np.number_value as isP,\n" +
             "to_date(concat(to_char(ps.date_value,'dd.mm'), to_char(u.version,'.yyyy')), 'DD.MM.YYYY') as periodStart, to_date(concat(to_char(pe.date_value,'dd.mm'), to_char(u.version,'.yyyy')), 'DD.MM.YYYY') as periodEnd,\n" +
             "case\n" +
             "\twhen u.ref_book_id = 31 then 'T'\n" +        //Транспортный налог
@@ -1516,10 +1516,12 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "join (select date_value, record_id from periodCodes where alias='CALENDAR_START_DATE') ps on to_char(ps.date_value,'dd.mm')=to_char(u.version,'dd.mm')\n" +
             "join (select date_value, record_id from periodCodes where alias='END_DATE') pe on pe.record_id = ps.record_id\n" +
             "join (select string_value, record_id from periodCodes where alias='NAME') pn on pn.record_id=ps.record_id\n" +
-            "join (select number_value, record_id from periodCodes where alias='T') t on t.record_id=ps.record_id\n" +
-            "join (select number_value, record_id from periodCodes where alias='I') i on i.record_id=ps.record_id\n" +
-            "join (select number_value, record_id from periodCodes where alias='D') d on d.record_id=ps.record_id)\n" +
-            "where taxCode is not null and ((isI = 1 and taxCode = 'I') or (isT = 1 and taxCode = 'T') or (isD = 1 and taxCode = 'D'))";
+            "join (select number_value, record_id from periodCodes where alias='T') nt on nt.record_id=ps.record_id\n" +
+            "join (select number_value, record_id from periodCodes where alias='I') ni on ni.record_id=ps.record_id\n" +
+            "join (select number_value, record_id from periodCodes where alias='D') nd on nd.record_id=ps.record_id)\n" +
+            "join (select number_value, record_id from periodCodes where alias='V') nv on nv.record_id=ps.record_id)\n" +
+            "join (select number_value, record_id from periodCodes where alias='P') np on np.record_id=ps.record_id)\n" +
+            "where taxCode is not null and ((isI = 1 and taxCode = 'I') or (isT = 1 and taxCode = 'T') or (isD = 1 and taxCode = 'D') or (isV = 1 and taxCode = 'V') or (isP = 1 and taxCode = 'P'))";
 
     public List<String> isVersionUsed(@NotNull Long refBookId, @NotNull List<Long> uniqueRecordIds, Date versionFrom, Date versionTo, boolean isValuesChanged) {
         Set<String> results = new HashSet<String>();

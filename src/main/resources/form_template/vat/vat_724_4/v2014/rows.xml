@@ -3,8 +3,8 @@
     <row alias="head1">
         <cell alias="rowNum" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
         <cell alias="fix" colSpan="6" rowSpan="1" stringValue="1. По операциям Банка" styleAlias="Заголовок"/>
-        <cell alias="name" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
-        <cell alias="number" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
+        <cell alias="name" colSpan="1" rowSpan="1"/>
+        <cell alias="number" colSpan="1" rowSpan="1"/>
         <cell alias="sum" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
         <cell alias="number2" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
         <cell alias="sum2" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
@@ -23,8 +23,8 @@
     <row alias="head2">
         <cell alias="rowNum" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
         <cell alias="fix" colSpan="7" rowSpan="1" stringValue="2. По налоговому агенту" styleAlias="Заголовок"/>
-        <cell alias="name" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
-        <cell alias="number" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
+        <cell alias="name" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="number" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
         <cell alias="sum" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
         <cell alias="number2" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
         <cell alias="sum2" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
