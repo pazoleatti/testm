@@ -10,7 +10,6 @@ import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.service.*;
-import com.aplana.sbrf.taxaccounting.service.script.ReportPeriodService;
 import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContext;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
@@ -56,6 +55,9 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
     @Autowired
     private LogEntryService logEntryService;
 
+    @Autowired
+    private DepartmentServiceImpl departmentService;
+
 	@Override
 	public void compose(FormData dformData, int reportPeriodId, Integer periodOrder,  int departmentId, int formTypeId, FormDataKind kind) {
         // Если экземпляр не найден, то он создается
@@ -78,11 +80,16 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
 			formDataScriptingService.executeScript(scriptComponentContext.getUserInfo(), dformData,
                     FormDataEvent.COMPOSE, scriptComponentContext.getLogger(), null);
 
+            String formName = dformData.getFormType().getName();
+            String kindName = dformData.getKind().getName();
+            String depatmentName = departmentService.get(dformData.getDepartmentId()).getName();
             if (scriptComponentContext.getLogger().containsLevel(LogLevel.ERROR)) {
-                throw new ServiceLoggerException(
-                        "Произошли ошибки при консолидации данных в приемнике: " +
-                                dformData.getKind().getName() + " \"" + dformData.getFormType().getName() + "\".",
-                        logEntryService.save(scriptComponentContext.getLogger().getEntries()));
+                throw new ServiceLoggerException("Произошли ошибки при создании налоговой формы-приемника: Подразделение: «%s», Тип: «%s», Вид: «%s».",
+                        logEntryService.save(scriptComponentContext.getLogger().getEntries()),
+                        depatmentName, kindName, formName);
+            } else {
+                scriptComponentContext.getLogger().info("%s: Сформирована налоговая форма-приемник: Подразделение: «%s», Тип: «%s», Вид: «%s».",
+                        FormDataEvent.COMPOSE.getTitle(), depatmentName, kindName, formName);
             }
 
             formDataDao.save(dformData);
