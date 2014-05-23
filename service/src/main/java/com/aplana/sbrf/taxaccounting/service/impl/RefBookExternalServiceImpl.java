@@ -42,33 +42,31 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
     @Autowired
     private RefBookScriptingService refBookScriptingService;
 
-    @Override
-    public void importRefBook(TAUserInfo userInfo, Logger logger) {
-        // регулярка файла/архива - true/false - id
-        Map<String, Pair<Boolean, Long>> map = new HashMap<String, Pair<Boolean, Long>>();
-        // архив для загр. спр. "Коды ОКАТО"
-        map.put("OKA.*", new Pair<Boolean, Long>(false, 3L));
-        // архив для загр. спр. "Коды ОКАТО"
-        map.put("payments.*", new Pair<Boolean, Long>(false, 3L));
-        // файл для загр. спр. "Организации-участники контролируемых сделок"
-        map.put("organization.xls", new Pair<Boolean, Long>(true, 9L));
-        // архив для загр. спр. "Коды субъектов Российской Федерации" (Регионы)
-        map.put("RNU.*", new Pair<Boolean, Long>(false, 4L));
-        // архив для загр. спр. "Коды субъектов Российской Федерации" (Регионы)
-        map.put("generaluse.AS_RNU.*.*", new Pair<Boolean, Long>(false, 4L));
+    private static long REF_BOOK_OKATO = 3L; // Коды ОКАТО
+    private static long REF_BOOK_OUKS = 9L;  // Организации-участники контролируемых сделок
+    private static long REF_BOOK_RF_SUBJ_CODE = 4L; // Коды субъектов Российской Федерации
+    private static long REF_BOOK_EMITENT = 100L; // Эмитенты
+    private static long REF_BOOK_BOND = 84L; // Ценные бумаги
 
-        //TODO добавить проверку ЭЦП (Marat Fayzullin 2013-10-19)
+    /**
+     * Импорт справочников из папки
+     * @param userInfo Пользователь
+     * @param logger Логгер
+     * @param refBookDirectoryParam Путь к директории
+     * @param mappingMap Маппинг имен: Регулярка → Пара(Признак архива, Id справочника)
+     */
+    private void importRefBook(TAUserInfo userInfo, Logger logger, ConfigurationParam refBookDirectoryParam, Map<String, Pair<Boolean, Long>> mappingMap) {
+        // TODO добавить проверку ЭЦП (Marat Fayzullin 2013-10-19)
         Map<ConfigurationParam, String> params = configurationService.getAllConfig(userInfo);
-        String refBookDirectory = params.get(ConfigurationParam.REF_BOOK_DIRECTORY);
-        // String refBookDirectory = "file://c:/okato/";
-        // String refBookDirectory = "file://c:/region/";
+        String refBookDirectory = params.get(refBookDirectoryParam);
 
         BufferedReader reader = null;
-        logger.info("Импорт данных справочников из директории \"" + refBookDirectory + "\".");
 
         if (refBookDirectory == null || refBookDirectory.trim().isEmpty()) {
             throw new ServiceException("Не указан путь к директории для импорта справочников.");
         }
+
+        logger.info("Импорт данных справочников из директории «" + refBookDirectory + "».");
 
         refBookDirectory = refBookDirectory.trim();
 
@@ -87,13 +85,13 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
                     if (!file.isFile()) {
                         continue;
                     }
-                    for (String key : map.keySet()) {
+                    for (String key : mappingMap.keySet()) {
                         if (fileName.matches(key)) { // Нашли в мапе соответствие
                             InputStream is = null;
-                            Long refBookId = map.get(key).getSecond();
+                            Long refBookId = mappingMap.get(key).getSecond();
                             try {
                                 is = new BufferedInputStream(file.getStream());
-                                if (!map.get(key).getFirst()) {  // Если это не сам файл, а архив
+                                if (!mappingMap.get(key).getFirst()) {  // Если это не сам файл, а архив
                                     ZipInputStream zis = new ZipInputStream(is);
                                     ZipEntry zipFileName = zis.getNextEntry();
                                     if (zipFileName != null) { // в архиве есть файл
@@ -108,6 +106,7 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
                                 // Обращение к скрипту
                                 Map<String, Object> additionalParameters = new HashMap<String, Object>();
                                 additionalParameters.put("inputStream", is);
+                                additionalParameters.put("fileName", fileName);
                                 refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.IMPORT, logger, additionalParameters);
                                 refBookImportCount++;
                             } catch (Exception e) {
@@ -164,6 +163,36 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
         } finally {
             IOUtils.closeQuietly(reader);
         }
+    }
+
+    @Override
+    public void importRefBook(TAUserInfo userInfo, Logger logger) {
+        // регулярка файла/архива - true/false - id
+        Map<String, Pair<Boolean, Long>> mappingMap = new HashMap<String, Pair<Boolean, Long>>();
+        // архив для загр. спр. "Коды ОКАТО"
+        mappingMap.put("OKA.*", new Pair<Boolean, Long>(false, REF_BOOK_OKATO));
+        // архив для загр. спр. "Коды ОКАТО"
+        mappingMap.put("payments.*", new Pair<Boolean, Long>(false, REF_BOOK_OKATO));
+        // файл для загр. спр. "Организации-участники контролируемых сделок"
+        mappingMap.put("organization.xls", new Pair<Boolean, Long>(true, REF_BOOK_OUKS));
+        // архив для загр. спр. "Коды субъектов Российской Федерации" (Регионы)
+        mappingMap.put("RNU.*", new Pair<Boolean, Long>(false, REF_BOOK_RF_SUBJ_CODE));
+        // архив для загр. спр. "Коды субъектов Российской Федерации" (Регионы)
+        mappingMap.put("generaluse.AS_RNU.*.*", new Pair<Boolean, Long>(false, REF_BOOK_RF_SUBJ_CODE));
+
+        importRefBook(userInfo, logger, ConfigurationParam.REF_BOOK_DIRECTORY, mappingMap);
+    }
+
+    @Override
+    public void importRefBookDiasoft(TAUserInfo userInfo, Logger logger) {
+        // Регулярка → Пара(Признак архива, Id справочника)
+        Map<String, Pair<Boolean, Long>> mappingMap = new HashMap<String, Pair<Boolean, Long>>();
+        // Ценные бумаги
+        mappingMap.put("DS[0-9]{6}\\.nsi", new Pair<Boolean, Long>(true, REF_BOOK_BOND));
+        // Эмитенты
+        mappingMap.put("DS[0-9]{6}\\.nsi", new Pair<Boolean, Long>(true, REF_BOOK_EMITENT));
+
+        importRefBook(userInfo, logger, ConfigurationParam.REF_BOOK_DIASOFT_DIRECTORY, mappingMap);
     }
 
     @Override
