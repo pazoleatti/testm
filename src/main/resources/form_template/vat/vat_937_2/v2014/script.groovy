@@ -3,6 +3,7 @@ package form_template.vat.vat_937_2.v2014
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
@@ -116,12 +117,12 @@ void calc() {
     def totalB = getDataRow(dataRows, 'totalB') // 7-я строка
 
     // строка 2 «Графа 13» = По строке 2 («Графа 12» - «Графа 5» - «Графа 7» - «Графа 9»)
-    totalA.with {
-        diff = (nds ?: 0) - (deal_20_Nds ?: 0) - (deal_18_Nds ?: 0) - (deal_10_Nds ?: 0)
-    }
+    def diff = (totalA.nds ?: 0) - (totalA.deal_20_Nds ?: 0) - (totalA.deal_18_Nds ?: 0) - (totalA.deal_10_Nds ?: 0)
+    totalA.diff = checkOverpower(diff, totalA, 'diff')
+
     // строка 6 графы с 2 по 11
     calcColumns.each {
-        totalB[it] = (totalPeriod[it] ?: 0) - (totalAnnul[it] ?: 0) + (totalFix[it] ?: 0)
+        totalB[it] = checkOverpower((totalPeriod[it] ?: 0) - (totalAnnul[it] ?: 0) + (totalFix[it] ?: 0), totalB, it)
     }
     dataRowHelper.update(dataRows)
 }
@@ -371,4 +372,38 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol = 12
         dataRows[i - 1].diff = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
     }
+}
+
+def checkOverpower(def value, def row, def alias) {
+    if (value?.abs() >= 1e15) {
+        def checksMap = [
+                'diff' : "По строке 2 «Графа 12» - «Графа 5» - «Графа 7» - «Графа 9»",
+                'bill' : "Графа 2 строки 4 - графа 2 строки 5 + графа 2 строки 6",
+                'dealNds' : "Графа 3 строки 4 - графа 3 строки 5 + графа 3 строки 6",
+                'deal_20' : "Графа 4 строки 4 - графа 4 строки 5 + графа 4 строки 6",
+                'deal_20_Nds' : "Графа 5 строки 4 - графа 5 строки 5 + графа 5 строки 6",
+                'deal_18' : "Графа 6 строки 4 - графа 6 строки 5 + графа 6 строки 6",
+                'deal_18_Nds' : "Графа 7 строки 4 - графа 7 строки 5 + графа 7 строки 6",
+                'deal_10' : "Графа 8 строки 4 - графа 8 строки 5 + графа 8 строки 6",
+                'deal_10_Nds' : "Графа 9 строки 4 - графа 9 строки 5 + графа 9 строки 6",
+                'deal_0' : "Графа 10 строки 4 - графа 10 строки 5 + графа 10 строки 6",
+                'deal' : "Графа 11 строки 4 - графа 11 строки 5 + графа 11 строки 6"
+        ]
+        def aliasMap = [
+                'diff' : "13",
+                'bill' : "2",
+                'dealNds' : "3",
+                'deal_20' : "4",
+                'deal_20_Nds' : "5",
+                'deal_18' : "6",
+                'deal_18_Nds' : "7",
+                'deal_10' : "8",
+                'deal_10_Nds' : "9",
+                'deal_0' : "10",
+                'deal' : "11"
+        ]
+        throw new ServiceException("Строка ${row.getIndex()}: Значение «Графы ${aliasMap[alias]}» превышает допустимую " +
+                "разрядность (17 знаков). «Графа ${aliasMap[alias]}» рассчитывается как «${checksMap[alias]}»!")
+    }
+    return value
 }

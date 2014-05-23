@@ -1,6 +1,7 @@
 package form_template.vat.vat_937_2_13.v2014
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
@@ -130,10 +131,10 @@ void calc() {
             row.rowNum = rowNum
         }
     }
-    def itog = getDataRow(dataRows, 'total')
-    itog?.sum = calcItog(dataRows)
     def other = getDataRow(dataRows, 'R3')
-    other?.sum = calcOther(dataRows)
+    other?.sum = checkOverpower(calcOther(dataRows), other, 'sum')
+    def itog = getDataRow(dataRows, 'total')
+    itog?.sum = checkOverpower(calcItog(dataRows), itog, 'sumTotal')
     dataRowHelper.update(dataRows)
 }
 
@@ -305,4 +306,20 @@ void addData(def xml, int headRowCount) {
     }
     dataRows.add(totalRow)
     dataRowHelper.save(dataRows)
+}
+
+def checkOverpower(def value, def row, def alias) {
+    if (value?.abs() >= 1e15) {
+        def checksMap = [
+                'sum' : "Сумма значений всех нефиксированных строк по Графе 3",
+                'sumTotal' : "Сумма значений строк 1-3 по Графе 3"
+        ]
+        def aliasMap = [
+                'sum' : "3",
+                'sumTotal' : "3"
+        ]
+        throw new ServiceException("Строка ${row.getIndex()}: Значение «Графы ${aliasMap[alias]}» превышает допустимую " +
+                "разрядность (17 знаков). «Графа ${aliasMap[alias]}» рассчитывается как «${checksMap[alias]}»!")
+    }
+    return value
 }
