@@ -1518,8 +1518,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "join (select string_value, record_id from periodCodes where alias='NAME') pn on pn.record_id=ps.record_id\n" +
             "join (select number_value, record_id from periodCodes where alias='T') nt on nt.record_id=ps.record_id\n" +
             "join (select number_value, record_id from periodCodes where alias='I') ni on ni.record_id=ps.record_id\n" +
-            "join (select number_value, record_id from periodCodes where alias='D') nd on nd.record_id=ps.record_id)\n" +
-            "join (select number_value, record_id from periodCodes where alias='V') nv on nv.record_id=ps.record_id)\n" +
+            "join (select number_value, record_id from periodCodes where alias='D') nd on nd.record_id=ps.record_id\n" +
+            "join (select number_value, record_id from periodCodes where alias='V') nv on nv.record_id=ps.record_id\n" +
             "join (select number_value, record_id from periodCodes where alias='P') np on np.record_id=ps.record_id)\n" +
             "where taxCode is not null and ((isI = 1 and taxCode = 'I') or (isT = 1 and taxCode = 'T') or (isD = 1 and taxCode = 'D') or (isV = 1 and taxCode = 'V') or (isP = 1 and taxCode = 'P'))";
 
