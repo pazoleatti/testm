@@ -6,7 +6,9 @@ import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author <a href="mailto:Marat.Fayzullin@aplana.com">Файзуллин Марат</a>
@@ -25,10 +27,34 @@ public class SqlUtilsTest {
 		SqlUtils.checkListSize(Arrays.asList(new Integer[] {}));
 	}
 
-	@Test
-	public void transformToSqlInStatementTest1() {
-		Assert.assertEquals("(1,5,4)", SqlUtils.transformToSqlInStatement(Arrays.asList(new Integer[] {1, 5, 4})));
-	}
+    @Test
+    public void transformToSqlInStatementTest1() {
+        Assert.assertEquals("(abc in (1,2,3) or abc in (4,5,6))", SqlUtils.transformToSqlInStatement("abc", Arrays.asList(new Integer[]{1, 2, 3, 4, 5, 6}), 3));
+    }
+
+    @Test
+    public void splitCollectionTest(){
+        List<List<Integer>> lists = new ArrayList<List<Integer>>(SqlUtils.splitCollection(Arrays.asList(new Integer[]{1, 2, 3, 4, 5, 6}), 2));
+        Assert.assertTrue(lists.get(0).get(0).equals(1));
+        Assert.assertTrue(lists.get(0).get(1).equals(2));
+
+        Assert.assertTrue(lists.get(1).get(0).equals(3));
+        Assert.assertTrue(lists.get(1).get(1).equals(4));
+
+        Assert.assertTrue(lists.get(2).get(0).equals(5));
+        Assert.assertTrue(lists.get(2).get(1).equals(6));
+    }
+
+    @Test
+    public void splitCollectionTest2(){
+        List<List<Integer>> lists = new ArrayList<List<Integer>>(SqlUtils.splitCollection(Arrays.asList(new Integer[]{1, 2, 3, 4, 5}), 3));
+        Assert.assertTrue(lists.get(0).get(0).equals(1));
+        Assert.assertTrue(lists.get(0).get(1).equals(2));
+        Assert.assertTrue(lists.get(0).get(2).equals(3));
+
+        Assert.assertTrue(lists.get(1).get(0).equals(4));
+        Assert.assertTrue(lists.get(1).get(1).equals(5));
+    }
 
 	@Test
 	public void transformFormStatesToSqlInStatementTest() {

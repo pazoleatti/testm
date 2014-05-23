@@ -69,7 +69,7 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 	public List<ReportPeriod> get(List<Integer> ids) {
 		return getJdbcTemplate().query(
 				"select id, name, tax_period_id, ord, start_date, end_date, dict_tax_period_id, calendar_start_date " +
-						"from report_period where id in (" + StringUtils.join(ids, ',') + ")",
+						"from report_period where " + SqlUtils.transformToSqlInStatement("id", ids),
 				new ReportPeriodMapper()
 		);
 	}
@@ -123,44 +123,32 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 
 	@Override
     public List<ReportPeriod> getPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList) {
-        Object[] params = new Object[departmentList.size() + 1];
-        int cnt = 0;
-        for (Integer departmentId : departmentList) {
-            params[cnt++] = departmentId;
-        }
-        params[cnt] = String.valueOf(taxType.getCode());
 
         return getJdbcTemplate().query(
                 "select rp.id, rp.name, rp.tax_period_id, rp.ord, rp.start_date, rp.end_date, rp.dict_tax_period_id, " +
 						"rp.calendar_start_date from report_period rp, tax_period tp where rp.id in " +
                         "(select distinct report_period_id from department_report_period " +
-                        "where correction_date is null and department_id in("+ SqlUtils.preparePlaceHolders(departmentList.size())+")) " +
+                        "where correction_date is null and "+ SqlUtils.transformToSqlInStatement("department_id", departmentList)+") " +
                         "and rp.tax_period_id = tp.id " +
-                        "and tp.tax_type = ? " +
+                        "and tp.tax_type = \'" + String.valueOf(taxType.getCode()) + "\' " +
                         "order by tp.year desc, rp.ord",
-                new ReportPeriodMapper(), params);
+                new ReportPeriodMapper());
     }
 
 	@Override
 	public List<ReportPeriod> getOpenPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList,
                                                                     boolean withoutBalance, boolean withoutCorrect) {
-		Object[] params = new Object[departmentList.size() + 1];
-		int cnt = 0;
-		for (Integer departmentId : departmentList) {
-			params[cnt++] = departmentId;
-		}
-		params[cnt] = String.valueOf(taxType.getCode());
 
 		return getJdbcTemplate().query(
 				"select rp.id, rp.name, rp.tax_period_id, rp.ord, rp.start_date, rp.end_date, rp.dict_tax_period_id, " +
 						"rp.calendar_start_date from report_period rp, tax_period tp where rp.id in " +
 						"(select distinct report_period_id from department_report_period " +
-						"where department_id in("+ SqlUtils.preparePlaceHolders(departmentList.size())+") and is_active=1 " +
+						"where "+ SqlUtils.transformToSqlInStatement("department_id", departmentList)+" and is_active=1 " +
 						(withoutBalance ? " and is_balance_period=0 " : "") + (withoutCorrect ? "and correction_date is null" : "") + " ) " +
 						"and rp.tax_period_id = tp.id " +
-						"and tp.tax_type = ?" +
+						"and tp.tax_type = \'" + String.valueOf(taxType.getCode()) +"\' " +
 						"order by tp.year desc, rp.ord",
-				new ReportPeriodMapper(), params);
+				new ReportPeriodMapper());
 	}
 
     @Override

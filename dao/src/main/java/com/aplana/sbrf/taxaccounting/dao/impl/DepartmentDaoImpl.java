@@ -8,10 +8,7 @@ import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
-import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -228,14 +225,12 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
             String recursive = isWithRecursive() ? "recursive" : "";
             return getJdbcTemplate().query(
                     "with " + recursive + " tree (id, parent_id) as " +
-                            "(select id, parent_id from department where id in " +
-                            "(" + SqlUtils.preparePlaceHolders(availableDepartments.size()) + ") " +
+                            "(select id, parent_id from department where " +
+                            SqlUtils.transformToSqlInStatement("id", availableDepartments) +
                             "union all " +
                             "select d.id, d.parent_id from department d inner join tree t on d.id = t.parent_id) " +
                             "select distinct d.* from tree t, department d where d.id = t.id",
-                    new DepartmentJdbcMapper(),
-                    availableDepartments.toArray()
-            );
+                    new DepartmentJdbcMapper());
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<Department>(0);
         }
@@ -311,13 +306,12 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 
     @Override
     public List<Integer> getPerformers(List<Integer> departments, int formType) {
-        String sql = "SELECT performer_dep_id " +
+        String sql = String.format("SELECT performer_dep_id " +
                 "FROM department_form_type " +
-                "WHERE department_id in (:ids) AND performer_dep_id IS NOT null  AND form_type_id = :formtype " +
-                "GROUP BY performer_dep_id";
+                "WHERE %s AND performer_dep_id IS NOT null  AND form_type_id = :formtype " +
+                "GROUP BY performer_dep_id", SqlUtils.transformToSqlInStatement("department_id", departments));
 
         Map<String, Object> parameterMap = new HashMap<String, Object>();
-        parameterMap.put("ids", departments);
         parameterMap.put("formtype", formType);
 
         return  getNamedParameterJdbcTemplate().queryForList(sql, parameterMap, Integer.class);
@@ -325,14 +319,13 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 
 	@Override
 	public List<Integer> getPerformers(List<Integer> departments, List<TaxType> taxTypes) {
-		String sql = "SELECT performer_dep_id " +
+		String sql = String.format("SELECT performer_dep_id " +
 				"FROM department_form_type dft " +
 				"LEFT JOIN form_type ft on dft.FORM_TYPE_ID=ft.ID " +
-				"WHERE department_id in (:ids) AND ft.tax_type in (:tt) AND performer_dep_id IS NOT null " +
-				"GROUP BY performer_dep_id";
+				"WHERE %s AND ft.tax_type in (:tt) AND performer_dep_id IS NOT null " +
+				"GROUP BY performer_dep_id", SqlUtils.transformToSqlInStatement("department_id", departments));
 
 		MapSqlParameterSource parameterMap = new MapSqlParameterSource();
-		parameterMap.addValue("ids", departments);
 		List<String> types = new ArrayList<String>();
 		for (TaxType type : taxTypes) {
 			types.add(String.valueOf(type.getCode()));
@@ -404,14 +397,13 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 
     @Override
     public List<Integer> getDepartmentIdsByExcutors(List<Integer> departments, List<TaxType> taxTypes) {
-        String sql = "select distinct department_id from department_form_type dft " +
+        String sql = String.format("select distinct department_id from department_form_type dft " +
                 "left join form_type ft on dft.form_type_id = ft.id " +
                 "where " +
                 "ft.tax_type in (:tt) " +
-                "and performer_dep_id in (:ids)";
+                "and %s ", SqlUtils.transformToSqlInStatement("performer_dep_id", departments));
 
         MapSqlParameterSource parameterMap = new MapSqlParameterSource();
-        parameterMap.addValue("ids", departments);
         List<String> types = new ArrayList<String>();
         for (TaxType type : taxTypes) {
             types.add(String.valueOf(type.getCode()));

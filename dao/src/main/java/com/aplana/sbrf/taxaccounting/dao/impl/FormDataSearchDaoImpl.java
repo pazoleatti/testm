@@ -30,7 +30,9 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 			.append(" AND dp.id = fd.department_id AND rp.id = fd.report_period_id AND tp.id=rp.tax_period_id");
 	
 		if (filter.getFormTypeIds() != null && !filter.getFormTypeIds().isEmpty()) {
-			sql.append(" AND ft.id in ").append(transformToSqlInStatement(filter.getFormTypeIds())); 
+			sql
+                .append(" AND ")
+                .append(transformToSqlInStatement("ft.id", filter.getFormTypeIds()));
 		}
 
 		if (filter.getTaxTypes() != null && !filter.getTaxTypes().isEmpty()) {
@@ -38,11 +40,15 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 		}
 
 		if (filter.getReportPeriodIds() != null && !filter.getReportPeriodIds().isEmpty()) {
-			sql.append(" AND rp.id in ").append(transformToSqlInStatement(filter.getReportPeriodIds()));
+			sql
+                .append(" AND ")
+                .append(transformToSqlInStatement("rp.id", filter.getReportPeriodIds()));
 		}
 
 		if (filter.getDepartmentIds() != null && !filter.getDepartmentIds().isEmpty()) {
-			sql.append(" AND fd.department_id in ").append(transformToSqlInStatement(filter.getDepartmentIds()));
+			sql
+                .append(" AND ")
+                .append(transformToSqlInStatement("fd.department_id", filter.getDepartmentIds()));
 		}
 
 		if (filter.getFormDataKinds() != null && !filter.getFormDataKinds().isEmpty()) {
@@ -65,8 +71,9 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 
 		if (filter.getAccessFilterType() == AccessFilterType.AVAILABLE_DEPARTMENTS
                 || filter.getAccessFilterType() == AccessFilterType.AVAILABLE_DEPARTMENTS_WITH_KIND) {
-            sql.append(" and fd.department_id in ").append(SqlUtils.transformToSqlInStatement(
-                    filter.getAvailableDepartmentIds()));
+            sql
+                .append(" and ")
+                .append(SqlUtils.transformToSqlInStatement("fd.department_id", filter.getAvailableDepartmentIds()));
 
             if (filter.getAccessFilterType() == AccessFilterType.AVAILABLE_DEPARTMENTS_WITH_KIND) {
                 sql.append(" and fd.kind in ").append(SqlUtils.transformFormKindsToSqlInStatement(
