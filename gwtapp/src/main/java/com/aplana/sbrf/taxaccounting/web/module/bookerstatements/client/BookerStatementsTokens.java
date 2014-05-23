@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.bookerstatements.client;
 
 /**
- * Токены для формы "Загрузка бухгалтерской отчётности"
+ * Токены для Формы фильтрации бухгалтерской отчётности
  *
  * @author Dmitriy Levykin
  */

@@ -1,6 +1,10 @@
 package com.aplana.sbrf.taxaccounting.service;
 
+import com.aplana.sbrf.taxaccounting.model.BookerStatementsFilter;
+import com.aplana.sbrf.taxaccounting.model.BookerStatementsSearchResultItem;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
 import java.io.InputStream;
 
@@ -21,4 +25,21 @@ public interface BookerStatementsService {
      * @param departmentId Подразделение    @throws IOException, ServiceException
      */
     void importXML(String realFileName, InputStream stream, Integer periodID, int typeID, Integer departmentId, TAUserInfo userInfo);
+
+    /**
+     * Получение списка бух отчетностей соответсвующих заданному фильтру
+     * @param bookerStatementsFilter
+     * @return
+     */
+    PagingResult<BookerStatementsSearchResultItem> findDataByFilter(BookerStatementsFilter bookerStatementsFilter);
+
+    /**
+     * Создание бух отчетности
+     * @param logger
+     * @param periodId
+     * @param typeId
+     * @param departmentId
+     * @param userInfo
+     */
+    void create(Logger logger, Integer periodId, int typeId, Integer departmentId, TAUserInfo userInfo);
 }

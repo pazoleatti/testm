@@ -3,18 +3,14 @@ package com.aplana.sbrf.taxaccounting.web.module.bookerstatements.client;
 import com.gwtplatform.mvp.client.UiHandlers;
 
 /**
- * Хендлеры формы "Загрузка бухгалтерской отчётности"
+ * Хендлеры Формы фильтрации бухгалтерской отчётности
  *
  * @author Dmitriy Levykin
  */
 public interface BookerStatementsUiHandlers extends UiHandlers {
-    void importData(String uuid);
-
     void onSearch();
 
-    void onDelete();
+    void onSortingChanged();
 
-    boolean isFilterFilled();
-
-    boolean isSearchEnabled();
+    void onCreateClicked();
 }
