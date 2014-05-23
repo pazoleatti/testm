@@ -36,8 +36,6 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
 	 */
 	private static final String VALUE_COLUMN_NAME = "value";
 
-	private static final String PARAM_NOT_FOUND_EXCEPTION = "Обнаружен незарегистрированный параметр приложения с кодом = \"%s\"";
-
 	@Override
 	public Map<ConfigurationParam, String> loadParams() {
 		final Map<ConfigurationParam, String> params = new HashMap<ConfigurationParam, String>();
@@ -50,7 +48,7 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
 				try {
 					params.put(ConfigurationParam.valueOf(code), value);
 				} catch (IllegalArgumentException e) {
-					throw new DaoException(String.format(PARAM_NOT_FOUND_EXCEPTION, code));
+					// Если параметр не найден в ConfigurationParam, то он просто пропускается (не виден на клиенте)
 				}
 			}
 			
