@@ -132,11 +132,6 @@
                             </g:HorizontalPanel>
                         </g:HorizontalPanel>
 
-                        <g:HorizontalPanel height="30px">
-                            <g:Label width="150px" text="Версия"/>
-                            <g:TextBox width="300px" ui:field="version"/>
-                        </g:HorizontalPanel>
-
                     </g:VerticalPanel>
 
                     <g:cell verticalAlignment="middle">
