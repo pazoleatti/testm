@@ -407,42 +407,52 @@ public class FormTemplateServiceImpl implements FormTemplateService {
      */
     protected void validateFormAutoNumerationColumn(FormTemplate formTemplate, Logger logger) {
 
-        List<Column> columns = formTemplate.getColumns();
         Integer formTemplateId = formTemplate.getId();
 
-        for (Column column : columns) {
-            if (column instanceof AutoNumerationColumn && ((AutoNumerationColumn) column).getType() == AutoNumerationColumnType.CROSS.getType()) {
-                // Проверяем наличие в версии макета до редактирования хотя бы одной автонумеруемой графы, у которой "Тип нумерации строк" != "Сквозная".
-                FormTemplate fullFormTemplate = getFullFormTemplate(formTemplateId);
-                List<Column> columnList = fullFormTemplate.getColumns();
-                for (Column col : columnList) {
-                    // Если это автонумеруемая графа и значение != сквозная
-                    if (col instanceof AutoNumerationColumn && ((AutoNumerationColumn) col).getType() != AutoNumerationColumnType.CROSS.getType()) {
-                        List<ReportPeriod> reportPeriodList = reportPeriodDao.getClosedPeriodsForFormTemplate(formTemplateId);
+        // Если есть хоть одна автонумеруемая графа
+        if (isAnyAutoNumerationColumn(formTemplate, AutoNumerationColumnType.CROSS.getType())) {
+            // Проверяем наличие в версии макета до редактирования хотя бы одной автонумеруемой графы, у которой "Тип нумерации строк" != "Сквозная".
+            FormTemplate fullFormTemplate = getFullFormTemplate(formTemplateId);
+            if (isAnyAutoNumerationColumn(fullFormTemplate, AutoNumerationColumnType.SERIAL.getType())) {
+                List<ReportPeriod> reportPeriodList = reportPeriodDao.getClosedPeriodsForFormTemplate(formTemplateId);
 
-                        if (reportPeriodList.size() != 0) {
-                            StringBuilder stringBuilder = new StringBuilder();
-                            for (int i = 0; i < reportPeriodList.size(); i++) {
-                                stringBuilder.append(reportPeriodList.get(i).getName()).append(" ");
-                                stringBuilder.append(reportPeriodList.get(i).getTaxPeriod().getYear());
-                                if (i < reportPeriodList.size() - 1) {
-                                    stringBuilder.append(", ");
-                                }
-                            }
-                            logger.error("Следующие периоды налоговых форм данной версии макета закрыты: " +
-                                    stringBuilder.toString() + ". " +
-                                    "Для добавления в макет автонумеруемой графы с типом сквозной нумерации строк необходимо открыть перечисленные периоды!");
-                        } else {
+                if (reportPeriodList.size() != 0) {
+                    StringBuilder stringBuilder = new StringBuilder();
+                    for (int i = 0; i < reportPeriodList.size(); i++) {
+                        stringBuilder.append(reportPeriodList.get(i).getName()).append(" ");
+                        stringBuilder.append(reportPeriodList.get(i).getTaxPeriod().getYear());
+                        if (i < reportPeriodList.size() - 1) {
+                            stringBuilder.append(", ");
+                        }
+                    }
+                    logger.error("Следующие периоды налоговых форм данной версии макета закрыты: " +
+                            stringBuilder.toString() + ". " +
+                            "Для добавления в макет автонумеруемой графы с типом сквозной нумерации строк необходимо открыть перечисленные периоды!");
+                } else {
 
                     /*
                      * Здесь обновляем значение атрибута "Номер последней строки предыдущей НФ".
                      * http://conf.aplana.com/pages/viewpage.action?pageId=11377661 п.7А.1.1.1
                      */
-                        }
-                    }
                 }
             }
         }
+    }
 
+    /**
+     * Есть ли хоть одна автонумеруемая графа указанного типа в макете
+     *
+     * @param formTemplate макета НФ
+     * @param type      тип нумерации
+     * @return true - есть, false - нет
+     */
+    protected boolean isAnyAutoNumerationColumn(FormTemplate formTemplate, int type) {
+        List<Column> columns = formTemplate.getColumns();
+        for (Column column : columns) {
+            if (column instanceof AutoNumerationColumn) {
+                return (((AutoNumerationColumn) column).getType() == (type));
+            }
+        }
+        return false;
     }
 }

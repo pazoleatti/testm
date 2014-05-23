@@ -51,7 +51,7 @@ public class DataRowColumnFactory {
         } else if (col instanceof AutoNumerationColumn) {
             AutoNumerationColumn autoNumerationColumn = (AutoNumerationColumn) col;
             columnContext.setColumn(autoNumerationColumn);
-            uiColumn = new AutoNumerationUiColumn(autoNumerationColumn, columnContext);
+            uiColumn = new AutoNumerationUiColumn(autoNumerationColumn);
         } else {
             throw new IllegalArgumentException();
         }

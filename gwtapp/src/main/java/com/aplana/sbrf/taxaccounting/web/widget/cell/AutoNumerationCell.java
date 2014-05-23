@@ -1,22 +1,21 @@
 package com.aplana.sbrf.taxaccounting.web.widget.cell;
 
-import com.aplana.sbrf.taxaccounting.model.AutoNumerationColumn;
+import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 
 /**
  * @author Fail Mukhametdinov
  */
-public class AutoNumerationCell extends com.google.gwt.cell.client.AbstractCell<Object>{
+public class AutoNumerationCell extends AbstractCell<Object> {
 
-    private AutoNumerationColumn column;
-
-    public AutoNumerationCell(ColumnContext columnContext) {
-        this.column = (AutoNumerationColumn) columnContext.getColumn();
-    }
-
-    // todo зависит от SBRFACCTAX-7142 0.3.8 Реализовать алгоритм нумерации строк в НФ
     @Override
     public void render(Context context, Object value, SafeHtmlBuilder sb) {
-        sb.append('1');
+        if (value == null) {
+            return;
+        }
+        SafeHtml safeValue = SafeHtmlUtils.fromString(String.valueOf(value));
+        sb.append(safeValue);
     }
 }

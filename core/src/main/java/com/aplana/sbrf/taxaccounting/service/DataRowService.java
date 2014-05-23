@@ -8,7 +8,7 @@ import java.util.List;
 public interface DataRowService {
 	
 	/**
-	 * Получение страныцы с набором строк НФ
+	 * Получение страницы с набором строк НФ
 	 * 
 	 *
      * @param userInfo

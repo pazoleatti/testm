@@ -165,4 +165,15 @@ public interface FormDataDao {
      * @return
      */
     List<String> getStringList(Integer columnId, Integer formTemplateTypeId);
+
+    /**
+     * Получить список экземпляров НФ, в пределах которых устанавливается сквозная нумерация строк.
+     *
+     * @param year Календарный год налогового периода
+     * @param departmentId идентификатор подразделения
+     * @param type тип налоговой формы
+     * @param kind вид налоговой формы
+     * @return список налоговых форм
+     */
+    List<FormData> getFormDataListForCrossNumeration(Integer year, Integer departmentId, String type, Integer kind);
 }

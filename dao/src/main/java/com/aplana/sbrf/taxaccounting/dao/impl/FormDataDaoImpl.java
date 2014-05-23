@@ -72,6 +72,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 			fd.setSigners(formDataSignerDao.getSigners(fd.getId()));
 			fd.setPerformer(formPerformerDao.get(fd.getId()));
             fd.setManual(rs.getBoolean("manual"));
+            fd.setPreviousRowNumber(rs.getInt("number_previous_row"));
 
 			result.formData = fd;
 			return result;
@@ -79,7 +80,25 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 
 	}
 
-	private class FormDataWithoutRowMapper implements RowMapper<FormData> {
+    private class FormDataWithoutRowMapper implements RowMapper<FormData> {
+        public FormData mapRow(ResultSet rs, int index)
+                throws SQLException {
+            FormData result = new FormData();
+            result.setId(SqlUtils.getLong(rs, "id"));
+            result.setDepartmentId(SqlUtils.getInteger(rs,"department_id"));
+            result.setState(WorkflowState.fromId(SqlUtils.getInteger(rs,"state")));
+            result.setReturnSign(rs.getBoolean("return_sign"));
+            result.setKind(FormDataKind.fromId(SqlUtils.getInteger(rs,"kind")));
+            result.setReportPeriodId(SqlUtils.getInteger(rs,"report_period_id"));
+            Integer periodOrder = SqlUtils.getInteger(rs,"period_order");
+            result.setPeriodOrder(rs.wasNull() ? null : periodOrder);
+            result.setPreviousRowNumber(rs.getInt("number_previous_row"));
+            return result;
+        }
+
+    }
+
+	private class FormDataWithoutRowMapperWithTypeId extends FormDataWithoutRowMapper {
 		public FormData mapRow(ResultSet rs, int index)
 				throws SQLException {
 			FormData result = new FormData();
@@ -331,7 +350,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
                             "left join (select max(manual) as manual, form_data_id from data_row group by form_data_id) r on r.form_data_id = fd.id\n" +
                             "WHERE fd.id = ?",
 					new Object[] { id }, new int[] { Types.NUMERIC },
-					new FormDataWithoutRowMapper());
+					new FormDataWithoutRowMapperWithTypeId());
 		} catch (EmptyResultDataAccessException e) {
 			throw new DaoException(String.format(MSG_FORM_NOT_FOUND, id));
 		}
@@ -443,5 +462,16 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
                 "WHERE FC.id = ? AND fd.form_template_id = ?",
                 new Object[]{columnId, formTemplateTypeId},
                 String.class);
+    }
+
+    @Override
+    public List<FormData> getFormDataListForCrossNumeration(Integer year, Integer departmentId, String type, Integer kind) {
+        return getJdbcTemplate().query("SELECT * FROM form_data fd " +
+                        "JOIN form_column fc ON fc.form_template_id = fd.form_template_id " +
+                        "LEFT JOIN report_period rp ON fd.report_period_id = rp.id " +
+                        "LEFT JOIN tax_period tp ON tp.id = rp.tax_period_id " +
+                        "WHERE fc.type = 'A' AND tp.year = ? AND fd.department_id = ? AND tp.tax_type = ? AND fd.kind = ? ORDER BY fd.period_order",
+                new Object[]{year, departmentId, type, kind},
+                new FormDataWithoutRowMapper()) ;
     }
 }
