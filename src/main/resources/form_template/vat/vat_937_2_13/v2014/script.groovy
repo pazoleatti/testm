@@ -200,7 +200,6 @@ void consolidation() {
     // Добавление строки «Итого»
     dataRows.add(totalRow)
     dataRowHelper.save(dataRows)
-    logger.info("Формирование консолидированной формы прошло успешно.")
 }
 
 def getReportPeriodStartDate() {

@@ -99,9 +99,6 @@ switch (formDataEvent) {
         consolidation()
         calc()
         logicCheck()
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            logger.info('Формирование сводной формы прошло успешно.')
-        }
 }
 
 // Кэш провайдеров

@@ -238,7 +238,6 @@ void consolidation() {
         }
     }
     dataRowHelper.save(dataRows)
-    logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
 void addRowsToRows(def dataRows, def addRows) {

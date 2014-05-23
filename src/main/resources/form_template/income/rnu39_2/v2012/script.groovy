@@ -282,7 +282,6 @@ void consolidation() {
         }
     }
     dataRowHelper.save(dataRows)
-    logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
 /** Проверка принадлежит ли строка разделу A. */

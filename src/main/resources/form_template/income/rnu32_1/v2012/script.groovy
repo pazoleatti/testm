@@ -276,7 +276,6 @@ void consolidation() {
         }
     }
     dataRowHelper.save(dataRows)
-    logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
 /** Отсорировать данные (по графе 1, 2). */
