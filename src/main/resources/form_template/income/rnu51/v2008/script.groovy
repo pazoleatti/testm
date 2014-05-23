@@ -1,5 +1,7 @@
 package form_template.income.rnu51.v2008
 
+import com.aplana.sbrf.taxaccounting.model.DataRow
+import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
@@ -383,11 +385,6 @@ def BigDecimal round(BigDecimal value, def int precision = 2) {
 }
 
 void logicCheck() {
-    if (isBalancePeriod()) {
-        // В периоде ввода остатков нет лог. проверок
-        return
-    }
-
     def dataRows = formDataService.getDataRowHelper(formData).getAllCached()
 
     // Для хранения правильных значении и сравнения с имеющимися при арифметических проверках
@@ -402,11 +399,8 @@ void logicCheck() {
             continue
         }
 
-        def index = row.getIndex()
-        def errorMsg = "Строка $index: "
-
         // 1. Проверка заполнения граф
-        checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
+        checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, !isBalancePeriod())
 
         if (formData.kind == FormDataKind.PRIMARY) {
             // 3. Арифметическая проверка граф 12, 16, 17, 18, 20, 21, 22
@@ -425,14 +419,14 @@ void logicCheck() {
     def totalOneSum = calcTotalOne(dataRows)
     def totalOneRow = getDataRow(dataRows, 'itogoKvartal')
     if (!checkTotalSum(totalOneRow, totalOneSum)) {
-        logger.error("Итоговые значения за текущий квартал рассчитаны неверно!")
+        loggerError("Итоговые значения за текущий квартал рассчитаны неверно!")
     }
 
     // 5. Проверка корректности расчета итоговых значений за текущий отчётный (налоговый) период
     def totalTwoSum = calcTotalTwo(totalOneSum)
     def totalTwoRow = getDataRow(dataRows, 'itogo')
     if (!checkTotalSum(totalTwoSum, totalTwoRow)) {
-        logger.error("Итоговые значения за текущий отчётный (налоговый) период рассчитаны неверно!")
+        loggerError("Итоговые значения за текущий отчётный (налоговый) период рассчитаны неверно!")
     }
 }
 
@@ -911,4 +905,13 @@ void addData(def xml, int headRowCount) {
     rows.add(totalOneRow)
     rows.add(totalTwoRow)
     dataRowHelper.save(rows)
+}
+
+/** Вывести сообщение. В периоде ввода остатков сообщения должны быть только НЕфатальными. */
+void loggerError(def msg) {
+    if (isBalancePeriod()) {
+        logger.warn(msg)
+    } else {
+        logger.error(msg)
+    }
 }
