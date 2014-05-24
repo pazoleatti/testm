@@ -2,21 +2,28 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.XmlSerializationUtils;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.FormTemplateContent;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateImpexService;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -39,7 +46,10 @@ public class FormTemplateImpexServiceImpl implements
 	private final static String SCRIPT_FILE = "script.groovy";
 	private final static String ROWS_FILE = "rows.xml";
 	private final static String HEADERS_FILE = "headers.xml";
+    private static String[] strings = new String[]{VERSION_FILE, CONTENT_FILE, SCRIPT_FILE, ROWS_FILE, HEADERS_FILE};
 	private final static String ENCODING = "UTF-8";
+
+    private static final Log logger = LogFactory.getLog(FormTemplateImpexServiceImpl.class);
 
 	@Override
 	public void exportFormTemplate(Integer id, OutputStream os) {
@@ -142,4 +152,89 @@ public class FormTemplateImpexServiceImpl implements
             throw new ServiceException("Не удалось импортировать шаблон", e);
 		}
 	}
+
+    @Override
+    public void exportAllTemplates(OutputStream stream) {
+        ZipOutputStream zipOutputStream = new ZipOutputStream(stream);
+        FileInputStream in;
+        File temFolder;
+        try {
+            temFolder = File.createTempFile(TEMPLATES_FOLDER, "");
+            temFolder.delete();
+            if (!temFolder.mkdir())
+                logger.error("");
+        } catch (IOException e) {
+            logger.error("Ошибки при создании временной директории.",e);
+            throw new ServiceException("Ошибки при создании временной директории.");
+        }
+
+        List<FormTemplate> formTemplates = formTemplateService.listAll();
+        ArrayList<String> paths = new ArrayList<String>(formTemplates.size());
+        for (FormTemplate template : formTemplates){
+            String folderTemplateName =
+                    String.format(TEMPLATE_OF_FOLDER_NAME,
+                            template.getType().getTaxType().getName(),
+                            template.getType().getId(),
+                            SIMPLE_DATE_FORMAT.format(template.getVersion()));
+            paths.add(folderTemplateName);
+            try {
+                File folderTemplate = new File(temFolder.getAbsolutePath() + File.separator + folderTemplateName, "");
+                folderTemplate.delete();
+                if (!folderTemplate.mkdirs())
+                    logger.warn("Can't create temporary directory");
+                //
+                FileOutputStream tempFile = new FileOutputStream(new File(folderTemplate.getAbsolutePath() + File.separator + VERSION_FILE));
+                tempFile.write("1.0".getBytes());
+                tempFile.close();
+                //
+                tempFile = new FileOutputStream(new File(folderTemplate.getAbsolutePath() + File.separator + CONTENT_FILE));
+                FormTemplateContent ftc = new FormTemplateContent();
+                ftc.fillFormTemplateContent(template);
+                JAXBContext jaxbContext = JAXBContext.newInstance(FormTemplateContent.class);
+                Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+                jaxbMarshaller.marshal(ftc, tempFile);
+                tempFile.close();
+                //
+                tempFile =  new FileOutputStream(new File(folderTemplate.getAbsolutePath() + File.separator + SCRIPT_FILE));
+                String ftScript = formTemplateDao.getFormTemplateScript(template.getId());
+                if (ftScript != null) {
+                    tempFile.write(ftScript.getBytes(ENCODING));
+                }
+                tempFile.close();
+                //
+                tempFile = new FileOutputStream(new File(folderTemplate.getAbsolutePath() + File.separator + ROWS_FILE));
+                tempFile.write(xmlSerializationUtils.serialize(formTemplateDao.getDataCells(template)).getBytes(ENCODING));
+                tempFile.close();
+                //
+                tempFile = new FileOutputStream(new File(folderTemplate.getAbsolutePath() + File.separator + HEADERS_FILE));
+                tempFile.write(xmlSerializationUtils.serialize(formTemplateDao.getHeaderCells(template)).getBytes(ENCODING));
+                tempFile.close();
+
+            } catch (IOException e) {
+                logger.error("", e);
+                throw new ServiceException("Ошибки при создании временной директории.");
+            } catch (JAXBException e) {
+                throw new ServiceException("Ошибка экспорта.");
+            }
+        }
+
+        try {
+            String pathPattern = File.separator + "%s" + File.separator + "%s";
+            for (String path : paths){
+                ZipEntry ze;
+                for (String s : strings){
+                    ze = new ZipEntry(TEMPLATES_FOLDER + String.format(pathPattern, path, s));
+                    zipOutputStream.putNextEntry(ze);
+                    in = new FileInputStream(temFolder.getAbsolutePath() + String.format(pathPattern, path, s));
+                    IOUtils.copy(in, zipOutputStream);
+                    zipOutputStream.closeEntry();
+                    IOUtils.closeQuietly(in);
+                }
+            }
+            zipOutputStream.finish();
+        } catch (IOException e){
+            logger.error("Error", e);
+            throw new ServiceException("Error");
+        }
+    }
 }

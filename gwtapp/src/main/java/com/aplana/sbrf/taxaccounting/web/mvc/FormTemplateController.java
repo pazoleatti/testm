@@ -65,6 +65,14 @@ public class FormTemplateController {
 		formTemplateImpexService.exportFormTemplate(formTemplateId, resp.getOutputStream());
 		resp.getOutputStream().close();
 	}
+
+    @RequestMapping(value = "formTemplate/downloadAll")
+    public void downloadAll(HttpServletResponse response) throws IOException {
+        response.setHeader("Content-Disposition", "attachment; filename=\"Templates.zip\"");
+        response.setCharacterEncoding("UTF-8");
+        formTemplateImpexService.exportAllTemplates(response.getOutputStream());
+        IOUtils.closeQuietly(response.getOutputStream());
+    }
 	
 	
 	@RequestMapping(value = "formTemplate/upload/{formTemplateId}",method = RequestMethod.POST)
