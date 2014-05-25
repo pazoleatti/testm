@@ -217,25 +217,8 @@ public class FormTemplateImpexServiceImpl implements
             }
         }
 
-        String pathPattern = File.separator + "%s" + File.separator + "%s";
-        for (String path : paths){
-            ZipEntry ze;
-            try {
-                for (String s : strings){
-                    ze = new ZipEntry(TEMPLATES_FOLDER + String.format(pathPattern, path, s));
-                    stream.putNextEntry(ze);
-                    in = new FileInputStream(temFolder.getAbsolutePath() + String.format(pathPattern, path, s));
-                    IOUtils.copy(in, stream);
-                    stream.closeEntry();
-                    IOUtils.closeQuietly(in);
-
-                }
-            } catch (IOException e){
-                logger.error("Error path " + path, e);
-                throw new ServiceException("Error");
-            }
-        }
         try {
+            String pathPattern = File.separator + "%s" + File.separator + "%s";
             for (String path : paths){
                 ZipEntry ze;
                 for (String s : strings){
@@ -250,6 +233,27 @@ public class FormTemplateImpexServiceImpl implements
         } catch (IOException e){
             logger.error("Error", e);
             throw new ServiceException("Error");
+        } finally {
+            dirTempDelete(temFolder);
+        }
+    }
+
+    //Удаление временных паоок
+    private void dirTempDelete(File directory){
+        if (directory.listFiles() == null){
+            if (!directory.delete())
+                logger.warn("Faild to delete file " + directory);
+            return;
+        }
+        for (File file : directory.listFiles()){
+            if (file.isDirectory()){
+                dirTempDelete(file);
+                if (!file.delete())
+                    logger.warn("Faild to delete file " + file);
+            } else {
+                if (!file.delete())
+                    logger.warn("Faild to delete file " + file);
+            }
         }
     }
 }

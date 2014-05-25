@@ -214,7 +214,7 @@ public class DeclarationTemplateImpexServiceImpl implements
                 IOUtils.closeQuietly(in);
             }
         } catch (IOException e){
-            logger.error("Error", e);
+            logger.error("Error ", e);
             throw new ServiceException("Error");
         }
     }

@@ -58,5 +58,23 @@ public class FormTemplateImpexpServiceImplTest {
 
         zipOutputStream.finish();
         IOUtils.closeQuietly(writer);
+        dirDelete(tempFolder);
+    }
+
+    private void dirDelete(File directory) throws FileNotFoundException {
+        if (directory.listFiles() == null){
+            System.out.println(directory.delete());
+            return;
+        }
+        for (File file : directory.listFiles()){
+            if (file.isDirectory()){
+                dirDelete(file);
+                if (!file.delete())
+                    throw new FileNotFoundException("");
+            } else {
+                if (!file.delete())
+                    throw new FileNotFoundException("");
+            }
+        }
     }
 }
