@@ -211,15 +211,31 @@ public class FormTemplateImpexServiceImpl implements
                 tempFile.close();
 
             } catch (IOException e) {
-                logger.error("", e);
-                throw new ServiceException("Ошибки при создании временной директории.");
+                logger.error("Ошибки при создании временной директории. Шаблон " + template.getName(), e);
             } catch (JAXBException e) {
-                throw new ServiceException("Ошибка экспорта.");
+                throw new ServiceException("Ошибка экспорта. Шаблон " + template.getName());
             }
         }
 
+        String pathPattern = File.separator + "%s" + File.separator + "%s";
+        for (String path : paths){
+            ZipEntry ze;
+            try {
+                for (String s : strings){
+                    ze = new ZipEntry(TEMPLATES_FOLDER + String.format(pathPattern, path, s));
+                    stream.putNextEntry(ze);
+                    in = new FileInputStream(temFolder.getAbsolutePath() + String.format(pathPattern, path, s));
+                    IOUtils.copy(in, stream);
+                    stream.closeEntry();
+                    IOUtils.closeQuietly(in);
+
+                }
+            } catch (IOException e){
+                logger.error("Error path " + path, e);
+                throw new ServiceException("Error");
+            }
+        }
         try {
-            String pathPattern = File.separator + "%s" + File.separator + "%s";
             for (String path : paths){
                 ZipEntry ze;
                 for (String s : strings){

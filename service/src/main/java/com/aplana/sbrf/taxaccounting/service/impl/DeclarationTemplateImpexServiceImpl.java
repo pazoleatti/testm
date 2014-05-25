@@ -181,7 +181,7 @@ public class DeclarationTemplateImpexServiceImpl implements
                 tempFile.close();
 
             } catch (IOException e) {
-                logger.error("", e);
+                logger.error("Ошибки при создании временной директории. Шаблон " + template.getName(), e);
                 throw new ServiceException("Ошибки при создании временной директории.");
             }
         }
