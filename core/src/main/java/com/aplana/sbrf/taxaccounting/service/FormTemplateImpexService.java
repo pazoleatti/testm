@@ -6,10 +6,11 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
+import java.util.zip.ZipOutputStream;
 
 public interface FormTemplateImpexService {
 
-    static final String TEMPLATES_FOLDER = "templates";
+    static final String TEMPLATES_FOLDER = "formTemplates";
     static final String TEMPLATE_OF_FOLDER_NAME =
             "%s" + File.separator + "formTemplate_%s" + File.separator + "%s";
     static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("yyyy");
@@ -29,5 +30,5 @@ public interface FormTemplateImpexService {
 	 */
 	FormTemplate importFormTemplate(Integer id, InputStream is);
 
-    void exportAllTemplates(OutputStream stream);
+    void exportAllTemplates(ZipOutputStream stream);
 }

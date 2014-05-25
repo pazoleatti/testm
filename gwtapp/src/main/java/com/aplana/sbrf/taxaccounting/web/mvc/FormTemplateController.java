@@ -4,10 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.FormTemplateImpexService;
-import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
-import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.service.MainOperatingService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
@@ -30,6 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
+import java.util.zip.ZipOutputStream;
 
 
 @Controller
@@ -45,6 +43,9 @@ public class FormTemplateController {
 	
 	@Autowired
 	FormTemplateImpexService formTemplateImpexService;
+
+    @Autowired
+    DeclarationTemplateImpexService declarationTemplateImpexService;
 
     @Autowired
     LogEntryService logEntryService;
@@ -70,7 +71,10 @@ public class FormTemplateController {
     public void downloadAll(HttpServletResponse response) throws IOException {
         response.setHeader("Content-Disposition", "attachment; filename=\"Templates.zip\"");
         response.setCharacterEncoding("UTF-8");
-        formTemplateImpexService.exportAllTemplates(response.getOutputStream());
+        ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream());
+        formTemplateImpexService.exportAllTemplates(zipOutputStream);
+        declarationTemplateImpexService.exportAllTemplates(zipOutputStream);
+        zipOutputStream.finish();
         IOUtils.closeQuietly(response.getOutputStream());
     }
 	

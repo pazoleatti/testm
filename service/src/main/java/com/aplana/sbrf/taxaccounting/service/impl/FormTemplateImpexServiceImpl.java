@@ -154,8 +154,8 @@ public class FormTemplateImpexServiceImpl implements
 	}
 
     @Override
-    public void exportAllTemplates(OutputStream stream) {
-        ZipOutputStream zipOutputStream = new ZipOutputStream(stream);
+    public void exportAllTemplates(ZipOutputStream stream) {
+
         FileInputStream in;
         File temFolder;
         try {
@@ -224,14 +224,13 @@ public class FormTemplateImpexServiceImpl implements
                 ZipEntry ze;
                 for (String s : strings){
                     ze = new ZipEntry(TEMPLATES_FOLDER + String.format(pathPattern, path, s));
-                    zipOutputStream.putNextEntry(ze);
+                    stream.putNextEntry(ze);
                     in = new FileInputStream(temFolder.getAbsolutePath() + String.format(pathPattern, path, s));
-                    IOUtils.copy(in, zipOutputStream);
-                    zipOutputStream.closeEntry();
+                    IOUtils.copy(in, stream);
+                    stream.closeEntry();
                     IOUtils.closeQuietly(in);
                 }
             }
-            zipOutputStream.finish();
         } catch (IOException e){
             logger.error("Error", e);
             throw new ServiceException("Error");
