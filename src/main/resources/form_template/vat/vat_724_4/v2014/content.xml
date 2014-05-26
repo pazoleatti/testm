@@ -7,7 +7,7 @@
     <fullName>Отчёт по сумме НДС, уплаченного в бюджет, в случае возврата ранее реализованных товаров (отказа от услуг)
         или возврата соответствующих сумм авансовых платежей
     </fullName>
-    <code></code>
+    <code>(724.4)</code>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rowNum</alias>
         <checking>false</checking>
@@ -50,7 +50,7 @@
         <checking>false</checking>
         <name>Данные бухгалтерского учёта. Налоговая база. Сумма</name>
         <order>5</order>
-        <width>10</width>
+        <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -68,7 +68,7 @@
         <checking>false</checking>
         <name>Данные бухгалтерского учёта. НДС. Сумма</name>
         <order>7</order>
-        <width>10</width>
+        <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
