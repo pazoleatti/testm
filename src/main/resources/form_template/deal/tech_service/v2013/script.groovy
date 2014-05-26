@@ -164,7 +164,7 @@ void logicCheck() {
         def costName = row.getCell('cost').column.name
 
         // Проверка стоимости
-        if (price != null && count != null && cost != price * count) {
+        if (row.price != calc13(row)) {
             logger.warn("Строка $rowNum: «$costName» не равна произведению «$countName» и «$priceName»!")
         }
 
@@ -229,18 +229,20 @@ void calc() {
         // Порядковый номер строки
         row.rowNum = index++
         // Расчет поля "Цена"
-        row.price = null
-        bankSum = row.bankSum
-        if (bankSum != null) {
-            count = row.count
-            row.price = count == null || count == 0 ? bankSum : bankSum / count
-        }
+        row.price = calc13(row)
         // Расчет поля "Стоимость"
-        row.cost = bankSum
+        row.cost = row.bankSum
         // Расчет полей зависимых от справочников
         row.countryCode = getRefBookValue(9, row.jurName)?.COUNTRY?.referenceValue
     }
     dataRowHelper.update(dataRows);
+}
+
+def BigDecimal calc13(def row) {
+    if (row.bankSum != null && row.count != null && row.count != 0) {
+        return (row.bankSum / row.count).setScale(0, RoundingMode.HALF_UP)
+    }
+    return null
 }
 
 // Получение импортируемых данных
