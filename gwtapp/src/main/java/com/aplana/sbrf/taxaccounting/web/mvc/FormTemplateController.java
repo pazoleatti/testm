@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.zip.ZipOutputStream;
@@ -43,9 +44,6 @@ public class FormTemplateController {
 	
 	@Autowired
 	FormTemplateImpexService formTemplateImpexService;
-
-    @Autowired
-    DeclarationTemplateImpexService declarationTemplateImpexService;
 
     @Autowired
     LogEntryService logEntryService;
@@ -69,12 +67,13 @@ public class FormTemplateController {
 
     @RequestMapping(value = "formTemplate/downloadAll")
     public void downloadAll(HttpServletResponse response) throws IOException {
-        response.setHeader("Content-Disposition", "attachment; filename=\"Templates.zip\"");
+        response.setHeader("Content-Disposition",
+                String.format("attachment; filename=\"Templates(%s).zip\"",
+                        new SimpleDateFormat("yyyy-MM-dd").format(new Date()))
+        );
         response.setCharacterEncoding("UTF-8");
-        ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream());
-        formTemplateImpexService.exportAllTemplates(zipOutputStream);
-        declarationTemplateImpexService.exportAllTemplates(zipOutputStream);
-        zipOutputStream.finish();
+
+        formTemplateImpexService.exportAllTemplates(response.getOutputStream());
         IOUtils.closeQuietly(response.getOutputStream());
     }
 	

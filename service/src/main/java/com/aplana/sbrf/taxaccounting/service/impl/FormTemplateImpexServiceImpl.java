@@ -3,12 +3,17 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.XmlSerializationUtils;
 import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.FormTemplateContent;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
+import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateImpexService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateImpexService;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -21,6 +26,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import java.io.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -40,6 +46,9 @@ public class FormTemplateImpexServiceImpl implements
 	@Autowired
 	FormTemplateService formTemplateService;
 
+    @Autowired
+    DeclarationTemplateService declarationTemplateService;
+
 	private final XmlSerializationUtils xmlSerializationUtils = XmlSerializationUtils.getInstance();
 	private final static String VERSION_FILE = "version";
 	private final static String CONTENT_FILE = "content.xml";
@@ -50,6 +59,15 @@ public class FormTemplateImpexServiceImpl implements
 	private final static String ENCODING = "UTF-8";
 
     private static final Log logger = LogFactory.getLog(FormTemplateImpexServiceImpl.class);
+
+    private static final int MAX_NAME_OF_DIR = 50;
+
+    private static final String DEC_TEMPLATES_FOLDER = "declaration";
+    private static final String FORM_TEMPLATES_FOLDER = "form";
+
+    private static final String TEMPLATE_OF_FOLDER_NAME =
+            "%s" + File.separator + "%s-%s" + File.separator + "%s";
+    private static final SimpleDateFormat SIMPLE_DATE_FORMAT_YEAR = new SimpleDateFormat("yyyy");
 
 	@Override
 	public void exportFormTemplate(Integer id, OutputStream os) {
@@ -154,12 +172,132 @@ public class FormTemplateImpexServiceImpl implements
 	}
 
     @Override
-    public void exportAllTemplates(ZipOutputStream stream) {
+    public void exportAllTemplates(OutputStream stream) {
+        ZipArchiveOutputStream zipOutputStream = new ZipArchiveOutputStream(stream);
+        zipOutputStream.setEncoding("UTF-8");
+        zipOutputStream.setFallbackToUTF8(true);
+        exportFormTemplate(zipOutputStream);
+        exportDecTemplates(zipOutputStream);
+        try {
+            zipOutputStream.finish();
+        } catch (IOException e) {
+            logger.error("", e);
+            throw new ServiceException("", e);
+        }
+    }
 
+    //Удаление временных паоок
+    private void dirTempDelete(File directory){
+        if (directory.listFiles() == null){
+            if (!directory.delete())
+                logger.warn("Faild to delete file " + directory);
+            return;
+        }
+        for (File file : directory.listFiles()){
+            if (file.isDirectory()){
+                dirTempDelete(file);
+                if (!file.delete())
+                    logger.warn("Faild to delete file " + file);
+            } else {
+                if (!file.delete())
+                    logger.warn("Faild to delete file " + file);
+            }
+        }
+    }
+
+    private void exportDecTemplates(ZipArchiveOutputStream zipOutputStream){
         FileInputStream in;
         File temFolder;
         try {
-            temFolder = File.createTempFile(TEMPLATES_FOLDER, "");
+            temFolder = File.createTempFile(DEC_TEMPLATES_FOLDER, "");
+            temFolder.delete();
+            if (!temFolder.mkdir())
+                logger.error("Can't create directory for declarations");
+        } catch (IOException e) {
+            throw new ServiceException("Ошибки при создании временной директории.");
+        }
+        List<DeclarationTemplate> declarationTemplates = declarationTemplateService.getByFilter(null);
+        ArrayList<String> paths = new ArrayList<String>(declarationTemplates.size());
+        for (DeclarationTemplate template : declarationTemplates){
+            String folderTemplateName =
+                    String.format(TEMPLATE_OF_FOLDER_NAME,
+                            template.getType().getTaxType().getDeclarationPrefix().toLowerCase(),
+                            template.getType().getId(),
+                            template.getType().getName().length() > MAX_NAME_OF_DIR ?
+                                    template.getType().getName().substring(0, MAX_NAME_OF_DIR)
+                                    : template.getType().getName(),
+                            SIMPLE_DATE_FORMAT_YEAR.format(template.getVersion()));
+            paths.add(folderTemplateName);
+            try {
+                File folderTemplate = new File(temFolder.getAbsolutePath() + File.separator + folderTemplateName, "");
+                folderTemplate.delete();
+                if (!folderTemplate.mkdirs())
+                    logger.warn("Can't create temporary directory");
+                //
+                FileOutputStream tempFile = new FileOutputStream(new File(folderTemplate.getAbsolutePath() + File.separator + VERSION_FILE));
+                tempFile.write("1.0".getBytes());
+                tempFile.close();
+                //
+                tempFile =  new FileOutputStream(new File(folderTemplate.getAbsolutePath() + File.separator + SCRIPT_FILE));
+                String ftScript = declarationTemplateService.getDeclarationTemplateScript(template.getId());
+                if (ftScript != null) {
+                    tempFile.write(ftScript.getBytes(ENCODING));
+                }
+                tempFile.close();
+                //
+                tempFile =  new FileOutputStream(new File(folderTemplate.getAbsolutePath() + File.separator + DeclarationTemplateImpexServiceImpl.REPORT_FILE));
+                String dtJrxm = declarationTemplateService.getJrxml(template.getId());
+                if (dtJrxm != null)
+                    tempFile.write(dtJrxm.getBytes(ENCODING));
+                tempFile.close();
+
+            } catch (IOException e) {
+                logger.error("Ошибки при создании временной директории. Шаблон " + template.getName(), e);
+                throw new ServiceException("Ошибки при создании временной директории.");
+            }
+        }
+
+        String pathPattern = File.separator + "%s" + File.separator + "%s";
+        try {
+            ZipArchiveEntry ze;
+            for (String path : paths){
+                // Version
+                ze = new ZipArchiveEntry(DEC_TEMPLATES_FOLDER + String.format(pathPattern, path, DeclarationTemplateImpexService.VERSION_FILE));
+                zipOutputStream.putArchiveEntry(ze);
+                in = new FileInputStream(temFolder.getAbsolutePath() + String.format(pathPattern, path, DeclarationTemplateImpexService.VERSION_FILE));
+                IOUtils.copy(in, zipOutputStream);
+                zipOutputStream.closeArchiveEntry();
+                IOUtils.closeQuietly(in);
+
+                // Script
+                ze = new ZipArchiveEntry(DEC_TEMPLATES_FOLDER + String.format(pathPattern, path, DeclarationTemplateImpexService.SCRIPT_FILE));
+                zipOutputStream.putArchiveEntry(ze);
+                in = new FileInputStream(temFolder.getAbsolutePath() + String.format(pathPattern, path, DeclarationTemplateImpexService.SCRIPT_FILE));
+                IOUtils.copy(in, zipOutputStream);
+                zipOutputStream.closeArchiveEntry();
+                IOUtils.closeQuietly(in);
+
+                // JasperTemplate
+                ze = new ZipArchiveEntry(DEC_TEMPLATES_FOLDER + String.format(pathPattern, path, DeclarationTemplateImpexService.REPORT_FILE));
+                zipOutputStream.putArchiveEntry(ze);
+                in = new FileInputStream(temFolder.getAbsolutePath() + String.format(pathPattern, path, DeclarationTemplateImpexService.REPORT_FILE));
+                IOUtils.copy(in, zipOutputStream);
+                zipOutputStream.closeArchiveEntry();
+                IOUtils.closeQuietly(in);
+            }
+        } catch (IOException e){
+            logger.error("Error ", e);
+            throw new ServiceException("Error");
+        } finally {
+            dirTempDelete(temFolder);
+        }
+    }
+
+    private void exportFormTemplate(ZipArchiveOutputStream zipOutputStream){
+        FileInputStream in;
+        File temFolder;
+        try {
+            temFolder = File.createTempFile(FORM_TEMPLATES_FOLDER, "");
             temFolder.delete();
             if (!temFolder.mkdir())
                 logger.error("");
@@ -173,9 +311,12 @@ public class FormTemplateImpexServiceImpl implements
         for (FormTemplate template : formTemplates){
             String folderTemplateName =
                     String.format(TEMPLATE_OF_FOLDER_NAME,
-                            template.getType().getTaxType().getName(),
+                            template.getType().getTaxType().getDeclarationPrefix().toLowerCase(),
                             template.getType().getId(),
-                            SIMPLE_DATE_FORMAT.format(template.getVersion()));
+                            template.getType().getName().length() > MAX_NAME_OF_DIR ?
+                                    template.getType().getName().substring(0, MAX_NAME_OF_DIR)
+                                    : template.getType().getName(),
+                            SIMPLE_DATE_FORMAT_YEAR.format(template.getVersion()));
             paths.add(folderTemplateName);
             try {
                 File folderTemplate = new File(temFolder.getAbsolutePath() + File.separator + folderTemplateName, "");
@@ -220,13 +361,13 @@ public class FormTemplateImpexServiceImpl implements
         try {
             String pathPattern = File.separator + "%s" + File.separator + "%s";
             for (String path : paths){
-                ZipEntry ze;
+                ZipArchiveEntry ze;
                 for (String s : strings){
-                    ze = new ZipEntry(TEMPLATES_FOLDER + String.format(pathPattern, path, s));
-                    stream.putNextEntry(ze);
+                    ze = new ZipArchiveEntry(FORM_TEMPLATES_FOLDER + String.format(pathPattern, path, s));
+                    zipOutputStream.putArchiveEntry(ze);
                     in = new FileInputStream(temFolder.getAbsolutePath() + String.format(pathPattern, path, s));
-                    IOUtils.copy(in, stream);
-                    stream.closeEntry();
+                    IOUtils.copy(in, zipOutputStream);
+                    zipOutputStream.closeArchiveEntry();
                     IOUtils.closeQuietly(in);
                 }
             }
@@ -235,25 +376,6 @@ public class FormTemplateImpexServiceImpl implements
             throw new ServiceException("Error");
         } finally {
             dirTempDelete(temFolder);
-        }
-    }
-
-    //Удаление временных паоок
-    private void dirTempDelete(File directory){
-        if (directory.listFiles() == null){
-            if (!directory.delete())
-                logger.warn("Faild to delete file " + directory);
-            return;
-        }
-        for (File file : directory.listFiles()){
-            if (file.isDirectory()){
-                dirTempDelete(file);
-                if (!file.delete())
-                    logger.warn("Faild to delete file " + file);
-            } else {
-                if (!file.delete())
-                    logger.warn("Faild to delete file " + file);
-            }
         }
     }
 }

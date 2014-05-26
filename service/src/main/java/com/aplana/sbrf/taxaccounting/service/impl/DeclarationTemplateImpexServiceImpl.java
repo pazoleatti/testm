@@ -13,11 +13,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -34,12 +35,11 @@ public class DeclarationTemplateImpexServiceImpl implements
 	@Autowired
 	DeclarationTemplateService declarationTemplateService;
 
-	private final static String VERSION_FILE = "version";
-    private final static String SCRIPT_FILE = "script.groovy";
-	private final static String REPORT_FILE = "report.jrxml";
 	private final static String ENCODING = "UTF-8";
 
     private static final Log logger = LogFactory.getLog(DeclarationTemplateImpexServiceImpl.class);
+
+    private static final int MAX_NAME_OF_DIR = 50;
 
 	@Override
 	public void exportDeclarationTemplate(TAUserInfo userInfo, Integer id, OutputStream os) {
@@ -135,87 +135,4 @@ public class DeclarationTemplateImpexServiceImpl implements
 			throw new ServiceException("Не удалось импортировать шаблон", e);
 		}
 	}
-
-    @Override
-    public void exportAllTemplates(ZipOutputStream stream) {
-        FileInputStream in;
-        File temFolder;
-        try {
-            temFolder = File.createTempFile(TEMPLATES_FOLDER, "");
-            temFolder.delete();
-            if (!temFolder.mkdir())
-                logger.error("Can't create directory for declarations");
-        } catch (IOException e) {
-            throw new ServiceException("Ошибки при создании временной директории.");
-        }
-        List<DeclarationTemplate> declarationTemplates = declarationTemplateService.getByFilter(null);
-        ArrayList<String> paths = new ArrayList<String>(declarationTemplates.size());
-        for (DeclarationTemplate template : declarationTemplates){
-            String folderTemplateName =
-                    String.format(TEMPLATE_OF_FOLDER_NAME,
-                            template.getType().getTaxType().getName(),
-                            template.getType().getId(),
-                            SIMPLE_DATE_FORMAT.format(template.getVersion()));
-            paths.add(folderTemplateName);
-            try {
-                File folderTemplate = new File(temFolder.getAbsolutePath() + File.separator + folderTemplateName, "");
-                folderTemplate.delete();
-                if (!folderTemplate.mkdirs())
-                    logger.warn("Can't create temporary directory");
-                //
-                FileOutputStream tempFile = new FileOutputStream(new File(folderTemplate.getAbsolutePath() + File.separator + VERSION_FILE));
-                tempFile.write("1.0".getBytes());
-                tempFile.close();
-                //
-                tempFile =  new FileOutputStream(new File(folderTemplate.getAbsolutePath() + File.separator + SCRIPT_FILE));
-                String ftScript = declarationTemplateDao.getDeclarationTemplateScript(template.getId());
-                if (ftScript != null) {
-                    tempFile.write(ftScript.getBytes(ENCODING));
-                }
-                tempFile.close();
-                //
-                tempFile =  new FileOutputStream(new File(folderTemplate.getAbsolutePath() + File.separator + REPORT_FILE));
-                String dtJrxm = declarationTemplateService.getJrxml(template.getId());
-                if (dtJrxm != null)
-                    tempFile.write(dtJrxm.getBytes(ENCODING));
-                tempFile.close();
-
-            } catch (IOException e) {
-                logger.error("Ошибки при создании временной директории. Шаблон " + template.getName(), e);
-                throw new ServiceException("Ошибки при создании временной директории.");
-            }
-        }
-
-        String pathPattern = File.separator + "%s" + File.separator + "%s";
-        try {
-            for (String path : paths){
-                // Version
-                ZipEntry ze = new ZipEntry(TEMPLATES_FOLDER + String.format(pathPattern, path, VERSION_FILE));
-                stream.putNextEntry(ze);
-                in = new FileInputStream(temFolder.getAbsolutePath() + String.format(pathPattern, path, VERSION_FILE));
-                IOUtils.copy(in, stream);
-                stream.closeEntry();
-                IOUtils.closeQuietly(in);
-
-                // Script
-                ze = new ZipEntry(TEMPLATES_FOLDER + String.format(pathPattern, path, SCRIPT_FILE));
-                stream.putNextEntry(ze);
-                in = new FileInputStream(temFolder.getAbsolutePath() + String.format(pathPattern, path, SCRIPT_FILE));
-                IOUtils.copy(in, stream);
-                stream.closeEntry();
-                IOUtils.closeQuietly(in);
-
-                // JasperTemplate
-                ze = new ZipEntry(TEMPLATES_FOLDER + String.format(pathPattern, path, REPORT_FILE));
-                stream.putNextEntry(ze);
-                in = new FileInputStream(temFolder.getAbsolutePath() + String.format(pathPattern, path, REPORT_FILE));
-                IOUtils.copy(in, stream);
-                stream.closeEntry();
-                IOUtils.closeQuietly(in);
-            }
-        } catch (IOException e){
-            logger.error("Error ", e);
-            throw new ServiceException("Error");
-        }
-    }
 }

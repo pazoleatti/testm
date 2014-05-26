@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -7,8 +9,6 @@ import org.junit.Test;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 /**
  * User: avanteev
@@ -41,24 +41,25 @@ public class FormTemplateImpexpServiceImplTest {
     @Test
     public void testZip() throws IOException {
         FileOutputStream fileOutputStream = new FileOutputStream(File.createTempFile(zipName, ".zip"));
-        ZipOutputStream zipOutputStream = new ZipOutputStream(fileOutputStream);
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(zipOutputStream));
+        //ZipOutputStream zipOutputStream = new ZipOutputStream(fileOutputStream);
+        ZipArchiveOutputStream zipOutputStream = new ZipArchiveOutputStream(fileOutputStream);
+        zipOutputStream.setEncoding("UTF-8");
         FileInputStream in = null;
         for (String fileName : files){
-            ZipEntry ze = new ZipEntry(new String((folder + File.separator + fileName).getBytes("UTF-8")));
-            zipOutputStream.putNextEntry(ze);
+            ZipArchiveEntry ze = new ZipArchiveEntry(new String((folder + File.separator + fileName).getBytes("UTF-8")));
+            zipOutputStream.putArchiveEntry(ze);
             try {
                 in = new FileInputStream(tempFolder.getAbsolutePath() + File.separator + fileName);
-                IOUtils.copy(in, writer, "UTF-8");
+                IOUtils.copy(in, zipOutputStream);
             } finally {
                 in.close();
             }
-            zipOutputStream.closeEntry();
+            zipOutputStream.closeArchiveEntry();
         }
 
         zipOutputStream.finish();
-        IOUtils.closeQuietly(writer);
-        dirDelete(tempFolder);
+        fileOutputStream.close();
+        //dirDelete(tempFolder);
     }
 
     private void dirDelete(File directory) throws FileNotFoundException {
