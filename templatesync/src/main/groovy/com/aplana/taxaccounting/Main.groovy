@@ -19,10 +19,10 @@ class Main {
 
     // Параметры подключения к БД
     def static DB_URL = 'jdbc:oracle:thin:@//172.16.127.16:1521/ORCL.APLANA.LOCAL'
-    def static DB_USER = 'TAX_0_3_8'
+    def static DB_USER = 'TAX'
     def static DB_PASSWORD = 'TAX'
     // Схема для сравнения макетов, null если сравнение не требуется
-    def static DB_USER_COMPARE = 'TAX_0_3_7'
+    def static DB_USER_COMPARE = 'TAX_TEST'
 
     // Путь к папке с шаблонами
     def static SRC_FOLDER_PATH = '../src/main/resources/form_template'
@@ -411,7 +411,7 @@ class Main {
         def map1 = [:]
         def columns1 = [:]
 
-        sql.eachRow("select id, type_id, data_rows, fixed_rows, name, fullname, code, data_headers, to_char(version, 'RRRR') as version, status, script, monthly from form_template where status not in (-1, 2)") {
+        sql.eachRow("select id, type_id, data_rows, fixed_rows, name, fullname, code, data_headers, to_char(version, 'RRRR') as version, status, script, 0 monthly from form_template where status not in (-1, 2)") {
             def type_id = it.type_id as Integer
             if (map1[type_id] == null) {
                 map1.put((Integer) it.type_id, [:])
@@ -472,7 +472,7 @@ class Main {
         def map2 = [:]
         def columns2 = [:]
 
-        sql.eachRow("select id, type_id, data_rows, fixed_rows, name, fullname, code, data_headers, to_char(version, 'RRRR') as version, status, script, monthly from form_template where status not in (-1, 2)") {
+        sql.eachRow("select id, type_id, data_rows, fixed_rows, name, fullname, code, data_headers, to_char(version, 'RRRR') as version, status, script, 0 monthly from form_template where status not in (-1, 2)") {
             def type_id = it.type_id as Integer
             if (map2[type_id] == null) {
                 map2.put((Integer) it.type_id, [:])
