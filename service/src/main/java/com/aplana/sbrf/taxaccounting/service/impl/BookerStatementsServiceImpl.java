@@ -241,9 +241,9 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
 
                     Cell cell = row.getCell(cells.next().getColumnIndex(), Row.RETURN_BLANK_AS_NULL);
 
-                    // пропускаем пустые ячейки
+                    // первая ячейка не должна быть пустой
                     if (cell == null) {
-                        continue;
+                        throw new ServiceException(BAD_FILE_MSG);
                     }
 
                     if (cell.getColumnIndex() > 1 && endOfFile) {
