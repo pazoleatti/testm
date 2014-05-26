@@ -511,9 +511,7 @@ def buildRow(def srcRow, def matrixRow) {
         case 394: // 19
             sign23 = formTypeId == 393 ? srcRow.signPhis : srcRow.deliverySign
             def values23 = getRefBookValue(18, sign23)
-            if (values23 != null && values23.SIGN.stringValue.equals("ОМС")) {
-                val23 = 2
-            } else {
+            if (values23 == null || !values23.SIGN.stringValue.equals("ОМС")) {
                 val23 = 1
             }
             break
