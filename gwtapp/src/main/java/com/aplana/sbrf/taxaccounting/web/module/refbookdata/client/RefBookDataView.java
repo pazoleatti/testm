@@ -240,7 +240,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 
     @UiHandler("cancelEdit")
     void cancelEditButtonClicked(ClickEvent event) {
-        Dialog.confirmMessage("Отмена изменений", "Вы подтверждаете отмену изменений?", new DialogHandler() {
+        Dialog.confirmMessage("Выход из режима редактирования", "Вы подтверждаете переход к режиму просмотра?", new DialogHandler() {
             @Override
             public void yes() {
                 getUiHandlers().setMode(FormMode.VIEW);
