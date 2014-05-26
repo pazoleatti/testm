@@ -74,6 +74,8 @@ public final class ScriptUtils {
 
     private static final String WRONG_XLS_FORMAT = "Выбранный файл не соответствует формату xls/xlsx/xlsm!";
 
+    private static final String OVERPOWER = "Строка %d: Значение графы «%s» превышает допустимую разрядность (%d знаков)!";
+
     /**
      * Интерфейс для переопределения алгоритма расчета
      */
@@ -871,5 +873,55 @@ public final class ScriptUtils {
         }
 
         return xml;
+    }
+
+    /**
+     * Проверка превышения разрядности значения.
+     *
+     * @param value число
+     * @param row строка
+     * @param alias алиас графы
+     * @param index номер строки
+     * @param size разрядность графы из чтз (например если 17.2, то 15 = 17 - 2 или 19.4, то 15 = 19 - 4)
+     */
+    public static void checkOverflow(BigDecimal value, DataRow<Cell> row, String alias, int index, int size) {
+        if (value == null) {
+            return;
+        }
+        // размерность
+        // максимальное число по ограничению
+        BigDecimal overpower = new BigDecimal("1E" + size);
+
+        // если значение больше или равно ограничению
+        if (value.abs().compareTo(overpower) > -1) {
+            String columnNumber = getColumnName(row, alias);
+            throw new ServiceException(OVERPOWER, index, columnNumber, size, columnNumber);
+        }
+    }
+
+    /**
+     * Расчет итогового значения, являющегося суммой по ячейкам одноименной графы, с проверкой размерности.
+     * Для форм НДС.
+     *
+     * @param dataRows строки нф
+     * @param totalRow итоговая строка
+     * @param columns список алиасов графов для суммироавния
+     * @param sizeMap мапа с разрядностью графы из чтз (например если 17.2, то 15 = 17 - 2 или 19.4, то 15 = 19 - 4)
+     */
+    public static void calcTotalSum(List<DataRow<Cell>> dataRows, DataRow<Cell> totalRow, List<String> columns,
+                                    HashMap<String, Integer> sizeMap) {
+        for (String alias : columns) {
+            BigDecimal sum = BigDecimal.valueOf(0);
+            for (DataRow<Cell> row : dataRows) {
+                if (row.getAlias() == null) {
+                    BigDecimal val = (BigDecimal) row.getCell(alias).getValue();
+                    if (val != null) {
+                        sum = sum.add(val);
+                    }
+                }
+            }
+            checkOverflow(sum, totalRow, alias, totalRow.getIndex(), sizeMap.get(alias));
+            totalRow.getCell(alias).setValue(sum, null);
+        }
     }
 }
