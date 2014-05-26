@@ -137,9 +137,6 @@ void logicCheck() {
         return
     }
 
-    def dFrom = reportPeriodService.getStartDate(formData.reportPeriodId).time
-    def dTo = reportPeriodService.getEndDate(formData.reportPeriodId).time
-
     for (row in dataRows) {
         if (row.getAlias() != null) {
             continue
@@ -167,13 +164,6 @@ void logicCheck() {
         if (okei != '796' && okei != '744') {
             def msg = okeiCodeCell.column.name
             logger.warn("Строка $rowNum: В графе «$msg» могут быть указаны только следующие элементы: шт., процент!")
-        }
-
-        //  Корректность даты договора
-        def dt = docDateCell.value
-        if (dt != null && (dt < dFrom || dt > dTo)) {
-            def msg = docDateCell.column.name
-            logger.warn("Строка $rowNum: «$msg» не может быть вне налогового периода!")
         }
 
         // Проверка цены

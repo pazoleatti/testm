@@ -168,13 +168,6 @@ void logicCheck() {
             logger.warn("Строка $rowNum: Графа «$msg1» и графа «$msg2» не могут быть заполнены одновременно!")
         }
 
-        // Корректность даты договора
-        def dt = contractDate
-        if (dt != null && (dt < dFrom || dt > dTo)) {
-            def msg = row.getCell('contractDate').column.name
-            logger.warn("Строка $rowNum: «$msg» не может быть вне налогового периода!")
-        }
-
         // Корректность даты (заключения) сделки
         if (transactionDeliveryDate < contractDate) {
             def msg1 = row.getCell('transactionDeliveryDate').column.name
