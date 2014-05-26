@@ -46,7 +46,7 @@
         <checking>false</checking>
         <name>Данные бухгалтерского учета. Налоговая база. Сумма</name>
         <order>5</order>
-        <width>10</width>
+        <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -64,7 +64,7 @@
         <checking>false</checking>
         <name>Данные бухгалтерского учета. НДС. Сумма</name>
         <order>7</order>
-        <width>10</width>
+        <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -82,7 +82,7 @@
         <checking>false</checking>
         <name>Сумма НДС по книге продаж</name>
         <order>9</order>
-        <width>10</width>
+        <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>

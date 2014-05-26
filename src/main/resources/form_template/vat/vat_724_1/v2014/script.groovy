@@ -9,7 +9,6 @@ import groovy.transform.Field
  * formTemplateId=600
  *
  * TODO:
- *      - логическая проверка 3 - не выполняется потому что графа 7 имеет тип строка
  *      - графа 3 и 2 - справочник «План счетов бухгалтерского учета», но он пока не сделан, временно указал другой справочник (38), потом надо поменять
  */
 
@@ -102,6 +101,9 @@ def sections = ['1_1', '1_2', '2', '3', '4', '5', '6', '7']
 @Field
 def endDate = null
 
+@Field
+def sizeMap = ['baseSum' : 15, 'ndsSum' : 15, 'ndsBookSum' : 15]
+
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
                     def boolean required = true) {
@@ -169,7 +171,8 @@ void calc() {
 
         // посчитать итоги по разделам
         def rows = (from <= to ? dataRows[from..to] : [])
-        calcTotalSum(rows, lastRow, totalColumns)
+        // calcTotalSum(rows, lastRow, totalColumns)
+        calcTotalSum(rows, lastRow, totalColumns, sizeMap)
     }
     updateIndexes(dataRows)
 
@@ -211,39 +214,9 @@ void logicCheck() {
                 (isSection1or2 && row.ndsNum == '60309.01' || isSection5or6)) {
             logger.warn(errorMsg + 'Сумма НДС по данным бухгалтерского учета не соответствует данным книги продаж!')
         }
-
-        // TODO (Ramil Timerbaev) пока исключил эту проверку потому что графа 7 имеет тип строка
-        // 3. Проверка суммы НДС
-        if (false && row.baseSum != null && row.ndsRate != null && row.ndsSum != null) {
-            def tmp = row.baseSum * row.ndsRate
-            def tmp1 = tmp + (tmp * 3) / 100
-            def tmp2 = tmp - (tmp * 3) / 100
-            if (tmp1 > row.ndsSum && row.ndsSum > tmp2) {
-                logger.warn(errorMsg + 'Сумма НДС по данным бухгалтерского учета не соответствует налоговой базе!')
-            }
-        }
     }
 
-    for (def section : sections) {
-        def firstRow = getDataRow(dataRows, getFirstRowAlias(section))
-        def lastRow = getDataRow(dataRows, getLastRowAlias(section))
-        def from = firstRow.getIndex()
-        def to = lastRow.getIndex() - 1
-
-        def sectionsRows = (from < to ? dataRows[from..(to - 1)] : [])
-        def tmpTotal = getTotalRow(sectionsRows)
-        def hasError = false
-        totalColumns.each { alias ->
-            if (lastRow[alias] != tmpTotal[alias]) {
-                logger.error(WRONG_TOTAL, getColumnName(lastRow, alias))
-                hasError = true
-            }
-        }
-        if (hasError) {
-            break
-        }
-    }
-
+    def hasError = false
     for (def section : sections) {
         def firstRow = getDataRow(dataRows, getFirstRowAlias(section))
         def lastRow = getDataRow(dataRows, getLastRowAlias(section))
@@ -252,9 +225,9 @@ void logicCheck() {
 
         def sectionsRows = (from < to ? dataRows[from..(to - 1)] : [])
 
-        // 4. Проверка итоговых значений по разделам 1-7
-        def tmpTotal = getTotalRow(sectionsRows)
-        def hasError = false
+        // 3. Проверка итоговых значений по разделам 1-7
+        def tmpTotal = getTotalRow(sectionsRows, lastRow.getIndex())
+
         if (!hasError) {
             totalColumns.each { alias ->
                 if (lastRow[alias] != tmpTotal[alias]) {
@@ -264,7 +237,7 @@ void logicCheck() {
             }
         }
 
-        // 5..7. Проверка номера балансового счета (графа 5) по разделам
+        // 4..6. Проверка номера балансового счета (графа 5) по разделам
         // 8. Проверка номера балансового счета (графа 5) по разделу между фиксированной строкой 2 и 4
         if (section == '7') {
             continue
@@ -521,7 +494,7 @@ void addData(def xml, int headRowCount) {
     dataRowHelper.save(rows)
 }
 
-def getTotalRow(sectionsRows) {
+def getTotalRow(sectionsRows, def index) {
     def newRow = formData.createDataRow()
     totalColumns.each { alias ->
         newRow.getCell(alias).setValue(BigDecimal.ZERO, null)
@@ -530,7 +503,9 @@ def getTotalRow(sectionsRows) {
         totalColumns.each { alias ->
             def value1 = newRow.getCell(alias).value
             def value2 = (row.getCell(alias).value ?: BigDecimal.ZERO)
-            newRow.getCell(alias).setValue(value1 + value2, null)
+            def sum = value1 + value2
+            checkOverflow(sum, newRow, alias, index, sizeMap[alias])
+            newRow.getCell(alias).setValue(sum, null)
         }
     }
     return newRow
