@@ -1,12 +1,12 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.RefBookExternalService;
 import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
@@ -43,6 +43,9 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
 
     @Autowired
     private RefBookScriptingService refBookScriptingService;
+
+    @Autowired
+    private RefBookFactory refBookFactory;
 
     private static long REF_BOOK_OKATO = 3L; // Коды ОКАТО
     private static long REF_BOOK_OUKS = 9L;  // Организации-участники контролируемых сделок
@@ -93,6 +96,9 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
                             for (Pair<Boolean, Long> refBookMapPair : matchList) {
                                 InputStream is = null;
                                 Long refBookId = refBookMapPair.getSecond();
+                                RefBook refBook = refBookFactory.get(refBookId);
+
+                                ScriptStatusHolder scriptStatusHolder = new ScriptStatusHolder();
                                 try {
                                     is = new BufferedInputStream(file.getStream());
                                     if (!refBookMapPair.getFirst()) {  // Если это не сам файл, а архив
@@ -103,14 +109,24 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
                                             is = zis;
                                         }
                                     }
-                                    logger.info("Импорт данных справочника из файла «" + fileName + "».");
+                                    logger.info("Импорт данных справочника «" + refBook.getName() + "» из файла «" + fileName + "».");
 
                                     // Обращение к скрипту
                                     Map<String, Object> additionalParameters = new HashMap<String, Object>();
                                     additionalParameters.put("inputStream", is);
                                     additionalParameters.put("fileName", fileName);
+                                    additionalParameters.put("scriptStatusHolder", scriptStatusHolder);
                                     refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.IMPORT, logger, additionalParameters);
-                                    refBookImportCount++;
+                                    // Обработка результата выполнения скрипта
+                                    switch (scriptStatusHolder.getScriptStatus()) {
+                                        case SUCCESS:
+                                            logger.info("Импорт успешно выполнен.");
+                                            refBookImportCount++;
+                                            break;
+                                        case SKIP:
+                                            logger.info("Файл пропущен. " + scriptStatusHolder.getStatusMessage());
+                                            break;
+                                    }
                                 } catch (Exception e) {
                                     //// Ошибка импорта отдельного справочника — откатываются изменения только по нему, импорт продолжается
                                     withError = true;
@@ -121,8 +137,8 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
                                         errorMsg = "";
                                     }
 
-                                    errorMsg = "Не удалось выполнить импорт данных справочника (id = " + refBookId + ") из файла «"
-                                            + fileName + "». " + errorMsg;
+                                    errorMsg = "Не удалось выполнить импорт данных справочника «" + refBook.getName()
+                                            + "» из файла «" + fileName + "». " + errorMsg;
 
                                     // Журнал аудита
                                     auditService.add(FormDataEvent.IMPORT, userInfo, userInfo.getUser().getDepartmentId(),
@@ -203,6 +219,7 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
         additionalParameters.put("validDateFrom", validDateFrom);
         additionalParameters.put("validDateTo", validDateTo);
         additionalParameters.put("isNewRecords", isNewRecords);
+        additionalParameters.put("scriptStatusHolder", new ScriptStatusHolder()); // Статус пока не обрабатывается
         refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.SAVE, logger, additionalParameters);
     }
 }

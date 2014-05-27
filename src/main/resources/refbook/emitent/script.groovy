@@ -1,6 +1,7 @@
 package refbook.emitent
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.ScriptStatus
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord
@@ -23,9 +24,6 @@ def REFBOOK_ID = 100
 
 void importFromNSI() {
     // На вход могут поступать как «Эмитенты», так и «Ценные бумаги», скрит сам должен определить «свой» ли файл
-
-    def dataProvider = refBookFactory.getDataProvider(REFBOOK_ID)
-
     println("Import Emitent: file name = $fileName")
 
     // Список добавляемых
@@ -40,6 +38,8 @@ void importFromNSI() {
     inputStream?.eachLine { line ->
         if ((line=~ /;/).count != 4) {
             // Не «Эмитенты»
+            scriptStatusHolder.setScriptStatus(ScriptStatus.SKIP)
+            scriptStatusHolder.setStatusMessage("Неверная структура файла «$fileName»!")
             return
         }
         lines.add(line)
@@ -48,10 +48,14 @@ void importFromNSI() {
     println("Import Emitent: strings count = " + lines.size())
 
     if (lines.isEmpty()) {
+        scriptStatusHolder.setScriptStatus(ScriptStatus.SKIP)
+        scriptStatusHolder.setStatusMessage("Неверная структура файла «$fileName»!")
         return
     }
 
     def actualDate = new GregorianCalendar(1970, Calendar.JANUARY, 1).getTime()
+
+    def dataProvider = refBookFactory.getDataProvider(REFBOOK_ID)
 
     // Получение актуальной версии справочника
     def actualEmitentList = dataProvider.getRecords(actualDate, null, null, null)
@@ -63,9 +67,9 @@ void importFromNSI() {
 
     lines.each { line ->
         def lineStrs = line.split(";")
-        def code = lineStrs[0]
-        def name = lineStrs[1]
-        def fullName = lineStrs[2]
+        def code = lineStrs[0] as String
+        def name = lineStrs[1] as String
+        def fullName = lineStrs[2] as String
 
         if (code != null && !code.isEmpty()) {
             def actualRecord = actualEmitentnMap.get(code)
@@ -93,15 +97,15 @@ void importFromNSI() {
 
     println("Import Emitent: Add count = ${addList.size()}, Update count = ${updList.size()}")
 
-    if (!addList.isEmpty()) {
+    if (!logger.containsLevel(LogLevel.ERROR) && !addList.isEmpty()) {
         dataProvider.createRecordVersion(logger, actualDate, null, addList)
     }
 
-    if (!updList.isEmpty()) {
+    if (!logger.containsLevel(LogLevel.ERROR) && !updList.isEmpty()) {
         dataProvider.updateRecords(actualDate, updList)
     }
 
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        logger.info("Импорт успешно выполнен.")
+        scriptStatusHolder.setScriptStatus(ScriptStatus.SUCCESS)
     }
 }
