@@ -243,18 +243,28 @@ public class FormDataDaoTest {
 
     @Test
     public void testFindFormDataByFormTemplate(){
-        Assert.assertEquals(4, formDataDao.findFormDataByFormTemplate(1).size());
+        Assert.assertEquals(9, formDataDao.findFormDataByFormTemplate(1).size());
         Assert.assertTrue(formDataDao.findFormDataByFormTemplate(10000).isEmpty());
     }
 
     @Test
     public void testGetFormDataListInActualPeriodByTemplate() throws ParseException {
         SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd");
-        Assert.assertEquals(4, formDataDao.getFormDataListInActualPeriodByTemplate(1, format.parse("2013.01.01")).size());
+        Assert.assertEquals(9, formDataDao.getFormDataListInActualPeriodByTemplate(1, format.parse("2013.01.01")).size());
     }
 
     @Test
     public void testFindByDepAndReportPeriod() throws ParseException {
         Assert.assertEquals(1, formDataDao.find(Arrays.asList(1), 1).size());
     }
+
+    @Test
+    public void testGetFormDataListForCrossNumeration() {
+        List<FormData> formDataList = formDataDao.getFormDataListForCrossNumeration(2014, 3, "I", FormDataKind.PRIMARY.getId());
+        Assert.assertEquals(3, formDataList.size());
+        Assert.assertEquals(1, formDataList.get(0).getPeriodOrder().intValue());
+        Assert.assertEquals(2, formDataList.get(1).getPeriodOrder().intValue());
+        Assert.assertEquals(3, formDataList.get(2).getPeriodOrder().intValue());
+    }
+
 }

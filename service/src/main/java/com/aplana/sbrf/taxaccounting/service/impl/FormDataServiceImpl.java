@@ -6,9 +6,11 @@ import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.api.*;
+import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
@@ -22,7 +24,6 @@ import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -773,5 +774,32 @@ public class FormDataServiceImpl implements FormDataService {
        } catch (DaoException e){
            throw new ServiceException("", e);
        }
+    }
+
+    @Override
+    public boolean updatePreviousRowNumber(FormData formData) {
+        int previousRowNumber = 0;
+
+        int year = reportPeriodService.getTaxPeriod(formData.getReportPeriodId()).getYear();
+        List<FormData> formDataList = formDataDao.getFormDataListForCrossNumeration(year, formData.getDepartmentId(), formData.getFormType().getName(), formData.getKind().getId());
+
+        for (int i = 0; i < formDataList.size(); i++) {
+
+            if (formDataList.get(i).getState() != WorkflowState.CREATED) {
+                previousRowNumber = dataRowDao.getSize(formDataList.get(i), null);
+            }
+
+            if (i == 0 && formDataList.get(i).getId().equals(formData.getId())) {
+                formData.setPreviousRowNumber(previousRowNumber);
+                formDataDao.save(formData);
+                return true;
+
+            } else if (formDataList.get(i).getId().equals(formData.getId())) {
+                formData.setPreviousRowNumber(previousRowNumber);
+                formDataDao.save(formData);
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -3,15 +3,16 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.core.api.LockCoreService;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
-import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -23,13 +24,48 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
 public class FormDataServiceTest {
 
     private FormDataServiceImpl formDataService = new FormDataServiceImpl();
+
+    private FormTemplate formTemplate;
+
+    private FormDataDao formDataDao;
+
+    private DataRowDao dataRowDao;
+
+    private PeriodService reportPeriodService;
+
+    @Before
+    public void init() {
+        // Макет
+        formTemplate = new FormTemplate();
+        formTemplate.setId(1);
+
+        // Тип формы
+        FormType formType = new FormType();
+        formType.setName(TaxType.INCOME.getName());
+        formTemplate.setType(formType);
+
+        // Автонумеруемая графа
+        AutoNumerationColumn autoNumerationColumn = new AutoNumerationColumn();
+        autoNumerationColumn.setId(1);
+        autoNumerationColumn.setTypeName(AutoNumerationColumnType.SERIAL.getName());
+        autoNumerationColumn.setType(AutoNumerationColumnType.SERIAL.getType());
+        formTemplate.addColumn(autoNumerationColumn);
+
+        // Mock
+        formDataDao = mock(FormDataDao.class);
+        dataRowDao = mock(DataRowDao.class);
+        reportPeriodService = mock(PeriodService.class);
+
+        ReflectionTestUtils.setField(formDataService, "formDataDao", formDataDao);
+        ReflectionTestUtils.setField(formDataService, "dataRowDao", dataRowDao);
+        ReflectionTestUtils.setField(formDataService, "reportPeriodService", reportPeriodService);
+    }
 
     /**
      * Тест удаления приемника при распринятии последнего источника
@@ -183,5 +219,109 @@ public class FormDataServiceTest {
         assertTrue(formDataService.existFormData(1, FormDataKind.SUMMARY, 1, logger));
         assertEquals("Существует экземпляр налоговой формы Тестовый тип НФ типа Сводная в подразделении Тестовое подразделение периоде Тестовый период 2014", logger.getEntries().get(0).getMessage());
         assertEquals("Существует экземпляр налоговой формы Тестовый тип НФ типа Сводная в подразделении Тестовое подразделение периоде Второй тестовый период 2014", logger.getEntries().get(1).getMessage());
+    }
+
+    /**
+     * Тестирование случая, когда экземпляр НФ является первым в сквозной нумерации
+     */
+    @Test
+    public void testUpdatePreviousRowNumber_1() {
+
+        FormData formData = new FormData(formTemplate);
+        formData.setId((long) 1);
+        formData.setDepartmentId(1);
+        formData.setReportPeriodId(1);
+        formData.setKind(FormDataKind.PRIMARY);
+        formData.setState(WorkflowState.CREATED);
+
+        List<FormData> formDataList = new ArrayList<FormData>();
+        formDataList.add(formData);
+
+        TaxPeriod taxPeriod = new TaxPeriod();
+        taxPeriod.setYear(2014);
+
+        when(formDataDao.getFormDataListForCrossNumeration(taxPeriod.getYear(), formData.getDepartmentId(), formData.getFormType().getName(), formData.getKind().getId())).thenReturn(formDataList);
+        when(reportPeriodService.getTaxPeriod(formData.getReportPeriodId())).thenReturn(taxPeriod);
+
+        formDataService.updatePreviousRowNumber(formData);
+        assertTrue(formData.getPreviousRowNumber().equals(0));
+    }
+
+    /**
+     * Тестирование случая, когда экземпляр НФ не является первым и предыдущие экземпляры НФ в состоянии отличном от "Создана"
+     */
+    @Test
+    public void testUpdatePreviousRowNumber_2() {
+
+        FormData formData = new FormData(formTemplate);
+        formData.setId((long) 1);
+        formData.setDepartmentId(1);
+        formData.setReportPeriodId(1);
+        formData.setKind(FormDataKind.PRIMARY);
+        formData.setState(WorkflowState.ACCEPTED);
+
+        FormData formData1 = new FormData(formTemplate);
+        formData1.setId((long) 2);
+        formData1.setDepartmentId(1);
+        formData1.setReportPeriodId(1);
+        formData1.setKind(FormDataKind.PRIMARY);
+        formData1.setState(WorkflowState.CREATED);
+
+        List<FormData> formDataList = new ArrayList<FormData>();
+        formDataList.add(formData);
+        formDataList.add(formData1);
+
+        TaxPeriod taxPeriod = new TaxPeriod();
+        taxPeriod.setYear(2014);
+
+        when(formDataDao.getFormDataListForCrossNumeration(taxPeriod.getYear(), formData1.getDepartmentId(), formData1.getFormType().getName(), formData1.getKind().getId())).thenReturn(formDataList);
+        when(dataRowDao.getSize(formData, null)).thenReturn(5);
+        when(reportPeriodService.getTaxPeriod(formData1.getReportPeriodId())).thenReturn(taxPeriod);
+
+        formDataService.updatePreviousRowNumber(formData1);
+        assertTrue(formData1.getPreviousRowNumber().equals(5));
+
+    }
+
+    /**
+     * Тестирование случая, когда экземпляр НФ не является первым и существуют предыдущие экземпляры НФ в состоянии "Создана"
+     */
+    @Test
+    public void testUpdatePreviousRowNumber_3() {
+        FormData formData = new FormData(formTemplate);
+        formData.setId((long) 1);
+        formData.setDepartmentId(1);
+        formData.setReportPeriodId(1);
+        formData.setKind(FormDataKind.PRIMARY);
+        formData.setState(WorkflowState.ACCEPTED);
+
+        FormData formData1 = new FormData(formTemplate);
+        formData1.setId((long) 2);
+        formData1.setDepartmentId(1);
+        formData1.setReportPeriodId(2);
+        formData1.setKind(FormDataKind.PRIMARY);
+        formData1.setState(WorkflowState.CREATED);
+
+        FormData formData2 = new FormData(formTemplate);
+        formData2.setId((long) 3);
+        formData2.setDepartmentId(1);
+        formData2.setReportPeriodId(3);
+        formData2.setKind(FormDataKind.PRIMARY);
+        formData2.setState(WorkflowState.CREATED);
+
+        List<FormData> formDataList = new ArrayList<FormData>();
+        formDataList.add(formData);
+        formDataList.add(formData1);
+        formDataList.add(formData2);
+
+        TaxPeriod taxPeriod = new TaxPeriod();
+        taxPeriod.setYear(2014);
+
+        when(formDataDao.getFormDataListForCrossNumeration(taxPeriod.getYear(), formData2.getDepartmentId(), formData2.getFormType().getName(), formData2.getKind().getId())).thenReturn(formDataList);
+        when(dataRowDao.getSize(formData, null)).thenReturn(5);
+        when(reportPeriodService.getTaxPeriod(formData2.getReportPeriodId())).thenReturn(taxPeriod);
+
+        formDataService.updatePreviousRowNumber(formData2);
+        assertTrue(formData2.getPreviousRowNumber().equals(5));
     }
 }
