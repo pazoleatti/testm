@@ -54,6 +54,9 @@ def editableColumns = ['differences', 'sum']
 @Field
 def nonEmptyColumns = ['rowNum', 'differences', 'sum']
 
+@Field
+def sizeMap = ['sum' : 15]
+
 // Дата начала отчетного периода
 @Field
 def startDate = null
@@ -132,9 +135,9 @@ void calc() {
         }
     }
     def other = getDataRow(dataRows, 'R3')
-    other?.sum = checkOverpower(calcOther(dataRows), other, 'sum')
+    other?.sum = checkOverflow(calcOther(dataRows), other, 'sum', other.getIndex(), sizeMap['sum'])
     def itog = getDataRow(dataRows, 'total')
-    itog?.sum = checkOverpower(calcItog(dataRows), itog, 'sumTotal')
+    itog?.sum = checkOverflow(calcItog(dataRows), itog, 'sum', itog.getIndex(), sizeMap['sum'])
     dataRowHelper.update(dataRows)
 }
 
@@ -305,20 +308,4 @@ void addData(def xml, int headRowCount) {
     }
     dataRows.add(totalRow)
     dataRowHelper.save(dataRows)
-}
-
-def checkOverpower(def value, def row, def alias) {
-    if (value?.abs() >= 1e15) {
-        def checksMap = [
-                'sum' : "Сумма значений всех нефиксированных строк по Графе 3",
-                'sumTotal' : "Сумма значений строк 1-3 по Графе 3"
-        ]
-        def aliasMap = [
-                'sum' : "3",
-                'sumTotal' : "3"
-        ]
-        throw new ServiceException("Строка ${row.getIndex()}: Значение «Графы ${aliasMap[alias]}» превышает допустимую " +
-                "разрядность (17 знаков). «Графа ${aliasMap[alias]}» рассчитывается как «${checksMap[alias]}»!")
-    }
-    return value
 }
