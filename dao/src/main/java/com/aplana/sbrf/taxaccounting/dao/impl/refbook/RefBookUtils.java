@@ -440,24 +440,24 @@ public class RefBookUtils extends AbstractDao {
                 if ((a.getId() == 64L || a.getId() == 12L || a.getId() == 810L) &&
                         (value != null && !NumberUtils.isNumber(value.getStringValue()) || a.isRequired() && value == null)){
                     //TODO добавить еще Определяющая часть кода ОКТМО
-                    errors.add("Значение атрибута " + a.getName() + " должно содержать только цифры");
+                    errors.add("Значение атрибута «" + a.getName() + "» должно содержать только цифры!");
                 }
 
                 //Проверка формата для кода окато
                 if ((a.getId() == 7L) && !okatoPattern.matcher(values.get(a.getAlias()).getStringValue()).matches()) {
-                    errors.add("Значение атрибута " + a.getName() + " должно быть задано в формате ×××××××××××, где × - цифра");
+                    errors.add("Значение атрибута «" + a.getName() + "» должно быть задано в формате ×××××××××××, где × - цифра!");
                 }
 
                 //Проверка формата для кода ТС
                 if ((a.getId() == 411L) && !codeTSPattern.matcher(values.get(a.getAlias()).getStringValue()).matches()) {
-                    errors.add("Значение атрибута " + a.getName() + " должно быть задано в формате ××××× или ***??, где × - цифра");
+                    errors.add("Значение атрибута «" + a.getName() + "» должно быть задано в формате ××××× или ***??, где × - цифра!");
                 }
 
                 //Проверка для иерархичных справочников
                 if (record.getRecordId() != null && a.getAlias().equals(RefBook.RECORD_PARENT_ID_ALIAS)) {
                     Long parentId = values.get(a.getAlias()).getReferenceValue();
                     if (record.getRecordId().equals(parentId)) {
-                        errors.add("Элемент справочника не может быть родительским для самого себя");
+                        errors.add("Элемент справочника не может быть родительским для самого себя!");
                     }
                 }
 
