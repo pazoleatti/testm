@@ -6,7 +6,8 @@ public enum Formats {
 	MM_YYYY    (2, "MM.yyyy", "99.9999"),
 	MMM_YYYY   (3, "MMMM yyyy", "99.9999"),
 	YYYY       (4, "yyyy", "9999"),
-	DD_MM	   (5, "dd.MM", "99.99");
+	DD_MM	   (5, "dd.MM", "99.99"),
+	BOOLEAN    (6, "", ""); // формат для числовых атрибутов, чтобы их отображать в виде чек-боксов
 
 	public static String[] months = new String[]{
 			"Январь",
