@@ -49,7 +49,7 @@
         <name>ИНН/КИО контрагента</name>
         <order>5</order>
         <width>7</width>
-        <parentId>21205</parentId>
+        <parentAlias>contraName</parentAlias>
         <refBookAttributeId>37</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
@@ -68,7 +68,7 @@
         <name>Код страны местонахождения контрагента</name>
         <order>7</order>
         <width>8</width>
-        <parentId>21208</parentId>
+        <parentAlias>contraCountry</parentAlias>
         <refBookAttributeId>50</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -78,7 +78,7 @@
         <order>8</order>
         <width>8</width>
         <maxLength>15</maxLength>
-        <precision>0</precision>
+        <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>currency</alias>
@@ -115,6 +115,7 @@
         <order>12</order>
         <width>5</width>
         <maxLength>128</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>contractDate</alias>
@@ -137,8 +138,9 @@
         <checking>false</checking>
         <name>Регистрационный код ценной бумаги</name>
         <order>15</order>
-        <width>7</width>
+        <width>8</width>
         <maxLength>500</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>bondCount</alias>

@@ -88,7 +88,7 @@ def currentDate = new Date()
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
                       def boolean required = false) {
-    if (value == null || value.trim().isEmpty()) {
+    if (value == null || (refBookId != 14 && value.trim().isEmpty())) {
         return null
     }
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
@@ -221,7 +221,7 @@ void calc() {
 // Получение импортируемых данных
 void importData() {
     def tmpRow = formData.createDataRow()
-    def xml = getXML('Сокращенная форма Данные для расчета сумм доходов по сделкам', null)
+    def xml = getXML('Данные для расчета сумм доходов по сделкам', null)
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 17, 3)
 
