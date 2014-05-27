@@ -6,6 +6,8 @@ import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.*;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Transformer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -154,11 +156,11 @@ public class AuditServiceImpl implements AuditService {
         // Типы форм
         if (logSystemFilter.getFormKind() != null && !logSystemFilter.getFormKind().isEmpty()) {
             logSystemFilterDao.setFormDataKinds(new ArrayList<FormDataKind>(CollectionUtils.collect(logSystemFilter.getFormKind(), new Transformer() {
-                @Override
-                public Object transform(Object input) {
-                    return FormDataKind.fromId((Integer)input);
-                }
-            })));
+				@Override
+				public Object transform(Object input) {
+					return FormDataKind.fromId((Integer) input);
+				}
+			})));
         } else {
             logSystemFilterDao.setFormDataKinds(formDataAccessService.getAvailableFormDataKind(userInfo, asList(logSystemFilter.getTaxType())));
         }

@@ -39,7 +39,7 @@ public class AuditDaoTest {
         filter.setTaxType(TaxType.TRANSPORT);
         filter.setReportPeriodName("2013");
         filter.setUserIds(new ArrayList<Long>(){{add(1l);}});
-        filter.setDepartmentIds(Arrays.asList(1));
+        filter.setDepartmentName("Банк");
 
         PagingResult<LogSearchResultItem> records = auditDao.getLogs(filter);
         LogSearchResultItem logSystem = records.get(0);
@@ -53,7 +53,7 @@ public class AuditDaoTest {
         assertEquals(3, logSystem.getFormKind().getId());
         assertEquals("the best note", logSystem.getNote());
         assertEquals("Подразделение", logSystem.getUserDepartmentName());
-        assertEquals(2, records.getTotalCount());
+        assertEquals(1, records.getTotalCount());
     }
 
     @Test
