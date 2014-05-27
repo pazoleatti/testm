@@ -437,7 +437,7 @@ public class RefBookUtils extends AbstractDao {
             for (RefBookAttribute a :attributes){
                 RefBookValue value = values.get(a.getAlias());
                 //Должны содержать только цифры - Код валюты. Цифровой, Определяющая часть кода ОКАТО, Определяющая часть кода ОКТМО, Цифровой код валюты выпуска
-                if ((a.getId() == 64L || a.getId() == 12L || a.getId() == 810L) &&
+                if ((a.getId() == 64L || a.getId() == 12L) &&
                         (value != null && !NumberUtils.isNumber(value.getStringValue()) || a.isRequired() && value == null)){
                     //TODO добавить еще Определяющая часть кода ОКТМО
                     errors.add("Значение атрибута «" + a.getName() + "» должно содержать только цифры!");
