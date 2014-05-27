@@ -72,9 +72,6 @@ def totalAEditableColumns = ['bill', 'dealNds', 'deal_20', 'deal_20_Nds', 'deal_
 @Field
 def nonEmptyColumns = ['bill', 'dealNds', 'deal_20', 'deal_20_Nds', 'deal_18', 'deal_18_Nds',
                        'deal_10', 'deal_10_Nds', 'deal_0', 'deal']
-@Field
-def sizeMap = ['diff' : 15, 'bill' : 15, 'dealNds' : 15, 'deal_20' : 15, 'deal_20_Nds' : 15, 'deal_18' : 15,
-        'deal_18_Nds' : 15, 'deal_10' : 15, 'deal_10_Nds' : 15, 'deal_0' : 15, 'deal' : 15]
 
 // Дата начала отчетного периода
 @Field
@@ -122,13 +119,11 @@ void calc() {
     def totalB = getDataRow(dataRows, 'totalB') // 7-я строка
 
     // строка 2 «Графа 13» = По строке 2 («Графа 12» - «Графа 5» - «Графа 7» - «Графа 9»)
-    def diff = (totalA.nds ?: 0) - (totalA.deal_20_Nds ?: 0) - (totalA.deal_18_Nds ?: 0) - (totalA.deal_10_Nds ?: 0)
-    totalA.diff = checkOverflowAlgorithm(diff, totalA, 'diff', totalA.getIndex(), sizeMap['diff'], '«Графа 12» - «Графа 5» - «Графа 7» - «Графа 9»')
+    totalA.diff = (totalA.nds ?: 0) - (totalA.deal_20_Nds ?: 0) - (totalA.deal_18_Nds ?: 0) - (totalA.deal_10_Nds ?: 0)
 
     // строка 6 графы с 2 по 11
     calcColumns.each {
-        def value = (totalPeriod[it] ?: 0) - (totalAnnul[it] ?: 0) + (totalFix[it] ?: 0)
-        totalB[it] = checkOverflow(value, totalB, it, totalB.getIndex(), sizeMap[it])
+        totalB[it] = (totalPeriod[it] ?: 0) - (totalAnnul[it] ?: 0) + (totalFix[it] ?: 0)
     }
     dataRowHelper.update(dataRows)
 }
@@ -376,17 +371,5 @@ void addData(def xml, int headRowCount) {
         // графа 13
         xmlIndexCol = 12
         dataRows[i - 1].diff = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-    }
-}
-
-def checkOverflowAlgorithm(BigDecimal value, DataRow<Cell> row, String alias, int index, int size, String algorithm) {
-    if (value == null) {
-        return;
-    }
-    BigDecimal overpower = new BigDecimal("1E" + size);
-
-    if (value.abs() >= overpower) {
-        String columnName = getColumnName(row, alias);
-        throw new ServiceException(OVERPOWER + " Графа «%s» рассчитывается как «%s»!", index, columnName, size, columnName, algorithm);
     }
 }

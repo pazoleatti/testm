@@ -53,9 +53,6 @@ def editableColumns = ['differences', 'sum']
 @Field
 def nonEmptyColumns = ['rowNum', 'differences', 'sum']
 
-@Field
-def sizeMap = ['sum' : 15]
-
 // Дата начала отчетного периода
 @Field
 def startDate = null
@@ -134,9 +131,8 @@ void calc() {
         }
     }
     def itog = getDataRow(dataRows, 'total')
-    itog?.sum = checkOverflow(calcItog(dataRows), itog, 'sum', itog.getIndex(), sizeMap['sum'])
+    itog?.sum = calcItog(dataRows)
     def other = getDataRow(dataRows, 'R2')
-    // checkOverflow не нужен поскольку первый вылавливает все случаи
     other?.sum = calcOther(dataRows)
     dataRowHelper.update(dataRows)
 }

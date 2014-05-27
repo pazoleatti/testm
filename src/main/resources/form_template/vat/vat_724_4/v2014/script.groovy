@@ -103,9 +103,6 @@ def sections = ['1', '2']
 @Field
 def endDate = null
 
-@Field
-def sizeMap = ['sum' : 15, 'sum2' : 15]
-
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
                     def boolean required = true) {
@@ -171,7 +168,7 @@ void calc() {
 
         // посчитать итоги по разделам
         def rows = (from <= to ? dataRows[from..to] : [])
-        calcTotalSum(rows, lastRow, totalColumns, sizeMap)
+        calcTotalSum(rows, lastRow, totalColumns)
     }
     updateIndexes(dataRows)
 
@@ -426,9 +423,7 @@ def getTotalRow(sectionsRows, def index) {
         totalColumns.each { alias ->
             def value1 = newRow.getCell(alias).value
             def value2 = (row.getCell(alias).value ?: BigDecimal.ZERO)
-            def sum = value1 + value2
-            checkOverflow(sum, newRow, alias, index, sizeMap[alias])
-            newRow.getCell(alias).setValue(sum, null)
+            newRow[alias] = value1 + value2
         }
     }
     return newRow
