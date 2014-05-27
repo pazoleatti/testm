@@ -64,12 +64,17 @@ class Main {
                         .er td {
                             color: #BEBEBE;
                         }
-                        .hdr {
+                        .hdr, .hdrh {
                             color: #0C183D;
                             font-weight: bold;
                             text-align: center;
+                        }
+                        .hdr {
                             background-color: white;
                             padding: 10px;
+                        }
+                        .hdrh {
+                             font-size: 13px;
                         }
                         .dlg {
                              display: none;
@@ -411,7 +416,7 @@ class Main {
         def map1 = [:]
         def columns1 = [:]
 
-        sql.eachRow("select id, type_id, data_rows, fixed_rows, name, fullname, code, data_headers, to_char(version, 'RRRR') as version, status, script, 0 monthly from form_template where status not in (-1, 2)") {
+        sql.eachRow("select id, type_id, data_rows, fixed_rows, name, fullname, code, data_headers, to_char(version, 'RRRR') as version, status, script, monthly from form_template where status not in (-1, 2)") {
             def type_id = it.type_id as Integer
             if (map1[type_id] == null) {
                 map1.put((Integer) it.type_id, [:])
@@ -472,7 +477,7 @@ class Main {
         def map2 = [:]
         def columns2 = [:]
 
-        sql.eachRow("select id, type_id, data_rows, fixed_rows, name, fullname, code, data_headers, to_char(version, 'RRRR') as version, status, script, 0 monthly from form_template where status not in (-1, 2)") {
+        sql.eachRow("select id, type_id, data_rows, fixed_rows, name, fullname, code, data_headers, to_char(version, 'RRRR') as version, status, script, monthly from form_template where status not in (-1, 2)") {
             def type_id = it.type_id as Integer
             if (map2[type_id] == null) {
                 map2.put((Integer) it.type_id, [:])
@@ -536,6 +541,8 @@ class Main {
         def builder = new groovy.xml.MarkupBuilder(writer)
 
         def columnTableData = [:]
+
+        def headerTableData = [:]
 
         builder.html {
             head {
@@ -607,6 +614,28 @@ class Main {
                                     def dataheadersC = tmp1?.data_headers == tmp2?.data_headers ? '+' : '—'
                                     def statusC = tmp1?.status == tmp2?.status ? '+' : '—'
                                     def scriptC = tmp1?.script == tmp2?.script ? '+' : '—'
+
+                                    def headerDiff = null
+                                    if (tmp1?.data_headers == null && tmp2?.data_headers != null || tmp1?.data_headers != null && tmp2?.data_headers == null)  {
+                                        headerDiff = "Нет в ${tmp1?.data_headers == null ? prefix1 : prefix2}"
+                                    } else if (tmp1?.data_headers != null && tmp2?.data_headers != null) {
+                                        // Сравнение заголовков
+                                        def root1 = new XmlParser().parseText(tmp1.data_headers)
+                                        def root2 = new XmlParser().parseText(tmp2.data_headers)
+
+                                        if (true) {
+                                            headerDiff = "Подробнее…"
+                                            def data = new Expando()
+                                            data.root1 = root1
+                                            data.root2 = root2
+                                            data.name = name
+                                            data.type_id = type_id
+                                            data.version = version
+                                            data.prefix1 = prefix1
+                                            data.prefix2 = prefix2
+                                            headerTableData.put("h_${type_id}_${version}", data)
+                                        }
+                                    }
 
                                     def colDiff = null
                                     if (columnsSet1 != null && columnsSet2 == null || columnsSet1 == null && columnsSet2 != null) {
@@ -754,7 +783,7 @@ class Main {
                                         if (dataheadersC == '+') {
                                             td(class: 'td_ok', dataheadersC)
                                         } else {
-                                            td(class: 'td_error', title: 'См. БД', dataheadersC)
+                                            td(class: 'td_error cln', title: headerDiff, 'data-tbl': "#h_${type_id}_${version}", dataheadersC)
                                         }
 
                                         if (statusC == '+') {
@@ -977,6 +1006,131 @@ class Main {
                                         td(class: 'td_error', column.attribute_id2)
                                     }
                                 }
+                            }
+                        }
+                    }
+                }
+
+                headerTableData.each() { key, data ->
+                    div(class: 'dlg', id: key, title: "Сравнение заголовков шаблона вида ${data.type_id} версии ${data.version} «${data.name}»") {
+
+                        // Сравнение
+                        def header1 = []
+                        def header2 = []
+                        def headerCompare = [] as Set
+
+                        // Шапка макета 1
+                        data.root1.each { row ->
+                            def headerRow = []
+                            header1.add(headerRow)
+                            row.each { col ->
+                                headerRow.add(col.@value)
+                            }
+                        }
+
+                        // Шапка макета 2
+                        data.root2.each { row ->
+                            def headerRow = []
+                            header2.add(headerRow)
+                            row.each { col ->
+                                headerRow.add(col.@value)
+                            }
+                        }
+
+                        // Сравнение ячеек шапки
+                        for (def i = 0; i < Math.max(header1.size(), header2.size()); i++) {
+                            def row1 = header1.size() > i ? header1.getAt(i) : null
+                            def row2 = header2.size() > i ? header2.getAt(i) : null
+
+                            for (def j = 0; j < Math.max(row1 == null ? 0 : row1.size(), row2 == null ? 0 : row2.size()); j++) {
+                                def cell1 = row1 == null ? null : (row1.size() > j ? row1.getAt(j) : null)
+                                def cell2 = row2 == null ? null : (row2.size() > j ? row2.getAt(j) : null)
+
+                                if (cell1 != cell2) {
+                                    headerCompare.add("$i $j")
+                                }
+                            }
+                        }
+
+                        // Вывод шапки 1
+                        div(class: 'hdrh', data.prefix1)
+                        table(class: 'rt') {
+                            def skipRowAliases = [:]
+                            def rowCounter = 0
+                            data.root1.each { row ->
+                                tr {
+                                    def skipCol = 0
+                                    def colCounter = 0
+                                    row.each { col ->
+                                        if (skipCol != 0) {
+                                            skipCol--
+                                        } else {
+                                            if (skipRowAliases[col.@alias] != null && skipRowAliases[col.@alias] != 0) {
+                                                skipRowAliases[col.@alias] = skipRowAliases[col.@alias] - 1
+                                            } else {
+                                                def colSpan = col.@colSpan
+                                                def rowSpan = col.@rowSpan
+
+                                                if (colSpan != '1') {
+                                                    skipCol = colSpan.toInteger() - 1
+                                                }
+
+                                                if (rowSpan != '1') {
+                                                    skipRowAliases.put(col.@alias, rowSpan.toInteger() - 1)
+                                                }
+
+                                                if (!headerCompare.contains("$rowCounter $colCounter")) {
+                                                    td(colspan: colSpan, rowspan: rowSpan, col.@value)
+                                                } else {
+                                                    td(class: 'td_error', colspan: colSpan, rowspan: rowSpan, col.@value)
+                                                }
+                                            }
+                                        }
+                                        colCounter++
+                                    }
+                                }
+                                rowCounter++
+                            }
+                        }
+
+                        // Вывод шапки 2
+                        div(class: 'hdrh', data.prefix2)
+                        table(class: 'rt') {
+                            def skipRowAliases = [:]
+                            def rowCounter = 0
+                            data.root2.each { row ->
+                                tr {
+                                    def skipCol = 0
+                                    def colCounter = 0
+                                    row.each { col ->
+                                        if (skipCol != 0) {
+                                            skipCol--
+                                        } else {
+                                            if (skipRowAliases[col.@alias] != null && skipRowAliases[col.@alias] != 0) {
+                                                skipRowAliases[col.@alias] = skipRowAliases[col.@alias] - 1
+                                            } else {
+                                                def colSpan = col.@colSpan
+                                                def rowSpan = col.@rowSpan
+
+                                                if (colSpan != '1') {
+                                                    skipCol = colSpan.toInteger() - 1
+                                                }
+
+                                                if (rowSpan != '1') {
+                                                    skipRowAliases.put(col.@alias, rowSpan.toInteger() - 1)
+                                                }
+
+                                                if (!headerCompare.contains("$rowCounter $colCounter")) {
+                                                    td(colspan: colSpan, rowspan: rowSpan, col.@value)
+                                                } else {
+                                                    td(class: 'td_error', colspan: colSpan, rowspan: rowSpan, col.@value)
+                                                }
+                                            }
+                                        }
+                                        colCounter++
+                                    }
+                                }
+                                rowCounter++
                             }
                         }
                     }
