@@ -262,7 +262,7 @@ create table department (
   tb_index    varchar2(3),
   sbrf_code   varchar2(255),
   region_id number(18),
-  is_active number(1,0) not null
+  is_active number(1,0) default 1 not null
 );
 comment on table department is 'Подразделения банка';
 comment on column department.id is 'Идентификатор записи';

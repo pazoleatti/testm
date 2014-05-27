@@ -67,6 +67,10 @@ def calcColumns = ['bill', 'dealNds', 'deal_20', 'deal_20_Nds', 'deal_18', 'deal
 @Field
 def totalAEditableColumns = ['bill', 'dealNds', 'deal_20', 'deal_20_Nds', 'deal_18', 'deal_18_Nds', 'deal_10', 'deal_10_Nds', 'nds']
 
+@Field
+def sizeMap = ['bill' : 15, 'dealNds' : 15, 'deal_20' : 15, 'deal_20_Nds' : 15, 'deal_18' : 15, 'deal_18_Nds' : 15,
+        'deal_10' : 15, 'deal_10_Nds' : 15, 'deal_0' : 15, 'deal' : 15, 'diff' : 15]
+
 // Дата начала отчетного периода
 @Field
 def startDate = null
@@ -110,12 +114,13 @@ void calc() {
     def totalB = getDataRow(dataRows, 'totalB') // 6-я строка
 
     // строка 2 «Графа 14» = По строке 2 («Графа 12» + «Графа 13» - «Графа 5» - «Графа 7» - «Графа 9»)
-    totalA.with {
-        diff = (nds ?: 0) - (deal_20_Nds ?: 0) - (deal_18_Nds ?: 0) - (deal_10_Nds ?: 0)
-    }
+    def diff = (totalA.nds ?: 0) - (totalA.deal_20_Nds ?: 0) - (totalA.deal_18_Nds ?: 0) - (totalA.deal_10_Nds ?: 0)
+    totalA.diff = checkOverflow(diff, totalA, 'diff', totalA.getIndex(), sizeMap['diff'])
+
     // строка 6 графы с 2 по 11
     calcColumns.each {
-        totalB[it] = (totalPeriod[it] ?: 0) - (totalAnnul[it] ?: 0)
+        def value = (totalPeriod[it] ?: 0) - (totalAnnul[it] ?: 0)
+        totalB[it] = checkOverflow(value, totalB, it, totalB.getIndex(), sizeMap[it])
     }
     dataRowHelper.update(dataRows)
 }
