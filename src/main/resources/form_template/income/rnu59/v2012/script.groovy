@@ -527,7 +527,6 @@ void consolidation() {
         data.insert(newRows, 1)
         sort(data)
     }
-    logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
 /**

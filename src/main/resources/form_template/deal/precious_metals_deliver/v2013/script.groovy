@@ -145,9 +145,6 @@ void logicCheck() {
         return
     }
 
-    def dFrom = reportPeriodService.getStartDate(formData.reportPeriodId).time
-    def dTo = reportPeriodService.getEndDate(formData.reportPeriodId).time
-
     // "Да" и "Нет"
     def recYesId = getRecordId(38, 'CODE', '1', -1, null, true)
     def recNoId = getRecordId(38, 'CODE', '0', -1, null, true)
@@ -196,13 +193,6 @@ void logicCheck() {
                 def msg1 = row.getCell('signPhis').column.name
                 logger.warn("Строка $rowNum: В графе «$msg1» указан «ОМС», графы ${builder.toString()} заполняться не должны!")
             }
-        }
-
-        // Корректность даты договора
-        def dt = contractDate
-        if (dt != null && (dt < dFrom || dt > dTo)) {
-            def msg = row.getCell('contractDate').column.name
-            logger.warn("Строка $rowNum: «$msg» не может быть вне налогового периода!")
         }
 
         // Корректность даты заключения сделки

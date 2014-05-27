@@ -1,8 +1,11 @@
 package form_template.vat.vat_937_1.v2014
 
+import com.aplana.sbrf.taxaccounting.model.Cell
+import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
@@ -109,10 +112,9 @@ void calc() {
     def totalAnnul = getDataRow(dataRows, 'totalAnnul') // 5-строка
     def totalB = getDataRow(dataRows, 'totalB') // 6-я строка
 
-    // строка 2 «Графа 14» = По строке 2 («Графа 12» + «Графа 13» - «Графа 5» - «Графа 7» - «Графа 9»)
-    totalA.with {
-        diff = (nds ?: 0) - (deal_20_Nds ?: 0) - (deal_18_Nds ?: 0) - (deal_10_Nds ?: 0)
-    }
+    // строка 2 «Графа 13» = По строке 2 («Графа 12» - «Графа 5» - «Графа 7» - «Графа 9»)
+    totalA.diff = (totalA.nds ?: 0) - (totalA.deal_20_Nds ?: 0) - (totalA.deal_18_Nds ?: 0) - (totalA.deal_10_Nds ?: 0)
+
     // строка 6 графы с 2 по 11
     calcColumns.each {
         totalB[it] = (totalPeriod[it] ?: 0) - (totalAnnul[it] ?: 0)
@@ -142,13 +144,13 @@ void logicCheck() {
     for (def row in [totalA, totalPeriod, totalAnnul]) {
         def errorMsg = "Строка ${row.getIndex()}: "
         if (row.deal_20 != null && row.deal_20_Nds != row.deal_20 * 0.2) {
-            logger.warn(errorMsg + "Сумма НДС, облагаемая по ставке 20%% неверная!")
+            logger.warn(errorMsg + "Сумма НДС, облагаемая по ставке 20%%, неверная!")
         }
         if (row.deal_18 != null && row.deal_18_Nds != row.deal_18 * 0.18) {
-            logger.warn(errorMsg + "Сумма НДС, облагаемая по ставке 18%% неверная!")
+            logger.warn(errorMsg + "Сумма НДС, облагаемая по ставке 18%%, неверная!")
         }
         if (row.deal_10 != null && row.deal_10_Nds != row.deal_10 * 0.1) {
-            logger.warn(errorMsg + "Сумма НДС, облагаемая по ставке 10%% неверная!")
+            logger.warn(errorMsg + "Сумма НДС, облагаемая по ставке 10%%, неверная!")
         }
     }
     // 5. По строке 2:
@@ -169,19 +171,20 @@ void logicCheck() {
             totalA.diff != totalA.nds - totalA.deal_20_Nds - totalA.deal_18_Nds - totalA.deal_10_Nds) {
         logger.error("Строка ${totalA.getIndex()}: " + "Неверно рассчитана графа «Расхождение (руб.)»!")
     }
-    // 8. Если существует экземпляр налоговой формы 937.1.14, чье подразделение и  налоговый период,
+    // 8. Если существует экземпляр налоговой формы 937.1.13, чье подразделение и  налоговый период,
     // соответствуют подразделению и налоговому периоду формы 937.1, то:
-    //      a.	Выполняется проверка: «Графа 14» строки 2 формы 937.1 = «Графа 3» итоговой строки – «Графа 3» строки 13 (форма 937.1.14).
-    //      b.	Если результат данной проверки неуспешный, то выдается сообщение об ошибке
-    // Иначе если экземпляр налоговой формы 937.1.14, чье подразделение и  налоговый период,
-    // соответствуют подразделению и налоговому периоду формы 937.1, не существует, то выдается сообщение об ошибке
+    //      a.	Выполняется проверка: «Графа 13» строки 2 формы 937.1 = «Графа 3» итоговой строки – «Графа 3» строки 2 (форма 937.1.13).
+    //      b.	Если результат данной проверки неуспешный, то выдается сообщение об ошибке №2
+    // Иначе если «Графа 13» (форма 937.1) <> 0 и экземпляр налоговой формы 937.1.13,
+    // чье подразделение и  налоговый период, соответствуют подразделению и налоговому периоду формы 937.1,
+    // не существует, то выдается сообщение об ошибке №1
     def appFormData = formDataService.find(607, formData.kind, formData.departmentId, formData.reportPeriodId)
     if (appFormData) {
         def appDataRows = formDataService.getDataRowHelper(appFormData)?.allCached
         if (appDataRows) {
-            def appR13Row = getDataRow(appDataRows, 'R13')
+            def appOtherRow = getDataRow(appDataRows, 'R2')
             def appTotalRow = getDataRow(appDataRows, 'total')
-            if (totalA.diff != (appTotalRow.sum - appR13Row.sum)) {
+            if (appTotalRow.sum == null || appOtherRow.sum == null || totalA.diff != (appTotalRow.sum - appOtherRow.sum)) {
                 logger.warn("Сумма расхождения не соответствует расшифровке! ")
             }
         }
@@ -227,7 +230,6 @@ void consolidation() {
         }
     }
     dataRowHelper.save(dataRows)
-    logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
 void addRowsToRows(def dataRows, def addRows) {

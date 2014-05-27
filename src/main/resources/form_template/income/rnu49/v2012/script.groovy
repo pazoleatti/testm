@@ -414,7 +414,6 @@ void consolidation() {
         }
     }
     dataRowHelper.save(dataRows)
-    logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
 def getSum(def dataRows, def columnAlias, def rowStart, def rowEnd) {

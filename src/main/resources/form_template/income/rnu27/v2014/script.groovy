@@ -121,7 +121,7 @@ def groupColumns = ['issuer', 'regNumber', 'tradeNumber']
 // Проверяемые на пустые значения атрибуты (графа 1..5, 8, 13..17)
 @Field
 def nonEmptyColumns = ['number', /*'issuer',*/ 'regNumber', 'tradeNumber', /*'currency',*/ 'reserveCalcValuePrev',
-        'marketQuotationInRub', 'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery']
+        'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery']
 
 // Атрибуты итоговых строк для которых вычисляются суммы (графа 6..9, 14..17)
 @Field
@@ -307,7 +307,7 @@ def logicCheck() {
                 logger.error(errorMsg + "Нарушена уникальность номера по порядку!")
             }
 
-            if (getCurrencyName(row.regNumber) == 'RUR') {
+            if (getCurrencyCode(row.regNumber) in ['810', '643']) {
                 // 17. Проверка графы 11
                 if (row.marketQuotation != null) {
                     loggerError(errorMsg + "Неверно заполнена графа «Рыночная котировка одной ценной бумаги в иностранной валюте»!")
@@ -732,14 +732,14 @@ BigDecimal calc8(DataRow row, def dataPrevRows) {
 }
 
 BigDecimal calc11(DataRow row) {
-    if (getCurrencyName(row.regNumber)?.contains("RUR")) {
+    if (getCurrencyCode(row.regNumber) in ['810', '643']) {
         return null
     }
     return row.marketQuotation
 }
 
 BigDecimal calc12(DataRow row) {
-    if (getCurrencyName(row.regNumber)?.contains("RUR")) {
+    if (getCurrencyCode(row.regNumber) in ['810', '643']) {
         return null
     }
     return row.rubCourse
@@ -836,10 +836,10 @@ def getIssuerName(def record84Id) {
     return getRefBookValue(100, issuerId)?.FULL_NAME?.value
 }
 
-/** Получить буквенный код валюты. */
-def getCurrencyName(def record84Id) {
+/** Получить цифровой код валюты. */
+def getCurrencyCode(def record84Id) {
     def record15Id = getRefBookValue(84, record84Id?.toLong())?.CODE_CUR?.value
-    return getRefBookValue(15, record15Id)?.CODE_2?.value
+    return getRefBookValue(15, record15Id)?.CODE?.value
 }
 
 /** Получить признак ценной бумаги. */

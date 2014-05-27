@@ -1,12 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server;
 
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
@@ -169,7 +169,8 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
             boolean needEdit = false;
 
             // Поиск версий настроек для указанного подразделения. Если они есть - создаем новую версию с существующим record_id, иначе создаем новый record_id (по сути элемент справочника)
-            String filter = DepartmentParamAliases.DEPARTMENT_ID.name() + " = " + action.getDepartmentCombined().getDepartmentId();
+            // String filter = SqlUtils.transformToSqlInStatement(DepartmentParamAliases.DEPARTMENT_ID.name(), action.getDepartmentCombined().getDepartmentId());
+            String filter = DepartmentParamAliases.DEPARTMENT_ID.name() + " = " + action.getDepartmentCombined().getDepartmentId().get(0);
             List<Pair<Long, Long>> recordPairs = provider.checkRecordExistence(null, filter);
             if (recordPairs.size() != 0) {
                 //Проверяем, к одному ли элементу относятся версии

@@ -7,7 +7,7 @@
     <fullName>Отчёт по сумме НДС, уплаченного в бюджет, в случае возврата ранее реализованных товаров (отказа от услуг)
         или возврата соответствующих сумм авансовых платежей
     </fullName>
-    <code></code>
+    <code>(724.4)</code>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rowNum</alias>
         <checking>false</checking>
@@ -26,30 +26,31 @@
         <maxLength>2000</maxLength>
         <prevLength>0</prevLength>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>name</alias>
         <checking>false</checking>
         <name>Данные бухгалтерского учёта. Налоговая база. Наименование балансового счёта</name>
         <order>3</order>
         <width>10</width>
-        <maxLength>255</maxLength>
-        <prevLength>0</prevLength>
+        <parentAlias>number</parentAlias>
+        <refBookAttributeId>249</refBookAttributeId>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>number</alias>
         <checking>false</checking>
         <name>Данные бухгалтерского учёта. Налоговая база. Номер балансового счёта</name>
         <order>4</order>
         <width>10</width>
-        <maxLength>22</maxLength>
-        <prevLength>0</prevLength>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>250</nameAttributeId>
+        <refBookAttributeId>250</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sum</alias>
         <checking>false</checking>
         <name>Данные бухгалтерского учёта. Налоговая база. Сумма</name>
         <order>5</order>
-        <width>10</width>
+        <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -59,7 +60,7 @@
         <name>Данные бухгалтерского учёта. НДС. Номер балансового счёта</name>
         <order>6</order>
         <width>10</width>
-        <maxLength>22</maxLength>
+        <maxLength>8</maxLength>
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -67,7 +68,7 @@
         <checking>false</checking>
         <name>Данные бухгалтерского учёта. НДС. Сумма</name>
         <order>7</order>
-        <width>10</width>
+        <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -77,7 +78,7 @@
         <name>Ставка НДС</name>
         <order>8</order>
         <width>10</width>
-        <maxLength>1000</maxLength>
+        <maxLength>6</maxLength>
         <prevLength>0</prevLength>
     </columns>
     <styles>

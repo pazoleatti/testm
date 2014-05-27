@@ -1,12 +1,12 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.RefBookExternalService;
 import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
@@ -29,6 +29,8 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import static java.util.Arrays.asList;
+
 @Service
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class RefBookExternalServiceImpl implements RefBookExternalService {
@@ -42,33 +44,34 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
     @Autowired
     private RefBookScriptingService refBookScriptingService;
 
-    @Override
-    public void importRefBook(TAUserInfo userInfo, Logger logger) {
-        // регулярка файла/архива - true/false - id
-        Map<String, Pair<Boolean, Long>> map = new HashMap<String, Pair<Boolean, Long>>();
-        // архив для загр. спр. "Коды ОКАТО"
-        map.put("OKA.*", new Pair<Boolean, Long>(false, 3L));
-        // архив для загр. спр. "Коды ОКАТО"
-        map.put("payments.*", new Pair<Boolean, Long>(false, 3L));
-        // файл для загр. спр. "Организации-участники контролируемых сделок"
-        map.put("organization.xls", new Pair<Boolean, Long>(true, 9L));
-        // архив для загр. спр. "Коды субъектов Российской Федерации" (Регионы)
-        map.put("RNU.*", new Pair<Boolean, Long>(false, 4L));
-        // архив для загр. спр. "Коды субъектов Российской Федерации" (Регионы)
-        map.put("generaluse.AS_RNU.*.*", new Pair<Boolean, Long>(false, 4L));
+    @Autowired
+    private RefBookFactory refBookFactory;
 
-        //TODO добавить проверку ЭЦП (Marat Fayzullin 2013-10-19)
+    private static long REF_BOOK_OKATO = 3L; // Коды ОКАТО
+    private static long REF_BOOK_OUKS = 9L;  // Организации-участники контролируемых сделок
+    private static long REF_BOOK_RF_SUBJ_CODE = 4L; // Коды субъектов Российской Федерации
+    private static long REF_BOOK_EMITENT = 100L; // Эмитенты
+    private static long REF_BOOK_BOND = 84L; // Ценные бумаги
+
+    /**
+     * Импорт справочников из папки
+     * @param userInfo Пользователь
+     * @param logger Логгер
+     * @param refBookDirectoryParam Путь к директории
+     * @param mappingMap Маппинг имен: Регулярка → Пара(Признак архива, Id справочника)
+     */
+    private void importRefBook(TAUserInfo userInfo, Logger logger, ConfigurationParam refBookDirectoryParam, Map<String, List<Pair<Boolean, Long>>> mappingMap) {
+        // TODO добавить проверку ЭЦП (Marat Fayzullin 2013-10-19)
         Map<ConfigurationParam, String> params = configurationService.getAllConfig(userInfo);
-        String refBookDirectory = params.get(ConfigurationParam.REF_BOOK_DIRECTORY);
-        // String refBookDirectory = "file://c:/okato/";
-        // String refBookDirectory = "file://c:/region/";
+        String refBookDirectory = params.get(refBookDirectoryParam);
 
         BufferedReader reader = null;
-        logger.info("Импорт данных справочников из директории \"" + refBookDirectory + "\".");
 
         if (refBookDirectory == null || refBookDirectory.trim().isEmpty()) {
             throw new ServiceException("Не указан путь к директории для импорта справочников.");
         }
+
+        logger.info("Импорт данных справочников из директории «" + refBookDirectory + "».");
 
         refBookDirectory = refBookDirectory.trim();
 
@@ -87,51 +90,65 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
                     if (!file.isFile()) {
                         continue;
                     }
-                    for (String key : map.keySet()) {
+                    for (String key : mappingMap.keySet()) {
                         if (fileName.matches(key)) { // Нашли в мапе соответствие
-                            InputStream is = null;
-                            Long refBookId = map.get(key).getSecond();
-                            try {
-                                is = new BufferedInputStream(file.getStream());
-                                if (!map.get(key).getFirst()) {  // Если это не сам файл, а архив
-                                    ZipInputStream zis = new ZipInputStream(is);
-                                    ZipEntry zipFileName = zis.getNextEntry();
-                                    if (zipFileName != null) { // в архиве есть файл
-                                        // дальше работаем с первым файлом архива вместо самого архива
-                                        is = zis;
-                                    } else {
-                                        break;
+                            List<Pair<Boolean, Long>> matchList = mappingMap.get(key);
+                            for (Pair<Boolean, Long> refBookMapPair : matchList) {
+                                InputStream is = null;
+                                Long refBookId = refBookMapPair.getSecond();
+                                RefBook refBook = refBookFactory.get(refBookId);
+
+                                ScriptStatusHolder scriptStatusHolder = new ScriptStatusHolder();
+                                try {
+                                    is = new BufferedInputStream(file.getStream());
+                                    if (!refBookMapPair.getFirst()) {  // Если это не сам файл, а архив
+                                        ZipInputStream zis = new ZipInputStream(is);
+                                        ZipEntry zipFileName = zis.getNextEntry();
+                                        if (zipFileName != null) { // в архиве есть файл
+                                            // дальше работаем с первым файлом архива вместо самого архива
+                                            is = zis;
+                                        }
                                     }
+                                    logger.info("Импорт данных справочника «" + refBook.getName() + "» из файла «" + fileName + "».");
+
+                                    // Обращение к скрипту
+                                    Map<String, Object> additionalParameters = new HashMap<String, Object>();
+                                    additionalParameters.put("inputStream", is);
+                                    additionalParameters.put("fileName", fileName);
+                                    additionalParameters.put("scriptStatusHolder", scriptStatusHolder);
+                                    refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.IMPORT, logger, additionalParameters);
+                                    // Обработка результата выполнения скрипта
+                                    switch (scriptStatusHolder.getScriptStatus()) {
+                                        case SUCCESS:
+                                            logger.info("Импорт успешно выполнен.");
+                                            refBookImportCount++;
+                                            break;
+                                        case SKIP:
+                                            logger.info("Файл пропущен. " + scriptStatusHolder.getStatusMessage());
+                                            break;
+                                    }
+                                } catch (Exception e) {
+                                    //// Ошибка импорта отдельного справочника — откатываются изменения только по нему, импорт продолжается
+                                    withError = true;
+                                    String errorMsg;
+                                    if (e != null && e.getLocalizedMessage() != null) {
+                                        errorMsg = e.getLocalizedMessage() + ".";
+                                    } else {
+                                        errorMsg = "";
+                                    }
+
+                                    errorMsg = "Не удалось выполнить импорт данных справочника «" + refBook.getName()
+                                            + "» из файла «" + fileName + "». " + errorMsg;
+
+                                    // Журнал аудита
+                                    auditService.add(FormDataEvent.IMPORT, userInfo, userInfo.getUser().getDepartmentId(),
+                                            null, null, null, null, errorMsg);
+
+                                    logger.error(errorMsg);
+                                } finally {
+                                    IOUtils.closeQuietly(is);
                                 }
-                                logger.info("Импорт данных справочника из файла «" + fileName + "».");
-
-                                // Обращение к скрипту
-                                Map<String, Object> additionalParameters = new HashMap<String, Object>();
-                                additionalParameters.put("inputStream", is);
-                                refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.IMPORT, logger, additionalParameters);
-                                refBookImportCount++;
-                            } catch (Exception e) {
-                                //// Ошибка импорта отдельного справочника — откатываются изменения только по нему, импорт продолжается
-                                withError = true;
-                                String errorMsg;
-                                if (e != null && e.getLocalizedMessage() != null) {
-                                    errorMsg = e.getLocalizedMessage() + ".";
-                                } else {
-                                    errorMsg = "";
-                                }
-
-                                errorMsg = "Не удалось выполнить импорт данных справочника (id = " + refBookId + ") из файла «"
-                                        + fileName + "». " + errorMsg;
-
-                                // Журнал аудита
-                                auditService.add(FormDataEvent.IMPORT, userInfo, userInfo.getUser().getDepartmentId(),
-                                        null, null, null, null, errorMsg);
-
-                                logger.error(errorMsg);
-                            } finally {
-                                IOUtils.closeQuietly(is);
                             }
-                            break;
                         }
                     }
                 }
@@ -167,6 +184,34 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
     }
 
     @Override
+    public void importRefBook(TAUserInfo userInfo, Logger logger) {
+        // регулярка файла/архива - true/false - id
+        Map<String, List<Pair<Boolean, Long>>> mappingMap = new HashMap<String, List<Pair<Boolean, Long>>>();
+        // архив для загр. спр. "Коды ОКАТО"
+        mappingMap.put("OKA.*", asList(new Pair<Boolean, Long>(false, REF_BOOK_OKATO)));
+        // архив для загр. спр. "Коды ОКАТО"
+        mappingMap.put("payments.*", asList(new Pair<Boolean, Long>(false, REF_BOOK_OKATO)));
+        // файл для загр. спр. "Организации-участники контролируемых сделок"
+        mappingMap.put("organization.xls", asList(new Pair<Boolean, Long>(true, REF_BOOK_OUKS)));
+        // архив для загр. спр. "Коды субъектов Российской Федерации" (Регионы)
+        mappingMap.put("RNU.*", asList(new Pair<Boolean, Long>(false, REF_BOOK_RF_SUBJ_CODE)));
+        // архив для загр. спр. "Коды субъектов Российской Федерации" (Регионы)
+        mappingMap.put("generaluse.AS_RNU.*.*", asList(new Pair<Boolean, Long>(false, REF_BOOK_RF_SUBJ_CODE)));
+
+        importRefBook(userInfo, logger, ConfigurationParam.REF_BOOK_DIRECTORY, mappingMap);
+    }
+
+    @Override
+    public void importRefBookDiasoft(TAUserInfo userInfo, Logger logger) {
+        // Регулярка → Пара(Признак архива, Id справочника)
+        Map<String, List<Pair<Boolean, Long>>> mappingMap = new HashMap<String, List<Pair<Boolean, Long>>>();
+        // Ценные бумаги + Эмитенты
+        mappingMap.put("DS[0-9]{6}\\.nsi", asList(new Pair<Boolean, Long>(true, REF_BOOK_BOND), new Pair<Boolean, Long>(true, REF_BOOK_EMITENT)));
+
+        importRefBook(userInfo, logger, ConfigurationParam.REF_BOOK_DIASOFT_DIRECTORY, mappingMap);
+    }
+
+    @Override
     public void saveRefBookRecords(long refBookId, List<Map<String, RefBookValue>> saveRecords, Date validDateFrom,
                                    Date validDateTo, boolean isNewRecords, TAUserInfo userInfo, Logger logger) {
         Map<String, Object> additionalParameters = new HashMap<String, Object>();
@@ -174,6 +219,7 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
         additionalParameters.put("validDateFrom", validDateFrom);
         additionalParameters.put("validDateTo", validDateTo);
         additionalParameters.put("isNewRecords", isNewRecords);
+        additionalParameters.put("scriptStatusHolder", new ScriptStatusHolder()); // Статус пока не обрабатывается
         refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.SAVE, logger, additionalParameters);
     }
 }

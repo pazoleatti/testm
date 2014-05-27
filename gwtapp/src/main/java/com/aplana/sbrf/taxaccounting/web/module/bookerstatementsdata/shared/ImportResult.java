@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.module.bookerstatements.shared;
+package com.aplana.sbrf.taxaccounting.web.module.bookerstatementsdata.shared;
 
 import com.gwtplatform.dispatch.shared.Result;
 

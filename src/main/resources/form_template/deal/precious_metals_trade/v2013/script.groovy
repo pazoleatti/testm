@@ -146,9 +146,6 @@ void logicCheck() {
         return
     }
 
-    def dFrom = reportPeriodService.getStartDate(formData.reportPeriodId).time
-    def dTo = reportPeriodService.getEndDate(formData.reportPeriodId).time
-
     // "Да" и "Нет"
     def recYesId = getRecordId(38, 'CODE', '1', -1, null, true)
     def recNoId = getRecordId(38, 'CODE', '0', -1, null, true)
@@ -163,13 +160,6 @@ void logicCheck() {
 
         def docDateCell = row.getCell('docDate')
         def dealDateCell = row.getCell('dealDate')
-
-        // Корректность даты договора
-        def dt = docDateCell.value
-        if (dt != null && (dt < dFrom || dt > dTo)) {
-            def msg = docDateCell.column.name
-            logger.warn("Строка $rowNum: «$msg» не может быть вне налогового периода!")
-        }
 
         // Корректность даты заключения сделки
         if (docDateCell.value > dealDateCell.value) {

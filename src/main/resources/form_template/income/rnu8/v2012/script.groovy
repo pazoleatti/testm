@@ -302,7 +302,6 @@ void consolidation() {
         }
     }
     dataRowHelper.save(dataRows)
-    logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
 // Получение импортируемых данных

@@ -1,5 +1,7 @@
 package form_template.income.rnu51.v2008
 
+import com.aplana.sbrf.taxaccounting.model.DataRow
+import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
@@ -21,13 +23,13 @@ import java.math.RoundingMode
 //7.		amountBonds             Число/15/               Количество облигаций (шт.)
 //8.		acquisitionPrice        Число/17.2/             Цена приобретения (руб.коп.)
 //9.		costOfAcquisition       Число/17.2/	            Расходы по приобретению (руб.коп.)
-//10.	    marketPriceInPerc       Число/18.3/             Рыночная цена на дату приобретения. В % к номиналу
+//10.	    marketPriceInPerc       Число/18.3/             Рыночная цена на дату приобретения. % к номиналу
 //11.	    marketPriceInRub        Число/17.2/             Рыночная цена на дату приобретения. В рублях и коп.
 //12.	    acquisitionPriceTax     Число/17.2/             Цена приобретения для целей налогообложения (руб.коп.)
 //13.	    redemptionValue         Число/17.2/             Стоимость погашения (руб.коп.)
-//14.	    priceInFactPerc         Число/18.3/             Фактическая цена реализации. В % к номиналу
+//14.	    priceInFactPerc         Число/18.3/             Фактическая цена реализации. % к номиналу
 //15.	    priceInFactRub          Число/17.2/             Фактическая цена реализации. В рублях и коп.
-//16.	    marketPriceInPerc1      Число/18.3/	            Рыночная цена на дату реализации. В % к номиналу
+//16.	    marketPriceInPerc1      Число/18.3/	            Рыночная цена на дату реализации. % к номиналу
 //17.	    marketPriceInRub1       Число/17.2/	            Рыночная цена на дату реализации. В рублях и коп.
 //18.	    salePriceTax            Число/17.2/             Цена реализации (выбытия) для целей налогообложения (руб.коп.)
 //19.	    expensesOnSale          Число/17.2/             Расходы по реализации (выбытию) (руб.коп.)
@@ -383,11 +385,6 @@ def BigDecimal round(BigDecimal value, def int precision = 2) {
 }
 
 void logicCheck() {
-    if (isBalancePeriod()) {
-        // В периоде ввода остатков нет лог. проверок
-        return
-    }
-
     def dataRows = formDataService.getDataRowHelper(formData).getAllCached()
 
     // Для хранения правильных значении и сравнения с имеющимися при арифметических проверках
@@ -402,11 +399,8 @@ void logicCheck() {
             continue
         }
 
-        def index = row.getIndex()
-        def errorMsg = "Строка $index: "
-
         // 1. Проверка заполнения граф
-        checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
+        checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, !isBalancePeriod())
 
         if (formData.kind == FormDataKind.PRIMARY) {
             // 3. Арифметическая проверка граф 12, 16, 17, 18, 20, 21, 22
@@ -425,14 +419,14 @@ void logicCheck() {
     def totalOneSum = calcTotalOne(dataRows)
     def totalOneRow = getDataRow(dataRows, 'itogoKvartal')
     if (!checkTotalSum(totalOneRow, totalOneSum)) {
-        logger.error("Итоговые значения за текущий квартал рассчитаны неверно!")
+        loggerError("Итоговые значения за текущий квартал рассчитаны неверно!")
     }
 
     // 5. Проверка корректности расчета итоговых значений за текущий отчётный (налоговый) период
     def totalTwoSum = calcTotalTwo(totalOneSum)
     def totalTwoRow = getDataRow(dataRows, 'itogo')
     if (!checkTotalSum(totalTwoSum, totalTwoRow)) {
-        logger.error("Итоговые значения за текущий отчётный (налоговый) период рассчитаны неверно!")
+        loggerError("Итоговые значения за текущий отчётный (налоговый) период рассчитаны неверно!")
     }
 }
 
@@ -753,12 +747,12 @@ void importDataXLS() {
             (xml.row[0].cell[19]): 'Всего расходы (руб. коп.)',
             (xml.row[0].cell[20]): 'Прибыль (+), убыток (-) от реализации (погашения) (руб.коп.)',
             (xml.row[0].cell[21]): 'Превышение цены реализации для целей налогообложения над ценой реализации (руб.коп.)',
-            (xml.row[1].cell[9]): 'В % к номиналу',
-            (xml.row[1].cell[10]): 'В рублях и коп.',
-            (xml.row[1].cell[13]): 'В % к номиналу',
-            (xml.row[1].cell[14]): 'В рублях и коп.',
-            (xml.row[1].cell[15]): 'В % к номиналу',
-            (xml.row[1].cell[16]): 'В рублях и коп.'
+            (xml.row[1].cell[9]): '% к номиналу',
+            (xml.row[1].cell[10]): 'руб.коп.',
+            (xml.row[1].cell[13]): '% к номиналу',
+            (xml.row[1].cell[14]): 'руб.коп.',
+            (xml.row[1].cell[15]): '% к номиналу',
+            (xml.row[1].cell[16]): 'руб.коп.'
     ]
     (0..21).each { index ->
         headerMapping.put((xml.row[2].cell[index]), (index+1).toString())
@@ -803,7 +797,7 @@ void addData(def xml, int headRowCount) {
         }
 
         // Пропуск итоговых строк
-        if (row.cell[1].text() != null && row.cell[1].text() != "") {
+        if (row.cell[0].text() == null || row.cell[0].text() == "") {
             continue
         }
 
@@ -911,4 +905,13 @@ void addData(def xml, int headRowCount) {
     rows.add(totalOneRow)
     rows.add(totalTwoRow)
     dataRowHelper.save(rows)
+}
+
+/** Вывести сообщение. В периоде ввода остатков сообщения должны быть только НЕфатальными. */
+void loggerError(def msg) {
+    if (isBalancePeriod()) {
+        logger.warn(msg)
+    } else {
+        logger.error(msg)
+    }
 }

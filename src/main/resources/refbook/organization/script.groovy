@@ -4,6 +4,8 @@
 package refbook.organization
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.ScriptStatus
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
@@ -26,7 +28,6 @@ switch (formDataEvent) {
 //// Кэши и константы
 @Field
 def refBookCache = [:]
-
 
 void save() {
     saveRecords.each {
@@ -70,6 +71,10 @@ void importFromXLS() {
         addData(xml)
     } catch (Exception e) {
         logger.error(e.message)
+    }
+
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        scriptStatusHolder.setScriptStatus(ScriptStatus.SUCCESS)
     }
 }
 

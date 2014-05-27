@@ -39,7 +39,10 @@ public class LoadRefBookHandler extends AbstractActionHandler<LoadRefBookAction,
 			ExecutionContext arg1) throws ActionException {
 		LoadRefBookResult result = new LoadRefBookResult();
 		Logger logger = new Logger();
+        // Импорт справочников из ЦАС НСИ
 		refBookExternalService.importRefBook(securityService.currentUserInfo(), logger);
+        // Импорт справочников из Diasoft Custody
+        refBookExternalService.importRefBookDiasoft(securityService.currentUserInfo(), logger);
         result.setUuid(logEntryService.save(logger.getEntries()));
 		return result;
 	}

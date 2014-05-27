@@ -93,8 +93,8 @@ void logicCheck() {
             checkNonEmptyColumns(row, index ?: 0, nonEmptyColumns, logger, true)
         }
     }
-    // Проверка суммы в строке 13
-    def other = getDataRow(dataRows, 'R13')
+    // Проверка суммы в строке 2
+    def other = getDataRow(dataRows, 'R2')
     if (other.sum != calcOther(dataRows)) {
         logger.error("Сумма в строке 13 «Прочие (расшифровать):» не совпадает с расшифровкой!")
     }
@@ -132,7 +132,7 @@ void calc() {
     }
     def itog = getDataRow(dataRows, 'total')
     itog?.sum = calcItog(dataRows)
-    def other = getDataRow(dataRows, 'R13')
+    def other = getDataRow(dataRows, 'R2')
     other?.sum = calcOther(dataRows)
     dataRowHelper.update(dataRows)
 }
@@ -141,7 +141,7 @@ void calc() {
 def calcItog(def dataRows) {
     def sum = 0 as BigDecimal
     for (def row in dataRows) {
-        if (row.getAlias() != 'total' && row.getAlias() != 'R13') {
+        if (row.getAlias() != 'total' && row.getAlias() != 'R2') {
             sum += row.sum == null ? 0 : row.sum
         }
     }
@@ -199,7 +199,6 @@ void consolidation() {
     // Добавление строки «Итого»
     dataRows.add(totalRow)
     dataRowHelper.save(dataRows)
-    logger.info("Формирование консолидированной формы прошло успешно.")
 }
 
 def getReportPeriodStartDate() {
@@ -231,31 +230,9 @@ void importData() {
             (xml.row[1].cell[2]) : '2',
             (xml.row[1].cell[3]) : '3',
             (xml.row[2].cell[0]) : '1',
-            (xml.row[2].cell[2]) : 'Суммы НДС, начисленные при безвозмездной передаче имущества (услуг), реализации по цене ниже рыночной',
+            (xml.row[2].cell[2]) : 'Суммы НДС, уплаченные в бюджет при реализации товаров (работ, услуг) и подлежащие вычету в случае возврата товаров (отказа от выполнения работ, оказания услуг), отраженные в дополнительных листах книги продаж',
             (xml.row[3].cell[0]) : '2',
-            (xml.row[3].cell[2]) : 'Счета-фактуры, не зарегистрированные в книге покупок в момент реализации монет и слитков из драгоценных металлов, т.к. регистрация была произведена до 01.10.2003 г.',
-            (xml.row[4].cell[0]) : '3',
-            (xml.row[4].cell[2]) : 'Счета-фактуры, не зарегистрированы в книге покупок при передаче в эксплуатацию основных средств, НМА, инвентаря и принадлежностей, т.к. регистрация была произведена до 01.10.2003 г.',
-            (xml.row[5].cell[0]) : '4',
-            (xml.row[5].cell[2]) : 'В книге покупок отсутствуют счета-фактуры по монетам и слиткам из драгоценных металлов, т.к. реквизиты счетов-фактур не поступили из ЦА',
-            (xml.row[6].cell[0]) : '5',
-            (xml.row[6].cell[2]) : 'В книге покупок отсутствуют счета-фактуры по централизованным закупкам',
-            (xml.row[7].cell[0]) : '6',
-            (xml.row[7].cell[2]) : 'Счета-фактуры, не зарегистрированные в книге покупок при передаче в эксплуатацию основных средств, НМА, инвентаря и принадлежностей, т.к. своевременно не получены',
-            (xml.row[8].cell[0]) : '7',
-            (xml.row[8].cell[2]) : 'Счета-фактуры, не зарегистрированные в книге покупок при отнесении на расходы НДС по услугам, т.к. своевременно не получены',
-            (xml.row[9].cell[0]) : '8',
-            (xml.row[9].cell[2]) : 'Зарегистрированы в книге покупок счета-фактуры, полученные за предыдущие отчетные периоды',
-            (xml.row[10].cell[0]) : '9',
-            (xml.row[10].cell[2]) : 'Зарегистрированы в книге покупок счета-фактуры в случае изменения, либо расторжения договора и возврата сумм оплаты, частичной оплаты, полученной в счет предстоящего оказания услуг (поставки товаров, выполнения работ), передачи имущественных прав (ранее зарегистрированные в книге покупок)',
-            (xml.row[11].cell[0]) : '10',
-            (xml.row[11].cell[2]) : 'Суммы НДС, отраженные по дополнительным листам книги покупок',
-            (xml.row[12].cell[0]) : '11',
-            (xml.row[12].cell[2]) : 'Округления',
-            (xml.row[13].cell[0]) : '12',
-            (xml.row[13].cell[2]) : 'Исправительные обороты',
-            (xml.row[14].cell[0]) : '13',
-            (xml.row[14].cell[2]) : 'Прочие (расшифровать):'
+            (xml.row[3].cell[2]) : 'Прочие (расшифровать):'
     ]
 
     checkHeaderEquals(headerMapping)
@@ -299,7 +276,7 @@ void addData(def xml, int headRowCount) {
         def newRow = null
 
         def rowIndex = xmlIndexRow - headRowCount + 1
-        def isFixed = rowIndex <= 13
+        def isFixed = rowIndex <= 2
         if (isFixed) {
             newRow = getDataRow(dataRows, "R$rowIndex")
         } else {

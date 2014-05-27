@@ -20,6 +20,11 @@ public interface RefBookExternalService {
 	public void importRefBook(TAUserInfo userInfo, Logger logger);
 
     /**
+     * Загрузка справочников из папки Diasoft Custody
+     */
+    public void importRefBookDiasoft(TAUserInfo userInfo, Logger logger);
+
+    /**
      * Вызов события FormDataEvent.SAVE для скрипта справочника
      * http://jira.aplana.com/browse/SBRFACCTAX-6780
      *

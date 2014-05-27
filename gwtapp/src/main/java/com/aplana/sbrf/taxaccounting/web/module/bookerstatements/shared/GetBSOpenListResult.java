@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.bookerstatements.shared;
 
+import com.aplana.sbrf.taxaccounting.model.BookerStatementsType;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.gwtplatform.dispatch.shared.Result;
@@ -10,7 +11,7 @@ import java.util.Set;
 /**
  * @author Dmitriy Levykin
  */
-public class GetBSOpenDataResult implements Result {
+public class GetBSOpenListResult implements Result {
 
     // Признак контролера УНП
     // true - контролера УНП, false - контролер, null - не контролер
@@ -27,6 +28,8 @@ public class GetBSOpenDataResult implements Result {
 
     // Отчетные периоды
     private List<ReportPeriod> reportPeriods;
+
+    private List<BookerStatementsType> bookerReportTypes;
 
     public List<ReportPeriod> getReportPeriods() {
         return reportPeriods;
@@ -66,5 +69,13 @@ public class GetBSOpenDataResult implements Result {
 
     public void setAvailableDepartments(Set<Integer> availableDepartments) {
         this.availableDepartments = availableDepartments;
+    }
+
+    public List<BookerStatementsType> getBookerReportTypes() {
+        return bookerReportTypes;
+    }
+
+    public void setBookerReportTypes(List<BookerStatementsType> bookerReportTypes) {
+        this.bookerReportTypes = bookerReportTypes;
     }
 }

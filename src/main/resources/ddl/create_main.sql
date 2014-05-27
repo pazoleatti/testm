@@ -180,7 +180,7 @@ comment on column ref_book_attribute.width is 'Ширина столбца. Ис
 comment on column ref_book_attribute.required is 'Признак обязательности поля (1 - обязательно; 0 - нет)';
 comment on column ref_book_attribute.is_unique is 'Признак уникальности значения атрибута справочника (1 - должно быть уникальным; 0 - нет)';
 comment on column ref_book_attribute.sort_order is 'Определяет порядок сортировки по умолчанию';
-comment on column ref_book_attribute.format is 'Формат. (Для дат: 0 - "", 1 - "dd.MM.yyyy", 2 - "MM.yyyy", 3 - "MMMM yyyy", 4 - "yyyy", 5 - "dd.MM")';
+comment on column ref_book_attribute.format is 'Формат. (Для дат: 0 - "", 1 - "dd.MM.yyyy", 2 - "MM.yyyy", 3 - "MMMM yyyy", 4 - "yyyy", 5 - "dd.MM"; Для чисел: 6 - чекбокс)';
 ------------------------------------------------------------------------------------------------------
 create table ref_book_record (
   id number(18) not null,
@@ -262,7 +262,7 @@ create table department (
   tb_index    varchar2(3),
   sbrf_code   varchar2(255),
   region_id number(18),
-  is_active number(1,0)
+  is_active number(1,0) default 1 not null
 );
 comment on table department is 'Подразделения банка';
 comment on column department.id is 'Идентификатор записи';
@@ -556,19 +556,27 @@ create sequence seq_department_form_type start with 10000;
 ---------------------------------------------------------------------------------------------------
 create table declaration_source (
   department_declaration_type_id number(9) not null,
-  src_department_form_type_id   number(9) not null
+  src_department_form_type_id   number(9) not null,
+  period_start date,
+  period_end date
 );
 comment on table declaration_source is 'Информация о формах-источниках данных для деклараций разных видов';
 comment on column declaration_source.department_declaration_type_id is 'Иденфтикиатор сочетания вида декларации и подразделения, для которого задаётся источник';
 comment on column declaration_source.src_department_form_type_id is 'Идентификатор сочетания типа и вида формы, а также подразделения, которые являются источников данных для деклараций';
+comment on column declaration_source.period_start is 'Дата начала назначения';
+comment on column declaration_source.period_end is 'Дата окончания назначения';
 ----------------------------------------------------------------------------------------------------
 create table form_data_source (
   department_form_type_id number(9) not null,
-  src_department_form_type_id number(9) not null
+  src_department_form_type_id number(9) not null,
+  period_start date,
+  period_end date
 );
 comment on table form_data_source is 'Информация об источниках данных для формирования консолидированных и сводных налоговоых форм';
 comment on column form_data_source.department_form_type_id is 'Идентификатор сочетания вида, типа формы и подразделения, для которого задётся источник данных';
 comment on column form_data_source.src_department_form_type_id is 'Идентификатор сочетания вида, типа формы и подразделения, которое является источником данных';
+comment on column form_data_source.period_start is 'Дата начала назначения';
+comment on column form_data_source.period_end is 'Дата окончания назначения';
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------
 create table sec_user (
   id number(9) not null,

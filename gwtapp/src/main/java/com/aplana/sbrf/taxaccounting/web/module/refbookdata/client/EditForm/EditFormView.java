@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm;
 
 import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.sbrf.taxaccounting.model.Formats;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.exception.BadValueException;
@@ -129,7 +130,11 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 			Widget widget;
 			switch (col.getAttributeType()) {
 				case NUMBER:
-					widget = new TextBox();
+                    if(Formats.BOOLEAN.equals(col.getFormat())){
+                        widget = new CheckBox();
+                    } else {
+                        widget = new TextBox();
+                    }
 					break;
 				case STRING:
 					widget = new TextBox();
@@ -229,9 +234,19 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 					rbw.setSingleValue(recordValue.getReferenceValue());
 				} else if(w.getValue() instanceof HasText) {
 					if (w.getKey().getAttributeType() == RefBookAttributeType.NUMBER) {
-						w.getValue().setValue(((BigDecimal) recordValue.getValue()) == null ? ""
-								: ((BigDecimal) recordValue.getValue()).toPlainString());
-					} else {
+                        if (w.getValue() instanceof CheckBox) {
+                            if(recordValue.getValue() == null){
+                                w.getValue().setValue(false);
+                            } else if(BigDecimal.ZERO.equals((BigDecimal) recordValue.getValue())){
+                                w.getValue().setValue(false);
+                            } else {
+                                w.getValue().setValue(true);
+                            }
+                        } else {
+                            w.getValue().setValue(((BigDecimal) recordValue.getValue()) == null ? ""
+                                    : ((BigDecimal) recordValue.getValue()).toPlainString());
+                        }
+                    } else {
 						w.getValue().setValue(recordValue.getValue());
 					}
                 } else {
@@ -250,9 +265,17 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 			try {
                 switch (field.getKey().getAttributeType()) {
 					case NUMBER:
-						Number number = (field.getValue().getValue() == null || field.getValue().getValue().toString().trim().isEmpty())
-								? null : new BigDecimal((String)field.getValue().getValue());
-						checkRequired(field.getKey(), number);
+                        Number number;
+                        if (field.getValue() instanceof CheckBox) {
+                            number = field.getValue().getValue() == null ?
+                                    null :
+                                    (Boolean) field.getValue().getValue() ?
+                                            BigDecimal.ONE : BigDecimal.ZERO;
+                        } else {
+                            number = (field.getValue().getValue() == null || field.getValue().getValue().toString().trim().isEmpty())
+                                    ? null : new BigDecimal((String) field.getValue().getValue());
+                        }
+                        checkRequired(field.getKey(), number);
 						if (number != null) {
 							String numberStr = Double.toString(number.doubleValue());
 							String fractionalStr = numberStr.substring(numberStr.indexOf('.')+1);

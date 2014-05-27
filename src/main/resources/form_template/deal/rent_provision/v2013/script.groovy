@@ -137,9 +137,6 @@ void logicCheck() {
         return
     }
 
-    def dFrom = reportPeriodService.getStartDate(formData.reportPeriodId).time
-    def dTo = reportPeriodService.getEndDate(formData.reportPeriodId).time
-
     for (row in dataRows) {
         if (row.getAlias() != null) {
             continue
@@ -170,12 +167,6 @@ void logicCheck() {
         def transactionDateName = row.getCell('transactionDate').column.name
         def countName = row.getCell('count').column.name
         def costName = row.getCell('cost').column.name
-
-        // Корректность даты договора
-        def dt = contractDate
-        if (dt != null && (dt < dFrom || dt > dTo)) {
-            logger.warn("Строка $rowNum: «$contractDateName» не может быть вне налогового периода!")
-        }
 
         // Проверка цены
         def res = null

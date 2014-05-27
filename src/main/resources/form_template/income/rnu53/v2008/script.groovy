@@ -460,7 +460,6 @@ void consolidation() {
     }
     def total = getCalcTotalRow()
     insert(data, total)
-    logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
 /**

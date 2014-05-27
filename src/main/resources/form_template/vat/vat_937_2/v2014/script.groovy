@@ -1,8 +1,11 @@
 package form_template.vat.vat_937_2.v2014
 
+import com.aplana.sbrf.taxaccounting.model.Cell
+import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
@@ -116,9 +119,8 @@ void calc() {
     def totalB = getDataRow(dataRows, 'totalB') // 7-я строка
 
     // строка 2 «Графа 13» = По строке 2 («Графа 12» - «Графа 5» - «Графа 7» - «Графа 9»)
-    totalA.with {
-        diff = (nds ?: 0) - (deal_20_Nds ?: 0) - (deal_18_Nds ?: 0) - (deal_10_Nds ?: 0)
-    }
+    totalA.diff = (totalA.nds ?: 0) - (totalA.deal_20_Nds ?: 0) - (totalA.deal_18_Nds ?: 0) - (totalA.deal_10_Nds ?: 0)
+
     // строка 6 графы с 2 по 11
     calcColumns.each {
         totalB[it] = (totalPeriod[it] ?: 0) - (totalAnnul[it] ?: 0) + (totalFix[it] ?: 0)
@@ -179,17 +181,18 @@ void logicCheck() {
     }
     // 8. Если существует экземпляр налоговой формы 937.2.13, чье подразделение и  налоговый период,
     // соответствуют подразделению и налоговому периоду формы 937.2, то:
-    //      a.	Выполняется проверка: «Графа 13» строки 2 формы 937.2 = «Графа 3» итоговой строки – «Графа 3» строки 4 (форма 937.2.13).
+    //      a.	Выполняется проверка: «Графа 13» строки 2 формы 937.2 = «Графа 3» итоговой строки – «Графа 3» строки 3 (форма 937.2.13).
     //      b.	Если результат данной проверки неуспешный, то выдается сообщение об ошибке
-    // Иначе если экземпляр налоговой формы 937.2.13, чье подразделение и  налоговый период,
-    // соответствуют подразделению и налоговому периоду формы 937.2, не существует, то выдается сообщение об ошибке
+    // Иначе если «Графа 13» (форма 937.2) <> 0 и экземпляр налоговой формы 937.2.13,
+    // чье подразделение и  налоговый период, соответствуют подразделению и налоговому периоду формы 937.2,
+    // не существует, то выдается сообщение об ошибке №1
     def appFormData = formDataService.find(609, formData.kind, formData.departmentId, formData.reportPeriodId)
     if (appFormData) {
         def appDataRows = formDataService.getDataRowHelper(appFormData)?.allCached
         if (appDataRows) {
-            def appR4Row = getDataRow(appDataRows, 'R4')
+            def appR4Row = getDataRow(appDataRows, 'R3')
             def appTotalRow = getDataRow(appDataRows, 'total')
-            if (totalA.diff != (appTotalRow.sum - appR4Row.sum)) {
+            if (appTotalRow.sum == null || appR4Row.sum == null || totalA.diff != (appTotalRow.sum - appR4Row.sum)) {
                 logger.warn("Сумма расхождения не соответствует расшифровке! ")
             }
         }
@@ -236,7 +239,6 @@ void consolidation() {
         }
     }
     dataRowHelper.save(dataRows)
-    logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
 void addRowsToRows(def dataRows, def addRows) {

@@ -1,6 +1,9 @@
 package form_template.vat.vat_937_2_13.v2014
 
+import com.aplana.sbrf.taxaccounting.model.Cell
+import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
@@ -93,10 +96,10 @@ void logicCheck() {
             checkNonEmptyColumns(row, index ?: 0, nonEmptyColumns, logger, true)
         }
     }
-    // Проверка суммы в строке 4
-    def other = getDataRow(dataRows, 'R4')
+    // Проверка суммы в строке 3
+    def other = getDataRow(dataRows, 'R3')
     if (other.sum != calcOther(dataRows)) {
-        logger.error("Сумма в строке 4 «Прочие (расшифровать):» не совпадает с расшифровкой!")
+        logger.error("Сумма в строке 3 «Прочие (расшифровать):» не совпадает с расшифровкой!")
     }
     // Проверка итоговых значений
     def itog = getDataRow(dataRows, 'total')
@@ -132,7 +135,7 @@ void calc() {
     }
     def itog = getDataRow(dataRows, 'total')
     itog?.sum = calcItog(dataRows)
-    def other = getDataRow(dataRows, 'R4')
+    def other = getDataRow(dataRows, 'R3')
     other?.sum = calcOther(dataRows)
     dataRowHelper.update(dataRows)
 }
@@ -141,7 +144,7 @@ void calc() {
 def calcItog(def dataRows) {
     def sum = 0 as BigDecimal
     for (def row in dataRows) {
-        if (row.getAlias() != 'total' && row.getAlias() != 'R4') {
+        if (row.getAlias() != 'total' && row.getAlias() != 'R3') {
             sum += row.sum == null ? 0 : row.sum
         }
     }
@@ -171,7 +174,7 @@ void consolidation() {
     for (def row in dataRows) {
         if (row.getAlias() != null && row.getAlias() != 'total') {
             tmp.add(row)
-            staticSum.put(row.getAlias(), 0 as BigDecimal)
+            staticSum.put(row.getAlias(), BigDecimal.ZERO)
         } else if (row.getAlias() == 'total') {
             totalRow = row
         }
@@ -199,7 +202,6 @@ void consolidation() {
     // Добавление строки «Итого»
     dataRows.add(totalRow)
     dataRowHelper.save(dataRows)
-    logger.info("Формирование консолидированной формы прошло успешно.")
 }
 
 def getReportPeriodStartDate() {

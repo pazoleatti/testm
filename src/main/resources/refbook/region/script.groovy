@@ -6,6 +6,7 @@
 package refbook.region
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.ScriptStatus
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
@@ -325,7 +326,8 @@ void importFromXML() {
     }
 
     println("Import Region: End " + System.currentTimeMillis())
+
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        logger.info("Импорт успешно выполнен.")
+        scriptStatusHolder.setScriptStatus(ScriptStatus.SUCCESS)
     }
 }
