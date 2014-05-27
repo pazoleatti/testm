@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
+import com.aplana.sbrf.taxaccounting.model.Formats;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.HorizontalAlignment;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookColumn;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookDataRow;
@@ -10,13 +11,17 @@ import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
+import com.aplana.sbrf.taxaccounting.web.widget.utils.WidgetUtils;
+import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.*;
@@ -125,13 +130,42 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 	@Override
 	public void setTableColumns(final List<RefBookColumn> columns) {
 		for (final RefBookColumn header : columns) {
-			TextColumn<RefBookDataRow> column = new TextColumn<RefBookDataRow>() {
-				@Override
-				public String getValue(RefBookDataRow object) {
-					return object.getValues().get(header.getAlias());
-				}
-			};
-			column.setHorizontalAlignment(convertAlignment(header.getAlignment()));
+            Column column;
+            if (Formats.BOOLEAN.equals(header.getFormat())) {
+                column = new Column<RefBookDataRow, Boolean>(new AbstractCell<Boolean>() {
+                    @Override
+                    public void render(Context context, Boolean value, SafeHtmlBuilder sb) {
+                        sb.append(value != null && value ? WidgetUtils.UNCHECKABLE_TRUE : WidgetUtils.UNCHECKABLE_FALSE);
+                    }
+                }) {
+                    @Override
+                    public Boolean getValue(RefBookDataRow object) {
+                        String s = object.getValues().get(header.getAlias());
+                        if (s != null && !s.trim().isEmpty()) {
+                            try {
+                                long l = Long.parseLong(s.trim());
+                                return l > 0;
+                            } catch (NumberFormatException e) {
+                                return false;
+                            }
+
+                        } else {
+                            return false;
+                        }
+                    }
+                };
+                column.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+            } else {
+                column = new TextColumn<RefBookDataRow>() {
+                    @Override
+                    public String getValue(RefBookDataRow object) {
+                        return object.getValues().get(header.getAlias());
+                    }
+                };
+
+                column.setHorizontalAlignment(convertAlignment(header.getAlignment()));
+            }
+
 			refbookDataTable.addResizableSortableColumn(column, header.getName());
 			refbookDataTable.setColumnWidth(column, header.getWidth(), Style.Unit.EM);
 		}
@@ -182,7 +216,6 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 
 	@Override
 	public void setSelected(Long recordId) {
-        System.out.println("setSelected: "+recordId);
         selectionModel.clear();
 		int i = 0;
 		for (RefBookDataRow row : refbookDataTable.getVisibleItems()) {

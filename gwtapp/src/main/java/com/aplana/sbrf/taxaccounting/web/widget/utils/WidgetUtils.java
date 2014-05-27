@@ -4,6 +4,8 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.TextBox;
 
@@ -19,6 +21,9 @@ public class WidgetUtils {
     public static DateTimeFormat dateTimeFormat = DateTimeFormat.getFormat("dd.MM.yyyy");
     public static String iconUrl = "resources/img/picker-icons/clear-icon.png";
     public static String dummyUrl = "resources/img/picker-icons/clear-icon-dummy.png";
+
+    public static SafeHtml UNCHECKABLE_TRUE = SafeHtmlUtils.fromSafeConstant("<input type=\"checkbox\" onclick=\"this.checked = true;\" readonly tabindex=\"-1\" checked/>");
+    public static SafeHtml UNCHECKABLE_FALSE = SafeHtmlUtils.fromSafeConstant("<input type=\"checkbox\" onclick=\"this.checked = false;\" readonly tabindex=\"-1\" />");
 
     public static String PICK_ALL = "Выделить все";
     public static String UNPICK_ALL = "Снять выделение";
