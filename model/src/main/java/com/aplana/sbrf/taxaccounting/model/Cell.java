@@ -93,7 +93,7 @@ public class Cell extends AbstractCell {
             }
         }
 
-        if ((value != null) && !(value instanceof Number && (getColumn() instanceof NumericColumn  || getColumn() instanceof ReferenceColumn)
+        if ((value != null) && !(value instanceof Number && (getColumn() instanceof NumericColumn  || getColumn() instanceof ReferenceColumn || getColumn() instanceof AutoNumerationColumn)
                 || value instanceof String && getColumn() instanceof StringColumn
                 || value instanceof Date && getColumn() instanceof DateColumn)) {
             throw new IllegalArgumentException(msg + "Несовместимые типы колонки и значения");

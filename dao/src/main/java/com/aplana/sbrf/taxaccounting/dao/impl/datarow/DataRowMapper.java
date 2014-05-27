@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.aplana.sbrf.taxaccounting.dao.impl.datarow.DataRowDaoImplUtils.*;
+import static com.aplana.sbrf.taxaccounting.dao.impl.datarow.DataRowDaoImplUtils.getCellValueExtractor;
 
 /**
  * @author sgoryachkin
@@ -130,27 +130,32 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 	public DataRow<Cell> mapRow(ResultSet rs, int rowNum) throws SQLException {
 		List<Cell> cells = FormDataUtils.createCells(fd.getFormColumns(),
 				fd.getFormStyles());
-		for (Cell cell : cells) {
-			// Values
-			CellValueExtractor extr = getCellValueExtractor(cell.getColumn());
-			cell.setValue(extr.getValue(rs,
-					String.format("V%s", cell.getColumn().getId())), rowNum);
-			// Styles
-			BigDecimal styleId = rs.getBigDecimal(String.format("S%s", cell
-					.getColumn().getId()));
-			cell.setStyleId(styleId != null ? styleId.intValueExact() : null);
-			// Editable
-			cell.setEditable(rs.getBoolean(String.format("E%s", cell
-					.getColumn().getId())));
-			// Span Info
-			Integer rowSpan = SqlUtils.getInteger(rs, String.format("RSI%s", cell.getColumn()
+        Integer previousRowNumber = fd.getPreviousRowNumber() != null ? fd.getPreviousRowNumber() : 0;
+        for (Cell cell : cells) {
+            // Values
+            if (cell.getColumn() instanceof AutoNumerationColumn) {
+                cell.setValue(SqlUtils.getInteger(rs, "IDX") + previousRowNumber, rowNum);
+            } else {
+                DataRowDaoImplUtils.CellValueExtractor extr = getCellValueExtractor(cell.getColumn());
+                cell.setValue(extr.getValue(rs,
+                        String.format("V%s", cell.getColumn().getId())), rowNum);
+            }
+            // Styles
+            BigDecimal styleId = rs.getBigDecimal(String.format("S%s", cell
+                    .getColumn().getId()));
+            cell.setStyleId(styleId != null ? styleId.intValueExact() : null);
+            // Editable
+            cell.setEditable(rs.getBoolean(String.format("E%s", cell
+                    .getColumn().getId())));
+            // Span Info
+            Integer rowSpan = SqlUtils.getInteger(rs, String.format("RSI%s", cell.getColumn()
                     .getId()));
-			cell.setRowSpan(((rowSpan == null)||(rowSpan == 0)) ? 1 : rowSpan);
-			Integer colSpan = SqlUtils.getInteger(rs, String.format("CSI%s", cell.getColumn()
-					.getId()));
-			cell.setColSpan(((colSpan == null)||(colSpan == 0)) ? 1 : colSpan);
-		}
-		DataRow<Cell> dataRow = new DataRow<Cell>(rs.getString("A"), cells);
+            cell.setRowSpan(((rowSpan == null) || (rowSpan == 0)) ? 1 : rowSpan);
+            Integer colSpan = SqlUtils.getInteger(rs, String.format("CSI%s", cell.getColumn()
+                    .getId()));
+            cell.setColSpan(((colSpan == null) || (colSpan == 0)) ? 1 : colSpan);
+        }
+        DataRow<Cell> dataRow = new DataRow<Cell>(rs.getString("A"), cells);
 		dataRow.setId(SqlUtils.getLong(rs,"ID"));
 		dataRow.setIndex(SqlUtils.getInteger(rs,"IDX"));
 		return dataRow;

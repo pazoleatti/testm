@@ -39,7 +39,7 @@
         <name>Наименование</name>
         <order>4</order>
         <width>10</width>
-        <maxLength>14</maxLength>
+        <maxLength>255</maxLength>
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
@@ -47,7 +47,7 @@
         <checking>false</checking>
         <name>ИНН</name>
         <order>5</order>
-        <width>5</width>
+        <width>6</width>
         <maxLength>10</maxLength>
         <prevLength>0</prevLength>
     </columns>
@@ -65,7 +65,7 @@
         <checking>false</checking>
         <name>Номер балансового счёта учёта суммы арендной платы</name>
         <order>7</order>
-        <width>10</width>
+        <width>12</width>
         <maxLength>22</maxLength>
         <prevLength>0</prevLength>
     </columns>
@@ -74,7 +74,7 @@
         <checking>false</checking>
         <name>Сумма арендной платы, уплаченная арендодателю</name>
         <order>8</order>
-        <width>8</width>
+        <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -91,7 +91,7 @@
         <checking>false</checking>
         <name>Сумма</name>
         <order>10</order>
-        <width>8</width>
+        <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -108,8 +108,8 @@
         <checking>false</checking>
         <name>Номер</name>
         <order>12</order>
-        <width>5</width>
-        <maxLength>2000</maxLength>
+        <width>7</width>
+        <maxLength>14</maxLength>
         <prevLength>0</prevLength>
     </columns>
     <styles>
