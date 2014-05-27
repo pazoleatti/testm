@@ -4,10 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.BlobDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.BlobData;
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.model.DeclarationType;
-import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
+import com.aplana.sbrf.taxaccounting.model.*;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -278,6 +275,17 @@ public class DeclarationTemplateDaoTest {
         Assert.assertEquals(3, declarationTemplateDao.getLastVersionEdition(2));
     }
 
+    @Test
+    public void testGeAll(){
+        Assert.assertEquals(6, declarationTemplateDao.getByFilter(null).size());
+    }
+
+    @Test
+    public void testGeByFilter(){
+        TemplateFilter filter = new TemplateFilter();
+        filter.setTaxType(TaxType.TRANSPORT);
+        Assert.assertEquals(4, declarationTemplateDao.getByFilter(filter).size());
+    }
 
     @Test
     public void getBadDeclarationTemplateScriptTest(){

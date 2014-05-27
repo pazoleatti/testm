@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
@@ -37,7 +38,7 @@ public class AuditServiceImpl implements AuditService {
 	}
 
 	@Override
-	@Transactional(readOnly = false)
+	@Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = false)
 	public void add(FormDataEvent event, TAUserInfo userInfo, int departmentId, Integer reportPeriodId,
 					Integer declarationTypeId, Integer formTypeId, Integer formKindId, String note) {
 		LogSystem log = new LogSystem();
@@ -136,6 +137,7 @@ public class AuditServiceImpl implements AuditService {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private LogSystemFilterDao createFormDataDaoFilter(TAUserInfo userInfo, LogSystemFilter logSystemFilter, LogSystemFilterDao logSystemFilterDao) {
 
         // Подразделения (могут быть не заданы - тогда все доступные по выборке 40 - http://conf.aplana.com/pages/viewpage.action?pageId=11380670)
@@ -150,15 +152,20 @@ public class AuditServiceImpl implements AuditService {
         // Отчетные периоды
         logSystemFilterDao.setReportPeriodName(logSystemFilter.getReportPeriodName());
         // Типы форм
-        if (logSystemFilter.getFormKind() != null) {
-            logSystemFilterDao.setFormDataKinds(Arrays.asList(logSystemFilter.getFormKind()));
+        if (logSystemFilter.getFormKind() != null && !logSystemFilter.getFormKind().isEmpty()) {
+            logSystemFilterDao.setFormDataKinds(new ArrayList<FormDataKind>(CollectionUtils.collect(logSystemFilter.getFormKind(), new Transformer() {
+                @Override
+                public Object transform(Object input) {
+                    return FormDataKind.fromId((Integer)input);
+                }
+            })));
         } else {
             logSystemFilterDao.setFormDataKinds(formDataAccessService.getAvailableFormDataKind(userInfo, asList(logSystemFilter.getTaxType())));
         }
         // Виды форм
         TAUser tAUser = userInfo.getUser();
         List<Long> formTypes = logSystemFilter.getFormTypeId() != null ?
-                Arrays.asList(Long.valueOf(logSystemFilter.getFormTypeId())) : new ArrayList<Long>(0);
+                logSystemFilter.getFormTypeId() : new ArrayList<Long>(0);
         if (formTypes.isEmpty()) {
             if (!tAUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
                 if (tAUser.hasRole(TARole.ROLE_CONTROL_NS) || tAUser.hasRole(TARole.ROLE_CONTROL)) {

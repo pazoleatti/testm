@@ -6,7 +6,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public interface FormTemplateImpexService {
-	
+
 	/**
 	 * Экспорт
 	 * 
@@ -22,5 +22,9 @@ public interface FormTemplateImpexService {
 	 */
 	FormTemplate importFormTemplate(Integer id, InputStream is);
 
-
+    /**
+     * Экспортит все шаблоны, как налоговых форм так и деклараций.
+     * @param stream
+     */
+    void exportAllTemplates(OutputStream stream);
 }
