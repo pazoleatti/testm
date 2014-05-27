@@ -1,8 +1,11 @@
 package form_template.vat.vat_937_1.v2014
 
+import com.aplana.sbrf.taxaccounting.model.Cell
+import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
@@ -113,9 +116,9 @@ void calc() {
     def totalAnnul = getDataRow(dataRows, 'totalAnnul') // 5-строка
     def totalB = getDataRow(dataRows, 'totalB') // 6-я строка
 
-    // строка 2 «Графа 14» = По строке 2 («Графа 12» + «Графа 13» - «Графа 5» - «Графа 7» - «Графа 9»)
+    // строка 2 «Графа 13» = По строке 2 («Графа 12» - «Графа 5» - «Графа 7» - «Графа 9»)
     def diff = (totalA.nds ?: 0) - (totalA.deal_20_Nds ?: 0) - (totalA.deal_18_Nds ?: 0) - (totalA.deal_10_Nds ?: 0)
-    totalA.diff = checkOverflow(diff, totalA, 'diff', totalA.getIndex(), sizeMap['diff'])
+    totalA.diff = checkOverflowAlgorithm(diff, totalA, 'diff', totalA.getIndex(), sizeMap['diff'], '«Графа 12» - «Графа 5» - «Графа 7» - «Графа 9»')
 
     // строка 6 графы с 2 по 11
     calcColumns.each {
@@ -187,7 +190,7 @@ void logicCheck() {
         if (appDataRows) {
             def appOtherRow = getDataRow(appDataRows, 'R2')
             def appTotalRow = getDataRow(appDataRows, 'total')
-            if (totalA.diff != (appTotalRow.sum - appOtherRow.sum)) {
+            if (appTotalRow.sum == null || appOtherRow.sum == null || totalA.diff != (appTotalRow.sum - appOtherRow.sum)) {
                 logger.warn("Сумма расхождения не соответствует расшифровке! ")
             }
         }
@@ -365,3 +368,16 @@ void addData(def xml, int headRowCount) {
         dataRows[i - 1].diff = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
     }
 }
+
+def checkOverflowAlgorithm(BigDecimal value, DataRow<Cell> row, String alias, int index, int size, String algorithm) {
+    if (value == null) {
+        return;
+    }
+    BigDecimal overpower = new BigDecimal("1E" + size);
+
+    if (value.abs() >= overpower) {
+        String columnName = getColumnName(row, alias);
+        throw new ServiceException(OVERPOWER + " Графа «%s» рассчитывается как «%s»!", index, columnName, size, columnName, algorithm);
+    }
+}
+

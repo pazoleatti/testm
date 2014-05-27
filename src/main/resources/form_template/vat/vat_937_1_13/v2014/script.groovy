@@ -133,10 +133,11 @@ void calc() {
             row.rowNum = rowNum
         }
     }
-    def other = getDataRow(dataRows, 'R2')
-    other?.sum = checkOverflow(calcOther(dataRows), other, 'sum', other.getIndex(), sizeMap['sum'])
     def itog = getDataRow(dataRows, 'total')
     itog?.sum = checkOverflow(calcItog(dataRows), itog, 'sum', itog.getIndex(), sizeMap['sum'])
+    def other = getDataRow(dataRows, 'R2')
+    // checkOverflow не нужен поскольку первый вылавливает все случаи
+    other?.sum = calcOther(dataRows)
     dataRowHelper.update(dataRows)
 }
 

@@ -1,5 +1,7 @@
 package form_template.vat.vat_937_2_13.v2014
 
+import com.aplana.sbrf.taxaccounting.model.Cell
+import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
@@ -134,10 +136,11 @@ void calc() {
             row.rowNum = rowNum
         }
     }
-    def other = getDataRow(dataRows, 'R3')
-    other?.sum = checkOverflow(calcOther(dataRows), other, 'sum', other.getIndex(), sizeMap['sum'])
     def itog = getDataRow(dataRows, 'total')
     itog?.sum = checkOverflow(calcItog(dataRows), itog, 'sum', itog.getIndex(), sizeMap['sum'])
+    def other = getDataRow(dataRows, 'R3')
+    // checkOverflow не нужен поскольку первый вылавливает все случаи
+    other?.sum = calcOther(dataRows)
     dataRowHelper.update(dataRows)
 }
 
