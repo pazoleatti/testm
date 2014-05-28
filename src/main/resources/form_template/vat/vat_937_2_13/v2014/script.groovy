@@ -99,7 +99,7 @@ void logicCheck() {
     // Проверка суммы в строке 3
     def other = getDataRow(dataRows, 'R3')
     if (other.sum != calcOther(dataRows)) {
-        logger.error("Сумма в строке 3 «Прочие (расшифровать):» не совпадает с расшифровкой!")
+        logger.error("Сумма в строке «Прочие (расшифровать):» не совпадает с расшифровкой!")
     }
     // Проверка итоговых значений
     def itog = getDataRow(dataRows, 'total')

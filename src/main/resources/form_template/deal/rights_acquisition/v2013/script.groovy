@@ -65,7 +65,7 @@ def autoFillColumns = ['rowNum', 'innKio', 'country', 'okeiCode', 'count', 'tota
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNum', 'name', 'country', 'okeiCode', 'count', 'price', 'totalCost', 'transactionDate']
+def nonEmptyColumns = ['rowNum', 'name', 'okeiCode', 'count', 'price', 'totalCost', 'transactionDate']
 
 // Дата окончания отчетного периода
 @Field
@@ -170,8 +170,6 @@ void calc() {
         // Итого стоимость без учета НДС, акцизов и пошлин, руб.
         row.totalCost = row.price
         row.okeiCode = getRecordId(12, 'CODE', '796', -1, null, true)
-        // Расчет полей зависимых от справочников
-        row.country = getRefBookValue(9, row.name)?.COUNTRY?.referenceValue
     }
     dataRowHelper.update(dataRows)
 }

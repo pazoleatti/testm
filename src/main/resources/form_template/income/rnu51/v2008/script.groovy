@@ -212,7 +212,7 @@ void calc() {
     })
 
     // Номер последний строки предыдущей формы
-    def index = (formDataEvent == FormDataEvent.IMPORT) ? 0 : formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
+    def index = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
 
     for (row in dataRows) {
         if (row.getAlias() != null) {

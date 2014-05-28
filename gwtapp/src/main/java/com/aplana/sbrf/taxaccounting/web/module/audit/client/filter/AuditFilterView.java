@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.audit.client.filter;
 import com.aplana.gwt.client.ListBoxWithTooltip;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.AuditFormType;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.LogSystemAuditFilter;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
@@ -20,6 +21,7 @@ import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -233,6 +235,9 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
                 Pair<Date, Date> datePair = reportPeriodIds.getPeriodDates(reportPeriodIds.getValue().get(0));
                 formTypeId.setPeriodDates(datePair.getFirst(), datePair.getSecond());
                 formTypeId.setEnabled(true);*/
+                List <Long> dataKinds = new ArrayList<Long>();
+                dataKinds.add((long) FormDataKind.PRIMARY.getId());
+                formDataKind.setValue(dataKinds, true);
                 setVisibleTaxFields();
                 break;
             case FORM_TYPE_DECLARATION:

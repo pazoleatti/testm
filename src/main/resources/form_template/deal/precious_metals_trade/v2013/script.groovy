@@ -77,16 +77,12 @@ def groupColumns = ['fullName', 'docNumber', 'docDate', 'dealFocus', 'deliverySi
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNum', 'fullName', 'interdependence', 'countryName', 'dealFocus', 'deliverySign', 'metalName',
+def nonEmptyColumns = ['rowNum', 'fullName', 'interdependence', 'dealFocus', 'deliverySign', 'metalName',
         'foreignDeal', 'count', 'price', 'total', 'dealDoneDate']
 
 // Дата окончания отчетного периода
 @Field
 def endDate = null
-
-// Текущая дата
-@Field
-def currentDate = new Date()
 
 //// Обертки методов
 
@@ -364,9 +360,6 @@ void calc() {
         row.total = row.price
         // Расчет поля "Количество"
         row.count = 1
-
-        // Расчет полей зависимых от справочников
-        row.countryName = getRefBookValue(9, row.fullName)?.COUNTRY?.referenceValue
 
         // Признак физической поставки
         def Boolean deliveryPhis = null
