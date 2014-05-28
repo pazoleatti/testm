@@ -182,7 +182,7 @@ void calc() {
     // строки предыдущего периода
     def prevDataRows = getPrevDataRows()
     // получить номер последний строки предыдущей формы если это не событие импорта
-    def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
+    def rowNumber = (isImport ? 0 : formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber'))
 
     dataRows.each { row ->
         if (!isImport) {
