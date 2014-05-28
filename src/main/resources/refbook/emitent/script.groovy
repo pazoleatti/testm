@@ -45,15 +45,15 @@ void importFromNSI() {
         lines.add(line)
     }
 
-    println("Import Emitent: strings count = " + lines.size())
-
     if (lines.isEmpty()) {
         scriptStatusHolder.setScriptStatus(ScriptStatus.SKIP)
         scriptStatusHolder.setStatusMessage("Неверная структура файла «$fileName»!")
         return
     }
 
-    def actualDate = new GregorianCalendar(1970, Calendar.JANUARY, 1).getTime()
+    println("Import Emitent: strings count = " + lines.size())
+
+    def actualDate = new GregorianCalendar(2012, Calendar.JANUARY, 1).getTime()
 
     def dataProvider = refBookFactory.getDataProvider(REFBOOK_ID)
 
