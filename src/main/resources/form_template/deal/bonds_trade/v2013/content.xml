@@ -52,15 +52,15 @@
         <parentAlias>contraName</parentAlias>
         <refBookAttributeId>37</refBookAttributeId>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>contraCountry</alias>
         <checking>false</checking>
         <name>Страна местонахождения контрагента</name>
         <order>6</order>
         <width>8</width>
-        <hierarchical>false</hierarchical>
-        <nameAttributeId>53</nameAttributeId>
-        <refBookAttributeId>53</refBookAttributeId>
+        <parentAlias>contraName</parentAlias>
+        <refBookAttributeId>33</refBookAttributeId>
+        <refBookAttributeId2>53</refBookAttributeId2>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>contraCountryCode</alias>
@@ -68,8 +68,9 @@
         <name>Код страны местонахождения контрагента</name>
         <order>7</order>
         <width>8</width>
-        <parentAlias>contraCountry</parentAlias>
-        <refBookAttributeId>50</refBookAttributeId>
+        <parentAlias>contraName</parentAlias>
+        <refBookAttributeId>33</refBookAttributeId>
+        <refBookAttributeId2>50</refBookAttributeId2>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>transactionSumCurrency</alias>
