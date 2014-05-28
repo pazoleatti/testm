@@ -191,8 +191,6 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         2. Если статус формы "Создана", "Подготовлена" - дата создания налоговой формы.*/
         char[] arr;
         Date printDate;
-        boolean isTaxTypeDeal = data.getFormType().getTaxType().equals(TaxType.DEAL);
-        if (isTaxTypeDeal) {
             printDate = ((data.getState() == WorkflowState.ACCEPTED || data.getState() == WorkflowState.APPROVED) && acceptanceDate!=null)
                     ? acceptanceDate :
                     ((data.getState() == WorkflowState.CREATED || data.getState() == WorkflowState.PREPARED) && creationDate!=null)
@@ -209,10 +207,6 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
             }
             sb.append(String.format(XlsxReportMetadata.DATE_CREATE, XlsxReportMetadata.sdf_d.format(printDate),
                     new String(arr), XlsxReportMetadata.sdf_y.format(printDate)));
-        } else {
-            sb.append(String.format(XlsxReportMetadata.DATE_CREATE, "__",
-                    "______", "__"));
-        }
 
         createCellByRange(XlsxReportMetadata.RANGE_DATE_CREATE, sb.toString(), 0, 0);
         sb.delete(0, sb.length());
