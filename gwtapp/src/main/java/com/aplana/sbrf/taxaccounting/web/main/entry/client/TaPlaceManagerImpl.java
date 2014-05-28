@@ -35,7 +35,7 @@ public class TaPlaceManagerImpl extends PlaceManagerImpl implements TaPlaceManag
 	
 	@Override
 	public void revealErrorPlace(String invalidHistoryToken) {
-        Dialog.errorMessage("Ошибка 404. Введен не корректный адрес. Вы будете перенаправлены на главную страницу", new DialogHandler() {
+        Dialog.errorMessage("Ошибка 404. Введен некорректный адрес. Вы будете перенаправлены на главную страницу", new DialogHandler() {
             @Override
             public void close() {
                 revealPlace(new PlaceRequest(HomeNameTokens.homePage));
