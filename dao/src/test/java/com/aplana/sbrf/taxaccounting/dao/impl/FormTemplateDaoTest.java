@@ -183,7 +183,7 @@ public class FormTemplateDaoTest {
 
     @Test
     public void testListAll(){
-        Assert.assertEquals(2, formTemplateDao.listAll().size());
+        Assert.assertEquals(3, formTemplateDao.listAll().size());
     }
 
     @Test

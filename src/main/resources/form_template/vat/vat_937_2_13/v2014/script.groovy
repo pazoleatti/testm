@@ -1,6 +1,9 @@
 package form_template.vat.vat_937_2_13.v2014
 
+import com.aplana.sbrf.taxaccounting.model.Cell
+import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
@@ -199,7 +202,6 @@ void consolidation() {
     // Добавление строки «Итого»
     dataRows.add(totalRow)
     dataRowHelper.save(dataRows)
-    logger.info("Формирование консолидированной формы прошло успешно.")
 }
 
 def getReportPeriodStartDate() {
@@ -231,13 +233,11 @@ void importData() {
             (xml.row[1].cell[2]) : '2',
             (xml.row[1].cell[3]) : '3',
             (xml.row[2].cell[0]) : '1',
-            (xml.row[2].cell[2]) : 'Реализация имущества, учитываемого на балансе с учетом уплаченного НДС',
-            (xml.row[3].cell[0]) : '2',
-            (xml.row[3].cell[2]) : 'Округления',
-            (xml.row[4].cell[0]) : '3',
-            (xml.row[4].cell[2]) : 'Исправительные обороты',
-            (xml.row[5].cell[0]) : '4',
-            (xml.row[5].cell[2]) : 'Прочие (расшифровать):'
+            (xml.row[2].cell[2]) : 'Округления',
+            (xml.row[3].cell[0]) : '3',
+            (xml.row[3].cell[2]) : 'Исправительные обороты',
+            (xml.row[4].cell[0]) : '4',
+            (xml.row[4].cell[2]) : 'Прочие (расшифровать):'
     ]
 
     checkHeaderEquals(headerMapping)

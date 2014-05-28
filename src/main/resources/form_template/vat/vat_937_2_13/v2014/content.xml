@@ -36,7 +36,7 @@
         <checking>false</checking>
         <name>Сумма, руб. (+/-)</name>
         <order>4</order>
-        <width>8</width>
+        <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>

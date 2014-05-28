@@ -1,11 +1,11 @@
-package com.aplana.sbrf.taxaccounting.web.module.bookerstatements.server;
+package com.aplana.sbrf.taxaccounting.web.module.bookerstatementsdata.server;
 
 import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.BookerStatementsService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.shared.ImportAction;
-import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.shared.ImportResult;
+import com.aplana.sbrf.taxaccounting.web.module.bookerstatementsdata.shared.ImportAction;
+import com.aplana.sbrf.taxaccounting.web.module.bookerstatementsdata.shared.ImportResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;

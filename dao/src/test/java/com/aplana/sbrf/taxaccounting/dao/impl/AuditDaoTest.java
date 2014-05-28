@@ -33,11 +33,13 @@ public class AuditDaoTest {
         filter.setDepartmentName("Б");
         filter.setCountOfRecords(10);
         filter.setStartIndex(0);
-        filter.setFormTypeId(1);
+        filter.setFormTypeId(Arrays.asList(1l));
         filter.setFromSearchDate(new Date(1304247365000l));
         filter.setToSearchDate(new Date(1369911365000l));
         filter.setTaxType(TaxType.TRANSPORT);
         filter.setReportPeriodName("2013");
+        filter.setUserIds(new ArrayList<Long>(){{add(1l);}});
+        filter.setDepartmentName("Банк");
 
         PagingResult<LogSearchResultItem> records = auditDao.getLogs(filter);
         LogSearchResultItem logSystem = records.get(0);
@@ -51,7 +53,7 @@ public class AuditDaoTest {
         assertEquals(3, logSystem.getFormKind().getId());
         assertEquals("the best note", logSystem.getNote());
         assertEquals("Подразделение", logSystem.getUserDepartmentName());
-        assertEquals(2, records.getTotalCount());
+        assertEquals(1, records.getTotalCount());
     }
 
     @Test
@@ -78,7 +80,7 @@ public class AuditDaoTest {
         LogSystemFilter filter = new LogSystemFilter();
         filter.setCountOfRecords(10);
         filter.setStartIndex(0);
-        filter.setFormTypeId(1);
+        filter.setFormTypeId(Arrays.asList(1l));
         List<Long> userList = new ArrayList<Long>();
         userList.add(1L);
         filter.setUserIds(userList);

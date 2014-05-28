@@ -1,9 +1,9 @@
 package com.aplana.sbrf.taxaccounting.model;
 
-import java.util.List;
-
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
+
+import java.util.List;
 
 /**
  * Данные по отчётной форме
@@ -37,6 +37,9 @@ public class FormData extends IdentityObject<Long> {
 
 	private FormDataPerformer performer;
 	private List<FormDataSigner> signers;
+
+    // Номер предыдущей формы
+    private Integer previousRowNumber;
 
 	public FormData() {
 	}
@@ -239,6 +242,14 @@ public class FormData extends IdentityObject<Long> {
 
     public void setManual(Boolean manual) {
         this.manual = manual;
+    }
+
+    public Integer getPreviousRowNumber() {
+        return previousRowNumber;
+    }
+
+    public void setPreviousRowNumber(Integer previousRowNumber) {
+        this.previousRowNumber = previousRowNumber;
     }
 
     @Override

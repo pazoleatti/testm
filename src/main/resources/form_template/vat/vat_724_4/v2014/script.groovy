@@ -11,7 +11,6 @@ import groovy.transform.Field
  * formTemplateId=603
  *
  * TODO:
- *      - логическая провека 5 и 6: не понятно какое название графы выводить: оба или одно
  *      - графа 3 и 2 - справочник «План счетов бухгалтерского учета», но он пока не сделан, временно указал другой справочник (38), потом надо поменять
  */
 
@@ -201,18 +200,7 @@ void logicCheck() {
         // 1. Проверка заполнения граф
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
 
-        // TODO (Ramil Timerbaev) пока исключил эту проверку потому что графа 7 имеет тип строка
-        // 2. Проверка суммы НДС
-        if (false && row.sum != null && row.nds != null && row.sum2 != null) {
-            def tmp = row.sum * row.nds
-            def tmp1 = tmp + (tmp * 3) / 100
-            def tmp2 = tmp - (tmp * 3) / 100
-            if (tmp1 > row.sum2 && row.sum2 > tmp2) {
-                logger.warn(errorMsg + 'Сумма НДС по данным бухгалтерского учета не соответствует налоговой базе!')
-            }
-        }
-
-        // 4..5. Проверка номера балансового счета (графа 5) по разделам
+        // 3..4. Проверка номера балансового счета (графа 5) по разделам
         if (row.number2 != null && row.nds != null) {
             def logicCheck5 = isSection1 &&
                     ((row.number2 == '60309.01' && row.nds in ['10', '18', '10/110', '18/118']) ||
@@ -225,7 +213,7 @@ void logicCheck() {
         }
     }
 
-    // 3. Проверка итоговых значений по разделам
+    // 2. Проверка итоговых значений по разделам
     for (def section : sections) {
         def firstRow = getDataRow(dataRows, 'head' + section)
         def lastRow = getDataRow(dataRows, 'total' + section)
@@ -233,7 +221,7 @@ void logicCheck() {
         def to = lastRow.getIndex() - 1
 
         def sectionsRows = (from < to ? dataRows[from..(to - 1)] : [])
-        def tmpTotal = getTotalRow(sectionsRows)
+        def tmpTotal = getTotalRow(sectionsRows, lastRow.getIndex())
         def hasError = false
         totalColumns.each { alias ->
             if (lastRow[alias] != tmpTotal[alias]) {
@@ -268,7 +256,6 @@ void consolidation() {
         }
     }
     dataRowHelper.save(dataRows)
-    logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
 // Удалить нефиксированные строки
@@ -427,7 +414,7 @@ void addData(def xml, int headRowCount) {
     dataRowHelper.save(dataRows)
 }
 
-def getTotalRow(sectionsRows) {
+def getTotalRow(sectionsRows, def index) {
     def newRow = formData.createDataRow()
     totalColumns.each { alias ->
         newRow.getCell(alias).setValue(BigDecimal.ZERO, null)
@@ -436,7 +423,7 @@ def getTotalRow(sectionsRows) {
         totalColumns.each { alias ->
             def value1 = newRow.getCell(alias).value
             def value2 = (row.getCell(alias).value ?: BigDecimal.ZERO)
-            newRow.getCell(alias).setValue(value1 + value2, null)
+            newRow[alias] = value1 + value2
         }
     }
     return newRow

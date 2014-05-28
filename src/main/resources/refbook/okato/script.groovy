@@ -1,6 +1,7 @@
 package refbook.okato
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.ScriptStatus
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
@@ -14,7 +15,7 @@ import java.text.SimpleDateFormat
 /**
  * Коды ОКАТО
  * blob_data.id = '99462c1e-1376-4fbe-8e31-eceb4ca470af'
- * ref_book_id = 4
+ * ref_book_id = 3
  *
  * @author Stanislav Yasinskiy
  * @author Levykin
@@ -358,10 +359,11 @@ void importFromXML() {
     println("Import OKATO: End " + System.currentTimeMillis())
 
     if (!hasChanges) {
-        logger.info("Файл не содержит новые записи или изменения к существующим записям!")
+        scriptStatusHolder.setScriptStatus(ScriptStatus.SKIP)
+        scriptStatusHolder.setStatusMessage("Файл не содержит новые записи или изменения к существующим записям!")
     } else {
         if (!logger.containsLevel(LogLevel.ERROR)) {
-            logger.info("Импорт успешно выполнен.")
+            scriptStatusHolder.setScriptStatus(ScriptStatus.SUCCESS)
         }
     }
 }

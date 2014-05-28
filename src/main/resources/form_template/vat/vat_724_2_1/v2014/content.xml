@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
-    <fixedRows>false</fixedRows>
+    <fixedRows>true</fixedRows>
     <name>Операции, не подлежащие налогообложению (освобождаемые от налогообложения), операции, не признаваемые объектом
         налогообложения, операции по реализации товаров (работ, услуг), местом реализации которых не признается
         территория Российской Федерации, а также суммы оплаты, частичной оплаты в счет предстоящих поставок (выполнения
@@ -11,7 +11,7 @@
         территория Российской Федерации, а также суммы оплаты, частичной оплаты в счет предстоящих поставок (выполнения
         работ, оказания услуг), длительность производственного цикла изготовления которых составляет свыше шести месяцев
     </fullName>
-    <code></code>
+    <code>6.2 (724.2.1)</code>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rowNum</alias>
         <checking>false</checking>
@@ -31,20 +31,11 @@
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>fix</alias>
-        <checking>false</checking>
-        <name>fix</name>
-        <order>3</order>
-        <width>0</width>
-        <maxLength>2000</maxLength>
-        <prevLength>0</prevLength>
-    </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>name</alias>
         <checking>false</checking>
         <name>Наименование операции</name>
-        <order>4</order>
-        <width>30</width>
+        <order>3</order>
+        <width>60</width>
         <maxLength>2000</maxLength>
         <prevLength>0</prevLength>
     </columns>
@@ -52,8 +43,8 @@
         <alias>realizeCost</alias>
         <checking>false</checking>
         <name>Стоимость реализованных (переданных) товаров (работ, услуг) без НДС</name>
-        <order>5</order>
-        <width>8</width>
+        <order>4</order>
+        <width>16</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -61,8 +52,8 @@
         <alias>obtainCost</alias>
         <checking>false</checking>
         <name>Стоимость приобретенных товаров (работа, услуг), не облагаемых НДС</name>
-        <order>6</order>
-        <width>8</width>
+        <order>5</order>
+        <width>16</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>

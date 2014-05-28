@@ -76,14 +76,12 @@
                         </style:LeftBar>
                     </fm:Left>
                 </fm:left>
+
                 <fm:right>
                     <fm:Right>
                         <style:LeftBar childValign="middle" height="100%">
-                            <fileuplod:FileUploadWidget text="Загрузить" title="Загрузить файл с отчетностью" ui:field="fileUploader" uploadAsTemporal="true" height="22px"
-                                                        addStyleNames="{style.fileUploader}"/>
-                            <!--Инициализируем параметры внутри View uploadHandler actionUrl смотри объевление (магия Дмитрия Л.)-->
-
-                            <style:LinkButton ui:field="deleteButton" text="Удалить" title="Удалить выбранную отчетность" img="resources/img/row-delete.png"/>
+                            <style:LinkButton ui:field="create" text="Создать..."
+                                              img="resources/img/add.png" title="Создать"/>
                         </style:LeftBar>
                     </fm:Right>
                 </fm:right>
@@ -105,7 +103,7 @@
                                 <g:Label text="Период:" addStyleNames="{style.marginRight3}"/>
                             </g:cell>
                             <g:cell width="100%">
-                                <rep:PeriodPickerPopupWidget ui:field="periodPickerPopup" multiselect="false"
+                                <rep:PeriodPickerPopupWidget ui:field="reportPeriodIds" multiselect="true"
                                                              width="100%"/>
                             </g:cell>
                         </g:HorizontalPanel>
@@ -116,7 +114,7 @@
                                 <g:Label text="Подразделение:" addStyleNames="{style.marginRight3}"/>
                             </g:cell>
                             <g:cell width="100%">
-                                <picker:DepartmentPickerPopupWidget ui:field="departmentPicker" multiselection="false"
+                                <picker:DepartmentPickerPopupWidget ui:field="departmentIds" multiselection="true"
                                                                     width="100%"/>
                             </g:cell>
 
@@ -129,7 +127,7 @@
                                 <g:Label wordWrap="false" text="Вид бух.отчётности:" addStyleNames="{style.marginRight3}"/>
                             </g:cell>
                             <g:cell width="100%">
-                                <g:ListBox ui:field="bookerReportType" width="100%" addStyleNames="{style.listBox}"/>
+                                <g:ValueListBox ui:field="bookerReportType" width="100%" addStyleNames="{style.listBox}"/>
                             </g:cell>
                         </g:HorizontalPanel>
                     </g:cell>

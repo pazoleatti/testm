@@ -1,8 +1,11 @@
 package form_template.vat.vat_937_1.v2014
 
+import com.aplana.sbrf.taxaccounting.model.Cell
+import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
@@ -109,10 +112,9 @@ void calc() {
     def totalAnnul = getDataRow(dataRows, 'totalAnnul') // 5-строка
     def totalB = getDataRow(dataRows, 'totalB') // 6-я строка
 
-    // строка 2 «Графа 14» = По строке 2 («Графа 12» + «Графа 13» - «Графа 5» - «Графа 7» - «Графа 9»)
-    totalA.with {
-        diff = (nds ?: 0) - (deal_20_Nds ?: 0) - (deal_18_Nds ?: 0) - (deal_10_Nds ?: 0)
-    }
+    // строка 2 «Графа 13» = По строке 2 («Графа 12» - «Графа 5» - «Графа 7» - «Графа 9»)
+    totalA.diff = (totalA.nds ?: 0) - (totalA.deal_20_Nds ?: 0) - (totalA.deal_18_Nds ?: 0) - (totalA.deal_10_Nds ?: 0)
+
     // строка 6 графы с 2 по 11
     calcColumns.each {
         totalB[it] = (totalPeriod[it] ?: 0) - (totalAnnul[it] ?: 0)
@@ -182,7 +184,7 @@ void logicCheck() {
         if (appDataRows) {
             def appOtherRow = getDataRow(appDataRows, 'R2')
             def appTotalRow = getDataRow(appDataRows, 'total')
-            if (totalA.diff != (appTotalRow.sum - appOtherRow.sum)) {
+            if (appTotalRow.sum == null || appOtherRow.sum == null || totalA.diff != (appTotalRow.sum - appOtherRow.sum)) {
                 logger.warn("Сумма расхождения не соответствует расшифровке! ")
             }
         }
@@ -228,7 +230,6 @@ void consolidation() {
         }
     }
     dataRowHelper.save(dataRows)
-    logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
 void addRowsToRows(def dataRows, def addRows) {
@@ -276,9 +277,8 @@ void importData() {
             (xml.row[0].cell[1]) : 'Всего счетов-фактур (шт.)',
             (xml.row[0].cell[2]) : 'Всего покупок, включая НДС (руб.)',
             (xml.row[0].cell[3]) : 'В том числе (руб.)',
-            (xml.row[0].cell[11]) : 'Сумма НДС, отнесенная на расходы Банка (руб.)',
-            (xml.row[0].cell[12]) : 'Сумма НДС, начисленная с авансов и предоплаты засчитываемая в налоговом периоде при реализации (руб.)',
-            (xml.row[0].cell[13]) : 'Расхождение (руб.)',
+            (xml.row[0].cell[11]) : 'Сумма НДС, подлежащая вычету (руб.)',
+            (xml.row[0].cell[12]) : 'Расхождение (руб.)',
             (xml.row[1].cell[3]) : 'покупки, облагаемые налогом по ставке',
             (xml.row[1].cell[10]) : 'покупки, освобождаемые от налога',
             (xml.row[2].cell[3]) : '20%%',
@@ -292,7 +292,7 @@ void importData() {
             (xml.row[3].cell[7]) : 'стоимость без НДС',
             (xml.row[3].cell[8]) : 'сумма НДС'
     ]
-    (0..13).each { index ->
+    (0..12).each { index ->
         headerMapping.put((xml.row[4].cell[index]), (index+1).toString())
     }
 

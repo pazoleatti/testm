@@ -73,7 +73,7 @@ def groupColumns = ['name', 'innKio', 'contractNum', 'contractDate', 'transactio
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNum', 'name', 'country', 'transactionType', 'price', 'cost', 'transactionDate']
+def nonEmptyColumns = ['rowNum', 'name', 'transactionType', 'price', 'cost', 'transactionDate']
 
 // Дата окончания отчетного периода
 @Field
@@ -141,9 +141,6 @@ void logicCheck() {
         return
     }
 
-    def dFrom = reportPeriodService.getStartDate(formData.reportPeriodId).time
-    def dTo = reportPeriodService.getEndDate(formData.reportPeriodId).time
-
     for (row in dataRows) {
         if (row.getAlias() != null) {
             continue
@@ -166,13 +163,6 @@ void logicCheck() {
             def msg1 = row.getCell('consumptionSum').column.name
             def msg2 = row.getCell('incomeSum').column.name
             logger.warn("Строка $rowNum: Одна из граф «$msg1» и «$msg2» должна быть заполнена!")
-        }
-
-        // Корректность даты договора
-        def dt = row.contractDate
-        if (dt != null && (dt < dFrom || dt > dTo)) {
-            def msg = row.getCell('contractDate').column.name
-            logger.warn("Строка $rowNum: «$msg» не может быть вне налогового периода!")
         }
 
         // Корректность даты заключения сделки
@@ -298,9 +288,6 @@ void calc() {
             row.price = (consumptionSum - incomeSum).abs()
             row.cost = row.price
         }
-
-        // Расчет полей зависимых от справочников
-        row.country = getRefBookValue(9, row.name)?.COUNTRY?.referenceValue
     }
 
     // Добавление подитов

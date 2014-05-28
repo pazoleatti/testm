@@ -43,7 +43,6 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     private ScriptComponentContext scriptComponentContext;
 
     private static final String FIND_ERROR = "FormData не сохранена, id = null.";
-    private static final String COMPOSE_SUCCESS = "Формирование консолидированной формы прошло успешно.";
     private static final String REF_BOOK_NOT_FOUND_IMPORT_ERROR = "Проверка файла: Строка %d, столбец %d содержит значение, отсутствующее в справочнике «%s»!";
     private static final String REF_BOOK_ROW_NOT_FOUND_ERROR = "Строка %d, графа «%s» содержит значение, отсутствующее в справочнике «%s»!";
     private static final String REF_BOOK_NOT_FOUND_ERROR = "В справочнике «%s» не найдено значение «%s», соответствующее атрибуту «%s»!";
@@ -193,9 +192,6 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
         }
 
         dataRowHelper.save(rows);
-        if (logger != null) {
-            logger.info(COMPOSE_SUCCESS);
-        }
     }
 
     @Override

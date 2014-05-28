@@ -124,7 +124,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
 
         // Откат при возникновении фатальных ошибок в скрипте
         if (scriptLogger.containsLevel(LogLevel.ERROR)) {
-            throw new ServiceLoggerException("Произошли ошибки при выполнении скрипта справочника.", logEntryService.save(logger.getEntries()));
+            throw new ServiceLoggerException("Произошли ошибки при выполнении скрипта справочника", logEntryService.save(logger.getEntries()));
         }
     }
 

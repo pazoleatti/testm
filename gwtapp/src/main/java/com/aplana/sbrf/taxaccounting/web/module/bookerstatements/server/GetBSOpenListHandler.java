@@ -1,15 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.module.bookerstatements.server;
 
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.TARole;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.shared.GetBSOpenDataAction;
-import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.shared.GetBSOpenDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.shared.GetBSOpenListAction;
+import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.shared.GetBSOpenListResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
@@ -18,6 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -28,7 +26,7 @@ import static java.util.Arrays.asList;
  */
 @Service
 @PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
-public class GetBSOpenDataHandler extends AbstractActionHandler<GetBSOpenDataAction, GetBSOpenDataResult> {
+public class GetBSOpenListHandler extends AbstractActionHandler<GetBSOpenListAction, GetBSOpenListResult> {
 
     @Autowired
     private DepartmentService departmentService;
@@ -42,13 +40,13 @@ public class GetBSOpenDataHandler extends AbstractActionHandler<GetBSOpenDataAct
     @Autowired
     private PeriodService periodService;
 
-    public GetBSOpenDataHandler() {
-        super(GetBSOpenDataAction.class);
+    public GetBSOpenListHandler() {
+        super(GetBSOpenListAction.class);
     }
 
     @Override
-    public GetBSOpenDataResult execute(GetBSOpenDataAction action, ExecutionContext executionContext) throws ActionException {
-        GetBSOpenDataResult result = new GetBSOpenDataResult();
+    public GetBSOpenListResult execute(GetBSOpenListAction action, ExecutionContext executionContext) throws ActionException {
+        GetBSOpenListResult result = new GetBSOpenListResult();
 
         // Текущий пользователь
         TAUser currUser = securityService.currentUserInfo().getUser();
@@ -87,12 +85,13 @@ public class GetBSOpenDataHandler extends AbstractActionHandler<GetBSOpenDataAct
 
         // Подразделение текущего пользователя
         result.setDepartment(departmentService.getDepartment(currUser.getDepartmentId()));
+        result.setBookerReportTypes(Arrays.asList(BookerStatementsType.values()));
 
         return result;
     }
 
     @Override
-    public void undo(GetBSOpenDataAction action, GetBSOpenDataResult result, ExecutionContext executionContext) throws ActionException {
+    public void undo(GetBSOpenListAction action, GetBSOpenListResult result, ExecutionContext executionContext) throws ActionException {
         // Не требуется
     }
 }

@@ -21,7 +21,8 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.NoSelectionModel;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -43,17 +44,26 @@ public class AdminView extends ViewWithUiHandlers<AdminUIHandlers> implements Ad
 	@UiField
     GenericCellTable<FormTypeTemplate> formTemplateTable;
 
-    private NoSelectionModel<FormTypeTemplate> selectionModel;
+    private SingleSelectionModel<FormTypeTemplate> selectionModel;
     private ListDataProvider<FormTypeTemplate> dataProvider;
     private ColumnSortEvent.ListHandler<FormTypeTemplate> sortHandler;
+
+    private FormTypeTemplate selectedItem;
 
 	@Inject
 	public AdminView(Binder binder) {
 		initWidget(binder.createAndBindUi(this));
 
-        selectionModel = new NoSelectionModel<FormTypeTemplate>();
+        selectionModel = new SingleSelectionModel<FormTypeTemplate>();
         dataProvider = new ListDataProvider<FormTypeTemplate>();
         sortHandler = new ColumnSortEvent.ListHandler<FormTypeTemplate>(dataProvider.getList());
+
+        selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                selectedItem = getSelectedElement();
+            }
+        });
 
         formTemplateTable.setSelectionModel(selectionModel);
 
@@ -145,11 +155,20 @@ public class AdminView extends ViewWithUiHandlers<AdminUIHandlers> implements Ad
         dataProvider.setList(formTypeTemplates);
         formTemplateTable.setVisibleRange(0, formTypeTemplates.size());
         sortHandler.setList(dataProvider.getList());
+        selectionModel.clear();
+        if (selectedItem != null) {
+            for(FormTypeTemplate item: formTypeTemplates) {
+                if (item.getFormTypeId() == selectedItem.getFormTypeId()) {
+                    selectionModel.setSelected(item, true);
+                    break;
+                }
+            }
+        }
 	}
 
     @Override
     public FormTypeTemplate getSelectedElement() {
-        return selectionModel.getLastSelectedObject();
+        return selectionModel.getSelectedObject();
     }
 
     @UiHandler("delete")

@@ -75,7 +75,7 @@ def groupColumns = ['fullName', 'docNum', 'docDate', 'currencyCode', 'countryDea
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNumber', 'fullName', 'countryName', 'currencyCode', 'countryDealCode', 'price', 'total',
+def nonEmptyColumns = ['rowNumber', 'fullName', 'currencyCode', 'countryDealCode', 'price', 'total',
         'dealDoneDate']
 
 // Дата окончания отчетного периода
@@ -144,9 +144,6 @@ void logicCheck() {
         return
     }
 
-    def dFrom = reportPeriodService.getStartDate(formData.reportPeriodId).time
-    def dTo = reportPeriodService.getEndDate(formData.reportPeriodId).time
-
     for (row in dataRows) {
         if (row.getAlias() != null) {
             continue
@@ -169,12 +166,6 @@ void logicCheck() {
             def msgIn = incomeSumCell.column.name
             def msgOut = outcomeSumCell.column.name
             logger.warn("Строка $rowNum: Одна из граф «$msgIn» и «$msgOut» должна быть заполнена!")
-        }
-        //  Корректность даты договора
-        def dt = docDateCell.value
-        if (dt != null && (dt < dFrom || dt > dTo)) {
-            def msg = docDateCell.column.name
-            logger.warn("Строка $rowNum: «$msg» не может быть вне налогового периода!")
         }
         // Корректность даты заключения сделки
         def dealDateCell = row.getCell('dealDate')
@@ -273,9 +264,6 @@ void calc() {
 
         // Расчет поля "Итого"
         row.total = row.price
-
-        // Расчет полей зависимых от справочников
-        row.countryName = getRefBookValue(9, row.fullName)?.COUNTRY?.referenceValue
     }
 
     // Добавление подитов

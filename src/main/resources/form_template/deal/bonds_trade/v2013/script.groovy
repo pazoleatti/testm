@@ -71,9 +71,8 @@ def autoFillColumns = ['rowNum', 'innKio', 'contraCountry', 'contraCountryCode',
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNum', 'transactionDeliveryDate', 'contraName', 'transactionMode', 'contraCountry',
-        'transactionSumCurrency', 'currency', 'courseCB', 'transactionSumRub',
-        'bondRegCode', 'bondCount', 'priceOne', 'transactionType']
+def nonEmptyColumns = ['rowNum', 'transactionDeliveryDate', 'contraName', 'transactionMode', 'transactionSumCurrency',
+        'currency', 'courseCB', 'transactionSumRub', 'bondRegCode', 'bondCount', 'priceOne', 'transactionType']
 
 // Дата окончания отчетного периода
 @Field
@@ -88,7 +87,7 @@ def currentDate = new Date()
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
                       def boolean required = false) {
-    if (value == null || value.trim().isEmpty()) {
+    if (value == null || (refBookId != 14 && value.trim().isEmpty())) {
         return null
     }
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
@@ -141,9 +140,6 @@ void logicCheck() {
         return
     }
 
-    def dFrom = reportPeriodService.getStartDate(formData.reportPeriodId).time
-    def dTo = reportPeriodService.getEndDate(formData.reportPeriodId).time
-
     for (row in dataRows) {
         if (row.getAlias() != null) {
             continue
@@ -174,13 +170,6 @@ void logicCheck() {
             def msg2 = row.getCell('transactionSumCurrency').column.name
             def msg3 = row.getCell('courseCB').column.name
             logger.warn("Строка $rowNum: «$msg1» не соответствует «$msg2» с учетом данных «$msg3»!")
-        }
-
-        // Корректность даты договора
-        def dt = contractDate
-        if (dt != null && (dt < dFrom || dt > dTo)) {
-            def msg = row.getCell('contractDate').column.name
-            logger.warn("Строка $rowNum: «$msg» в строке $rowNum не может быть вне налогового периода!")
         }
 
         // Корректность даты заключения сделки
@@ -221,9 +210,6 @@ void calc() {
         if (transactionSumRub != null && bondCount != null && bondCount != 0) {
             row.priceOne = transactionSumRub / bondCount
         }
-
-        // Расчет полей зависимых от справочников
-        row.contraCountry = getRefBookValue(9, row.contraName)?.COUNTRY?.referenceValue
     }
     dataRowHelper.update(dataRows)
 }
@@ -231,7 +217,7 @@ void calc() {
 // Получение импортируемых данных
 void importData() {
     def tmpRow = formData.createDataRow()
-    def xml = getXML('Сокращенная форма Данные для расчета сумм доходов по сделкам', null)
+    def xml = getXML('Данные для расчета сумм доходов по сделкам', null)
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 17, 3)
 

@@ -1,6 +1,8 @@
 package refbook.emitent
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.ScriptStatus
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
@@ -21,27 +23,89 @@ switch (formDataEvent) {
 def REFBOOK_ID = 100
 
 void importFromNSI() {
-    def dataProvider = refBookFactory.getDataProvider(REFBOOK_ID)
-    logger.info("fileName = $fileName")
-    def addList = []
-    // TODO Необходимо реализовать поиск уже имеющихся записей и формировать три списка — на создание, изменение, обновление http://conf.aplana.com/pages/viewpage.action?pageId=12322877
-    inputStream?.eachLine { line ->
-        def lineStrs = line.split(";")
-        def code = lineStrs[0]
-        def name = lineStrs[1]
-        def fullName = lineStrs[2]
+    // На вход могут поступать как «Эмитенты», так и «Ценные бумаги», скрит сам должен определить «свой» ли файл
+    println("Import Emitent: file name = $fileName")
 
-        def record = new RefBookRecord()
-        map = [:]
-        map.put("CODE", new RefBookValue(RefBookAttributeType.STRING, code))
-        map.put("NAME", new RefBookValue(RefBookAttributeType.STRING, name))
-        map.put("FULL_NAME", new RefBookValue(RefBookAttributeType.STRING, fullName))
-        record.setRecordId(null)
-        record.setValues(map)
-        addList.add(record)
+    // Список добавляемых
+    def addList = []
+    // Список обновляемых
+    def updList = []
+
+    // Строки файла
+    def lines = []
+
+    // Проверки
+    inputStream?.eachLine { line ->
+        if ((line=~ /;/).count != 4) {
+            // Не «Эмитенты»
+            scriptStatusHolder.setScriptStatus(ScriptStatus.SKIP)
+            scriptStatusHolder.setStatusMessage("Неверная структура файла «$fileName»!")
+            return
+        }
+        lines.add(line)
     }
 
-    println("File records size = ${addList.size()}")
+    if (lines.isEmpty()) {
+        scriptStatusHolder.setScriptStatus(ScriptStatus.SKIP)
+        scriptStatusHolder.setStatusMessage("Неверная структура файла «$fileName»!")
+        return
+    }
 
-    dataProvider.createRecordVersion(logger, new Date(), null, addList)
+    println("Import Emitent: strings count = " + lines.size())
+
+    def actualDate = new GregorianCalendar(2012, Calendar.JANUARY, 1).getTime()
+
+    def dataProvider = refBookFactory.getDataProvider(REFBOOK_ID)
+
+    // Получение актуальной версии справочника
+    def actualEmitentList = dataProvider.getRecords(actualDate, null, null, null)
+    println("Import Emitent: Current Emitent found record count = " + actualEmitentList?.size())
+    def actualEmitentnMap = [:]
+    actualEmitentList?.each { map ->
+        actualEmitentnMap.put(map.CODE.stringValue, map)
+    }
+
+    lines.each { line ->
+        def lineStrs = line.split(";")
+        def code = lineStrs[0] as String
+        def name = lineStrs[1] as String
+        def fullName = lineStrs[2] as String
+
+        if (code != null && !code.isEmpty()) {
+            def actualRecord = actualEmitentnMap.get(code)
+            if (actualRecord == null) {
+                // Добавление новой записи
+                def record = new RefBookRecord()
+                map = [:]
+                map.put("CODE", new RefBookValue(RefBookAttributeType.STRING, code))
+                map.put("NAME", new RefBookValue(RefBookAttributeType.STRING, name))
+                map.put("FULL_NAME", new RefBookValue(RefBookAttributeType.STRING, fullName))
+                record.setValues(map)
+                addList.add(record)
+            } else {
+                // Обновление существующей версии
+                if (actualRecord.NAME.stringValue != name || actualRecord.FULL_NAME.stringValue != fullName) {
+                    actualRecord.put("NAME", new RefBookValue(RefBookAttributeType.STRING, name))
+                    actualRecord.put("FULL_NAME", new RefBookValue(RefBookAttributeType.STRING, fullName))
+                    updList.add(actualRecord)
+                }
+            }
+        }
+    }
+
+    println("Import Emitent: File records size = ${lines.size()}")
+
+    println("Import Emitent: Add count = ${addList.size()}, Update count = ${updList.size()}")
+
+    if (!logger.containsLevel(LogLevel.ERROR) && !addList.isEmpty()) {
+        dataProvider.createRecordVersion(logger, actualDate, null, addList)
+    }
+
+    if (!logger.containsLevel(LogLevel.ERROR) && !updList.isEmpty()) {
+        dataProvider.updateRecords(actualDate, updList)
+    }
+
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        scriptStatusHolder.setScriptStatus(ScriptStatus.SUCCESS)
+    }
 }

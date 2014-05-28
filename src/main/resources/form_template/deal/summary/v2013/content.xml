@@ -3,7 +3,7 @@
     <fixedRows>false</fixedRows>
     <name>Сводный отчет</name>
     <fullName>Сводный отчет</fullName>
-    <code>TODO</code>
+    <code></code>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>groupName</alias>
         <checking>false</checking>
@@ -11,6 +11,7 @@
         <order>1</order>
         <width>0</width>
         <maxLength>255</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>dealNum1</alias>
@@ -178,7 +179,7 @@
         <name>п. 260 &quot;Количество участников сделки&quot;</name>
         <order>18</order>
         <width>6</width>
-        <maxLength>1</maxLength>
+        <maxLength>3</maxLength>
         <precision>0</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -243,6 +244,7 @@
         <order>25</order>
         <width>20</width>
         <maxLength>500</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>dealSubjectCode1</alias>
@@ -250,7 +252,7 @@
         <name>п. 040 &quot;Код предмета сделки (код по ТН ВЭД)&quot;</name>
         <order>26</order>
         <width>5</width>
-        <hierarchical>true</hierarchical>
+        <hierarchical>false</hierarchical>
         <nameAttributeId>649</nameAttributeId>
         <refBookAttributeId>648</refBookAttributeId>
     </columns>
@@ -290,6 +292,7 @@
         <order>30</order>
         <width>5</width>
         <maxLength>500</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>contractDate</alias>
@@ -336,6 +339,7 @@
         <order>35</order>
         <width>5</width>
         <maxLength>500</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>locality1</alias>
@@ -344,6 +348,7 @@
         <order>36</order>
         <width>6</width>
         <maxLength>500</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>countryCode2</alias>
@@ -372,6 +377,7 @@
         <order>39</order>
         <width>5</width>
         <maxLength>500</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>locality2</alias>
@@ -380,6 +386,7 @@
         <order>40</order>
         <width>6</width>
         <maxLength>500</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>deliveryCode</alias>
@@ -460,7 +467,7 @@
         <name>п. 020 &quot;Сведения об организации&quot;</name>
         <order>49</order>
         <width>6</width>
-        <parentId>21427</parentId>
+        <parentAlias>organName</parentAlias>
         <refBookAttributeId>39</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
@@ -489,7 +496,7 @@
         <name>п. 050 &quot;ИНН организации&quot;</name>
         <order>52</order>
         <width>7</width>
-        <parentId>21427</parentId>
+        <parentAlias>organName</parentAlias>
         <refBookAttributeId>37</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
@@ -498,7 +505,7 @@
         <name>п. 060 &quot;КПП организации&quot;</name>
         <order>53</order>
         <width>7</width>
-        <parentId>21427</parentId>
+        <parentAlias>organName</parentAlias>
         <refBookAttributeId>38</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
@@ -507,7 +514,7 @@
         <name>п. 070 &quot;Регистрационный номер организации в стране ее регистрации (инкорпорации)&quot;</name>
         <order>54</order>
         <width>8</width>
-        <parentId>21427</parentId>
+        <parentAlias>organName</parentAlias>
         <refBookAttributeId>34</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
@@ -517,7 +524,7 @@
             имеется)&quot;</name>
         <order>55</order>
         <width>9</width>
-        <parentId>21427</parentId>
+        <parentAlias>organName</parentAlias>
         <refBookAttributeId>35</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
@@ -526,7 +533,7 @@
         <name>п. 090 &quot;Адрес&quot;</name>
         <order>56</order>
         <width>15</width>
-        <parentId>21427</parentId>
+        <parentAlias>organName</parentAlias>
         <refBookAttributeId>36</refBookAttributeId>
     </columns>
     <styles>

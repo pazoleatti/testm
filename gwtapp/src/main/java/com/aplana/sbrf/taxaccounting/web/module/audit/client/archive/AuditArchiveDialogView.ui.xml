@@ -35,7 +35,7 @@
                     <d:DateMaskBoxPicker ui:field="toSearchDate" width="120px"/>
                 </g:HorizontalPanel>
             <g:cell height="45px" verticalAlignment="top">
-                <g:Label text="До выбранной даты, будет производится архивация всех текущих записей журнала аудита." addStyleNames="{style.content} {style.label}"/>
+                <g:Label text="До выбранной даты будет производиться архивация всех текущих записей журнала аудита." addStyleNames="{style.content} {style.label}"/>
             </g:cell>
             <g:cell horizontalAlignment="ALIGN_RIGHT" verticalAlignment="bottom">
                 <g:FlowPanel width="100%" addStyleNames="{style.footerPanel}">

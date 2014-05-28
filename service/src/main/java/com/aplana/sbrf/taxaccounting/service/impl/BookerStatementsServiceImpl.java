@@ -1,12 +1,12 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.BookerStatementsSearchDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookIncome101Dao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookIncome102Dao;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.Income101;
-import com.aplana.sbrf.taxaccounting.model.Income102;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
@@ -29,7 +29,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Сервис для формы "Загрузка бухгалтерской отчётности из xls"
+ * Сервис для форм бухгалтерской отчётности
  *
  * @author Stanislav Yasinskiy
  */
@@ -90,6 +90,9 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
 
     @Autowired
     AuditService auditService;
+
+    @Autowired
+    BookerStatementsSearchDao bookerStatementsSearchDao;
 
     @Override
     public void importXML(String realFileName, InputStream stream, Integer periodId, int typeId, Integer departmentId, TAUserInfo userInfo) {
@@ -161,7 +164,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
             }
         }
 
-        String formStr = typeId == 0 ? "Форма 101" : "Форма 102";
+        String formStr = (typeId == BookerStatementsType.INCOME101.getId() ? BookerStatementsType.INCOME101.getName() : BookerStatementsType.INCOME101.getName());
         auditService.add(FormDataEvent.IMPORT, userInfo, departmentId, periodId, null, null, null,
                 "Импорт бухгалтерской отчетности «" + formStr + "». Файл «" + realFileName + "».");
     }
@@ -238,12 +241,13 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
 
                     Cell cell = row.getCell(cells.next().getColumnIndex(), Row.RETURN_BLANK_AS_NULL);
 
-                    if(cell.getColumnIndex() > 1 && endOfFile) {
-                        break;
-                    }
-                    // пропускаем пустые ячейки
+                    // первая ячейка не должна быть пустой
                     if (cell == null) {
-                        continue;
+                        throw new ServiceException(BAD_FILE_MSG);
+                    }
+
+                    if (cell.getColumnIndex() > 1 && endOfFile) {
+                        break;
                     }
 
                     try {
@@ -478,5 +482,72 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
             }
         }
         return new ServiceException("Данные столбца '" + colName + "' файла не соответствуют ожидаемому типу данных. Файл не может быть загружен.");
+    }
+
+    @Override
+    public void create(Logger logger, Integer periodId, int typeId, Integer departmentId, TAUserInfo userInfo) {
+
+        if (departmentId == null){
+            throw new ServiceException(DEPARTMENTID_INVALID);
+        }
+        if (periodId == null) {
+            throw new ServiceException(REPORT_PERIOD_INVALID);
+        }
+        // Проверка того, что пользователем указан открытый отчетный период
+        if (!reportPeriodService.isActivePeriod(periodId, departmentId)) {
+            logger.error("Выбранный период закрыт");
+        }
+        RefBookDataProvider provider;
+        if (typeId == BookerStatementsType.INCOME101.getId()) {
+            provider = rbFactory.getDataProvider(RefBookIncome101Dao.REF_BOOK_ID);
+        } else {
+            provider = rbFactory.getDataProvider(RefBookIncome102Dao.REF_BOOK_ID);
+        }
+
+        Date version = reportPeriodService.getEndDate(periodId).getTime();
+
+        List<Long> ids = provider.getUniqueRecordIds(version, " department_id = " + departmentId);
+        if (ids.size()>0) {
+            logger.error("Бухгалтерская отчётность с заданными параметрами уже существует");
+        }
+
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            return ;
+        }
+        if (typeId == 0) {
+            List<Map<String, RefBookValue>> records = new LinkedList<Map<String, RefBookValue>>();
+
+            Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
+            map.put(I_101_REPORT_PERIOD_ID, new RefBookValue(RefBookAttributeType.NUMBER, periodId));
+            map.put(I_101_ACCOUNT, new RefBookValue(RefBookAttributeType.STRING, "-1"));
+            map.put(I_101_ACCOUNT_NAME, new RefBookValue(RefBookAttributeType.STRING, null));
+            map.put(I_101_INCOME_DEBET_REMAINS, new RefBookValue(RefBookAttributeType.NUMBER, null));
+            map.put(I_101_INCOME_CREDIT_REMAINS, new RefBookValue(RefBookAttributeType.NUMBER, null));
+            map.put(I_101_DEBET_RATE, new RefBookValue(RefBookAttributeType.NUMBER, null));
+            map.put(I_101_CREDIT_RATE, new RefBookValue(RefBookAttributeType.NUMBER, null));
+            map.put(I_101_OUTCOME_DEBET_REMAINS, new RefBookValue(RefBookAttributeType.NUMBER, null));
+            map.put(I_101_OUTCOME_CREDIT_REMAINS, new RefBookValue(RefBookAttributeType.NUMBER, null));
+            map.put(I_101_DEPARTMENT_ID, new RefBookValue(RefBookAttributeType.REFERENCE, (long) departmentId));
+            records.add(map);
+            provider.updateRecords(new Date(), records);
+        } else {
+
+            List<Map<String, RefBookValue>> records = new LinkedList<Map<String, RefBookValue>>();
+            Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
+            map.put(I_102_REPORT_PERIOD_ID, new RefBookValue(RefBookAttributeType.NUMBER, periodId));
+            map.put(I_102_OPU_CODE, new RefBookValue(RefBookAttributeType.STRING, "-1"));
+            map.put(I_102_TOTAL_SUM, new RefBookValue(RefBookAttributeType.NUMBER, null));
+            map.put(I_102_ITEM_NAME, new RefBookValue(RefBookAttributeType.STRING, null));
+            map.put(I_102_DEPARTMENT_ID, new RefBookValue(RefBookAttributeType.REFERENCE, (long) departmentId));
+            records.add(map);
+            provider.updateRecords(new Date(), records);
+        }
+    }
+
+    @Override
+    public PagingResult<BookerStatementsSearchResultItem> findDataByFilter(BookerStatementsFilter bookerStatementsFilter) {
+        return bookerStatementsSearchDao.findPage(bookerStatementsFilter, bookerStatementsFilter.getSearchOrdering(),
+                bookerStatementsFilter.isAscSorting(), new PagingParams(bookerStatementsFilter.getStartIndex(),
+                bookerStatementsFilter.getCountOfRecords()));
     }
 }

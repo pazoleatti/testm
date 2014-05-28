@@ -76,7 +76,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
         versionOperatingService.isIntersectionVersion(0, formTypeId, VersionedObjectStatus.NORMAL, declarationTemplate.getVersion(), templateActualEndDate, logger);
         checkError(logger);
         declarationTemplate.setEdition(1);//т.к. первый
-        declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);
+        declarationTemplate.setStatus(VersionedObjectStatus.DRAFT);
         int id = declarationTemplateService.save(declarationTemplate);
 
         logging(id, TemplateChangesEvent.CREATED, user);
