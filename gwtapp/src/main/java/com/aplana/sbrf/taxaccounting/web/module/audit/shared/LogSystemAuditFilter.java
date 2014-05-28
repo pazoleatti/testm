@@ -169,13 +169,13 @@ public class LogSystemAuditFilter implements Serializable {
     public LogSystemFilter convertTo(){
         LogSystemFilter systemFilter = new LogSystemFilter();
         systemFilter.setCountOfRecords(this.getCountOfRecords());
-        systemFilter.setFormKind(formKind != null && !formKind.isEmpty()? FormDataKind.fromId(Integer.valueOf(String.valueOf(formKind.get(0)))) : null);
-        systemFilter.setDepartmentName(this.departmentName);
+		systemFilter.setFormKind(formKind);
+		systemFilter.setDepartmentName(this.departmentName);
         systemFilter.setTaxType(this.getTaxType());
         systemFilter.setAscSorting(this.isAscSorting());
         systemFilter.setAuditFormTypeId(auditFormTypeId != null? auditFormTypeId.getId() : null);
         systemFilter.setDeclarationTypeId(this.getDeclarationTypeId());
-        systemFilter.setFormTypeId(this.getFormTypeIds() != null && !formTypeIds.isEmpty() ? formTypeIds.get(0).intValue() : null);
+        systemFilter.setFormTypeId(formTypeIds);
         systemFilter.setFromSearchDate(this.getFromSearchDate());
         systemFilter.setToSearchDate(this.getToSearchDate());
         systemFilter.setReportPeriodName(this.getReportPeriodName());

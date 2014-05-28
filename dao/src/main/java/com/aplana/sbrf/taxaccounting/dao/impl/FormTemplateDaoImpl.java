@@ -190,7 +190,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 	@Override
 	public List<FormTemplate> listAll() {
 		return getJdbcTemplate().query("select id, version, name, fullname, type_id, edition, fixed_rows, code, status, monthly" +
-                " from form_template where status = 0", new FormTemplateMapper(false));
+                " from form_template where status in (0,1)", new FormTemplateMapper(true));
 	}
 
     @Override

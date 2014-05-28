@@ -46,7 +46,7 @@ public class AuditArchiveDialogView extends PopupViewWithUiHandlers<AuditArchive
 
     @UiHandler("archiveButton")
     public void onArchiveButton(ClickEvent event){
-        Dialog.confirmMessage("Подтверждение", "При архиварации, данные будут выгружены в файл и удалены из Системы. Продолжить выполнение операции?", new DialogHandler() {
+        Dialog.confirmMessage("Подтверждение", "При архивации данные будут выгружены в файл и удалены из Системы. Продолжить выполнение операции?", new DialogHandler() {
             @Override
             public void yes() {
                 super.yes();

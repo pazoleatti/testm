@@ -42,6 +42,7 @@ public class GetMainMenuActionHandler extends
 
 	private static final String CLEAR_CACHE_LINK = "cache/clear-cache";
 	private static final String NUMBER_SIGN = "#";
+    private static final String DOWNLOAD_ALL_TEMPLATES = "download/formTemplate/downloadAll";
 	private static final String TYPE = "nType";
 
 	public GetMainMenuActionHandler() {
@@ -213,6 +214,7 @@ public class GetMainMenuActionHandler extends
                 templateMenu.getSubMenu().add((new MenuItem("Справочники", NUMBER_SIGN
                         + RefBookListTokens.REFBOOK_LIST_ADMIN)));
                 templateMenu.getSubMenu().add(new MenuItem("Сбросить кэш", CLEAR_CACHE_LINK));
+                templateMenu.getSubMenu().add(new MenuItem("Экспорт макетов", DOWNLOAD_ALL_TEMPLATES));
             }
 
             // в банке все равно такого пользователя не будет, если надо убрать скажите мне aivanov

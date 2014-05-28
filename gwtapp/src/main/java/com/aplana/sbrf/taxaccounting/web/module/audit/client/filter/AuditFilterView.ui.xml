@@ -79,7 +79,7 @@
                                            multiSelect="true" versionEnabled="false"/>
                 </g:HorizontalPanel>
                 <g:cell height="25px">
-                    <g:HorizontalPanel spacing="2"  verticalAlignment="middle" width="100%">
+                    <g:HorizontalPanel spacing="2"  verticalAlignment="middle" width="100%" ui:field="reportPeriodPanel">
                         <g:cell horizontalAlignment="right" width="135px" >
                             <g:Label text="Период:" addStyleNames="{style.labelBlockMargin}"/>
                         </g:cell>
