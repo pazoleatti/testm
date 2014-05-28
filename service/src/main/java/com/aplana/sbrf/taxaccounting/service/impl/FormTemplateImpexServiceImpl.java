@@ -2,10 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.XmlSerializationUtils;
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.FormTemplateContent;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateImpexService;
@@ -310,13 +307,13 @@ public class FormTemplateImpexServiceImpl implements
         ArrayList<String> paths = new ArrayList<String>(formTemplates.size());
         for (FormTemplate template : formTemplates){
             String folderTemplateName =
-                    String.format(TEMPLATE_OF_FOLDER_NAME,
+                    Translator.transliterate(String.format(TEMPLATE_OF_FOLDER_NAME,
                             template.getType().getTaxType().getDeclarationPrefix().toLowerCase(),
                             template.getType().getId(),
                             template.getType().getName().length() > MAX_NAME_OF_DIR ?
                                     template.getType().getName().substring(0, MAX_NAME_OF_DIR).trim()
                                     : template.getType().getName(),
-                            SIMPLE_DATE_FORMAT_YEAR.format(template.getVersion()));
+                            SIMPLE_DATE_FORMAT_YEAR.format(template.getVersion())));
             paths.add(folderTemplateName);
             try {
                 File folderTemplate = new File(temFolder.getAbsolutePath() + File.separator + folderTemplateName, "");
