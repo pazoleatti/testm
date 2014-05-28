@@ -69,7 +69,7 @@ def autoFillColumns = ['rowNum', 'innKio', 'country', 'countryCode']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNum', 'jurName', 'country', 'contractNum', 'contractDate',
+def nonEmptyColumns = ['rowNum', 'jurName', 'contractNum', 'contractDate',
         'transactionNum', 'transactionDeliveryDate', 'dealsMode', 'date1', 'date2', 'priceFirstCurrency',
         'currencyCode', 'courseCB', 'priceFirstRub', 'transactionDate']
 
@@ -203,8 +203,6 @@ void calc() {
     for (row in dataRows) {
         // Порядковый номер строки
         row.rowNum = index++
-        // Расчет полей зависимых от справочников
-        row.country = getRefBookValue(9, row.jurName)?.COUNTRY?.referenceValue
     }
     dataRowHelper.update(dataRows);
 }

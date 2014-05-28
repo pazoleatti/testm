@@ -22,6 +22,7 @@
         <order>2</order>
         <width>0</width>
         <maxLength>100</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>name</alias>
@@ -49,18 +50,18 @@
         <name>ИНН/КИО</name>
         <order>5</order>
         <width>7</width>
-        <parentId>21248</parentId>
+        <parentAlias>name</parentAlias>
         <refBookAttributeId>37</refBookAttributeId>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>country</alias>
         <checking>false</checking>
         <name>Наименование страны регистрации</name>
         <order>6</order>
         <width>8</width>
-        <hierarchical>false</hierarchical>
-        <nameAttributeId>53</nameAttributeId>
-        <refBookAttributeId>53</refBookAttributeId>
+        <parentAlias>name</parentAlias>
+        <refBookAttributeId>33</refBookAttributeId>
+        <refBookAttributeId2>53</refBookAttributeId2>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>countryCode1</alias>
@@ -68,8 +69,9 @@
         <name>Код страны по классификатору ОКСМ</name>
         <order>7</order>
         <width>7</width>
-        <parentId>21250</parentId>
-        <refBookAttributeId>50</refBookAttributeId>
+        <parentAlias>name</parentAlias>
+        <refBookAttributeId>33</refBookAttributeId>
+        <refBookAttributeId2>50</refBookAttributeId2>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>contractNum</alias>
@@ -78,6 +80,7 @@
         <order>8</order>
         <width>5</width>
         <maxLength>128</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>contractDate</alias>
@@ -94,6 +97,7 @@
         <order>10</order>
         <width>5</width>
         <maxLength>500</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>dealType</alias>
@@ -180,6 +184,7 @@
         <order>19</order>
         <width>5</width>
         <maxLength>50</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>settlement1</alias>
@@ -188,6 +193,7 @@
         <order>20</order>
         <width>6</width>
         <maxLength>50</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>countryCode3</alias>
@@ -216,6 +222,7 @@
         <order>23</order>
         <width>5</width>
         <maxLength>50</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>settlement2</alias>
@@ -224,6 +231,7 @@
         <order>24</order>
         <width>6</width>
         <maxLength>50</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>conditionCode</alias>
@@ -287,6 +295,7 @@
         <order>31</order>
         <width>0</width>
         <maxLength>1000</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>transactionDate</alias>

@@ -3,7 +3,7 @@
     <fixedRows>false</fixedRows>
     <name>Привлечение средств на межбанковском рынке</name>
     <fullName>Привлечение средств на межбанковском рынке</fullName>
-    <code>TODO</code>
+    <code></code>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rowNumber</alias>
         <checking>false</checking>
@@ -29,18 +29,18 @@
         <name>ИНН/КИО</name>
         <order>3</order>
         <width>7</width>
-        <parentId>21339</parentId>
+        <parentAlias>fullNamePerson</parentAlias>
         <refBookAttributeId>37</refBookAttributeId>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>countryName</alias>
         <checking>false</checking>
         <name>Наименование страны регистрации</name>
         <order>4</order>
         <width>7</width>
-        <hierarchical>false</hierarchical>
-        <nameAttributeId>53</nameAttributeId>
-        <refBookAttributeId>53</refBookAttributeId>
+        <parentAlias>fullNamePerson</parentAlias>
+        <refBookAttributeId>33</refBookAttributeId>
+        <refBookAttributeId2>53</refBookAttributeId2>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>countryCode</alias>
@@ -48,8 +48,9 @@
         <name>Код страны регистрации по классификатору ОКСМ</name>
         <order>5</order>
         <width>7</width>
-        <parentId>21341</parentId>
-        <refBookAttributeId>50</refBookAttributeId>
+        <parentAlias>fullNamePerson</parentAlias>
+        <refBookAttributeId>33</refBookAttributeId>
+        <refBookAttributeId2>50</refBookAttributeId2>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>docNum</alias>
@@ -58,6 +59,7 @@
         <order>6</order>
         <width>5</width>
         <maxLength>128</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>docDate</alias>
@@ -74,6 +76,7 @@
         <order>8</order>
         <width>5</width>
         <maxLength>128</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>dealDate</alias>

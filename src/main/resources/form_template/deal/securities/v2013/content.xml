@@ -31,7 +31,7 @@
         <name>ИНН/КИО</name>
         <order>3</order>
         <width>7</width>
-        <parentId>21071</parentId>
+        <parentAlias>fullNamePerson</parentAlias>
         <refBookAttributeId>37</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
@@ -79,6 +79,7 @@
         <order>8</order>
         <width>5</width>
         <maxLength>128</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>docDate</alias>

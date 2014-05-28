@@ -3,7 +3,7 @@
     <fixedRows>false</fixedRows>
     <name>Привлечение ресурсов</name>
     <fullName>Привлечение ресурсов</fullName>
-    <code>TODO</code>
+    <code></code>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rowNumber</alias>
         <checking>false</checking>
@@ -29,18 +29,18 @@
         <name>ИНН/КИО</name>
         <order>3</order>
         <width>7</width>
-        <parentId>21476</parentId>
+        <parentAlias>fullNamePerson</parentAlias>
         <refBookAttributeId>37</refBookAttributeId>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>countryName</alias>
         <checking>false</checking>
         <name>Страна регистрации</name>
         <order>4</order>
         <width>8</width>
-        <hierarchical>false</hierarchical>
-        <nameAttributeId>53</nameAttributeId>
-        <refBookAttributeId>50</refBookAttributeId>
+        <parentAlias>fullNamePerson</parentAlias>
+        <refBookAttributeId>33</refBookAttributeId>
+        <refBookAttributeId2>50</refBookAttributeId2>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sum</alias>
@@ -58,6 +58,7 @@
         <order>6</order>
         <width>5</width>
         <maxLength>128</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>docDate</alias>

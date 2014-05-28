@@ -68,7 +68,7 @@ def autoFillColumns = ['rowNum', 'innKio', 'countryCode', 'cost']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNum', 'jurName', 'countryCode', 'contractNum', 'contractDate', 'country', 'count', 'price',
+def nonEmptyColumns = ['rowNum', 'jurName', 'contractNum', 'contractDate', 'country', 'count', 'price',
         'cost', 'transactionDate']
 
 // Дата окончания отчетного периода
@@ -239,8 +239,6 @@ void calc() {
 
         // Расчет поля "Стоимость"
         row.cost = bankSum
-        // Расчет полей зависимых от справочников
-        row.countryCode = getRefBookValue(9, row.jurName)?.COUNTRY?.referenceValue
     }
     dataRowHelper.update(dataRows)
 }
