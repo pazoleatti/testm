@@ -83,5 +83,39 @@
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-instrument</artifactId>
+            <version>${springframework.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-aspects</artifactId>
+            <version>${springframework.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+            <version>${org.aspectj.version}</version>
+        </dependency>
 	</dependencies>
+    <build>
+        <plugins>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <goals>
+                    <project>test</project>
+                </goals>
+                <configuration>
+                    <detail>true</detail>
+                    <forkMode>once</forkMode>
+                    <argLine>-javaagent:"${settings.localRepository}/org/springframework/spring-instrument/3.1.4.RELEASE/spring-instrument-3.1.4.RELEASE.jar"</argLine>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
