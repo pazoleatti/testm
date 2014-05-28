@@ -11,7 +11,10 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.service.script.*;
+import com.aplana.sbrf.taxaccounting.service.script.DepartmentFormTypeService;
+import com.aplana.sbrf.taxaccounting.service.script.FormDataService;
+import com.aplana.sbrf.taxaccounting.service.script.ReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.script.TaxPeriodService;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
 import com.aplana.sbrf.taxaccounting.service.script.refbook.RefBookService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContext;
@@ -256,6 +259,10 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
         return getRefBookRecord(refBookId, recordCache, providerCache, null, alias, value, date);
     }
 
+    private static boolean isNumeric(String str) {
+        return str.matches("-?\\d+(\\.\\d+)?");
+    }
+
     /**
      * Получение записи справочника
      */
@@ -279,6 +286,10 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
             String template;
             // TODO: поиск по выражениям с датами не реализован
             if (type == RefBookAttributeType.REFERENCE || type == RefBookAttributeType.NUMBER) {
+                if (!isNumeric(value)) {
+                    // В справочнике поле числовое, а у нас строка, которая не парсится — ничего не ищем выдаем ошибку
+                    return null;
+                }
                 template = "%s = %s";
             } else {
                 template = "LOWER(%s) = LOWER('%s')";
