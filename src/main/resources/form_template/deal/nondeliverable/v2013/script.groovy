@@ -73,7 +73,7 @@ def groupColumns = ['name', 'innKio', 'contractNum', 'contractDate', 'transactio
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNum', 'name', 'country', 'transactionType', 'price', 'cost', 'transactionDate']
+def nonEmptyColumns = ['rowNum', 'name', 'transactionType', 'price', 'cost', 'transactionDate']
 
 // Дата окончания отчетного периода
 @Field
@@ -288,9 +288,6 @@ void calc() {
             row.price = (consumptionSum - incomeSum).abs()
             row.cost = row.price
         }
-
-        // Расчет полей зависимых от справочников
-        row.country = getRefBookValue(9, row.name)?.COUNTRY?.referenceValue
     }
 
     // Добавление подитов
