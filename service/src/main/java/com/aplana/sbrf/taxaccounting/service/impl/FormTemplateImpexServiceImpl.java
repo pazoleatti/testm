@@ -217,13 +217,13 @@ public class FormTemplateImpexServiceImpl implements
         ArrayList<String> paths = new ArrayList<String>(declarationTemplates.size());
         for (DeclarationTemplate template : declarationTemplates){
             String folderTemplateName =
-                    String.format(TEMPLATE_OF_FOLDER_NAME,
+                    Translator.transliterate(String.format(TEMPLATE_OF_FOLDER_NAME,
                             template.getType().getTaxType().getDeclarationPrefix().toLowerCase(),
                             template.getType().getId(),
                             template.getType().getName().length() > MAX_NAME_OF_DIR ?
                                     template.getType().getName().substring(0, MAX_NAME_OF_DIR).trim()
                                     : template.getType().getName(),
-                            SIMPLE_DATE_FORMAT_YEAR.format(template.getVersion()));
+                            SIMPLE_DATE_FORMAT_YEAR.format(template.getVersion())));
             paths.add(folderTemplateName);
             try {
                 File folderTemplate = new File(temFolder.getAbsolutePath() + File.separator + folderTemplateName, "");
