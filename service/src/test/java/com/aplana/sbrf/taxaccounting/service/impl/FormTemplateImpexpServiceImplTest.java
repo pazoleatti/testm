@@ -60,6 +60,7 @@ public class FormTemplateImpexpServiceImplTest {
         zipOutputStream.finish();
         fileOutputStream.close();
         //dirDelete(tempFolder);
+        System.out.println(tempFolder.getAbsolutePath());
     }
 
     private void dirDelete(File directory) throws FileNotFoundException {
