@@ -125,7 +125,7 @@
                         <style:LeftBar marginRight="5" childValign="middle" height="100%">
                             <g:Label ui:field="formDecLabel" text="Налоговые формы" addStyleNames="{style.formDecLabel}"/>
                             <g:HTML addStyleNames="{style.verSep}"/>
-                            <style:LinkAnchor ui:field="formDecAnchor" href="#" text="Декларации"
+                            <style:LinkButton ui:field="formDecAnchor" text="Декларации"
                                               disableImage="true" addStyleNames="{style.titleText}"/>
                         </style:LeftBar>
                     </fm:Right>
@@ -173,14 +173,8 @@
                                                                            header="Выберите приёмник" multiselection="false"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
-                                    <g:ResizeLayoutPanel ui:field="leftFormTableWrapper"
-                                                         addStyleNames="{style.tableBG}, {style.upTables}">
-                                        <style:GenericDataGrid ui:field="leftFormTable" width="100%"
-                                                               height="100%"/>
-                                    </g:ResizeLayoutPanel>
-                                    <g:ResizeLayoutPanel ui:field="leftDecTableWrapper"  addStyleNames="{style.tableBG} {style.upTables}">
-                                        <style:GenericDataGrid ui:field="leftDecTable" width="100%"
-                                                               height="100%"/>
+                                    <g:ResizeLayoutPanel addStyleNames="{style.tableBG}, {style.upTables}">
+                                        <style:GenericDataGrid ui:field="leftTable" width="100%" height="100%"/>
                                     </g:ResizeLayoutPanel>
                                 </g:HTMLPanel>
 

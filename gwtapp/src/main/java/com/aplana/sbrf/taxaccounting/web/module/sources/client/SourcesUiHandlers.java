@@ -1,27 +1,30 @@
 package com.aplana.sbrf.taxaccounting.web.module.sources.client;
 
-import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
-import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.web.module.sources.client.assingDialog.AssignDialogView;
+import com.aplana.sbrf.taxaccounting.web.module.sources.client.assingDialog.ButtonClickHandlers;
+import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.DepartmentAssign;
+import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.PeriodsInterval;
 import com.gwtplatform.mvp.client.UiHandlers;
 
 import java.util.List;
 
 public interface SourcesUiHandlers extends UiHandlers {
-    void updateFormSources(DepartmentFormType departmentFormType, List<Long> sourceDepartmentFormTypeIds);
+    void updateCurrentAssign(DepartmentAssign departmentFormType, PeriodsInterval periodInterval, List<Long> sourceDepartmentFormTypeIds);
 
-    void updateDeclarationSources(final DepartmentDeclarationType departmentDeclarationType,
-                                  List<Long> sourceDepartmentFormTypeIds);
+    void openAssignDialog(AssignDialogView.State state, PeriodsInterval pi, ButtonClickHandlers handlers);
 
-    void getFormSources(Integer departmentId);
+    void closeAssignDialog();
 
-    void getFormReceivers(Integer departmentId);
+    void getFormsRight(Integer departmentId);
 
-    void getFormReceiverSources(DepartmentFormType departmentFormType);
+    void getFormsLeft(Integer departmentId);
 
-    void getDeclarationReceiverSources(DepartmentDeclarationType departmentDeclarationType);
+    void getDecsLeft(Integer departmentId);
 
-    void getDeclarationReceivers(Integer departmentId);
+    void getDecsRight(Integer departmentId);
+
+    void getCurrentAssigns(DepartmentAssign departmentAssign);
 
     TaxType getTaxType();
 

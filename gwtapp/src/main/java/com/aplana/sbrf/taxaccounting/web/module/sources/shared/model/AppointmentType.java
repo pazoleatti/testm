@@ -5,7 +5,7 @@ package com.aplana.sbrf.taxaccounting.web.module.sources.shared.model;
  *
  * @author dloskarev
  */
-public enum AppointmentType {
+public enum AppointmentType implements HasName {
     SOURCES("источников"),
     RECIPIENT("приемников");
 

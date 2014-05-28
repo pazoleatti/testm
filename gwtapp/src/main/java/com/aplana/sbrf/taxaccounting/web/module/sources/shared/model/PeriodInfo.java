@@ -3,7 +3,12 @@ package com.aplana.sbrf.taxaccounting.web.module.sources.shared.model;
 import java.io.Serializable;
 import java.util.Date;
 
-public class PeriodInfo implements Serializable {
+/**
+ * Моделька для бокса с периодами
+ *
+ * @author dloshkarev
+ */
+public class PeriodInfo implements HasName, Serializable {
     private static final long serialVersionUID = 342474480237083779L;
     private String name;
     private Date startDate;

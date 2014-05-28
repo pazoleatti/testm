@@ -305,4 +305,12 @@ public class Spinner extends DoubleStateComposite
 	public void setMaxValue(int maxValue) {
 		this.maxValue = maxValue;
 	}
+
+    public void setTitle(String title) {
+        panel.setTitle(title);
+    }
+
+    public String getTitle() {
+        return panel.getTitle();
+    }
 }
