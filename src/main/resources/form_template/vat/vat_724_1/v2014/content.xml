@@ -29,7 +29,7 @@
         <order>3</order>
         <width>20</width>
         <parentAlias>baseAccNum</parentAlias>
-        <refBookAttributeId>249</refBookAttributeId>
+        <refBookAttributeId>901</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>baseAccNum</alias>
@@ -38,8 +38,8 @@
         <order>4</order>
         <width>10</width>
         <hierarchical>false</hierarchical>
-        <nameAttributeId>250</nameAttributeId>
-        <refBookAttributeId>250</refBookAttributeId>
+        <nameAttributeId>900</nameAttributeId>
+        <refBookAttributeId>900</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>baseSum</alias>
