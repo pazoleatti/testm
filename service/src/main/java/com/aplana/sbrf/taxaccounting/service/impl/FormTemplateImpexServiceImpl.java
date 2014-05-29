@@ -218,7 +218,7 @@ public class FormTemplateImpexServiceImpl implements
         for (DeclarationTemplate template : declarationTemplates){
             String folderTemplateName =
                     Translator.transliterate(String.format(TEMPLATE_OF_FOLDER_NAME,
-                            template.getType().getTaxType().getDeclarationPrefix().toLowerCase(),
+                            template.getType().getTaxType().name().toLowerCase(),
                             template.getType().getId(),
                             template.getType().getName().length() > MAX_NAME_OF_DIR ?
                                     template.getType().getName().substring(0, MAX_NAME_OF_DIR).trim()
@@ -308,7 +308,7 @@ public class FormTemplateImpexServiceImpl implements
         for (FormTemplate template : formTemplates){
             String folderTemplateName =
                     Translator.transliterate(String.format(TEMPLATE_OF_FOLDER_NAME,
-                            template.getType().getTaxType().getDeclarationPrefix().toLowerCase(),
+                            template.getType().getTaxType().name().toLowerCase(),
                             template.getType().getId(),
                             template.getType().getName().length() > MAX_NAME_OF_DIR ?
                                     template.getType().getName().substring(0, MAX_NAME_OF_DIR).trim()
