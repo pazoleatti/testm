@@ -8,15 +8,12 @@ import groovy.transform.Field
  * Отчёт о суммах начисленного НДС по операциям Банка
  * formTemplateId=600
  *
- * TODO:
- *      - графа 3 и 2 - справочник «План счетов бухгалтерского учета», но он пока не сделан, временно указал другой справочник (38), потом надо поменять
  */
 
 // графа 1 - rowNum
 // графа   - fix
-// TODO (Ramil Timerbaev) как будет готов справочник «План счетов бухгалтерского учета», поменять на него
-// графа 2 - baseAccName    - зависит от графы 3 - атрибут 000 - NAME - «Наименование балансового счета», справочник 00 «План счетов бухгалтерского учета»
-// графа 3 - baseAccNum     - атрибут 000 - NAME - «Номер балансового счета», справочник 00 «План счетов бухгалтерского учета»
+// графа 2 - baseAccName    - зависит от графы 3 - атрибут 901 - ACCOUNT_NAME - «Наименование счета», справочник 101 «План счетов бухгалтерского учета»
+// графа 3 - baseAccNum     - атрибут 900 - ACCOUNT - «Номер счета», справочник 101 «План счетов бухгалтерского учета»
 // графа 4 - baseSum
 // графа 5 - ndsNum
 // графа 6 - ndsSum
@@ -451,17 +448,15 @@ void addData(def xml, int headRowCount) {
             newRow.getCell(it).setStyleAlias('Автозаполняемая')
         }
 
-        // TODO (Ramil Timerbaev) справочник «План счетов бухгалтерского учета» не готов, потом поменять на правильный справочник
-        // Графа 3 - атрибут 000 - NAME - «Номер балансового счета», справочник 00 «План счетов бухгалтерского учета»
-        record = getRecordImport(38, 'VALUE', row.cell[3].text(), xlsIndexRow, 3 + colOffset)
+        // Графа 3 - атрибут 900 - ACCOUNT - «Номер балансового счета», справочник 101 «План счетов бухгалтерского учета»
+        record = getRecordImport(101, 'ACCOUNT', row.cell[3].text(), xlsIndexRow, 3 + colOffset)
         newRow.baseAccNum = record?.record_id?.value
 
-        // TODO (Ramil Timerbaev) справочник «План счетов бухгалтерского учета» не готов, потом поменять на правильный справочник
-        // Графа 2 - зависит от графы 3 - атрибут 000 - NAME - «Наименование балансового счета», справочник 00 «План счетов бухгалтерского учета»
+        // Графа 2 - зависит от графы 3 - атрибут 901 - ACCOUNT_NAME - «Наименование балансового счета», справочник 101 «План счетов бухгалтерского учета»
         if (record != null) {
-            def value1 = record?.CODE?.value?.toString()
+            def value1 = record?.ACCOUNT_NAME?.value?.toString()
             def value2 = row.cell[2].text()
-            formDataService.checkReferenceValue(38, value1, value2, xlsIndexRow, 2 + colOffset, logger, true)
+            formDataService.checkReferenceValue(101, value1, value2, xlsIndexRow, 2 + colOffset, logger, true)
         }
 
         // Графа 4
@@ -481,7 +476,6 @@ void addData(def xml, int headRowCount) {
 
         aliasR[title].add(newRow)
     }
-
 
     aliasR.each { k, v ->
         rows.addAll(v)

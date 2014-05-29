@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
-    <fixedRows>false</fixedRows>
+    <fixedRows>true</fixedRows>
     <name>Итоговые данные книги продаж</name>
     <fullName>Итоговые данные книги продаж</fullName>
-    <code></code>
+    <code>(937.2)</code>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>period</alias>
         <checking>false</checking>
