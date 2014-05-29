@@ -151,7 +151,10 @@ void logicCheck() {
         }
         def rowNum = row.getIndex()
 
-        checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, false)
+        // графа 14 = элемент с кодом «1»
+        def isSignPhis = (getRefBookValue(18, row.signPhis)?.CODE?.numberValue == 1)
+
+        checkNonEmptyColumns(row, rowNum, isSignPhis ? nonEmptyColumns : nonEmptyColumns + 'countryCode2', logger, false)
 
         def transactionDeliveryDate = row.transactionDeliveryDate
         def contractDate = row.contractDate
@@ -163,7 +166,7 @@ void logicCheck() {
         def transactionDate = row.transactionDate
 
         // Проверка зависимости от признака физической поставки
-        if (getRefBookValue(18, row.signPhis)?.CODE?.numberValue == 1) {
+        if (isSignPhis) {
             def isHaveNotEmptyField = false
             def checkField = ['countryCode2', 'region1', 'city1', 'settlement1', 'countryCode3', 'region2', 'city2', 'settlement2', 'conditionCode']
             for (it in checkField) {

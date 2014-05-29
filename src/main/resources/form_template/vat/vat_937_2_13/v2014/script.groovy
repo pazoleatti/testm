@@ -1,9 +1,6 @@
 package form_template.vat.vat_937_2_13.v2014
 
-import com.aplana.sbrf.taxaccounting.model.Cell
-import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
@@ -224,20 +221,13 @@ void importData() {
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 3, 1)
 
-    // TODO отделить шапку от фиксированных строк, но пока метода нет и сообщение не утвердили
     def headerMapping = [
             (xml.row[0].cell[0]) : getColumnName(tmpRow, 'rowNum'),
             (xml.row[0].cell[2]) : getColumnName(tmpRow, 'differences'),
             (xml.row[0].cell[3]) : getColumnName(tmpRow, 'sum'),
             (xml.row[1].cell[0]) : '1',
             (xml.row[1].cell[2]) : '2',
-            (xml.row[1].cell[3]) : '3',
-            (xml.row[2].cell[0]) : '1',
-            (xml.row[2].cell[2]) : 'Округления',
-            (xml.row[3].cell[0]) : '3',
-            (xml.row[3].cell[2]) : 'Исправительные обороты',
-            (xml.row[4].cell[0]) : '4',
-            (xml.row[4].cell[2]) : 'Прочие (расшифровать):'
+            (xml.row[1].cell[3]) : '3'
     ]
 
     checkHeaderEquals(headerMapping)
@@ -253,6 +243,7 @@ void addData(def xml, int headRowCount) {
     def xmlIndexRow = -1 // Строки xml, от 0
     def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
     def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
+    def indexRow = 0
 
     def totalRow = getDataRow(dataRows, 'total')
     totalRow.sum = 0
@@ -281,7 +272,7 @@ void addData(def xml, int headRowCount) {
         def newRow = null
 
         def rowIndex = xmlIndexRow - headRowCount + 1
-        def isFixed = rowIndex <= 4
+        def isFixed = rowIndex <= 3
         if (isFixed) {
             newRow = getDataRow(dataRows, "R$rowIndex")
         } else {
@@ -296,6 +287,19 @@ void addData(def xml, int headRowCount) {
         if (!isFixed) {
             newRow.rowNum = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, true)
             newRow.differences = row.cell[2].text()
+        } else {
+            def dataRow = dataRows.get(indexRow)
+            indexRow++
+
+            def values = [:]
+            values.rowNum = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, true)
+            values.differences = row.cell[2].text()
+
+            ['rowNum', 'differences'].each { alias ->
+                if (dataRow[alias] != values[alias]) {
+                    logger.error('Неверное значение в фиксированных строках') // TODO (Bulat Kinzyabulatov) поменять сообщение после того как уточнится что выводить
+                }
+            }
         }
         newRow.sum = parseNumber(row.cell[3].text(), xlsIndexRow, 3 + colOffset, logger, true)
 
