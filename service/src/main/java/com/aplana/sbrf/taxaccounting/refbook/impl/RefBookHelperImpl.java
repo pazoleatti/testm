@@ -227,14 +227,10 @@ public class RefBookHelperImpl implements RefBookHelper {
     }
 
     @Override
-    public Map<Long, String> singleRecordDereferenceWithAttrId2(RefBook refBook, RefBookDataProvider provider,
-                                                                List<RefBookAttribute> attributes, Map<String, RefBookValue> record) {
-
+    public Map<Long, RefBookDataProvider> getHashedProviders(List<RefBookAttribute> attributes, Map<Long, List<Long>> attrId2Map){
         //кэшируем список провайдеров для атрибутов-ссылок, чтобы для каждой строки их заново не создавать
         Map<Long, RefBookDataProvider> refProviders = new HashMap<Long, RefBookDataProvider>();
-        // кэшируем список дополнительных атрибутов если есть для каждого аттрибута
-        Map<Long, List<Long>> attrId2Map = getAttrToListAttrId2Map(refBook.getAttributes());
-        for (RefBookAttribute attribute : refBook.getAttributes()) {
+        for (RefBookAttribute attribute : attributes) {
             if (RefBookAttributeType.REFERENCE.equals(attribute.getAttributeType())) {
                 if (!refProviders.containsKey(attribute.getId())) {
                     refProviders.put(attribute.getId(), refBookFactory.getDataProvider(attribute.getRefBookId()));
@@ -250,6 +246,17 @@ public class RefBookHelperImpl implements RefBookHelper {
                 }
             }
         }
+        return refProviders;
+    }
+
+    @Override
+    public Map<Long, String> singleRecordDereferenceWithAttrId2(RefBook refBook, RefBookDataProvider provider,
+                                                                List<RefBookAttribute> attributes, Map<String, RefBookValue> record) {
+
+        // кэшируем список дополнительных атрибутов если есть для каждого аттрибута
+        Map<Long, List<Long>> attrId2Map = getAttrToListAttrId2Map(refBook.getAttributes());
+        //кэшируем список провайдеров для атрибутов-ссылок, чтобы для каждой строки их заново не создавать
+        Map<Long, RefBookDataProvider> refProviders = getHashedProviders(refBook.getAttributes(), attrId2Map );
 
         Map<Long, String> result = new HashMap<Long, String>();
         for (RefBookAttribute attribute : attributes) {

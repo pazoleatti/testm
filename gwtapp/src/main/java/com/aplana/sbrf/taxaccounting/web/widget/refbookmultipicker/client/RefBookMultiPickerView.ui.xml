@@ -43,7 +43,7 @@
 
         <pager:FlexiblePager ui:field="pager" location="RIGHT" addStyleNames="{style.pager}"
                              showFastForwardButton="false" fastForwardRows="0"
-                             showLastPageButton="true" type="refBookPicker"/>
+                             showLastPageButton="true" type="refBookPicker" defaultPageSize="100"/>
 
     </g:HTMLPanel>
 </ui:UiBinder>

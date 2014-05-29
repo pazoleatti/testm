@@ -39,6 +39,18 @@ public interface RefBookHelper {
     Map<Long, List<Long>> getAttrToListAttrId2Map(List<RefBookAttribute> attributes);
 
     /**
+     * Получить кэш списока провайдеров для атрибутов-ссылок, чтобы для каждой строки их заново не создавать
+     * @see RefBookHelper#getAttrToListAttrId2Map
+     *
+     * @param attributes атрибуты справочника
+     * @param attrToListAttrId2Map кэш списка дополнительных атрибутов
+     *                             если есть для каждого аттрибута
+     *                             @see RefBookHelper#getAttrToListAttrId2Map
+     * @return мап провайдера для атрибутов-ссылок
+     */
+    Map<Long, RefBookDataProvider> getHashedProviders(List<RefBookAttribute> attributes, Map<Long, List<Long>> attrToListAttrId2Map);
+
+    /**
      * Получить список соотвествий идентификатора к разименованному значению записи справочника
      * В том же списке разименованные значения ссылочных атрибутов полученные по атрибуту второго уровня
      * @param refBook справоник
