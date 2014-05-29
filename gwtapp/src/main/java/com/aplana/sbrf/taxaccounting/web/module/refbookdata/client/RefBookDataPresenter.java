@@ -33,6 +33,7 @@ import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -82,6 +83,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         void resetSearchInputBox();
         /** Обновление вьюшки для определенного состояния */
         void updateMode(FormMode mode);
+        //Показывает/скрывает поля, которые необходимы только для версионирования
+        void setVersionedFields(boolean isVisible);
     }
 
 	@Inject
@@ -225,7 +228,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 								getView().setRefBookNameDesc(result.getName());
 							}
 						}, this));
-
+        getView().setVersionedFields(!Arrays.asList(RefBookDataModule.NOT_VERSIONED_REF_BOOK_IDS).contains(refBookDataId));
+        editFormPresenter.setCanVersion(!Arrays.asList(RefBookDataModule.NOT_VERSIONED_REF_BOOK_IDS).contains(refBookDataId));
 	}
 
 	@Override

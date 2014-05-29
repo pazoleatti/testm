@@ -43,6 +43,8 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
     @UiField
     Label titleDesc;
     @UiField
+    Label relevanceDateLabel;
+    @UiField
     DateMaskBoxPicker relevanceDate;
 
     @UiField
@@ -66,7 +68,6 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
     @Inject
     public RefBookHierDataView(final Binder uiBinder) {
         initWidget(uiBinder.createAndBindUi(this));
-
         relevanceDate.setValue(new Date());
 
         pickerState.setVersionDate(relevanceDate.getValue());
@@ -272,5 +273,11 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
     public void clearFilterInputBox() {
         pickerState.setSearchPattern("");
         filterText.setValue("");
+    }
+
+    @Override
+    public void setVersionedFields(boolean isVisible) {
+        relevanceDate.setVisible(isVisible);
+        relevanceDateLabel.setVisible(isVisible);
     }
 }

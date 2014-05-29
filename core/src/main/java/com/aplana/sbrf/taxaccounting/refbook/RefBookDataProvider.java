@@ -179,9 +179,9 @@ public interface RefBookDataProvider {
     void updateRecordsVersionEnd(Logger logger, Date versionEnd, List<Long> uniqueRecordIds);
     /**
      * Удаляет все версии записи из справочника
-     * @param uniqueRecordIds список идентификаторов записей, все версии которых будут удалены
+     * @param recordIds список идентификаторов записей, все версии которых будут удалены
      */
-    void deleteAllRecords(Logger logger, List<Long> uniqueRecordIds);
+    void deleteAllRecords(Logger logger, List<Long> recordIds);
     /**
      * Удаляет указанные версии записи из справочника
      * @param uniqueRecordIds список идентификаторов версий записей, которые будут удалены

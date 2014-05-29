@@ -69,6 +69,8 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
     Label editModeLabel;
     @UiField
     TextBox filterText;
+    @UiField
+    Label relevanceDateLabel;
 
     private String searchPattern;
 
@@ -366,6 +368,12 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
                 separator.setVisible(false);
                 break;
         }
+    }
+
+    @Override
+    public void setVersionedFields(boolean isVisible) {
+        relevanceDate.setVisible(isVisible);
+        relevanceDateLabel.setVisible(isVisible);
     }
 
     @Override

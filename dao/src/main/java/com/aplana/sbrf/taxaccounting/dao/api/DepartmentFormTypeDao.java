@@ -101,11 +101,11 @@ public interface DepartmentFormTypeDao {
      * информацию из данной налоговой формы в качестве источника  для определенного подразделения приемника
      *
      * @param sourceDepartmentId идентификатор подразделения формы-источника
-     * @param destinationDepartmentId   вид налоговой формы-источника
+     * @param destinationDepartmentId  подразделение приемник
      * @return информация о формах-потребителях в виде списка
      *         {@link DepartmentFormType}
      */
-    List<DepartmentFormType> getFormDestinations(int sourceDepartmentId, int destinationDepartmentId, List<Integer> formTypes);
+    List<DepartmentFormType> getFormDestinationsWithDestDepId(int sourceDepartmentId, int destinationDepartmentId, List<Integer> formTypes);
 
     /**
      * Возвращает информацию о декларациях-потребителях, которые должны использовать
@@ -128,7 +128,7 @@ public interface DepartmentFormTypeDao {
      * @return информация о декларациях-потребителях в виде списка
      *         {@link DepartmentDeclarationType}
      */
-    List<DepartmentDeclarationType> getDeclarationDestinations(int sourceDepartmentId, int destinationDepartmentId, List<Integer> formTypes);
+    List<DepartmentDeclarationType> getDeclarationDestinationsWithDestDepId(int sourceDepartmentId, int destinationDepartmentId, List<Integer> formTypes);
 
     /**
      * Возвращает информацию о формах-источниках, которые должны использоваться

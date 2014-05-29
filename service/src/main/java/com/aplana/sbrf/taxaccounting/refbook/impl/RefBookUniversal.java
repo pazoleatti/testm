@@ -93,7 +93,7 @@ public class RefBookUniversal implements RefBookDataProvider {
 
     @Override
     public List<Long> getUniqueRecordIds(Date version, String filter) {
-        throw new UnsupportedOperationException();
+        return refBookUtils.getUniqueRecordIds(refBookId, REF_BOOK_RECORD_TABLE_NAME, filter);
     }
 
     @Override

@@ -54,9 +54,13 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
     LinkAnchor allVersion;
     @UiField
     HorizontalPanel buttonBlock;
+    @UiField
+    Label startVersionDateLabel;
+    @UiField
+    Label endVersionDateLabel;
 
     private boolean isVersionMode = false;
-    private boolean readOnly;
+    private boolean canVersion = true;
     private boolean isHierarchy = false;
     private boolean isNeedToReload = false;
 
@@ -108,7 +112,17 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
         }
     }
 
-	@Override
+    @Override
+    public void setVisibleFields(boolean canVersion) {
+        this.canVersion = canVersion;
+        versionStart.setVisible(canVersion);
+        versionEnd.setVisible(canVersion);
+        startVersionDateLabel.setVisible(canVersion);
+        endVersionDateLabel.setVisible(canVersion);
+        allVersion.setVisible(canVersion);
+    }
+
+    @Override
 	public Map<RefBookColumn, HasValue> createInputFields(List<RefBookColumn> attributes) {
 		editPanel.clear();
 		if (widgets != null) widgets.clear();
@@ -373,7 +387,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
     public void fillVersionData(RefBookRecordVersionData versionData, Long refBookId, Long refBookRecordId) {
         versionStart.setValue(versionData.getVersionStart());
         versionEnd.setValue(versionData.getVersionEnd());
-        allVersion.setVisible(!isVersionMode);
+        allVersion.setVisible(!isVersionMode && canVersion);
         allVersion.setText("Все версии ("+versionData.getVersionCount()+")");
         allVersion.setHref("#"
                 + RefBookDataTokens.refBookVersion

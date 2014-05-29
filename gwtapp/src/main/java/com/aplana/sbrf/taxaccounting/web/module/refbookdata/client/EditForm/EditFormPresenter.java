@@ -12,12 +12,14 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.event.RollbackTableRowSelection;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.exception.BadValueException;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.renameDialog.ConfirmButtonClickHandler;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.renameDialog.RenameDialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.FormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataTokens;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
 import com.aplana.sbrf.taxaccounting.web.widget.logarea.shared.SaveLogEntriesAction;
 import com.aplana.sbrf.taxaccounting.web.widget.logarea.shared.SaveLogEntriesResult;
+import com.aplana.sbrf.taxaccounting.web.widget.utils.WidgetUtils;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -47,6 +49,8 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
     private boolean isVersionMode = false;
     /** Режим показа формы */
     private FormMode mode;
+    /**Может ли справочник работать с версиями*/
+    private boolean canVersion= false;
     private Map<String, Object> modifiedFields = new HashMap<String, Object>();
 
     public void setNeedToReload() {
@@ -72,6 +76,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
         /** Обновление вьюшки для определенного состояния */
         void updateMode(FormMode mode);
         void updateRefBookPickerPeriod();
+        void setVisibleFields(boolean isVisible);
     }
 
     protected final RenameDialogPresenter renameDialogPresenter;
@@ -185,11 +190,11 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 	@Override
 	public void onSaveClicked() {
 		try {
-            if (getView().getVersionFrom() == null) {
+            if (canVersion && getView().getVersionFrom() == null) {
                 Dialog.warningMessage("Версия не сохранена", "Не указана дата начала актуальности");
                 return;
             }
-            if (getView().getVersionTo() != null && (getView().getVersionFrom().getTime() >= getView().getVersionTo().getTime())) {
+            if (canVersion && getView().getVersionTo() != null && (getView().getVersionFrom().getTime() >= getView().getVersionTo().getTime())) {
                 Dialog.warningMessage("Версия не сохранена", "Дата окончания должна быть больше даты начала актуальности");
                 return;
             }
@@ -237,19 +242,19 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                 action.setVersionFrom(getView().getVersionFrom());
                 action.setVersionTo(getView().getVersionTo());
 
-//                // TODO заменить, сделано для примера
-//                if (currentRefBookId == 30) {
-//                    if(modifiedFields.containsKey("NAME")){
-//                        renameDialogPresenter.open(new ConfirmButtonClickHandler() {
-//                            @Override
-//                            public void onClick(Date dateFrom, Date dateTo) {
-//                                // тут дальнейшая обработка по сценаарию постановки
-//                                Dialog.infoMessage("Переименовываем с " + WidgetUtils.getDateString(dateFrom) +
-//                                        " по " + WidgetUtils.getDateString(dateTo) + "на имя \"" + modifiedFields.get("NAME") + "\"");
-//                            }
-//                        });
-//                    }
-//                }
+                // TODO заменить, сделано для примера
+                if (currentRefBookId == 30) {
+                    if(modifiedFields.containsKey("NAME")){
+                        renameDialogPresenter.open(new ConfirmButtonClickHandler() {
+                            @Override
+                            public void onClick(Date dateFrom, Date dateTo) {
+                                // тут дальнейшая обработка по сценаарию постановки
+                                Dialog.infoMessage("Переименовываем с " + WidgetUtils.getDateString(dateFrom) +
+                                        " по " + WidgetUtils.getDateString(dateTo) + "на имя \"" + modifiedFields.get("NAME") + "\"");
+                            }
+                        });
+                    }
+                }
 
                 final RecordChanges recordChanges = fillRecordChanges(currentUniqueRecordId, map, action.getVersionFrom(), action.getVersionTo());
                 dispatchAsync.execute(action,
@@ -343,6 +348,11 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
     public void setVersionMode(boolean versionMode) {
         isVersionMode = versionMode;
         getView().setVersionMode(versionMode);
+    }
+
+    public void setCanVersion(boolean canVersion) {
+        this.canVersion = canVersion;
+        getView().setVisibleFields(canVersion);
     }
 
     public void setCurrentUniqueRecordId(Long currentUniqueRecordId) {

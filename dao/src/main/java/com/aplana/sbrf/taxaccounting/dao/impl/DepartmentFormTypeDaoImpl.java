@@ -63,18 +63,26 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
     private static final String GET_FORM_SOURCES_SQL = "select * from department_form_type src_dft where exists "
             + "(select 1 from department_form_type dft, form_data_source fds where "
             + "fds.department_form_type_id=dft.id and fds.src_department_form_type_id=src_dft.id "
-            + "and dft.department_id=? and dft.form_type_id=? and dft.kind=?)";
+            + "and dft.department_id=? %s %s)";
 
     @Override
     public List<DepartmentFormType> getFormSources(int departmentId,
                                                    int formTypeId, FormDataKind kind) {
+        String[] strings = new String[2];
+        Object[] params = new Object[]{departmentId};
+        if (formTypeId != 0) {
+            strings[0] = " and dft.form_type_id= " + formTypeId;
+        } else {
+            strings[0] = "";
+        }
+        if (kind != null){
+            strings[1] = " and dft.kind = " + kind.getId();
+        } else {
+            strings[1] = "";
+        }
         return getJdbcTemplate().query(
-                GET_FORM_SOURCES_SQL,
-                new Object[]{
-                        departmentId,
-                        formTypeId,
-                        kind.getId()
-                },
+                String.format(GET_FORM_SOURCES_SQL, strings),
+                params,
                 DFT_MAPPER
         );
     }
@@ -103,70 +111,87 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                 "insert into form_data_source (department_form_type_id, src_department_form_type_id) values (?, ?)", bpss);
     }
 
-    private static final String GET_FORM_DESTINATIONS_SQL = "select * from department_form_type dest_dft where exists "
-            + "(select 1 from department_form_type dft, form_data_source fds where "
-            + "fds.src_department_form_type_id=dft.id and fds.department_form_type_id=dest_dft.id "
-            + "and dft.department_id=? and dft.form_type_id=? and dft.kind=?)";
-
     @Override
     public List<DepartmentFormType> getFormDestinations(int sourceDepartmentId,
                                                         int sourceFormTypeId, FormDataKind sourceKind) {
+        StringBuilder sb = new StringBuilder("select * from department_form_type dest_dft where exists "
+                + "(select 1 from department_form_type dft, form_data_source fds where "
+                + "fds.src_department_form_type_id=dft.id and fds.department_form_type_id=dest_dft.id "
+                + "and dft.department_id = ? ");
+        if (sourceFormTypeId != 0)
+            sb.append(" and dft.form_type_id = ").append(sourceFormTypeId);
+        if (sourceKind != null)
+            sb.append(" and dft.kind = ").append(sourceKind.getId());
+        sb.append(")");
         return getJdbcTemplate().query(
-                GET_FORM_DESTINATIONS_SQL,
-                new Object[]{sourceDepartmentId, sourceFormTypeId,
-                        sourceKind.getId()}, DFT_MAPPER);
+                sb.toString(),
+                new Object[]{sourceDepartmentId}, DFT_MAPPER);
     }
 
     private static final String GET_FORM_DESTINATIONS_FOR_DEST_DEPARTMENT_SQL =  "select * from department_form_type dest_dft where exists "
             + "(select 1 from department_form_type dft, form_data_source fds where "
             + "fds.src_department_form_type_id=dft.id and fds.department_form_type_id=dest_dft.id "
-            + "and dft.department_id=:sourceDepartmentId and dft.form_type_id in (:formTypes)) and dest_dft.DEPARTMENT_ID = :destinationDepartmentId";
+            + "and dft.department_id=:sourceDepartmentId %s) and dest_dft.DEPARTMENT_ID = :destinationDepartmentId";
 
     @Override
-    public List<DepartmentFormType> getFormDestinations(final int sourceDepartmentId, final int destinationDepartmentId, final List<Integer> formTypes) {
+    public List<DepartmentFormType> getFormDestinationsWithDestDepId(final int sourceDepartmentId, final int destinationDepartmentId, final List<Integer> formTypes) {
         HashMap<String, Object> values = new HashMap<String, Object>(){{
             put("sourceDepartmentId", sourceDepartmentId);
             put("destinationDepartmentId", destinationDepartmentId);
             put("formTypes", formTypes);
         }};
+        String sqlTag = formTypes != null && !formTypes.isEmpty() ? "and dft.form_type_id in (:formTypes)": "";
         try {
             return getNamedParameterJdbcTemplate().query(
-                    GET_FORM_DESTINATIONS_FOR_DEST_DEPARTMENT_SQL,
+                    String.format(GET_FORM_DESTINATIONS_FOR_DEST_DEPARTMENT_SQL, sqlTag),
                     values, DFT_MAPPER);
         } catch (DataAccessException e){
             throw new DaoException("Ошибка пр получении форм-назначений", e);
         }
     }
 
-    private static final String GET_DECLARATION_DESTINATIONS_SQL = "select * from department_declaration_type dest_ddt where exists "
-            + "(select 1 from department_form_type dft, declaration_source ds where "
-            + "ds.src_department_form_type_id=dft.id and ds.department_declaration_type_id=dest_ddt.id "
-            + "and dft.department_id=? and dft.form_type_id=? and dft.kind=?)";
+    private static final String GET_DECLARATION_DESTINATIONS_SQL =  "select * from department_declaration_type dest_ddt where exists "
+            + "(select 1 from department_declaration_type ddt, declaration_source ds where "
+            + "ds.src_department_form_type_id=ddt.id and ds.department_declaration_type_id=dest_ddt.id "
+            + "and ddt.department_id=? %s %s)";
 
     @Override
     public List<DepartmentDeclarationType> getDeclarationDestinations(int sourceDepartmentId,
                                                                       int sourceFormTypeId, FormDataKind sourceKind) {
+        String[] strings = new String[2];
+        Object[] params = new Object[]{sourceDepartmentId};
+        if (sourceFormTypeId != 0) {
+            strings[0] = " and ddt.declaration_type_id = " + sourceFormTypeId;
+        } else {
+            strings[0] = "";
+        }
+        if (sourceKind != null){
+            strings[1] = " and ddt.department_id = " + sourceKind.getId();
+        } else {
+            strings[1] = "";
+        }
+
         return getJdbcTemplate().query(
-                GET_DECLARATION_DESTINATIONS_SQL,
-                new Object[]{sourceDepartmentId, sourceFormTypeId,
-                        sourceKind.getId()}, DDT_MAPPER);
+                String.format(GET_DECLARATION_DESTINATIONS_SQL, strings),
+               params, DDT_MAPPER);
     }
 
     private static final String GET_DECLARATION_DESTINATIONS_FOR_DEST_DEPARTMENT_SQL = "SELECT * FROM department_declaration_type dest_ddt WHERE exists "
             + "(SELECT 1 FROM DEPARTMENT_DECLARATION_TYPE ddt, declaration_source ds WHERE "
             + "ds.src_department_form_type_id=ddt.id AND ds.department_declaration_type_id=dest_ddt.id "
-            + "AND ddt.department_id=:sourceDepartmentId AND ddt.DECLARATION_TYPE_ID IN (:formTypes)) AND dest_ddt.DEPARTMENT_ID = :destinationDepartmentId";
+            + "AND ddt.department_id=:sourceDepartmentId %s) AND dest_ddt.DEPARTMENT_ID = :destinationDepartmentId";
 
     @Override
-    public List<DepartmentDeclarationType> getDeclarationDestinations(final int sourceDepartmentId, final int destinationDepartmentId, final List<Integer> formTypes) {
+    public List<DepartmentDeclarationType> getDeclarationDestinationsWithDestDepId(final int sourceDepartmentId, final int destinationDepartmentId, final List<Integer> formTypes) {
         HashMap<String, Object> values = new HashMap<String, Object>(){{
             put("sourceDepartmentId", sourceDepartmentId);
             put("destinationDepartmentId", destinationDepartmentId);
             put("formTypes", formTypes);
         }};
+        String sqlTag = formTypes != null && !formTypes.isEmpty() ? "AND ddt.DECLARATION_TYPE_ID IN (:formTypes)": "";
         try {
             return getNamedParameterJdbcTemplate().query(
-                    GET_DECLARATION_DESTINATIONS_FOR_DEST_DEPARTMENT_SQL,
+                    String.format(GET_DECLARATION_DESTINATIONS_FOR_DEST_DEPARTMENT_SQL, sqlTag),
                     values, DDT_MAPPER);
         } catch (DataAccessException e){
             throw new DaoException("Ошибка пр получении деклараций-назначений", e);
@@ -176,16 +201,20 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
     private static final String GET_DECLARATION_SOURCES_SQL = "select * from department_form_type src_dft where exists "
             + "(select 1 from department_declaration_type ddt, declaration_source dds where "
             + "dds.department_declaration_type_id=ddt.id and dds.src_department_form_type_id=src_dft.id "
-            + "and ddt.department_id=? and ddt.declaration_type_id=?)";
+            + "and ddt.department_id=? %s)";
 
     @Override
     public List<DepartmentFormType> getDeclarationSources(int departmentId, int declarationTypeId) {
+        String[] strings = new String[1];
+        Object[] params = new Object[]{departmentId};
+        if (declarationTypeId != 0) {
+            strings[0] = " and ddt.declaration_type_id= " + declarationTypeId;
+        } else {
+            strings[0] = "";
+        }
         return getJdbcTemplate().query(
-                GET_DECLARATION_SOURCES_SQL,
-                new Object[]{
-                        departmentId,
-                        declarationTypeId
-                },
+                String.format(GET_DECLARATION_SOURCES_SQL, strings),
+                params,
                 DFT_MAPPER
         );
     }
@@ -285,21 +314,31 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
     private static final String GET_ALL_DEPARTMENT_SOURCES_SQL = "select * from department_form_type src_dft where "
             + "exists (select 1 from department_form_type dft, form_data_source fds, form_type src_ft where "
             + "fds.department_form_type_id=dft.id and fds.src_department_form_type_id=src_dft.id and src_ft.id = src_dft.form_type_id "
-            + "and dft.department_id=? and src_ft.tax_type = ?) "
+            + "and dft.department_id=? %s ) "
             + "or exists (select 1 from department_declaration_type ddt, declaration_source dds, form_type src_ft where "
             + "dds.department_declaration_type_id=ddt.id and dds.src_department_form_type_id=src_dft.id and src_ft.id = src_dft.form_type_id "
-            + "and ddt.department_id=? and src_ft.tax_type = ?) ";
+            + "and ddt.department_id=? %s) ";
 
     @Override
     public List<DepartmentFormType> getDepartmentSources(int departmentId, TaxType taxType) {
+        Object[] params;
+        String[] strings;
+        if ( taxType != null) {
+            params = new Object[]{
+                    departmentId,
+                    String.valueOf(taxType.getCode()),
+                    departmentId,
+                    String.valueOf(taxType.getCode())};
+            strings = new String[]{ "and src_ft.tax_type = ?", "and src_ft.tax_type = ?"};
+        } else {
+            params =  new Object[]{
+                    departmentId,
+                    departmentId};
+            strings =  new String[]{"",""};
+        }
         return getJdbcTemplate().query(
-                GET_ALL_DEPARTMENT_SOURCES_SQL,
-                new Object[]{
-                        departmentId,
-                        String.valueOf(taxType.getCode()),
-                        departmentId,
-                        String.valueOf(taxType.getCode())
-                },
+                String.format(GET_ALL_DEPARTMENT_SOURCES_SQL, strings),
+                params,
                 DFT_MAPPER
         );
     }

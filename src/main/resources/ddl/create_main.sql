@@ -274,6 +274,8 @@ comment on column department.tb_index is 'Индекс территориаль�
 comment on column department.sbrf_code is 'Код подразделения в нотации Сбербанка';
 comment on column department.region_id is 'Код региона';
 comment on column department.is_active is 'Действующее подразделение (0 - не действующее, 1 - действующее)';
+
+create sequence seq_department start with 1000;
 ---------------------------------------------------------------------------------------------------
 create table report_period (
   id number(9) not null,
