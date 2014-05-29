@@ -8,129 +8,20 @@ import groovy.sql.Sql
 class DBReport {
     // Сравненение шаблонов в БД
     def static void compareDBFormTemplate(def prefix1, def prefix2) {
-        // 1
-        println("DBMS connect: $prefix1")
-        def sql = Sql.newInstance(Main.DB_URL, prefix1, Main.DB_PASSWORD, "oracle.jdbc.OracleDriver")
+        // Запросы на получение макетов
+        def sqlTemplate1 = "select id, type_id, data_rows, fixed_rows, name, fullname, code, data_headers, to_char(version, 'RRRR') as version, status, script, monthly from form_template where status not in (-1, 2)"
+        def sqlTemplate2 = "select id, type_id, data_rows, fixed_rows, name, fullname, code, data_headers, to_char(version, 'RRRR') as version, status, script, monthly from form_template where status not in (-1, 2)"
 
+        // Запросы на получение колонок
+        def sqlColumns1 = "select id, name, form_template_id, ord, alias, type, width, precision, max_length, checking, attribute_id, format, filter, parent_column_id, (select alias from form_column fc2 where fc2.id = fc1.parent_column_id) as parent_alias, attribute_id2 from form_column fc1 where form_template_id in (select distinct id from form_template where status not in (-1, 2)) order by ord"
+        def sqlColumns2 = "select id, name, form_template_id, ord, alias, type, width, precision, max_length, checking, attribute_id, format, filter, parent_column_id, (select alias from form_column fc2 where fc2.id = fc1.parent_column_id) as parent_alias, attribute_id2 from form_column fc1 where form_template_id in (select distinct id from form_template where status not in (-1, 2)) order by ord"
+
+        // Перечень всех всерсий в БД (заполняется в getTemplates)
         def allVersions = [:]
 
-        def map1 = [:]
-        def columns1 = [:]
-
-        sql.eachRow("select id, type_id, data_rows, fixed_rows, name, fullname, code, data_headers, to_char(version, 'RRRR') as version, status, script, monthly from form_template where status not in (-1, 2)") {
-            def type_id = it.type_id as Integer
-            if (map1[type_id] == null) {
-                map1.put((Integer) it.type_id, [:])
-            }
-            // Версия макета
-            def version = new Expando()
-            version.id = it.id as Integer
-            version.type_id = it.type_id as Integer
-            version.data_rows = it.data_rows?.characterStream?.text
-            version.fixed_rows = it.fixed_rows as Integer
-            version.name = it.name
-            version.fullname = it.fullname
-            version.code = it.code
-            version.data_headers = it.data_headers?.characterStream?.text
-            version.version = it.version
-            version.status = it.status
-            version.script = it.script?.characterStream?.text?.trim()?.replaceAll("\r", "")
-            version.monthly = it.monthly as Integer
-            map1[type_id].put(it.version, version)
-            if (!allVersions.containsKey(type_id)) {
-                allVersions.put(type_id, [] as Set)
-            }
-            allVersions[type_id].add(version.version)
-        }
-
-        // Графы
-        sql.eachRow("select id, name, form_template_id, ord, alias, type, width, precision, max_length, checking, attribute_id, format, filter, parent_column_id, (select alias from form_column fc2 where fc2.id = fc1.parent_column_id) as parent_alias, attribute_id2 from form_column fc1 where form_template_id in (select distinct id from form_template where status not in (-1, 2)) order by ord") {
-            def form_template_id = it.form_template_id as Integer
-            if (!columns1.containsKey(form_template_id)) {
-                columns1.put(form_template_id, [] as Set)
-            }
-            def column = new Expando()
-            column.id = it.id as Integer
-            column.form_template_id = form_template_id
-            column.ord = it.ord
-            column.alias = it.alias
-            column.type = it.type
-            column.width = it.width
-            column.precision = it.precision
-            column.max_length = it.max_length
-            column.checking = it.checking
-            column.attribute_id = it.attribute_id
-            column.format = it.format
-            column.filter = it.filter
-            column.parent_column_id = it.parent_column_id
-            column.parent_alias = it.parent_alias
-            column.attribute_id2 = it.attribute_id2
-            columns1[form_template_id].add(column)
-        }
-
-        sql.close()
-        println("Load DB form_template1 OK")
-
-        // 2
-        println("DBMS connect: $prefix2")
-        sql = Sql.newInstance(Main.DB_URL, prefix2, Main.DB_PASSWORD, "oracle.jdbc.OracleDriver")
-
-        def map2 = [:]
-        def columns2 = [:]
-
-        sql.eachRow("select id, type_id, data_rows, fixed_rows, name, fullname, code, data_headers, to_char(version, 'RRRR') as version, status, script, monthly from form_template where status not in (-1, 2)") {
-            def type_id = it.type_id as Integer
-            if (map2[type_id] == null) {
-                map2.put((Integer) it.type_id, [:])
-            }
-            // Версия макета
-            def version = new Expando()
-            version.id = it.id as Integer
-            version.type_id = it.type_id as Integer
-            version.data_rows = it.data_rows?.characterStream?.text
-            version.fixed_rows = it.fixed_rows as Integer
-            version.name = it.name
-            version.fullname = it.fullname
-            version.code = it.code
-            version.data_headers = it.data_headers?.characterStream?.text
-            version.version = it.version
-            version.status = it.status
-            version.script = it.script?.characterStream?.text?.trim()?.replaceAll("\r", "")
-            version.monthly = it.monthly as Integer
-            map2[type_id].put(it.version, version)
-            if (!allVersions.containsKey(type_id)) {
-                allVersions.put(type_id, [] as Set)
-            }
-            allVersions[type_id].add(version.version)
-        }
-
-        // Графы
-        sql.eachRow("select id, name, form_template_id, ord, alias, type, width, precision, max_length, checking, attribute_id, format, filter, parent_column_id, (select alias from form_column fc2 where fc2.id = fc1.parent_column_id) as parent_alias, attribute_id2 from form_column fc1 where form_template_id in (select distinct id from form_template where status not in (-1, 2)) order by ord") {
-            def form_template_id = it.form_template_id as Integer
-            if (!columns2.containsKey(form_template_id)) {
-                columns2.put(form_template_id, [] as Set)
-            }
-            def column = new Expando()
-            column.id = it.id as Integer
-            column.form_template_id = form_template_id
-            column.ord = it.ord
-            column.alias = it.alias
-            column.type = it.type
-            column.width = it.width
-            column.precision = it.precision
-            column.max_length = it.max_length
-            column.checking = it.checking
-            column.attribute_id = it.attribute_id
-            column.format = it.format
-            column.filter = it.filter
-            column.parent_column_id = it.parent_column_id
-            column.parent_alias = it.parent_alias
-            column.attribute_id2 = it.attribute_id2
-            columns2[form_template_id].add(column)
-        }
-
-        sql.close()
-        println("Load DB form_template2 OK")
+        // Макеты
+        def templates1 = getTemplates(prefix1, sqlTemplate1, sqlColumns1, allVersions)
+        def templates2 = getTemplates(prefix2, sqlTemplate2, sqlColumns2, allVersions)
 
         // Построение отчета
         def report = new File(Main.REPORT_DB_NAME)
@@ -138,13 +29,14 @@ class DBReport {
             report.delete()
         }
 
-        def writer = new FileWriter(new File(Main.REPORT_DB_NAME))
-        def builder = new groovy.xml.MarkupBuilder(writer)
-
+        // Данные для отображения отличий в графах НФ
         def columnTableData = [:]
 
+        // Данные для отображения отличий в шапках НФ
         def headerTableData = [:]
 
+        def writer = new FileWriter(new File(Main.REPORT_DB_NAME))
+        def builder = new groovy.xml.MarkupBuilder(writer)
         builder.html {
             head {
                 meta(charset: 'windows-1251')
@@ -155,6 +47,7 @@ class DBReport {
                 link('', rel: 'stylesheet', href: 'http://code.jquery.com/ui/1.10.3/themes/black-tie/jquery-ui.css')
             }
             body {
+                // Скрипт вызова диалога
                 script(type: 'text/javascript', '''
                 $(function() {
                     $('.cln').click(function() {
@@ -193,21 +86,25 @@ class DBReport {
                             th 'monthly'
                         }
 
+                        // Сравнение
                         Main.TEMPLATE_NAME_TO_TYPE_ID[taxName].each { folderName, type_id ->
                             if (type_id != -1) {
                                 allVersions[type_id].each { version ->
-                                    // Сравнение
-                                    def tmp1 = map1[type_id]?.get(version)
-                                    def tmp2 = map2[type_id]?.get(version)
+                                    // Макеты
+                                    def tmp1 = templates1.templateMap[type_id]?.get(version)
+                                    def tmp2 = templates2.templateMap[type_id]?.get(version)
 
-                                    def columnsSet1 = columns1[tmp1?.id]
-                                    def columnsSet2 = columns2[tmp2?.id]
+                                    // Графы
+                                    def columnsSet1 = templates1.columnsMap[tmp1?.id]
+                                    def columnsSet2 = templates2.columnsMap[tmp2?.id]
 
+                                    // Имя из первого макета, а при его отсутствии — из второго
                                     def name = tmp1?.name
                                     if (name == null) {
                                         name = tmp2?.name
                                     }
 
+                                    // Признак сравнения
                                     def nameC = tmp1?.name == tmp2?.name ? '+' : '—'
                                     def fullnameC = tmp1?.fullname == tmp2?.fullname ? '+' : '—'
                                     def fixedrowsC = tmp1?.fixed_rows == tmp2?.fixed_rows ? '+' : '—'
@@ -216,8 +113,10 @@ class DBReport {
                                     def statusC = tmp1?.status == tmp2?.status ? '+' : '—'
                                     def scriptC = tmp1?.script == tmp2?.script ? '+' : '—'
 
+                                    // Сравнение шапок НФ
                                     def headerDiff = null
                                     if (tmp1?.data_headers == null && tmp2?.data_headers != null || tmp1?.data_headers != null && tmp2?.data_headers == null) {
+                                        // Один заголовок отсутствует
                                         headerDiff = "Нет в ${tmp1?.data_headers == null ? prefix1 : prefix2}"
                                     } else if (tmp1?.data_headers != null && tmp2?.data_headers != null && tmp1?.data_headers != tmp2?.data_headers) {
                                         // Сравнение заголовков
@@ -225,38 +124,17 @@ class DBReport {
                                         def root2 = new XmlParser().parseText(tmp2.data_headers)
 
                                         // Сравнение
-                                        def header1 = []
-                                        def header2 = []
-                                        def headerCompare = [] as Set
-
-                                        // Шапка макета 1
-                                        root1.each { row ->
-                                            def headerRow = []
-                                            header1.add(headerRow)
-                                            row.each { col ->
-                                                headerRow.add(col.@value)
-                                            }
-                                        }
-
-                                        // Шапка макета 2
-                                        root2.each { row ->
-                                            def headerRow = []
-                                            header2.add(headerRow)
-                                            row.each { col ->
-                                                headerRow.add(col.@value)
-                                            }
-                                        }
+                                        def header1 = getHeaderCells(root1) // Шапка макета 1
+                                        def header2 = getHeaderCells(root2) // Шапка макета 2
+                                        def headerCompare = [] as Set // Набор отличающихся ячеек
 
                                         // Сравнение ячеек шапки
                                         for (def i = 0; i < Math.max(header1.size(), header2.size()); i++) {
                                             def row1 = header1.size() > i ? header1.getAt(i) : null
                                             def row2 = header2.size() > i ? header2.getAt(i) : null
-
-                                            for (
-                                                    def j = 0; j < Math.max(row1 == null ? 0 : row1.size(), row2 == null ? 0 : row2.size()); j++) {
+                                            for (def j = 0; j < Math.max(row1 == null ? 0 : row1.size(), row2 == null ? 0 : row2.size()); j++) {
                                                 def cell1 = row1 == null ? null : (row1.size() > j ? row1.getAt(j) : null)
                                                 def cell2 = row2 == null ? null : (row2.size() > j ? row2.getAt(j) : null)
-
                                                 if (cell1 != cell2) {
                                                     headerCompare.add("$i $j")
                                                 }
@@ -264,67 +142,11 @@ class DBReport {
                                         }
 
                                         // Невидимые ячейки
-                                        def hiddenCell1 = []
-                                        def hiddenCell2 = []
+                                        def hiddenCells1 = getHiddenCells(root1)
+                                        def hiddenCells2 = getHiddenCells(root2)
 
-                                        def skipRowAliases = [:]
-                                        def rowCounter = 0
-                                        root1.each { row ->
-                                            def skipCol = 0
-                                            def colCounter = 0
-                                            row.each { col ->
-                                                if (skipCol != 0) {
-                                                    skipCol--
-                                                    hiddenCell1.add("${rowCounter} ${colCounter}")
-                                                } else {
-                                                    if (skipRowAliases[col.@alias] != null && skipRowAliases[col.@alias] != 0) {
-                                                        skipRowAliases[col.@alias] = skipRowAliases[col.@alias] - 1
-                                                        hiddenCell1.add("${rowCounter} ${colCounter}")
-                                                    } else {
-                                                        def colSpan = col.@colSpan
-                                                        def rowSpan = col.@rowSpan
-                                                        if (colSpan != '1') {
-                                                            skipCol = colSpan.toInteger() - 1
-                                                        }
-                                                        if (rowSpan != '1') {
-                                                            skipRowAliases.put(col.@alias, rowSpan.toInteger() - 1)
-                                                        }
-                                                    }
-                                                }
-                                                colCounter++
-                                            }
-                                            rowCounter++
-                                        }
-
-                                        skipRowAliases = [:]
-                                        rowCounter = 0
-                                        root2.each { row ->
-                                            def skipCol = 0
-                                            def colCounter = 0
-                                            row.each { col ->
-                                                if (skipCol != 0) {
-                                                    skipCol--
-                                                    hiddenCell2.add("${rowCounter} ${colCounter}")
-                                                } else {
-                                                    if (skipRowAliases[col.@alias] != null && skipRowAliases[col.@alias] != 0) {
-                                                        skipRowAliases[col.@alias] = skipRowAliases[col.@alias] - 1
-                                                        hiddenCell2.add("${rowCounter} ${colCounter}")
-                                                    } else {
-                                                        def colSpan = col.@colSpan
-                                                        def rowSpan = col.@rowSpan
-                                                        if (colSpan != '1') {
-                                                            skipCol = colSpan.toInteger() - 1
-                                                        }
-                                                        if (rowSpan != '1') {
-                                                            skipRowAliases.put(col.@alias, rowSpan.toInteger() - 1)
-                                                        }
-                                                    }
-                                                }
-                                                colCounter++
-                                            }
-                                            rowCounter++
-                                        }
-                                        headerCompare.removeAll(hiddenCell1.intersect(hiddenCell2))
+                                        // Не учитываем отличия в невидимых ячейках
+                                        headerCompare.removeAll(hiddenCells1.intersect(hiddenCells2))
 
                                         if (headerCompare.isEmpty()) {
                                             headerDiff = "Есть отличия в невидимых ячейках"
@@ -340,11 +162,16 @@ class DBReport {
                                             data.prefix1 = prefix1
                                             data.prefix2 = prefix2
                                             data.headerCompare = headerCompare
+                                            data.hiddenCells1 = hiddenCells1
+                                            data.hiddenCells2 = hiddenCells2
                                             headerTableData.put("h_${type_id}_${version}", data)
                                         }
                                     }
 
+                                    // Сравнение граф НФ
                                     def colDiff = null
+                                    def headers = ['ord', 'alias', 'name', 'type', 'width', 'precision', 'max_length', 'checking', 'attribute_id',
+                                            'format', 'filter', 'parent_alias', 'attribute_id2']
                                     if (columnsSet1 != null && columnsSet2 == null || columnsSet1 == null && columnsSet2 != null) {
                                         colDiff = "Нет в ${columnsSet1 == null ? prefix1 : prefix2}"
                                     } else if (columnsSet1 != null && columnsSet2 != null) {
@@ -353,83 +180,14 @@ class DBReport {
                                         for (def i = 0; i < Math.max(columnsSet1.size(), columnsSet2.size()); i++) {
                                             def col1 = columnsSet1.size() > i ? columnsSet1.getAt(i) : null
                                             def col2 = columnsSet2.size() > i ? columnsSet2.getAt(i) : null
-                                            if (col1?.name != col2?.name) {
-                                                if (!changesMap.containsKey(i)) {
-                                                    changesMap.put(i, [])
+
+                                            headers.each { header ->
+                                                if (col1 == null || col2 == null || col1[header] != col2[header]) {
+                                                    if (!changesMap.containsKey(i)) {
+                                                        changesMap.put(i, [])
+                                                    }
+                                                    changesMap[i].add(header)
                                                 }
-                                                changesMap[i].add("name")
-                                            }
-                                            if (col1?.ord != col2?.ord) {
-                                                if (!changesMap.containsKey(i)) {
-                                                    changesMap.put(i, [])
-                                                }
-                                                changesMap[i].add("ord")
-                                            }
-                                            if (col1?.alias != col2?.alias) {
-                                                if (!changesMap.containsKey(i)) {
-                                                    changesMap.put(i, [])
-                                                }
-                                                changesMap[i].add("alias")
-                                            }
-                                            if (col1?.type != col2?.type) {
-                                                if (!changesMap.containsKey(i)) {
-                                                    changesMap.put(i, [])
-                                                }
-                                                changesMap[i].add("type")
-                                            }
-                                            if (col1?.width != col2?.width) {
-                                                if (!changesMap.containsKey(i)) {
-                                                    changesMap.put(i, [])
-                                                }
-                                                changesMap[i].add("width")
-                                            }
-                                            if (col1?.precision != col2?.precision) {
-                                                if (!changesMap.containsKey(i)) {
-                                                    changesMap.put(i, [])
-                                                }
-                                                changesMap[i].add("precision")
-                                            }
-                                            if (col1?.max_length != col2?.max_length) {
-                                                if (!changesMap.containsKey(i)) {
-                                                    changesMap.put(i, [])
-                                                }
-                                                changesMap[i].add("max_length")
-                                            }
-                                            if (col1?.checking != col2?.checking) {
-                                                if (!changesMap.containsKey(i)) {
-                                                    changesMap.put(i, [])
-                                                }
-                                                changesMap[i].add("checking")
-                                            }
-                                            if (col1?.attribute_id != col2?.attribute_id) {
-                                                if (!changesMap.containsKey(i)) {
-                                                    changesMap.put(i, [])
-                                                }
-                                                changesMap[i].add("attribute_id")
-                                            }
-                                            if (col1?.format != col2?.format) {
-                                                if (!changesMap.containsKey(i)) {
-                                                    changesMap.put(i, [])
-                                                }
-                                                changesMap[i].add("format")
-                                            }
-                                            if (col1?.filter != col2?.filter) {
-                                                if (!changesMap.containsKey(i)) {
-                                                    changesMap.put(i, [])
-                                                }
-                                                changesMap[i].add("filter")
-                                            }
-                                            if (col1?.parent_alias != col2?.parent_alias) {
-                                                if (!changesMap.containsKey(i)) {
-                                                    changesMap.put(i, [])
-                                                }
-                                                changesMap[i].add("parent_alias")
-                                            }
-                                            if (col1?.attribute_id2 != col2?.attribute_id2) {
-                                                if (!changesMap.containsKey(i)) {
-                                                    changesMap.put(i, [])
-                                                }
-                                                changesMap[i].add("attribute_id2")
                                             }
                                         }
 
@@ -440,6 +198,7 @@ class DBReport {
                                             data.tmp2 = tmp2
                                             data.name = name
                                             data.changesMap = changesMap
+                                            data.headers = headers
                                             data.columnsSet1 = columnsSet1
                                             data.columnsSet2 = columnsSet2
                                             data.type_id = type_id
@@ -459,6 +218,7 @@ class DBReport {
                                         td version
                                         td tmp1?.id
                                         td tmp2?.id
+
                                         if (nameC == '+') {
                                             td(class: 'td_ok', nameC)
                                         } else {
@@ -533,292 +293,190 @@ class DBReport {
                         }
                     }
                 }
+                // Скрытый блок для отображения отличий в графах НФ
                 columnTableData.each() { key, data ->
                     div(class: 'dlg', id: key, title: "Сравнение граф шаблона вида ${data.type_id} версии ${data.version} «${data.name}»") {
                         table(class: 'rt') {
-                            tr {
-                                td(colspan: 12, class: 'hdr', data.prefix1)
-                            }
-                            tr {
-                                th 'ord'
-                                th 'alias'
-                                th 'type'
-                                th 'width'
-                                th 'precision'
-                                th 'max_length'
-                                th 'checking'
-                                th 'attribute_id'
-                                th 'format'
-                                th 'filter'
-                                th 'parent_alias'
-                                th 'attribute_id2'
-                            }
-
-                            def changesMap = data.changesMap
-
-                            data.columnsSet1.eachWithIndex { column, i ->
-                                tr {
-                                    if (!changesMap[i]?.contains('ord')) {
-                                        td column.ord
-                                    } else {
-                                        td(class: 'td_error', column.ord)
-                                    }
-
-                                    if (!changesMap[i]?.contains('alias')) {
-                                        td column.alias
-                                    } else {
-                                        td(class: 'td_error', column.alias)
-                                    }
-
-                                    if (!changesMap[i]?.contains('type')) {
-                                        td column.type
-                                    } else {
-                                        td(class: 'td_error', column.type)
-                                    }
-
-                                    if (!changesMap[i]?.contains('width')) {
-                                        td column.width
-                                    } else {
-                                        td(class: 'td_error', column.width)
-                                    }
-
-                                    if (!changesMap[i]?.contains('precision')) {
-                                        td column.precision
-                                    } else {
-                                        td(class: 'td_error', column.precision)
-                                    }
-
-                                    if (!changesMap[i]?.contains('max_length')) {
-                                        td column.max_length
-                                    } else {
-                                        td(class: 'td_error', column.max_length)
-                                    }
-
-                                    if (!changesMap[i]?.contains('checking')) {
-                                        td column.checking
-                                    } else {
-                                        td(class: 'td_error', column.checking)
-                                    }
-
-                                    if (!changesMap[i]?.contains('attribute_id')) {
-                                        td column.attribute_id
-                                    } else {
-                                        td(class: 'td_error', column.attribute_id)
-                                    }
-
-                                    if (!changesMap[i]?.contains('format')) {
-                                        td column.format
-                                    } else {
-                                        td(class: 'td_error', column.format)
-                                    }
-
-                                    if (!changesMap[i]?.contains('filter')) {
-                                        td column.filter
-                                    } else {
-                                        td(class: 'td_error', column.filter)
-                                    }
-
-                                    if (!changesMap[i]?.contains('parent_alias')) {
-                                        td column.parent_alias
-                                    } else {
-                                        td(class: 'td_error', column.parent_alias)
-                                    }
-
-                                    if (!changesMap[i]?.contains('attribute_id2')) {
-                                        td column.attribute_id2
-                                    } else {
-                                        td(class: 'td_error', column.attribute_id2)
-                                    }
-                                }
-                            }
-
-                            tr {
-                                td(colspan: 12, class: 'hdr', data.prefix2)
-                            }
-                            tr {
-                                th 'ord'
-                                th 'alias'
-                                th 'type'
-                                th 'width'
-                                th 'precision'
-                                th 'max_length'
-                                th 'checking'
-                                th 'attribute_id'
-                                th 'format'
-                                th 'filter'
-                                th 'parent_alias'
-                                th 'attribute_id2'
-                            }
-
-                            data.columnsSet2.eachWithIndex { column, i ->
-                                tr {
-                                    if (!changesMap[i]?.contains('ord')) {
-                                        td column.ord
-                                    } else {
-                                        td(class: 'td_error', column.ord)
-                                    }
-
-                                    if (!changesMap[i]?.contains('alias')) {
-                                        td column.alias
-                                    } else {
-                                        td(class: 'td_error', column.alias)
-                                    }
-
-                                    if (!changesMap[i]?.contains('type')) {
-                                        td column.type
-                                    } else {
-                                        td(class: 'td_error', column.type)
-                                    }
-
-                                    if (!changesMap[i]?.contains('width')) {
-                                        td column.width
-                                    } else {
-                                        td(class: 'td_error', column.width)
-                                    }
-
-                                    if (!changesMap[i]?.contains('precision')) {
-                                        td column.precision
-                                    } else {
-                                        td(class: 'td_error', column.precision)
-                                    }
-
-                                    if (!changesMap[i]?.contains('max_length')) {
-                                        td column.max_length
-                                    } else {
-                                        td(class: 'td_error', column.max_length)
-                                    }
-
-                                    if (!changesMap[i]?.contains('checking')) {
-                                        td column.checking
-                                    } else {
-                                        td(class: 'td_error', column.checking)
-                                    }
-
-                                    if (!changesMap[i]?.contains('attribute_id')) {
-                                        td column.attribute_id
-                                    } else {
-                                        td(class: 'td_error', column.attribute_id)
-                                    }
-
-                                    if (!changesMap[i]?.contains('format')) {
-                                        td column.format
-                                    } else {
-                                        td(class: 'td_error', column.format)
-                                    }
-
-                                    if (!changesMap[i]?.contains('filter')) {
-                                        td column.filter
-                                    } else {
-                                        td(class: 'td_error', column.filter)
-                                    }
-
-                                    if (!changesMap[i]?.contains('parent_alias')) {
-                                        td column.parent_alias
-                                    } else {
-                                        td(class: 'td_error', column.parent_alias)
-                                    }
-
-                                    if (!changesMap[i]?.contains('attribute_id2')) {
-                                        td column.attribute_id2
-                                    } else {
-                                        td(class: 'td_error', column.attribute_id2)
-                                    }
-                                }
-                            }
+                            // Вывод таблицы с колонками 1
+                            printColumnsTable(builder, data.changesMap, data.headers, data.prefix1, data.columnsSet1)
+                            // Вывод таблицы с колонками 2
+                            printColumnsTable(builder, data.changesMap, data.headers, data.prefix2, data.columnsSet2)
                         }
                     }
                 }
-
+                // Скрытый блок для отображения отличий шапках НФ
                 headerTableData.each() { key, data ->
                     div(class: 'dlg', id: key, title: "Сравнение заголовков шаблона вида ${data.type_id} версии ${data.version} «${data.name}»") {
-                        def headerCompare = data.headerCompare
-
-                        // Вывод шапки 1
-                        div(class: 'hdrh', data.prefix1)
-                        table(class: 'rt') {
-                            def skipRowAliases = [:]
-                            def rowCounter = 0
-                            data.root1.each { row ->
-                                tr {
-                                    def skipCol = 0
-                                    def colCounter = 0
-                                    row.each { col ->
-                                        if (skipCol != 0) {
-                                            skipCol--
-                                        } else {
-                                            if (skipRowAliases[col.@alias] != null && skipRowAliases[col.@alias] != 0) {
-                                                skipRowAliases[col.@alias] = skipRowAliases[col.@alias] - 1
-                                            } else {
-                                                def colSpan = col.@colSpan
-                                                def rowSpan = col.@rowSpan
-
-                                                if (colSpan != '1') {
-                                                    skipCol = colSpan.toInteger() - 1
-                                                }
-
-                                                if (rowSpan != '1') {
-                                                    skipRowAliases.put(col.@alias, rowSpan.toInteger() - 1)
-                                                }
-
-                                                if (!headerCompare.contains("$rowCounter $colCounter")) {
-                                                    td(colspan: colSpan, rowspan: rowSpan, col.@value)
-                                                } else {
-                                                    td(class: 'td_error', colspan: colSpan, rowspan: rowSpan, col.@value)
-                                                }
-                                            }
-                                        }
-                                        colCounter++
-                                    }
-                                }
-                                rowCounter++
-                            }
-                        }
-
-                        // Вывод шапки 2
-                        div(class: 'hdrh', data.prefix2)
-                        table(class: 'rt') {
-                            def skipRowAliases = [:]
-                            def rowCounter = 0
-                            data.root2.each { row ->
-                                tr {
-                                    def skipCol = 0
-                                    def colCounter = 0
-                                    row.each { col ->
-                                        if (skipCol != 0) {
-                                            skipCol--
-                                        } else {
-                                            if (skipRowAliases[col.@alias] != null && skipRowAliases[col.@alias] != 0) {
-                                                skipRowAliases[col.@alias] = skipRowAliases[col.@alias] - 1
-                                            } else {
-                                                def colSpan = col.@colSpan
-                                                def rowSpan = col.@rowSpan
-
-                                                if (colSpan != '1') {
-                                                    skipCol = colSpan.toInteger() - 1
-                                                }
-
-                                                if (rowSpan != '1') {
-                                                    skipRowAliases.put(col.@alias, rowSpan.toInteger() - 1)
-                                                }
-
-                                                if (!headerCompare.contains("$rowCounter $colCounter")) {
-                                                    td(colspan: colSpan, rowspan: rowSpan, col.@value)
-                                                } else {
-                                                    td(class: 'td_error', colspan: colSpan, rowspan: rowSpan, col.@value)
-                                                }
-                                            }
-                                        }
-                                        colCounter++
-                                    }
-                                }
-                                rowCounter++
-                            }
-                        }
+                        // Вывод таблицы с шапкой 1
+                        printHeaderTable(builder, data.prefix1, data.root1, data.headerCompare, data.hiddenCells1)
+                        // Вывод таблицы с шапкой 2
+                        printHeaderTable(builder, data.prefix2, data.root2, data.headerCompare, data.hiddenCells2)
                     }
                 }
             }
         }
         writer.close()
         println("See ${Main.REPORT_DB_NAME} for details")
+    }
+
+    // Получение макетов
+    def private static getTemplates(def prefix, def sqlTemplate, def sqlColumns, def allVersions) {
+        println("DBMS connect: $prefix")
+        def retVal = new Expando()
+
+        def sql = Sql.newInstance(Main.DB_URL, prefix, Main.DB_PASSWORD, "oracle.jdbc.OracleDriver")
+
+        def templateMap = [:]
+        def columnsMap = [:]
+
+        sql.eachRow(sqlTemplate) {
+            def type_id = it.type_id as Integer
+            if (templateMap[type_id] == null) {
+                templateMap.put((Integer) it.type_id, [:])
+            }
+            // Версия макета
+            def version = new Expando()
+            version.id = it.id as Integer
+            version.type_id = it.type_id as Integer
+            version.data_rows = it.data_rows?.characterStream?.text
+            version.fixed_rows = it.fixed_rows as Integer
+            version.name = it.name
+            version.fullname = it.fullname
+            version.code = it.code
+            version.data_headers = it.data_headers?.characterStream?.text
+            version.version = it.version
+            version.status = it.status
+            version.script = it.script?.characterStream?.text?.trim()?.replaceAll("\r", "")
+            version.monthly = it.monthly as Integer
+            templateMap[type_id].put(it.version, version)
+            if (!allVersions.containsKey(type_id)) {
+                allVersions.put(type_id, [] as Set)
+            }
+            allVersions[type_id].add(version.version)
+        }
+
+        // Графы
+        sql.eachRow(sqlColumns) {
+            def form_template_id = it.form_template_id as Integer
+            if (!columnsMap.containsKey(form_template_id)) {
+                columnsMap.put(form_template_id, [] as Set)
+            }
+            def column = new Expando()
+            column.id = it.id as Integer
+            column.name = it.name
+            column.form_template_id = form_template_id
+            column.ord = it.ord
+            column.alias = it.alias
+            column.type = it.type
+            column.width = it.width
+            column.precision = it.precision
+            column.max_length = it.max_length
+            column.checking = it.checking
+            column.attribute_id = it.attribute_id
+            column.format = it.format
+            column.filter = it.filter
+            column.parent_column_id = it.parent_column_id
+            column.parent_alias = it.parent_alias
+            column.attribute_id2 = it.attribute_id2
+            columnsMap[form_template_id].add(column)
+        }
+
+        sql.close()
+        println("Load DB form_template from $prefix OK")
+        retVal.templateMap = templateMap
+        retVal.columnsMap = columnsMap
+        return retVal
+    }
+
+    // XML-data_headers → список списков ячеек
+    def private static getHeaderCells(def root) {
+        def retVal = []
+        root.each { row ->
+            def headerRow = []
+            retVal.add(headerRow)
+            row.each { col ->
+                headerRow.add(col.@value)
+            }
+        }
+        return retVal
+    }
+
+    // XML-data_headers → список невидимых ячеек
+    def private static getHiddenCells(def root) {
+        def retVal = []
+        def skipRowAliases = [:]
+        def rowCounter = 0
+        root.each { row ->
+            def skipCol = 0
+            def colCounter = 0
+            row.each { col ->
+                if (skipCol != 0) {
+                    skipCol--
+                    retVal.add("${rowCounter} ${colCounter}")
+                } else {
+                    if (skipRowAliases[col.@alias] != null && skipRowAliases[col.@alias] != 0) {
+                        skipRowAliases[col.@alias] = skipRowAliases[col.@alias] - 1
+                        retVal.add("${rowCounter} ${colCounter}")
+                    } else {
+                        def colSpan = col.@colSpan
+                        def rowSpan = col.@rowSpan
+                        if (colSpan != '1') {
+                            skipCol = colSpan.toInteger() - 1
+                        }
+                        if (rowSpan != '1') {
+                            skipRowAliases.put(col.@alias, rowSpan.toInteger() - 1)
+                        }
+                    }
+                }
+                colCounter++
+            }
+            rowCounter++
+        }
+        return retVal
+    }
+
+    // Вывод шапки для data_headers
+    def private static printHeaderTable(def builder, def prefix, def root, def headerCompare, def hiddenCells) {
+        builder.div(class: 'hdrh', prefix)
+        builder.table(class: 'rt') {
+            def rowCounter = 0
+            root.each { row ->
+                tr {
+                    def colCounter = 0
+                    row.each { col ->
+                        def key = "$rowCounter $colCounter"
+                        if (!hiddenCells.contains(key)) {
+                            td((headerCompare.contains(key) ? [class: 'td_error'] : [:]) +
+                                    (col.@colSpan == '1' ? [:] : [colspan: col.@colSpan]) +
+                                    (col.@rowSpan == '1' ? [:] : [rowspan: col.@rowSpan]),
+                                    col.@value)
+                        }
+                        colCounter++
+                    }
+                }
+                rowCounter++
+            }
+        }
+    }
+
+    // Вывод шапки для columns
+    def private static printColumnsTable(def builder, def changesMap, def headers, def prefix, def columnsSet) {
+        // Название таблицы
+        builder.tr {
+            td(colspan: 13, class: 'hdr', prefix)
+        }
+        builder.tr {
+            headers.each { header ->
+                th header
+            }
+        }
+        // Содержимое таблицы
+        columnsSet.eachWithIndex { column, i ->
+            builder.tr {
+                headers.each { header ->
+                    td((changesMap[i]?.contains(header) ? [class: 'td_error'] : [:]), column[header])
+                }
+            }
+        }
     }
 }
