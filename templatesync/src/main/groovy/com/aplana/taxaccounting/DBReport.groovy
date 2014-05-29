@@ -481,10 +481,19 @@ class DBReport {
                                             td(class: 'td_ok', datarowsC)
                                         } else {
                                             def title = 'См. БД'
+                                            def tdClass = 'td_error'
                                             if (tmp1?.data_rows == null && tmp2?.data_rows != null || tmp1?.data_rows != null && tmp2?.data_rows == null) {
+                                                def emptyDataRows = "<?xml version=\"1.0\" encoding=\"utf-8\"?><rows/>"
                                                 title = "Нет в ${tmp1?.data_rows == null ? prefix1 : prefix2}"
+                                                if (tmp1?.data_rows?.trim() == emptyDataRows || tmp2?.data_rows?.trim() == emptyDataRows) {
+                                                    tdClass = 'td_gr'
+                                                    datarowsC = '+/—'
+                                                    title = "$title, но оба пустые"
+                                                } else {
+                                                    // TODO Детальное сравнение
+                                                }
                                             }
-                                            td(class: 'td_error', title: title, datarowsC)
+                                            td(class: tdClass, title: title, datarowsC)
                                         }
 
                                         if (dataheadersC == '+') {
