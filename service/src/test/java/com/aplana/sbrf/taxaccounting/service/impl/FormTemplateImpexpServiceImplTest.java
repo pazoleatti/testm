@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.model.Translator;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.io.IOUtils;
@@ -22,14 +23,14 @@ public class FormTemplateImpexpServiceImplTest {
 
     @Before
     public void init() throws IOException {
-        tempFolder = File.createTempFile(folder,"");
+        tempFolder = File.createTempFile(Translator.transliterate(folder),"");
         tempFolder.delete();
         tempFolder.mkdir();
         files = new ArrayList<String>(10);
 
         for (int i = 0; i < 10; i++){
-            File file = new File(tempFolder.getAbsolutePath() + File.separator +
-                    "(РНУ-102) Регистр " + File.separator + "Налог");
+            File file = new File(Translator.transliterate(tempFolder.getAbsolutePath() + File.separator +
+                    "(РНУ-102) Регистр " + File.separator + "Налог"));
             file.delete();
             file.mkdirs();
         }
@@ -43,10 +44,11 @@ public class FormTemplateImpexpServiceImplTest {
         FileOutputStream fileOutputStream = new FileOutputStream(File.createTempFile(zipName, ".zip"));
         //ZipOutputStream zipOutputStream = new ZipOutputStream(fileOutputStream);
         ZipArchiveOutputStream zipOutputStream = new ZipArchiveOutputStream(fileOutputStream);
-        zipOutputStream.setEncoding("UTF-8");
+        zipOutputStream.setEncoding("UTF8");
+        zipOutputStream.setUseLanguageEncodingFlag(true);
         FileInputStream in = null;
         for (String fileName : files){
-            ZipArchiveEntry ze = new ZipArchiveEntry(new String((folder + File.separator + fileName).getBytes("UTF-8")));
+            ZipArchiveEntry ze = new ZipArchiveEntry(Translator.transliterate(folder + File.separator + fileName));
             zipOutputStream.putArchiveEntry(ze);
             try {
                 in = new FileInputStream(tempFolder.getAbsolutePath() + File.separator + fileName);
@@ -60,6 +62,7 @@ public class FormTemplateImpexpServiceImplTest {
         zipOutputStream.finish();
         fileOutputStream.close();
         //dirDelete(tempFolder);
+        System.out.println(tempFolder.getAbsolutePath());
     }
 
     private void dirDelete(File directory) throws FileNotFoundException {

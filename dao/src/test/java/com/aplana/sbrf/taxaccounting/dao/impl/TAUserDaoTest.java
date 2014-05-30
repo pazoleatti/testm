@@ -1,17 +1,26 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
+import com.aplana.sbrf.taxaccounting.cache.CacheManagerDecorator;
+import com.aplana.sbrf.taxaccounting.cache.ExtendedSimpleCacheManager;
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.MembersFilterData;
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.interceptor.CacheInterceptor;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,10 +35,18 @@ public class TAUserDaoTest {
 	@Autowired
 	private TAUserDao userDao;
 
-	private static String LOGIN_CONTROL_BANK = "controlbank";
+    @Autowired
+    private CacheManagerDecorator cacheManagerDecorator;
+
+    private static String LOGIN_CONTROL_BANK = "controlbank";
 	private static String LOGIN_TEST_BANK = "testBank";
-	
-	@Test
+
+    @Before
+    public void init(){
+        cacheManagerDecorator.clearAll();
+    }
+
+    @Test
 	public void testGetById() {
 		TAUser user = userDao.getUser(1);
 		Assert.assertEquals(1, user.getId());
