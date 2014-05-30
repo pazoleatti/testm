@@ -4,7 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import groovy.transform.Field
 
 /**
- *  (937.1.13) Расшифровка графы 14 «Расхождение» формы 937.1
+ *  (937.1.13) Расшифровка графы 13 «Расхождение» формы 937.1
  *
  *  formTemplateId=607
  */
@@ -228,11 +228,7 @@ void importData() {
             (xml.row[0].cell[3]) : getColumnName(tmpRow, 'sum'),
             (xml.row[1].cell[0]) : '1',
             (xml.row[1].cell[2]) : '2',
-            (xml.row[1].cell[3]) : '3',
-            (xml.row[2].cell[0]) : '1',
-            (xml.row[2].cell[2]) : 'Суммы НДС, уплаченные в бюджет при реализации товаров (работ, услуг) и подлежащие вычету в случае возврата товаров (отказа от выполнения работ, оказания услуг), отраженные в дополнительных листах книги продаж',
-            (xml.row[3].cell[0]) : '2',
-            (xml.row[3].cell[2]) : 'Прочие (расшифровать):'
+            (xml.row[1].cell[3]) : '3'
     ]
 
     checkHeaderEquals(headerMapping)
@@ -248,6 +244,7 @@ void addData(def xml, int headRowCount) {
     def xmlIndexRow = -1 // Строки xml, от 0
     def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
     def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
+    def indexRow = 0
 
     def totalRow = getDataRow(dataRows, 'total')
     totalRow.sum = 0
@@ -291,6 +288,19 @@ void addData(def xml, int headRowCount) {
         if (!isFixed) {
             newRow.rowNum = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, true)
             newRow.differences = row.cell[2].text()
+        } else {
+            def dataRow = dataRows.get(indexRow)
+            indexRow++
+
+            def values = [:]
+            values.rowNum = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, true)
+            values.differences = row.cell[2].text()
+
+            ['rowNum', 'differences'].each { alias ->
+                if (dataRow[alias] != values[alias]) {
+                    logger.error('Неверное значение в фиксированных строках') // TODO (Bulat Kinzyabulatov) поменять сообщение после того как уточнится что выводить
+                }
+            }
         }
         newRow.sum = parseNumber(row.cell[3].text(), xlsIndexRow, 3 + colOffset, logger, true)
 

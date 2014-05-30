@@ -212,7 +212,7 @@ void calc() {
     })
 
     // Номер последний строки предыдущей формы
-    def index = (formDataEvent == FormDataEvent.IMPORT) ? 0 : formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
+    def index = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
 
     for (row in dataRows) {
         if (row.getAlias() != null) {
@@ -814,7 +814,7 @@ void addData(def xml, int headRowCount) {
         int fileColIndex = 0
 
         // графа 1
-        newRow.rowNumber = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, false)
+        newRow.rowNumber = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, true)
         fileColIndex++
 
         // графа 2 - справочник 61 "Коды сделок"
@@ -830,75 +830,75 @@ void addData(def xml, int headRowCount) {
         fileColIndex++
 
         // графа 5
-        newRow.acquisitionDate = parseDate(row.cell[fileColIndex].text(), 'dd.MM.yyyy', xlsIndexRow, fileColIndex + colOffset, logger, false)
+        newRow.acquisitionDate = parseDate(row.cell[fileColIndex].text(), 'dd.MM.yyyy', xlsIndexRow, fileColIndex + colOffset, logger, true)
         fileColIndex++
 
         // графа 6
-        newRow.saleDate = parseDate(row.cell[fileColIndex].text(), 'dd.MM.yyyy', xlsIndexRow, fileColIndex + colOffset, logger, false)
+        newRow.saleDate = parseDate(row.cell[fileColIndex].text(), 'dd.MM.yyyy', xlsIndexRow, fileColIndex + colOffset, logger, true)
         fileColIndex++
 
         // графа 7
-        newRow.amountBonds = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, false)
+        newRow.amountBonds = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, true)
         fileColIndex++
 
         // графа 8
-        newRow.acquisitionPrice = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, false)
+        newRow.acquisitionPrice = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, true)
         fileColIndex++
 
         // графа 9
-        newRow.costOfAcquisition = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, false)
+        newRow.costOfAcquisition = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, true)
         fileColIndex++
 
         // графа 10
-        newRow.marketPriceInPerc = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, false)
+        newRow.marketPriceInPerc = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, true)
         fileColIndex++
 
         // графа 11
-        newRow.marketPriceInRub = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, false)
+        newRow.marketPriceInRub = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, true)
         fileColIndex++
 
         // графа 12
-        newRow.acquisitionPriceTax = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, false)
+        newRow.acquisitionPriceTax = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, true)
         fileColIndex++
 
         // графа 13
-        newRow.redemptionValue = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, false)
+        newRow.redemptionValue = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, true)
         fileColIndex++
 
         // графа 14
-        newRow.priceInFactPerc = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, false)
+        newRow.priceInFactPerc = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, true)
         fileColIndex++
 
         // графа 15
-        newRow.priceInFactRub = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, false)
+        newRow.priceInFactRub = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, true)
         fileColIndex++
 
         // графа 16
-        newRow.marketPriceInPerc1 = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, false)
+        newRow.marketPriceInPerc1 = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, true)
         fileColIndex++
 
         // графа 17
-        newRow.marketPriceInRub1 = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, false)
+        newRow.marketPriceInRub1 = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, true)
         fileColIndex++
 
         // графа 18
-        newRow.salePriceTax = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, false)
+        newRow.salePriceTax = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, true)
         fileColIndex++
 
         // графа 19
-        newRow.expensesOnSale = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, false)
+        newRow.expensesOnSale = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, true)
         fileColIndex++
 
         // графа 20
-        newRow.expensesTotal = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, false)
+        newRow.expensesTotal = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, true)
         fileColIndex++
 
         // графа 21
-        newRow.profit = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, false)
+        newRow.profit = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, true)
         fileColIndex++
 
         // графа 22
-        newRow.excessSalePriceTax = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, false)
+        newRow.excessSalePriceTax = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, true)
 
         rows.add(newRow)
     }

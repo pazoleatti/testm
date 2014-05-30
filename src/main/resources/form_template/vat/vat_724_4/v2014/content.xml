@@ -33,7 +33,7 @@
         <order>3</order>
         <width>10</width>
         <parentAlias>number</parentAlias>
-        <refBookAttributeId>249</refBookAttributeId>
+        <refBookAttributeId>901</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>number</alias>
@@ -42,8 +42,8 @@
         <order>4</order>
         <width>10</width>
         <hierarchical>false</hierarchical>
-        <nameAttributeId>250</nameAttributeId>
-        <refBookAttributeId>250</refBookAttributeId>
+        <nameAttributeId>900</nameAttributeId>
+        <refBookAttributeId>900</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sum</alias>
@@ -80,6 +80,15 @@
         <width>10</width>
         <maxLength>6</maxLength>
         <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sumNds</alias>
+        <checking>false</checking>
+        <name>Сумма НДС по книге продаж</name>
+        <order>9</order>
+        <width>11</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
     </columns>
     <styles>
         <alias>Контрольные суммы</alias>

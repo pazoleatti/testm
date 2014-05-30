@@ -60,8 +60,11 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
 
 	@Override
 	public void compose(FormData dformData, int reportPeriodId, Integer periodOrder,  int departmentId, int formTypeId, FormDataKind kind) {
+        // пересобирается ли форма
+        boolean isRecompose = true;
         // Если экземпляр не найден, то он создается
-		if (dformData == null) {
+        if (dformData == null) {
+            isRecompose = false;
 			// TODO: Надо подумать, что делать с пользователем.
 			int formTemplateId = formTemplateDao.getActiveFormTemplateId(formTypeId, reportPeriodId);
             // Создание формы в том же периоде
@@ -88,8 +91,8 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
                         logEntryService.save(scriptComponentContext.getLogger().getEntries()),
                         depatmentName, kindName, formName);
             } else {
-                scriptComponentContext.getLogger().info("%s: Сформирована налоговая форма-приемник: Подразделение: «%s», Тип: «%s», Вид: «%s».",
-                        FormDataEvent.COMPOSE.getTitle(), depatmentName, kindName, formName);
+                scriptComponentContext.getLogger().info("%s: %s налоговая форма-приемник: Подразделение: «%s», Тип: «%s», Вид: «%s».",
+                        FormDataEvent.COMPOSE.getTitle(), isRecompose? "Переформирована" : "Сформирована", depatmentName, kindName, formName);
             }
 
             formDataDao.save(dformData);

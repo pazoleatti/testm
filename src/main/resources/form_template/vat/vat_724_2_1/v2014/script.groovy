@@ -15,22 +15,30 @@ import groovy.transform.Field
  * formTemplateId=601
  *
  * TODO:
- *      - расчет графов 4 и 5 не доделан (по чтз много вопросов к заказчику)
+ *      - нет справочнкика «Классификатор соответствия кодов операций налоговой формы 724.2.1 по НДС символам ОПУ»
+ *              http://jira.aplana.com/browse/SBRFACCTAX-7396
+ *      - расчет графы 4 и 5 не доделан и недопроверен из за справочника «Классификатор соответствия кодов операций налоговой формы 724.2.1 по НДС символам ОПУ»
  *
  * @author Stanislav Yasinskiy
  */
+
+// графа 1 - rowNum         № пп
+// графа 2 - code           Код операции
+// графа 3 - name           Наименование операции  -
+// графа 4 - realizeCost    Стоимость реализованных (переданных) товаров (работ, услуг) без НДС
+// графа 5 - obtainCost     Стоимость приобретенных товаров  (работа, услуг), не облагаемых НДС
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CALCULATE:
-        checkIncome102()
+        prevCalcCheck()
         calc()
         logicCheck()
         break
     case FormDataEvent.CHECK:
-        checkIncome102()
+        prevCalcCheck()
         logicCheck()
         break
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
@@ -39,11 +47,11 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
-        checkIncome102()
+        prevCalcCheck()
         logicCheck()
         break
     case FormDataEvent.COMPOSE:
-        checkIncome102()
+        prevCalcCheck()
         consolidation()
         calc()
         logicCheck()
@@ -53,27 +61,13 @@ switch (formDataEvent) {
         break
 }
 
-// графа 1 - rowNum         № пп
-// графа 2 - code           Код операции
-// графа 3 - name           Наименование операции  -
-// графа 4 - realizeCost    Стоимость реализованных (переданных) товаров (работ, услуг) без НДС
-// графа 5 - obtainCost     Стоимость приобретенных товаров  (работа, услуг), не облагаемых НДС
-
-//// Кэши и константы
-@Field
-def providerCache = [:]
-@Field
-def recordCache = [:]
-@Field
-def refBookCache = [:]
-
 // Автозаполняемые атрибуты (графа 4, 5)
 @Field
 def autoFillColumns = ['realizeCost', 'obtainCost']
 
-// Проверяемые на пустые значения атрибуты (группа 1..4)
+// Проверяемые на пустые значения атрибуты (группа 1..5)
 @Field
-def nonEmptyColumns = ['rowNum', 'code', 'name', 'realizeCost']
+def nonEmptyColumns = ['rowNum', 'code', 'name', 'realizeCost', 'obtainCost']
 
 // Поля, для которых подсчитываются итоговые значения (графа 4, 5)
 @Field
@@ -94,23 +88,14 @@ def income102Data = null
 @Field
 def dateFormat = "dd.MM.yyyy"
 
-//// Обертки методов
+@Field
+def calcRowAlias4 = ['R1', 'R2', 'R3', 'R4', 'R7', 'R8', 'R9', 'R10', 'R16']
 
-// Поиск записи в справочнике по значению (для импорта)
-def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required = false) {
-    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
-            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
-}
-
-// Разыменование записи справочника
-def getRefBookValue(def long refBookId, def Long recordId) {
-    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
-}
+@Field
+def calcRowAlias5 = ['R7', 'R8']
 
 //// Кастомные методы
 
-// Алгоритмы заполнения полей формы
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
@@ -119,15 +104,12 @@ void calc() {
         if (row.getAlias() == 'itog') {
             continue
         }
-        // TODO посчитать графы 4 и 5 из "форма 102 бухгалтерской отчетности"
-        // TODO Нужны соответствия кодов ОПУ о кодов операций
-        // getIncome102DataByOPU()
-        // income102Row.TOTAL_SUM.numberValue
-        def values = calc4_5(row)
+
         // графа 4
-        row.realizeCost = values.realizeCost
+        row.realizeCost = (row.getAlias() in calcRowAlias4 ? calc4(row) : row.realizeCost)
+
         // графа 5
-        row.obtainCost = values.obtainCost
+        row.obtainCost = (row.getAlias() in calcRowAlias5 ? calc5(row) : null)
     }
 
     // подсчет итогов
@@ -139,17 +121,6 @@ void calc() {
     dataRowHelper.save(dataRows);
 }
 
-// Строки справочника «Отчет о прибылях и убытках» по ОПУ-коду
-def getIncome102DataByOPU(def String opuCode) {
-    def retVal = []
-    for (def income102Row : getIncome102Data()) {
-        if (income102Row.OPU_CODE.value == opuCode) {
-            retVal.add(income102Row)
-        }
-    }
-    return retVal
-}
-
 def logicCheck() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
 
@@ -157,8 +128,10 @@ def logicCheck() {
         if (row.getAlias() == 'itog') {
             continue
         }
-        // 1. Проверка заполнения граф
-        checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
+
+        // 1. Проверка заполнения граф (по графе 5 обязательны тока строки 7 и 8)
+        def columns = (row.getAlias() in calcRowAlias5 ? nonEmptyColumns : nonEmptyColumns - 'obtainCost')
+        checkNonEmptyColumns(row, row.getIndex(), columns, logger, true)
     }
 
     // 2. Проверка итоговых значений
@@ -204,6 +177,23 @@ void checkIncome102() {
     }
 }
 
+void prevCalcCheck() {
+
+    // 1. Проверка превышения разрядности граф - сделано в ядре
+    // сделано в ядре
+
+    // 2. Проверка наличия экземпляра «Отчета о прибылях и убытках» по соответствующему подразделению за соответствующий налоговый период
+    checkIncome102()
+
+    // 3. Проверка наличия символов ОПУ в Экземпляре Отчета о прибылях и убытках, необходимых для заполнения «Графы 4»	Экземпляр «Отчета о прибылях и убытках» подразделения и периода, для которых сформирована текущая форма, содержит записи по всем символам ОПУ, необходимым для заполнения «Графы 4» на основе справочника «Классификатор соответствия кодов операций налоговой формы 724.2.1 по НДС символам ОПУ» 	1	Строка <Номер строки>: Экземпляр Отчета о прибылях и убытках за период <Дата начала отчетного периода> - <Дата окончания отчётного периода> не содержит записей для заполнения графы 4 по следующим символам ОПУ: «Перечень символов ОПУ через запятую»! Расчеты не могут быть выполнены.
+    // 4. Проверка наличия символов ОПУ в Экземпляре Отчета о прибылях и убытках, необходимых для заполнения «Графы 5»	Экземпляр «Отчета о прибылях и убытках» подразделения и периода, для которых сформирована текущая форма, содержит записи по всем символам ОПУ, необходимым для заполнения «Графы 5» на основе справочника «Классификатор соответствия кодов операций налоговой формы 724.2.1 по НДС символам ОПУ» 	1	Строка <Номер строки>: Экземпляр Отчета о прибылях и убытках за период <Дата начала отчетного периода> - <Дата окончания отчётного периода> не содержит записей для заполнения графы 5 по следующим символам ОПУ: «Перечень символов ОПУ через запятую»! Расчеты не могут быть выполнены.
+    // эти проверки происходят при расчетах в методе getOpuCodes
+
+    // 5. Проверка наличия соответствия кода операций символам ОПУ для графы 4	В справочнике «Классификатор соответствия кодов операций налоговой формы 724.2.1 по НДС символам ОПУ» существует запись для «Графы 2» и «Графы 4» по строкам 1-4, 7-10, 16	1	Строка <Номера строк>: В справочнике «Классификатор соответствия кодов операций налоговой формы 724.2.1 по НДС символам ОПУ» нет данных для заполнения графы 4! Расчеты не могут быть выполнены.
+    // 6. Проверка наличия соответствия кода операций символам ОПУ для графы 5	В справочнике «Классификатор соответствия кодов операций налоговой формы 724.2.1 по НДС символам ОПУ» существует запись для «Графы 2» и «Графы 5» по строкам 7 и 8	1	Строка <Номера строк>: В справочнике «Классификатор соответствия кодов операций налоговой формы 724.2.1 по НДС символам ОПУ» нет данных для заполнения графы 5! Расчеты не могут быть выполнены.
+    // эти проверки происходят при расчетах в методе getSumByOpuCodes
+}
+
 // Консолидация
 void consolidation() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
@@ -225,73 +215,81 @@ void consolidation() {
     dataRowHelper.update(dataRows)
 }
 
-// TODO (Ramil Timerbaev) дополнить по чтз, много вопросов к заказчику
-// расчитать значения графы 4 и 5, вернуть в мапе
-def calc4_5(row) {
-    def for4 = null
-    def for5 = null
-    switch (row.code) {
-        case '1010201' :
-            for4 = getIncome102DataByOPU('16301') + getIncome102DataByOPU('17306.17')
-            for5 = getIncome102DataByOPU('') // TODO (Ramil Timerbaev)
-            break
-        case '1010239' :
-            for4 = getIncome102DataByOPU('17306.17')
-            for5 = getIncome102DataByOPU('') // TODO (Ramil Timerbaev)
-            break
-        case '1010242' :
-            for4 = getIncome102DataByOPU('12403.03')
-            for5 = getIncome102DataByOPU('') // TODO (Ramil Timerbaev)
-            break
-        case '1010243' :
-            for4 = getIncome102DataByOPU('') // TODO (Ramil Timerbaev)
-            for5 = getIncome102DataByOPU('') // TODO (Ramil Timerbaev)
-            break
-        case '1010275' :
-            for4 = getIncome102DataByOPU('26404')
-            for5 = getIncome102DataByOPU('') // TODO (Ramil Timerbaev)
-            break
-        case '1010276' :
-            for4 = getIncome102DataByOPU('') // TODO (Ramil Timerbaev)
-            for5 = getIncome102DataByOPU('') // TODO (Ramil Timerbaev)
-            break
-        case '1010277' :
-            for4 = getIncome102DataByOPU('') // TODO (Ramil Timerbaev)
-            for5 = getIncome102DataByOPU('') // TODO (Ramil Timerbaev)
-            break
-        case '1010285' :
-            for4 = getIncome102DataByOPU('12403.01')
-            for5 = getIncome102DataByOPU('') // TODO (Ramil Timerbaev)
-            break
-        case '1010288' :
-            for4 = getIncome102DataByOPU('') // TODO (Ramil Timerbaev)
-            for5 = getIncome102DataByOPU('') // TODO (Ramil Timerbaev)
-            break
-        case '1010298' :
-            for4 = getIncome102DataByOPU('16302.01')
-            for5 = getIncome102DataByOPU('') // TODO (Ramil Timerbaev)
-            break
-        case '1010801' :
-            for4 = getIncome102DataByOPU('') // TODO (Ramil Timerbaev)
-            for5 = getIncome102DataByOPU('') // TODO (Ramil Timerbaev)
-            break
-        case '1010802' :
-            for4 = getIncome102DataByOPU('') // TODO (Ramil Timerbaev)
-            for5 = getIncome102DataByOPU('') // TODO (Ramil Timerbaev)
-            break
-        case '1010805' :
-            for4 = getIncome102DataByOPU('') // TODO (Ramil Timerbaev)
-            for5 = getIncome102DataByOPU('') // TODO (Ramil Timerbaev)
-            break
-        case '1010806' :
-            for4 = getIncome102DataByOPU('16302.01')
-            for5 = getIncome102DataByOPU('') // TODO (Ramil Timerbaev)
-            break
+def calc4(def row) {
+    return calc4or5(row, 4)
+}
+
+def calc5(def row) {
+    return calc4or5(row, 5)
+}
+
+/**
+ * Посчитать значение для графы 4 или 5.
+ *
+ * @param row строка
+ * @param columnFlag признак графы: 0 – Графа 4, 1 – Графа 5
+ */
+def calc4or5(def row, def columnNumber) {
+    // список кодов ОПУ из справочника
+    // TODO (Ramil Timerbaev) когда будет готов справочник - раскомментировать
+    // def opuCodes = getOpuCodes(row.code, row.getIndex(), columnNumber)
+    // сумма кодов ОПУ из отчета 102
+    // def sum = getSumByOpuCodes(opuCodes, row.getIndex(), columnNumber)
+    def sum = 182 // TODO (Ramil Timerbaev) костыль
+    return roundValue(sum, 2)
+}
+
+/**
+ * Получить список кодов ОПУ.
+ *
+ * @param code код операции
+ * @param index номер строки
+ * @param columnFlag номер графы (4 или 5)
+ */
+def getOpuCodes(def code, def index, def columnNumber) {
+    // признак графы: 0 – Графа 4, 1 – Графа 5
+    def columnFlag = (columnNumber == 4 ? 0 : 1)
+    // TODO (Ramil Timerbaev) еще не готов справочник «Классификатор соответствия кодов операций налоговой формы 724.2.1 по НДС символам ОПУ»
+    // потом поправить фильтр и id справочника
+    def filter = "(Код операции или столбец 1 справочника) = $code AND (Графа налоговой формы 724.2.1 или столбец 2 справочника) = $columnFlag"
+    def records = refBookFactory.getDataProvider(00L)?.getRecords(getReportPeriodEndDate(), null, filter, null)
+    if (records == null || records.isEmpty()) {
+        // условия выполнения расчетов
+        // 5, 6. Проверка наличия соответствия кода операций символам ОПУ для графы 4/5
+        throw new ServiceException("Строка $index: В справочнике «%s» нет данных для заполнения графы $columnNumber! Расчеты не могут быть выполнены.",
+                refBookFactory.get(00L).name)
     }
-    def result = [:]
-    result.realizeCost = roundValue(for4 ? for4.sum { it -> it.TOTAL_SUM.value } : 0)
-    result.obtainCost = roundValue(for5 ? for5.sum { it -> it.TOTAL_SUM.value } : 0)
-    return result
+    def opuCodes = []
+    records.each { record ->
+        opuCodes.add(record?.NAME?.value)
+    }
+
+    return opuCodes
+}
+
+/**
+ * Посчитать сумму по кодам ОПУ.
+ *
+ * @param opuCodes список кодов ОПУ
+ */
+def getSumByOpuCodes(def opuCodes, def index, def columnNumber) {
+    def tmp = BigDecimal.ZERO
+    def hasData = false
+    for (def income102Row : getIncome102Data()) {
+        if (income102Row?.OPU_CODE?.value in opuCodes) {
+            tmp += (income102Row?.TOTAL_SUM?.value ?: 0)
+            hasData = true
+        }
+    }
+    if (!hasData) {
+        // условия выполнения расчетов
+        // 3, 4. Проверка наличия символов ОПУ в Экземпляре Отчета о прибылях и убытках, необходимых для заполнения «Графы 4/5»
+        def start = getReportPeriodStartDate().format(dateFormat)
+        def end = getReportPeriodEndDate().format(dateFormat)
+        throw new ServiceException("Строка $index: Экземпляр Отчета о прибылях и убытках за период $start - $end не содержит записей " +
+                "для заполнения графы $columnNumber по следующим символам ОПУ: «${opuCodes.join(', ')}»! Расчеты не могут быть выполнены.")
+    }
+    return tmp
 }
 
 def calcItog(def dataRows) {

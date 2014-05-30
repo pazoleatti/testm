@@ -71,9 +71,9 @@ def autoFillColumns = ['rowNum', 'innKio', 'contraCountry', 'contraCountryCode',
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNum', 'transactionDeliveryDate', 'contraName', 'transactionMode', 'contraCountry',
-        'transactionSumCurrency', 'currency', 'courseCB', 'transactionSumRub',
-        'bondRegCode', 'bondCount', 'priceOne', 'transactionType']
+def nonEmptyColumns = ['rowNum', 'transactionDeliveryDate', 'contraName', 'transactionMode', 'transactionSumCurrency',
+        'currency', 'courseCB', 'transactionSumRub', 'contractNum', 'contractDate', 'transactionDate', 'bondRegCode',
+        'bondCount', 'priceOne', 'transactionType']
 
 // Дата окончания отчетного периода
 @Field
@@ -147,7 +147,8 @@ void logicCheck() {
         }
         def rowNum = row.getIndex()
 
-        checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, false)
+        checkNonEmptyColumns(row, rowNum, ['contractNum', 'contractDate'], logger, true)
+        checkNonEmptyColumns(row, rowNum, nonEmptyColumns - ['contractNum', 'contractDate'], logger, false)
 
         def transactionDeliveryDate = row.transactionDeliveryDate
         def transactionDate = row.transactionDate
@@ -211,9 +212,6 @@ void calc() {
         if (transactionSumRub != null && bondCount != null && bondCount != 0) {
             row.priceOne = transactionSumRub / bondCount
         }
-
-        // Расчет полей зависимых от справочников
-        row.contraCountry = getRefBookValue(9, row.contraName)?.COUNTRY?.referenceValue
     }
     dataRowHelper.update(dataRows)
 }

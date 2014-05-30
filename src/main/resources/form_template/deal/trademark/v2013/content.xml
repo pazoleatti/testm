@@ -1,11 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
-    <type>
-        <id>379</id>
-        <name>Предоставление права пользования товарным знаком</name>
-        <status>NORMAL</status>
-        <taxType>DEAL</taxType>
-    </type>
     <fixedRows>false</fixedRows>
     <name>Предоставление права пользования товарным знаком</name>
     <fullName>Отчет в отношении доходов ОАО «Сбербанк России» по Контролируемым сделкам, связанным с предоставлением
@@ -15,7 +9,6 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rowNumber</alias>
         <checking>false</checking>
-        <id>17920</id>
         <name>№ п/п</name>
         <order>1</order>
         <width>4</width>
@@ -25,7 +18,6 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>fullNamePerson</alias>
         <checking>false</checking>
-        <id>17921</id>
         <name>Полное наименование юридического лица с указанием ОПФ</name>
         <order>2</order>
         <width>10</width>
@@ -36,28 +28,25 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>inn</alias>
         <checking>false</checking>
-        <id>17922</id>
         <name>ИНН/КИО</name>
         <order>3</order>
         <width>7</width>
-        <parentId>17921</parentId>
+        <parentAlias>fullNamePerson</parentAlias>
         <refBookAttributeId>37</refBookAttributeId>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>countryCode</alias>
         <checking>false</checking>
-        <id>17923</id>
         <name>Код страны по классификатору ОКСМ</name>
         <order>4</order>
         <width>5</width>
-        <hierarchical>false</hierarchical>
-        <nameAttributeId>53</nameAttributeId>
-        <refBookAttributeId>50</refBookAttributeId>
+        <parentAlias>fullNamePerson</parentAlias>
+        <refBookAttributeId>33</refBookAttributeId>
+        <refBookAttributeId2>50</refBookAttributeId2>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sum</alias>
         <checking>false</checking>
-        <id>17924</id>
         <name>Сумма доходов Банка, руб.</name>
         <order>5</order>
         <width>8</width>
@@ -67,16 +56,15 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>docNumber</alias>
         <checking>false</checking>
-        <id>17925</id>
         <name>Номер договора</name>
         <order>6</order>
         <width>5</width>
         <maxLength>128</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>docDate</alias>
         <checking>false</checking>
-        <id>17926</id>
         <name>Дата договора</name>
         <order>7</order>
         <width>7</width>
@@ -85,7 +73,6 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>price</alias>
         <checking>false</checking>
-        <id>17927</id>
         <name>Цена</name>
         <order>8</order>
         <width>8</width>
@@ -95,7 +82,6 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>cost</alias>
         <checking>false</checking>
-        <id>17928</id>
         <name>Стоимость</name>
         <order>9</order>
         <width>8</width>
@@ -105,7 +91,6 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>dealDate</alias>
         <checking>false</checking>
-        <id>17929</id>
         <name>Дата совершения сделки</name>
         <order>10</order>
         <width>7</width>
@@ -116,7 +101,6 @@
         <backColor>LIGHT_BLUE</backColor>
         <bold>false</bold>
         <fontColor>BLACK</fontColor>
-        <id>10700</id>
         <italic>false</italic>
     </styles>
     <styles>
@@ -124,7 +108,6 @@
         <backColor>WHITE</backColor>
         <bold>true</bold>
         <fontColor>DARK_GREEN</fontColor>
-        <id>10840</id>
         <italic>false</italic>
     </styles>
 </formTemplateContent>

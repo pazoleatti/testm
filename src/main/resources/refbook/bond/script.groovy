@@ -3,6 +3,10 @@ package refbook.bond
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.ScriptStatus
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import groovy.transform.Field
 
 import java.text.SimpleDateFormat
@@ -56,13 +60,13 @@ void importFromNSI() {
         lines.add(line)
     }
 
-    println("Import Bonds: strings count = " + lines.size())
-
     if (lines.isEmpty()) {
         scriptStatusHolder.setScriptStatus(ScriptStatus.SKIP)
         scriptStatusHolder.setStatusMessage("Неверная структура файла «$fileName»!")
         return
     }
+
+    println("Import Bonds: strings count = " + lines.size())
 
     def actualDate = new GregorianCalendar(2012, Calendar.JANUARY, 1).getTime()
 
@@ -77,7 +81,7 @@ void importFromNSI() {
     println("Import Bonds: Current Bonds found record count = " + actualBondList?.size())
     def actualBondMap = [:]
     actualBondList?.each { map ->
-        actualBondMap.put(map.ID.numberValue, map)
+        actualBondMap.put(map?.ID?.numberValue?.toString(), map)
     }
 
     // Получение актуальной версии справочника «Эмитенты»
@@ -129,61 +133,113 @@ void importFromNSI() {
         def startDate = (startDateStr == null || startDateStr.isEmpty()) ?: dateFormat.parse(startDateStr)
         def endDate = (endDateStr == null || endDateStr.isEmpty()) ?: dateFormat.parse(endDateStr)
 
-        if (id != null && !id.isEmpty()) {
-            // Проверка ссылки на «Эмитент»
-            if (issuer != null && !issuer.isEmpty() && !actualEmitentnMap.containsKey(issuer)) {
-                logger.error("Для записи «Идентификатор ценной бумаги» = $id файла «$fileName» не удается заполнить атрибут «Эмитент» = $issuer, т.к. такой элемент отсутствует в Системе!")
-            }
-            // Проверка ссылки на «Цифровой код валюты выпуска»
-            if (codeCur != null && !codeCur.isEmpty() && !actualCurrencyMap.containsKey(codeCur)) {
-                logger.error("Для записи «Идентификатор ценной бумаги» = $id файла «$fileName» не удается заполнить атрибут «Цифровой код валюты выпуска» = $codeCur, т.к. такой элемент отсутствует в Системе!")
-            }
-            // Проверка ссылки на «Признак ценной бумаги»
-            if (sign != null && !sign.isEmpty() && !actualBondSignMap.containsKey(sign)) {
-                logger.error("Для записи «Идентификатор ценной бумаги» = $id файла «$fileName» не удается заполнить атрибут «Признак ценной бумаги» = $sign, т.к. такой элемент отсутствует в Системе!")
-            }
-            // Проверка ссылки на «Тип (вид) ценной бумаги»
-            if (type != null && !type.isEmpty() && !actualBondTypeMap.containsKey(type)) {
-                logger.error("Для записи «Идентификатор ценной бумаги» = $id файла «$fileName» не удается заполнить атрибут «Тип (вид) ценной бумаги» = $type, т.к. такой элемент отсутствует в Системе!")
-            }
+        if (startDateStr != null && startDateStr.equals("01.01.1900")) {
+            startDate = null
         }
 
-//        if (code != null && !code.isEmpty()) {
-//            def actualRecord = actualEmitentnMap.get(code)
-//            if (actualRecord == null) {
-//                // Добавление новой записи
-//                def record = new RefBookRecord()
-//                map = [:]
-//                map.put("ID", new RefBookValue(RefBookAttributeType.NUMBER, code))
-//                map.put("ISSUER", new RefBookValue(RefBookAttributeType.REFERENCE, code))
-//
-//
-//                map.put("NAME", new RefBookValue(RefBookAttributeType.STRING, name))
-//                map.put("FULL_NAME", new RefBookValue(RefBookAttributeType.STRING, fullName))
-//                record.setValues(map)
-//                addList.add(record)
-//            } else {
-//                // Обновление существующей версии
-//                if (actualRecord.NAME.stringValue != name || actualRecord.FULL_NAME.stringValue != fullName) {
-//                    actualRecord.put("NAME", new RefBookValue(RefBookAttributeType.STRING, name))
-//                    actualRecord.put("FULL_NAME", new RefBookValue(RefBookAttributeType.STRING, fullName))
-//                    updList.add(actualRecord)
-//                }
-//            }
-//        }
+        if (endDateStr != null && endDateStr.equals("01.01.1900")) {
+            endDate = null
+        }
+
+        if (fullName.trim().isEmpty()) {
+            fullName = null
+        }
+
+        if (shortName.trim().isEmpty()) {
+            shortName = null
+        }
+
+        if (regNum.trim().isEmpty()) {
+            regNum = null
+        }
+
+        if (id != null && !id.isEmpty()) {
+            // TODO Заменить warn на error после ответов из Банка
+            // Проверка ссылки на «Эмитент»
+            def issuerRef =  actualEmitentnMap[issuer]?.get(RefBook.RECORD_ID_ALIAS)?.numberValue
+            if (issuer != null && !issuer.isEmpty() && issuerRef == null) {
+                logger.warn("Для записи «Идентификатор ценной бумаги» = $id файла «$fileName» не удается заполнить атрибут «Эмитент» = $issuer, т.к. такой элемент отсутствует в Системе!")
+            }
+            // Проверка ссылки на «Цифровой код валюты выпуска»
+            def curRef =  actualCurrencyMap[codeCur]?.get(RefBook.RECORD_ID_ALIAS)?.numberValue
+            if (codeCur != null && !codeCur.isEmpty() && curRef == null) {
+                logger.warn("Для записи «Идентификатор ценной бумаги» = $id файла «$fileName» не удается заполнить атрибут «Цифровой код валюты выпуска» = $codeCur, т.к. такой элемент отсутствует в Системе!")
+            }
+            // Проверка ссылки на «Признак ценной бумаги»
+            def signRef =  actualBondSignMap[sign]?.get(RefBook.RECORD_ID_ALIAS)?.numberValue
+            if (sign != null && !sign.isEmpty() && signRef == null) {
+                logger.warn("Для записи «Идентификатор ценной бумаги» = $id файла «$fileName» не удается заполнить атрибут «Признак ценной бумаги» = $sign, т.к. такой элемент отсутствует в Системе!")
+            }
+            // Проверка ссылки на «Тип (вид) ценной бумаги»
+            def typeRef =  actualBondTypeMap[type]?.get(RefBook.RECORD_ID_ALIAS)?.numberValue
+            if (type != null && !type.isEmpty() && typeRef == null) {
+                logger.warn("Для записи «Идентификатор ценной бумаги» = $id файла «$fileName» не удается заполнить атрибут «Тип (вид) ценной бумаги» = $type, т.к. такой элемент отсутствует в Системе!")
+            }
+
+            def actualRecord = actualBondMap.get(id)
+
+            if (actualRecord == null) {
+                // Добавление новой записи
+                def record = new RefBookRecord()
+                map = [:]
+                map.put("ID", new RefBookValue(RefBookAttributeType.NUMBER, id.toLong()))
+                if (issuerRef != null) {
+                    map.put("ISSUER", new RefBookValue(RefBookAttributeType.REFERENCE, issuerRef))
+                }
+                if (curRef != null) {
+                    map.put("CODE_CUR", new RefBookValue(RefBookAttributeType.REFERENCE, curRef))
+                }
+                if (signRef != null) {
+                    map.put("SIGN", new RefBookValue(RefBookAttributeType.REFERENCE, signRef))
+                }
+                if (typeRef != null) {
+                    map.put("TYPE", new RefBookValue(RefBookAttributeType.REFERENCE, typeRef))
+                }
+                map.put("FULLNAME", new RefBookValue(RefBookAttributeType.STRING, fullName))
+                map.put("SHORTNAME", new RefBookValue(RefBookAttributeType.STRING, shortName))
+                map.put("REG_NUM", new RefBookValue(RefBookAttributeType.STRING, regNum))
+                map.put("START_DATE", new RefBookValue(RefBookAttributeType.DATE, startDate))
+                map.put("END_DATE", new RefBookValue(RefBookAttributeType.DATE, endDate))
+                record.setValues(map)
+                addList.add(record)
+            } else {
+                // Обновление существующей версии
+                if (actualRecord.ISSUER.referenceValue != issuerRef
+                        || actualRecord.CODE_CUR.referenceValue != curRef
+                        || actualRecord.FULLNAME.stringValue != fullName
+                        || actualRecord.SHORTNAME.stringValue != shortName
+                        || actualRecord.REG_NUM.stringValue != regNum
+                        || actualRecord.SIGN.referenceValue != signRef
+                        || actualRecord.TYPE.referenceValue != typeRef
+                        || actualRecord.START_DATE.dateValue != startDate
+                        || actualRecord.END_DATE.dateValue != endDate
+                ) {
+                    actualRecord.put("ISSUER", new RefBookValue(RefBookAttributeType.REFERENCE, issuerRef))
+                    actualRecord.put("CODE_CUR", new RefBookValue(RefBookAttributeType.REFERENCE, curRef))
+                    actualRecord.put("FULLNAME", new RefBookValue(RefBookAttributeType.STRING, fullName))
+                    actualRecord.put("SHORTNAME", new RefBookValue(RefBookAttributeType.STRING, shortName))
+                    actualRecord.put("REG_NUM", new RefBookValue(RefBookAttributeType.STRING, regNum))
+                    actualRecord.put("SIGN", new RefBookValue(RefBookAttributeType.REFERENCE, signRef))
+                    actualRecord.put("TYPE", new RefBookValue(RefBookAttributeType.REFERENCE, typeRef))
+                    actualRecord.put("START_DATE", new RefBookValue(RefBookAttributeType.DATE, startDate))
+                    actualRecord.put("END_DATE", new RefBookValue(RefBookAttributeType.DATE, endDate))
+                    updList.add(actualRecord)
+                }
+            }
+        }
     }
 
     println("Import Bonds: File records size = ${lines.size()}")
 
     println("Import Bonds: Add count = ${addList.size()}, Update count = ${updList.size()}")
 
-//    if (!logger.containsLevel(LogLevel.ERROR) && !addList.isEmpty()) {
-//        dataProvider.createRecordVersion(logger, actualDate, null, addList)
-//    }
-//
-//    if (!logger.containsLevel(LogLevel.ERROR) && !updList.isEmpty()) {
-//        dataProvider.updateRecords(actualDate, updList)
-//    }
+    if (!logger.containsLevel(LogLevel.ERROR) && !addList.isEmpty()) {
+        dataProviderBond.createRecordVersion(logger, actualDate, null, addList)
+    }
+
+    if (!logger.containsLevel(LogLevel.ERROR) && !updList.isEmpty()) {
+        dataProviderBond.updateRecords(actualDate, updList)
+    }
 
     if (!logger.containsLevel(LogLevel.ERROR)) {
         scriptStatusHolder.setScriptStatus(ScriptStatus.SUCCESS)

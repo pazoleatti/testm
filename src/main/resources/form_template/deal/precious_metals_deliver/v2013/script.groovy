@@ -76,16 +76,12 @@ def groupColumns = ['name', 'dependence', 'country', 'countryCode1', 'signPhis',
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNum', 'name', 'dependence', 'dealType', 'country', 'innerCode', 'unitCountryCode', 'signPhis',
+def nonEmptyColumns = ['rowNum', 'name', 'dependence', 'dealType', 'contractNum', 'contractDate', 'innerCode', 'unitCountryCode', 'signPhis',
         'signTransaction', 'count', 'priceOne', 'totalNds', 'transactionDate']
 
 // Дата окончания отчетного периода
 @Field
 def endDate = null
-
-// Текущая дата
-@Field
-def currentDate = new Date()
 
 //// Обертки методов
 
@@ -155,14 +151,18 @@ void logicCheck() {
         }
         def rowNum = row.getIndex()
 
-        checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, false)
+        // графа 14 = элемент с кодом «1»
+        def isSignPhis = (getRefBookValue(18, row.signPhis)?.CODE?.numberValue == 1)
+
+        checkNonEmptyColumns(row, rowNum, ['contractNum', 'contractDate'], logger, true)
+        checkNonEmptyColumns(row, rowNum,
+                isSignPhis ?
+                    nonEmptyColumns - ['contractNum', 'contractDate'] :
+                    nonEmptyColumns - ['contractNum', 'contractDate'] + ['countryCode2']
+                , logger, false)
 
         def transactionDeliveryDate = row.transactionDeliveryDate
         def contractDate = row.contractDate
-        def settlement1 = row.settlement1
-        def city1 = row.city1
-        def settlement2 = row.settlement2
-        def city2 = row.city2
         def incomeSum = row.incomeSum
         def consumptionSum = row.consumptionSum
         def priceOne = row.priceOne
@@ -171,7 +171,7 @@ void logicCheck() {
         def transactionDate = row.transactionDate
 
         // Проверка зависимости от признака физической поставки
-        if (getRefBookValue(18, row.signPhis)?.CODE?.numberValue == 1) {
+        if (isSignPhis) {
             def isHaveNotEmptyField = false
             def checkField = ['countryCode2', 'region1', 'city1', 'settlement1', 'countryCode3', 'region2', 'city2', 'settlement2', 'conditionCode']
             for (it in checkField) {
@@ -374,9 +374,6 @@ void calc() {
 
         row.totalNds = row.priceOne
 
-        // Расчет полей зависимых от справочников
-        row.country = getRefBookValue(9, row.name)?.COUNTRY?.referenceValue
-
         // Признак физической поставки
         def Boolean deliveryPhis = null
         if (row.signPhis != null) {
@@ -464,11 +461,13 @@ String getValuesByGroupColumn(DataRow row) {
     if (dependence != null)
         builder.append(dependence).append(sep)
 
-    country = getRefBookValue(10, row.country)?.NAME?.stringValue
+    map2 = getRefBookValue(10, map?.COUNTRY?.referenceValue)
+
+    country = map2?.NAME?.stringValue
     if (country != null)
         builder.append(country).append(sep)
 
-    countryCode1 = getRefBookValue(10, row.country)?.CODE?.stringValue
+    countryCode1 = map2?.CODE?.stringValue
     if (countryCode1 != null)
         builder.append(countryCode1).append(sep)
 
@@ -764,12 +763,6 @@ def getReportPeriodEndDate() {
         endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     }
     return endDate
-}
-
-// Возвращает графу вида "гр. хх"
-def getGrafNum(def alias) {
-    def atr = getAtributes().find { it -> it.getValue()[0] == alias }
-    atr.getValue()[1]
 }
 
 def getAtributes() {

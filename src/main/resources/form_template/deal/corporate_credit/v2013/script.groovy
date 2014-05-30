@@ -67,7 +67,7 @@ def autoFillColumns = ['rowNumber', 'inn', 'countryName', 'count', 'price', 'cos
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNumber', 'fullNamePerson', 'countryName', 'sum', 'docNumber', 'docDate', 'count',
+def nonEmptyColumns = ['rowNumber', 'fullNamePerson', 'sum', 'docNumber', 'docDate', 'count',
         'price', 'cost', 'dealDate']
 
 // Дата окончания отчетного периода
@@ -142,7 +142,8 @@ void logicCheck() {
         }
         def rowNum = row.getIndex()
 
-        checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, false)
+        checkNonEmptyColumns(row, rowNum, ['docNumber', 'docDate'], logger, true)
+        checkNonEmptyColumns(row, rowNum, nonEmptyColumns - ['docNumber', 'docDate'], logger, false)
 
         def docDateCell = row.getCell('docDate')
 
@@ -188,9 +189,6 @@ void calc() {
         row.price = row.sum
         // Расчет поля "Стоимость"
         row.cost = row.sum
-
-        // Расчет полей зависимых от справочников
-        row.countryName = getRefBookValue(9, row.fullNamePerson)?.COUNTRY?.referenceValue
     }
     dataRowHelper.update(dataRows)
 }

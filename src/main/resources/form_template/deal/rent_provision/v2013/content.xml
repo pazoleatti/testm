@@ -9,7 +9,6 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rowNum</alias>
         <checking>false</checking>
-        <id>21040</id>
         <name>№ п/п</name>
         <order>1</order>
         <width>4</width>
@@ -32,18 +31,18 @@
         <name>ИНН/КИО</name>
         <order>3</order>
         <width>7</width>
-        <parentId>21041</parentId>
+        <parentAlias>jurName</parentAlias>
         <refBookAttributeId>37</refBookAttributeId>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>countryCode</alias>
         <checking>false</checking>
         <name>Код страны по классификатору ОКСМ</name>
         <order>4</order>
         <width>7</width>
-        <hierarchical>false</hierarchical>
-        <nameAttributeId>53</nameAttributeId>
-        <refBookAttributeId>50</refBookAttributeId>
+        <parentAlias>jurName</parentAlias>
+        <refBookAttributeId>33</refBookAttributeId>
+        <refBookAttributeId2>50</refBookAttributeId2>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>incomeBankSum</alias>
@@ -70,6 +69,7 @@
         <order>7</order>
         <width>5</width>
         <maxLength>128</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>contractDate</alias>
@@ -106,6 +106,7 @@
         <order>11</order>
         <width>5</width>
         <maxLength>50</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>settlement</alias>
@@ -114,6 +115,7 @@
         <order>12</order>
         <width>7</width>
         <maxLength>50</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>count</alias>

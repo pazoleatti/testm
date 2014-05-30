@@ -1,11 +1,8 @@
 package form_template.vat.vat_937_1.v2014
 
-import com.aplana.sbrf.taxaccounting.model.Cell
-import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
@@ -68,7 +65,7 @@ def allColumns = ['period', 'bill', 'dealNds', 'deal_20', 'deal_20_Nds', 'deal_1
 def calcColumns = ['bill', 'dealNds', 'deal_20', 'deal_20_Nds', 'deal_18', 'deal_18_Nds',
                    'deal_10', 'deal_10_Nds', 'deal_0', 'deal']
 @Field
-def totalAEditableColumns = ['bill', 'dealNds', 'deal_20', 'deal_20_Nds', 'deal_18', 'deal_18_Nds', 'deal_10', 'deal_10_Nds', 'nds']
+def totalANonEmptyColumns = ['bill', 'dealNds', 'deal_20', 'deal_20_Nds', 'deal_18', 'deal_18_Nds', 'deal_10', 'deal_10_Nds', 'nds', 'diff']
 
 // Дата начала отчетного периода
 @Field
@@ -134,7 +131,7 @@ void logicCheck() {
     // 1. Обязательность заполнения:
     //	Графы 2-9, 12-14 строки 2;
     //	Графы 2-11 строк 4, 5
-    checkNonEmptyColumns(totalA, totalA.getIndex(), totalAEditableColumns, logger, true)
+    checkNonEmptyColumns(totalA, totalA.getIndex(), totalANonEmptyColumns, logger, true)
     checkNonEmptyColumns(totalPeriod, totalPeriod.getIndex(), calcColumns, logger, true)
     checkNonEmptyColumns(totalAnnul, totalAnnul.getIndex(), calcColumns, logger, true)
     // 2-4. По строкам 2, 4, 5:
@@ -189,7 +186,7 @@ void logicCheck() {
             }
         }
     } else if (totalA.diff != 0) {
-        logger.warn("Экземпляр налоговой формы 937.1.14 «Расшифровка графы 14» за период %s - %s не существует (отсутствуют первичные данные для проверки)!",
+        logger.warn("Экземпляр налоговой формы 937.1.13 «Расшифровка графы 13» за период %s - %s не существует (отсутствуют первичные данные для проверки)!",
                 getReportPeriodStartDate().format(dateFormat), getReportPeriodEndDate().format(dateFormat))
     }
     // 9. «Графа N» строки 6 = Графа N строки 4 - Графа N строки 5, где N = 2, 3, 4, 5, 6, 7, 8, 9, 10 или 11
@@ -211,7 +208,7 @@ void consolidation() {
     def totalB = getDataRow(dataRows, 'totalB') // 6-я строка
 
     //очистить форму
-    (totalAEditableColumns + "diff").each {
+    totalANonEmptyColumns.each {
         totalA[it] = 0
     }
     calcColumns.each {
@@ -243,7 +240,7 @@ void addRowsToRows(def dataRows, def addRows) {
     def addAnnul = getDataRow(addRows, 'totalAnnul') // 5-строка
     def addB = getDataRow(addRows, 'totalB') // 6-я строка
 
-    (totalAEditableColumns + "diff").each {
+    totalANonEmptyColumns.each {
         totalA[it] += addA[it]
     }
     calcColumns.each {
@@ -277,9 +274,8 @@ void importData() {
             (xml.row[0].cell[1]) : 'Всего счетов-фактур (шт.)',
             (xml.row[0].cell[2]) : 'Всего покупок, включая НДС (руб.)',
             (xml.row[0].cell[3]) : 'В том числе (руб.)',
-            (xml.row[0].cell[11]) : 'Сумма НДС, отнесенная на расходы Банка (руб.)',
-            (xml.row[0].cell[12]) : 'Сумма НДС, начисленная с авансов и предоплаты засчитываемая в налоговом периоде при реализации (руб.)',
-            (xml.row[0].cell[13]) : 'Расхождение (руб.)',
+            (xml.row[0].cell[11]) : 'Сумма НДС, подлежащая вычету (руб.)',
+            (xml.row[0].cell[12]) : 'Расхождение (руб.)',
             (xml.row[1].cell[3]) : 'покупки, облагаемые налогом по ставке',
             (xml.row[1].cell[10]) : 'покупки, освобождаемые от налога',
             (xml.row[2].cell[3]) : '20%%',
@@ -293,7 +289,7 @@ void importData() {
             (xml.row[3].cell[7]) : 'стоимость без НДС',
             (xml.row[3].cell[8]) : 'сумма НДС'
     ]
-    (0..13).each { index ->
+    (0..12).each { index ->
         headerMapping.put((xml.row[4].cell[index]), (index+1).toString())
     }
 

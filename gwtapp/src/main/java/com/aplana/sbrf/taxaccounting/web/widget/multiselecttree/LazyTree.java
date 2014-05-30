@@ -13,7 +13,6 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.*;
 
-import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 /**
@@ -41,7 +40,8 @@ public class LazyTree<H extends LazyTreeItem> extends Tree implements HasLazyTre
     private boolean isSelectChildViaParent;
     /* Признак возможности выбора нескольких узлов дерева. */
     private Boolean multiSelect;
-
+    private List<H> loadedItems = new ArrayList<H>();
+    private Integer itemsCount = 0;
     private HandlerRegistration selectionHandlerRegistration;
 
     /**
@@ -67,33 +67,19 @@ public class LazyTree<H extends LazyTreeItem> extends Tree implements HasLazyTre
             @Override
             public void onSelection(SelectionEvent<TreeItem> event) {
                 // По завершению этого метода итем становится селектальным
-                LazyTreeItem lazyTreeItem = (LazyTreeItem) event.getSelectedItem();
+                H item = (H) event.getSelectedItem();
 
-                Boolean multiSelect = lazyTreeItem.isMultiSelection();
+                Boolean multiSelect = item.isMultiSelection();
 
                 if (multiSelect != null) {
-
-                    if (!multiSelect) {
-//                        if (getSelectedSet().iterator().next().equals(lazyTreeItem)) {
-//                            return;
-//                        }
-                        // для предыдушего радио-значения удаляем выделение
-                        //getSelectedSet().iterator().next().setItemState(null);
-                        //getSelectedSet().clear();
-                        //lazyTreeItem.setItemState(true);
-                        selectionModel.setSelected((H) lazyTreeItem, true);
+                    if (multiSelect) {
+                        setSelected(item, !item.isSelected());
                     } else {
-                        if (!lazyTreeItem.isSelected()) {
-                            //lazyTreeItem.setItemState(true);
-                            selectionModel.setSelected((H) lazyTreeItem, true);
-                        } else {
-                            //lazyTreeItem.setItemState(null);
-                            selectionModel.setSelected((H) lazyTreeItem, false);
-                        }
+                        clearSelection();
+                        setSelected(item, true);
                     }
-                    LazyTreeSelectionEvent.fire(LazyTree.this, ((H) lazyTreeItem));
+                    LazyTreeSelectionEvent.fire(LazyTree.this, item);
                 }
-
             }
         });
 
@@ -109,13 +95,21 @@ public class LazyTree<H extends LazyTreeItem> extends Tree implements HasLazyTre
     }
 
     private void onSelectionChange(){
-        for (H h : getLoadedItems(null)) {
-            h.setItemState(selectionModel.isSelected(h) ? true : null);
-        }
+//        for (H h : getAllLoadedItems()) {
+//            h.setItemState(selectionModel.isSelected(h) ? true : null);
+//        }
+    }
+
+    @Override
+    public void clear() {
+        super.clear();
+        loadedItems = new ArrayList<H>();
+        itemsCount = 0;
     }
 
     public void setSelected(H refBookUiTreeItem, boolean selected) {
         selectionModel.setSelected(refBookUiTreeItem, selected);
+        refBookUiTreeItem.setItemState(selected ? true : null);
     }
 
     private Set<H> getSelectedSet(){
@@ -165,6 +159,7 @@ public class LazyTree<H extends LazyTreeItem> extends Tree implements HasLazyTre
         }
         ensureSelection(item);
         super.addItem(item);
+        itemsCount++;
     }
 
     /**
@@ -189,6 +184,7 @@ public class LazyTree<H extends LazyTreeItem> extends Tree implements HasLazyTre
         ensureSelection(item);
         if (parent != null) {
             parent.addItem(item);
+            itemsCount++;
         } else {
             addItem(item);
         }
@@ -227,10 +223,22 @@ public class LazyTree<H extends LazyTreeItem> extends Tree implements HasLazyTre
      * @param parent узел для которого ищутся дочерние, если null что ищется с root'a
      * @return list список элементов
      */
-    public List<H> getLoadedItems(H parent){
+    public List<H> getLoadedItems(H parent) {
         List<H> hs = new LinkedList<H>();
         findAllChild(hs, parent);
         return hs;
+    }
+
+    public List<H> getAllLoadedItems() {
+        System.out.println("s " + loadedItems.size() +" c " + itemsCount);
+        if(loadedItems.size()!= itemsCount){
+            loadedItems.clear();
+            List<H> loadedItems1 = getLoadedItems(null);
+            loadedItems.addAll(loadedItems1);
+            itemsCount = loadedItems1.size();
+        }
+        System.out.println("s " + loadedItems.size() +" c " + itemsCount);
+        return loadedItems;
     }
 
     /**
@@ -301,7 +309,7 @@ public class LazyTree<H extends LazyTreeItem> extends Tree implements HasLazyTre
     }
 
     public Set<H> getSelectedItems() {
-        for (H h : getLoadedItems(null)) {
+        for (H h : getAllLoadedItems()) {
             ensureSelection(h);
         }
         return Collections.unmodifiableSet(selectionModel.getSelectedSet());
@@ -334,6 +342,8 @@ public class LazyTree<H extends LazyTreeItem> extends Tree implements HasLazyTre
      * Удалить элемент из дерева.
      */
     public void removeItem(H item) {
+        loadedItems.remove(item);
+        itemsCount--;
         item.remove();
     }
 
@@ -342,6 +352,8 @@ public class LazyTree<H extends LazyTreeItem> extends Tree implements HasLazyTre
      */
     public void removeChildItems(H parent) {
         for(int i = 0; i < parent.getChildCount(); i++){
+            loadedItems.remove(parent.getChild(i));
+            itemsCount--;
             parent.getChild(i).remove();
         }
         parent.setChildLoaded(false);

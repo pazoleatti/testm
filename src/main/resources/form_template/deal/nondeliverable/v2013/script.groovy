@@ -73,7 +73,7 @@ def groupColumns = ['name', 'innKio', 'contractNum', 'contractDate', 'transactio
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNum', 'name', 'country', 'transactionType', 'price', 'cost', 'transactionDate']
+def nonEmptyColumns = ['rowNum', 'name', 'contractNum', 'contractDate', 'transactionType', 'price', 'cost', 'transactionDate']
 
 // Дата окончания отчетного периода
 @Field
@@ -147,7 +147,8 @@ void logicCheck() {
         }
         def rowNum = row.getIndex()
 
-        checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, false)
+        checkNonEmptyColumns(row, rowNum, ['contractNum', 'contractDate'], logger, true)
+        checkNonEmptyColumns(row, rowNum, nonEmptyColumns - ['contractNum', 'contractDate'], logger, false)
 
         // Проверка доходов и расходов
         def consumptionSum = row.consumptionSum
@@ -288,9 +289,6 @@ void calc() {
             row.price = (consumptionSum - incomeSum).abs()
             row.cost = row.price
         }
-
-        // Расчет полей зависимых от справочников
-        row.country = getRefBookValue(9, row.name)?.COUNTRY?.referenceValue
     }
 
     // Добавление подитов

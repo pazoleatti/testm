@@ -10,19 +10,17 @@ import groovy.transform.Field
  *
  * formTemplateId=603
  *
- * TODO:
- *      - графа 3 и 2 - справочник «План счетов бухгалтерского учета», но он пока не сделан, временно указал другой справочник (38), потом надо поменять
  */
 
 // графа 1 - rowNum
 // графа   - fix
-// TODO (Ramil Timerbaev) как будет готов справочник «План счетов бухгалтерского учета», поменять на него
-// графа 2 - name       - зависит от графы 3 - атрибут 000 - NAME - «Наименование счета», справочник 00 «План счетов бухгалтерского учета»
-// графа 3 - number     - атрибут 000 - NAME - «Номер счета», справочник 00 «План счетов бухгалтерского учета»
+// графа 2 - name       - зависит от графы 3 - атрибут 901 - ACCOUNT_NAME - «Наименование счета», справочник 101 «План счетов бухгалтерского учета»
+// графа 3 - number     - атрибут 900 - ACCOUNT - «Номер счета», справочник 101 «План счетов бухгалтерского учета»
 // графа 4 - sum
 // графа 5 - number2
 // графа 6 - sum2
 // графа 7 - nds
+// графа 8 - sumNds
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
@@ -73,23 +71,23 @@ def refBookCache = [:]
 
 // все атрибуты
 @Field
-def allColumns = ['rowNum', 'fix', 'name', 'number', 'sum', 'number2', 'sum2', 'nds']
+def allColumns = ['rowNum', 'fix', 'name', 'number', 'sum', 'number2', 'sum2', 'nds', 'sumNds']
 
-// Редактируемые атрибуты (графа 3..7)
+// Редактируемые атрибуты (графа 3..8)
 @Field
-def editableColumns = ['number', 'sum', 'number2', 'sum2', 'nds']
+def editableColumns = ['number', 'sum', 'number2', 'sum2', 'nds', 'sumNds']
 
 // Автозаполняемые атрибуты
 @Field
 def autoFillColumns = allColumns - editableColumns
 
-// Проверяемые на пустые значения атрибуты (графа 1, 3, 4, 6)
+// Проверяемые на пустые значения атрибуты (графа 1, 3, 4, 6, 8)
 @Field
-def nonEmptyColumns = ['rowNum', 'number', 'sum', 'sum2']
+def nonEmptyColumns = ['rowNum', 'number', 'sum', 'sum2', 'sumNds']
 
 // Атрибуты итоговых строк для которых вычисляются суммы (графа 4, 6)
 @Field
-def totalColumns = ['sum', 'sum2']
+def totalColumns = ['sum', 'sum2', 'sumNds']
 
 // Группируемые атрибуты (графа 3, 5)
 @Field
@@ -370,17 +368,15 @@ void addData(def xml, int headRowCount) {
         def newRow = getNewRow()
         def int xlsIndexRow = xmlIndexRow + rowOffset
 
-        // TODO (Ramil Timerbaev) справочник «План счетов бухгалтерского учета» не готов, потом поменять на правильный справочник
-        // Графа 3 - атрибут 000 - NAME - «Номер балансового счета», справочник 00 «План счетов бухгалтерского учета»
-        record = getRecordImport(38, 'VALUE', row.cell[3].text(), xlsIndexRow, 3 + colOffset)
+        // Графа 3 - атрибут 900 - ACCOUNT - «Номер балансового счета», справочник 101 «План счетов бухгалтерского учета»
+        record = getRecordImport(101, 'ACCOUNT', row.cell[3].text(), xlsIndexRow, 3 + colOffset)
         newRow.number = record?.record_id?.value
 
-        // TODO (Ramil Timerbaev) справочник «План счетов бухгалтерского учета» не готов, потом поменять на правильный справочник
-        // Графа 2 - зависит от графы 3 - атрибут 000 - NAME - «Наименование балансового счета», справочник 00 «План счетов бухгалтерского учета»
+        // Графа 2 - зависит от графы 3 - атрибут 901 - ACCOUNT_NAME - «Наименование балансового счета», справочник 101 «План счетов бухгалтерского учета»
         if (record != null) {
-            def value1 = record?.CODE?.value?.toString()
+            def value1 = record?.ACCOUNT_NAME?.value?.toString()
             def value2 = row.cell[2].text()
-            formDataService.checkReferenceValue(38, value1, value2, xlsIndexRow, 2 + colOffset, logger, true)
+            formDataService.checkReferenceValue(101, value1, value2, xlsIndexRow, 2 + colOffset, logger, true)
         }
 
         // графа 4
@@ -394,6 +390,9 @@ void addData(def xml, int headRowCount) {
 
         // графа 7
         newRow.nds = row.cell[7].text()
+
+        // графа 8
+        newRow.sumNds = getNumber(row.cell[8].text(), xlsIndexRow, 8 + colOffset)
 
         mapRows[sectionIndex].add(newRow)
     }

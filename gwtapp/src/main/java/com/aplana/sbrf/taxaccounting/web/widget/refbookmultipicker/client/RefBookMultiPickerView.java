@@ -342,28 +342,6 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
         return null;
     }
 
-
-//    /**
-//     * Получить разименованные значения выбранных строк в виде строки через ";".
-//     *
-//     * @param key           ключ
-//     * @param selectedItems список выбрнных элементов
-//     */
-//    private String getValueByKey(Integer key, List<RefBookItem> selectedItems) {
-//        if (key == null) {
-//            return null;
-//        }
-//        StringBuilder sb = new StringBuilder();
-//        for (int i = 0; i < selectedItems.size(); i++) {
-//            RefBookItem item = selectedItems.get(i);
-//            sb.append(item.getValues().get(key));
-//            if (i < selectedItems.size() - 1) {
-//                sb.append("; ");
-//            }
-//        }
-//        return sb.toString();
-//    }
-
     @Override
     public Boolean isMultiSelect() {
         return multiSelect;
@@ -397,6 +375,7 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
     @Override
     public void selectAll(DeferredInvokeHandler handler) {
         if (multiSelect) {
+            /* оставлю на будущее мало ли постановка поменяется
             if(cellTable.getRowCount() == cellTable.getVisibleItemCount()){
                 // если отображены все итемы на одной странице
                 for (RefBookItem refBookItem : cellTable.getVisibleItems()) {
@@ -411,7 +390,14 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
                 // подгружаем потому что нужны разименованные значения
                 getUiHandlers().loadingForSelection(new ArrayList<Long>(), handler);
             }
-
+            */
+            for (RefBookItem refBookItem : cellTable.getVisibleItems()) {
+                selectionModel.setSelected(refBookItem, true);
+            }
+            widgetFireChangeEvent(getSelectedIds());
+            if (handler != null) {
+                handler.onInvoke();
+            }
         }
     }
 

@@ -298,6 +298,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
         state.setMultiSelect(multiSelect);
         isEnabledFireChangeEvent = true;
         refBookView.setMultiSelect(multiSelect);
+        pickAll.setVisible(multiSelect);
     }
 
     @Override

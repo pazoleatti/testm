@@ -24,6 +24,11 @@ public class RefBookRecordDereferenceValue implements Comparable<RefBookRecordDe
     public RefBookRecordDereferenceValue() {
     }
 
+    public RefBookRecordDereferenceValue(Long valueAttrId, String valueAttrAlias) {
+        this.valueAttrId = valueAttrId;
+        this.valueAttrAlias = valueAttrAlias;
+    }
+
     public RefBookRecordDereferenceValue(Long valueAttrId, String valueAttrAlias, String dereferenceValue) {
         this.dereferenceValue = dereferenceValue;
         this.valueAttrId = valueAttrId;

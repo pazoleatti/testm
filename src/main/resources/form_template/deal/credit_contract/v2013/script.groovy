@@ -67,7 +67,7 @@ def autoFillColumns = ['rowNum', 'innKio', 'country', 'okeiCode', 'count', 'tota
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNum', 'name', 'country', 'contractNum', 'contractDate', 'okeiCode', 'count',
+def nonEmptyColumns = ['rowNum', 'name', 'contractNum', 'contractDate', 'okeiCode', 'count',
         'price', 'totalCost', 'transactionDate']
 
 // Дата окончания отчетного периода
@@ -142,7 +142,8 @@ void logicCheck() {
         }
         def rowNum = row.getIndex()
 
-        checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, false)
+        checkNonEmptyColumns(row, rowNum, ['contractNum', 'contractDate'], logger, true)
+        checkNonEmptyColumns(row, rowNum, nonEmptyColumns - ['contractNum', 'contractDate'], logger, false)
 
         def transactionDate = row.transactionDate
         def contractDate = row.contractDate
@@ -189,8 +190,6 @@ void calc() {
         // Итого стоимость без учета НДС, акцизов и пошлин, руб.
         row.totalCost = row.price
         row.okeiCode = getRecordId(12, 'CODE', '796', -1, null, true)
-        // Расчет полей зависимых от справочников
-        row.country = getRefBookValue(9, row.name)?.COUNTRY?.referenceValue
     }
     dataRowHelper.update(dataRows)
 }

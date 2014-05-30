@@ -69,9 +69,9 @@ def autoFillColumns = ['rowNum', 'innKio', 'country', 'countryCode']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNum', 'jurName', 'country', 'contractNum', 'contractDate',
-        'transactionNum', 'transactionDeliveryDate', 'dealsMode', 'date1', 'date2', 'priceFirstCurrency',
-        'currencyCode', 'courseCB', 'priceFirstRub', 'transactionDate']
+def nonEmptyColumns = ['rowNum', 'jurName', 'contractNum', 'contractDate', 'transactionNum', 'transactionDeliveryDate',
+        'dealsMode', 'date1', 'date2', 'priceFirstCurrency', 'currencyCode', 'courseCB', 'priceFirstRub',
+        'transactionDate']
 
 // Дата окончания отчетного периода
 @Field
@@ -148,7 +148,8 @@ void logicCheck() {
         }
         def rowNum = row.getIndex()
 
-        checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, false)
+        checkNonEmptyColumns(row, rowNum, ['contractNum', 'contractDate'], logger, true)
+        checkNonEmptyColumns(row, rowNum, nonEmptyColumns - ['contractNum', 'contractDate'], logger, false)
 
         def contractDate = row.contractDate
         def transactionDate = row.transactionDate
@@ -203,8 +204,6 @@ void calc() {
     for (row in dataRows) {
         // Порядковый номер строки
         row.rowNum = index++
-        // Расчет полей зависимых от справочников
-        row.country = getRefBookValue(9, row.jurName)?.COUNTRY?.referenceValue
     }
     dataRowHelper.update(dataRows);
 }
