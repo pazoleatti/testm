@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.main.page.client;
 
 import com.aplana.sbrf.taxaccounting.web.main.api.client.GINContextHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.DialogBoxChangeVisibilityEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.ErrorEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
@@ -142,6 +143,7 @@ public class MainPagePresenter extends
 	@ProxyEvent
 	public void onNavigation(NavigationEvent navigationEvent) {
 		titleUpdatedFromEvent = false;
+        messageDialogPresenter.getView().hide();
 	}
 
 	@Override

@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.main.page.client;
 
-import com.aplana.sbrf.taxaccounting.web.main.api.client.event.DialogBoxChangeVisibilityEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.entry.client.ScreenLockEvent;
 import com.google.inject.Inject;
@@ -35,7 +34,6 @@ public class MessageDialogPresenter extends
 		getView().setModal(true);
 		getView().setStackTrace(messageEvent.getThrowable());
         getView().setErrorImage(messageEvent.isError());
-		DialogBoxChangeVisibilityEvent.fire(this, true);
 		super.onReveal();
 	}
 
@@ -49,10 +47,6 @@ public class MessageDialogPresenter extends
 
 	@Override
 	protected void onHide(){
-		DialogBoxChangeVisibilityEvent.fire(this, false);
         ScreenLockEvent.fire(this, false);
 	}
-
-
-
 }
