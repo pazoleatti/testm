@@ -181,6 +181,15 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		return true;
 	}
 
+    @Override
+    public void onReset(){
+        // при каждом открытии страницы скрываем модальные окна, на случай если они были открыты а адрес страницы поменяли
+        this.signersPresenter.getView().hide();
+        this.dialogPresenter.getView().hide();
+        this.formSearchPresenter.getView().hide();
+        this.sourcesPresenter.getView().hide();
+    }
+
 	@Override
 	protected void onHide() {
 		super.onHide();
