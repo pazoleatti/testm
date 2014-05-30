@@ -7,7 +7,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public interface DeclarationTemplateImpexService {
-	
+    public final static String VERSION_FILE = "version";
+    public final static String SCRIPT_FILE = "script.groovy";
+    public final static String REPORT_FILE = "report.jrxml";
+
 	/**
 	 * Экспорт
 	 * 
@@ -23,5 +26,4 @@ public interface DeclarationTemplateImpexService {
 	 * @param is
 	 */
 	DeclarationTemplate importDeclarationTemplate(TAUserInfo userInfo, Integer id, InputStream is);
-
 }

@@ -35,6 +35,9 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
         implements AuditFilterPresenter.MyView, Editor<LogSystemAuditFilter> {
 
     @UiField
+    Panel reportPeriodPanel;
+
+    @UiField
     TextBox reportPeriodName;
 
     interface Binder extends UiBinder<Widget, AuditFilterView> {
@@ -144,6 +147,7 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     @Override
     public void init() {
         driver.edit(new LogSystemAuditFilter());
+        reportPeriodPanel.setVisible(false);
     }
 
     @Inject
@@ -213,22 +217,15 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
             getUiHandlers().onSearchButtonClicked();
     }
 
-    /*@UiHandler("taxType")
+    @UiHandler("taxType")
     void onTaxTypeValueChange(ValueChangeEvent<TaxType> event) {
         if (taxType.getValue() == null){
-            reportPeriodIds.setValue(null, true);
-            reportPeriodIds.setEnabled(false);
-            formTypeId.setFilter(null);
-            return;
+            reportPeriodPanel.setVisible(false);
+            reportPeriodName.setValue(null);
         } else {
-            formTypeId.setFilter("TAX_TYPE='" + taxType.getValue().getCode() + "'");
+            reportPeriodPanel.setVisible(true);
         }
-        if (getUiHandlers() != null) {
-            reportPeriodIds.setValue(null, true);
-            getUiHandlers().getReportPeriods(event.getValue());
-            reportPeriodIds.setEnabled(true);
-        }
-    }*/
+    }
 
     @UiHandler("auditFormTypeId")
     public void onAuditFormTypeChange(ValueChangeEvent<AuditFormType> event){

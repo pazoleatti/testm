@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,10 +22,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.*;
 
@@ -236,17 +234,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 		sql.append(" WHERE (? is null or (log_date BETWEEN ? AND (? + interval '1' day)))");
 
 		if (filter.getUserIds()!=null && !filter.getUserIds().isEmpty()) {
-            List<Long> userList = filter.getUserIds();
-            String userSql = "";
-            for(Long temp : userList){
-                if (userSql.equals("")){
-                    userSql = temp.toString();
-                }
-                else{
-                    userSql = userSql + ", " + temp.toString();
-                }
-            }
-            sql.append(String.format(" AND %suser_id in ", prefix)).append("(").append(userSql).append(")");
+            sql.append(" AND ").append(SqlUtils.transformToSqlInStatement(String.format(" %suser_id ", prefix), filter.getUserIds()));
 		}
 
 		if (filter.getReportPeriodName() != null) {
@@ -254,12 +242,12 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                     .append("%").append(filter.getReportPeriodName()).append("%\'");
 		}
 
-		if (filter.getFormKind() != null && filter.getFormKind().getId() != 0) {
-			sql.append(String.format(" AND %sform_kind_id = ", prefix)).append(filter.getFormKind().getId());
+		if (filter.getFormKind() != null && !filter.getFormKind().isEmpty()) {
+			sql.append(" AND ").append(SqlUtils.transformToSqlInStatement(String.format(" %sform_kind_id  ", prefix),filter.getFormKind()));
 		}
 
-		if (filter.getFormTypeId() != null) {
-			sql.append(String.format(" AND %sform_type_id = ", prefix)).append(filter.getFormTypeId());
+		if (filter.getFormTypeId() != null && !filter.getFormTypeId().isEmpty()) {
+			sql.append(" AND ").append(SqlUtils.transformToSqlInStatement(String.format(" %sform_type_id ", prefix), filter.getFormTypeId()));
 		}
 
 		if (filter.getDeclarationTypeId() != null) {
@@ -276,16 +264,12 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 
         if (filter.getTaxType() != null){
             List<String> rpNames = expressionForReportNames(filter.getTaxType());
-            sql.append(String.format(" AND %sreport_period_name IN (", prefix));
-            for (String rpName : rpNames) {
-                sql.append("\'").append(rpName).append("\'").append(",");
-            }
-            sql.replace(sql.length() - 1, sql.length(), "");
-            sql.append(")");
+            sql.append(" AND ").append(SqlUtils.transformToSqlInStatementForString(String.format(" %sreport_period_name ", prefix), rpNames));
+            sql.append(" AND ft.tax_type in ").append(transformTaxTypeToSqlInStatement(Arrays.asList(filter.getTaxType())));
         }
 
-		if (filter.getDepartmentId() != null) {
-            sql.append(String.format(" AND %sdepartment_id = ", prefix)).append(filter.getDepartmentId());
+		if (filter.getDepartmentIds() != null && !filter.getDepartmentIds().isEmpty()) {
+            sql.append(" AND ").append(SqlUtils.transformToSqlInStatement(String.format(" %sdepartment_id ", prefix), filter.getDepartmentIds()));
 		}
 	}
 
@@ -317,6 +301,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 
 	private int getCount(LogSystemFilter filter) {
 		StringBuilder sql = new StringBuilder("select count(*) from log_system ls ");
+        sql.append("left join form_type ft on ls.form_type_id=ft.\"ID\" ");
 		appendSelectWhereClause(sql, filter, "");
 		return getJdbcTemplate().queryForInt(
 				sql.toString(),

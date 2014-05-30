@@ -430,7 +430,7 @@ comment on table form_data is 'Данные по налоговым формам
 comment on column form_data.id is 'Первичный ключ';
 comment on column form_data.form_template_id is 'Идентификатор шаблона формы';
 comment on column form_data.department_id is 'Идентификатор подраздения';
-comment on column form_data.state is 'Код состояния';
+comment on column form_data.state is 'Код состояния (1 - Создана, 2 - Подготовлена; 3 - Утверждена; 4 - Принята)';
 comment on column form_data.kind is 'Тип налоговой формы (1 - Первичная, 2 - Консолидированная, 3 - Сводная, 4 - Форма УНП, 5 - Выходная)';
 comment on column form_data.report_period_id is 'Идентификатор отчетного периода';
 comment on column form_data.return_sign is 'Флаг возврата (0 - обычный режим; 1 - форма возвращена из вышестоящего статуса)';

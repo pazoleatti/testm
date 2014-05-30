@@ -252,7 +252,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
         StringBuilder query = new StringBuilder("select declaration_template.id " +
                        "from declaration_template " +
                        "left join declaration_type on declaration_template.declaration_type_id = declaration_type.id " +
-                       "where declaration_template.status = 0"
+                       "where declaration_template.status in (0,1)"
         );
 
         if (filter.getTaxType() != null) {
@@ -267,7 +267,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
     @Override
     public List<Integer> listAllId() {
         return getJdbcTemplate().queryForList(
-                "select form_template.id from form_template",
+                "select DECLARATION_TEMPLATE.id from DECLARATION_TEMPLATE where status in (0,1)",
                 Integer.class
         );
     }

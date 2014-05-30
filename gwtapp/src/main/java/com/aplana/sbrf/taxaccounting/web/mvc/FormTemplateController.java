@@ -4,10 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.FormTemplateImpexService;
-import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
-import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.service.MainOperatingService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
@@ -28,8 +25,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.zip.ZipOutputStream;
 
 
 @Controller
@@ -65,6 +64,18 @@ public class FormTemplateController {
 		formTemplateImpexService.exportFormTemplate(formTemplateId, resp.getOutputStream());
 		resp.getOutputStream().close();
 	}
+
+    @RequestMapping(value = "formTemplate/downloadAll")
+    public void downloadAll(HttpServletResponse response) throws IOException {
+        response.setHeader("Content-Disposition",
+                String.format("attachment; filename=\"Templates(%s).zip\"",
+                        new SimpleDateFormat("yyyy-MM-dd").format(new Date()))
+        );
+        response.setCharacterEncoding("UTF-8");
+
+        formTemplateImpexService.exportAllTemplates(response.getOutputStream());
+        IOUtils.closeQuietly(response.getOutputStream());
+    }
 	
 	
 	@RequestMapping(value = "formTemplate/upload/{formTemplateId}",method = RequestMethod.POST)

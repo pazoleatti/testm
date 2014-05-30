@@ -621,9 +621,9 @@ def buildRow(def srcRow, def matrixRow) {
     }
 
     // Графа 25
-    if (formTypeId == 393) {
+    if (formTypeId == 393 || formTypeId == 394) {
         def values25 = getRefBookValue(64, row.dealType)
-        if (values25 != null && values25.CODE.numberValue == 1) {
+        if (values25 != null && values25.CODE.numberValue == 2) {
             row.dealSubjectCode1 = getRecordId(73, 'CODE', '7108120001')
         }
     }
