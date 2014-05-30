@@ -7,7 +7,6 @@ import groovy.transform.Field
 /**
  * Отчёт о суммах начисленного НДС по операциям Банка
  * formTemplateId=600
- *
  */
 
 // графа 1 - rowNum
@@ -70,13 +69,9 @@ def refBookCache = [:]
 @Field
 def allColumns = ['rowNum', 'baseAccName', 'baseAccNum', 'baseSum', 'ndsNum', 'ndsSum', 'ndsRate', 'ndsBookSum']
 
-// Редактируемые атрибуты (графа 3..8)
+// Редактируемые атрибуты (графа 3..6, 8)
 @Field
-def editableColumns = ['baseAccNum', 'baseSum', 'ndsNum', 'ndsSum', 'ndsRate', 'ndsBookSum']
-
-// Автозаполняемые атрибуты
-@Field
-def autoFillColumns = allColumns - editableColumns
+def editableColumns = ['baseAccNum', 'baseSum', 'ndsNum', 'ndsSum', 'ndsBookSum']
 
 // Проверяемые на пустые значения атрибуты (1, 3, 4, 6, 8)
 @Field
@@ -125,17 +120,19 @@ def addRow() {
             index = lastRow.getIndex()
         }
     }
-    dataRowHelper.insert(getNewRow(), index)
+    def isSection7 = (index > getDataRow(dataRows, 'head_7').getIndex())
+    dataRowHelper.insert(getNewRow(isSection7), index)
 }
 
 // Получить новую строку с заданными стилями
-def getNewRow() {
+def getNewRow(def isSection7) {
     def row = formData.createDataRow()
-    editableColumns.each {
+    def columns = (isSection7 ? editableColumns + 'ndsRate' : editableColumns)
+    columns.each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
     }
-    autoFillColumns.each {
+    (allColumns - columns).each {
         row.getCell(it).setStyleAlias('Автозаполняемая')
     }
     return row
@@ -157,10 +154,9 @@ void calc() {
         sortRows(sectionsRows, sortColumns)
 
         // расчитать
-        def value7 = calc7(section)
         for (def row : sectionsRows) {
             // графа 7
-            row.ndsRate = value7
+            row.ndsRate = calc7(row, section)
         }
 
         // посчитать итоги по разделам
@@ -199,7 +195,7 @@ void logicCheck() {
         def errorMsg = "Строка $index: "
 
         // 1. Обязательность заполнения полей
-        def columns = (isSection7 ? nonEmptyColumns - 'ndsRate' : nonEmptyColumns)
+        def columns = (isSection7 ? nonEmptyColumns : nonEmptyColumns + 'ndsRate')
         checkNonEmptyColumns(row, index, columns, logger, true)
 
         // 2. Проверка суммы НДС по данным бухгалтерского учета и книге продаж
@@ -333,7 +329,7 @@ def calc5(def section) {
     return tmp
 }
 
-def calc7(def section) {
+def calc7(def row, def section) {
     def tmp = null
     switch (section) {
         case '1_1':
@@ -352,6 +348,7 @@ def calc7(def section) {
             tmp = '10/118'
             break
         case '7':
+            tmp = row.ndsRate
             break
     }
     return tmp
@@ -396,6 +393,9 @@ void addData(def xml, int headRowCount) {
     def rows = []
     def title = null
     def isFirstSection = true
+    def isSection7 = false
+
+    def rowHead7 = getDataRow(dataRows, 'head_7')
 
     def aliasR = [
             '1. Суммы, полученные от реализации товаров (услуг, имущественных прав) по ставке 18%': [getDataRow(dataRows, 'head_1')],
@@ -412,7 +412,7 @@ void addData(def xml, int headRowCount) {
             'total_5': [getDataRow(dataRows, 'total_5')],
             '6. Суммы, полученные в виде штрафов, пени, неустоек по расчётной ставке исчисления налога от общей суммы полученного дохода 18/118': [getDataRow(dataRows, 'head_6')],
             'total_6': [getDataRow(dataRows, 'total_6')],
-            '7. Суммы, отражённые в бухгалтерском учёте и книге продаж, не вошедшие в разделы с 1 по 6': [getDataRow(dataRows, 'head_7')],
+            '7. Суммы, отражённые в бухгалтерском учёте и книге продаж, не вошедшие в разделы с 1 по 6': [rowHead7],
             'total_7': [getDataRow(dataRows, 'total_7')]
     ]
 
@@ -436,17 +436,11 @@ void addData(def xml, int headRowCount) {
                 isFirstSection = false
                 title = '1_2'
             }
+            isSection7 = (title == rowHead7.fix)
             continue
         }
 
-        def newRow = formData.createDataRow()
-        editableColumns.each {
-            newRow.getCell(it).editable = true
-            newRow.getCell(it).setStyleAlias('Редактируемая')
-        }
-        autoFillColumns.each {
-            newRow.getCell(it).setStyleAlias('Автозаполняемая')
-        }
+        def newRow = getNewRow(isSection7)
 
         // Графа 3 - атрибут 900 - ACCOUNT - «Номер балансового счета», справочник 101 «План счетов бухгалтерского учета»
         record = getRecordImport(101, 'ACCOUNT', row.cell[3].text(), xlsIndexRow, 3 + colOffset)
