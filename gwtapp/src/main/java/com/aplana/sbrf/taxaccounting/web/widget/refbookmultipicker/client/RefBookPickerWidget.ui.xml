@@ -131,7 +131,7 @@
                             <g:Label ui:field="selectionCountLabel" width="95px" wordWrap="false" text="Выделено: 0"/>
                         </g:cell>
                         <g:cell horizontalAlignment="left" width="99%">
-                            <style:LinkButton ui:field="pickAll" text="Выделить все" img="resources/img/loading.gif" disableImage="true" width="100px"/>
+                            <style:LinkButton ui:field="pickAll" text="Выделить все" img="resources/img/loading.gif" disableImage="true" width="120px"/>
                         </g:cell>
                         <g:Button ui:field="clearButton" text="Очистить" width="70px"
                                   addStyleNames="{modal.marginRight10}"/>

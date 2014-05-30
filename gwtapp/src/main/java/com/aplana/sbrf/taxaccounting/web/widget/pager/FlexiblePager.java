@@ -230,6 +230,8 @@ public class FlexiblePager extends AbstractPager {
     private final HTML rightLabel = new HTML();
     private final IntegerBox rowsCountOnPage = new IntegerBox();
     private String type;
+    /* количество строк на страницу по умолчанию */
+    private Integer defaultPageSize = DEFAULT_PAGE_SIZE;
     private HorizontalPanel layout;
 
 	private final ImageButton lastPage;
@@ -310,10 +312,12 @@ public class FlexiblePager extends AbstractPager {
 	 * @param showLastPageButton if true, show a button to go the the last page
 	 * @param imageButtonConstants Constants that contain the image button names
      * @param type тип пагинатора (место где оно используется - список форм, справочник...)
+     * @param defaultPageSize количство строк на страницу по умолчанию
 	 */
 	public FlexiblePager(TextLocation location, Resources resources,
 						 boolean showFastForwardButton, final int fastForwardRows,
-						 boolean showLastPageButton, ImageButtonsConstants imageButtonConstants, String type) {
+						 boolean showLastPageButton, ImageButtonsConstants imageButtonConstants,
+                         String type, Integer defaultPageSize) {
 		super();
 		
 		this.resources = resources;
@@ -322,6 +326,9 @@ public class FlexiblePager extends AbstractPager {
 		this.style.ensureInjected();
 		this.setRangeLimited(false);
         this.type = type;
+        if (defaultPageSize != null) {
+            this.defaultPageSize = defaultPageSize;
+        }
 
 		// Create the buttons.
 		String disabledStyle = style.disabledButton();
@@ -478,7 +485,7 @@ public class FlexiblePager extends AbstractPager {
 						 boolean showFastForwardButton, final int fastForwardRows,
 						 boolean showLastPageButton, String type) {
 		this(location, resources, showFastForwardButton, fastForwardRows, showLastPageButton,
-				GWT.<ImageButtonsConstants>create(ImageButtonsConstants.class), type);
+				GWT.<ImageButtonsConstants>create(ImageButtonsConstants.class), type, null);
 	}
 
 	@Override
@@ -565,7 +572,7 @@ public class FlexiblePager extends AbstractPager {
                 return Integer.valueOf(value);
             }
         }
-        return DEFAULT_PAGE_SIZE;
+        return defaultPageSize;
     }
 
     @Override
@@ -575,6 +582,14 @@ public class FlexiblePager extends AbstractPager {
         }
 		super.setPageSize(pageSize);
 	}
+
+    public Integer getDefaultPageSize() {
+        return defaultPageSize;
+    }
+
+    public void setDefaultPageSize(Integer defaultPageSize) {
+        this.defaultPageSize = defaultPageSize;
+    }
 
     /**
      * Показывать только надпись "Показано: 1-xx из xx" или показывать весть пейджинг

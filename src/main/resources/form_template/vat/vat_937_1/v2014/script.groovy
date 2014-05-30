@@ -1,11 +1,8 @@
 package form_template.vat.vat_937_1.v2014
 
-import com.aplana.sbrf.taxaccounting.model.Cell
-import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
@@ -68,7 +65,7 @@ def allColumns = ['period', 'bill', 'dealNds', 'deal_20', 'deal_20_Nds', 'deal_1
 def calcColumns = ['bill', 'dealNds', 'deal_20', 'deal_20_Nds', 'deal_18', 'deal_18_Nds',
                    'deal_10', 'deal_10_Nds', 'deal_0', 'deal']
 @Field
-def totalAEditableColumns = ['bill', 'dealNds', 'deal_20', 'deal_20_Nds', 'deal_18', 'deal_18_Nds', 'deal_10', 'deal_10_Nds', 'nds']
+def totalANonEmptyColumns = ['bill', 'dealNds', 'deal_20', 'deal_20_Nds', 'deal_18', 'deal_18_Nds', 'deal_10', 'deal_10_Nds', 'nds', 'diff']
 
 // Дата начала отчетного периода
 @Field
@@ -134,7 +131,7 @@ void logicCheck() {
     // 1. Обязательность заполнения:
     //	Графы 2-9, 12-14 строки 2;
     //	Графы 2-11 строк 4, 5
-    checkNonEmptyColumns(totalA, totalA.getIndex(), totalAEditableColumns, logger, true)
+    checkNonEmptyColumns(totalA, totalA.getIndex(), totalANonEmptyColumns, logger, true)
     checkNonEmptyColumns(totalPeriod, totalPeriod.getIndex(), calcColumns, logger, true)
     checkNonEmptyColumns(totalAnnul, totalAnnul.getIndex(), calcColumns, logger, true)
     // 2-4. По строкам 2, 4, 5:
@@ -211,7 +208,7 @@ void consolidation() {
     def totalB = getDataRow(dataRows, 'totalB') // 6-я строка
 
     //очистить форму
-    (totalAEditableColumns + "diff").each {
+    totalANonEmptyColumns.each {
         totalA[it] = 0
     }
     calcColumns.each {
@@ -243,7 +240,7 @@ void addRowsToRows(def dataRows, def addRows) {
     def addAnnul = getDataRow(addRows, 'totalAnnul') // 5-строка
     def addB = getDataRow(addRows, 'totalB') // 6-я строка
 
-    (totalAEditableColumns + "diff").each {
+    totalANonEmptyColumns.each {
         totalA[it] += addA[it]
     }
     calcColumns.each {

@@ -110,7 +110,7 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
      * Открыть каскадно все дочерние ветки из веток рута
      */
     public void cascadeOpen() {
-        for (RefBookUiTreeItem uiTreeItem : tree.getLoadedItems(null)) {
+        for (RefBookUiTreeItem uiTreeItem : tree.getAllLoadedItems()) {
             uiTreeItem.setState(true);
         }
     }
@@ -298,7 +298,7 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
     }
 
     private RefBookUiTreeItem getUiTreeItem(Long id) {
-        for (RefBookUiTreeItem item : tree.getLoadedItems(null)) {
+        for (RefBookUiTreeItem item : tree.getAllLoadedItems()) {
             if (item.getRefBookTreeItem().getId().equals(id)) {
                 return item;
             }
@@ -473,13 +473,13 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
 
     @Override
     public int getLoadedItemsCount() {
-        return tree.getLoadedItems(null).size();
+        return tree.getAllLoadedItems().size();
     }
 
     @Override
     public void selectAll(DeferredInvokeHandler handler) {
         if (multiSelect) {
-            for (RefBookUiTreeItem uiTreeItem : tree.getLoadedItems(null)) {
+            for (RefBookUiTreeItem uiTreeItem : tree.getAllLoadedItems()) {
                 tree.setSelected(uiTreeItem, true);
             }
             widgetFireChangeEvent(getSelectedIds());
@@ -492,7 +492,7 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
     @Override
     public void unselectAll(DeferredInvokeHandler handler) {
         if (multiSelect) {
-            for (RefBookUiTreeItem uiTreeItem : tree.getLoadedItems(null)) {
+            for (RefBookUiTreeItem uiTreeItem : tree.getAllLoadedItems()) {
                 tree.setSelected(uiTreeItem, false);
             }
             widgetFireChangeEvent(getSelectedIds());
