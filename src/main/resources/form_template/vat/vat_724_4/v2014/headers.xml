@@ -9,7 +9,6 @@
         <cell alias="number2" colSpan="1" rowSpan="1" value="Данные бухгалтерского учёта"/>
         <cell alias="sum2" colSpan="1" rowSpan="1" value="Данные бухгалтерского учёта"/>
         <cell alias="nds" colSpan="1" rowSpan="3" value="Ставка НДС"/>
-        <cell alias="sumNds" colSpan="1" rowSpan="3" value="Сумма НДС по книге продаж"/>
     </row>
     <row alias="">
         <cell alias="rowNum" colSpan="1" rowSpan="1" value="№ пп"/>
@@ -20,7 +19,6 @@
         <cell alias="number2" colSpan="2" rowSpan="1" value="НДС"/>
         <cell alias="sum2" colSpan="1" rowSpan="1" value="НДС"/>
         <cell alias="nds" colSpan="1" rowSpan="1" value="Ставка НДС"/>
-        <cell alias="sumNds" colSpan="1" rowSpan="1" value="Сумма НДС по книге продаж"/>
     </row>
     <row alias="">
         <cell alias="rowNum" colSpan="1" rowSpan="1" value="№ пп"/>
@@ -31,7 +29,6 @@
         <cell alias="number2" colSpan="1" rowSpan="1" value="номер балансового счёта"/>
         <cell alias="sum2" colSpan="1" rowSpan="1" value="сумма"/>
         <cell alias="nds" colSpan="1" rowSpan="1" value="Ставка НДС"/>
-        <cell alias="sumNds" colSpan="1" rowSpan="1" value="Сумма НДС по книге продаж"/>
     </row>
     <row alias="">
         <cell alias="rowNum" colSpan="1" rowSpan="1" value="1"/>
@@ -42,6 +39,5 @@
         <cell alias="number2" colSpan="1" rowSpan="1" value="5"/>
         <cell alias="sum2" colSpan="1" rowSpan="1" value="6"/>
         <cell alias="nds" colSpan="1" rowSpan="1" value="7"/>
-        <cell alias="sumNds" colSpan="1" rowSpan="1" value="8"/>
     </row>
 </rows>

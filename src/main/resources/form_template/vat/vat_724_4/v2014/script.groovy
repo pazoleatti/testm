@@ -20,7 +20,6 @@ import groovy.transform.Field
 // графа 5 - number2
 // графа 6 - sum2
 // графа 7 - nds
-// графа 8 - sumNds
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
@@ -71,11 +70,11 @@ def refBookCache = [:]
 
 // все атрибуты
 @Field
-def allColumns = ['rowNum', 'fix', 'name', 'number', 'sum', 'number2', 'sum2', 'nds', 'sumNds']
+def allColumns = ['rowNum', 'fix', 'name', 'number', 'sum', 'number2', 'sum2', 'nds']
 
 // Редактируемые атрибуты (графа 3..8)
 @Field
-def editableColumns = ['number', 'sum', 'number2', 'sum2', 'nds', 'sumNds']
+def editableColumns = ['number', 'sum', 'number2', 'sum2', 'nds']
 
 // Автозаполняемые атрибуты
 @Field
@@ -83,11 +82,11 @@ def autoFillColumns = allColumns - editableColumns
 
 // Проверяемые на пустые значения атрибуты (графа 1, 3, 4, 6, 8)
 @Field
-def nonEmptyColumns = ['rowNum', 'number', 'sum', 'sum2', 'sumNds']
+def nonEmptyColumns = ['rowNum', 'number', 'sum', 'number2', 'sum2', 'nds']
 
 // Атрибуты итоговых строк для которых вычисляются суммы (графа 4, 6)
 @Field
-def totalColumns = ['sum', 'sum2', 'sumNds']
+def totalColumns = ['sum', 'sum2']
 
 // Группируемые атрибуты (графа 3, 5)
 @Field
@@ -390,9 +389,6 @@ void addData(def xml, int headRowCount) {
 
         // графа 7
         newRow.nds = row.cell[7].text()
-
-        // графа 8
-        newRow.sumNds = getNumber(row.cell[8].text(), xlsIndexRow, 8 + colOffset)
 
         mapRows[sectionIndex].add(newRow)
     }
