@@ -41,7 +41,6 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 	protected void onReveal() {
 		super.onReveal();
 	    getView().clearInput();
-		DialogBoxChangeVisibilityEvent.fire(this, true);
 	}
 
 	@Override
@@ -71,7 +70,6 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 	@Override
 	public void hide() {
 		getView().hide();
-		DialogBoxChangeVisibilityEvent.fire(this, false);
 	}
 
 	public void setDeclarationId(long declarationId) {
