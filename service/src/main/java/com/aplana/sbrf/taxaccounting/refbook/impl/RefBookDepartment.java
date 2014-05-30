@@ -378,6 +378,8 @@ public class RefBookDepartment implements RefBookDataProvider {
                 provider.getUniqueRecordIds(calendar.getTime(), String.format(FILTER_BY_DEPARTMENT, depId)), false);
 
         deletePeriods(depId, logger);
+
+        refBookDepartmentDao.remove(depId);
         /*auditService.add(FormDataEvent.LOGOUT, null, 0, null, null, null, null,
                 "");*/
     }
