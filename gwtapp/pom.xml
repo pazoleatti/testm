@@ -250,6 +250,7 @@
 						<configuration>
 							<draftCompile>true</draftCompile>
 							<validateOnly>true</validateOnly>
+                            <extraJvmArgs>-Xmx4g -XX:MaxPermSize=512m -javaagent:"${settings.localRepository}/org/springframework/spring-instrument/3.1.4.RELEASE/spring-instrument-3.1.4.RELEASE.jar" -Xbootclasspath/a:"${settings.localRepository}/org/springframework/spring-instrument/3.1.4.RELEASE/spring-instrument-3.1.4.RELEASE.jar"</extraJvmArgs>
 						</configuration>
 					</plugin>
 				</plugins>
