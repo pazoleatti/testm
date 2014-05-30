@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao;
@@ -11,7 +12,10 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Transformer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -32,6 +36,9 @@ import static com.aplana.sbrf.taxaccounting.model.DepartmentType.*;
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Transactional
 public class RefBookDepartment implements RefBookDataProvider {
+
+    private final Calendar calendar = Calendar.getInstance();
+    private static final String FILTER_BY_DEPARTMENT = "DEPARTMENT_ID = %d";
 
     public static final Long REF_BOOK_ID = RefBookDepartmentDao.REF_BOOK_ID;
     private static final String DEPARTMENT_TABLE_NAME = "DEPARTMENT";
@@ -64,6 +71,22 @@ public class RefBookDepartment implements RefBookDataProvider {
     private FormTypeService formTypeService;
     @Autowired
     private DeclarationTypeService declarationTypeService;
+    @Autowired
+    private FormDataSearchService formDataSearchService;
+    @Autowired
+    private FormTemplateService formTemplateService;
+    @Autowired
+    private DeclarationTemplateService declarationTemplateService;
+    @Autowired
+    private RefBookIncome101 refBookIncome101;
+    @Autowired
+    private RefBookIncome102 refBookIncome102;
+    @Autowired
+    private DepartmentReportPeriodDao departmentReportPeriodDao;
+    @Autowired
+    AuditService auditService;
+    @Autowired
+    private RefBookFactory rbFactory;
 
 
     @Override
@@ -104,9 +127,10 @@ public class RefBookDepartment implements RefBookDataProvider {
     @Override
     public List<Date> getVersions(Date startDate, Date endDate) {
         // версионирования нет, только одна версия
-		return Arrays.asList(new Date[]{new Date(0)});
+		return Arrays.asList(new Date(0));
 	}
 
+    @SuppressWarnings("unchecked")
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecordVersions(final Long recordId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
         return new PagingResult(new ArrayList<Map<String, RefBookValue>>(){{add(getRecordData(recordId));}}, 1);
@@ -162,7 +186,15 @@ public class RefBookDepartment implements RefBookDataProvider {
 
     @Override
     public List<Long> createRecordVersion(Logger logger, Date versionFrom, Date versionTo, List<RefBookRecord> records) {
-        throw new UnsupportedOperationException();
+        List<RefBookAttribute> attributes = refBookDao.getAttributes(REF_BOOK_ID);
+        Map<String, RefBookValue> refBookValueMap = records.get(0).getValues();
+        checkCorrectness(logger, attributes, records);
+        int depId = refBookDepartmentDao.create(refBookValueMap, attributes);
+        int terrBankId = departmentService.getParentTB(depId).getId();
+        createPeriods(depId, fromCode(refBookValueMap.get(DEPARTMENT_TYPE_ATTRIBUTE).getNumberValue().intValue()),
+                terrBankId, logger);
+
+        return new ArrayList<Long>(0);
     }
 
     @Override
@@ -170,6 +202,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         return new ArrayList<Pair<RefBookAttribute, RefBookValue>>();
     }
 
+    //http://conf.aplana.com/pages/viewpage.action?pageId=11378355
     @Override
     public void updateRecordVersion(Logger logger, final Long uniqueRecordId, Date versionFrom, Date versionTo, Map<String, RefBookValue> records) {
         final Department dep = departmentService.getDepartment(uniqueRecordId.intValue());
@@ -177,11 +210,20 @@ public class RefBookDepartment implements RefBookDataProvider {
         DepartmentType newType = fromCode(records.get(DEPARTMENT_TYPE_ATTRIBUTE).getNumberValue().intValue());
         boolean isChangeType = oldType != newType;
         boolean isHasOpenPeriods = false;
+
+        int oldTBId = departmentService.getParentTB(uniqueRecordId.intValue()).getId();
+        int newTBId = records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue().intValue() != 0?
+                departmentService.getParentTB(records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue().intValue()).getId()
+                : uniqueRecordId.intValue();
+        boolean isChangeTB = oldTBId != newTBId;
+
         if (isChangeType){
             switch (oldType){
+                //3 шаг
                 case ROOT_BANK :
-                    logger.warn("Подразделению не может быть изменен тип \"Банк\"!\"");
+                    logger.error("Подразделению не может быть изменен тип \"Банк\"!\"");
                     return;
+                //4 шаг
                 case TERR_BANK:
                     List<ReportPeriod> openReportPeriods =
                             new ArrayList<ReportPeriod>(periodService.getOpenPeriodsByTaxTypeAndDepartments(TaxType.TRANSPORT, Arrays.asList(uniqueRecordId.intValue()), true, true));
@@ -194,6 +236,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                                 logEntryService.save(logger.getEntries()));
                     }
                     break;
+                //5 шаг
                 case CSKO_PCP:
                 case INTERNAL:
                     List<TAUserFull> users = taUserService.getByFilter(new MembersFilterData(){{
@@ -215,6 +258,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         refBookRecord.setValues(records);
 
         //Проверка корректности
+        //6 шаг
         if (isHasOpenPeriods){
             checkCorrectness(logger, attributes, Arrays.asList(refBookRecord));
             if (logger.containsLevel(LogLevel.ERROR))
@@ -223,12 +267,20 @@ public class RefBookDepartment implements RefBookDataProvider {
         }
 
         //7
-        int oldTBId = departmentService.getParentTB(uniqueRecordId.intValue()).getId();
-        int newTBId = records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue().intValue() != 0?
-                departmentService.getParentTB(records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue().intValue()).getId()
-                : uniqueRecordId.intValue();
-        if (oldTBId != newTBId){
-            //7A.1
+        if (versionFrom != null){
+            if (oldType != TERR_BANK){
+                //7А.3.1.1А  (7А.3.1.1А.1 - 7А.3.1.1А.5)
+                if (isChangeTB){
+                    formDataService.updateFDTBNames(newTBId, oldTBId, versionFrom, versionTo);
+                }
+                //7А.3.1.2
+                formDataService.updateFDDepartmentNames(dep.getId(), records.get(DEPARTMENT_TYPE_ATTRIBUTE).getStringValue(), versionFrom, versionTo);
+            }
+        }
+
+        //8 шаг
+        if (isChangeTB){
+            //8A.1
             if (!formDataService.existFormDataByTaxAndDepartment(Arrays.asList(TaxType.PROPERTY, TaxType.TRANSPORT), Arrays.asList(dep.getId())) ||
                     declarationDataSearchService.getDeclarationIds(
                             new DeclarationDataFilter(){{
@@ -246,17 +298,25 @@ public class RefBookDepartment implements RefBookDataProvider {
                 formTypes.addAll(sourceService.listAllByTaxType(TaxType.PROPERTY));
                 List<DepartmentFormType> departmentFormTypes = sourceService.getDestinationsFormWithDestDepartment(newTBId, oldTBId, formTypes);
                 List<DepartmentDeclarationType> departmentDeclarationTypes = sourceService.getDestinationsDeclarationWithDestDepartment(newTBId, oldTBId, formTypes);
+                //TODO avanteev : Переписать, пусть возвращает уже только готовые данные
                 if (departmentFormTypes != null && !departmentFormTypes.isEmpty() ||
                         departmentDeclarationTypes != null && !departmentDeclarationTypes.isEmpty()){
                     for (DepartmentFormType departmentFormType : departmentFormTypes){
-                        logger.warn(WARN_MESSAGE);
+                        logger.warn(WARN_MESSAGE,
+                                formTypeService.get(departmentFormType.getFormTypeId()).getName(),
+                                departmentService.getDepartment(departmentFormType.getDepartmentId()).getName(),
+                                //sourceService.getDFTSourceByDDT(),
+                                departmentService.getDepartment(newTBId).getName());
                     }
-                    createPeriods(dep);
+                    createPeriods(uniqueRecordId, newType, newTBId, logger);
                 } else {
-                    createPeriods(dep);
+                    createPeriods(uniqueRecordId, newType, newTBId, logger);
                 }
             }
         }
+
+        //Сохранение
+        refBookDepartmentDao.update(uniqueRecordId, records, refBook.getAttributes());
     }
 
     @Override
@@ -270,8 +330,58 @@ public class RefBookDepartment implements RefBookDataProvider {
     }
 
     @Override
-    public void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds) {
-        throw new UnsupportedOperationException();
+    public void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds, boolean force) {
+        int depId = uniqueRecordIds.get(0).intValue();
+        isInUsed(departmentService.getDepartment(depId), logger);
+        if (logger.containsLevel(LogLevel.ERROR))
+            return;
+        else if (logger.containsLevel(LogLevel.WARNING) && !force){
+            return;
+        }
+        calendar.set(1970, Calendar.JANUARY, 1);
+        refBookIncome101.deleteRecordVersions(logger, refBookIncome101.getUniqueRecordIds(calendar.getTime(),
+                String.format(FILTER_BY_DEPARTMENT, depId)), false);
+        refBookIncome102.deleteRecordVersions(logger, refBookIncome102.getUniqueRecordIds(calendar.getTime(),
+                String.format(FILTER_BY_DEPARTMENT, depId)), false);
+
+        sourceService.deleteDFT(CollectionUtils.collect(sourceService.getDFTByDepartment(depId, null),
+                new Transformer() {
+                    @Override
+                    public Object transform(Object o) {
+                        return ((DepartmentFormType)o).getId();
+                    }
+                }));
+        sourceService.deleteDDT(CollectionUtils.collect(sourceService.getDDTByDepartment(depId, null),
+                new Transformer() {
+                    @Override
+                    public Object transform(Object o) {
+                        return ((DepartmentDeclarationType) o).getId();
+                    }
+                }));
+        //
+        calendar.clear();
+        calendar.set(1970, Calendar.JANUARY, 1);
+        RefBookDataProvider provider = rbFactory.getDataProvider(RefBook.DEPARTMENT_CONFIG_INCOME);
+        provider.deleteRecordVersions(logger,
+                provider.getUniqueRecordIds(calendar.getTime(), String.format(FILTER_BY_DEPARTMENT, depId)), false);
+        provider = rbFactory.getDataProvider(RefBook.DEPARTMENT_CONFIG_TRANSPORT);
+        provider.deleteRecordVersions(logger,
+                provider.getUniqueRecordIds(calendar.getTime(), String.format(FILTER_BY_DEPARTMENT, depId)), false);
+        provider = rbFactory.getDataProvider(RefBook.DEPARTMENT_CONFIG_DEAL);
+        provider.deleteRecordVersions(logger,
+                provider.getUniqueRecordIds(calendar.getTime(), String.format(FILTER_BY_DEPARTMENT, depId)), false);
+        provider = rbFactory.getDataProvider(RefBook.DEPARTMENT_CONFIG_VAT);
+        provider.deleteRecordVersions(logger,
+                provider.getUniqueRecordIds(calendar.getTime(), String.format(FILTER_BY_DEPARTMENT, depId)), false);
+        provider = rbFactory.getDataProvider(RefBook.DEPARTMENT_CONFIG_PROPERTY);
+        provider.deleteRecordVersions(logger,
+                provider.getUniqueRecordIds(calendar.getTime(), String.format(FILTER_BY_DEPARTMENT, depId)), false);
+
+        deletePeriods(depId, logger);
+
+        refBookDepartmentDao.remove(depId);
+        /*auditService.add(FormDataEvent.LOGOUT, null, 0, null, null, null, null,
+                "");*/
     }
 
     @Override
@@ -285,7 +395,8 @@ public class RefBookDepartment implements RefBookDataProvider {
     }
 
     private void checkCorrectness(Logger logger, List<RefBookAttribute> attributes, List<RefBookRecord> records) {
-        if (departmentService.getBankDepartment() != null){
+        if (departmentService.getBankDepartment().getType().getCode() ==
+                records.get(0).getValues().get(DEPARTMENT_TYPE_ATTRIBUTE).getNumberValue().intValue()){
             logger.error("Подразделение с типом \"Банк\" уже существует!");
             return;
         }
@@ -309,7 +420,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         }
 
         //Получаем записи у которых совпали значения уникальных атрибутов
-        List<Pair<Long,String>> matchedRecords = refBookDao.getMatchedRecordsByUniqueAttributesForNonVersion(REF_BOOK_ID, DEPARTMENT_TABLE_NAME, attributes, records);
+        List<Pair<Long,String>> matchedRecords = refBookDepartmentDao.getMatchedRecordsByUniqueAttributes(REF_BOOK_ID, attributes, records);
         if (matchedRecords != null && !matchedRecords.isEmpty()) {
             StringBuilder attrNames = new StringBuilder();
             for (Pair<Long,String> pair : matchedRecords) {
@@ -323,65 +434,144 @@ public class RefBookDepartment implements RefBookDataProvider {
     }
 
     //http://conf.aplana.com/pages/viewpage.action?pageId=11402881
-    //TODO : Не закончена постановка
-    private void createPeriods(Department department){
+    private void createPeriods(long depId, DepartmentType newDepartmentType, int terrBankId, Logger logger){
         //1
-        if (department.getType() != DepartmentType.TERR_BANK){
-
+        if (newDepartmentType != DepartmentType.TERR_BANK){
+            //1А.1.1
+            List<Long> reportPeriods =
+                    refBookDepartmentDao.getPeriodsByTaxTypesAndDepartments(
+                            Arrays.asList(TaxType.values()),
+                            Arrays.asList(terrBankId));
+            if (!reportPeriods.isEmpty()){
+                for (Long periodIs : reportPeriods)
+                    //1А.1.1.1
+                    if (periodService.existForDepartment((int) depId, periodIs))
+                        return;
+                //1А.1.1.1А
+                for (Long periodIs : reportPeriods){
+                    ReportPeriod period = periodService.getReportPeriod(periodIs.intValue());
+                    periodService.saveOrUpdate(
+                            departmentReportPeriodDao.get(period.getId(), depId),
+                            null,
+                            logger.getEntries());
+                }
+                return;
+            }
+            return;
         }
         //2
-        List<ReportPeriod> reportPeriodsIncome = periodService.getPeriodsByTaxTypeAndDepartments(TaxType.INCOME, Arrays.asList(0));
-        List<ReportPeriod> reportPeriodsVat = periodService.getPeriodsByTaxTypeAndDepartments(TaxType.VAT, Arrays.asList(0));
-        if (reportPeriodsIncome != null && reportPeriodsIncome.size() >= 1 || reportPeriodsVat != null && reportPeriodsVat.size() >= 1){
-
+        List<Long> reportPeriods =
+                refBookDepartmentDao.getPeriodsByTaxTypesAndDepartments(Arrays.asList(TaxType.INCOME, TaxType.DEAL, TaxType.VAT), Arrays.asList(0));
+        if (!reportPeriods.isEmpty()){
+            for (Long periodIs : reportPeriods){
+                ReportPeriod period = periodService.getReportPeriod(periodIs.intValue());
+                periodService.saveOrUpdate(
+                        departmentReportPeriodDao.get(period.getId(), depId),
+                        null,
+                        logger.getEntries());
+            }
         }
     }
 
     //Проверка использования
     private void isInUsed(final Department department, Logger logger){
-
-        //TODO : В FormDataSearchService добавить метод поиска записей по фильтру аналогично findDataByUserIdAndFilter, а то на каждый чих новый метод
+        //1 точка запроса
+        List<FormData> formDatas =
+                formDataSearchService.findDataByFilter(new FormDataFilter(){{setDepartmentIds(Arrays.asList(department.getId()));
+                setSearchOrdering(FormDataSearchOrdering.ID);}});
+        for (FormData formData : formDatas){
+            logger.error(String.format("Существует экземпляр формы %s типа %s в подразделении %s в периоде %s!",
+                    formTemplateService.get(formData.getFormTemplateId()).getName(),
+                    formData.getKind().getName(),
+                    department.getName(),
+                    periodService.getReportPeriod(formData.getReportPeriodId()).getName()));
+        }
 
         //2 точка запроса
-        List<DeclarationData> decDataIds = declarationDataSearchService.getDeclarationData(new DeclarationDataFilter(){{setDepartmentIds(Arrays.asList(department.getId()));}},
+        List<DeclarationData> declarationDatas =
+                declarationDataSearchService.getDeclarationData(new DeclarationDataFilter(){{setDepartmentIds(Arrays.asList(department.getId()));}},
                 DeclarationDataSearchOrdering.ID, true);
-        if (!decDataIds.isEmpty()){
-            for (DeclarationData decData : decDataIds){
-                logger.error(String.format("Существует экземпляр декларации %s в подразделении %s в периоде %s!",
-                        decData.getDeclarationTemplateId(),
-                        department.getName(),
-                        periodService.getReportPeriod(decData.getReportPeriodId()).getName()));
-            }
+        for (DeclarationData decData : declarationDatas){
+            logger.error(String.format("Существует экземпляр декларации %s в подразделении %s в периоде %s!",
+                    declarationTemplateService.get(decData.getDeclarationTemplateId()).getName(),
+                    department.getName(),
+                    periodService.getReportPeriod(decData.getReportPeriodId()).getName()));
+        }
+
+        //3 точка запроса
+        for (String result : refBookDao.isVersionUsedInRefBooks(REF_BOOK_ID, Arrays.asList((long) department.getId()))){
+            logger.error(result);
         }
 
         //4 точка запроса
         List<DepartmentFormType> departmentFormTypes = sourceService.getDFTByDepartment(department.getId(), null);
-        if (!departmentFormTypes.isEmpty()){
-            for (DepartmentFormType dft : departmentFormTypes){
-                FormType formType =  formTypeService.get(dft.getFormTypeId());
-                logger.warn(String.format("Существует назначение формы %s типа %s подразделению %s!",
-                        formType.getName(), dft.getKind().getName(), department.getName())
-                );
-            }
+        for (DepartmentFormType dft : departmentFormTypes){
+            FormType formType =  formTypeService.get(dft.getFormTypeId());
+            logger.warn(String.format("Существует назначение формы %s типа %s подразделению %s!",
+                    formType.getName(), dft.getKind().getName(), department.getName())
+            );
         }
 
         //5 точка запроса
         List<DepartmentDeclarationType> departmentDeclarationTypes = sourceService.getDDTByDepartment(department.getId(), null);
-        if (!departmentDeclarationTypes.isEmpty()){
-            for (DepartmentDeclarationType ddt : departmentDeclarationTypes){
-                DeclarationType declarationType = declarationTypeService.get(ddt.getDeclarationTypeId());
-                logger.warn(String.format("Существует назначение декларации %s подразделению %s!",
-                        declarationType.getName(), department.getName()));
-            }
+        for (DepartmentDeclarationType ddt : departmentDeclarationTypes){
+            DeclarationType declarationType = declarationTypeService.get(ddt.getDeclarationTypeId());
+            logger.warn(String.format("Существует назначение декларации %s подразделению %s!",
+                    declarationType.getName(), department.getName()));
+        }
+
+        //6 точка запроса
+        List<Long> ref101 = refBookIncome101.getUniqueRecordIds(new Date(), String.format(FILTER_BY_DEPARTMENT, department.getId()));
+        List<Long> ref102 = refBookIncome102.getUniqueRecordIds(new Date(), String.format(FILTER_BY_DEPARTMENT, department.getId()));
+        for (Long id : ref101){
+            Map<String, RefBookValue> values = refBookIncome101.getRecordData(id);
+            logger.warn(String.format("Существует загруженная для подразделения %s бух. отчетность в периоде %s!",
+                    department.getName(), periodService.getReportPeriod(values.get("REPORT_PERIOD_ID").getNumberValue().intValue())));
+        }
+        for (Long id : ref102){
+            Map<String, RefBookValue> values = refBookIncome101.getRecordData(id);
+            logger.warn(String.format("Существует загруженная для подразделения %s бух. отчетность в периоде %s!",
+                    department.getName(), periodService.getReportPeriod(values.get("REPORT_PERIOD_ID").getNumberValue().intValue())));
         }
 
         //7 точка запроса
         List<TAUserFull> users = taUserService.getByFilter(new MembersFilterData(){{
             setDepartmentIds(new HashSet<Integer>(Arrays.asList(department.getId())));
         }});
-        if (!users.isEmpty()){
-            for (TAUserFull taUserFull : users)
-                logger.error(String.format("Подразделению %s назначен пользовател с логином %s!", department.getName(), taUserFull.getUser().getName()));
+        for (TAUserFull taUserFull : users)
+            logger.error(String.format("Подразделению %s назначен пользовател с логином %s!", department.getName(), taUserFull.getUser().getName()));
+
+        //8 точка запроса
+        List<DepartmentFormType> departmentFormTypesDest = sourceService.getFormDestinations(department.getId(), 0, null);
+        List<DepartmentDeclarationType> departmentDeclarationTypesDest = sourceService.getDeclarationDestinations(department.getId(), 0, null);
+        List<DepartmentFormType> depFTSources = sourceService.getDFTSourcesByDFT(department.getId(), 0 , null);
+        List<DepartmentFormType> depDTSources = sourceService.getDFTSourceByDDT(department.getId(), 0);
+        //TODO : Доделать после того как Денис сделает источники-приемники
+        for (DepartmentFormType departmentFormType : departmentFormTypesDest){
+            logger.warn(String.format("назначение является источником для %s - %s - %s приемника в периоде %s",
+                    department.getName(),
+                    departmentFormType.getKind().getName(),
+                    formTypeService.get(departmentFormType.getFormTypeId()).getName()));
         }
+        for (DepartmentDeclarationType departmentDeclarationType : departmentDeclarationTypesDest){
+            logger.warn(String.format("назначение является источником для %s - %s - %s приемника в периоде %s"));
+        }
+        for (DepartmentFormType departmentFormType : depFTSources){
+            logger.warn(String.format("назначение является источником для %s - %s - %s приемника в периоде %s"));
+        }
+        for (DepartmentFormType departmentFormType : depDTSources){
+            logger.warn(String.format("назначение является приёмником для %s - %s - %s источника в периоде %s"));
+        }
+    }
+
+    private void deletePeriods(int depId, Logger logger){
+        List<Long> reportPeriods =
+                refBookDepartmentDao.getPeriodsByTaxTypesAndDepartments(
+                        Arrays.asList(TaxType.values()),
+                        Arrays.asList(depId));
+        for (Long id : reportPeriods){
+            periodService.removePeriodWithLog(id.intValue(), null, Arrays.asList(depId), null, logger.getEntries());
+        }
+
     }
 }

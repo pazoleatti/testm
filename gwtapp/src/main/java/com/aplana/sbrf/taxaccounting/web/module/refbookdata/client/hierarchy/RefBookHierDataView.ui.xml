@@ -89,7 +89,8 @@
                     </g:HorizontalPanel>
 
                     <g:HorizontalPanel verticalAlignment="middle">
-                        <g:Label wordWrap="false" text="Дата актуальности: " addStyleNames="{style.marginRight2}"/>
+                        <g:Label wordWrap="false" text="Дата актуальности: " addStyleNames="{style.marginRight2}"
+                                 ui:field="relevanceDateLabel"/>
                         <d:DateMaskBoxPicker ui:field="relevanceDate" width="110px"/>
                     </g:HorizontalPanel>
 

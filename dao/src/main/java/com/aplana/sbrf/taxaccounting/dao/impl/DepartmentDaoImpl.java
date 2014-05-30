@@ -45,12 +45,11 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 			logger.debug("Fetching department with id = " + id  + " from database");
 		}
         try {
-            Department result = getJdbcTemplate().queryForObject(
+            return getJdbcTemplate().queryForObject(
                     "select * from department where id = ?",
                     new Object[] { id },
                     new DepartmentJdbcMapper()
             );
-            return result;
         } catch (EmptyResultDataAccessException e) {
             throw new DaoException("Не удалось найти подразделение банка с id = " + id);
         }
@@ -172,6 +171,7 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
                 department.setRegionId(null);
             }
             department.setActive(rs.getBoolean("is_active"));
+            department.setCode(rs.getInt("code"));
 			return department;
 		}
 	}

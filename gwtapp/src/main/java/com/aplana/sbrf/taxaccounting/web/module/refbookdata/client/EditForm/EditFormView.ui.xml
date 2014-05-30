@@ -66,13 +66,13 @@
                         <g:VerticalPanel width="100%">
                             <g:HorizontalPanel width="100%">
                                 <g:cell width="20%" horizontalAlignment="right">
-                                    <g:Label wordWrap="false" text="Действует с:" addStyleNames="{style.labelStyle}"/>
+                                    <g:Label ui:field="startVersionDateLabel" wordWrap="false" text="Действует с:" addStyleNames="{style.labelStyle}"/>
                                 </g:cell>
 
                                 <g:cell width="80%">
                                     <g:HorizontalPanel>
                                         <d:DateMaskBoxPicker ui:field="versionStart" width="110px" forceSetValue="true"/>
-                                        <g:Label text=" по:" width="20px" addStyleNames="{style.bothMargin}"/>
+                                        <g:Label ui:field="endVersionDateLabel" text=" по:" width="20px" addStyleNames="{style.bothMargin}"/>
                                         <d:DateMaskBoxPicker ui:field="versionEnd" canBeEmpty="true" width="110px" forceSetValue="true"/>
                                     </g:HorizontalPanel>
                                 </g:cell>

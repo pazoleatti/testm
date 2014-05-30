@@ -53,26 +53,31 @@ public class DepartmentFormTypeDaoImplTest {
 	@Test
 	public void getFormSources(){
 		assertEquals(5, departmentFormTypeDao.getFormSources(2, 1, FormDataKind.fromId(3)).size());
+        assertEquals(6, departmentFormTypeDao.getFormSources(2, 0, null).size());
 	}
 	
 	@Test
 	public void getDeclarationSources(){
 		assertEquals(4, departmentFormTypeDao.getDeclarationSources(2, 1).size());
+        assertEquals(4, departmentFormTypeDao.getDeclarationSources(2, 0).size());
 	}
 	
 	@Test
      public void getFormDestinations(){
         assertEquals(2, departmentFormTypeDao.getFormDestinations(1, 1, FormDataKind.fromId(3)).size());
+        assertEquals(2, departmentFormTypeDao.getFormDestinations(1, 0, null).size());
     }
 
     @Test
     public void getFormDestinationsForDestDep(){
-        assertEquals(0, departmentFormTypeDao.getFormDestinations(1, 1, Arrays.asList(1)).size());
+        assertEquals(0, departmentFormTypeDao.getFormDestinationsWithDestDepId(1, 1, Arrays.asList(1)).size());
+        assertEquals(0, departmentFormTypeDao.getFormDestinationsWithDestDepId(1, 1, null).size());
     }
 
 	@Test
 	public void getDeclarationDestinations1(){
-		assertEquals(1, departmentFormTypeDao.getDeclarationDestinations(3, 1, FormDataKind.fromId(3)).size());
+		assertEquals(0, departmentFormTypeDao.getDeclarationDestinations(3, 1, FormDataKind.fromId(3)).size());
+        assertEquals(0, departmentFormTypeDao.getDeclarationDestinations(3, 0,null).size());
 	}
 
 	@Test
@@ -82,12 +87,13 @@ public class DepartmentFormTypeDaoImplTest {
 
     @Test
     public void getDeclarationDestinationsForDestDep(){
-        assertEquals(0, departmentFormTypeDao.getDeclarationDestinations(1, 1,  Arrays.asList(1)).size());
+        assertEquals(0, departmentFormTypeDao.getDeclarationDestinationsWithDestDepId(1, 1, Arrays.asList(1)).size());
     }
 	
 	@Test
 	public void testGetAllSources() {
 		assertEquals(5, departmentFormTypeDao.getDepartmentSources(2, TaxType.TRANSPORT).size());
+        assertEquals(9, departmentFormTypeDao.getDepartmentSources(2, null).size());
 	}
 
 	@Test

@@ -1,6 +1,6 @@
-insert into DEPARTMENT (id, name, parent_id, type, shortname, tb_index, sbrf_code) values (1, 'Банк', null, 1, null, null, '12');
-insert into DEPARTMENT (id, name, parent_id, type, shortname, tb_index, sbrf_code) values (2, 'ТБ1', 1, 2, null, null, '23');
-insert into DEPARTMENT (id, name, parent_id, type, shortname, tb_index, sbrf_code) values (3, 'ТБ2', 1, 2, null, null, null);
+insert into DEPARTMENT (id, name, parent_id, type, shortname, tb_index, sbrf_code, code) values (1, 'Банк', null, 1, null, null, '12', 1);
+insert into DEPARTMENT (id, name, parent_id, type, shortname, tb_index, sbrf_code, code) values (2, 'ТБ1', 1, 2, null, null, '23', 2);
+insert into DEPARTMENT (id, name, parent_id, type, shortname, tb_index, sbrf_code, code) values (3, 'ТБ2', 1, 2, null, null, null, 3);
 
 insert into tax_period(id, tax_type, year) values (1, 'T', 2013);
 insert into tax_period(id, tax_type, year) values (11, 'T', 2012);

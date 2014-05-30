@@ -1,8 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.hierarchy;
 
 import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.Edit
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.event.RollbackTableRowSelection;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.FormMode;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataModule;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataTokens;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.VersionForm.RefBookVersionPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
@@ -48,17 +49,18 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
 
     static final Object TYPE_editFormPresenter = new Object();
 
-    private Long refBookDataId;
+    Long refBookDataId;
 
     private Long recordId;
 
     private FormMode mode;
 
+    boolean canVersion = true;
+
     EditFormPresenter editFormPresenter;
     RefBookVersionPresenter versionPresenter;
 
     private final DispatchAsync dispatcher;
-    private final TaPlaceManager placeManager;
 
     public interface MyView extends View, HasUiHandlers<RefBookHierDataUiHandlers> {
 
@@ -88,6 +90,9 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
         void updateMode(FormMode mode);
         /** Очистить */
         void clearFilterInputBox();
+
+        //Показывает/скрывает поля, которые необходимы только для версионирования
+        void setVersionedFields(boolean isVisible);
     }
 
     @Inject
@@ -95,7 +100,6 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
                                     RefBookVersionPresenter versionPresenter, PlaceManager placeManager, final MyProxy proxy, DispatchAsync dispatcher) {
         super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
         this.dispatcher = dispatcher;
-        this.placeManager = (TaPlaceManager) placeManager;
         this.editFormPresenter = editFormPresenter;
         this.versionPresenter = versionPresenter;
         this.mode = FormMode.VIEW;
@@ -125,7 +129,7 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
         if (event.isSuccess()) {
             RecordChanges rc = event.getRecordChanges();
             RefBookTreeItem selectedItem = getView().getSelectedItem();
-            if (!WidgetUtils.isInLimitPeriod(rc.getStart(), rc.getEnd(), getView().getRelevanceDate())) {
+            if (canVersion && !WidgetUtils.isInLimitPeriod(rc.getStart(), rc.getEnd(), getView().getRelevanceDate())) {
                 getView().deleteItem(rc.getId());
             } else {
                 if (selectedItem != null) {
@@ -158,27 +162,65 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
 
     @Override
     public void onDeleteRowClicked() {
-        DeleteRefBookRowAction action = new DeleteRefBookRowAction();
-        action.setRefBookId(refBookDataId);
-        final Long selected = getView().getSelectedId();
-        action.setRecordsId(Arrays.asList(selected));
-        action.setDeleteVersion(false);
-        dispatcher.execute(action, CallbackUtils.defaultCallback(
-                new AbstractCallback<DeleteRefBookRowResult>() {
-                    @Override
-                    public void onSuccess(DeleteRefBookRowResult result) {
-                        LogCleanEvent.fire(RefBookHierDataPresenter.this);
-                        LogAddEvent.fire(RefBookHierDataPresenter.this, result.getUuid());
-                        if (result.isException()) {
-                            Dialog.errorMessage("Удаление всех версий элемента справочника",
-                                    "Обнаружены фатальные ошибки!");
-                        } else {
-                            editFormPresenter.show(null);
-                            editFormPresenter.setNeedToReload();
-                            getView().deleteItem(selected);
+        if (canVersion){
+            DeleteRefBookRowAction action = new DeleteRefBookRowAction();
+            action.setRefBookId(refBookDataId);
+            final Long selected = getView().getSelectedId();
+            action.setRecordsId(Arrays.asList(selected));
+            action.setDeleteVersion(false);
+            dispatcher.execute(action, CallbackUtils.defaultCallback(
+                    new AbstractCallback<DeleteRefBookRowResult>() {
+                        @Override
+                        public void onSuccess(DeleteRefBookRowResult result) {
+                            LogCleanEvent.fire(RefBookHierDataPresenter.this);
+                            LogAddEvent.fire(RefBookHierDataPresenter.this, result.getUuid());
+                            if (result.isException()) {
+                                Dialog.errorMessage("Удаление всех версий элемента справочника",
+                                        "Обнаружены фатальные ошибки!");
+                            } else {
+                                editFormPresenter.show(null);
+                                editFormPresenter.setNeedToReload();
+                                getView().deleteItem(selected);
+                            }
                         }
+                    }, this));
+        } else {
+            DeleteNonVersionRefBookRowAction action = new DeleteNonVersionRefBookRowAction();
+            final Long selected = getView().getSelectedId();
+            action.setRecordsId(Arrays.asList(selected));
+            action.setOkDelete(false);
+            dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<DeleteNonVersionRefBookRowResult>() {
+                @Override
+                public void onSuccess(DeleteNonVersionRefBookRowResult result) {
+                    if (result.isWarning()){
+                        Dialog.warningMessage("Удаление подразделения","Удалить все связанные записи?", new DialogHandler() {
+                            @Override
+                            public void yes() {
+                                DeleteNonVersionRefBookRowAction action = new DeleteNonVersionRefBookRowAction();
+                                final Long selected = getView().getSelectedId();
+                                action.setRecordsId(Arrays.asList(selected));
+                                action.setOkDelete(true);
+                                dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<DeleteNonVersionRefBookRowResult>() {
+                                    @Override
+                                    public void onSuccess(DeleteNonVersionRefBookRowResult result) {
+                                        LogAddEvent.fire(RefBookHierDataPresenter.this, result.getUuid());
+                                        editFormPresenter.show(null);
+                                        editFormPresenter.setNeedToReload();
+                                        getView().deleteItem(selected);
+                                    }
+                                }, RefBookHierDataPresenter.this));
+                            }
+
+                            @Override
+                            public void no() {
+                                Dialog.hideMessage();
+                            }
+                        });
                     }
-                }, this));
+                }
+            }, RefBookHierDataPresenter.this));
+        }
+
     }
 
     @Override
@@ -246,7 +288,9 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
                         getView().setRefBookNameDesc(result.getName());
                     }
                 }, this));
-
+        canVersion = !Arrays.asList(RefBookDataModule.NOT_VERSIONED_REF_BOOK_IDS).contains(refBookDataId);
+        getView().setVersionedFields(canVersion);
+        editFormPresenter.setCanVersion(canVersion);
     }
 
     @Override

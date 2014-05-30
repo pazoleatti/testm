@@ -19,13 +19,13 @@ insert into form_type (id, name, tax_type) values (12, 'FormType - Transport3', 
 
 insert into form_type (id, name, tax_type) values (21, 'FormType - Income2', 'I');
 
-insert into department (id, name, parent_id, type) values (1, 'Банк', null, 1);
-insert into department (id, name, parent_id, type) values (2, 'ТБ1', 1, 2);
-insert into department (id, name, parent_id, type) values (3, 'ТБ2', 1, 2);
-insert into department (id, name, parent_id, type) values (4, 'ГОСБ1', 2, 3);
-insert into department (id, name, parent_id, type) values (5, 'ГОСБ2', 2, 3);
-insert into department (id, name, parent_id, type) values (6, 'ГОСБ3', 2, 3);
-insert into department (id, name, parent_id, type) values (7, 'ОСБ1', 4, 4);
+insert into department (id, name, parent_id, type, code) values (1, 'Банк', null, 1, 1);
+insert into department (id, name, parent_id, type, code) values (2, 'ТБ1', 1, 2, 2);
+insert into department (id, name, parent_id, type, code) values (3, 'ТБ2', 1, 2, 3);
+insert into department (id, name, parent_id, type, code) values (4, 'ГОСБ1', 2, 3, 4);
+insert into department (id, name, parent_id, type, code) values (5, 'ГОСБ2', 2, 3, 5);
+insert into department (id, name, parent_id, type, code) values (6, 'ГОСБ3', 2, 3, 6);
+insert into department (id, name, parent_id, type, code) values (7, 'ОСБ1', 4, 4, 7);
 
 -- В подразделении 1 есть все налоговые формы
 insert into department_form_type (id, department_id, form_type_id, kind) values (1, 1, 1, 3);

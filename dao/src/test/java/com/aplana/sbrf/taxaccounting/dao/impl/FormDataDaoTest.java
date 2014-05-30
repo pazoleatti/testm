@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.FormPerformerDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -15,9 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 // TODO: (sgoryachkin) Пришлось вычистить тесты, т.к. они тестировали в основном только работу со строками, что теперь не актуально
 // Нужно написать нормальные тесты на получение сохранение FormData и проверить поля
@@ -32,6 +31,8 @@ public class FormDataDaoTest {
 
 	@Autowired
 	FormDataDao formDataDao;
+    @Autowired
+    FormPerformerDao formPerformerDao;
 
 	@Test
 	public void testGet() {
@@ -256,6 +257,28 @@ public class FormDataDaoTest {
     @Test
     public void testFindByDepAndReportPeriod() throws ParseException {
         Assert.assertEquals(1, formDataDao.find(Arrays.asList(1), 1).size());
+    }
+
+    @Test
+    public void testUpdateFDPerformerTBDepartmentNames() throws ParseException {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(2012, Calendar.JANUARY, 1);
+        Date startDate = calendar.getTime();
+        calendar.set(2013, Calendar.AUGUST, 1);
+        Date endDate = calendar.getTime();
+        formDataDao.updateFDPerformerTBDepartmentNames("Bank1", "Ban", startDate, endDate);
+        Assert.assertEquals("Bank1/Uralsib", formPerformerDao.get(11).getReportDepartmentName());
+    }
+
+    @Test
+    public void testUpdateFDPerformerDepartmentNames() throws ParseException {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(2012, Calendar.JANUARY, 1);
+        Date startDate = calendar.getTime();
+        calendar.set(2013, Calendar.AUGUST, 1);
+        Date endDate = calendar.getTime();
+        formDataDao.updateFDPerformerDepartmentNames(1, "Bank1", startDate, endDate);
+        Assert.assertEquals("Ban/Bank1", formPerformerDao.get(11).getReportDepartmentName());
     }
 
     @Test

@@ -170,7 +170,7 @@ public class SourceServiceImpl implements SourceService {
         List<Integer> formTypeIds = new ArrayList<Integer>();
         for (FormType formType : formTypes)
             formTypeIds.add(formType.getId());
-        return departmentFormTypeDao.getFormDestinations(sourceDepartmentId, destinationDepartmentId, formTypeIds);
+        return departmentFormTypeDao.getFormDestinationsWithDestDepId(sourceDepartmentId, destinationDepartmentId, formTypeIds);
     }
 
     @Override
@@ -178,7 +178,7 @@ public class SourceServiceImpl implements SourceService {
         List<Integer> formTypeIds = new ArrayList<Integer>();
         for (FormType formType : formTypes)
             formTypeIds.add(formType.getId());
-        return departmentFormTypeDao.getDeclarationDestinations(sourceDepartmentId, destinationDepartmentId, formTypeIds);
+        return departmentFormTypeDao.getDeclarationDestinationsWithDestDepId(sourceDepartmentId, destinationDepartmentId, formTypeIds);
     }
 
     @Override

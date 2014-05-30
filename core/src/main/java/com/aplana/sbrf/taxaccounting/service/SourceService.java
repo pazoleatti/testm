@@ -1,10 +1,10 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import java.util.Collection;
-import java.util.List;
-
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Интерфейс сервиса для работы с привязкой департаментов к подразделениям
@@ -231,6 +231,14 @@ public interface SourceService {
      */
     boolean existAssignedForm(int departmentId, int typeId, FormDataKind kind);
 
+    /**
+     * Получает формы-приемники для конкретного департамента приемника
+     *
+     * @param sourceDepartmentId департамент-источник
+     * @param destinationDepartmentId департамент-приемник
+     * @param formTypes идентификаторы типов
+     * @return List{@link DepartmentFormType}
+     */
     List<DepartmentFormType> getDestinationsFormWithDestDepartment(int sourceDepartmentId, int destinationDepartmentId, List<FormType> formTypes);
     List<DepartmentDeclarationType> getDestinationsDeclarationWithDestDepartment(int sourceDepartmentId, int destinationDepartmentId, List<FormType> formTypes);
 

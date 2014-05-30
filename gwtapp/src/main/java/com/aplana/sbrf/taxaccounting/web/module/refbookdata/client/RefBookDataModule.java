@@ -13,6 +13,9 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.script.RefBoo
 import com.gwtplatform.mvp.client.gin.AbstractPresenterModule;
 
 public class RefBookDataModule extends AbstractPresenterModule {
+    /**Идентификаторы справочников, которые не версионируются*/
+    public static final Long[] NOT_VERSIONED_REF_BOOK_IDS = new Long[]{30l};
+
     @Override
     protected void configure() {
 

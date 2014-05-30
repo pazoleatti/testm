@@ -46,8 +46,8 @@ insert into ref_book_record(id, record_id, ref_book_id, version, status) VALUES 
 insert into ref_book_record(id, record_id, ref_book_id, version, status) VALUES (22, 2, 8, to_date('01.01.2013', 'DD.MM.YYYY'), 0);
 
 -- department
-insert into department (id, NAME, parent_id, TYPE, shortname, tb_index, sbrf_code) VALUES (1, 'банк1', NULL, 1, NULL, NULL, NULL);
-insert into department (id, NAME, parent_id, TYPE, shortname, tb_index, sbrf_code) VALUES (2, 'банк2', 1, 2, NULL, NULL, NULL);
+insert into department (id, NAME, parent_id, TYPE, shortname, tb_index, sbrf_code, code) VALUES (1, 'банк1', NULL, 1, NULL, NULL, NULL, 1);
+insert into department (id, NAME, parent_id, TYPE, shortname, tb_index, sbrf_code, code) VALUES (2, 'банк2', 1, 2, NULL, NULL, NULL, 2);
 
 -- report period
 insert into report_period (id, NAME, tax_period_id, ord, dict_tax_period_id, start_date, end_date, calendar_start_date) VALUES (1, '2002 - 1 квартал', 1, 1, 21, date '2013-01-01', date '2013-03-31', date '2013-01-01');
