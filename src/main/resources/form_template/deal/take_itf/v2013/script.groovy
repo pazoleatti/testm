@@ -124,24 +124,24 @@ void logicCheck() {
         if (row.getAlias() != null) {
             continue
         }
-        def rowNumber = row.getIndex()
+        def rowNum = row.getIndex()
 
-        // Обязательность заполнения графы 1-12
-        checkNonEmptyColumns(row, rowNumber, nonEmptyColumns, logger, false)
+        checkNonEmptyColumns(row, rowNum, ['docNumber', 'docDate'], logger, true)
+        checkNonEmptyColumns(row, rowNum, nonEmptyColumns - ['docNumber', 'docDate'], logger, false)
 
         // Проверка цены
         if (row.outcomeSum != row.price) {
-            logger.warn("Строка $rowNumber: Цена не может отличаться от суммы расходов Банка!")
+            logger.warn("Строка $rowNum: Цена не может отличаться от суммы расходов Банка!")
         }
 
         // Проверка стоимости
         if (row.outcomeSum != row.total) {
-            logger.warn("Строка $rowNumber: Стоимость не может отличаться от суммы расходов Банка!")
+            logger.warn("Строка $rowNum: Стоимость не может отличаться от суммы расходов Банка!")
         }
 
         // Корректность даты сделки
         if (row.dealDoneDate < row.docDate) {
-            logger.warn("Строка $rowNumber: Дата совершения сделки не может быть меньше даты договора!")
+            logger.warn("Строка $rowNum: Дата совершения сделки не может быть меньше даты договора!")
         }
     }
 

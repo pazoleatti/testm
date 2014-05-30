@@ -72,7 +72,8 @@ def autoFillColumns = ['rowNum', 'innKio', 'contraCountry', 'contraCountryCode',
 // Проверяемые на пустые значения атрибуты
 @Field
 def nonEmptyColumns = ['rowNum', 'transactionDeliveryDate', 'contraName', 'transactionMode', 'transactionSumCurrency',
-        'currency', 'courseCB', 'transactionSumRub', 'bondRegCode', 'bondCount', 'priceOne', 'transactionType']
+        'currency', 'courseCB', 'transactionSumRub', 'contractNum', 'contractDate', 'transactionDate', 'bondRegCode',
+        'bondCount', 'priceOne', 'transactionType']
 
 // Дата окончания отчетного периода
 @Field
@@ -146,7 +147,8 @@ void logicCheck() {
         }
         def rowNum = row.getIndex()
 
-        checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, false)
+        checkNonEmptyColumns(row, rowNum, ['contractNum', 'contractDate'], logger, true)
+        checkNonEmptyColumns(row, rowNum, nonEmptyColumns - ['contractNum', 'contractDate'], logger, false)
 
         def transactionDeliveryDate = row.transactionDeliveryDate
         def transactionDate = row.transactionDate
