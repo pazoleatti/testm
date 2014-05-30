@@ -17,7 +17,7 @@ public class ReferenceUiColumn extends DataRowColumn<Object> {
 	}
 
 	@Override
-	public Long getValue(DataRow<Cell> dataRow) {
-		return (Long) dataRow.get(alias);
+	public Object getValue(DataRow<Cell> dataRow) {
+		return dataRow.get(alias);
 	}
 }
