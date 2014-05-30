@@ -164,8 +164,8 @@ void logicCheck() {
         }
         def rowNum = row.getIndex()
 
-        // 1. Обязательность заполнения графы 1-12
-        checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, false)
+        checkNonEmptyColumns(row, rowNum, ['docNumber', 'docDate'], logger, true)
+        checkNonEmptyColumns(row, rowNum, nonEmptyColumns - ['docNumber', 'docDate'], logger, false)
 
         def dealDateCell = row.getCell('dealDate')
 

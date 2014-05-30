@@ -39,13 +39,12 @@ public class LinkButton extends FocusWidget implements HasHorizontalAlignment,
 		SafeHtml render(SafeUri url, String text);
 	}
 
-	private static final LocalHtmlTemplates templates = GWT
-			.create(LocalHtmlTemplates.class);
+	private static final LocalHtmlTemplates templates = GWT.create(LocalHtmlTemplates.class);
 	private static final String DEFAULT_IMG = "resources/img/starfish-16.png";
 	private static final String DEFAULT_TEXT = "";
 	private String text;
 	private String img;
-    private boolean disablePic = false;
+    private Boolean disable = false;
 
 	public LinkButton() {
 		this(null, null, null);
@@ -90,9 +89,10 @@ public class LinkButton extends FocusWidget implements HasHorizontalAlignment,
 	}
 
     public void setDisableImage(Boolean disable) {
-        this.disablePic = disable;
-        DOM.getChild((Element) getElement().getFirstChildElement(), 0).getStyle().setDisplay(disable ? Style.Display.NONE: Style.Display.INLINE);
-        DOM.getChild((Element) getElement().getFirstChildElement(), 1).getStyle().setMarginLeft(disable ? 0 : 19, Style.Unit.PX);
+        if(this.disable!= disable){
+            this.disable = disable;
+            setHTML(templates.render(UriUtils.fromTrustedString(this.img), this.text));
+        }
     }
 
     public void setImageResource(ImageResource ir) {
@@ -132,19 +132,19 @@ public class LinkButton extends FocusWidget implements HasHorizontalAlignment,
 	@Override
 	public void setHorizontalAlignment(HorizontalAlignmentConstant align) {
 		horzAlign = align;
-		getElement().getStyle().setProperty("textAlign",
-				align.getTextAlignString());
+		getElement().getStyle().setProperty("textAlign", align.getTextAlignString());
 	}
 
 	@Override
 	public void setHTML(SafeHtml html) {
 		setHTML(html.asString());
-        setDisableImage(disablePic);
 	}
 
 	@Override
 	public void setHTML(String html) {
 		directionalTextHelper.setTextOrHtml(html, true);
+        DOM.getChild((Element) getElement().getFirstChildElement(), 0).getStyle().setDisplay(disable ? Style.Display.NONE: Style.Display.INLINE);
+        DOM.getChild((Element) getElement().getFirstChildElement(), 1).getStyle().setMarginLeft(disable ? 0 : 19, Style.Unit.PX);
 	}
 
 	@Override

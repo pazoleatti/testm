@@ -14,11 +14,6 @@ import groovy.transform.Field
  *
  * formTemplateId=601
  *
- * TODO:
- *      - нет справочнкика «Классификатор соответствия кодов операций налоговой формы 724.2.1 по НДС символам ОПУ»
- *              http://jira.aplana.com/browse/SBRFACCTAX-7396
- *      - расчет графы 4 и 5 не доделан и недопроверен из за справочника «Классификатор соответствия кодов операций налоговой формы 724.2.1 по НДС символам ОПУ»
- *
  * @author Stanislav Yasinskiy
  */
 
@@ -161,7 +156,7 @@ def getReportPeriodEndDate() {
 // Получение данных из справочника «Отчет о прибылях и убытках» для текужего подразделения и отчетного периода
 def getIncome102Data() {
     if (income102Data == null) {
-        def filter = "REPORT_PERIOD_ID = ${formData.reportPeriodId} AND DEPARTMENT_ID = ${formData.departmentId}"
+        def filter = "DEPARTMENT_ID = ${formData.departmentId}"
         income102Data = refBookFactory.getDataProvider(52L)?.getRecords(getReportPeriodEndDate(), null, filter, null)
     }
     return income102Data
@@ -231,11 +226,9 @@ def calc5(def row) {
  */
 def calc4or5(def row, def columnNumber) {
     // список кодов ОПУ из справочника
-    // TODO (Ramil Timerbaev) когда будет готов справочник - раскомментировать
-    // def opuCodes = getOpuCodes(row.code, row.getIndex(), columnNumber)
+    def opuCodes = getOpuCodes(row.code, row.getIndex(), columnNumber)
     // сумма кодов ОПУ из отчета 102
-    // def sum = getSumByOpuCodes(opuCodes, row.getIndex(), columnNumber)
-    def sum = 182 // TODO (Ramil Timerbaev) костыль
+    def sum = getSumByOpuCodes(opuCodes, row.getIndex(), columnNumber)
     return roundValue(sum, 2)
 }
 
@@ -249,19 +242,18 @@ def calc4or5(def row, def columnNumber) {
 def getOpuCodes(def code, def index, def columnNumber) {
     // признак графы: 0 – Графа 4, 1 – Графа 5
     def columnFlag = (columnNumber == 4 ? 0 : 1)
-    // TODO (Ramil Timerbaev) еще не готов справочник «Классификатор соответствия кодов операций налоговой формы 724.2.1 по НДС символам ОПУ»
     // потом поправить фильтр и id справочника
-    def filter = "(Код операции или столбец 1 справочника) = $code AND (Графа налоговой формы 724.2.1 или столбец 2 справочника) = $columnFlag"
-    def records = refBookFactory.getDataProvider(00L)?.getRecords(getReportPeriodEndDate(), null, filter, null)
+    def filter = "BOX_724_2_1 = $columnFlag AND CODE = '$code'"
+    def records = refBookFactory.getDataProvider(102L)?.getRecords(getReportPeriodEndDate(), null, filter, null)
     if (records == null || records.isEmpty()) {
         // условия выполнения расчетов
         // 5, 6. Проверка наличия соответствия кода операций символам ОПУ для графы 4/5
         throw new ServiceException("Строка $index: В справочнике «%s» нет данных для заполнения графы $columnNumber! Расчеты не могут быть выполнены.",
-                refBookFactory.get(00L).name)
+                refBookFactory.get(102L).name)
     }
     def opuCodes = []
     records.each { record ->
-        opuCodes.add(record?.NAME?.value)
+        opuCodes.add(record?.OPU?.value)
     }
 
     return opuCodes

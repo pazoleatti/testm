@@ -76,7 +76,7 @@ def groupColumns = ['name', 'dependence', 'country', 'countryCode1', 'signPhis',
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNum', 'name', 'dependence', 'dealType', 'innerCode', 'unitCountryCode', 'signPhis',
+def nonEmptyColumns = ['rowNum', 'name', 'dependence', 'dealType', 'contractNum', 'contractDate', 'innerCode', 'unitCountryCode', 'signPhis',
         'signTransaction', 'count', 'priceOne', 'totalNds', 'transactionDate']
 
 // Дата окончания отчетного периода
@@ -154,7 +154,12 @@ void logicCheck() {
         // графа 14 = элемент с кодом «1»
         def isSignPhis = (getRefBookValue(18, row.signPhis)?.CODE?.numberValue == 1)
 
-        checkNonEmptyColumns(row, rowNum, isSignPhis ? nonEmptyColumns : nonEmptyColumns + 'countryCode2', logger, false)
+        checkNonEmptyColumns(row, rowNum, ['contractNum', 'contractDate'], logger, true)
+        checkNonEmptyColumns(row, rowNum,
+                isSignPhis ?
+                    nonEmptyColumns - ['contractNum', 'contractDate'] :
+                    nonEmptyColumns - ['contractNum', 'contractDate'] + ['countryCode2']
+                , logger, false)
 
         def transactionDeliveryDate = row.transactionDeliveryDate
         def contractDate = row.contractDate

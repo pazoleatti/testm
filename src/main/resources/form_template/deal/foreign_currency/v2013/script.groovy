@@ -71,11 +71,11 @@ def autoFillColumns = ['rowNumber', 'inn', 'countryName', 'countryCode', 'price'
 
 // Группируемые атрибуты
 @Field
-def groupColumns = ['fullName', 'docNum', 'docDate', 'currencyCode', 'countryDealCode']
+def groupColumns = ['fullName', 'currencyCode', 'countryDealCode']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNumber', 'fullName', 'currencyCode', 'countryDealCode', 'price', 'total',
+def nonEmptyColumns = ['rowNumber', 'fullName', 'docNum', 'docDate', 'currencyCode', 'countryDealCode', 'price', 'total',
         'dealDoneDate']
 
 // Дата окончания отчетного периода
@@ -150,7 +150,8 @@ void logicCheck() {
         }
         def rowNum = row.getIndex()
 
-        checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, false)
+        checkNonEmptyColumns(row, rowNum, ['docNum', 'docDate'], logger, true)
+        checkNonEmptyColumns(row, rowNum, nonEmptyColumns - ['docNum', 'docDate'], logger, false)
 
         def docDateCell = row.getCell('docDate')
 
