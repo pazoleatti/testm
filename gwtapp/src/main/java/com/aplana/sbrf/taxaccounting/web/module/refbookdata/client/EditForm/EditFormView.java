@@ -23,7 +23,6 @@ import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.*;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -133,11 +132,11 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
                     if(Formats.BOOLEAN.equals(col.getFormat())){
                         widget = new CheckBox();
                     } else {
-                        widget = new TextBox();
+                        widget = new com.aplana.gwt.client.TextBox();
                     }
 					break;
 				case STRING:
-					widget = new TextBox();
+					widget = new com.aplana.gwt.client.TextBox();
 					break;
 				case DATE:
 					widget = new DateMaskBoxPicker(col.getFormat());
@@ -150,7 +149,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 					widget = refbookWidget;
 					break;
 				default:
-					widget = new TextBox();
+					widget = new com.aplana.gwt.client.TextBox();
 					break;
 			}
 

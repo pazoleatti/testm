@@ -8,7 +8,7 @@ INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (6, 'Коды �
 INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (7, 'Параметры налоговых льгот', 0, 1, 0);
 INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (8, 'Коды, определяющие налоговый (отчётный) период', 0, 1, 0);
 
-INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (9, 'Организации-участники контролируемых сделок', 1, 0, 1);
+INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (9, 'Организации-участники контролируемых сделок', 1, 1, 1);
 INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (10, 'ОК 025-2001 (Общероссийский классификатор стран мира)', 1, 1, 0);
 INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (11, 'Услуги в части программного обеспечения', 0, 1, 0);
 INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (12, 'Коды единиц измерения на основании ОКЕИ', 0, 1, 0);
