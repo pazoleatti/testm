@@ -14,6 +14,7 @@
 	</bean>
 
     <tx:annotation-driven mode="aspectj"/>
+    <tx:jta-transaction-manager/>
     <context:load-time-weaver aspectj-weaving="on"/>
 
 	<!-- JDBC-based DAOs -->
