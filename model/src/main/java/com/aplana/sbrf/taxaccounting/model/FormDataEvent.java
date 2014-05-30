@@ -58,7 +58,9 @@ public enum FormDataEvent implements Serializable {
     LOGOUT(502, "Выход пользователя из Системы"),
     EXTERNAL_INTERACTION(503, "Взаимодействие с внешней АС"),
 
-	LOG_SYSTEM_BACKUP(601, "Архивирование журнала событий");
+	LOG_SYSTEM_BACKUP(601, "Архивирование журнала событий"),
+
+    DELETE_DEPARTMENT(903, "Удаление подразделения");
 
 	private String title;
 	private int code;

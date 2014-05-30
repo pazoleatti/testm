@@ -81,15 +81,6 @@
         <maxLength>6</maxLength>
         <prevLength>0</prevLength>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>sumNds</alias>
-        <checking>false</checking>
-        <name>Сумма НДС по книге продаж</name>
-        <order>9</order>
-        <width>11</width>
-        <maxLength>17</maxLength>
-        <precision>2</precision>
-    </columns>
     <styles>
         <alias>Контрольные суммы</alias>
         <backColor>LIGHT_BROWN</backColor>

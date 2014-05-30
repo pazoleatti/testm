@@ -1,11 +1,14 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataSearchDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.FormDataDaoFilter.AccessFilterType;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.util.FormTypeAlphanumericComparator;
 import com.aplana.sbrf.taxaccounting.service.*;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Transformer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -31,12 +34,51 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
     @Autowired
     private SourceService sourceService;
 
+    @Autowired
+    private FormDataDao formDataDao;
+
 	@Override
 	public PagingResult<FormDataSearchResultItem> findDataByUserIdAndFilter(TAUserInfo userInfo, FormDataFilter formDataFilter) {
         return formDataSearchDao.findPage(createFormDataDaoFilter(userInfo, formDataFilter), formDataFilter.getSearchOrdering(),
 				formDataFilter.isAscSorting(), new PagingParams(formDataFilter.getStartIndex(),
 				formDataFilter.getCountOfRecords()));
 	}
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<FormData> findDataByFilter(FormDataFilter formDataFilter) {
+        FormDataDaoFilter formDataDaoFilter = new FormDataDaoFilter();
+        formDataDaoFilter.setDepartmentIds(formDataFilter.getDepartmentIds());
+        // Отчетные периоды
+        formDataDaoFilter.setReportPeriodIds(formDataFilter.getReportPeriodIds());
+        formDataDaoFilter.setFormDataKind((List<FormDataKind>)CollectionUtils.collect(formDataFilter.getFormDataKind(), new Transformer() {
+            @Override
+            public Object transform(Object input) {
+                return FormDataKind.fromId((Integer)input);
+            }
+        }));
+        formDataDaoFilter.setFormTypeIds(formDataFilter.getFormTypeId());
+        // Состояние
+        if (formDataFilter.getFormState() != null) {
+            formDataDaoFilter.setStates(asList(formDataFilter.getFormState()));
+        }
+        // Признак возврата
+        formDataDaoFilter.setReturnState(formDataFilter.getReturnState());
+        // Вид налога
+        if (formDataFilter.getTaxType() != null) {
+            formDataDaoFilter.setTaxTypes(asList(formDataFilter.getTaxType()));
+        }
+        formDataDaoFilter.setAccessFilterType(AccessFilterType.ALL);
+
+        List<Long> ids = formDataSearchDao.findIdsByFilter(formDataDaoFilter);
+        return ids.isEmpty() ? new ArrayList<FormData>(0) :
+                (List<FormData>)CollectionUtils.collect(ids, new Transformer() {
+                    @Override
+                    public Object transform(Object input) {
+                        return formDataDao.get((Integer)input, null);
+                    }
+                });
+    }
 
     @Override
     public List<Long> findDataIdsByUserAndFilter(TAUserInfo userInfo, FormDataFilter filter) {

@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import com.aplana.sbrf.taxaccounting.cache.CacheManagerDecorator;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
@@ -8,7 +7,6 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,14 +36,6 @@ public class FormTemplateDaoTest {
 	// TODO: расширить тесты
 	@Autowired
 	private FormTemplateDao formTemplateDao;
-
-    @Autowired
-    private CacheManagerDecorator cacheManagerDecorator;
-
-    @Before
-    public void init(){
-        cacheManagerDecorator.clearAll();
-    }
 
     @CacheEvict(value = CacheConstants.FORM_TEMPLATE, key = "1", beforeInvocation = true)
 	@Test

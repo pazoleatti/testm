@@ -362,7 +362,7 @@ public class FormDataServiceImpl implements FormDataService {
 		Map<String, Object> additionalParameters = new HashMap<String, Object>();
 		additionalParameters.put("currentDataRow", currentDataRow);
 		formDataScriptingService.executeScript(userInfo, formData,
-				FormDataEvent.DELETE_ROW, logger, additionalParameters);
+                FormDataEvent.DELETE_ROW, logger, additionalParameters);
 		if (logger.containsLevel(LogLevel.ERROR)) {
 			throw new ServiceLoggerException(
 					"Произошли ошибки в скрипте удаления строки",
@@ -443,7 +443,7 @@ public class FormDataServiceImpl implements FormDataService {
 		formDataAccessService.canEdit(userInfo, formData.getId(), formData.isManual());
 
 		formDataScriptingService.executeScript(userInfo, formData,
-				FormDataEvent.SAVE, logger, null);
+                FormDataEvent.SAVE, logger, null);
 
 		formDataDao.save(formData);
 		
@@ -451,7 +451,7 @@ public class FormDataServiceImpl implements FormDataService {
 
 		logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.SAVE, null);
 		auditService.add(FormDataEvent.SAVE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-				null, formData.getFormType().getId(), formData.getKind().getId(), null);
+                null, formData.getFormType().getId(), formData.getKind().getId(), null);
 
 		return formData.getId();
 	}
@@ -774,6 +774,30 @@ public class FormDataServiceImpl implements FormDataService {
        } catch (DaoException e){
            throw new ServiceException("", e);
        }
+    }
+
+    @Override
+    public void updateFDTBNames(int newDepTBId, int oldDepTBId, Date dateFrom, Date dateTo) {
+        if (dateFrom == null)
+            throw new ServiceException("Должна быть установлена хотя бы \"Дата от\"");
+        try {
+            Department departmentTBNew = departmentDao.getDepartment(newDepTBId);
+            Department departmentTBOld = departmentDao.getDepartment(oldDepTBId);
+            formDataDao.updateFDPerformerTBDepartmentNames(departmentTBNew.getName(), departmentTBOld.getName(), dateFrom, dateTo);
+        } catch (ServiceException e){
+            throw new ServiceException("Ошибка при обновлении имени ТБ", e);
+        }
+    }
+
+    @Override
+    public void updateFDDepartmentNames(int depTBId, String depName, Date dateFrom, Date dateTo) {
+        if (dateFrom == null)
+            throw new ServiceException("Должна быть установлена хотя бы \"Дата от\"");
+        try {
+            formDataDao.updateFDPerformerDepartmentNames(depTBId, depName, dateFrom, dateTo);
+        } catch (ServiceException e){
+            throw new ServiceException("Ошибка при обновлении имени ТБ", e);
+        }
     }
 
     @Override

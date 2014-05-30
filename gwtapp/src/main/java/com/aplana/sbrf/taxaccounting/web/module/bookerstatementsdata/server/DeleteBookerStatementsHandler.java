@@ -32,7 +32,7 @@ public class DeleteBookerStatementsHandler extends AbstractActionHandler<DeleteB
         } else {
             provider = rbFactory.getDataProvider(GetBookerStatementsHandler.REF_BOOK_102);
         }
-        provider.deleteRecordVersions(new Logger(), action.getUniqueRecordIds());
+        provider.deleteRecordVersions(new Logger(), action.getUniqueRecordIds(), false);
         return new DeleteBookerStatementsResult();
     }
 

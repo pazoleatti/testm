@@ -31,10 +31,8 @@ import java.util.*;
 public class PeriodServiceImpl implements PeriodService{
 
 	private static final Long PERIOD_CODE_REFBOOK = 8L;
-	private static final long REF_BOOK_101 = 50L;
-	private static final long REF_BOOK_102 = 52L;
 
-	@Autowired
+    @Autowired
 	private ReportPeriodDao reportPeriodDao;
 
 	@Autowired
@@ -60,9 +58,6 @@ public class PeriodServiceImpl implements PeriodService{
 
 	@Autowired
 	private DeclarationDataSearchService declarationDataSearchService;
-
-	@Autowired
-	private AuditService auditService;
 
     @Autowired
     private NotificationService notificationService;
@@ -228,7 +223,7 @@ public class PeriodServiceImpl implements PeriodService{
 		}
 	}
 
-	private void saveOrUpdate(DepartmentReportPeriod departmentReportPeriod, Date correctionDate, List<LogEntry> logs) {
+	public void saveOrUpdate(DepartmentReportPeriod departmentReportPeriod, Date correctionDate, List<LogEntry> logs) {
 		DepartmentReportPeriod dp = departmentReportPeriodDao.get(departmentReportPeriod.getReportPeriod().getId(),
 				departmentReportPeriod.getDepartmentId(), departmentReportPeriod.getCorrectPeriod());
         String balance;
@@ -470,7 +465,8 @@ public class PeriodServiceImpl implements PeriodService{
 		return canRemove;
 	}
 
-	private void removePeriodWithLog(int reportPeriodId, Date correctionDate, List<Integer> departmentId,  TaxType taxType, List<LogEntry> logs) {
+    @Override
+	public void removePeriodWithLog(int reportPeriodId, Date correctionDate, List<Integer> departmentId,  TaxType taxType, List<LogEntry> logs) {
 		for (Integer id : departmentId) {
             DepartmentReportPeriod drp = departmentReportPeriodDao.get(reportPeriodId, id.longValue(), correctionDate);
             if (drp == null) {

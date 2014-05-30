@@ -1,9 +1,9 @@
 insert into declaration_template(id, edition, name, version, declaration_type_id) values (1, 1, 'Декларация 1', date '2014-01-01', 1);
-insert into department (id, name, parent_id, type) values (1, 'Department name 1', null, 1);
-insert into department (id, name, parent_id, type) values (2, 'Department name 5', 1, 2);
-insert into department (id, name, parent_id, type) values (3, 'Department name 2', 1, 2);
-insert into department (id, name, parent_id, type) values (4, 'Department name 3', 1, 2);
-insert into department (id, name, parent_id, type) values (5, 'Department name 4', 1, 2);
+insert into department (id, name, parent_id, type, code) values (1, 'Department name 1', null, 1, 1);
+insert into department (id, name, parent_id, type, code) values (2, 'Department name 5', 1, 2, 2);
+insert into department (id, name, parent_id, type, code) values (3, 'Department name 2', 1, 2, 3);
+insert into department (id, name, parent_id, type, code) values (4, 'Department name 3', 1, 2, 4);
+insert into department (id, name, parent_id, type, code) values (5, 'Department name 4', 1, 2, 5);
 insert into tax_period(id, tax_type, year) values (1, 'T', 2013);
 
 -- для проверки get, getXmlData и hasXmlData
