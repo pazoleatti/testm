@@ -521,7 +521,7 @@ public class RefBookUniversal implements RefBookDataProvider {
     }
 
     @Override
-    public void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds) {
+    public void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds, boolean force) {
         try {
             //Проверка использования
             List<String> usagesResult = refBookDao.isVersionUsed(refBookId, uniqueRecordIds, null, null, true);

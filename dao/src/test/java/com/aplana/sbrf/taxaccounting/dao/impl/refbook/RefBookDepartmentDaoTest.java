@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 
+import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
@@ -35,6 +37,8 @@ public class RefBookDepartmentDaoTest {
     RefBookDepartmentDao refBookDepartmentDao;
     @Autowired
     RefBookDao refBookDao;
+    @Autowired
+    DepartmentDao departmentDao;
 
     @Test
     public void getRecords() {
@@ -109,8 +113,15 @@ public class RefBookDepartmentDaoTest {
                 put("name", new RefBookValue(RefBookAttributeType.STRING, "dsfs"));
                 put("sbrf_code", new RefBookValue(RefBookAttributeType.STRING, "99_0000_00"));
                 put("type", new RefBookValue(RefBookAttributeType.NUMBER, DepartmentType.MANAGEMENT.getCode()));
+                put("code", new RefBookValue(RefBookAttributeType.NUMBER, 101));
         }};
         refBookDepartmentDao.create(record, refBookDao.getAttributes(30l));
+    }
+
+    @Test(expected = DaoException.class)
+    public void testRemove() {
+        refBookDepartmentDao.remove(1);
+        departmentDao.getDepartment(1);
     }
 
     private Date getDate(int day, int month, int year) {

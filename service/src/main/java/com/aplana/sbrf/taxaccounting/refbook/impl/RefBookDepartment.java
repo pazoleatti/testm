@@ -37,15 +37,6 @@ import static com.aplana.sbrf.taxaccounting.model.DepartmentType.*;
 @Transactional
 public class RefBookDepartment implements RefBookDataProvider {
 
-    //Параметр сделан, чтобы с клиента получать уведомление о том, что
-    //пользователь согласен продолжать удаление подразделения в случае не критичных ошибок
-    //Фактически хардкод!
-    private boolean isOkDelete = false;
-
-    public void setOkDelete(boolean okDelete) {
-        isOkDelete = okDelete;
-    }
-
     private final Calendar calendar = Calendar.getInstance();
     private static final String FILTER_BY_DEPARTMENT = "DEPARTMENT_ID = %d";
 
@@ -200,7 +191,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         checkCorrectness(logger, attributes, records);
         int depId = refBookDepartmentDao.create(refBookValueMap, attributes);
         int terrBankId = departmentService.getParentTB(depId).getId();
-        createPeriods(depId, fromCode(refBookValueMap.get(DEPARTMENT_TYPE_ATTRIBUTE).getReferenceValue().intValue()),
+        createPeriods(depId, fromCode(refBookValueMap.get(DEPARTMENT_TYPE_ATTRIBUTE).getNumberValue().intValue()),
                 terrBankId, logger);
 
         return new ArrayList<Long>(0);
@@ -339,19 +330,19 @@ public class RefBookDepartment implements RefBookDataProvider {
     }
 
     @Override
-    public void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds) {
+    public void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds, boolean force) {
         int depId = uniqueRecordIds.get(0).intValue();
         isInUsed(departmentService.getDepartment(depId), logger);
         if (logger.containsLevel(LogLevel.ERROR))
             return;
-        else if (logger.containsLevel(LogLevel.WARNING) && !isOkDelete){
+        else if (logger.containsLevel(LogLevel.WARNING) && !force){
             return;
         }
         calendar.set(1970, Calendar.JANUARY, 1);
         refBookIncome101.deleteRecordVersions(logger, refBookIncome101.getUniqueRecordIds(calendar.getTime(),
-                String.format(FILTER_BY_DEPARTMENT, depId)));
+                String.format(FILTER_BY_DEPARTMENT, depId)), false);
         refBookIncome102.deleteRecordVersions(logger, refBookIncome102.getUniqueRecordIds(calendar.getTime(),
-                String.format(FILTER_BY_DEPARTMENT, depId)));
+                String.format(FILTER_BY_DEPARTMENT, depId)), false);
 
         sourceService.deleteDFT(CollectionUtils.collect(sourceService.getDFTByDepartment(depId, null),
                 new Transformer() {
@@ -372,19 +363,19 @@ public class RefBookDepartment implements RefBookDataProvider {
         calendar.set(1970, Calendar.JANUARY, 1);
         RefBookDataProvider provider = rbFactory.getDataProvider(RefBook.DEPARTMENT_CONFIG_INCOME);
         provider.deleteRecordVersions(logger,
-                provider.getUniqueRecordIds(calendar.getTime(), String.format(FILTER_BY_DEPARTMENT, depId)));
+                provider.getUniqueRecordIds(calendar.getTime(), String.format(FILTER_BY_DEPARTMENT, depId)), false);
         provider = rbFactory.getDataProvider(RefBook.DEPARTMENT_CONFIG_TRANSPORT);
         provider.deleteRecordVersions(logger,
-                provider.getUniqueRecordIds(calendar.getTime(), String.format(FILTER_BY_DEPARTMENT, depId)));
+                provider.getUniqueRecordIds(calendar.getTime(), String.format(FILTER_BY_DEPARTMENT, depId)), false);
         provider = rbFactory.getDataProvider(RefBook.DEPARTMENT_CONFIG_DEAL);
         provider.deleteRecordVersions(logger,
-                provider.getUniqueRecordIds(calendar.getTime(), String.format(FILTER_BY_DEPARTMENT, depId)));
+                provider.getUniqueRecordIds(calendar.getTime(), String.format(FILTER_BY_DEPARTMENT, depId)), false);
         provider = rbFactory.getDataProvider(RefBook.DEPARTMENT_CONFIG_VAT);
         provider.deleteRecordVersions(logger,
-                provider.getUniqueRecordIds(calendar.getTime(), String.format(FILTER_BY_DEPARTMENT, depId)));
+                provider.getUniqueRecordIds(calendar.getTime(), String.format(FILTER_BY_DEPARTMENT, depId)), false);
         provider = rbFactory.getDataProvider(RefBook.DEPARTMENT_CONFIG_PROPERTY);
         provider.deleteRecordVersions(logger,
-                provider.getUniqueRecordIds(calendar.getTime(), String.format(FILTER_BY_DEPARTMENT, depId)));
+                provider.getUniqueRecordIds(calendar.getTime(), String.format(FILTER_BY_DEPARTMENT, depId)), false);
 
         deletePeriods(depId, logger);
         /*auditService.add(FormDataEvent.LOGOUT, null, 0, null, null, null, null,
@@ -402,7 +393,8 @@ public class RefBookDepartment implements RefBookDataProvider {
     }
 
     private void checkCorrectness(Logger logger, List<RefBookAttribute> attributes, List<RefBookRecord> records) {
-        if (departmentService.getBankDepartment() != null){
+        if (departmentService.getBankDepartment().getType().getCode() ==
+                records.get(0).getValues().get(DEPARTMENT_TYPE_ATTRIBUTE).getNumberValue().intValue()){
             logger.error("Подразделение с типом \"Банк\" уже существует!");
             return;
         }

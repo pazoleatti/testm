@@ -185,8 +185,11 @@ public interface RefBookDataProvider {
     /**
      * Удаляет указанные версии записи из справочника
      * @param uniqueRecordIds список идентификаторов версий записей, которые будут удалены
+     * @param force флаг для получнеия информации из модального окна, в случае когда необходимо запросить
+     *                   какое-нибудь подтверждение(например, об удалении
+     *                   пример {@link com.aplana.sbrf.taxaccounting.refbook.impl.RefBookDepartment})
      */
-    void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds);
+    void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds, boolean force);
 
     /**
      * Получает идентификатор записи, который имеет наименьшую дату начала актуальности для указанной версии

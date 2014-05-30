@@ -40,7 +40,7 @@ public class DeleteNonVersionRefBookRowHandler extends AbstractActionHandler<Del
         DeleteNonVersionRefBookRowResult result = new DeleteNonVersionRefBookRowResult();
         Logger logger = new Logger();
         if (action.getRecordsId().size() > 0) {
-            refBookDataProvider.deleteRecordVersions(logger, action.getRecordsId());
+            refBookDataProvider.deleteRecordVersions(logger, action.getRecordsId(), action.isOkDelete());
             if (logger.containsLevel(LogLevel.ERROR))
                 throw new ServiceLoggerException("Удаление невозможно, обнаружены ссылки на подразделение",
                         logEntryService.save(logger.getEntries()));

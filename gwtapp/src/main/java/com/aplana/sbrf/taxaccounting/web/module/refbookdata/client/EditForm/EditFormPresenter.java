@@ -234,7 +234,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                 }, this));
 			} else {
                 //Редактирование версии
-                SaveRefBookRowVersionAction action = new SaveRefBookRowVersionAction();
+                final SaveRefBookRowVersionAction action = new SaveRefBookRowVersionAction();
                 action.setRefBookId(currentRefBookId);
                 action.setRecordId(currentUniqueRecordId);
                 Map<String, RefBookValueSerializable> map = getView().getFieldsValues();
@@ -248,9 +248,11 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                         renameDialogPresenter.open(new ConfirmButtonClickHandler() {
                             @Override
                             public void onClick(Date dateFrom, Date dateTo) {
-                                // тут дальнейшая обработка по сценаарию постановки
+                                /*// тут дальнейшая обработка по сценаарию постановки
                                 Dialog.infoMessage("Переименовываем с " + WidgetUtils.getDateString(dateFrom) +
-                                        " по " + WidgetUtils.getDateString(dateTo) + "на имя \"" + modifiedFields.get("NAME") + "\"");
+                                        " по " + WidgetUtils.getDateString(dateTo) + "на имя \"" + modifiedFields.get("NAME") + "\"")*/
+                                action.setVersionFrom(WidgetUtils.getDateWithOutTime(dateFrom));
+                                action.setVersionTo(WidgetUtils.getDateWithOutTime(dateTo));
                             }
                         });
                     }

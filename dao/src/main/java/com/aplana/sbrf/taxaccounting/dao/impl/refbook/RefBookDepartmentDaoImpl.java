@@ -33,9 +33,8 @@ import java.util.Map;
 public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepartmentDao {
 
 	private static final String TABLE_NAME = "DEPARTMENT";
-    private static final String SEQUENCE_NAME = "seq_department";
 
-	@Autowired
+    @Autowired
 	private RefBookUtils refBookUtils;
     @Autowired
     ReportPeriodDao reportPeriodDao;
@@ -146,8 +145,6 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
     public int create(Map<String, RefBookValue> records, List<RefBookAttribute> attributes) {
         PreparedStatementData ps = new PreparedStatementData();
         for (RefBookAttribute attribute : attributes) {
-            if (attribute.getAlias().toUpperCase().equals("ID"))
-                continue;
             ps.appendQuery(attribute.getAlias() + ",");
 
             if (attribute.getAttributeType().equals(RefBookAttributeType.STRING)) {
@@ -176,6 +173,11 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
 
     @Override
     public void remove(long uniqueId) {
-        //To change body of implemented methods use File | Settings | File Templates.
+        try {
+            getJdbcTemplate().update("delete from department where id = ?", uniqueId);
+        } catch (DataAccessException e){
+            logger.error("", e);
+            throw new DaoException("", e);
+        }
     }
 }
