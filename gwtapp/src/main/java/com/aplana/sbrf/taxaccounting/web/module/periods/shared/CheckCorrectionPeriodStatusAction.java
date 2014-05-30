@@ -11,7 +11,7 @@ public class CheckCorrectionPeriodStatusAction extends UnsecuredActionImpl<Check
     TaxType taxType;
     List<Integer> selectedDepartments;
     Date term;
-    ReportPeriod selectedPeriod;
+    int reportPeriodId;
 
     public List<Integer> getSelectedDepartments() {
         return selectedDepartments;
@@ -29,19 +29,19 @@ public class CheckCorrectionPeriodStatusAction extends UnsecuredActionImpl<Check
         this.term = term;
     }
 
-    public ReportPeriod getSelectedPeriod() {
-        return selectedPeriod;
-    }
-
-    public void setSelectedPeriod(ReportPeriod selectedPeriod) {
-        this.selectedPeriod = selectedPeriod;
-    }
-
     public TaxType getTaxType() {
         return taxType;
     }
 
     public void setTaxType(TaxType taxType) {
         this.taxType = taxType;
+    }
+
+    public int getReportPeriodId() {
+        return reportPeriodId;
+    }
+
+    public void setReportPeriodId(int reportPeriodId) {
+        this.reportPeriodId = reportPeriodId;
     }
 }

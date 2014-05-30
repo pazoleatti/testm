@@ -52,6 +52,13 @@ public interface DepartmentReportPeriodDao {
      * Открыть закрыть период для подразделения
      */
     void updateActive(long departmentReportPeriodId, boolean active);
+
+    /**
+     * Изменить дату корректировки
+     * @param departmentReportPeriodId
+     * @param correctionDate дата корректировки
+     */
+    void updateCorrectionDate(long departmentReportPeriodId, Date correctionDate);
 	
 	/**
 	 * Получить объект
@@ -104,4 +111,12 @@ public interface DepartmentReportPeriodDao {
     List<DepartmentReportPeriod> getDepartmentCorrectionPeriods(long departmentId, int reportPeriodId);
 
     DepartmentReportPeriod getById(long id);
+
+    /**
+     * изменить признак ввода остатков
+     * @param reportPeriodId идентификатор отчетного период
+     * @param departmentId идентификатор подразделения
+     * @param isBalance признак ввода остатков
+     */
+    public void changeBalance(int reportPeriodId, int departmentId, boolean isBalance);
 }

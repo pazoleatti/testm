@@ -480,8 +480,10 @@ public class PeriodServiceImpl implements PeriodService{
 			departmentReportPeriodDao.delete(drpId);
             //TODO dloshkarev: можно сразу получать список а не выполнять запросы в цикле
 			ReportPeriod rp = reportPeriodDao.get(reportPeriodId);
-			logs.add(new LogEntry(LogLevel.INFO,
-					rp.getName() + " " + rp.getTaxPeriod().getYear() + " удалён для " + departmentService.getDepartment(id).getName()));
+            if (logs != null) {
+                logs.add(new LogEntry(LogLevel.INFO,
+                        rp.getName() + " " + rp.getTaxPeriod().getYear() + " удалён для " + departmentService.getDepartment(id).getName()));
+            }
 		}
 
         notificationService.deleteByReportPeriod(reportPeriodId);
@@ -528,6 +530,7 @@ public class PeriodServiceImpl implements PeriodService{
 						case OPEN:
 						case CLOSE:
 						case DELETE:
+                        case EDIT:
 						case EDIT_DEADLINE:
 								return departmentService.getBADepartments(user);
 					}
@@ -542,6 +545,7 @@ public class PeriodServiceImpl implements PeriodService{
 						case OPEN:
 						case CLOSE:
 						case DELETE:
+                        case EDIT:
 						case EDIT_DEADLINE:
 							return departmentService.getAllChildren(departmentId);
 					}
@@ -567,6 +571,7 @@ public class PeriodServiceImpl implements PeriodService{
 						case OPEN:
 						case CLOSE:
 						case DELETE:
+                        case EDIT:
 						case EDIT_DEADLINE:
 							return departmentService.getBADepartments(user);
 					}
@@ -749,5 +754,75 @@ public class PeriodServiceImpl implements PeriodService{
             }
         }
         return PeriodStatusBeforeOpen.NOT_EXIST;
+    }
+
+    @Override
+    public void edit(int reportPeriodId, int newDictTaxPeriodId, int newYear, TaxType taxType, TAUserInfo user,
+                     long departmentId, boolean isBalance, List<LogEntry> logs) {
+        ReportPeriod rp = getReportPeriod(reportPeriodId);
+
+
+        List<Department> deps = getAvailableDepartments(taxType, user.getUser(), Operation.EDIT, (int) departmentId);
+        if ((rp.getDictTaxPeriodId() == newDictTaxPeriodId) && (rp.getTaxPeriod().getYear() == newYear)) { // Изменился только ввод остатков
+
+            for (Department dep : deps) {
+                departmentReportPeriodDao.changeBalance(reportPeriodId, dep.getId(), isBalance);
+                logs.add(new LogEntry(LogLevel.INFO,
+                        "Период с " + rp.getName() + " " + rp.getTaxPeriod().getYear() + " был изменён на " + rp.getName() + " для " + dep.getName()));//<соответствующий календарный год>** + <"ввод остатков" *>**  для <Наименование подразделения>"));
+            }
+
+        } else {
+            List<Integer> depIds = new ArrayList<Integer>();
+            for (Department dep : deps) {
+                depIds.add(dep.getId());
+            }
+            removePeriodWithLog(reportPeriodId, null, depIds, taxType, null);
+            open(newYear, newDictTaxPeriodId, taxType, user, departmentId, null, isBalance, null);
+            for (Department dep : deps) {
+                logs.add(new LogEntry(LogLevel.INFO,
+                        "Период с " + rp.getName() + " " + rp.getTaxPeriod().getYear() + " был изменён на " + newDictTaxPeriodId + " для " + dep.getName()));//<соответствующий календарный год>** + <"ввод остатков" *>**  для <Наименование подразделения>"));
+            }
+        }
+    }
+
+    @Override
+    public void editCorrectionPeriod(int reportPeriodId, int newReportPeriodId, long departmentId, TaxType taxType,
+                                     Date correctionDate, Date newCorrectionDate, TAUserInfo user, List<LogEntry> logs) {
+        if (reportPeriodId == newReportPeriodId) { // изменилась только дата корректировки
+            ReportPeriod rp = getReportPeriod(reportPeriodId);
+            ReportPeriod newRp = getReportPeriod(newReportPeriodId);
+            PeriodStatusBeforeOpen status = checkPeriodStatusBeforeOpen(rp, departmentId, newCorrectionDate);
+            if (status == PeriodStatusBeforeOpen.NOT_EXIST) {
+                List<Department> deps = getAvailableDepartments(taxType, user.getUser(), Operation.EDIT, (int) departmentId);
+                for (Department dep : deps) {
+                    DepartmentReportPeriod drp = departmentReportPeriodDao.get(reportPeriodId, (long)dep.getId(), correctionDate);
+                    departmentReportPeriodDao.updateCorrectionDate(drp.getId(), newCorrectionDate);
+                    logs.add(new LogEntry(LogLevel.INFO,
+                            "Корректирующий период с " + rp.getName() + " " + rp.getTaxPeriod().getYear() + " был изменён на " + newRp.getName() + " для " + dep.getName()));//<соответствующий календарный год>** + <"ввод остатков" *>**  для <Наименование подразделения>"));
+
+                }
+            }
+        } else {
+            ReportPeriod rp = getReportPeriod(newReportPeriodId);
+            PeriodStatusBeforeOpen status = checkPeriodStatusBeforeOpen(rp, departmentId, newCorrectionDate);
+            if (status == PeriodStatusBeforeOpen.NOT_EXIST) {
+                List<Department> deps = getAvailableDepartments(taxType, user.getUser(), Operation.EDIT, (int) departmentId);
+                List<Integer> depIds = new ArrayList<Integer>();
+                for (Department dep : deps) {
+                    depIds.add(dep.getId());
+                }
+                removePeriodWithLog(reportPeriodId, correctionDate, depIds, taxType, null);
+                ReportPeriod newRp = getReportPeriod(newReportPeriodId);
+                openCorrectionPeriod(taxType, newRp, departmentId, newCorrectionDate, user, null);
+                for (Department dep : deps) {
+                    logs.add(new LogEntry(LogLevel.INFO,
+                            "Корректирующий период с " + rp.getName() + " " + rp.getTaxPeriod().getYear() + " был изменён на " + newRp.getName() + " для " + dep.getName()));//<соответствующий календарный год>** + <"ввод остатков" *>**  для <Наименование подразделения>"));
+                }
+
+
+
+            }
+        }
+
     }
 }

@@ -129,6 +129,8 @@
                                           ui:field="openCorrectPeriod"/>
                         <style:LinkButton img="resources/img/lock-16.png" text="Закрыть период"
                                           ui:field="closePeriod"/>
+                        <style:LinkButton img="resources/img/lock-16.png" text="Редактировать период"
+                                          ui:field="editPeriod" visible="false"/>
                         <g:Button ui:field="removePeriod" text="Удалить период"/>
                         <g:Button ui:field="setDeadlineButton" visible="false" text="Назначить срок сдачи"/>
                     </style:LeftBar>

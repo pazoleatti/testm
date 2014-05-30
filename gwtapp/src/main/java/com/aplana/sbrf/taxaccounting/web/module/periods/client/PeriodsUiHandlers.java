@@ -10,4 +10,5 @@ public interface PeriodsUiHandlers extends UiHandlers {
     void setDeadline();
 	void removePeriod();
 	void selectionChanged();
+    void editPeriod();
 }

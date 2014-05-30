@@ -36,13 +36,13 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
         @Override
         public ReportPeriod mapRow(ResultSet rs, int index) throws SQLException {
             ReportPeriod reportPeriod = new ReportPeriod();
-            reportPeriod.setId(SqlUtils.getInteger(rs,"id"));
+            reportPeriod.setId(SqlUtils.getInteger(rs, "id"));
             reportPeriod.setName(rs.getString("name"));
-            reportPeriod.setTaxPeriod(taxPeriodDao.get(SqlUtils.getInteger(rs,"tax_period_id")));
-            reportPeriod.setOrder(SqlUtils.getInteger(rs,"ord"));
+            reportPeriod.setTaxPeriod(taxPeriodDao.get(SqlUtils.getInteger(rs, "tax_period_id")));
+            reportPeriod.setOrder(SqlUtils.getInteger(rs, "ord"));
             reportPeriod.setStartDate(rs.getDate("start_date"));
             reportPeriod.setEndDate(rs.getDate("end_date"));
-            reportPeriod.setDictTaxPeriodId(SqlUtils.getInteger(rs,"dict_tax_period_id"));
+            reportPeriod.setDictTaxPeriodId(SqlUtils.getInteger(rs, "dict_tax_period_id"));
 			reportPeriod.setCalendarStartDate(rs.getDate("calendar_start_date"));
             return reportPeriod;
         }

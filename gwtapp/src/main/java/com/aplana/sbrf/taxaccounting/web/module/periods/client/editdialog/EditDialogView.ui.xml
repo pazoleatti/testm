@@ -1,0 +1,87 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:picker="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
+             xmlns:w="urn:import:com.aplana.gwt.client"
+             xmlns:date="urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker"
+             xmlns:r="urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client"
+             xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
+
+    <ui:style>
+        .content {
+            margin: 10px;
+        }
+
+        .footerPanel {
+            background-color: #E8E1CF;
+            width: 100%;
+            height: 38px;
+        }
+
+        .footerButton {
+            margin: 8px 10px 8px 0 !important;
+            width: 64px;
+        }
+
+    </ui:style>
+
+    <w:ModalWindow iconUrl="resources/img/unlock-16.png" title="Редактирование периода">
+        <g:VerticalPanel width="400px" addStyleNames="aplana-ModalWindow-contentBackWhite">
+            <g:DecoratorPanel addStyleNames="{style.content}" width="380px">
+                <g:VerticalPanel>
+                    <g:HorizontalPanel verticalAlignment="middle" width="100%" spacing="3">
+                        <g:cell horizontalAlignment="right">
+                            <g:Label text="Подразделение: " width="180px"/>
+                        </g:cell>
+                        <picker:DepartmentPickerPopupWidget ui:field="departmentPicker" multiselection="false" width="250px"
+                                                            labelWordWrap="false"/>
+                    </g:HorizontalPanel>
+
+                    <g:HorizontalPanel ui:field="yearPnl" verticalAlignment="middle"
+                                       width="100%" spacing="3">
+                        <g:cell horizontalAlignment="right">
+                            <g:Label text="Год: " width="180px"/>
+                        </g:cell>
+                        <g:cell width="100%" horizontalAlignment="left">
+                            <w:Spinner ui:field="yearBox" minValue="1900" maxValue="2100" width="250px"/>
+                        </g:cell>
+                    </g:HorizontalPanel>
+
+                    <g:HorizontalPanel verticalAlignment="middle"
+                                       width="100%" spacing="3">
+                        <g:cell horizontalAlignment="right">
+                            <g:Label ui:field="periodLbl" text="Период: " width="180px"/>
+                        </g:cell>
+                        <g:cell width="100%" horizontalAlignment="left">
+                            <r:RefBookPickerWidget ui:field="period" isHierarchical="false" width="250px"
+                                                   versionEnabled="false"
+                                                   attributeIdInt="26"
+                                                   multiSelect="false"/>
+                        </g:cell>
+                    </g:HorizontalPanel>
+
+                    <g:HorizontalPanel verticalAlignment="middle"
+                                       width="100%" spacing="3">
+                        <g:cell horizontalAlignment="right">
+                            <g:Label text="Ввод остатков" width="180px"/>
+                        </g:cell>
+                        <g:cell width="100%" horizontalAlignment="left">
+                            <g:CheckBox ui:field="balancePeriod"/>
+                        </g:cell>
+                    </g:HorizontalPanel>
+                </g:VerticalPanel>
+
+            </g:DecoratorPanel>
+
+            <style:Bar addStyleNames="{style.footerPanel}">
+                <style:RightBar>
+                    <g:Button addStyleNames="{style.footerButton}" ui:field="continueButton" text="Редактировать период"
+                              width="120px"/>
+                    <g:Button addStyleNames="{style.footerButton}" ui:field="cancelButton" text="Закрыть окно"
+                              width="100px"/>
+                </style:RightBar>
+            </style:Bar>
+
+        </g:VerticalPanel>
+    </w:ModalWindow>
+</ui:UiBinder> 
