@@ -158,7 +158,8 @@ void logicCheck() {
         }
         def rowNum = row.getIndex()
 
-        checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, false)
+        checkNonEmptyColumns(row, rowNum, ['docNum', 'docDate'], logger, true)
+        checkNonEmptyColumns(row, rowNum, nonEmptyColumns - ['docNum', 'docDate'], logger, false)
 
         // Проверка доходов
         def sumCell = row.getCell('sum')

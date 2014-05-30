@@ -143,7 +143,8 @@ void logicCheck() {
         }
         def rowNum = row.getIndex()
 
-        checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, false)
+        checkNonEmptyColumns(row, rowNum, ['contractNum', 'contractDate'], logger, true)
+        checkNonEmptyColumns(row, rowNum, nonEmptyColumns - ['contractNum', 'contractDate'], logger, false)
 
         def count = row.count
         def cost = row.cost

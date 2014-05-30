@@ -75,7 +75,7 @@ def groupColumns = ['fullName', 'docNumber', 'docDate']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNumber', 'fullName', 'sum', 'price', 'total', 'dealDoneDate']
+def nonEmptyColumns = ['rowNumber', 'fullName', 'docNumber', 'docDate', 'sum', 'price', 'total', 'dealDoneDate']
 
 // Дата окончания отчетного периода
 @Field
@@ -149,7 +149,8 @@ void logicCheck() {
         }
         def rowNum = row.getIndex()
 
-        checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, false)
+        checkNonEmptyColumns(row, rowNum, ['docNumber', 'docDate'], logger, true)
+        checkNonEmptyColumns(row, rowNum, nonEmptyColumns - ['docNumber', 'docDate'], logger, false)
 
         def dealDateCell = row.getCell('dealDate')
         def docDateCell = row.getCell('docDate')

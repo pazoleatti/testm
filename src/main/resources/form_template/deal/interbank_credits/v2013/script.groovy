@@ -59,7 +59,7 @@ def refBookCache = [:]
 
 // Редактируемые атрибуты
 @Field
-def editableColumns = ['fullName', 'docNumber', 'docDate', 'dealNumber', 'dealDate', 'sum', 'dealDoneDate']
+def editableColumns = ['fullName', 'dealNumber', 'dealDate', 'sum', 'dealDoneDate']
 
 // Автозаполняемые атрибуты
 @Field
@@ -67,7 +67,7 @@ def autoFillColumns = ['rowNumber', 'inn', 'countryName', 'countryCode', 'count'
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNumber', 'fullName', 'count', 'sum', 'price', 'dealDoneDate']
+def nonEmptyColumns = ['rowNumber', 'fullName', 'docNumber', 'docDate', 'count', 'sum', 'price', 'dealDoneDate']
 
 // Дата окончания отчетного периода
 @Field
@@ -141,7 +141,8 @@ void logicCheck() {
         }
         def rowNum = row.getIndex()
 
-        checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, false)
+        checkNonEmptyColumns(row, rowNum, ['docNumber', 'docDate'], logger, true)
+        checkNonEmptyColumns(row, rowNum, nonEmptyColumns - ['docNumber', 'docDate'], logger, false)
 
         def docDateCell = row.getCell('docDate')
         def dealDateCell = row.getCell('dealDate')
