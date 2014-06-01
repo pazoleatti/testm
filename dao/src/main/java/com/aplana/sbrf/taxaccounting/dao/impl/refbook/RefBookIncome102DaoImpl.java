@@ -56,12 +56,7 @@ public class RefBookIncome102DaoImpl extends AbstractDao implements RefBookIncom
     }
 
     @Override
-    public List<Long> getUniqueRecordIds(Integer reportPeriodId, String filter) {
-        if (filter == null || filter.isEmpty()) {
-            filter = " REPORT_PERIOD_ID = " + reportPeriodId;
-        } else {
-            filter += " AND REPORT_PERIOD_ID = " + reportPeriodId;
-        }
+    public List<Long> getUniqueRecordIds(String filter) {
         return refBookUtils.getUniqueRecordIds(REF_BOOK_ID, TABLE_NAME, filter);
     }
 

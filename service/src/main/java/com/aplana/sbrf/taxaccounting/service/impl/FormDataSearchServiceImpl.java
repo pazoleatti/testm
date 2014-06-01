@@ -75,7 +75,7 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
                 (List<FormData>)CollectionUtils.collect(ids, new Transformer() {
                     @Override
                     public Object transform(Object input) {
-                        return formDataDao.get((Integer)input, null);
+                        return formDataDao.get((Long)input, null);
                     }
                 });
     }

@@ -13,6 +13,8 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.stereotype.Repository;
 
@@ -51,21 +53,23 @@ public class RefBookIncome101DaoImpl extends AbstractDao implements RefBookIncom
     }
 
     @Override
-    public List<Long> getUniqueRecordIds(Integer reportPeriodId, String filter) {
-        if (filter == null || filter.isEmpty()) {
-            filter = " REPORT_PERIOD_ID = " + reportPeriodId;
-        } else {
-            filter += " AND REPORT_PERIOD_ID = " + reportPeriodId;
-        }
+    public List<Long> getUniqueRecordIds(String filter) {
         return refBookUtils.getUniqueRecordIds(REF_BOOK_ID, TABLE_NAME, filter);
     }
 
     @Override
     public Map<String, RefBookValue> getRecordData(Long recordId) {
-        return getJdbcTemplate().queryForObject("select ID as "+RefBook.RECORD_ID_ALIAS+", REPORT_PERIOD_ID, ACCOUNT, INCOME_DEBET_REMAINS, INCOME_CREDIT_REMAINS, DEBET_RATE, CREDIT_RATE, OUTCOME_DEBET_REMAINS, OUTCOME_CREDIT_REMAINS, ACCOUNT_NAME, DEPARTMENT_ID " +
-                "from " + TABLE_NAME + " where id = ?",
-                new RefBookValueMapper(refBookDao.get(REF_BOOK_ID)),
-                recordId);
+        try {
+            return getJdbcTemplate().queryForObject("select ID as "+RefBook.RECORD_ID_ALIAS+", REPORT_PERIOD_ID, ACCOUNT, INCOME_DEBET_REMAINS, INCOME_CREDIT_REMAINS, DEBET_RATE, CREDIT_RATE, OUTCOME_DEBET_REMAINS, OUTCOME_CREDIT_REMAINS, ACCOUNT_NAME, DEPARTMENT_ID " +
+                    "from " + TABLE_NAME + " where id = ?",
+                    new RefBookValueMapper(refBookDao.get(REF_BOOK_ID)),
+                    recordId);
+        } catch (EmptyResultDataAccessException e){
+            return new HashMap<String, RefBookValue>(0);
+        } catch (DataAccessException e){
+            logger.error("", e);
+            throw new DaoException("", e);
+        }
     }
 
 	@Override
