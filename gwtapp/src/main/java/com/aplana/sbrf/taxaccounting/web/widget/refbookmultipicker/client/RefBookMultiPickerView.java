@@ -197,6 +197,7 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
 
     @Override
     public void load(PickerState pickerState) {
+        filterText = pickerState.getSearchPattern();
         getUiHandlers().init(pickerState);
     }
 
@@ -286,17 +287,17 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
 
     @Override
     public void refresh(boolean force) {
-        if (asWidget().getElement().getOffsetWidth() > 0) {
+        int width = asWidget().getElement().getOffsetWidth();
+        if (width > 0) {
             // когда вьха уже разместилась в дереве DOM у она получает физическую ширину
             // по ней и определем что таблица отображается на странице
             if (pager.getPage() != 0) {
                 pager.firstPage();
             } else {
-                //TODO пока убрал aivanov 5.5.14
-                //// Если данные еще не грузились или игнорим если "силой" грузим
-                //if (cellTable.getVisibleItemCount() < 1 || force) {
+                //// Если данные еще не грузились или игнорим если "силой" грузим SBRFACCTAX-6844
+                if (cellTable.getVisibleItemCount() == 0 || force) {
                     cellTable.setVisibleRangeAndClearData(cellTable.getVisibleRange(), true);
-                //}
+                }
             }
         }
     }

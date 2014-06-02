@@ -90,7 +90,6 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 	    String eventType = nevent.getType();
 	    if ((BrowserEvents.KEYDOWN.equals(eventType) && nevent.getKeyCode() == KeyCodes.KEY_ENTER)
 	    		|| (CLICK.equals(eventType))) {
-
             if (this.changeHandlerRegistration != null) {
                 this.changeHandlerRegistration.removeHandler();
             }
@@ -136,9 +135,10 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 
             // При нажатии на ячейку инициализируем справочник, если он ещё не инициализирован
             if (!refBookPikerAlredyInit) {
-                refBookPiker.load(attrId, column.getFilter(), columnContext.getStartDate(),
-                        columnContext.getEndDate());
                 refBookPikerAlredyInit = true;
+                refBookPiker.setAttributeId(attrId);
+                refBookPiker.setFilter(column.getFilter());
+                refBookPiker.setPeriodDates(columnContext.getStartDate(), columnContext.getEndDate());
             }
 
             // Устанавливаем старое значение
@@ -148,8 +148,10 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
                         refBookPiker.setValue(Arrays.asList(nvalue), false);
                     }
                 } else {
-                    refBookPiker.setValue(Arrays.asList(nvalue), false);
+                    refBookPiker.setSingleValue(nvalue, false);
                 }
+            } else {
+                refBookPiker.setSingleValue(null, false);
             }
 
 			// Устанавливаем позицию и отображаем справочник

@@ -80,7 +80,7 @@ public class ModalWindow extends DialogBox implements CanHide {
         close.getElement().getStyle().setMargin(4, Style.Unit.PX);
         icon.getElement().getStyle().setFloat(Style.Float.LEFT);
         icon.getElement().getStyle().setMargin(4, Style.Unit.PX);
-        icon.setTitle(CLOSE_ICON_TITLE);
+        close.setTitle(CLOSE_ICON_TITLE);
 
         caption = new HTMLPanel("");
         caption.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
