@@ -341,11 +341,19 @@ public class FormTemplateImpexServiceImpl implements
                 tempFile.close();
                 //
                 tempFile = new FileOutputStream(new File(folderTemplate.getAbsolutePath() + File.separator + ROWS_FILE));
-                tempFile.write(xmlSerializationUtils.serialize(formTemplateDao.getDataCells(template)).getBytes(ENCODING));
+                try {
+                    tempFile.write(xmlSerializationUtils.serialize(formTemplateDao.getDataCells(template)).getBytes(ENCODING));
+                } catch (IllegalArgumentException ignore){
+
+                }
                 tempFile.close();
                 //
                 tempFile = new FileOutputStream(new File(folderTemplate.getAbsolutePath() + File.separator + HEADERS_FILE));
-                tempFile.write(xmlSerializationUtils.serialize(formTemplateDao.getHeaderCells(template)).getBytes(ENCODING));
+                try {
+                    tempFile.write(xmlSerializationUtils.serialize(formTemplateDao.getHeaderCells(template)).getBytes(ENCODING));
+                } catch (IllegalArgumentException ignore){
+
+                }
                 tempFile.close();
 
             } catch (IOException e) {
