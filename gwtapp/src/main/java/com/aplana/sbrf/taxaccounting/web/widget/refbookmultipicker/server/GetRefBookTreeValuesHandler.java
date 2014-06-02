@@ -93,7 +93,8 @@ public class GetRefBookTreeValuesHandler extends AbstractActionHandler<GetRefBoo
             RefBookTreeItem parent = action.getParent();
             refBookPage = refBookDataProvider.getChildrenRecords(parent != null ? parent.getId() : null, action.getVersion(), null, filterWithoutPattern, sort);
             // TODO aivanov заменить на более оптимальный вариант
-            for (Map<String, RefBookValue> record : refBookDataProvider.getChildrenRecords(parent != null ? parent.getId() : null, action.getVersion(), null, filter, null)) {
+            for (Map<String, RefBookValue> record : refBookDataProvider.getChildrenRecords(parent != null ? parent.getId() : null,
+                    action.getVersion(), null, filter, sort == null ? refBook.getSortAttribute() : sort)) {
                 filterIds.add(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
             }
         }
