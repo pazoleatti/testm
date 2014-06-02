@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallba
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.handler.DeferredInvokeHandler;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.event.CheckValuesCountHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.*;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.PickerState;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.RefBookItem;
@@ -185,6 +186,23 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
         ps.setSearchPattern(searchPattern);
     }
 
+    @Override
+    public void getValuesCount(String text, final CheckValuesCountHandler checkValuesCountHandler) {
+        GetCountFilterValuesAction action = new GetCountFilterValuesAction();
+        action.setSearchPattern(text);
+        action.setFilter(ps.getFilter());
+        action.setRefBookAttrId(ps.getRefBookAttrId());
+        action.setVersion(ps.getVersionDate());
+        action.setContext(ps.getPickerContext());
+        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetCountFilterValuesResult>() {
+            @Override
+            public void onSuccess(GetCountFilterValuesResult result) {
+                checkValuesCountHandler.onGetValuesCount(result.getCount());
+            }
+        }, this));
+
+    }
+
     private boolean isNeedReloadHeaders(PickerState newPs) {
         return WidgetUtils.isWasChange(ps.getRefBookAttrId(), newPs.getRefBookAttrId()) ||
                 WidgetUtils.isWasChange(ps.isMultiSelect(), newPs.isMultiSelect()) ||
@@ -192,26 +210,4 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
                 WidgetUtils.isWasChange(ps.getFilter(), newPs.getFilter()) ||
                 WidgetUtils.isWasChange(ps.getSearchPattern(), newPs.getSearchPattern());
     }
-
-    /* Проверка на изменения входных параметров*/
-    private boolean isNewParams(PickerState newPs) {
-        Boolean hasChange =
-                WidgetUtils.isWasChange(ps.getRefBookAttrId(), newPs.getRefBookAttrId()) ||
-                        WidgetUtils.isWasChange(ps.isMultiSelect(), newPs.isMultiSelect()) ||
-                        WidgetUtils.isWasChange(ps.getVersionDate(), newPs.getVersionDate()) ||
-                        WidgetUtils.isWasChange(ps.getFilter(), newPs.getFilter()) ||
-                        WidgetUtils.isWasChange(ps.getSearchPattern(), newPs.getSearchPattern());
-
-
-        if (hasChange) {
-            ps.setRefBookAttrId(newPs.getRefBookAttrId());
-            ps.setFilter(newPs.getFilter());
-            ps.setSearchPattern(newPs.getSearchPattern());
-            ps.setVersionDate(newPs.getVersionDate());
-            ps.setMultiSelect(newPs.isMultiSelect());
-        }
-
-        return hasChange;
-    }
-
 }

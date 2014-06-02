@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.GINContextHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.event.CheckValuesCountHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.*;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.PickerState;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.RefBookTreeItem;
@@ -184,6 +185,23 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
     @Override
     public void highLightItem(RefBookUiTreeItem uiTreeItem) {
         uiTreeItem.highLightText(ps.getSearchPattern());
+    }
+
+    @Override
+    public void getValuesCount(String text, final CheckValuesCountHandler checkValuesCountHandler) {
+        GetCountFilterValuesAction action = new GetCountFilterValuesAction();
+        action.setHierarchy(true);
+        action.setSearchPattern(text);
+        action.setFilter(ps.getFilter());
+        action.setRefBookAttrId(ps.getRefBookAttrId());
+        action.setVersion(ps.getVersionDate());
+        action.setContext(ps.getPickerContext());
+        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetCountFilterValuesResult>() {
+            @Override
+            public void onSuccess(GetCountFilterValuesResult result) {
+                checkValuesCountHandler.onGetValuesCount(result.getCount());
+            }
+        }, this));
     }
 
     @Override

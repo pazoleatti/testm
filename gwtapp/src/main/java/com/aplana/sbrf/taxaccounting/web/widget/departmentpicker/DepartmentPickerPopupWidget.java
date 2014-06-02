@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.departmentpicker;
 
 import com.aplana.gwt.client.DoubleStateComposite;
 import com.aplana.gwt.client.ModalWindow;
+import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
@@ -198,8 +199,14 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
     }
 
     private void find(){
-        tree.filter(filter.getText().trim());
-        updateSelectAllLabel();
+        String text = filter.getText().trim();
+        List<DepartmentTreeItem> items = tree.getItems();
+        if (tree.countOnFilter(text, items) >= 100) {
+            Dialog.warningMessage("Уточните параметры поиска: найдено слишком много значений");
+        } else {
+            tree.filter(filter.getText().trim(), items);
+            updateSelectAllLabel();
+        }
     }
 
     @Override
