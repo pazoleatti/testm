@@ -73,9 +73,17 @@ def allColumns = ['rowNum', 'baseAccName', 'baseAccNum', 'baseSum', 'ndsNum', 'n
 @Field
 def editableColumns = ['baseAccNum', 'baseSum', 'ndsNum', 'ndsSum', 'ndsBookSum']
 
-// Проверяемые на пустые значения атрибуты (1, 3, 4, 6, 8)
+// Проверяемые на пустые значения атрибуты для разделов 1, 2, 3, 4 (1-4, 6-8)
 @Field
-def nonEmptyColumns = ['rowNum', 'baseAccNum', 'baseSum', 'ndsSum', 'ndsBookSum']
+def nonEmptyColumns1 = allColumns - 'baseAccName' - 'ndsNum'
+
+// Проверяемые на пустые значения атрибуты для разделов 1*, 5, 6 (1-8)
+@Field
+def nonEmptyColumns2 = allColumns - 'baseAccName'
+
+// Проверяемые на пустые значения атрибуты для разделов 7 (1-4, 6, 8)
+@Field
+def nonEmptyColumns3 = allColumns - 'baseAccName' - 'ndsNum' - 'ndsRate'
 
 // Сортируемые атрибуты (графа 3, 5)
 @Field
@@ -188,6 +196,7 @@ void logicCheck() {
         if (row.getAlias() != null) {
             isSection1or2 = (row.getAlias() == 'head_1' || row.getAlias() == 'head_2')
             isSection5or6 = (row.getAlias() == 'head_5' || row.getAlias() == 'head_6')
+            isSection1subOr5or6 = (row.getAlias() == 'total_1' || row.getAlias() == 'head_5' || row.getAlias() == 'head_6')
             isSection7 = row.getAlias() == 'head_7'
             continue
         }
@@ -195,7 +204,7 @@ void logicCheck() {
         def errorMsg = "Строка $index: "
 
         // 1. Обязательность заполнения полей
-        def columns = (isSection7 ? nonEmptyColumns : nonEmptyColumns + 'ndsRate')
+        def columns = (isSection1subOr5or6 ? nonEmptyColumns2 : (isSection7 ? nonEmptyColumns3 : nonEmptyColumns1))
         checkNonEmptyColumns(row, index, columns, logger, true)
 
         // 2. Проверка суммы НДС по данным бухгалтерского учета и книге продаж

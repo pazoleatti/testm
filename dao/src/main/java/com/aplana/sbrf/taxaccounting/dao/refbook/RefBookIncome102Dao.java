@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.dao.refbook;
 
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 
@@ -44,11 +43,10 @@ public interface RefBookIncome102Dao {
 
     /**
      * Получает уникальные идентификаторы записей, удовлетворяющих условиям фильтра
-     * @param reportPeriodId
      * @param filter условие фильтрации строк. Может быть не задано
      * @return
      */
-    List<Long> getUniqueRecordIds(Integer reportPeriodId, String filter);
+    List<Long> getUniqueRecordIds(String filter);
 
     /**
      * Получение записи справочника по recordId

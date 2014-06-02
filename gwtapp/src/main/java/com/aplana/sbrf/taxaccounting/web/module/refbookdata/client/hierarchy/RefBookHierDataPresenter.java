@@ -189,6 +189,7 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
             final Long selected = getView().getSelectedId();
             action.setRecordsId(Arrays.asList(selected));
             action.setOkDelete(false);
+            action.setRefBookId(refBookDataId);
             dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<DeleteNonVersionRefBookRowResult>() {
                 @Override
                 public void onSuccess(DeleteNonVersionRefBookRowResult result) {
@@ -200,6 +201,7 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
                                 final Long selected = getView().getSelectedId();
                                 action.setRecordsId(Arrays.asList(selected));
                                 action.setOkDelete(true);
+                                action.setRefBookId(refBookDataId);
                                 dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<DeleteNonVersionRefBookRowResult>() {
                                     @Override
                                     public void onSuccess(DeleteNonVersionRefBookRowResult result) {

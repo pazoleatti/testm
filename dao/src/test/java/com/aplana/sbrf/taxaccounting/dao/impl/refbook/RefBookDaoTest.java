@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
+import static java.util.Arrays.asList;
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 
@@ -173,14 +174,42 @@ public class RefBookDaoTest {
 	}
 
 	@Test
-	public void testGetRecordData(){
-		Map<String, RefBookValue> record = refBookDao.getRecordData(1L, 4L);
-		assertEquals(4, record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().intValue());
-		assertEquals("Вий", record.get(ATTRIBUTE_NAME).getStringValue());
-		assertEquals(425, record.get(ATTRIBUTE_PAGECOUNT).getNumberValue().doubleValue(), 1e-5);
-		assertEquals(6, record.get(ATTRIBUTE_AUTHOR).getReferenceValue().intValue());
-		assertNull(record.get(ATTRIBUTE_NULL).getStringValue());
-	}
+	public void getRecordData1Test() {
+        Map<String, RefBookValue> record = refBookDao.getRecordData(1L, 4L);
+        assertEquals(4, record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().intValue());
+        assertEquals("Вий", record.get(ATTRIBUTE_NAME).getStringValue());
+        assertEquals(425, record.get(ATTRIBUTE_PAGECOUNT).getNumberValue().doubleValue(), 1e-5);
+        assertEquals(6, record.get(ATTRIBUTE_AUTHOR).getReferenceValue().intValue());
+        assertNull(record.get(ATTRIBUTE_NULL).getStringValue());
+    }
+
+    @Test(expected = DaoException.class)
+    public void getRecordData2Test(){
+        // Несуществующая запись
+        refBookDao.getRecordData(1L, -1L);
+    }
+
+    @Test(expected = DaoException.class)
+    public void getRecordData3Test(){
+        // Запись есть, а значений нет. Ситуация эквивалента отсутствию значения.
+        refBookDao.getRecordData(1L, 3L);
+    }
+
+    @Test
+    public void getRecordData4Test(){
+        Map<Long, Map<String, RefBookValue>> records = refBookDao.getRecordData(1L, asList(1L, 3L, 4L, -1L));
+        assertEquals(2, records.size());
+
+        Map<String, RefBookValue> record1 = records.get(1L);
+        assertEquals(1L, record1.get(RefBook.RECORD_ID_ALIAS).getNumberValue());
+        assertEquals(.25d, record1.get(ATTRIBUTE_WEIGHT).getNumberValue().doubleValue(), 0);
+        assertEquals(5L, record1.get(ATTRIBUTE_AUTHOR).getReferenceValue().longValue());
+
+        Map<String, RefBookValue> record4 = records.get(4L);
+        assertEquals(4L, record4.get(RefBook.RECORD_ID_ALIAS).getNumberValue());
+        assertEquals(2.399d, record4.get(ATTRIBUTE_WEIGHT).getNumberValue().doubleValue(), 0);
+        assertEquals(6L, record4.get(ATTRIBUTE_AUTHOR).getReferenceValue().longValue());
+    }
 
 	private Date getDate(int day, int month, int year) {
 		return new GregorianCalendar(year, month - 1, day, 15, 46, 57).getTime();
@@ -450,7 +479,7 @@ public class RefBookDaoTest {
     public void deleteAllRecordVersions() {
         PagingResult<Map<String, RefBookValue>> records = refBookDao.getRecords(1L, getDate(1, 1, 2014), null, null, null);
         assertEquals(1, records.size());
-        refBookDao.deleteAllRecordVersions(1L, Arrays.asList(2L, 4L));
+        refBookDao.deleteAllRecordVersions(1L, asList(2L, 4L));
         records = refBookDao.getRecords(1L, getDate(1, 1, 2014), null, null, null);
         assertEquals(0, records.size());
     }
@@ -459,20 +488,20 @@ public class RefBookDaoTest {
     public void deleteRecordVersions() {
         PagingResult<Map<String, RefBookValue>> records = refBookDao.getRecords(1L, getDate(1, 1, 2013), null, null, null);
         assertEquals(2, records.size());
-        refBookUtils.deleteRecordVersions(REF_BOOK_RECORD_TABLE_NAME, Arrays.asList(1L));
+        refBookUtils.deleteRecordVersions(REF_BOOK_RECORD_TABLE_NAME, asList(1L));
         records = refBookDao.getRecords(1L, getDate(1, 1, 2013), null, null, null);
         assertEquals(1, records.size());
     }
 
     @Test
     public void isVersionExist() {
-        assertTrue(refBookDao.isVersionsExist(1L, Arrays.asList(1L), getDate(1, 1, 2013)));
-        assertFalse(refBookDao.isVersionsExist(1L, Arrays.asList(1L), getDate(1, 1, 2014)));
+        assertTrue(refBookDao.isVersionsExist(1L, asList(1L), getDate(1, 1, 2013)));
+        assertFalse(refBookDao.isVersionsExist(1L, asList(1L), getDate(1, 1, 2014)));
     }
 
     @Test
     public void getRecordsVersionStart() {
-        Map<Long, Date> result = refBookDao.getRecordsVersionStart(Arrays.asList(1L, 2L));
+        Map<Long, Date> result = refBookDao.getRecordsVersionStart(asList(1L, 2L));
         assertEquals(getZeroTimeDate(getDate(1, 1, 2013)), result.get(1L));
         assertEquals(getZeroTimeDate(getDate(1, 2, 2013)), result.get(2L));
     }
@@ -544,7 +573,7 @@ public class RefBookDaoTest {
 
     @Test
     public void hasChildren() {
-        List<Date> versions = refBookDao.hasChildren(4L, Arrays.asList(8L));
+        List<Date> versions = refBookDao.hasChildren(4L, asList(8L));
         assertEquals(1, versions.size());
         assertEquals(getZeroTimeDate(getDate(1,1,2013)), getZeroTimeDate(versions.get(0)));
     }

@@ -50,8 +50,17 @@ public class RefBookIncome102 implements RefBookDataProvider {
 
     @Override
     public List<Long> getUniqueRecordIds(Date version, String filter) {
-        ReportPeriod period = reportPeriodDao.getReportPeriodByDate(TaxType.INCOME, version);
-        return dao.getUniqueRecordIds(period.getId(), filter);
+        if (version != null){
+            ReportPeriod period = reportPeriodDao.getReportPeriodByDate(TaxType.INCOME, version);
+            if (filter == null || filter.isEmpty()) {
+                filter = " REPORT_PERIOD_ID = " + period.getId();
+            } else {
+                filter += " AND REPORT_PERIOD_ID = " + period.getId();
+            }
+            return dao.getUniqueRecordIds(filter);
+        } else {
+            return dao.getUniqueRecordIds(filter);
+        }
     }
 
     @Override
@@ -72,6 +81,11 @@ public class RefBookIncome102 implements RefBookDataProvider {
     @Override
     public Map<String, RefBookValue> getRecordData(Long recordId) {
         return dao.getRecordData(recordId);
+    }
+
+    @Override
+    public Map<Long, Map<String, RefBookValue>> getRecordData(List<Long> recordIds) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

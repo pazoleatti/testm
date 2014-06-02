@@ -4,11 +4,13 @@ import java.util.*;
 
 import com.aplana.gwt.client.DoubleStateComposite;
 import com.aplana.gwt.client.ModalWindow;
+import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.modal.CanHide;
 import com.aplana.gwt.client.modal.OnHideHandler;
 import com.aplana.gwt.client.modal.OpenModalWindowEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.handler.DeferredInvokeHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.event.CheckValuesCountHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.PickerContext;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.PickerState;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
@@ -206,6 +208,17 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     @UiHandler("searchButton")
     void onSearchButtonClicked(ClickEvent event) {
         refBookView.find(searchTextBox.getText());
+        //TODO aivanov раскомментить когда доделаем getUniqueRecordIds
+//        refBookView.checkCount(searchTextBox.getText(), new CheckValuesCountHandler() {
+//            @Override
+//            public void onGetValuesCount(Integer count) {
+//                if (count != null && count < 100) {
+//                    refBookView.find(searchTextBox.getText());
+//                } else {
+//                    Dialog.warningMessage("Уточните параметры поиска: найдено слишком много значений.");
+//                }
+//            }
+//        });
     }
 
     @UiHandler("clearIconButton")

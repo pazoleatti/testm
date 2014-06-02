@@ -92,8 +92,13 @@ public class RefBookUniversal implements RefBookDataProvider {
     }
 
     @Override
-    public List<Long> getUniqueRecordIds(Date version, String filter) {
-        return refBookUtils.getUniqueRecordIds(refBookId, REF_BOOK_RECORD_TABLE_NAME, filter);
+    public List<Long>  getUniqueRecordIds(Date version, String filter) {
+        List<Pair<Long, Long>> pairs = refBookDao.getRecordIdPairs(refBookId, version, filter);
+        List<Long> uniqueRecordIds = new ArrayList<Long>(pairs.size());
+        for (Pair<Long, Long> pair : pairs){
+            uniqueRecordIds.add(pair.getFirst());
+        }
+        return uniqueRecordIds;
     }
 
     @Override
@@ -105,6 +110,11 @@ public class RefBookUniversal implements RefBookDataProvider {
 	public Map<String, RefBookValue> getRecordData(Long recordId) {
 		return refBookDao.getRecordData(refBookId, recordId);
 	}
+
+    @Override
+    public Map<Long, Map<String, RefBookValue>> getRecordData(List<Long> recordIds) {
+        return refBookDao.getRecordData(refBookId, recordIds);
+    }
 
     @Override
     public RefBookValue getValue(Long recordId, Long attributeId) {

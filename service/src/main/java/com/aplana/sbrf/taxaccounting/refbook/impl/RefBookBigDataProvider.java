@@ -101,6 +101,11 @@ public class RefBookBigDataProvider implements RefBookDataProvider {
     }
 
     @Override
+    public Map<Long, Map<String, RefBookValue>> getRecordData(List<Long> recordIds) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public RefBookValue getValue(Long recordId, Long attributeId) {
         RefBook refBook = rbDao.get(refBookId);
         RefBookAttribute attribute = refBook.getAttribute(attributeId);

@@ -135,6 +135,11 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 		if (declaration.isAccepted()) {
 			throw new AccessDeniedException("Декларация уже принята");
 		}
+
+        // Нельзя принимать декларацию в закрытом периоде
+        if (!reportPeriodService.isActivePeriod(declaration.getReportPeriodId(), declaration.getDepartmentId())) {
+            throw new AccessDeniedException("Период закрыт");
+        }
 		// Принять декларацию могут только контолёр текущего уровня
 		// обособленного подразделения и контролёр УНП
 		checkRolesForReading(userInfo, declaration.getDepartmentId(),
@@ -147,6 +152,10 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 		if (!declaration.isAccepted()) {
 			throw new AccessDeniedException("Декларация не принята");
 		}
+        // Нельзя возвращать декларацию в закрытом периоде
+        if (!reportPeriodService.isActivePeriod(declaration.getReportPeriodId(), declaration.getDepartmentId())) {
+            throw new AccessDeniedException("Период закрыт");
+        }
 		// Отменить принятие декларацию могут только контолёр текущего уровня и
 		// контролёр УНП
 		checkRolesForReading(userInfo, declaration.getDepartmentId(),
@@ -159,6 +168,10 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 		if (declaration.isAccepted()) {
 			throw new AccessDeniedException("Декларация принята");
 		}
+        // Нельзя удалить декларацию в закрытом периоде
+        if (!reportPeriodService.isActivePeriod(declaration.getReportPeriodId(), declaration.getDepartmentId())) {
+            throw new AccessDeniedException("Период закрыт");
+        }
 		// Удалять могут только контолёр текущего уровня и контролёр УНП
 		checkRolesForReading(userInfo, declaration.getDepartmentId(),
 				declaration.getReportPeriodId(), checkedSet);
@@ -171,6 +184,10 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 			throw new AccessDeniedException("Декларация принята");
 		}
 
+        // Нельзя обновить декларацию в закрытом периоде
+        if (!reportPeriodService.isActivePeriod(declaration.getReportPeriodId(), declaration.getDepartmentId())) {
+            throw new AccessDeniedException("Период закрыт");
+        }
         // Обновлять декларацию могут только контолёр текущего уровня и
 		// контролёр УНП
 		checkRolesForReading(userInfo, declaration.getDepartmentId(),

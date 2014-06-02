@@ -110,12 +110,22 @@ public class FormDataServiceTest {
         when(departmentFormTypeDao.getFormDestinations(1, 1, FormDataKind.PRIMARY)).thenReturn(list);
         ReflectionTestUtils.setField(formDataService, "departmentFormTypeDao", departmentFormTypeDao);
 
+        Department department = new Department();
+        department.setName("Тестовое подразделение");
+
+        DepartmentDao departmentDao = mock(DepartmentDao.class);
+        ReflectionTestUtils.setField(formDataService, "departmentDao", departmentDao);
+
 
         FormDataDao formDataDao = mock(FormDataDao.class);
         FormData formData1 = new FormData();
         formData1.setId(2L);
+        formData1.setFormType(formType);
+        formData1.setKind(FormDataKind.CONSOLIDATED);
+        formData1.setDepartmentId(1);
         when(formDataDao.find(departmentFormType.getFormTypeId(), departmentFormType.getKind(), departmentFormType.getDepartmentId(), formData.getReportPeriodId())).thenReturn(formData1);
         when(formDataDao.get(formData1.getId(), false)).thenReturn(formData);
+        when(departmentDao.getDepartment(formData1.getDepartmentId())).thenReturn(department);
 
         doAnswer(new Answer<Object>() {
             public Object answer(InvocationOnMock invocation) {

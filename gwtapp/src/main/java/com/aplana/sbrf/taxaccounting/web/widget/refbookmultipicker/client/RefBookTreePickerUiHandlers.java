@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client;
 
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.event.CheckValuesCountHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.PickerState;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.RefBookUiTreeItem;
 import com.gwtplatform.mvp.client.UiHandlers;
@@ -59,4 +60,6 @@ public interface RefBookTreePickerUiHandlers extends UiHandlers {
     void selectFirstItenOnLoad();
 
     void highLightItem(RefBookUiTreeItem uiTreeItem);
+
+    void getValuesCount(String text, CheckValuesCountHandler checkValuesCountHandler);
 }

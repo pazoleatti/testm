@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.handler.DeferredInvokeH
 import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.LazyTree;
 import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.event.LazyTreeSelectionEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.event.LazyTreeSelectionHandler;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.event.CheckValuesCountHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.event.RootLoadedEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.PickerState;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.RefBookRecordDereferenceValue;
@@ -500,6 +501,11 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
                 handler.onInvoke();
             }
         }
+    }
+
+    @Override
+    public void checkCount(String text, CheckValuesCountHandler checkValuesCountHandler) {
+        getUiHandlers().getValuesCount(text, checkValuesCountHandler);
     }
 
     public void widgetFireChangeEvent(Set<Long> value) {

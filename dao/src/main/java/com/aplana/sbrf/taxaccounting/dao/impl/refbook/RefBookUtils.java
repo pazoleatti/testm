@@ -43,7 +43,7 @@ public class RefBookUtils extends AbstractDao {
 
 	private void appendSortClause(PreparedStatementData ps, RefBook refBook, RefBookAttribute sortAttribute, boolean isSortAscending) {
 		RefBookAttribute defaultSort = refBook.getSortAttribute();
-		String sortAlias = sortAttribute == null ? (defaultSort == null ? "RECORD_ID" : defaultSort.getAlias()) : sortAttribute.getAlias();
+		String sortAlias = sortAttribute == null ? (defaultSort == null ? "id" : defaultSort.getAlias()) : sortAttribute.getAlias();
 		if (isSupportOver()) {
 			// row_number() over (order by ... asc\desc)
 			ps.appendQuery("row_number() over ( order by ");
