@@ -82,7 +82,7 @@ def autoFillColumns = allColumns - editableColumns
 
 // Проверяемые на пустые значения атрибуты (графа 1, 3, 4, 6, 8)
 @Field
-def nonEmptyColumns = ['rowNum', 'number', 'sum', 'number2', 'sum2', 'nds']
+def nonEmptyColumns = ['rowNum', 'number', 'sum', 'sum2']
 
 // Атрибуты итоговых строк для которых вычисляются суммы (графа 4, 6)
 @Field
@@ -313,7 +313,7 @@ void importData() {
             (xml.row[1].cell[5]): 'НДС',
 
             (xml.row[2].cell[2]): 'наименование балансового счёта',
-            (xml.row[2].cell[3]): 'номер балансового счёта',
+            (xml.row[2].cell[3]): 'номер балансового счёта расхода',
             (xml.row[2].cell[4]): 'сумма',
             (xml.row[2].cell[5]): 'номер балансового счёта',
             (xml.row[2].cell[6]): 'сумма',
