@@ -87,7 +87,7 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
             String kindName = dformData.getKind().getName();
             String depatmentName = departmentService.get(dformData.getDepartmentId()).getName();
             if (scriptComponentContext.getLogger().containsLevel(LogLevel.ERROR)) {
-                throw new ServiceLoggerException("Произошли ошибки при создании налоговой формы-приемника: Подразделение: «%s», Тип: «%s», Вид: «%s».",
+                throw new ServiceLoggerException("Налоговая форма-приемник не сформирована: Подразделение: «%s», Тип: «%s», Вид: «%s».",
                         logEntryService.save(scriptComponentContext.getLogger().getEntries()),
                         depatmentName, kindName, formName);
             } else {
