@@ -182,7 +182,7 @@
                     <g:VerticalPanel>
                         <refbookmultipicker:RefBookPickerWidget ui:field="fPicker" width="480px" labelWordWrap="false"
                                                                 multiSelect="true" isHierarchical="false" versionEnabled="false"
-                                                                attributeIdInt="835" addStyleNames="{style.margin5}"/>
+                                                                attributeIdInt="811" addStyleNames="{style.margin5}"/>
                         <g:HorizontalPanel spacing="1" verticalAlignment="middle">
                             <g:VerticalPanel>
                                 <g:CheckBox ui:field="fpMultiPickCb" wordWrap="false" text="Мультивыбор"/>

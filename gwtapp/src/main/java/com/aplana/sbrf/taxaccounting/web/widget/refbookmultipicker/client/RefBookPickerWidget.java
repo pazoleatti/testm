@@ -210,37 +210,29 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
 
     @UiHandler("clearIconButton")
     void onClearIconButtonClicked(ClickEvent event) {
-        if (state.getSetIds() != null) {
-            state.getSetIds().clear();
-        }
-        clearSearchPattern();
-        updateUIState();
-        prevState.setValues(state);
-
-        isEnabledFireChangeEvent = true;
-        refBookView.load(state);
+        clear();
     }
 
     @UiHandler("clearButton")
     void onClearButtonClicked(ClickEvent event) {
+        clear();
+        modalPanel.hide();
+    }
+
+    private void clear(){
         if (state.getSetIds() != null) {
             state.getSetIds().clear();
         }
-        clearSearchPattern();
+        //clearSearchPattern();
         updateUIState();
         prevState.setValues(state);
 
         isEnabledFireChangeEvent = true;
         refBookView.load(state);
-        modalPanel.hide();
     }
 
     @UiHandler("pickButton")
     void onPickButtonClicked(ClickEvent event) {
-        save();
-    }
-
-    private void save() {
         clearAndSetValues(refBookView.getSelectedIds());
         prevState.setValues(state);
         updateUIState();
@@ -323,20 +315,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
 
     @Override
     public void setSingleValue(Long value, boolean fireEvents) {
-        if (value == null) {
-            state.setSetIds(null);
-            clearSearchPattern();
-            prevState.setValues(state);
-            if (!isManualUpdate) {
-                refBookView.load(state);
-                updateUIState();
-            }
-            if (fireEvents) {
-                ValueChangeEvent.fire(this, null);
-            }
-        } else {
-            setValue(Arrays.asList(value), fireEvents);
-        }
+        setValue(value == null ? null : Arrays.asList(value), fireEvents);
     }
 
     @Override
@@ -349,8 +328,8 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
         prevState.setValues(state);
         if (value == null) {
             state.setSetIds(null);
-            clearSearchPattern();
             prevState.setValues(state);
+            clearSearchPattern();
             if (!isManualUpdate) {
                 refBookView.load(state);
                 updateUIState();

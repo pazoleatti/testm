@@ -74,6 +74,8 @@ public final class ScriptUtils {
 
     private static final String WRONG_XLS_FORMAT = "Выбранный файл не соответствует формату xls/xlsx/xlsm!";
 
+    private static final String WRONG_FIXED_VALUE = "Строка %d графа «%s» содержит значение «%s», не соответствующее значению «%s» данной графы в макете налоговой формы!";
+
     /**
      * Интерфейс для переопределения алгоритма расчета
      */
@@ -871,5 +873,27 @@ public final class ScriptUtils {
         }
 
         return xml;
+    }
+
+    /**
+     * Проверить фиксированное значение из файла на соответствие фиксированой строке из макета.
+     *
+     * @param row строка
+     * @param value значение для проверки
+     * @param valueExpected ожидаемое значение
+     * @param indexRow номер строки
+     * @param alias алиас столбца проверяемой графы
+     * @param logger для вывода лога
+     * @param required фатальность
+     */
+    public static void checkFixedValue(DataRow<Cell> row, String value, String valueExpected, int indexRow, String alias, Logger logger, boolean required) {
+        if (value != null && !value.equals(valueExpected) || value == null && valueExpected != null) {
+            String msg = String.format(WRONG_FIXED_VALUE, indexRow, getColumnName(row, alias), value, valueExpected);
+            if (required) {
+                logger.error("%s", msg);
+            } else {
+                logger.warn("%s", msg);
+            }
+        }
     }
 }

@@ -10,9 +10,6 @@ import groovy.transform.Field
  * налоговой ставки 0 процентов по которым документально подтверждена
  *
  * formTemplateId=602
- *
- * TODO:
- *      - при импорте поменять сообщение при несоответствии фискированных данных загружаемым
  */
 
 // графа 1 - rowNum     № пп
@@ -179,9 +176,9 @@ void addData(def xml, int headRowCount) {
 
         // Проверить фиксированные значения (графа 1..3)
         ['rowNum', 'code', 'name'].each { alias ->
-            if (dataRow.getCell(alias).value != values[alias]) {
-                logger.error('Неверное значение в фиксированных строках') // TODO (Ramil Timerbaev) поменять сообщение после того как уточнится что выводить
-            }
+            def value = values[alias]?.toString()
+            def valueExpected = dataRow.getCell(alias).value?.toString()
+            checkFixedValue(dataRow, value, valueExpected, indexRow, alias, logger, true)
         }
 
         // графа 4

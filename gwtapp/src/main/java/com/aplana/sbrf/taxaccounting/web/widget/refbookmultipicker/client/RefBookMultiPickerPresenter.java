@@ -74,14 +74,14 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
                             getView().setHeaders(result.getHeaders());
                             getView().refresh(true);
 
-                            trySelect(newState);
+                            trySelect(ps);
                         }
                     }, this)
             );
         } else {
             //иначе просто сеттим
             ps.setValues(newState);
-            trySelect(newState);
+            trySelect(ps);
             getView().refresh(false);
         }
     }
@@ -91,6 +91,7 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
             if (getView().getSelectedIds().isEmpty() || !stateWithIds.getSetIds().containsAll(getView().getSelectedIds())){
                 loadingForSelection(stateWithIds.getSetIds(), null);
             }
+            ps.getSetIds().clear();
         } else {
             getView().setSelection(new ArrayList<RefBookItem>());
         }

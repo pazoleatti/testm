@@ -1,6 +1,9 @@
 package form_template.vat.vat_937_2_13.v2014
 
+import com.aplana.sbrf.taxaccounting.model.Cell
+import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
@@ -63,6 +66,9 @@ def endDate = null
 
 @Field
 def dateFormat = 'dd.MM.yyyy'
+
+@Field
+def sizeSum = 15
 
 // Добавление строки
 void addRow() {
@@ -133,7 +139,7 @@ void calc() {
     def itog = getDataRow(dataRows, 'total')
     itog?.sum = calcItog(dataRows)
     def other = getDataRow(dataRows, 'R3')
-    other?.sum = calcOther(dataRows)
+    other?.sum = checkOverflowAlgorithm(calcOther(dataRows), other, 'sum', other.getIndex(), sizeSum, "Сумма значений всех нефиксированных строк по Графе 3")
     dataRowHelper.update(dataRows)
 }
 
@@ -141,7 +147,7 @@ void calc() {
 def calcItog(def dataRows) {
     def sum = 0 as BigDecimal
     for (def row in dataRows) {
-        if (row.getAlias() != 'total' && row.getAlias() != 'R3') {
+        if (row.getAlias() != 'total' && row.getAlias() != null) {
             sum += row.sum == null ? 0 : row.sum
         }
     }
@@ -296,9 +302,9 @@ void addData(def xml, int headRowCount) {
             values.differences = row.cell[2].text()
 
             ['rowNum', 'differences'].each { alias ->
-                if (dataRow[alias] != values[alias]) {
-                    logger.error('Неверное значение в фиксированных строках') // TODO (Bulat Kinzyabulatov) поменять сообщение после того как уточнится что выводить
-                }
+                def value = values[alias]?.toString()
+                def valueExpected = dataRow.getCell(alias).value?.toString()
+                checkFixedValue(dataRow, value, valueExpected, indexRow, alias, logger, true)
             }
         }
         newRow.sum = parseNumber(row.cell[3].text(), xlsIndexRow, 3 + colOffset, logger, true)
@@ -309,4 +315,16 @@ void addData(def xml, int headRowCount) {
     }
     dataRows.add(totalRow)
     dataRowHelper.save(dataRows)
+}
+
+def checkOverflowAlgorithm(BigDecimal value, DataRow<Cell> row, String alias, int index, int size, String algorithm) {
+    if (value == null) {
+        return;
+    }
+    BigDecimal overpower = new BigDecimal("1E" + size);
+
+    if (value.abs() >= overpower) {
+        String columnName = getColumnName(row, alias);
+        throw new ServiceException("Строка %d: Значение графы «%s» превышает допустимую разрядность (%d знаков). Графа «%s» рассчитывается как «%s»!", index, columnName, size, columnName, algorithm);
+    }
 }
