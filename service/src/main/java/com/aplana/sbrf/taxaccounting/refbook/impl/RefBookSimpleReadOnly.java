@@ -71,7 +71,12 @@ public class RefBookSimpleReadOnly extends AbstractReadOnlyRefBook {
 		return refBookUtils.getRecordData(getRefBookId(), getTableName(), recordId);
     }
 
-	public String getTableName() {
+    @Override
+    public Map<Long, Map<String, RefBookValue>> getRecordData(List<Long> recordIds) {
+        throw new UnsupportedOperationException();
+    }
+
+    public String getTableName() {
 		if (StringUtils.isEmpty(tableName)) {
 			throw new IllegalArgumentException("Field \"tableName\" must be set");
 		}

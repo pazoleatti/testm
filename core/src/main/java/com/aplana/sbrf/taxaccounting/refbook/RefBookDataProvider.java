@@ -99,6 +99,12 @@ public interface RefBookDataProvider {
 	Map<String, RefBookValue> getRecordData(Long recordId);
 
     /**
+     * Получение структуры Код строки → Строка справочника по списку кодов строк
+     * @param recordIds код строки справочника
+     */
+    Map<Long, Map<String, RefBookValue>> getRecordData(List<Long> recordIds);
+
+    /**
      * Значение справочника по Id записи и Id атрибута
      * @param recordId
      * @param attributeId

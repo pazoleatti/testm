@@ -125,6 +125,11 @@ public class RefBookDepartment implements RefBookDataProvider {
     }
 
     @Override
+    public Map<Long, Map<String, RefBookValue>> getRecordData(List<Long> recordIds) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public List<Date> getVersions(Date startDate, Date endDate) {
         // версионирования нет, только одна версия
 		return Arrays.asList(new Date(0));
