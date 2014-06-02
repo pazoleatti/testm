@@ -345,7 +345,7 @@ def calc7(def row, def section) {
             tmp = '18/118'
             break
         case '4':
-            tmp = '10/118'
+            tmp = '10/110'
             break
         case '7':
             tmp = row.ndsRate
