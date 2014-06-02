@@ -475,4 +475,59 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
                 new Object[]{year, departmentId, type, kind},
                 new FormDataWithoutRowMapper()) ;
     }
+
+
+    private static final String UPDATE_FORM_DATA_PERFORMER_TB =
+            "merge into FORM_DATA_PERFORMER fdp using (\n" +
+                    "  with depNameParts as (select SUBSTR(rdn, 0, instr(rdn, '/', 1) - 1) first_dep_name, SUBSTR(rdn, instr(rdn, '/', 1) + 1,length(rdn)) second_dep_name, form_data_id from (select fdp_f.REPORT_DEPARTMENT_NAME rdn, fdp_f.FORM_DATA_ID form_data_id from FORM_DATA_PERFORMER fdp_f)),\n" +
+                    "       formDataIdsWithRegExp as (select distinct fd.ID fd_id, depNameParts.first_dep_name, depNameParts.second_dep_name from FORM_DATA fd\n" +
+                    "                     join REPORT_PERIOD rp on rp.ID = fd.REPORT_PERIOD_ID\n" +
+                    "                     join depNameParts on depNameParts.form_data_id = fd.ID\n" +
+                    "                      where %s \n" +
+                    "                      and depNameParts.first_dep_name = :oldDepartmentName)" +
+                    "SELECT * FROM formDataIdsWithRegExp) b on (fdp.form_data_id = b.fd_id) WHEN MATCHED THEN UPDATE SET REPORT_DEPARTMENT_NAME = (:newDepartmentName || '/' || b.second_dep_name)";
+    @Override
+    public void updateFDPerformerTBDepartmentNames(String newDepartmentName, String oldDepartmentName, Date dateFrom, Date dateTo) {
+        String dateTag = dateFrom != null && dateTo != null ? "(rp.START_DATE between :dateFrom and :dateTo or rp.END_DATE  between :dateFrom and :dateTo)"
+                : dateFrom != null ? "rp.START_DATE >= :dateFrom"
+                : null;
+        HashMap<String, Object> values = new HashMap<String, Object>();
+        values.put("dateFrom", dateFrom);
+        values.put("dateTo", dateTo);
+        values.put("newDepartmentName", newDepartmentName);
+        values.put("oldDepartmentName", oldDepartmentName);
+        try {
+            getNamedParameterJdbcTemplate().update(String.format(UPDATE_FORM_DATA_PERFORMER_TB, dateTag), values);
+        } catch (DataAccessException e){
+            logger.error("Ошибка при обновлении значений.", e);
+            throw new DaoException("Ошибка при обновлении значений.", e);
+        }
+    }
+
+    private static final String UPDATE_FORM_DATA_PERFORMER_DEPARTMENT_NAME =
+            "merge into FORM_DATA_PERFORMER fdp using (\n" +
+                    "  with depNameParts as (select SUBSTR(rdn, 0, instr(rdn, '/', 1) - 1) first_dep_name, SUBSTR(rdn, instr(rdn, '/', 1) + 1,length(rdn)) second_dep_name, form_data_id from \n" +
+                    "    (select fdp_f.REPORT_DEPARTMENT_NAME rdn, fdp_f.FORM_DATA_ID form_data_id from FORM_DATA_PERFORMER fdp_f where fdp_f.PRINT_DEPARTMENT_ID = :departmentId)),\n" +
+                    "       formDataIdsWithRegExp as (select distinct fd.ID fd_id, depNameParts.first_dep_name, depNameParts.second_dep_name from FORM_DATA fd\n" +
+                    "                     join REPORT_PERIOD rp on rp.ID = fd.REPORT_PERIOD_ID\n" +
+                    "                     join depNameParts on depNameParts.form_data_id = fd.ID\n" +
+                    "                      where %s)\n" +
+                    "              SELECT * FROM formDataIdsWithRegExp) b on (fdp.form_data_id = b.fd_id) WHEN MATCHED THEN UPDATE SET REPORT_DEPARTMENT_NAME = (b.first_dep_name || '/' || :newDepartmentName)";
+    @Override
+    public void updateFDPerformerDepartmentNames(int departmentId, String newDepartmentName, Date dateFrom, Date dateTo) {
+        String dateTag = dateFrom != null && dateTo != null ? "(rp.START_DATE between :dateFrom and :dateTo or rp.END_DATE  between :dateFrom and :dateTo)"
+                : dateFrom != null ? "rp.START_DATE >= :dateFrom"
+                : null;
+        HashMap<String, Object> values = new HashMap<String, Object>();
+        values.put("dateFrom", dateFrom);
+        values.put("dateTo", dateTo);
+        values.put("newDepartmentName", newDepartmentName);
+        values.put("departmentId", departmentId);
+        try {
+            getNamedParameterJdbcTemplate().update(String.format(UPDATE_FORM_DATA_PERFORMER_DEPARTMENT_NAME, dateTag), values);
+        } catch (DataAccessException e){
+            logger.error("", e);
+            throw new DaoException("", e);
+        }
+    }
 }

@@ -1,0 +1,75 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:picker="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
+             xmlns:w="urn:import:com.aplana.gwt.client"
+             xmlns:date="urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker"
+             xmlns:r="urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client"
+             xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
+
+    <ui:style>
+        .content {
+            margin: 10px;
+        }
+
+        .footerPanel {
+            background-color: #E8E1CF;
+            width: 100%;
+            height: 38px;
+        }
+
+        .footerButton {
+            margin: 8px 10px 8px 0 !important;
+            width: 64px;
+        }
+
+    </ui:style>
+
+    <w:ModalWindow iconUrl="resources/img/unlock-16.png" title="Редактирование корректирующего периода">
+        <g:VerticalPanel width="400px" addStyleNames="aplana-ModalWindow-contentBackWhite">
+            <g:DecoratorPanel addStyleNames="{style.content}" width="380px">
+                <g:VerticalPanel>
+                    <g:HorizontalPanel verticalAlignment="middle" width="100%" spacing="3">
+                        <g:cell horizontalAlignment="right">
+                            <g:Label text="Подразделение: " width="180px"/>
+                        </g:cell>
+                        <picker:DepartmentPickerPopupWidget ui:field="departmentPicker" multiselection="false" width="250px"
+                                                            labelWordWrap="false"/>
+                    </g:HorizontalPanel>
+
+                    <g:HorizontalPanel verticalAlignment="middle" visible="true"
+                                       width="100%" spacing="3">
+                        <g:cell horizontalAlignment="right">
+                            <g:Label text="Период корректировки: " width="180px"/>
+                        </g:cell>
+                        <g:cell width="100%" horizontalAlignment="left">
+                            <w:ListBoxWithTooltip ui:field="periodList" width="250px"/>
+                        </g:cell>
+                    </g:HorizontalPanel>
+
+                    <g:HorizontalPanel ui:field="termPnl" verticalAlignment="middle" visible="true"
+                                       width="100%" spacing="3">
+                        <g:cell horizontalAlignment="right">
+                            <g:Label text="Период сдачи корректировки: " width="180px"/>
+                        </g:cell>
+                        <g:cell width="100%" horizontalAlignment="left">
+                            <date:DateMaskBoxPicker width="60px" ui:field="term"/>
+                        </g:cell>
+                    </g:HorizontalPanel>
+
+                </g:VerticalPanel>
+
+            </g:DecoratorPanel>
+
+            <style:Bar addStyleNames="{style.footerPanel}">
+                <style:RightBar>
+                    <g:Button addStyleNames="{style.footerButton}" ui:field="continueButton" text="Редактировать период"
+                              width="120px"/>
+                    <g:Button addStyleNames="{style.footerButton}" ui:field="cancelButton" text="Закрыть окно"
+                              width="100px"/>
+                </style:RightBar>
+            </style:Bar>
+
+        </g:VerticalPanel>
+    </w:ModalWindow>
+</ui:UiBinder> 

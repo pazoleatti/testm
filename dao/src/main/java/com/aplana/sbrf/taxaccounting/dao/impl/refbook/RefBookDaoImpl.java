@@ -1354,56 +1354,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }
     }
 
-    private final static String CHECK_UNIQUE_MATCHES_FOR_NON_VERSION = "select id record_id from %s t where ";
-    @Override
-    public List<Pair<Long, String>> getMatchedRecordsByUniqueAttributesForNonVersion(Long refBookId, String tableName, List<RefBookAttribute> attributes, List<RefBookRecord> records) {
-        boolean hasUniqueAttributes = false;
-        PreparedStatementData ps = new PreparedStatementData();
-        ps.appendQuery(CHECK_UNIQUE_MATCHES_FOR_NON_VERSION);
-        for (RefBookAttribute attribute : attributes) {
-            if (attribute.isUnique()) {
-                hasUniqueAttributes = true;
-                for (int i=0; i < records.size(); i++) {
-                    Map<String, RefBookValue> values = records.get(i).getValues();
-                    ps.appendQuery(String.format("t.%s = ?",  attribute.getAlias()));
-
-                    if (attribute.getAttributeType().equals(RefBookAttributeType.STRING)) {
-                        ps.addParam(values.get(attribute.getAlias()).getStringValue());
-                    }
-                    if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
-                        ps.addParam(values.get(attribute.getAlias()).getReferenceValue());
-                    }
-                    if (attribute.getAttributeType().equals(RefBookAttributeType.NUMBER)) {
-                        ps.addParam(values.get(attribute.getAlias()).getNumberValue());
-                    }
-                    if (attribute.getAttributeType().equals(RefBookAttributeType.DATE)) {
-                        ps.addParam(values.get(attribute.getAlias()).getDateValue());
-                    }
-
-                    if (i < records.size() - 1) {
-                        ps.appendQuery(" or ");
-                    }
-                }
-            }
-        }
-
-
-        try {
-            if (hasUniqueAttributes) {
-                return getJdbcTemplate().query(String.format(ps.getQuery().toString(), tableName), ps.getParams().toArray(), new RowMapper<Pair<Long, String>>() {
-                    @Override
-                    public Pair<Long, String> mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return new Pair<Long, String>(SqlUtils.getLong(rs,"ID"), rs.getString("NAME"));
-                    }
-                });
-            } else {
-                return new PagingResult<Pair<Long, String>>(new ArrayList<Pair<Long, String>>(0));
-            }
-        } catch (DataAccessException e){
-            throw new DaoException("Ошибка при поиске уникальных значений в справочнике " + tableName, e);
-        }
-    }
-
     private final static String CHECK_CONFLICT_VALUES_VERSIONS = "with conflictRecord as (select * from REF_BOOK_RECORD where %s),\n" +
             "allRecordsInConflictGroup as (select r.* from REF_BOOK_RECORD r where exists (select 1 from conflictRecord cr where r.REF_BOOK_ID=cr.REF_BOOK_ID and r.RECORD_ID=cr.RECORD_ID)),\n" +
             "recordsByVersion as (select ar.*, row_number() over(partition by ar.RECORD_ID order by ar.version) rn from allRecordsInConflictGroup ar),\n" +
@@ -1608,6 +1558,31 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             //do nothing
         }
         return new ArrayList<String>(results);
+    }
+
+    @Override
+    public Collection<String> isVersionUsedInRefBooks(Long refBookId, List<Long> uniqueRecordIds) {
+        Set<String> results = new HashSet<String>();
+        String in = SqlUtils.transformToSqlInStatement("v.reference_value", uniqueRecordIds);
+        String sql;
+        Map<String, Object> params = new HashMap<String, Object>();
+        //Проверка использования в справочниках
+        try {
+            sql = String.format(CHECK_USAGES_IN_REFBOOK, in);
+            params.put("refBookId", refBookId);
+            results.addAll(getNamedParameterJdbcTemplate().query(sql, params, new RowMapper<String>() {
+                @Override
+                public String mapRow(ResultSet rs, int rowNum) throws SQLException {
+                    return "Существует ссылка на запись справочника. Справочник "+rs.getString("refBookName")+", действует с "+sdf.format(rs.getDate("versionStart"))+".";
+                }
+            }));
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<String>(0);
+        } catch (DataAccessException e){
+            logger.error("Проверка использования", e);
+            throw new DaoException("Проверка использования", e);
+        }
+        return results;
     }
 
     private static final String GET_NEXT_RECORD_VERSION = "with nextVersion as (select r.* from ref_book_record r where r.ref_book_id = ? and r.record_id = ? and r.version  = \n" +

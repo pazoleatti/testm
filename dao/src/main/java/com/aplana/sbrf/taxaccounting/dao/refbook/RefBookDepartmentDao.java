@@ -2,9 +2,13 @@ package com.aplana.sbrf.taxaccounting.dao.refbook;
 
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -43,4 +47,30 @@ public interface RefBookDepartmentDao {
      * @return
      */
     Map<String, RefBookValue> getRecordData(Long recordId);
+
+    /**
+     * Поиск среди всех элементов справочника (без учета версий) значений уникальных атрибутов, которые бы дублировались с новыми,
+     * отдельных справочников.
+     * Обеспечение соблюдения уникальности атрибутов в пределах справочника
+     * @param refBookId идентификатор справочника
+     * @param tableName уникальный идентификатор записи справочника(соответствующая таблица)
+     * @param attributes атрибуты справочника
+     * @param records новые значения полей элемента справочника
+     * @return список пар идентификатор записи-имя атрибута, у которых совпали значения уникальных атрибутов
+     */
+    List<Pair<Long,String>> getMatchedRecordsByUniqueAttributes(Long refBookId, List<RefBookAttribute> attributes, List<RefBookRecord> records);
+
+    /**
+     * Получает отчетные периоды по виду налога и департаментам
+     * @param taxTypes
+     * @param departmentList
+     * @return
+     */
+    public List<Long> getPeriodsByTaxTypesAndDepartments(List<TaxType> taxTypes, List<Integer> departmentList);
+
+    void update(long uniqueId, Map<String, RefBookValue> records, List<RefBookAttribute> attributes);
+
+    int create(Map<String, RefBookValue> records, List<RefBookAttribute> attributes);
+
+    void remove(long uniqueId);
 }

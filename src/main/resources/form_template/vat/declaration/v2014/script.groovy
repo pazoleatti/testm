@@ -5,9 +5,16 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import groovy.transform.Field
 import groovy.xml.MarkupBuilder
+
 /**
  * Декларация НДС. Генератор XML.
  * http://jira.aplana.com/browse/SBRFACCTAX-6453
+ *
+ * TODO:
+ *      - неясно как заполнять РеалТов18: в 1ом разделе формы 724.1 есть 2 итоговые строки (total_1_1 и total_1_2),
+ *              неясно какую использовать, задан вопрос заказчику, пока использую первую итоговую строку первого раздела
+ *      - расчет для НалНеВыч не сделан, сказали пока не делать, потому что неясно как вычислять.
+ *      - проверки 8.2.2 сказали пока не делать, по ним есть воспросы к заказчику
  */
 
 switch (formDataEvent) {
@@ -17,9 +24,11 @@ switch (formDataEvent) {
         break
     case FormDataEvent.CHECK:
         checkDeparmentParams(LogLevel.ERROR)
+        logicCheck()
         break
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:
         checkDeparmentParams(LogLevel.ERROR)
+        logicCheck()
         break
     default:
         return
@@ -32,11 +41,21 @@ def providerCache = [:]
 @Field
 def refBookCache = [:]
 
-/**
- * Получение провайдера с использованием кеширования
- * @param providerId
- * @return
- */
+@Field
+def empty = 0
+
+// Дата окончания отчетного периода
+@Field
+def reportPeriodEndDate = null
+
+def getEndDate() {
+    if (reportPeriodEndDate == null) {
+        reportPeriodEndDate = reportPeriodService.getEndDate(declarationData.reportPeriodId)?.time
+    }
+    return reportPeriodEndDate
+}
+
+/** Получение провайдера с использованием кеширования. */
 def getProvider(def long providerId) {
     if (!providerCache.containsKey(providerId)) {
         providerCache.put(providerId, refBookFactory.getDataProvider(providerId))
@@ -44,26 +63,16 @@ def getProvider(def long providerId) {
     return providerCache.get(providerId)
 }
 
-/**
- * Разыменование с использованием кеширования
- * @param refBookId
- * @param recordId
- * @return
- */
-def getRefBookValue(def long refBookId, def long recordId) {
-    if (!refBookCache.containsKey(recordId)) {
-        refBookCache.put(recordId, refBookService.getRecordData(refBookId, recordId))
-    }
-    return refBookCache.get(recordId)
+/** Разыменование с использованием кеширования. */
+def getRefBookValue(def long refBookId, def recordId) {
+    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
 void checkDeparmentParams(LogLevel logLevel) {
-    def date = reportPeriodService.getStartDate(declarationData.reportPeriodId).getTime()
-
     def departmentId = declarationData.departmentId
 
     // Параметры подразделения
-    def departmentParamList = getProvider(RefBook.DEPARTMENT_CONFIG_VAT).getRecords(date, null, "DEPARTMENT_ID = $departmentId", null)
+    def departmentParamList = getProvider(RefBook.DEPARTMENT_CONFIG_VAT).getRecords(getEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null)
 
     if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
         throw new Exception("Ошибка при получении настроек обособленного подразделения")
@@ -135,39 +144,151 @@ List<String> getErrorVersion(record) {
  * Запуск генерации XML
  */
 void generateXML() {
-    def date = reportPeriodService.getStartDate(declarationData.reportPeriodId).getTime()
-    def departmentId = declarationData.departmentId
-
-    // Параметры подразделения
-    def departmentParam = getProvider(RefBook.DEPARTMENT_CONFIG_VAT).getRecords(date, null, "DEPARTMENT_ID = $departmentId", null).get(0)
-
-    def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData)
-
-    def builder = new MarkupBuilder(xml)
-
     // Тип декларации
-    def declarationType = 5
+    def declarationType = 4
+    def departmentId = declarationData.departmentId
+    def reportPeriodId = declarationData.reportPeriodId
+
     // Код формы отчетности по КНД
     def String KND = '1151001'
 
-    // ОКАТО
-    def okato = departmentParam?.OKTMO?.referenceValue != null ? getRefBookValue(96, departmentParam.OKTMO?.referenceValue)?.CODE?.stringValue : null
-    // ОКВЭД
-    def okvedCode = departmentParam?.OKVED_CODE?.referenceValue != null ? getRefBookValue(34, departmentParam?.OKVED_CODE?.referenceValue)?.CODE?.stringValue : null
-    // По месту
-    def taxPlaceTypeCode = departmentParam?.TAX_PLACE_TYPE_CODE?.referenceValue != null ? getRefBookValue(2, departmentParam?.TAX_PLACE_TYPE_CODE?.referenceValue)?.CODE?.stringValue : null
+    // Параметры подразделения - начало
+    def departmentParam = getProvider(RefBook.DEPARTMENT_CONFIG_VAT).getRecords(getEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null).get(0)
+    if (departmentParam == null) {
+        throw new Exception('Ошибка при получении настроек обособленного подразделения')
+    }
+    def taxOrganCode = departmentParam?.TAX_ORGAN_CODE?.value
+    def okvedCode = getRefBookValue(34, departmentParam?.OKVED_CODE?.value)?.CODE?.value // ОКВЭД
+    def okato = getRefBookValue(96, departmentParam?.OKTMO?.value)?.CODE?.value // ОКАТО
+    def taxPlaceTypeCode = getRefBookValue(2, departmentParam?.TAX_PLACE_TYPE_CODE?.value)?.CODE?.value // По месту
+    def signatoryId = getRefBookValue(35, departmentParam?.SIGNATORY_ID?.value)?.CODE?.value
+    def phone = departmentParam?.PHONE?.value
+    def name = departmentParam?.NAME?.value
+    def inn = departmentParam?.INN?.value
+    def kpp = departmentParam?.KPP?.value
+    def appVersion = departmentParam?.APP_VERSION?.value
+    def formatVersion = departmentParam?.FORMAT_VERSION?.value
+    def surname = departmentParam?.SIGNATORY_SURNAME?.value
+    def firstname = departmentParam?.SIGNATORY_FIRSTNAME?.value
+    def lastname = departmentParam?.SIGNATORY_LASTNAME?.value
+    def approveDocName = departmentParam?.APPROVE_DOC_NAME?.value
+    def approveOrgName = departmentParam?.APPROVE_ORG_NAME?.value
+    // Параметры подразделения - конец
+
     // Список данных форм-источников
-    def formDataList = formDataCollection.getRecords()
-    // Тип формы → Данные формы
-    def formDataRecordsMap = [:]
+    def formDataList = declarationService.getAcceptedFormDataSources(declarationData).getRecords()
+    // Тип формы > Строки формы
+    def dataRowsMap = [:]
     for (def formData : formDataList) {
-        formDataRecordsMap.put(formData.formType.id, formData)
+        def dataRows = formDataService.getDataRowHelper(formData)?.getAll()
+        dataRowsMap.put(formData.formType.id, dataRows)
     }
 
+    /*
+     * Расчет значений декларации.
+     */
+
+    /** ПрПодп. */
+    def prPodp = (signatoryId != null ? signatoryId : 1)
+
+    // РАЗДЕЛ 3
+    // форма 724.1
+    def rows724_1 = dataRowsMap[600]
+    // форма 724.4
+    def rows724_4 = dataRowsMap[603]
+    // форма 937.1
+    def rows937_1 = dataRowsMap[606]
+
+    /** НалБаза (РеалТов18). Код строки 010 Графа 3. */
+    def nalBaza010 = empty
+    /** СумНал (РеалТов18). Код строки 010 Графа 5. */
+    def sumNal010 = empty
+
+    /** НалБаза (РеалТов10). Код строки 020 Графа 3. */
+    def nalBaza020 = empty
+    /** СумНал (РеалТов10). Код строки 020 Графа 5. */
+    def sumNal020 = empty
+
+    /** НалБаза (РеалТов118). Код строки 030 Графа 3. */
+    def nalBaza030 = empty
+    /** СумНал (РеалТов118). Код строки 030 Графа 5. */
+    def sumNal030 = empty
+
+    /** НалБаза (РеалТов110). Код строки 040 Графа 3. */
+    def nalBaza040 = empty
+    /** СумНал (РеалТов110). Код строки 040 Графа 5. */
+    def sumNal040 = empty
+
+    /** НалБаза (ОплПредПост). Код строки 070 Графа 3. */
+    def nalBaza070 = empty
+    /** СумНал (ОплПредПост). Код строки 070 Графа 5. */
+    def sumNal070 = empty
+
+    /** НалБаза (ОплНОТовар). Код строки 080 Графа 3. */
+    def nalBaza080 = empty
+    /** СумНал (ОплНОТовар). Код строки 080 Графа 5. */
+    def sumNal080 = empty
+    if (rows724_1) {
+        // TODO (Ramil Timerbaev) в 1ом разделе формы 724.1 есть 2 итоговые строки (total_1_1 и total_1_2),
+        // неясно какую использовать, задан вопрос заказчику,
+        // пока использую первую итоговую строку первого раздела
+        def row = getDataRow(rows724_1, 'total_1_1')
+        nalBaza010 = round(row?.baseSum ?: empty)
+        sumNal010 = round(row?.ndsSum ?: empty)
+
+        row = getDataRow(rows724_1, 'total_2')
+        nalBaza020 = round(row?.baseSum ?: empty)
+        sumNal020 = round(row?.ndsSum ?: empty)
+
+        row = getDataRow(rows724_1, 'total_3')
+        nalBaza030 = round(row?.baseSum ?: empty)
+        sumNal030 = round(row?.ndsSum ?: empty)
+
+        row = getDataRow(rows724_1, 'total_4')
+        nalBaza040 = round(row?.baseSum ?: empty)
+        sumNal020 = round(row?.ndsSum ?: empty)
+
+        row = getDataRow(rows724_1, 'total_5')
+        nalBaza070 = round(row?.baseSum ?: empty)
+        sumNal070 = round(row?.ndsSum ?: empty)
+
+        row = getDataRow(rows724_1, 'total_6')
+        nalBaza080 = round(row?.baseSum ?: empty)
+        sumNal080 = round(row?.ndsSum ?: empty)
+    }
+    /** НалВосстОбщ. Код строки 120 Графа 5. */
+    def nalVosstObsh = sumNal010 + sumNal020 + sumNal030 + sumNal040 + sumNal070 + sumNal080
+    /** НалВыч171Общ. Код строки 130 Графа 5. */
+    def nalVich171Obsh = empty
+    if (rows724_4) {
+        def tmp = getDataRow(rows724_4, 'total1')?.sum2 + getDataRow(rows724_4, 'total1')?.sum2
+        nalVich171Obsh = round(tmp)
+    }
+    /** НалИсчПрод. Код строки 200 Графа 5. */
+    def nalIschProd = empty
+    if (rows937_1) {
+        nalIschProd = round(getDataRow(rows937_1, 'totalA')?.nds)
+    }
+    /** НалВычОбщ. Код строки 220 Графа 5. */
+    def nalVichObsh = nalVich171Obsh + nalIschProd
+    /** НалПУ164. Код строки 240 и код строки 230.*/
+    def nalPU164 = (nalVosstObsh - nalVichObsh).abs()
+    // РАЗДЕЛ 3 - КОНЕЦ
+
+    // РАЗДЕЛ 1
+    /** СумПУ_173.1. Код строки декларации 040 или 050. */
+    def sumPU_173_1 = nalPU164
+    // РАЗДЕЛ 1 - КОНЕЦ
+
+    /*
+     * Формирование XML'ки.
+     */
+
+    def builder = new MarkupBuilder(xml)
     builder.Файл(
-            ИдФайл: declarationService.generateXmlFileId(declarationType, departmentId, declarationData.reportPeriodId),
-            ВерсПрог: departmentParam?.APP_VERSION?.stringValue,
-            ВерсФорм: departmentParam?.FORMAT_VERSION?.stringValue) {
+            ИдФайл: declarationService.generateXmlFileId(declarationType, departmentId, reportPeriodId),
+            ВерсПрог: appVersion,
+            ВерсФорм: formatVersion) {
         Документ(
                 // ТИТУЛЬНЫЙ ЛИСТ
                 // Код формы отчетности по КНД
@@ -175,35 +296,27 @@ void generateXML() {
                 // Дата формирования документа
                 ДатаДок: (docDate != null ? docDate : new Date()).format("dd.MM.yyyy"),
                 // Отчетный год
-                ОтчетГод: reportPeriodService.get(declarationData.reportPeriodId).taxPeriod.year,
+                ОтчетГод: reportPeriodService.get(reportPeriodId).taxPeriod.year,
                 // Код налогового органа
-                КодНО: departmentParam?.TAX_ORGAN_CODE?.stringValue,
+                КодНО: taxOrganCode,
                 // Номер корректировки
-                НомКорр: reportPeriodService.getCorrectionPeriodNumber(declarationData.reportPeriodId, declarationData.departmentId),
+                НомКорр: reportPeriodService.getCorrectionPeriodNumber(reportPeriodId, departmentId),
                 // Код места, по которому представляется документ
                 ПоМесту: taxPlaceTypeCode
         ) {
             // ТИТУЛЬНЫЙ ЛИСТ
             СвНП(
                     ОКВЭД: okvedCode,
-                    Тлф: departmentParam?.PHONE?.stringValue
+                    Тлф: phone
             ) {
                 НПЮЛ(
-                        НаимОрг: departmentParam?.NAME?.stringValue,
-                        ИННЮЛ: departmentParam?.INN?.stringValue,
-                        КПП: departmentParam?.KPP?.stringValue
+                        НаимОрг: name,
+                        ИННЮЛ: inn,
+                        КПП: kpp
                 )
             }
-            def prPodp = 1
-            if (departmentParam?.SIGNATORY_ID?.referenceValue != null) {
-                prPodp = getRefBookValue(35, departmentParam?.SIGNATORY_ID?.referenceValue)?.CODE?.numberValue
-            }
-            Подписант(
-                    ПрПодп: prPodp
-            ) {
-                def String surname = departmentParam?.SIGNATORY_SURNAME?.stringValue
-                def String firstname = departmentParam?.SIGNATORY_FIRSTNAME?.stringValue
-                def String lastname = departmentParam?.SIGNATORY_LASTNAME?.stringValue
+
+            Подписант(ПрПодп: prPodp) {
                 ФИО(
                         [Фамилия: surname] +
                                 [Имя: firstname] +
@@ -211,133 +324,246 @@ void generateXML() {
                 )
                 if (prPodp == 2) {
                     СвПред(
-                            НаимДок: departmentParam?.APPROVE_DOC_NAME?.stringValue,
-                            НаимОрг: departmentParam?.APPROVE_ORG_NAME?.stringValue
+                            НаимДок: approveDocName, // в xml быть не должно (чтз 8.1.1). не заполняется если ПрПодп = 1
+                            НаимОрг: approveOrgName
                     )
                 }
             }
+            // ТИТУЛЬНЫЙ ЛИСТ - КОНЕЦ
 
             НДС() {
                 // РАЗДЕЛ 1
                 СумУплНП(
                         ОКАТО: okato,
                         КБК: '18210301000011000110',
-                        'СумПУ_173.5': 0,
-                        'СумПУ_173.1': '' // TODO Вычисление
+                        'СумПУ_173.5': empty,
+                        'СумПУ_173.1': sumPU_173_1
                 )
+                // РАЗДЕЛ 1 - КОНЕЦ
 
                 // РАЗДЕЛ 2
-                def rows = [] // TODO Строки 724.6, 724.7
-                for (def row : rows) {
+                def section2Rows = getSection2Rows(dataRowsMap)
+                for (def row : section2Rows) {
                     СумУплНА(
-                            // КППИно: '',
+                            // КППИно: empty, // в xml быть не должно (чтз 8.1.1)
                             КБК: '18210301000011000110',
                             ОКАТО: okato,
-                            СумИсчисл: '', // TODO Вычисление из row
-                            КодОпер: '', // TODO Вычисление из row
-                            СумИсчислОтгр: 0,
-                            СумИсчислОпл: 0,
-                            СумИсчислНА: 0
+                            СумИсчисл: row.sumIschisl,
+                            КодОпер: row.codeOper,
+                            СумИсчислОтгр: empty,
+                            СумИсчислОпл: empty,
+                            СумИсчислНА: empty
                     ) {
                         СведПродЮЛ(
-                                НаимПрод: '', // TODO Вычисление из row
-                                ИННЮЛПрод: '', // TODO Вычисление из row
+                                НаимПрод: row.naimProd,
+                                ИННЮЛПрод: row.innULProd,
                         )
                     }
                 }
+                // пустой раздел 2
+                if (!section2Rows) {
+                    СумУплНА(
+                            // КППИно: empty, // в xml быть не должно (чтз 8.1.1)
+                            КБК: '18210301000011000110',
+                            ОКАТО: okato,
+                            СумИсчисл: empty,
+                            КодОпер: empty,
+                            СумИсчислОтгр: empty,
+                            СумИсчислОпл: empty,
+                            СумИсчислНА: empty
+                    ) {
+                        СведПродЮЛ(
+                                НаимПрод: empty,
+                                ИННЮЛПрод: empty,
+                        )
+                    }
+                }
+                // РАЗДЕЛ 2 - КОНЕЦ
 
                 // РАЗДЕЛ 3
                 СумУпл164(
-                        НалПУ164: null // TODO Не описан в ТЗ
+                        НалПУ164: nalPU164
                 ) {
                     СумНалОб(
-                            НалВосстОбщ: null // TODO Вычисление
+                            НалВосстОбщ: nalVosstObsh
                     ) {
                         РеалТов18(
-                                НалБаза: null, // TODO Вычисление из 724.1
-                                СумНал: null // TODO Вычисление из 724.1
+                                НалБаза: nalBaza010,
+                                СумНал: sumNal010
                         )
                         РеалТов10(
-                                НалБаза: null, // TODO Вычисление из 724.1
-                                СумНал: null // TODO Вычисление из 724.1
+                                НалБаза: nalBaza020,
+                                СумНал: sumNal020
                         )
+
                         РеалТов118(
-                                НалБаза: null, // TODO Вычисление из 724.1
-                                СумНал: null // TODO Вычисление из 724.1
+                                НалБаза: nalBaza030,
+                                СумНал: sumNal030
                         )
                         РеалТов110(
-                                НалБаза: null, // TODO Вычисление из 724.1
-                                СумНал: null // TODO Вычисление из 724.1
+                                НалБаза: nalBaza040,
+                                СумНал: sumNal040
                         )
                         РеалПредИК(
-                                НалБаза: 0,
-                                СумНал: 0
+                                НалБаза: empty,
+                                СумНал: empty
                         )
                         ВыпСМРСоб(
-                                НалБаза: 0,
-                                СумНал: 0
+                                НалБаза: empty,
+                                СумНал: empty
                         )
                         ОплПредПост(
-                                НалБаза: null, // TODO Вычисление из 724.1
-                                СумНал: null // TODO Вычисление из 724.1
+                                НалБаза: nalBaza070,
+                                СумНал: sumNal070
                         )
                         ОплНОТовар(
-                                НалБаза: null, // TODO Вычисление из 724.1
-                                СумНал: null // TODO Вычисление из 724.1
+                                НалБаза: nalBaza080,
+                                СумНал: sumNal080
                         )
                         СумНалВосст(
-                                СумНалВс: 0,
-                                СумНалСтав0: 0,
-                                СумНал170: 0
+                                СумНалВс: empty,
+                                СумНалСтав0: empty,
+                                СумНал170: empty
                         )
                     }
                     СумНалВыч(
-                            НалВычОбщ: null, // TODO Вычисление из 724.1
-                            НалПредНППок: 0,
-                            НалИсчСМР: null, // Нет в ТЗ
-                            НалИсчПрод: null, // TODO Вычисление из 724.1
-                            НалУплПокНА: null // TODO Вычисление из 724.1
+                            НалВычОбщ: nalVichObsh,
+                            НалПредНППок: empty,
+                            НалИсчСМР: empty,
+                            НалИсчПрод: nalIschProd,
+                            НалУплПокНА: empty
                     ) {
                         НалВыч171(
-                                НалВыч171Общ: null, // TODO Вычисление из 724.4
-                                НалВычКапСтр: 0
+                                НалВыч171Общ: nalVich171Obsh,
+                                НалВычКапСтр: empty
                         )
                         НалВычТамож(
-                                НалВычВс: 0,
-                                НалУплТО: 0,
-                                НалУплНО: 0
+                                НалВычВс: empty,
+                                НалУплТО: empty,
+                                НалУплНО: empty
                         )
                     }
                 }
+                // РАЗДЕЛ 3 - КОНЕЦ
 
                 // РАЗДЕЛ 4
                 НалПодтв0(
-                        СумУменИтог: 0
+                        СумУменИтог: empty
                 ) {
-                    СумОпер4(
-                            КодОпер: null, // TODO Вычисление из 724.2.2
-                            НалБаза: null, // TODO Вычисление из 724.2.2
-                            НалВычПод: 0,
-                            НалНеПод: 0,
-                            НалВосст: 0
-                    )
-                }
-
-                // РАЗДЕЛ 7
-                ОперНеНал(
-                        ОплПостСв6Мес: 0
-                ) {
-                    rows = [] // TODO Строки 724.2.1
-                    for (def row : rows) {
-                        СумОпер7(
-                                КодОпер: null, // TODO Вычисление из row
-                                СтРеалТов: null, // TODO Вычисление из row
-                                СтПриобТов: null, // TODO Вычисление из row
-                                НалНеВыч: 0
+                    // форма 724.2.2
+                    for (def row : dataRowsMap[602]) {
+                        if (row.getAlias() == 'itog') {
+                            continue
+                        }
+                        СумОпер4(
+                                КодОпер: row.code,
+                                НалБаза: round(row.base),
+                                НалВычПод: empty,
+                                НалНеПод: empty,
+                                НалВосст: empty
+                        )
+                    }
+                    // пустой раздел 4
+                    if (!dataRowsMap[602]) {
+                        СумОпер4(
+                                КодОпер: empty,
+                                НалБаза: empty,
+                                НалВычПод: empty,
+                                НалНеПод: empty,
+                                НалВосст: empty
                         )
                     }
                 }
+                // РАЗДЕЛ 4 - КОНЕЦ
+
+                // РАЗДЕЛ 7
+                ОперНеНал(ОплПостСв6Мес: empty) {
+                    // форма 724.2.1
+                    for (def row : dataRowsMap[601]) {
+                        if (row.getAlias() == 'itog') {
+                            continue
+                        }
+                        СумОпер7(
+                                КодОпер: row.code,
+                                СтРеалТов: round(row.realizeCost),
+                                СтПриобТов: round(row.obtainCost ?: empty),
+                                НалНеВыч: getNalNeVich(row) // TODO (Ramil Timerbaev)  недоделано
+                        )
+                    }
+                    // пустой раздел 7
+                    if (!dataRowsMap[601]) {
+                        СумОпер7(
+                                КодОпер: empty,
+                                СтРеалТов: empty,
+                                СтПриобТов: empty,
+                                НалНеВыч: empty
+                        )
+                    }
+                }
+                // РАЗДЕЛ 7 - КОНЕЦ
             }
         }
     }
+}
+
+/**
+ * Получить список значений для раздела 2.
+ *
+ * @param dataRowsMap мапа со строками форм-источников
+ * @return список мап со значениями
+ */
+def getSection2Rows(def dataRowsMap) {
+    def rows = []
+    // форма 724.6
+    for (def row : dataRowsMap[604]) {
+        if (row.getAlias() != null) {
+            continue
+        }
+        def newRow = [:]
+        newRow.sumIschisl = round(row.sum2)
+        newRow.codeOper = '1011712'
+        newRow.naimProd = row.contragent
+        newRow.innULProd = empty
+        rows.add(newRow)
+    }
+    // форма 724.7
+    for (def row : dataRowsMap[605]) {
+        if (row.getAlias() != null) {
+            continue
+        }
+        def newRow = [:]
+        newRow.sumIschisl = round(row.ndsSum)
+        newRow.codeOper = '1011703'
+        newRow.naimProd = row.name
+        newRow.innULProd = row.inn
+        rows.add(newRow)
+    }
+    return rows
+}
+
+def round(def value) {
+    return ((BigDecimal) value)?.setScale(0, BigDecimal.ROUND_HALF_UP)
+}
+
+/**
+ * Получить значение для НалНеВыч.
+ *
+ * @param row строка формы 724.2.1
+ */
+def getNalNeVich(def row) {
+    // TODO (Ramil Timerbaev) сказали пока не делать, потому что неясно как вычислять.
+    // сумма из отчета 102
+    // сумма из расходов простых
+    // разность сумм
+    return empty
+}
+
+/** Логические проверки. */
+void logicCheck() {
+    // получение данных из xml'ки
+    def xmlString = declarationService.getXmlData(declarationData.id)
+    xmlString = xmlString.replace('<?xml version="1.0" encoding="windows-1251"?>', '')
+    def xmlData = new XmlSlurper().parseText(xmlString)
+
+    // TODO (Ramil Timerbaev) проверки 8.2.2 сказали пока не делать, по ним есть воспросы к заказчику
 }

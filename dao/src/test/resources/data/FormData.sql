@@ -30,6 +30,8 @@ insert into form_data(id, form_template_id, department_id, state, kind, report_p
 insert into form_data(id, form_template_id, department_id, state, kind, report_period_id, return_sign, period_order) values (19, 2, 1, 1, 1, 15, 0, 5); /* Повтор для теста */
 insert into form_data(id, form_template_id, department_id, state, kind, report_period_id, return_sign, period_order) values (20, 2, 1, 1, 1, 15, 0, 6);
 
+insert into form_data_performer(form_data_id, name, phone, PRINT_DEPARTMENT_ID, REPORT_DEPARTMENT_NAME) values (11, 'Bank', '', 1, 'Bank/Uralsib');
+
 -- Для автонумеруемой графы
 insert into tax_period(id, tax_type, year) values (100, 'I', 2014);
 

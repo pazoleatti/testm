@@ -262,7 +262,8 @@ create table department (
   tb_index    varchar2(3),
   sbrf_code   varchar2(255),
   region_id number(18),
-  is_active number(1,0) default 1 not null
+  is_active number(1,0) default 1 not null,
+  code number(9,0) not null
 );
 comment on table department is 'Подразделения банка';
 comment on column department.id is 'Идентификатор записи';
@@ -274,6 +275,9 @@ comment on column department.tb_index is 'Индекс территориаль�
 comment on column department.sbrf_code is 'Код подразделения в нотации Сбербанка';
 comment on column department.region_id is 'Код региона';
 comment on column department.is_active is 'Действующее подразделение (0 - не действующее, 1 - действующее)';
+comment on column department.code is 'Код подразделения';
+
+create sequence seq_department start with 1000;
 ---------------------------------------------------------------------------------------------------
 create table report_period (
   id number(9) not null,

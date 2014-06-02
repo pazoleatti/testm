@@ -16,6 +16,9 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.TaManualReveal
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.deadlinedialog.DeadlineDialogPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.periods.client.editdialog.EditCorrectionDialogPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.periods.client.editdialog.EditDialogData;
+import com.aplana.sbrf.taxaccounting.web.module.periods.client.editdialog.EditDialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.event.PeriodCreated;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.opencorrectdialog.OpenCorrectDialogPresenter;
@@ -58,12 +61,15 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 		TableRow getSelectedRow();
         void setCanChangeDepartment(boolean canChange);
 		void setCanChangeDeadline(boolean canChangeDeadline);
+        void setCanEditPeriod(boolean canEditPeriod);
 		void setCanEdit(boolean canEdit);
 	}
 
 	private final TaPlaceManager placeManager;
 	private final DispatchAsync dispatcher;
 	protected final OpenDialogPresenter openDialogPresenter;
+    protected final EditDialogPresenter editDialogPresenter;
+    protected final EditCorrectionDialogPresenter editCorrectionDialogPresenter;
     protected final OpenCorrectDialogPresenter openCorrectDialogPresenter;
     protected final DeadlineDialogPresenter deadlineDialogPresenter;
 
@@ -71,13 +77,16 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 	public PeriodsPresenter(final EventBus eventBus, final MyView view,
 	                        final MyProxy proxy, PlaceManager placeManager, DispatchAsync dispatcher,
 	                        OpenDialogPresenter openDialogPresenter, DeadlineDialogPresenter deadlineDialogPresenter,
-                            OpenCorrectDialogPresenter openCorrectDialogPresenter) {
+                            OpenCorrectDialogPresenter openCorrectDialogPresenter, EditDialogPresenter editDialogPresenter,
+                            EditCorrectionDialogPresenter editCorrectionDialogPresenter) {
 		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
 		this.placeManager = (TaPlaceManager) placeManager;
 		this.dispatcher = dispatcher;
 		this.openDialogPresenter = openDialogPresenter;
         this.openCorrectDialogPresenter = openCorrectDialogPresenter;
         this.deadlineDialogPresenter = deadlineDialogPresenter;
+        this.editDialogPresenter = editDialogPresenter;
+        this.editCorrectionDialogPresenter = editCorrectionDialogPresenter;
 		getView().setUiHandlers(this);
 	}
 
@@ -250,9 +259,42 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 	@Override
 	public void selectionChanged() {
 		getView().setCanChangeDeadline(getView().getSelectedRow().isOpen());
+        getView().setCanEditPeriod(getView().getSelectedRow().isOpen());
 	}
 
-	public void find() {
+    @Override
+    public void editPeriod() {
+        final EditDialogData initData = new EditDialogData();
+        initData.setYear(getView().getSelectedRow().getYear());
+        initData.setBalance(getView().getSelectedRow().isBalance());
+        initData.setDepartmentId(getView().getDepartmentId().getDepartmentId());
+        initData.setReportPeriodId(getView().getSelectedRow().getReportPeriodId());
+        if (getView().getSelectedRow().getCorrectPeriod() == null) {
+            editDialogPresenter.init(initData);
+            addToPopupSlot(editDialogPresenter);
+        } else {
+            final GetCorrectPeriodsAction action = new GetCorrectPeriodsAction();
+            action.setTaxType(taxType);
+            DepartmentPair departmentPair = getView().getDepartmentId();
+            final int departmentId = departmentPair.getDepartmentId();
+            action.setDepartmentId(departmentId);
+            dispatcher.execute(action, CallbackUtils
+                            .defaultCallback(new AbstractCallback<GetCorrectPeriodsResult>() {
+                                @Override
+                                public void onSuccess(GetCorrectPeriodsResult result) {
+                                    initData.setCorrectionReportPeriods(result.getReportPeriod());
+                                    initData.setCorrectionDate(getView().getSelectedRow().getCorrectPeriod());
+                                    editCorrectionDialogPresenter.init(initData);
+                                    addToPopupSlot(editCorrectionDialogPresenter);
+                                }
+                            }, PeriodsPresenter.this)
+            );
+
+        }
+
+    }
+
+    public void find() {
 		GetPeriodDataAction requestData = new GetPeriodDataAction();
 		requestData.setTaxType(taxType);
 		requestData.setFrom(getView().getFromYear());
@@ -286,8 +328,15 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 						getView().setCanEdit(result.isCanEdit());
 						openDialogPresenter.setDepartments(result.getDepartments(), result.getAvalDepartments(), Arrays.asList(result.getSelectedDepartment()), true);
                         openDialogPresenter.setCanChangeDepartment(result.canChangeDepartment());
+                        editDialogPresenter.setDepartments(result.getDepartments(), result.getAvalDepartments(), Arrays.asList(result.getSelectedDepartment()), true);
+                        editDialogPresenter.setCanChangeDepartment(result.canChangeDepartment());
+                        editDialogPresenter.setTaxType(result.getTaxType());
                         openCorrectDialogPresenter.setDepartments(result.getDepartments(), result.getAvalDepartments(), Arrays.asList(result.getSelectedDepartment()), true);
                         openCorrectDialogPresenter.setCanChangeDepartment(result.canChangeDepartment());
+
+                        editCorrectionDialogPresenter.setDepartments(result.getDepartments(), result.getAvalDepartments(), Arrays.asList(result.getSelectedDepartment()), true);
+                        editCorrectionDialogPresenter.setCanChangeDepartment(result.canChangeDepartment());
+                        editCorrectionDialogPresenter.setTaxType(result.getTaxType());
 						find();
 					}
 				}, PeriodsPresenter.this).addCallback(TaManualRevealCallback.create(this, this.placeManager))

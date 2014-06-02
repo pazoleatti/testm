@@ -62,6 +62,9 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
     LinkButton openCorrectPeriod;
 
     @UiField
+    LinkButton editPeriod;
+
+    @UiField
     Button setDeadlineButton;
 
 	@UiField
@@ -238,6 +241,13 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 		}
 	}
 
+    @UiHandler("editPeriod")
+    void onEditPeriodClicked(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().editPeriod();
+        }
+    }
+
     @UiHandler("openCorrectPeriod")
     void onOpenCorrectPeriod(ClickEvent event) {
         if (getUiHandlers() != null) {
@@ -262,11 +272,15 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 		setDeadlineButton.setVisible(canChangeDeadline);
 	}
 
-	@Override
+    @Override
+    public void setCanEditPeriod(boolean canEditPeriod) {
+        editPeriod.setVisible(canEditPeriod);
+    }
+
+    @Override
 	public void setCanEdit(boolean canEdit) {
 		closePeriod.setVisible(canEdit);
 		openPeriod.setVisible(canEdit);
 		removePeriod.setVisible(canEdit);
-        openCorrectPeriod.setVisible(canEdit);
 	}
 }

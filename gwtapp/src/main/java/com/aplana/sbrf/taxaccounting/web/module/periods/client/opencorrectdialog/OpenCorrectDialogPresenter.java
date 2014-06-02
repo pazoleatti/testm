@@ -136,14 +136,13 @@ public class OpenCorrectDialogPresenter extends PresenterWidget<OpenCorrectDialo
 
         CheckCorrectionPeriodStatusAction action = new CheckCorrectionPeriodStatusAction();
         action.setSelectedDepartments(getView().getSelectedDepartments());
-        action.setSelectedPeriod(getView().getSelectedPeriod());
+        action.setReportPeriodId(getView().getSelectedPeriod().getId());
         action.setTerm(getView().getTerm());
 
         dispatcher.execute(action, CallbackUtils
                         .defaultCallback(new AbstractCallback<CheckCorrectionPeriodStatusResult>() {
                             @Override
                             public void onSuccess(CheckCorrectionPeriodStatusResult result) {
-                                System.out.println("T: " + result.getStatus());
                                 switch (result.getStatus()) {
                                     case NOT_EXIST:
                                         openCorrectionPeriod();

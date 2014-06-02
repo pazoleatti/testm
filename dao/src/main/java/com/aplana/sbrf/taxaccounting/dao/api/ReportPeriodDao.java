@@ -62,6 +62,14 @@ public interface ReportPeriodDao {
      */
     public List<ReportPeriod> getPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList);
 
+    /**
+     * Список отчетных периодов для указанного вида налога и для указанных подразделений
+     * @param taxTypes Виды налога
+     * @param departmentList Список подразделений
+     * @return Список отчетных периодов
+     */
+    public List<Long> getPeriodsByTaxTypesAndDepartments(List<TaxType> taxTypes, List<Integer> departmentList);
+
 	/**
 	 * Получить список всех отчетных периодов по заданному виду налога за период. Алгоритм: ищет все отчетные периоды,
 	 * которые пересекаются с указанной датой. В случае, если период не найден возвращается ошибка.

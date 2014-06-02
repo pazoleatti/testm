@@ -6,8 +6,8 @@ import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -36,13 +36,13 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
         @Override
         public ReportPeriod mapRow(ResultSet rs, int index) throws SQLException {
             ReportPeriod reportPeriod = new ReportPeriod();
-            reportPeriod.setId(SqlUtils.getInteger(rs,"id"));
+            reportPeriod.setId(SqlUtils.getInteger(rs, "id"));
             reportPeriod.setName(rs.getString("name"));
-            reportPeriod.setTaxPeriod(taxPeriodDao.get(SqlUtils.getInteger(rs,"tax_period_id")));
-            reportPeriod.setOrder(SqlUtils.getInteger(rs,"ord"));
+            reportPeriod.setTaxPeriod(taxPeriodDao.get(SqlUtils.getInteger(rs, "tax_period_id")));
+            reportPeriod.setOrder(SqlUtils.getInteger(rs, "ord"));
             reportPeriod.setStartDate(rs.getDate("start_date"));
             reportPeriod.setEndDate(rs.getDate("end_date"));
-            reportPeriod.setDictTaxPeriodId(SqlUtils.getInteger(rs,"dict_tax_period_id"));
+            reportPeriod.setDictTaxPeriodId(SqlUtils.getInteger(rs, "dict_tax_period_id"));
 			reportPeriod.setCalendarStartDate(rs.getDate("calendar_start_date"));
             return reportPeriod;
         }
@@ -134,7 +134,29 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
                 new ReportPeriodMapper());
     }
 
-	@Override
+    @Override
+    public List<Long> getPeriodsByTaxTypesAndDepartments(List<TaxType> taxTypes, List<Integer> departmentList) {
+        Object[] params = new Object[departmentList.size()];
+        int cnt = 0;
+        for (Integer departmentId : departmentList) {
+            params[cnt++] = departmentId;
+        }
+
+        try {
+            return getJdbcTemplate().queryForList(
+                    "select rp.id from report_period rp, tax_period tp where rp.id in " +
+                            "(select distinct report_period_id from department_report_period " +
+                            "where correction_date is null and department_id in("+ SqlUtils.preparePlaceHolders(departmentList.size())+")) " +
+                            "and rp.tax_period_id = tp.id " +
+                            "and tp.tax_type in " + SqlUtils.transformTaxTypeToSqlInStatement(taxTypes) +
+                            "order by tp.year desc, rp.ord", Long.class, params);
+        } catch (DataAccessException e){
+            logger.error("", e);
+            throw new  DaoException("", e);
+        }
+    }
+
+    @Override
 	public List<ReportPeriod> getOpenPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList,
                                                                     boolean withoutBalance, boolean withoutCorrect) {
 

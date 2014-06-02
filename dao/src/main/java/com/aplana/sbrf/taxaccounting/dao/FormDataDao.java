@@ -6,7 +6,6 @@ import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -165,6 +164,24 @@ public interface FormDataDao {
      * @return
      */
     List<String> getStringList(Integer columnId, Integer formTemplateTypeId);
+
+    /**
+     * Обноляет "первую часть" имени подразделения. Первая часть строки - символы, следующие до символа "/".
+     * @param newDepartmentName новое имя подразделеия ТБ
+     * @param oldDepartmentName старое имя подразделения ТБ
+     * @param dateFrom дата начала периода, с которой искать НФ
+     * @param dateTo дата окончания периода, до которой искать НФ
+     */
+    void updateFDPerformerTBDepartmentNames(String newDepartmentName, String oldDepartmentName, Date dateFrom, Date dateTo);
+
+    /**
+     * Обноляет "вторую часть" имени подразделения. Вторая часть строки - если символ "/" в строке есть, то все символы после символа "/", иначе вся строка.
+     * @param departmentId идентификатор обновляемого подразделения
+     * @param newDepartmentName старое имя подразделения ТБ
+     * @param dateFrom дата начала периода, с которой искать НФ
+     * @param dateTo дата окончания периода, до которой искать НФ
+     */
+    void updateFDPerformerDepartmentNames(int departmentId, String newDepartmentName, Date dateFrom, Date dateTo);
 
     /**
      * Получить список экземпляров НФ, в пределах которых устанавливается сквозная нумерация строк.

@@ -69,12 +69,12 @@ insert into ref_book_value(record_id, attribute_id, string_value, number_value, 
   (7, 4, 'Петренко П.П.', null, null, null);
 
 -- Подразделения
-insert into DEPARTMENT (id, name, parent_id, type, shortname, tb_index, sbrf_code)
-  values (1, 'Банк', null, 1, null, null, '12');
-insert into DEPARTMENT (id, name, parent_id, type, shortname, tb_index, sbrf_code)
-  values (2, 'ТБ1', 1, 2, null, null, '23');
-insert into DEPARTMENT (id, name, parent_id, type, shortname, tb_index, sbrf_code)
-  values (3, 'ТБ2', 1, 2, null, null, null);
+insert into DEPARTMENT (id, name, parent_id, type, shortname, tb_index, sbrf_code, code)
+  values (1, 'Банк', null, 1, null, null, '12', 1);
+insert into DEPARTMENT (id, name, parent_id, type, shortname, tb_index, sbrf_code, code)
+  values (2, 'ТБ1', 1, 2, null, null, '23', 2);
+insert into DEPARTMENT (id, name, parent_id, type, shortname, tb_index, sbrf_code, code)
+  values (3, 'ТБ2', 1, 2, null, null, null, 3);
 
 -- FormType
 insert into form_type (id, name, tax_type) values (1, 'FormType - Transport', 'T');

@@ -38,7 +38,7 @@ public class DeleteRefBookRowHandler extends AbstractActionHandler<DeleteRefBook
         if (action.getRecordsId().size() > 0) {
             if (action.isDeleteVersion()) {
                 Long nextVersion = refBookDataProvider.getFirstRecordId(action.getRecordsId().get(0));
-                refBookDataProvider.deleteRecordVersions(logger, action.getRecordsId());
+                refBookDataProvider.deleteRecordVersions(logger, action.getRecordsId(), false);
                 result.setNextVersion(nextVersion);
             } else {
                 try {

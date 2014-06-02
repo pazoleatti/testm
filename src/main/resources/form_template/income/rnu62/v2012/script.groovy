@@ -159,7 +159,7 @@ def isRubleCurrency(def currencyCode) {
     if (currencyCode == null) {
         return null
     }
-    return formDataService.getRefBookValue(15, currencyCode.toLong(), refBookCache)?.CODE?.stringValue == '810'
+    return formDataService.getRefBookValue(15, currencyCode.toLong(), refBookCache)?.CODE?.stringValue in ['810', '643']
 }
 
 /** Количество дней в году за который делаем */

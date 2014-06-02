@@ -256,7 +256,7 @@ def getRateBR(def dataRow, def date) {
         if (isRoublel(dataRow)) {
             return 1
         } else {
-            return getRefBookRecord(22, 'CODE_NUMBER', "${currency}", date, -1, null, true)?.RATE.getNumberValue()
+            return getRefBookRecord(22, 'CODE_NUMBER', "${currency}", date, -1, null, true)?.RATE?.getNumberValue()
         }
     return null
 }
@@ -327,7 +327,7 @@ def getLoss(def dataRow) {
  * Проверка валюты на рубли
  */
 def isRoublel(def dataRow) {
-    return getRefBookValue(15, dataRow.currencyDebtObligation)?.CODE?.stringValue == '810'
+    return getRefBookValue(15, dataRow.currencyDebtObligation)?.CODE?.stringValue in ['810', '643']
 }
 
 def getRepaymentDateDuration(dataRow) {

@@ -23,6 +23,15 @@ public interface FormDataSearchService {
 	PagingResult<FormDataSearchResultItem> findDataByUserIdAndFilter(TAUserInfo userInfo, FormDataFilter formDataFilter);
 
     /**
+     * Данный метод на formDataFilter формирует набор НФ
+     * {@link FormDataDaoFilter}, а затем сформированный FormDataDaoFilter передает в функцию
+     * {@link FormDataSearchDao.findByFilter()} для выполнения запроса к базе по заданным параметрам фильтра.
+     * @param formDataFilter фильтр, по параметрам которого происходит поиск данных по отчетной форме
+     * @return список идентификаторов данных по отчётным формам, соответствующие критериям поиска.
+     */
+    List<FormData> findDataByFilter(FormDataFilter formDataFilter);
+
+    /**
      * Данный метод, основываясь на текущем пользователе и formDataFilter, формирует параметры фильтра и возвращает
      * все id НФ подходящич под фильтр.
      * {@link FormDataDaoFilter}, а затем сформированный FormDataDaoFilter передает в функцию

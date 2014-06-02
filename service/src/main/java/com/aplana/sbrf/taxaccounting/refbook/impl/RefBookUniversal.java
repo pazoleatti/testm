@@ -93,7 +93,7 @@ public class RefBookUniversal implements RefBookDataProvider {
 
     @Override
     public List<Long> getUniqueRecordIds(Date version, String filter) {
-        throw new UnsupportedOperationException();
+        return refBookUtils.getUniqueRecordIds(refBookId, REF_BOOK_RECORD_TABLE_NAME, filter);
     }
 
     @Override
@@ -521,7 +521,7 @@ public class RefBookUniversal implements RefBookDataProvider {
     }
 
     @Override
-    public void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds) {
+    public void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds, boolean force) {
         try {
             //Проверка использования
             List<String> usagesResult = refBookDao.isVersionUsed(refBookId, uniqueRecordIds, null, null, true);

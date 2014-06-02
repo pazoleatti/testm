@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.server;
 
 import com.aplana.sbrf.taxaccounting.model.PeriodStatusBeforeOpen;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.CheckCorrectionPeriodStatusAction;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.CheckCorrectionPeriodStatusResult;
@@ -24,8 +25,9 @@ public class CheckCorrectionPeriodStatusHandler extends AbstractActionHandler<Ch
 
     @Override
     public CheckCorrectionPeriodStatusResult execute(CheckCorrectionPeriodStatusAction action, ExecutionContext executionContext) throws ActionException {
+        ReportPeriod rp = periodService.getReportPeriod(action.getReportPeriodId());
         PeriodStatusBeforeOpen status =
-                periodService.checkPeriodStatusBeforeOpen(action.getSelectedPeriod(), action.getSelectedDepartments().get(0), action.getTerm());
+                periodService.checkPeriodStatusBeforeOpen(rp, action.getSelectedDepartments().get(0), action.getTerm());
         CheckCorrectionPeriodStatusResult result = new CheckCorrectionPeriodStatusResult();
         result.setStatus(status);
         return result;

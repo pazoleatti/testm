@@ -221,7 +221,6 @@ void importData() {
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 3, 1)
 
-    // TODO отделить шапку от фиксированных строк, но пока метода нет и сообщение не утвердили
     def headerMapping = [
             (xml.row[0].cell[0]) : getColumnName(tmpRow, 'rowNum'),
             (xml.row[0].cell[2]) : getColumnName(tmpRow, 'differences'),
@@ -297,9 +296,9 @@ void addData(def xml, int headRowCount) {
             values.differences = row.cell[2].text()
 
             ['rowNum', 'differences'].each { alias ->
-                if (dataRow[alias] != values[alias]) {
-                    logger.error('Неверное значение в фиксированных строках') // TODO (Bulat Kinzyabulatov) поменять сообщение после того как уточнится что выводить
-                }
+                def value = values[alias]?.toString()
+                def valueExpected = dataRow.getCell(alias).value?.toString()
+                checkFixedValue(dataRow, value, valueExpected, indexRow, alias, logger, true)
             }
         }
         newRow.sum = parseNumber(row.cell[3].text(), xlsIndexRow, 3 + colOffset, logger, true)

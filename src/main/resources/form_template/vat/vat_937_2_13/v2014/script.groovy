@@ -296,9 +296,9 @@ void addData(def xml, int headRowCount) {
             values.differences = row.cell[2].text()
 
             ['rowNum', 'differences'].each { alias ->
-                if (dataRow[alias] != values[alias]) {
-                    logger.error('Неверное значение в фиксированных строках') // TODO (Bulat Kinzyabulatov) поменять сообщение после того как уточнится что выводить
-                }
+                def value = values[alias]?.toString()
+                def valueExpected = dataRow.getCell(alias).value?.toString()
+                checkFixedValue(dataRow, value, valueExpected, indexRow, alias, logger, true)
             }
         }
         newRow.sum = parseNumber(row.cell[3].text(), xlsIndexRow, 3 + colOffset, logger, true)

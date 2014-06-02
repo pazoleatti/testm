@@ -148,7 +148,7 @@ public class RefBookUser implements RefBookDataProvider {
     }
 
     @Override
-    public void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds) {
+    public void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds, boolean force) {
         throw new UnsupportedOperationException();
     }
 

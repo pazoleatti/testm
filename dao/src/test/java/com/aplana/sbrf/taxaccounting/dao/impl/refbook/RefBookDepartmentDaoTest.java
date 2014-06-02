@@ -1,11 +1,17 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 
+import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao;
+import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,9 +20,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Map;
+import java.util.*;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"RefBookDepartmentDaoTest.xml"})
@@ -28,6 +35,10 @@ public class RefBookDepartmentDaoTest {
 
     @Autowired
     RefBookDepartmentDao refBookDepartmentDao;
+    @Autowired
+    RefBookDao refBookDao;
+    @Autowired
+    DepartmentDao departmentDao;
 
     @Test
     public void getRecords() {
@@ -70,6 +81,51 @@ public class RefBookDepartmentDaoTest {
         Map<String, RefBookValue> record = refBookDepartmentDao.getRecordData(2L);
         RefBookValue expectedValue = new RefBookValue(RefBookAttributeType.STRING, "Териториальный Банк №1");
         assertTrue(record.get("name").equals(expectedValue));
+    }
+
+    @Test
+    public void testGetMatchedRecordsByUniqueAttributes() {
+        RefBook refBook = refBookDao.get(30L);
+        PagingResult<Map<String, RefBookValue>> allValues = refBookDao.getRecords(refBook.getId(), getDate(1, 1, 2013), null, null, null);
+        assertEquals(0, allValues.size());
+        List<RefBookRecord> records = new ArrayList<RefBookRecord>();
+        for (Map<String, RefBookValue> values : allValues) {
+            RefBookRecord record = new RefBookRecord();
+            record.setValues(values);
+            record.setRecordId(null);
+            records.add(record);
+        }
+        List<Pair<Long,String>> matches =
+                refBookDepartmentDao.getMatchedRecordsByUniqueAttributes(refBook.getId(), refBook.getAttributes(), records);
+        assertEquals(0, matches.size());
+    }
+
+    @Test
+    public void testUpdate() {
+        Map<String, RefBookValue> record = refBookDepartmentDao.getRecordData(2L);
+        refBookDepartmentDao.update(30l, record, refBookDao.getAttributes(30l));
+    }
+
+    @Test
+    public void testCreate() {
+        Map<String, RefBookValue> record = new HashMap<String, RefBookValue>()
+        {{
+                put("name", new RefBookValue(RefBookAttributeType.STRING, "dsfs"));
+                put("sbrf_code", new RefBookValue(RefBookAttributeType.STRING, "99_0000_00"));
+                put("type", new RefBookValue(RefBookAttributeType.NUMBER, DepartmentType.MANAGEMENT.getCode()));
+                put("code", new RefBookValue(RefBookAttributeType.NUMBER, 101));
+        }};
+        refBookDepartmentDao.create(record, refBookDao.getAttributes(30l));
+    }
+
+    @Test(expected = DaoException.class)
+    public void testRemove() {
+        refBookDepartmentDao.remove(1);
+        departmentDao.getDepartment(1);
+    }
+
+    private Date getDate(int day, int month, int year) {
+        return new GregorianCalendar(year, month - 1, day, 15, 46, 57).getTime();
     }
 
 }

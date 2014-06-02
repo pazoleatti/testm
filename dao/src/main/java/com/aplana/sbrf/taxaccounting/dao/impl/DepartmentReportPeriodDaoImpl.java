@@ -108,6 +108,14 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements
                         active ? 1 : 0, departmentReportPeriodId);
     }
 
+    @Override
+    @Transactional(readOnly=false)
+    public void updateCorrectionDate(long departmentReportPeriodId, Date correctionDate) {
+        getJdbcTemplate()
+                .update("update DEPARTMENT_REPORT_PERIOD set CORRECTION_DATE=? where ID=?",
+                        correctionDate, departmentReportPeriodId);
+    }
+
 	@Override
 	public DepartmentReportPeriod get(int reportPeriodId, Long departmentId) {
 		return DataAccessUtils
@@ -205,6 +213,15 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements
                 "select * from department_report_period where id = ?",
                 new Object[]{id},
                 mapper
+        );
+    }
+
+    @Override
+    public void changeBalance(int reportPeriodId, int departmentId, boolean isBalance) {
+        getJdbcTemplate().update(
+                "update department_report_period set is_balance_period = ? where department_id = ? and report_period_id = ?",
+                new Object[] {isBalance ? 1 : 0, departmentId, reportPeriodId},
+                new int[] {Types.NUMERIC, Types.NUMERIC, Types.NUMERIC}
         );
     }
 

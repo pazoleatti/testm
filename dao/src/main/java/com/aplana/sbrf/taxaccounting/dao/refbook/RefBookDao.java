@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -222,18 +223,6 @@ public interface RefBookDao {
     List<Pair<Long,String>> getMatchedRecordsByUniqueAttributes(Long refBookId, Long uniqueRecordId, List<RefBookAttribute> attributes, List<RefBookRecord> records);
 
     /**
-     * Поиск среди всех элементов справочника (без учета версий) значений уникальных атрибутов, которые бы дублировались с новыми,
-     * отдельных справочников.
-     * Обеспечение соблюдения уникальности атрибутов в пределах справочника
-     * @param refBookId идентификатор справочника
-     * @param tableName уникальный идентификатор записи справочника(соответствующая таблица)
-     * @param attributes атрибуты справочника
-     * @param records новые значения полей элемента справочника
-     * @return список пар идентификатор записи-имя атрибута, у которых совпали значения уникальных атрибутов
-     */
-    List<Pair<Long,String>> getMatchedRecordsByUniqueAttributesForNonVersion(Long refBookId, String tableName, List<RefBookAttribute> attributes, List<RefBookRecord> records);
-
-    /**
      * Поиск существующих версий, которые могут пересекаться с новой версией
      * @param refBookId идентификатор справочника
      * @param recordId идентификатор записи справочника (без учета версий)
@@ -272,6 +261,8 @@ public interface RefBookDao {
      * @param isValuesChanged признак того, что были изменены атрибуты  @return результаты проверки. Сообщения об ошибках
      */
     List<String> isVersionUsed(Long refBookId, List<Long> uniqueRecordIds, Date versionFrom, Date versionTo, boolean isValuesChanged);
+
+    Collection<String> isVersionUsedInRefBooks(Long refBookId, List<Long> uniqueRecordIds);
 
     /**
      * Возвращает данные о версии следующей за указанной

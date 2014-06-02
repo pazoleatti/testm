@@ -54,6 +54,8 @@ public interface PeriodService {
 	void open(int year, int dictionaryTaxPeriodId, TaxType taxType, TAUserInfo user,
 	          long departmentId, List<LogEntry> logs, boolean isBalance, Date correctionDate);
 
+    void saveOrUpdate(DepartmentReportPeriod departmentReportPeriod, Date correctionDate, List<LogEntry> logs);
+
 	/**
 	 * Закрыть период
 	 * @param taxType тип налога
@@ -196,6 +198,16 @@ public interface PeriodService {
 	void removeReportPeriod(TaxType taxType, int reportPeriodId, Date correctionDate, long departmentId, List<LogEntry> logs, TAUserInfo user);
 
     /**
+     *
+     * @param reportPeriodId идентификатор отчетного периода
+     * @param correctionDate дата корректировки (может быть пустой)
+     * @param departmentId идентификатор подразделения, для которого удаляется период
+     * @param taxType тип налога
+     * @param logs логер, при необходимости
+     */
+    public void removePeriodWithLog(int reportPeriodId, Date correctionDate, List<Integer> departmentId,  TaxType taxType, List<LogEntry> logs);
+
+    /**
      * Список отчетных периодов для указанного вида налога и для указанных подразделений
      *
      * @param taxType Вид налога
@@ -297,4 +309,31 @@ public interface PeriodService {
      */
     PeriodStatusBeforeOpen checkPeriodStatusBeforeOpen(ReportPeriod reportPeriod, long departmentId, Date term);
 
+    /**
+     * Редактировать отчетный период
+     * @param reportPeriodId идентификатор отчетного период
+     * @param newDictTaxPeriodId новый отчетный период
+     * @param newYear новый год :)
+     * @param taxType тип налога
+     * @param user пользователь, который выполняет действие
+     * @param departmentId идентификатор подразделения
+     * @param isBalance признак ввода остатков
+     * @param logs логер, при необходимости
+     */
+    public void edit(int reportPeriodId, int newDictTaxPeriodId, int newYear, TaxType taxType, TAUserInfo user,
+                     long departmentId, boolean isBalance,  List<LogEntry> logs);
+
+    /**
+     * Редактировать корректирующий период
+     * @param reportPeriodId идентификатор отчетного период
+     * @param newReportPeriodId новый идентификатор отчетного период
+     * @param departmentId идентификатор подразделения
+     * @param taxType тип налога
+     * @param correctionDate дата корректировки
+     * @param newCorrectionDate новая дата корректировки
+     * @param user пользователь, который выполняет действие
+     * @param logs логер, при необходимости
+     */
+    public void editCorrectionPeriod(int reportPeriodId, int newReportPeriodId, long departmentId, TaxType taxType,
+                                     Date correctionDate, Date newCorrectionDate, TAUserInfo user, List<LogEntry> logs);
 }

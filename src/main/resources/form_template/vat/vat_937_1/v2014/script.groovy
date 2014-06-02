@@ -309,8 +309,14 @@ void addData(def xml, int headRowCount) {
         def row = xml.row[headRowCount + i]
         def int xlsIndexRow = rowOffset + headRowCount + i
 
+        // графа 1
+        def xmlIndexCol = 0
+        if (i != 2) { // пропускаем вторую строку
+            dataRows[i - 1].period = row.cell[xmlIndexCol].text()
+        }
+
         // графа 2
-        def xmlIndexCol = 1
+        xmlIndexCol = 1
         dataRows[i - 1].bill = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
 
         // графа 3

@@ -9,8 +9,8 @@ INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFEREN
 INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH, REQUIRED) VALUES (654, 74, 'E-mail', 'EMAIL', 1, 4, null, null, 1, null, 128, 0);
 INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH, REQUIRED) VALUES (652, 74, 'ФИО', 'NAME', 1, 2, null, null, 1, null, 50, 0);
 
-INSERT INTO DEPARTMENT (id, name, parent_id, type, shortname, tb_index, sbrf_code) VALUES (1, 'Главный Банк', null, 1, 'Банк', null, '018_075_01');
-INSERT INTO DEPARTMENT (id, name, parent_id, type, shortname, tb_index, sbrf_code) VALUES (2, 'Териториальный Банк №1', 1, 2, 'ТБ1', NULL, '018_003_01');
+INSERT INTO DEPARTMENT (id, name, parent_id, type, shortname, tb_index, sbrf_code, code) VALUES (1, 'Главный Банк', null, 1, 'Банк', null, '018_075_01', 1);
+INSERT INTO DEPARTMENT (id, name, parent_id, type, shortname, tb_index, sbrf_code, code) VALUES (2, 'Териториальный Банк №1', 1, 2, 'ТБ1', NULL, '018_003_01', 2);
 
 INSERT INTO SEC_USER (ID, LOGIN, NAME, DEPARTMENT_ID, IS_ACTIVE, EMAIL) VALUES (3, 'controlBank', 'Контролёр Банка', 1, 1, null);
 INSERT INTO SEC_USER (ID, LOGIN, NAME, DEPARTMENT_ID, IS_ACTIVE, EMAIL) VALUES (1, 'controlTB1', 'Контролёр ТБ1', 2, 1, null);
