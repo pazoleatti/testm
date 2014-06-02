@@ -247,8 +247,17 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         universalFilterTreeListener.setPs(filterPS);
         Filter.getFilterQuery(filter, universalFilterTreeListener);
 
-        StringBuilder fromSql = new StringBuilder("\nfrom ref_book_record r\n");
+        StringBuilder fromSql = new StringBuilder();
+        fromSql.append("\nfrom ref_book_record r\n");
 
+        if (version != null) {
+            fromSql.append("join t on (r.version = t.version and r.record_id = t.record_id)\n");
+            ps.appendQuery(WITH_STATEMENT);
+            ps.appendQuery("\n");
+            ps.addParam(refBookId);
+            ps.addParam(version);
+            ps.addParam(version);
+        }
         ps.appendQuery("select\n");
         ps.appendQuery(" r.id as ID, r.record_id as RECORD_ID\n");
 
@@ -281,10 +290,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         ps.appendQuery(fromSql.toString());
         ps.appendQuery("where\n  r.ref_book_id = ?");
         ps.addParam(refBookId);
-        if (version != null) {
-            ps.appendQuery(" and  r.version = ?");
-            ps.addParam(version);
-        }
         ps.appendQuery(" and\n  status <> -1\n");
 
         // обработка параметров фильтра
