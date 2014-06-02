@@ -82,7 +82,7 @@ def autoFillColumns = allColumns - editableColumns
 
 // Проверяемые на пустые значения атрибуты (графа 1, 3, 4, 6, 8)
 @Field
-def nonEmptyColumns = ['rowNum', 'number', 'sum', 'sum2']
+def nonEmptyColumns = ['rowNum', 'number', 'sum', 'number2', 'sum2', 'nds']
 
 // Атрибуты итоговых строк для которых вычисляются суммы (графа 4, 6)
 @Field
