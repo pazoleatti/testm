@@ -83,6 +83,11 @@ public abstract class AbstractPermanentRefBook extends AbstractReadOnlyRefBook {
     }
 
     @Override
+    public Map<Long, Map<String, RefBookValue>> getRecordData(List<Long> recordIds) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public List<Long> getParentsHierarchy(Long uniqueRecordId) {
         throw new UnsupportedOperationException();
     }

@@ -639,7 +639,12 @@ public class FormDataServiceImpl implements FormDataService {
                 formDataCompositionService.compose(destinationForm, formData.getReportPeriodId(), periodOrder,
                         destinationDFT.getDepartmentId(), destinationDFT.getFormTypeId(), destinationDFT.getKind());
             } else if (destinationForm != null) {
+                String formName = destinationForm.getFormType().getName();
+                String kindName = destinationForm.getKind().getName();
+                String departmentName = departmentDao.getDepartment(destinationForm.getDepartmentId()).getName();
                 deleteFormData(logger, userInfo, destinationForm.getId(), formData.isManual());
+                logger.info("%s: Расформирована налоговая форма-приемник: Подразделение: «%s», Тип: «%s», Вид: «%s».",
+                        FormDataEvent.COMPOSE.getTitle(), departmentName, kindName, formName);
             }
         }
     }

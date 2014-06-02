@@ -11,10 +11,7 @@ import groovy.xml.MarkupBuilder
  * http://jira.aplana.com/browse/SBRFACCTAX-6453
  *
  * TODO:
- *      - неясно как заполнять РеалТов18: в 1ом разделе формы 724.1 есть 2 итоговые строки (total_1_1 и total_1_2),
- *              неясно какую использовать, задан вопрос заказчику, пока использую первую итоговую строку первого раздела
  *      - расчет для НалНеВыч не сделан, сказали пока не делать, потому что неясно как вычислять.
- *      - проверки 8.2.2 сказали пока не делать, по ним есть воспросы к заказчику
  */
 
 switch (formDataEvent) {
@@ -229,12 +226,12 @@ void generateXML() {
     /** СумНал (ОплНОТовар). Код строки 080 Графа 5. */
     def sumNal080 = empty
     if (rows724_1) {
-        // TODO (Ramil Timerbaev) в 1ом разделе формы 724.1 есть 2 итоговые строки (total_1_1 и total_1_2),
-        // неясно какую использовать, задан вопрос заказчику,
-        // пока использую первую итоговую строку первого раздела
         def row = getDataRow(rows724_1, 'total_1_1')
-        nalBaza010 = round(row?.baseSum ?: empty)
-        sumNal010 = round(row?.ndsSum ?: empty)
+        def row2 = getDataRow(rows724_1, 'total_1_2')
+        def tmp = (row?.baseSum ?: empty) + (row2?.baseSum ?: empty)
+        nalBaza010 = round(tmp)
+        tmp = (row?.ndsSum ?: empty) + (row2?.ndsSum ?: empty)
+        sumNal010 = round(tmp)
 
         row = getDataRow(rows724_1, 'total_2')
         nalBaza020 = round(row?.baseSum ?: empty)
@@ -565,5 +562,73 @@ void logicCheck() {
     xmlString = xmlString.replace('<?xml version="1.0" encoding="windows-1251"?>', '')
     def xmlData = new XmlSlurper().parseText(xmlString)
 
-    // TODO (Ramil Timerbaev) проверки 8.2.2 сказали пока не делать, по ним есть воспросы к заказчику
+    // 1.4
+    /** НалВосстОбщ. Код строки 120 Графа 5. */
+    def nalVosstObsh = xmlData.Документ.НДС.СумУпл164.СумНалОб.@НалВосстОбщ.text() as BigDecimal
+    /** НалВычОбщ. Код строки 220 Графа 5. */
+    def nalVichObsh = xmlData.Документ.НДС.СумУпл164.СумНалВыч.@НалВычОбщ.text() as BigDecimal
+    /** НалПУ164. Код строки 240 и код строки 230.*/
+    def nalPU164 = xmlData.Документ.НДС.СумУпл164.@НалПУ164.text() as BigDecimal
+    if (nalVosstObsh == 0 && nalVichObsh != 0 && nalPU164 != 0) {
+        logger.warn('КС 1.4. Возможно нарушение ст. 170, 171, 172 НК РФ: Необоснованное применение налоговых вычетов. ' +
+                'При проведении мероприятий налогового контроля следует учитывать письмо ФНС России от 27.06.2007 N ММ-14-08/275 дсп')
+    }
+
+    // 1.5
+    /** НалБаза (РеалТов18). Код строки 010 Графа 3. */
+    def nalBaza010 = xmlData.Документ.НДС.СумУпл164.СумНалОб.РеалТов18.@НалБаза.text() as BigDecimal
+    /** НалБаза (РеалТов10). Код строки 020 Графа 3. */
+    def nalBaza020 = xmlData.Документ.НДС.СумУпл164.СумНалОб.РеалТов18.@НалБаза.text() as BigDecimal
+    /** НалБаза (РеалТов118). Код строки 030 Графа 3. */
+    def nalBaza030 = xmlData.Документ.НДС.СумУпл164.СумНалОб.РеалТов18.@НалБаза.text() as BigDecimal
+    /** НалБаза (РеалТов110). Код строки 040 Графа 3. */
+    def nalBaza040 = xmlData.Документ.НДС.СумУпл164.СумНалОб.РеалТов18.@НалБаза.text() as BigDecimal
+    def tmp1 = nalBaza010 + nalBaza020 + nalBaza030 + nalBaza040
+    def divider = tmp1 + getSumSection7ByCode(xmlData, 'СтРеалТов')
+    tmp1 = (divider != 0 ? tmp1 / divider : empty)
+
+    /** НалВыч171Общ. Код строки 130 Графа 5. */
+    def nalVich171Obsh = xmlData.Документ.НДС.СумУпл164.СумНалВыч.НалВыч171.@НалВыч171Общ.text() as BigDecimal
+    def tmp2 = nalVich171Obsh
+    divider = tmp2 + getSumSection7ByCode(xmlData, 'НалНеВыч')
+    tmp2 = (divider != 0 ? tmp2 / divider : empty)
+
+    if (tmp1 != tmp2) {
+        logger.warn('КС 1.5. Возможно нарушение ст. 149, 170 п. 4 НК РФ: Возможно необоснованное применение налоговых вычетов')
+    }
+
+    // 1.14
+    /** НалИсчПрод. Код строки 200 Графа 5. */
+    def nalIschProd = xmlData.Документ.НДС.СумУпл164.СумНалВыч.@НалИсчПрод.text() as BigDecimal
+    /** СумНал (РеалТов18). Код строки 010 Графа 5. */
+    def sumNal010 = xmlData.Документ.НДС.СумУпл164.СумНалОб.РеалТов18.@СумНал.text() as BigDecimal
+    /** СумНал (РеалТов10). Код строки 020 Графа 5. */
+    def sumNal020 = xmlData.Документ.НДС.СумУпл164.СумНалОб.РеалТов10.@СумНал.text() as BigDecimal
+    /** СумНал (РеалТов118). Код строки 030 Графа 5. */
+    def sumNal030 = xmlData.Документ.НДС.СумУпл164.СумНалОб.РеалТов118.@СумНал.text() as BigDecimal
+    /** СумНал (РеалТов110). Код строки 040 Графа 5. */
+    def sumNal040 = xmlData.Документ.НДС.СумУпл164.СумНалОб.РеалТов110.@СумНал.text() as BigDecimal
+
+    if (nalIschProd < (sumNal010 + sumNal020 + sumNal030 + sumNal040)) {
+        logger.warn('КС 1.14. Возможно нарушение ст. 171 п. 8, 172 п. 6 либо ст. 146 п. 1 НК РФ: ' +
+                'Налоговые вычеты не обоснованы, либо налоговая баща занижена, так как суммы отработанных авансов не включены в реализацию')
+    }
+}
+
+/**
+ * Получить сумму атрибута paramName из раздела 7.
+ *
+ * @param xmlData xml
+ * @param paramName имя атрибута в xml (графа 2 'СтРеалТов' или графа 4 'НалНеВыч')
+ */
+def getSumSection7ByCode(def xmlData, def paramName) {
+    def sum = BigDecimal.ZERO
+    xmlData.Документ.НДС.ОперНеНал.СумОпер7.each {
+        def code = it.@КодОпер.text() as BigDecimal
+        def value = it.@"$paramName".text() as BigDecimal
+        if (1010800 <= code && code <= 1010814) {
+            sum += value
+        }
+    }
+    return sum
 }

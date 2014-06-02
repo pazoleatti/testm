@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.server;
 
-import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.exception.TAException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -11,9 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerUtils;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.*;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.RefBookRecordDereferenceValue;
@@ -45,10 +42,7 @@ public class GetRefBookTreeValuesHandler extends AbstractActionHandler<GetRefBoo
     LogEntryService logEntryService;
 
     @Autowired
-    SecurityService securityService;
-
-    @Autowired
-    DepartmentService departmentService;
+    RefBookPickerFilterBuilder buildFilter;
 
     public GetRefBookTreeValuesHandler() {
         super(GetRefBookTreeValuesAction.class);
@@ -61,9 +55,9 @@ public class GetRefBookTreeValuesHandler extends AbstractActionHandler<GetRefBoo
         Logger logger = new Logger();
         RefBook refBook = refBookFactory.getByAttribute(action.getRefBookAttrId());
         RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(refBook.getId());
-        Department userDep = departmentService.getDepartment(securityService.currentUserInfo().getUser().getDepartmentId());
-        String filter = buildFilter(action.getFilter(), action.getSearchPattern(), refBook, userDep);
-        String filterWithoutPattern = buildFilter(action.getFilter(), null, refBook, userDep);
+
+        String filter = buildFilter.buildTreePickerFilter(action.getFilter(), action.getSearchPattern(), refBook);
+        String filterWithoutPattern = buildFilter.buildTreePickerFilter(action.getFilter(), null, refBook);
 
         if (filter != null && filter.equals(RefBookPickerUtils.NO_REGION_MATCHES_FLAG)) {
             //Среди подразделений пользователя нет относящихся к какому то региону и нет смысла получать записи справочника - ни одна не должна быть ему доступна
@@ -99,7 +93,8 @@ public class GetRefBookTreeValuesHandler extends AbstractActionHandler<GetRefBoo
             RefBookTreeItem parent = action.getParent();
             refBookPage = refBookDataProvider.getChildrenRecords(parent != null ? parent.getId() : null, action.getVersion(), null, filterWithoutPattern, sort);
             // TODO aivanov заменить на более оптимальный вариант
-            for (Map<String, RefBookValue> record : refBookDataProvider.getChildrenRecords(parent != null ? parent.getId() : null, action.getVersion(), null, filter, null)) {
+            for (Map<String, RefBookValue> record : refBookDataProvider.getChildrenRecords(parent != null ? parent.getId() : null,
+                    action.getVersion(), null, filter, sort == null ? refBook.getSortAttribute() : sort)) {
                 filterIds.add(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
             }
         }
@@ -118,58 +113,6 @@ public class GetRefBookTreeValuesHandler extends AbstractActionHandler<GetRefBoo
             }
         }
         return null;
-    }
-
-    private static String buildFilter(String filter, String searchPattern, RefBook refBook, Department dep) {
-        StringBuilder resultFilter = new StringBuilder();
-        if (filter != null && !filter.trim().isEmpty()) {
-            resultFilter.append(filter.trim());
-        }
-
-        String regionFilter = RefBookPickerUtils.buildRegionFilterForUser(dep == null ? null : Arrays.asList(dep), refBook);
-        if (regionFilter != null) {
-            if (regionFilter.equals(RefBookPickerUtils.NO_REGION_MATCHES_FLAG)) {
-                return regionFilter;
-            }
-            if (resultFilter.length() > 0) {
-                resultFilter.append(" and ");
-            }
-            resultFilter.append("(" + regionFilter + ")");
-        }
-
-        StringBuilder resultSearch = new StringBuilder();
-        if (searchPattern != null && !searchPattern.trim().isEmpty()) {
-
-            for (RefBookAttribute attribute : refBook.getAttributes()) {
-                if (RefBookAttributeType.STRING.equals(attribute.getAttributeType())) {
-                    if (resultSearch.length() > 0) {
-                        resultSearch.append(" or ");
-                    }
-                    resultSearch.append("LOWER(").append(attribute.getAlias()).append(")").append(" like ")
-                            .append("'%" + searchPattern.trim().toLowerCase() + "%'");
-                }/*
-                 * else if
-				 * (RefBookAttributeType.NUMBER.equals(attribute.getAttributeType
-				 * ()) && isNumeric(searchPattern)){ if (resultSearch.length() >
-				 * 0){ resultSearch.append(" or "); }
-				 * resultSearch.append(attribute
-				 * .getAlias()).append("=").append("\"" + searchPattern + "\"");
-				 * }
-				 */
-            }
-
-        }
-
-        if (resultFilter.length() > 0 && resultSearch.length() > 0) {
-            return "(" + resultFilter.toString() + ") and (" + resultSearch.toString() + ")";
-        } else if (resultFilter.length() > 0 && resultSearch.length() == 0) {
-            return resultFilter.toString();
-        } else if (resultSearch.length() > 0 && resultFilter.length() == 0) {
-            return resultSearch.toString();
-        } else {
-            return null;
-        }
-
     }
 
     // Преобразуем в гуи модельку

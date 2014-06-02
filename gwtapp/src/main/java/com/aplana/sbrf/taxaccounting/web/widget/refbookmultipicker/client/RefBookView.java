@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.aplana.sbrf.taxaccounting.web.main.api.client.handler.DeferredInvokeHandler;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.event.CheckValuesCountHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.PickerState;
 import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -87,4 +88,11 @@ public interface RefBookView extends HasValueChangeHandlers<Set<Long>>, IsWidget
      * Развыделить все записи, если мультиселект
      */
     void unselectAll(DeferredInvokeHandler handler);
+
+    /**
+     * проверка на количество попадающих под фильтр значений
+     * @param text текст
+     * @param checkValuesCountHandler хендлер который исполниться после получения количества попавщих под фильтр записей
+     */
+    void checkCount(String text, CheckValuesCountHandler checkValuesCountHandler);
 }

@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client;
 
 import com.aplana.sbrf.taxaccounting.web.main.api.client.handler.DeferredInvokeHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.event.CheckValuesCountHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.PickerState;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.RefBookItem;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
@@ -410,6 +411,11 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
                 handler.onInvoke();
             }
         }
+    }
+
+    @Override
+    public void checkCount(String text, CheckValuesCountHandler checkValuesCountHandler) {
+        getUiHandlers().getValuesCount(text, checkValuesCountHandler);
     }
 
     public void widgetFireChangeEvent(Set<Long> value) {
