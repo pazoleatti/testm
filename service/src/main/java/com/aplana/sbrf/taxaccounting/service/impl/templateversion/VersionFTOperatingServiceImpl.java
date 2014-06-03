@@ -84,7 +84,7 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
                     case DRAFT:
                         compareResult = newIntersection.compareTo(intersection);
                         //Варианты 1, 2, 3, 4, 5, 6, 9, 10, 1a, 2a, 3a
-                        if (compareResult == 2 || compareResult == 0 ||compareResult == -2 || compareResult == 7 ||
+                        if (compareResult == 5 || compareResult == 2 || compareResult == 0 || compareResult == -2 || compareResult == 7 ||
                                 compareResult == -7 || compareResult == -1 || compareResult == 16 || compareResult == -11 ||
                                 compareResult == 11 || compareResult == -16 || compareResult == 10){
                             logger.error("Обнаружено пересечение указанного срока актуальности с существующей версией");
@@ -121,7 +121,7 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
                             formTemplateService.save(formTemplate);
                         }
                         //Варианты 16,19,20,18a,10a,1a
-                        else if (compareResult == 5 || compareResult == -1 || compareResult == 10 || compareResult == 16){
+                        else if (compareResult == 11 || compareResult == 5 || compareResult == -1 || compareResult == 10 || compareResult == 16){
                             formTemplateService.delete(intersection.getTemplateId());
                         }
                         break;

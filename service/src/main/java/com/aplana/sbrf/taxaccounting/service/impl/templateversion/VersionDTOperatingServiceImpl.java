@@ -79,7 +79,7 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
                     case DRAFT:
                         compareResult = newIntersection.compareTo(intersection);
                         //Варианты 1, 2, 3, 4, 5, 6, 9, 10, 1a, 2a, 3a
-                        if (compareResult == 2 || compareResult == 0 ||compareResult == -2 || compareResult == 7 ||
+                        if (compareResult == 5 || compareResult == 2 || compareResult == 0 ||compareResult == -2 || compareResult == 7 ||
                                 compareResult == -7 || compareResult == -1 || compareResult == 16 || compareResult == -11 ||
                                 compareResult == 11 || compareResult == -16 || compareResult == 10){
                             logger.error("Обнаружено пересечение указанного срока актуальности с существующей версией");
@@ -116,7 +116,7 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
                             declarationTemplateService.save(formTemplate);
                         }
                         //Варианты 16,18a,19,20
-                        else if (compareResult == 5 || compareResult == -1 || compareResult == 10 || compareResult == 16){
+                        else if (compareResult == 11 || compareResult == 5 || compareResult == -1 || compareResult == 10 || compareResult == 16){
                             declarationTemplateService.delete(intersection.getTemplateId());
                         }
                         break;
