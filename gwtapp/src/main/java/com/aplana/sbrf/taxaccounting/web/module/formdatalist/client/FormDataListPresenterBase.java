@@ -51,7 +51,7 @@ public abstract class FormDataListPresenterBase<Proxy_ extends Proxy<?>>
 	 */
 	public interface MyView extends View, HasUiHandlers<FormDataListUiHandlers> {
 		
-		void setTableData(int start, long totalCount, List<FormDataSearchResultItem> records, Map<Integer, String> departmentFullNames);
+		void setTableData(int start, long totalCount, List<FormDataSearchResultItem> records, Map<Integer, String> departmentFullNames, Long selectedItemId);
 		
 		void updateData();
 		
@@ -68,6 +68,12 @@ public abstract class FormDataListPresenterBase<Proxy_ extends Proxy<?>>
         void updatePageSize(TaxType taxType);
 
         void updateFormDataTable(TaxType taxType);
+
+        Long getSelectedId();
+
+        void setPage(Integer page);
+
+        int getPage();
 	}
 	
 	protected final PlaceManager placeManager;

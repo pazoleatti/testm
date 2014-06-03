@@ -91,6 +91,12 @@ public class RefBookOktmoProvider implements RefBookDataProvider {
     }
 
     @Override
+    public Long getRowNum(Date version, Long recordId,
+                          String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
+        return dao.getRowNum(getTableName(), refBookId, version, recordId, filter, sortAttribute, isSortAscending);
+    }
+
+    @Override
     public List<Long> getParentsHierarchy(Long uniqueRecordId) {
         return refBookUtils.getParentsHierarchy(OKTMO_TABLE_NAME, uniqueRecordId);
     }

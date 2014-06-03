@@ -37,6 +37,12 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
     @Autowired
     private FormDataDao formDataDao;
 
+    @Override
+    public Long getRowNumByFilter(TAUserInfo userInfo, FormDataFilter formDataFilter) {
+        return formDataSearchDao.getRowNumByFilter(createFormDataDaoFilter(userInfo, formDataFilter), formDataFilter.getSearchOrdering(),
+                formDataFilter.isAscSorting(), formDataFilter.getFormDataId());
+    }
+
 	@Override
 	public PagingResult<FormDataSearchResultItem> findDataByUserIdAndFilter(TAUserInfo userInfo, FormDataFilter formDataFilter) {
         return formDataSearchDao.findPage(createFormDataDaoFilter(userInfo, formDataFilter), formDataFilter.getSearchOrdering(),

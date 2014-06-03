@@ -249,20 +249,21 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
         editFormPresenter.setCurrentUniqueRecordId(null);
         editFormPresenter.setRecordId(null);
 
+        /** Очищаем поле поиска если перешли со страницы списка справочников */
         if (!request.getParameterNames().contains(RefBookDataTokens.REFBOOK_RECORD_ID)) {
             if (mode == FormMode.EDIT) mode = FormMode.VIEW;
             updateMode();
             getView().clearFilterInputBox();
+            recordId = null;
+        } else {
+            updateMode();
+            recordId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_RECORD_ID, null));
         }
 
         refBookDataId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_DATA_ID, null));
 
-        /** Очищаем поле поиска если перешли со страницы списка справочников */
-        if(!request.getParameterNames().contains(RefBookDataTokens.REFBOOK_RECORD_ID)){
-            
-        }
-
-        dispatcher.execute(new GetRefBookAttributesAction(refBookDataId), CallbackUtils.defaultCallback(
+        GetRefBookAttributesAction action = new GetRefBookAttributesAction(refBookDataId);
+        dispatcher.execute(action, CallbackUtils.defaultCallback(
                 new AbstractCallback<GetRefBookAttributesResult>() {
                     @Override
                     public void onSuccess(GetRefBookAttributesResult result) {
@@ -274,7 +275,12 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
                         }
                         getView().setAttributeId(attrId);
                         editFormPresenter.init(refBookDataId, result.isReadOnly());
-                        getView().loadAndSelect();
+                        if (recordId == null) {
+                            getView().reload();
+                            getView().loadAndSelect();
+                        } else {
+                            checkRecord();
+                        }
                         getProxy().manualReveal(RefBookHierDataPresenter.this);
                         if (result.isReadOnly()){
                             mode = FormMode.READ;
@@ -293,6 +299,27 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
         canVersion = !Arrays.asList(RefBookDataModule.NOT_VERSIONED_REF_BOOK_IDS).contains(refBookDataId);
         getView().setVersionedFields(canVersion);
         editFormPresenter.setCanVersion(canVersion);
+    }
+
+    private void checkRecord() {
+        CheckRecordExistenceAction action = new CheckRecordExistenceAction();
+        action.setRefBookId(refBookDataId);
+        action.setRecordId(recordId);
+        dispatcher.execute(action, CallbackUtils.defaultCallback(
+                new AbstractCallback<CheckRecordExistenceResult>() {
+                    @Override
+                    public void onSuccess(CheckRecordExistenceResult result) {
+                        if (result.isRecordExistence()) {
+                            recordId = null;
+                            getView().reload();
+                            getView().loadAndSelect();
+                        } else {
+                            getView().reload();
+                            getView().setSelected(recordId);
+                            editFormPresenter.show(recordId);
+                        }
+                    }
+                }, this));
     }
 
     @Override

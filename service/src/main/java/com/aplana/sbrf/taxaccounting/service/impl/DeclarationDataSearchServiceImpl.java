@@ -32,6 +32,12 @@ public class DeclarationDataSearchServiceImpl implements DeclarationDataSearchSe
     @Autowired
     private DepartmentService departmentService;
 
+    @Override
+    public Long getRowNumByFilter(DeclarationDataFilter declarationFilter) {
+        return declarationDao.getRowNumByFilter(declarationFilter, declarationFilter.getSearchOrdering(),
+                declarationFilter.isAscSorting(), declarationFilter.getDeclarationDataId());
+    }
+
 	@Override
 	public PagingResult<DeclarationDataSearchResultItem> search(DeclarationDataFilter declarationFilter) {
 		return declarationDao.findPage(declarationFilter, declarationFilter.getSearchOrdering(),

@@ -109,7 +109,27 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 		}
 	}
 
-	@Override
+
+    @Override
+    public Long getRowNumByFilter(DeclarationDataFilter filter, DeclarationDataSearchOrdering ordering, boolean ascSorting, Long declarationDataId) {
+        StringBuilder sql = new StringBuilder("select rn from (select dat.*, rownum as rn from (");
+        appendSelectClause(sql);
+        appendFromAndWhereClause(sql, filter);
+        appendOrderByClause(sql, ordering, ascSorting);
+        sql.append(") dat) ordDat where declaration_data_id = ?");
+
+        try {
+            return getJdbcTemplate(). queryForLong(
+                    sql.toString(),
+                    new Object[] {
+                            declarationDataId
+                    });
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
+
+    @Override
 	public PagingResult<DeclarationDataSearchResultItem> findPage(DeclarationDataFilter declarationFilter, DeclarationDataSearchOrdering ordering,
 	                                                 boolean ascSorting,PagingParams pageParams) {
 		StringBuilder sql = new StringBuilder("select ordDat.* from (select dat.*, rownum as rn from (");

@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.FormDataDaoFilter.AccessFilterType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -166,7 +167,26 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 			sql.append(" desc");
 		}
 	}
-	
+
+    @Override
+    public Long getRowNumByFilter(FormDataDaoFilter filter, FormDataSearchOrdering ordering, boolean ascSorting, Long formDataId) {
+        StringBuilder sql = new StringBuilder("select rn from (select dat.*, rownum as rn from (");
+        appendSelectClause(sql);
+        appendFromAndWhereClause(sql, filter);
+        appendOrderByClause(sql, ordering, ascSorting);
+        sql.append(") dat) ordDat where form_data_id = ?");
+
+        try {
+            return getJdbcTemplate(). queryForLong(
+                    sql.toString(),
+                    new Object[] {
+                            formDataId
+                    });
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
+
 	@Override
 	public PagingResult<FormDataSearchResultItem> findPage(FormDataDaoFilter filter, FormDataSearchOrdering ordering, boolean ascSorting, PagingParams pageParams) {
 		StringBuilder sql = new StringBuilder("select ordDat.* from (select dat.*, rownum as rn from (");

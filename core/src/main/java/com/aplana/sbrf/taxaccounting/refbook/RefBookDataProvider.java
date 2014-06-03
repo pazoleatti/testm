@@ -81,6 +81,18 @@ public interface RefBookDataProvider {
 		PagingParams pagingParams, String filter, RefBookAttribute sortAttribute);
 
     /**
+     * Получение row_num записи по заданным параметрам
+     * @param version дата актуальности
+     * @param recordId id записи справочника
+     * @param filter условие фильтрации строк
+     * @param sortAttribute условие фильтрации строк
+     * @param isSortAscending сортируемый столбец. Может быть не задан
+     * @return
+     */
+    Long getRowNum(Date version, Long recordId,
+                   String filter, RefBookAttribute sortAttribute, boolean isSortAscending);
+
+    /**
      * Возвращает список идентификаторов элементов справочника, являющихся родительскими  по иерархии вверх для указанного элемента
      * Список упорядочен и начинается с главного корневого элемента
      * @param uniqueRecordId идентификатор записи справочника

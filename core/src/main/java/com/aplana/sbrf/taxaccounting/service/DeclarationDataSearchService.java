@@ -11,6 +11,8 @@ import java.util.List;
  */
 public interface DeclarationDataSearchService {
 
+    Long getRowNumByFilter(DeclarationDataFilter declarationFilter);
+
 	/**
 	 * Данный метод, вызывает FormDataDao#findPage() для выполнения запроса к базе по заданным параметрам фильтра.
 	 * @param declarationFilter фильтр, по параметрам которого происходит поиск данных по декларациям

@@ -115,6 +115,12 @@ public class RefBookDepartment implements RefBookDataProvider {
     }
 
     @Override
+    public Long getRowNum(Date version, Long recordId,
+                          String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
+        throw new UnsupportedOperationException();//return refBookDepartmentDao.getRowNum(recordId, filter, sortAttribute, isSortAscending);
+    }
+
+    @Override
     public List<Long> getParentsHierarchy(Long uniqueRecordId) {
         return refBookUtils.getParentsHierarchy(DEPARTMENT_TABLE_NAME, uniqueRecordId);
     }

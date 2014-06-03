@@ -59,6 +59,12 @@ public class RefBookUser implements RefBookDataProvider {
     }
 
     @Override
+    public Long getRowNum(Date version, Long recordId,
+                          String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
+        return refBookUserDao.getRowNum(recordId, filter, sortAttribute, isSortAscending);
+    }
+
+    @Override
     public List<Long> getParentsHierarchy(Long uniqueRecordId) {
         throw new UnsupportedOperationException();
     }

@@ -23,7 +23,9 @@ public class DeclarationDataFilter implements Serializable {
 	/*Количество записей, которые нужно вернуть*/
 	private int countOfRecords;
 
-	private DeclarationDataSearchOrdering searchOrdering;
+    private Long declarationDataId;
+
+    private DeclarationDataSearchOrdering searchOrdering;
 
 	/*true, если сортируем по возрастанию, false - по убыванию*/
 	private boolean ascSorting;
@@ -98,5 +100,13 @@ public class DeclarationDataFilter implements Serializable {
 
     public void setFormState(WorkflowState formState) {
         this.formState = formState;
+    }
+
+    public Long getDeclarationDataId() {
+        return declarationDataId;
+    }
+
+    public void setDeclarationDataId(Long declarationDataId) {
+        this.declarationDataId = declarationDataId;
     }
 }

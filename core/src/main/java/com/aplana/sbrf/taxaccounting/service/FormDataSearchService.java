@@ -11,6 +11,8 @@ import java.util.List;
  *
  */
 public interface FormDataSearchService {
+    Long getRowNumByFilter(TAUserInfo userInfo, FormDataFilter formDataFilter);
+
 	/**
 	 * Данный метод, основываясь на текущем пользователе и formDataFilter, формирует параметры фильтра
 	 * {@link FormDataDaoFilter}, а затем сформированный FormDataDaoFilter передает в функцию

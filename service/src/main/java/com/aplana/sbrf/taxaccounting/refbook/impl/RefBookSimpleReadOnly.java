@@ -59,6 +59,12 @@ public class RefBookSimpleReadOnly extends AbstractReadOnlyRefBook {
     }
 
     @Override
+    public Long getRowNum(Date version, Long recordId,
+                          String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
+        return refBookUtils.getRowNum(getRefBookId(), getTableName(), recordId, filter, sortAttribute, isSortAscending, getWhereClause());
+    }
+
+    @Override
     public List<Long> getParentsHierarchy(Long uniqueRecordId) {
         if (tableName.equals(DEPARTMENT_TABLE_NAME)) {
             return refBookUtils.getParentsHierarchy(DEPARTMENT_TABLE_NAME, uniqueRecordId);

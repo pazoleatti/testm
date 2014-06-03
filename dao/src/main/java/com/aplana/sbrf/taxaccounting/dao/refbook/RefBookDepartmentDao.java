@@ -49,6 +49,16 @@ public interface RefBookDepartmentDao {
     Map<String, RefBookValue> getRecordData(Long recordId);
 
     /**
+     * Получение row_num записи по заданным параметрам
+     * @param recordId
+     * @param filter
+     * @param sortAttribute
+     * @param isSortAscending
+     * @return
+     */
+    Long getRowNum(Long recordId, String filter, RefBookAttribute sortAttribute, boolean isSortAscending);
+
+    /**
      * Поиск среди всех элементов справочника (без учета версий) значений уникальных атрибутов, которые бы дублировались с новыми,
      * отдельных справочников.
      * Обеспечение соблюдения уникальности атрибутов в пределах справочника

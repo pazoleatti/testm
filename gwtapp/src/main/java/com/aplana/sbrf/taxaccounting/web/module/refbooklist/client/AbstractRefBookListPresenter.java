@@ -38,7 +38,7 @@ public abstract class AbstractRefBookListPresenter<V extends AbstractRefBookList
     @Override
     public void prepareFromRequest(final PlaceRequest request) {
         super.prepareFromRequest(request);
-        loadData(filterText);
+        onFindClicked();
     }
 
     @Override
@@ -72,8 +72,6 @@ public abstract class AbstractRefBookListPresenter<V extends AbstractRefBookList
     protected void onReveal() {
         super.onReveal();
         LogCleanEvent.fire(this);
-        getView().setFilter("");
-        onFindClicked();
     }
 
     /**
@@ -92,10 +90,11 @@ public abstract class AbstractRefBookListPresenter<V extends AbstractRefBookList
                             public void onSuccess(GetTableDataResult result) {
                                 List<TableModel> tableData = result.getTableData();
                                 if (tableData != null && tableData.size() > 0) {
-                                    getView().setTableData(tableData);
+                                    getView().setTableData(tableData, getSelectedId());
                                 } else {
-                                    getView().setTableData(new ArrayList<TableModel>());
+                                    getView().setTableData(new ArrayList<TableModel>(), null);
                                 }
+                                setSelectedId(null);
                                 getProxy().manualReveal(AbstractRefBookListPresenter.this);
                             }
 
@@ -106,15 +105,28 @@ public abstract class AbstractRefBookListPresenter<V extends AbstractRefBookList
                         }, this));
     }
 
+    protected abstract Long getSelectedId();
+
+    protected abstract void setSelectedId(Long selectedId);
+
     protected boolean getOnlyVisible() {
         return true;
     }
 
     public interface MyView extends View, HasUiHandlers<RefBookListUiHandlers> {
-        void setTableData(List<TableModel> tableData);
+        void setTableData(List<TableModel> tableData, Long selectedItemId);
+
+        Long getSelectedId();
 
         String getFilter();
 
         void setFilter(String filterText);
     }
+
+    @Override
+    protected void onHide() {
+        super.onHide();
+        setSelectedId(getView().getSelectedId());
+    }
+
 }

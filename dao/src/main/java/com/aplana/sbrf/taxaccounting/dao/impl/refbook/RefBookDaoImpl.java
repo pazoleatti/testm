@@ -236,6 +236,13 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     @Override
+    public Long getRowNum(@NotNull Long refBookId, Date version, Long recordId,
+                                                              String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
+        PreparedStatementData ps = getRefBookSql(refBookId, null, version, sortAttribute, filter, null, isSortAscending);
+        return refBookUtils.getRowNum(ps, recordId);
+    }
+
+    @Override
     public List<Pair<Long, Long>> getRecordIdPairs(Long refBookId, Date version, String filter) {                       // модель которая будет возвращаться как результат
         PreparedStatementData ps = new PreparedStatementData();
 
@@ -495,9 +502,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
         ps.appendQuery("SELECT * FROM "); //TODO: заменить "select *" на полное перечисление полей (Marat Fayzullin 30.01.2014)
         ps.appendQuery("(select\n");
-        ps.appendQuery("  r.id as \"");
+        ps.appendQuery("  r.id as ");
         ps.appendQuery(RefBook.RECORD_ID_ALIAS);
-        ps.appendQuery("\",\n");
+        ps.appendQuery(",\n");
 
         if (version == null) {
             ps.appendQuery("  t.version as \"");

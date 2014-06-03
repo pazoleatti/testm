@@ -24,6 +24,8 @@ public class FormDataFilter implements Serializable{
 
 	private WorkflowState formState;
 
+    private Long formDataId;
+
 	/*Стартовый индекс списка записей */
 	private int startIndex;
 
@@ -80,7 +82,15 @@ public class FormDataFilter implements Serializable{
 		this.formState = formState;
 	}
 
-	public int getStartIndex() {
+    public Long getFormDataId() {
+        return formDataId;
+    }
+
+    public void setFormDataId(Long formDataId) {
+        this.formDataId = formDataId;
+    }
+
+    public int getStartIndex() {
 		return startIndex;
 	}
 

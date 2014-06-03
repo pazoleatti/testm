@@ -51,7 +51,9 @@ public interface DeclarationDataDao {
 	 */
 	void delete(long declarationDataId);
 
-	/**
+    Long getRowNumByFilter(DeclarationDataFilter filter, DeclarationDataSearchOrdering ordering, boolean ascSorting, Long declarationDataId);
+
+    /**
 	 * Данный метод основывая на параметрах фильтра делает поиск в базе и возвращает список идентификаторов данных
 	 * по декларациям, соответствующие критериям поиска
 	 * @param declarationDataFilter - фильтр, по которому происходит поиск

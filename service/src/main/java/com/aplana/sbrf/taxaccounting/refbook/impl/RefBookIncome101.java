@@ -75,6 +75,12 @@ public class RefBookIncome101 implements RefBookDataProvider {
     }
 
     @Override
+    public Long getRowNum(Date version, Long recordId,
+                          String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public List<Long> getParentsHierarchy(Long uniqueRecordId) {
         throw new UnsupportedOperationException();
     }

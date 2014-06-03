@@ -24,6 +24,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.Range;
+import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -61,6 +62,9 @@ public class DeclarationListView extends
 
     private Map<Integer, String> departmentFullNames;
 
+
+    private SingleSelectionModel<DeclarationDataSearchResultItem> selectionModel;
+
     @UiField
     Label declarationHeader;
 
@@ -96,6 +100,9 @@ public class DeclarationListView extends
 	@Inject
 	public DeclarationListView(final MyBinder uiBinder) {
 		initWidget(uiBinder.createAndBindUi(this));
+
+        selectionModel = new SingleSelectionModel<DeclarationDataSearchResultItem>();
+        declarationTable.setSelectionModel(selectionModel);
 
         pager.setDisplay(declarationTable);
         declarationTable.setPageSize(pager.getPageSize());
@@ -212,6 +219,15 @@ public class DeclarationListView extends
     }
 
     @Override
+    public Long getSelectedId() {
+        DeclarationDataSearchResultItem item = selectionModel.getSelectedObject();
+        if (item != null) {
+            return item.getDeclarationDataId();
+        }
+        return null;
+    }
+
+    @Override
     public void clearTable() {
         while (declarationTable.getColumnCount() > 0) {
             declarationTable.removeColumn(0);
@@ -240,10 +256,19 @@ public class DeclarationListView extends
     }
 
     @Override
-    public void setTableData(int start, long totalCount, List<DeclarationDataSearchResultItem> records, Map<Integer, String> departmentFullNames) {
+    public void setTableData(int start, long totalCount, List<DeclarationDataSearchResultItem> records, Map<Integer, String> departmentFullNames, Long selectedItemId) {
         declarationTable.setRowCount((int) totalCount);
         declarationTable.setRowData(start, records);
         this.departmentFullNames = departmentFullNames;
+        selectionModel.clear();
+        if (selectedItemId != null) {
+            for(DeclarationDataSearchResultItem item: records) {
+                if (item.getDeclarationDataId().equals(selectedItemId)) {
+                    selectionModel.setSelected(item, true);
+                    break;
+                }
+            }
+        }
     }
 
     @Override
@@ -311,6 +336,17 @@ public class DeclarationListView extends
 //        });
 //        return resizableHeader;
 //    }
+
+
+    @Override
+    public void setPage(Integer page) {
+        if (page != null) pager.setPage(page);
+    }
+
+    @Override
+    public int getPage() {
+        return pager.getPage();
+    }
 
 	private void setSortByColumn(String sortByColumn){
 		if (DEPARTMENT_TITLE.equals(sortByColumn)){

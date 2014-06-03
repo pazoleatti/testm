@@ -79,6 +79,11 @@ public class RefBookUniversal implements RefBookDataProvider {
         return refBookDao.getParentsHierarchy(uniqueRecordId);
     }
 
+    public Long getRowNum(Date version, Long recordId,
+                   String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
+        return refBookDao.getRowNum(refBookId, version, recordId, filter, sortAttribute, isSortAscending);
+    }
+
     @Override
 	public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams,
 			String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {

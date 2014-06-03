@@ -12,6 +12,7 @@ public class GetRefBookTableDataAction extends UnsecuredActionImpl<GetRefBookTab
 	PagingParams pagingParams;
 	Date relevanceDate;
     private String searchPattern;
+    private Long recordId;
 
 	public long getRefBookId() {
 		return refBookId;
@@ -43,6 +44,14 @@ public class GetRefBookTableDataAction extends UnsecuredActionImpl<GetRefBookTab
 
     public void setSearchPattern(String searchPattern) {
         this.searchPattern = searchPattern;
+    }
+
+    public Long getRecordId() {
+        return recordId;
+    }
+
+    public void setRecordId(Long recordId) {
+        this.recordId = recordId;
     }
 
     @Override

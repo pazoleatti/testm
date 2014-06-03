@@ -71,6 +71,18 @@ public interface RefBookDao {
 		String filter, RefBookAttribute sortAttribute);
 
     /**
+     * Получение row_num записи по заданным параметрам
+     * @param refBookId код справочника
+     * @param version дата актуальности
+     * @param recordId
+     * @param filter условие фильтрации строк. Может быть не задано
+     * @param sortAttribute сортируемый столбец. Может быть не задан
+     * @return
+     */
+    Long getRowNum(Long refBookId, Date version, Long recordId,
+                   String filter, RefBookAttribute sortAttribute, boolean isSortAscending);
+
+    /**
 	 * Перегруженный вариант метода, для сохранения обратной совместимости
 	 * @param refBookId код справочника
 	 * @param version дата актуальности

@@ -13,6 +13,8 @@ public class GetRefBookTableDataResult implements Result {
 	String desc;
     private String uuid;
 
+    private Long rowNum;
+
 	public List<RefBookAttribute> getTableHeaders() {
 		return tableHeaders;
 	}
@@ -51,5 +53,13 @@ public class GetRefBookTableDataResult implements Result {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
+    }
+
+    public Long getRowNum() {
+        return rowNum;
+    }
+
+    public void setRowNum(Long rowNum) {
+        this.rowNum = rowNum;
     }
 }

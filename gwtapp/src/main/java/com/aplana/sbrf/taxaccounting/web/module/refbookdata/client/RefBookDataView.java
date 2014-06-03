@@ -231,6 +231,15 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 		}
 	}
 
+    @Override
+    public Long getSelected() {
+        RefBookDataRow selectedObject = selectionModel.getSelectedObject();
+        if (selectedObject != null) {
+            return selectedObject.getRefBookRowId();
+        }
+        return null;
+    }
+
 	@Override
     public void resetRefBookElements() {
         int i;

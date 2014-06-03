@@ -23,7 +23,7 @@ public class DeclarationListPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	public interface MyView extends View, HasUiHandlers<DeclarationListUiHandlers> {
         void updateData(int pageNumber);
 
-        void setTableData(int start, long totalCount, List<DeclarationDataSearchResultItem> records, Map<Integer, String> departmentFullNames);
+        void setTableData(int start, long totalCount, List<DeclarationDataSearchResultItem> records, Map<Integer, String> departmentFullNames, Long selectedItemId);
 
         void updateData();
 
@@ -38,6 +38,12 @@ public class DeclarationListPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         void initTable(TaxType taxType);
 
         void clearTable();
+
+        Long getSelectedId();
+
+        void setPage(Integer page);
+
+        int getPage();
     }
 
 	protected final DispatchAsync dispatcher;

@@ -39,6 +39,21 @@ public class GetFormDataListHandler extends AbstractActionHandler<GetFormDataLis
             return null;
         }
         GetFormDataListResult res = new GetFormDataListResult();
+
+        if (action.getFormDataFilter().getFormDataId() != null) {
+            Long rowNum = formDataSearchService
+                    .getRowNumByFilter(securityService.currentUserInfo(), action.getFormDataFilter());
+
+            if (rowNum != null) {
+                rowNum = rowNum - 1;
+                int countOfRecords = action.getFormDataFilter().getCountOfRecords();
+                int startIndex = action.getFormDataFilter().getStartIndex();
+                res.setPage((int)(rowNum/countOfRecords));
+                if (((int)startIndex/countOfRecords) != res.getPage()) {
+                    return res;
+                }
+            }
+        }
         PagingResult<FormDataSearchResultItem> resultPage = formDataSearchService
                 .findDataByUserIdAndFilter(securityService.currentUserInfo(), action.getFormDataFilter());
         Map<Integer, String> departmentFullNames = new HashMap<Integer, String>();

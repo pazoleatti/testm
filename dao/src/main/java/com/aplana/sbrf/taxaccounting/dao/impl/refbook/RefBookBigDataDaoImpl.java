@@ -64,6 +64,13 @@ public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookOktmoDa
         return result;
     }
 
+    @Override
+    public Long getRowNum(String tableName, Long refBookId, Date version, Long recordId, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
+        RefBook refBook = refBookDao.get(refBookId);
+        PreparedStatementData ps = getSimpleQuery(tableName, refBook, null, version, sortAttribute, filter, null, isSortAscending, null);
+        return refBookUtils.getRowNum(ps, recordId);
+    }
+
     public PagingResult<Map<String, RefBookValue>> getChildrenRecords(String tableName, Long refBookId, Long parentRecordId, Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
         RefBook refBook = refBookDao.get(refBookId);
         // получаем страницу с данными

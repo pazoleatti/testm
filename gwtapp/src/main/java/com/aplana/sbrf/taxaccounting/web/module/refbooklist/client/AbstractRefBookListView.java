@@ -9,6 +9,7 @@ import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.view.client.SingleSelectionModel;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 import java.util.List;
@@ -22,6 +23,8 @@ import java.util.List;
 public abstract class AbstractRefBookListView extends ViewWithUiHandlers<RefBookListUiHandlers>
         implements AbstractRefBookListPresenter.MyView {
 
+    private SingleSelectionModel<TableModel> selectionModel;
+
     @UiField
     GenericDataGrid<TableModel> formDataTable;
     @UiField
@@ -30,8 +33,31 @@ public abstract class AbstractRefBookListView extends ViewWithUiHandlers<RefBook
     LinkAnchor loadButton;
 
     @Override
-    public void setTableData(List<TableModel> tableData) {
+    public void setTableData(List<TableModel> tableData, Long selectedItemId) {
         formDataTable.setRowData(tableData);
+        selectionModel.clear();
+        if (selectedItemId != null) {
+            for(TableModel item: tableData) {
+                if (item.getId().equals(selectedItemId)) {
+                    selectionModel.setSelected(item, true);
+                    break;
+                }
+            }
+        }
+    }
+
+    protected void setSelectionModel() {
+        selectionModel = new SingleSelectionModel<TableModel>();
+        formDataTable.setSelectionModel(selectionModel);
+    }
+
+    @Override
+    public Long getSelectedId() {
+        TableModel item = selectionModel.getSelectedObject();
+        if (item != null) {
+            return item.getId();
+        }
+        return null;
     }
 
     @Override

@@ -71,7 +71,7 @@ public class RefBookUtils extends AbstractDao {
                                                 String filter, PagingParams pagingParams, boolean isSortAscending, String whereClause) {
         String orderBy = "";
         PreparedStatementData ps = new PreparedStatementData();
-        ps.appendQuery("SELECT ");
+        ps.appendQuery("SELECT row_number_over, ");
         ps.appendQuery("id ");
         ps.appendQuery(RefBook.RECORD_ID_ALIAS);
         for (RefBookAttribute attribute : refBook.getAttributes()) {
@@ -304,6 +304,28 @@ public class RefBookUtils extends AbstractDao {
 			return getJdbcTemplate().query(ps.getQuery().toString(), new RefBookValueMapper(refBook));
 		}
 	}
+
+    public Long getRowNum(Long refBookId, String tableName, Long recordId,
+                                                              String filter, RefBookAttribute sortAttribute, boolean isSortAscending, String whereClause) {
+        RefBook refBook = refBookDao.get(refBookId);
+        PreparedStatementData ps = getSimpleQuery(refBook, tableName, sortAttribute, filter, null, isSortAscending, whereClause);
+        return getRowNum(ps, recordId);
+    }
+
+    /**
+     * Возвращает row_num для элемента справочника
+     * @param ps
+     * @param recordId
+     * @return
+     */
+    public Long getRowNum(PreparedStatementData ps, Long recordId) {
+        try {
+            ps.addParam(recordId);
+            return getJdbcTemplate().queryForLong("select " + RefBook.RECORD_SORT_ALIAS + " from (" + ps.getQuery().toString() + ") where " + RefBook.RECORD_ID_ALIAS + " = ?", ps.getParams().toArray());
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
 
 	/**
 	 * Возвращает количество записей в выборке
