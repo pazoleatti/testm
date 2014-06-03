@@ -92,23 +92,33 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 
     @Override
     public void updateRefBookPickerPeriod() {
-        Date start = versionStart.getValue();
-        if (start == null) {
-            start = new Date();
-        }
+        if(canVersion){
+            Date start = versionStart.getValue();
+            if (start == null) {
+                start = new Date();
+            }
 
-        if (versionEnd.getValue() != null && start.after(versionEnd.getValue())) {
-            Dialog.errorMessage("Неправильно указан диапазон дат!");
-            versionEnd.setValue(null);
-            return;
-        }
+            if (versionEnd.getValue() != null && start.after(versionEnd.getValue())) {
+                Dialog.errorMessage("Неправильно указан диапазон дат!");
+                versionEnd.setValue(null);
+                return;
+            }
 
-        for (Map.Entry<RefBookColumn, HasValue> w : widgets.entrySet()) {
-            if (w.getValue() instanceof RefBookPickerWidget) {
-                RefBookPickerWidget rbw = (RefBookPickerWidget) w.getValue();
-                rbw.setPeriodDates(start, versionEnd.getValue());
+            for (Map.Entry<RefBookColumn, HasValue> w : widgets.entrySet()) {
+                if (w.getValue() instanceof RefBookPickerWidget) {
+                    RefBookPickerWidget rbw = (RefBookPickerWidget) w.getValue();
+                    rbw.setPeriodDates(start, versionEnd.getValue());
+                }
+            }
+        } else {
+            for (Map.Entry<RefBookColumn, HasValue> w : widgets.entrySet()) {
+                if (w.getValue() instanceof RefBookPickerWidget) {
+                    RefBookPickerWidget rbw = (RefBookPickerWidget) w.getValue();
+                    rbw.setPeriodDates(null, null);
+                }
             }
         }
+
     }
 
     @Override
@@ -156,7 +166,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 					widget = new DateMaskBoxPicker(col.getFormat());
 					break;
 				case REFERENCE:
-                    RefBookPickerWidget refbookWidget = new RefBookPickerWidget(isHierarchy, false);
+                    RefBookPickerWidget refbookWidget = new RefBookPickerWidget(col.isHierarchical(), false);
                     refbookWidget.setManualUpdate(true);
 					refbookWidget.setAttributeId(col.getRefBookAttributeId());
                     refbookWidget.setTitle(col.getRefBookName());

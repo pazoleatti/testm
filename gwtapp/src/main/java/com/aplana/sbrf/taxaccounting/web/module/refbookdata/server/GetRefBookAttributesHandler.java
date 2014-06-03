@@ -46,11 +46,16 @@ public class GetRefBookAttributesHandler extends AbstractActionHandler<GetRefBoo
 		List<RefBookColumn> columns = new ArrayList<RefBookColumn>();
 		for (RefBookAttribute attribute : attributes) {
 			RefBookColumn col = new RefBookColumn();
+            RefBook attributeRefBook = null;
+            if(attribute.getRefBookId()!=null){
+                attributeRefBook = refBookFactory.get(attribute.getRefBookId());
+            }
 			col.setId(attribute.getId());
 			col.setAlias(attribute.getAlias());
 			col.setAttributeType(attribute.getAttributeType());
 			col.setName(attribute.getName());
-            col.setRefBookName(attribute.getRefBookId()==null?"":refBookFactory.get(attribute.getRefBookId()).getName());
+            col.setRefBookName(attributeRefBook == null ? "" : attributeRefBook.getName());
+            col.setHierarchical(attributeRefBook != null && attributeRefBook.getType() == 1);
 			col.setRefBookAttributeId(attribute.getRefBookAttributeId());
 			col.setWidth(attribute.getWidth());
 			col.setAlignment(getHorizontalAlignment(attribute));
