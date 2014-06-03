@@ -12,6 +12,8 @@ public class RefBookColumn extends Column {
 
 	private Long refBookAttributeId;
 
+    private Long refBookAttributeId2;
+
     private long nameAttributeId;
 
 	private String filter;
@@ -74,4 +76,12 @@ public class RefBookColumn extends Column {
 		return validationStrategy;
 	}
 
+
+    public Long getRefBookAttributeId2() {
+        return refBookAttributeId2;
+    }
+
+    public void setRefBookAttributeId2(Long refBookAttributeId2) {
+        this.refBookAttributeId2 = refBookAttributeId2;
+    }
 }

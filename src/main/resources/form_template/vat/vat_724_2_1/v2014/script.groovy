@@ -19,7 +19,7 @@ import groovy.transform.Field
 
 // графа 1 - rowNum         № пп
 // графа 2 - code           Код операции
-// графа 3 - name           Наименование операции  -
+// графа 3 - name           Наименование операции
 // графа 4 - realizeCost    Стоимость реализованных (переданных) товаров (работ, услуг) без НДС
 // графа 5 - obtainCost     Стоимость приобретенных товаров  (работа, услуг), не облагаемых НДС
 
@@ -52,7 +52,9 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.IMPORT:
-        noImport(logger)
+        importData()
+        calc()
+        logicCheck()
         break
 }
 
@@ -76,9 +78,8 @@ def startDate = null
 @Field
 def endDate = null
 
-// Cправочник «Отчет о прибылях и убытках (Форма 0409102-СБ)»
 @Field
-def income102Data = null
+def prevEndDate = null
 
 @Field
 def dateFormat = "dd.MM.yyyy"
@@ -88,6 +89,13 @@ def calcRowAlias4 = ['R1', 'R2', 'R3', 'R4', 'R7', 'R8', 'R9', 'R10', 'R16']
 
 @Field
 def calcRowAlias5 = ['R7', 'R8']
+
+@Field
+def repordPeriod = null
+
+// Cправочник «Отчет о прибылях и убытках (Форма 0409102-СБ)»
+@Field
+def income102DataCache = [:]
 
 //// Кастомные методы
 
@@ -153,19 +161,34 @@ def getReportPeriodEndDate() {
     return endDate
 }
 
-// Получение данных из справочника «Отчет о прибылях и убытках» для текужего подразделения и отчетного периода
-def getIncome102Data() {
-    if (income102Data == null) {
-        def filter = "DEPARTMENT_ID = ${formData.departmentId}"
-        income102Data = refBookFactory.getDataProvider(52L)?.getRecords(getReportPeriodEndDate(), null, filter, null)
+def getPrevReportPeriodEndDate() {
+    if (prevEndDate == null) {
+        def prevPerortId = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)?.id
+        prevEndDate = reportPeriodService.getEndDate(prevPerortId).time
     }
-    return income102Data
+    return prevEndDate
+}
+
+def getRepordPeriod() {
+    if (repordPeriod == null) {
+        repordPeriod = reportPeriodService.get(formData.reportPeriodId)
+    }
+    return repordPeriod
+}
+
+// Получение данных из справочника «Отчет о прибылях и убытках» для текужего подразделения и отчетного периода
+def getIncome102Data(def date) {
+    if (!income102DataCache.containsKey(date)) {
+        def filter = "DEPARTMENT_ID = ${formData.departmentId}"
+        income102DataCache.put(date, refBookFactory.getDataProvider(52L)?.getRecords(date, null, filter, null))
+    }
+    return income102DataCache.get(date)
 }
 
 // Проверка наличия необходимых записей в справочнике «Отчет о прибылях и убытках»
 void checkIncome102() {
     // Наличие экземпляра Отчета о прибылях и убытках подразделения и периода, для которых сформирована текущая форма
-    if (getIncome102Data() == null) {
+    if (getIncome102Data(getReportPeriodEndDate()) == null) {
         throw new ServiceException("Экземпляр Отчета о прибылях и убытках за период " +
                 "${getReportPeriodStartDate().format(dateFormat)} - ${getReportPeriodEndDate().format(dateFormat)} " +
                 "не существует (отсутствуют данные для расчета)!")
@@ -173,20 +196,14 @@ void checkIncome102() {
 }
 
 void prevCalcCheck() {
-
-    // 1. Проверка превышения разрядности граф - сделано в ядре
-    // сделано в ядре
-
-    // 2. Проверка наличия экземпляра «Отчета о прибылях и убытках» по соответствующему подразделению за соответствующий налоговый период
+    // 1. Проверка наличия экземпляра «Отчета о прибылях и убытках» по соответствующему подразделению за соответствующий налоговый период
     checkIncome102()
 
-    // 3. Проверка наличия символов ОПУ в Экземпляре Отчета о прибылях и убытках, необходимых для заполнения «Графы 4»	Экземпляр «Отчета о прибылях и убытках» подразделения и периода, для которых сформирована текущая форма, содержит записи по всем символам ОПУ, необходимым для заполнения «Графы 4» на основе справочника «Классификатор соответствия кодов операций налоговой формы 724.2.1 по НДС символам ОПУ» 	1	Строка <Номер строки>: Экземпляр Отчета о прибылях и убытках за период <Дата начала отчетного периода> - <Дата окончания отчётного периода> не содержит записей для заполнения графы 4 по следующим символам ОПУ: «Перечень символов ОПУ через запятую»! Расчеты не могут быть выполнены.
-    // 4. Проверка наличия символов ОПУ в Экземпляре Отчета о прибылях и убытках, необходимых для заполнения «Графы 5»	Экземпляр «Отчета о прибылях и убытках» подразделения и периода, для которых сформирована текущая форма, содержит записи по всем символам ОПУ, необходимым для заполнения «Графы 5» на основе справочника «Классификатор соответствия кодов операций налоговой формы 724.2.1 по НДС символам ОПУ» 	1	Строка <Номер строки>: Экземпляр Отчета о прибылях и убытках за период <Дата начала отчетного периода> - <Дата окончания отчётного периода> не содержит записей для заполнения графы 5 по следующим символам ОПУ: «Перечень символов ОПУ через запятую»! Расчеты не могут быть выполнены.
-    // эти проверки происходят при расчетах в методе getOpuCodes
+    // 2. Проверка наличия в справочнике «Классификатор соответствия кодов операций налоговой формы 724.2.1 по НДС символам ОПУ» данных для графы 4 и 5
+    // эта проверка происходит при расчетах в методе getOpuCodes
 
-    // 5. Проверка наличия соответствия кода операций символам ОПУ для графы 4	В справочнике «Классификатор соответствия кодов операций налоговой формы 724.2.1 по НДС символам ОПУ» существует запись для «Графы 2» и «Графы 4» по строкам 1-4, 7-10, 16	1	Строка <Номера строк>: В справочнике «Классификатор соответствия кодов операций налоговой формы 724.2.1 по НДС символам ОПУ» нет данных для заполнения графы 4! Расчеты не могут быть выполнены.
-    // 6. Проверка наличия соответствия кода операций символам ОПУ для графы 5	В справочнике «Классификатор соответствия кодов операций налоговой формы 724.2.1 по НДС символам ОПУ» существует запись для «Графы 2» и «Графы 5» по строкам 7 и 8	1	Строка <Номера строк>: В справочнике «Классификатор соответствия кодов операций налоговой формы 724.2.1 по НДС символам ОПУ» нет данных для заполнения графы 5! Расчеты не могут быть выполнены.
-    // эти проверки происходят при расчетах в методе getSumByOpuCodes
+    // 3. Проверка наличия символов ОПУ в Экземпляре Отчета о прибылях и убытках, необходимых для заполнения «Графы 4» и «Графы 5»
+    // эта проверка происходит при расчетах в методе getSumByOpuCodes
 }
 
 // Консолидация
@@ -247,7 +264,7 @@ def getOpuCodes(def code, def index, def columnNumber) {
     def records = refBookFactory.getDataProvider(102L)?.getRecords(getReportPeriodEndDate(), null, filter, null)
     if (records == null || records.isEmpty()) {
         // условия выполнения расчетов
-        // 5, 6. Проверка наличия соответствия кода операций символам ОПУ для графы 4/5
+        // 2. Проверка наличия в справочнике «Классификатор соответствия кодов операций налоговой формы 724.2.1 по НДС символам ОПУ» данных для графы 4 и 5
         throw new ServiceException("Строка $index: В справочнике «%s» нет данных для заполнения графы $columnNumber! Расчеты не могут быть выполнены.",
                 refBookFactory.get(102L).name)
     }
@@ -267,7 +284,10 @@ def getOpuCodes(def code, def index, def columnNumber) {
 def getSumByOpuCodes(def opuCodes, def index, def columnNumber) {
     def tmp = BigDecimal.ZERO
     def hasData = false
-    for (def income102Row : getIncome102Data()) {
+    // В отчете 102 данные хранятся по периодам как у прибыли (1 квартал, полгода, 9 месяцев, год)
+    // Для формы 724.2.1 нужны квартальные данные, поэтому для получения кваратальных значении из отчета 102
+    // сначало берутся данные за текущий периода, а потом вычитаются данные запредыдущий период (например: 9 месяцев - полгода)
+    for (def income102Row : getIncome102Data(getReportPeriodEndDate())) {
         if (income102Row?.OPU_CODE?.value in opuCodes) {
             tmp += (income102Row?.TOTAL_SUM?.value ?: 0)
             hasData = true
@@ -275,11 +295,19 @@ def getSumByOpuCodes(def opuCodes, def index, def columnNumber) {
     }
     if (!hasData) {
         // условия выполнения расчетов
-        // 3, 4. Проверка наличия символов ОПУ в Экземпляре Отчета о прибылях и убытках, необходимых для заполнения «Графы 4/5»
+        // 3. Проверка наличия символов ОПУ в Экземпляре Отчета о прибылях и убытках, необходимых для заполнения «Графы 4» и «Графы 5»
         def start = getReportPeriodStartDate().format(dateFormat)
         def end = getReportPeriodEndDate().format(dateFormat)
-        throw new ServiceException("Строка $index: Экземпляр Отчета о прибылях и убытках за период $start - $end не содержит записей " +
+        logger.warn("Строка $index: Экземпляр Отчета о прибылях и убытках за период $start - $end не содержит записей " +
                 "для заполнения графы $columnNumber по следующим символам ОПУ: «${opuCodes.join(', ')}»! Расчеты не могут быть выполнены.")
+        return BigDecimal.ZERO
+    }
+    if (getRepordPeriod().order > 1) {
+        for (def income102Row : getIncome102Data(getPrevReportPeriodEndDate())) {
+            if (income102Row?.OPU_CODE?.value in opuCodes) {
+                tmp -= (income102Row?.TOTAL_SUM?.value ?: 0)
+            }
+        }
     }
     return tmp
 }
@@ -306,4 +334,87 @@ def roundValue(def value, int precision = 2) {
     } else {
         return null
     }
+}
+
+// Получение импортируемых данных
+void importData() {
+    def tmpRow = formData.createDataRow()
+    def xml = getXML(ImportInputStream, importService, UploadFileName, getColumnName(tmpRow, 'rowNum'), null)
+
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 5, 2)
+
+    def headerMapping = [
+            (xml.row[0].cell[0]): getColumnName(tmpRow, 'rowNum'),
+            (xml.row[0].cell[1]): getColumnName(tmpRow, 'code'),
+            (xml.row[0].cell[2]): getColumnName(tmpRow, 'name'),
+            (xml.row[0].cell[3]): getColumnName(tmpRow, 'realizeCost'),
+            (xml.row[0].cell[4]): getColumnName(tmpRow, 'obtainCost')
+    ]
+
+    (1..5).each { index ->
+        headerMapping.put((xml.row[1].cell[index - 1]), index.toString())
+    }
+
+    checkHeaderEquals(headerMapping)
+
+    addData(xml, 2)
+}
+
+// Заполнить форму данными
+void addData(def xml, int headRowCount) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+
+    def xmlIndexRow = -1 // Строки xml, от 0
+    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
+    def indexRow = 0
+
+    for (def row : xml.row) {
+        xmlIndexRow++
+
+        // Пропуск строк шапки
+        if (xmlIndexRow <= headRowCount - 1) {
+            continue
+        }
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        // Пропуск итоговых строк
+        if (row.cell[2].text() == 'Итого') {
+            break
+        }
+
+        def dataRow = dataRows.get(indexRow)
+        indexRow++
+
+        def xmlIndexCol = -1
+        def int xlsIndexRow = xmlIndexRow + rowOffset
+
+        def values = [:]
+        xmlIndexCol++
+        values.rowNum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        xmlIndexCol++
+        values.code = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
+        values.name = row.cell[xmlIndexCol].text()
+
+        // Проверить фиксированные значения (графа 1..3)
+        ['rowNum', 'code', 'name'].each { alias ->
+            def value = values[alias]?.toString()
+            def valueExpected = dataRow.getCell(alias).value?.toString()
+            checkFixedValue(dataRow, value, valueExpected, indexRow, alias, logger, true)
+        }
+
+        // графа 4
+        xmlIndexCol++
+        dataRow.realizeCost = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        // графа 5
+        xmlIndexCol++
+        dataRow.obtainCost = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+    }
+    dataRowHelper.save(dataRows)
 }

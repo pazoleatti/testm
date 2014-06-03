@@ -92,6 +92,12 @@ public class FormDataListPresenter extends
 		filterPresenter.changeFilterElementNames(taxType);
         getView().updatePageSize(taxType);
         if (taxTypeOld == null || !taxType.equals(taxTypeOld)) getView().updateFormDataTable(taxType);
+        String url = FormDataPresenter.NAME_TOKEN + ";" + FormDataPresenter.FORM_DATA_ID;
+        if ((lstHistory.get(0) == null || !lstHistory.get(0).startsWith(url)) &&
+                (lstHistory.get(1) == null || !lstHistory.get(1).startsWith(url))) {
+            filterPresenter.getView().clean();
+            filterStates.clear();
+        }
         // Передаем типы налоговых форм
         GetKindListAction kindListAction = new GetKindListAction();
         kindListAction.setTaxType(taxType);
@@ -104,16 +110,6 @@ public class FormDataListPresenter extends
                 }, this));
         super.prepareFromRequest(request);
 	}
-
-    @Override
-    protected void onReveal() {
-        super.onReveal();
-        String url = FormDataPresenter.NAME_TOKEN + ";" + FormDataPresenter.FORM_DATA_ID;
-        if ((lstHistory.get(0) == null || !lstHistory.get(0).startsWith(url)) &&
-                (lstHistory.get(1) == null || !lstHistory.get(1).startsWith(url))) {
-            filterPresenter.getView().clean();
-        }
-    }
 
     @Override
 	public void onClickCreate(FormDataListCreateEvent event) {

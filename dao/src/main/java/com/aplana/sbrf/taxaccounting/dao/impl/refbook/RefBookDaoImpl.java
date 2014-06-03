@@ -248,8 +248,17 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         universalFilterTreeListener.setPs(filterPS);
         Filter.getFilterQuery(filter, universalFilterTreeListener);
 
-        StringBuilder fromSql = new StringBuilder("\nfrom ref_book_record r\n");
+        StringBuilder fromSql = new StringBuilder();
+        fromSql.append("\nfrom ref_book_record r\n");
 
+        if (version != null) {
+            fromSql.append("join t on (r.version = t.version and r.record_id = t.record_id)\n");
+            ps.appendQuery(WITH_STATEMENT);
+            ps.appendQuery("\n");
+            ps.addParam(refBookId);
+            ps.addParam(version);
+            ps.addParam(version);
+        }
         ps.appendQuery("select\n");
         ps.appendQuery(" r.id as ID, r.record_id as RECORD_ID\n");
 
@@ -282,10 +291,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         ps.appendQuery(fromSql.toString());
         ps.appendQuery("where\n  r.ref_book_id = ?");
         ps.addParam(refBookId);
-        if (version != null) {
-            ps.appendQuery(" and  r.version = ?");
-            ps.addParam(version);
-        }
         ps.appendQuery(" and\n  status <> -1\n");
 
         // обработка параметров фильтра
@@ -328,55 +333,104 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         return getRecords(refBookId, version, pagingParams, filter, sortAttribute, true);
     }
 
-	public static final String SELECT_SINGLE_ROW_VALUES_QUERY =
-		" SELECT r.id, v.attribute_id, " +
-		" v.string_value, v.number_value, v.date_value, v.reference_value" +
-		" FROM ref_book_record r LEFT JOIN ref_book_value v ON v.record_id = r.id " +
-		" WHERE r.id = ? AND r.ref_book_id = ?";
+    /**
+     * Обработка запроса на получение строки/строк справочника
+     * @param rs ResultSet
+     * @param records Справочник
+     * @throws SQLException
+     */
+    private void processRecordDataRow(ResultSet rs, RefBook refBook, Map<Long, Map<String, RefBookValue>> records) throws SQLException {
+        Long id = SqlUtils.getLong(rs, "id");
+        Long attributeId = SqlUtils.getLong(rs, "attribute_id");
+
+        if (id == null || attributeId == null) {
+            // Ситуауция возможна когда в ref_book_record есть запись, а в ref_book_value соответствующих записе нет
+            return;
+        }
+
+        if (!records.containsKey(id)) {
+            records.put(id, refBook.createRecord());
+        }
+
+        Map<String, RefBookValue> record = records.get(id);
+
+        RefBookValue recordIdValue = record.get(RefBook.RECORD_ID_ALIAS);
+        if (recordIdValue.getNumberValue() == null) {
+            recordIdValue.setValue(id);
+        }
+
+        RefBookAttribute attribute = refBook.getAttribute(attributeId);
+        String columnName = attribute.getAttributeType().name() + "_value";
+        if (rs.getObject(columnName) != null) {
+            Object value = null;
+            switch (attribute.getAttributeType()) {
+                case STRING: {
+                    value = rs.getString(columnName);
+                }
+                break;
+                case NUMBER: {
+                    value = rs.getBigDecimal(columnName).setScale(attribute.getPrecision());
+                }
+                break;
+                case DATE: {
+                    value = rs.getDate(columnName);
+                }
+                break;
+                case REFERENCE: {
+                    value = SqlUtils.getLong(rs, columnName);
+                }
+                break;
+            }
+            RefBookValue attrValue = record.get(attribute.getAlias());
+            attrValue.setValue(value);
+        }
+    }
+
+    // Строка справочника по идентификатору строки
+    private static final String SELECT_SINGLE_ROW_VALUES_QUERY =
+            " SELECT r.id, v.attribute_id, " +
+                    " v.string_value, v.number_value, v.date_value, v.reference_value" +
+                    " FROM ref_book_record r LEFT JOIN ref_book_value v ON v.record_id = r.id " +
+                    " WHERE r.id = ? AND r.ref_book_id = ?";
 
     @Override
     public Map<String, RefBookValue> getRecordData(@NotNull Long refBookId, @NotNull Long recordId) {
         final RefBook refBook = get(refBookId);
-		final Map<String, RefBookValue> result = refBook.createRecord();
-		getJdbcTemplate().query(SELECT_SINGLE_ROW_VALUES_QUERY, new Object[]{recordId, refBookId}, new int[]{Types.NUMERIC, Types.NUMERIC}, new RowCallbackHandler() {
-			@Override
-			public void processRow(ResultSet rs) throws SQLException {
-				RefBookValue recordIdValue = result.get(RefBook.RECORD_ID_ALIAS);
-				if (recordIdValue.getNumberValue() == null) {
-					recordIdValue.setValue(SqlUtils.getLong(rs,"id"));
-				}
-				Long attributeId = SqlUtils.getLong(rs,"attribute_id");
-				RefBookAttribute attribute = refBook.getAttribute(attributeId);
-				String columnName = attribute.getAttributeType().name() + "_value";
-				if (rs.getObject(columnName) != null) {
-					Object value = null;
-					switch (attribute.getAttributeType()) {
-						case STRING: {
-							value = rs.getString(columnName);
-						}
-						break;
-						case NUMBER: {
-							value = rs.getBigDecimal(columnName).setScale(attribute.getPrecision());
-						}
-						break;
-						case DATE: {
-							value = rs.getDate(columnName);
-						}
-						break;
-						case REFERENCE: {
-							value = SqlUtils.getLong(rs,columnName);
-						}
-						break;
-					}
-					RefBookValue attrValue = result.get(attribute.getAlias());
-					attrValue.setValue(value);
-				}
-			}
-		});
-		if (result.get(RefBook.RECORD_ID_ALIAS).getNumberValue() == null) { // если элемент не найден
-			throw new DaoException(String.format("В справочнике \"%s\" (id = %d) не найден элемент с id = %d", refBook.getName(), refBookId, recordId));
-		}
-		return result;
+        final Map<Long, Map<String, RefBookValue>> resultMap = new HashMap<Long, Map<String, RefBookValue>>();
+
+        getJdbcTemplate().query(SELECT_SINGLE_ROW_VALUES_QUERY, new Object[]{recordId, refBookId}, new int[]{Types.NUMERIC, Types.NUMERIC}, new RowCallbackHandler() {
+            @Override
+            public void processRow(ResultSet rs) throws SQLException {
+                processRecordDataRow(rs, refBook, resultMap);
+            }
+        });
+        if (resultMap.isEmpty()) { // если элемент не найден
+            throw new DaoException(String.format("В справочнике \"%s\" (id = %d) не найден элемент с id = %d", refBook.getName(), refBookId, recordId));
+        }
+        return resultMap.values().iterator().next();
+    }
+
+    // Строки справочника по списку идентификаторов строки
+    public static final String SELECT_VALUES_BY_IDS_QUERY =
+            "SELECT r.id, v.attribute_id, " +
+                    "v.string_value, v.number_value, v.date_value, v.reference_value " +
+                    "FROM ref_book_record r LEFT JOIN ref_book_value v ON v.record_id = r.id " +
+                    "WHERE r.id in (:recordIds) AND r.ref_book_id = :refBookId";
+
+    @Override
+    public Map<Long, Map<String, RefBookValue>> getRecordData(@NotNull Long refBookId, @NotNull List<Long> recordIds) {
+        final RefBook refBook = get(refBookId);
+        final Map<Long, Map<String, RefBookValue>> resultMap = new HashMap<Long, Map<String, RefBookValue>>();
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("refBookId", refBookId);
+        params.put("recordIds", recordIds);
+        getNamedParameterJdbcTemplate().query(SELECT_VALUES_BY_IDS_QUERY, params, new RowCallbackHandler() {
+            @Override
+            public void processRow(ResultSet rs) throws SQLException {
+                processRecordDataRow(rs, refBook, resultMap);
+            }
+        });
+        return resultMap;
     }
 
     private static final String WITH_STATEMENT =

@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client;
 
 import com.aplana.sbrf.taxaccounting.web.main.api.client.handler.DeferredInvokeHandler;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.event.CheckValuesCountHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.PickerState;
 import com.gwtplatform.mvp.client.UiHandlers;
 
@@ -20,4 +21,6 @@ public interface RefBookMultiPickerUiHandlers extends UiHandlers {
     void onSort(Integer columnIndex, boolean isSortAscending);
 
     void find(String searchPattern);
+
+    void getValuesCount(String text, CheckValuesCountHandler checkValuesCountHandler);
 }

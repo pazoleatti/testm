@@ -14,7 +14,6 @@ import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -113,8 +112,7 @@ public class RefBookHelperImpl implements RefBookHelper {
 				if ((cell.getColumn() instanceof RefBookColumn) && value != null) {
                     // Разыменование справочных ячеек
                     RefBookColumn column = (RefBookColumn) cell.getColumn();
-                    Long refAttributeId = column.getRefBookAttributeId();
-                    dereferenceRefBookValue(logger, providers, refAttributeId, cell, value);
+                    dereferenceRefBookValue(logger, providers, column, cell, value);
                 } else if ((cell.getColumn() instanceof ReferenceColumn)) {
                     // Разыменование ссылочных ячеек
                     ReferenceColumn column = (ReferenceColumn) cell.getColumn();
@@ -165,8 +163,10 @@ public class RefBookHelperImpl implements RefBookHelper {
         cell.setRefBookDereference(String.valueOf(refBookValue));
     }
 
-    private void dereferenceRefBookValue(Logger logger, Map<Long, Pair<RefBookDataProvider, RefBookAttribute>> providers,
-                                         Long refAttributeId, Cell cell, Object value) {
+    private void dereferenceRefBookValue (Logger logger, Map<Long, Pair<RefBookDataProvider, RefBookAttribute>> providers,
+                                            RefBookColumn refBookColumn, Cell cell, Object value) {
+
+        Long refAttributeId = refBookColumn.getRefBookAttributeId();
         Pair<RefBookDataProvider, RefBookAttribute> pair = providers.get(refAttributeId);
         if (pair == null) {
             RefBook refBook = refBookFactory.getByAttribute(refAttributeId);
@@ -183,10 +183,26 @@ public class RefBookHelperImpl implements RefBookHelper {
             return;
         }
         RefBookValue refBookValue = record.get(pair.getSecond().getAlias());
+        // Если найденое значение ссылка, то делаем разыменование для 2 уровня
+        if ((refBookValue.getReferenceValue() != null) && (refBookValue.getAttributeType() == RefBookAttributeType.REFERENCE) && (refBookColumn.getRefBookAttributeId2() != null)) {
+            refAttributeId = refBookColumn.getRefBookAttributeId2();
+            RefBook refBook = refBookFactory.getByAttribute(refAttributeId);
+            RefBookAttribute attribute = refBook.getAttribute(refAttributeId);
+            RefBookDataProvider provider = refBookFactory.getDataProvider(refBook.getId());
+            pair = new Pair<RefBookDataProvider, RefBookAttribute>(provider, attribute);
+            providers.put(refAttributeId, pair);
+            try {
+                record = pair.getFirst().getRecordData(refBookValue.getReferenceValue());
+            } catch (DaoException e) {
+                logger.error(e.getMessage());
+                return;
+            }
+            refBookValue = record.get(pair.getSecond().getAlias());
+        }
         cell.setRefBookDereference(String.valueOf(refBookValue));
     }
 
-	@Override
+    @Override
 	public Map<String, String> singleRecordDereference(RefBook refBook,	RefBookDataProvider provider,
                                                        List<RefBookAttribute> attributes,	Map<String, RefBookValue> record) {
 

@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.server;
 
-import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.exception.TAException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -55,6 +54,9 @@ public class GetRefBookMultiValuesHandler extends AbstractActionHandler<GetRefBo
     @Autowired
     FormDataService formDataService;
 
+    @Autowired
+    RefBookPickerFilterBuilder buildFilter;
+
     public GetRefBookMultiValuesHandler() {
         super(GetRefBookMultiValuesAction.class);
     }
@@ -71,7 +73,7 @@ public class GetRefBookMultiValuesHandler extends AbstractActionHandler<GetRefBo
 
         RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(refBook.getId());
 
-        String filter = buildFilter(action.getFilter(), action.getSearchPattern(), refBook, context);
+        String filter = buildFilter.buildMultiPickerFilter(action.getFilter(), action.getSearchPattern(), refBook, context);
         if (filter != null && filter.equals(RefBookPickerUtils.NO_REGION_MATCHES_FLAG)) {
             //Среди подразделений пользователя нет относящихся к какому то региону и нет смысла получать записи справочника - ни одна не должна быть ему доступна
             result.setPage(new PagingResult<RefBookItem>(new LinkedList<RefBookItem>(), 0));
@@ -128,59 +130,6 @@ public class GetRefBookMultiValuesHandler extends AbstractActionHandler<GetRefBo
         return null;
     }
 
-
-    private String buildFilter(String filter, String searchPattern, RefBook refBook, PickerContext context) {
-        StringBuilder resultFilter = new StringBuilder();
-        if (filter != null && !filter.trim().isEmpty()) {
-            resultFilter.append(filter.trim());
-        }
-
-        if ((refBook != null)
-                && (refBook.getRegionAttribute() != null)
-                && (context != null)) {
-
-            String regionFilter;
-            switch (context.getRegionFilter()) {
-                case DEPARTMENT_CONFIG_FILTER:
-                    regionFilter = refBook.getRegionAttribute().getAlias() + " = " + context.getAttributeId();
-                    break;
-                case DEFAULT:
-                case FORM_FILTER:
-                    Department department = null;
-                    if (context.getFormDataId() != null) {
-                        department = departmentService.getFormDepartment(context.getFormDataId());
-                    }
-                    regionFilter = RefBookPickerUtils.buildRegionFilterForUser(department == null ? null : Arrays.asList(department), refBook);
-                    if (regionFilter != null && regionFilter.equals(RefBookPickerUtils.NO_REGION_MATCHES_FLAG)) {
-                        return regionFilter;
-                    }
-                    break;
-                default:
-                    regionFilter = null;
-            }
-
-            if (regionFilter != null) {
-                if (resultFilter.length() > 0) {
-                    resultFilter.append(" and ");
-                }
-                resultFilter.append("(" + regionFilter + ")");
-            }
-
-        }
-
-        String resultSearch = refBookFactory.getSearchQueryStatement(searchPattern, refBook.getId());
-
-        if (resultFilter.length() > 0 && resultSearch != null && resultSearch.length() > 0) {
-            return "(" + resultFilter.toString() + ") and (" + resultSearch.toString() + ")";
-        } else if (resultFilter.length() > 0 && (resultSearch == null || resultSearch.length() == 0)) {
-            return resultFilter.toString();
-        } else if (resultSearch != null && resultSearch.length() > 0 && resultFilter.length() == 0) {
-            return resultSearch.toString();
-        } else if ("".equals(filter)) {
-            return "";
-        }
-        return null;
-    }
 
     public static boolean isNumeric(String str) {
         NumberFormat formatter = NumberFormat.getInstance();

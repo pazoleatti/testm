@@ -84,6 +84,11 @@ public class RefBookIncome102 implements RefBookDataProvider {
     }
 
     @Override
+    public Map<Long, Map<String, RefBookValue>> getRecordData(List<Long> recordIds) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public List<Date> getVersions(Date startDate, Date endDate) {
 		return dao.getVersions(startDate, endDate);
     }

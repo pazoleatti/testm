@@ -125,6 +125,11 @@ public class RefBookDepartment implements RefBookDataProvider {
     }
 
     @Override
+    public Map<Long, Map<String, RefBookValue>> getRecordData(List<Long> recordIds) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public List<Date> getVersions(Date startDate, Date endDate) {
         // версионирования нет, только одна версия
 		return Arrays.asList(new Date(0));
@@ -189,12 +194,14 @@ public class RefBookDepartment implements RefBookDataProvider {
         List<RefBookAttribute> attributes = refBookDao.getAttributes(REF_BOOK_ID);
         Map<String, RefBookValue> refBookValueMap = records.get(0).getValues();
         checkCorrectness(logger, attributes, records);
+        if (logger.containsLevel(LogLevel.ERROR))
+            return new ArrayList<Long>(0);
         int depId = refBookDepartmentDao.create(refBookValueMap, attributes);
         int terrBankId = departmentService.getParentTB(depId).getId();
         createPeriods(depId, fromCode(refBookValueMap.get(DEPARTMENT_TYPE_ATTRIBUTE).getNumberValue().intValue()),
                 terrBankId, logger);
 
-        return new ArrayList<Long>(0);
+        return new ArrayList<Long>(depId);
     }
 
     @Override
@@ -348,7 +355,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                 new Transformer() {
                     @Override
                     public Object transform(Object o) {
-                        return ((DepartmentFormType)o).getId();
+                        return ((DepartmentFormType) o).getId();
                     }
                 });
         if (dftIsd.isEmpty())

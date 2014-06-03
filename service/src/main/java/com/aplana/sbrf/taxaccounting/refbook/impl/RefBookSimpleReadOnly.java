@@ -73,6 +73,11 @@ public class RefBookSimpleReadOnly extends AbstractReadOnlyRefBook {
     }
 
     @Override
+    public Map<Long, Map<String, RefBookValue>> getRecordData(List<Long> recordIds) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public Map<RefBookAttributePair, String> getAttributesValues(List<RefBookAttributePair> attributePairs) {
         throw new UnsupportedOperationException();
     }

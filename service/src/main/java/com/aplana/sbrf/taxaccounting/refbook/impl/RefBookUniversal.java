@@ -112,6 +112,11 @@ public class RefBookUniversal implements RefBookDataProvider {
 	}
 
     @Override
+    public Map<Long, Map<String, RefBookValue>> getRecordData(List<Long> recordIds) {
+        return refBookDao.getRecordData(refBookId, recordIds);
+    }
+
+    @Override
     public RefBookValue getValue(Long recordId, Long attributeId) {
         return refBookDao.getValue(recordId, attributeId);
     }
