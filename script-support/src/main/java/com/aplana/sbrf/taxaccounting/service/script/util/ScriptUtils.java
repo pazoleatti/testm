@@ -888,7 +888,7 @@ public final class ScriptUtils {
      */
     public static void checkFixedValue(DataRow<Cell> row, String value, String valueExpected, int indexRow, String alias, Logger logger, boolean required) {
         if (value != null && !value.equals(valueExpected) || value == null && valueExpected != null) {
-            String msg = String.format(WRONG_FIXED_VALUE, indexRow, getColumnName(row, alias), value, valueExpected);
+            String msg = String.format(WRONG_FIXED_VALUE, indexRow, getColumnName(row, alias), value, valueExpected != null ? valueExpected : "");
             if (required) {
                 logger.error("%s", msg);
             } else {
