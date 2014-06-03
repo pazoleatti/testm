@@ -59,4 +59,9 @@ class RefBookUserDaoImpl extends AbstractDao implements RefBookUserDao {
         }
         return result;
     }
+
+    @Override
+    public Long getRowNum(Long recordId, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
+        return refBookUtils.getRowNum(REF_BOOK_ID, TABLE_NAME, recordId, filter, sortAttribute, isSortAscending, null);
+    }
 }

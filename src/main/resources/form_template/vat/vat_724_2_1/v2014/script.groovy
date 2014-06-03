@@ -188,7 +188,7 @@ def getIncome102Data(def date) {
 // Проверка наличия необходимых записей в справочнике «Отчет о прибылях и убытках»
 void checkIncome102() {
     // Наличие экземпляра Отчета о прибылях и убытках подразделения и периода, для которых сформирована текущая форма
-    if (getIncome102Data(getReportPeriodEndDate()) == null) {
+    if (getIncome102Data(getReportPeriodEndDate()) == []) {
         throw new ServiceException("Экземпляр Отчета о прибылях и убытках за период " +
                 "${getReportPeriodStartDate().format(dateFormat)} - ${getReportPeriodEndDate().format(dateFormat)} " +
                 "не существует (отсутствуют данные для расчета)!")

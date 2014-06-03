@@ -22,7 +22,9 @@ public interface FormDataSearchDao {
 	List<FormDataSearchResultItem> findByFilter(FormDataDaoFilter filter);
 
     List<Long> findIdsByFilter(FormDataDaoFilter filter);
-	
+
+    Long getRowNumByFilter(FormDataDaoFilter filter, FormDataSearchOrdering ordering, boolean ascSorting, Long formDataId);
+
 	/**
 	 * Возвращает список {@link FormDataSearchResultItem}, представляющий набор данных по налоговым формам, удовлетворяющих 
 	 * переданному фильтру, с учётом заданной сортировки и заданному диапазону индексов (параметры паджинации) 

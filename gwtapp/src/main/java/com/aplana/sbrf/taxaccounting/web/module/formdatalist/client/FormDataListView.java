@@ -19,19 +19,14 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.cellview.client.DataGrid;
-import com.google.gwt.user.cellview.client.Header;
-import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.cellview.client.*;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
-import com.google.gwt.view.client.AsyncDataProvider;
-import com.google.gwt.view.client.HasData;
-import com.google.gwt.view.client.Range;
+import com.google.gwt.view.client.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -67,6 +62,8 @@ public class FormDataListView extends
 
     private Map<Integer, String> departmentFullNames;
 
+    private SingleSelectionModel<FormDataSearchResultItem> selectionModel;
+
     @UiField
 	Panel filterContentPanel;
 
@@ -98,6 +95,9 @@ public class FormDataListView extends
 	@Inject
 	public FormDataListView(final MyBinder binder) {
 		initWidget(binder.createAndBindUi(this));
+
+        selectionModel = new SingleSelectionModel<FormDataSearchResultItem>();
+        formDataTable.setSelectionModel(selectionModel);
 
 		TextColumn<FormDataSearchResultItem> formKindColumn = new TextColumn<FormDataSearchResultItem>() {
 			@Override
@@ -206,6 +206,15 @@ public class FormDataListView extends
 	}
 
     @Override
+    public Long getSelectedId() {
+        FormDataSearchResultItem item = selectionModel.getSelectedObject();
+        if (item != null) {
+            return item.getFormDataId();
+        }
+        return null;
+    }
+
+    @Override
     public void updateFormDataTable(TaxType taxType) {
         if (!taxType.equals(TaxType.DEAL)) {
             create.setText(FORM_DATA_CREATE);
@@ -239,13 +248,32 @@ public class FormDataListView extends
 	}
 
 	@Override
-	public void setTableData(int start, long totalCount, List<FormDataSearchResultItem> records, Map<Integer, String> departmentFullNames) {
-		formDataTable.setRowCount((int) totalCount);
+	public void setTableData(int start, long totalCount, List<FormDataSearchResultItem> records, Map<Integer, String> departmentFullNames, Long selectedItemId) {
+        formDataTable.setRowCount((int) totalCount);
 		formDataTable.setRowData(start, records);
         this.departmentFullNames = departmentFullNames;
+        selectionModel.clear();
+        if (selectedItemId != null) {
+            for(FormDataSearchResultItem item: records) {
+                if (item.getFormDataId().equals(selectedItemId)) {
+                    selectionModel.setSelected(item, true);
+                    break;
+                }
+            }
+        }
 	}
 
-	@Override
+    @Override
+    public void setPage(Integer page) {
+        if (page != null) pager.setPage(page);
+    }
+
+    @Override
+    public int getPage() {
+        return pager.getPage();
+    }
+
+    @Override
 	public FormDataSearchOrdering getSearchOrdering(){
 		if (sortByColumn == null){
 			setSortByColumn("");

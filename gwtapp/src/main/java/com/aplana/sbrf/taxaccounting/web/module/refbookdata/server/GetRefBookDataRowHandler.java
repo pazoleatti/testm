@@ -80,6 +80,21 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
                 }
             }
 
+            if (action.getRecordId() != null) {
+                Long rowNum = refBookDataProvider
+                        .getRowNum(action.getRelevanceDate(), action.getRecordId(), filter, refBook.getAttributes().get(0), true);
+                result.setRowNum(rowNum);
+
+                if (rowNum != null) {
+                    rowNum = rowNum - 1;
+                    int countOfRecords = action.getPagingParams().getCount();
+                    int startIndex = action.getPagingParams().getStartIndex();
+                    int page = ((int)(rowNum/countOfRecords));
+                    if (((int)startIndex/countOfRecords) != page) {
+                        return result;
+                    }
+                }
+            }
 			PagingResult<Map<String, RefBookValue>> refBookPage = refBookDataProvider
 					.getRecords(action.getRelevanceDate(), action.getPagingParams(), filter, refBook.getAttributes().get(0));
 			List<RefBookDataRow> rows = new ArrayList<RefBookDataRow>();

@@ -16,7 +16,9 @@ public class GetFormDataListResult implements Result {
 	private List<ReportPeriod> reportPeriods;
     Map<Integer, String> departmentFullNames;
 
-	//общее количество записей (на всех страницах)
+    private Integer page;
+
+    //общее количество записей (на всех страницах)
 	private long totalCountOfRecords;
 	
 	public GetFormDataListResult() {
@@ -66,4 +68,12 @@ public class GetFormDataListResult implements Result {
 	public void setTotalCountOfRecords(long totalCountOfRecords) {
 		this.totalCountOfRecords = totalCountOfRecords;
 	}
+
+    public Integer getPage() {
+        return page;
+    }
+
+    public void setPage(Integer page) {
+        this.page = page;
+    }
 }

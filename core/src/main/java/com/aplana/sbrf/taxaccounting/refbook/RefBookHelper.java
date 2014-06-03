@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Универсальный помощник для работы со справочниками
@@ -61,4 +62,8 @@ public interface RefBookHelper {
      */
     Map<Long, String> singleRecordDereferenceWithAttrId2(RefBook refBook, RefBookDataProvider provider,
                                                          List<RefBookAttribute> attributes, Map<String, RefBookValue> record);
+
+    RefBook getRefBookByAttributeId(Long attributeId);
+
+    Map<Long, RefBookDataProvider> getProviders(Set<Long> attributeIds);
 }

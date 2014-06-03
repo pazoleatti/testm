@@ -42,4 +42,14 @@ public interface RefBookUserDao {
      * @return
      */
     Map<String, RefBookValue> getRecordData(Long recordId);
+
+    /**
+     * Получение row_num записи по заданным параметрам
+     *
+     * @param recordId
+     * @param filter
+     * @param sortAttribute
+     * @return
+     */
+    Long getRowNum(Long recordId, String filter, RefBookAttribute sortAttribute, boolean isSortAscending);
 }

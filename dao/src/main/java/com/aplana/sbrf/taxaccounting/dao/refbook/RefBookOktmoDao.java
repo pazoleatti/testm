@@ -11,12 +11,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Дао для больших справочников, которые хранятся в отдельных таблицах
- * Например: ОКАТО, ОКТМО
+ * Дао для октмо
  *
  * @author auldanov, dloshkarev
  */
-public interface RefBookBigDataDao {
+public interface RefBookOktmoDao {
 
     /**
      * Загружает данные справочника на определенную дату актуальности
@@ -29,6 +28,18 @@ public interface RefBookBigDataDao {
      * @return
      */
     PagingResult<Map<String, RefBookValue>> getRecords(String tableName, Long refBookId, Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending);
+
+    /**
+     * Получение row_num записи по заданным параметрам
+     * @param tableName название таблицы
+     * @param refBookId код справочника
+     * @param version дата актуальности
+     * @param recordId id записи справочника
+     * @param filter условие фильтрации строк. Может быть не задано
+     * @param sortAttribute сортируемый столбец. Может быть не задан
+     * @return
+     */
+    Long getRowNum(String tableName, Long refBookId, Date version, Long recordId, String filter, RefBookAttribute sortAttribute, boolean isSortAscending);
 
     /**
      * Получение записи справочника по recordId
@@ -220,4 +231,13 @@ public interface RefBookBigDataDao {
      * @return возвращает список дат начала периода актуальности, для версий у которых были найдены дочерние элементы. Либо null, если их нет
      */
     List<Date> hasChildren(String tableName, List<Long> uniqueRecordIds);
+
+    /**
+     * Возвращает значения атрибутов для указанных записей
+     * @param attributePairs список пар идентификатор записи-идентификатор атрибута
+     * @return
+     *      ключ - пара идентификатор записи-идентификатор атрибута
+     *      значение - строковое представление значения атрибута
+     */
+    Map<RefBookAttributePair,String> getAttributesValues(List<RefBookAttributePair> attributePairs);
 }

@@ -51,7 +51,6 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 	private Long refBookDataId;
 
     private Long recordId;
-    private Integer page;
     private FormMode mode;
 
 	EditFormPresenter editFormPresenter;
@@ -66,6 +65,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 		void setTableColumns(final List<RefBookColumn> columns);
 		void setTableData(int start, int totalCount, List<RefBookDataRow> dataRows);
 		void setSelected(Long recordId);
+        Long getSelected();
 		void assignDataProvider(int pageSize, AbstractDataProvider<RefBookDataRow> data);
         int getPageSize();
 		void setRange(Range range);
@@ -109,7 +109,6 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 	protected void onReveal() {
 		super.onReveal();
         LogCleanEvent.fire(this);
-        if (recordId != null) getView().setPage(page);
 		setInSlot(TYPE_editFormPresenter, editFormPresenter);
 	}
 
@@ -163,8 +162,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 	@Override
 	public void onSelectionChanged() {
 		if (getView().getSelectedRow() != null) {
-            recordId = getView().getSelectedRow().getRefBookRowId();
-            page = getView().getPage();
+            Long recordId = getView().getSelectedRow().getRefBookRowId();
             editFormPresenter.setRecordId(recordId);
 			editFormPresenter.show(recordId);
         }
@@ -193,11 +191,10 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         editFormPresenter.setRecordId(null);
 		GetRefBookAttributesAction action = new GetRefBookAttributesAction();
 		refBookDataId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_DATA_ID, null));
-        if (page != null && request.getParameterNames().contains(RefBookDataTokens.REFBOOK_RECORD_ID)) {
+        if (request.getParameterNames().contains(RefBookDataTokens.REFBOOK_RECORD_ID)) {
             recordId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_RECORD_ID, null));
         } else {
             recordId = null;
-            page = null;
             getView().resetSearchInputBox();
             setMode(FormMode.VIEW);
         }
@@ -245,6 +242,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 			if (refBookDataId == null) return;
 			final Range range = display.getVisibleRange();
 			GetRefBookTableDataAction action = new GetRefBookTableDataAction();
+            action.setRecordId(recordId);
 			action.setRefBookId(refBookDataId);
 			action.setPagingParams(new PagingParams(range.getStart() + 1, range.getLength()));
 			action.setRelevanceDate(getView().getRelevanceDate());
@@ -254,16 +252,24 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 							new AbstractCallback<GetRefBookTableDataResult>() {
 								@Override
 								public void onSuccess(GetRefBookTableDataResult result) {
+                                    if (result.getRowNum() != null) {
+                                        int page = (int)((result.getRowNum() - 1)/range.getLength());
+                                        if (page != getView().getPage()) {
+                                            getView().setPage(page);
+                                            return ;
+                                        }
+                                    }
 									getView().setTableData(range.getStart(),
                                             result.getTotalCount(), result.getDataRows());
                                     // http://jira.aplana.com/browse/SBRFACCTAX-5684 автофокус на первую строку
-                                    if ((recordId == null || page == null) && !result.getDataRows().isEmpty()) {
+                                    if (recordId == null && !result.getDataRows().isEmpty()) {
                                         getView().setSelected(result.getDataRows().get(0).getRefBookRowId());
                                     }
                                     // http://jira.aplana.com/browse/SBRFACCTAX-5759
-                                    if (recordId != null && page != null) {
+                                    if (recordId != null) {
                                         getView().setSelected(recordId);
                                     }
+                                    recordId = null;
                                     //LogAddEvent.fire(RefBookDataPresenter.this, result.getUuid());
 								}
 							}, RefBookDataPresenter.this));

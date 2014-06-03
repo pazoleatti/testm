@@ -1,4 +1,4 @@
- package refbook.currency_rate
+package refbook.currency_rate
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
@@ -14,7 +14,7 @@ import java.text.SimpleDateFormat
 /**
  * blob_data.id = '99e90406-60f0-4a87-b6f0-7f127abf1fbb'
  *
- * Cкрипт справочника "Курсы валют" из КСШ
+ * Cкрипт справочника "Курсы валют" из КСШ (id = 22)
  *
  * @author Stanislav Yasinskiy
  */
@@ -26,6 +26,9 @@ switch (formDataEvent) {
 
 @Field
 def REFBOOK_ID = 22
+
+@Field
+def EMPTY_DATA_ERROR = "Сообщение не содержит значений, соответствующих загружаемым данным!"
 
 void importFromXML() {
     def dataProvider = refBookFactory.getDataProvider(REFBOOK_ID)
@@ -39,8 +42,9 @@ void importFromXML() {
     def Long code = null // код валюты
     def BigDecimal rate = null // курс валюты
     def BigDecimal lotSize = 1 // Атрибут LotSize
-    def Map<String, Number> codeToRecordId = new HashMap<String, Number>() // Код → Id элемента
+    // def Map<String, Number> codeToRecordId = new HashMap<String, Number>() // Код → Id элемента
 
+    def fileRecords = []
     try {
         def XMLInputFactory factory = XMLInputFactory.newInstance();
         factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE)
@@ -55,13 +59,6 @@ void importFromXML() {
                 // Версия справочника
                 if (reader.getName().equals(QName.valueOf("StartDateTime"))) {
                     version = sdf.parse(reader.getElementText())
-                    // Получение значений на максимальную дату актуальности
-                    def maxActualDate = new GregorianCalendar(2114, Calendar.JANUARY, 1).getTime() // 01.01.2114
-                    dataProvider.getRecords(maxActualDate, null, null, null).each {
-                        if (it.CODE_NUMBER != null) {
-                            codeToRecordId.put(it.CODE_NUMBER.referenceValue, it.get(RefBook.RECORD_ID_ALIAS).numberValue)
-                        }
-                    }
                 }
 
                 // Дошли до секции с курсами
@@ -104,13 +101,8 @@ void importFromXML() {
                 recordsMap.put("CODE_NUMBER", new RefBookValue(RefBookAttributeType.REFERENCE, code))
                 recordsMap.put("NAME", new RefBookValue(RefBookAttributeType.REFERENCE, code))
                 recordsMap.put("CODE_LETTER", new RefBookValue(RefBookAttributeType.REFERENCE, code))
-                recordsMap.put("RATE", new RefBookValue(RefBookAttributeType.NUMBER, rate/lotSize))
-                if (codeToRecordId.containsKey(code)) {
-                    recordsMap.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, codeToRecordId.get(code)))
-                    updateList.add(recordsMap)
-                } else {
-                    insertList.add(recordsMap)
-                }
+                recordsMap.put("RATE", new RefBookValue(RefBookAttributeType.NUMBER, rate / lotSize))
+                fileRecords.add(recordsMap)
                 lotSize = 1
             }
             reader.next()
@@ -119,8 +111,42 @@ void importFromXML() {
         reader?.close()
     }
 
+    if (fileRecords.empty) {
+        throw new ServiceException(EMPTY_DATA_ERROR)
+    }
+
+    // Получение идентификаторов строк
+    def filterStr = ''
+    fileRecords.each { record ->
+        filterStr += ((record == fileRecords.getAt(0)) ? "" : " or ") + " CODE_NUMBER = " + record.CODE_NUMBER.referenceValue
+    }
+
+    def recordIds = dataProvider.getUniqueRecordIds(null, filterStr)
+
+    // Получение записей
+    def existRecords = [:]
+    if (recordIds != null && !recordIds.empty) {
+        existRecords = dataProvider.getRecordData(recordIds)
+    }
+
+    // CODE_NUMBER → Запись
+    def existMap = [:]
+    existRecords.each { key, record ->
+        existMap.put(record.CODE_NUMBER.referenceValue, record)
+    }
+
+    fileRecords.each { record ->
+        def existRecord = existMap[record.CODE_NUMBER.referenceValue]
+        if (existRecord != null) {
+            record.put(RefBook.RECORD_ID_ALIAS, existRecord[RefBook.RECORD_ID_ALIAS])
+            updateList.add(record)
+        } else {
+            insertList.add(record)
+        }
+    }
+
     if (insertList.empty && updateList.empty) {
-        throw new ServiceException("Сообщение не содержит значений, соответствующих загружаемым данным!")
+        throw new ServiceException(EMPTY_DATA_ERROR)
     }
     if (!insertList.empty) {
         dataProvider.insertRecords(version, insertList)

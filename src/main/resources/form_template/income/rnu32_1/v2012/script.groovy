@@ -458,10 +458,11 @@ def calc17(def row, def lastDay) {
 }
 
 def calc18(def row) {
-    if (row.incomePrev == null || row.incomeShortPosition == null || row.percIncome == null) {
+    if (row.percIncome == null) {
         return null
     }
-    return roundValue(row.incomePrev + row.incomeShortPosition + row.percIncome, 2)
+    def tmp = (row.incomePrev ?: 0) + (row.incomeShortPosition ?: 0) + row.percIncome
+    return roundValue(tmp, 2)
 }
 
 /** Получить сумму столбца. */

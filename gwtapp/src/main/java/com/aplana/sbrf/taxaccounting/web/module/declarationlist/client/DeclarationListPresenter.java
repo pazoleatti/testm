@@ -45,6 +45,8 @@ public class DeclarationListPresenter extends
      */
     private Map<TaxType, DeclarationDataFilter> filterStates = new HashMap<TaxType, DeclarationDataFilter>();
     private Map<Integer, String> lstHistory = new HashMap<Integer, String>();
+    private Long selectedItemId;
+    private TaxType taxType;
 
     @ProxyEvent
     @Override
@@ -86,10 +88,22 @@ public class DeclarationListPresenter extends
 			LogCleanEvent.fire(this);
 			LogShowEvent.fire(this, false);
 			super.prepareFromRequest(request);
-			TaxType taxType = TaxType.valueOf(request.getParameter("nType", ""));
+            TaxType taxTypeOld = taxType;
+			taxType = TaxType.valueOf(request.getParameter("nType", ""));
             getView().initTable(taxType);
+            if (taxTypeOld == null || !taxType.equals(taxTypeOld)) {
+                filterStates.clear();
+                getView().updateTitle(taxType);
+                selectedItemId = null;
+            }
+            String url = DeclarationDataTokens.declarationData + ";" +DeclarationDataTokens.declarationId;
+            if ((lstHistory.get(0) == null || !lstHistory.get(0).startsWith(url)) &&
+                    (lstHistory.get(1) == null || !lstHistory.get(1).startsWith(url))) {
+                filterPresenter.getView().clean();
+                filterStates.clear();
+                selectedItemId = null;
+            }
 			filterPresenter.initFilter(taxType, filterStates.get(taxType));
-			getView().updateTitle(taxType);
             filterPresenter.getView().updateFilter(taxType);
             getView().updatePageSize(taxType);
 		} catch (Exception e) {
@@ -116,6 +130,7 @@ public class DeclarationListPresenter extends
     @Override
     public void onRangeChange(final int start, final int length) {
         DeclarationDataFilter filter = filterPresenter.getFilterData();
+        filter.setDeclarationDataId(selectedItemId);
         filter.setCountOfRecords(length);
         filter.setStartIndex(start);
         filter.setAscSorting(getView().isAscSorting());
@@ -127,20 +142,15 @@ public class DeclarationListPresenter extends
                 .defaultCallback(new AbstractCallback<GetDeclarationListResult>() {
                     @Override
                     public void onSuccess(GetDeclarationListResult result) {
-                        getView().setTableData(start, result.getTotalCountOfRecords(),
-                                result.getRecords(), result.getDepartmentFullNames());
+                        if (result.getPage() != null && !result.getPage().equals(getView().getPage())) {
+                            getView().setPage(result.getPage());
+                        } else {
+                            getView().setTableData(start, result.getTotalCountOfRecords(),
+                                result.getRecords(), result.getDepartmentFullNames(), selectedItemId);
+                            selectedItemId = null;
+                        }
                     }
                 }, DeclarationListPresenter.this));
-    }
-
-    @Override
-    protected void onReveal() {
-        super.onReveal();
-        String url = DeclarationDataTokens.declarationData + ";" +DeclarationDataTokens.declarationId;
-        if ((lstHistory.get(0) == null || !lstHistory.get(0).startsWith(url)) &&
-                (lstHistory.get(1) == null || !lstHistory.get(1).startsWith(url))) {
-            filterPresenter.getView().clean();
-        }
     }
 
     private void updateTitle(TaxType taxType){
@@ -176,5 +186,11 @@ public class DeclarationListPresenter extends
         // то вместо создания нового мы должны будем получать фильтр из мапки и обновлять.
 
         filterStates.put(taxType, cloneFilter);
+    }
+
+    @Override
+    protected void onHide() {
+        super.onHide();
+        selectedItemId = getView().getSelectedId();
     }
 }

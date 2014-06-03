@@ -69,12 +69,28 @@ public class GetDeclarationListHandler extends AbstractActionHandler<GetDeclarat
             action.getDeclarationFilter().setDepartmentIds(availableList);
         }
 
+        GetDeclarationListResult result = new GetDeclarationListResult();
+
+        if (action.getDeclarationFilter().getDeclarationDataId() != null) {
+            Long rowNum = declarationDataSearchService
+                    .getRowNumByFilter(action.getDeclarationFilter());
+
+            if (rowNum != null) {
+                rowNum = rowNum - 1;
+                int countOfRecords = action.getDeclarationFilter().getCountOfRecords();
+                int startIndex = action.getDeclarationFilter().getStartIndex();
+                result.setPage((int)(rowNum/countOfRecords));
+                if (((int)startIndex/countOfRecords) != result.getPage()) {
+                    return result;
+                }
+            }
+        }
+
 		PagingResult<DeclarationDataSearchResultItem> page = declarationDataSearchService.search(action.getDeclarationFilter());
         Map<Integer, String> departmentFullNames = new HashMap<Integer, String>();
         for(DeclarationDataSearchResultItem item: page) {
             if (departmentFullNames.get(item.getDepartmentId()) == null) departmentFullNames.put(item.getDepartmentId(), departmentService.getParentsHierarchy(item.getDepartmentId()));
         }
-        GetDeclarationListResult result = new GetDeclarationListResult();
 		result.setRecords(page);
         result.setDepartmentFullNames(departmentFullNames);
 		result.setTotalCountOfRecords(page.getTotalCount());

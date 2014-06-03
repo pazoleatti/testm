@@ -29,6 +29,7 @@ public class RefBookListView extends AbstractRefBookListView implements RefBookL
     @UiConstructor
     public RefBookListView(final Binder uiBinder) {
         initWidget(uiBinder.createAndBindUi(this));
+        setSelectionModel();
         initTable();
     }
 

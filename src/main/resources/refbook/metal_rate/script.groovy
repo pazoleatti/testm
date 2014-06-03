@@ -1,7 +1,9 @@
 package refbook.metal_rate
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.ScriptStatus
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
@@ -14,7 +16,7 @@ import java.text.SimpleDateFormat
 /**
  * blob_data.id = '99e90406-60f0-4a87-b6f0-7f127abf1182'
  *
- * Скрипт загрузки справочника "Курсы драгоценных металлов" из КСШ
+ * Скрипт загрузки справочника "Курсы драгоценных металлов" из КСШ  (id = 90)
  *
  * @author Stanislav Yasinskiy
  */
@@ -26,6 +28,9 @@ switch (formDataEvent) {
 
 @Field
 def REFBOOK_ID = 90
+
+@Field
+def EMPTY_DATA_ERROR = "Сообщение не содержит значений, соответствующих загружаемым данным!"
 
 void importFromXML() {
     def dataProvider = refBookFactory.getDataProvider(REFBOOK_ID)
@@ -39,8 +44,8 @@ void importFromXML() {
     def List<Map<String, RefBookValue>> updateList = new ArrayList<Map<String, RefBookValue>>() // Измененные элементы
     def Long code = null // код драг. металла
     def BigDecimal rate = null // курс драг. металла
-    def Map<String, Number> codeToRecordId = new HashMap<String, Number>() // Код → Id элемента
 
+    def fileRecords = []
     try {
         def XMLInputFactory factory = XMLInputFactory.newInstance();
         factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE)
@@ -55,13 +60,6 @@ void importFromXML() {
                 // Версия справочника
                 if (reader.getName().equals(QName.valueOf("StartDateTime"))) {
                     version = sdf.parse(reader.getElementText())
-                    // Получение значений на максимальную дату актуальности
-                    def maxActualDate = new GregorianCalendar(2114, Calendar.JANUARY, 1).getTime() // 01.01.2114
-                    dataProvider.getRecords(maxActualDate, null, null, null).records.each {
-                        if (it.CODE != null) {
-                            codeToRecordId.put(it.CODE.referenceValue, it.get(RefBook.RECORD_ID_ALIAS).numberValue)
-                        }
-                    }
                 }
 
                 // Дошли до секции с курсами
@@ -92,12 +90,7 @@ void importFromXML() {
                 recordsMap = new HashMap<String, RefBookValue>()
                 recordsMap.put("CODE", new RefBookValue(RefBookAttributeType.REFERENCE, code))
                 recordsMap.put("RATE", new RefBookValue(RefBookAttributeType.NUMBER, rate))
-                if (codeToRecordId.containsKey(code)) {
-                    recordsMap.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, codeToRecordId.get(code)))
-                    updateList.add(recordsMap)
-                } else {
-                    insertList.add(recordsMap)
-                }
+                fileRecords.add(recordsMap)
             }
             reader.next()
         }
@@ -105,9 +98,44 @@ void importFromXML() {
         reader?.close()
     }
 
-    if (insertList.empty && updateList.empty) {
-        throw new ServiceException("Сообщение не содержит значений, соответствующих загружаемым данным!")
+    if (fileRecords.empty) {
+        throw new ServiceException(EMPTY_DATA_ERROR)
     }
+
+    // Получение идентификаторов строк
+    def filterStr = ''
+    fileRecords.each { record ->
+        filterStr += ((record == fileRecords.getAt(0)) ? "" : " or ") + " CODE = " + record.CODE.referenceValue
+    }
+
+    def recordIds = dataProvider.getUniqueRecordIds(null, filterStr)
+
+    // Получение записей
+    def existRecords = [:]
+    if (recordIds != null && !recordIds.empty) {
+        existRecords = dataProvider.getRecordData(recordIds)
+    }
+
+    // CODE → Запись
+    def existMap = [:]
+    existRecords.each { key, record ->
+        existMap.put(record.CODE.referenceValue, record)
+    }
+
+    fileRecords.each { record ->
+        def existRecord = existMap[record.CODE.referenceValue]
+        if (existRecord != null) {
+            record.put(RefBook.RECORD_ID_ALIAS, existRecord[RefBook.RECORD_ID_ALIAS])
+            updateList.add(record)
+        } else {
+            insertList.add(record)
+        }
+    }
+
+    if (insertList.empty && updateList.empty) {
+        throw new ServiceException(EMPTY_DATA_ERROR)
+    }
+
     if (!insertList.empty) {
         dataProvider.insertRecords(version, insertList)
     }

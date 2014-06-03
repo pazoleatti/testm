@@ -60,6 +60,8 @@ public class FormDataListPresenter extends
 
     private Map<Integer, String> lstHistory = new HashMap<Integer, String>();
 
+    private Long selectedItemId;
+
 	@Inject
 	public FormDataListPresenter(EventBus eventBus, MyView view, MyProxy proxy,
 			PlaceManager placeManager, DispatchAsync dispatcher,
@@ -91,12 +93,17 @@ public class FormDataListPresenter extends
 		taxType = TaxType.valueOf(request.getParameter("nType", ""));
 		filterPresenter.changeFilterElementNames(taxType);
         getView().updatePageSize(taxType);
-        if (taxTypeOld == null || !taxType.equals(taxTypeOld)) getView().updateFormDataTable(taxType);
+        if (taxTypeOld == null || !taxType.equals(taxTypeOld)) {
+            filterStates.clear();
+            getView().updateFormDataTable(taxType);
+            selectedItemId = null;
+        }
         String url = FormDataPresenter.NAME_TOKEN + ";" + FormDataPresenter.FORM_DATA_ID;
         if ((lstHistory.get(0) == null || !lstHistory.get(0).startsWith(url)) &&
                 (lstHistory.get(1) == null || !lstHistory.get(1).startsWith(url))) {
             filterPresenter.getView().clean();
             filterStates.clear();
+            selectedItemId = null;
         }
         // Передаем типы налоговых форм
         GetKindListAction kindListAction = new GetKindListAction();
@@ -185,6 +192,7 @@ public class FormDataListPresenter extends
         if (filter == null) {
             return;
         }
+        filter.setFormDataId(selectedItemId);
 		filter.setCountOfRecords(length);
 		filter.setStartIndex(start);
 		filter.setAscSorting(getView().isAscSorting());
@@ -195,7 +203,12 @@ public class FormDataListPresenter extends
 				.defaultCallback(new AbstractCallback<GetFormDataListResult>() {
 					@Override
 					public void onSuccess(GetFormDataListResult result) {
-						getView().setTableData(start, result.getTotalCountOfRecords(), result.getRecords(), result.getDepartmentFullNames());
+                        if (result.getPage() != null && !result.getPage().equals(getView().getPage())) { // находим и устанавливаем нужную Page
+                            getView().setPage(result.getPage());
+                        } else {
+                            getView().setTableData(start, result.getTotalCountOfRecords(), result.getRecords(), result.getDepartmentFullNames(), selectedItemId);
+                            selectedItemId = null;
+                        }
 					}
 				}, FormDataListPresenter.this));
 	}
@@ -203,5 +216,11 @@ public class FormDataListPresenter extends
     @Override
     public void onCreateClicked() {
         FormDataListCreateEvent.fire(this);
+    }
+
+    @Override
+    protected void onHide() {
+        super.onHide();
+        selectedItemId = getView().getSelectedId();
     }
 }

@@ -75,11 +75,11 @@ public class RefBookFactoryImpl implements RefBookFactory {
 			refBookSimple.setRefBookId(RefBookSimpleReadOnly.SEC_ROLE_REF_BOOK_ID);
 			refBookSimple.setTableName(RefBookSimpleReadOnly.SEC_ROLE_TABLE_NAME);
 			return refBookSimple;
-        } else if(RefBookBigDataProvider.OKTMO_REF_BOOK_ID.equals(refBookId)) {  //  Справочник "ОКТМО"
-            RefBookBigDataProvider dataProvider = (RefBookBigDataProvider) applicationContext.getBean("RefBookBigDataProvider", RefBookDataProvider.class);
+        } else if(RefBookOktmoProvider.OKTMO_REF_BOOK_ID.equals(refBookId)) {  //  Справочник "ОКТМО"
+            RefBookOktmoProvider dataProvider = (RefBookOktmoProvider) applicationContext.getBean("RefBookOktmoProvider", RefBookDataProvider.class);
             dataProvider.setRefBookId(refBookId);
-            if (RefBookBigDataProvider.OKTMO_REF_BOOK_ID.equals(refBookId)) {
-                dataProvider.setTableName(RefBookBigDataProvider.OKTMO_TABLE_NAME);
+            if (RefBookOktmoProvider.OKTMO_REF_BOOK_ID.equals(refBookId)) {
+                dataProvider.setTableName(RefBookOktmoProvider.OKTMO_TABLE_NAME);
             }
             return dataProvider;
 		} else if (RefBookFormDataKind.REF_BOOK_ID.equals(refBookId)) {
@@ -219,7 +219,7 @@ public class RefBookFactoryImpl implements RefBookFactory {
                 RefBookUser.REF_BOOK_ID,
                 RefBookSimpleReadOnly.FORM_TYPE_REF_BOOK_ID,
                 RefBookSimpleReadOnly.SEC_ROLE_REF_BOOK_ID,
-                RefBookBigDataProvider.OKTMO_REF_BOOK_ID,
+                RefBookOktmoProvider.OKTMO_REF_BOOK_ID,
                 RefBookFormDataKind.REF_BOOK_ID};
 
         for (Long rbId : foreignRefBooks) {

@@ -16,9 +16,7 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.NoSelectionModel;
-import com.google.gwt.view.client.Range;
+import com.google.gwt.view.client.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -41,15 +39,24 @@ public class DeclarationTemplateListView extends ViewWithUiHandlers<DeclarationT
     @UiField
     Panel filterContentPanel;
 
-    private NoSelectionModel<DeclarationTypeTemplate> selectionModel;
+    private SingleSelectionModel<DeclarationTypeTemplate> selectionModel;
     private ListDataProvider<DeclarationTypeTemplate> dataProvider = new ListDataProvider<DeclarationTypeTemplate>();
     private ColumnSortEvent.ListHandler<DeclarationTypeTemplate> dataSortHandler;
+
+    private DeclarationTypeTemplate selectedItem;
 
     @Inject
 	public DeclarationTemplateListView(Binder binder) {
 		initWidget(binder.createAndBindUi(this));
 
-        selectionModel = new NoSelectionModel<DeclarationTypeTemplate>();
+        selectionModel = new SingleSelectionModel<DeclarationTypeTemplate>();
+
+        selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                selectedItem = getSelectedElement();
+            }
+        });
 
 		// колонка Наименование декларации
 		Column<DeclarationTypeTemplate, DeclarationTypeTemplate> linkColumn = new Column<DeclarationTypeTemplate, DeclarationTypeTemplate>(
@@ -112,13 +119,22 @@ public class DeclarationTemplateListView extends ViewWithUiHandlers<DeclarationT
 	@Override
 	public void setDeclarationTypeTemplateRows(List<DeclarationTypeTemplate> result) {
         dataProvider.setList(result);
-        declarationTemplateTable.setVisibleRange(new Range(0, result.size()));
+        declarationTemplateTable.setVisibleRange(0, result.size());
         dataSortHandler.setList(dataProvider.getList());
+        selectionModel.clear();
+        if (selectedItem != null) {
+            for(DeclarationTypeTemplate item: result) {
+                if (item.getTypeId() == selectedItem.getTypeId()) {
+                    selectionModel.setSelected(item, true);
+                    break;
+                }
+            }
+        }
 	}
 
     @Override
     public DeclarationTypeTemplate getSelectedElement() {
-        return selectionModel.getLastSelectedObject();
+        return selectionModel.getSelectedObject();
     }
 
     @Override

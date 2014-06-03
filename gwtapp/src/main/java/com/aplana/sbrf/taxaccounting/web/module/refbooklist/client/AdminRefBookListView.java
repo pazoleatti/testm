@@ -31,6 +31,7 @@ public class AdminRefBookListView extends AbstractRefBookListView implements Adm
     @UiConstructor
     public AdminRefBookListView(final Binder uiBinder) {
         initWidget(uiBinder.createAndBindUi(this));
+        setSelectionModel();
         initTable();
         loadButton.removeFromParent();
         formHeader.setText("Настройки");

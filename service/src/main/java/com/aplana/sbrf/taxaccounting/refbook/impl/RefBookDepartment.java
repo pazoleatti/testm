@@ -115,6 +115,12 @@ public class RefBookDepartment implements RefBookDataProvider {
     }
 
     @Override
+    public Long getRowNum(Date version, Long recordId,
+                          String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
+        throw new UnsupportedOperationException();//return refBookDepartmentDao.getRowNum(recordId, filter, sortAttribute, isSortAscending);
+    }
+
+    @Override
     public List<Long> getParentsHierarchy(Long uniqueRecordId) {
         return refBookUtils.getParentsHierarchy(DEPARTMENT_TABLE_NAME, uniqueRecordId);
     }
@@ -411,6 +417,12 @@ public class RefBookDepartment implements RefBookDataProvider {
     @Override
     public Long getRecordId(Long uniqueRecordId) {
        return uniqueRecordId;
+    }
+
+    @Override
+    public Map<RefBookAttributePair, String> getAttributesValues(List<RefBookAttributePair> attributePairs) {
+        //Не реализовано, т.к решили что пока иерархические справочники не будем оптимизировать
+        throw new UnsupportedOperationException();
     }
 
     private void checkCorrectness(Logger logger, List<RefBookAttribute> attributes, List<RefBookRecord> records) {
