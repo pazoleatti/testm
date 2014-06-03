@@ -69,6 +69,11 @@ public class RefBookUser implements RefBookDataProvider {
     }
 
     @Override
+    public Map<Long, Map<String, RefBookValue>> getRecordData(List<Long> recordIds) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public List<Date> getVersions(Date startDate, Date endDate) {
         List<Date> list = new ArrayList<Date>();
         list.add(Calendar.getInstance().getTime());
@@ -159,6 +164,11 @@ public class RefBookUser implements RefBookDataProvider {
 
     @Override
     public Long getRecordId(Long uniqueRecordId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Map<RefBookAttributePair, String> getAttributesValues(List<RefBookAttributePair> attributePairs) {
         throw new UnsupportedOperationException();
     }
 }

@@ -1,4 +1,4 @@
-package form_template.vat.declaration.v2014
+package form_template.vat.declaration_audit.v2014
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
@@ -7,8 +7,10 @@ import groovy.transform.Field
 import groovy.xml.MarkupBuilder
 
 /**
- * Декларация НДС. Генератор XML.
- * http://jira.aplana.com/browse/SBRFACCTAX-6453
+ * Декларация по налогу на НДС (аудит). Генератор XML.
+ * http://jira.aplana.com/browse/SBRFACCTAX-7579
+ *
+ * совпадает с "Декларация по налогу на НДС" (declaration_fns), кроме заполнения секции "РАЗДЕЛ 2"
  *
  * TODO:
  *      - расчет для НалНеВыч не сделан, сказали пока не делать, потому что неясно как вычислять.
@@ -339,41 +341,21 @@ void generateXML() {
                 // РАЗДЕЛ 1 - КОНЕЦ
 
                 // РАЗДЕЛ 2
-                def section2Rows = getSection2Rows(dataRowsMap)
-                for (def row : section2Rows) {
-                    СумУплНА(
-                            // КППИно: empty, // в xml быть не должно (чтз 8.1.1)
-                            КБК: '18210301000011000110',
-                            ОКАТО: okato,
-                            СумИсчисл: row.sumIschisl,
-                            КодОпер: row.codeOper,
-                            СумИсчислОтгр: empty,
-                            СумИсчислОпл: empty,
-                            СумИсчислНА: empty
-                    ) {
-                        СведПродЮЛ(
-                                НаимПрод: row.naimProd,
-                                ИННЮЛПрод: row.innULProd,
-                        )
-                    }
-                }
-                // пустой раздел 2
-                if (!section2Rows) {
-                    СумУплНА(
-                            // КППИно: empty, // в xml быть не должно (чтз 8.1.1)
-                            КБК: '18210301000011000110',
-                            ОКАТО: okato,
-                            СумИсчисл: empty,
-                            КодОпер: empty,
-                            СумИсчислОтгр: empty,
-                            СумИсчислОпл: empty,
-                            СумИсчислНА: empty
-                    ) {
-                        СведПродЮЛ(
-                                НаимПрод: empty,
-                                ИННЮЛПрод: empty,
-                        )
-                    }
+                def ndsSum = getSection2NdsSum(dataRowsMap)
+                СумУплНА(
+                        // КППИно: empty, // в xml быть не должно (чтз 8.1.1)
+                        КБК: '18210301000011000110',
+                        ОКАТО: okato,
+                        СумИсчисл: ndsSum,
+                        КодОпер: empty,
+                        СумИсчислОтгр: empty,
+                        СумИсчислОпл: empty,
+                        СумИсчислНА: empty
+                ) {
+                    СведПродЮЛ(
+                            НаимПрод: empty,
+                            ИННЮЛПрод: empty,
+                    )
                 }
                 // РАЗДЕЛ 2 - КОНЕЦ
 
@@ -504,38 +486,24 @@ void generateXML() {
 }
 
 /**
- * Получить список значений для раздела 2.
- *
- * @param dataRowsMap мапа со строками форм-источников
- * @return список мап со значениями
+ * Получить сумму значений атрибутов «НДС. Сумма» итоговой строки налоговых форм источников (Форма 724.6, 724.7)
+ * (для раздела 2)
  */
-def getSection2Rows(def dataRowsMap) {
-    def rows = []
+def getSection2NdsSum(def dataRowsMap) {
+    def sum = 0
     // форма 724.6
     for (def row : dataRowsMap[604]) {
         if (row.getAlias() != null) {
-            continue
+            sum += row.sum2
         }
-        def newRow = [:]
-        newRow.sumIschisl = round(row.sum2)
-        newRow.codeOper = '1011712'
-        newRow.naimProd = row.contragent
-        newRow.innULProd = empty
-        rows.add(newRow)
     }
     // форма 724.7
     for (def row : dataRowsMap[605]) {
         if (row.getAlias() != null) {
-            continue
+            sum += row.ndsSum
         }
-        def newRow = [:]
-        newRow.sumIschisl = round(row.ndsSum)
-        newRow.codeOper = '1011703'
-        newRow.naimProd = row.name
-        newRow.innULProd = row.inn
-        rows.add(newRow)
     }
-    return rows
+    return round(sum)
 }
 
 def round(def value) {

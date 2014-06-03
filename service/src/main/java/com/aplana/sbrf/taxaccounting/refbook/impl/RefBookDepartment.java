@@ -125,6 +125,11 @@ public class RefBookDepartment implements RefBookDataProvider {
     }
 
     @Override
+    public Map<Long, Map<String, RefBookValue>> getRecordData(List<Long> recordIds) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public List<Date> getVersions(Date startDate, Date endDate) {
         // версионирования нет, только одна версия
 		return Arrays.asList(new Date(0));
@@ -406,6 +411,12 @@ public class RefBookDepartment implements RefBookDataProvider {
     @Override
     public Long getRecordId(Long uniqueRecordId) {
        return uniqueRecordId;
+    }
+
+    @Override
+    public Map<RefBookAttributePair, String> getAttributesValues(List<RefBookAttributePair> attributePairs) {
+        //Не реализовано, т.к решили что пока иерархические справочники не будем оптимизировать
+        throw new UnsupportedOperationException();
     }
 
     private void checkCorrectness(Logger logger, List<RefBookAttribute> attributes, List<RefBookRecord> records) {

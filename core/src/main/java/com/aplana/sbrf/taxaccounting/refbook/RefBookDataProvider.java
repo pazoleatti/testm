@@ -3,10 +3,7 @@ package com.aplana.sbrf.taxaccounting.refbook;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
 import java.util.Date;
@@ -97,6 +94,12 @@ public interface RefBookDataProvider {
 	 * @return
 	 */
 	Map<String, RefBookValue> getRecordData(Long recordId);
+
+    /**
+     * Получение структуры Код строки → Строка справочника по списку кодов строк
+     * @param recordIds код строки справочника
+     */
+    Map<Long, Map<String, RefBookValue>> getRecordData(List<Long> recordIds);
 
     /**
      * Значение справочника по Id записи и Id атрибута
@@ -204,6 +207,13 @@ public interface RefBookDataProvider {
      * @return
      */
     Long getRecordId(Long uniqueRecordId);
+
+    /**
+     * Возвращает данные по списку атрибутов
+     * @param attributePairs связки атрибут-запись справочника
+     * @return значения для связок
+     */
+    Map<RefBookAttributePair, String> getAttributesValues(List<RefBookAttributePair> attributePairs);
 
     /**
      * Создает новые записи в справочнике

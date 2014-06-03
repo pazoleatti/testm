@@ -196,7 +196,7 @@ void logicCheck() {
         if (row.getAlias() != null) {
             isSection1or2 = (row.getAlias() == 'head_1' || row.getAlias() == 'head_2')
             isSection5or6 = (row.getAlias() == 'head_5' || row.getAlias() == 'head_6')
-            isSection1subOr5or6 = (row.getAlias() == 'total_1' || row.getAlias() == 'head_5' || row.getAlias() == 'head_6')
+            isSection1subOr5or6 = (row.getAlias() == 'total_1_1' || row.getAlias() == 'head_5' || row.getAlias() == 'head_6')
             isSection7 = row.getAlias() == 'head_7'
             continue
         }

@@ -113,7 +113,15 @@ public interface RefBookDao {
 	 */
 	Map<String, RefBookValue> getRecordData(Long refBookId, Long recordId);
 
-	/**
+    /**
+     * Получение структуры Код строки → Строка справочника по списку кодов строк
+     *
+     * @param refBookId код справочника
+     * @param recordIds список кодов строк справочника
+     */
+    Map<Long, Map<String, RefBookValue>> getRecordData(Long refBookId, List<Long> recordIds);
+
+    /**
 	 * Создает новые версии записи в справочнике.
      * Если задан параметр recordId - то создается новая версия записи справочника
 	 * @param refBookId код справочника
@@ -357,6 +365,15 @@ public interface RefBookDao {
      * @param scriptId идентификатор скрипта
      */
     void setScriptId(Long refBookId, String scriptId);
+
+    /**
+     * Возвращает значения атрибутов для указанных записей
+     * @param attributePairs список пар идентификатор записи-идентификатор атрибута
+     * @return
+     *      ключ - пара идентификатор записи-идентификатор атрибута
+     *      значение - строковое представление значения атрибута
+     */
+    Map<RefBookAttributePair, String> getAttributesValues(List<RefBookAttributePair> attributePairs);
 
     /**
      * Создает новые записи в справочнике
