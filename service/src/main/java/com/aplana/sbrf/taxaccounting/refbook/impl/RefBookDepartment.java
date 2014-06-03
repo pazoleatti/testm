@@ -413,6 +413,12 @@ public class RefBookDepartment implements RefBookDataProvider {
        return uniqueRecordId;
     }
 
+    @Override
+    public Map<RefBookAttributePair, String> getAttributesValues(List<RefBookAttributePair> attributePairs) {
+        //Не реализовано, т.к решили что пока иерархические справочники не будем оптимизировать
+        throw new UnsupportedOperationException();
+    }
+
     private void checkCorrectness(Logger logger, List<RefBookAttribute> attributes, List<RefBookRecord> records) {
         if (departmentService.getBankDepartment().getType().getCode() ==
                 records.get(0).getValues().get(DEPARTMENT_TYPE_ATTRIBUTE).getNumberValue().intValue()){
