@@ -308,14 +308,14 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
         }
     }
 
+    private static String INTERSECTION_VERSION_SQL = "with segmentIntersection as (Select ID, TYPE_ID, STATUS, VERSION, row_number() %s" +
+            " rn from FORM_TEMPLATE where TYPE_ID = :typeId AND STATUS in (0,1,2)) " +
+            " select * from (select rv.ID ID, rv.STATUS, rv.TYPE_ID RECORD_ID, rv.VERSION versionFrom, rv2.version - interval '1' day versionTo" +
+            " FROM segmentIntersection rv " +
+            " left outer join segmentIntersection rv2 on rv.TYPE_ID = rv2.TYPE_ID and rv.rn+1 = rv2.rn) where";
     @Override
     public List<VersionSegment> findFTVersionIntersections(int formTypeId, int formTemplateId, Date actualStartVersion, Date actualEndVersion) {
-        String INTERSECTION_VERSION_SQL = "with segmentIntersection as (Select ID, TYPE_ID, STATUS, VERSION, row_number()" +
-                (isSupportOver()? " over(partition by TYPE_ID order by version)" : " over()") +
-                " rn from FORM_TEMPLATE where TYPE_ID = :typeId AND STATUS in (0,1,2)) " +
-                " select * from (select rv.ID ID, rv.STATUS, rv.TYPE_ID RECORD_ID, rv.VERSION versionFrom, rv2.version - interval '1' day versionTo" +
-                " FROM segmentIntersection rv " +
-                " left outer join segmentIntersection rv2 on rv.TYPE_ID = rv2.TYPE_ID and rv.rn+1 = rv2.rn) where";
+        String overTag = isSupportOver() ? " over(partition by TYPE_ID order by version)" : " over()";
 
         Map<String, Object> valueMap =  new HashMap<String, Object>();
         valueMap.put("typeId", formTypeId);
@@ -323,7 +323,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
         valueMap.put("actualEndVersion", actualEndVersion);
         valueMap.put("templateId", formTemplateId);
 
-        StringBuilder builder = new StringBuilder(INTERSECTION_VERSION_SQL);
+        StringBuilder builder = new StringBuilder(String.format(INTERSECTION_VERSION_SQL, overTag));
         builder.append(" ((versionFrom <= :actualStartVersion and versionTo >= :actualStartVersion)");
         if (actualEndVersion != null)
             builder.append(" OR versionFrom BETWEEN :actualStartVersion AND :actualEndVersion + interval '1' day OR versionTo BETWEEN :actualStartVersion AND :actualEndVersion");
