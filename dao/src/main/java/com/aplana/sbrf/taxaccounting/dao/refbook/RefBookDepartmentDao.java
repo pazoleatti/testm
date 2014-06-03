@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributePair;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
@@ -83,4 +84,13 @@ public interface RefBookDepartmentDao {
     int create(Map<String, RefBookValue> records, List<RefBookAttribute> attributes);
 
     void remove(long uniqueId);
+
+    /**
+     * Возвращает значения атрибутов для указанных записей
+     * @param attributePairs список пар идентификатор записи-идентификатор атрибута
+     * @return
+     *      ключ - пара идентификатор записи-идентификатор атрибута
+     *      значение - строковое представление значения атрибута
+     */
+    Map<RefBookAttributePair,String> getAttributesValues(List<RefBookAttributePair> attributePairs);
 }

@@ -10,21 +10,17 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * User: ekuvshinov
@@ -184,5 +180,47 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
             logger.error("", e);
             throw new DaoException("", e);
         }
+    }
+
+    private final static String GET_ATTRIBUTES_VALUES = "select \n" +
+            "  attribute_id,\n" +
+            "  record_id, \n" +
+            "  value,\n" +
+            "  data_type\n" +
+            "from (\n" +
+            "  with t as (\n" +
+            "  select id as record_id, name, to_char(parent_id) as parent_id, to_char(type)as type, shortname, to_char(tb_index) as tb_index, sbrf_code, to_char(region_id) as region_id, to_char(is_active) as is_active, to_char(code) as code from department \n" +
+            "  )\n" +
+            "  select a.id as attribute_id, a.type as data_type, record_id, value from t\n" +
+            "  unpivot \n" +
+            "  (value for attribute_alias in (NAME, parent_id, type, shortname, tb_index, sbrf_code, region_id, is_active, code)) \n" +
+            "  join ref_book_attribute a on attribute_alias = a.alias\n" +
+            "  where ref_book_id = 30\n" +
+            ") where (record_id, attribute_id) in ";
+
+    @Override
+    public Map<RefBookAttributePair, String> getAttributesValues(List<RefBookAttributePair> attributePairs) {
+        final Map<RefBookAttributePair, String> result = new HashMap<RefBookAttributePair, String>();
+        PreparedStatementData ps = new PreparedStatementData();
+        ps.appendQuery(GET_ATTRIBUTES_VALUES);
+        ps.appendQuery("(");
+        for (Iterator<RefBookAttributePair> it = attributePairs.iterator(); it.hasNext();) {
+            RefBookAttributePair pair = it.next();
+            ps.appendQuery("(?,?)");
+            ps.addParam(pair.getUniqueRecordId());
+            ps.addParam(pair.getAttributeId());
+            if (it.hasNext()) {
+                ps.appendQuery(",");
+            }
+        }
+        ps.appendQuery(")");
+        getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(),
+                new RowCallbackHandler() {
+                    @Override
+                    public void processRow(ResultSet rs) throws SQLException {
+                        result.put(new RefBookAttributePair(rs.getLong("attribute_id"), rs.getLong("record_id")), rs.getString("value"));
+                    }
+                });
+        return result;
     }
 }
