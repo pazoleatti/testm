@@ -124,6 +124,15 @@ def reportDay = null
 def Boolean isBalancePeriod = null
 
 //// Обертки методов
+// Поиск записи в справочнике по значению (для расчетов) + по дате
+def getRefBookRecord(def Long refBookId, def String alias, def String value, def Date day, def int rowIndex, def String cellName,
+                     boolean required) {
+    if (value == null) {
+        return null
+    }
+    return formDataService.getRefBookRecord(refBookId, recordCache, providerCache, refBookCache, alias, value,
+            day, rowIndex, cellName, logger, required)
+}
 
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
@@ -200,6 +209,8 @@ void calc() {
             row.lotSizePrev = calc6(row, prevRow, prevDataRows)
             // графа 8
             row.reserveCalcValuePrev = calc8(prevRow)
+            // графа 12 курс валют
+            row.rubCourse = calc12(row, reportDate)
             // графа 13
             row.marketQuotationInRub = calc13(row)
             // графа 14
@@ -502,6 +513,19 @@ def BigDecimal calc8(def prevRow) {
         tmp = prevRow.reserveCalcValue
     }
     return roundValue(tmp, 2)
+}
+
+//def calc11(def row) {
+//    def tmp = row.marketQuotation // на случай ручного ввода
+//    def currency = getRefBookValue(84, row.currency)?.CODE_CUR?.value
+//    if (currency == '810') {
+//        tmp = row.marketQuotationInRub
+//    }
+//    return roundValue(tmp, 6)
+//}
+
+def BigDecimal calc12(def row, def date) {
+    return roundValue(getRate(row, date), 4)
 }
 
 def BigDecimal calc13(def row) {
@@ -834,6 +858,19 @@ def getPrevRowByColumn4(def prevDataRows, def column4Value) {
         }
     }
     return null
+}
+
+// Получить курс валюты по id записи из справочнкиа ценной бумаги (84)
+def getRate(def row, def Date date) {
+    if (row.currency == null) {
+        return null
+    }
+    // получить запись (поле Цифровой код валюты выпуска) из справочника ценные бумаги (84) по id записи
+    def code = getRefBookValue(84, row.currency)?.CODE_CUR?.value
+
+    // получить запись (поле курс валюты) из справочника курс валют (22) по цифровому коду валюты
+    def record22 = getRefBookRecord(22, 'CODE_NUMBER', code.toString(), date, row.getIndex(), null, true)
+    return record22?.RATE?.value
 }
 
 def getIssuerName(def record84Id) {
