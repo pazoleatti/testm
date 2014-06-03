@@ -176,4 +176,9 @@ public class RefBookIncome101 implements RefBookDataProvider {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public Map<RefBookAttributePair, String> getAttributesValues(List<RefBookAttributePair> attributePairs) {
+        throw new UnsupportedOperationException();
+    }
+
 }

@@ -11,12 +11,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Дао для больших справочников, которые хранятся в отдельных таблицах
- * Например: ОКАТО, ОКТМО
+ * Дао для октмо
  *
  * @author auldanov, dloshkarev
  */
-public interface RefBookBigDataDao {
+public interface RefBookOktmoDao {
 
     /**
      * Загружает данные справочника на определенную дату актуальности
@@ -220,4 +219,13 @@ public interface RefBookBigDataDao {
      * @return возвращает список дат начала периода актуальности, для версий у которых были найдены дочерние элементы. Либо null, если их нет
      */
     List<Date> hasChildren(String tableName, List<Long> uniqueRecordIds);
+
+    /**
+     * Возвращает значения атрибутов для указанных записей
+     * @param attributePairs список пар идентификатор записи-идентификатор атрибута
+     * @return
+     *      ключ - пара идентификатор записи-идентификатор атрибута
+     *      значение - строковое представление значения атрибута
+     */
+    Map<RefBookAttributePair,String> getAttributesValues(List<RefBookAttributePair> attributePairs);
 }

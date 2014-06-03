@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.refbook.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -16,16 +17,15 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * User: avanteev
  */
 @Service
+@Transactional
 public class RefBookHelperImpl implements RefBookHelper {
 
 	@Autowired
@@ -33,6 +33,9 @@ public class RefBookHelperImpl implements RefBookHelper {
 
     @Autowired
     ColumnDao columnDao;
+
+    @Autowired
+    RefBookDao refBookDao;
 
     public void dataRowsCheck(Collection<DataRow<Cell>> dataRows, List<Column> columns) {
         Map<Long, Pair<RefBookDataProvider, RefBookAttribute>> providers = new HashMap<Long, Pair<RefBookDataProvider, RefBookAttribute>>();
@@ -285,6 +288,23 @@ public class RefBookHelperImpl implements RefBookHelper {
                 value = record.get(alias);
             }
             result.put(id, value == null ? "" : String.valueOf(value));
+        }
+        return result;
+    }
+
+    @Override
+    public RefBook getRefBookByAttributeId(Long attributeId) {
+        return refBookDao.getByAttribute(attributeId);
+    }
+
+    @Override
+    public Map<Long, RefBookDataProvider> getProviders(Set<Long> attributeIds) {
+        Map<Long, RefBookDataProvider> result = new HashMap<Long, RefBookDataProvider>();
+        for (Long attributeId : attributeIds) {
+            Long refBookId = refBookDao.getByAttribute(attributeId).getId();
+            if (!result.containsKey(refBookId)) {
+                result.put(refBookId, refBookFactory.getDataProvider(refBookId));
+            }
         }
         return result;
     }

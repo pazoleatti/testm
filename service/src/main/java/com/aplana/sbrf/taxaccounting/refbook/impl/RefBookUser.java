@@ -161,4 +161,9 @@ public class RefBookUser implements RefBookDataProvider {
     public Long getRecordId(Long uniqueRecordId) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public Map<RefBookAttributePair, String> getAttributesValues(List<RefBookAttributePair> attributePairs) {
+        throw new UnsupportedOperationException();
+    }
 }

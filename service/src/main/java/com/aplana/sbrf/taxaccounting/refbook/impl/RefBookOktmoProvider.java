@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
-import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookBigDataDao;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookOktmoDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
@@ -29,14 +29,14 @@ import java.util.Map;
 
 /**
  * Провайдер для больших справочников, которые хранятся в отдельных таблицах
- * Например: ОКТМО (в будущем окато)
+ * Для окато
  *
  * @author dloshkarev
  */
-@Service("RefBookBigDataProvider")
+@Service("RefBookOktmoProvider")
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Transactional
-public class RefBookBigDataProvider implements RefBookDataProvider {
+public class RefBookOktmoProvider implements RefBookDataProvider {
 
 	// Справочник "ОКТМО"
 	public static final Long OKTMO_REF_BOOK_ID = 96L;
@@ -49,7 +49,7 @@ public class RefBookBigDataProvider implements RefBookDataProvider {
     private String tableName;
 
     @Autowired
-    RefBookBigDataDao dao;
+    RefBookOktmoDao dao;
 
     @Autowired
     RefBookDao rbDao;
@@ -454,6 +454,11 @@ public class RefBookBigDataProvider implements RefBookDataProvider {
     @Override
     public Long getRecordId(Long uniqueRecordId) {
         return dao.getRecordId(getTableName(), uniqueRecordId);
+    }
+
+    @Override
+    public Map<RefBookAttributePair, String> getAttributesValues(List<RefBookAttributePair> attributePairs) {
+        return dao.getAttributesValues(attributePairs);
     }
 
     @Override

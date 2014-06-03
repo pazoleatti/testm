@@ -4,10 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.exception.TAException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
@@ -203,14 +200,83 @@ public class GetRefBookMultiValuesHandler extends AbstractActionHandler<GetRefBo
     private PagingResult<RefBookItem> asseblRefBookPage(GetRefBookMultiValuesAction action,
                                                         PagingResult<Map<String, RefBookValue>> refBookPage,
                                                         RefBook refBook) {
+        //System.out.println("asseblRefBookPage started");
+        //long allTime = System.nanoTime();
+        //long time = System.nanoTime();
         List<RefBookItem> items = new LinkedList<RefBookItem>();
         List<RefBookAttribute> attributes = refBook.getAttributes();
+        Set<Long> attributeIds = new HashSet<Long>();
 
         // кэшируем список дополнительных атрибутов если есть для каждого аттрибута
         Map<Long, List<Long>> attrId2Map = refBookHelper.getAttrToListAttrId2Map(attributes);
-        //кэшируем список провайдеров для атрибутов-ссылок, чтобы для каждой строки их заново не создавать
-        Map<Long, RefBookDataProvider> refProviders = refBookHelper.getHashedProviders(attributes, attrId2Map);
+        //System.out.println("getAttrToListAttrId2Map: "+((double)(System.nanoTime()-time)/1000000000.0)+"s");
+        //time = System.nanoTime();
 
+        Map<Long, List<RefBookAttributePair>> attributesMap = new HashMap<Long, List<RefBookAttributePair>>();
+
+        /**
+         * Заполняем мапу связками атрибут-запись, для дальнейшего разыменовывания пачкой
+         * Упорядочиваем их по идентификатору справочника - для каждого справочника будет своя логика
+         */
+        for (Map<String, RefBookValue> record : refBookPage) {
+            for (RefBookAttribute refBookAttribute : attributes) {
+                String alias = refBookAttribute.getAlias();
+                Long id = refBookAttribute.getId();
+                Long refBookId = refBookAttribute.getRefBookId();
+
+                if (refBookAttribute.isVisible()) {
+                    if (RefBookAttributeType.REFERENCE.equals(refBookAttribute.getAttributeType())) {
+                        Long refValue = record.get(alias).getReferenceValue();
+                        if (refValue != null) {
+                            attributeIds.add(refBookAttribute.getRefBookAttributeId());
+                            //Получаем связки для основных атрибутов
+                            if (attributesMap.containsKey(refBookId)) {
+                                attributesMap.get(refBookId).add(new RefBookAttributePair(refBookAttribute.getRefBookAttributeId(), refValue));
+                            } else {
+                                List<RefBookAttributePair> list = new ArrayList<RefBookAttributePair>();
+                                list.add(new RefBookAttributePair(refBookAttribute.getRefBookAttributeId(), refValue));
+                                attributesMap.put(refBookId, list);
+                            }
+                            //Получаем связки для атрибутов второго уровня
+                            if (attrId2Map.get(id) != null) {
+                                for (Long id2 : attrId2Map.get(id)) {
+                                    RefBook refBook2 = refBookHelper.getRefBookByAttributeId(id2);
+                                    attributeIds.add(id2);
+                                    if (attributesMap.containsKey(refBook2.getId())) {
+                                        attributesMap.get(refBook2.getId()).add(new RefBookAttributePair(id2, refValue));
+                                    } else {
+                                        List<RefBookAttributePair> list = new ArrayList<RefBookAttributePair>();
+                                        list.add(new RefBookAttributePair(refBookAttribute.getRefBookAttributeId(), refValue));
+                                        attributesMap.put(refBook2.getId(), list);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        //System.out.println("prepare: "+((double)(System.nanoTime()-time)/1000000000.0)+"s");
+        //time = System.nanoTime();
+
+        /**
+         * Получаем провайдеры для каждого справочника и кэшируем их
+         * Получаем разыменованую пачку значений
+         */
+        Map<Long, RefBookDataProvider> refProviders = refBookHelper.getProviders(attributeIds);
+        Map<RefBookAttributePair, String> dereferencedAttributes = new HashMap<RefBookAttributePair, String>();
+
+        for (Map.Entry<Long, List<RefBookAttributePair>> attribute : attributesMap.entrySet()) {
+            RefBookDataProvider provider = refProviders.get(attribute.getKey());
+            dereferencedAttributes.putAll(provider.getAttributesValues(attribute.getValue()));
+        }
+        //System.out.println("get values: "+((double)(System.nanoTime()-time)/1000000000.0)+"s");
+        //time = System.nanoTime();
+
+
+        /**
+         * Раздаем разыменованные значения по требованию
+         */
         for (Map<String, RefBookValue> record : refBookPage) {
             RefBookItem item = new RefBookItem();
 
@@ -221,8 +287,7 @@ public class GetRefBookMultiValuesHandler extends AbstractActionHandler<GetRefBo
             for (RefBookAttribute refBookAttribute : attributes) {
                 String alias = refBookAttribute.getAlias();
                 Long id = refBookAttribute.getId();
-                RefBookValue value = null;
-                String dereferanceValueString = null;
+                String value = null;
 
                 if (refBookAttribute.isVisible()) {
 
@@ -233,34 +298,32 @@ public class GetRefBookMultiValuesHandler extends AbstractActionHandler<GetRefBo
                     if (RefBookAttributeType.REFERENCE.equals(refBookAttribute.getAttributeType())) {
                         Long refValue = record.get(alias).getReferenceValue();
                         if (refValue != null) {
-                            // получаем провайдер данных для целевого справочника
-                            RefBookDataProvider attrProvider = refProviders.get(id);
-                            // запрашиваем значение для разыменовывания
-                            value = attrProvider.getValue(refValue, refBookAttribute.getRefBookAttributeId());
+                            value = dereferencedAttributes.get(new RefBookAttributePair(refBookAttribute.getRefBookAttributeId(), refValue));
                             // для каждого найденного дополнительного аттрибута разименуем значение
                             if (attrId2Map.get(id) != null) {
                                 for (Long id2 : attrId2Map.get(id)) {
-                                    RefBookDataProvider attr2Provider = refProviders.get(id2);
-                                    RefBookValue value2 = attr2Provider.getValue(refValue, id2);
-                                    dereferenceValue.getAttrId2DerefValueMap().put(id2, value2 == null ? "" : String.valueOf(value2));
+                                    String value2 = dereferencedAttributes.get(new RefBookAttributePair(id2, refValue));
+                                    dereferenceValue.getAttrId2DerefValueMap().put(id2, value2 == null ? "" : value2);
                                 }
                             }
                         }
                     } else {
-                        value = record.get(alias);
+                        RefBookValue refBookValue = record.get(alias);
+                        value = (refBookValue == null ? "" : String.valueOf(refBookValue));
                     }
-                    dereferanceValueString = (value == null ? "" : String.valueOf(value));
-                    dereferenceValue.setDereferenceValue(dereferanceValueString);
+                    dereferenceValue.setDereferenceValue(value);
                     refBookDereferenceValues.add(dereferenceValue);
                 }
                 if (id.equals(action.getRefBookAttrId())) {
-                    item.setDereferenceValue(dereferanceValueString);
+                    item.setDereferenceValue(value);
                 }
             }
 
             item.setRefBookRecordDereferenceValues(refBookDereferenceValues);
             items.add(item);
         }
+        //System.out.println("get values: "+((double)(System.nanoTime()-time)/1000000000.0)+"s");
+        //System.out.println("time: "+((double)(System.nanoTime()-allTime)/1000000000.0)+"s");
 
         return new PagingResult<RefBookItem>(items, refBookPage.getTotalCount());
     }

@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.refbook.impl.fixed;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributePair;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.impl.AbstractReadOnlyRefBook;
@@ -84,6 +85,11 @@ public abstract class AbstractPermanentRefBook extends AbstractReadOnlyRefBook {
 
     @Override
     public List<Long> getParentsHierarchy(Long uniqueRecordId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Map<RefBookAttributePair, String> getAttributesValues(List<RefBookAttributePair> attributePairs) {
         throw new UnsupportedOperationException();
     }
 }

@@ -565,6 +565,11 @@ public class RefBookUniversal implements RefBookDataProvider {
     }
 
     @Override
+    public Map<RefBookAttributePair, String> getAttributesValues(List<RefBookAttributePair> attributePairs) {
+        return refBookDao.getAttributesValues(attributePairs);
+    }
+
+    @Override
 	public void insertRecords(Date version, List<Map<String, RefBookValue>> records) {
         refBookDao.createRecords(refBookId, version, records);
         //createRecordVersion(Logger logger, Long recordId, Date versionFrom, Date versionTo, List<Map<String, RefBookValue>> records)

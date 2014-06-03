@@ -99,6 +99,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 	}
 
     @Override
+    @Cacheable(value = "PermanentData", key = "'RefBook_attribute_'+#attributeId.toString()")
     public RefBook getByAttribute(@NotNull Long attributeId) {
         try {
             return get(getJdbcTemplate().queryForLong(
@@ -1130,6 +1131,30 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     @CacheEvict(value = "PermanentData", key = "'RefBook_'+#refBookId.toString()")
     public void setScriptId(Long refBookId, String scriptId) {
         getJdbcTemplate().update("update ref_book set script_id = ? where id = ?", scriptId, refBookId);
+    }
+
+    @Override
+    public Map<RefBookAttributePair, String> getAttributesValues(List<RefBookAttributePair> attributePairs) {
+        final Map<RefBookAttributePair, String> result = new HashMap<RefBookAttributePair, String>();
+        PreparedStatementData ps = new PreparedStatementData();
+        ps.appendQuery("select record_id, attribute_id, coalesce(string_value, to_char(number_value),to_char(date_value)) as value from ref_book_value where");
+        for (Iterator<RefBookAttributePair> it = attributePairs.iterator(); it.hasNext();) {
+            RefBookAttributePair pair = it.next();
+            ps.appendQuery(" (attribute_id = ? and record_id = ?) ");
+            ps.addParam(pair.getAttributeId());
+            ps.addParam(pair.getUniqueRecordId());
+            if (it.hasNext()) {
+                ps.appendQuery(" or ");
+            }
+        }
+        getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(),
+                new RowCallbackHandler() {
+                    @Override
+                    public void processRow(ResultSet rs) throws SQLException {
+                        result.put(new RefBookAttributePair(rs.getLong("attribute_id"), rs.getLong("record_id")), rs.getString("value"));
+                    }
+                });
+        return result;
     }
 
     @Override

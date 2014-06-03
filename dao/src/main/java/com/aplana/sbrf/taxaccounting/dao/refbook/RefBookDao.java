@@ -359,6 +359,15 @@ public interface RefBookDao {
     void setScriptId(Long refBookId, String scriptId);
 
     /**
+     * Возвращает значения атрибутов для указанных записей
+     * @param attributePairs список пар идентификатор записи-идентификатор атрибута
+     * @return
+     *      ключ - пара идентификатор записи-идентификатор атрибута
+     *      значение - строковое представление значения атрибута
+     */
+    Map<RefBookAttributePair, String> getAttributesValues(List<RefBookAttributePair> attributePairs);
+
+    /**
      * Создает новые записи в справочнике
      * @param refBookId код справочника
      * @param version дата актуальности новых записей

@@ -6,7 +6,7 @@ import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.Filter;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.SimpleFilterTreeListener;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookValueMapper;
-import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookBigDataDao;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookOktmoDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
@@ -37,7 +37,7 @@ import java.util.*;
  * @author dloshkarev
  */
 @Repository
-public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookBigDataDao {
+public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookOktmoDao {
 
     @Autowired
     private RefBookUtils refBookUtils;
@@ -788,5 +788,47 @@ public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookBigData
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
+    }
+
+    private final static String GET_ATTRIBUTES_VALUES = "select \n" +
+            "  attribute_id,\n" +
+            "  record_id, \n" +
+            "  value,\n" +
+            "  data_type\n" +
+            "from (\n" +
+            "  with t as (\n" +
+            "  select id as record_id, to_char(id) as id, to_char(code) as code, to_char(parent_id) as parent_id, name from ref_book_oktmo \n" +
+            "  )\n" +
+            "  select a.id as attribute_id, a.type as data_type, record_id, value from t\n" +
+            "  unpivot \n" +
+            "  (value for attribute_alias in (NAME, CODE, ID, PARENT_ID)) \n" +
+            "  join ref_book_attribute a on attribute_alias = a.alias\n" +
+            "  where ref_book_id = 96\n" +
+            ") where (record_id, attribute_id) in ";
+
+    @Override
+    public Map<RefBookAttributePair, String> getAttributesValues(List<RefBookAttributePair> attributePairs) {
+        final Map<RefBookAttributePair, String> result = new HashMap<RefBookAttributePair, String>();
+        PreparedStatementData ps = new PreparedStatementData();
+        ps.appendQuery(GET_ATTRIBUTES_VALUES);
+        ps.appendQuery("(");
+        for (Iterator<RefBookAttributePair> it = attributePairs.iterator(); it.hasNext();) {
+            RefBookAttributePair pair = it.next();
+            ps.appendQuery("(?,?)");
+            ps.addParam(pair.getUniqueRecordId());
+            ps.addParam(pair.getAttributeId());
+            if (it.hasNext()) {
+                ps.appendQuery(",");
+            }
+        }
+        ps.appendQuery(")");
+        getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(),
+                new RowCallbackHandler() {
+                    @Override
+                    public void processRow(ResultSet rs) throws SQLException {
+                        result.put(new RefBookAttributePair(rs.getLong("attribute_id"), rs.getLong("record_id")), rs.getString("value"));
+                    }
+                });
+        return result;
     }
 }

@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributePair;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,7 +72,12 @@ public class RefBookSimpleReadOnly extends AbstractReadOnlyRefBook {
 		return refBookUtils.getRecordData(getRefBookId(), getTableName(), recordId);
     }
 
-	public String getTableName() {
+    @Override
+    public Map<RefBookAttributePair, String> getAttributesValues(List<RefBookAttributePair> attributePairs) {
+        throw new UnsupportedOperationException();
+    }
+
+    public String getTableName() {
 		if (StringUtils.isEmpty(tableName)) {
 			throw new IllegalArgumentException("Field \"tableName\" must be set");
 		}
