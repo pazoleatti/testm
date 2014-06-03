@@ -197,7 +197,8 @@ class Main {
                     'rnu8': 320
             ],
             'vat': [
-                    'declaration': -1,
+                    'declaration_audit': -1,
+                    'declaration_fns': -1,
                     'vat_724_1': 600,
                     'vat_724_2_1': 601,
                     'vat_724_2_2': 602,
