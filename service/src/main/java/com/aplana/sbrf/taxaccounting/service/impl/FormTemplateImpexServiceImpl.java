@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.XmlSerializationUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -343,7 +344,7 @@ public class FormTemplateImpexServiceImpl implements
                 tempFile = new FileOutputStream(new File(folderTemplate.getAbsolutePath() + File.separator + ROWS_FILE));
                 try {
                     tempFile.write(xmlSerializationUtils.serialize(formTemplateDao.getDataCells(template)).getBytes(ENCODING));
-                } catch (IllegalArgumentException ignore){
+                } catch (DaoException ignore){
 
                 }
                 tempFile.close();
@@ -351,7 +352,7 @@ public class FormTemplateImpexServiceImpl implements
                 tempFile = new FileOutputStream(new File(folderTemplate.getAbsolutePath() + File.separator + HEADERS_FILE));
                 try {
                     tempFile.write(xmlSerializationUtils.serialize(formTemplateDao.getHeaderCells(template)).getBytes(ENCODING));
-                } catch (IllegalArgumentException ignore){
+                } catch (DaoException ignore){
 
                 }
                 tempFile.close();

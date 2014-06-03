@@ -239,8 +239,10 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
             return dataRowXml != null ? xmlSerializationUtils.deserialize(dataRowXml, formTemplate.getColumns(), formTemplate.getStyles(), Cell.class):
                     new ArrayList<DataRow<Cell>>();
         } catch (IllegalArgumentException e){
+            logger.error(String.format("Шаблон %s версия %s", formTemplate.getType().getName(), formTemplate.getId()), e);
             throw new DaoException(e.getLocalizedMessage());
         } catch (DataAccessException e){
+            logger.error(String.format("Ошибка при получении строк шаблона %s НФ.", formTemplate.getType().getName()), e);
             throw new DaoException("Ошибка при получении строк шаблона НФ.", e);
         }
     }
@@ -255,8 +257,10 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
             return headerDataXml != null ? xmlSerializationUtils.deserialize(headerDataXml, formTemplate.getColumns(), formTemplate.getStyles(), HeaderCell.class):
                     new ArrayList<DataRow<HeaderCell>>();
         }  catch (IllegalArgumentException e){
+            logger.error(String.format("Шаблон %s версия %s", formTemplate.getType().getName(), formTemplate.getId()), e);
             throw new DaoException(e.getLocalizedMessage());
         } catch (DataAccessException e){
+            logger.error(String.format("Ошибка при получении заголовка шаблона %s НФ.", formTemplate.getType().getName()), e);
             throw new DaoException("Ошибка при получении заголовка шаблона НФ.", e);
         }
     }

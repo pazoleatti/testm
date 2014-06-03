@@ -195,7 +195,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
                 FormDataUtils.setValueOners(formTemplate.getHeaders());
             } catch (DaoException e){
                 this.logger.error("Ошибка при получении заголовков шаблона НФ.", e);
-                logger.error("Ошибка при получении графы \"Заголовки\" заголовков шаблона НФ. %s", e.getMessage());
+                logger.error("Ошибка при получении графы \"Заголовки\" шаблона НФ. %s", e.getMessage());
             }
         }
         return formTemplate;
