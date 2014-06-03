@@ -57,7 +57,7 @@
     </row>
     <row alias="R8">
         <cell alias="rowNum" colSpan="1" numericValue="8" rowSpan="1"/>
-        <cell alias="code" colSpan="1" rowSpan="1" stringValue="1010284"/>
+        <cell alias="code" colSpan="1" rowSpan="1" stringValue="1010277"/>
         <cell alias="name" colSpan="1" rowSpan="1"
               stringValue="Операции по оказанию услуг, связанных с обслуживанием банковских карт (п/п. 3.1 п. 3 ст. 149 НК РФ)"/>
         <cell alias="realizeCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
