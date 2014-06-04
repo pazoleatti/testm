@@ -93,7 +93,7 @@ public class EditDialogView extends PopupViewWithUiHandlers<EditDialogUiHandlers
 
 	@UiHandler("cancelButton")
 	public void onCancel(ClickEvent event){
-        Dialog.confirmMessage("Отмена операции открытия периода", "Отменить операцию открытия периода?", new DialogHandler() {
+        Dialog.confirmMessage("Отмена операции редактирования периода", "Отменить операцию редактирования периода?", new DialogHandler() {
             @Override
             public void yes() {
                 hide();
@@ -108,8 +108,9 @@ public class EditDialogView extends PopupViewWithUiHandlers<EditDialogUiHandlers
 	}
 
     @Override
-    public void setReportPeriod(long reportPeriodId) {
+    public void setReportPeriod(long reportPeriodId, String periodName) {
         period.setPeriodDates(new Date(), new Date());
+        period.setDereferenceValue(periodName);
         period.setSingleValue(reportPeriodId);
 
     }

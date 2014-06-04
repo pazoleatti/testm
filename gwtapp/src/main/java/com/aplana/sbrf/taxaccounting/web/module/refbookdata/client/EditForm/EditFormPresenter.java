@@ -266,16 +266,17 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                     public void onSuccess(SaveRefBookRowVersionResult result) {
                                         LogCleanEvent.fire(EditFormPresenter.this);
                                         LogAddEvent.fire(EditFormPresenter.this, result.getUuid());
-                                        setIsFormModified(false);
                                         UpdateForm.fire(EditFormPresenter.this, !result.isException(), recordChanges);
                                         if (result.isException()) {
                                             Dialog.errorMessage("Версия не сохранена", "Обнаружены фатальные ошибки!");
+                                        } else {
+                                            setIsFormModified(false);
                                         }
                                     }
                                 }, this));
 			}
 		} catch (BadValueException bve) {
-            setIsFormModified(false);
+            Dialog.errorMessage("Версия не сохранена", "Обнаружены фатальные ошибки!");
             List<LogEntry> logEntries = new ArrayList<LogEntry>();
             logEntries.add(new LogEntry(LogLevel.ERROR, "\" " + bve.getFieldName() + "\": " + bve.getDescription()));
             SaveLogEntriesAction action = new SaveLogEntriesAction();
@@ -337,7 +338,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
         setIsFormModified(true);
 	}
 
-    private void setIsFormModified(boolean isFormModified) {
+    public void setIsFormModified(boolean isFormModified) {
         this.isFormModified = isFormModified;
         if (isFormModified) {
             placeManager.setOnLeaveConfirmation("Вы подтверждаете отмену изменений?");
