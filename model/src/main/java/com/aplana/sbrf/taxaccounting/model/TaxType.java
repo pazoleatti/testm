@@ -23,7 +23,7 @@ public enum TaxType {
 	/**
 	 * УКС
 	 */
-	DEAL('D', "Учет контролируемых сделок", "NO_DEAL");
+	DEAL('D', "Учет контролируемых сделок", "UT_UVKNRSD");
 
 	private final char code;
 	private final String name;
