@@ -13,6 +13,7 @@ public class EditDialogData {
     private Long reportPeriodId;
     private List<ReportPeriod> correctionReportPeriods;
     private Date correctionDate;
+    private String periodName;
 
     public boolean isBalance() {
         return isBalance;
@@ -68,5 +69,13 @@ public class EditDialogData {
 
     public void setCorrectionDate(Date correctionDate) {
         this.correctionDate = correctionDate;
+    }
+
+    public String getPeriodName() {
+        return periodName;
+    }
+
+    public void setPeriodName(String periodName) {
+        this.periodName = periodName;
     }
 }

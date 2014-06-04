@@ -44,8 +44,16 @@ public class RefBookDepartment implements RefBookDataProvider {
     private static final String DEPARTMENT_TABLE_NAME = "DEPARTMENT";
     private static final String DEPARTMENT_TYPE_ATTRIBUTE = "TYPE";
     private static final String DEPARTMENT_PARENT_ATTRIBUTE = "PARENT_ID";
-    private static final String WARN_MESSAGE =
+    private static final String WARN_MESSAGE_TARGET =
             "Внимание! Форма %s подразделения %s при сохранении будет являться приемником для формы %s подразделения %s, относящимся к разным территориальным банкам";
+    private static final String WARN_MESSAGE_SOURCE =
+            "Внимание! Форма %s подразделения %s при сохранении будет являться источником для формы %s подразделения %s, относящимся к разным территориальным банкам";
+
+
+    public static final String DESTINATION_FTS = "destinationFTs";
+    public static final String SOURCE_FTS = "sourceFTs";
+    public static final String DESTINATION_DTS = "destinationDTs";
+    public static final String SOURCE_DTS = "sourceDTs";
 
     @Autowired
     RefBookDao refBookDao;
@@ -296,7 +304,7 @@ public class RefBookDepartment implements RefBookDataProvider {
             }
         }
 
-        //8 шаг
+        //10 шаг
         if (isChangeTB){
             //8A.1
             if (!formDataService.existFormDataByTaxAndDepartment(Arrays.asList(TaxType.PROPERTY, TaxType.TRANSPORT), Arrays.asList(dep.getId())) ||
@@ -311,25 +319,42 @@ public class RefBookDepartment implements RefBookDataProvider {
                         setDepartmentIds(Arrays.asList(dep.getId()));
                     }},
                     DeclarationDataSearchOrdering.ID, true).isEmpty()){
-                //7A 1.1
-                List<FormType> formTypes = sourceService.listAllByTaxType(TaxType.PROPERTY);
-                formTypes.addAll(sourceService.listAllByTaxType(TaxType.PROPERTY));
-                List<DepartmentFormType> departmentFormTypes = sourceService.getDestinationsFormWithDestDepartment(newTBId, oldTBId, formTypes);
-                List<DepartmentDeclarationType> departmentDeclarationTypes = sourceService.getDestinationsDeclarationWithDestDepartment(newTBId, oldTBId, formTypes);
-                //TODO avanteev : Переписать, пусть возвращает уже только готовые данные
-                if (departmentFormTypes != null && !departmentFormTypes.isEmpty() ||
-                        departmentDeclarationTypes != null && !departmentDeclarationTypes.isEmpty()){
-                    for (DepartmentFormType departmentFormType : departmentFormTypes){
-                        logger.warn(WARN_MESSAGE,
-                                formTypeService.get(departmentFormType.getFormTypeId()).getName(),
-                                departmentService.getDepartment(departmentFormType.getDepartmentId()).getName(),
-                                //sourceService.getDFTSourceByDDT(),
-                                departmentService.getDepartment(newTBId).getName());
-                    }
-                    createPeriods(uniqueRecordId, newType, newTBId, logger);
-                } else {
-                    createPeriods(uniqueRecordId, newType, newTBId, logger);
+                //10A 1.1, 10А.1.1А
+
+                Map<String, List> sourcesDestinations = sourceService.getSourcesDestinations(newTBId, oldTBId, Arrays.asList(TaxType.TRANSPORT, TaxType.PROPERTY));
+                List<Pair<DepartmentFormType, DepartmentFormType>> destinationFTs = sourcesDestinations.get(DESTINATION_FTS);
+                List<Pair<DepartmentFormType, DepartmentFormType>> sourceFTs = sourcesDestinations.get(SOURCE_FTS);
+                List<Pair<DepartmentFormType, DepartmentDeclarationType>> destinationDTs = sourcesDestinations.get(DESTINATION_DTS);
+                List<Pair<DepartmentFormType, DepartmentDeclarationType>> sourceDTs = sourcesDestinations.get(SOURCE_DTS);
+                for (Pair<DepartmentFormType, DepartmentFormType> destinationDFTPair : destinationFTs){
+                    logger.warn(WARN_MESSAGE_TARGET,
+                            formTypeService.get(destinationDFTPair.getSecond().getFormTypeId()).getName(),
+                            departmentService.getDepartment(destinationDFTPair.getSecond().getDepartmentId()).getName(),
+                            formTypeService.get(destinationDFTPair.getFirst().getFormTypeId()).getName(),
+                            departmentService.getDepartment(newTBId).getName());
                 }
+                for (Pair<DepartmentFormType, DepartmentFormType> sourceDFTPair : sourceFTs){
+                    logger.warn(WARN_MESSAGE_SOURCE,
+                            formTypeService.get(sourceDFTPair.getFirst().getFormTypeId()).getName(),
+                            departmentService.getDepartment(sourceDFTPair.getFirst().getDepartmentId()).getName(),
+                            formTypeService.get(sourceDFTPair.getSecond().getFormTypeId()).getName(),
+                            departmentService.getDepartment(newTBId).getName());
+                }
+                for (Pair<DepartmentFormType, DepartmentDeclarationType> destinationDDTPair : destinationDTs){
+                    logger.warn(WARN_MESSAGE_TARGET,
+                            declarationTypeService.get(destinationDDTPair.getSecond().getDeclarationTypeId()).getName(),
+                            departmentService.getDepartment(destinationDDTPair.getSecond().getDepartmentId()).getName(),
+                            formTypeService.get(destinationDDTPair.getFirst().getFormTypeId()).getName(),
+                            departmentService.getDepartment(newTBId).getName());
+                }
+                for (Pair<DepartmentFormType, DepartmentDeclarationType> sourceDDTPair : sourceDTs){
+                    logger.warn(WARN_MESSAGE_SOURCE,
+                            formTypeService.get(sourceDDTPair.getFirst().getFormTypeId()).getName(),
+                            departmentService.getDepartment(sourceDDTPair.getFirst().getDepartmentId()).getName(),
+                            declarationTypeService.get(sourceDDTPair.getSecond().getDeclarationTypeId()).getName(),
+                            departmentService.getDepartment(newTBId).getName());
+                }
+                createPeriods(uniqueRecordId, newType, newTBId, logger);
             }
         }
 
@@ -401,6 +426,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         if (!uniqueIds.isEmpty()){
             provider.deleteRecordVersions(logger, uniqueIds, false);
         }
+        //Когда атрибуты появятся
         /*provider = rbFactory.getDataProvider(RefBook.DEPARTMENT_CONFIG_PROPERTY);
         uniqueIds = provider.getUniqueRecordIds(calendar.getTime(), String.format(FILTER_BY_DEPARTMENT, depId));
         if (!uniqueIds.isEmpty()){
