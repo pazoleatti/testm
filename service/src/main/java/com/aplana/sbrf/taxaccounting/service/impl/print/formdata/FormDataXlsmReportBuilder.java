@@ -455,12 +455,12 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
             RegionUtil.setBorderTop(CellStyle.BORDER_THICK, region, sheet, workBook);
             RegionUtil.setBorderRight(CellStyle.BORDER_THICK, region, sheet, workBook);
             RegionUtil.setBorderLeft(CellStyle.BORDER_THICK, region, sheet, workBook);
-        }else {
+        }/*else {
             RegionUtil.setBorderBottom(CellStyle.BORDER_THIN, region, sheet, workBook);
             RegionUtil.setBorderTop(CellStyle.BORDER_THIN, region, sheet, workBook);
             RegionUtil.setBorderRight(CellStyle.BORDER_THIN, region, sheet, workBook);
             RegionUtil.setBorderLeft(CellStyle.BORDER_THIN, region, sheet, workBook);
-        }
+        }*/
         sheet.addMergedRegion(region);
     }
 
