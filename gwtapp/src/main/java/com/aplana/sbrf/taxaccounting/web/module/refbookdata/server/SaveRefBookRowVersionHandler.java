@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server;
 
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
@@ -63,7 +64,9 @@ public class SaveRefBookRowVersionHandler extends AbstractActionHandler<SaveRefB
         } catch (ServiceLoggerException e) {
             result.setException(true);
         }
-
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            result.setException(true);
+        }
         result.setUuid(logEntryService.save(logger.getEntries()));
 		return result;
 	}
