@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.web.main.page.client;
 
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.page.client.MainPagePresenter.MyView;
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -25,6 +24,9 @@ public class MainPageView extends ViewImpl implements MyView {
 
 	@UiField
 	Panel signInContentPanel;
+
+    @UiField
+    Panel manualMenuPanel;
 
 	@UiField
 	Panel mainContentPanel;
@@ -58,8 +60,10 @@ public class MainPageView extends ViewImpl implements MyView {
 			setMainMenuContent(content);
 		} else if (slot == MainPagePresenter.TYPE_LogAreaContent){
 			setNotificationContent(content);
-		} else if(slot == MainPagePresenter.TYPE_ProjectVersionContent){
-			setProjectVersion(content);
+		} else if(slot == MainPagePresenter.TYPE_ProjectVersionContent) {
+            setProjectVersion(content);
+        } else if (slot == MainPagePresenter.TYPE_ManualMenu) {
+            setManualMenuPanel(content);
 		} else {
 			super.setInSlot(slot, content);
 		}
@@ -92,8 +96,15 @@ public class MainPageView extends ViewImpl implements MyView {
 			logAreaPanel.add(content);
 		}
 	}
-	
-	private void setProjectVersion(IsWidget content) {
+
+    private void setManualMenuPanel(IsWidget content) {
+        manualMenuPanel.clear();
+        if (content != null) {
+            manualMenuPanel.add(content);
+        }
+    }
+
+    private void setProjectVersion(IsWidget content) {
 		projectVersion.clear();
 		if (content != null) {
 			projectVersion.add(content);
