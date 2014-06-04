@@ -89,7 +89,7 @@ public class EditCorrectionDialogView extends PopupViewWithUiHandlers<EditCorrec
 
     @UiHandler("cancelButton")
     public void onCancel(ClickEvent event){
-        Dialog.confirmMessage("Отмена операции открытия периода", "Отменить операцию открытия периода?", new DialogHandler() {
+        Dialog.confirmMessage("Отмена операции редактирования периода", "Отменить операцию редактирования периода?", new DialogHandler() {
             @Override
             public void yes() {
                 hide();
