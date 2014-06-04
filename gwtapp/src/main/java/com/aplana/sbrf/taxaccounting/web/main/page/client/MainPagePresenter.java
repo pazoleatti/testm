@@ -2,14 +2,14 @@ package com.aplana.sbrf.taxaccounting.web.main.page.client;
 
 import com.aplana.sbrf.taxaccounting.web.main.api.client.GINContextHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.event.DialogBoxChangeVisibilityEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.ErrorEvent;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.main.entry.client.ScreenLockEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.logarea.client.LogAreaPresenter;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.client.MainMenuPresenter;
+import com.aplana.sbrf.taxaccounting.web.widget.menu.client.ManualMenuPresenter;
 import com.aplana.sbrf.taxaccounting.web.widget.signin.client.SignInPresenter;
 import com.aplana.sbrf.taxaccounting.web.widget.version.client.ProjectVersionPresenter;
 import com.google.gwt.dom.client.Document;
@@ -55,6 +55,7 @@ public class MainPagePresenter extends
 	static final Object TYPE_MainMenuContent = new Object();
 	static final Object TYPE_LogAreaContent = new Object();
 	static final Object TYPE_ProjectVersionContent = new Object();
+    static final Object TYPE_ManualMenu = new Object();
 
 	static {
 		RevealContentTypeHolder.setMainContent(TYPE_SetMainContent);
@@ -64,8 +65,8 @@ public class MainPagePresenter extends
 	private final MainMenuPresenter mainMenuPresenter;
 	private final LogAreaPresenter logAreaPresenter;
 	private final ProjectVersionPresenter projectVersionPresenter;
-
-	private final MessageDialogPresenter messageDialogPresenter;
+    private final ManualMenuPresenter manualMenuPresenter;
+    private final MessageDialogPresenter messageDialogPresenter;
 
 
 	/**
@@ -81,7 +82,7 @@ public class MainPagePresenter extends
 			final MyProxy proxy, SignInPresenter signInPresenter,
 			MainMenuPresenter mainMenuPresenter, PlaceManager placeManager,
 			MessageDialogPresenter messageDialogPresenter, LogAreaPresenter notificationPresenter,
-			ProjectVersionPresenter projectVersionPresenter) {
+			ProjectVersionPresenter projectVersionPresenter, ManualMenuPresenter manualMenuPresenter) {
 		super(eventBus, view, proxy, RevealType.RootLayout);
 		this.signInPresenter = signInPresenter;
 		this.mainMenuPresenter = mainMenuPresenter;
@@ -89,7 +90,8 @@ public class MainPagePresenter extends
 		this.messageDialogPresenter = messageDialogPresenter;
 		this.logAreaPresenter = notificationPresenter;
 		this.projectVersionPresenter = projectVersionPresenter;
-		GINContextHolder.setDispatchAsync(dispatcher);
+        this.manualMenuPresenter = manualMenuPresenter;
+        GINContextHolder.setDispatchAsync(dispatcher);
 		GINContextHolder.setEventBus(eventBus);
 	}
 
@@ -100,6 +102,7 @@ public class MainPagePresenter extends
 		setInSlot(TYPE_MainMenuContent, mainMenuPresenter);
 		setInSlot(TYPE_LogAreaContent, logAreaPresenter);
 		setInSlot(TYPE_ProjectVersionContent, projectVersionPresenter);
+        setInSlot(TYPE_ManualMenu, manualMenuPresenter);
 
 	}
 
@@ -110,6 +113,7 @@ public class MainPagePresenter extends
 		clearSlot(TYPE_MainMenuContent);
 		clearSlot(TYPE_LogAreaContent);
 		clearSlot(TYPE_ProjectVersionContent);
+        clearSlot(TYPE_ManualMenu);
 	}
 
 	@Override
