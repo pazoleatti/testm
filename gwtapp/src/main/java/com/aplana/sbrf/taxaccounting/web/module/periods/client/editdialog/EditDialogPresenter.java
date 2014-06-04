@@ -75,7 +75,7 @@ public class EditDialogPresenter extends PresenterWidget<EditDialogPresenter.MyV
                 && (data.getYear().equals(initData.getYear()))
                 && (data.getReportPeriodId().equals(initData.getReportPeriodId()))
                 && (data.getDepartmentId().equals(initData.getDepartmentId()))) {
-            Dialog.errorMessage("Ни одни параметр не был изменен!");
+            Dialog.errorMessage("Редактирование параметров", "Ни один параметр не был изменен!");
             return;
         }
 

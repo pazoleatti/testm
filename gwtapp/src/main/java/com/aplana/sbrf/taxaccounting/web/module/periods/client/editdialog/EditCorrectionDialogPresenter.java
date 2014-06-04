@@ -71,7 +71,7 @@ public class EditCorrectionDialogPresenter extends PresenterWidget<EditCorrectio
         if (data.getDepartmentId().equals(initData.getDepartmentId())
                 && data.getCorrectionDate().equals(initData.getCorrectionDate())
                 && data.getCorrectionReportPeriods().get(0).equals(initData.getCorrectionReportPeriods().get(0))) {
-            Dialog.errorMessage("Ни одни параметр не был изменен!");
+            Dialog.errorMessage("Редактирование параметров", "Ни один параметр не был изменен!");
             return;
         }
 
