@@ -62,7 +62,7 @@
               value="Превышение цены реализации для целей налогообложения над ценой реализации, рублей"/>
     </row>
     <row alias="">
-        <cell alias="fix" colSpan="1" rowSpan="1" value="Номер балансового счёта"/>
+        <cell alias="fix" colSpan="1" rowSpan="1" value=""/>
         <cell alias="balanceNumber" colSpan="1" rowSpan="1" value="Номер балансового счёта"/>
         <cell alias="operationType" colSpan="1" rowSpan="1"
               value="Вид операции (продажа, погашение, открытие \закрытие короткой позиции)"/>
