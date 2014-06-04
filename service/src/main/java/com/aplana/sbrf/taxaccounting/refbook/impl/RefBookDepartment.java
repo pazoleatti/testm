@@ -426,8 +426,7 @@ public class RefBookDepartment implements RefBookDataProvider {
 
     @Override
     public Map<RefBookAttributePair, String> getAttributesValues(List<RefBookAttributePair> attributePairs) {
-        //Не реализовано, т.к решили что пока иерархические справочники не будем оптимизировать
-        throw new UnsupportedOperationException();
+        return refBookDepartmentDao.getAttributesValues(attributePairs);
     }
 
     private void checkCorrectness(Logger logger, List<RefBookAttribute> attributes, List<RefBookRecord> records) {
