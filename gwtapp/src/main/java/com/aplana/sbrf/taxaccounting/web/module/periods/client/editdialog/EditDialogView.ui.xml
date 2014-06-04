@@ -25,7 +25,7 @@
 
     </ui:style>
 
-    <w:ModalWindow iconUrl="resources/img/unlock-16.png" title="Редактирование периода">
+    <w:ModalWindow iconUrl="resources/img/unlock-16.png" title="Редактировать период">
         <g:VerticalPanel width="400px" addStyleNames="aplana-ModalWindow-contentBackWhite">
             <g:DecoratorPanel addStyleNames="{style.content}" width="380px">
                 <g:VerticalPanel>
