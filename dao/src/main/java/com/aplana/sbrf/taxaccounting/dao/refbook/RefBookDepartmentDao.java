@@ -83,4 +83,11 @@ public interface RefBookDepartmentDao {
     int create(Map<String, RefBookValue> records, List<RefBookAttribute> attributes);
 
     void remove(long uniqueId);
+
+    /**
+     * Получает количетсво уникальных записей, удовлетворяющих условиям фильтра
+     * @param filter условие фильтрации строк. Может быть не задано
+     * @return
+     */
+    int getRecordsCount(String filter);
 }

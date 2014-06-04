@@ -1,10 +1,9 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl.fixed;
 
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.TARole;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,5 +37,10 @@ public class RefBookFormDataKind extends AbstractPermanentRefBook {
         }
 
         return records;
+    }
+
+    @Override
+    public int getRecordsCount(Date version, String filter) {
+        return getRecords(filter).size();
     }
 }

@@ -55,11 +55,11 @@ public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookOktmoDa
     public PagingResult<Map<String, RefBookValue>> getRecords(String tableName, Long refBookId, Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
         RefBook refBook = refBookDao.get(refBookId);
         // получаем страницу с данными
-        PreparedStatementData ps = getSimpleQuery(tableName, refBook, null, version, sortAttribute, filter, pagingParams, isSortAscending, null);
+        PreparedStatementData ps = getSimpleQuery(tableName, refBook, null, version, sortAttribute, filter, pagingParams, isSortAscending, null, false);
         List<Map<String, RefBookValue>> records = refBookUtils.getRecordsData(ps, refBook);
         PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
         // получаем информацию о количестве всех записей с текущим фильтром
-        ps = getSimpleQuery(tableName, refBook, null, version, sortAttribute, filter, null, isSortAscending, null);
+        ps = getSimpleQuery(tableName, refBook, null, version, sortAttribute, filter, null, isSortAscending, null, false);
         result.setTotalCount(refBookUtils.getRecordsCount(ps));
         return result;
     }
@@ -67,7 +67,7 @@ public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookOktmoDa
     @Override
     public Long getRowNum(String tableName, Long refBookId, Date version, Long recordId, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
         RefBook refBook = refBookDao.get(refBookId);
-        PreparedStatementData ps = getSimpleQuery(tableName, refBook, null, version, sortAttribute, filter, null, isSortAscending, null);
+        PreparedStatementData ps = getSimpleQuery(tableName, refBook, null, version, sortAttribute, filter, null, isSortAscending, null, false);
         return refBookUtils.getRowNum(ps, recordId);
     }
 
@@ -96,7 +96,7 @@ public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookOktmoDa
         refBook.setAttributes(new ArrayList<RefBookAttribute>());
         refBook.getAttributes().addAll(oldRefBook.getAttributes());
         // получаем страницу с данными
-        PreparedStatementData ps = getSimpleQuery(tableName, refBook, uniqueRecordId, null, sortAttribute, filter, pagingParams, isSortAscending, null);
+        PreparedStatementData ps = getSimpleQuery(tableName, refBook, uniqueRecordId, null, sortAttribute, filter, pagingParams, isSortAscending, null, false);
 
         //Добавляем атрибуты версии, т.к они не хранятся в бд
         refBook.getAttributes().add(RefBook.getVersionFromAttribute());
@@ -127,15 +127,16 @@ public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookOktmoDa
      * @param version дата актуальности, по которой определяется период актуальности и соответственно версия записи, которая в нем действует
      *                Если = null, значит будет выполняться получение всех версий записи
      *                Иначе выполняется получение всех записей справочника, активных на указанную дату
-     * @param sortAttribute
-     * @param filter
-     * @param pagingParams
-     * @param isSortAscending
-     * @param whereClause
+     * @param sortAttribute атррибут по которому сортируется выборка
+     * @param filter параметры фильтрации
+     * @param pagingParams параметры пагинации
+     * @param isSortAscending порядок сортировки
+     * @param whereClause дополнительные условия запроса
+     * @param onlyId флаг указывающий на то что в выборке будет только record_id а не полный список полей
      * @return
      */
     private PreparedStatementData getSimpleQuery(String tableName, RefBook refBook, Long uniqueRecordId, Date version, RefBookAttribute sortAttribute,
-                                                String filter, PagingParams pagingParams, boolean isSortAscending, String whereClause) {
+                                                String filter, PagingParams pagingParams, boolean isSortAscending, String whereClause, boolean onlyId) {
         PreparedStatementData ps = new PreparedStatementData();
 
         if (version != null) {
@@ -148,7 +149,12 @@ public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookOktmoDa
             ps.addParam(VersionedObjectStatus.NORMAL.getId());
         }
 
-        ps.appendQuery("SELECT * FROM ");
+        if (onlyId) {
+            ps.appendQuery("SELECT record_id FROM ");
+        } else {
+            ps.appendQuery("SELECT * FROM ");
+        }
+
         ps.appendQuery("(select r.id as ");
         ps.appendQuery(RefBook.RECORD_ID_ALIAS);
 
@@ -837,5 +843,19 @@ public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookOktmoDa
                     }
                 });
         return result;
+    }
+
+    @Override
+    public List<Long> getUniqueRecordIds(Long refBookId, String tableName, Date version, String filter) {
+        RefBook refBook = refBookDao.get(refBookId);
+        PreparedStatementData ps = getSimpleQuery(tableName, refBook, null, version, null, filter, null, false, null, true);
+        return getJdbcTemplate().queryForList(ps.getQuery().toString(), ps.getParams().toArray(), Long.class);
+    }
+
+    @Override
+    public int getRecordsCount(Long refBookId, String tableName, Date version, String filter) {
+        RefBook refBook = refBookDao.get(refBookId);
+        PreparedStatementData ps = getSimpleQuery(tableName, refBook, null, version, null, filter, null, false, null, true);
+        return refBookUtils.getRecordsCount(ps);
     }
 }

@@ -1,8 +1,6 @@
 package com.aplana.gwt.client;
 
-import com.google.gwt.editor.client.IsEditor;
 import com.google.gwt.editor.client.LeafValueEditor;
-import com.google.gwt.editor.ui.client.adapters.ValueBoxEditor;
 import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -69,7 +67,7 @@ public class DoubleStateWrapper<W extends Widget, T> extends DoubleStateComposit
 	@SuppressWarnings("unchecked")
 	@Override
 	public HandlerRegistration addValueChangeHandler(ValueChangeHandler<T> handler) {
-		if(widget instanceof ValueChangeHandler){
+		if(widget instanceof HasValueChangeHandlers){
 			return ((HasValueChangeHandlers)widget).addValueChangeHandler(handler);
 		} else {
             //throw new UnsupportedOperationException("The widget is not instance of HasValueChangeHandlers.");

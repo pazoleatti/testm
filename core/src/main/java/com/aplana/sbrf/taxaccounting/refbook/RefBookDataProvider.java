@@ -59,6 +59,14 @@ public interface RefBookDataProvider {
     List<Long> getUniqueRecordIds(Date version, String filter);
 
     /**
+     * Получает количество уникальных записей, удовлетворяющих условиям фильтра
+     * @param version дата актуальности
+     * @param filter условие фильтрации строк. Может быть не задано
+     * @return
+     */
+    int getRecordsCount(Date version, String filter);
+
+    /**
      * Проверяет, существуют ли версии элемента справочника, удовлетворяющие указанному фильтру
      * @param version дата актуальности. Может быть null - тогда не учитывается
      * @param filter

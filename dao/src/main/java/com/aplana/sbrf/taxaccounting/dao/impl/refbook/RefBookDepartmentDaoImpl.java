@@ -185,4 +185,9 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
             throw new DaoException("", e);
         }
     }
+
+    @Override
+    public int getRecordsCount(String filter) {
+        return refBookUtils.getRecordsCount(REF_BOOK_ID, TABLE_NAME, filter);
+    }
 }

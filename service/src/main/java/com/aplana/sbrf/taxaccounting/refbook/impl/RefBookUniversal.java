@@ -107,6 +107,11 @@ public class RefBookUniversal implements RefBookDataProvider {
     }
 
     @Override
+    public int getRecordsCount(Date version, String filter) {
+        return refBookDao.getRecordsCount(refBookId, version, filter);
+    }
+
+    @Override
     public List<Pair<Long, Long>> checkRecordExistence(Date version, String filter) {
         return refBookDao.getRecordIdPairs(refBookId, version, filter);
     }

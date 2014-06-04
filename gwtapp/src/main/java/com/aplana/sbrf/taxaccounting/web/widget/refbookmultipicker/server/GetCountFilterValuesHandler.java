@@ -72,8 +72,8 @@ public class GetCountFilterValuesHandler extends AbstractActionHandler<GetCountF
 
         RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(refBook.getId());
 
-        List<Long> uniqueRecordIds = refBookDataProvider.getUniqueRecordIds(action.getVersion(), filter);
-        result.setCount(uniqueRecordIds != null ? uniqueRecordIds.size() : 0);
+        Integer count = refBookDataProvider.getRecordsCount(action.getVersion(), filter);
+        result.setCount(count);
 
         return result;
     }

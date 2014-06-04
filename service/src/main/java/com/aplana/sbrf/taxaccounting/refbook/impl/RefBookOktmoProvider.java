@@ -77,7 +77,12 @@ public class RefBookOktmoProvider implements RefBookDataProvider {
 
     @Override
     public List<Long> getUniqueRecordIds(Date version, String filter) {
-        throw new UnsupportedOperationException();
+        return dao.getUniqueRecordIds(OKTMO_REF_BOOK_ID, getTableName(), version, filter);
+    }
+
+    @Override
+    public int getRecordsCount(Date version, String filter) {
+        return dao.getRecordsCount(OKTMO_REF_BOOK_ID, getTableName(), version, filter);
     }
 
     @Override

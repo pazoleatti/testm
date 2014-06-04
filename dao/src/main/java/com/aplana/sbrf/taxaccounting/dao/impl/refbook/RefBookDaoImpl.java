@@ -322,6 +322,14 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             return null;
         }
     }
+
+    @Override
+    public int getRecordsCount(Long refBookId, Date version, String filter) {
+        PreparedStatementData psForCount = getRefBookSql(refBookId, null, version, null, filter, null, true);
+        psForCount.setQuery(new StringBuilder("SELECT count(*) FROM (" + psForCount.getQuery() + ")"));
+        return getJdbcTemplate().queryForInt(psForCount.getQuery().toString(), psForCount.getParams().toArray());
+    }
+
     private PagingResult<Map<String, RefBookValue>> getChildren(@NotNull Long refBookId, @NotNull Date version, PagingParams pagingParams,
 																String filter, RefBookAttribute sortAttribute, boolean isSortAscending, Long parentId) {
         PreparedStatementData ps = getChildrenStatement(refBookId, null, version, sortAttribute, filter, pagingParams, isSortAscending, parentId);

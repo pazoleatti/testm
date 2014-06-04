@@ -105,6 +105,11 @@ public class RefBookDepartment implements RefBookDataProvider {
     }
 
     @Override
+    public int getRecordsCount(Date version, String filter) {
+        return refBookDepartmentDao.getRecordsCount(filter);
+    }
+
+    @Override
     public List<Pair<Long, Long>> checkRecordExistence(Date version, String filter) {
         throw new UnsupportedOperationException();
     }
