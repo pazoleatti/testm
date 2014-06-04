@@ -191,7 +191,7 @@ void checkIncome102() {
     if (getIncome102Data(getReportPeriodEndDate()) == []) {
         throw new ServiceException("Экземпляр Отчета о прибылях и убытках за период " +
                 "${getReportPeriodStartDate().format(dateFormat)} - ${getReportPeriodEndDate().format(dateFormat)} " +
-                "не существует (отсутствуют данные для расчета)!")
+                "не существует (отсутствуют данные для расчета)! Расчеты не могут быть выполнены.")
     }
 }
 

@@ -64,6 +64,7 @@
         <hierarchical>false</hierarchical>
         <nameAttributeId>810</nameAttributeId>
         <refBookAttributeId>810</refBookAttributeId>
+        <refBookAttributeId2>64</refBookAttributeId2>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>lotSizePrev</alias>
