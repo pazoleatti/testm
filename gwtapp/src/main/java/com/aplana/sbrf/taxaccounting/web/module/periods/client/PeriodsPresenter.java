@@ -269,6 +269,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
         initData.setBalance(getView().getSelectedRow().isBalance());
         initData.setDepartmentId(getView().getDepartmentId().getDepartmentId());
         initData.setReportPeriodId(getView().getSelectedRow().getReportPeriodId());
+        initData.setPeriodName(getView().getSelectedRow().getPeriodName());
         if (getView().getSelectedRow().getCorrectPeriod() == null) {
             editDialogPresenter.init(initData);
             addToPopupSlot(editDialogPresenter);

@@ -108,8 +108,9 @@ public class EditDialogView extends PopupViewWithUiHandlers<EditDialogUiHandlers
 	}
 
     @Override
-    public void setReportPeriod(long reportPeriodId) {
+    public void setReportPeriod(long reportPeriodId, String periodName) {
         period.setPeriodDates(new Date(), new Date());
+        period.setDereferenceValue(periodName);
         period.setSingleValue(reportPeriodId);
 
     }
