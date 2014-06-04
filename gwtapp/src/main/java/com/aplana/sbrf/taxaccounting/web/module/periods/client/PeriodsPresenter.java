@@ -268,7 +268,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
         initData.setYear(getView().getSelectedRow().getYear());
         initData.setBalance(getView().getSelectedRow().isBalance());
         initData.setDepartmentId(getView().getDepartmentId().getDepartmentId());
-        initData.setReportPeriodId(getView().getSelectedRow().getReportPeriodId());
+        initData.setReportPeriodId((int)getView().getSelectedRow().getReportPeriodId());
         initData.setPeriodName(getView().getSelectedRow().getPeriodName());
         if (getView().getSelectedRow().getCorrectPeriod() == null) {
             editDialogPresenter.init(initData);

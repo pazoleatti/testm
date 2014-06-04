@@ -58,7 +58,13 @@ public class EditCorrectionDialogPresenter extends PresenterWidget<EditCorrectio
                 || (data.getCorrectionReportPeriods() == null)
                 || (data.getCorrectionReportPeriods().isEmpty())
                 || (data.getCorrectionDate() == null)) {
-            Dialog.errorMessage("Не все поля заполнены");
+            Dialog.errorMessage("Редактирование параметров", "Не заполнены следующие обязательные к заполнению поля: "
+                            + ((data.getDepartmentId() == null) ? "Подразделение " : "")
+                            + ((data.getCorrectionReportPeriods() == null) ? " Период корректировки " : "")
+                            + ((data.getCorrectionDate() == null) ? "Период сдачи корректировки " : "")
+
+                            + "!"
+            );
             return;
         }
 

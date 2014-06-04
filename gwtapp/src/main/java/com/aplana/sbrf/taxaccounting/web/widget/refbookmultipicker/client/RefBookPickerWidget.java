@@ -325,7 +325,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
 
     @Override
     public Long getSingleValue() {
-        return state.getSetIds() != null ? state.getSetIds().iterator().next() : null;
+        return ((state.getSetIds() != null) && !state.getSetIds().isEmpty()) ? state.getSetIds().iterator().next() : null;
     }
 
     @Override

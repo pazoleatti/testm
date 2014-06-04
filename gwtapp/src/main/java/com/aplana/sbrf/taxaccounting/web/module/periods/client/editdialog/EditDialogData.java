@@ -10,7 +10,7 @@ public class EditDialogData {
     private Integer year;
     private Integer departmentId;
     private Long dictTaxPeriodId;
-    private Long reportPeriodId;
+    private Integer reportPeriodId;
     private List<ReportPeriod> correctionReportPeriods;
     private Date correctionDate;
     private String periodName;
@@ -47,11 +47,11 @@ public class EditDialogData {
         this.dictTaxPeriodId = dictTaxPeriodId;
     }
 
-    public Long getReportPeriodId() {
+    public Integer getReportPeriodId() {
         return reportPeriodId;
     }
 
-    public void setReportPeriodId(Long reportPeriodId) {
+    public void setReportPeriodId(Integer reportPeriodId) {
         this.reportPeriodId = reportPeriodId;
     }
 
