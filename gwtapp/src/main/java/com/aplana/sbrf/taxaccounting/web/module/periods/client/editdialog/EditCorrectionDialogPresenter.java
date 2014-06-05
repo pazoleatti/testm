@@ -14,6 +14,7 @@ import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -25,6 +26,7 @@ public class EditCorrectionDialogPresenter extends PresenterWidget<EditCorrectio
         void setSelectedDepartment(Integer departmentId);
         void setCanChangeDepartment(boolean canChange);
         void setPeriodsList(List<ReportPeriod> reportPeriods);
+        void setCorrectionDate(Date date);
     }
 
     private DispatchAsync dispatcher;
@@ -134,6 +136,7 @@ public class EditCorrectionDialogPresenter extends PresenterWidget<EditCorrectio
         initData = data;
         getView().setSelectedDepartment(data.getDepartmentId());
         getView().setPeriodsList(data.getCorrectionReportPeriods());
+        getView().setCorrectionDate(data.getCorrectionDate());
 
     }
 

@@ -108,5 +108,10 @@ public class EditCorrectionDialogView extends PopupViewWithUiHandlers<EditCorrec
         periodList.setAcceptableValues(reportPeriods);
     }
 
+    @Override
+    public void setCorrectionDate(Date date) {
+        term.setValue(date);
+    }
+
 
 }
