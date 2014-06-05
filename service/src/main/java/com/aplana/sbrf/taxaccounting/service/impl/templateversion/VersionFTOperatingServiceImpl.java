@@ -148,8 +148,9 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
     public void cleanVersions(int templateId, int typeId, VersionedObjectStatus status, Date versionActualDateStart, Date versionActualDateEnd, Logger logger) {
         if (templateId == 0)
             return;
-        FormTemplate formTemplateFake = formTemplateService.getNearestFTRight(templateId, VersionedObjectStatus.FAKE);
-        if (formTemplateFake != null)
+        FormTemplate formTemplateFake = formTemplateService.getNearestFTRight(templateId,
+                VersionedObjectStatus.NORMAL, VersionedObjectStatus.DRAFT, VersionedObjectStatus.FAKE);
+        if (formTemplateFake != null && formTemplateFake.getStatus() == VersionedObjectStatus.FAKE)
             formTemplateService.delete(formTemplateFake.getId());
     }
 
