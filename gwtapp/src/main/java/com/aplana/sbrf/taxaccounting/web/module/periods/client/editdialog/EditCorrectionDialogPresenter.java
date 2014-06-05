@@ -14,6 +14,7 @@ import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -25,6 +26,7 @@ public class EditCorrectionDialogPresenter extends PresenterWidget<EditCorrectio
         void setSelectedDepartment(Integer departmentId);
         void setCanChangeDepartment(boolean canChange);
         void setPeriodsList(List<ReportPeriod> reportPeriods);
+        void setCorrectionDate(Date date);
     }
 
     private DispatchAsync dispatcher;
@@ -58,14 +60,20 @@ public class EditCorrectionDialogPresenter extends PresenterWidget<EditCorrectio
                 || (data.getCorrectionReportPeriods() == null)
                 || (data.getCorrectionReportPeriods().isEmpty())
                 || (data.getCorrectionDate() == null)) {
-            Dialog.errorMessage("Не все поля заполнены");
+            Dialog.errorMessage("Редактирование параметров", "Не заполнены следующие обязательные к заполнению поля: "
+                            + ((data.getDepartmentId() == null) ? "Подразделение " : "")
+                            + ((data.getCorrectionReportPeriods() == null) ? " Период корректировки " : "")
+                            + ((data.getCorrectionDate() == null) ? "Период сдачи корректировки " : "")
+
+                            + "!"
+            );
             return;
         }
 
         if (data.getDepartmentId().equals(initData.getDepartmentId())
                 && data.getCorrectionDate().equals(initData.getCorrectionDate())
                 && data.getCorrectionReportPeriods().get(0).equals(initData.getCorrectionReportPeriods().get(0))) {
-            Dialog.errorMessage("Ни одни параметр не был изменен!");
+            Dialog.errorMessage("Редактирование параметров", "Ни один параметр не был изменен!");
             return;
         }
 
@@ -128,6 +136,7 @@ public class EditCorrectionDialogPresenter extends PresenterWidget<EditCorrectio
         initData = data;
         getView().setSelectedDepartment(data.getDepartmentId());
         getView().setPeriodsList(data.getCorrectionReportPeriods());
+        getView().setCorrectionDate(data.getCorrectionDate());
 
     }
 

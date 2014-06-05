@@ -81,7 +81,7 @@ public class EditCorrectionDialogView extends PopupViewWithUiHandlers<EditCorrec
     @UiHandler("continueButton")
     public void onContinue(ClickEvent event) {
         EditDialogData data = new EditDialogData();
-        data.setReportPeriodId(periodList.getValue().getId().longValue());
+        data.setReportPeriodId(periodList.getValue() == null ? null : periodList.getValue().getId());
         data.setDepartmentId(departmentPicker.getValue().get(0));
         data.setCorrectionDate(term.getValue());
         getUiHandlers().onContinue(data);
@@ -106,6 +106,11 @@ public class EditCorrectionDialogView extends PopupViewWithUiHandlers<EditCorrec
     @Override
     public void setPeriodsList(List<ReportPeriod> reportPeriods) {
         periodList.setAcceptableValues(reportPeriods);
+    }
+
+    @Override
+    public void setCorrectionDate(Date date) {
+        term.setValue(date);
     }
 
 

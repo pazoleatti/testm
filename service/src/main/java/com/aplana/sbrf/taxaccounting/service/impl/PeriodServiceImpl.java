@@ -201,7 +201,7 @@ public class PeriodServiceImpl implements PeriodService{
                 logs.add(new LogEntry(LogLevel.WARNING,
                         "Форма " + fd.getFormType().getName() +
                                 " " + fd.getKind().getName() +
-                                " в подразделение " + departmentService.getDepartment(fd.getDepartmentId()).getName() +
+                                " в подразделении " + departmentService.getDepartment(fd.getDepartmentId()).getName() +
                                 " редактируется пользователем " + userService.getUser(lock.getUserId()).getName()));
                 allGood = false;
             }
@@ -756,7 +756,9 @@ public class PeriodServiceImpl implements PeriodService{
     public void edit(int reportPeriodId, int newDictTaxPeriodId, int newYear, TaxType taxType, TAUserInfo user,
                      long departmentId, boolean isBalance, List<LogEntry> logs) {
         ReportPeriod rp = getReportPeriod(reportPeriodId);
-
+        RefBook refBook = rbFactory.get(PERIOD_CODE_REFBOOK);
+        RefBookDataProvider provider = rbFactory.getDataProvider(refBook.getId());
+        Map<String, RefBookValue> dictTaxPeriod = provider.getRecordData((long) newDictTaxPeriodId);
 
         List<Department> deps = getAvailableDepartments(taxType, user.getUser(), Operation.EDIT, (int) departmentId);
         if ((rp.getDictTaxPeriodId() == newDictTaxPeriodId) && (rp.getTaxPeriod().getYear() == newYear)) { // Изменился только ввод остатков
@@ -776,7 +778,7 @@ public class PeriodServiceImpl implements PeriodService{
             open(newYear, newDictTaxPeriodId, taxType, user, departmentId, null, isBalance, null);
             for (Department dep : deps) {
                 logs.add(new LogEntry(LogLevel.INFO,
-                        "Период с " + rp.getName() + " " + rp.getTaxPeriod().getYear() + " был изменён на " + newDictTaxPeriodId + " для " + dep.getName()));//<соответствующий календарный год>** + <"ввод остатков" *>**  для <Наименование подразделения>"));
+                        "Период с " + rp.getName() + " " + rp.getTaxPeriod().getYear() + " был изменён на " + dictTaxPeriod.get("NAME").getStringValue() + " " + newYear + " для " + dep.getName()));//<соответствующий календарный год>** + <"ввод остатков" *>**  для <Наименование подразделения>"));
             }
         }
     }

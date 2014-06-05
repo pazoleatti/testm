@@ -62,7 +62,12 @@ public class EditDialogPresenter extends PresenterWidget<EditDialogPresenter.MyV
         if ((data.getYear() == null)
                 || (data.getReportPeriodId() == null)
                 || (data.getDepartmentId() == null)) {
-            Dialog.errorMessage("Не все поля заполнены");
+            Dialog.errorMessage("Редактирование параметров", "Не заполнены следующие обязательные к заполнению поля: "
+                    + ((data.getDepartmentId() == null) ? "Подразделение " : "")
+                    + ((data.getYear() == null) ? " Год " : "")
+                    + ((data.getReportPeriodId() == null) ? "Период " : "")
+                    + "!"
+            );
             return;
         }
 
@@ -70,7 +75,7 @@ public class EditDialogPresenter extends PresenterWidget<EditDialogPresenter.MyV
                 && (data.getYear().equals(initData.getYear()))
                 && (data.getReportPeriodId().equals(initData.getReportPeriodId()))
                 && (data.getDepartmentId().equals(initData.getDepartmentId()))) {
-            Dialog.errorMessage("Ни одни параметр не был изменен!");
+            Dialog.errorMessage("Редактирование параметров", "Ни один параметр не был изменен!");
             return;
         }
 
@@ -82,7 +87,7 @@ public class EditDialogPresenter extends PresenterWidget<EditDialogPresenter.MyV
                             @Override
                             public void onSuccess(CanRemovePeriodResult result) {
                                 if (!result.isCanRemove()) {
-                                    Dialog.errorMessage("Редактирование периода невозможно!");
+                                    Dialog.errorMessage("Редактирование периода", "Редактирование периода невозможно!");
                                     return;
                                 } else {
                                     checkHasCorrectionPeriod(data);
@@ -105,7 +110,7 @@ public class EditDialogPresenter extends PresenterWidget<EditDialogPresenter.MyV
                             @Override
                             public void onSuccess(CheckHasCorrectionPeriodResult result) {
                                 if (result.isHasCorrectionPeriods()) {
-                                    Dialog.errorMessage("Перед изменением периода необходимо удалить все связанные корректирующие периоды!");
+                                    Dialog.errorMessage("Редактирование периода", "Перед изменением периода необходимо удалить все связанные корректирующие периоды!");
                                 } else {
                                     edit(data);
                                 }
