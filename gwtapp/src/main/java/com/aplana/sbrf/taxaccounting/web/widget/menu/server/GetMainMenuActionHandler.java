@@ -17,6 +17,7 @@ import com.aplana.sbrf.taxaccounting.web.module.migration.client.MigrationTokens
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.PeriodsTokens;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.client.RefBookListTokens;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.client.SchedulerTokens;
+import com.aplana.sbrf.taxaccounting.web.module.scriptExecution.client.ScriptExecutionTokens;
 import com.aplana.sbrf.taxaccounting.web.module.sources.client.SourcesTokens;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.TaxFormNominationToken;
 import com.aplana.sbrf.taxaccounting.web.module.testpage.client.TestPageTokens;
@@ -211,10 +212,12 @@ public class GetMainMenuActionHandler extends
                         + AdminConstants.NameTokens.adminPage));
                 templateMenu.getSubMenu().add(new MenuItem("Макеты деклараций", NUMBER_SIGN
                         + DeclarationTemplateTokens.declarationTemplateList));
-                templateMenu.getSubMenu().add((new MenuItem("Справочники", NUMBER_SIGN
-                        + RefBookListTokens.REFBOOK_LIST_ADMIN)));
+                templateMenu.getSubMenu().add(new MenuItem("Справочники", NUMBER_SIGN
+                        + RefBookListTokens.REFBOOK_LIST_ADMIN));
                 templateMenu.getSubMenu().add(new MenuItem("Сбросить кэш", CLEAR_CACHE_LINK));
                 templateMenu.getSubMenu().add(new MenuItem("Экспорт макетов", DOWNLOAD_ALL_TEMPLATES));
+                templateMenu.getSubMenu().add(new MenuItem("Выполнить скрипт", NUMBER_SIGN
+                        + ScriptExecutionTokens.SCRIPT_EXECUTION));
             }
 
             // в банке все равно такого пользователя не будет, если надо убрать скажите мне aivanov
