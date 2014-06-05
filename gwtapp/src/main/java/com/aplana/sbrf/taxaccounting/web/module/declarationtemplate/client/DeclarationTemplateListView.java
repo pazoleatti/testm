@@ -16,7 +16,9 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.*;
+import com.google.gwt.view.client.ListDataProvider;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -121,6 +123,8 @@ public class DeclarationTemplateListView extends ViewWithUiHandlers<DeclarationT
         dataProvider.setList(result);
         declarationTemplateTable.setVisibleRange(0, result.size());
         dataSortHandler.setList(dataProvider.getList());
+        /* При единственном значении не перерисовывается таблица http://jira.aplana.com/browse/SBRFACCTAX-7612 */
+        declarationTemplateTable.flush();
         selectionModel.clear();
         if (selectedItem != null) {
             for(DeclarationTypeTemplate item: result) {
