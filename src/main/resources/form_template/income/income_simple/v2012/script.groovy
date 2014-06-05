@@ -396,6 +396,7 @@ def consolidationSummary(def dataRows) {
     fillRecordsMap(28, 'CODE', knuList, getReportPeriodEndDate())
 
     // получить формы-источники в текущем налоговом периоде
+    // TODO (Ramil Timerbaev) используется устаревший метод departmentFormTypeService.getSources, возможно надо заменить на departmentFormTypeService.getFormSources
     departmentFormTypeService.getSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         def child = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
         if (child != null && child.state == WorkflowState.ACCEPTED) {
