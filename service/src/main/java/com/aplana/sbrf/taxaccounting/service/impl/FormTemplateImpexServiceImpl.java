@@ -164,7 +164,7 @@ public class FormTemplateImpexServiceImpl implements
             	throw new ServiceException("Версия файла для импорта не поддерживается: " + version);
             }
 		} catch (Exception e) {
-            throw new ServiceException("Не удалось импортировать шаблон", e);
+            throw new ServiceException("Загрузить макет не удалось. Проверьте источник данных", e);
 		}
 	}
 
