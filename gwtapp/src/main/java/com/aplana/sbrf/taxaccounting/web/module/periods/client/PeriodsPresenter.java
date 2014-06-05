@@ -166,12 +166,19 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 
     @Override
 	public void onFindButton() {
-        if (getView().getDepartmentId() == null) {
-            Dialog.warningMessage("Не выбрано подразделение!");
+        if ((getView().getDepartmentId() == null)
+                || (getView().getFromYear() == null)
+                || (getView().getToYear() == null)) {
+            Dialog.errorMessage("Указание параметров поиска",
+                    "Не заполнены следующие обязательные к заполнению поля: "
+                    + (getView().getDepartmentId() == null ? "Подразделение " : "")
+                    + (getView().getFromYear() == null ? "Период с " : "")
+                    + (getView().getToYear() == null ? "Период по " : "")
+            );
         } else if ((getView().getFromYear() == null)
 				|| (getView().getToYear() == null)
 				|| (getView().getFromYear() > getView().getToYear())){
-			Dialog.warningMessage("Внимание","Интервал периода поиска указан неверно!");
+			Dialog.errorMessage("Указание параметров поиска","Интервал периода поиска указан неверно!");
 		} else {
 			find();
 		}
