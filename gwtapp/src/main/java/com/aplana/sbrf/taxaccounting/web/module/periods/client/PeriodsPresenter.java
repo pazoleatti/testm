@@ -122,6 +122,9 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
                             public void onSuccess(ClosePeriodResult result) {
                                 find();
                                 LogAddEvent.fire(PeriodsPresenter.this, result.getUuid());
+                                if (result.isErrorBeforeClose()) {
+                                    Dialog.errorMessage("Закрытие периода", "Период не может быть закрыт, пока выполняется редактирование форм, относящихся к этому периоду!");
+                                }
                             }
                         }, PeriodsPresenter.this));
             }
