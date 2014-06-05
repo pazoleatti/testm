@@ -15,6 +15,8 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.TaManualRevealCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.deadlinedialog.DeadlineDialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.editdialog.EditCorrectionDialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.editdialog.EditDialogData;
@@ -228,10 +230,6 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 	}
 
 	private void checkAndRemovePeriod() {
-//		if (taxType != TaxType.INCOME) {
-//			removeReportPeriod();
-//			return;
-//		}
 		CanRemovePeriodAction action = new CanRemovePeriodAction();
 		action.setReportPeriodId((int)getView().getSelectedRow().getReportPeriodId());
 		dispatcher.execute(action, CallbackUtils
@@ -242,6 +240,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 							removeReportPeriod();
 						} else {
                             LogAddEvent.fire(PeriodsPresenter.this, result.getUuid());
+                            Dialog.errorMessage("Удаление периода", "Удаление периода невозможно!");
 						}
 					}
 				}, PeriodsPresenter.this));
@@ -320,6 +319,8 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 	@Override
 	public void prepareFromRequest(PlaceRequest request) {
 		super.prepareFromRequest(request);
+        LogCleanEvent.fire(this);
+        LogShowEvent.fire(this, false);
 
 		PeriodsGetFilterData getFilterData = new PeriodsGetFilterData();
 		getFilterData.setTaxType(TaxType.valueOf(request.getParameter("nType", "")));

@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.DepartmentFormTypeShared;
 import com.google.inject.Inject;
@@ -88,6 +90,8 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 	@Override
 	public void prepareFromRequest(final PlaceRequest request) {
 		super.prepareFromRequest(request);
+        LogCleanEvent.fire(this);
+        LogShowEvent.fire(this, false);
 
 		// При инициализации формы получаем списки департаментов
 		GetDepartmentsAction action = new GetDepartmentsAction();

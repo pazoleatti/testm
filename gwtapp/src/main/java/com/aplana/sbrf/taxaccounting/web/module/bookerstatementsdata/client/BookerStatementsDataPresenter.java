@@ -8,6 +8,8 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.client.BookerStatementsTokens;
 import com.aplana.sbrf.taxaccounting.web.module.bookerstatementsdata.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookColumn;
@@ -149,6 +151,8 @@ public class BookerStatementsDataPresenter extends Presenter<BookerStatementsDat
     @Override
     public void prepareFromRequest(PlaceRequest request) {
         super.prepareFromRequest(request);
+        LogCleanEvent.fire(this);
+        LogShowEvent.fire(this, false);
         if (request.getParameterNames().contains(BookerStatementsDataTokens.DEPARTMENT_ID)) {
             departmentId = Integer.parseInt(request.getParameter(BookerStatementsDataTokens.DEPARTMENT_ID, null));
         }

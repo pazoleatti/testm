@@ -201,7 +201,7 @@ public class PeriodServiceImpl implements PeriodService{
                 logs.add(new LogEntry(LogLevel.WARNING,
                         "Форма " + fd.getFormType().getName() +
                                 " " + fd.getKind().getName() +
-                                " в подразделение " + departmentService.getDepartment(fd.getDepartmentId()).getName() +
+                                " в подразделении " + departmentService.getDepartment(fd.getDepartmentId()).getName() +
                                 " редактируется пользователем " + userService.getUser(lock.getUserId()).getName()));
                 allGood = false;
             }
