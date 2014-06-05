@@ -45,6 +45,8 @@ public class GetRefBookAttributesHandler extends AbstractActionHandler<GetRefBoo
         result.setRefBookType(refBook.getType());
 		List<RefBookColumn> columns = new ArrayList<RefBookColumn>();
 		for (RefBookAttribute attribute : attributes) {
+            if (!attribute.isVisible())
+                continue;
 			RefBookColumn col = new RefBookColumn();
             RefBook attributeRefBook = null;
             if(attribute.getRefBookId()!=null){
