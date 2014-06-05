@@ -228,10 +228,10 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 	}
 
 	private void checkAndRemovePeriod() {
-		if (taxType != TaxType.INCOME) {
-			removeReportPeriod();
-			return;
-		}
+//		if (taxType != TaxType.INCOME) {
+//			removeReportPeriod();
+//			return;
+//		}
 		CanRemovePeriodAction action = new CanRemovePeriodAction();
 		action.setReportPeriodId((int)getView().getSelectedRow().getReportPeriodId());
 		dispatcher.execute(action, CallbackUtils
