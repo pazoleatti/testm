@@ -216,8 +216,6 @@ public class GetMainMenuActionHandler extends
                         + RefBookListTokens.REFBOOK_LIST_ADMIN));
                 templateMenu.getSubMenu().add(new MenuItem("Сбросить кэш", CLEAR_CACHE_LINK));
                 templateMenu.getSubMenu().add(new MenuItem("Экспорт макетов", DOWNLOAD_ALL_TEMPLATES));
-                templateMenu.getSubMenu().add(new MenuItem("Выполнить скрипт", NUMBER_SIGN
-                        + ScriptExecutionTokens.SCRIPT_EXECUTION));
             }
 
             // в банке все равно такого пользователя не будет, если надо убрать скажите мне aivanov
