@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.client;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -65,6 +66,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 		void setCanChangeDeadline(boolean canChangeDeadline);
         void setCanEditPeriod(boolean canEditPeriod);
 		void setCanEdit(boolean canEdit);
+        void setCanOpenCorrectPeriod(boolean canOpenCorrectPeriod);
 	}
 
 	private final TaPlaceManager placeManager;
@@ -264,8 +266,19 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 
 	@Override
 	public void selectionChanged() {
-		getView().setCanChangeDeadline(getView().getSelectedRow().isOpen());
-        getView().setCanEditPeriod(getView().getSelectedRow().isOpen());
+        TableRow selectedRow = getView().getSelectedRow();
+        getView().setCanChangeDeadline(!selectedRow.isSubHeader() && selectedRow.isOpen());
+        getView().setCanEditPeriod(!selectedRow.isSubHeader() && selectedRow.isOpen());
+        List<TaxType> ITD = new ArrayList<TaxType>();
+        ITD.add(TaxType.INCOME);
+        ITD.add(TaxType.TRANSPORT);
+        ITD.add(TaxType.DEAL);
+        if (selectedRow != null && !selectedRow.isSubHeader() && !selectedRow.isOpen() && !selectedRow.isBalance() && selectedRow.getCorrectPeriod() == null &&
+                (ITD.contains(taxType) && selectedRow.getPeriodName().equals("год") || !ITD.contains(taxType))) {
+            getView().setCanOpenCorrectPeriod(true);
+        } else {
+            getView().setCanOpenCorrectPeriod(false);
+        }
 	}
 
     @Override
