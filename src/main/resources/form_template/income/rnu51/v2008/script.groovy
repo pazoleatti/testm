@@ -289,6 +289,7 @@ def calcTotalTwo(def totalOneSum) {
             result[it] = totalOneSum[it] ?: 0 + (prevTotal == null ? 0 : prevTotal[it])
         }
     } else if (formData.kind == FormDataKind.CONSOLIDATED) {
+        // TODO (Ramil Timerbaev) в метод departmentFormTypeService.getFormSources добавить периоды
         departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
             if (it.formTypeId == formData.getFormType().getId()) {
                 def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
