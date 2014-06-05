@@ -87,7 +87,7 @@ public class EditDialogPresenter extends PresenterWidget<EditDialogPresenter.MyV
                             @Override
                             public void onSuccess(CanRemovePeriodResult result) {
                                 if (!result.isCanRemove()) {
-                                    Dialog.errorMessage("Редактирование периода невозможно!");
+                                    Dialog.errorMessage("Редактирование периода", "Редактирование периода невозможно!");
                                     return;
                                 } else {
                                     checkHasCorrectionPeriod(data);
@@ -110,7 +110,7 @@ public class EditDialogPresenter extends PresenterWidget<EditDialogPresenter.MyV
                             @Override
                             public void onSuccess(CheckHasCorrectionPeriodResult result) {
                                 if (result.isHasCorrectionPeriods()) {
-                                    Dialog.errorMessage("Перед изменением периода необходимо удалить все связанные корректирующие периоды!");
+                                    Dialog.errorMessage("Редактирование периода", "Перед изменением периода необходимо удалить все связанные корректирующие периоды!");
                                 } else {
                                     edit(data);
                                 }
