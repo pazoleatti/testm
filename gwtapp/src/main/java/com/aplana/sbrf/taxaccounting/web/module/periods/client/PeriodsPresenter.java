@@ -104,7 +104,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
         }
         if (!getView().getSelectedRow().isSubHeader()) {
             if (!getView().getSelectedRow().isOpen()) {
-                Dialog.warningMessage("Период уже закрыт.");
+                Dialog.errorMessage("Закрытие периода", "Выбранный период уже закрыт!");
                 return;
             } else {
                 ClosePeriodAction requestData = new ClosePeriodAction();
