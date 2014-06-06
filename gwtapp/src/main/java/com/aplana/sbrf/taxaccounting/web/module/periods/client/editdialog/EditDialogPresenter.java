@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
+import com.aplana.sbrf.taxaccounting.web.module.periods.client.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -134,6 +135,7 @@ public class EditDialogPresenter extends PresenterWidget<EditDialogPresenter.MyV
                             public void onSuccess(EditPeriodResult result) {
                                 LogAddEvent.fire(EditDialogPresenter.this, result.getUuid());
                                 getView().hide();
+                                UpdateForm.fire(EditDialogPresenter.this);
                             }
 
                         }, EditDialogPresenter.this)

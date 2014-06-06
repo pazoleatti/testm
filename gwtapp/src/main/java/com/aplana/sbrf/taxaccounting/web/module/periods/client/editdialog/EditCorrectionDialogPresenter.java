@@ -4,6 +4,7 @@ import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.module.periods.client.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -119,6 +120,8 @@ public class EditCorrectionDialogPresenter extends PresenterWidget<EditCorrectio
                     } else if ((result.getStatus() == PeriodStatusBeforeOpen.OPEN)
                             || (result.getStatus() == PeriodStatusBeforeOpen.CLOSE)) {
                         Dialog.errorMessage("Указанный период уже заведён в Системе!");
+                    } else {
+                        UpdateForm.fire(EditCorrectionDialogPresenter.this);
                     }
                 }
 
