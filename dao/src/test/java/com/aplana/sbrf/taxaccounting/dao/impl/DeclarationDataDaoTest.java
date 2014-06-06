@@ -37,7 +37,6 @@ public class DeclarationDataDaoTest {
     public void init(){
         blobData = new BlobData();
         blobData.setName("");
-        blobData.setDataSize(10);
         blobData.setInputStream(new ByteArrayInputStream("test-data-string-2".getBytes()));
         blobData.setCreationDate(new Date());
         blobData.setUuid(UUID.randomUUID().toString().toLowerCase());
