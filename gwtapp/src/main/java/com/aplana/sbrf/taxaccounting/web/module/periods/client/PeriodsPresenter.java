@@ -8,6 +8,7 @@ import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
@@ -111,24 +112,53 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
                 Dialog.errorMessage("Закрытие периода", "Выбранный период уже закрыт!");
                 return;
             } else {
-                ClosePeriodAction requestData = new ClosePeriodAction();
-                requestData.setTaxType(taxType);
-                requestData.setReportPeriodId((int) getView().getSelectedRow().getReportPeriodId());
-                requestData.setDepartmentId(getView().getSelectedRow().getDepartmentId());
-                requestData.setCorrectionDate(getView().getSelectedRow().getCorrectPeriod());
-                dispatcher.execute(requestData, CallbackUtils
-                        .defaultCallback(new AbstractCallback<ClosePeriodResult>() {
+
+                CheckHasManualEditFormAction manualEditFormAction = new CheckHasManualEditFormAction();
+                manualEditFormAction.setDepartmentId((int) getView().getSelectedRow().getDepartmentId());
+                manualEditFormAction.setKind(FormDataKind.SUMMARY);
+                manualEditFormAction.setReportPeriodId((int) getView().getSelectedRow().getReportPeriodId());
+                manualEditFormAction.setTaxType(taxType);
+
+                dispatcher.execute(manualEditFormAction, CallbackUtils
+                        .defaultCallback(new AbstractCallback<CheckHasManualEditFormResult>() {
                             @Override
-                            public void onSuccess(ClosePeriodResult result) {
-                                find();
-                                LogAddEvent.fire(PeriodsPresenter.this, result.getUuid());
-                                if (result.isErrorBeforeClose()) {
-                                    Dialog.errorMessage("Закрытие периода", "Период не может быть закрыт, пока выполняется редактирование форм, относящихся к этому периоду!");
-                                }
+                            public void onSuccess(CheckHasManualEditFormResult result) {
+                               if (result.hasManualInputForms()) {
+                                   LogAddEvent.fire(PeriodsPresenter.this, result.getUuid());
+                                   Dialog.confirmMessage("Закрытие периода",
+                                           "В Системе существуют налоговые формы, для которых существуют версии ручного ввода. Продолжить операцию закрытия периода?",
+                                           new DialogHandler() {
+                                               @Override
+                                               public void yes() {
+                                                   PeriodsPresenter.this.close();
+                                               }
+                                           });
+                               } else {
+                                   close();
+                               }
                             }
                         }, PeriodsPresenter.this));
             }
         }
+    }
+
+    private void close() {
+        ClosePeriodAction requestData = new ClosePeriodAction();
+        requestData.setTaxType(taxType);
+        requestData.setReportPeriodId((int) getView().getSelectedRow().getReportPeriodId());
+        requestData.setDepartmentId(getView().getSelectedRow().getDepartmentId());
+        requestData.setCorrectionDate(getView().getSelectedRow().getCorrectPeriod());
+        dispatcher.execute(requestData, CallbackUtils
+                .defaultCallback(new AbstractCallback<ClosePeriodResult>() {
+                    @Override
+                    public void onSuccess(ClosePeriodResult result) {
+                        find();
+                        LogAddEvent.fire(PeriodsPresenter.this, result.getUuid());
+                        if (result.isErrorBeforeClose()) {
+                            Dialog.errorMessage("Закрытие периода", "Период не может быть закрыт, пока выполняется редактирование форм, относящихся к этому периоду!");
+                        }
+                    }
+                }, PeriodsPresenter.this));
     }
 
 	@Override

@@ -583,6 +583,15 @@ public class PeriodServiceImpl implements PeriodService{
         return reportPeriodDao.getPeriodsByTaxTypeAndDepartments(taxType, departmentList);
     }
 
+    @Override
+    public List<Integer> getAvailableDepartmentsForClose(TaxType taxType, TAUser user, int departmentId) {
+        List<Integer> departments = new ArrayList<Integer>();
+        for (Department dep : getAvailableDepartments(taxType, user, Operation.CLOSE, departmentId)) {
+            departments.add(dep.getId());
+        }
+        return departments;
+    }
+
     /**
      * Возвращает список доступных месяцев для указанного отчетного периода.
      * @param reportPeriodId идентификатор отчетного период

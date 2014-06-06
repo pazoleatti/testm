@@ -216,6 +216,14 @@ public interface PeriodService {
      */
     List<ReportPeriod> getPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList);
 
+    /**
+     * Получить список подразделений для закрытия периода
+     * @param taxType Тип налога
+     * @param user пользователь выполняющий операцию
+     * @param departmentId идентификатор подразделения
+     * @return список идентификаторов подразделений
+     */
+    List<Integer> getAvailableDepartmentsForClose(TaxType taxType, TAUser user, int departmentId);
 
 	/**
 	 * Проверяет существование периода для подразделения
