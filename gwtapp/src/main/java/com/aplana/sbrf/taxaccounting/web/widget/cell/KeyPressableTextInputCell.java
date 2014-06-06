@@ -37,10 +37,17 @@ import static com.google.gwt.dom.client.BrowserEvents.*;
 public class KeyPressableTextInputCell extends
 		AbstractEditableCell<String, KeyPressableTextInputCell.ViewData> {
 
-	interface Template extends SafeHtmlTemplates {
-		@Template("<input type=\"text\" value=\"{0}\" tabindex=\"-1\"></input>")
-		SafeHtml input(String value);
-	}
+    private boolean textRight = false;
+
+    interface Template extends SafeHtmlTemplates {
+        @Template("<input type=\"text\" value=\"{0}\" tabindex=\"-1\"></input>")
+        SafeHtml input(String value);
+    }
+
+    interface TemplateTextRight extends Template {
+        @Template("<input type=\"text\" value=\"{0}\" style=\"text-align:right; \" tabindex=\"-1\"></input>")
+        SafeHtml input(String value);
+    }
 
 	/**
 	 * The view data object used by this cell. We need to store both the text and
@@ -133,6 +140,7 @@ public class KeyPressableTextInputCell extends
 	}
 
 	private static Template template;
+	private static Template templateRight;
 
 	private final SafeHtmlRenderer<String> renderer;
 
@@ -141,7 +149,7 @@ public class KeyPressableTextInputCell extends
 	 * {@link SimpleSafeHtmlRenderer}.
 	 */
 	public KeyPressableTextInputCell() {
-		this(SimpleSafeHtmlRenderer.getInstance());
+		this(SimpleSafeHtmlRenderer.getInstance(), false);
 	}
 
 	/**
@@ -151,11 +159,20 @@ public class KeyPressableTextInputCell extends
 	 * @param renderer a {@link SafeHtmlRenderer SafeHtmlRenderer<String>}
 	 *          instance
 	 */
-	public KeyPressableTextInputCell(SafeHtmlRenderer<String> renderer) {
-		super(CLICK, KEYUP, KEYDOWN, BLUR, KEYPRESS);
-		if (template == null) {
-			template = GWT.create(Template.class);
-		}
+	public KeyPressableTextInputCell(SafeHtmlRenderer<String> renderer, boolean textRight) {
+        // переделал на MOUSEUP потому что при клике там не правильный порядок идет
+        // проброса событий, так как строка перерисовывется еще
+		super(MOUSEUP, KEYUP, KEYDOWN, BLUR);
+        this.textRight = textRight;
+        if (this.textRight) {
+            if (templateRight == null) {
+                templateRight = GWT.create(TemplateTextRight.class);
+            }
+        } else {
+            if (template == null) {
+                template = GWT.create(Template.class);
+            }
+        }
 		if (renderer == null) {
 			throw new IllegalArgumentException("renderer == null");
 		}
@@ -179,10 +196,9 @@ public class KeyPressableTextInputCell extends
 		} else {
 			String type = event.getType();
 			int keyCode = event.getKeyCode();
-			boolean enterPressed = KEYUP.equals(type)
-					&& keyCode == KeyCodes.KEY_ENTER;
-			if (CLICK.equals(type) || enterPressed) {
-				// Go into edit mode.
+			boolean enterPressed = KEYUP.equals(type) && keyCode == KeyCodes.KEY_ENTER;
+			if (MOUSEUP.equals(type) || enterPressed) {
+                // Go into edit mode.
 				if (viewData == null) {
 					viewData = new ViewData(value);
 					setViewData(key, viewData);
@@ -214,8 +230,8 @@ public class KeyPressableTextInputCell extends
          * input element is always treated as text. SafeHtml isn't valid in the
          * context of the value attribute.
          */
-				sb.append(template.input(text));
-				return;
+                sb.append(textRight ? templateRight.input(text) : template.input(text));
+                return;
 			} else {
 				// The user pressed enter, but view data still exists.
 				toRender = text;
@@ -306,7 +322,6 @@ public class KeyPressableTextInputCell extends
     }-*/;
 
 	protected boolean checkInputtedValue(String value) {
-
 		return false;
 	}
 
