@@ -238,6 +238,8 @@ public class SourceServiceImpl implements SourceService {
                 formToFormRelation.setFormType(formData.getFormType());
                 /** тип нф */
                 formToFormRelation.setFormDataKind(departmentFormType.getKind());
+                /** установить id */
+                formToFormRelation.setFormDataId(formData.getId());
 
                 formToFormRelations.add(formToFormRelation);
             } else if (includeUncreatedForms){
