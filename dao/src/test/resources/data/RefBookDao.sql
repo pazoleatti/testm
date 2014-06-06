@@ -1,4 +1,4 @@
-insert into blob_data(id, name, data, creation_date, type, data_size) values ('24af57ef-ec1c-455f-a4fa-f0fb29483066', 'Скрипт', '', sysdate, 1, 0)
+insert into blob_data(id, name, data, creation_date, type) values ('24af57ef-ec1c-455f-a4fa-f0fb29483066', 'Скрипт', '', sysdate, 1)
 
 insert into ref_book(id, name) values
 (1, 'Книга');

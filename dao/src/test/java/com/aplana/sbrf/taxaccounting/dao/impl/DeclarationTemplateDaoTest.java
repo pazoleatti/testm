@@ -46,7 +46,6 @@ public class DeclarationTemplateDaoTest {
 		String sampleBlobData = "sample text";
 		BlobData blob = new BlobData();
 		blob.setCreationDate(new Date());
-		blob.setDataSize(sampleBlobData.length());
 		blob.setUuid(SAMPLE_BLOB_ID);
 		blob.setType(0);
 		blob.setInputStream(new ByteArrayInputStream(sampleBlobData.getBytes("UTF-8")));
