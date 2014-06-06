@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao;
@@ -89,8 +88,6 @@ public class RefBookDepartment implements RefBookDataProvider {
     private RefBookIncome101 refBookIncome101;
     @Autowired
     private RefBookIncome102 refBookIncome102;
-    @Autowired
-    private DepartmentReportPeriodDao departmentReportPeriodDao;
     @Autowired
     AuditService auditService;
     @Autowired
@@ -220,7 +217,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         createPeriods(depId, fromCode(refBookValueMap.get(DEPARTMENT_TYPE_ATTRIBUTE).getNumberValue().intValue()),
                 terrBankId, logger);
 
-        return new ArrayList<Long>(depId);
+        return Arrays.asList((long)depId);
     }
 
     @Override
@@ -229,6 +226,7 @@ public class RefBookDepartment implements RefBookDataProvider {
     }
 
     //http://conf.aplana.com/pages/viewpage.action?pageId=11378355
+    @SuppressWarnings("unchecked")
     @Override
     public void updateRecordVersion(Logger logger, final Long uniqueRecordId, Date versionFrom, Date versionTo, Map<String, RefBookValue> records) {
         final Department dep = departmentService.getDepartment(uniqueRecordId.intValue());
@@ -372,6 +370,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         throw new UnsupportedOperationException();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds, boolean force) {
         int depId = uniqueRecordIds.get(0).intValue();
@@ -510,11 +509,12 @@ public class RefBookDepartment implements RefBookDataProvider {
                         return;
                 //1А.1.1.1А
                 for (Long periodIs : reportPeriods){
-                    ReportPeriod period = periodService.getReportPeriod(periodIs.intValue());
-                    periodService.saveOrUpdate(
-                            departmentReportPeriodDao.get(period.getId(), depId),
-                            null,
-                            logger.getEntries());
+                    DepartmentReportPeriod drp = new DepartmentReportPeriod();
+                    drp.setReportPeriod(periodService.getReportPeriod(periodIs.intValue()));
+                    drp.setDepartmentId(depId);
+                    drp.setActive(true);
+                    drp.setCorrectPeriod(null);
+                    periodService.saveOrUpdate(drp, null, logger.getEntries());
                 }
                 return;
             }
@@ -525,9 +525,13 @@ public class RefBookDepartment implements RefBookDataProvider {
                 refBookDepartmentDao.getPeriodsByTaxTypesAndDepartments(Arrays.asList(TaxType.INCOME, TaxType.DEAL, TaxType.VAT), Arrays.asList(0));
         if (!reportPeriods.isEmpty()){
             for (Long periodIs : reportPeriods){
-                ReportPeriod period = periodService.getReportPeriod(periodIs.intValue());
+                DepartmentReportPeriod drp = new DepartmentReportPeriod();
+                drp.setReportPeriod(periodService.getReportPeriod(periodIs.intValue()));
+                drp.setDepartmentId(depId);
+                drp.setActive(true);
+                drp.setCorrectPeriod(null);
                 periodService.saveOrUpdate(
-                        departmentReportPeriodDao.get(period.getId(), depId),
+                        drp,
                         null,
                         logger.getEntries());
             }
