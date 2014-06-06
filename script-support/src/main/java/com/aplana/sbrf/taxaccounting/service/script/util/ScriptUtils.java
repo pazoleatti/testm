@@ -74,7 +74,9 @@ public final class ScriptUtils {
 
     private static final String WRONG_XLS_FORMAT = "Выбранный файл не соответствует формату xls/xlsx/xlsm!";
 
-    private static final String WRONG_FIXED_VALUE = "Строка %d графа «%s» содержит значение «%s», не соответствующее значению «%s» данной графы в макете налоговой формы!";
+    private static final String WRONG_FIXED_VALUE = "Строка %d: Графа «%s» содержит значение «%s», не соответствующее значению «%s» данной графы в макете налоговой формы!";
+    private static final String EMPTY_VALUE = "Строка %d: Графа «%s» содержит пустое значение, не соответствующее значению «%s» данной графы в макете налоговой формы!";
+    private static final String EMPTY_EXPECTED_VALUE = "Строка %d: Графа «%s» содержит значение «%s», не соответствующее пустому значению данной графы в макете налоговой формы!";
 
     /**
      * Интерфейс для переопределения алгоритма расчета
@@ -888,7 +890,14 @@ public final class ScriptUtils {
      */
     public static void checkFixedValue(DataRow<Cell> row, String value, String valueExpected, int indexRow, String alias, Logger logger, boolean required) {
         if (value != null && !value.equals(valueExpected) || value == null && valueExpected != null) {
-            String msg = String.format(WRONG_FIXED_VALUE, indexRow, getColumnName(row, alias), value, valueExpected != null ? valueExpected : "");
+            String msg;
+            if (valueExpected != null && !valueExpected.trim().isEmpty() && value != null && !value.trim().isEmpty()) {
+                msg = String.format(WRONG_FIXED_VALUE, indexRow, getColumnName(row, alias), value, valueExpected);
+            } else if (valueExpected == null || valueExpected.trim().isEmpty()) {
+                msg = String.format(EMPTY_EXPECTED_VALUE, indexRow, getColumnName(row, alias), value);
+            } else {
+                msg = String.format(EMPTY_VALUE, indexRow, getColumnName(row, alias), valueExpected);
+            }
             if (required) {
                 logger.error("%s", msg);
             } else {
