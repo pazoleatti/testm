@@ -115,7 +115,7 @@ public class RefBookDepartmentDaoTest {
                 put("type", new RefBookValue(RefBookAttributeType.NUMBER, DepartmentType.MANAGEMENT.getCode()));
                 put("code", new RefBookValue(RefBookAttributeType.NUMBER, 101));
         }};
-        refBookDepartmentDao.create(record, refBookDao.getAttributes(30l));
+        assertEquals(1000, refBookDepartmentDao.create(record, refBookDao.getAttributes(30l)));
     }
 
     @Test(expected = DaoException.class)

@@ -14,10 +14,16 @@ import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
@@ -144,7 +150,7 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
     private static final String CREATE_DEPARTMENT = "insert into department (id, %s) values(seq_department.nextval, %s)";
     @Override
     public int create(Map<String, RefBookValue> records, List<RefBookAttribute> attributes) {
-        PreparedStatementData ps = new PreparedStatementData();
+        final PreparedStatementData ps = new PreparedStatementData();
         for (RefBookAttribute attribute : attributes) {
             ps.appendQuery(attribute.getAlias() + ",");
 
@@ -161,11 +167,24 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
                 ps.addParam(records.get(attribute.getAlias()).getDateValue());
             }
         }
-        String ph = SqlUtils.preparePlaceHolders(records.size());
+        final String ph = SqlUtils.preparePlaceHolders(records.size());
         try {
-            return getJdbcTemplate().update(
-                    String.format(CREATE_DEPARTMENT, ps.getQuery().toString().substring(0, ps.getQuery().toString().length() - 1), ph),
-                    ps.getParams().toArray());
+            PreparedStatementCreator psc = new PreparedStatementCreator() {
+                @Override
+                public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+                    PreparedStatement statement = con.prepareStatement(
+                            String.format(CREATE_DEPARTMENT, ps.getQuery().toString().substring(0, ps.getQuery().toString().length() - 1), ph),
+                            new String[]{"ID"}
+                    );
+                    for (int i =0; i < ps.getParams().size(); i++)
+                        statement.setObject(i+1, ps.getParams().get(i));
+                    return statement;
+                }
+            };
+            KeyHolder keyHolder = new GeneratedKeyHolder();
+            getJdbcTemplate().update(
+                    psc, keyHolder);
+            return keyHolder.getKey().intValue();
         } catch (DataAccessException e){
             logger.error("", e);
             throw new DaoException("", e);
@@ -176,6 +195,8 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
     public void remove(long uniqueId) {
         try {
             getJdbcTemplate().update("delete from department where id = ?", uniqueId);
+        } catch (DataIntegrityViolationException e){
+            throw new DaoException("Нарушение ограничения целостности. Возможно обнаружена порожденная запись.", e);
         } catch (DataAccessException e){
             logger.error("", e);
             throw new DaoException("", e);
