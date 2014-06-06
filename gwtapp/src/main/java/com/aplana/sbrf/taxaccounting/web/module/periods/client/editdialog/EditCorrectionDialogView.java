@@ -104,8 +104,15 @@ public class EditCorrectionDialogView extends PopupViewWithUiHandlers<EditCorrec
     }
 
     @Override
-    public void setPeriodsList(List<ReportPeriod> reportPeriods) {
+    public void setPeriods(List<ReportPeriod> reportPeriods, Integer reportPeriodId) {
+        periodList.setValue(null);
         periodList.setAcceptableValues(reportPeriods);
+        for(ReportPeriod reportPeriod: reportPeriods) {
+            if (reportPeriod.getId() == reportPeriodId) {
+                periodList.setValue(reportPeriod);
+                break;
+            }
+        }
     }
 
     @Override

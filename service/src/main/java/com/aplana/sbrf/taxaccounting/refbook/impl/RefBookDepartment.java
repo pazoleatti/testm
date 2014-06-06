@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao;
@@ -89,8 +88,6 @@ public class RefBookDepartment implements RefBookDataProvider {
     private RefBookIncome101 refBookIncome101;
     @Autowired
     private RefBookIncome102 refBookIncome102;
-    @Autowired
-    private DepartmentReportPeriodDao departmentReportPeriodDao;
     @Autowired
     AuditService auditService;
     @Autowired
@@ -220,7 +217,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         createPeriods(depId, fromCode(refBookValueMap.get(DEPARTMENT_TYPE_ATTRIBUTE).getNumberValue().intValue()),
                 terrBankId, logger);
 
-        return new ArrayList<Long>(depId);
+        return Arrays.asList((long)depId);
     }
 
     @Override
@@ -229,6 +226,7 @@ public class RefBookDepartment implements RefBookDataProvider {
     }
 
     //http://conf.aplana.com/pages/viewpage.action?pageId=11378355
+    @SuppressWarnings("unchecked")
     @Override
     public void updateRecordVersion(Logger logger, final Long uniqueRecordId, Date versionFrom, Date versionTo, Map<String, RefBookValue> records) {
         final Department dep = departmentService.getDepartment(uniqueRecordId.intValue());
@@ -238,9 +236,10 @@ public class RefBookDepartment implements RefBookDataProvider {
         boolean isHasOpenPeriods = false;
 
         int oldTBId = departmentService.getParentTB(uniqueRecordId.intValue()).getId();
-        int newTBId = records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue().intValue() != 0?
+        int newTBId =
+                records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue() != null && records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue().intValue() != 0?
                 departmentService.getParentTB(records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue().intValue()).getId()
-                : uniqueRecordId.intValue();
+                : 0;
         boolean isChangeTB = oldTBId != newTBId;
 
         if (isChangeType){
@@ -257,7 +256,11 @@ public class RefBookDepartment implements RefBookDataProvider {
                     isHasOpenPeriods = !openReportPeriods.isEmpty();
                     if (isHasOpenPeriods){
                         for (ReportPeriod period : openReportPeriods)
-                            logger.warn("Для подразделения %s для налога <вид налога> открыт период %s", dep.getName(), period.getName());
+                            logger.warn(
+                                    "Для подразделения %s для налога %s открыт период %s",
+                                    dep.getName(),
+                                    period.getTaxPeriod().getTaxType().getName(),
+                                    period.getName());
                         throw new ServiceLoggerException("Подразделению не может быть изменен тип \"ТБ\", если для него существует период!",
                                 logEntryService.save(logger.getEntries()));
                     }
@@ -372,6 +375,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         throw new UnsupportedOperationException();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds, boolean force) {
         int depId = uniqueRecordIds.get(0).intValue();
@@ -394,7 +398,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                         return ((DepartmentFormType) o).getId();
                     }
                 });
-        if (dftIsd.isEmpty())
+        if (!dftIsd.isEmpty())
             sourceService.deleteDFT(dftIsd);
         Collection<Long> ddtIds = CollectionUtils.collect(sourceService.getDDTByDepartment(depId, null),
                 new Transformer() {
@@ -403,7 +407,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                         return ((DepartmentDeclarationType) o).getId();
                     }
                 });
-        if (ddtIds.isEmpty())
+        if (!ddtIds.isEmpty())
             sourceService.deleteDDT(ddtIds);
         //
         RefBookDataProvider provider = rbFactory.getDataProvider(RefBook.DEPARTMENT_CONFIG_INCOME);
@@ -510,11 +514,12 @@ public class RefBookDepartment implements RefBookDataProvider {
                         return;
                 //1А.1.1.1А
                 for (Long periodIs : reportPeriods){
-                    ReportPeriod period = periodService.getReportPeriod(periodIs.intValue());
-                    periodService.saveOrUpdate(
-                            departmentReportPeriodDao.get(period.getId(), depId),
-                            null,
-                            logger.getEntries());
+                    DepartmentReportPeriod drp = new DepartmentReportPeriod();
+                    drp.setReportPeriod(periodService.getReportPeriod(periodIs.intValue()));
+                    drp.setDepartmentId(depId);
+                    drp.setActive(true);
+                    drp.setCorrectPeriod(null);
+                    periodService.saveOrUpdate(drp, null, logger.getEntries());
                 }
                 return;
             }
@@ -525,9 +530,13 @@ public class RefBookDepartment implements RefBookDataProvider {
                 refBookDepartmentDao.getPeriodsByTaxTypesAndDepartments(Arrays.asList(TaxType.INCOME, TaxType.DEAL, TaxType.VAT), Arrays.asList(0));
         if (!reportPeriods.isEmpty()){
             for (Long periodIs : reportPeriods){
-                ReportPeriod period = periodService.getReportPeriod(periodIs.intValue());
+                DepartmentReportPeriod drp = new DepartmentReportPeriod();
+                drp.setReportPeriod(periodService.getReportPeriod(periodIs.intValue()));
+                drp.setDepartmentId(depId);
+                drp.setActive(true);
+                drp.setCorrectPeriod(null);
                 periodService.saveOrUpdate(
-                        departmentReportPeriodDao.get(period.getId(), depId),
+                        drp,
                         null,
                         logger.getEntries());
             }

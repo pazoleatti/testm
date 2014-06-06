@@ -4,6 +4,7 @@ import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.module.periods.client.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -25,7 +26,7 @@ public class EditCorrectionDialogPresenter extends PresenterWidget<EditCorrectio
         void setTaxType(TaxType taxType);
         void setSelectedDepartment(Integer departmentId);
         void setCanChangeDepartment(boolean canChange);
-        void setPeriodsList(List<ReportPeriod> reportPeriods);
+        void setPeriods(List<ReportPeriod> reportPeriods, Integer reportPeriodId);
         void setCorrectionDate(Date date);
     }
 
@@ -57,12 +58,11 @@ public class EditCorrectionDialogPresenter extends PresenterWidget<EditCorrectio
     @Override
     public void onContinue(final EditDialogData data) {
         if ((data.getCorrectionDate() == null)
-                || (data.getCorrectionReportPeriods() == null)
-                || (data.getCorrectionReportPeriods().isEmpty())
+                || (data.getReportPeriodId() == null)
                 || (data.getCorrectionDate() == null)) {
             Dialog.errorMessage("Редактирование параметров", "Не заполнены следующие обязательные к заполнению поля: "
                             + ((data.getDepartmentId() == null) ? "Подразделение " : "")
-                            + ((data.getCorrectionReportPeriods() == null) ? " Период корректировки " : "")
+                            + ((data.getReportPeriodId() == null) ? " Период корректировки " : "")
                             + ((data.getCorrectionDate() == null) ? "Период сдачи корректировки " : "")
 
                             + "!"
@@ -119,6 +119,8 @@ public class EditCorrectionDialogPresenter extends PresenterWidget<EditCorrectio
                     } else if ((result.getStatus() == PeriodStatusBeforeOpen.OPEN)
                             || (result.getStatus() == PeriodStatusBeforeOpen.CLOSE)) {
                         Dialog.errorMessage("Указанный период уже заведён в Системе!");
+                    } else {
+                        UpdateForm.fire(EditCorrectionDialogPresenter.this);
                     }
                 }
 
@@ -135,7 +137,7 @@ public class EditCorrectionDialogPresenter extends PresenterWidget<EditCorrectio
     public void init(EditDialogData data) {
         initData = data;
         getView().setSelectedDepartment(data.getDepartmentId());
-        getView().setPeriodsList(data.getCorrectionReportPeriods());
+        getView().setPeriods(data.getCorrectionReportPeriods(), data.getReportPeriodId());
         getView().setCorrectionDate(data.getCorrectionDate());
 
     }

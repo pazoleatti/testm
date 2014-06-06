@@ -59,7 +59,7 @@ def refBookCache = [:]
 
 // Редактируемые атрибуты
 @Field
-def editableColumns = ['fullName', 'dealNumber', 'dealDate', 'sum', 'dealDoneDate']
+def editableColumns = ['fullName', 'dealNumber', 'dealDate', 'sum', 'docNumber', 'docDate', 'dealDoneDate']
 
 // Автозаполняемые атрибуты
 @Field

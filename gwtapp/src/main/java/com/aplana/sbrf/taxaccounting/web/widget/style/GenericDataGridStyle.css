@@ -57,8 +57,13 @@
 }
 
 .dataGridCell input {
-	width: 99%;
+	width: 100%;
     margin: 0;
+    padding: 0 1px;
+    border-width: 0;
+    height: 14px;
+    font-size:11px;
+    outline: none;
 }
 
 .dataGridFirstColumnFooter {

@@ -26,7 +26,6 @@ import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
 import com.gwtplatform.mvp.client.proxy.Place;
-import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
@@ -97,7 +96,7 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
 
     @Inject
     public RefBookHierDataPresenter(final EventBus eventBus, final MyView view, EditFormPresenter editFormPresenter,
-                                    RefBookVersionPresenter versionPresenter, PlaceManager placeManager, final MyProxy proxy, DispatchAsync dispatcher) {
+                                    RefBookVersionPresenter versionPresenter, final MyProxy proxy, DispatchAsync dispatcher) {
         super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
         this.dispatcher = dispatcher;
         this.editFormPresenter = editFormPresenter;
@@ -194,7 +193,7 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
                 @Override
                 public void onSuccess(DeleteNonVersionRefBookRowResult result) {
                     if (result.isWarning()){
-                        Dialog.warningMessage("Удаление подразделения","Удалить все связанные записи?", new DialogHandler() {
+                        Dialog.confirmMessage("Удаление подразделения","Удалить все связанные записи?", new DialogHandler() {
                             @Override
                             public void yes() {
                                 DeleteNonVersionRefBookRowAction action = new DeleteNonVersionRefBookRowAction();
@@ -218,6 +217,11 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
                                 Dialog.hideMessage();
                             }
                         });
+                    } else {
+                        LogAddEvent.fire(RefBookHierDataPresenter.this, result.getUuid());
+                        editFormPresenter.show(null);
+                        editFormPresenter.setNeedToReload();
+                        getView().deleteItem(selected);
                     }
                 }
             }, RefBookHierDataPresenter.this));

@@ -27,6 +27,9 @@ public class FormToFormRelation implements Serializable {
     /** форма создана/не создана */
     boolean created;
 
+    /** Идентификатор созданной формы */
+    Long formDataId;
+
     public String getFullDepartmentName() {
         return fullDepartmentName;
     }
@@ -81,6 +84,14 @@ public class FormToFormRelation implements Serializable {
 
     public void setState(WorkflowState state) {
         this.state = state;
+    }
+
+    public Long getFormDataId() {
+        return formDataId;
+    }
+
+    public void setFormDataId(Long formDataId) {
+        this.formDataId = formDataId;
     }
 
     @Override
