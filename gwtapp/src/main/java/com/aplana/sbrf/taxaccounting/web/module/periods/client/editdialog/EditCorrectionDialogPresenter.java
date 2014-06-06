@@ -26,7 +26,7 @@ public class EditCorrectionDialogPresenter extends PresenterWidget<EditCorrectio
         void setTaxType(TaxType taxType);
         void setSelectedDepartment(Integer departmentId);
         void setCanChangeDepartment(boolean canChange);
-        void setPeriodsList(List<ReportPeriod> reportPeriods);
+        void setPeriods(List<ReportPeriod> reportPeriods, Integer reportPeriodId);
         void setCorrectionDate(Date date);
     }
 
@@ -58,12 +58,11 @@ public class EditCorrectionDialogPresenter extends PresenterWidget<EditCorrectio
     @Override
     public void onContinue(final EditDialogData data) {
         if ((data.getCorrectionDate() == null)
-                || (data.getCorrectionReportPeriods() == null)
-                || (data.getCorrectionReportPeriods().isEmpty())
+                || (data.getReportPeriodId() == null)
                 || (data.getCorrectionDate() == null)) {
             Dialog.errorMessage("Редактирование параметров", "Не заполнены следующие обязательные к заполнению поля: "
                             + ((data.getDepartmentId() == null) ? "Подразделение " : "")
-                            + ((data.getCorrectionReportPeriods() == null) ? " Период корректировки " : "")
+                            + ((data.getReportPeriodId() == null) ? " Период корректировки " : "")
                             + ((data.getCorrectionDate() == null) ? "Период сдачи корректировки " : "")
 
                             + "!"
@@ -138,7 +137,7 @@ public class EditCorrectionDialogPresenter extends PresenterWidget<EditCorrectio
     public void init(EditDialogData data) {
         initData = data;
         getView().setSelectedDepartment(data.getDepartmentId());
-        getView().setPeriodsList(data.getCorrectionReportPeriods());
+        getView().setPeriods(data.getCorrectionReportPeriods(), data.getReportPeriodId());
         getView().setCorrectionDate(data.getCorrectionDate());
 
     }
