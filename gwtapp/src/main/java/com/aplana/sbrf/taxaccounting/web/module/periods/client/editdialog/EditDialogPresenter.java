@@ -65,9 +65,11 @@ public class EditDialogPresenter extends PresenterWidget<EditDialogPresenter.MyV
                 || (data.getReportPeriodId() == null)
                 || (data.getDepartmentId() == null)) {
             Dialog.errorMessage("Редактирование параметров", "Не заполнены следующие обязательные к заполнению поля: "
-                    + ((data.getDepartmentId() == null) ? "Подразделение " : "")
-                    + ((data.getYear() == null) ? " Год " : "")
-                    + ((data.getReportPeriodId() == null) ? "Период " : "")
+                    + ((data.getDepartmentId() == null) ? "\"Подразделение\"" : "")
+                    + ((data.getDepartmentId() == null) && (data.getYear() == null) ? ", " : "")
+                    + ((data.getYear() == null) ? "\"Год\"" : "")
+                    + ((data.getDepartmentId() == null) || (data.getYear() == null) && (data.getReportPeriodId() == null) ? ", " : "")
+                    + ((data.getReportPeriodId() == null) ? "\"Период\"" : "")
                     + "!"
             );
             return;
