@@ -240,4 +240,19 @@ public interface RefBookOktmoDao {
      *      значение - строковое представление значения атрибута
      */
     Map<RefBookAttributePair,String> getAttributesValues(List<RefBookAttributePair> attributePairs);
+
+    /**
+     * Получает уникальные идентификаторы записей, удовлетворяющих условиям фильтра
+     * @param version дата актуальности
+     * @param filter условие фильтрации строк. Может быть не задано
+     * @return список идентификаторов
+     */
+    List<Long> getUniqueRecordIds(Long oktmoRefBookId, String tableName, Date version, String filter);
+    /**
+     * Получает количество уникальных записей, удовлетворяющих условиям фильтра
+     * @param version дата актуальности
+     * @param filter условие фильтрации строк. Может быть не задано
+     * @return количество
+     */
+    int getRecordsCount(Long oktmoRefBookId, String tableName, Date version, String filter);
 }

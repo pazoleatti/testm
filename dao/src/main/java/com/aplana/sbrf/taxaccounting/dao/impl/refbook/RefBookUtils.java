@@ -253,6 +253,22 @@ public class RefBookUtils extends AbstractDao {
         });
     }
 
+
+
+    /**
+     * Получает количество уникальных записей, удовлетворяющих условиям фильтра
+     * @param refBookId ид справочника
+     * @param tableName название таблицы
+     * @param filter условие фильтрации строк. Может быть не задано
+     * @return количество
+     */
+    public int getRecordsCount(Long refBookId, String tableName, String filter) {
+        RefBook refBook = refBookDao.get(refBookId);
+
+        PreparedStatementData ps = getSimpleQuery(refBook, tableName, null, filter, null, false, null);
+        return getRecordsCount(ps);
+    }
+
 	/**
      * Возвращает дочерние записи справочника учитывая иерархичность таблицы
      * @param tableName название таблицы

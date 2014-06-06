@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributePair;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
@@ -63,7 +64,6 @@ public interface RefBookDepartmentDao {
      * отдельных справочников.
      * Обеспечение соблюдения уникальности атрибутов в пределах справочника
      * @param refBookId идентификатор справочника
-     * @param tableName уникальный идентификатор записи справочника(соответствующая таблица)
      * @param attributes атрибуты справочника
      * @param records новые значения полей элемента справочника
      * @return список пар идентификатор записи-имя атрибута, у которых совпали значения уникальных атрибутов
@@ -83,4 +83,20 @@ public interface RefBookDepartmentDao {
     int create(Map<String, RefBookValue> records, List<RefBookAttribute> attributes);
 
     void remove(long uniqueId);
+
+    /**
+     * Получает количетсво уникальных записей, удовлетворяющих условиям фильтра
+     * @param filter условие фильтрации строк. Может быть не задано
+     * @return
+     */
+    int getRecordsCount(String filter);
+
+    /**
+     * Возвращает значения атрибутов для указанных записей
+     * @param attributePairs список пар идентификатор записи-идентификатор атрибута
+     * @return
+     *      ключ - пара идентификатор записи-идентификатор атрибута
+     *      значение - строковое представление значения атрибута
+     */
+    Map<RefBookAttributePair,String> getAttributesValues(List<RefBookAttributePair> attributePairs);
 }

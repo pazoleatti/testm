@@ -3,6 +3,8 @@ package com.aplana.sbrf.taxaccounting.web.module.migration.client;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.module.migration.shared.MigrationAction;
 import com.aplana.sbrf.taxaccounting.web.module.migration.shared.MigrationResult;
 import com.google.gwt.i18n.shared.DateTimeFormat;
@@ -16,6 +18,7 @@ import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
 import com.gwtplatform.mvp.client.proxy.Place;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
+import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
 import java.util.Arrays;
@@ -53,6 +56,13 @@ public class MigrationPresenter extends Presenter<MigrationPresenter.MyView,
         super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
         this.dispatcher = dispatcher;
         getView().setUiHandlers(this);
+    }
+
+    @Override
+    public void prepareFromRequest(PlaceRequest request) {
+        super.prepareFromRequest(request);
+        LogCleanEvent.fire(this);
+        LogShowEvent.fire(this, false);
     }
 
     @Override

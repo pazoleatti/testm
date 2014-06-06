@@ -62,6 +62,11 @@ public abstract class AbstractPermanentRefBook extends AbstractReadOnlyRefBook {
     }
 
     @Override
+    public int getRecordsCount(Date version, String filter) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public Map<String, RefBookValue> getRecordData(Long recordId) {
         Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
         Map<Long, Map<String, String>> records = getRecords(null);

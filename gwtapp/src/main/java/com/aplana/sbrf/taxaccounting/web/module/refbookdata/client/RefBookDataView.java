@@ -288,6 +288,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
             @Override
             public void yes() {
                 getUiHandlers().setMode(FormMode.VIEW);
+                getUiHandlers().cancelChanges();
             }
         });
     }

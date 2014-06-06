@@ -98,7 +98,8 @@ public class RefBookUniversal implements RefBookDataProvider {
 
     @Override
     public List<Long>  getUniqueRecordIds(Date version, String filter) {
-        List<Pair<Long, Long>> pairs = refBookDao.getRecordIdPairs(refBookId, version, filter);
+        //TODO: возможно нужно точное совпадение версии
+        List<Pair<Long, Long>> pairs = refBookDao.getRecordIdPairs(refBookId, version, false, filter);
         List<Long> uniqueRecordIds = new ArrayList<Long>(pairs.size());
         for (Pair<Long, Long> pair : pairs){
             uniqueRecordIds.add(pair.getFirst());
@@ -107,8 +108,13 @@ public class RefBookUniversal implements RefBookDataProvider {
     }
 
     @Override
+    public int getRecordsCount(Date version, String filter) {
+        return refBookDao.getRecordsCount(refBookId, version, filter);
+    }
+
+    @Override
     public List<Pair<Long, Long>> checkRecordExistence(Date version, String filter) {
-        return refBookDao.getRecordIdPairs(refBookId, version, filter);
+        return refBookDao.getRecordIdPairs(refBookId, version, true, filter);
     }
 
     @Override

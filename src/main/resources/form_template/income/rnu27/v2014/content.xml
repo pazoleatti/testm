@@ -170,7 +170,7 @@
         <checking>false</checking>
         <name>Восстановление резерва, руб.коп.</name>
         <order>18</order>
-        <width>5</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>

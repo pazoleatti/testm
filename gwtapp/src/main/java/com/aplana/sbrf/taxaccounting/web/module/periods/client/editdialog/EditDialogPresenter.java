@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
+import com.aplana.sbrf.taxaccounting.web.module.periods.client.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -27,7 +28,7 @@ public class EditDialogPresenter extends PresenterWidget<EditDialogPresenter.MyV
 		void setTaxType(TaxType taxType);
         void setSelectedDepartment(Integer departmentId);
 		void setCanChangeDepartment(boolean canChange);
-        void setReportPeriod(long reportPeriodId);
+        void setReportPeriod(long reportPeriodId, String periodName);
         void setBalancePeriod(boolean isBalance);
 	}
 
@@ -62,7 +63,12 @@ public class EditDialogPresenter extends PresenterWidget<EditDialogPresenter.MyV
         if ((data.getYear() == null)
                 || (data.getReportPeriodId() == null)
                 || (data.getDepartmentId() == null)) {
-            Dialog.errorMessage("Не все поля заполнены");
+            Dialog.errorMessage("Редактирование параметров", "Не заполнены следующие обязательные к заполнению поля: "
+                    + ((data.getDepartmentId() == null) ? "Подразделение " : "")
+                    + ((data.getYear() == null) ? " Год " : "")
+                    + ((data.getReportPeriodId() == null) ? "Период " : "")
+                    + "!"
+            );
             return;
         }
 
@@ -70,7 +76,7 @@ public class EditDialogPresenter extends PresenterWidget<EditDialogPresenter.MyV
                 && (data.getYear().equals(initData.getYear()))
                 && (data.getReportPeriodId().equals(initData.getReportPeriodId()))
                 && (data.getDepartmentId().equals(initData.getDepartmentId()))) {
-            Dialog.errorMessage("Ни одни параметр не был изменен!");
+            Dialog.errorMessage("Редактирование параметров", "Ни один параметр не был изменен!");
             return;
         }
 
@@ -82,7 +88,7 @@ public class EditDialogPresenter extends PresenterWidget<EditDialogPresenter.MyV
                             @Override
                             public void onSuccess(CanRemovePeriodResult result) {
                                 if (!result.isCanRemove()) {
-                                    Dialog.errorMessage("Редактирование периода невозможно!");
+                                    Dialog.errorMessage("Редактирование периода", "Редактирование периода невозможно!");
                                     return;
                                 } else {
                                     checkHasCorrectionPeriod(data);
@@ -105,7 +111,7 @@ public class EditDialogPresenter extends PresenterWidget<EditDialogPresenter.MyV
                             @Override
                             public void onSuccess(CheckHasCorrectionPeriodResult result) {
                                 if (result.isHasCorrectionPeriods()) {
-                                    Dialog.errorMessage("Перед изменением периода необходимо удалить все связанные корректирующие периоды!");
+                                    Dialog.errorMessage("Редактирование периода", "Перед изменением периода необходимо удалить все связанные корректирующие периоды!");
                                 } else {
                                     edit(data);
                                 }
@@ -129,6 +135,7 @@ public class EditDialogPresenter extends PresenterWidget<EditDialogPresenter.MyV
                             public void onSuccess(EditPeriodResult result) {
                                 LogAddEvent.fire(EditDialogPresenter.this, result.getUuid());
                                 getView().hide();
+                                UpdateForm.fire(EditDialogPresenter.this);
                             }
 
                         }, EditDialogPresenter.this)
@@ -145,7 +152,7 @@ public class EditDialogPresenter extends PresenterWidget<EditDialogPresenter.MyV
         getView().setYear(data.getYear());
         getView().setBalancePeriod(data.isBalance());
         getView().setSelectedDepartment(data.getDepartmentId());
-        getView().setReportPeriod(data.getReportPeriodId());
+        getView().setReportPeriod(data.getDictTaxPeriodId(), data.getPeriodName());
     }
 
     public void setSelectedDepartment(Integer departmentId){

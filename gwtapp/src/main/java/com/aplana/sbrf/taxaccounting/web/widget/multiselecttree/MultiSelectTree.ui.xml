@@ -2,7 +2,7 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
     <ui:style type="com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.MultiSelectTree.Style">
-            /* для заголовка */
+        /* для заголовка */
         .msiHeader {
             padding-left: 25px;
             padding-top: 4px;
@@ -12,14 +12,14 @@
             height: 25px;
         }
 
-            /* для узла дерева */
+        /* для узла дерева */
         .msiTreeItem {
             font-weight: normal;
             font-style: normal;
             /*line-height: 1em;*/
         }
 
-            /*для узла дерева при фокусе/выборе */
+        /*для узла дерева при фокусе/выборе */
         .msiTreeItem:focus {
             background-color: #FFDB7F;
         }
@@ -28,12 +28,12 @@
             background-color: #FFDB7F;
         }
 
-            /* для дерева */
+        /* для дерева */
         .msiTree {
 
         }
 
-            /* для общей панели. */
+        /* для общей панели. */
         .msiMainPanel {
             float: left;
             border-color: #949494;
@@ -42,7 +42,7 @@
             width: 100% !important;
         }
 
-            /* для панели с деревом */
+        /* для панели с деревом */
         .msiTreePanel {
             background-color: #FFFFFF;
         }

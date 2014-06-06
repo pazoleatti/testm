@@ -25,7 +25,7 @@
     </row>
     <row alias="">
         <cell alias="rowNumber" colSpan="1" rowSpan="1" value="№ пп"/>
-        <cell alias="fix" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="fix" colSpan="1" rowSpan="1" value="Новый столбец"/>
         <cell alias="contractNumber" colSpan="1" rowSpan="1" value="Номер договора"/>
         <cell alias="contractData" colSpan="1" rowSpan="1" value="Дата договора"/>
         <cell alias="base" colSpan="1" rowSpan="1" value="База для расчёта комиссии"/>
@@ -48,7 +48,7 @@
     </row>
     <row alias="">
         <cell alias="rowNumber" colSpan="1" rowSpan="1" value="№ пп"/>
-        <cell alias="fix" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="fix" colSpan="1" rowSpan="1" value="Новый столбец"/>
         <cell alias="contractNumber" colSpan="1" rowSpan="1" value="Номер договора"/>
         <cell alias="contractData" colSpan="1" rowSpan="1" value="Дата договора"/>
         <cell alias="base" colSpan="1" rowSpan="1" value="База для расчёта комиссии"/>

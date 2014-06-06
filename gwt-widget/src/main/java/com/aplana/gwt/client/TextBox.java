@@ -1,12 +1,13 @@
 package com.aplana.gwt.client;
 
 import com.google.gwt.user.client.ui.HasText;
+import com.google.gwt.user.client.ui.HasValue;
 
 /**
  * TextBox, который в задимсабленном состоянии показывает Label.
  * @author Vitaliy Samolovskikh
  */
-public class TextBox extends DoubleStateWrapper<com.google.gwt.user.client.ui.TextBox, String> implements HasText {
+public class TextBox extends DoubleStateWrapper<com.google.gwt.user.client.ui.TextBox, String> implements HasText, HasValue<String> {
 	public TextBox() {
 		super(new com.google.gwt.user.client.ui.TextBox());
 	}

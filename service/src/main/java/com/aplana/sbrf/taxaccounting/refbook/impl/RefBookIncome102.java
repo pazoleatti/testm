@@ -64,6 +64,21 @@ public class RefBookIncome102 implements RefBookDataProvider {
     }
 
     @Override
+    public int getRecordsCount(Date version, String filter) {
+        if (version != null){
+            ReportPeriod period = reportPeriodDao.getReportPeriodByDate(TaxType.INCOME, version);
+            if (filter == null || filter.isEmpty()) {
+                filter = " REPORT_PERIOD_ID = " + period.getId();
+            } else {
+                filter += " AND REPORT_PERIOD_ID = " + period.getId();
+            }
+            return dao.getRecordsCount(filter);
+        } else {
+            return dao.getRecordsCount(filter);
+        }
+    }
+
+    @Override
     public List<Pair<Long, Long>> checkRecordExistence(Date version, String filter) {
         throw new UnsupportedOperationException();
     }

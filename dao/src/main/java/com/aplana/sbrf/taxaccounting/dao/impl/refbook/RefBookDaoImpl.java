@@ -243,7 +243,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     @Override
-    public List<Pair<Long, Long>> getRecordIdPairs(Long refBookId, Date version, String filter) {                       // модель которая будет возвращаться как результат
+    public List<Pair<Long, Long>> getRecordIdPairs(Long refBookId, Date version, Boolean needAccurateVersion, String filter) {                       // модель которая будет возвращаться как результат
         PreparedStatementData ps = new PreparedStatementData();
 
         RefBook refBook = get(refBookId);
@@ -258,7 +258,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         StringBuilder fromSql = new StringBuilder();
         fromSql.append("\nfrom ref_book_record r\n");
 
-        if (version != null) {
+        if (version != null && !needAccurateVersion) {
             fromSql.append("join t on (r.version = t.version and r.record_id = t.record_id)\n");
             ps.appendQuery(WITH_STATEMENT);
             ps.appendQuery("\n");
@@ -298,6 +298,10 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         ps.appendQuery(fromSql.toString());
         ps.appendQuery("where\n  r.ref_book_id = ?");
         ps.addParam(refBookId);
+        if (version != null && needAccurateVersion) {
+            ps.appendQuery(" and  r.version = ?");
+            ps.addParam(version);
+        }
         ps.appendQuery(" and\n  status <> -1\n");
 
         // обработка параметров фильтра
@@ -322,6 +326,14 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             return null;
         }
     }
+
+    @Override
+    public int getRecordsCount(Long refBookId, Date version, String filter) {
+        PreparedStatementData psForCount = getRefBookSql(refBookId, null, version, null, filter, null, true);
+        psForCount.setQuery(new StringBuilder("SELECT count(*) FROM (" + psForCount.getQuery() + ")"));
+        return getJdbcTemplate().queryForInt(psForCount.getQuery().toString(), psForCount.getParams().toArray());
+    }
+
     private PagingResult<Map<String, RefBookValue>> getChildren(@NotNull Long refBookId, @NotNull Date version, PagingParams pagingParams,
 																String filter, RefBookAttribute sortAttribute, boolean isSortAscending, Long parentId) {
         PreparedStatementData ps = getChildrenStatement(refBookId, null, version, sortAttribute, filter, pagingParams, isSortAscending, parentId);

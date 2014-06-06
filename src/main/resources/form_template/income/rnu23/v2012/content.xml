@@ -20,6 +20,7 @@
         <order>2</order>
         <width>0</width>
         <maxLength>500</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>contract</alias>
@@ -28,6 +29,7 @@
         <order>3</order>
         <width>5</width>
         <maxLength>20</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>contractDate</alias>
@@ -193,16 +195,16 @@
         <italic>false</italic>
     </styles>
     <styles>
-        <alias>Контрольные суммы</alias>
-        <backColor>LIGHT_BROWN</backColor>
-        <bold>true</bold>
+        <alias>Редактируемая</alias>
+        <backColor>LIGHT_BLUE</backColor>
+        <bold>false</bold>
         <fontColor>BLACK</fontColor>
         <italic>false</italic>
     </styles>
     <styles>
-        <alias>Редактируемая</alias>
-        <backColor>LIGHT_BLUE</backColor>
-        <bold>false</bold>
+        <alias>Контрольные суммы</alias>
+        <backColor>LIGHT_BROWN</backColor>
+        <bold>true</bold>
         <fontColor>BLACK</fontColor>
         <italic>false</italic>
     </styles>

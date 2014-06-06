@@ -15,9 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 @Service
 @Transactional
@@ -166,19 +164,17 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public List<DepartmentFormType> getDestinationsFormWithDestDepartment(int sourceDepartmentId, int destinationDepartmentId, List<FormType> formTypes) {
-        List<Integer> formTypeIds = new ArrayList<Integer>();
-        for (FormType formType : formTypes)
-            formTypeIds.add(formType.getId());
-        return departmentFormTypeDao.getFormDestinationsWithDestDepId(sourceDepartmentId, destinationDepartmentId, formTypeIds);
-    }
-
-    @Override
-    public List<DepartmentDeclarationType> getDestinationsDeclarationWithDestDepartment(int sourceDepartmentId, int destinationDepartmentId, List<FormType> formTypes) {
-        List<Integer> formTypeIds = new ArrayList<Integer>();
-        for (FormType formType : formTypes)
-            formTypeIds.add(formType.getId());
-        return departmentFormTypeDao.getDeclarationDestinationsWithDestDepId(sourceDepartmentId, destinationDepartmentId, formTypeIds);
+    public Map<String, List> getSourcesDestinations(int departmentId, int terrBankId, List<TaxType> taxTypes) {
+        HashMap<String, List> map = new HashMap<String, List>();
+        List<Pair<DepartmentFormType, DepartmentFormType>> destinationFT = departmentFormTypeDao.getFormDestinationsWithDepId(departmentId, terrBankId,taxTypes);
+        map.put("destinationFTs", destinationFT);
+        List<Pair<DepartmentFormType, DepartmentFormType>> sourceFTs = departmentFormTypeDao.getFormSourcesWithDepId(departmentId, terrBankId,taxTypes);
+        map.put("sourceFTs", sourceFTs);
+        List<Pair<DepartmentFormType, DepartmentDeclarationType>> destinationDTs = departmentFormTypeDao.getDeclarationDestinationsWithDepId(departmentId, terrBankId,taxTypes);
+        map.put("destinationDTs", destinationDTs);
+        List<Pair<DepartmentFormType, DepartmentDeclarationType>> sourceDTs = departmentFormTypeDao.getDeclarationSourcesWithDepId(departmentId, terrBankId,taxTypes);
+        map.put("sourceDTs", sourceDTs);
+        return map;
     }
 
     @Override
@@ -242,6 +238,8 @@ public class SourceServiceImpl implements SourceService {
                 formToFormRelation.setFormType(formData.getFormType());
                 /** тип нф */
                 formToFormRelation.setFormDataKind(departmentFormType.getKind());
+                /** установить id */
+                formToFormRelation.setFormDataId(formData.getId());
 
                 formToFormRelations.add(formToFormRelation);
             } else if (includeUncreatedForms){

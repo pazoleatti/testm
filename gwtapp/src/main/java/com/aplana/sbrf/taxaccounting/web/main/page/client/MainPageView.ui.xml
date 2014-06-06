@@ -58,16 +58,16 @@
             height: 30px;
         }
 
-        .menuLeftElements{
+        .menuLeftElements {
             float: left;
         }
 
-        .helpMenu table{
+        .helpMenu table {
             border-spacing: 0;
             height: 100%;
         }
 
-        .helpMenu .gwt-MenuItem{
+        .helpMenu .gwt-MenuItem {
             padding: 0 7px;
         }
     </ui:style>
@@ -94,30 +94,22 @@
                         <g:HTMLPanel ui:field="signInContentPanel" styleName="{style.signin}"/>
 
                         <div style="float: right">
-                            <g:MenuBar ui:field="helpMenu" addStyleNames="{style.helpMenu}">
-                                <g:MenuItem>
-                                    <a href="#!about" target="_blank" title="О программе">
-                                        <img src="resources/img/exclamation_mark.png" style="border: none" alt="!"/>
-                                    </a>
-                                </g:MenuItem>
-
-                                <g:MenuItem>
-                                    <img src="resources/img/question_mark.png" title="Руководство пользователя" alt="?"/>
-                                    <g:MenuBar vertical="true">
-                                        <g:MenuItem>
-                                            <a href="resources/help_un.pdf" target="_blank"
-                                               title="Руководство пользователя"
-                                               style="color:#000000; text-decoration:none;"><div>Учет налогов</div>
-                                            </a>
-                                        </g:MenuItem>
-                                        <g:MenuItem>
-                                            <a href="resources/help_uks.pdf" target="_blank"
-                                               style="color:#000000; text-decoration:none;"><div>Учет КС</div>
-                                            </a>
-                                        </g:MenuItem>
-                                    </g:MenuBar>
-                                </g:MenuItem>
-                            </g:MenuBar>
+                            <table>
+                                <tr>
+                                    <td>
+                                        <g:MenuBar ui:field="helpMenu" addStyleNames="{style.helpMenu}">
+                                            <g:MenuItem>
+                                                <a href="#!about" target="_blank" title="О программе">
+                                                    <img src="resources/img/exclamation_mark.png" style="border: none" alt="!"/>
+                                                </a>
+                                            </g:MenuItem>
+                                        </g:MenuBar>
+                                    </td>
+                                    <td>
+                                        <g:HTMLPanel ui:field="manualMenuPanel" addStyleNames="{style.menuLeftElements}"/>
+                                    </td>
+                                </tr>
+                            </table>
                         </div>
                     </div>
                 </g:HTMLPanel>
