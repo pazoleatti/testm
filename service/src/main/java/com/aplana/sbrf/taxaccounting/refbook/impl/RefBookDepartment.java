@@ -236,9 +236,10 @@ public class RefBookDepartment implements RefBookDataProvider {
         boolean isHasOpenPeriods = false;
 
         int oldTBId = departmentService.getParentTB(uniqueRecordId.intValue()).getId();
-        int newTBId = records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue().intValue() != 0?
+        int newTBId =
+                records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue() != null && records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue().intValue() != 0?
                 departmentService.getParentTB(records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue().intValue()).getId()
-                : uniqueRecordId.intValue();
+                : 0;
         boolean isChangeTB = oldTBId != newTBId;
 
         if (isChangeType){
@@ -255,7 +256,11 @@ public class RefBookDepartment implements RefBookDataProvider {
                     isHasOpenPeriods = !openReportPeriods.isEmpty();
                     if (isHasOpenPeriods){
                         for (ReportPeriod period : openReportPeriods)
-                            logger.warn("Для подразделения %s для налога <вид налога> открыт период %s", dep.getName(), period.getName());
+                            logger.warn(
+                                    "Для подразделения %s для налога %s открыт период %s",
+                                    dep.getName(),
+                                    period.getTaxPeriod().getTaxType().getName(),
+                                    period.getName());
                         throw new ServiceLoggerException("Подразделению не может быть изменен тип \"ТБ\", если для него существует период!",
                                 logEntryService.save(logger.getEntries()));
                     }
@@ -393,7 +398,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                         return ((DepartmentFormType) o).getId();
                     }
                 });
-        if (dftIsd.isEmpty())
+        if (!dftIsd.isEmpty())
             sourceService.deleteDFT(dftIsd);
         Collection<Long> ddtIds = CollectionUtils.collect(sourceService.getDDTByDepartment(depId, null),
                 new Transformer() {
@@ -402,7 +407,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                         return ((DepartmentDeclarationType) o).getId();
                     }
                 });
-        if (ddtIds.isEmpty())
+        if (!ddtIds.isEmpty())
             sourceService.deleteDDT(ddtIds);
         //
         RefBookDataProvider provider = rbFactory.getDataProvider(RefBook.DEPARTMENT_CONFIG_INCOME);

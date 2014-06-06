@@ -242,6 +242,8 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                 action.setVersionFrom(getView().getVersionFrom());
                 action.setVersionTo(getView().getVersionTo());
 
+                final RecordChanges recordChanges = fillRecordChanges(currentUniqueRecordId, map, action.getVersionFrom(), action.getVersionTo());
+
                 // TODO заменить, сделано для примера
                 if (currentRefBookId == 30) {
                     if(modifiedFields.containsKey("NAME")){
@@ -253,12 +255,28 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                         " по " + WidgetUtils.getDateString(dateTo) + "на имя \"" + modifiedFields.get("NAME") + "\"")*/
                                 action.setVersionFrom(WidgetUtils.getDateWithOutTime(dateFrom));
                                 action.setVersionTo(WidgetUtils.getDateWithOutTime(dateTo));
+
+                                dispatchAsync.execute(action,
+                                        CallbackUtils.defaultCallback(
+                                                new AbstractCallback<SaveRefBookRowVersionResult>() {
+                                                    @Override
+                                                    public void onSuccess(SaveRefBookRowVersionResult result) {
+                                                        LogCleanEvent.fire(EditFormPresenter.this);
+                                                        LogAddEvent.fire(EditFormPresenter.this, result.getUuid());
+                                                        UpdateForm.fire(EditFormPresenter.this, !result.isException(), recordChanges);
+                                                        if (result.isException()) {
+                                                            Dialog.errorMessage("Версия не сохранена", "Обнаружены фатальные ошибки!");
+                                                        } else {
+                                                            setIsFormModified(false);
+                                                        }
+                                                    }
+                                                }, EditFormPresenter.this));
                             }
                         });
+                        return;
                     }
                 }
 
-                final RecordChanges recordChanges = fillRecordChanges(currentUniqueRecordId, map, action.getVersionFrom(), action.getVersionTo());
                 dispatchAsync.execute(action,
                         CallbackUtils.defaultCallback(
                                 new AbstractCallback<SaveRefBookRowVersionResult>() {

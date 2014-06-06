@@ -193,7 +193,7 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
                 @Override
                 public void onSuccess(DeleteNonVersionRefBookRowResult result) {
                     if (result.isWarning()){
-                        Dialog.warningMessage("Удаление подразделения","Удалить все связанные записи?", new DialogHandler() {
+                        Dialog.confirmMessage("Удаление подразделения","Удалить все связанные записи?", new DialogHandler() {
                             @Override
                             public void yes() {
                                 DeleteNonVersionRefBookRowAction action = new DeleteNonVersionRefBookRowAction();
