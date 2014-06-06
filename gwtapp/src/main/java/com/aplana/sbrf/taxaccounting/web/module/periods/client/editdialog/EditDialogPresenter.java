@@ -150,7 +150,7 @@ public class EditDialogPresenter extends PresenterWidget<EditDialogPresenter.MyV
         getView().setYear(data.getYear());
         getView().setBalancePeriod(data.isBalance());
         getView().setSelectedDepartment(data.getDepartmentId());
-        getView().setReportPeriod(data.getReportPeriodId(), data.getPeriodName());
+        getView().setReportPeriod(data.getDictTaxPeriodId(), data.getPeriodName());
     }
 
     public void setSelectedDepartment(Integer departmentId){
