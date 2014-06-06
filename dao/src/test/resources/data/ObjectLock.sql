@@ -7,7 +7,7 @@ insert into department (id, name, parent_id, type, code) values (1, 'А - деп
 insert into form_type (id, name, tax_type) values (1, 'А - тип', 'T');
 insert into form_template (id, type_id, data_rows, version, edition, fixed_rows, name, fullname, code)
   values (1, 1, null, date '2013-01-01', 1, 1, 'name', 'fullname', 'code');
-insert into report_period (id, name, tax_period_id, ord, dict_tax_period_id, start_date, end_date, calendar_start_date) values (1, 'Transport report period 1', 1, 1, 21, date '2013-01-01', date '2013-03-31', date '2013-01-01');
+insert into report_period (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date) values (1, 'Transport report period 1', 1, 21, date '2013-01-01', date '2013-03-31', date '2013-01-01');
 
 insert into sec_user (id, name, login, department_id, is_active, email) values (1, 'user1', 'user1', 1, 1, 'user1@bank.ru');
 insert into sec_user (id, name, login, department_id, is_active, email) values (2, 'user2', 'user2', 1, 1, 'user2@bank.ru');

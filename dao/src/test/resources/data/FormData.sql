@@ -9,19 +9,19 @@ insert into form_data(id, form_template_id, department_id, state, kind, report_p
 	
 -- Для проверки FormDataDao.find
 insert into tax_period(id, tax_type, year) values (10, 'T', 2013);
-insert into report_period (id, name, tax_period_id, ord, dict_tax_period_id, start_date, end_date, calendar_start_date) values (11, 'первый квартал', 10, 6, 21, date '2013-01-01', date '2013-03-31', date '2013-01-01');
+insert into report_period (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date) values (11, 'первый квартал', 10, 21, date '2013-01-01', date '2013-03-31', date '2013-01-01');
 insert into form_data(id, form_template_id, department_id, state, kind, report_period_id, return_sign) values (11, 1, 1, 1, 3, 11, 0);
 
-insert into report_period (id, name, tax_period_id, ord, dict_tax_period_id, start_date, end_date, calendar_start_date) values (12, 'первый квартал', 10, 2, 22, date '2013-04-01', date '2013-06-30', date '2013-04-01');
+insert into report_period (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date) values (12, 'первый квартал', 10, 22, date '2013-04-01', date '2013-06-30', date '2013-04-01');
 insert into form_data(id, form_template_id, department_id, state, kind, report_period_id, return_sign) values (12, 1, 1, 1, 3, 12, 0);
 insert into form_data(id, form_template_id, department_id, state, kind, report_period_id, return_sign) values (13, 1, 1, 1, 3, 12, 0);
 
-insert into report_period (id, name, tax_period_id, ord, dict_tax_period_id, start_date, end_date, calendar_start_date) values (13, 'Transport report period 13', 10, 3, 23, date '2013-07-01', date '2013-09-30', date '2013-07-01');
+insert into report_period (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date) values (13, 'Transport report period 13', 10, 23, date '2013-07-01', date '2013-09-30', date '2013-07-01');
 
 -- Ежемесячные формы
 insert into tax_period(id, tax_type, year) values (12, 'I', 2013);
-insert into report_period (id, name, tax_period_id, ord, dict_tax_period_id, start_date, end_date, calendar_start_date) values (14, 'Deal report period 14', 12, 1, 22, date '2013-01-01', date '2013-03-31', date '2013-01-01');
-insert into report_period (id, name, tax_period_id, ord, dict_tax_period_id, start_date, end_date, calendar_start_date) values (15, 'Deal report period 15', 12, 2, 23, date '2013-04-01', date '2013-06-30', date '2013-04-01');
+insert into report_period (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date) values (14, 'Deal report period 14', 12, 22, date '2013-01-01', date '2013-03-31', date '2013-01-01');
+insert into report_period (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date) values (15, 'Deal report period 15', 12, 23, date '2013-04-01', date '2013-06-30', date '2013-04-01');
 insert into form_data(id, form_template_id, department_id, state, kind, report_period_id, return_sign, period_order) values (14, 2, 1, 1, 1, 14, 0, 1);
 insert into form_data(id, form_template_id, department_id, state, kind, report_period_id, return_sign, period_order) values (15, 2, 1, 1, 1, 14, 0, 2);
 insert into form_data(id, form_template_id, department_id, state, kind, report_period_id, return_sign, period_order) values (16, 2, 1, 1, 1, 14, 0, 3);
@@ -35,9 +35,9 @@ insert into form_data_performer(form_data_id, name, phone, PRINT_DEPARTMENT_ID, 
 -- Для автонумеруемой графы
 insert into tax_period(id, tax_type, year) values (100, 'I', 2014);
 
-insert into report_period (id, name, tax_period_id, ord, dict_tax_period_id, start_date, end_date, calendar_start_date) values (200, 'первый квартал', 100, 1, 21, date '2014-01-01', date '2014-03-31', date '2014-01-01');
-insert into report_period (id, name, tax_period_id, ord, dict_tax_period_id, start_date, end_date, calendar_start_date) values (201, 'полугодие', 100, 2, 22, date '2014-04-01', date '2014-06-30', date '2014-04-01');
-insert into report_period (id, name, tax_period_id, ord, dict_tax_period_id, start_date, end_date, calendar_start_date) values (202, '9 месяцев', 100, 3, 23, date '2014-07-01', date '2014-09-30', date '2014-07-01');
+insert into report_period (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date) values (200, 'первый квартал', 100, 21, date '2014-01-01', date '2014-03-31', date '2014-01-01');
+insert into report_period (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date) values (201, 'полугодие', 100, 22, date '2014-04-01', date '2014-06-30', date '2014-04-01');
+insert into report_period (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date) values (202, '9 месяцев', 100, 23, date '2014-07-01', date '2014-09-30', date '2014-07-01');
 
 insert into form_data(id, form_template_id, department_id, state, kind, report_period_id, return_sign, period_order) values (300, 1, 3, 2, 1, 200, 0, 1);
 insert into form_data(id, form_template_id, department_id, state, kind, report_period_id, return_sign, period_order) values (301, 1, 3, 1, 1, 202, 0, 3);
