@@ -126,7 +126,7 @@
                         <style:LinkButton img="resources/img/unlock-16.png" text="Открыть период"
                                           ui:field="openPeriod"/>
                         <style:LinkButton img="resources/img/unlock-16.png" text="Открыть корректирующий период"
-                                          ui:field="openCorrectPeriod"/>
+                                          ui:field="openCorrectPeriod" visible="false"/>
                         <style:LinkButton img="resources/img/lock-16.png" text="Закрыть период"
                                           ui:field="closePeriod"/>
                         <style:LinkButton img="resources/img/lock-16.png" text="Редактировать период"
