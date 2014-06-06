@@ -236,9 +236,10 @@ public class RefBookDepartment implements RefBookDataProvider {
         boolean isHasOpenPeriods = false;
 
         int oldTBId = departmentService.getParentTB(uniqueRecordId.intValue()).getId();
-        int newTBId = records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue().intValue() != 0?
+        int newTBId =
+                records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue() != null && records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue().intValue() != 0?
                 departmentService.getParentTB(records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue().intValue()).getId()
-                : uniqueRecordId.intValue();
+                : 0;
         boolean isChangeTB = oldTBId != newTBId;
 
         if (isChangeType){
