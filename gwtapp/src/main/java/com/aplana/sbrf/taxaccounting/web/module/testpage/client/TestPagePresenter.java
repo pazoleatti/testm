@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.web.module.testpage.client;
 
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.TaActionException;
 import com.aplana.sbrf.taxaccounting.web.main.entry.client.ScreenLockEvent;
 import com.google.inject.Inject;
@@ -43,6 +45,8 @@ public class TestPagePresenter extends Presenter<TestPagePresenter.MyView,
     @Override
     public void prepareFromRequest(final PlaceRequest request) {
         super.prepareFromRequest(request);
+        LogCleanEvent.fire(this);
+        LogShowEvent.fire(this, false);
     }
 
     @Override

@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbooklist.client;
 
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataTokens;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -39,6 +41,8 @@ public class AdminRefBookListPresenter extends AbstractRefBookListPresenter<Admi
 
     @Override
     public void prepareFromRequest(final PlaceRequest request) {
+        LogCleanEvent.fire(this);
+        LogShowEvent.fire(this, false);
         String url = RefBookDataTokens.REFBOOK_SCRIPT + ";" + RefBookDataTokens.REFBOOK_DATA_ID;
         if ((lstHistory.get(0) == null || !lstHistory.get(0).startsWith(url)) &&
                 (lstHistory.get(1) == null || !lstHistory.get(1).startsWith(url))) {

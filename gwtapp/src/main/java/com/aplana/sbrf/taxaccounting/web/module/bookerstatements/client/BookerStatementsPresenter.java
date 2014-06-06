@@ -4,6 +4,8 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.client.create.CreateBookerStatementsPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.bookerstatementsdata.client.BookerStatementsDataTokens;
@@ -156,6 +158,8 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
     @Override
     public void prepareFromRequest(PlaceRequest request) {
         super.prepareFromRequest(request);
+        LogCleanEvent.fire(this);
+        LogShowEvent.fire(this, false);
         String url = BookerStatementsDataTokens.bookerStatements + ";";
         if ((lstHistory.get(0) == null || !lstHistory.get(0).startsWith(url)) &&
                 (lstHistory.get(1) == null || !lstHistory.get(1).startsWith(url))) {

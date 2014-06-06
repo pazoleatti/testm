@@ -148,7 +148,7 @@ public class OpenCorrectDialogPresenter extends PresenterWidget<OpenCorrectDialo
                                         openCorrectionPeriod();
                                         break;
                                     case CLOSE:
-                                        Dialog.confirmMessage("Корректирующий период закрыт, выполнить переоткрытие?",
+                                        Dialog.confirmMessage("Корректирование периода", "Корректирующий период закрыт, выполнить переоткрытие?",
                                                 new DialogHandler() {
                                                     @Override
                                                     public void yes() {

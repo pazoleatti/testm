@@ -14,6 +14,7 @@ public class TableRow implements Serializable {
 	private boolean isSubHeader;
     private Boolean balance;
 	int year; //TODO Возможно не  нужно хранить дату в каждом экземпляре
+    private int dictTaxPeriodId;
 
 	public int getYear() {
 		return year;
@@ -104,5 +105,13 @@ public class TableRow implements Serializable {
 
     public void setCorrectPeriod(Date correctPeriod) {
         this.correctPeriod = correctPeriod;
+    }
+
+    public int getDictTaxPeriodId() {
+        return dictTaxPeriodId;
+    }
+
+    public void setDictTaxPeriodId(int dictTaxPeriodId) {
+        this.dictTaxPeriodId = dictTaxPeriodId;
     }
 }

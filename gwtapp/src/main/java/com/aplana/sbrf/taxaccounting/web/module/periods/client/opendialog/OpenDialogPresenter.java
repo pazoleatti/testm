@@ -88,13 +88,13 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
                     public void onSuccess(CheckPeriodStatusResult result) {
                         switch (result.getStatus()) {
                             case OPEN:
-                                Dialog.infoMessage("Период уже открыт!");
+                                Dialog.infoMessage("Открытие периода", "Период уже открыт!");
                                 break;
                             case NOT_EXIST:
                                 open(openFilterData);
                                 break;
                             case CLOSE:
-                                Dialog.confirmMessage("Период закрыт, выполнить его переоткрытие?", new DialogHandler() {
+                                Dialog.confirmMessage("Открытие периода", "Период закрыт, выполнить его переоткрытие?", new DialogHandler() {
                                     @Override
                                     public void yes() {
                                         open(openFilterData);

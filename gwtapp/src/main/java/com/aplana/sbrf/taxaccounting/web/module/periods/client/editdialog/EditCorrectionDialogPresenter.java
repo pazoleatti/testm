@@ -4,6 +4,7 @@ import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.module.periods.client.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -14,6 +15,7 @@ import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -25,6 +27,7 @@ public class EditCorrectionDialogPresenter extends PresenterWidget<EditCorrectio
         void setSelectedDepartment(Integer departmentId);
         void setCanChangeDepartment(boolean canChange);
         void setPeriodsList(List<ReportPeriod> reportPeriods);
+        void setCorrectionDate(Date date);
     }
 
     private DispatchAsync dispatcher;
@@ -117,6 +120,8 @@ public class EditCorrectionDialogPresenter extends PresenterWidget<EditCorrectio
                     } else if ((result.getStatus() == PeriodStatusBeforeOpen.OPEN)
                             || (result.getStatus() == PeriodStatusBeforeOpen.CLOSE)) {
                         Dialog.errorMessage("Указанный период уже заведён в Системе!");
+                    } else {
+                        UpdateForm.fire(EditCorrectionDialogPresenter.this);
                     }
                 }
 
@@ -134,6 +139,7 @@ public class EditCorrectionDialogPresenter extends PresenterWidget<EditCorrectio
         initData = data;
         getView().setSelectedDepartment(data.getDepartmentId());
         getView().setPeriodsList(data.getCorrectionReportPeriods());
+        getView().setCorrectionDate(data.getCorrectionDate());
 
     }
 

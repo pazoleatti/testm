@@ -381,8 +381,8 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
             valueMap.put("statusList", statusList);
             valueMap.put("actualBeginVersion", actualBeginVersion);
 
-            return getNamedParameterJdbcTemplate().queryForInt("select MIN(id) from declaration_template " +
-                    " where declaration_type_id = :typeId and TRUNC(version, 'DD') > :actualBeginVersion and status in (:statusList)",
+            return getNamedParameterJdbcTemplate().queryForInt("select * from (select id from declaration_template where declaration_type_id = :typeId " +
+                    " and TRUNC(version, 'DD') > :actualBeginVersion and status in (:statusList) order by version, edition) where rownum = 1",
                     valueMap);
         } catch(EmptyResultDataAccessException e){
             return 0;
