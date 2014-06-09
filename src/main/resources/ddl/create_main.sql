@@ -161,7 +161,8 @@ create table ref_book_attribute (
   required number(1) default 0 not null,
   is_unique number(1) default 0 not null,
   sort_order number(9),
-  format number(2)
+  format number(2),
+  read_only number(1) default 0 not null
 );
 comment on table ref_book_attribute is 'Атрибут справочника';
 comment on column ref_book_attribute.id is 'Уникальный идентификатор';
@@ -179,6 +180,7 @@ comment on column ref_book_attribute.required is 'Признак обязате�
 comment on column ref_book_attribute.is_unique is 'Признак уникальности значения атрибута справочника (1 - должно быть уникальным; 0 - нет)';
 comment on column ref_book_attribute.sort_order is 'Определяет порядок сортировки по умолчанию';
 comment on column ref_book_attribute.format is 'Формат. (Для дат: 0 - "", 1 - "dd.MM.yyyy", 2 - "MM.yyyy", 3 - "MMMM yyyy", 4 - "yyyy", 5 - "dd.MM"; Для чисел: 6 - чекбокс)';
+comment on column ref_book_attribute.read_only is 'Только для чтения (0 - редактирование доступно пользователю; 1 - редактирование недоступно пользователю)';
 ------------------------------------------------------------------------------------------------------
 create table ref_book_record (
   id number(18) not null,
