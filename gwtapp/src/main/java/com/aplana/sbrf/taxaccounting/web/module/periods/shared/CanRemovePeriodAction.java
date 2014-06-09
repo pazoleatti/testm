@@ -4,6 +4,7 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
 public class CanRemovePeriodAction extends UnsecuredActionImpl<CanRemovePeriodResult> {
 	int reportPeriodId;
+    String operationName = "удаляемом";
 
 	public int getReportPeriodId() {
 		return reportPeriodId;
@@ -12,4 +13,12 @@ public class CanRemovePeriodAction extends UnsecuredActionImpl<CanRemovePeriodRe
 	public void setReportPeriodId(int reportPeriodId) {
 		this.reportPeriodId = reportPeriodId;
 	}
+
+    public String getOperationName() {
+        return operationName;
+    }
+
+    public void setOperationName(String operationName) {
+        this.operationName = operationName;
+    }
 }

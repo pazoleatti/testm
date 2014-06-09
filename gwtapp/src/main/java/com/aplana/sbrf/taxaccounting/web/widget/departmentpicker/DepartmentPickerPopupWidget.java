@@ -205,6 +205,7 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
             Dialog.warningMessage("Уточните параметры поиска: найдено слишком много значений");
         } else {
             tree.filter(filter.getText().trim(), items);
+            tree.setShowDisabledDepartment(showDisabled.getValue());
             updateSelectAllLabel();
         }
     }
