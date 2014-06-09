@@ -108,7 +108,7 @@ public class EditDialogPresenter extends PresenterWidget<EditDialogPresenter.MyV
         CheckHasCorrectionPeriodAction hasCorrectionPeriodAction = new CheckHasCorrectionPeriodAction();
         hasCorrectionPeriodAction.setTaxType(taxType);
         hasCorrectionPeriodAction.setDepartmentId(data.getDepartmentId().intValue());
-        hasCorrectionPeriodAction.setReportPeriodId(data.getReportPeriodId().intValue() );
+        hasCorrectionPeriodAction.setReportPeriodId(initData.getReportPeriodId() );
         dispatcher.execute(hasCorrectionPeriodAction, CallbackUtils
                         .defaultCallback(new AbstractCallback<CheckHasCorrectionPeriodResult>() {
                             @Override
