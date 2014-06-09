@@ -1,9 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.client;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.Department;
@@ -40,6 +36,10 @@ import com.gwtplatform.mvp.client.proxy.Place;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, PeriodsPresenter.MyProxy>
 								implements PeriodsUiHandlers, PeriodCreated.OpenPeriodHandler, UpdateForm.UpdateFormHandler {
@@ -206,12 +206,27 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
         if ((getView().getDepartmentId() == null)
                 || (getView().getFromYear() == null)
                 || (getView().getToYear() == null)) {
+            StringBuilder msg = new StringBuilder();
+            if (getView().getDepartmentId() == null) {
+                msg.append("\"Подразделение\"");
+                if ((getView().getFromYear() == null) || (getView().getToYear() == null)) {
+                    msg.append(", ");
+                }
+            }
+
+            if (getView().getFromYear() == null) {
+                msg.append("\"Период с\"");
+                if (getView().getToYear() == null) {
+                    msg.append(", ");
+                }
+            }
+
+            if (getView().getToYear() == null) {
+                msg.append("\"Период по\"");
+            }
+
             Dialog.errorMessage("Указание параметров поиска",
-                    "Не заполнены следующие обязательные к заполнению поля: "
-                    + (getView().getDepartmentId() == null ? "Подразделение " : "")
-                    + (getView().getFromYear() == null ? "Период с " : "")
-                    + (getView().getToYear() == null ? "Период по " : "")
-            );
+                    "Не заполнены следующие обязательные к заполнению поля: " + msg.toString() + "!");
         } else if ((getView().getFromYear() == null)
 				|| (getView().getToYear() == null)
 				|| (getView().getFromYear() > getView().getToYear())){
