@@ -45,6 +45,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 								implements PeriodsUiHandlers, PeriodCreated.OpenPeriodHandler, UpdateForm.UpdateFormHandler {
 
 	private TaxType taxType;
+    private int currentYear;
 
 	@ProxyCodeSplit
 	@NameToken(PeriodsTokens.PERIODS)
@@ -170,7 +171,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
         }
         openDialogPresenter.resetToDefault();
         openDialogPresenter.setSelectedDepartment(departmentPair.getDepartmentId());
-        openDialogPresenter.setYear(getView().getFromYear());
+        openDialogPresenter.setYear(currentYear);
         addToPopupSlot(openDialogPresenter);
 	}
 
@@ -390,6 +391,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 				.defaultCallback(new AbstractCallback<PeriodsGetFilterDataResult>() {
 					@Override
 					public void onSuccess(PeriodsGetFilterDataResult result) {
+                        currentYear = result.getCurrentYear();
 						PeriodsPresenter.this.taxType = result.getTaxType();
                         getView().setTaxTitle(taxType.getName());
 						getView().setTitle("Ведение периодов");
