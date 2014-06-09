@@ -247,8 +247,8 @@ public class PeriodServiceImpl implements PeriodService{
                         + departmentService.getDepartment(departmentReportPeriod.getDepartmentId().intValue()).getName()
                         + " для налога "
                         + departmentReportPeriod.getReportPeriod().getTaxPeriod().getTaxType().getName()
-                        + " открыт период "
-                        + departmentReportPeriod.getReportPeriod().getName()));
+                        + " открыт период " + departmentReportPeriod.getReportPeriod().getName() + " "
+                        + departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear()));
             } else {
                 logs.add(new LogEntry(LogLevel.INFO, "Корректирующий период: " + departmentReportPeriod.getReportPeriod().getName()
                         + " " + year + " открыт для " + departmentService.getDepartment(departmentReportPeriod.getDepartmentId().intValue()).getName()));
