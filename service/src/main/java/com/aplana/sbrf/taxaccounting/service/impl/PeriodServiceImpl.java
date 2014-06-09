@@ -771,13 +771,14 @@ public class PeriodServiceImpl implements PeriodService{
         RefBookDataProvider provider = rbFactory.getDataProvider(refBook.getId());
         Map<String, RefBookValue> dictTaxPeriod = provider.getRecordData((long) newDictTaxPeriodId);
 
+        String strBalance = isBalance ? " ввод остатков" : "";
         List<Department> deps = getAvailableDepartments(taxType, user.getUser(), Operation.EDIT, (int) departmentId);
         if ((rp.getDictTaxPeriodId() == newDictTaxPeriodId) && (rp.getTaxPeriod().getYear() == newYear)) { // Изменился только ввод остатков
 
             for (Department dep : deps) {
                 departmentReportPeriodDao.changeBalance(reportPeriodId, dep.getId(), isBalance);
                 logs.add(new LogEntry(LogLevel.INFO,
-                        "Период с " + rp.getName() + " " + rp.getTaxPeriod().getYear() + " был изменён на " + rp.getName() + " для " + dep.getName()));//<соответствующий календарный год>** + <"ввод остатков" *>**  для <Наименование подразделения>"));
+                        "Период с " + rp.getName() + " " + rp.getTaxPeriod().getYear() + " был изменён на " + rp.getName() + strBalance + " для " + dep.getName()));//<соответствующий календарный год>** + <"ввод остатков" *>**  для <Наименование подразделения>"));
             }
 
         } else {
@@ -789,7 +790,7 @@ public class PeriodServiceImpl implements PeriodService{
             open(newYear, newDictTaxPeriodId, taxType, user, departmentId, null, isBalance, null);
             for (Department dep : deps) {
                 logs.add(new LogEntry(LogLevel.INFO,
-                        "Период с " + rp.getName() + " " + rp.getTaxPeriod().getYear() + " был изменён на " + dictTaxPeriod.get("NAME").getStringValue() + " " + newYear + " для " + dep.getName()));//<соответствующий календарный год>** + <"ввод остатков" *>**  для <Наименование подразделения>"));
+                        "Период с " + rp.getName() + " " + rp.getTaxPeriod().getYear() + " был изменён на " + dictTaxPeriod.get("NAME").getStringValue() + " " + newYear + strBalance + " для " + dep.getName()));//<соответствующий календарный год>** + <"ввод остатков" *>**  для <Наименование подразделения>"));
             }
         }
     }
