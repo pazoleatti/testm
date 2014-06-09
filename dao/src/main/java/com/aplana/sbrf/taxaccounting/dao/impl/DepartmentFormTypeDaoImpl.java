@@ -614,16 +614,17 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
 
     @Override
     public List<Pair<String, String>> existAcceptedDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind, Integer reportPeriodId) {
-        return getJdbcTemplate().query("select fd.kind, d.name from form_data fd\n" +
-                "join department_form_type dft on (dft.department_id = fd.department_id and dft.kind = fd.kind)\n" +
-                "join form_template ft on (ft.id = fd.form_template_id and ft.type_id = dft.form_type_id)\n" +
-                "join form_data_source fds on fds.department_form_type_id = dft.id\n" +
-                "join department d on d.id = fd.department_id\n" +
-                "where fds.src_department_form_type_id = (select id from department_form_type where department_id = ? and kind = ? and form_type_id = ?)\n" +
-                "and fd.report_period_id = ? and fd.state = 4", new RowMapper<Pair<String, String>>() {
+        return getJdbcTemplate().query("select dtype.name as declarationType, d.name as departmentName from declaration_data dd\n" +
+                "join declaration_template dt on dt.id = dd.declaration_template_id\n" +
+                "join declaration_type dtype on dtype.id = dt.declaration_type_id \n" +
+                "join department d on d.id = dd.department_id\n" +
+                "join department_declaration_type ddt on (ddt.department_id = d.id and ddt.declaration_type_id = dtype.id)\n" +
+                "join declaration_source ds on ds.department_declaration_type_id = ddt.id\n" +
+                "join department_form_type dft on dft.id = ds.src_department_form_type_id\n" +
+                "where dft.department_id = ? and dft.kind = ? and dft.form_type_id = ? and dd.report_period_id = ? and dd.is_accepted = 1", new RowMapper<Pair<String, String>>() {
             @Override
             public Pair<String, String> mapRow(ResultSet rs, int rowNum) throws SQLException {
-                return new Pair<String, String>(FormDataKind.fromId(SqlUtils.getInteger(rs,"KIND")).getName(), rs.getString("NAME"));
+                return new Pair<String, String>(rs.getString("declarationType"), rs.getString("departmentName"));
             }
         }, sourceDepartmentId, sourceKind.getId(), sourceFormTypeId, reportPeriodId);
     }
