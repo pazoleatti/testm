@@ -216,8 +216,8 @@ public class PeriodServiceImpl implements PeriodService{
 			ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
 			int year = period.getReportPeriod().getTaxPeriod().getYear();
 			logs.add(new LogEntry(LogLevel.INFO, "Период" + " \"" + reportPeriod.getName() + "\" " +
-					"за " + year + " год " +
-					"закрыт для подразделения \"" +
+					year + " " +
+					"закрыт для \"" +
 					departmentService.getDepartment((int) departmentId).getName() +
 					"\""));
 		}
@@ -243,12 +243,12 @@ public class PeriodServiceImpl implements PeriodService{
 		if (logs != null) {
 			int year = departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear();
             if (departmentReportPeriod.getCorrectPeriod() == null) {
-                logs.add(new LogEntry(LogLevel.INFO, "Для подразделения "
-                        + departmentService.getDepartment(departmentReportPeriod.getDepartmentId().intValue()).getName()
-                        + " для налога "
-                        + departmentReportPeriod.getReportPeriod().getTaxPeriod().getTaxType().getName()
-                        + " открыт период " + departmentReportPeriod.getReportPeriod().getName() + " "
-                        + departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear()));
+                logs.add(new LogEntry(LogLevel.INFO,
+                        "Период " + "\"" + departmentReportPeriod.getReportPeriod().getName() + "\" "
+                        + departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + " "
+                        + (departmentReportPeriod.isBalance() ? "\"ввод остатков\"" : "") + " "
+                        + " открыт для \"" + departmentService.getDepartment(departmentReportPeriod.getDepartmentId().intValue()).getName() + "\""
+                ));
             } else {
                 logs.add(new LogEntry(LogLevel.INFO, "Корректирующий период: " + departmentReportPeriod.getReportPeriod().getName()
                         + " " + year + " открыт для " + departmentService.getDepartment(departmentReportPeriod.getDepartmentId().intValue()).getName()));
@@ -480,7 +480,9 @@ public class PeriodServiceImpl implements PeriodService{
 			ReportPeriod rp = reportPeriodDao.get(reportPeriodId);
             if (logs != null) {
                 logs.add(new LogEntry(LogLevel.INFO,
-                        rp.getName() + " " + rp.getTaxPeriod().getYear() + " удалён для " + departmentService.getDepartment(id).getName()));
+                        "Период \"" + rp.getName() + "\" " +
+                         rp.getTaxPeriod().getYear() + " удалён для " + "\"" + departmentService.getDepartment(id).getName() + "\""
+                ));
             }
 		}
 
