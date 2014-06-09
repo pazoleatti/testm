@@ -324,7 +324,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                     DeclarationDataSearchOrdering.ID, true).isEmpty()){
                 //10A 1.1, 10А.1.1А
 
-                Map<String, List> sourcesDestinations = sourceService.getSourcesDestinations(newTBId, oldTBId, Arrays.asList(TaxType.TRANSPORT, TaxType.PROPERTY));
+                Map<String, List> sourcesDestinations = sourceService.getSourcesDestinations(uniqueRecordId.intValue(), newTBId, Arrays.asList(TaxType.TRANSPORT, TaxType.PROPERTY));
                 List<Pair<DepartmentFormType, DepartmentFormType>> destinationFTs = sourcesDestinations.get(DESTINATION_FTS);
                 List<Pair<DepartmentFormType, DepartmentFormType>> sourceFTs = sourcesDestinations.get(SOURCE_FTS);
                 List<Pair<DepartmentFormType, DepartmentDeclarationType>> destinationDTs = sourcesDestinations.get(DESTINATION_DTS);
@@ -502,28 +502,30 @@ public class RefBookDepartment implements RefBookDataProvider {
     private void createPeriods(long depId, DepartmentType newDepartmentType, int terrBankId, Logger logger){
         //1
         if (newDepartmentType != DepartmentType.TERR_BANK){
-            //1А.1.1
-            List<Long> reportPeriods =
-                    refBookDepartmentDao.getPeriodsByTaxTypesAndDepartments(
-                            Arrays.asList(TaxType.values()),
-                            Arrays.asList(terrBankId));
-            if (!reportPeriods.isEmpty()){
-                for (Long periodIs : reportPeriods)
-                    //1А.1.1.1
-                    if (periodService.existForDepartment((int) depId, periodIs))
-                        return;
-                //1А.1.1.1А
-                for (Long periodIs : reportPeriods){
-                    DepartmentReportPeriod drp = new DepartmentReportPeriod();
-                    drp.setReportPeriod(periodService.getReportPeriod(periodIs.intValue()));
-                    drp.setDepartmentId(depId);
-                    drp.setActive(periodService.isPeriodOpen(terrBankId, periodIs));
-                    drp.setCorrectPeriod(null);
-                    periodService.saveOrUpdate(drp, null, logger.getEntries());
+            if (departmentService.getParentTB((int) depId) != null){
+                //1А.1.1
+                List<Long> reportPeriods =
+                        refBookDepartmentDao.getPeriodsByTaxTypesAndDepartments(
+                                Arrays.asList(TaxType.values()),
+                                Arrays.asList(terrBankId));
+                if (!reportPeriods.isEmpty()){
+                    for (Long periodIs : reportPeriods)
+                        //1А.1.1.1
+                        if (periodService.existForDepartment((int) depId, periodIs))
+                            return;
+                    //1А.1.1.1А
+                    for (Long periodIs : reportPeriods){
+                        DepartmentReportPeriod drp = new DepartmentReportPeriod();
+                        drp.setReportPeriod(periodService.getReportPeriod(periodIs.intValue()));
+                        drp.setDepartmentId(depId);
+                        drp.setActive(true);
+                        drp.setCorrectPeriod(null);
+                        periodService.saveOrUpdate(drp, null, logger.getEntries());
+                    }
+                    return;
                 }
                 return;
             }
-            return;
         }
         //2
         List<Long> reportPeriods =
@@ -648,5 +650,21 @@ public class RefBookDepartment implements RefBookDataProvider {
             periodService.removePeriodWithLog(id.intValue(), null, Arrays.asList(depId), null, logger.getEntries());
         }
 
+    }
+
+    private void checkCycle(Department department, Department parentDep, Logger logger){
+        List<Integer> childIds = departmentService.getAllChildrenIds(department.getId());
+        //>1 т.к. запрос всегда как минимум возвращает переданный id
+        boolean isChild = !childIds.isEmpty() && childIds.size() > 1 && childIds.contains(department.getId());
+        if (isChild)
+            logger.error("Подразделение %s не может быть указано как родительское, т.к. уже принадлежит к орг. структуре подразделения %s",
+                    department.getName(), parentDep.getName());
+
+        List<Integer> parentIds = departmentService.getAllParentIds(department.getId());
+        //>2 т.к. запрос всегда как минимум возвращает переданный id и подразделение Банк
+        boolean isParent = !parentIds.isEmpty() && parentIds.size() > 2 && parentIds.contains(department.getId());
+        if (isParent)
+            logger.error("Подразделение %s не может быть включено в орг. структуру подразделения %s, т.к. уже содержит его в своей орг. структуре!",
+                    parentDep.getName(), department.getName());
     }
 }

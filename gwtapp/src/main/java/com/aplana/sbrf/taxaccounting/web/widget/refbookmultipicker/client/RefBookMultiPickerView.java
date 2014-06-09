@@ -248,7 +248,7 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
     }
 
     @Override
-    public void setHeaders(Map<String, Integer> headers) {
+    public void setHeaders(Map<String, Integer> headers, List<Integer> unVisibleColumns) {
         for (int i = cellTable.getColumnCount() - 1; i >= 0; i--) {
             cellTable.removeColumn(i);
         }
@@ -278,10 +278,12 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
                     }
                 }
             };
-            RefBookItemTextColumn refBookItemTextColumn = new RefBookItemTextColumn(i, true, cell);
-            sortColumns.put(refBookItemTextColumn, i);
-            cellTable.addResizableColumn(refBookItemTextColumn, entry.getKey());
-            cellTable.setColumnWidth(refBookItemTextColumn, entry.getValue(), Style.Unit.PC);
+            if (!unVisibleColumns.contains(i)) {
+                RefBookItemTextColumn refBookItemTextColumn = new RefBookItemTextColumn(i, true, cell);
+                sortColumns.put(refBookItemTextColumn, i);
+                cellTable.addResizableColumn(refBookItemTextColumn, entry.getKey());
+                cellTable.setColumnWidth(refBookItemTextColumn, entry.getValue(), Style.Unit.PC);
+            }
             i++;
         }
     }

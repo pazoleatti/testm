@@ -94,6 +94,16 @@ public class DepartmentServiceImpl implements DepartmentService {
         return departmentDao.getAllChildren(parentDepartmentId);
     }
 
+    @Override
+    public List<Integer> getAllChildrenIds(int depId) {
+        return departmentDao.getAllChildrenIds(depId);
+    }
+
+    @Override
+    public List<Integer> getAllParentIds(int depId) {
+        return departmentDao.getAllParentIds(depId);
+    }
+
     // http://conf.aplana.com/pages/viewpage.action?pageId=11380675
     @Override
     public List<Department> getBADepartments(TAUser tAUser) {
@@ -276,7 +286,10 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public Department getParentTB(int departmentId) {
         try {
-            return getDepartment(departmentDao.getParentTBId(departmentId));
+            Integer tbId = departmentDao.getParentTBId(departmentId);
+            if (tbId == null)
+                return null;
+            return getDepartment(tbId);
         } catch (ServiceException e){
             throw new ServiceException("", e);
         }

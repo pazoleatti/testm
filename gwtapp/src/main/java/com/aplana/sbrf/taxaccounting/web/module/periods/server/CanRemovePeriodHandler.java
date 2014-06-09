@@ -61,42 +61,52 @@ public class CanRemovePeriodHandler extends AbstractActionHandler<CanRemovePerio
         }
         String depFilter = buildFilter(departmentIds, action.getReportPeriodId());
 
-        //Check INCOME_101
-		RefBookDataProvider dataProvider = rbFactory.getDataProvider(REF_BOOK_101);
+        PagingResult<Map<String, RefBookValue>> result101 = null;
+        PagingResult<Map<String, RefBookValue>> result102 = null;
+        if (action.getTaxType() == TaxType.INCOME) {
+            //Check INCOME_101
+            RefBookDataProvider dataProvider = rbFactory.getDataProvider(REF_BOOK_101);
 
-		Date endDate = periodService.getEndDate(action.getReportPeriodId()).getTime();
-		PagingResult<Map<String, RefBookValue>> result101 =  dataProvider.getRecords(endDate, null, depFilter, null);
+            Date endDate = periodService.getEndDate(action.getReportPeriodId()).getTime();
+            result101 = dataProvider.getRecords(endDate, null, depFilter, null);
 
-        Set<Integer> depInc101Ids = new HashSet<Integer>();
-        for (Map<String, RefBookValue> e : result101) {
-            depInc101Ids.add(e.get("DEPARTMENT_ID").getReferenceValue().intValue());
-        }
+            Set<Integer> depInc101Ids = new HashSet<Integer>();
+            for (Map<String, RefBookValue> e : result101) {
+                depInc101Ids.add(e.get("DEPARTMENT_ID").getReferenceValue().intValue());
+            }
 
-        for (Integer id : depInc101Ids) {
-            logs.add(new LogEntry(LogLevel.ERROR, "Форма 101 (бухгалтерская отчётность) в подразделении \"" +
-                    departmentService.getDepartment(id).getName() +
-                    "\" находится в удаляемом периоде!"));
-        }
+            for (Integer id : depInc101Ids) {
+                logs.add(new LogEntry(LogLevel.ERROR, "Форма 101 (бухгалтерская отчётность) в подразделении \"" +
+                        departmentService.getDepartment(id).getName() +
+                        "\" находится в " +
+                        action.getOperationName()
+                        + " периоде!"));
+            }
 
-        //Check INCOME_102
-		dataProvider = rbFactory.getDataProvider(REF_BOOK_102);
-		PagingResult<Map<String, RefBookValue>> result102 =  dataProvider.getRecords(endDate, null, depFilter, null);
-        Set<Integer> depInc102Ids = new HashSet<Integer>();
-        for (Map<String, RefBookValue> e : result102) {
-            depInc102Ids.add(e.get("DEPARTMENT_ID").getReferenceValue().intValue());
-        }
+            //Check INCOME_102
+            dataProvider = rbFactory.getDataProvider(REF_BOOK_102);
+            result102 = dataProvider.getRecords(endDate, null, depFilter, null);
+            Set<Integer> depInc102Ids = new HashSet<Integer>();
+            for (Map<String, RefBookValue> e : result102) {
+                depInc102Ids.add(e.get("DEPARTMENT_ID").getReferenceValue().intValue());
+            }
 
-        for (Integer id : depInc102Ids) {
-            logs.add(new LogEntry(LogLevel.ERROR, "Форма 102 (бухгалтерская отчётность) в подразделении \"" +
-                    departmentService.getDepartment(id).getName() +
-                    "\" находится в удаляемом периоде!"));
+            for (Integer id : depInc102Ids) {
+                logs.add(new LogEntry(LogLevel.ERROR, "Форма 102 (бухгалтерская отчётность) в подразделении \"" +
+                        departmentService.getDepartment(id).getName() +
+                        "\" находится в " +
+                        action.getOperationName() +
+                        " периоде!"));
+            }
         }
 
         //Check forms
         List<FormData> formDatas = formDataService.find(departmentIds, action.getReportPeriodId());
         for (FormData fd : formDatas) {
             logs.add(new LogEntry(LogLevel.ERROR, "Форма " + fd.getFormType().getName() + " " + fd.getKind().getName() +
-                    " в подразделении " + departmentService.getDepartment(fd.getDepartmentId()).getName() + " находится в удаляемом периоде!"));
+                    " в подразделении " + departmentService.getDepartment(fd.getDepartmentId()).getName() + " находится в " +
+                    action.getOperationName() +
+                    " периоде!"));
         }
 
 
@@ -108,9 +118,13 @@ public class CanRemovePeriodHandler extends AbstractActionHandler<CanRemovePerio
             DeclarationData dd = declarationDataService.get(id, user);
             DeclarationTemplate dt = declarationService.get(dd.getDeclarationTemplateId());
             logs.add(new LogEntry(LogLevel.ERROR, dt.getType().getName() + " в подразделении " +
-                    departmentService.getDepartment(dd.getDepartmentId()).getName() + " находится в удаляемом периоде!"));
+                    departmentService.getDepartment(dd.getDepartmentId()).getName() + " находится в " +
+                    action.getOperationName() +
+                    " периоде!"));
         }
-		result.setCanRemove(result101.isEmpty() && result102.isEmpty() && formDatas.isEmpty() && declarations.isEmpty());
+		result.setCanRemove(((result101 == null) || result101.isEmpty())
+                &&((result102 == null) || result102.isEmpty())
+                && formDatas.isEmpty() && declarations.isEmpty());
         result.setUuid(logEntryService.save(logs));
 		return result;
 

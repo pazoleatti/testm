@@ -86,13 +86,15 @@ public class EditDialogPresenter extends PresenterWidget<EditDialogPresenter.MyV
 
         CanRemovePeriodAction action = new CanRemovePeriodAction();
         action.setReportPeriodId(initData.getReportPeriodId().intValue());
+        action.setOperationName("редактируемом");
+        action.setTaxType(taxType);
         dispatcher.execute(action, CallbackUtils
                         .defaultCallback(new AbstractCallback<CanRemovePeriodResult>() {
                             @Override
                             public void onSuccess(CanRemovePeriodResult result) {
                                 if (!result.isCanRemove()) {
+                                    LogAddEvent.fire(EditDialogPresenter.this, result.getUuid());
                                     Dialog.errorMessage("Редактирование периода", "Редактирование периода невозможно!");
-                                    return;
                                 } else {
                                     checkHasCorrectionPeriod(data);
                                 }
@@ -108,7 +110,7 @@ public class EditDialogPresenter extends PresenterWidget<EditDialogPresenter.MyV
         CheckHasCorrectionPeriodAction hasCorrectionPeriodAction = new CheckHasCorrectionPeriodAction();
         hasCorrectionPeriodAction.setTaxType(taxType);
         hasCorrectionPeriodAction.setDepartmentId(data.getDepartmentId().intValue());
-        hasCorrectionPeriodAction.setReportPeriodId(data.getReportPeriodId().intValue() );
+        hasCorrectionPeriodAction.setReportPeriodId(initData.getReportPeriodId() );
         dispatcher.execute(hasCorrectionPeriodAction, CallbackUtils
                         .defaultCallback(new AbstractCallback<CheckHasCorrectionPeriodResult>() {
                             @Override
