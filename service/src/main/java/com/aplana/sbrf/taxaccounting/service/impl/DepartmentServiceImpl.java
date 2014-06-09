@@ -276,7 +276,10 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public Department getParentTB(int departmentId) {
         try {
-            return getDepartment(departmentDao.getParentTBId(departmentId));
+            Integer tbId = departmentDao.getParentTBId(departmentId);
+            if (tbId == null)
+                return null;
+            return getDepartment(tbId);
         } catch (ServiceException e){
             throw new ServiceException("", e);
         }

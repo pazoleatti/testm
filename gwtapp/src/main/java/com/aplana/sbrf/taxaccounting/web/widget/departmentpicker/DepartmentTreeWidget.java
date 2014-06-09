@@ -137,19 +137,17 @@ public class DepartmentTreeWidget extends MultiSelectTree<List<DepartmentPair>, 
     }
 
     public void setShowDisabledDepartment(boolean showDisabledDepartment) {
-        if(this.showDisabledDepartment != showDisabledDepartment){
-            for (DepartmentTreeItem departmentTreeItem : getAllChild(null)) {
-                if(!departmentTreeItem.isActive()){
-                    if(showDisabledDepartment){
-                        departmentTreeItem.setVisible(true);
-                    } else {
-                        departmentTreeItem.setVisible(false);
-                        departmentTreeItem.setValue(false, true);
-                    }
+        for (DepartmentTreeItem departmentTreeItem : getAllChild(null)) {
+            if (!departmentTreeItem.isActive()) {
+                if (showDisabledDepartment) {
+                    departmentTreeItem.setVisible(true);
+                } else {
+                    departmentTreeItem.setVisible(false);
+                    departmentTreeItem.setValue(false, true);
                 }
             }
-            this.showDisabledDepartment = showDisabledDepartment;
         }
+        this.showDisabledDepartment = showDisabledDepartment;
     }
 
     /**
