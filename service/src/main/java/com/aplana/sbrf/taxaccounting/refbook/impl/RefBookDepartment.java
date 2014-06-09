@@ -517,7 +517,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                     DepartmentReportPeriod drp = new DepartmentReportPeriod();
                     drp.setReportPeriod(periodService.getReportPeriod(periodIs.intValue()));
                     drp.setDepartmentId(depId);
-                    drp.setActive(true);
+                    drp.setActive(periodService.isPeriodOpen(terrBankId, periodIs));
                     drp.setCorrectPeriod(null);
                     periodService.saveOrUpdate(drp, null, logger.getEntries());
                 }
@@ -533,7 +533,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                 DepartmentReportPeriod drp = new DepartmentReportPeriod();
                 drp.setReportPeriod(periodService.getReportPeriod(periodIs.intValue()));
                 drp.setDepartmentId(depId);
-                drp.setActive(true);
+                drp.setActive(periodService.isPeriodOpen(0, periodIs));
                 drp.setCorrectPeriod(null);
                 periodService.saveOrUpdate(
                         drp,
