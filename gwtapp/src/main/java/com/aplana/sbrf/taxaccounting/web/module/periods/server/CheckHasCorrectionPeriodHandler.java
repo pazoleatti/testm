@@ -30,7 +30,7 @@ public class CheckHasCorrectionPeriodHandler extends AbstractActionHandler<Check
         List<DepartmentReportPeriod> drp = periodService.listByDepartmentIdAndTaxType((long)action.getDepartmentId(), action.getTaxType());
         result.setHasCorrectionPeriods(false);
         for (DepartmentReportPeriod rp : drp) {
-            if ((rp.getReportPeriod().getId() == action.getReportPeriodId())
+            if ((rp.getReportPeriod().getDictTaxPeriodId() == action.getReportPeriodId())
                     &&(rp.getCorrectPeriod() != null)) {
                 result.setHasCorrectionPeriods(true);
             }
