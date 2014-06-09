@@ -60,11 +60,11 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
             departmentFTSource.setPerformerId(SqlUtils.getInteger(rs, "src_performer_dep_id"));
 
             DepartmentFormType departmentFTDest = new DepartmentFormType();
-            departmentFTSource.setId(SqlUtils.getLong(rs, "tgt_dft_id"));
-            departmentFTSource.setFormTypeId(SqlUtils.getInteger(rs, "tgt_ft_id"));
-            departmentFTSource.setDepartmentId(SqlUtils.getInteger(rs, "tgt_department_id"));
-            departmentFTSource.setKind(FormDataKind.fromId(SqlUtils.getInteger(rs, "tgt_kind")));
-            departmentFTSource.setPerformerId(SqlUtils.getInteger(rs, "tgt_performer_dep_id"));
+            departmentFTDest.setId(SqlUtils.getLong(rs, "tgt_dft_id"));
+            departmentFTDest.setFormTypeId(SqlUtils.getInteger(rs, "tgt_ft_id"));
+            departmentFTDest.setDepartmentId(SqlUtils.getInteger(rs, "tgt_department_id"));
+            departmentFTDest.setKind(FormDataKind.fromId(SqlUtils.getInteger(rs, "tgt_kind")));
+            departmentFTDest.setPerformerId(SqlUtils.getInteger(rs, "tgt_performer_dep_id"));
 
             return new Pair<DepartmentFormType, DepartmentFormType>(departmentFTSource, departmentFTDest);
         }
