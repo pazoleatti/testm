@@ -217,7 +217,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         if (logger.containsLevel(LogLevel.ERROR))
             return new ArrayList<Long>(0);
         int depId = refBookDepartmentDao.create(refBookValueMap, attributes);
-        int terrBankId = departmentService.getParentTB(depId).getId();
+        int terrBankId = departmentService.getParentTB(depId) != null ? departmentService.getParentTB(depId).getId() : 0;
         createPeriods(depId, fromCode(refBookValueMap.get(DEPARTMENT_TYPE_ATTRIBUTE).getNumberValue().intValue()),
                 terrBankId, logger);
 
@@ -236,7 +236,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         final Department dep = departmentService.getDepartment(uniqueRecordId.intValue());
         Department parentDep = records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue() != null && records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue().intValue() != 0?
                 departmentService.getParentTB(records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue().intValue())
-                : null;
+                : departmentService.getBankDepartment();
         DepartmentType oldType = dep.getType();
         DepartmentType newType = fromCode(records.get(DEPARTMENT_TYPE_ATTRIBUTE).getNumberValue().intValue());
         boolean isChangeType = oldType != newType;
