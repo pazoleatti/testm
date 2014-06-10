@@ -386,15 +386,19 @@ public class PeriodServiceImpl implements PeriodService{
 		else {
 			if (existForDepartment((int) departmentId, reportPeriods.get(0).getId())) {
 				DepartmentReportPeriod drp = departmentReportPeriodDao.get(reportPeriods.get(0).getId(), departmentId);
-				if (drp.isBalance() == balancePeriod) {
-					if (drp.isActive()) {
-						return PeriodStatusBeforeOpen.OPEN;
-					} else {
-						return PeriodStatusBeforeOpen.CLOSE;
-					}
-				} else {
-					return PeriodStatusBeforeOpen.BALANCE_STATUS_CHANGED;
-				}
+                if (drp != null) {
+                    if (drp.isBalance() == balancePeriod) {
+                        if (drp.isActive()) {
+                            return PeriodStatusBeforeOpen.OPEN;
+                        } else {
+                            return PeriodStatusBeforeOpen.CLOSE;
+                        }
+                    } else {
+                        return PeriodStatusBeforeOpen.BALANCE_STATUS_CHANGED;
+                    }
+                } else if (!departmentReportPeriodDao.getDepartmentCorrectionPeriods(departmentId, reportPeriods.get(0).getId()).isEmpty()){
+                    return PeriodStatusBeforeOpen.CORRECTION_PERIOD_ALREADY_EXIST;
+                }
 			}
 			return PeriodStatusBeforeOpen.NOT_EXIST;
 		}
