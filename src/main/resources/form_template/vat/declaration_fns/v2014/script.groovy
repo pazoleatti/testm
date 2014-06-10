@@ -148,6 +148,9 @@ void generateXML() {
     def departmentId = declarationData.departmentId
     def reportPeriodId = declarationData.reportPeriodId
 
+    /** Отчётный период. */
+    def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+
     // Код формы отчетности по КНД
     def String KND = '1151001'
 
@@ -186,6 +189,16 @@ void generateXML() {
     /*
      * Расчет значений декларации.
      */
+
+    /*
+     * Расчет значений для текущей декларации.
+     */
+
+    def period = 0
+    if (reportPeriod.order != null) {
+        def values = [21, 31, 33, 34]
+        period = values[reportPeriod.order - 1]
+    }
 
     /** ПрПодп. */
     def prPodp = (signatoryId != null ? signatoryId : 1)
@@ -294,6 +307,8 @@ void generateXML() {
                 КНД: KND,
                 // Дата формирования документа
                 ДатаДок: (docDate != null ? docDate : new Date()).format("dd.MM.yyyy"),
+                // Код налогового (отчетного) периода
+                Период : period,
                 // Отчетный год
                 ОтчетГод: reportPeriodService.get(reportPeriodId).taxPeriod.year,
                 // Код налогового органа
