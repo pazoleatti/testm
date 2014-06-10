@@ -14,35 +14,23 @@ import java.util.List;
  */
 public class TAUsersReportBuilderTest {
 
-    private List<TAUserFullWithDepartmentPath> taUserList = new ArrayList<TAUserFullWithDepartmentPath>();
+    private List<TAUserView> taUserList = new ArrayList<TAUserView>();
 
     @Before
     public void setUp() {
-	    TAUserFullWithDepartmentPath  userFull = new TAUserFullWithDepartmentPath();
-        TAUser user = new TAUser();
-        TARole role = new TARole();
-        TARole role1 = new TARole();
-        role.setAlias("ROLE_CONTROL");
-        role1.setAlias("ROLE_CONTROL_UNP");
-        List<TARole> roleList = new ArrayList<TARole>();
-        roleList.add(role);
-        roleList.add(role1);
+        TAUserView userView = new TAUserView();
 
-        user.setActive(false);
-        user.setEmail("@sd");
-        user.setDepartmentId(1);
-        user.setLogin("controlBank");
-        user.setRoles(roleList);
-        user.setName("Контролер");
-        userFull.setUser(user);
+        userView.setName("Контролер");
+        userView.setActive(false);
+        userView.setEmail("@sd");
+        userView.setDepId(1);
+        userView.setLogin("controlBank");
+        userView.setRoles("Контролёр, Контролёр УНП");
+        userView.setDepName("Департамент");
 
-        Department dep = new Department();
-        dep.setName("Департамент");
-        userFull.setDepartment(dep);
-
-        taUserList.add(userFull);
-        taUserList.add(userFull);
-        taUserList.add(userFull);
+        taUserList.add(userView);
+        taUserList.add(userView);
+        taUserList.add(userView);
 
     }
 

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.aplana.sbrf.taxaccounting.model.TaxType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -45,9 +44,8 @@ public class GetDepartmentsHandler extends AbstractActionHandler<GetDepartmentsA
 		} else if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)) {
 
 			Set<Integer> availableDepartments = new HashSet<Integer>();
-            for (Department dep : departmentService.getBADepartments(userInfo.getUser())) {
-                availableDepartments.add(dep.getId());
-            }
+            availableDepartments.addAll(departmentService.getBADepartmentIds(userInfo.getUser()));
+
 			result.setDepartments(new ArrayList<Department>(departmentService
 					.getRequiredForTreeDepartments(availableDepartments)
 					.values()));

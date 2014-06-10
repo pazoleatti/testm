@@ -13,7 +13,7 @@ public interface DepartmentDao {
 	 * Получить подразделение по коду
 	 * @param id идентфикатор подразделения
 	 * @return объект подразделения пользователя
-	 * @throws com.aplana.sbrf.taxaccounting.dao.api.exception.exception.DaoException если подразделение с таким идентификатором не существует
+	 * @throws com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException если подразделение с таким идентификатором не существует
 	 */
 	Department getDepartment(int id);
 
@@ -64,6 +64,12 @@ public interface DepartmentDao {
      * @return список всех подразделений
      */
     List<Department> listDepartments();
+
+    /**
+     * Получить список идентификаторов всех подразделений
+     * @return список идентификаторов всех подразделений
+     */
+    List<Integer> listDepartmentIds();
         
     /**
      * Получение обособленного подразделения по значению 
@@ -85,6 +91,13 @@ public interface DepartmentDao {
     List<Department> getDepartmentsByType(int type);
 
     /**
+     * Получение идентификаторов подразделений по типу
+     * @param type тип подразделения
+     * @return список идентификаторов подразделений
+     */
+    List<Integer> getDepartmentIdsByType(int type);
+
+    /**
      * Получение ТБ для подразделения (тип = 2)
      * @param departmentId Подразделение пользователя
      * @return ТБ
@@ -97,6 +110,13 @@ public interface DepartmentDao {
      * @return Список подразделений
      */
     List<Department> getDepartmenTBChildren(int departmentId);
+
+    /**
+     * Получение ТБ для подразделения (тип = 2) + все дочерние подразделения
+     * @param departmentId Подразделение пользователя
+     * @return Список идентификаторов подразделений
+     */
+    List<Integer> getDepartmenTBChildrenId(int departmentId);
 
     /**
      * Получение списка подразделений, необходимых для построения неразрывного дерева подразделений

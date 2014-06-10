@@ -53,14 +53,10 @@ public class CanRemovePeriodHandler extends AbstractActionHandler<CanRemovePerio
 	public CanRemovePeriodResult execute(CanRemovePeriodAction action, ExecutionContext executionContext) throws ActionException {
 		CanRemovePeriodResult result = new CanRemovePeriodResult();
         TAUserInfo user = securityService.currentUserInfo();
-        List<Department> departments = departmentService.getBADepartments(user.getUser());
-        List<Integer> departmentIds = new ArrayList<Integer>();
-        List<LogEntry> logs = new ArrayList<LogEntry>();
-        for (Department dep : departments) {
-            departmentIds.add(dep.getId());
-        }
+        List<Integer> departmentIds = departmentService.getBADepartmentIds(user.getUser());
         String depFilter = buildFilter(departmentIds, action.getReportPeriodId());
 
+        List<LogEntry> logs = new ArrayList<LogEntry>();
         //Check INCOME_101
 		RefBookDataProvider dataProvider = rbFactory.getDataProvider(REF_BOOK_101);
 

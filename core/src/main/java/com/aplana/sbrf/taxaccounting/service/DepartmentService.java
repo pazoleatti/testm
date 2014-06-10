@@ -38,6 +38,13 @@ public interface DepartmentService {
     List<Department> listAll();
 
     /**
+     * Получить список идентификаторов всех департамент
+     *
+     * @return список идентификаторов всех департаментов
+     */
+    List<Integer> listIdAll();
+
+    /**
      * Получить дочерние подразделения (не полная инициализация)
      *
      * @param parentDepartmentId
@@ -94,15 +101,34 @@ public interface DepartmentService {
     List<Department> getBADepartments(TAUser tAUser);
 
     /**
+     * Выборка идентификаторов подразделений для бизнес-администрирования
+     *
+     * @param tAUser пользователь
+     * @return список идентификаторов
+     */
+    List<Integer> getBADepartmentIds(TAUser tAUser);
+
+    /**
      * Получение ТБ
      * http://conf.aplana.com/pages/viewpage.action?pageId=11380723
      * Для роли "Контролер УНП" может быть несколько подразделений
      * Для роли "Контролер НС" только одно подразделение
      *
      * @param tAUser пользователь
-     * @return
+     * @return список подразделений
      */
     List<Department> getTBDepartments(TAUser tAUser);
+
+    /**
+     * Получение идентификаторов ТБ
+     * http://conf.aplana.com/pages/viewpage.action?pageId=11380723
+     * Для роли "Контролер УНП" может быть несколько подразделений
+     * Для роли "Контролер НС" только одно подразделение
+     *
+     * @param tAUser пользователь
+     * @return список идентификаторов подразделений
+     */
+    List<Integer> getTBDepartmentIds(TAUser tAUser);
 
     /**
      * Получение Банка
@@ -161,7 +187,7 @@ public interface DepartmentService {
 
     /**
      * Список подразделений передаваемых в СУДИР
-     * @return подразделения с типом {@link DepartmentType.MANAGEMENT} и {@link DepartmentType.MANAGEMENT}
+     * @return подразделения с типом {@link com.aplana.sbrf.taxaccounting.model.DepartmentType#MANAGEMENT}
      */
     List<Department> getDepartmentForSudir();
 

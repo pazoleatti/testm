@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.members.client;
 
 import com.aplana.sbrf.taxaccounting.model.MembersFilterData;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.TAUserFullWithDepartmentPath;
+import com.aplana.sbrf.taxaccounting.model.TAUserView;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
@@ -60,7 +60,7 @@ public class MembersPresenter extends Presenter<MembersPresenter.MyView, Members
     }
 
     public interface MyView extends View, HasUiHandlers<MembersUiHandlers> {
-        void setTaUserFullCellTable(PagingResult<TAUserFullWithDepartmentPath> userFullList, int startIndex);
+        void setTaUserFullCellTable(PagingResult<TAUserView> userFullList, int startIndex);
 	    MembersFilterData getFilter();
 	    void updateData();
 	    void updateData(int pageNumber);

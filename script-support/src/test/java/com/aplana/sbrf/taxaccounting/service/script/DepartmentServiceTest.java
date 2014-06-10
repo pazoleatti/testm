@@ -44,6 +44,11 @@ public class DepartmentServiceTest {
         temp.add(validTB);
         when(departmentDao.listDepartments()).thenReturn(temp);
 
+        List<Integer> tempIds = new ArrayList<Integer>();
+        tempIds.add(valid.getId());
+        tempIds.add(validTB.getId());
+        when(departmentDao.listDepartmentIds()).thenReturn(tempIds);
+
         when(departmentDao.getDepartmentByName("Банк1")).thenReturn(new Department());
         when(departmentDao.getDepartmentByName("")).thenReturn(null);
 
