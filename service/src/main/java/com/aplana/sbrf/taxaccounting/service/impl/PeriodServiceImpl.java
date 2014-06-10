@@ -122,9 +122,8 @@ public class PeriodServiceImpl implements PeriodService{
 			newReportPeriod.setDictTaxPeriodId(dictionaryTaxPeriodId);
 
 			String name = record.get("NAME").getStringValue();
-			Number ord = record.get("ORD").getNumberValue();
 
-			if (name == null || name.isEmpty() || ord == null
+			if (name == null || name.isEmpty()
 					|| record.get("START_DATE").getDateValue() == null
 					|| record.get("END_DATE").getDateValue() == null
 					|| record.get("CALENDAR_START_DATE").getDateValue() == null) {
@@ -156,7 +155,6 @@ public class PeriodServiceImpl implements PeriodService{
             }
 
 			newReportPeriod.setName(name);
-			newReportPeriod.setOrder(ord.intValue());
 			newReportPeriod.setStartDate(start.getTime());
 			newReportPeriod.setEndDate(end.getTime());
 			newReportPeriod.setCalendarStartDate(calendarDate.getTime());

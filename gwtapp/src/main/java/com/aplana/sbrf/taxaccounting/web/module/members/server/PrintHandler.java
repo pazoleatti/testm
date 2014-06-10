@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.members.server;
 
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.TAUserFull;
-import com.aplana.sbrf.taxaccounting.model.TAUserFullWithDepartmentPath;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
@@ -41,15 +38,10 @@ public class PrintHandler  extends AbstractActionHandler<PrintAction, PrintResul
 
 	@Override
 	public PrintResult execute(PrintAction printAction, ExecutionContext executionContext) throws ActionException {
-		PagingResult<TAUserFullWithDepartmentPath> page = new PagingResult<TAUserFullWithDepartmentPath>();
-		for (TAUserFull user : taUserService.getByFilter(printAction.getMembersFilterData())) {
-			TAUserFullWithDepartmentPath fullUser = new TAUserFullWithDepartmentPath();
-			fullUser.setDepartment(user.getDepartment());
-			fullUser.setUser(user.getUser());
-			fullUser.setFullDepartmentPath(departmentService.getParentsHierarchyShortNames(user.getDepartment().getId()));
-			page.add(fullUser);
-		}
-		String filePath = printingService.generateExcelUsers(page);
+
+        PagingResult<TAUserView> usersByFilter = taUserService.getUsersByFilter(printAction.getMembersFilterData());
+
+		String filePath = printingService.generateExcelUsers(usersByFilter);
 		try {
 			InputStream fileInputStream = new FileInputStream(filePath);
 

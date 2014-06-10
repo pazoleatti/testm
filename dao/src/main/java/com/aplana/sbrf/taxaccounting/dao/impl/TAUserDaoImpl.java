@@ -3,9 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.model.MembersFilterData;
-import com.aplana.sbrf.taxaccounting.model.TARole;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.cache.annotation.CacheEvict;
@@ -55,6 +53,23 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 			return result;
 		}
 	};
+
+    private static final RowMapper<TAUserView> TA_USER_VIEW_MAPPER = new RowMapper<TAUserView>() {
+
+        @Override
+        public TAUserView mapRow(ResultSet rs, int index) throws SQLException {
+            TAUserView result = new TAUserView();
+            result.setId(SqlUtils.getInteger(rs,"id"));
+            result.setName(rs.getString("name"));
+            result.setActive(SqlUtils.getInteger(rs, "active") == 1);
+            result.setDepId(SqlUtils.getInteger(rs, "dep_id"));
+            result.setLogin(rs.getString("login"));
+            result.setEmail(rs.getString("email"));
+            result.setRoles(rs.getString("role_names"));
+            result.setDepName(rs.getString("path"));
+            return result;
+        }
+    };
 
 	@Override
 	@Cacheable(value = "User", key = "#userId")
@@ -307,7 +322,99 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 		}
 	}
 
-	@Override
+    @Override
+    public PagingResult<TAUserView> getUsersByFilter(MembersFilterData filter) {
+        StringBuilder sqlForCount = new StringBuilder("select count(*) from (");
+        StringBuilder sql = new StringBuilder("select * from ( select rownum r, users.* from (\n");
+        sql.append(sqlUserByFilter());
+
+        if (filter == null) {
+            sql.append(" order by name ) users)");
+            sqlForCount.append(sql.toString()).append(")");
+        } else {
+            if (filter.getActive() != null) {
+                sql.append(" and is_active = ").append(filter.getActive() ? "1" : "0");
+            }
+            if (filter.getUserName() != null && !filter.getUserName().isEmpty()) {
+                sql.append(" and lower(name) like " + "\'%").append(filter.getUserName().toLowerCase()).append("%\'");
+            }
+            if (filter.getDepartmentIds() != null && !filter.getDepartmentIds().isEmpty()) {
+                sql.append(" and ").append(SqlUtils.transformToSqlInStatement("department_id", new ArrayList<Integer>(filter.getDepartmentIds())));
+            }
+            if (filter.getRoleIds() != null && !filter.getRoleIds().isEmpty()) {
+                sql.append(" and exists (select 1 from sec_user_role ur where us.id = ur.user_id and ").append(SqlUtils.transformToSqlInStatement("ur.role_id", filter.getRoleIds())).append(")");
+            }
+
+            sqlForCount.append(sql.toString()).append(") users ))");
+            sql.append(" order by ");
+            if (filter.getSortField() != null) {
+                switch (filter.getSortField()) {
+                    case LOGIN:
+                        sql.append("login");
+                        break;
+                    case MAIL:
+                        sql.append("email");
+                        break;
+                    case ACTIVE:
+                        sql.append("active");
+                        break;
+                    case DEPARTMENT:
+                        sql.append("path");
+                        break;
+                    case ROLE:
+                        sql.append("role_names");
+                        break;
+                    case NAME:
+                    default:
+                        sql.append("name");
+                        break;
+                }
+            } else {
+                sql.append("name");
+            }
+
+            sql.append(filter.isAsc() ? " asc" : " desc");
+            sql.append(") users) ");
+            Integer startIndex = filter.getStartIndex();
+            Integer count = filter.getCountOfRecords();
+            if (startIndex != null && count != null) {
+                sql.append("\nwhere r between ").append(startIndex + 1).append(" and ").append(startIndex + 1 + count);
+            }
+        }
+        try {
+            PagingResult<TAUserView> pagingResult = new PagingResult<TAUserView>(getJdbcTemplate().query(sql.toString(), TA_USER_VIEW_MAPPER));
+            pagingResult.setTotalCount(filter == null ? pagingResult.size() : getJdbcTemplate().queryForInt(sqlForCount.toString()));
+            return pagingResult;
+        } catch (DataAccessException e) {
+            throw new DaoException("Ошибка при получении списка пользователей. " + e.getLocalizedMessage());
+        }
+    }
+
+    private String sqlUserByFilter(){
+        return "with \n" +
+                "cov_rls as (\n" +
+                    "select ur.user_id user_id, sr.name\n" +
+                    "from  sec_user_role ur\n" +
+                    "join sec_role sr on ur.role_id=sr.id \n" +
+                    "order by user_id\n" +
+                "),\n" +
+                "arg_rls as (\n" +
+                    "select cov_rls.user_id, listagg(cov_rls.name, ', ') within group(order by cov_rls.name) as role_concat\n" +
+                    "from cov_rls\n" +
+                    "group by cov_rls.user_id\n" +
+                "),\n" +
+                "deps as (\n" +
+                    "select dep.id as dep_id, ltrim(sys_connect_by_path(dep.shortname, '/'), '/') as path\n" +
+                    "from department dep\n" +
+                    "start with dep.parent_id in (select id from department where parent_id is null)\n" +
+                    "connect by prior dep.id = dep.parent_id\n" +
+                ")\n" +
+                "select us.id, us.name, us.login, us.email, us.is_active as active, roless.role_concat as role_names, us.department_id as dep_id, deps.path\n" +
+                "from sec_user us, arg_rls roless, deps deps\n" +
+                "where us.department_id=deps.dep_id and roless.user_id=us.id";
+    }
+
+    @Override
 	public int count(MembersFilterData filter) {
 		if (filter == null) {
 			return 0;

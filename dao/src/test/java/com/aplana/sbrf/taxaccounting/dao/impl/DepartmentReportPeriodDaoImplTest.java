@@ -55,7 +55,6 @@ public class DepartmentReportPeriodDaoImplTest {
 
 		reportPeriod1 = new ReportPeriod();
 		reportPeriod1.setName("MyTestName1");
-		reportPeriod1.setOrder(9);
 		reportPeriod1.setTaxPeriod(taxPeriod);
 		reportPeriod1.setDictTaxPeriodId(21);
 		reportPeriod1.setStartDate(new Date());
@@ -65,7 +64,6 @@ public class DepartmentReportPeriodDaoImplTest {
 
 		reportPeriod2 = new ReportPeriod();
 		reportPeriod2.setName("MyTestName1");
-		reportPeriod2.setOrder(10);
 		reportPeriod2.setTaxPeriod(taxPeriod);
 		reportPeriod2.setDictTaxPeriodId(22);
 		reportPeriod2.setStartDate(new Date());
@@ -102,8 +100,6 @@ public class DepartmentReportPeriodDaoImplTest {
 		List<DepartmentReportPeriod> reportPeriodList = departmentReportPeriodDao
 				.getByDepartment(1l);
 		assertEquals(2, reportPeriodList.size());
-		assertEquals(9, reportPeriodList.get(0).getReportPeriod().getOrder());
-		assertEquals(10, reportPeriodList.get(1).getReportPeriod().getOrder());
 
 		reportPeriodList = departmentReportPeriodDao.getByDepartment(-1l);
 		assertEquals(0, reportPeriodList.size());
@@ -125,7 +121,6 @@ public class DepartmentReportPeriodDaoImplTest {
 		assertEquals(Long.valueOf(1l), departmentReportPeriod.getDepartmentId());
 		assertEquals(true, departmentReportPeriod.isActive());
 		assertEquals(true, departmentReportPeriod.isBalance());
-		assertEquals(9, departmentReportPeriod.getReportPeriod().getOrder());
         assertEquals(Long.valueOf(1000), departmentReportPeriod.getId());
 	
 	}
@@ -146,8 +141,6 @@ public class DepartmentReportPeriodDaoImplTest {
 		assertEquals(Long.valueOf(1l), departmentReportPeriod.getDepartmentId());
 		assertEquals(false, departmentReportPeriod.isActive());
 		assertEquals(false, departmentReportPeriod.isBalance());
-		assertEquals(9, departmentReportPeriod.getReportPeriod().getOrder());
-	
 	}
 
 	@Test
@@ -168,7 +161,6 @@ public class DepartmentReportPeriodDaoImplTest {
 		assertEquals(Long.valueOf(1l), departmentReportPeriod.getDepartmentId());
 		assertEquals(false, departmentReportPeriod.isActive());
 		assertEquals(true, departmentReportPeriod.isBalance());
-		assertEquals(9, departmentReportPeriod.getReportPeriod().getOrder());
 
 		departmentReportPeriodDao.updateActive(departmentReportPeriod
 				.getReportPeriod().getId(), 1l, null, true);

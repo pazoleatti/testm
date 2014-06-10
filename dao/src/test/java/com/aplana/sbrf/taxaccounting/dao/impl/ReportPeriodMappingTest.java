@@ -39,7 +39,6 @@ public class ReportPeriodMappingTest {
         assertEquals(Integer.valueOf(4), reportPeriod.getId());
         assertEquals("Income report period 1", reportPeriod.getName());
         assertEquals(Integer.valueOf(31), reportPeriod.getTaxPeriod().getId());
-        assertEquals(1, reportPeriod.getOrder());
         assertEquals(21, reportPeriod.getDictTaxPeriodId());
 
     }

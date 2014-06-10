@@ -84,6 +84,18 @@ public class DepartmentDaoTest {
 
     @Test
     public void getDepartmentsByType() {
+        List<Integer> result = departmentDao.getDepartmentIdsByType(DepartmentType.ROOT_BANK.getCode());
+        Assert.assertEquals(1, result.size());
+        result = departmentDao.getDepartmentIdsByType(DepartmentType.TERR_BANK.getCode());
+        Assert.assertEquals(2, result.size());
+        result = departmentDao.getDepartmentIdsByType(DepartmentType.CSKO_PCP.getCode());
+        Assert.assertEquals(3, result.size());
+        result = departmentDao.getDepartmentIdsByType(DepartmentType.MANAGEMENT.getCode());
+        Assert.assertEquals(0, result.size());
+    }
+
+    @Test
+    public void getDepartmentIdsByType() {
         List<Department> result = departmentDao.getDepartmentsByType(DepartmentType.ROOT_BANK.getCode());
         Assert.assertEquals(1, result.size());
         result = departmentDao.getDepartmentsByType(DepartmentType.TERR_BANK.getCode());

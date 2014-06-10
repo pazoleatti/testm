@@ -153,6 +153,7 @@ public class TAUserServiceImpl implements TAUserService {
     }
 
 	@Override
+    @Deprecated
 	public PagingResult<TAUserFull> getByFilter(MembersFilterData filter) {
 		PagingResult<TAUserFull> taUserFullList = new PagingResult<TAUserFull>();
 		for(Integer userId : userDao.getByFilter(filter)) {
@@ -167,7 +168,12 @@ public class TAUserServiceImpl implements TAUserService {
 		return taUserFullList;
 	}
 
-	@Override
+    @Override
+    public PagingResult<TAUserView> getUsersByFilter(MembersFilterData filter) {
+        return userDao.getUsersByFilter(filter);
+    }
+
+    @Override
 	public List<Department> getDepartmentHierarchy(int department) {
 		return getHierarchy(departmentDao.getDepartment(department));
 	}

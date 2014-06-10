@@ -51,6 +51,7 @@ alter table ref_book_attribute add constraint ref_book_attr_fk_reference_id fore
 alter table ref_book_attribute add constraint ref_book_attr_fk_attribute_id foreign key (attribute_id) references ref_book_attribute(id);
 alter table ref_book_attribute add constraint ref_book_attr_chk_is_unique check (is_unique in (0, 1));
 alter table ref_book_attribute add constraint ref_book_attribute_chk_format check (format in (0,1,2,3,4,5,6));
+alter table ref_book_attribute add constraint ref_book_attr_chk_read_only check (read_only in (0, 1));
 
 alter table ref_book add constraint ref_book_fk_region foreign key (region_attribute_id) references ref_book_attribute(id);
 

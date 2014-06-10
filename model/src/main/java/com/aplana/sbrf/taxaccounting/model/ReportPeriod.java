@@ -16,8 +16,6 @@ public class ReportPeriod implements Serializable {
 	private Integer id;
 	/** Текстовое обозначение отчетного периода */
 	private String name;
-	/** Порядок следования отчетного периода в рамках налового */
-	private int order;
 	/** Ссылка на налоговый период */
 	private TaxPeriod taxPeriod;
 	/** Дата начала отчетного периода */
@@ -53,22 +51,6 @@ public class ReportPeriod implements Serializable {
 	 */
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	/**
-	 * Получить порядковый номер отчётного периода в налоговом (начиная с 1)
-	 * @return порядковый номер отчётного периода в налоговом
-	 */
-	public int getOrder() {
-		return order;
-	}
-	
-	/**
-	 * Задать порядковый номер отчётного периода в налоговом (начиная с 1)
-	 * @param order порядковый номер отчётного периода в налоговом
-	 */
-	public void setOrder(int order) {
-		this.order = order;
 	}
 
 	public int getDictTaxPeriodId() {

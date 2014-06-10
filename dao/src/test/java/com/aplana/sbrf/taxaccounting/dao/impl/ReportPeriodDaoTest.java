@@ -57,7 +57,6 @@ public class ReportPeriodDaoTest {
 	public void listByTaxPeriodSuccessfulTest() {
 		ReportPeriod newReportPeriod = new ReportPeriod();
 		newReportPeriod.setName("MyTestName1");
-		newReportPeriod.setOrder(9);
 		newReportPeriod.setTaxPeriod(taxPeriod);
 		newReportPeriod.setDictTaxPeriodId(21);
 		newReportPeriod.setStartDate(new Date());
@@ -67,7 +66,6 @@ public class ReportPeriodDaoTest {
 		
 		newReportPeriod = new ReportPeriod();
 		newReportPeriod.setName("MyTestName2");
-		newReportPeriod.setOrder(10);
 		newReportPeriod.setTaxPeriod(taxPeriod);
 		newReportPeriod.setDictTaxPeriodId(22);
 		newReportPeriod.setStartDate(new Date());
@@ -77,8 +75,6 @@ public class ReportPeriodDaoTest {
 		
 		List<ReportPeriod> reportPeriodList = reportPeriodDao.listByTaxPeriod(taxPeriod.getId());
         assertEquals(2, reportPeriodList.size());
-        assertEquals(9, reportPeriodList.get(0).getOrder());
-        assertEquals(10, reportPeriodList.get(1).getOrder());
 
 		reportPeriodList = reportPeriodDao.listByTaxPeriod(-1);
 		assertEquals(0, reportPeriodList.size());
@@ -88,7 +84,6 @@ public class ReportPeriodDaoTest {
 	public void saveAndGetSuccessTest() {
 		ReportPeriod newReportPeriod = new ReportPeriod();
 		newReportPeriod.setName("MyTestName");
-		newReportPeriod.setOrder(9);
 		newReportPeriod.setTaxPeriod(taxPeriod);
 		newReportPeriod.setDictTaxPeriodId(21);
 		newReportPeriod.setStartDate(new Date());
@@ -100,7 +95,6 @@ public class ReportPeriodDaoTest {
 
 		assertEquals("MyTestName", reportPeriod.getName());
 		assertEquals(taxPeriod.getId(), Integer.valueOf(reportPeriod.getTaxPeriod().getId()));
-		assertEquals(9, reportPeriod.getOrder());
 		assertEquals(taxPeriod.getId(), Integer.valueOf(reportPeriod.getTaxPeriod().getId()));
 		assertEquals(21, reportPeriod.getDictTaxPeriodId());
 	}
