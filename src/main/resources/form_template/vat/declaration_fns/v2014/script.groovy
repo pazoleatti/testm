@@ -119,7 +119,8 @@ List<String> getErrorDepartment(record) {
     if (record.SIGNATORY_FIRSTNAME.stringValue == null || record.SIGNATORY_FIRSTNAME.stringValue.isEmpty()) {
         errorList.add("«Имя подписанта»")
     }
-    if (record.APPROVE_DOC_NAME.stringValue == null || record.APPROVE_DOC_NAME.stringValue.isEmpty()) {
+    //Если ПрПодп (не пусто или не 1) и значение атрибута на форме настроек подразделений не задано
+    if ((record.SIGNATORY_ID?.referenceValue != null && getRefBookValue(35, record.SIGNATORY_ID?.value)?.CODE?.value != 1) && (record.APPROVE_DOC_NAME.stringValue == null || record.APPROVE_DOC_NAME.stringValue.isEmpty())) {
         errorList.add("«Наименование документа, подтверждающего полномочия представителя»")
     }
     if (record.TAX_PLACE_TYPE_CODE?.referenceValue == null) {
