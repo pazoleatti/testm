@@ -16,6 +16,7 @@ public class RefBookColumn implements Serializable{
 	private HorizontalAlignment alignment;
     private Formats format;
     private boolean isHierarchical = false;
+    private boolean readOnly;
 
    /** Обязательность заполнения */
     private boolean required;
@@ -106,5 +107,13 @@ public class RefBookColumn implements Serializable{
 
     public void setHierarchical(boolean isHierarchical) {
         this.isHierarchical = isHierarchical;
+    }
+
+    public boolean isReadOnly() {
+        return readOnly;
+    }
+
+    public void setReadOnly(boolean readOnly) {
+        this.readOnly = readOnly;
     }
 }

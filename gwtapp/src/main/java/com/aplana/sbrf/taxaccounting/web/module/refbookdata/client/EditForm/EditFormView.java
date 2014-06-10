@@ -34,6 +34,8 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 	/** Маскимальная длина для строковых значений у справочников */
 	private static final int MAX_STRING_VALUE_LENGTH = 2000;
 
+    private static final String READ_ONLY_FIELD_STYLE = "read-only-field";
+
     interface Binder extends UiBinder<Widget, EditFormView> { }
 
 	Map<RefBookColumn, HasValue> widgets;
@@ -195,7 +197,9 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
                 widget.getElement().getStyle().setProperty("minWidth", "100px");
                 widget.getElement().getStyle().setProperty("maxWidth", "100%");
             }
-
+            if (col.isReadOnly()) {
+                widget.addStyleName(READ_ONLY_FIELD_STYLE);
+            }
             oneField.add(widget);
             oneField.setCellWidth(widget, "80%");
             oneField.setCellHorizontalAlignment(widget, HasHorizontalAlignment.ALIGN_LEFT);
@@ -385,12 +389,13 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
         if (widgets != null){
             for (HasValue entry : widgets.values()) {
                 if (entry instanceof HasEnabled) {
-                    ((HasEnabled) entry).setEnabled(enabled);
+                    boolean readonly = ((UIObject) entry).getStyleName().contains(READ_ONLY_FIELD_STYLE);
+                    ((HasEnabled) entry).setEnabled(readonly ? false : enabled);
                 }
             }
         }
 
-	}
+    }
 
     @Override
     public void fillVersionData(RefBookRecordVersionData versionData, Long refBookId, Long refBookRecordId) {
@@ -475,5 +480,5 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 		if (getUiHandlers() != null) {
 			getUiHandlers().onCancelClicked();
 		}
-	}
+    }
 }
