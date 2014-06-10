@@ -60,6 +60,7 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 
 	@Override
 	public void clearInput(){
+        textLengthLabel.setText("");
 		data.setText("");
 	}
 
