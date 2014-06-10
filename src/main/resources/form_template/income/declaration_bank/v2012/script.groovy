@@ -35,6 +35,7 @@ switch (formDataEvent) {
 // Кэш провайдеров
 @Field
 def providerCache = [:]
+
 // Кэш значений справочника
 @Field
 def refBookCache = [:]
