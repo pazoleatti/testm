@@ -371,7 +371,11 @@ void generateXML() {
                     ) {
                         СведПродЮЛ(
                                 НаимПрод: row.naimProd,
-                                ИННЮЛПрод: row.innULProd,
+                                {
+                                    if (row.innULProd) {
+                                        ИННЮЛПрод: row.innULProd
+                                    }
+                                }
                         )
                     }
                 }
@@ -538,7 +542,7 @@ def getSection2Rows(def dataRowsMap) {
         newRow.sumIschisl = round(row.sum2)
         newRow.codeOper = '1011712'
         newRow.naimProd = row.contragent
-        newRow.innULProd = empty
+        //newRow.innULProd = empty
         rows.add(newRow)
     }
     // форма 724.7
