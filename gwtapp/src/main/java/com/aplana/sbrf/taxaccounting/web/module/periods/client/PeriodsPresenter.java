@@ -283,6 +283,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 	private void checkAndRemovePeriod() {
 		CanRemovePeriodAction action = new CanRemovePeriodAction();
 		action.setReportPeriodId((int)getView().getSelectedRow().getReportPeriodId());
+        action.setTaxType(taxType);
 		dispatcher.execute(action, CallbackUtils
 				.defaultCallback(new AbstractCallback<CanRemovePeriodResult>() {
 					@Override

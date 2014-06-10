@@ -216,8 +216,8 @@ public class PeriodServiceImpl implements PeriodService{
 			ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
 			int year = period.getReportPeriod().getTaxPeriod().getYear();
 			logs.add(new LogEntry(LogLevel.INFO, "Период" + " \"" + reportPeriod.getName() + "\" " +
-					"за " + year + " год " +
-					"закрыт для подразделения \"" +
+					year + " " +
+					"закрыт для \"" +
 					departmentService.getDepartment((int) departmentId).getName() +
 					"\""));
 		}
@@ -243,12 +243,12 @@ public class PeriodServiceImpl implements PeriodService{
 		if (logs != null) {
 			int year = departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear();
             if (departmentReportPeriod.getCorrectPeriod() == null) {
-                logs.add(new LogEntry(LogLevel.INFO, "Для подразделения "
-                        + departmentService.getDepartment(departmentReportPeriod.getDepartmentId().intValue()).getName()
-                        + " для налога "
-                        + departmentReportPeriod.getReportPeriod().getTaxPeriod().getTaxType().getName()
-                        + " открыт период " + departmentReportPeriod.getReportPeriod().getName() + " "
-                        + departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear()));
+                logs.add(new LogEntry(LogLevel.INFO,
+                        "Период " + "\"" + departmentReportPeriod.getReportPeriod().getName() + "\" "
+                        + departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + " "
+                        + (departmentReportPeriod.isBalance() ? "\"ввод остатков\"" : "") + " "
+                        + " открыт для \"" + departmentService.getDepartment(departmentReportPeriod.getDepartmentId().intValue()).getName() + "\""
+                ));
             } else {
                 logs.add(new LogEntry(LogLevel.INFO, "Корректирующий период: " + departmentReportPeriod.getReportPeriod().getName()
                         + " " + year + " открыт для " + departmentService.getDepartment(departmentReportPeriod.getDepartmentId().intValue()).getName()));
@@ -386,15 +386,19 @@ public class PeriodServiceImpl implements PeriodService{
 		else {
 			if (existForDepartment((int) departmentId, reportPeriods.get(0).getId())) {
 				DepartmentReportPeriod drp = departmentReportPeriodDao.get(reportPeriods.get(0).getId(), departmentId);
-				if (drp.isBalance() == balancePeriod) {
-					if (drp.isActive()) {
-						return PeriodStatusBeforeOpen.OPEN;
-					} else {
-						return PeriodStatusBeforeOpen.CLOSE;
-					}
-				} else {
-					return PeriodStatusBeforeOpen.BALANCE_STATUS_CHANGED;
-				}
+                if (drp != null) {
+                    if (drp.isBalance() == balancePeriod) {
+                        if (drp.isActive()) {
+                            return PeriodStatusBeforeOpen.OPEN;
+                        } else {
+                            return PeriodStatusBeforeOpen.CLOSE;
+                        }
+                    } else {
+                        return PeriodStatusBeforeOpen.BALANCE_STATUS_CHANGED;
+                    }
+                } else if (!departmentReportPeriodDao.getDepartmentCorrectionPeriods(departmentId, reportPeriods.get(0).getId()).isEmpty()){
+                    return PeriodStatusBeforeOpen.CORRECTION_PERIOD_ALREADY_EXIST;
+                }
 			}
 			return PeriodStatusBeforeOpen.NOT_EXIST;
 		}
@@ -480,7 +484,9 @@ public class PeriodServiceImpl implements PeriodService{
 			ReportPeriod rp = reportPeriodDao.get(reportPeriodId);
             if (logs != null) {
                 logs.add(new LogEntry(LogLevel.INFO,
-                        rp.getName() + " " + rp.getTaxPeriod().getYear() + " удалён для " + departmentService.getDepartment(id).getName()));
+                        "Период \"" + rp.getName() + "\" " +
+                         rp.getTaxPeriod().getYear() + " удалён для " + "\"" + departmentService.getDepartment(id).getName() + "\""
+                ));
             }
 		}
 
@@ -771,13 +777,14 @@ public class PeriodServiceImpl implements PeriodService{
         RefBookDataProvider provider = rbFactory.getDataProvider(refBook.getId());
         Map<String, RefBookValue> dictTaxPeriod = provider.getRecordData((long) newDictTaxPeriodId);
 
+        String strBalance = isBalance ? " ввод остатков" : "";
         List<Department> deps = getAvailableDepartments(taxType, user.getUser(), Operation.EDIT, (int) departmentId);
         if ((rp.getDictTaxPeriodId() == newDictTaxPeriodId) && (rp.getTaxPeriod().getYear() == newYear)) { // Изменился только ввод остатков
 
             for (Department dep : deps) {
                 departmentReportPeriodDao.changeBalance(reportPeriodId, dep.getId(), isBalance);
                 logs.add(new LogEntry(LogLevel.INFO,
-                        "Период с " + rp.getName() + " " + rp.getTaxPeriod().getYear() + " был изменён на " + rp.getName() + " для " + dep.getName()));//<соответствующий календарный год>** + <"ввод остатков" *>**  для <Наименование подразделения>"));
+                        "Период с " + rp.getName() + " " + rp.getTaxPeriod().getYear() + " был изменён на " + rp.getName() + strBalance + " для " + dep.getName()));//<соответствующий календарный год>** + <"ввод остатков" *>**  для <Наименование подразделения>"));
             }
 
         } else {
@@ -789,7 +796,7 @@ public class PeriodServiceImpl implements PeriodService{
             open(newYear, newDictTaxPeriodId, taxType, user, departmentId, null, isBalance, null);
             for (Department dep : deps) {
                 logs.add(new LogEntry(LogLevel.INFO,
-                        "Период с " + rp.getName() + " " + rp.getTaxPeriod().getYear() + " был изменён на " + dictTaxPeriod.get("NAME").getStringValue() + " " + newYear + " для " + dep.getName()));//<соответствующий календарный год>** + <"ввод остатков" *>**  для <Наименование подразделения>"));
+                        "Период с " + rp.getName() + " " + rp.getTaxPeriod().getYear() + " был изменён на " + dictTaxPeriod.get("NAME").getStringValue() + " " + newYear + strBalance + " для " + dep.getName()));//<соответствующий календарный год>** + <"ввод остатков" *>**  для <Наименование подразделения>"));
             }
         }
     }

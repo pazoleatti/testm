@@ -293,6 +293,31 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     }
 
     @Override
+    public List<Integer> getAllChildrenIds(int parentDepartmentId) {
+        try {
+            return getJdbcTemplate().queryForList(
+                    "select id from department CONNECT BY prior id = parent_id start with id = ?",
+                    new Object[] { parentDepartmentId },
+                    Integer.class
+            );
+        } catch (DataAccessException e) {
+            throw new DaoException("Ошибка получения дочерних подразделений", e);
+        }
+    }
+
+    @Override
+    public List<Integer> getAllParentIds(int depId) {
+        try {
+            return getJdbcTemplate().queryForList(
+                    "SELECT id FROM department START WITH id = ? CONNECT BY  id = prior parent_id",
+                    new Object[]{depId},
+                    Integer.class);
+        } catch (DataAccessException e){
+            throw new DaoException("Ошибка получения родительских подразделений.", e);
+        }
+    }
+
+    @Override
     public List<Integer> getDepartmentsBySourceControl(int userDepartmentId, List<TaxType> taxTypes) {
         return getDepartmentsBySource(userDepartmentId, taxTypes, false);
     }

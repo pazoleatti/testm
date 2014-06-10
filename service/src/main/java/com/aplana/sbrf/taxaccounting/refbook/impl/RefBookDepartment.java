@@ -651,4 +651,20 @@ public class RefBookDepartment implements RefBookDataProvider {
         }
 
     }
+
+    private void checkCycle(Department department, Department parentDep, Logger logger){
+        List<Integer> childIds = departmentService.getAllChildrenIds(department.getId());
+        //>1 т.к. запрос всегда как минимум возвращает переданный id
+        boolean isChild = !childIds.isEmpty() && childIds.size() > 1 && childIds.contains(department.getId());
+        if (isChild)
+            logger.error("Подразделение %s не может быть указано как родительское, т.к. уже принадлежит к орг. структуре подразделения %s",
+                    department.getName(), parentDep.getName());
+
+        List<Integer> parentIds = departmentService.getAllParentIds(department.getId());
+        //>2 т.к. запрос всегда как минимум возвращает переданный id и подразделение Банк
+        boolean isParent = !parentIds.isEmpty() && parentIds.size() > 2 && parentIds.contains(department.getId());
+        if (isParent)
+            logger.error("Подразделение %s не может быть включено в орг. структуру подразделения %s, т.к. уже содержит его в своей орг. структуре!",
+                    parentDep.getName(), department.getName());
+    }
 }

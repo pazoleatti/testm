@@ -94,10 +94,17 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements
 	@Transactional(readOnly=false)
 	public void updateActive(int reportPeriodId, Long departmentId, Date correctionDate,
 			boolean active) {
-		getJdbcTemplate()
-				.update("update DEPARTMENT_REPORT_PERIOD set IS_ACTIVE=? where REPORT_PERIOD_ID=? and DEPARTMENT_ID=? " +
-                                "and (? is null or CORRECTION_DATE = ?)",
-						active ? 1 : 0, reportPeriodId, departmentId, correctionDate, correctionDate);
+        if (correctionDate == null) {
+            getJdbcTemplate()
+                    .update("update DEPARTMENT_REPORT_PERIOD set IS_ACTIVE=? where REPORT_PERIOD_ID=? and DEPARTMENT_ID=? " +
+                                    "and CORRECTION_DATE is null",
+                            active ? 1 : 0, reportPeriodId, departmentId);
+        } else {
+            getJdbcTemplate()
+                    .update("update DEPARTMENT_REPORT_PERIOD set IS_ACTIVE=? where REPORT_PERIOD_ID=? and DEPARTMENT_ID=? " +
+                                    "and CORRECTION_DATE = ?",
+                            active ? 1 : 0, reportPeriodId, departmentId, correctionDate);
+        }
 	}
 
     @Override

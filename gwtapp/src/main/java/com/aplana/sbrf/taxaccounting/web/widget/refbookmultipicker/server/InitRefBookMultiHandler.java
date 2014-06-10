@@ -33,17 +33,22 @@ public class InitRefBookMultiHandler extends AbstractActionHandler<InitRefBookMu
     public InitRefBookMultiResult execute(InitRefBookMultiAction action, ExecutionContext context) throws ActionException {
         InitRefBookMultiResult result = new InitRefBookMultiResult();
         Map<String, Integer> headers = new LinkedHashMap<String, Integer>();
+        //TODO aivanov заменить на мапу в будщем
+        List<Integer> unvisible = new LinkedList<Integer>();
 
         RefBook refBook = refBookFactory.getByAttribute(action.getRefBookAttrId());
+        int i = 0;
         for (RefBookAttribute refBookAttribute : refBook.getAttributes()) {
-            if (refBookAttribute.isVisible()) {
-                headers.put(refBookAttribute.getName(), refBookAttribute.getWidth());
+            if (!refBookAttribute.isVisible()) {
+                unvisible.add(i);
             }
+            headers.put(refBookAttribute.getName(), refBookAttribute.getWidth());
+            i++;
         }
 
         result.setRefBookId(refBook.getId());
         result.setHeaders(headers);
-
+        result.setUnVisibleColumns(unvisible);
         return result;
     }
 

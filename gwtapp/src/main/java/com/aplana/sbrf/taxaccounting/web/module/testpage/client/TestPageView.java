@@ -476,4 +476,16 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
         return "Событие: \"" + (eventValue != null ? formatDMY.format(eventValue) : null) + "\", значение: \"" + (elemValue != null ? formatDMY.format(elemValue) : null) + "\" .";
     }
 
+
+    @Override
+    public void setIds(int fpickerId, int hpickerId) {
+        if (fpickerId != -1) {
+            fPicker.setAttributeIdInt(fpickerId);
+        }
+        fPicker.setTitle(fPicker.getTitle() + "Выбор из справочника. Атрибут разименования=" +  fPicker.getAttributeId());
+        if (hpickerId != -1) {
+            hPicker.setAttributeIdInt(hpickerId);
+        }
+        hPicker.setTitle(hPicker.getTitle() + "Выбор из справочника. Атрибут разименования=" + hPicker.getAttributeId());
+    }
 }

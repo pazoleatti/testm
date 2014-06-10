@@ -73,7 +73,7 @@
         <checking>false</checking>
         <name>Вид услуг</name>
         <order>8</order>
-        <width>5</width>
+        <width>15</width>
         <maxLength>128</maxLength>
         <prevLength>0</prevLength>
     </columns>

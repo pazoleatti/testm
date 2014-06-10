@@ -87,6 +87,7 @@ public class EditDialogPresenter extends PresenterWidget<EditDialogPresenter.MyV
         CanRemovePeriodAction action = new CanRemovePeriodAction();
         action.setReportPeriodId(initData.getReportPeriodId().intValue());
         action.setOperationName("редактируемом");
+        action.setTaxType(taxType);
         dispatcher.execute(action, CallbackUtils
                         .defaultCallback(new AbstractCallback<CanRemovePeriodResult>() {
                             @Override
