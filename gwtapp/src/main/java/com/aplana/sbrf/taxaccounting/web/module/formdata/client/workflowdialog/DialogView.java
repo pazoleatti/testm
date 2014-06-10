@@ -35,6 +35,7 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 		super(eventBus);
 		widget = uiBinder.createAndBindUi(this);
 		widget.setAnimationEnabled(true);
+        textLengthLabel.setText("");
         data.addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
@@ -60,6 +61,7 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 
 	@Override
 	public void clearInput(){
+        textLengthLabel.setText("");
 		data.setText("");
 	}
 

@@ -5,6 +5,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiTemplate;
 import com.google.gwt.user.client.ui.Image;
@@ -30,6 +31,12 @@ public class ManualMenuView extends AbstractMenuView implements ManualMenuPresen
 
     public void setMenuItems(List<MenuItem> menuItems) {
         menu.clearItems();
+        com.google.gwt.user.client.ui.MenuItem aboutItem =
+                new com.google.gwt.user.client.ui.MenuItem(template.link("#!about", SafeHtmlUtils.EMPTY_SAFE_HTML));
+        Image mark = new Image("resources/img/exclamation_mark.png");
+        menu.addItem(aboutItem).getElement().getFirstChildElement().appendChild(mark.getElement())
+                .setAttribute("style", "border:0");
+        mark.setTitle("О программе");
         for (MenuItem item : menuItems) {
             MenuBar subMenuBar = new MenuBar(true);
             addSubMenu(item, subMenuBar);

@@ -9,5 +9,6 @@ public enum PeriodStatusBeforeOpen {
 	CLOSE, // Закрыт
 	NOT_EXIST, // Не существует
 	BALANCE_STATUS_CHANGED, // При создании был изменен статус ввода остатка
+    CORRECTION_PERIOD_ALREADY_EXIST, // Существуют корректирующие периоды
     INVALID
 }
