@@ -504,14 +504,12 @@ public class RefBookDepartment implements RefBookDataProvider {
         //Получаем записи у которых совпали значения уникальных атрибутов
         List<Pair<Long,String>> matchedRecords = refBookDepartmentDao.getMatchedRecordsByUniqueAttributes(recordId, attributes, records);
         if (matchedRecords != null && !matchedRecords.isEmpty()) {
-            StringBuilder attrNames = new StringBuilder();
             for (Pair<Long,String> pair : matchedRecords) {
-                attrNames.append("\"").append(pair.getSecond()).append("\", ");
+                logger.error(String.format("Нарушено требование к уникальности, уже существует подразделение %s с такими значениями атрибута \"%s\"!",
+                        departmentService.getDepartment(pair.getFirst().intValue()).getName(),
+                        pair.getSecond()));
             }
-            attrNames.delete(attrNames.length() - 2, attrNames.length());
-            throw new ServiceException(String.format("Нарушено требование к уникальности, уже существует подразделение %s с такими значениями атрибутов %s!",
-                    departmentService.getDepartment(matchedRecords.get(0).getFirst().intValue()).getName(),
-                    attrNames.toString()));
+            throw new ServiceLoggerException(ERROR_MESSAGE, logEntryService.save(logger.getEntries()));
         }
     }
 
@@ -535,7 +533,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                         DepartmentReportPeriod drp = new DepartmentReportPeriod();
                         drp.setReportPeriod(periodService.getReportPeriod(periodIs.intValue()));
                         drp.setDepartmentId(depId);
-                        drp.setActive(true);
+                        drp.setActive(periodService.isPeriodOpen(terrBankId, periodIs));
                         drp.setCorrectPeriod(null);
                         periodService.saveOrUpdate(drp, null, logger.getEntries());
                     }

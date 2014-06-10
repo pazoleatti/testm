@@ -69,13 +69,17 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
         boolean hasUniqueAttributes = false;
         PreparedStatementData ps = new PreparedStatementData();
         ps.appendQuery(CHECK_UNIQUE_MATCHES_FOR_NON_VERSION);
-        ps.addParam(recordId);
         ArrayList<RefBookAttribute> uniqueAttrs = new ArrayList<RefBookAttribute>();
         for (RefBookAttribute attribute : attributes) {
             if (attribute.isUnique())
                 uniqueAttrs.add(attribute);
         }
-        String idOddsTag = recordId != null ? "t.id <> ?" : "";
+        String idOddsTag = "";
+        if (recordId != null){
+            ps.addParam(recordId);
+            idOddsTag = "t.id <> ?";
+        }
+
         String andTag = !uniqueAttrs.isEmpty() && recordId != null ? "AND" : "";
         StringBuilder sb = new StringBuilder();
         for (int i=0; i < uniqueAttrs.size(); i++) {
@@ -110,12 +114,13 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
         try {
             if (hasUniqueAttributes) {
                 return getJdbcTemplate().query(
-                        String.format(ps.getQuery().toString(), TABLE_NAME, idOddsTag, andTag, sb.toString()), ps.getParams().toArray(), new RowMapper<Pair<Long, String>>() {
-                    @Override
-                    public Pair<Long, String> mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return new Pair<Long, String>(SqlUtils.getLong(rs, "record_id"), rs.getString("NAME"));
-                    }
-                });
+                        String.format(ps.getQuery().toString(), TABLE_NAME, idOddsTag, andTag, sb.toString()), ps.getParams().toArray(),
+                        new RowMapper<Pair<Long, String>>() {
+                            @Override
+                            public Pair<Long, String> mapRow(ResultSet rs, int rowNum) throws SQLException {
+                                return new Pair<Long, String>(SqlUtils.getLong(rs, "record_id"), rs.getString("NAME"));
+                            }
+                        });
             } else {
                 return new PagingResult<Pair<Long, String>>(new ArrayList<Pair<Long, String>>(0));
             }

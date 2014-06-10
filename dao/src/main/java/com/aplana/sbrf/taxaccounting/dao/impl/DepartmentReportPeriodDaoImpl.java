@@ -2,10 +2,12 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.RowMapper;
@@ -36,8 +38,8 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements
 			reportPeriod.setDepartmentId(SqlUtils.getLong(rs,"DEPARTMENT_ID"));
 			reportPeriod.setReportPeriod(reportPeriodDao.get(SqlUtils
                     .getInteger(rs,"REPORT_PERIOD_ID")));
-			reportPeriod.setActive(SqlUtils.getInteger(rs,"IS_ACTIVE") == 0 ? false : true);
-			reportPeriod.setBalance(SqlUtils.getInteger(rs,"IS_BALANCE_PERIOD") == 0 ? false : true);
+			reportPeriod.setActive(SqlUtils.getInteger(rs, "IS_ACTIVE") != 0);
+			reportPeriod.setBalance(SqlUtils.getInteger(rs, "IS_BALANCE_PERIOD") != 0);
             reportPeriod.setCorrectPeriod(rs.getDate("CORRECTION_DATE"));
 			return reportPeriod;
 		}
@@ -185,12 +187,19 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements
 
 	@Override
 	public boolean isPeriodOpen(int departmentId, long reportPeriodId) {
-		int is_active = getJdbcTemplate().queryForInt(
-				"select distinct is_active from department_report_period where department_id = ? and report_period_id = ?",
-				new Object[] {departmentId, reportPeriodId},
-				new int[] {Types.NUMERIC, Types.NUMERIC}
-		);
-		return is_active != 0;
+		try {
+            int is_active = getJdbcTemplate().queryForInt(
+                    "select distinct is_active from department_report_period where department_id = ? and report_period_id = ?",
+                    new Object[] {departmentId, reportPeriodId},
+                    new int[] {Types.NUMERIC, Types.NUMERIC}
+            );
+
+            return is_active != 0;
+        } catch (DataAccessException e){
+            logger.error("", e);
+            throw new DaoException("", e);
+        }
+
 	}
 
     @Override

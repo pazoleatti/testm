@@ -101,6 +101,9 @@ public class RefBookDepartmentDaoTest {
         List<Pair<Long,String>> matches =
                 refBookDepartmentDao.getMatchedRecordsByUniqueAttributes(100l, refBook.getAttributes(), records);
         assertEquals(1, matches.size());
+        List<Pair<Long,String>> matchesNull =
+                refBookDepartmentDao.getMatchedRecordsByUniqueAttributes(null, refBook.getAttributes(), records);
+        assertEquals(1, matchesNull.size());
     }
 
     @Test
