@@ -32,8 +32,7 @@ import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 import java.util.HashMap;
 import java.util.Map;
 
-public class FormDataListPresenter extends
-		FormDataListPresenterBase<FormDataListPresenter.MyProxy> implements
+public class FormDataListPresenter extends FormDataListPresenterBase<FormDataListPresenter.MyProxy> implements
 		FormDataListUiHandlers, FilterFormDataReadyEvent.MyHandler, FormDataListCreateEvent.FormDataCreateHandler,
 		FormDataListApplyEvent.FormDataApplyHandler {
 	/**

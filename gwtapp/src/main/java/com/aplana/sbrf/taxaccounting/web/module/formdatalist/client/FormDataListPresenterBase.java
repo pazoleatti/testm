@@ -34,36 +34,31 @@ import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.Proxy;
 
 /**
- * The base class of {@link ContactPagePresenter}. The goal of this class is
- * just to show that {@code @ProxyEvent} can be used in base classes. See Issue
- * 180.
- * 
+ *
+ * @param <Proxy_> The {@link Proxy} type.
  * @author Philippe Beaudoin
- * 
- * @param <Proxy_>
- *            The {@link Proxy} type.
  */
 public abstract class FormDataListPresenterBase<Proxy_ extends Proxy<?>>
-		extends Presenter<FormDataListPresenterBase.MyView, Proxy_> {
+        extends Presenter<FormDataListPresenterBase.MyView, Proxy_> {
 
-	/**
-	 * View.
-	 */
-	public interface MyView extends View, HasUiHandlers<FormDataListUiHandlers> {
-		
-		void setTableData(int start, long totalCount, List<FormDataSearchResultItem> records, Map<Integer, String> departmentFullNames, Long selectedItemId);
-		
-		void updateData();
-		
-		void updateData(int pageNumber);
+    /**
+     * View.
+     */
+    public interface MyView extends View, HasUiHandlers<FormDataListUiHandlers> {
 
-		FormDataSearchOrdering getSearchOrdering();
+        void setTableData(int start, long totalCount, List<FormDataSearchResultItem> records, Map<Integer, String> departmentFullNames, Long selectedItemId);
 
-		boolean isAscSorting();
+        void updateData();
 
-		void updateTitle(String title);
+        void updateData(int pageNumber);
 
-		void updateHeader(String title);
+        FormDataSearchOrdering getSearchOrdering();
+
+        boolean isAscSorting();
+
+        void updateTitle(String title);
+
+        void updateHeader(String title);
 
         void updatePageSize(TaxType taxType);
 
@@ -74,44 +69,44 @@ public abstract class FormDataListPresenterBase<Proxy_ extends Proxy<?>>
         void setPage(Integer page);
 
         int getPage();
-	}
-	
-	protected final PlaceManager placeManager;
-	protected final DispatchAsync dispatcher;
-	protected final CreateFormDataPresenter dialogPresenter;
+    }
 
-	protected final FilterFormDataPresenter filterPresenter;
-	static final Object TYPE_filterPresenter = new Object();
-	
+    protected final PlaceManager placeManager;
+    protected final DispatchAsync dispatcher;
+    protected final CreateFormDataPresenter dialogPresenter;
 
-	public FormDataListPresenterBase(EventBus eventBus, MyView view,
-			Proxy_ proxy, PlaceManager placeManager, DispatchAsync dispatcher,
-			FilterFormDataPresenter filterPresenter, CreateFormDataPresenter dialogPresenter) {
-		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
-		this.placeManager = placeManager;
-		this.dispatcher = dispatcher;
-		this.filterPresenter = filterPresenter;
-		this.dialogPresenter = dialogPresenter;
-	}
-	
-	/* (non-Javadoc)
-	 * @see com.gwtplatform.mvp.client.Presenter#useManualReveal()
-	 */
-	@Override
-	public boolean useManualReveal() {
-		return true;
-	}
-	
-	@Override
-	protected void onReveal() {
-		super.onReveal();
-		setInSlot(TYPE_filterPresenter, filterPresenter);
-	}
+    protected final FilterFormDataPresenter filterPresenter;
+    static final Object TYPE_filterPresenter = new Object();
 
-	@Override
-	protected void onHide() {
-		super.onHide();
-		clearSlot(TYPE_filterPresenter);
-	}
+
+    public FormDataListPresenterBase(EventBus eventBus, MyView view,
+                                     Proxy_ proxy, PlaceManager placeManager, DispatchAsync dispatcher,
+                                     FilterFormDataPresenter filterPresenter, CreateFormDataPresenter dialogPresenter) {
+        super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
+        this.placeManager = placeManager;
+        this.dispatcher = dispatcher;
+        this.filterPresenter = filterPresenter;
+        this.dialogPresenter = dialogPresenter;
+    }
+
+    /* (non-Javadoc)
+     * @see com.gwtplatform.mvp.client.Presenter#useManualReveal()
+     */
+    @Override
+    public boolean useManualReveal() {
+        return true;
+    }
+
+    @Override
+    protected void onReveal() {
+        super.onReveal();
+        setInSlot(TYPE_filterPresenter, filterPresenter);
+    }
+
+    @Override
+    protected void onHide() {
+        super.onHide();
+        clearSlot(TYPE_filterPresenter);
+    }
 
 }
