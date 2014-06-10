@@ -57,14 +57,14 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
             departmentFTSource.setFormTypeId(SqlUtils.getInteger(rs, "src_ft_id"));
             departmentFTSource.setDepartmentId(SqlUtils.getInteger(rs, "src_department_id"));
             departmentFTSource.setKind(FormDataKind.fromId(SqlUtils.getInteger(rs, "src_kind")));
-            departmentFTSource.setPerformerId(SqlUtils.getInteger(rs, "src_performer_dep_id"));
+            departmentFTSource.setPerformerId(rs.getInt("src_performer_dep_id"));
 
             DepartmentFormType departmentFTDest = new DepartmentFormType();
             departmentFTDest.setId(SqlUtils.getLong(rs, "tgt_dft_id"));
             departmentFTDest.setFormTypeId(SqlUtils.getInteger(rs, "tgt_ft_id"));
             departmentFTDest.setDepartmentId(SqlUtils.getInteger(rs, "tgt_department_id"));
             departmentFTDest.setKind(FormDataKind.fromId(SqlUtils.getInteger(rs, "tgt_kind")));
-            departmentFTDest.setPerformerId(SqlUtils.getInteger(rs, "tgt_performer_dep_id"));
+            departmentFTDest.setPerformerId(rs.getInt("tgt_performer_dep_id"));
 
             return new Pair<DepartmentFormType, DepartmentFormType>(departmentFTSource, departmentFTDest);
         }
@@ -94,7 +94,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
             departmentFTSource.setDepartmentId(SqlUtils.getInteger(rs, "src_department_id"));
             departmentFTSource.setFormTypeId(SqlUtils.getInteger(rs, "src_ft_id"));
             departmentFTSource.setKind(FormDataKind.fromId(SqlUtils.getInteger(rs, "src_kind")));
-            departmentFTSource.setPerformerId(SqlUtils.getInteger(rs, "src_performer_dep_id"));
+            departmentFTSource.setPerformerId(rs.getInt("src_performer_dep_id"));
             return new Pair<DepartmentFormType, DepartmentDeclarationType>(departmentFTSource, departmentDTDest);
         }
     };
