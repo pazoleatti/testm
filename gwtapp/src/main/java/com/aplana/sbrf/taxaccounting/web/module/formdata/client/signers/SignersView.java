@@ -5,21 +5,26 @@ import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.FormDataPerformer;
 import com.aplana.sbrf.taxaccounting.model.FormDataSigner;
+import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.TableModel;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
+import com.aplana.sbrf.taxaccounting.web.widget.style.table.ComparatorWithNull;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.cell.client.TextInputCell;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -34,6 +39,8 @@ import java.util.Set;
  * Форма "Исполнитель и подписанты"
  */
 public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> implements SignersPresenter.MyView {
+
+    private static final int NAME_AND_POSITION_MAX_LENGTH = 100;
 
     public interface Binder extends UiBinder<PopupPanel, SignersView> {
     }
@@ -83,7 +90,10 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
     private FormDataPerformer performer;
     private boolean readOnlyMode;
     private final SingleSelectionModel<FormDataSigner> selectionModel = new SingleSelectionModel<FormDataSigner>();
-    private static final int NAME_AND_POSITION_MAX_LENGTH = 100;
+
+    private ListDataProvider<FormDataSigner> dataProvider = new ListDataProvider<FormDataSigner>();
+    private ColumnSortEvent.ListHandler<FormDataSigner> sortHandler = new ColumnSortEvent.ListHandler<FormDataSigner>(dataProvider.getList());
+    private HandlerRegistration columnSortEventRegistration;
 
     @Inject
     public SignersView(Binder uiBinder, EventBus eventBus) {
@@ -158,6 +168,8 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 
     private void setSigners() {
         signersTable.setRowData(clonedSigners);
+        dataProvider.setList(clonedSigners);
+        sortHandler.setList(dataProvider.getList());
         signersTable.redraw();
     }
 
@@ -168,6 +180,7 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
                 clonedSigner.setId(signer.getId());
                 clonedSigner.setName(signer.getName());
                 clonedSigner.setPosition(signer.getPosition());
+                clonedSigner.setOrd(signer.getOrd());
                 to.add(clonedSigner);
             }
         }
@@ -182,7 +195,9 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
             if (ind > 0) {
                 FormDataSigner exchange = clonedSigners.get(ind - 1);
                 clonedSigners.set(ind - 1, signer);
+                signer.setOrd(ind + 1);     // переопределяем порядок в модельке
                 clonedSigners.set(ind, exchange);
+                exchange.setOrd(ind + 2);   // переопределяем порядок в модельке
                 setSigners();
                 selectionModel.setSelected(signer, true);
             }
@@ -198,7 +213,9 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
             if (ind < clonedSigners.size() - 1) {
                 FormDataSigner exchange = clonedSigners.get(ind + 1);
                 clonedSigners.set(ind + 1, signer);
+                signer.setOrd(ind + 2);
                 clonedSigners.set(ind, exchange);
+                exchange.setOrd(ind + 1);
                 setSigners();
                 selectionModel.setSelected(signer, true);
             }
@@ -217,8 +234,10 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
     @UiHandler("removeSigner")
     public void onRemoveSigner(ClickEvent event) {
         FormDataSigner signer = selectionModel.getSelectedObject();
-        clonedSigners.remove(clonedSigners.indexOf(signer));
-        setSigners();
+        if(clonedSigners.contains(signer)){
+            clonedSigners.remove(clonedSigners.indexOf(signer));
+            setSigners();
+        }
     }
 
     @UiHandler("saveButton")
@@ -242,7 +261,7 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
         }
 
         if (departmentPicker.getValue() == null || departmentPicker.getValue().isEmpty()) {
-            Dialog.warningMessage("Не указано подразделение-исполнитель!");
+            Dialog.warningMessage("Укажите подразделение-исполнитель.");
             return;
         }
 
@@ -268,7 +287,7 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
     private boolean validateSigners() {
         for (FormDataSigner signer : clonedSigners) {
             if (signer.getName().isEmpty() || signer.getPosition().isEmpty()) {
-                Dialog.warningMessage("Необходимо ввести ФИО подписанта и должность");
+                Dialog.warningMessage("Необходимо заполнить поля ФИО и Должность всех подписантов.");
                 return false;
             }
         }
@@ -304,7 +323,7 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
         }
     }
 
-    private void initTable(boolean readOnlyMode) {
+    private void initTable(final boolean readOnlyMode) {
         signersTable.setSelectionModel(selectionModel);
         // Clean columns
         while (signersTable.getColumnCount() > 0) {
@@ -314,12 +333,14 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
         TextColumn<FormDataSigner> idColumn = new TextColumn<FormDataSigner>() {
             @Override
             public String getValue(FormDataSigner object) {
-                return "" + (clonedSigners.indexOf(object) + 1);
+                if(readOnlyMode){
+                    return String.valueOf(object.getOrd());
+                } else {
+                    return "" + (clonedSigners.indexOf(object) + 1);
+                }
             }
         };
         idColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-        signersTable.addColumn(idColumn, "№ пп");
-        signersTable.setColumnWidth(idColumn, 40, Style.Unit.PX);
 
         AbstractCell<String> nameCell;
         AbstractCell<String> positionCell;
@@ -327,7 +348,15 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
         if (readOnlyMode) {
             nameCell = new TextCell();
             positionCell = new TextCell();
+            if(!dataProvider.getDataDisplays().contains(signersTable)){
+                dataProvider.addDataDisplay(signersTable);
+                columnSortEventRegistration = signersTable.addColumnSortHandler(sortHandler);
+            }
         } else {
+            if (dataProvider.getDataDisplays().contains(signersTable)) {
+                dataProvider.removeDataDisplay(signersTable);
+                columnSortEventRegistration.removeHandler();
+            }
             nameCell = new TextInputCell();
             positionCell = new TextInputCell();
         }
@@ -345,11 +374,11 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
                     signer.setName(value);
                 } else {
                     signer.setName(value.substring(0, NAME_AND_POSITION_MAX_LENGTH));
-                    Dialog.warningMessage("Количество символов для ФИО подписанта превысило допустимое значение 100");
+                    Dialog.warningMessage("Количество символов для ФИО подписанта " +
+                            "превысило допустимое значение "+NAME_AND_POSITION_MAX_LENGTH+".");
                 }
             }
         });
-        signersTable.addResizableColumn(nameColumn, "ФИО подписанта");
 
         Column<FormDataSigner, String> positionColumn = new Column<FormDataSigner, String>(positionCell) {
             @Override
@@ -364,11 +393,42 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
                     signer.setPosition(value);
                 } else {
                     signer.setPosition(value.substring(0, NAME_AND_POSITION_MAX_LENGTH));
-                    Dialog.warningMessage("Количество символов для должности подписанта превысило допустимое значение 100");
+                    Dialog.warningMessage("Количество символов для должности подписанта" +
+                            " превысило допустимое значение "+NAME_AND_POSITION_MAX_LENGTH+".");
                 }
             }
         });
+
+        signersTable.addColumn(idColumn, "№ пп");
+        signersTable.setColumnWidth(idColumn, 60, Style.Unit.PX);
+        signersTable.addResizableColumn(nameColumn, "ФИО подписанта");
         signersTable.addResizableColumn(positionColumn, "Должность");
+
+        if(readOnlyMode){
+            idColumn.setSortable(true);
+            nameColumn.setSortable(true);
+            positionColumn.setSortable(true);
+        }
+
+        // компораторы для сортировки на клиенте
+        sortHandler.setComparator(idColumn, new ComparatorWithNull<FormDataSigner, Integer>() {
+            @Override
+            public int compare(FormDataSigner o1, FormDataSigner o2) {
+                return compareWithNull(o1.getOrd(),o2.getOrd());
+            }
+        });
+        sortHandler.setComparator(nameColumn, new ComparatorWithNull<FormDataSigner, String >() {
+            @Override
+            public int compare(FormDataSigner o1, FormDataSigner o2) {
+                return compareWithNull(o1.getName(), o2.getName());
+            }
+        });
+        sortHandler.setComparator(positionColumn, new ComparatorWithNull<FormDataSigner, String >() {
+            @Override
+            public int compare(FormDataSigner o1, FormDataSigner o2) {
+                return compareWithNull(o1.getPosition(), o2.getPosition());
+            }
+        });
     }
 
     private boolean isEqualClonedAndCurrentSignersAndReporter() {
