@@ -22,7 +22,9 @@ import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 public class LinkButton extends FocusWidget implements HasHorizontalAlignment,
 		HasHTML, HasSafeHtml {
 
-	interface LocalHtmlTemplates extends SafeHtmlTemplates {
+    private Boolean disable = false;
+
+    interface LocalHtmlTemplates extends SafeHtmlTemplates {
 		@Template("<div>" +
                     "<img style=\"display: inline; border: none; margin-right: -16px; vertical-align: top;\" src=\"{0}\"/>" +
                     "<div style=\"" +
@@ -84,8 +86,10 @@ public class LinkButton extends FocusWidget implements HasHorizontalAlignment,
 	}
 
     public void setDisableImage(Boolean disable) {
-        DOM.getChild((Element) getElement().getFirstChildElement(), 0).getStyle().setDisplay(disable ? Style.Display.NONE: Style.Display.INLINE);
-        DOM.getChild((Element) getElement().getFirstChildElement(), 1).getStyle().setMarginLeft(disable ? 0 : 19, Style.Unit.PX);
+        if(this.disable!= disable){
+            this.disable = disable;
+            setHTML(templates.render(UriUtils.fromTrustedString(this.img), this.text));
+        }
     }
 
     public void setImageResource(ImageResource ir) {
@@ -137,6 +141,8 @@ public class LinkButton extends FocusWidget implements HasHorizontalAlignment,
 	@Override
 	public void setHTML(String html) {
 		directionalTextHelper.setTextOrHtml(html, true);
+        DOM.getChild((Element) getElement().getFirstChildElement(), 0).getStyle().setDisplay(disable ? Style.Display.NONE: Style.Display.INLINE);
+        DOM.getChild((Element) getElement().getFirstChildElement(), 1).getStyle().setMarginLeft(disable ? 0 : 19, Style.Unit.PX);
 	}
 
 	@Override

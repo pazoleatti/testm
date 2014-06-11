@@ -2,19 +2,19 @@ package com.aplana.sbrf.taxaccounting.web.module.sources.shared;
 
 import java.util.List;
 
-import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.DepartmentFormTypeShared;
+import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.CurrentAssign;
 import com.gwtplatform.dispatch.shared.Result;
 
 public class GetCurrentSourcesResult implements Result {
 	private static final long serialVersionUID = 7613228265079535068L;
 	
-	private List<DepartmentFormTypeShared> currentSources;
+	private List<CurrentAssign> currentSources;
 
-	public List<DepartmentFormTypeShared> getCurrentSources() {
+	public List<CurrentAssign> getCurrentSources() {
 		return currentSources;
 	}
 
-	public void setCurrentSources(List<DepartmentFormTypeShared> currentSources) {
+	public void setCurrentSources(List<CurrentAssign> currentSources) {
 		this.currentSources = currentSources;
 	}
 

@@ -5,13 +5,14 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
 import java.util.List;
 
-public class UpdateFormSourcesAction extends UnsecuredActionImpl<UpdateSourcesResult> {
-	private Long departmentFormTypeId;
-	private List<Long> sourceDepartmentFormTypeIds;
+public class UpdateCurrentAssignsAction extends UnsecuredActionImpl<UpdateCurrentAssignsResult> {
+    private Long departmentAssignId;
+    private List<Long> rightDepartmentAssignIds;
     private PeriodInfo periodFrom;
     private PeriodInfo periodTo;
     private int yearFrom;
     private int yearTo;
+    private boolean isForm = true;
 
     public PeriodInfo getPeriodFrom() {
         return periodFrom;
@@ -45,19 +46,27 @@ public class UpdateFormSourcesAction extends UnsecuredActionImpl<UpdateSourcesRe
         this.yearTo = yearTo;
     }
 
-    public Long getDepartmentFormTypeId() {
-		return departmentFormTypeId;
-	}
+    public Long getDepartmentAssignId() {
+        return departmentAssignId;
+    }
 
-	public void setDepartmentFormTypeId(Long departmentFormTypeId) {
-		this.departmentFormTypeId = departmentFormTypeId;
-	}
+    public void setDepartmentAssignId(Long departmentAssignId) {
+        this.departmentAssignId = departmentAssignId;
+    }
 
-	public List<Long> getSourceDepartmentFormTypeIds() {
-		return sourceDepartmentFormTypeIds;
-	}
+    public List<Long> getRightDepartmentAssignIds() {
+        return rightDepartmentAssignIds;
+    }
 
-	public void setSourceDepartmentFormTypeIds(List<Long> sourceDepartmentFormTypeIds) {
-		this.sourceDepartmentFormTypeIds = sourceDepartmentFormTypeIds;
-	}
+    public void setRightDepartmentAssignIds(List<Long> rightDepartmentAssignIds) {
+        this.rightDepartmentAssignIds = rightDepartmentAssignIds;
+    }
+
+    public boolean isForm() {
+        return isForm;
+    }
+
+    public void setForm(boolean isForm) {
+        this.isForm = isForm;
+    }
 }

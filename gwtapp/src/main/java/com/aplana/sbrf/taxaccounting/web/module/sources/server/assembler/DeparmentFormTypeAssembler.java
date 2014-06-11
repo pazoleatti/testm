@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.CurrentAssign;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -13,7 +14,6 @@ import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
 import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.DepartmentFormTypeShared;
 
 @Component
 public class DeparmentFormTypeAssembler {
@@ -24,13 +24,10 @@ public class DeparmentFormTypeAssembler {
 	@Autowired
 	private DepartmentService departmentService;
 	
-    public List<DepartmentFormTypeShared> assemble(List<DepartmentFormType> departmentFormTypes){
-    	List<DepartmentFormTypeShared> departmentFormTypeShareds = new ArrayList<DepartmentFormTypeShared>();
-    	int i = 1;
+    public List<CurrentAssign> assemble(List<DepartmentFormType> departmentFormTypes){
+    	List<CurrentAssign> currentAssigns = new ArrayList<CurrentAssign>();
     	for (DepartmentFormType departmentFormType : departmentFormTypes) {
-    		DepartmentFormTypeShared departmentFormTypeShared = assemble(departmentFormType);
-    		departmentFormTypeShared.setIndex(i++);
-			departmentFormTypeShareds.add(departmentFormTypeShared);
+			currentAssigns.add(assemble(departmentFormType));
 		}
     	
 		Map<Integer, FormType> formTypes = new HashMap<Integer, FormType>();
@@ -41,15 +38,15 @@ public class DeparmentFormTypeAssembler {
 		}
 		Collections.sort(departmentFormTypes, new DepartmentFormTypeComparator(formTypes));
 		
-    	return departmentFormTypeShareds;
+    	return currentAssigns;
     }
     
-    private DepartmentFormTypeShared assemble(DepartmentFormType departmentFormType){
-    	DepartmentFormTypeShared result = new DepartmentFormTypeShared();    	
+    private CurrentAssign assemble(DepartmentFormType departmentFormType){
+    	CurrentAssign result = new CurrentAssign();
     	result.setDepartmentName(departmentService.getParentsHierarchy(departmentFormType.getDepartmentId()));
     	result.setId(departmentFormType.getId());
-    	result.setFormTypeName(departmentFormTypeService.getFormType(departmentFormType.getFormTypeId()).getName());
-    	result.setKind(departmentFormType.getKind());
+    	result.setName(departmentFormTypeService.getFormType(departmentFormType.getFormTypeId()).getName());
+    	result.setFormKind(departmentFormType.getKind());
     	return result;
     }
 

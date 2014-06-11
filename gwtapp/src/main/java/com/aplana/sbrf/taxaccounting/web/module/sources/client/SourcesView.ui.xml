@@ -5,21 +5,7 @@
              xmlns:w="urn:import:com.aplana.gwt.client"
              xmlns:fm="urn:import:com.aplana.gwt.client.form">
 
-    <ui:style field="css" type="com.aplana.sbrf.taxaccounting.web.module.sources.client.SourcesView.LinkStyle">
-        .enabled {
-            cursor: pointer;
-        }
-
-        .disabled {
-            cursor: default;
-        }
-    </ui:style>
-
     <ui:style>
-
-        .nd {
-            font-size: 14px;
-        }
 
         .titleText {
             font-size: 14px;
@@ -27,11 +13,10 @@
         }
 
         .titleText div {
-            font-size: 14px;
+            font-size: 13px !important;
         }
 
         .btnPanel {
-            height: 25px;
             padding-left: 15px;
             padding-top: 5px;
         }
@@ -49,28 +34,75 @@
         }
 
         .searchLabel {
-            margin-right: 5px;
-            margin-left: 5px;
             font-weight: bold;
         }
 
-        .destinationLabel {
+        .bold {
             font-weight: bold;
-            text-align: center;
+            padding-right: 4px;
         }
 
         .leftPanel {
-            width: 100%;
+            position: absolute !important;
+            bottom: 0;
+            left: 0;
+            right: 50.5%;
+            top: 0;
         }
 
         .rightPanel {
-            width: 100%;
+            position: absolute !important;
+            bottom: 0;
+            right: 0;
+            left: 50.5%;
+            top: 0;
         }
 
         .horSep {
             height: 1px;
             margin: 4px 9px;
             border-top: 1px solid #aeaeac;
+        }
+
+        .verSep {
+            height: 23px;
+            width: 0;
+            margin: 0 2px;
+            border-left: 1px solid #aeaeac;
+        }
+
+        .formDecLabel {
+            font-weight: bold;
+            font-size: 15px;
+        }
+
+        .tableBG {
+            background-color: white;
+            border: 1px solid #6F6F6F;
+        }
+
+        .upWrapper {
+            position: absolute !important;
+            bottom: 5px !important;
+            right: 5px !important;
+            left: 5px !important;
+            top: 5px !important;
+        }
+
+        .upTables {
+            position: absolute !important;
+            bottom: 0;
+            right: 0;
+            left: 0;
+            top: 49px;
+        }
+
+        .downMar {
+            position: absolute !important;
+            bottom: 5px !important;
+            right: 5px !important;
+            left: 5px !important;
+            top: 28px !important;
         }
 
     </ui:style>
@@ -82,8 +114,8 @@
                 <fm:left>
                     <fm:Left>
                         <style:LeftBar marginRight="5" childValign="middle" height="100%">
-                            <g:Label addStyleNames="{style.titleText}, {style.marginRight5}"
-                                     text="Указание форм источников"/>
+                            <g:Label ui:field="taxTypeLabel" addStyleNames="{style.titleText}, {style.marginRight5}"
+                                     text="Налог на прибыль"/>
                             <g:Label text="—" addStyleNames="{style.titleText}, {style.marginRight5}"/>
                         </style:LeftBar>
                     </fm:Left>
@@ -91,14 +123,16 @@
                 <fm:right>
                     <fm:Right>
                         <style:LeftBar marginRight="5" childValign="middle" height="100%">
-                            <style:LinkAnchor ui:field="formDecAnchor" href="#" text="Налоговые формы"
+                            <g:Label ui:field="formDecLabel" text="Налоговые формы" addStyleNames="{style.formDecLabel}"/>
+                            <g:HTML addStyleNames="{style.verSep}"/>
+                            <style:LinkButton ui:field="formDecAnchor" text="Декларации"
                                               disableImage="true" addStyleNames="{style.titleText}"/>
                         </style:LeftBar>
                     </fm:Right>
                 </fm:right>
                 <fm:resizable>
                     <fm:Resizable>
-                        <g:Label ui:field="titleLabel" text="Налоговые формы"/>
+                        <g:Label ui:field="titleLabel" text="Указание источников/приемников"/>
                     </fm:Resizable>
                 </fm:resizable>
             </fm:HeaderContainer>
@@ -107,56 +141,86 @@
             <fm:BodyContainer>
 
                 <g:HorizontalPanel spacing="3" addStyleNames="{style.btnPanel}" verticalAlignment="middle">
-                    <g:Label addStyleNames="{style.searchLabel}" text="Назначение:"/>
-                    <g:ValueListBox ui:field="appointmentTypePicker" addStyleNames="{style.marginRight5}"/>
-                    <g:ValueListBox ui:field="periodFrom" width="300" addStyleNames="{style.marginRight5}"/>
-                    <w:Spinner ui:field="yearFrom" minValue="1900" maxValue="2100" width="100px" addStyleNames="{style.marginRight5}"/>
-                    <g:ValueListBox ui:field="periodTo" width="300" addStyleNames="{style.marginRight5}"/>
-                    <w:Spinner ui:field="yearTo" minValue="1900" maxValue="2100" width="100px" addStyleNames="{style.marginRight5}"/>
-                    <style:LinkAnchor ui:field="assignButton" text="Создать назначение" img="resources/img/sources_approve.png"
-                                      addStyleNames="{style.marginRight5}"/>
-                    <style:LinkAnchor ui:field="cancelButton" text="Отменить назначение"
-                                      img="resources/img/sources_reject.png"/>
+                    <g:Label text="Период: с" wordWrap="false" addStyleNames="{style.marginRight5}"/>
+                    <g:ValueListBox ui:field="periodFrom" width="200px" addStyleNames="{style.marginRight5}"/>
+                    <w:Spinner ui:field="yearFrom" minValue="1900" maxValue="2100" width="60px" height="19px" addStyleNames="{style.marginRight5}"/>
+                    <g:Label text="по" wordWrap="false" addStyleNames="{style.marginRight5}"/>
+                    <g:ValueListBox ui:field="periodTo" width="200px" addStyleNames="{style.marginRight5}"/>
+                    <w:Spinner ui:field="yearTo" minValue="1900" maxValue="2100" width="60px" height="19px"
+                               addStyleNames="{style.marginRight5}"/>
+
+                    <g:cell width="100%" horizontalAlignment="right">
+                        <g:Label addStyleNames="{style.searchLabel}" text="Назначение:"/>
+                    </g:cell>
+                    <g:cell horizontalAlignment="right">
+                        <g:ValueListBox ui:field="appointmentTypePicker" addStyleNames="{style.marginRight5}"/>
+                    </g:cell>
                 </g:HorizontalPanel>
 
-                <g:Label addStyleNames="{style.horSep}"/>
+                <g:HTML addStyleNames="{style.horSep}"/>
 
                 <g:SplitLayoutPanel addStyleNames="{style.table}">
-                    <g:north size="350">
-                        <g:HorizontalPanel spacing="5" height="100%" width="100%">
-
-                            <g:VerticalPanel addStyleNames="{style.leftPanel}">
-                                <g:Label text="Приёмник" addStyleNames="{style.destinationLabel}"/>
-                                <g:HorizontalPanel width="100%" height="30px" verticalAlignment="middle">
-                                    <g:Label text="Подразделение:" width="120px" addStyleNames="{style.searchLabel}"/>
-                                    <g:cell width="100%">
-                                        <d:DepartmentPickerPopupWidget ui:field="departmentReceiverPicker" width="100%"
-                                                                       header="Выберите приёмник" multiselection="false"/>
-                                    </g:cell>
-
-                                </g:HorizontalPanel>
-                                <style:GenericDataGrid ui:field="formReceiversTable" width="100%" height="350px"/>
-                                <style:GenericDataGrid ui:field="declarationReceiversTable" width="100%"
-                                                       height="350px"/>
-                            </g:VerticalPanel>
-
-                            <g:VerticalPanel addStyleNames="{style.rightPanel}">
-                                <g:Label text="Источник" addStyleNames="{style.destinationLabel}"/>
-                                <g:HorizontalPanel width="100%" height="30px" verticalAlignment="middle">
-                                    <g:Label text="Подразделение:" width="120px" addStyleNames="{style.searchLabel}"/>
-                                    <g:cell width="100%">
-                                        <d:DepartmentPickerPopupWidget ui:field="departmentSourcePicker" width="100%"
-                                                                       header="Выберите источник" multiselection="false"/>
-                                    </g:cell>
-                                </g:HorizontalPanel>
-                                <style:GenericDataGrid ui:field="sourcesTable" width="100%" height="350px"/>
-                            </g:VerticalPanel>
-
-                        </g:HorizontalPanel>
-                    </g:north>
                     <g:center>
-                        <style:GenericDataGrid ui:field="currentSourcesTable" width="100%" height="100%"/>
+                        <g:ResizeLayoutPanel addStyleNames="{style.upWrapper}">
+                            <g:HTMLPanel width="100%" height="100%">
+                                <!--Левая-->
+                                <g:HTMLPanel addStyleNames="{style.leftPanel}">
+                                    <style:LabelSeparator ui:field="leftLabel" text="Приёмник" addStyleNames="{style.bold}" />
+                                    <g:HorizontalPanel width="100%" height="30px" verticalAlignment="middle">
+                                        <g:Label text="Подразделение:" width="120px" addStyleNames="{style.searchLabel}"/>
+                                        <g:cell width="100%">
+                                            <d:DepartmentPickerPopupWidget ui:field="leftDepPicker" width="100%"
+                                                                           header="Выберите приёмник" multiselection="false"/>
+                                        </g:cell>
+                                    </g:HorizontalPanel>
+                                    <g:ResizeLayoutPanel addStyleNames="{style.tableBG}, {style.upTables}">
+                                        <style:GenericDataGrid ui:field="leftTable" width="100%" height="100%"/>
+                                    </g:ResizeLayoutPanel>
+                                </g:HTMLPanel>
+
+                                <!--Правая-->
+                                <g:HTMLPanel addStyleNames="{style.rightPanel}">
+                                    <g:HorizontalPanel width="100%" verticalAlignment="middle">
+                                        <g:cell width="100%">
+                                            <style:LabelSeparator ui:field="rightLabel" text="Источники" addStyleNames="{style.bold}"/>
+                                        </g:cell>
+                                        <style:LinkButton ui:field="assignButton" text="Создать назначение" img="resources/img/add.png"
+                                                          addStyleNames="{style.marginRight5}"/>
+                                    </g:HorizontalPanel>
+
+                                    <g:HorizontalPanel width="100%" height="30px" verticalAlignment="middle">
+                                        <g:Label text="Подразделение:" width="120px" addStyleNames="{style.searchLabel}"/>
+                                        <g:cell width="100%">
+                                            <d:DepartmentPickerPopupWidget ui:field="rightDepPicker"
+                                                                           width="100%" header="Выберите источник"
+                                                                           multiselection="false"/>
+                                        </g:cell>
+                                    </g:HorizontalPanel>
+                                    <g:ResizeLayoutPanel addStyleNames="{style.tableBG} {style.upTables}">
+                                        <style:GenericDataGrid ui:field="rightTable" width="100%" height="100%"/>
+                                    </g:ResizeLayoutPanel>
+                                </g:HTMLPanel>
+                            </g:HTMLPanel>
+                        </g:ResizeLayoutPanel>
+
                     </g:center>
+                    <g:south size="200">
+                        <!--Нижняя-->
+                        <g:HTMLPanel height="100%" width="100%">
+                            <g:HorizontalPanel width="100%" spacing="4">
+                                <g:cell width="100%">
+                                    <style:LabelSeparator ui:field="downLabel" text="Указанные источники" addStyleNames="{style.bold}"/>
+                                </g:cell>
+                                <style:LinkButton ui:field="editButton" text="Редактировать назначение" img="resources/img/edit.png"/>
+                                <style:LinkButton ui:field="cancelButton" text="Удалить назначение"
+                                                  img="resources/img/row-delete.png"/>
+                            </g:HorizontalPanel>
+                            <g:ResizeLayoutPanel addStyleNames="{style.tableBG}, {style.downMar}">
+                                <style:GenericDataGrid ui:field="downTable" width="100%" height="100%"/>
+                            </g:ResizeLayoutPanel>
+                        </g:HTMLPanel>
+                    </g:south>
+
                 </g:SplitLayoutPanel>
 
             </fm:BodyContainer>
