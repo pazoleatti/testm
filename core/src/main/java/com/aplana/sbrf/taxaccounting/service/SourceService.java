@@ -1,15 +1,12 @@
 package com.aplana.sbrf.taxaccounting.service;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationType;
-import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
-import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormType;
-import com.aplana.sbrf.taxaccounting.model.FormTypeKind;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.source.SourceClientData;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
 /**
@@ -26,26 +23,18 @@ public interface SourceService {
      *
      * @param departmentId идентификатор подразделения
      * @param taxType      вид налога
+     * @param periodStart  начало периода, в котором действуют назначения
+     * @param periodEnd    окончание периода, в котором действуют назначения
      * @return информация о формах-источниках в виде списка
      *         {@link com.aplana.sbrf.taxaccounting.model.DepartmentFormType}
      */
-    List<DepartmentFormType> getDFTSourcesByDepartment(int departmentId, TaxType taxType);
-    
-    /**
-     * Возвращает НФ назначения для подразделения
-     *
-     * @param departmentId идентификатор подразделения
-     * @param taxType      вид налога
-     * @return информация о формах-источниках в виде списка
-     *         {@link com.aplana.sbrf.taxaccounting.model.DepartmentFormType}
-     */
-    List<DepartmentFormType> getDFTByDepartment(int departmentId, TaxType taxType);
+    List<DepartmentFormType> getDFTSourcesByDepartment(int departmentId, TaxType taxType, Date periodStart, Date periodEnd);
 
     /**
      * Возвращает типы НФ назначения для подразделения с заданным исполнителем
      *
-     * @param performerDepId    идентификатор подразделения исполнителя
-     * @param taxType           вид налога
+     * @param performerDepId идентификатор подразделения исполнителя
+     * @param taxType        вид налога
      * @return список типов НФ
      */
     List<Long> getDFTByPerformerDep(int performerDepId, TaxType taxType, List<FormDataKind> kinds);
@@ -57,20 +46,33 @@ public interface SourceService {
      * 3) типы НФ, которые назначены формам из 2) в качестве источников.
      * (из http://conf.aplana.com/pages/viewpage.action?pageId=11382061 пункт 3.b.iii, 3.b.iv, 3.b.v)
      *
-     * @param performerDepId    идентификатор подразделения исполнителя
-     * @param taxType           вид налога
+     * @param performerDepId идентификатор подразделения исполнителя
+     * @param taxType        вид налога
      * @return список типов НФ
      */
     List<Long> getDFTFormTypeBySource(int performerDepId, TaxType taxType, List<FormDataKind> kinds);
-	/**
-	 * Возвращает информацию о назначенных подразделению декларациях по заданному виду налога
-	 * 
-	 * @param departmentId идентификатор подразделения
-	 * @param taxType вид налога
-	 * @return список назначенных подразделению деклараций (с учётом вида и типа) по заданному виду налога
-	 */
-	List<DepartmentDeclarationType> getDDTByDepartment(int departmentId, TaxType taxType);
-    
+
+    /**
+     * Возвращает НФ назначения для подразделения
+     *
+     * @param departmentId идентификатор подразделения
+     * @param taxType      вид налога
+     * @return информация о формах-источниках в виде списка
+     *         {@link com.aplana.sbrf.taxaccounting.model.DepartmentFormType}
+     */
+    @Deprecated
+    List<DepartmentFormType> getDFTByDepartment(int departmentId, TaxType taxType);
+
+    /**
+     * Возвращает информацию о назначенных подразделению декларациях по заданному виду налога
+     *
+     * @param departmentId идентификатор подразделения
+     * @param taxType      вид налога
+     * @return список назначенных подразделению деклараций (с учётом вида и типа) по заданному виду налога
+     */
+    @Deprecated
+    List<DepartmentDeclarationType> getDDTByDepartment(int departmentId, TaxType taxType);
+
     /**
      * Возвращает информацию об источниках, которые должны использоваться при
      * формировании налоговой формы назначения с заданными параметрами
@@ -82,10 +84,11 @@ public interface SourceService {
      * @return информация о формах-источниках в виде списка
      *         {@link com.aplana.sbrf.taxaccounting.model.DepartmentFormType}
      */
+    @Deprecated
     List<DepartmentFormType> getDFTSourcesByDFT(int departmentId, int formTypeId, FormDataKind kind);
-    
+
     /**
-     * Возвращает НФ назначения (DFT), которые являются источником для ДЕ назначения (DDT) 
+     * Возвращает НФ назначения (DFT), которые являются источником для ДЕ назначения (DDT)
      * (в данном случае DDT и связка департамента и типа декларации - одно и тоже)
      *
      * @param departmentId      идентификатор декларации
@@ -93,17 +96,8 @@ public interface SourceService {
      * @return информация о формах-источниках в виде списка
      *         {@link com.aplana.sbrf.taxaccounting.model.DepartmentFormType}
      */
+    @Deprecated
     List<DepartmentFormType> getDFTSourceByDDT(int departmentId, int declarationTypeId);
-    
-    /**
-     * Обновляет информацию об источниках формы
-     *
-     * @param leftDpartmentFormTypeId     идентификатор связки из левой части формы. Т.е тот, для которого назначают множество источников/приемников
-     * @param rightDepartmentFormTypeIds идентификаторы связок из справой части формы. Т.е те, которые являются множеством источников/приемников для связки из левой части
-     */
-    void saveFormSources(Long leftDpartmentFormTypeId, List<Long> rightDepartmentFormTypeIds);
-
- 
 
     /**
      * Возвращает информацию о декларациях-потребителях, которые должны использовать
@@ -112,12 +106,12 @@ public interface SourceService {
      * @param sourceDepartmentId идентификатор подразделения формы-источника
      * @param sourceFormTypeId   вид налоговой формы-источника
      * @param sourceKind         тип налоговой формы-источника
+     * @param periodStart  начало периода, в котором действуют назначения
+     * @param periodEnd    окончание периода, в котором действуют назначения
      * @return информация о декларациях-потребителях в виде списка
      *         {@link com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType}
      */
-    List<DepartmentDeclarationType> getDeclarationDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind);
-
-
+    List<DepartmentDeclarationType> getDeclarationDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind, Date periodStart, Date periodEnd);
 
     /**
      * Обновляет информацию об источниках для декларации
@@ -125,9 +119,8 @@ public interface SourceService {
      * @param declarationTypeId           идентификатор связки для которой нужно обновить источники
      * @param sourceDepartmentFormTypeIds идентификаторы деклараций-источников в виде списка
      */
+    @Deprecated
     void saveDeclarationSources(final Long declarationTypeId, final List<Long> sourceDepartmentFormTypeIds);
-
- 
 
     /**
      * Возвращает список назначенных деклараций для выбранного налога и подразделения
@@ -138,7 +131,7 @@ public interface SourceService {
      *         {@link com.aplana.sbrf.taxaccounting.model.FormTypeKind}
      */
     List<FormTypeKind> getDeclarationAssigned(Long departmentId, char taxType);
-    
+
     /**
      * Возвращает список назначенных налоговых форм для выбранного налога и подразделения
      *
@@ -161,7 +154,6 @@ public interface SourceService {
     /**
      * Добавляет налоговые формы, назначенные подразделению
      *
-     *
      * @param departmentId id подразделения
      * @param typeId       id типа налоговой формы
      * @param formId       id вида налоговой формы
@@ -172,7 +164,7 @@ public interface SourceService {
     /**
      * Удаляет налоговые формы, назначенные подразделению
      *
-     * @param id id на удаление
+     * @param ids id на удаление
      */
     void deleteDFT(Collection<Long> ids);
 
@@ -187,33 +179,34 @@ public interface SourceService {
     /**
      * Удаляет декларации, назначенные подразделению
      *
-     * @param id id на удаление
+     * @param ids id на удаление
      */
     void deleteDDT(Collection<Long> ids);
-    
-	/**
-	 * Получить вид налоговой формы по идентификатору
-	 * @param typeId идентификатор вида
-	 * @return Объект, представляющий вид налоговой формы
-	 * @throws DaoException если в БД нет записи с соответствующим ключом
-	 */
-	FormType getFormType(int formTypeId);
-	
-	/**
-	 * Получить описание вида декларации по идентификатору
-	 * @param declarationTypeId идентификатор вида декларации
-	 * @return описание вида декларации, с заданным идентификатором
-	 * @throws DaoException если в БД нет такой записи
-	 */
-	DeclarationType getDeclarationType(int declarationTypeId);
-	
+
+    /**
+     * Получить вид налоговой формы по идентификатору
+     *
+     * @param formTypeId идентификатор вида
+     * @return Объект, представляющий вид налоговой формы
+     */
+    FormType getFormType(int formTypeId);
+
+    /**
+     * Получить описание вида декларации по идентификатору
+     *
+     * @param declarationTypeId идентификатор вида декларации
+     * @return описание вида декларации, с заданным идентификатором
+     */
+    DeclarationType getDeclarationType(int declarationTypeId);
+
     /**
      * Получить все существующие виды налоговых форм по виду налога
+     *
      * @param taxType вид налога
      * @return список всех существующих видов налоговых форм по виду налога
      */
-	List<FormType> listAllByTaxType(TaxType taxType);
-	
+    List<FormType> listAllByTaxType(TaxType taxType);
+
     /**
      * Возвращает информацию о формах-потребителях, которые должны использовать
      * информацию из данной налоговой формы в качестве источника
@@ -221,10 +214,12 @@ public interface SourceService {
      * @param sourceDepartmentId идентификатор подразделения формы-источника
      * @param sourceFormTypeId   вид налоговой формы-источника
      * @param sourceKind         тип налоговой формы-источника
+     * @param periodStart  начало периода, в котором действуют назначения
+     * @param periodEnd    окончание периода, в котором действуют назначения
      * @return информация о формах-потребителях в виде списка
      *         {@link com.aplana.sbrf.taxaccounting.model.DepartmentFormType}
      */
-    List<DepartmentFormType> getFormDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind);
+    List<DepartmentFormType> getFormDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind, Date periodStart, Date periodEnd);
 
     /**
      * Проверяет существование формы назначения для позразделения с id = departmentId
@@ -232,25 +227,51 @@ public interface SourceService {
      *
      * @param departmentId
      * @param typeId
-     * @param kindId
+     * @param kind
      * @return true - существует форма, false в противном случае
      */
     boolean existAssignedForm(int departmentId, int typeId, FormDataKind kind);
 
     /**
      * Проверяет существование форм-приемников в статусе "Принята" в указанном отчетном периоде
+     *
      * @param sourceDepartmentId идентификатор подразделения формы-источника
      * @param sourceFormTypeId   вид налоговой формы-источника
      * @param sourceKind         тип налоговой формы-источника
      * @param reportPeriodId     идентификатор отчетного периода
+     * @param periodStart  начало периода, в котором действуют назначения
+     * @param periodEnd    окончание периода, в котором действуют назначения
      * @return список найденных пар "вид приёмника-подразделение приёмника"
      */
-    List<Pair<String, String>> existAcceptedDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind, Integer reportPeriodId);
+    List<Pair<String, String>> existAcceptedDestinations(int sourceDepartmentId, int sourceFormTypeId,
+                                                         FormDataKind sourceKind, Integer reportPeriodId,
+                                                         Date periodStart, Date periodEnd);
 
     /**
      * Обновление исполнителя для назначенной формы
      */
     void updatePerformer(int id, Integer performerId);
 
-	List<DeclarationType> allDeclarationTypeByTaxType(TaxType taxType);
+    List<DeclarationType> allDeclarationTypeByTaxType(TaxType taxType);
+
+    /**
+     * Создает новые назначения источников-приемников
+     *
+     * @param sourceClientData данные связок источников-приемников
+     */
+    void createSources(Logger logger, SourceClientData sourceClientData);
+
+    /**
+     * Создает новые назначения источников-приемников
+     *
+     * @param sourceClientData данные связок источников-приемников
+     */
+    void deleteSources(Logger logger, SourceClientData sourceClientData);
+
+    /**
+     * Обновляет указанные назначения источников-приемников
+     *
+     * @param sourceClientData данные связок источников-приемников
+     */
+    void updateSources(Logger logger, SourceClientData sourceClientData);
 }

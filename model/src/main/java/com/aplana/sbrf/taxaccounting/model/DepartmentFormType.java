@@ -87,5 +87,29 @@ public class DepartmentFormType implements Serializable {
 		return "DepartmentFormType [id=" + id + ", departmentId="
 				+ departmentId + ", formTypeId=" + formTypeId + ", kind="
 				+ kind + "]";
-	}	
+	}
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        DepartmentFormType that = (DepartmentFormType) o;
+
+        if (departmentId != that.departmentId) return false;
+        if (formTypeId != that.formTypeId) return false;
+        if (id != null ? !id.equals(that.id) : that.id != null) return false;
+        if (kind != that.kind) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + departmentId;
+        result = 31 * result + formTypeId;
+        result = 31 * result + (kind != null ? kind.hashCode() : 0);
+        return result;
+    }
 }

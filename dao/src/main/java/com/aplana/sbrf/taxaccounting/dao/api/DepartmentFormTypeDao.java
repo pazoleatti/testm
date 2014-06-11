@@ -3,7 +3,9 @@ package com.aplana.sbrf.taxaccounting.dao.api;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Интерфейс Dao для работы с источникам НФ
@@ -64,12 +66,19 @@ public interface DepartmentFormTypeDao {
     List<DepartmentFormType> getFormSources(int departmentId, int formTypeId, FormDataKind kind);
 
     /**
-     * Обновляет информацию об источниках формы
+     * Возвращает информацию о всех налоговых формах, которые являются источниками
+     * для налоговых форм или деклараций в заданном подразделении
+     * Предполагается что метод будет использоваться для заполнения фильтра,
+     * списком доступных для выбора департаментов, типов НФ, и видов НФ (kind)
      *
-     * @param departmentFormTypeId        идентификатор связки для которой нужно обновить источники
-     * @param sourceDepartmentFormTypeIds идентификаторы форм-источников в виде списка
+     * @param departmentId идентификатор подразделения
+     * @param taxType      вид налога
+     * @param periodStart  начало периода, в котором действуют назначения
+     * @param periodEnd    окончание периода, в котором действуют назначения
+     * @return информация о формах-источниках в виде списка
+     *         {@link DepartmentFormType}
      */
-    void saveFormSources(Long departmentFormTypeId, List<Long> sourceDepartmentFormTypeIds);
+    List<DepartmentFormType> getDepartmentSources(int departmentId, TaxType taxType, Date periodStart, Date periodEnd);
 
     /**
      * Возвращает информацию о всех налоговых формах, которые являются источниками
@@ -82,7 +91,22 @@ public interface DepartmentFormTypeDao {
      * @return информация о формах-источниках в виде списка
      *         {@link DepartmentFormType}
      */
+    @Deprecated
     List<DepartmentFormType> getDepartmentSources(int departmentId, TaxType taxType);
+
+    /**
+     * Возвращает информацию о формах-потребителях, которые должны использовать
+     * информацию из данной налоговой формы в качестве источника
+     *
+     * @param sourceDepartmentId идентификатор подразделения формы-источника
+     * @param sourceFormTypeId   вид налоговой формы-источника
+     * @param sourceKind         тип налоговой формы-источника
+     * @param periodStart  начало периода, в котором действуют назначения
+     * @param periodEnd    окончание периода, в котором действуют назначения
+     * @return информация о формах-потребителях в виде списка
+     *         {@link DepartmentFormType}
+     */
+    List<DepartmentFormType> getFormDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind, Date periodStart, Date periodEnd);
 
     /**
      * Возвращает информацию о формах-потребителях, которые должны использовать
@@ -94,7 +118,22 @@ public interface DepartmentFormTypeDao {
      * @return информация о формах-потребителях в виде списка
      *         {@link DepartmentFormType}
      */
+    @Deprecated
     List<DepartmentFormType> getFormDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind);
+
+    /**
+     * Возвращает информацию о декларациях-потребителях, которые должны использовать
+     * информацию из данной налоговой формы в качестве источника
+     *
+     * @param sourceDepartmentId идентификатор подразделения формы-источника
+     * @param sourceFormTypeId   вид налоговой формы-источника
+     * @param sourceKind         тип налоговой формы-источника
+     * @param periodStart  начало периода, в котором действуют назначения
+     * @param periodEnd    окончание периода, в котором действуют назначения
+     * @return информация о декларациях-потребителях в виде списка
+     *         {@link DepartmentDeclarationType}
+     */
+    List<DepartmentDeclarationType> getDeclarationDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind, Date periodStart, Date periodEnd);
 
     /**
      * Возвращает информацию о декларациях-потребителях, которые должны использовать
@@ -106,6 +145,7 @@ public interface DepartmentFormTypeDao {
      * @return информация о декларациях-потребителях в виде списка
      *         {@link DepartmentDeclarationType}
      */
+    @Deprecated
     List<DepartmentDeclarationType> getDeclarationDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind);
 
     /**
@@ -179,11 +219,18 @@ public interface DepartmentFormTypeDao {
     boolean existAssignedForm(int departmentId, int typeId, FormDataKind kind);
 
     /**
-     * Проверяет, существует ли список назначенных подразделению форм (с учётом вида и типа)
-     * @param departmentFormTypeIds список идентификаторов назначений
-     * @return назначения существуют?
+     * Проверяет существование форм-приемников в статусе "Принята" в указанном отчетном периоде
+     * @param sourceDepartmentId идентификатор подразделения формы-источника
+     * @param sourceFormTypeId   вид налоговой формы-источника
+     * @param sourceKind         тип налоговой формы-источника
+     * @param reportPeriodId     идентификатор отчетного периода
+     * @param periodStart  начало периода, в котором действуют назначения
+     * @param periodEnd    окончание периода, в котором действуют назначения
+     * @return приемники существуют?
      */
-    boolean existDepartmentFormTypes(List<Long> departmentFormTypeIds);
+    List<Pair<String, String>> existAcceptedDestinations(int sourceDepartmentId, int sourceFormTypeId,
+                                                         FormDataKind sourceKind, Integer reportPeriodId,
+                                                         Date periodStart, Date periodEnd);
 
     /**
      * Проверяет существование форм-приемников в статусе "Принята" в указанном отчетном периоде
@@ -193,5 +240,6 @@ public interface DepartmentFormTypeDao {
      * @param reportPeriodId     идентификатор отчетного периода
      * @return приемники существуют?
      */
+    @Deprecated
     List<Pair<String, String>> existAcceptedDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind, Integer reportPeriodId);
 }

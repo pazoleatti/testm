@@ -222,7 +222,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 
         //Не существует приёмника формы, имеющего статус "Принят"?
         List<Pair<String, String>> destinations = sourceService.existAcceptedDestinations(formData.getDepartmentId(), formData.getFormType().getId(),
-                formData.getKind(), formData.getReportPeriodId());
+                formData.getKind(), formData.getReportPeriodId(), null, null);
         if (!destinations.isEmpty()) {
             ReportPeriod period = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
             for (Pair<String, String> destination : destinations) {
@@ -398,7 +398,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 
         //Не существует приёмника формы, имеющего статус "Принят"?
         List<Pair<String, String>> destinations = sourceService.existAcceptedDestinations(formData.getDepartmentId(), formData.getFormType().getId(),
-                formData.getKind(), formData.getReportPeriodId());
+                formData.getKind(), formData.getReportPeriodId(), null, null);
         if (!destinations.isEmpty()) {
             ReportPeriod period = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
             for (Pair<String, String> destination : destinations) {

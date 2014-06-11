@@ -23,7 +23,7 @@ public class UpdateFormSourcesHandler extends AbstractActionHandler<UpdateFormSo
 
     @Override
     public UpdateSourcesResult execute(UpdateFormSourcesAction action, ExecutionContext context) {
-		departmentFormTypeService.saveFormSources(action.getDepartmentFormTypeId(), action.getSourceDepartmentFormTypeIds());
+		//departmentFormTypeService.createSources(action.getDepartmentFormTypeId(), action.getSourceDepartmentFormTypeIds());
 		return new UpdateSourcesResult();
     }
 
