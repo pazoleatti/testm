@@ -256,6 +256,9 @@ def copyData() {
     def rows = []
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
     def prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
+    if(prevReportPeriod == null){
+        return
+    }
     if (reportPeriod.order == 4) {
         rows.addAll(getPrevRowsForCopy(prevReportPeriod, []))
         prevReportPeriod = reportPeriodService.getPrevReportPeriod(prevReportPeriod.id)
