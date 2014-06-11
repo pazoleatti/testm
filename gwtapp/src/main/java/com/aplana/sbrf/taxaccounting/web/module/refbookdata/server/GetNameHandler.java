@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server;
 
-import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
@@ -8,7 +7,6 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.GetNameAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.GetNameResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
