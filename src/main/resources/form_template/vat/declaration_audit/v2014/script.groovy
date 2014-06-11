@@ -255,7 +255,7 @@ void generateXML() {
 
         row = getDataRow(rows724_1, 'total_4')
         nalBaza040 = round(row?.baseSum ?: empty)
-        sumNal020 = round(row?.ndsSum ?: empty)
+        sumNal040 = round(row?.ndsSum ?: empty)
 
         row = getDataRow(rows724_1, 'total_5')
         nalBaza070 = round(row?.baseSum ?: empty)
