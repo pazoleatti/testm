@@ -1230,6 +1230,26 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         return result;
     }
 
+    private static final String CHECK_LOOPS = "SELECT CASE WHEN EXISTS (\n" +
+            "  WITH value_hierarchy (id, parent_id) AS (\n" +
+            "    SELECT rbr.id,rbv.reference_value AS parent_id\n" +
+            "    FROM ref_book_record rbr\n" +
+            "    join ref_book_attribute rba ON rba.ref_book_id = rbr.ref_book_id AND rba.alias = 'PARENT_ID'\n" +
+            "    join ref_book_value rbv ON rbv.record_id = rbr.id AND rbv.attribute_id = rba.id\n" +
+            "  )\n" +
+            "  SELECT vh.*,LEVEL\n" +
+            "  FROM   value_hierarchy vh\n" +
+            "  WHERE  id = ?\n" +
+            "  START WITH id = ?\n" +
+            "  CONNECT BY parent_id = PRIOR id) \n" +
+            "  THEN 1 ELSE 0 END AS has_cycle \n" +
+            "FROM dual";
+
+    @Override
+    public boolean hasLoops(Long uniqueRecordId, Long parentRecordId) {
+        return getJdbcTemplate().queryForInt(CHECK_LOOPS, parentRecordId, uniqueRecordId) == 1;
+    }
+
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecordVersions(@NotNull Long refBookId, @NotNull Long uniqueRecordId,
 			PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {

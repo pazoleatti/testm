@@ -13,6 +13,9 @@ import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -37,6 +40,9 @@ public class RefBookUtils extends AbstractDao {
 
 	@Autowired
 	private RefBookDao refBookDao;
+
+    @Autowired
+    RefBookFactory refBookFactory;
 
     @Autowired
     private ApplicationContext applicationContext;
@@ -560,6 +566,64 @@ public class RefBookUtils extends AbstractDao {
     public void deleteRecordVersions(String tableName, @NotNull List<Long> uniqueRecordIds) {
         String sql = String.format(DELETE_VERSION, tableName, SqlUtils.transformToSqlInStatement("id", uniqueRecordIds));
         getJdbcTemplate().update(sql);
+    }
+
+    /**
+     * Формирует
+     * @param refBook
+     * @param values
+     * @return
+     */
+    public String buildUniqueRecordName(RefBook refBook, List<Pair<RefBookAttribute, RefBookValue>> values) {
+        RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(refBook.getId());
+        //кэшируем список провайдеров для атрибутов-ссылок, чтобы для каждой строки их заново не создавать
+        Map<String, RefBookDataProvider> refProviders = new HashMap<String, RefBookDataProvider>();
+        Map<String, String> refAliases = new HashMap<String, String>();
+        for (RefBookAttribute attribute : refBook.getAttributes()) {
+            if (attribute.getAttributeType() == RefBookAttributeType.REFERENCE) {
+                refProviders.put(attribute.getAlias(), refBookFactory.getDataProvider(attribute.getRefBookId()));
+                RefBook refRefBook = refBookFactory.get(attribute.getRefBookId());
+                RefBookAttribute refAttribute = refRefBook.getAttribute(attribute.getRefBookAttributeId());
+                refAliases.put(attribute.getAlias(), refAttribute.getAlias());
+            }
+        }
+
+        StringBuilder uniqueValues = new StringBuilder();
+
+        for(int i = 0; i < values.size(); i++) {
+            RefBookAttribute attribute = values.get(i).getFirst();
+            RefBookValue value = values.get(i).getSecond();
+            switch (attribute.getAttributeType()) {
+                case NUMBER:
+                    if (value.getNumberValue() != null) {
+                        uniqueValues.append(value.getNumberValue().toString());
+                    }
+                    break;
+                case DATE:
+                    if (value.getDateValue() != null) {
+                        uniqueValues.append(value.getDateValue().toString());
+                    }
+                    break;
+                case STRING:
+                    if (value.getStringValue() != null) {
+                        uniqueValues.append(value.getStringValue());
+                    }
+                    break;
+                case REFERENCE:
+                    if (value.getReferenceValue() != null) {
+                        Map<String, RefBookValue> refValue = refProviders.get(attribute.getAlias()).getRecordData(value.getReferenceValue());
+                        uniqueValues.append(refValue.get(refAliases.get(attribute.getAlias())).toString());
+                    }
+                    break;
+                default:
+                    uniqueValues.append("undefined");
+                    break;
+            }
+            if (i < values.size() - 1) {
+                uniqueValues.append("/");
+            }
+        }
+        return uniqueValues.toString();
     }
 
     public static class RecordVersionMapper implements RowMapper<RefBookRecordVersion> {
