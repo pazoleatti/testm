@@ -67,12 +67,4 @@ public interface RefBookHelper {
     RefBook getRefBookByAttributeId(Long attributeId);
 
     Map<Long, RefBookDataProvider> getProviders(Set<Long> attributeIds);
-
-    /**
-     * Формирует имя для записи справочника, основанное на уникальных атрибутах
-     * @param refBook справочник
-     * @param values список значений уникальных атрибутов
-     * @return
-     */
-    String buildUniqueRecordName(RefBook refBook, List<Pair<RefBookAttribute, RefBookValue>> values);
 }

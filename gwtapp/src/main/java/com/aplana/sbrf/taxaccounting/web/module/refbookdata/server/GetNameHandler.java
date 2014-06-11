@@ -26,32 +26,80 @@ import java.util.Map;
 @PreAuthorize("isAuthenticated()")
 public class GetNameHandler extends AbstractActionHandler<GetNameAction, GetNameResult> {
 
-	@Autowired
-	RefBookFactory refBookFactory;
     @Autowired
-    RefBookHelper refBookHelper;
+    RefBookFactory refBookFactory;
 
-	public GetNameHandler() {
-		super(GetNameAction.class);
-	}
+    public GetNameHandler() {
+        super(GetNameAction.class);
+    }
 
-	@Override
-	public GetNameResult execute(GetNameAction action, ExecutionContext executionContext) throws ActionException {
+    @Override
+    public GetNameResult execute(GetNameAction action, ExecutionContext executionContext) throws ActionException {
         GetNameResult result = new GetNameResult();
+
         RefBook refBook = refBookFactory.get(action.getRefBookId());
+        result.setName(refBook.getName());
+        result.setRefBookType(refBook.getType());
+
         RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(action.getRefBookId());
+        //кэшируем список провайдеров для атрибутов-ссылок, чтобы для каждой строки их заново не создавать
+        Map<String, RefBookDataProvider> refProviders = new HashMap<String, RefBookDataProvider>();
+        Map<String, String> refAliases = new HashMap<String, String>();
+        for (RefBookAttribute attribute : refBook.getAttributes()) {
+            if (attribute.getAttributeType() == RefBookAttributeType.REFERENCE) {
+                refProviders.put(attribute.getAlias(), refBookFactory.getDataProvider(attribute.getRefBookId()));
+                RefBook refRefBook = refBookFactory.get(attribute.getRefBookId());
+                RefBookAttribute refAttribute = refRefBook.getAttribute(attribute.getRefBookAttributeId());
+                refAliases.put(attribute.getAlias(), refAttribute.getAlias());
+            }
+        }
 
         if (action.getUniqueRecordId() != null) {
-            result.setName(refBook.getName());
-            result.setRefBookType(refBook.getType());
-            result.setUniqueAttributeValues(refBookHelper.buildUniqueRecordName(refBook,
-                    refBookDataProvider.getUniqueAttributeValues(action.getUniqueRecordId())));
+            //Получение значений уникальных параметров
+            List<Pair<RefBookAttribute, RefBookValue>> values = refBookDataProvider.getUniqueAttributeValues(action.getUniqueRecordId());
+
+            StringBuilder uniqueValues = new StringBuilder();
+
+            for(int i = 0; i < values.size(); i++) {
+                RefBookAttribute attribute = values.get(i).getFirst();
+                RefBookValue value = values.get(i).getSecond();
+                switch (attribute.getAttributeType()) {
+                    case NUMBER:
+                        if (value.getNumberValue() != null) {
+                            uniqueValues.append(value.getNumberValue().toString());
+                        }
+                        break;
+                    case DATE:
+                        if (value.getDateValue() != null) {
+                            uniqueValues.append(value.getDateValue().toString());
+                        }
+                        break;
+                    case STRING:
+                        if (value.getStringValue() != null) {
+                            uniqueValues.append(value.getStringValue());
+                        }
+                        break;
+                    case REFERENCE:
+                        if (value.getReferenceValue() != null) {
+                            Map<String, RefBookValue> refValue = refProviders.get(attribute.getAlias()).getRecordData(value.getReferenceValue());
+                            uniqueValues.append(refValue.get(refAliases.get(attribute.getAlias())).toString());
+                        }
+                        break;
+                    default:
+                        uniqueValues.append("undefined");
+                        break;
+                }
+                if (i < values.size() - 1) {
+                    uniqueValues.append("/");
+                }
+            }
+            result.setUniqueAttributeValues(uniqueValues.toString());
             Long recordId = refBookDataProvider.getRecordId(action.getUniqueRecordId());
             result.setRecordId(recordId);
         }
 
-		return result;
-	}
+        return result;
+    }
 
 	@Override
 	public void undo(GetNameAction getNameAction, GetNameResult getNameResult, ExecutionContext executionContext) throws ActionException {
