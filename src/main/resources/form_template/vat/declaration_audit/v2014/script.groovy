@@ -270,7 +270,7 @@ void generateXML() {
     /** НалВыч171Общ. Код строки 130 Графа 5. */
     def nalVich171Obsh = empty
     if (rows724_4) {
-        def tmp = getDataRow(rows724_4, 'total1')?.sum2 + getDataRow(rows724_4, 'total1')?.sum2
+        def tmp = getDataRow(rows724_4, 'total1')?.sum2 + getDataRow(rows724_4, 'total2')?.sum2
         nalVich171Obsh = round(tmp)
     }
     /** НалИсчПрод. Код строки 200 Графа 5. */
