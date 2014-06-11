@@ -179,7 +179,7 @@
 ($V{ИНН_плательщика}+"-------------------------").substring(0,12)]]></initialValueExpression>
 		</variable>
 		<variable name="НаимПрод" class="java.lang.String">
-			<variableExpression><![CDATA[$F{СведПродЮЛ_НаимПрод} == null ?
+			<variableExpression><![CDATA[($F{СведПродЮЛ_НаимПрод} == null || $F{СведПродЮЛ_НаимПрод}.equals("0")) ?
 "----------------------------------------------------------------------------------------------------------------------------------------------------------------"
 :
 ($F{СведПродЮЛ_НаимПрод}+"----------------------------------------------------------------------------------------------------------------------------------------------------------------").substring(0,160)]]></variableExpression>
@@ -197,7 +197,7 @@
 ($F{СумИсчисл}+"------------").substring(0,12)]]></initialValueExpression>
 		</variable>
 		<variable name="КодОпер" class="java.lang.String">
-			<variableExpression><![CDATA[$F{КодОпер} == null ?
+			<variableExpression><![CDATA[($F{КодОпер} == null || $F{КодОпер}.equals("0")) ?
 "-----------" :
 ($F{КодОпер}+"----------").substring(0,7)]]></variableExpression>
 			<initialValueExpression><![CDATA[$F{КодОпер} == null ? "-----------" : ($F{КодОпер}+"----------").substring(0,7)]]></initialValueExpression>
