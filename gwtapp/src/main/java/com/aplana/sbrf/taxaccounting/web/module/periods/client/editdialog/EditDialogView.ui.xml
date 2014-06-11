@@ -56,7 +56,8 @@
                             <r:RefBookPickerWidget ui:field="period" isHierarchical="false" width="250px"
                                                    versionEnabled="false"
                                                    attributeIdInt="26"
-                                                   multiSelect="false"/>
+                                                   multiSelect="false"
+                                                   title="Выбор периода"/>
                         </g:cell>
                     </g:HorizontalPanel>
 

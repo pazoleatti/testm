@@ -96,11 +96,15 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public List<Integer> getAllChildrenIds(int depId) {
+        if (depId == 0)
+            return new ArrayList<Integer>(0);
         return departmentDao.getAllChildrenIds(depId);
     }
 
     @Override
     public List<Integer> getAllParentIds(int depId) {
+        if (depId == 0)
+            return new ArrayList<Integer>(0);
         return departmentDao.getAllParentIds(depId);
     }
 
