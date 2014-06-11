@@ -248,6 +248,9 @@ public class DeclarationListView extends
 
     @Override
     public void updateData(int pageNumber) {
+        if(pageNumber == 0){
+            declarationTable.getColumnSortList().clear();
+        }
         if (pager.getPage() == pageNumber){
             updateData();
         } else {
@@ -319,24 +322,6 @@ public class DeclarationListView extends
             getUiHandlers().onCreateClicked();
         }
     }
-//    убрать если в будущем сортировка работает нормально
-//    private Header<String> getHeader(final String columnName, Column<DeclarationDataSearchResultItem, ?> returnColumn) {
-//        GenericDataGrid.DataGridResizableHeader resizableHeader;
-//        final SortingHeaderCell headerCell = new SortingHeaderCell();
-//        resizableHeader = declarationTable.createResizableHeader(columnName, returnColumn, headerCell);
-//
-//        resizableHeader.setUpdater(new ValueUpdater<String>() {
-//            @Override
-//            public void update(String value) {
-//
-//                if (getUiHandlers() != null) {
-//                    getUiHandlers().onSortingChanged();
-//                }
-//            }
-//        });
-//        return resizableHeader;
-//    }
-
 
     @Override
     public void setPage(Integer page) {

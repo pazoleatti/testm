@@ -63,6 +63,11 @@ public class RefBookAttribute implements Serializable {
     /** формат отображения даты */
     private Formats format;
 
+    /**
+     * Признак «Только для чтения»
+     */
+    private boolean readOnly;
+
 	/**
 	 * Возвращает код атрибута
 	 * @return код атрибута
@@ -247,6 +252,20 @@ public class RefBookAttribute implements Serializable {
         this.format = format;
     }
 
+    /**
+     * Признак «Только для чтения»
+     */
+    public boolean isReadOnly() {
+        return readOnly;
+    }
+
+    /**
+     * Признак «Только для чтения»
+     */
+    public void setReadOnly(boolean readOnly) {
+        this.readOnly = readOnly;
+    }
+
     @Override
 	public boolean equals(Object o) {
 		if (this == o) {
@@ -286,6 +305,9 @@ public class RefBookAttribute implements Serializable {
         if (required != that.required){
             return false;
         }
+        if (readOnly != that.readOnly){
+            return false;
+        }
         if (unique != that.unique){
             return false;
         }
@@ -316,6 +338,7 @@ public class RefBookAttribute implements Serializable {
 		sb.append(", precision=").append(precision);
 		sb.append(", width=").append(width);
 		sb.append(", required=").append(required);
+        sb.append(", readOnly=").append(readOnly);
         sb.append(", unique=").append(unique);
 		sb.append(", sortOrder=").append(sortOrder);
         sb.append(", format=").append(format != null ? format.getFormat() : null);

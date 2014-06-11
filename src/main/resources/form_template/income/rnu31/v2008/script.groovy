@@ -147,6 +147,7 @@ void consolidation() {
         row.getCell(alias).setValue(0, row.getIndex())
     }
 
+    // TODO (Ramil Timerbaev) в метод departmentFormTypeService.getFormSources добавить периоды
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
         if (it.formTypeId == formData.formType.id) {
             def taxPeriodId = reportPeriodService.get(formData.reportPeriodId)?.taxPeriod?.id

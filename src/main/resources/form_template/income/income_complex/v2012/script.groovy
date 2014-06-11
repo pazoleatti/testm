@@ -296,6 +296,7 @@ void consolidationSummary(def dataRows) {
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
 
     // получить формы-источники в текущем налоговом периоде
+    // TODO (Ramil Timerbaev) используется устаревший метод departmentFormTypeService.getSources, возможно надо заменить на departmentFormTypeService.getFormSources
     departmentFormTypeService.getSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
         def prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
         def isMonth = it.formTypeId in [332, 328] //ежемесячная

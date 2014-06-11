@@ -546,8 +546,12 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     @Override
     public BigDecimal getPrevRowNumber(FormData formData, int departmentId, String alias) {
         ReportPeriod reportPeriod = reportPeriodService.get(formData.getReportPeriodId());
-        if (reportPeriod != null && reportPeriod.getOrder() == 1) {
-            return BigDecimal.ZERO;
+        if (reportPeriod != null) {
+            Calendar rpCalendar = Calendar.getInstance();
+            rpCalendar.setTime(reportPeriod.getStartDate());
+            if (rpCalendar.get(Calendar.DAY_OF_MONTH) == 1 && rpCalendar.get(Calendar.MONTH) == Calendar.JANUARY) {
+                return BigDecimal.ZERO;
+            }
         }
         BigDecimal rowNumber = BigDecimal.ZERO;
         FormData prevFormData = getFormDataPrev(formData, departmentId);

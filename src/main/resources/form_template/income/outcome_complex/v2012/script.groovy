@@ -250,7 +250,8 @@ void consolidationBank(def dataRows) {
         }
     }
 
-    // получить консолидированные формы из источников     .
+    // получить консолидированные формы из источников
+    // TODO (Ramil Timerbaev) используется устаревший метод departmentFormTypeService.getSources, возможно надо заменить на departmentFormTypeService.getFormSources
     departmentFormTypeService.getSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         def child = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
         if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == formData.formType.id) {
@@ -307,6 +308,7 @@ void consolidationSummary(def dataRows) {
         addPrevValue(prevList, dataRows, 'consumptionBuhSumPrevTaxPeriod', dataRowsOld, 'consumptionBuhSumAccepted')
     }
     // получить формы-источники в текущем налоговом периоде
+    // TODO (Ramil Timerbaev) используется устаревший метод departmentFormTypeService.getSources, возможно надо заменить на departmentFormTypeService.getFormSources
     departmentFormTypeService.getSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
         def isMonth = it.formTypeId in [332] //ежемесячная
         def children = []

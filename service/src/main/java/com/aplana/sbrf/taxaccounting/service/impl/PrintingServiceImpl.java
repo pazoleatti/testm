@@ -9,7 +9,6 @@ import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
@@ -117,9 +116,9 @@ public class PrintingServiceImpl implements PrintingService {
 	}
 
     @Override
-    public String generateExcelUsers(List<TAUserFullWithDepartmentPath> taUserFullList) {
+    public String generateExcelUsers(List<TAUserView> taUserViewList) {
         try {
-            TAUsersReportBuilder taBuilder = new TAUsersReportBuilder(taUserFullList);
+            TAUsersReportBuilder taBuilder = new TAUsersReportBuilder(taUserViewList);
             return taBuilder.createReport();
         }catch (IOException e){
             logger.error(e.getMessage(), e);

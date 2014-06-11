@@ -74,14 +74,25 @@ public interface TAUserService {
 	/**
 	 * @param filter фильтер
 	 * @return возвращает страницу со списком пользователей
+     * @deprecated для вытаскиваине юзера по подразделению необходимо создать отдельный метод
+     * этот создавался для представления списка на клименте
 	 */
+    @Deprecated
 	PagingResult<TAUserFull> getByFilter(MembersFilterData filter);
+
+    /**
+     * Получить выборку пользователей для представления "Список пользователей"
+     * @param filter фильтер
+     * @return возвращает страницу со списком пользователей
+     */
+    PagingResult<TAUserView> getUsersByFilter(MembersFilterData filter);
 
 	/**
 	 * Возвращает список-путь от переданного подразделения по иерархии вверх
 	 * @param department
 	 * @return
 	 */
+    // TODO перенести в дао подразделений
 	List<Department> getDepartmentHierarchy(int department);
 
 }

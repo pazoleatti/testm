@@ -18,8 +18,8 @@
         <g:FormPanel ui:field="uploadFormTemplatePanel" encoding="multipart/form-data"
                  method="post">
             <t:LeftBar>
-                <g:FileUpload name="uploadFormFile" />
-                <g:SubmitButton text="Импорт" addStyleNames="{style.submit}"/>
+                <g:FileUpload ui:field="uploadFormFile" name="uploadFormFile" />
+                <g:SubmitButton ui:field="importFormTemplateButton" text="Импорт" addStyleNames="{style.submit}"/>
             </t:LeftBar>
         </g:FormPanel>
         <g:Button text="Экспорт" ui:field="downloadFormTemplateButton"

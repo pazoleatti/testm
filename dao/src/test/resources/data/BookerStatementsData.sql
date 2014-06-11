@@ -50,8 +50,8 @@ insert into department (id, NAME, parent_id, TYPE, shortname, tb_index, sbrf_cod
 insert into department (id, NAME, parent_id, TYPE, shortname, tb_index, sbrf_code, code) VALUES (2, 'банк2', 1, 2, NULL, NULL, NULL, 2);
 
 -- report period
-insert into report_period (id, NAME, tax_period_id, ord, dict_tax_period_id, start_date, end_date, calendar_start_date) VALUES (1, '2002 - 1 квартал', 1, 1, 21, date '2013-01-01', date '2013-03-31', date '2013-01-01');
-insert into report_period (id, NAME, tax_period_id, ord, dict_tax_period_id, start_date, end_date, calendar_start_date) VALUES (2, '2002 - 2 квартал', 1, 2, 22, date '2013-01-01', date '2013-06-30', date '2013-04-01');
+insert into report_period (id, NAME, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date) VALUES (1, '2002 - 1 квартал', 1, 21, date '2013-01-01', date '2013-03-31', date '2013-01-01');
+insert into report_period (id, NAME, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date) VALUES (2, '2002 - 2 квартал', 1, 22, date '2013-01-01', date '2013-06-30', date '2013-04-01');
 
 -- income101 data
 insert into income_101 (id, report_period_id, account, income_debet_remains, income_credit_remains, debet_rate, credit_rate,

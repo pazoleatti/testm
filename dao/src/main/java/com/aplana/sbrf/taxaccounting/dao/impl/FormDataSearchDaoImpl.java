@@ -143,6 +143,9 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 		case REPORT_PERIOD_NAME:
 			column = "rp.name";
 			break;
+        case REPORT_PERIOD_MONTH_NAME:
+            column = "fd.period_order";
+            break;
 		case STATE:
 			column = "fd.state";
 			break;

@@ -52,13 +52,14 @@ public class GetManualMenuHandler extends AbstractActionHandler<GetManualMenuAct
 
             MenuItem menuItem = new MenuItem("Учет налогов");
 
-            menuItem.getSubMenu().add(new MenuItem("Руководство для бизнес-пользователей", "resources/help_un.pdf"));
-            if (currentUser.hasRole(TARole.ROLE_CONF)) {
+            if (!currentUser.hasRole(TARole.ROLE_CONF)) {
+                menuItem.getSubMenu().add(new MenuItem("Руководство для бизнес-пользователей", "resources/help_un.pdf"));
+                manualMenu.getSubMenu().add(menuItem);
+                manualMenu.getSubMenu().add(new MenuItem("Учет КС", "resources/help_uks.pdf", "Учет КС"));
+            } else {
                 menuItem.getSubMenu().add(new MenuItem("Руководство для Настройщика макетов", "resources/help_conf.pdf"));
+                manualMenu.getSubMenu().add(menuItem);
             }
-
-            manualMenu.getSubMenu().add(menuItem);
-            manualMenu.getSubMenu().add(new MenuItem("Учет КС", "resources/help_uks.pdf", "Учет КС"));
             menuItems.add(manualMenu);
         }
 

@@ -51,7 +51,6 @@ public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
             blobData.setUuid(uuid);
             blobData.setCreationDate(new java.util.Date());
             blobData.setType(0);
-            blobData.setDataSize(baos.size());
 
             PreparedStatementCreator psc = new PreparedStatementCreator() {
 
@@ -61,13 +60,12 @@ public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
 
                     PreparedStatement ps = con
                             .prepareStatement(
-                                    "insert into blob_data (id, name, data, creation_date, type, data_size) values (?,?,?,?,?,?)");
+                                    "insert into blob_data (id, name, data, creation_date, type) values (?,?,?,?,?)");
                     ps.setString(1, blobData.getUuid());
                     ps.setString(2, blobData.getName());
                     ps.setBlob(3, blobData.getInputStream());
                     ps.setDate(4, new Date(blobData.getCreationDate().getTime()));
                     ps.setInt(5, blobData.getType());
-                    ps.setInt(6, blobData.getDataSize());
                     return ps;
                 }
             };
@@ -107,7 +105,6 @@ public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
 
             blobData.setInputStream(is);
             blobData.setUuid(uuid);
-            blobData.setDataSize(baos.size());
 
             PreparedStatementCreator psc = new PreparedStatementCreator() {
 
@@ -117,10 +114,9 @@ public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
 
                     PreparedStatement ps = con
                             .prepareStatement(
-                                    "update blob_data set data = ?, data_size = ? where id = ?");
+                                    "update blob_data set data = ? where id = ?");
                     ps.setBlob(1, blobData.getInputStream());
-                    ps.setInt(2, blobData.getDataSize());
-                    ps.setString(3, blobData.getUuid());
+                    ps.setString(2, blobData.getUuid());
                     return ps;
                 }
             };

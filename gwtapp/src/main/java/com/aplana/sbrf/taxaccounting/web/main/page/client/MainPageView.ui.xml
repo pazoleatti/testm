@@ -9,7 +9,7 @@
             color: white;
             font-size: 14px;
             font-weight: normal;
-            height: 30px;
+            height: 32px;
             vertical-align: middle;
             padding: 0 10px;
             white-space: nowrap;
@@ -46,6 +46,7 @@
         .gwt-MenuBar-horizontal .gwt-MenuItem-selected {
             background-color: white;
             border-top: 1px solid #e4e4e4;
+            height: 28px;
             border-bottom: 1px solid #e4e4e4;
         }
 
@@ -60,6 +61,10 @@
 
         .menuLeftElements {
             float: left;
+        }
+
+        .menuRightElements {
+            float: right;
         }
 
         .helpMenu table {
@@ -93,24 +98,7 @@
 
                         <g:HTMLPanel ui:field="signInContentPanel" styleName="{style.signin}"/>
 
-                        <div style="float: right">
-                            <table>
-                                <tr>
-                                    <td>
-                                        <g:MenuBar ui:field="helpMenu" addStyleNames="{style.helpMenu}">
-                                            <g:MenuItem>
-                                                <a href="#!about" target="_blank" title="О программе">
-                                                    <img src="resources/img/exclamation_mark.png" style="border: none" alt="!"/>
-                                                </a>
-                                            </g:MenuItem>
-                                        </g:MenuBar>
-                                    </td>
-                                    <td>
-                                        <g:HTMLPanel ui:field="manualMenuPanel" addStyleNames="{style.menuLeftElements}"/>
-                                    </td>
-                                </tr>
-                            </table>
-                        </div>
+                        <g:HTMLPanel ui:field="manualMenuPanel" addStyleNames="{style.menuRightElements}" />
                     </div>
                 </g:HTMLPanel>
             </g:north>
