@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formtemplate.server;
 
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
@@ -44,7 +45,12 @@ public class GetFormHandler extends AbstractActionHandler<GetFormAction, GetForm
 
         Logger logger = new Logger();
         GetFormResult result = new GetFormResult();
-		formTemplateService.checkLockedByAnotherUser(action.getId(), userInfo);
+        try {
+            formTemplateService.checkLockedByAnotherUser(action.getId(), userInfo);
+        } catch (AccessDeniedException e) {
+            logger.error(e);
+            result.setLockedByAnotherUser(true);
+        }
         FormTemplateExt formTemplateExt = new FormTemplateExt();
 		FormTemplate formTemplate = formTemplateService.getFullFormTemplate(action.getId(), logger);
         formTemplateExt.setActualEndVersionDate(formTemplateService.getFTEndDate(formTemplate.getId()));
@@ -52,10 +58,13 @@ public class GetFormHandler extends AbstractActionHandler<GetFormAction, GetForm
         if (!logger.getEntries().isEmpty())
             result.setUuid(logEntryService.save(logger.getEntries()));
 
-		formTemplateService.lock(action.getId(), userInfo);
-        formTemplateExt.setFormTemplate(formTemplate);
-		result.setForm(formTemplateExt);
-        result.setRefBookList(refBookFactory.getAll(false));
+        result.setFormTypeId(formTemplate.getType().getId());
+        if (!result.isLockedByAnotherUser()) {
+		    formTemplateService.lock(action.getId(), userInfo);
+            formTemplateExt.setFormTemplate(formTemplate);
+            result.setForm(formTemplateExt);
+            result.setRefBookList(refBookFactory.getAll(false));
+        }
         return result;
     }
 
