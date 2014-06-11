@@ -566,9 +566,9 @@ public class RefBookUtils extends AbstractDao {
     }
 
     /**
-     * Формирует
-     * @param refBook
-     * @param values
+     * Формирует имя для записи справочника, основанное на уникальных атрибутах
+     * @param refBook справочник
+     * @param values список значений уникальных атрибутов
      * @return
      */
     public String buildUniqueRecordName(RefBook refBook, List<Pair<RefBookAttribute, RefBookValue>> values) {

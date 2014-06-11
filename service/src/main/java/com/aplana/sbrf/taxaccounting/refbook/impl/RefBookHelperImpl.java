@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.refbook.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -35,6 +36,9 @@ public class RefBookHelperImpl implements RefBookHelper {
 
     @Autowired
     RefBookDao refBookDao;
+
+    @Autowired
+    RefBookUtils refBookUtils;
 
     public void dataRowsCheck(Collection<DataRow<Cell>> dataRows, List<Column> columns) {
         Map<Long, Pair<RefBookDataProvider, RefBookAttribute>> providers = new HashMap<Long, Pair<RefBookDataProvider, RefBookAttribute>>();
@@ -323,6 +327,11 @@ public class RefBookHelperImpl implements RefBookHelper {
             }
         }
         return result;
+    }
+
+    @Override
+    public String buildUniqueRecordName(RefBook refBook, List<Pair<RefBookAttribute, RefBookValue>> values) {
+        return refBookUtils.buildUniqueRecordName(refBook, values);
     }
 
 }

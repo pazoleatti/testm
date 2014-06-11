@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
 import java.util.Collection;
 import java.util.List;
@@ -66,4 +67,12 @@ public interface RefBookHelper {
     RefBook getRefBookByAttributeId(Long attributeId);
 
     Map<Long, RefBookDataProvider> getProviders(Set<Long> attributeIds);
+
+    /**
+     * Формирует имя для записи справочника, основанное на уникальных атрибутах
+     * @param refBook справочник
+     * @param values список значений уникальных атрибутов
+     * @return
+     */
+    String buildUniqueRecordName(RefBook refBook, List<Pair<RefBookAttribute, RefBookValue>> values);
 }

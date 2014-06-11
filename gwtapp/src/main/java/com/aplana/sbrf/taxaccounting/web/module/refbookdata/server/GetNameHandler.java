@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.GetNameAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.GetNameResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -28,7 +29,7 @@ public class GetNameHandler extends AbstractActionHandler<GetNameAction, GetName
 	@Autowired
 	RefBookFactory refBookFactory;
     @Autowired
-    RefBookUtils refBookUtils;
+    RefBookHelper refBookHelper;
 
 	public GetNameHandler() {
 		super(GetNameAction.class);
@@ -43,7 +44,7 @@ public class GetNameHandler extends AbstractActionHandler<GetNameAction, GetName
         if (action.getUniqueRecordId() != null) {
             result.setName(refBook.getName());
             result.setRefBookType(refBook.getType());
-            result.setUniqueAttributeValues(refBookUtils.buildUniqueRecordName(refBook,
+            result.setUniqueAttributeValues(refBookHelper.buildUniqueRecordName(refBook,
                     refBookDataProvider.getUniqueAttributeValues(action.getUniqueRecordId())));
             Long recordId = refBookDataProvider.getRecordId(action.getUniqueRecordId());
             result.setRecordId(recordId);
