@@ -17,9 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Реализация DAO для работы с {@link ReportPeriod отчётными периодами}
@@ -36,14 +34,37 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
         @Override
         public ReportPeriod mapRow(ResultSet rs, int index) throws SQLException {
             ReportPeriod reportPeriod = new ReportPeriod();
-            reportPeriod.setId(SqlUtils.getInteger(rs, "id"));
+            Integer id = SqlUtils.getInteger(rs, "id");
+            reportPeriod.setId(id);
             reportPeriod.setName(rs.getString("name"));
             reportPeriod.setTaxPeriod(taxPeriodDao.get(SqlUtils.getInteger(rs, "tax_period_id")));
             reportPeriod.setStartDate(rs.getDate("start_date"));
             reportPeriod.setEndDate(rs.getDate("end_date"));
             reportPeriod.setDictTaxPeriodId(SqlUtils.getInteger(rs, "dict_tax_period_id"));
-			reportPeriod.setCalendarStartDate(rs.getDate("calendar_start_date"));
+            Date calendarStartDate = rs.getDate("calendar_start_date");
+			reportPeriod.setCalendarStartDate(calendarStartDate);
+            reportPeriod.setOrder(getReportOrder(calendarStartDate, id));
             return reportPeriod;
+        }
+
+        /**
+         * Получить порядковый номер отчётного периода в налоговом, основываясь на календарную дату начала ОП:
+         * 1 января	 - 1
+         * 1 апреля	 - 2
+         * 1 июля	 - 3
+         * 1 октября - 4
+         * @return порядковый номер отчётного периода в налоговом
+         */
+        private int getReportOrder(Date date, Integer id) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+            int monthNumber = calendar.get(Calendar.MONTH);
+            List<Integer> correctMonths = Arrays.asList(0, 3, 6, 9);
+            // день всегда первое число месяца; месяцы только янв, апр, июл и окт
+            if (calendar.get(Calendar.DAY_OF_MONTH) != 1 || (!correctMonths.contains(monthNumber))) {
+                throw new DaoException("Неверная календарная дата начала отчетного периода с id=" + id);
+            }
+            return (monthNumber + 3) / 3;
         }
     }
 

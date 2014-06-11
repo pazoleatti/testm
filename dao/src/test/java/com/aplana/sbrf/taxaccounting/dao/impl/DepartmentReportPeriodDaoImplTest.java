@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import org.junit.Before;
@@ -59,7 +60,7 @@ public class DepartmentReportPeriodDaoImplTest {
 		reportPeriod1.setDictTaxPeriodId(21);
 		reportPeriod1.setStartDate(new Date());
 		reportPeriod1.setEndDate(new Date());
-		reportPeriod1.setCalendarStartDate(new Date());
+		reportPeriod1.setCalendarStartDate(new GregorianCalendar(2014,Calendar.JANUARY,1).getTime());
 		reportPeriodDao.save(reportPeriod1);
 
 		reportPeriod2 = new ReportPeriod();
@@ -68,7 +69,7 @@ public class DepartmentReportPeriodDaoImplTest {
 		reportPeriod2.setDictTaxPeriodId(22);
 		reportPeriod2.setStartDate(new Date());
 		reportPeriod2.setEndDate(new Date());
-		reportPeriod2.setCalendarStartDate(new Date());
+		reportPeriod2.setCalendarStartDate(new GregorianCalendar(2014,Calendar.JANUARY,1).getTime());
 		reportPeriodDao.save(reportPeriod2);
 
 	}
