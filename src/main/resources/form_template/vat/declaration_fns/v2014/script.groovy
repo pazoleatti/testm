@@ -119,7 +119,8 @@ List<String> getErrorDepartment(record) {
     if (record.SIGNATORY_FIRSTNAME.stringValue == null || record.SIGNATORY_FIRSTNAME.stringValue.isEmpty()) {
         errorList.add("«Имя подписанта»")
     }
-    if (record.APPROVE_DOC_NAME.stringValue == null || record.APPROVE_DOC_NAME.stringValue.isEmpty()) {
+    //Если ПрПодп (не пусто или не 1) и значение атрибута на форме настроек подразделений не задано
+    if ((record.SIGNATORY_ID?.referenceValue != null && getRefBookValue(35, record.SIGNATORY_ID?.value)?.CODE?.value != 1) && (record.APPROVE_DOC_NAME.stringValue == null || record.APPROVE_DOC_NAME.stringValue.isEmpty())) {
         errorList.add("«Наименование документа, подтверждающего полномочия представителя»")
     }
     if (record.TAX_PLACE_TYPE_CODE?.referenceValue == null) {
@@ -130,7 +131,7 @@ List<String> getErrorDepartment(record) {
 
 List<String> getErrorVersion(record) {
     List<String> errorList = new ArrayList<String>()
-    if (record.FORMAT_VERSION.stringValue == null || !record.FORMAT_VERSION.stringValue.equals('5.01')) {
+    if (record.FORMAT_VERSION.stringValue == null || !record.FORMAT_VERSION.stringValue.equals('5.03')) {
         errorList.add("«Версия формата»")
     }
     if (record.APP_VERSION.stringValue == null || !record.APP_VERSION.stringValue.equals('XLR_FNP_TAXCOM_5_03')) {
@@ -258,7 +259,7 @@ void generateXML() {
 
         row = getDataRow(rows724_1, 'total_4')
         nalBaza040 = round(row?.baseSum ?: empty)
-        sumNal020 = round(row?.ndsSum ?: empty)
+        sumNal040 = round(row?.ndsSum ?: empty)
 
         row = getDataRow(rows724_1, 'total_5')
         nalBaza070 = round(row?.baseSum ?: empty)
@@ -273,7 +274,7 @@ void generateXML() {
     /** НалВыч171Общ. Код строки 130 Графа 5. */
     def nalVich171Obsh = empty
     if (rows724_4) {
-        def tmp = getDataRow(rows724_4, 'total1')?.sum2 + getDataRow(rows724_4, 'total1')?.sum2
+        def tmp = getDataRow(rows724_4, 'total1')?.sum2 + getDataRow(rows724_4, 'total2')?.sum2
         nalVich171Obsh = round(tmp)
     }
     /** НалИсчПрод. Код строки 200 Графа 5. */
@@ -368,10 +369,16 @@ void generateXML() {
                             СумИсчислОпл: empty,
                             СумИсчислНА: empty
                     ) {
-                        СведПродЮЛ(
-                                НаимПрод: row.naimProd,
-                                ИННЮЛПрод: row.innULProd,
-                        )
+                        if (row.innULProd != null) {
+                            СведПродЮЛ(
+                                    НаимПрод: row.naimProd,
+                                    ИННЮЛПрод: row.innULProd
+                            )
+                        } else {
+                            СведПродЮЛ(
+                                    НаимПрод: row.naimProd
+                            )
+                        }
                     }
                 }
                 // пустой раздел 2
@@ -537,7 +544,7 @@ def getSection2Rows(def dataRowsMap) {
         newRow.sumIschisl = round(row.sum2)
         newRow.codeOper = '1011712'
         newRow.naimProd = row.contragent
-        newRow.innULProd = empty
+        //newRow.innULProd = empty
         rows.add(newRow)
     }
     // форма 724.7
@@ -628,7 +635,7 @@ void logicCheck() {
 
     if (nalIschProd < (sumNal010 + sumNal020 + sumNal030 + sumNal040)) {
         logger.warn('КС 1.14. Возможно нарушение ст. 171 п. 8, 172 п. 6 либо ст. 146 п. 1 НК РФ: ' +
-                'Налоговые вычеты не обоснованы, либо налоговая баща занижена, так как суммы отработанных авансов не включены в реализацию')
+                'Налоговые вычеты не обоснованы, либо налоговая база занижена, так как суммы отработанных авансов не включены в реализацию')
     }
 }
 

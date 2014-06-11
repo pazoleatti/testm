@@ -451,8 +451,7 @@ public class PeriodServiceImpl implements PeriodService{
 			if (!declarationDataSearchService.search(filter).isEmpty()) {
 				blockedBy.add(dep);
 				canRemove = false;
-				continue;
-			}
+            }
 		}
 
 		if (!canRemove) {
@@ -839,6 +838,17 @@ public class PeriodServiceImpl implements PeriodService{
 
             }
         }
+
+    }
+
+    @Override
+    public List<DepartmentReportPeriod> getDRPByDepartmentIds(List<TaxType> taxTypes, List<Long> departmentIds) {
+        if (departmentIds == null || departmentIds.isEmpty())
+            return new ArrayList<DepartmentReportPeriod>(0);
+        if (taxTypes == null)
+            return departmentReportPeriodDao.getListDRPByDepartmentIds(Arrays.asList(TaxType.values()), departmentIds);
+        else
+            return departmentReportPeriodDao.getListDRPByDepartmentIds(taxTypes, departmentIds);
 
     }
 }

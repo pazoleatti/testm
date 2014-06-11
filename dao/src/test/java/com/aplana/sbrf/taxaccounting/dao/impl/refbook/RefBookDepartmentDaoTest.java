@@ -86,8 +86,11 @@ public class RefBookDepartmentDaoTest {
     @Test
     public void testGetMatchedRecordsByUniqueAttributes() {
         RefBook refBook = refBookDao.get(30L);
-        PagingResult<Map<String, RefBookValue>> allValues = refBookDao.getRecords(refBook.getId(), getDate(1, 1, 2013), null, null, null);
-        assertEquals(0, allValues.size());
+        PagingResult<Map<String, RefBookValue>> allValues = new PagingResult<Map<String, RefBookValue>>();
+        allValues.add(new HashMap<String, RefBookValue>(){{
+            put("code", new RefBookValue(RefBookAttributeType.NUMBER, 1));
+            put("name", new RefBookValue(RefBookAttributeType.STRING, "Банк"));
+        }});
         List<RefBookRecord> records = new ArrayList<RefBookRecord>();
         for (Map<String, RefBookValue> values : allValues) {
             RefBookRecord record = new RefBookRecord();
@@ -96,8 +99,11 @@ public class RefBookDepartmentDaoTest {
             records.add(record);
         }
         List<Pair<Long,String>> matches =
-                refBookDepartmentDao.getMatchedRecordsByUniqueAttributes(refBook.getId(), refBook.getAttributes(), records);
-        assertEquals(0, matches.size());
+                refBookDepartmentDao.getMatchedRecordsByUniqueAttributes(100l, refBook.getAttributes(), records);
+        assertEquals(1, matches.size());
+        List<Pair<Long,String>> matchesNull =
+                refBookDepartmentDao.getMatchedRecordsByUniqueAttributes(null, refBook.getAttributes(), records);
+        assertEquals(1, matchesNull.size());
     }
 
     @Test
@@ -122,10 +128,6 @@ public class RefBookDepartmentDaoTest {
     public void testRemove() {
         refBookDepartmentDao.remove(1);
         departmentDao.getDepartment(1);
-    }
-
-    private Date getDate(int day, int month, int year) {
-        return new GregorianCalendar(year, month - 1, day, 15, 46, 57).getTime();
     }
 
 }

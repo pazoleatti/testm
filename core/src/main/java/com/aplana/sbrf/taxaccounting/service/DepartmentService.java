@@ -192,7 +192,8 @@ public interface DepartmentService {
     /**
      * Получает родительский ТБ для подразделения.
      * @param departmentId иденетификатор подразделения, для которого надо получить терр. банк.
-     * @return терр. банк
+     * @return терр. банк. Возвращает null, если departmentId корневое подразделение.
+     *          Возвращает переданное подразделение, если оно и есть террбанк.
      */
     Department getParentTB(int departmentId);
 
