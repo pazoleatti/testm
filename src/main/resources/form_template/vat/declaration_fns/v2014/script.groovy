@@ -369,14 +369,16 @@ void generateXML() {
                             СумИсчислОпл: empty,
                             СумИсчислНА: empty
                     ) {
-                        СведПродЮЛ(
-                                НаимПрод: row.naimProd,
-                                {
-                                    if (row.innULProd) {
-                                        ИННЮЛПрод: row.innULProd
-                                    }
-                                }
-                        )
+                        if (row.innULProd != null) {
+                            СведПродЮЛ(
+                                    НаимПрод: row.naimProd,
+                                    ИННЮЛПрод: row.innULProd
+                            )
+                        } else {
+                            СведПродЮЛ(
+                                    НаимПрод: row.naimProd
+                            )
+                        }
                     }
                 }
                 // пустой раздел 2
