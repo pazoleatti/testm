@@ -42,9 +42,6 @@ public class RefBookUtils extends AbstractDao {
 	private RefBookDao refBookDao;
 
     @Autowired
-    RefBookFactory refBookFactory;
-
-    @Autowired
     private ApplicationContext applicationContext;
 
 	private void appendSortClause(PreparedStatementData ps, RefBook refBook, RefBookAttribute sortAttribute, boolean isSortAscending) {
@@ -575,7 +572,7 @@ public class RefBookUtils extends AbstractDao {
      * @return
      */
     public String buildUniqueRecordName(RefBook refBook, List<Pair<RefBookAttribute, RefBookValue>> values) {
-        RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(refBook.getId());
+        RefBookFactory refBookFactory = applicationContext.getBean("refBookFactory", RefBookFactory.class);
         //кэшируем список провайдеров для атрибутов-ссылок, чтобы для каждой строки их заново не создавать
         Map<String, RefBookDataProvider> refProviders = new HashMap<String, RefBookDataProvider>();
         Map<String, String> refAliases = new HashMap<String, String>();
