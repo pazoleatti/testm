@@ -95,6 +95,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
         type.setStatus(VersionedObjectStatus.DRAFT);
         type.setTaxType(event.getTaxType());
         formTemplate.setType(type);
+        formTemplateTypeId = formTemplate.getType().getId();
         formTemplate.getStyles().addAll(new ArrayList<FormStyle>());
         getView().setTitle(formTemplate.getName());
         RevealContentEvent.fire(FormTemplateMainPresenter.this, RevealContentTypeHolder.getMainContent(), FormTemplateMainPresenter.this);
@@ -119,6 +120,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
                         formTemplateExt.setFormTemplate(formTemplate);
                         formTemplate.setVersion(new Date());
                         formTemplate.setType(result.getFormType());
+                        formTemplateTypeId = formTemplate.getType().getId();
                         formTemplate.getStyles().addAll(new ArrayList<FormStyle>());
                         placeManager.revealPlace(new PlaceRequest.Builder().nameToken(AdminConstants.NameTokens.formTemplateInfoPage).
                                 with(AdminConstants.NameTokens.formTemplateId, "0").build());
@@ -242,9 +244,6 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
     }
 
     private void setFormTemplate() {
-        formTemplateExt = null;
-        formTemplate = null;
-        formTemplateTypeId = null;
         final int formId = Integer.valueOf(placeManager.getCurrentPlaceRequest().getParameter(AdminConstants.NameTokens.formTemplateId, "0"));
         if (formId != 0) {
 			GetFormAction action = new GetFormAction();
@@ -265,6 +264,8 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
                             LogAddEvent.fire(FormTemplateMainPresenter.this, result.getUuid());
                             FormTemplateMainPresenter.this.formTemplateTypeId = result.getFormTypeId();
                             if (result.isLockedByAnotherUser()) {
+                                formTemplateExt = null;
+                                formTemplate = null;
                                 Dialog.errorMessage("Шаблон формы заблокирован другим пользователем");
                                 return ;
                             }
@@ -320,6 +321,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
                     Dialog.infoMessage("Форма сохранена");
                     formTemplate.setId(result.getFormTemplateId());
                     formTemplate.setType(result.getFormType());
+                    formTemplateTypeId = formTemplate.getType().getId();
                     getView().activateVersion(true);
                     getView().activateVersionName(formTemplate.getStatus().getId() == 0? "Вывести из действия" : "Ввести в действие");
                     getView().setTitle(formTemplate.getName());
