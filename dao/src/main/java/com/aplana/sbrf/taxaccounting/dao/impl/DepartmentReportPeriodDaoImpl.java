@@ -156,7 +156,31 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements
         }
     }
 
-	@Override
+    private static final String DRP_BY_DEPARTMENT_IDS_AND_TAX_TYPES =
+            "SELECT * FROM DEPARTMENT_REPORT_PERIOD drp \n" +
+                    "LEFT JOIN REPORT_PERIOD rp ON rp.ID = drp.REPORT_PERIOD_ID\n" +
+                    "LEFT JOIN TAX_PERIOD tp ON tp.ID = rp.TAX_PERIOD_ID\n" +
+                    "  WHERE %s AND tp.TAX_TYPE IN %s";
+    @Override
+    public List<DepartmentReportPeriod> getListDRPByDepartmentIds(List<TaxType> taxTypes, List<Long> departmentIds) {
+        try {
+            MapSqlParameterSource params = new MapSqlParameterSource();
+            params.addValue("departmentIds", departmentIds);
+            params.addValue("taxTypes", taxTypes);
+            return getNamedParameterJdbcTemplate().query(
+                    String.format(DRP_BY_DEPARTMENT_IDS_AND_TAX_TYPES,
+                            SqlUtils.transformToSqlInStatement("DEPARTMENT_ID", departmentIds),
+                            SqlUtils.transformTaxTypeToSqlInStatement(taxTypes)),
+                    params,
+                    mapper
+            );
+        } catch (DataAccessException e){
+            logger.error("", e);
+            throw new DaoException("", e);
+        }
+    }
+
+    @Override
 	public void delete(int reportPeriodId, Integer departmentId) {
 		getJdbcTemplate().update(
 				"delete from department_report_period where department_id = ? and report_period_id = ?",

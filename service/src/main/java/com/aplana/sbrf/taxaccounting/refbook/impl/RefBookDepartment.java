@@ -234,18 +234,20 @@ public class RefBookDepartment implements RefBookDataProvider {
     @Override
     public void updateRecordVersion(Logger logger, final Long uniqueRecordId, Date versionFrom, Date versionTo, Map<String, RefBookValue> records) {
         final Department dep = departmentService.getDepartment(uniqueRecordId.intValue());
-        Department parentDep = records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue() != null && records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue().intValue() != 0?
-                departmentService.getParentTB(records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue().intValue())
-                : departmentService.getBankDepartment();
+        Department parentDep = records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue() != null ?
+                departmentService.getDepartment(records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue().intValue())
+                : null;
         DepartmentType oldType = dep.getType();
         DepartmentType newType = fromCode(records.get(DEPARTMENT_TYPE_ATTRIBUTE).getNumberValue().intValue());
         boolean isChangeType = oldType != newType;
 
-        int oldTBId = departmentService.getParentTB(uniqueRecordId.intValue()).getId();
-        int newTBId =
-                records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue() != null && records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue().intValue() != 0?
-                departmentService.getParentTB(records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue().intValue()).getId()
-                : 0;
+        Department oldTb = departmentService.getParentTB(uniqueRecordId.intValue());
+        int oldTBId = oldTb != null ? oldTb.getId() : 0;
+        Department newTb =
+                records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue() != null ?
+                departmentService.getParentTB(records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue().intValue()) :
+                departmentService.getBankDepartment();
+        int newTBId = newTb != null ? newTb.getId() : uniqueRecordId.intValue();
         boolean isChangeTB = oldTBId != newTBId;
 
         if (isChangeType){
@@ -253,7 +255,8 @@ public class RefBookDepartment implements RefBookDataProvider {
                 //3 шаг
                 case ROOT_BANK :
                     logger.error("Подразделению не может быть изменен тип \"Банк\"!\"");
-                    return;
+                    throw new ServiceLoggerException(ERROR_MESSAGE,
+                            logEntryService.save(logger.getEntries()));
                 //4 шаг
                 case TERR_BANK:
                     List<ReportPeriod> openReportPeriods =
@@ -311,7 +314,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         }
 
         //9 шаг. Проверка зацикливания
-        if (dep.getParentId() != parentDep.getId()){
+        if (dep.getType() != DepartmentType.ROOT_BANK && dep.getParentId() != parentDep.getId()){
             checkCycle(dep, parentDep, logger);
             if (logger.containsLevel(LogLevel.ERROR))
                 throw new ServiceLoggerException(ERROR_MESSAGE,
@@ -471,6 +474,7 @@ public class RefBookDepartment implements RefBookDataProvider {
     }
 
     private void checkCorrectness(Logger logger, Long recordId, List<RefBookAttribute> attributes, List<RefBookRecord> records) {
+        Department rootBank = departmentService.getBankDepartment();
         DepartmentType type = DepartmentType.fromCode(records.get(0).getValues().get(DEPARTMENT_TYPE_ATTRIBUTE).getNumberValue().intValue());
         if (records.get(0).getValues().get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue() != null &&
                 type == DepartmentType.ROOT_BANK){
@@ -478,7 +482,7 @@ public class RefBookDepartment implements RefBookDataProvider {
             return;
         }
 
-        if (departmentService.getBankDepartment() != null && type == DepartmentType.ROOT_BANK){
+        if (rootBank != null && type == DepartmentType.ROOT_BANK && (recordId == null || rootBank.getId() != recordId.intValue())){
             logger.error("Подразделение с типом \"Банк\" уже существует!");
             return;
         }
@@ -519,22 +523,21 @@ public class RefBookDepartment implements RefBookDataProvider {
         if (newDepartmentType != DepartmentType.TERR_BANK){
             if (departmentService.getParentTB((int) depId) != null){
                 //1А.1.1
-                List<Long> reportPeriods =
-                        refBookDepartmentDao.getPeriodsByTaxTypesAndDepartments(
-                                Arrays.asList(TaxType.values()),
-                                Arrays.asList(terrBankId));
-                if (!reportPeriods.isEmpty()){
-                    for (Long periodIs : reportPeriods)
+                List<DepartmentReportPeriod> listDRP =
+                        periodService.getDRPByDepartmentIds(null, Arrays.asList((long) terrBankId));
+                if (!listDRP.isEmpty()){
+                    for (DepartmentReportPeriod drp : listDRP)
                         //1А.1.1.1
-                        if (periodService.existForDepartment((int) depId, periodIs))
+                        if (periodService.existForDepartment((int) depId, drp.getReportPeriod().getId()))
                             return;
                     //1А.1.1.1А
-                    for (Long periodIs : reportPeriods){
-                        DepartmentReportPeriod drp = new DepartmentReportPeriod();
-                        drp.setReportPeriod(periodService.getReportPeriod(periodIs.intValue()));
-                        drp.setDepartmentId(depId);
-                        drp.setActive(periodService.isPeriodOpen(terrBankId, periodIs));
-                        drp.setCorrectPeriod(null);
+                    for (DepartmentReportPeriod drp : listDRP){
+                        DepartmentReportPeriod drpCopy = new DepartmentReportPeriod();
+                        drpCopy.setReportPeriod(drp.getReportPeriod());
+                        drpCopy.setDepartmentId(depId);
+                        drpCopy.setActive(drp.isActive());
+                        drpCopy.setCorrectPeriod(drp.getCorrectPeriod());
+                        drpCopy.setBalance(drp.isBalance());
                         periodService.saveOrUpdate(drp, null, logger.getEntries());
                     }
                     return;
@@ -543,19 +546,21 @@ public class RefBookDepartment implements RefBookDataProvider {
             }
         }
         //2
-        List<Long> reportPeriods =
-                refBookDepartmentDao.getPeriodsByTaxTypesAndDepartments(Arrays.asList(TaxType.INCOME, TaxType.DEAL, TaxType.VAT), Arrays.asList(0));
-        if (!reportPeriods.isEmpty()){
-            for (Long periodIs : reportPeriods){
-                DepartmentReportPeriod drp = new DepartmentReportPeriod();
-                drp.setReportPeriod(periodService.getReportPeriod(periodIs.intValue()));
-                drp.setDepartmentId(depId);
-                drp.setActive(periodService.isPeriodOpen(0, periodIs));
-                drp.setCorrectPeriod(null);
-                periodService.saveOrUpdate(
-                        drp,
-                        null,
-                        logger.getEntries());
+        List<DepartmentReportPeriod> listDRP =
+                periodService.getDRPByDepartmentIds(Arrays.asList(TaxType.INCOME, TaxType.DEAL, TaxType.VAT), Arrays.asList(0l));
+        if (!listDRP.isEmpty()){
+            for (DepartmentReportPeriod drp : listDRP)
+                //1А.1.1.1
+                if (periodService.existForDepartment((int) depId, drp.getReportPeriod().getId()))
+                    return;
+            for (DepartmentReportPeriod drp : listDRP){
+                DepartmentReportPeriod drpCopy = new DepartmentReportPeriod();
+                drpCopy.setReportPeriod(drp.getReportPeriod());
+                drpCopy.setDepartmentId(depId);
+                drpCopy.setActive(drp.isActive());
+                drpCopy.setCorrectPeriod(null);
+                drpCopy.setBalance(drp.isBalance());
+                periodService.saveOrUpdate(drpCopy, null, logger.getEntries());
             }
         }
     }
