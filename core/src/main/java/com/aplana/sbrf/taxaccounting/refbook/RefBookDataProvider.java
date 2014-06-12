@@ -205,6 +205,13 @@ public interface RefBookDataProvider {
      * @param recordIds список идентификаторов записей, все версии которых будут удалены
      */
     void deleteAllRecords(Logger logger, List<Long> recordIds);
+
+    /**
+     * Удаляет указанные версии записи из справочника
+     * @param uniqueRecordIds список идентификаторов версий записей, которые будут удалены
+     */
+    void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds);
+
     /**
      * Удаляет указанные версии записи из справочника
      * @param uniqueRecordIds список идентификаторов версий записей, которые будут удалены

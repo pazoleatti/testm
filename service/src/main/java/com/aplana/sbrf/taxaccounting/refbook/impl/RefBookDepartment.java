@@ -250,6 +250,10 @@ public class RefBookDepartment implements RefBookDataProvider {
         int newTBId = newTb != null ? newTb.getId() : uniqueRecordId.intValue();
         boolean isChangeTB = oldTBId != newTBId;
 
+        if (isChangeTB)
+            throw new ServiceLoggerException("Невозможно переместить подразделение в состав другого территориального банка!",
+                    logEntryService.save(logger.getEntries()));
+
         if (isChangeType){
             switch (oldType){
                 //3 шаг
@@ -322,7 +326,8 @@ public class RefBookDepartment implements RefBookDataProvider {
         }
 
         //10 шаг
-        if (isChangeTB){
+        //Временно коммнтим до 0.3.9
+        /*if (isChangeTB){
             //8A.1
             if (!formDataService.existFormDataByTaxAndDepartment(Arrays.asList(TaxType.PROPERTY, TaxType.TRANSPORT), Arrays.asList(dep.getId())) ||
                     declarationDataSearchService.getDeclarationIds(
@@ -373,7 +378,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                 }
                 createPeriods(uniqueRecordId, newType, newTBId, logger);
             }
-        }
+        }*/
 
         //Сохранение
         refBookDepartmentDao.update(uniqueRecordId, records, refBook.getAttributes());
@@ -386,6 +391,11 @@ public class RefBookDepartment implements RefBookDataProvider {
 
     @Override
     public void deleteAllRecords(Logger logger, List<Long> uniqueRecordIds) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds) {
         throw new UnsupportedOperationException();
     }
 
@@ -554,13 +564,15 @@ public class RefBookDepartment implements RefBookDataProvider {
                 if (periodService.existForDepartment((int) depId, drp.getReportPeriod().getId()))
                     return;
             for (DepartmentReportPeriod drp : listDRP){
-                DepartmentReportPeriod drpCopy = new DepartmentReportPeriod();
-                drpCopy.setReportPeriod(drp.getReportPeriod());
-                drpCopy.setDepartmentId(depId);
-                drpCopy.setActive(drp.isActive());
-                drpCopy.setCorrectPeriod(null);
-                drpCopy.setBalance(drp.isBalance());
-                periodService.saveOrUpdate(drpCopy, null, logger.getEntries());
+                for (Integer childDepId : departmentService.getAllChildrenIds((int) depId)){
+                    DepartmentReportPeriod drpCopy = new DepartmentReportPeriod();
+                    drpCopy.setReportPeriod(drp.getReportPeriod());
+                    drpCopy.setDepartmentId(Long.valueOf(childDepId));
+                    drpCopy.setActive(drp.isActive());
+                    drpCopy.setCorrectPeriod(null);
+                    drpCopy.setBalance(drp.isBalance());
+                    periodService.saveOrUpdate(drpCopy, null, logger.getEntries());
+                }
             }
         }
     }
