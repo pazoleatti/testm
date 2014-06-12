@@ -99,7 +99,14 @@ public class EditCorrectionDialogPresenter extends PresenterWidget<EditCorrectio
     }
 
     private void edit(final EditDialogData data) {
+        int correctionDate = data.getCorrectionDate().getYear()+1900;
+        int year = data.getPeriodYear().intValue();
 
+        if (correctionDate < year) {
+            Dialog.warningMessage("Редактирование параметров",
+                    "Календарный год периода сдачи корректировки не должен быть меньше календарного года корректируемого периода!");
+            return;
+        }
         CheckCorrectionPeriodStatusAction checkCorrectionPeriodStatusAction = new CheckCorrectionPeriodStatusAction();
         checkCorrectionPeriodStatusAction.setSelectedDepartments(Arrays.asList(data.getDepartmentId()));
         checkCorrectionPeriodStatusAction.setReportPeriodId(data.getReportPeriodId().intValue());

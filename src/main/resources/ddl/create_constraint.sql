@@ -15,7 +15,8 @@ alter table tax_period add constraint tax_period_chk_taxtype check (tax_type in 
 
 alter table form_template add constraint form_template_pk primary key (id);
 alter table form_template add constraint form_template_fk_type_id foreign key (type_id) references form_type(id);
-alter table form_template add constraint form_template_uniq_version unique(type_id, version);
+--ограничение не работает, в таком виде оно бесполезно
+--alter table form_template add constraint form_template_uniq_version unique(type_id, version);
 alter table form_template add constraint form_template_chk_fixed_rows check(fixed_rows in (0, 1));
 alter table form_template add constraint form_template_check_status check (status in (-1, 0, 1, 2));
 alter table form_template add constraint form_template_chk_monthly check (monthly in (0, 1));
