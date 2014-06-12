@@ -318,7 +318,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         }
 
         //9 шаг. Проверка зацикливания
-        if (dep.getType() != DepartmentType.ROOT_BANK && dep.getParentId() != parentDep.getId()){
+        if (dep.getType() != DepartmentType.ROOT_BANK && dep.getParentId() != (parentDep != null ? parentDep.getId() : 0)){
             checkCycle(dep, parentDep, logger);
             if (logger.containsLevel(LogLevel.ERROR))
                 throw new ServiceLoggerException(ERROR_MESSAGE,
@@ -564,15 +564,13 @@ public class RefBookDepartment implements RefBookDataProvider {
                 if (periodService.existForDepartment((int) depId, drp.getReportPeriod().getId()))
                     return;
             for (DepartmentReportPeriod drp : listDRP){
-                for (Integer childDepId : departmentService.getAllChildrenIds((int) depId)){
-                    DepartmentReportPeriod drpCopy = new DepartmentReportPeriod();
-                    drpCopy.setReportPeriod(drp.getReportPeriod());
-                    drpCopy.setDepartmentId(Long.valueOf(childDepId));
-                    drpCopy.setActive(drp.isActive());
-                    drpCopy.setCorrectPeriod(null);
-                    drpCopy.setBalance(drp.isBalance());
-                    periodService.saveOrUpdate(drpCopy, null, logger.getEntries());
-                }
+                DepartmentReportPeriod drpCopy = new DepartmentReportPeriod();
+                drpCopy.setReportPeriod(drp.getReportPeriod());
+                drpCopy.setDepartmentId(depId);
+                drpCopy.setActive(drp.isActive());
+                drpCopy.setCorrectPeriod(null);
+                drpCopy.setBalance(drp.isBalance());
+                periodService.saveOrUpdate(drpCopy, null, logger.getEntries());
             }
         }
     }
