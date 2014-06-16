@@ -12,6 +12,8 @@ public class GetFormResult implements Result {
     private FormTemplateExt form;
     private List<RefBook> refBookList;
     private String uuid;
+    private int formTypeId;
+    private boolean lockedByAnotherUser = false;
 
     public String getUuid() {
         return uuid;
@@ -35,5 +37,21 @@ public class GetFormResult implements Result {
 
     public void setRefBookList(List<RefBook> refBookList) {
         this.refBookList = refBookList;
+    }
+
+    public int getFormTypeId() {
+        return formTypeId;
+    }
+
+    public void setFormTypeId(int formTypeId) {
+        this.formTypeId = formTypeId;
+    }
+
+    public boolean isLockedByAnotherUser() {
+        return lockedByAnotherUser;
+    }
+
+    public void setLockedByAnotherUser(boolean lockedByAnotherUser) {
+        this.lockedByAnotherUser = lockedByAnotherUser;
     }
 }
