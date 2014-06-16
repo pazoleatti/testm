@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared;
 
 
+import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.model.TaxNominationColumnEnum;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
 import java.util.List;
@@ -12,9 +13,11 @@ public class GetTableDataAction extends UnsecuredActionImpl<GetTableDataResult> 
 
     private List<Integer> departmentsIds;
     private char taxType;
-    private boolean isForm;
+    private boolean isForm = true;
     private int startIndex;
     private int count;
+    private TaxNominationColumnEnum sortColumn = TaxNominationColumnEnum.DEPARTMENT;
+    private boolean asc = true;
 
     public List<Integer> getDepartmentsIds() {
         return departmentsIds;
@@ -54,5 +57,21 @@ public class GetTableDataAction extends UnsecuredActionImpl<GetTableDataResult> 
 
     public void setCount(int count) {
         this.count = count;
+    }
+
+    public void setSortColumn(TaxNominationColumnEnum sortColumn) {
+        this.sortColumn = sortColumn;
+    }
+
+    public TaxNominationColumnEnum getSortColumn() {
+        return sortColumn;
+    }
+
+    public void setAsc(boolean asc) {
+        this.asc = asc;
+    }
+
+    public boolean isAsc() {
+        return asc;
     }
 }
