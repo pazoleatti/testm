@@ -227,10 +227,10 @@ public class RefBookDepartment implements RefBookDataProvider {
             throw new ServiceLoggerException("Подразделение не создано, обнаружены фатальные ошибки!",
                     logEntryService.save(logger.getEntries()));
 
-        auditService.add(FormDataEvent.UPDATE_DEPARTMENT, logger.getTaUserInfo(), depId,
+        auditService.add(FormDataEvent.UPDATE_DEPARTMENT, logger.getTaUserInfo(), 0,
                 null, null, null, null,
                 String.format("Создано подразделение %s, значения атрибутов: %s",
-                        departmentService.getDepartment(depId).getName(),
+                        refBookValueMap.get(DEPARTMENT_NAME_ATTRIBUTE).toString(),
                         assembleMessage(refBookValueMap)));
         return Arrays.asList((long)depId);
     }
@@ -480,9 +480,9 @@ public class RefBookDepartment implements RefBookDataProvider {
 
         deletePeriods(depId, logger);
 
-        refBookDepartmentDao.remove(depId);
-        auditService.add(FormDataEvent.DELETE_DEPARTMENT, logger.getTaUserInfo(), depId, null, null, null, null,
+        auditService.add(FormDataEvent.DELETE_DEPARTMENT, logger.getTaUserInfo(), 0, null, null, null, null,
                 String.format("Удалено подразделение %s", departmentService.getParentsHierarchy(depId)));
+        refBookDepartmentDao.remove(depId);
     }
 
     @Override
