@@ -103,7 +103,7 @@ public class EditCorrectionDialogPresenter extends PresenterWidget<EditCorrectio
         int year = data.getPeriodYear().intValue();
 
         if (correctionDate < year) {
-            Dialog.warningMessage("Редактирование параметров",
+            Dialog.errorMessage("Редактирование параметров",
                     "Календарный год периода сдачи корректировки не должен быть меньше календарного года корректируемого периода!");
             return;
         }
