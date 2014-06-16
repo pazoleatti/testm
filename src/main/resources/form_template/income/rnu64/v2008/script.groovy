@@ -428,6 +428,7 @@ def isBalancePeriod() {
 void consolidation() {
     def rows = []
     def sum = 0
+    // TODO (Ramil Timerbaev) в метод departmentFormTypeService.getFormSources добавить периоды
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
             def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)

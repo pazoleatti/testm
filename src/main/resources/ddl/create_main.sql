@@ -29,7 +29,7 @@ create sequence seq_ref_book_oktmo start with 300000 increment by 100;
 
 create table configuration (
   code varchar2(50) not null,
-  value varchar2(510)
+  value clob
 );
 comment on table configuration is 'Настройки приложения, конфигурация';
 comment on column configuration.code is 'Код параметра';
@@ -118,8 +118,7 @@ create table blob_data (
   name          varchar2(530) null,
   data          blob not null,
   creation_date date not null,
-  type          number(1) default 0 not null,
-  data_size     number(9) not null
+  type          number(1) default 0 not null
 );
 comment on table blob_data is 'Файловое хранилище';
 comment on column blob_data.id is 'Уникальный идентификатор';
@@ -127,7 +126,6 @@ comment on column blob_data.name is 'Название файла';
 comment on column blob_data.data is 'Бинарные данные';
 comment on column blob_data.creation_date is 'Дата создания';
 comment on column blob_data.type is 'Тип данных (0 - постоянные, 1 - временные)';
-comment on column blob_data.data_size is 'Размер файла в байтах';
 ----------------------------------------------------------------------------------------------------
 create table ref_book (
   id number(18,0) not null,
@@ -163,7 +161,8 @@ create table ref_book_attribute (
   required number(1) default 0 not null,
   is_unique number(1) default 0 not null,
   sort_order number(9),
-  format number(2)
+  format number(2),
+  read_only number(1) default 0 not null
 );
 comment on table ref_book_attribute is 'Атрибут справочника';
 comment on column ref_book_attribute.id is 'Уникальный идентификатор';
@@ -181,6 +180,7 @@ comment on column ref_book_attribute.required is 'Признак обязате�
 comment on column ref_book_attribute.is_unique is 'Признак уникальности значения атрибута справочника (1 - должно быть уникальным; 0 - нет)';
 comment on column ref_book_attribute.sort_order is 'Определяет порядок сортировки по умолчанию';
 comment on column ref_book_attribute.format is 'Формат. (Для дат: 0 - "", 1 - "dd.MM.yyyy", 2 - "MM.yyyy", 3 - "MMMM yyyy", 4 - "yyyy", 5 - "dd.MM"; Для чисел: 6 - чекбокс)';
+comment on column ref_book_attribute.read_only is 'Только для чтения (0 - редактирование доступно пользователю; 1 - редактирование недоступно пользователю)';
 ------------------------------------------------------------------------------------------------------
 create table ref_book_record (
   id number(18) not null,
@@ -283,7 +283,6 @@ create table report_period (
   id number(9) not null,
   name varchar2(510) not null,
   tax_period_id number(9) not null,
-  ord      number(2) not null,
   dict_tax_period_id number(18) not null,
   start_date date not null,
   end_date date not null,
@@ -293,7 +292,6 @@ comment on table report_period is 'Отчетные периоды';
 comment on column report_period.id is 'Первичный ключ';
 comment on column report_period.name is 'Наименование периода';
 comment on column report_period.tax_period_id is 'Налоговый период';
-comment on column report_period.ord is 'Номер отчетного периода в налоговом';
 comment on column report_period.dict_tax_period_id is 'Ссылка на справочник отчетных периодов';
 comment on column report_period.start_date is 'Дата начала отчетного периода';
 comment on column report_period.end_date is 'Дата окончания отчетного периода';

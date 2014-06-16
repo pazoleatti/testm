@@ -41,6 +41,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 	private final PlaceManager placeManager;
 	private FormTemplate formTemplate;
     private FormTemplateExt formTemplateExt;
+    private Integer formTemplateTypeId;
 
     protected VersionHistoryPresenter versionHistoryPresenter;
 
@@ -94,6 +95,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
         type.setStatus(VersionedObjectStatus.DRAFT);
         type.setTaxType(event.getTaxType());
         formTemplate.setType(type);
+        formTemplateTypeId = formTemplate.getType().getId();
         formTemplate.getStyles().addAll(new ArrayList<FormStyle>());
         getView().setTitle(formTemplate.getName());
         RevealContentEvent.fire(FormTemplateMainPresenter.this, RevealContentTypeHolder.getMainContent(), FormTemplateMainPresenter.this);
@@ -118,6 +120,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
                         formTemplateExt.setFormTemplate(formTemplate);
                         formTemplate.setVersion(new Date());
                         formTemplate.setType(result.getFormType());
+                        formTemplateTypeId = formTemplate.getType().getId();
                         formTemplate.getStyles().addAll(new ArrayList<FormStyle>());
                         placeManager.revealPlace(new PlaceRequest.Builder().nameToken(AdminConstants.NameTokens.formTemplateInfoPage).
                                 with(AdminConstants.NameTokens.formTemplateId, "0").build());
@@ -175,7 +178,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 	@Override
 	public void onHide() {
 		super.onHide();
-		unlockForm(formTemplate.getId() != null?formTemplate.getId():0);
+        unlockForm((formTemplate != null && formTemplate.getId() != null)?formTemplate.getId():0);
         if (closeFormTemplateHandlerRegistration != null)
 		    closeFormTemplateHandlerRegistration.removeHandler();
 	}
@@ -241,7 +244,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
     }
 
     private void setFormTemplate() {
-		final int formId = Integer.valueOf(placeManager.getCurrentPlaceRequest().getParameter(AdminConstants.NameTokens.formTemplateId, "0"));
+        final int formId = Integer.valueOf(placeManager.getCurrentPlaceRequest().getParameter(AdminConstants.NameTokens.formTemplateId, "0"));
         if (formId != 0) {
 			GetFormAction action = new GetFormAction();
 			action.setId(formId);
@@ -259,6 +262,13 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 						@Override
 						public void onSuccess(GetFormResult result) {
                             LogAddEvent.fire(FormTemplateMainPresenter.this, result.getUuid());
+                            FormTemplateMainPresenter.this.formTemplateTypeId = result.getFormTypeId();
+                            if (result.isLockedByAnotherUser()) {
+                                formTemplateExt = null;
+                                formTemplate = null;
+                                Dialog.errorMessage("Шаблон формы заблокирован другим пользователем");
+                                return ;
+                            }
                             formTemplateExt = result.getForm();
 							formTemplate = formTemplateExt.getFormTemplate();
 							getView().setFormId(formTemplate.getId());
@@ -311,6 +321,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
                     Dialog.infoMessage("Форма сохранена");
                     formTemplate.setId(result.getFormTemplateId());
                     formTemplate.setType(result.getFormType());
+                    formTemplateTypeId = formTemplate.getType().getId();
                     getView().activateVersion(true);
                     getView().activateVersionName(formTemplate.getStatus().getId() == 0? "Вывести из действия" : "Ввести в действие");
                     getView().setTitle(formTemplate.getName());
@@ -361,10 +372,10 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 
     @Override
     public void onReturnClicked() {
-        if (formTemplate.getType().getId() == 0)
+        if (formTemplateTypeId == null)
             placeManager.revealPlace(new PlaceRequest.Builder().nameToken(AdminConstants.NameTokens.adminPage).build());
         else
-            placeManager.revealPlace(new PlaceRequest.Builder().nameToken(AdminConstants.NameTokens.formTemplateVersionList).with(AdminConstants.NameTokens.formTypeId, String.valueOf(formTemplate.getType().getId())).build());
+            placeManager.revealPlace(new PlaceRequest.Builder().nameToken(AdminConstants.NameTokens.formTemplateVersionList).with(AdminConstants.NameTokens.formTypeId, String.valueOf(formTemplateTypeId)).build());
     }
 
     @Override

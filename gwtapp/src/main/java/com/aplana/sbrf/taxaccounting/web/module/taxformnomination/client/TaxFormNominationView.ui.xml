@@ -70,7 +70,7 @@
                 <fm:right>
                     <fm:Right>
                         <style:LeftBar marginRight="10" childValign="middle" height="100%">
-                            <style:LinkAnchor disableImage="true" ui:field="switchMode" href="#" addStyleNames="{style.titleText}"/>
+                            <style:LinkButton disableImage="true" ui:field="switchMode" addStyleNames="{style.titleText}"/>
                         </style:LeftBar>
                     </fm:Right>
                 </fm:right>
@@ -102,16 +102,16 @@
                 <style:LeftBar addStyleNames="{style.filterPanel}" marginRight="10" childValign="middle">
                     <g:Button ui:field="assignAnchor" title="Назначить" text="Назначить..."/>
                     <style:LinkButton ui:field="editAnchor" enabled="false" text="Редактировать"/>
-                    <style:LinkAnchor wordWrap="false" enabled="false" ui:field="cancelAnchor" text="Отменить назначение"/>
+                    <style:LinkButton enabled="false" ui:field="cancelAnchor" text="Отменить назначение"/>
                 </style:LeftBar>
 
-                <g:ScrollPanel ui:field="formGridWrapper" addStyleNames="{style.table}">
-                    <style:GenericCellTable ui:field="formGrid" width="100%" height="100%"/>
-                </g:ScrollPanel>
+                <g:ResizeLayoutPanel ui:field="formGridWrapper" addStyleNames="{style.table}">
+                    <style:GenericDataGrid ui:field="formGrid" width="100%" height="100%"/>
+                </g:ResizeLayoutPanel>
 
-                <g:ScrollPanel ui:field="declarationGridWrapper" addStyleNames="{style.table}">
-                    <style:GenericCellTable ui:field="declarationGrid" width="100%" height="100%"/>
-                </g:ScrollPanel>
+                <g:ResizeLayoutPanel ui:field="declarationGridWrapper" addStyleNames="{style.table}">
+                    <style:GenericDataGrid ui:field="decGrid" width="100%" height="100%"/>
+                </g:ResizeLayoutPanel>
 
                 <pager:FlexiblePager ui:field="formPager" addStyleNames="{style.pager}"
                                      location="CENTER" showFastForwardButton="false"

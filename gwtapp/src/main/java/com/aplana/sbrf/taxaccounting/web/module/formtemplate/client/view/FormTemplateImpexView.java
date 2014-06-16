@@ -6,9 +6,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.FormPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -21,8 +19,14 @@ public class FormTemplateImpexView extends ViewWithUiHandlers<FormTemplateImpexU
 	@UiField
 	FormPanel uploadFormTemplatePanel;
 
+    @UiField
+    FileUpload uploadFormFile;
+
 	@UiField
 	Button downloadFormTemplateButton;
+
+    @UiField
+    SubmitButton importFormTemplateButton;
 
     @Inject
 	public FormTemplateImpexView(Binder binder) {
@@ -32,13 +36,13 @@ public class FormTemplateImpexView extends ViewWithUiHandlers<FormTemplateImpexU
 			@Override
 			public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
                 if(event.getResults() == null){
-                    getUiHandlers().uploadFormTemplateFail("Ошибки при импорте формы.");
+                    getUiHandlers().uploadFormTemplateFail();
                     return;
                 }
                 if (event.getResults().contains(ERROR_RESP)) {
                     getUiHandlers().uploadDectResponseWithErrorUuid(event.getResults().replaceFirst(ERROR_RESP, ""));
                 }else if (event.getResults().toLowerCase().contains(ERROR)) {
-                    getUiHandlers().uploadFormTemplateFail(event.getResults().replaceFirst(ERROR, ""));
+                    getUiHandlers().uploadFormTemplateFail();
                 } else {
                     getUiHandlers().uploadFormTemplateSuccess(event.getResults().replaceFirst(SUCCESS_RESP, ""));
                 }
@@ -54,5 +58,15 @@ public class FormTemplateImpexView extends ViewWithUiHandlers<FormTemplateImpexU
 	@UiHandler("downloadFormTemplateButton")
 	public void onDownloadFormTemplateButton(ClickEvent event){
 		getUiHandlers().downloadFormTemplate();
+	}
+
+	@UiHandler("importFormTemplateButton")
+	public void onImportFormTemplateButton(ClickEvent event){
+        if (uploadFormFile.getFilename() == null || "".equals(uploadFormFile.getFilename())) {
+            getUiHandlers().uploadFormTemplateFail();
+            event.preventDefault();
+            return;
+        }
+        uploadFormTemplatePanel.submit();
 	}
 }

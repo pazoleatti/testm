@@ -32,10 +32,10 @@ public class FormDataFilter implements Serializable{
 	/*Количество записей, которые нужно вернуть*/
 	private int countOfRecords;
 
-	private FormDataSearchOrdering searchOrdering;
+	private FormDataSearchOrdering searchOrdering = FormDataSearchOrdering.ID;
 
 	/*true, если сортируем по возрастанию, false - по убыванию*/
-	private boolean ascSorting;
+	private boolean ascSorting = true;
 
 	private Boolean returnState;
 

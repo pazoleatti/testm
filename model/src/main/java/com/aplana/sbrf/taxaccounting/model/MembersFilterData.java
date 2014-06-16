@@ -5,64 +5,93 @@ import java.util.List;
 import java.util.Set;
 
 /**
+ * Модель фильтра для выборки пользователей
  * @author Eugene Stetsenko
  */
-public class MembersFilterData implements Serializable{
-	private static final long serialVersionUID = 5954894694420337600L;
+public class MembersFilterData implements Serializable {
+    private static final long serialVersionUID = 5954894694420337600L;
 
-	Boolean active;
-	String userName;
-	List<Long> roleIds;
-	Set<Integer> departmentIds;
+    public enum SortField {
+        NAME,
+        LOGIN,
+        MAIL,
+        ACTIVE,
+        DEPARTMENT,
+        ROLE
+    }
 
-	Integer countOfRecords;
-	Integer startIndex;
+    private Boolean active;
+    private String userName;
+    private List<Long> roleIds;
+    private Set<Integer> departmentIds;
 
-	public Boolean getActive() {
-		return active;
-	}
+    private Integer countOfRecords;
+    private Integer startIndex;
 
-	public void setActive(Boolean active) {
-		this.active = active;
-	}
+    private SortField sortField;
+    private boolean isAsc = true;
 
-	public String getUserName() {
-		return userName;
-	}
+    public Boolean getActive() {
+        return active;
+    }
 
-	public void setUserName(String userName) {
-		this.userName = userName;
-	}
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
 
-	public Integer getCountOfRecords() {
-		return countOfRecords;
-	}
+    public String getUserName() {
+        return userName;
+    }
 
-	public void setCountOfRecords(Integer countOfRecords) {
-		this.countOfRecords = countOfRecords;
-	}
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
 
-	public Integer getStartIndex() {
-		return startIndex;
-	}
+    public Integer getCountOfRecords() {
+        return countOfRecords;
+    }
 
-	public void setStartIndex(Integer startIndex) {
-		this.startIndex = startIndex;
-	}
+    public void setCountOfRecords(Integer countOfRecords) {
+        this.countOfRecords = countOfRecords;
+    }
 
-	public List<Long> getRoleIds() {
-		return roleIds;
-	}
+    public Integer getStartIndex() {
+        return startIndex;
+    }
 
-	public void setRoleIds(List<Long> roleIds) {
-		this.roleIds = roleIds;
-	}
+    public void setStartIndex(Integer startIndex) {
+        this.startIndex = startIndex;
+    }
 
-	public Set<Integer> getDepartmentIds() {
-		return departmentIds;
-	}
+    public List<Long> getRoleIds() {
+        return roleIds;
+    }
 
-	public void setDepartmentIds(Set<Integer> departmentIds) {
-		this.departmentIds = departmentIds;
-	}
+    public void setRoleIds(List<Long> roleIds) {
+        this.roleIds = roleIds;
+    }
+
+    public Set<Integer> getDepartmentIds() {
+        return departmentIds;
+    }
+
+    public void setDepartmentIds(Set<Integer> departmentIds) {
+        this.departmentIds = departmentIds;
+    }
+
+    public SortField getSortField() {
+        return sortField;
+    }
+
+    public void setSortField(SortField sortField) {
+        this.sortField = sortField;
+    }
+
+    public boolean isAsc() {
+        return isAsc;
+    }
+
+    public void setAsc(boolean isAsc) {
+        this.isAsc = isAsc;
+    }
 }

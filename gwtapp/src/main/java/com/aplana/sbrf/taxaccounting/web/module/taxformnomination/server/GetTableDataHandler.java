@@ -28,29 +28,7 @@ public class GetTableDataHandler extends AbstractActionHandler<GetTableDataActio
     @Autowired
     private SourceService departmentFormTypeService;
 
-    static final Comparator<FormTypeKind> comparator =  new Comparator<FormTypeKind>() {
-        /**
-         * Порядок сортировки записей при отображении:
-         * - Подразделение
-         * - Тип налоговой формы
-         * - Вид налоговой формы
-         *
-         * @param o1
-         * @param o2
-         * @return
-         */
-        public int compare(FormTypeKind o1, FormTypeKind o2) {
-            int result = o1.getDepartment().getName().compareTo(o2.getDepartment().getName());
-            if (result == 0) {
-                result = o1.getKind().getName().compareTo(o2.getKind().getName());
-                if (result == 0) {
-                    result = o1.getName().compareTo(o2.getName());
-                }
-            }
-
-            return result;
-        }
-    };
+    static final TaxNominationDataComparator comparator = new TaxNominationDataComparator();
 
     @Override
     public GetTableDataResult execute(GetTableDataAction action, ExecutionContext executionContext) throws ActionException {
@@ -58,34 +36,42 @@ public class GetTableDataHandler extends AbstractActionHandler<GetTableDataActio
 
         char taxType = action.getTaxType();
         List<FormTypeKind> data = new ArrayList<FormTypeKind>();
-        if (action.isForm()){
-            for (Integer depoId: action.getDepartmentsIds()){
+        // загрузка данных
+        if (action.isForm()) {
+            for (Integer depoId : action.getDepartmentsIds()) {
                 data.addAll(departmentFormTypeService.getFormAssigned(depoId.longValue(), taxType));
             }
-
-            // sort
-            Collections.sort(data, comparator);
-        }
-        else {
-            for (Integer depoId: action.getDepartmentsIds()){
+        } else {
+            for (Integer depoId : action.getDepartmentsIds()) {
                 data.addAll(departmentFormTypeService.getDeclarationAssigned(depoId.longValue(), taxType));
             }
         }
+        // формирование мапы с полным названием подразделения
         Map<Integer, String> departmentFullNames = new HashMap<Integer, String>();
-        for(FormTypeKind item: data) {
-            if (departmentFullNames.get(item.getDepartment().getId()) == null) departmentFullNames.put(item.getDepartment().getId(), departmentService.getParentsHierarchy(item.getDepartment().getId()));
-            if (item.getPerformer() != null && departmentFullNames.get(item.getPerformer().getId()) == null) departmentFullNames.put(item.getPerformer().getId(), departmentService.getParentsHierarchy(item.getPerformer().getId()));
+        for (FormTypeKind item : data) {
+            int departmentId = item.getDepartment().getId();
+            Integer performerId = item.getPerformer() != null ? item.getPerformer().getId() : null;
+            if (departmentFullNames.get(departmentId) == null) {
+                departmentFullNames.put(departmentId, departmentService.getParentsHierarchy(departmentId));
+            }
+            if (performerId != null && departmentFullNames.get(performerId) == null) {
+                departmentFullNames.put(performerId, departmentService.getParentsHierarchy(performerId));
+            }
         }
         result.setDepartmentFullNames(departmentFullNames);
 
-        if (action.getCount() != 0){
-            int toIndex = action.getStartIndex()+action.getCount() > data.size() ?
-                        data.size() : action.getStartIndex()+action.getCount();
+        //сортировка
+        comparator.setup(action.getSortColumn(), action.isAsc(), action.isForm(), departmentFullNames);
+        Collections.sort(data, comparator);
+
+        // обрезание по пейджингу
+        if (action.getCount() != 0) {
+            int toIndex = action.getStartIndex() +
+                    action.getCount() > data.size() ? data.size() : action.getStartIndex() + action.getCount();
             result.setTableData(new ArrayList<FormTypeKind>(data.subList(action.getStartIndex(), toIndex)));
         } else {
             result.setTableData(data);
         }
-
         result.setTotalCount(data.size());
 
         return result;

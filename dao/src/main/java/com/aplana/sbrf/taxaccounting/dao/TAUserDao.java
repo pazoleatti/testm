@@ -2,7 +2,9 @@ package com.aplana.sbrf.taxaccounting.dao;
 
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.MembersFilterData;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TAUserView;
 
 import java.util.List;
 
@@ -65,9 +67,16 @@ public interface TAUserDao {
 	 */
 	int checkUserLogin(String login);
 
-	public List<Integer> getByFilter(MembersFilterData filter);
+	List<Integer> getByFilter(MembersFilterData filter);
 
-	public int count(MembersFilterData filter);
+    /**
+     * Выборка данных пользователей по фильтру и сортировкой
+     * @param filter данные фильтра
+     * @return список данных пользователя. Модель представления
+     */
+    PagingResult<TAUserView> getUsersByFilter(MembersFilterData filter);
+
+	int count(MembersFilterData filter);
 
 	/**
 	 * Проверяет, есть ли пользователь с таким логином.

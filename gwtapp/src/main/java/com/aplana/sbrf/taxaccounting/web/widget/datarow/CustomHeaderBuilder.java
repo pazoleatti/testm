@@ -41,8 +41,10 @@ public class CustomHeaderBuilder extends AbstractHeaderOrFooterBuilder<DataRow<C
 
 		Context context = new Context(0, 2, header.getKey());
 		if (!needBorder) {
-			th.style().borderStyle(com.google.gwt.dom.client.Style.BorderStyle.NONE);
-		}
+            th.style().borderStyle(com.google.gwt.dom.client.Style.BorderStyle.NONE);
+		} else {
+            th.style().width(0, com.google.gwt.dom.client.Style.Unit.EM);
+        }
 		renderHeader(th, context, header);
 
 		th.endTH();
@@ -63,8 +65,8 @@ public class CustomHeaderBuilder extends AbstractHeaderOrFooterBuilder<DataRow<C
 					newHeader = new TextHeader(header.getCell(colAlias).getValue().toString());
                     String columnWidth = getTable().getColumnWidth(getTable().getColumn(i));
 					boolean needBorder = (header.getCell(colAlias).getColumn().getWidth() != 0)
-                            || !columnWidth.equals("0em")
-                            || !columnWidth.equals("0px");
+                            && !columnWidth.equals("0em") && !columnWidth.equals("0.0em")
+                            && !columnWidth.equals("0px") && !columnWidth.equals("0.0px");
 					buildHeader(tr, newHeader, header.getCell(colAlias).getColSpan(), header.getCell(colAlias).getRowSpan(), needBorder);
 				}
 

@@ -85,12 +85,7 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     @Override
     public String getParentsHierarchy(Integer departmentId) {
         try {
-            String path = getJdbcTemplate().queryForObject(
-                    "SELECT SYS_CONNECT_BY_PATH(name, '/') as path \n" +
-                            "FROM department \n" +
-                            "WHERE id = ? \n" +
-                            "START WITH parent_id in (select id from department where parent_id is null)  \n" +
-                            "CONNECT BY PRIOR id = parent_id",
+            return getJdbcTemplate().queryForObject(sqlParentHierarchy("name"),
                     new RowMapper<String>() {
                         @Override
                         public String mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -99,7 +94,6 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
                     },
                     departmentId
             );
-            return path.substring(1);
         } catch (EmptyResultDataAccessException e) {
             return getDepartment(departmentId).getName();
         }
@@ -108,25 +102,27 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 	@Override
 	public String getParentsHierarchyShortNames(Integer departmentId) {
 		try {
-			String path = getJdbcTemplate().queryForObject(
-                    "SELECT SYS_CONNECT_BY_PATH(shortname, '/') as path \n" +
-                            "FROM department\n" +
-                            "WHERE id = ?\n" +
-                            "START WITH parent_id in (select id from department where parent_id is null)  \n" +
-                            "CONNECT BY PRIOR id = parent_id",
-					new RowMapper<String>() {
-						@Override
-						public String mapRow(ResultSet rs, int rowNum) throws SQLException {
-							return rs.getString("path");
-						}
-					},
-					departmentId
-			);
-			return path.substring(1);
+            return getJdbcTemplate().queryForObject(sqlParentHierarchy("shortname"),
+                    new RowMapper<String>() {
+                        @Override
+                        public String mapRow(ResultSet rs, int rowNum) throws SQLException {
+                            return rs.getString("path");
+                        }
+                    },
+                    departmentId
+            );
 		} catch (EmptyResultDataAccessException e) {
 			return getDepartment(departmentId).getShortName();
 		}
 	}
+
+    private String sqlParentHierarchy(String columnName){
+        return "SELECT LTRIM(SYS_CONNECT_BY_PATH("+columnName+", '/'), '/') as path \n" +
+                "FROM department\n" +
+                "WHERE id = ?\n" +
+                "START WITH parent_id in (select id from department where parent_id is null)  \n" +
+                "CONNECT BY PRIOR id = parent_id";
+    }
 
     @Override
     public Integer getParentTBId(int departmentId) {
@@ -152,7 +148,19 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
         }
     }
 
-	protected class DepartmentJdbcMapper implements RowMapper<Department> {
+    @Override
+    public List<Integer> listDepartmentIds() {
+        try {
+            return getJdbcTemplate().queryForList(
+                    "select id from department",
+                    Integer.class
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<Integer>(0);
+        }
+    }
+
+    protected class DepartmentJdbcMapper implements RowMapper<Department> {
 		@Override
 		public Department mapRow(ResultSet rs, int rowNum) throws SQLException {
 			Department department = new Department();
@@ -208,6 +216,19 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     }
 
     @Override
+    public List<Integer> getDepartmentIdsByType(int type) {
+        try {
+            return getJdbcTemplate().queryForList(
+                    "SELECT id FROM department dp WHERE dp.type = ?",
+                    new Object[]{type},
+                    Integer.class
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<Integer>(0);
+        }
+    }
+
+    @Override
     public Department getDepartmenTB(int departmentId) {
         return getParentDepartmentByType(departmentId, 2);
     }
@@ -215,6 +236,11 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     @Override
     public List<Department> getDepartmenTBChildren(int departmentId) {
         return getParentDepartmentChildByType(departmentId, 2);
+    }
+
+    @Override
+    public List<Integer> getDepartmenTBChildrenId(int departmentId) {
+        return getParentDepartmentChildIdByType(departmentId, 2);
     }
 
     @Override
@@ -259,24 +285,53 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
      */
     private List<Department> getParentDepartmentChildByType(int departmentId, int typeId) {
         try {
-            String recursive = isWithRecursive() ? "recursive" : "";
-            return getJdbcTemplate().query("with " + recursive + " tree1 (id, parent_id, type) as " +
-                    "(select id, parent_id, type from department where id = ? " +
-                    "union all " +
-                    "select d.id, d.parent_id, d.type from " +
-                    "department d inner join tree1 t1 on d.id = t1.parent_id where d.type >= ?), " +
-                    "tree2 (id, root_id, type) as " +
-                    "(select id, id root_id, type from department where type = ? " +
-                    "union all select d.id, t2.root_id, d.type " +
-                    "from department d inner join tree2 t2 on d.parent_id = t2.id) " +
-                    "select d.* from tree1 t1, tree2 t2, department d where t1.type = ? " +
-                    "and t2.root_id = t1.id and t2.id = d.id",
+            return getJdbcTemplate().query(createQueryParentDepartmentChildByType(false),
                     new Object[]{departmentId, typeId, typeId, typeId},
                     new DepartmentJdbcMapper()
             );
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<Department>(0);
         }
+    }
+
+    /**
+     * Получение идентификатора родительского узла заданного типа (указанное подразделение м.б. результатом, если его тип соответствует искомому)
+     * + все идентификаторы дочерних подразделений
+     */
+    private List<Integer> getParentDepartmentChildIdByType(int departmentId, int typeId) {
+        try {
+            return getJdbcTemplate().queryForList(createQueryParentDepartmentChildByType(true),
+                    new Object[]{departmentId, typeId, typeId, typeId},
+                    Integer.class
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<Integer>(0);
+        }
+    }
+
+    /**
+     * Формирование запроса для методов
+     * @see DepartmentDaoImpl#getParentDepartmentChildIdByType(int, int)
+     * @see DepartmentDaoImpl#getParentDepartmentChildByType(int, int)
+     * @param idOnly true - выборка только идентификаторов, false - выборка полной модели
+     * @return строку запроса
+     */
+    private String createQueryParentDepartmentChildByType(boolean idOnly) {
+        String recursive = isWithRecursive() ? "recursive" : "";
+        String rez = "with " + recursive + " tree1 (id, parent_id, type) as " +
+                "(select id, parent_id, type from department where id = ? " +
+                "union all " +
+                "select d.id, d.parent_id, d.type from " +
+                "department d inner join tree1 t1 on d.id = t1.parent_id where d.type >= ?), " +
+                "tree2 (id, root_id, type) as " +
+                "(select id, id root_id, type from department where type = ? " +
+                "union all select d.id, t2.root_id, d.type " +
+                "from department d inner join tree2 t2 on d.parent_id = t2.id) " +
+                (idOnly ? "select d.id " : "select d.* ") +                         // определяем
+                "from tree1 t1, tree2 t2, department d where t1.type = ? " +
+                "and t2.root_id = t1.id and t2.id = d.id";
+        System.out.println("" + rez+"");
+        return rez;
     }
 
     @Override

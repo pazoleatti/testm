@@ -70,8 +70,10 @@ public class Cell extends AbstractCell {
         }
 
         String msg = "Графа «" + getColumn().getName() + "» ";
+        String msgValue = "Значение графы «" + getColumn().getName() + "» ";
         if (rowNumber != null) {
             msg = "Строка " + rowNumber + ": " + msg;
+            msgValue = "Строка " + rowNumber + ": " + msgValue;
         }
 
         // Проверяем на предмет столбца - справочник
@@ -110,9 +112,9 @@ public class Cell extends AbstractCell {
             value = ((BigDecimal) value).setScale(precision,
                     RoundingMode.HALF_UP);
             if (!getColumn().getValidationStrategy().matches(((BigDecimal) value).toPlainString())) {
-                throw new IllegalArgumentException(msg + "содержит число " +
-                        ((BigDecimal) value).toPlainString() + " несоответствующее формату " +
-                        ((NumericColumn) getColumn()).getMaxLength() + "." + ((NumericColumn) getColumn()).getPrecision());
+                throw new IllegalArgumentException(msgValue + "превышает допустимую разрядность (" +
+                        (((NumericColumn) getColumn()).getMaxLength() - ((NumericColumn) getColumn()).getPrecision()) +
+                        " знаков)!");
             }
         } else if (getColumn() instanceof StringColumn) {
             if (!getColumn().getValidationStrategy().matches((String) value)) {

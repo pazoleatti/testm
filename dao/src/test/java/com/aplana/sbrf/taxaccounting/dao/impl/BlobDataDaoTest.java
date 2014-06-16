@@ -50,7 +50,6 @@ public class BlobDataDaoTest {
         blobData.setInputStream(new FileInputStream(file));
         blobData.setCreationDate(new Date());
         blobData.setType(0);
-        blobData.setDataSize(76754);
     }
 
     @Test

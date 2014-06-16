@@ -44,15 +44,11 @@ public class GetFilterValuesHandler extends AbstractActionHandler<GetFilterValue
 		Set<Integer> depIds = new HashSet<Integer>();
 
 		if (currentUser.hasRole(TARole.ROLE_ADMIN) ) {
-			for (Department dep : departmentService.listAll()) {
-				depIds.add(dep.getId());
-			}
-		} else if (currentUser.hasRole(TARole.ROLE_CONTROL_NS) || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
-			for (Department dep : departmentService.getBADepartments(currentUser)) {
-				depIds.add(dep.getId());
-			}
-		}
-		result.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(depIds).values()));
+            depIds.addAll(departmentService.listIdAll());
+        } else if (currentUser.hasRole(TARole.ROLE_CONTROL_NS) || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+            depIds.addAll(departmentService.getBADepartmentIds(currentUser));
+        }
+        result.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(depIds).values()));
 		return result;
 	}
 

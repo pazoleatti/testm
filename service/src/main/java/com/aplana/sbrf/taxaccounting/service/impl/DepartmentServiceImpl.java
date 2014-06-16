@@ -56,6 +56,11 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
+    public List<Integer> listIdAll() {
+        return departmentDao.listDepartmentIds();
+    }
+
+    @Override
     public List<Department> getChildren(int parentDepartmentId) {
         return departmentDao.getChildren(parentDepartmentId);
     }
@@ -109,6 +114,20 @@ public class DepartmentServiceImpl implements DepartmentService {
         return retList;
     }
 
+    @Override
+    public List<Integer> getBADepartmentIds(TAUser tAUser) {
+        List<Integer> retList = new ArrayList<Integer>();
+
+        if (tAUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+            // все подразделения из справочника подразделений
+            retList.addAll(departmentDao.listDepartmentIds());
+        } else if (tAUser.hasRole(TARole.ROLE_CONTROL_NS)) {
+            retList.addAll(departmentDao.getDepartmenTBChildrenId(tAUser.getDepartmentId()));
+        }
+
+        return retList;
+    }
+
     // http://conf.aplana.com/pages/viewpage.action?pageId=11380723
     @Override
     public List<Department> getTBDepartments(TAUser tAUser) {
@@ -129,6 +148,32 @@ public class DepartmentServiceImpl implements DepartmentService {
                 Department departmenTB = departmentDao.getDepartmenTB(tAUser.getDepartmentId());
                 if (departmenTB != null) {
                     retList.add(departmenTB);
+                }
+            }
+        }
+
+        return retList;
+    }
+
+    @Override
+    public List<Integer> getTBDepartmentIds(TAUser tAUser) {
+        List<Integer> retList = new ArrayList<Integer>();
+
+        if (tAUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+            // подразделение с типом 1
+            retList.addAll(departmentDao.getDepartmentIdsByType(DepartmentType.ROOT_BANK.getCode()));
+            // подразделения с типом 2
+            retList.addAll(departmentDao.getDepartmentIdsByType(DepartmentType.TERR_BANK.getCode()));
+        } else if (tAUser.hasRole(TARole.ROLE_CONTROL_NS)) {
+            if (departmentDao.getDepartment(tAUser.getDepartmentId()).getType() == DepartmentType.TERR_BANK) {
+                // поразделение пользователя
+                retList.add(tAUser.getDepartmentId());
+
+            } else {
+                // подразделение с типом 2, являющееся родительским по отношению к подразделению пользователя
+                Department departmenTB = departmentDao.getDepartmenTB(tAUser.getDepartmentId());
+                if (departmenTB != null) {
+                    retList.add(departmenTB.getId());
                 }
             }
         }

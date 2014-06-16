@@ -34,7 +34,7 @@
 		<jetty.version>6.1H.22</jetty.version>
 		<springframework.version>3.1.4.RELEASE</springframework.version>
 		<springsecurity.version>3.1.4.RELEASE</springsecurity.version>
-		<org.aspectj.version>1.6.12</org.aspectj.version>
+		<org.aspectj.version>1.8.0</org.aspectj.version>
 		<groovy.version>2.0.6</groovy.version>
 		<jasperreports.version>5.0.1</jasperreports.version>
 		<poi.version>3.8</poi.version>
@@ -185,6 +185,11 @@
 				<artifactId>spring-security-web</artifactId>
 				<version>${springsecurity.version}</version>
 			</dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-aspects</artifactId>
+                <version>${springframework.version}</version>
+            </dependency>
 
 			<!-- AspectJ -->
 			<dependency>
@@ -416,7 +421,15 @@
 						</archive>
 					</configuration>
 				</plugin>
-
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>aspectj-maven-plugin</artifactId>
+                    <version>1.4</version>
+                    <configuration>
+                        <source>${java.version}</source>
+                        <target>${java.version}</target>
+                    </configuration>
+                </plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-war-plugin</artifactId>

@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.cache.ExtendedSimpleCacheManager;
 import com.aplana.sbrf.taxaccounting.cache.KeyWrapper;
 import com.aplana.sbrf.taxaccounting.dao.BlobDataDao;
+import com.aplana.sbrf.taxaccounting.dao.DaoObject;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
@@ -11,10 +12,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import org.apache.commons.collections.MapUtils;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -33,6 +31,7 @@ import java.util.HashMap;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 /**
  * User: avanteev
@@ -43,6 +42,9 @@ import static org.junit.Assert.assertEquals;
 @Transactional
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class CacheTest {
+
+    @Autowired
+    private DaoObject daoObject;
 
     @Autowired
     private ApplicationContext applicationContext;
@@ -97,11 +99,15 @@ public class CacheTest {
 		String sampleBlobData = "sample text";
 		BlobData blob = new BlobData();
 		blob.setCreationDate(new Date());
-		blob.setDataSize(sampleBlobData.length());
 		blob.setUuid(SAMPLE_BLOB_ID);
 		blob.setType(0);
 		blob.setInputStream(new ByteArrayInputStream(sampleBlobData.getBytes("UTF-8")));
 		blobDataDao.create(blob);
+    }
+
+    @After
+    public void clearCache(){
+        cacheManager.clearAll();
     }
 
     @Test
@@ -185,4 +191,27 @@ public class CacheTest {
         MapUtils.debugPrint(System.out, name, map);
     }
 
+    @Test
+    public void cacheTest(){
+        assertEquals(daoObject.getCachedNumberFromCachedMethod(), daoObject.getCachedNumberFromCachedMethod());
+    }
+
+    @Test
+    public void cacheTest2(){
+        int v = daoObject.getCachedNumberFromCachedMethod();
+        cacheManager.clearAll();
+        assertNotEquals(v, daoObject.getCachedNumberFromCachedMethod());
+    }
+
+    @Test
+    public void cacheTestPrivateInvocation(){
+        assertEquals(daoObject.getCachedNumberFromPrivateInsideMethod("123"), daoObject.getCachedNumberFromPrivateInsideMethod("123"));
+    }
+
+    @Test
+    public void cacheTestPrivateInvocation2(){
+        int v = daoObject.getCachedNumberFromPrivateInsideMethod("1234");
+        cacheManager.clearAll();
+        assertNotEquals(v, daoObject.getCachedNumberFromPrivateInsideMethod("1234"));
+    }
 }

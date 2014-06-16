@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -37,10 +38,18 @@ public class GetConfigurationHandler extends
 			ExecutionContext context) throws ActionException {
 		
 		List<ConfigTuple> tuples = new ArrayList<ConfigTuple>();
-		for (Map.Entry<ConfigurationParam, String> entry : configurationService.getAllConfig(securityService.currentUserInfo()).entrySet()) {
+
+        ConfigurationParamModel model = configurationService.getAllConfig(securityService.currentUserInfo());
+
+        // Параметры, которых нет в БД тоже должны присутствовать, чтобы можно было заполнить
+        for (ConfigurationParam key : ConfigurationParam.values()) {
+            model.put(key, model.get(key));
+        }
+
+		for (Map.Entry<ConfigurationParam, List<String>> entry : model.entrySet()) {
 			ConfigTuple configTuple = new ConfigTuple();
 			configTuple.setParam(entry.getKey());
-			configTuple.setValue(entry.getValue());
+			configTuple.setValue(model.getFullStringValue(entry.getKey()));
 			tuples.add(configTuple);
 		}
         Collections.sort(tuples);
@@ -53,6 +62,5 @@ public class GetConfigurationHandler extends
 	public void undo(GetConfigurationAction arg0, GetConfigurationResult arg1,
 			ExecutionContext arg2) throws ActionException {
 		// Ничего не делаем
-
 	}
 }

@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.members.server;
 
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.TAUserFull;
-import com.aplana.sbrf.taxaccounting.model.TAUserFullWithDepartmentPath;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.web.module.members.shared.GetMembersAction;
@@ -14,8 +11,6 @@ import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 /**
  * User: Eugene Stetsenko
@@ -40,17 +35,9 @@ public class MembersHandler extends AbstractActionHandler<GetMembersAction, GetM
         GetMembersResult result = new GetMembersResult();
 		result.setStartIndex(action.getMembersFilterData().getStartIndex());
 
-        PagingResult<TAUserFull> taUserFulls = taUserService.getByFilter(action.getMembersFilterData());
-	    PagingResult<TAUserFullWithDepartmentPath> page = new PagingResult<TAUserFullWithDepartmentPath>();
-	    for (TAUserFull user : taUserFulls) {
-		    TAUserFullWithDepartmentPath fullUser = new TAUserFullWithDepartmentPath();
-		    fullUser.setDepartment(user.getDepartment());
-		    fullUser.setUser(user.getUser());
-		    fullUser.setFullDepartmentPath(departmentService.getParentsHierarchyShortNames(user.getDepartment().getId()));
-		    page.add(fullUser);
-	    }
-        page.setTotalCount(taUserFulls.getTotalCount());
-	    result.setTaUserList(page);
+        PagingResult<TAUserView> taUserFulls = taUserService.getUsersByFilter(action.getMembersFilterData());
+	    result.setTaUserList(taUserFulls);
+	    result.setStartIndex(action.getMembersFilterData().getStartIndex());
         return result;
     }
 

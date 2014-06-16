@@ -65,7 +65,7 @@ public class BlobDataServiceImpl implements BlobDataService {
         BlobData blobData = new BlobData();
         blobData.setName(name);
         try {
-            blobData.setDataSize(is.available());
+            is.available();
         } catch (IOException e) {
             throw new ServiceException("Ошибка при получении данных", e);
         }

@@ -1,10 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client;
 
 import com.aplana.sbrf.taxaccounting.model.FormTypeKind;
+import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.model.TaxNominationColumnEnum;
 import com.gwtplatform.mvp.client.UiHandlers;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * Хэндлеры для формы "Назначение форм и деклараций"
@@ -12,12 +12,9 @@ import java.util.Set;
  * @author Stanislav Yasinskiy
  */
 public interface TaxFormNominationUiHandlers extends UiHandlers {
-    void getTaxFormKind();
 
     void reloadFormTableData();
     void reloadDeclarationTableData();
-
-    void save(Set<Long> ids);
 
     void onClickOpenFormDestinations();
     void onClickEditFormDestinations(List<FormTypeKind> formTypeKinds);
@@ -31,7 +28,7 @@ public interface TaxFormNominationUiHandlers extends UiHandlers {
      */
 	void onClickFormCancelAnchor();
 
-    void onFormRangeChange(int start, int length);
+    void onFormRangeChange(int start, int length, TaxNominationColumnEnum sort, boolean asc);
 
-    void onDeclarationRangeChange(int start, int length);
+    void onDeclarationRangeChange(int start, int length, TaxNominationColumnEnum sort, boolean asc);
 }

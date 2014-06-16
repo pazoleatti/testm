@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl.print.tausers;
 
-import com.aplana.sbrf.taxaccounting.model.TARole;
-import com.aplana.sbrf.taxaccounting.model.TAUserFullWithDepartmentPath;
+import com.aplana.sbrf.taxaccounting.model.TAUserView;
 import com.aplana.sbrf.taxaccounting.service.impl.print.AbstractReportBuilder;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
@@ -15,7 +14,7 @@ import java.util.List;
  */
 public class TAUsersReportBuilder extends AbstractReportBuilder {
 
-    private List<TAUserFullWithDepartmentPath> taUserList;
+    private List<TAUserView> taUserList;
 
     private int rowNumber = 3;
     private int cellNumber = 0;
@@ -28,7 +27,7 @@ public class TAUsersReportBuilder extends AbstractReportBuilder {
     private static final String SIXTH_COLUMN = "Роль";
 
 
-    public TAUsersReportBuilder(List<TAUserFullWithDepartmentPath> taUserList) {
+    public TAUsersReportBuilder(List<TAUserView> taUserList) {
         super("Список_пользователей_", ".xlsx");
         this.taUserList = taUserList;
         this.workBook = new XSSFWorkbook();
@@ -113,47 +112,43 @@ public class TAUsersReportBuilder extends AbstractReportBuilder {
         cs.setBorderRight(CellStyle.BORDER_DOUBLE);
         cs.setBorderLeft(CellStyle.BORDER_DOUBLE);
 
-        for (TAUserFullWithDepartmentPath user : taUserList){
+        for (TAUserView user : taUserList){
             Row row = sheet.createRow(sheet.getLastRowNum() + 1);
 
 	        Cell cell = row.createCell(cellNumber);
 
 	        cell.setCellStyle(cs);
-	        cell.setCellValue(user.getUser().getName());
+	        cell.setCellValue(user.getName());
 	        fillWidth(cellNumber, cell.getStringCellValue().length());
 	        cellNumber++;
 
 	        cell = row.createCell(cellNumber);
             cell.setCellStyle(cs);
-            cell.setCellValue(user.getUser().getLogin());
+            cell.setCellValue(user.getLogin());
             fillWidth(cellNumber, cell.getStringCellValue().length());
             cellNumber++;
 
 	        cell = row.createCell(cellNumber);
 	        cell.setCellStyle(cs);
-	        cell.setCellValue(user.getUser().getEmail());
+	        cell.setCellValue(user.getEmail());
 	        fillWidth(cellNumber, cell.getStringCellValue().length());
 	        cellNumber++;
 
 	        cell = row.createCell(cellNumber);
 	        cell.setCellStyle(cs);
-	        cell.setCellValue(user.getUser().isActive()?"Да":"Нет");
+	        cell.setCellValue(user.getActive()?"Да":"Нет");
 	        fillWidth(cellNumber, cell.getStringCellValue().length());
 	        cellNumber++;
 
             cell = row.createCell(cellNumber);
             cell.setCellStyle(cs);
-	        cell.setCellValue(user.getFullDepartmentPath());
+	        cell.setCellValue(user.getDepName());
             fillWidth(cellNumber, cell.getStringCellValue().length());
             cellNumber++;
 
             cell = row.createCell(cellNumber);
             cell.setCellStyle(cs);
-	        StringBuilder roles = new StringBuilder();
-            for (TARole role : user.getUser().getRoles()){
-                roles.append(role.getName() + ", ");
-            }
-	        cell.setCellValue(roles.delete((roles.length()-2), roles.length()-1).toString());
+            cell.setCellValue(user.getRoles());
 	        fillWidth(cellNumber, cell.getStringCellValue().length());
 	        cellNumber++;
 

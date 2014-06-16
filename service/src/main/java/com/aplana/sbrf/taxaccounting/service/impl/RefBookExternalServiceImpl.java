@@ -62,124 +62,126 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
      */
     private void importRefBook(TAUserInfo userInfo, Logger logger, ConfigurationParam refBookDirectoryParam, Map<String, List<Pair<Boolean, Long>>> mappingMap) {
         // TODO добавить проверку ЭЦП (Marat Fayzullin 2013-10-19)
-        Map<ConfigurationParam, String> params = configurationService.getAllConfig(userInfo);
-        String refBookDirectory = params.get(refBookDirectoryParam);
+        ConfigurationParamModel model = configurationService.getAllConfig(userInfo);
+        List<String> refBookDirectoryList = model.get(refBookDirectoryParam);
 
         BufferedReader reader = null;
 
-        if (refBookDirectory == null || refBookDirectory.trim().isEmpty()) {
+        if (refBookDirectoryList == null || refBookDirectoryList.isEmpty()) {
             throw new ServiceException("Не указан путь к директории для импорта справочников.");
         }
 
-        logger.info("Импорт данных справочников из директории «" + refBookDirectory + "».");
+        for (String refBookDirectory : refBookDirectoryList) {
+            logger.info("Импорт данных справочников из директории «" + refBookDirectory + "».");
 
-        refBookDirectory = refBookDirectory.trim();
+            refBookDirectory = refBookDirectory.trim();
 
-        // Число успешно импортированных файлов
-        int refBookImportCount = 0;
+            // Число успешно импортированных файлов
+            int refBookImportCount = 0;
 
-        // Признак наличия ошибок при импорте
-        boolean withError = false;
-        try {
-            // SmbFile folder = new SmbFile(refBookDirectory);
-            FileWrapper folder = ResourceUtils.getSharedResource(refBookDirectory);
-            if (folder.list() != null) {
-                for (String fileName : folder.list()) {
-                    FileWrapper file = ResourceUtils.getSharedResource(refBookDirectory + fileName);
-                    // Из директории считываем только файлы
-                    if (!file.isFile()) {
-                        continue;
-                    }
-                    for (String key : mappingMap.keySet()) {
-                        if (fileName.matches(key)) { // Нашли в мапе соответствие
-                            List<Pair<Boolean, Long>> matchList = mappingMap.get(key);
-                            for (Pair<Boolean, Long> refBookMapPair : matchList) {
-                                InputStream is = null;
-                                Long refBookId = refBookMapPair.getSecond();
-                                RefBook refBook = refBookFactory.get(refBookId);
+            // Признак наличия ошибок при импорте
+            boolean withError = false;
+            try {
+                // SmbFile folder = new SmbFile(refBookDirectory);
+                FileWrapper folder = ResourceUtils.getSharedResource(refBookDirectory);
+                if (folder.list() != null) {
+                    for (String fileName : folder.list()) {
+                        FileWrapper file = ResourceUtils.getSharedResource(refBookDirectory + fileName);
+                        // Из директории считываем только файлы
+                        if (!file.isFile()) {
+                            continue;
+                        }
+                        for (String key : mappingMap.keySet()) {
+                            if (fileName.matches(key)) { // Нашли в мапе соответствие
+                                List<Pair<Boolean, Long>> matchList = mappingMap.get(key);
+                                for (Pair<Boolean, Long> refBookMapPair : matchList) {
+                                    InputStream is = null;
+                                    Long refBookId = refBookMapPair.getSecond();
+                                    RefBook refBook = refBookFactory.get(refBookId);
 
-                                ScriptStatusHolder scriptStatusHolder = new ScriptStatusHolder();
-                                try {
-                                    is = new BufferedInputStream(file.getStream());
-                                    if (!refBookMapPair.getFirst()) {  // Если это не сам файл, а архив
-                                        ZipInputStream zis = new ZipInputStream(is);
-                                        ZipEntry zipFileName = zis.getNextEntry();
-                                        if (zipFileName != null) { // в архиве есть файл
-                                            // дальше работаем с первым файлом архива вместо самого архива
-                                            is = zis;
+                                    ScriptStatusHolder scriptStatusHolder = new ScriptStatusHolder();
+                                    try {
+                                        is = new BufferedInputStream(file.getStream());
+                                        if (!refBookMapPair.getFirst()) {  // Если это не сам файл, а архив
+                                            ZipInputStream zis = new ZipInputStream(is);
+                                            ZipEntry zipFileName = zis.getNextEntry();
+                                            if (zipFileName != null) { // в архиве есть файл
+                                                // дальше работаем с первым файлом архива вместо самого архива
+                                                is = zis;
+                                            }
                                         }
+                                        logger.info("Импорт данных справочника «" + refBook.getName() + "» из файла «" + fileName + "».");
+
+                                        // Обращение к скрипту
+                                        Map<String, Object> additionalParameters = new HashMap<String, Object>();
+                                        additionalParameters.put("inputStream", is);
+                                        additionalParameters.put("fileName", fileName);
+                                        additionalParameters.put("scriptStatusHolder", scriptStatusHolder);
+                                        refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.IMPORT, logger, additionalParameters);
+                                        // Обработка результата выполнения скрипта
+                                        switch (scriptStatusHolder.getScriptStatus()) {
+                                            case SUCCESS:
+                                                logger.info("Импорт успешно выполнен.");
+                                                refBookImportCount++;
+                                                break;
+                                            case SKIP:
+                                                logger.info("Файл пропущен. " + scriptStatusHolder.getStatusMessage());
+                                                break;
+                                        }
+                                    } catch (Exception e) {
+                                        //// Ошибка импорта отдельного справочника — откатываются изменения только по нему, импорт продолжается
+                                        withError = true;
+                                        String errorMsg;
+                                        if (e != null && e.getLocalizedMessage() != null) {
+                                            errorMsg = e.getLocalizedMessage() + ".";
+                                        } else {
+                                            errorMsg = "";
+                                        }
+
+                                        errorMsg = "Не удалось выполнить импорт данных справочника «" + refBook.getName()
+                                                + "» из файла «" + fileName + "». " + errorMsg;
+
+                                        // Журнал аудита
+                                        auditService.add(FormDataEvent.IMPORT, userInfo, userInfo.getUser().getDepartmentId(),
+                                                null, null, null, null, errorMsg);
+
+                                        logger.error(errorMsg);
+                                    } finally {
+                                        IOUtils.closeQuietly(is);
                                     }
-                                    logger.info("Импорт данных справочника «" + refBook.getName() + "» из файла «" + fileName + "».");
-
-                                    // Обращение к скрипту
-                                    Map<String, Object> additionalParameters = new HashMap<String, Object>();
-                                    additionalParameters.put("inputStream", is);
-                                    additionalParameters.put("fileName", fileName);
-                                    additionalParameters.put("scriptStatusHolder", scriptStatusHolder);
-                                    refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.IMPORT, logger, additionalParameters);
-                                    // Обработка результата выполнения скрипта
-                                    switch (scriptStatusHolder.getScriptStatus()) {
-                                        case SUCCESS:
-                                            logger.info("Импорт успешно выполнен.");
-                                            refBookImportCount++;
-                                            break;
-                                        case SKIP:
-                                            logger.info("Файл пропущен. " + scriptStatusHolder.getStatusMessage());
-                                            break;
-                                    }
-                                } catch (Exception e) {
-                                    //// Ошибка импорта отдельного справочника — откатываются изменения только по нему, импорт продолжается
-                                    withError = true;
-                                    String errorMsg;
-                                    if (e != null && e.getLocalizedMessage() != null) {
-                                        errorMsg = e.getLocalizedMessage() + ".";
-                                    } else {
-                                        errorMsg = "";
-                                    }
-
-                                    errorMsg = "Не удалось выполнить импорт данных справочника «" + refBook.getName()
-                                            + "» из файла «" + fileName + "». " + errorMsg;
-
-                                    // Журнал аудита
-                                    auditService.add(FormDataEvent.IMPORT, userInfo, userInfo.getUser().getDepartmentId(),
-                                            null, null, null, null, errorMsg);
-
-                                    logger.error(errorMsg);
-                                } finally {
-                                    IOUtils.closeQuietly(is);
                                 }
                             }
                         }
                     }
                 }
-            }
-            String msg = "Произведен импорт данных справочников из «" + refBookDirectory + "»" +
-                    (withError ? " с ошибками." : " без ошибок.") + " Импортировано файлов: " + refBookImportCount + ".";
+                String msg = "Произведен импорт данных справочников из «" + refBookDirectory + "»" +
+                        (withError ? " с ошибками." : " без ошибок.") + " Импортировано файлов: " + refBookImportCount + ".";
 
-            if (refBookImportCount == 0) {
-                msg = "Импорт не выполнен, корректных файлов с данными справочников в папке «" + refBookDirectory + "» не найдено.";
-            }
+                if (refBookImportCount == 0) {
+                    msg = "Импорт не выполнен, корректных файлов с данными справочников в папке «" + refBookDirectory + "» не найдено.";
+                }
 
-            // Журнал аудита
-            auditService.add(FormDataEvent.IMPORT, userInfo, userInfo.getUser().getDepartmentId(), null, null, null,
-                    null, msg);
-            logger.info(msg);
-        } catch (Exception e) {
-            //// Глобальная ошибка импорта — все изменения откатываются
-            // Журнал аудита
-            String errorMsg;
-            if (e != null && e.getLocalizedMessage() != null) {
-                errorMsg = e.getLocalizedMessage() + ".";
-            } else {
-                errorMsg = "";
-            }
-            errorMsg = "Импорт не выполнен, ошибка доступа к папке «" + refBookDirectory + "». " + errorMsg;
+                // Журнал аудита
+                auditService.add(FormDataEvent.IMPORT, userInfo, userInfo.getUser().getDepartmentId(), null, null, null,
+                        null, msg);
+                logger.info(msg);
+            } catch (Exception e) {
+                //// Глобальная ошибка импорта — все изменения откатываются
+                // Журнал аудита
+                String errorMsg;
+                if (e != null && e.getLocalizedMessage() != null) {
+                    errorMsg = e.getLocalizedMessage() + ".";
+                } else {
+                    errorMsg = "";
+                }
+                errorMsg = "Импорт не выполнен, ошибка доступа к папке «" + refBookDirectory + "». " + errorMsg;
 
-            auditService.add(FormDataEvent.IMPORT, userInfo, userInfo.getUser().getDepartmentId(), null, null, null,
-                    null, errorMsg);
-            throw new ServiceException(errorMsg, e);
-        } finally {
-            IOUtils.closeQuietly(reader);
+                auditService.add(FormDataEvent.IMPORT, userInfo, userInfo.getUser().getDepartmentId(), null, null, null,
+                        null, errorMsg);
+                throw new ServiceException(errorMsg, e);
+            } finally {
+                IOUtils.closeQuietly(reader);
+            }
         }
     }
 
