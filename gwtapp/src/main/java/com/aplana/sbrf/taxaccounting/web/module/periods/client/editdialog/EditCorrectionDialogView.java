@@ -84,7 +84,7 @@ public class EditCorrectionDialogView extends PopupViewWithUiHandlers<EditCorrec
         data.setReportPeriodId(periodList.getValue() == null ? null : periodList.getValue().getId());
         data.setDepartmentId(departmentPicker.getValue().get(0));
         data.setCorrectionDate(term.getValue());
-        data.setPeriodYear(periodList.getValue() == null ? null : periodList.getValue().getStartDate().getYear()+1900);
+        data.setPeriodYear(periodList.getValue() == null ? 0 : periodList.getValue().getStartDate().getYear()+1900);
         getUiHandlers().onContinue(data);
     }
 

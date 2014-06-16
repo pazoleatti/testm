@@ -8,7 +8,6 @@ import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.cell.client.AbstractCell;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -210,10 +209,12 @@ public class DeclarationListView extends
             declarationTable.addColumn(stateColumn, declarationTable.createResizableHeader(STATE_TITLE, stateColumn));
         } else {
             declarationTable.addColumn(declarationTypeColumn, declarationTypeHeader);
-            declarationTable.setColumnWidth(declarationTypeColumn, 0, Style.Unit.EM);
+            // http://jira.aplana.com/browse/SBRFACCTAX-7742
+            //declarationTable.setColumnWidth(declarationTypeColumn, 0, Style.Unit.EM);
             declarationTable.addColumn(departmentColumn, declarationTable.createResizableHeader(DEPARTMENT_TITLE, departmentColumn));
             declarationTable.addColumn(reportPeriodColumn, reportPeriodHeader);
-            declarationTable.setColumnWidth(reportPeriodColumn, 0, Style.Unit.EM);
+            // http://jira.aplana.com/browse/SBRFACCTAX-7742
+            //declarationTable.setColumnWidth(reportPeriodColumn, 0, Style.Unit.EM);
             declarationTable.addColumn(stateColumn, declarationTable.createResizableHeader(STATE_TITLE, stateColumn));
         }
     }
