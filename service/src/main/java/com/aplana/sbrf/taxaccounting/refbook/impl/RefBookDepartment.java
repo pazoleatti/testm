@@ -700,7 +700,7 @@ public class RefBookDepartment implements RefBookDataProvider {
     }
 
     private void checkCycle(Department department, Department parentDep, Logger logger){
-        List<Integer> childIds = departmentService.getAllChildrenIds(parentDep.getId());
+        List<Integer> childIds = departmentService.getAllChildrenIds(department.getId());
         //>1 т.к. запрос всегда как минимум возвращает переданный id
         boolean isChild = !childIds.isEmpty() && childIds.size() > 1 && childIds.contains(department.getId());
         if (isChild)
