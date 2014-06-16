@@ -19,7 +19,7 @@ public enum TaxType {
 	/**
 	 * НДС
 	 */
-	VAT('V', "НДС", "NO_VAT"),
+	VAT('V', "НДС", "NO_NDS"),
 	/**
 	 * УКС
 	 */
