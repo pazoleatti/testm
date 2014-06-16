@@ -63,6 +63,7 @@ public class GetPeriodDataHandler extends AbstractActionHandler<GetPeriodDataAct
 				row.setPeriodCondition(period.isActive());
 				row.setBalance(period.isBalance());
 				row.setYear(year);
+                row.setOrd(period.getReportPeriod().getOrder());
 				row.setCorrectPeriod(period.getCorrectPeriod());
 				Department dep = departmentMap.get(period.getDepartmentId().intValue());
 				Notification notification = notificationService.get(period.getReportPeriod().getId(), dep.getId(), dep.getParentId());
@@ -76,12 +77,31 @@ public class GetPeriodDataHandler extends AbstractActionHandler<GetPeriodDataAct
 			header.setPeriodName("Календарный год " + (rec.getKey()));
 			header.setSubHeader(true);
 			rows.add(header);
-			rows.addAll(rec.getValue());
+
+            List<TableRow> sortedRows = rec.getValue();
+            Collections.sort(rec.getValue(), new RowComparator());
+            rows.addAll(sortedRows);
 		}
 		res.setRows(rows);
 
 		return res;
 	}
+
+    class RowComparator implements Comparator<TableRow> {
+        @Override
+        public int compare(TableRow a, TableRow b) {
+            if ((a.getCorrectPeriod() == null) && (b.getCorrectPeriod() == null)) {
+                return (a.getOrd() > b.getOrd() ? 1 : -1);
+            }
+            if (a.getCorrectPeriod() == null) {
+                return -1;
+            }
+            if (b.getCorrectPeriod() == null) {
+                return 1;
+            }
+            return a.getCorrectPeriod().compareTo(b.getCorrectPeriod());
+        }
+    }
 
 	@Override
 	public void undo(GetPeriodDataAction getPeriodDataAction, GetPeriodDataResult getPeriodDataResult,
