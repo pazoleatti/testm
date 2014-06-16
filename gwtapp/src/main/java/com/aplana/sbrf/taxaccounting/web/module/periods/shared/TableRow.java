@@ -15,6 +15,7 @@ public class TableRow implements Serializable {
     private Boolean balance;
 	int year; //TODO Возможно не  нужно хранить дату в каждом экземпляре
     private int dictTaxPeriodId;
+    private int ord; // Порядок следования в налоговом периоде
 
 	public int getYear() {
 		return year;
@@ -113,5 +114,13 @@ public class TableRow implements Serializable {
 
     public void setDictTaxPeriodId(int dictTaxPeriodId) {
         this.dictTaxPeriodId = dictTaxPeriodId;
+    }
+
+    public int getOrd() {
+        return ord;
+    }
+
+    public void setOrd(int ord) {
+        this.ord = ord;
     }
 }
