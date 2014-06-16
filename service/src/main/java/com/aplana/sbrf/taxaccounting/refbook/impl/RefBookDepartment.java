@@ -212,6 +212,9 @@ public class RefBookDepartment implements RefBookDataProvider {
         List<RefBookAttribute> attributes = refBookDao.getAttributes(REF_BOOK_ID);
         Map<String, RefBookValue> refBookValueMap = records.get(0).getValues();
         checkCorrectness(logger, null, attributes, records);
+        if (logger.containsLevel(LogLevel.ERROR))
+            throw new ServiceLoggerException("Подразделение не создано, обнаружены фатальные ошибки!",
+                    logEntryService.save(logger.getEntries()));
         Department newDepartment = new Department();
         newDepartment.setName(records.get(0).getValues().get(DEPARTMENT_NAME_ATTRIBUTE).getStringValue());
         if (logger.containsLevel(LogLevel.ERROR))
@@ -220,7 +223,15 @@ public class RefBookDepartment implements RefBookDataProvider {
         int terrBankId = departmentService.getParentTB(depId) != null ? departmentService.getParentTB(depId).getId() : 0;
         createPeriods(depId, fromCode(refBookValueMap.get(DEPARTMENT_TYPE_ATTRIBUTE).getNumberValue().intValue()),
                 terrBankId, logger);
+        if (logger.containsLevel(LogLevel.ERROR))
+            throw new ServiceLoggerException("Подразделение не создано, обнаружены фатальные ошибки!",
+                    logEntryService.save(logger.getEntries()));
 
+        auditService.add(FormDataEvent.UPDATE_DEPARTMENT, logger.getTaUserInfo(), depId,
+                null, null, null, null,
+                String.format("Создано подразделение %s, значения атрибутов: %s",
+                        departmentService.getDepartment(depId).getName(),
+                        assembleMessage(refBookValueMap)));
         return Arrays.asList((long)depId);
     }
 
@@ -382,6 +393,12 @@ public class RefBookDepartment implements RefBookDataProvider {
 
         //Сохранение
         refBookDepartmentDao.update(uniqueRecordId, records, refBook.getAttributes());
+
+        auditService.add(FormDataEvent.UPDATE_DEPARTMENT, logger.getTaUserInfo(), uniqueRecordId.intValue(),
+                null, null, null, null,
+                String.format("Изменены значения атрибутов подразделения %s, новые значения атрибутов: %s",
+                        departmentService.getDepartment(uniqueRecordId.intValue()).getName(),
+                        assembleMessage(records)));
     }
 
     @Override
@@ -464,8 +481,8 @@ public class RefBookDepartment implements RefBookDataProvider {
         deletePeriods(depId, logger);
 
         refBookDepartmentDao.remove(depId);
-        /*auditService.add(FormDataEvent.LOGOUT, null, 0, null, null, null, null,
-                "");*/
+        auditService.add(FormDataEvent.DELETE_DEPARTMENT, logger.getTaUserInfo(), depId, null, null, null, null,
+                String.format("Удалено подразделение %s", departmentService.getParentsHierarchy(depId)));
     }
 
     @Override
@@ -696,5 +713,15 @@ public class RefBookDepartment implements RefBookDataProvider {
         if (isParent)
             logger.error("Подразделение %s не может быть включено в орг. структуру подразделения %s, т.к. уже содержит его в своей орг. структуре!",
                     parentDep.getName(), department.getName());*/
+    }
+
+    private String assembleMessage(Map<String, RefBookValue> records){
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String, RefBookValue> record : records.entrySet()){
+            if (!record.getKey().equals(DEPARTMENT_NAME_ATTRIBUTE))
+                sb.append(String.format(" %s- %s ", record.getKey(), record.getValue().toString()));
+        }
+
+        return sb.toString();
     }
 }

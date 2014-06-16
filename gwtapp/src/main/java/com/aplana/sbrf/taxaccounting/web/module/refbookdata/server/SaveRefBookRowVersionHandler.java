@@ -66,6 +66,7 @@ public class SaveRefBookRowVersionHandler extends AbstractActionHandler<SaveRefB
         } catch (ServiceLoggerException e) {
             result.setException(true);
         }*/
+        logger.setTaUserInfo(securityService.currentUserInfo());
         refBookDataProvider.updateRecordVersion(logger, action.getRecordId(), action.getVersionFrom(), action.getVersionTo(), valueToSave);
         if (logger.containsLevel(LogLevel.ERROR)) {
             result.setException(true);
