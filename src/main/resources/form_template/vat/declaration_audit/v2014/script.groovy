@@ -438,31 +438,24 @@ void generateXML() {
                 // РАЗДЕЛ 3 - КОНЕЦ
 
                 // РАЗДЕЛ 4
-                НалПодтв0(
-                        СумУменИтог: empty
-                ) {
-                    // форма 724.2.2
-                    for (def row : dataRowsMap[602]) {
-                        if (row.getAlias() == 'itog') {
-                            continue
+                // непустой раздел 4
+                if (dataRowsMap[602]) {
+                    НалПодтв0(
+                            СумУменИтог: empty
+                    ) {
+                        // форма 724.2.2
+                        for (def row : dataRowsMap[602]) {
+                            if (row.getAlias() == 'itog') {
+                                continue
+                            }
+                            СумОпер4(
+                                    КодОпер: row.code,
+                                    НалБаза: round(row.base),
+                                    НалВычПод: empty,
+                                    НалНеПод: empty,
+                                    НалВосст: empty
+                            )
                         }
-                        СумОпер4(
-                                КодОпер: row.code,
-                                НалБаза: round(row.base),
-                                НалВычПод: empty,
-                                НалНеПод: empty,
-                                НалВосст: empty
-                        )
-                    }
-                    // пустой раздел 4
-                    if (!dataRowsMap[602]) {
-                        СумОпер4(
-                                КодОпер: empty,
-                                НалБаза: empty,
-                                НалВычПод: empty,
-                                НалНеПод: empty,
-                                НалВосст: empty
-                        )
                     }
                 }
                 // РАЗДЕЛ 4 - КОНЕЦ
