@@ -129,7 +129,8 @@ public class OpenCorrectDialogPresenter extends PresenterWidget<OpenCorrectDialo
             return;
         }
 
-        if (getView().getSelectedPeriod().getCalendarStartDate().after(getView().getTerm())) {
+        if (getView().getSelectedPeriod().getCalendarStartDate().after(getView().getTerm()) ||
+                getView().getSelectedPeriod().getCalendarStartDate().equals(getView().getTerm())) {
             Dialog.errorMessage("Календарный год периода сдачи корректировки не должен быть меньше календарного года корректируемого периода!");
             return;
         }
