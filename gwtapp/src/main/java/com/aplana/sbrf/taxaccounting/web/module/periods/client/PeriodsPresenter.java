@@ -183,7 +183,6 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
             return;
         }
 
-
         final GetCorrectPeriodsAction action = new GetCorrectPeriodsAction();
         action.setTaxType(taxType);
         final int departmentId = departmentPair.getDepartmentId();
@@ -194,7 +193,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
                             public void onSuccess(GetCorrectPeriodsResult result) {
                                 openCorrectDialogPresenter.resetToDefault();
                                 openCorrectDialogPresenter.setSelectedDepartment(departmentId);
-                                openCorrectDialogPresenter.setPeriodsList(result.getReportPeriod());
+                                openCorrectDialogPresenter.setPeriodsList(result.getReportPeriod(), getView().getSelectedRow().getReportPeriodId());
                                 openCorrectDialogPresenter.setTaxType(taxType);
                                 addToPopupSlot(openCorrectDialogPresenter);
                             }
