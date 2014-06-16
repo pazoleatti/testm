@@ -29,7 +29,7 @@ create sequence seq_ref_book_oktmo start with 300000 increment by 100;
 
 create table configuration (
   code varchar2(50) not null,
-  value varchar2(510)
+  value clob
 );
 comment on table configuration is 'Настройки приложения, конфигурация';
 comment on column configuration.code is 'Код параметра';

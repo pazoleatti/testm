@@ -1,15 +1,11 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.core.api.ConfigurationProvider;
 import com.aplana.sbrf.taxaccounting.core.api.LockCoreService;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.api.*;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -80,7 +76,7 @@ public class FormDataServiceImpl implements FormDataService {
 	@Autowired
 	private SignService signService;
 	@Autowired
-	private ConfigurationProvider configurationProvider;
+	private ConfigurationDao configurationDao;
 	@Autowired
 	private ApplicationContext applicationContext;
     @Autowired
@@ -179,7 +175,12 @@ public class FormDataServiceImpl implements FormDataService {
             String ext = getFileExtention(fileName);
             if(!ext.equals(XLS_EXT) && !ext.equals(XLSX_EXT)){
 
-                String pKeyFileUrl = configurationProvider.getString(ConfigurationParam.FORM_DATA_KEY_FILE);
+                String pKeyFileUrl = null;
+                List<String> paramList = configurationDao.loadParams().get(ConfigurationParam.FORM_DATA_KEY_FILE);
+                if (paramList != null && !paramList.isEmpty()) {
+                    pKeyFileUrl =  paramList.get(0); // Хранение списка, но для ЭЦП может использоваться лишь одно значение
+                }
+
                 if (pKeyFileUrl != null) { // Необходимо проверить подпись
                     InputStream pKeyFileInputStream = null;
 

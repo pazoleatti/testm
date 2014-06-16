@@ -1,12 +1,12 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
+import java.io.IOException;
+import java.sql.Clob;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
+import org.springframework.util.StringUtils;
 
 /**
  * Реализация ДАО для работа с параметрами приложения
@@ -37,39 +38,48 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
 	private static final String VALUE_COLUMN_NAME = "value";
 
 	@Override
-	public Map<ConfigurationParam, String> loadParams() {
-		final Map<ConfigurationParam, String> params = new HashMap<ConfigurationParam, String>();
-		getJdbcTemplate().query("select code, value from configuration", new RowCallbackHandler() {
-
-			@Override
-			public void processRow(ResultSet rs) throws SQLException {
-				String code = rs.getString(CODE_COLUMN_NAME);
-				String value = rs.getString(VALUE_COLUMN_NAME);
-				try {
-					params.put(ConfigurationParam.valueOf(code), value);
-				} catch (IllegalArgumentException e) {
-					// Если параметр не найден в ConfigurationParam, то он просто пропускается (не виден на клиенте)
-				}
-			}
-			
-		});
-		return params;
-	}
+	public ConfigurationParamModel loadParams() {
+        final ConfigurationParamModel model = new ConfigurationParamModel();
+        getJdbcTemplate().query("select code, value from configuration", new RowCallbackHandler() {
+            @Override
+            public void processRow(ResultSet rs) throws SQLException {
+                try {
+                    String code = rs.getString(CODE_COLUMN_NAME);
+                    Clob clobValue = rs.getClob(VALUE_COLUMN_NAME);
+                    if (clobValue != null) {
+                        char clobVal[] = new char[(int) clobValue.length()];
+                        clobValue.getCharacterStream().read(clobVal);
+                        model.setFullStringValue(ConfigurationParam.valueOf(code), new String(clobVal));
+                    } else {
+                        model.put(ConfigurationParam.valueOf(code), null);
+                    }
+                } catch (IOException e) {
+                    throw new DaoException("Ошибка получения конфигурационных параметров!");
+                } catch (IllegalArgumentException e) {
+                    // Если параметр не найден в ConfigurationParam, то он просто пропускается (не виден на клиенте)
+                }
+            }
+        });
+        return model;
+    }
 
 	@Override
-	public void saveParams(Map<ConfigurationParam, String> newParams) {
-		Map<ConfigurationParam, String> oldParams = loadParams();
+	public void saveParams(ConfigurationParamModel model) {
+		Map<ConfigurationParam, List<String>> oldParams = loadParams();
 
 		List<Object[]> insertParams = new ArrayList<Object[]>();
 		List<Object[]> updateParams = new ArrayList<Object[]>();
-		for (Map.Entry<ConfigurationParam, String> entry : newParams.entrySet()) {
-			ConfigurationParam param = entry.getKey();
-			String value = entry.getValue();
 
-			if (oldParams.containsKey(entry.getKey())) {
+		for (Map.Entry<ConfigurationParam, List<String>> entry : model.entrySet()) {
+			ConfigurationParam param = entry.getKey();
+			String value = null;
+            if (entry.getValue() != null && !entry.getValue().isEmpty()) {
+                value = model.getFullStringValue(entry.getKey());
+            }
+            if (oldParams.containsKey(entry.getKey())) {
 				updateParams.add(new Object[] {value, param.toString()});
 			} else {
-				insertParams.add(new Object[] {value, param.toString()});
+				insertParams.add(new Object[]{value, param.toString()});
 			}
 		}
 		if (insertParams.size() > 0) {
