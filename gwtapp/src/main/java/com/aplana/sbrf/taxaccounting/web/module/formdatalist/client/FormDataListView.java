@@ -224,7 +224,7 @@ public class FormDataListView extends ViewWithUiHandlers<FormDataListUiHandlers>
     @Override
     public Long getSelectedId() {
         FormDataSearchResultItem item = selectionModel.getSelectedObject();
-        return (Long) keyProvider.getKey(item);
+        return (Long) selectionModel.getKey(item);
     }
 
     @Override

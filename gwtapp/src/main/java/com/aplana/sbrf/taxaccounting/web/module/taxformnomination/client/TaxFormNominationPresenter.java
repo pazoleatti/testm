@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.declara
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.event.UpdateTable;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.formDestinationsDialog.FormDestinationsPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.*;
+import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.model.TaxNominationColumnEnum;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -51,10 +52,6 @@ public class TaxFormNominationPresenter
         // Инициализация
         void init(TaxType nType, boolean isForm);
 
-
-        // установка данных
-        void setTaxFormKind(List<FormType> formTypes);
-
         // установка данные в таблицу отображающую данные вкладки "Назначение деклараций"
         void setDataToFormTable(int start, int totalCount, List<FormTypeKind> departmentFormTypes, Map<Integer, String> departmentFullNames);
         // установка данные в таблицу отображающую данные вкладки "Назначение налоговых форм"
@@ -63,23 +60,16 @@ public class TaxFormNominationPresenter
         // получение данных
         boolean isForm();
 
-        //Long departmentId();
-
-        Integer getTypeId();
-
-        Integer getFormId();
-
         List<Integer> getDepartments();
 
 	    List<FormTypeKind> getSelectedItemsOnDeclarationGrid();
         List<FormTypeKind> getSelectedItemsOnFormGrid();
 
         /**
-         * Обновление линков редактировать/отменить назначение
+         * Обновление достпности кнопок редактировать/отменить назначение
          */
-        void updatePanelAnchors();
+        void updateButtonsEnabled();
 
-        public void updateDeclarationPanelAnchors();
         /**
          * Обновление страницы
          */
@@ -95,7 +85,10 @@ public class TaxFormNominationPresenter
     private final DispatchAsync dispatcher;
 
     @Inject
-    public TaxFormNominationPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy, DispatchAsync dispatcher, FormDestinationsPresenter formDestinationsPresenter, DeclarationDestinationsPresenter declarationDestinationsPresenter) {
+    public TaxFormNominationPresenter(final EventBus eventBus, final MyView view,
+                                      final MyProxy proxy, DispatchAsync dispatcher,
+                                      FormDestinationsPresenter formDestinationsPresenter,
+                                      DeclarationDestinationsPresenter declarationDestinationsPresenter) {
         super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
         this.dispatcher = dispatcher;
         this.formDestinationsPresenter = formDestinationsPresenter;
@@ -142,24 +135,6 @@ public class TaxFormNominationPresenter
     // TODO Unlock. Реализовать механизм блокировок.
 
     /**
-     * Перезагруска бокса "Вид налоговой формы"/"Вид декларации"
-     */
-    @Override
-    public void getTaxFormKind() {
-        GetTaxFormTypesAction action = new GetTaxFormTypesAction();
-        action.setTaxType(taxType);
-        action.setForm(getView().isForm());
-
-        dispatcher.execute(action, CallbackUtils
-                .defaultCallback(new AbstractCallback<GetTaxFormTypesResult>() {
-                    @Override
-                    public void onSuccess(GetTaxFormTypesResult result) {
-                        getView().setTaxFormKind(result.getFormTypeList());
-                    }
-                }, this));
-    }
-
-    /**
      * Перезагрузка таблицы, отображающий данные для "Назначение деклараций"
      */
     @Override
@@ -169,7 +144,7 @@ public class TaxFormNominationPresenter
                     @Override
                     public void onSuccess(GetTableDataResult result) {
                         getView().setDataToFormTable(0, result.getTotalCount(), result.getTableData(), result.getDepartmentFullNames());
-                        getView().updatePanelAnchors();
+                        getView().updateButtonsEnabled();
                     }
                 }, this));
     }
@@ -181,7 +156,7 @@ public class TaxFormNominationPresenter
                     @Override
                     public void onSuccess(GetTableDataResult result) {
                         getView().setDataToDeclarationTable(0, result.getTotalCount(), result.getTableData(), result.getDepartmentFullNames());
-                        getView().updateDeclarationPanelAnchors();
+                        getView().updateButtonsEnabled();
                     }
                 }, this));
     }
@@ -194,31 +169,6 @@ public class TaxFormNominationPresenter
 
          return action;
      }
-
-    /**
-     * Добавление, удаление зависимостей
-     *
-     * @param ids список id на удаление или null если нажата кнопка "Назначить"
-     */
-    @Override
-    public void save(Set<Long> ids) {
-        SaveAction action = new SaveAction();
-        action.setIds(ids);
-        // ?? action.setDepartmentsIds(getView().getDepartments());
-        action.setTypeId(getView().getTypeId());
-        action.setFormId(getView().getFormId());
-        action.setTaxType(taxType.getCode());
-        action.setForm(getView().isForm());
-        dispatcher.execute(action, CallbackUtils
-                .defaultCallback(new AbstractCallback<GetTableDataResult>() {
-                    @Override
-                    public void onSuccess(GetTableDataResult result) {
-                        if (result.getTableData() != null)
-                            getView().setDataToFormTable(0, result.getTotalCount(), result.getTableData(), result.getDepartmentFullNames());
-                        // ??
-                    }
-                }, this));
-    }
 
     @Override
     public void onClickOpenFormDestinations() {
@@ -247,9 +197,9 @@ public class TaxFormNominationPresenter
 								reloadDeclarationTableData();
 								if ((result.getUuid() != null ) && !result.getUuid().isEmpty()) {
                                     if (result.isExistDeclaration()) {
-                                        Dialog.errorMessage("Ошибка", "Невозможно отменить назначение, т. к. созданы экземпляры декларации");
+                                        Dialog.errorMessage("Невозможно отменить назначение, т.к. созданы экземпляры декларации");
                                     } else {
-                                        Dialog.errorMessage("Ошибка", "Невозможно снять назначение декларации, т. к. назначение декларации является приемником данных");
+                                        Dialog.errorMessage("Невозможно снять назначение декларации, т.к. назначение декларации является приемником данных");
                                         // TODO удаление связей
                                     }
 									LogAddEvent.fire(TaxFormNominationPresenter.this, result.getUuid());
@@ -309,34 +259,38 @@ public class TaxFormNominationPresenter
     }
 
     @Override
-    public void onFormRangeChange(final int start, int length) {
+    public void onFormRangeChange(final int start, int length, TaxNominationColumnEnum sort, boolean asc) {
         GetTableDataAction action = getTableDataAction();
         action.setCount(length);
         action.setStartIndex(start);
+        action.setSortColumn(sort);
+        action.setAsc(asc);
 
         dispatcher.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<GetTableDataResult>() {
                     @Override
                     public void onSuccess(GetTableDataResult result) {
                         getView().setDataToFormTable(start, result.getTotalCount(), result.getTableData(), result.getDepartmentFullNames());
-                        getView().updatePanelAnchors();
+                        getView().updateButtonsEnabled();
                     }
                 }, this));
     }
 
 
     @Override
-    public void onDeclarationRangeChange(final int start, int length) {
+    public void onDeclarationRangeChange(final int start, int length, TaxNominationColumnEnum sort, boolean asc) {
         GetTableDataAction action = getTableDataAction();
         action.setCount(length);
         action.setStartIndex(start);
+        action.setSortColumn(sort);
+        action.setAsc(asc);
 
         dispatcher.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<GetTableDataResult>() {
                     @Override
                     public void onSuccess(GetTableDataResult result) {
                         getView().setDataToDeclarationTable(start, result.getTotalCount(), result.getTableData(), result.getDepartmentFullNames());
-                        getView().updateDeclarationPanelAnchors();
+                        getView().updateButtonsEnabled();
                     }
                 }, this));
     }
