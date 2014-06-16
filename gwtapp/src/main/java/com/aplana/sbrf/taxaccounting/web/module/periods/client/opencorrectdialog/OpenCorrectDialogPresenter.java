@@ -32,7 +32,7 @@ public class OpenCorrectDialogPresenter extends PresenterWidget<OpenCorrectDialo
 
 	public interface MyView extends PopupView, HasUiHandlers<OpenCorrectDialogUiHandlers> {
 		void setDepartments(List<Department> departments, Set<Integer> avalDepartments, List<DepartmentPair> selectedDepartments, boolean enable);
-        void setPeriodsList(List<ReportPeriod> reportPeriods, long reportPeriodId);
+        void setPeriodsList(List<ReportPeriod> reportPeriods);
 		void setTaxType(TaxType taxType);
         void setSelectedDepartment(Integer departmentId);
         void resetForm();
@@ -93,8 +93,8 @@ public class OpenCorrectDialogPresenter extends PresenterWidget<OpenCorrectDialo
 		getView().setCanChangeDepartment(canChange);
 	}
 
-	public void setPeriodsList(List<ReportPeriod> reportPeriods, long reportPeriodId) {
-        getView().setPeriodsList(reportPeriods, reportPeriodId);
+	public void setPeriodsList(List<ReportPeriod> reportPeriods) {
+        getView().setPeriodsList(reportPeriods);
 	}
 
 	@Override
