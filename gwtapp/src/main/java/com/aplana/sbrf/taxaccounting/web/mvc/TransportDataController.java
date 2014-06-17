@@ -46,8 +46,14 @@ public class TransportDataController {
         upload.setHeaderEncoding("UTF-8");
         List<FileItem> items = upload.parseRequest(request);
 
+        String fileName = items.get(0).getName();
+        if (fileName.contains("\\")) {
+            // IE Выдает полный путь
+            fileName = fileName.substring(fileName.lastIndexOf("\\") + 1);
+        }
+
         transportDataService.uploadFile(securityService.currentUserInfo(), ConfigurationParam.FORM_DATA_DIRECTORY,
-                items.get(0).getName(), items.get(0).getInputStream(), logger);
+                fileName, items.get(0).getInputStream(), logger);
 
         if (!logger.getEntries().isEmpty()){
             response.getWriter().printf("uuid %s", logEntryService.save(logger.getEntries()));
