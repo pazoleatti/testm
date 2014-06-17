@@ -47,7 +47,6 @@ public class FormDataCSVReportBuilder extends AbstractReportBuilder {
 
     @Override
     protected String flush() throws IOException {
-        String tmpDir = System.getProperty("java.io.tmpdir");
         File file = File.createTempFile(FILE_NAME, ".csv");
         CSVWriter csvWriter = new CSVWriter(new FileWriter(file), ';');
 
