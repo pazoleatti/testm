@@ -33,6 +33,15 @@ public interface DepartmentDao {
      */
     List<Department> getAllChildren(int parentDepartmentId);
 
+    List<Integer> getAllChildrenIds(int depId);
+
+    /**
+     * Получить список ВСЕХ дочерних подразделений по коду подзаделения
+     * @param depId идентификатор родительского подразделения
+     * @return список объектов, представляющих текущее и родительские подразделения
+     */
+    List<Integer> getAllParentIds(int depId);
+
 	/**
 	 * Получить родительское подразделение по коду подзаделения
 	 * * Внимание: объект, возвращаемый данным методом инициализируется не полностью (в частности в ним не заполняется

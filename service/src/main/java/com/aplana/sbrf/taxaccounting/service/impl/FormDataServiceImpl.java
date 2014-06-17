@@ -832,4 +832,9 @@ public class FormDataServiceImpl implements FormDataService {
         }
         return false;
     }
+
+    @Override
+    public List<FormData> getManualInputForms(List<Integer> departments, int reportPeriodId, TaxType taxType, FormDataKind kind) {
+        return formDataDao.getManualInputForms(departments, reportPeriodId, taxType, kind);
+    }
 }

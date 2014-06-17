@@ -24,19 +24,19 @@ import java.util.Map;
 @PreAuthorize("isAuthenticated()")
 public class GetNameHandler extends AbstractActionHandler<GetNameAction, GetNameResult> {
 
-	@Autowired
-	RefBookFactory refBookFactory;
+    @Autowired
+    RefBookFactory refBookFactory;
 
-	public GetNameHandler() {
-		super(GetNameAction.class);
-	}
+    public GetNameHandler() {
+        super(GetNameAction.class);
+    }
 
-	@Override
-	public GetNameResult execute(GetNameAction action, ExecutionContext executionContext) throws ActionException {
+    @Override
+    public GetNameResult execute(GetNameAction action, ExecutionContext executionContext) throws ActionException {
         GetNameResult result = new GetNameResult();
 
         RefBook refBook = refBookFactory.get(action.getRefBookId());
-		result.setName(refBook.getName());
+        result.setName(refBook.getName());
         result.setRefBookType(refBook.getType());
 
         RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(action.getRefBookId());
@@ -96,8 +96,8 @@ public class GetNameHandler extends AbstractActionHandler<GetNameAction, GetName
             result.setRecordId(recordId);
         }
 
-		return result;
-	}
+        return result;
+    }
 
 	@Override
 	public void undo(GetNameAction getNameAction, GetNameResult getNameResult, ExecutionContext executionContext) throws ActionException {

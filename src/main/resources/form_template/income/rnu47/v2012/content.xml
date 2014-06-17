@@ -1,26 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
     <fixedRows>true</fixedRows>
-    <name>(РНУ-47) Регистр налогового учёта «ведомость начисленной амортизации по основным средствам, а также расходов в виде капитальных вложений»
+    <name>(РНУ-47) Регистр налогового учёта «ведомость начисленной амортизации по основным средствам, а также расходов в
+        виде капитальных вложений»
     </name>
-    <fullName>(РНУ-47) Регистр налогового учёта «ведомость начисленной амортизации по основным средствам, а также расходов в виде капитальных вложений»
+    <fullName>(РНУ-47) Регистр налогового учёта «ведомость начисленной амортизации по основным средствам, а также
+        расходов в виде капитальных вложений»
     </fullName>
     <code>РНУ-47</code>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>number</alias>
-        <checking>false</checking>
-        <name>Строка</name>
-        <order>1</order>
-        <width>5</width>
-        <maxLength>15</maxLength>
-        <precision>0</precision>
-    </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>amortGroup</alias>
         <checking>false</checking>
         <name>Амортизационные группы</name>
-        <order>2</order>
-        <width>25</width>
+        <order>1</order>
+        <width>20</width>
         <maxLength>500</maxLength>
         <prevLength>0</prevLength>
     </columns>
@@ -28,7 +21,7 @@
         <alias>sumCurrentPeriodTotal</alias>
         <checking>false</checking>
         <name>Сумма расходов в виде капитальных вложений, предусмотренных п. 9 ст. 258 НК РФ за отчётный месяц</name>
-        <order>3</order>
+        <order>2</order>
         <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -36,9 +29,10 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sumTaxPeriodTotal</alias>
         <checking>false</checking>
-        <name>Сумма расходов в виде капитальных вложений, предусмотренных п. 9 ст. 258 НК РФ с начала налогового периода
+        <name>Сумма расходов в виде капитальных вложений, предусмотренных п. 9 ст. 258 НК РФ с начала налогового
+            периода
         </name>
-        <order>4</order>
+        <order>3</order>
         <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -47,7 +41,7 @@
         <alias>amortPeriod</alias>
         <checking>false</checking>
         <name>Сумма начисленной амортизации за отчётный месяц</name>
-        <order>5</order>
+        <order>4</order>
         <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -56,7 +50,7 @@
         <alias>amortTaxPeriod</alias>
         <checking>false</checking>
         <name>Сумма начисленной амортизации с начала налогового периода</name>
-        <order>6</order>
+        <order>5</order>
         <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -69,9 +63,9 @@
         <italic>false</italic>
     </styles>
     <styles>
-        <alias>Контрольные суммы</alias>
-        <backColor>LIGHT_BROWN</backColor>
-        <bold>true</bold>
+        <alias>Вычисляемая</alias>
+        <backColor>BLUE</backColor>
+        <bold>false</bold>
         <fontColor>BLACK</fontColor>
         <italic>false</italic>
     </styles>

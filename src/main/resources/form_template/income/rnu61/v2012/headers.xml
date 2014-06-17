@@ -8,7 +8,7 @@
         <cell alias="nominal" colSpan="1" rowSpan="2" value="Номинал"/>
         <cell alias="currencyCode" colSpan="1" rowSpan="2" value="Код валюты"/>
         <cell alias="rateBRBill" colSpan="2" rowSpan="1" value="Курс Банка России"/>
-        <cell alias="rateBROperation" colSpan="1" rowSpan="1" value="Курс Банка России"/>
+        <cell alias="rateBROperation" colSpan="1" rowSpan="1" value="Курс Банка России (руб.)"/>
         <cell alias="paymentStart" colSpan="1" rowSpan="2" value="Дата наступления срока платежа"/>
         <cell alias="paymentEnd" colSpan="1" rowSpan="2" value="Дата окончания срока платежа"/>
         <cell alias="interestRate" colSpan="1" rowSpan="2" value="Процентная ставка"/>

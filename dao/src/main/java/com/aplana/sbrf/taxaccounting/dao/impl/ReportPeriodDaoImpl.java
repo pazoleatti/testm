@@ -199,7 +199,8 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
                             "left join TAX_PERIOD tp on rp.TAX_PERIOD_ID=tp.ID " +
                             "left join DEPARTMENT_REPORT_PERIOD drp on rp.ID=drp.REPORT_PERIOD_ID  " +
                             "where tp.TAX_TYPE = ? and drp.DEPARTMENT_ID= ? " +
-                            "and drp.IS_BALANCE_PERIOD=0 and drp.IS_ACTIVE=0 and CORRECTION_DATE is null",
+                            "and drp.IS_BALANCE_PERIOD=0 and drp.IS_ACTIVE=0 and CORRECTION_DATE is null " +
+                            "order by year",
                     new Object[]{String.valueOf(taxType.getCode()), departmentId},
                     new int[] { Types.VARCHAR, Types.NUMERIC},
                     new ReportPeriodMapper()

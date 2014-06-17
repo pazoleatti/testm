@@ -391,6 +391,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 
         if (refBookAttrBox.getValue().getAttributeType() == RefBookAttributeType.REFERENCE){
             RefBook refBookDereference = getUiHandlers().getRefBook(refBookAttrBox.getValue().getRefBookId());
+            refBookAttrRefBox.setValue(null);
             refBookAttrRefBox.setAcceptableValues(refBookDereference.getAttributes());
             refBookAttrRefBox.setVisible(true);
         }
@@ -406,6 +407,8 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
         Column currentColumn = columns.get(columnListBox.getSelectedIndex());
         if (currentColumn instanceof ReferenceColumn) {
             ((ReferenceColumn) currentColumn).setRefBookAttributeId2(event.getValue().getId());
+        } else if (currentColumn instanceof  RefBookColumn) {
+            ((RefBookColumn) currentColumn).setRefBookAttributeId2(event.getValue().getId());
         }
     }
 
@@ -543,6 +546,21 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
             refBookAttrBox.setValue(refBookAttribute, false);
             refBookAttrBox.setAcceptableValues(getUiHandlers().getRefBook(
                     getUiHandlers().getRefBookByAttributeId(attributeId)).getAttributes());
+            if (refBookAttribute.getAttributeType() == RefBookAttributeType.REFERENCE) {
+                refBookAttrRefBox.setVisible(true);
+
+                if (((RefBookColumn)column).getRefBookAttributeId2() != null){
+                    Long attributeId2 = ((RefBookColumn)column).getRefBookAttributeId2();
+                    refBookAttrRefBox.setValue(getUiHandlers().getRefBookAttribute(attributeId2),false);
+                }
+                else{
+                    refBookAttrRefBox.setValue(null, false);
+                }
+
+                refBookAttrRefBox.setAcceptableValues(getUiHandlers().getRefBook(
+                        getUiHandlers().getRefBookByAttributeId(
+                                refBookAttribute.getRefBookAttributeId())).getAttributes());
+            }
             // Справочник
             refBookBox.setValue(getUiHandlers().getRefBook(getUiHandlers().getRefBookByAttributeId(attributeId)), false);
 

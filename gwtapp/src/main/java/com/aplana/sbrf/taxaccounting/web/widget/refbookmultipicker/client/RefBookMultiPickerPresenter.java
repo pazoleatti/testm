@@ -34,7 +34,7 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
 
     interface MyView extends View, HasUiHandlers<RefBookMultiPickerUiHandlers> {
 
-        void setHeaders(Map<String, Integer> headers);
+        void setHeaders(Map<String, Integer> headers, List<Integer> unVisibleColumns);
 
         void setRowData(int start, List<RefBookItem> values, int size);
 
@@ -72,7 +72,7 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
                     CallbackUtils.defaultCallback(new AbstractCallback<InitRefBookMultiResult>() {
                         @Override
                         public void onSuccess(InitRefBookMultiResult result) {
-                            getView().setHeaders(result.getHeaders());
+                            getView().setHeaders(result.getHeaders(), result.getUnVisibleColumns());
                             getView().refresh(true);
 
                             trySelect(ps);

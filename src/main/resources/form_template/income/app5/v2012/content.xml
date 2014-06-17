@@ -27,7 +27,7 @@
         <checking>false</checking>
         <name>Территориальный банк</name>
         <order>3</order>
-        <width>25</width>
+        <width>55</width>
         <hierarchical>true</hierarchical>
         <nameAttributeId>161</nameAttributeId>
         <refBookAttributeId>161</refBookAttributeId>

@@ -54,7 +54,7 @@
         <checking>false</checking>
         <name>Доход по данным бухгалтерского учёта. Сумма</name>
         <order>6</order>
-        <width>10</width>
+        <width>8</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -63,7 +63,7 @@
         <checking>false</checking>
         <name>Доход по данным бухгалтерского учёта. В т.ч. учтено в предыдущих налоговых периодах</name>
         <order>7</order>
-        <width>10</width>
+        <width>8</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -117,16 +117,16 @@
         <checking>true</checking>
         <name>Сумма по бухгалтерскому учёту. В Приложении №5</name>
         <order>13</order>
-        <width>10</width>
+        <width>8</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>opuSumByTableD</alias>
         <checking>true</checking>
-        <name>Сумма по бухгалтерскому учёту. В Таблице &quot;Д&quot;</name>
+        <name>Сумма по бухгалтерскому учёту. В Таблице "Д"</name>
         <order>14</order>
-        <width>10</width>
+        <width>8</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -135,7 +135,7 @@
         <checking>true</checking>
         <name>Сумма по бухгалтерскому учёту. В бухгалтерской отчётности</name>
         <order>15</order>
-        <width>10</width>
+        <width>8</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -144,7 +144,7 @@
         <checking>true</checking>
         <name>Расхождение</name>
         <order>16</order>
-        <width>10</width>
+        <width>8</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -191,14 +191,14 @@
         <italic>false</italic>
     </styles>
     <styles>
-        <alias>11 Значение в столбце &quot;ЛП&quot;</alias>
+        <alias>11 Значение в столбце "ЛП"</alias>
         <backColor>WHITE</backColor>
         <bold>true</bold>
         <fontColor>RED</fontColor>
         <italic>false</italic>
     </styles>
     <styles>
-        <alias>15 Значение в столбце &quot;Расхождение&quot;</alias>
+        <alias>15 Значение в столбце "Расхождение"</alias>
         <backColor>WHITE</backColor>
         <bold>true</bold>
         <fontColor>DARK_BLUE</fontColor>
@@ -212,7 +212,7 @@
         <italic>false</italic>
     </styles>
     <styles>
-        <alias>12 Спец. значение в столбце &quot;ЛП&quot;    </alias>
+        <alias>12 Спец. значение в столбце "ЛП"</alias>
         <backColor>RED</backColor>
         <bold>true</bold>
         <fontColor>WHITE</fontColor>

@@ -84,7 +84,14 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
         });
 
         initWidget(uiBinder.createAndBindUi(this));
+        init();
         //updateEnabled();
+    }
+
+    private void init() {
+        departmentPicker.setEnabled(false);
+        declarationTypeBox.setEnabled(false);
+        continueButton.setEnabled(false);
     }
 
     private void updateEnabled() {

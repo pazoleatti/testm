@@ -49,6 +49,27 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         }
     };
 
+    private static final RowMapper<Pair<DepartmentFormType, DepartmentFormType>> DFT_MAPPER_PAIR = new RowMapper<Pair<DepartmentFormType, DepartmentFormType>>() {
+        @Override
+        public Pair<DepartmentFormType, DepartmentFormType> mapRow(ResultSet rs, int rowNum) throws SQLException {
+            DepartmentFormType departmentFTSource = new DepartmentFormType();
+            departmentFTSource.setId(SqlUtils.getLong(rs, "source_dft_id"));
+            departmentFTSource.setFormTypeId(SqlUtils.getInteger(rs, "src_ft_id"));
+            departmentFTSource.setDepartmentId(SqlUtils.getInteger(rs, "src_department_id"));
+            departmentFTSource.setKind(FormDataKind.fromId(SqlUtils.getInteger(rs, "src_kind")));
+            departmentFTSource.setPerformerId(rs.getInt("src_performer_dep_id"));
+
+            DepartmentFormType departmentFTDest = new DepartmentFormType();
+            departmentFTDest.setId(SqlUtils.getLong(rs, "tgt_dft_id"));
+            departmentFTDest.setFormTypeId(SqlUtils.getInteger(rs, "tgt_ft_id"));
+            departmentFTDest.setDepartmentId(SqlUtils.getInteger(rs, "tgt_department_id"));
+            departmentFTDest.setKind(FormDataKind.fromId(SqlUtils.getInteger(rs, "tgt_kind")));
+            departmentFTDest.setPerformerId(rs.getInt("tgt_performer_dep_id"));
+
+            return new Pair<DepartmentFormType, DepartmentFormType>(departmentFTSource, departmentFTDest);
+        }
+    };
+
     private static final RowMapper<DepartmentDeclarationType> DDT_MAPPER = new RowMapper<DepartmentDeclarationType>() {
         @Override
         public DepartmentDeclarationType mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -57,6 +78,24 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
             departmentFormType.setDepartmentId(SqlUtils.getInteger(rs,"department_id"));
             departmentFormType.setDeclarationTypeId(SqlUtils.getInteger(rs,"declaration_type_id"));
             return departmentFormType;
+        }
+    };
+
+    private static final RowMapper<Pair<DepartmentFormType, DepartmentDeclarationType>> DDT_MAPPER_PAIR = new RowMapper<Pair<DepartmentFormType, DepartmentDeclarationType>>() {
+        @Override
+        public Pair<DepartmentFormType, DepartmentDeclarationType> mapRow(ResultSet rs, int rowNum) throws SQLException {
+            DepartmentDeclarationType departmentDTDest = new DepartmentDeclarationType();
+            departmentDTDest.setId(SqlUtils.getInteger(rs, "tgt_ddt_id"));
+            departmentDTDest.setDepartmentId(SqlUtils.getInteger(rs, "tgt_department_id"));
+            departmentDTDest.setDeclarationTypeId(SqlUtils.getInteger(rs, "tgt_dt_id"));
+
+            DepartmentFormType departmentFTSource = new DepartmentFormType();
+            departmentFTSource.setId(SqlUtils.getLong(rs, "source_dft_id"));
+            departmentFTSource.setDepartmentId(SqlUtils.getInteger(rs, "src_department_id"));
+            departmentFTSource.setFormTypeId(SqlUtils.getInteger(rs, "src_ft_id"));
+            departmentFTSource.setKind(FormDataKind.fromId(SqlUtils.getInteger(rs, "src_kind")));
+            departmentFTSource.setPerformerId(rs.getInt("src_performer_dep_id"));
+            return new Pair<DepartmentFormType, DepartmentDeclarationType>(departmentFTSource, departmentDTDest);
         }
     };
 
@@ -128,32 +167,134 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                 new Object[]{sourceDepartmentId}, DFT_MAPPER);
     }
 
-    private static final String GET_FORM_DESTINATIONS_FOR_DEST_DEPARTMENT_SQL =  "select * from department_form_type dest_dft where exists "
-            + "(select 1 from department_form_type dft, form_data_source fds where "
-            + "fds.src_department_form_type_id=dft.id and fds.department_form_type_id=dest_dft.id "
-            + "and dft.department_id=:sourceDepartmentId %s) and dest_dft.DEPARTMENT_ID = :destinationDepartmentId";
+    private static final String COMMON_WITH = "with tgt_dep_hierarchy(root_id, id, parent_id, name) as (\n" +
+            "select connect_by_root id as root_id, id, parent_id, name\n" +
+            "from department\n" +
+            "start with id = :terrBankId --IN: Подразделение-ТБ, относительно которого надо построить иерархию\n" +
+            "connect by parent_id = prior id)";
+
+    private static final String GET_FORM_DESTINATIONS_FOR_DEPARTMENT_SQL =
+            "select fds.src_department_form_type_id source_dft_id, src.department_id src_department_id, src.form_type_id src_ft_id, src.kind src_kind, src.performer_dep_id src_performer_dep_id, \n" +
+                    "fds.department_form_type_id tgt_dft_id, tgt.department_id tgt_department_id, tgt.form_type_id tgt_ft_id, tgt.kind tgt_kind, tgt.performer_dep_id tgt_performer_dep_id \n" +
+            "from department_form_type src\n" +
+            "join form_data_source fds on src.id = fds.src_department_form_type_id\n" +
+            "join department_form_type tgt on fds.department_form_type_id = tgt.id\n" +
+            "join tgt_dep_hierarchy tdp on tdp.id = tgt.department_id\n" +
+            "join form_type ft on ft.id = tgt.form_type_id\n" +
+            "where src.department_id=:departmentId\n" +
+            "      and ft.tax_type in %s";
 
     @Override
-    public List<DepartmentFormType> getFormDestinationsWithDestDepId(final int sourceDepartmentId, final int destinationDepartmentId, final List<Integer> formTypes) {
+    public List<Pair<DepartmentFormType, DepartmentFormType>> getFormDestinationsWithDepId(final int departmentId, final int terrBankId, List<TaxType> taxTypes) {
         HashMap<String, Object> values = new HashMap<String, Object>(){{
-            put("sourceDepartmentId", sourceDepartmentId);
-            put("destinationDepartmentId", destinationDepartmentId);
-            put("formTypes", formTypes);
+            put("departmentId", departmentId);
+            put("terrBankId", terrBankId);
         }};
-        String sqlTag = formTypes != null && !formTypes.isEmpty() ? "and dft.form_type_id in (:formTypes)": "";
+        String sqlTag = taxTypes != null && !taxTypes.isEmpty() ?
+                SqlUtils.transformTaxTypeToSqlInStatement(taxTypes) :
+                SqlUtils.transformTaxTypeToSqlInStatement(Arrays.asList(TaxType.values()));
         try {
             return getNamedParameterJdbcTemplate().query(
-                    String.format(GET_FORM_DESTINATIONS_FOR_DEST_DEPARTMENT_SQL, sqlTag),
-                    values, DFT_MAPPER);
+                    COMMON_WITH + String.format(GET_FORM_DESTINATIONS_FOR_DEPARTMENT_SQL, sqlTag),
+                    values, DFT_MAPPER_PAIR);
         } catch (DataAccessException e){
             throw new DaoException("Ошибка пр получении форм-назначений", e);
         }
     }
 
-    private static final String GET_DECLARATION_DESTINATIONS_SQL =  "select * from department_declaration_type dest_ddt where exists "
-            + "(select 1 from department_declaration_type ddt, declaration_source ds where "
-            + "ds.src_department_form_type_id=ddt.id and ds.department_declaration_type_id=dest_ddt.id "
-            + "and ddt.department_id=? %s %s)";
+    private static final String GET_FORM_SOURCES_FOR_DEPARTMENT_SQL =
+            "select fds.src_department_form_type_id source_dft_id, src.department_id src_department_id, src.form_type_id src_ft_id, src.kind src_kind, src.performer_dep_id src_performer_dep_id, \n" +
+                    "fds.department_form_type_id tgt_dft_id, tgt.department_id tgt_department_id, tgt.form_type_id tgt_ft_id, tgt.kind tgt_kind, tgt.performer_dep_id tgt_performer_dep_id \n" +
+            "from department_form_type src\n" +
+            "join form_data_source fds on src.id = fds.src_department_form_type_id\n" +
+            "join department_form_type tgt on fds.department_form_type_id = tgt.id\n" +
+            "join tgt_dep_hierarchy tdp on tdp.id = src.department_id \n" +
+            "join form_type ft on ft.id = src.form_type_id \n" +
+            "where tgt.department_id=:departmentId \n" +
+            "      and ft.tax_type in %s";
+
+    @Override
+    public List<Pair<DepartmentFormType, DepartmentFormType>> getFormSourcesWithDepId(final int departmentId, final int terrBankId, List<TaxType> taxTypes) {
+        HashMap<String, Object> values = new HashMap<String, Object>(){{
+            put("departmentId", departmentId);
+            put("terrBankId", terrBankId);
+        }};
+        try {
+            String sqlTag = taxTypes != null && !taxTypes.isEmpty() ?
+                    SqlUtils.transformTaxTypeToSqlInStatement(taxTypes) :
+                    SqlUtils.transformTaxTypeToSqlInStatement(Arrays.asList(TaxType.values()));
+            return getNamedParameterJdbcTemplate().query(
+                    COMMON_WITH + String.format(GET_FORM_SOURCES_FOR_DEPARTMENT_SQL, sqlTag),
+                    values, DFT_MAPPER_PAIR);
+        } catch (DataAccessException e){
+            logger.error("", e);
+            throw new DaoException("Ошибка при получении НФ назначений", e);
+        }
+    }
+
+    private static final String GET_DECLARATION_DESTINATIONS_FOR_DEPARTMENT_SQL =
+                "select fds.src_department_form_type_id source_dft_id, src.department_id src_department_id, src.form_type_id src_ft_id, src.kind src_kind, src.performer_dep_id src_performer_dep_id, \n" +
+                        "fds.department_declaration_type_id tgt_ddt_id, tgt.department_id tgt_department_id, tgt.declaration_type_id tgt_dt_id \n" +
+                "from department_form_type src\n" +
+                "join declaration_source fds on src.id = fds.src_department_form_type_id\n" +
+                "join department_declaration_type tgt on fds.department_declaration_type_id = tgt.id\n" +
+                "join tgt_dep_hierarchy tdp on tdp.id = tgt.department_id\n" +
+                "join DECLARATION_TYPE ft on ft.id = tgt.declaration_type_id\n" +
+                "where src.department_id=5\n" +
+                "   and ft.tax_type in %s";
+
+    @Override
+    public List<Pair<DepartmentFormType, DepartmentDeclarationType>> getDeclarationDestinationsWithDepId(final int departmentId, final int terrBankId, List<TaxType> taxTypes) {
+        HashMap<String, Object> values = new HashMap<String, Object>(){{
+            put("departmentId", departmentId);
+            put("terrBankId", terrBankId);
+        }};
+        String sqlTag = taxTypes != null && !taxTypes.isEmpty() ?
+                SqlUtils.transformTaxTypeToSqlInStatement(taxTypes) :
+                SqlUtils.transformTaxTypeToSqlInStatement(Arrays.asList(TaxType.values()));
+        try {
+            return getNamedParameterJdbcTemplate().query(
+                    COMMON_WITH + String.format(GET_DECLARATION_DESTINATIONS_FOR_DEPARTMENT_SQL, sqlTag),
+                    values, DDT_MAPPER_PAIR);
+        } catch (DataAccessException e){
+            throw new DaoException("Ошибка при получении деклараций назначений", e);
+        }
+    }
+
+    private static final String GET_DECLARATION_SOURCES_FOR_DEPARTMENT_SQL =
+            "select fds.src_department_form_type_id source_dft_id, src.department_id src_department_id, src.form_type_id src_ft_id, src.kind src_kind, src.performer_dep_id src_performer_dep_id, \n" +
+                    "fds.department_declaration_type_id tgt_ddt_id, tgt.department_id tgt_department_id, tgt.declaration_type_id tgt_dt_id \n" +
+            "from department_form_type src\n" +
+            "join declaration_source fds on src.id = fds.src_department_form_type_id\n" +
+            "join department_declaration_type tgt on fds.department_declaration_type_id = tgt.id\n" +
+            "join tgt_dep_hierarchy tdp on tdp.id = src.department_id \n" +
+            "join form_type ft on ft.id = src.form_type_id \n" +
+            "where tgt.department_id=:departmentId\n" +
+            "      and ft.tax_type in %s";
+
+    @Override
+    public List<Pair<DepartmentFormType, DepartmentDeclarationType>> getDeclarationSourcesWithDepId(final int departmentId, final int terrBankId, List<TaxType> taxTypes) {
+        HashMap<String, Object> values = new HashMap<String, Object>(){{
+            put("departmentId", departmentId);
+            put("terrBankId", terrBankId);
+        }};
+        String sqlTag = taxTypes != null && !taxTypes.isEmpty() ?
+                SqlUtils.transformTaxTypeToSqlInStatement(taxTypes) :
+                SqlUtils.transformTaxTypeToSqlInStatement(Arrays.asList(TaxType.values()));
+        try {
+            return getNamedParameterJdbcTemplate().query(
+                    COMMON_WITH + String.format(GET_DECLARATION_SOURCES_FOR_DEPARTMENT_SQL, sqlTag),
+                    values, DDT_MAPPER_PAIR);
+        } catch (DataAccessException e){
+            logger.error("Ошибка при получении источников назначений", e);
+            throw new DaoException("", e);
+        }
+    }
+
+    private static final String GET_DECLARATION_DESTINATIONS_SQL = "select * from department_declaration_type dest_ddt where exists "
+            + "(select 1 from department_form_type dft, declaration_source ds where "
+            + "ds.src_department_form_type_id=dft.id and ds.department_declaration_type_id=dest_ddt.id "
+            + "and dft.department_id=? %s %s)";
 
     @Override
     public List<DepartmentDeclarationType> getDeclarationDestinations(int sourceDepartmentId,
@@ -161,12 +302,12 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         String[] strings = new String[2];
         Object[] params = new Object[]{sourceDepartmentId};
         if (sourceFormTypeId != 0) {
-            strings[0] = " and ddt.declaration_type_id = " + sourceFormTypeId;
+            strings[0] = " and dft.form_type_id = " + sourceFormTypeId;
         } else {
             strings[0] = "";
         }
         if (sourceKind != null){
-            strings[1] = " and ddt.department_id = " + sourceKind.getId();
+            strings[1] = " and dft.kind = " + sourceKind.getId();
         } else {
             strings[1] = "";
         }
@@ -174,28 +315,6 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         return getJdbcTemplate().query(
                 String.format(GET_DECLARATION_DESTINATIONS_SQL, strings),
                params, DDT_MAPPER);
-    }
-
-    private static final String GET_DECLARATION_DESTINATIONS_FOR_DEST_DEPARTMENT_SQL = "SELECT * FROM department_declaration_type dest_ddt WHERE exists "
-            + "(SELECT 1 FROM DEPARTMENT_DECLARATION_TYPE ddt, declaration_source ds WHERE "
-            + "ds.src_department_form_type_id=ddt.id AND ds.department_declaration_type_id=dest_ddt.id "
-            + "AND ddt.department_id=:sourceDepartmentId %s) AND dest_ddt.DEPARTMENT_ID = :destinationDepartmentId";
-
-    @Override
-    public List<DepartmentDeclarationType> getDeclarationDestinationsWithDestDepId(final int sourceDepartmentId, final int destinationDepartmentId, final List<Integer> formTypes) {
-        HashMap<String, Object> values = new HashMap<String, Object>(){{
-            put("sourceDepartmentId", sourceDepartmentId);
-            put("destinationDepartmentId", destinationDepartmentId);
-            put("formTypes", formTypes);
-        }};
-        String sqlTag = formTypes != null && !formTypes.isEmpty() ? "AND ddt.DECLARATION_TYPE_ID IN (:formTypes)": "";
-        try {
-            return getNamedParameterJdbcTemplate().query(
-                    String.format(GET_DECLARATION_DESTINATIONS_FOR_DEST_DEPARTMENT_SQL, sqlTag),
-                    values, DDT_MAPPER);
-        } catch (DataAccessException e){
-            throw new DaoException("Ошибка пр получении деклараций-назначений", e);
-        }
     }
 
     private static final String GET_DECLARATION_SOURCES_SQL = "select * from department_form_type src_dft where exists "
@@ -491,16 +610,17 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
 
     @Override
     public List<Pair<String, String>> existAcceptedDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind, Integer reportPeriodId) {
-        return getJdbcTemplate().query("select fd.kind, d.name from form_data fd\n" +
-                "join department_form_type dft on (dft.department_id = fd.department_id and dft.kind = fd.kind)\n" +
-                "join form_template ft on (ft.id = fd.form_template_id and ft.type_id = dft.form_type_id)\n" +
-                "join form_data_source fds on fds.department_form_type_id = dft.id\n" +
-                "join department d on d.id = fd.department_id\n" +
-                "where fds.src_department_form_type_id = (select id from department_form_type where department_id = ? and kind = ? and form_type_id = ?)\n" +
-                "and fd.report_period_id = ? and fd.state = 4", new RowMapper<Pair<String, String>>() {
+        return getJdbcTemplate().query("select dtype.name as declarationType, d.name as departmentName from declaration_data dd\n" +
+                "join declaration_template dt on dt.id = dd.declaration_template_id\n" +
+                "join declaration_type dtype on dtype.id = dt.declaration_type_id \n" +
+                "join department d on d.id = dd.department_id\n" +
+                "join department_declaration_type ddt on (ddt.department_id = d.id and ddt.declaration_type_id = dtype.id)\n" +
+                "join declaration_source ds on ds.department_declaration_type_id = ddt.id\n" +
+                "join department_form_type dft on dft.id = ds.src_department_form_type_id\n" +
+                "where dft.department_id = ? and dft.kind = ? and dft.form_type_id = ? and dd.report_period_id = ? and dd.is_accepted = 1", new RowMapper<Pair<String, String>>() {
             @Override
             public Pair<String, String> mapRow(ResultSet rs, int rowNum) throws SQLException {
-                return new Pair<String, String>(FormDataKind.fromId(SqlUtils.getInteger(rs,"KIND")).getName(), rs.getString("NAME"));
+                return new Pair<String, String>(rs.getString("declarationType"), rs.getString("departmentName"));
             }
         }, sourceDepartmentId, sourceKind.getId(), sourceFormTypeId, reportPeriodId);
     }

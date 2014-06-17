@@ -7,13 +7,11 @@ import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.FormTypeTemp
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericCellTable;
 import com.aplana.sbrf.taxaccounting.web.widget.style.table.ComparatorWithNull;
 import com.google.gwt.cell.client.AbstractCell;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -155,6 +153,8 @@ public class AdminView extends ViewWithUiHandlers<AdminUIHandlers> implements Ad
         dataProvider.setList(formTypeTemplates);
         formTemplateTable.setVisibleRange(0, formTypeTemplates.size());
         sortHandler.setList(dataProvider.getList());
+        /* При единственном значении не перерисовывается таблица http://jira.aplana.com/browse/SBRFACCTAX-7612 */
+        formTemplateTable.flush();
         selectionModel.clear();
         if (selectedItem != null) {
             for(FormTypeTemplate item: formTypeTemplates) {

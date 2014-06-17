@@ -184,6 +184,8 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 		fromBox.setValue(yearFrom);
 		toBox.setValue(yearTo);
 		setDeadlineButton.setVisible(false);
+        openCorrectPeriod.setVisible(false);
+        editPeriod.setVisible(false);
 	}
 
 	@Override
@@ -283,4 +285,9 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 		openPeriod.setVisible(canEdit);
 		removePeriod.setVisible(canEdit);
 	}
+
+    @Override
+    public void setCanOpenCorrectPeriod(boolean canOpenCorrectPeriod) {
+        openCorrectPeriod.setVisible(canOpenCorrectPeriod);
+    }
 }

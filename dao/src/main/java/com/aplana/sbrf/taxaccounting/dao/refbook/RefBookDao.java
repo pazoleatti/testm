@@ -97,10 +97,19 @@ public interface RefBookDao {
     /**
      * Проверяет, существуют ли версии элемента справочника, удовлетворяющие указанному фильтру
      * @param version дата актуальности. Может быть null - тогда не учитывается
-     * @param filter
+     * @param needAccurateVersion признак того, что нужно точное совпадение по дате начала действия записи
+     * @param filter фильтр для отбора записей
      * @return пары идентификатор версии элемента - идентификаторидентификатор элемента справочника
      */
-    List<Pair<Long, Long>> getRecordIdPairs(Long refBookId, Date version, String filter);
+    List<Pair<Long, Long>> getRecordIdPairs(Long refBookId, Date version, Boolean needAccurateVersion, String filter);
+
+    /**
+     * Получает количество уникальных записей, удовлетворяющих условиям фильтра
+     * @param version дата версии
+     * @param filter условие фильтрации строк. Может быть не задано
+     * @return количество
+     */
+    int getRecordsCount(Long refBookId, Date version, String filter);
 
 	/**
 	 * Загружает данные иерархического справочника на определенную дату актуальности
@@ -386,6 +395,15 @@ public interface RefBookDao {
      *      значение - строковое представление значения атрибута
      */
     Map<RefBookAttributePair, String> getAttributesValues(List<RefBookAttributePair> attributePairs);
+
+    /**
+     * Проверяет существует ли циклическая зависимость для указанных записей справочника
+     * Если среди дочерних элементов указанной записи существует указанный родительский элемент, то существует цикл
+     * @param uniqueRecordId идентификатор записи
+     * @param parentRecordId идентификатор родительской записи
+     * @return циклическая зависимость существует?
+     */
+    boolean hasLoops(Long uniqueRecordId, Long parentRecordId);
 
     /**
      * Создает новые записи в справочнике

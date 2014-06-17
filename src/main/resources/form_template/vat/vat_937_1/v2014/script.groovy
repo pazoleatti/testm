@@ -117,7 +117,8 @@ void calc() {
 
     // строка 2 «Графа 13» = По строке 2 («Графа 12» - «Графа 5» - «Графа 7» - «Графа 9»)
     def diff = (totalA.nds ?: 0) - (totalA.deal_20_Nds ?: 0) - (totalA.deal_18_Nds ?: 0) - (totalA.deal_10_Nds ?: 0)
-    totalA.diff = checkOverflowAlgorithm(diff, totalA, 'diff', totalA.getIndex(), sizeDiff, '«Графа 12» - «Графа 5» - «Графа 7» - «Графа 9»')
+    checkOverflowAlgorithm(diff, totalA, 'diff', totalA.getIndex(), sizeDiff, '«Графа 12» - «Графа 5» - «Графа 7» - «Графа 9»')
+    totalA.diff = diff
 
     // строка 6 графы с 2 по 11
     calcColumns.each {

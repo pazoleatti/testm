@@ -20,6 +20,7 @@
         <order>2</order>
         <width>0</width>
         <maxLength>1000</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>bill</alias>
@@ -28,6 +29,7 @@
         <order>3</order>
         <width>5</width>
         <maxLength>255</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>buyDate</alias>

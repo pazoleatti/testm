@@ -24,7 +24,6 @@
         <width>10</width>
         <parentAlias>name</parentAlias>
         <refBookAttributeId>166</refBookAttributeId>
-        <refBookAttributeId2>0</refBookAttributeId2>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>name</alias>
@@ -105,7 +104,7 @@
         <checking>false</checking>
         <name>Процентный доход, руб.коп.</name>
         <order>11</order>
-        <width>8</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>

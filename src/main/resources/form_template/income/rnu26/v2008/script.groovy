@@ -521,12 +521,11 @@ void importData() {
  */
 def getSum(def data, def columnAlias) {
     def rows = data.getAllCached()
-    def from = 0
-    def to = rows.size() - 1
-    if (from > to) {
-        return 0
+    def sum = BigDecimal.ZERO
+    for (def row : rows) {
+        sum += (row[columnAlias] ?: BigDecimal.ZERO)
     }
-    return summ(formData, rows, new ColumnRange(columnAlias, from, to))
+    return roundValue(sum, 2)
 }
 
 /**

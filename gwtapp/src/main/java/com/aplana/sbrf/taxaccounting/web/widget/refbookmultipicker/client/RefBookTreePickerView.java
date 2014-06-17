@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.LazyTree;
 import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.event.LazyTreeSelectionEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.event.LazyTreeSelectionHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.event.CheckValuesCountHandler;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.event.ChildrenLoadedEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.event.RootLoadedEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.PickerState;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.RefBookRecordDereferenceValue;
@@ -126,6 +127,7 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
                 item.setState(true);
             }
         }
+        ChildrenLoadedEvent.fire(this, uiTreeItem);
         if (!openOnLoad) {
             tryOpen();
         }
@@ -519,6 +521,10 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
 
     public HandlerRegistration addRootLoadedHandler(RootLoadedEvent.RootLoadedHandler handler) {
         return asWidget().addHandler(handler, RootLoadedEvent.getType());
+    }
+
+    public HandlerRegistration addChildrenLoadedHandler(ChildrenLoadedEvent.Handler handler) {
+        return asWidget().addHandler(handler, ChildrenLoadedEvent.getType());
     }
 
     @Override
