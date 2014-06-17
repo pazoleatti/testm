@@ -27,8 +27,7 @@
         <g:VerticalPanel width="100%" addStyleNames="aplana-ModalWindow-contentBackWhite">
             <g:cell>
                 <g:VerticalPanel spacing="5" addStyleNames="{style.typicalFormBody}">
-                    <g:Label text="Укажите, в течение какого периода печатные
-                                        формы должны содержать новое наименование подразделения."/>
+                    <g:Label text="Укажите, в течение какого периода печатные формы должны содержать новое наименование подразделения."/>
                     <g:HorizontalPanel spacing="5" verticalAlignment="middle">
                         <g:Label text="C"/>
                         <d:DateMaskBoxPicker ui:field="dateFrom"/>
