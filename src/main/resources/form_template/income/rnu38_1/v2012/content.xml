@@ -15,6 +15,7 @@
         <order>1</order>
         <width>7</width>
         <maxLength>30</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>amount</alias>

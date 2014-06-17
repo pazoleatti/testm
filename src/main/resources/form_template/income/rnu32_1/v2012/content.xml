@@ -25,7 +25,6 @@
         <width>10</width>
         <parentAlias>name</parentAlias>
         <refBookAttributeId>166</refBookAttributeId>
-        <refBookAttributeId2>0</refBookAttributeId2>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>name</alias>
@@ -80,7 +79,7 @@
         <checking>false</checking>
         <name>Номинальная стоимость, ед. вал.</name>
         <order>8</order>
-        <width>5</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -142,7 +141,7 @@
         <checking>false</checking>
         <name>Объявленный доход по текущему купону, руб.коп.</name>
         <order>15</order>
-        <width>6</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -151,7 +150,7 @@
         <checking>false</checking>
         <name>Доход с даты погашения предыдущего купона, руб.коп.</name>
         <order>16</order>
-        <width>6</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -160,7 +159,7 @@
         <checking>false</checking>
         <name>Доход с даты открытия короткой позиции, руб.коп.</name>
         <order>17</order>
-        <width>6</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -169,7 +168,7 @@
         <checking>false</checking>
         <name>Процентный доход по дисконтным облигациям, руб.коп.</name>
         <order>18</order>
-        <width>6</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -178,7 +177,7 @@
         <checking>false</checking>
         <name>Всего процентный доход, руб.коп.</name>
         <order>19</order>
-        <width>6</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>

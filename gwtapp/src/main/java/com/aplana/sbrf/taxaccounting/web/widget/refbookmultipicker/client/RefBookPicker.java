@@ -60,6 +60,8 @@ public interface RefBookPicker extends HasValue<List<Long>>, LeafValueEditor<Lis
 
     void reload();
 
+    // @deprecated Использовать getOtherDereferenceValue(Long attrId)
+    @Deprecated
     String getOtherDereferenceValue(String alias);
 
     String getOtherDereferenceValue(Long attrId);

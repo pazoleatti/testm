@@ -191,7 +191,7 @@ void checkIncome102() {
     if (getIncome102Data(getReportPeriodEndDate()) == []) {
         throw new ServiceException("Экземпляр Отчета о прибылях и убытках за период " +
                 "${getReportPeriodStartDate().format(dateFormat)} - ${getReportPeriodEndDate().format(dateFormat)} " +
-                "не существует (отсутствуют данные для расчета)!")
+                "не существует (отсутствуют данные для расчета)! Расчеты не могут быть выполнены.")
     }
 }
 
@@ -211,6 +211,10 @@ void consolidation() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
+    dataRows.each{
+        it.realizeCost = null
+        it.obtainCost = null
+    }
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
         def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
         if (source != null && source.state == WorkflowState.ACCEPTED && source.formType.taxType == TaxType.VAT) {

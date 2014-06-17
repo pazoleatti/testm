@@ -77,7 +77,12 @@ public class RefBookOktmoProvider implements RefBookDataProvider {
 
     @Override
     public List<Long> getUniqueRecordIds(Date version, String filter) {
-        throw new UnsupportedOperationException();
+        return dao.getUniqueRecordIds(OKTMO_REF_BOOK_ID, getTableName(), version, filter);
+    }
+
+    @Override
+    public int getRecordsCount(Date version, String filter) {
+        return dao.getRecordsCount(OKTMO_REF_BOOK_ID, getTableName(), version, filter);
     }
 
     @Override
@@ -432,6 +437,11 @@ public class RefBookOktmoProvider implements RefBookDataProvider {
 
     @Override
     public void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds, boolean force) {
+        deleteRecordVersions(logger, uniqueRecordIds);
+    }
+
+    @Override
+    public void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds) {
         //TODO dloshkarev: надо все перепроверять. Т.к пока эти справочники read only, то эти методы не нужны
         throw new UnsupportedOperationException();
         /*try {

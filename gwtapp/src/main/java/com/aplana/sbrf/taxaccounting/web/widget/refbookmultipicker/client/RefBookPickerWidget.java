@@ -137,8 +137,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
             @Override
             public void onKeyPress(KeyPressEvent event) {
                 if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ENTER) {
-                    refBookView.find(searchTextBox.getText());
-                    state.setSearchPattern(searchTextBox.getText());
+                    onSearchButtonClicked(null);
                 }
             }
         });
@@ -207,18 +206,21 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
 
     @UiHandler("searchButton")
     void onSearchButtonClicked(ClickEvent event) {
-        refBookView.find(searchTextBox.getText());
-        //TODO aivanov раскомментить когда доделаем getUniqueRecordIds
-//        refBookView.checkCount(searchTextBox.getText(), new CheckValuesCountHandler() {
-//            @Override
-//            public void onGetValuesCount(Integer count) {
-//                if (count != null && count < 100) {
-//                    refBookView.find(searchTextBox.getText());
-//                } else {
-//                    Dialog.warningMessage("Уточните параметры поиска: найдено слишком много значений.");
-//                }
-//            }
-//        });
+        final String text = searchTextBox.getText();
+        if (text != null && !text.trim().isEmpty()) {
+            refBookView.checkCount(text.trim(), new CheckValuesCountHandler() {
+                @Override
+                public void onGetValuesCount(Integer count) {
+                    if (count != null && count < (isHierarchical() ? 50 : 100)) {
+                        refBookView.find(text);
+                    } else {
+                        Dialog.warningMessage("Уточните параметры поиска: найдено слишком много значений.");
+                    }
+                }
+            });
+        } else {
+            refBookView.find(text);
+        }
     }
 
     @UiHandler("clearIconButton")
@@ -323,7 +325,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
 
     @Override
     public Long getSingleValue() {
-        return state.getSetIds() != null ? state.getSetIds().iterator().next() : null;
+        return ((state.getSetIds() != null) && !state.getSetIds().isEmpty()) ? state.getSetIds().iterator().next() : null;
     }
 
     @Override

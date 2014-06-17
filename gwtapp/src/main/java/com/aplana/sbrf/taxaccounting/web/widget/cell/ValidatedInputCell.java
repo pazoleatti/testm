@@ -13,7 +13,7 @@ public class ValidatedInputCell extends KeyPressableTextInputCell {
 
 	ColumnContext columnContext;
 
-	public ValidatedInputCell(final ColumnContext columnContext) {
+	public ValidatedInputCell(final ColumnContext columnContext, boolean textRight) {
 		super(new SafeHtmlRenderer<String>() {
 			@Override
 			public SafeHtml render(String s) {
@@ -25,7 +25,7 @@ public class ValidatedInputCell extends KeyPressableTextInputCell {
 			public void render(String s, SafeHtmlBuilder safeHtmlBuilder) {
 					safeHtmlBuilder.appendEscaped(columnContext.getColumn().getFormatter().format(s));
 			}
-		});
+		}, textRight);
 		this.columnContext = columnContext;
 	}
 

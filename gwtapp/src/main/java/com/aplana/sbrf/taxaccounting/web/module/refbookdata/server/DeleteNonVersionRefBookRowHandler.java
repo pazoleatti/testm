@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.DeleteNonVersionRefBookRowAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.DeleteNonVersionRefBookRowResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -28,6 +29,9 @@ public class DeleteNonVersionRefBookRowHandler extends AbstractActionHandler<Del
     @Autowired
     private LogEntryService logEntryService;
 
+    @Autowired
+    private SecurityService securityService;
+
     public DeleteNonVersionRefBookRowHandler() {
         super(DeleteNonVersionRefBookRowAction.class);
     }
@@ -40,6 +44,7 @@ public class DeleteNonVersionRefBookRowHandler extends AbstractActionHandler<Del
         DeleteNonVersionRefBookRowResult result = new DeleteNonVersionRefBookRowResult();
         Logger logger = new Logger();
         if (action.getRecordsId().size() > 0) {
+            logger.setTaUserInfo(securityService.currentUserInfo());
             refBookDataProvider.deleteRecordVersions(logger, action.getRecordsId(), action.isOkDelete());
             if (logger.containsLevel(LogLevel.ERROR))
                 throw new ServiceLoggerException("Удаление невозможно, обнаружены ссылки на подразделение",

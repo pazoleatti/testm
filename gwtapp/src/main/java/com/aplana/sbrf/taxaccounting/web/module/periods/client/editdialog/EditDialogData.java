@@ -10,9 +10,11 @@ public class EditDialogData {
     private Integer year;
     private Integer departmentId;
     private Long dictTaxPeriodId;
-    private Long reportPeriodId;
+    private Integer reportPeriodId;
     private List<ReportPeriod> correctionReportPeriods;
     private Date correctionDate;
+    private String periodName;
+    private Integer periodYear;
 
     public boolean isBalance() {
         return isBalance;
@@ -46,11 +48,11 @@ public class EditDialogData {
         this.dictTaxPeriodId = dictTaxPeriodId;
     }
 
-    public Long getReportPeriodId() {
+    public Integer getReportPeriodId() {
         return reportPeriodId;
     }
 
-    public void setReportPeriodId(Long reportPeriodId) {
+    public void setReportPeriodId(Integer reportPeriodId) {
         this.reportPeriodId = reportPeriodId;
     }
 
@@ -68,5 +70,21 @@ public class EditDialogData {
 
     public void setCorrectionDate(Date correctionDate) {
         this.correctionDate = correctionDate;
+    }
+
+    public String getPeriodName() {
+        return periodName;
+    }
+
+    public void setPeriodName(String periodName) {
+        this.periodName = periodName;
+    }
+
+    public Integer getPeriodYear() {
+        return periodYear;
+    }
+
+    public void setPeriodYear(Integer periodYear) {
+        this.periodYear = periodYear;
     }
 }

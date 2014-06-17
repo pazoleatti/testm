@@ -3,10 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
@@ -198,10 +195,13 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
                 depCombined.setRecordId(recordPairs.get(0).getFirst());
             }
 
+            RefBookRecordVersion recordVersion;
             if (!needEdit) {
-                provider.createRecordVersion(logger, period.getCalendarStartDate(), null, Arrays.asList(record));
+                List<Long> newRecordIds = provider.createRecordVersion(logger, period.getCalendarStartDate(), null, Arrays.asList(record));
+                recordVersion = provider.getRecordVersionInfo(newRecordIds.get(0));
             } else {
                 provider.updateRecordVersion(logger, depCombined.getRecordId(), period.getCalendarStartDate(), null, paramsMap);
+                recordVersion = provider.getRecordVersionInfo(depCombined.getRecordId());
             }
 
             String periodName = period.getName() + " " + period.getTaxPeriod().getYear();
@@ -248,8 +248,11 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
             }
 
             if (!logger.containsLevel(LogLevel.ERROR)) {
-                String strEndDate = sdf.format(period.getEndDate());  //TODO поменять когда изменять действие "сохранить", связано с задачей http://jira.aplana.com/browse/SBRFACCTAX-6994
-                logger.info(String.format(SUCCESS_INFO, departmentName, sdf.format(period.getCalendarStartDate()), strEndDate));
+                if (recordVersion.getVersionEnd() != null) {
+                    logger.info(String.format(SUCCESS_INFO, departmentName, sdf.format(period.getCalendarStartDate()), sdf.format(recordVersion.getVersionEnd())));
+                } else {
+                    logger.info(String.format(SUCCESS_INFO, departmentName, sdf.format(period.getCalendarStartDate()), "\"-\""));
+                }
             }
             result.setUuid(logEntryService.save(logger.getEntries()));
             if (logger.containsLevel(LogLevel.ERROR)) {

@@ -74,6 +74,7 @@ public class LinkButton extends FocusWidget implements HasHorizontalAlignment,
         getElement().getStyle().setTextDecoration(Style.TextDecoration.NONE);
         getElement().getStyle().setColor("#004276");
         getElement().getStyle().setCursor(Style.Cursor.POINTER);
+        getElement().getStyle().setOutlineStyle(Style.OutlineStyle.NONE);
 
 	}
 

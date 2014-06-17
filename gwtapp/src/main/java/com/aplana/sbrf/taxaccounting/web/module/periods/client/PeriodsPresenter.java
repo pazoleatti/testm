@@ -1,12 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.client;
 
-import java.util.Arrays;
-import java.util.List;
-
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
@@ -15,6 +13,8 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.TaManualRevealCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.deadlinedialog.DeadlineDialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.editdialog.EditCorrectionDialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.editdialog.EditDialogData;
@@ -37,10 +37,15 @@ import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, PeriodsPresenter.MyProxy>
 								implements PeriodsUiHandlers, PeriodCreated.OpenPeriodHandler, UpdateForm.UpdateFormHandler {
 
 	private TaxType taxType;
+    private int currentYear;
 
 	@ProxyCodeSplit
 	@NameToken(PeriodsTokens.PERIODS)
@@ -63,6 +68,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 		void setCanChangeDeadline(boolean canChangeDeadline);
         void setCanEditPeriod(boolean canEditPeriod);
 		void setCanEdit(boolean canEdit);
+        void setCanOpenCorrectPeriod(boolean canOpenCorrectPeriod);
 	}
 
 	private final TaPlaceManager placeManager;
@@ -104,24 +110,56 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
         }
         if (!getView().getSelectedRow().isSubHeader()) {
             if (!getView().getSelectedRow().isOpen()) {
-                Dialog.warningMessage("Период уже закрыт.");
+                Dialog.errorMessage("Закрытие периода", "Выбранный период уже закрыт!");
                 return;
             } else {
-                ClosePeriodAction requestData = new ClosePeriodAction();
-                requestData.setTaxType(taxType);
-                requestData.setReportPeriodId((int) getView().getSelectedRow().getReportPeriodId());
-                requestData.setDepartmentId(getView().getSelectedRow().getDepartmentId());
-                requestData.setCorrectionDate(getView().getSelectedRow().getCorrectPeriod());
-                dispatcher.execute(requestData, CallbackUtils
-                        .defaultCallback(new AbstractCallback<ClosePeriodResult>() {
+
+                CheckHasManualEditFormAction manualEditFormAction = new CheckHasManualEditFormAction();
+                manualEditFormAction.setDepartmentId((int) getView().getSelectedRow().getDepartmentId());
+                manualEditFormAction.setKind(FormDataKind.SUMMARY);
+                manualEditFormAction.setReportPeriodId((int) getView().getSelectedRow().getReportPeriodId());
+                manualEditFormAction.setTaxType(taxType);
+
+                dispatcher.execute(manualEditFormAction, CallbackUtils
+                        .defaultCallback(new AbstractCallback<CheckHasManualEditFormResult>() {
                             @Override
-                            public void onSuccess(ClosePeriodResult result) {
-                                find();
-                                LogAddEvent.fire(PeriodsPresenter.this, result.getUuid());
+                            public void onSuccess(CheckHasManualEditFormResult result) {
+                               if (result.hasManualInputForms()) {
+                                   LogAddEvent.fire(PeriodsPresenter.this, result.getUuid());
+                                   Dialog.confirmMessage("Закрытие периода",
+                                           "В Системе существуют налоговые формы, для которых существуют версии ручного ввода. Продолжить операцию закрытия периода?",
+                                           new DialogHandler() {
+                                               @Override
+                                               public void yes() {
+                                                   PeriodsPresenter.this.close();
+                                               }
+                                           });
+                               } else {
+                                   close();
+                               }
                             }
                         }, PeriodsPresenter.this));
             }
         }
+    }
+
+    private void close() {
+        ClosePeriodAction requestData = new ClosePeriodAction();
+        requestData.setTaxType(taxType);
+        requestData.setReportPeriodId((int) getView().getSelectedRow().getReportPeriodId());
+        requestData.setDepartmentId(getView().getSelectedRow().getDepartmentId());
+        requestData.setCorrectionDate(getView().getSelectedRow().getCorrectPeriod());
+        dispatcher.execute(requestData, CallbackUtils
+                .defaultCallback(new AbstractCallback<ClosePeriodResult>() {
+                    @Override
+                    public void onSuccess(ClosePeriodResult result) {
+                        find();
+                        LogAddEvent.fire(PeriodsPresenter.this, result.getUuid());
+                        if (result.isErrorBeforeClose()) {
+                            Dialog.errorMessage("Закрытие периода", "Период не может быть закрыт, пока выполняется редактирование форм, относящихся к этому периоду!");
+                        }
+                    }
+                }, PeriodsPresenter.this));
     }
 
 	@Override
@@ -133,7 +171,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
         }
         openDialogPresenter.resetToDefault();
         openDialogPresenter.setSelectedDepartment(departmentPair.getDepartmentId());
-        openDialogPresenter.setYear(getView().getFromYear());
+        openDialogPresenter.setYear(currentYear);
         addToPopupSlot(openDialogPresenter);
 	}
 
@@ -145,7 +183,6 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
             return;
         }
 
-
         final GetCorrectPeriodsAction action = new GetCorrectPeriodsAction();
         action.setTaxType(taxType);
         final int departmentId = departmentPair.getDepartmentId();
@@ -156,7 +193,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
                             public void onSuccess(GetCorrectPeriodsResult result) {
                                 openCorrectDialogPresenter.resetToDefault();
                                 openCorrectDialogPresenter.setSelectedDepartment(departmentId);
-                                openCorrectDialogPresenter.setPeriodsList(result.getReportPeriod());
+                                openCorrectDialogPresenter.setPeriodsList(result.getReportPeriod(), (int)getView().getSelectedRow().getReportPeriodId());
                                 openCorrectDialogPresenter.setTaxType(taxType);
                                 addToPopupSlot(openCorrectDialogPresenter);
                             }
@@ -166,12 +203,34 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 
     @Override
 	public void onFindButton() {
-        if (getView().getDepartmentId() == null) {
-            Dialog.warningMessage("Не выбрано подразделение!");
+        if ((getView().getDepartmentId() == null)
+                || (getView().getFromYear() == null)
+                || (getView().getToYear() == null)) {
+            StringBuilder msg = new StringBuilder();
+            if (getView().getDepartmentId() == null) {
+                msg.append("\"Подразделение\"");
+                if ((getView().getFromYear() == null) || (getView().getToYear() == null)) {
+                    msg.append(", ");
+                }
+            }
+
+            if (getView().getFromYear() == null) {
+                msg.append("\"Период с\"");
+                if (getView().getToYear() == null) {
+                    msg.append(", ");
+                }
+            }
+
+            if (getView().getToYear() == null) {
+                msg.append("\"Период по\"");
+            }
+
+            Dialog.errorMessage("Указание параметров поиска",
+                    "Не заполнены следующие обязательные к заполнению поля: " + msg.toString() + "!");
         } else if ((getView().getFromYear() == null)
 				|| (getView().getToYear() == null)
 				|| (getView().getFromYear() > getView().getToYear())){
-			Dialog.warningMessage("Внимание","Интервал периода поиска указан неверно!");
+			Dialog.errorMessage("Указание параметров поиска","Интервал периода поиска указан неверно!");
 		} else {
 			find();
 		}
@@ -221,12 +280,9 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 	}
 
 	private void checkAndRemovePeriod() {
-		if (taxType != TaxType.INCOME) {
-			removeReportPeriod();
-			return;
-		}
 		CanRemovePeriodAction action = new CanRemovePeriodAction();
 		action.setReportPeriodId((int)getView().getSelectedRow().getReportPeriodId());
+        action.setTaxType(taxType);
 		dispatcher.execute(action, CallbackUtils
 				.defaultCallback(new AbstractCallback<CanRemovePeriodResult>() {
 					@Override
@@ -235,6 +291,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 							removeReportPeriod();
 						} else {
                             LogAddEvent.fire(PeriodsPresenter.this, result.getUuid());
+                            Dialog.errorMessage("Удаление периода", "Удаление периода невозможно!");
 						}
 					}
 				}, PeriodsPresenter.this));
@@ -258,8 +315,19 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 
 	@Override
 	public void selectionChanged() {
-		getView().setCanChangeDeadline(getView().getSelectedRow().isOpen());
-        getView().setCanEditPeriod(getView().getSelectedRow().isOpen());
+        TableRow selectedRow = getView().getSelectedRow();
+        getView().setCanChangeDeadline(!selectedRow.isSubHeader() && selectedRow.isOpen());
+        getView().setCanEditPeriod(!selectedRow.isSubHeader() && selectedRow.isOpen());
+        List<TaxType> ITD = new ArrayList<TaxType>();
+        ITD.add(TaxType.INCOME);
+        ITD.add(TaxType.TRANSPORT);
+        ITD.add(TaxType.DEAL);
+        if (selectedRow != null && !selectedRow.isSubHeader() && !selectedRow.isOpen() && !selectedRow.isBalance() && selectedRow.getCorrectPeriod() == null &&
+                (ITD.contains(taxType) && selectedRow.getPeriodName().equals("год") || !ITD.contains(taxType))) {
+            getView().setCanOpenCorrectPeriod(true);
+        } else {
+            getView().setCanOpenCorrectPeriod(false);
+        }
 	}
 
     @Override
@@ -268,7 +336,9 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
         initData.setYear(getView().getSelectedRow().getYear());
         initData.setBalance(getView().getSelectedRow().isBalance());
         initData.setDepartmentId(getView().getDepartmentId().getDepartmentId());
-        initData.setReportPeriodId(getView().getSelectedRow().getReportPeriodId());
+        initData.setReportPeriodId((int)getView().getSelectedRow().getReportPeriodId());
+        initData.setDictTaxPeriodId((long)getView().getSelectedRow().getDictTaxPeriodId());
+        initData.setPeriodName(getView().getSelectedRow().getPeriodName());
         if (getView().getSelectedRow().getCorrectPeriod() == null) {
             editDialogPresenter.init(initData);
             addToPopupSlot(editDialogPresenter);
@@ -312,6 +382,8 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 	@Override
 	public void prepareFromRequest(PlaceRequest request) {
 		super.prepareFromRequest(request);
+        LogCleanEvent.fire(this);
+        LogShowEvent.fire(this, false);
 
 		PeriodsGetFilterData getFilterData = new PeriodsGetFilterData();
 		getFilterData.setTaxType(TaxType.valueOf(request.getParameter("nType", "")));
@@ -319,6 +391,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 				.defaultCallback(new AbstractCallback<PeriodsGetFilterDataResult>() {
 					@Override
 					public void onSuccess(PeriodsGetFilterDataResult result) {
+                        currentYear = result.getCurrentYear();
 						PeriodsPresenter.this.taxType = result.getTaxType();
                         getView().setTaxTitle(taxType.getName());
 						getView().setTitle("Ведение периодов");

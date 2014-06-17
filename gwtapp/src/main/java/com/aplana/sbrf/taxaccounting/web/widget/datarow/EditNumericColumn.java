@@ -21,7 +21,7 @@ public class EditNumericColumn extends DataRowColumn<String> {
 	private NumberFormat numberFormat;
 
 	public EditNumericColumn(final NumericColumn column, ColumnContext columnContext) {
-		super(new ValidatedInputCell(columnContext), column);
+		super(new ValidatedInputCell(columnContext, true), column);
 		this.setHorizontalAlignment(ALIGN_RIGHT);
 
 		StringBuffer mask = new StringBuffer("#");

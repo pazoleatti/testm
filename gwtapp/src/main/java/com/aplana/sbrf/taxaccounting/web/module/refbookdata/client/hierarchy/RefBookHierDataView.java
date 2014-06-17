@@ -59,6 +59,8 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
     @UiField
     HTML separator;
     @UiField
+    HTML separatorVersion;
+    @UiField
     Button search;
     @UiField
     TextBox filterText;
@@ -277,6 +279,7 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
 
     @Override
     public void setVersionedFields(boolean isVisible) {
+        separatorVersion.setVisible(isVisible);
         relevanceDate.setVisible(isVisible);
         relevanceDateLabel.setVisible(isVisible);
     }

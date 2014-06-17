@@ -60,6 +60,16 @@ public interface DepartmentService {
      */
     List<Department> getAllChildren(int parentDepartmentId);
 
+    List<Integer> getAllChildrenIds(int depId);
+
+    /**
+     * Получить все родительские подразделения
+     *
+     * @param depId подразделение от которого ищем
+     * @return список идентификаторов подразделений
+     */
+    List<Integer> getAllParentIds(int depId);
+
     /**
      * Получить родительское подразделения для департамента
      *
@@ -208,7 +218,8 @@ public interface DepartmentService {
     /**
      * Получает родительский ТБ для подразделения.
      * @param departmentId иденетификатор подразделения, для которого надо получить терр. банк.
-     * @return терр. банк
+     * @return терр. банк. Возвращает null, если departmentId корневое подразделение.
+     *          Возвращает переданное подразделение, если оно и есть террбанк.
      */
     Department getParentTB(int departmentId);
 

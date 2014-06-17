@@ -88,13 +88,13 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
                     public void onSuccess(CheckPeriodStatusResult result) {
                         switch (result.getStatus()) {
                             case OPEN:
-                                Dialog.infoMessage("Период уже открыт!");
+                                Dialog.infoMessage("Открытие периода", "Период уже открыт!");
                                 break;
                             case NOT_EXIST:
                                 open(openFilterData);
                                 break;
                             case CLOSE:
-                                Dialog.confirmMessage("Период закрыт, выполнить его переоткрытие?", new DialogHandler() {
+                                Dialog.confirmMessage("Открытие периода", "Период закрыт, выполнить его переоткрытие?", new DialogHandler() {
                                     @Override
                                     public void yes() {
                                         open(openFilterData);
@@ -113,6 +113,9 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
                                 break;
                             case BALANCE_STATUS_CHANGED:
                                 Dialog.warningMessage("Внимание", "Данный период уже заведён в Системе. Изменение признака ввода остатков невозможно, так как в Системе может быть заведён только один период с (без) указания признака ввода остатков!");
+                                break;
+                            case CORRECTION_PERIOD_ALREADY_EXIST:
+                                Dialog.errorMessage("Открытие периода", "Для указанного периода существуют корректирующие периоды, его переоткрытие невозможно!");
                                 break;
                             default:
                                 getView().hide();

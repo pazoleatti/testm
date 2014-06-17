@@ -4,6 +4,8 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.client.event.CreateNewVersionEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.shared.*;
@@ -105,6 +107,8 @@ public class TemplateVersionListPresenter extends Presenter<TemplateVersionListP
     @Override
     public void prepareFromRequest(PlaceRequest request) {
         super.prepareFromRequest(request);
+        LogCleanEvent.fire(this);
+        LogShowEvent.fire(this, false);
         GetFTVersionListAction action = new GetFTVersionListAction();
         action.setFormTypeId(Integer.parseInt(request.getParameter("formTypeId", "")));
         dispatcher.execute(action, CallbackUtils.defaultCallback(

@@ -2,74 +2,59 @@
 <rows>
     <row alias="">
         <cell alias="rowNum" colSpan="18" rowSpan="1" value="Полная форма"/>
-        <cell alias="transactionDeliveryDate" colSpan="1" rowSpan="1" value="Полная форма"/>
-        <cell alias="contraName" colSpan="1" rowSpan="1" value="Полная форма"/>
-        <cell alias="transactionMode" colSpan="1" rowSpan="1" value="Полная форма"/>
-        <cell alias="innKio" colSpan="1" rowSpan="1" value="Полная форма"/>
-        <cell alias="contraCountry" colSpan="1" rowSpan="1" value="Полная форма"/>
-        <cell alias="contraCountryCode" colSpan="1" rowSpan="1" value="Полная форма"/>
-        <cell alias="transactionSumCurrency" colSpan="1" rowSpan="1" value="Полная форма"/>
-        <cell alias="currency" colSpan="1" rowSpan="1" value="Полная форма"/>
-        <cell alias="courseCB" colSpan="1" rowSpan="1" value="Полная форма"/>
-        <cell alias="transactionSumRub" colSpan="1" rowSpan="1" value="Полная форма"/>
-        <cell alias="contractNum" colSpan="1" rowSpan="1" value="Полная форма"/>
-        <cell alias="contractDate" colSpan="1" rowSpan="1" value="Полная форма"/>
-        <cell alias="transactionDate" colSpan="1" rowSpan="1" value="Полная форма"/>
-        <cell alias="bondRegCode" colSpan="1" rowSpan="1" value="Полная форма"/>
-        <cell alias="bondCount" colSpan="1" rowSpan="1" value="Полная форма"/>
-        <cell alias="priceOne" colSpan="1" rowSpan="1" value="Полная форма"/>
-        <cell alias="transactionType" colSpan="1" rowSpan="1" value="Полная форма"/>
+        <cell alias="transactionDeliveryDate" colSpan="1" rowSpan="1" value="Дата сделки (поставки)"/>
+        <cell alias="contraName" colSpan="1" rowSpan="1" value="Наименование контрагента и ОПФ"/>
+        <cell alias="transactionMode" colSpan="1" rowSpan="1" value="Режим переговорных сделок"/>
+        <cell alias="innKio" colSpan="1" rowSpan="1" value="ИНН/КИО контрагента"/>
+        <cell alias="contraCountry" colSpan="1" rowSpan="1" value="Страна местонахождения контрагента"/>
+        <cell alias="contraCountryCode" colSpan="1" rowSpan="1" value="Код страны местонахождения контрагента"/>
+        <cell alias="transactionSumCurrency" colSpan="1" rowSpan="1"
+              value="Сумма сделки (с учетом НКД), в валюте расчетов."/>
+        <cell alias="currency" colSpan="1" rowSpan="1" value="Валюта расчетов по сделке"/>
+        <cell alias="courseCB" colSpan="1" rowSpan="1" value="Курс ЦБ РФ"/>
+        <cell alias="transactionSumRub" colSpan="1" rowSpan="1" value="Сумма сделки (с учетом НКД), руб."/>
+        <cell alias="contractNum" colSpan="1" rowSpan="1" value="Номер договора"/>
+        <cell alias="contractDate" colSpan="1" rowSpan="1" value="Дата договора"/>
+        <cell alias="transactionDate" colSpan="1" rowSpan="1" value="Дата заключения сделки"/>
+        <cell alias="bondRegCode" colSpan="1" rowSpan="1" value="Регистрационный код ценной бумаги"/>
+        <cell alias="bondCount" colSpan="1" rowSpan="1" value="Количество бумаг по сделке, шт."/>
+        <cell alias="priceOne" colSpan="1" rowSpan="1" value="Цена за 1 шт., руб."/>
+        <cell alias="transactionType" colSpan="1" rowSpan="1" value="Тип сделки"/>
     </row>
     <row alias="">
         <cell alias="rowNum" colSpan="18" rowSpan="1"
               value="Данные для заполнения Уведомления о сделках с ценными бумагами, признаваемых Контролируемыми сделками (заполняются по итогам года)"/>
-        <cell alias="transactionDeliveryDate" colSpan="1" rowSpan="1"
-              value="Данные для заполнения Уведомления о сделках с ценными бумагами, признаваемых Контролируемыми сделками (заполняются по итогам года)"/>
-        <cell alias="contraName" colSpan="1" rowSpan="1"
-              value="Данные для заполнения Уведомления о сделках с ценными бумагами, признаваемых Контролируемыми сделками (заполняются по итогам года)"/>
-        <cell alias="transactionMode" colSpan="1" rowSpan="1"
-              value="Данные для заполнения Уведомления о сделках с ценными бумагами, признаваемых Контролируемыми сделками (заполняются по итогам года)"/>
-        <cell alias="innKio" colSpan="1" rowSpan="1"
-              value="Данные для заполнения Уведомления о сделках с ценными бумагами, признаваемых Контролируемыми сделками (заполняются по итогам года)"/>
-        <cell alias="contraCountry" colSpan="1" rowSpan="1"
-              value="Данные для заполнения Уведомления о сделках с ценными бумагами, признаваемых Контролируемыми сделками (заполняются по итогам года)"/>
-        <cell alias="contraCountryCode" colSpan="1" rowSpan="1"
-              value="Данные для заполнения Уведомления о сделках с ценными бумагами, признаваемых Контролируемыми сделками (заполняются по итогам года)"/>
-        <cell alias="transactionSumCurrency" colSpan="1" rowSpan="1"
-              value="Данные для заполнения Уведомления о сделках с ценными бумагами, признаваемых Контролируемыми сделками (заполняются по итогам года)"/>
-        <cell alias="currency" colSpan="1" rowSpan="1"
-              value="Данные для заполнения Уведомления о сделках с ценными бумагами, признаваемых Контролируемыми сделками (заполняются по итогам года)"/>
-        <cell alias="courseCB" colSpan="1" rowSpan="1"
-              value="Данные для заполнения Уведомления о сделках с ценными бумагами, признаваемых Контролируемыми сделками (заполняются по итогам года)"/>
-        <cell alias="transactionSumRub" colSpan="1" rowSpan="1"
-              value="Данные для заполнения Уведомления о сделках с ценными бумагами, признаваемых Контролируемыми сделками (заполняются по итогам года)"/>
-        <cell alias="contractNum" colSpan="1" rowSpan="1"
-              value="Данные для заполнения Уведомления о сделках с ценными бумагами, признаваемых Контролируемыми сделками (заполняются по итогам года)"/>
-        <cell alias="contractDate" colSpan="1" rowSpan="1"
-              value="Данные для заполнения Уведомления о сделках с ценными бумагами, признаваемых Контролируемыми сделками (заполняются по итогам года)"/>
-        <cell alias="transactionDate" colSpan="1" rowSpan="1"
-              value="Данные для заполнения Уведомления о сделках с ценными бумагами, признаваемых Контролируемыми сделками (заполняются по итогам года)"/>
-        <cell alias="bondRegCode" colSpan="1" rowSpan="1"
-              value="Данные для заполнения Уведомления о сделках с ценными бумагами, признаваемых Контролируемыми сделками (заполняются по итогам года)"/>
-        <cell alias="bondCount" colSpan="1" rowSpan="1"
-              value="Данные для заполнения Уведомления о сделках с ценными бумагами, признаваемых Контролируемыми сделками (заполняются по итогам года)"/>
-        <cell alias="priceOne" colSpan="1" rowSpan="1"
-              value="Данные для заполнения Уведомления о сделках с ценными бумагами, признаваемых Контролируемыми сделками (заполняются по итогам года)"/>
-        <cell alias="transactionType" colSpan="1" rowSpan="1"
-              value="Данные для заполнения Уведомления о сделках с ценными бумагами, признаваемых Контролируемыми сделками (заполняются по итогам года)"/>
+        <cell alias="transactionDeliveryDate" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="contraName" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="transactionMode" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="innKio" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="contraCountry" colSpan="1" rowSpan="1" value="Страна местонахождения контрагента"/>
+        <cell alias="contraCountryCode" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="transactionSumCurrency" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="currency" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="courseCB" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="transactionSumRub" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="contractNum" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="contractDate" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="transactionDate" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="bondRegCode" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="bondCount" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="priceOne" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="transactionType" colSpan="1" rowSpan="1" value=""/>
     </row>
     <row alias="">
         <cell alias="rowNum" colSpan="1" rowSpan="3" value="№ п/п"/>
         <cell alias="transactionDeliveryDate" colSpan="10" rowSpan="1" value="Сокращенная форма"/>
-        <cell alias="contraName" colSpan="1" rowSpan="1" value="Сокращенная форма"/>
-        <cell alias="transactionMode" colSpan="1" rowSpan="1" value="Сокращенная форма"/>
-        <cell alias="innKio" colSpan="1" rowSpan="1" value="Сокращенная форма"/>
-        <cell alias="contraCountry" colSpan="1" rowSpan="1" value="Сокращенная форма"/>
-        <cell alias="contraCountryCode" colSpan="1" rowSpan="1" value="Сокращенная форма"/>
-        <cell alias="transactionSumCurrency" colSpan="1" rowSpan="1" value="Сокращенная форма"/>
-        <cell alias="currency" colSpan="1" rowSpan="1" value="Сокращенная форма"/>
-        <cell alias="courseCB" colSpan="1" rowSpan="1" value="Сокращенная форма"/>
-        <cell alias="transactionSumRub" colSpan="1" rowSpan="1" value="Сокращенная форма"/>
+        <cell alias="contraName" colSpan="1" rowSpan="1" value="Наименование контрагента и ОПФ"/>
+        <cell alias="transactionMode" colSpan="1" rowSpan="1" value="Режим переговорных сделок"/>
+        <cell alias="innKio" colSpan="1" rowSpan="1" value="ИНН/КИО контрагента"/>
+        <cell alias="contraCountry" colSpan="1" rowSpan="1" value="Страна местонахождения контрагента"/>
+        <cell alias="contraCountryCode" colSpan="1" rowSpan="1" value="Код страны местонахождения контрагента"/>
+        <cell alias="transactionSumCurrency" colSpan="1" rowSpan="1"
+              value="Сумма сделки (с учетом НКД), в валюте расчетов."/>
+        <cell alias="currency" colSpan="1" rowSpan="1" value="Валюта расчетов по сделке"/>
+        <cell alias="courseCB" colSpan="1" rowSpan="1" value="Курс ЦБ РФ"/>
+        <cell alias="transactionSumRub" colSpan="1" rowSpan="1" value="Сумма сделки (с учетом НКД), руб."/>
         <cell alias="contractNum" colSpan="1" rowSpan="3" value="Номер договора"/>
         <cell alias="contractDate" colSpan="1" rowSpan="3" value="Дата договора"/>
         <cell alias="transactionDate" colSpan="1" rowSpan="3" value="Дата заключения сделки"/>
@@ -82,16 +67,16 @@
         <cell alias="rowNum" colSpan="1" rowSpan="1" value="№ п/п"/>
         <cell alias="transactionDeliveryDate" colSpan="10" rowSpan="1"
               value="Данные для расчета сумм доходов по сделкам"/>
-        <cell alias="contraName" colSpan="1" rowSpan="1" value="Данные для расчета сумм доходов по сделкам"/>
-        <cell alias="transactionMode" colSpan="1" rowSpan="1" value="Данные для расчета сумм доходов по сделкам"/>
-        <cell alias="innKio" colSpan="1" rowSpan="1" value="Данные для расчета сумм доходов по сделкам"/>
-        <cell alias="contraCountry" colSpan="1" rowSpan="1" value="Данные для расчета сумм доходов по сделкам"/>
-        <cell alias="contraCountryCode" colSpan="1" rowSpan="1" value="Данные для расчета сумм доходов по сделкам"/>
+        <cell alias="contraName" colSpan="1" rowSpan="1" value="Наименование контрагента и ОПФ"/>
+        <cell alias="transactionMode" colSpan="1" rowSpan="1" value="Режим переговорных сделок"/>
+        <cell alias="innKio" colSpan="1" rowSpan="1" value="ИНН/КИО контрагента"/>
+        <cell alias="contraCountry" colSpan="1" rowSpan="1" value="Страна местонахождения контрагента"/>
+        <cell alias="contraCountryCode" colSpan="1" rowSpan="1" value="Код страны местонахождения контрагента"/>
         <cell alias="transactionSumCurrency" colSpan="1" rowSpan="1"
-              value="Данные для расчета сумм доходов по сделкам"/>
-        <cell alias="currency" colSpan="1" rowSpan="1" value="Данные для расчета сумм доходов по сделкам"/>
-        <cell alias="courseCB" colSpan="1" rowSpan="1" value="Данные для расчета сумм доходов по сделкам"/>
-        <cell alias="transactionSumRub" colSpan="1" rowSpan="1" value="Данные для расчета сумм доходов по сделкам"/>
+              value="Сумма сделки (с учетом НКД), в валюте расчетов."/>
+        <cell alias="currency" colSpan="1" rowSpan="1" value="Валюта расчетов по сделке"/>
+        <cell alias="courseCB" colSpan="1" rowSpan="1" value="Курс ЦБ РФ"/>
+        <cell alias="transactionSumRub" colSpan="1" rowSpan="1" value="Сумма сделки (с учетом НКД), руб."/>
         <cell alias="contractNum" colSpan="1" rowSpan="1" value="Номер договора"/>
         <cell alias="contractDate" colSpan="1" rowSpan="1" value="Дата договора"/>
         <cell alias="transactionDate" colSpan="1" rowSpan="1" value="Дата заключения сделки"/>
