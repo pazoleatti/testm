@@ -29,7 +29,9 @@ public interface FormDataUiHandlers extends UiHandlers{
 
 	void onCheckClicked();
 
-	void onPrintClicked();
+	void onPrintExcelClicked();
+
+    void onPrintCSVClicked();
 
 	void onSignersClicked();
 

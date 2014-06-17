@@ -10,6 +10,7 @@ import java.util.List;
 public interface PrintingService {
 	
 	String generateExcel(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked);
+    String generateCSV(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked);
 	String generateExcelLogEntry(List<LogEntry> listLogEntries);
     String generateExcelUsers(List<TAUserView> taUserViewList);
     String generateExcelLogSystem(List<LogSearchResultItem> resultItems);

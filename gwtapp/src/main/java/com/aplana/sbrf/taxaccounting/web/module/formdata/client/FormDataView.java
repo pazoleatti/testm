@@ -14,6 +14,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.EndLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.StartLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
+import com.aplana.sbrf.taxaccounting.web.widget.style.DropdownButton;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
@@ -102,7 +103,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	Button deleteFormButton;
 
 	@UiField
-    LinkButton printAnchor;
+    DropdownButton printAnchor;
 	@UiField
 	Anchor returnAnchor;
 
@@ -219,6 +220,28 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
                 recalcReportPeriodLabelWidth();
             }
         });
+
+        LinkButton printToExcel = new LinkButton("Excel");
+        printToExcel.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if (getUiHandlers() != null) {
+                    getUiHandlers().onPrintExcelClicked();
+                }
+            }
+        });
+
+        LinkButton printToCSV = new LinkButton("CSV");
+        printToCSV.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if (getUiHandlers() != null) {
+                    getUiHandlers().onPrintCSVClicked();
+                }
+            }
+        });
+        printAnchor.addItem(printToExcel);
+        printAnchor.addItem(printToCSV);
     }
 
 	@Override
@@ -408,13 +431,6 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	void onCheckButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
 			getUiHandlers().onCheckClicked();
-		}
-	}
-
-	@UiHandler("printAnchor")
-	void onPrintAnchorClicked(ClickEvent event) {
-		if (getUiHandlers() != null) {
-			getUiHandlers().onPrintClicked();
 		}
 	}
 
