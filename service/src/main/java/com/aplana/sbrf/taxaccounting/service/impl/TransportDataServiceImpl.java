@@ -36,7 +36,6 @@ public class TransportDataServiceImpl implements TransportDataService {
     final static String EMPTY_INPUT_STREAM_ERROR = "Поток данных пуст!";
     final static String NO_CATALOG_ERROR = "Не указан каталог загрузки в конфигурационных параметрах АС «Учет налогов»!";
 
-
     @Override
     public void uploadFile(TAUserInfo userInfo, ConfigurationParam folderParam, String fileName, InputStream inputStream, Logger logger) throws IOException {
         // Проверка прав

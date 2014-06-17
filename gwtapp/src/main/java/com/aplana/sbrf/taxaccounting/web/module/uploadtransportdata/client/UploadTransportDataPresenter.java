@@ -1,8 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.client;
 
+import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
+import com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.client.fileupload.FileUploadHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.EndLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.StartLoadFileEvent;
 import com.google.inject.Inject;
@@ -32,6 +34,7 @@ public class UploadTransportDataPresenter extends Presenter<UploadTransportDataP
 
     public interface MyView extends View, HasUiHandlers<UploadTransportDataUiHandlers> {
         public void setUploadActionUrl(String actionUrl);
+        public void setFileUploadHandler(FileUploadHandler fileUploadHandler);
     }
 
     @Inject
@@ -40,6 +43,17 @@ public class UploadTransportDataPresenter extends Presenter<UploadTransportDataP
         super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
         getView().setUiHandlers(this);
         getView().setUploadActionUrl(ACTION_URL);
+        getView().setFileUploadHandler(new FileUploadHandler() {
+            @Override
+            public void onSuccess() {
+                Dialog.infoMessage("Загрузка транспортных файлов в каталог загрузки", "Загрузка транспортных файлов в каталог загрузки завершена");
+            }
+
+            @Override
+            public void onFailure() {
+                Dialog.errorMessage("Загрузка транспортных файлов в каталог загрузки", "Транспортные файлы не загружены в каталог загрузки. Обратитесь к администратору!");
+            }
+        });
     }
 
     @Override

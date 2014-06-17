@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.TransportDataService;
@@ -56,14 +57,14 @@ public class TransportDataController {
                 fileName, items.get(0).getInputStream(), logger);
 
         if (!logger.getEntries().isEmpty()){
-            response.getWriter().printf("uuid %s", logEntryService.save(logger.getEntries()));
+            response.getWriter().printf((logger.containsLevel(LogLevel.ERROR) ? "error " : "") + "uuid %s", logEntryService.save(logger.getEntries()));
         }
     }
 
     @ExceptionHandler(ServiceLoggerException.class)
     public void logServiceExceptionHandler(ServiceLoggerException e, final HttpServletResponse response)
             throws IOException {
-        response.getWriter().printf("uuid %s", e.getUuid());
+        response.getWriter().printf("error uuid %s", e.getUuid());
     }
 
     @ExceptionHandler(Exception.class)
@@ -74,7 +75,7 @@ public class TransportDataController {
         try {
             Logger logger = new Logger();
             logger.error("Ошибка: " + e.getMessage());
-            response.getWriter().printf("uuid %s", logEntryService.save(logger.getEntries()));
+            response.getWriter().printf("error uuid %s", logEntryService.save(logger.getEntries()));
         } catch (IOException ioException) {
             logger.error(ioException.getMessage(), ioException);
         }

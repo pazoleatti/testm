@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.client;
 
+import com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.client.fileupload.FileUploadHandler;
 import com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.client.fileupload.FileUploadWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.EndLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.StartLoadFileEvent;
@@ -49,5 +50,10 @@ public class UploadTransportDataView extends ViewWithUiHandlers<UploadTransportD
     @Override
     public void setUploadActionUrl(String actionUrl) {
         uploadWidget.setActionUrl(actionUrl);
+    }
+
+    @Override
+    public void setFileUploadHandler(FileUploadHandler fileUploadHandler) {
+        uploadWidget.setFileUploadHandler(fileUploadHandler);
     }
 }

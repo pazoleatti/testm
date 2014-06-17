@@ -51,7 +51,6 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
 		CreateFormDataResult result = new CreateFormDataResult();
 		Logger logger = new Logger();
 
-        // TODO Левыкин: для ежемесячных форм передавать periodOrder
 		result.setFormDataId(formDataService.createFormData(logger, userInfo,
 				formTemplateService.getActiveFormTemplateId(action
 						.getFormDataTypeId(), action.getReportPeriodId()), action

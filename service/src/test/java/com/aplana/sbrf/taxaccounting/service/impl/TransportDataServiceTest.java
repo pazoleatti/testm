@@ -6,7 +6,9 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.TransportDataService;
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -158,6 +160,6 @@ public class TransportDataServiceTest {
     }
 
     private static InputStream getFileAsStream(String fileName) {
-        return BookerStatementsServiceImplTest.class.getClassLoader().getResourceAsStream(TEST_PATH + fileName);
+        return TransportDataServiceTest.class.getClassLoader().getResourceAsStream(TEST_PATH + fileName);
     }
 }

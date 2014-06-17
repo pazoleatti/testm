@@ -29,7 +29,9 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
     private String value;
     private static String jsonPattern = "(<pre.*>)(.+?)(</pre>)";
     private static String UUID_STRING = "uuid";
+    private static String ERROR_STRING = "error";
     private static Binder uiBinder = GWT.create(Binder.class);
+    private FileUploadHandler fileUploadHandler;
 
     @UiField
     FileUpload uploader;
@@ -46,20 +48,25 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
         formPanel.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
             @Override
             public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
-                try {
-                    if (!event.getResults().toLowerCase().contains("error") && event.getResults().toLowerCase().contains(UUID_STRING)) {
-                        String uuid = event.getResults().replaceAll(jsonPattern, "$2");
-                        uuid = uuid.substring(uuid.indexOf(UUID_STRING) + UUID_STRING.length() + 1, uuid.length());
-                        EndLoadFileEvent.fire(FileUploadWidget.this, uuid);
-                        setValue(value, true);
+                String resultSring = event.getResults().toLowerCase();
+                System.out.println("resultSring = "+resultSring);
+                if (fileUploadHandler != null) {
+                    if (resultSring.startsWith(ERROR_STRING)) {
+                        fileUploadHandler.onFailure();
                     } else {
-                        EndLoadFileEvent.fire(FileUploadWidget.this, true);
-                        setValue("");
+                        fileUploadHandler.onSuccess();
                     }
-                    formPanel.reset();
-                } catch (Exception e) {
-                    e.printStackTrace();
                 }
+                if (event.getResults().toLowerCase().contains(UUID_STRING)) {
+                    String uuid = event.getResults().replaceAll(jsonPattern, "$2");
+                    uuid = uuid.substring(uuid.indexOf(UUID_STRING) + UUID_STRING.length() + 1, uuid.length());
+                    EndLoadFileEvent.fire(FileUploadWidget.this, uuid);
+                    setValue(value, true);
+                } else {
+                    EndLoadFileEvent.fire(FileUploadWidget.this, true);
+                    setValue("");
+                }
+                formPanel.reset();
             }
         });
         uploader.addChangeHandler(new ChangeHandler() {
@@ -69,6 +76,10 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
                 formPanel.submit();
             }
         });
+    }
+
+    public void setFileUploadHandler(FileUploadHandler fileUploadHandler) {
+        this.fileUploadHandler = fileUploadHandler;
     }
 
     @Override
