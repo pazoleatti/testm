@@ -68,9 +68,10 @@ public class OpenCorrectDialogView extends PopupViewWithUiHandlers<OpenCorrectDi
 	}
 
 	@Override
-	public void setPeriodsList(List<ReportPeriod> reportPeriods) {
+    public void setPeriodsList(List<ReportPeriod> reportPeriods, Integer reportPeriodId) {
         this.reportPeriods = reportPeriods;
         periodList.setPeriods(reportPeriods);
+        periodList.setValue(Arrays.asList(reportPeriodId), true);
 	}
 
     @Override

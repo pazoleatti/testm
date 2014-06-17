@@ -193,7 +193,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
                             public void onSuccess(GetCorrectPeriodsResult result) {
                                 openCorrectDialogPresenter.resetToDefault();
                                 openCorrectDialogPresenter.setSelectedDepartment(departmentId);
-                                openCorrectDialogPresenter.setPeriodsList(result.getReportPeriod());
+                                openCorrectDialogPresenter.setPeriodsList(result.getReportPeriod(), (int)getView().getSelectedRow().getReportPeriodId());
                                 openCorrectDialogPresenter.setTaxType(taxType);
                                 addToPopupSlot(openCorrectDialogPresenter);
                             }
