@@ -5,7 +5,8 @@
              xmlns:w="urn:import:com.aplana.gwt.client"
              xmlns:date="urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker"
              xmlns:r="urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client"
-             xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
+             xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
+             xmlns:per="urn:import:com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client">
 
     <ui:style>
         .content {
@@ -25,7 +26,7 @@
 
     </ui:style>
 
-    <w:ModalWindow iconUrl="resources/img/unlock-16.png" title="Редактирование корректирующего периода">
+    <w:ModalWindow iconUrl="resources/img/unlock-16.png" title="Редактировать период">
         <g:VerticalPanel width="400px" addStyleNames="aplana-ModalWindow-contentBackWhite">
             <g:DecoratorPanel addStyleNames="{style.content}" width="380px">
                 <g:VerticalPanel>
@@ -43,7 +44,7 @@
                             <g:Label text="Период корректировки: " width="180px"/>
                         </g:cell>
                         <g:cell width="100%" horizontalAlignment="left">
-                            <w:ListBoxWithTooltip ui:field="periodList" width="250px"/>
+                            <per:PeriodPickerPopupWidget ui:field="periodList" width="250px" multiselect="false"/>
                         </g:cell>
                     </g:HorizontalPanel>
 
@@ -53,7 +54,7 @@
                             <g:Label text="Период сдачи корректировки: " width="180px"/>
                         </g:cell>
                         <g:cell width="100%" horizontalAlignment="left">
-                            <date:DateMaskBoxPicker width="60px" ui:field="term"/>
+                            <date:DateMaskBoxPicker width="60px" ui:field="term" canBeEmpty="true"/>
                         </g:cell>
                     </g:HorizontalPanel>
 
@@ -63,9 +64,9 @@
 
             <style:Bar addStyleNames="{style.footerPanel}">
                 <style:RightBar>
-                    <g:Button addStyleNames="{style.footerButton}" ui:field="continueButton" text="Редактировать период"
+                    <g:Button addStyleNames="{style.footerButton}" ui:field="continueButton" text="Редактировать"
                               width="120px"/>
-                    <g:Button addStyleNames="{style.footerButton}" ui:field="cancelButton" text="Закрыть окно"
+                    <g:Button addStyleNames="{style.footerButton}" ui:field="cancelButton" text="Отмена"
                               width="100px"/>
                 </style:RightBar>
             </style:Bar>

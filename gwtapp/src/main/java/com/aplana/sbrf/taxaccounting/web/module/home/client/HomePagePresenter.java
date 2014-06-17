@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.web.module.home.client;
 
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.Presenter;
@@ -41,7 +43,9 @@ public class HomePagePresenter extends
 	@Override
 	protected void onReveal() {
 		super.onReveal();
-		TitleUpdateEvent.fire(this, "Домашняя страница");
+        TitleUpdateEvent.fire(this, "Домашняя страница");
+        LogCleanEvent.fire(this);
+        LogShowEvent.fire(this, false);
 		// setInSlot(TYPE_testPresenter, filterPresenter);
 	}
 

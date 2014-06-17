@@ -6,8 +6,8 @@
         <cell alias="bill" colSpan="1" rowSpan="2" value="Вексель"/>
         <cell alias="buyDate" colSpan="1" rowSpan="2" value="Дата приобретения"/>
         <cell alias="currency" colSpan="1" rowSpan="2" value="Код валюты"/>
-        <cell alias="nominal" colSpan="1" rowSpan="2" value="Номинал (ед. валюты)"/>
-        <cell alias="price" colSpan="1" rowSpan="2" value="Цена приобретения (ед. валюты)"/>
+        <cell alias="nominal" colSpan="1" rowSpan="2" value="Номинал, ед. валюты"/>
+        <cell alias="price" colSpan="1" rowSpan="2" value="Цена приобретения, ед. валюты"/>
         <cell alias="maturity" colSpan="1" rowSpan="2" value="Срок платежа"/>
         <cell alias="termDealBill" colSpan="1" rowSpan="2" value="Возможный срок обращения векселя, дней"/>
         <cell alias="percIncome" colSpan="1" rowSpan="2" value="Заявленный процентный доход (дисконт), ед. валюты "/>
@@ -26,8 +26,8 @@
         <cell alias="bill" colSpan="1" rowSpan="1" value="Вексель"/>
         <cell alias="buyDate" colSpan="1" rowSpan="1" value="Дата приобретения"/>
         <cell alias="currency" colSpan="1" rowSpan="1" value="Код валюты"/>
-        <cell alias="nominal" colSpan="1" rowSpan="1" value="Номинал (ед. валюты)"/>
-        <cell alias="price" colSpan="1" rowSpan="1" value="Цена приобретения (ед. валюты)"/>
+        <cell alias="nominal" colSpan="1" rowSpan="1" value="Номинал, ед. валюты"/>
+        <cell alias="price" colSpan="1" rowSpan="1" value="Цена приобретения, ед. валюты"/>
         <cell alias="maturity" colSpan="1" rowSpan="1" value="Срок платежа"/>
         <cell alias="termDealBill" colSpan="1" rowSpan="1" value="Возможный срок обращения векселя, дней"/>
         <cell alias="percIncome" colSpan="1" rowSpan="1" value="Заявленный процентный доход (дисконт), ед. валюты "/>

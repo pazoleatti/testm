@@ -288,4 +288,10 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         versionPresenter.setMode(mode);
         getView().updateMode(mode);
     }
+
+    @Override
+    public void cancelChanges() {
+        editFormPresenter.setIsFormModified(false);
+        editFormPresenter.onCancelClicked();
+    }
 }

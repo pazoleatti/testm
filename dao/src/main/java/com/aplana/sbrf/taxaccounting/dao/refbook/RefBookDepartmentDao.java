@@ -63,13 +63,12 @@ public interface RefBookDepartmentDao {
      * Поиск среди всех элементов справочника (без учета версий) значений уникальных атрибутов, которые бы дублировались с новыми,
      * отдельных справочников.
      * Обеспечение соблюдения уникальности атрибутов в пределах справочника
-     * @param refBookId идентификатор справочника
-     * @param tableName уникальный идентификатор записи справочника(соответствующая таблица)
+     * @param recordId идентификатор справочника
      * @param attributes атрибуты справочника
      * @param records новые значения полей элемента справочника
      * @return список пар идентификатор записи-имя атрибута, у которых совпали значения уникальных атрибутов
      */
-    List<Pair<Long,String>> getMatchedRecordsByUniqueAttributes(Long refBookId, List<RefBookAttribute> attributes, List<RefBookRecord> records);
+    List<Pair<Long,String>> getMatchedRecordsByUniqueAttributes(Long recordId, List<RefBookAttribute> attributes, List<RefBookRecord> records);
 
     /**
      * Получает отчетные периоды по виду налога и департаментам
@@ -84,6 +83,13 @@ public interface RefBookDepartmentDao {
     int create(Map<String, RefBookValue> records, List<RefBookAttribute> attributes);
 
     void remove(long uniqueId);
+
+    /**
+     * Получает количетсво уникальных записей, удовлетворяющих условиям фильтра
+     * @param filter условие фильтрации строк. Может быть не задано
+     * @return
+     */
+    int getRecordsCount(String filter);
 
     /**
      * Возвращает значения атрибутов для указанных записей

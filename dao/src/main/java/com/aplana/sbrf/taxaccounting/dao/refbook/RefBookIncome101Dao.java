@@ -49,6 +49,13 @@ public interface RefBookIncome101Dao {
     List<Long> getUniqueRecordIds(String filter);
 
     /**
+     * Получает количество уникальных записей, удовлетворяющих условиям фильтра
+     * @param filter условие фильтрации строк. Может быть не задано
+     * @return
+     */
+    int getRecordsCount(String filter);
+
+    /**
      * Получение записи справочника по recordId
      * @param recordId
      * @return

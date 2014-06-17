@@ -41,10 +41,11 @@ public interface RefBookView extends HasValueChangeHandlers<Set<Long>>, IsWidget
      * Возвращает разименованное значение поля в выбранной строке по alias
      *
      * !!!!! Не предназначен для мультиселекта
-     *
+     * @deprecated Использовать getOtherDereferenceValue(Long attrId)
      * @param alias наименование атрибута
      * @return строку с единичным значением(даже если выбрано куча)
      */
+    @Deprecated
     String getOtherDereferenceValue(String alias);
 
     /**

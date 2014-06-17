@@ -14,14 +14,14 @@
         <cell alias="debtOver90DaysReserve" colSpan="1" rowSpan="1" value="Задолженность более 90 дней"/>
         <cell alias="totalReserve" colSpan="1" rowSpan="2" value="Итого расчётный резерв"/>
         <cell alias="reservePrev" colSpan="2" rowSpan="1" value="Резерв"/>
-        <cell alias="reserveCurrent" colSpan="1" rowSpan="1" value="Резерв"/>
+        <cell alias="reserveCurrent" colSpan="1" rowSpan="1" value="Резерв на отчётную дату"/>
         <cell alias="calcReserve" colSpan="3" rowSpan="1" value="Изменение фактического резерва"/>
         <cell alias="reserveRecovery" colSpan="1" rowSpan="1" value="Изменение фактического резерва"/>
         <cell alias="useReserve" colSpan="1" rowSpan="1" value="Изменение фактического резерва"/>
     </row>
     <row alias="">
         <cell alias="number" colSpan="1" rowSpan="1" value="№ пп"/>
-        <cell alias="forLabel" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="forLabel" colSpan="1" rowSpan="1" value=" "/>
         <cell alias="debtor" colSpan="1" rowSpan="1" value="Наименование дебитора"/>
         <cell alias="provision" colSpan="1" rowSpan="1" value="Обеспечение"/>
         <cell alias="nameBalanceAccount" colSpan="1" rowSpan="1" value="Наименование балансового счёта"/>
@@ -31,7 +31,7 @@
         <cell alias="debtOver90DaysSum" colSpan="1" rowSpan="1" value="сумма долга"/>
         <cell alias="debtOver90DaysNormAllocation100per" colSpan="1" rowSpan="1" value="норматив отчислений 100%"/>
         <cell alias="debtOver90DaysReserve" colSpan="1" rowSpan="1" value="расчётный резерв"/>
-        <cell alias="totalReserve" colSpan="1" rowSpan="1" value="Итого расчётный резерв"/>
+        <cell alias="totalReserve" colSpan="1" rowSpan="1" value="итого расчётный резерв"/>
         <cell alias="reservePrev" colSpan="1" rowSpan="1" value="на предыдущую отчётную дату"/>
         <cell alias="reserveCurrent" colSpan="1" rowSpan="1" value="на отчетную дату"/>
         <cell alias="calcReserve" colSpan="1" rowSpan="1"

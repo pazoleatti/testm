@@ -382,8 +382,8 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
             if (actualBeginVersion == null)
                 throw new DataRetrievalFailureException("Дата начала актуализации версии не должна быть null");
 
-            return getNamedParameterJdbcTemplate().queryForInt("select MIN(id) from form_template where type_id = :typeId " +
-                    " and TRUNC(version, 'DD') > :actualBeginVersion and status in (:statusList)", valueMap);
+            return getNamedParameterJdbcTemplate().queryForInt("select * from (select id from form_template where type_id = :typeId" +
+                    " and TRUNC(version, 'DD') > :actualBeginVersion and status in (:statusList) order by version, edition) where rownum = 1", valueMap);
         } catch(EmptyResultDataAccessException e){
             return 0;
         } catch (DataAccessException e){

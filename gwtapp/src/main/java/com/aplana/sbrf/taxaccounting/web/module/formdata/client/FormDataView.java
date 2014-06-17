@@ -15,9 +15,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.EndLoadFileEven
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.StartLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.Style;
-import com.google.gwt.dom.client.TableCellElement;
+import com.google.gwt.dom.client.*;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
@@ -198,16 +196,22 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		formDataTable.addCellPreviewHandler(new CellPreviewEvent.Handler<DataRow<Cell>>() {
 			@Override
 			public void onCellPreview(CellPreviewEvent<DataRow<Cell>> event) {
-				if ("mouseover".equals(event.getNativeEvent().getType())) {
-					long index = (event.getIndex() - (pager.getPage() * formDataTable.getPageSize()));
-                    TableCellElement cellElement = formDataTable.getRowElement((int) index).getCells().getItem(event.getColumn());
-					if (cellElement.getInnerText().replace("\u00A0", "").trim().isEmpty()) {
-						cellElement.removeAttribute("title");
-					} else {
-						cellElement.setTitle(cellElement.getInnerText());
-					}
-				}
-			}
+                if ("mouseover".equals(event.getNativeEvent().getType())) {
+                    EventTarget eventTarget = event.getNativeEvent().getEventTarget();
+                    if (Element.is(eventTarget)) {
+                        Element target = Element.as(eventTarget);
+                        if ("td".equals(target.getTagName().toLowerCase())) {
+                            System.out.println("" + event.getNativeEvent().getEventTarget() + "");
+                            TableCellElement cellElement = formDataTable.getRowElement(event.getIndex()).getCells().getItem(event.getColumn());
+                            if (cellElement.getInnerText().replace("\u00A0", "").trim().isEmpty()) {
+                                cellElement.removeAttribute("title");
+                            } else {
+                                cellElement.setTitle(cellElement.getInnerText());
+                            }
+                        }
+                    }
+                }
+            }
 		});
         formDataTable.setPageSize(pager.getPageSize());
         pager.setDisplay(formDataTable);

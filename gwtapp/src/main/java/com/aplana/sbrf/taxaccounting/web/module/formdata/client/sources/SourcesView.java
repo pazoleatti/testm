@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.client.sources;
 
 import com.aplana.gwt.client.ModalWindow;
 import com.aplana.sbrf.taxaccounting.model.FormToFormRelation;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.ClickableTextCell;
@@ -130,13 +131,6 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
             }
         };
 
-        TextColumn<FormToFormRelation> formTypeColumn = new TextColumn<FormToFormRelation>() {
-            @Override
-            public String getValue(FormToFormRelation object) {
-                return object.getFormType().getName();
-            }
-        };
-
         TextColumn<FormToFormRelation> performerColumn = new TextColumn<FormToFormRelation>() {
             @Override
             public String getValue(FormToFormRelation object) {
@@ -151,11 +145,27 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
             }
         };
 
-        Column<FormToFormRelation, String> formKindColumn = new Column<FormToFormRelation, String>(new ClickableTextCell()){
+        TextColumn<FormToFormRelation> formKindColumn = new TextColumn<FormToFormRelation>() {
+            @Override
+            public String getValue(FormToFormRelation object) {
+                return object.getFormDataKind().getName();
+            }
+        };
+
+        Column<FormToFormRelation, String> formTypeColumn = new Column<FormToFormRelation, String>(new ClickableTextCell()){
 
             @Override
             public void render(Cell.Context context, FormToFormRelation object, SafeHtmlBuilder sb) {
-                String link = "<p style=\"color: #0000CD\">" + object.getFormType().getName() + "<p>";
+                String link;
+                if (object.isCreated()) {
+                    link = "<a href=\"#"
+                            + FormDataPresenter.NAME_TOKEN + ";"
+                            + FormDataPresenter.FORM_DATA_ID + "="
+                            + object.getFormDataId() + "\">"
+                            + object.getFormType().getName() + "</a>";
+                } else {
+                    link = object.getFormType().getName();
+                }
                 sb.appendHtmlConstant(link);
             }
 
@@ -174,9 +184,9 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
         table.addColumn(departmentColumn, "Подразделение");
         table.setColumnWidth(departmentColumn, 100, Style.Unit.PX);
         table.addColumn(formKindColumn, "Тип формы");
-        table.setColumnWidth(formKindColumn, 250, Style.Unit.PX);
+        table.setColumnWidth(formKindColumn, 200, Style.Unit.PX);
         table.addColumn(formTypeColumn, "Вид формы");
-        table.setColumnWidth(formTypeColumn, 200, Style.Unit.PX);
+        table.setColumnWidth(formTypeColumn, 250, Style.Unit.PX);
         table.addColumn(performerColumn, "Исполнитель");
         table.setColumnWidth(performerColumn, 150, Style.Unit.PX);
         table.addColumn(stateColumn, "Состояние формы");

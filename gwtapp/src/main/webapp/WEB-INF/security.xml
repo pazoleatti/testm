@@ -25,7 +25,7 @@
 		<intercept-url pattern="/**" access="isAuthenticated()"/>
 		<custom-filter position="LOGOUT_FILTER" ref="logoutFilter"/>
 		<custom-filter position="PRE_AUTH_FILTER" ref="j2eePreAuthFilter"/>
-		<form-login login-processing-url="/j_security_check"/>
+		<form-login login-processing-url="/j_security_check" default-target-url="/Main.jsp"/>
 	</http>
 	<global-method-security pre-post-annotations="enabled" proxy-target-class="true"/>
 
@@ -65,7 +65,7 @@
 	<!--Настройка фильтра для события удаления сессии-->
 	<beans:bean id="sessionAuthStrategy"
 				class="org.springframework.security.web.session.SimpleRedirectInvalidSessionStrategy">
-		<beans:constructor-arg name="invalidSessionUrl" value="/login"/>
+		<beans:constructor-arg name="invalidSessionUrl" value="/pkmslogout"/>
 	</beans:bean>
 
 	<authentication-manager alias="appControlAuthenticationManager">

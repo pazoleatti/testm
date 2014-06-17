@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model;
 
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -59,7 +59,7 @@ public class RefBookItem implements Serializable {
             dereferenceValue = "";
         }
         if (refBookRecordDereferenceValues == null) {
-            refBookRecordDereferenceValues = new ArrayList<RefBookRecordDereferenceValue>();
+            refBookRecordDereferenceValues = new LinkedList<RefBookRecordDereferenceValue>();
         }
         refBookRecordDereferenceValues.add(new RefBookRecordDereferenceValue(valueAttrId, valueAttrAlias, dereferenceValue));
     }

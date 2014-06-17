@@ -24,6 +24,7 @@
         <order>2</order>
         <width>0</width>
         <maxLength>10</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>code</alias>
@@ -33,7 +34,6 @@
         <width>5</width>
         <parentAlias>incomeType</parentAlias>
         <refBookAttributeId>140</refBookAttributeId>
-        <refBookAttributeId2>0</refBookAttributeId2>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>incomeType</alias>

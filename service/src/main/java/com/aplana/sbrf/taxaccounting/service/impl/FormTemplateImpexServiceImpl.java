@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.dao.impl.util.XmlSerializationUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateImpexService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateImpexService;
@@ -70,7 +71,7 @@ public class FormTemplateImpexServiceImpl implements
 	@Override
 	public void exportFormTemplate(Integer id, OutputStream os) {
 		try {
-			FormTemplate ft = formTemplateService.getFullFormTemplate(id);
+			FormTemplate ft = formTemplateService.getFullFormTemplate(id, new Logger());
 			ZipOutputStream zos = new ZipOutputStream(os);
 
 			// Version

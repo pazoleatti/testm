@@ -125,7 +125,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>similarDealGroup</alias>
         <checking>false</checking>
-        <name>п. 200 &quot;Группа однородных сделок&quot;</name>
+        <name>п. 200 "Группа однородных сделок"</name>
         <order>13</order>
         <width>6</width>
         <hierarchical>false</hierarchical>
@@ -135,7 +135,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>dealNameCode</alias>
         <checking>false</checking>
-        <name>п. 210 &quot;Коды наименования сделки&quot;</name>
+        <name>п. 210 "Коды наименования сделки"</name>
         <order>14</order>
         <width>6</width>
         <hierarchical>false</hierarchical>
@@ -145,7 +145,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>taxpayerSideCode</alias>
         <checking>false</checking>
-        <name>п. 211 &quot;Код стороны сделки, которой является налогоплательщик&quot;</name>
+        <name>п. 211 "Код стороны сделки, которой является налогоплательщик"</name>
         <order>15</order>
         <width>5</width>
         <hierarchical>false</hierarchical>
@@ -155,8 +155,9 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>dealPriceSign</alias>
         <checking>false</checking>
-        <name>п. 220 &quot;Признак определения цены сделки с учетом особенностей, предусмотренных статьей 105.4 НК РФ
-            (регулируемые цены)&quot;</name>
+        <name>п. 220 "Признак определения цены сделки с учетом особенностей, предусмотренных статьей 105.4 НК РФ
+            (регулируемые цены)"
+        </name>
         <order>16</order>
         <width>8</width>
         <hierarchical>false</hierarchical>
@@ -166,7 +167,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>dealPriceCode</alias>
         <checking>false</checking>
-        <name>п. 230 &quot;Код определения цены сделки&quot;</name>
+        <name>п. 230 "Код определения цены сделки"</name>
         <order>17</order>
         <width>6</width>
         <hierarchical>false</hierarchical>
@@ -176,7 +177,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>dealMemberCount</alias>
         <checking>false</checking>
-        <name>п. 260 &quot;Количество участников сделки&quot;</name>
+        <name>п. 260 "Количество участников сделки"</name>
         <order>18</order>
         <width>6</width>
         <maxLength>3</maxLength>
@@ -185,7 +186,8 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>income</alias>
         <checking>false</checking>
-        <name>п. 300 &quot;Сумма доходов налогоплательщика по контролируемой сделке (группе однородных сделок) в рублях&quot;</name>
+        <name>п. 300 "Сумма доходов налогоплательщика по контролируемой сделке (группе однородных сделок) в рублях"
+        </name>
         <order>19</order>
         <width>9</width>
         <maxLength>15</maxLength>
@@ -194,7 +196,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>incomeIncludingRegulation</alias>
         <checking>false</checking>
-        <name>п. 301 &quot;в том числе сумма доходов по сделкам, цены которых подлежат регулированию&quot;</name>
+        <name>п. 301 "в том числе сумма доходов по сделкам, цены которых подлежат регулированию"</name>
         <order>20</order>
         <width>8</width>
         <maxLength>15</maxLength>
@@ -203,7 +205,8 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>outcome</alias>
         <checking>false</checking>
-        <name>п. 310 &quot;Сумма расходов налогоплательщика по контролируемой сделке (группе однородных сделок) в рублях&quot;</name>
+        <name>п. 310 "Сумма расходов налогоплательщика по контролируемой сделке (группе однородных сделок) в рублях"
+        </name>
         <order>21</order>
         <width>9</width>
         <maxLength>15</maxLength>
@@ -212,7 +215,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>outcomeIncludingRegulation</alias>
         <checking>false</checking>
-        <name>п. 311 &quot;в том числе сумма расходов по сделкам, цены которых подлежат регулированию&quot;</name>
+        <name>п. 311 "в том числе сумма расходов по сделкам, цены которых подлежат регулированию"</name>
         <order>22</order>
         <width>8</width>
         <maxLength>15</maxLength>
@@ -221,7 +224,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>dealNum2</alias>
         <checking>false</checking>
-        <name>п. 010 &quot;Порядковый номер сделки по уведомлению (из раздела 1А)&quot;</name>
+        <name>п. 010 "Порядковый номер сделки по уведомлению (из раздела 1А)"</name>
         <order>23</order>
         <width>6</width>
         <maxLength>15</maxLength>
@@ -230,7 +233,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>dealType</alias>
         <checking>false</checking>
-        <name>п. 020 &quot;Тип предмета сделки&quot;</name>
+        <name>п. 020 "Тип предмета сделки"</name>
         <order>24</order>
         <width>5</width>
         <hierarchical>false</hierarchical>
@@ -240,7 +243,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>dealSubjectName</alias>
         <checking>false</checking>
-        <name>п. 030 &quot;Наименование предмета сделки&quot;</name>
+        <name>п. 030 "Наименование предмета сделки"</name>
         <order>25</order>
         <width>20</width>
         <maxLength>500</maxLength>
@@ -249,7 +252,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>dealSubjectCode1</alias>
         <checking>false</checking>
-        <name>п. 040 &quot;Код предмета сделки (код по ТН ВЭД)&quot;</name>
+        <name>п. 040 "Код предмета сделки (код по ТН ВЭД)"</name>
         <order>26</order>
         <width>5</width>
         <hierarchical>false</hierarchical>
@@ -259,7 +262,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>dealSubjectCode2</alias>
         <checking>false</checking>
-        <name>п. 043 &quot;Код предмета сделки (код по ОКП)&quot;</name>
+        <name>п. 043 "Код предмета сделки (код по ОКП)"</name>
         <order>27</order>
         <width>5</width>
         <hierarchical>false</hierarchical>
@@ -269,7 +272,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>dealSubjectCode3</alias>
         <checking>false</checking>
-        <name>п. 045 &quot;Код предмета сделки (код по ОКВЭД)&quot;</name>
+        <name>п. 045 "Код предмета сделки (код по ОКВЭД)"</name>
         <order>28</order>
         <width>5</width>
         <hierarchical>false</hierarchical>
@@ -279,7 +282,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>otherNum</alias>
         <checking>false</checking>
-        <name>п. 050 &quot;Номер другого участника сделки&quot;</name>
+        <name>п. 050 "Номер другого участника сделки"</name>
         <order>29</order>
         <width>5</width>
         <maxLength>15</maxLength>
@@ -288,7 +291,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>contractNum</alias>
         <checking>false</checking>
-        <name>п. 060 &quot;Номер договора&quot;</name>
+        <name>п. 060 "Номер договора"</name>
         <order>30</order>
         <width>5</width>
         <maxLength>500</maxLength>
@@ -297,7 +300,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>contractDate</alias>
         <checking>false</checking>
-        <name>п. 065 &quot;Дата договора&quot; </name>
+        <name>п. 065 "Дата договора"</name>
         <order>31</order>
         <width>7</width>
         <formatId>0</formatId>
@@ -305,7 +308,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>countryCode</alias>
         <checking>false</checking>
-        <name>п. 070 &quot;Код страны происхождения предмета сделки по классификатору ОКСМ (цифровой)&quot;</name>
+        <name>п. 070 "Код страны происхождения предмета сделки по классификатору ОКСМ (цифровой)"</name>
         <order>32</order>
         <width>7</width>
         <hierarchical>false</hierarchical>
@@ -391,7 +394,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>deliveryCode</alias>
         <checking>false</checking>
-        <name>п. 100 &quot;Код условия поставки (заполняется только для товаров)&quot;</name>
+        <name>п. 100 "Код условия поставки (заполняется только для товаров)"</name>
         <order>41</order>
         <width>6</width>
         <hierarchical>false</hierarchical>
@@ -401,7 +404,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>okeiCode</alias>
         <checking>false</checking>
-        <name>п. 110 &quot;Код единицы измерения по ОКЕИ&quot;</name>
+        <name>п. 110 "Код единицы измерения по ОКЕИ"</name>
         <order>42</order>
         <width>5</width>
         <hierarchical>false</hierarchical>
@@ -411,7 +414,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>count</alias>
         <checking>false</checking>
-        <name>п. 120 &quot;Количество&quot;</name>
+        <name>п. 120 "Количество"</name>
         <order>43</order>
         <width>6</width>
         <maxLength>15</maxLength>
@@ -420,7 +423,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>price</alias>
         <checking>false</checking>
-        <name>п. 130 &quot;Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.&quot;</name>
+        <name>п. 130 "Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб."</name>
         <order>44</order>
         <width>5</width>
         <maxLength>15</maxLength>
@@ -429,7 +432,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>total</alias>
         <checking>false</checking>
-        <name>п. 140 &quot;Итого стоимость без учета НДС, акцизов и пошлины, руб.&quot;</name>
+        <name>п. 140 "Итого стоимость без учета НДС, акцизов и пошлины, руб."</name>
         <order>45</order>
         <width>5</width>
         <maxLength>15</maxLength>
@@ -438,7 +441,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>dealDoneDate</alias>
         <checking>false</checking>
-        <name>п. 150 &quot;Дата совершения сделки (цифрами день, месяц, год)&quot;</name>
+        <name>п. 150 "Дата совершения сделки (цифрами день, месяц, год)"</name>
         <order>46</order>
         <width>7</width>
         <formatId>0</formatId>
@@ -446,7 +449,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>dealNum3</alias>
         <checking>false</checking>
-        <name>п. 010 &quot;Порядковый номер сделки (из раздела 1А)&quot;</name>
+        <name>п. 010 "Порядковый номер сделки (из раздела 1А)"</name>
         <order>47</order>
         <width>6</width>
         <maxLength>15</maxLength>
@@ -455,7 +458,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>dealMemberNum</alias>
         <checking>false</checking>
-        <name>п. 015 &quot;Порядковый номер участника сделки (из раздела 1Б)&quot;</name>
+        <name>п. 015 "Порядковый номер участника сделки (из раздела 1Б)"</name>
         <order>48</order>
         <width>6</width>
         <maxLength>15</maxLength>
@@ -464,7 +467,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>organInfo</alias>
         <checking>false</checking>
-        <name>п. 020 &quot;Сведения об организации&quot;</name>
+        <name>п. 020 "Сведения об организации"</name>
         <order>49</order>
         <width>6</width>
         <parentAlias>organName</parentAlias>
@@ -473,7 +476,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>countryCode3</alias>
         <checking>false</checking>
-        <name>п. 030 &quot;Код страны по классификатору ОКСМ&quot;</name>
+        <name>п. 030 "Код страны по классификатору ОКСМ"</name>
         <order>50</order>
         <width>7</width>
         <hierarchical>false</hierarchical>
@@ -483,7 +486,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>organName</alias>
         <checking>false</checking>
-        <name>п. 040 &quot;Наименование организации&quot;</name>
+        <name>п. 040 "Наименование организации"</name>
         <order>51</order>
         <width>8</width>
         <hierarchical>false</hierarchical>
@@ -493,7 +496,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>organINN</alias>
         <checking>false</checking>
-        <name>п. 050 &quot;ИНН организации&quot;</name>
+        <name>п. 050 "ИНН организации"</name>
         <order>52</order>
         <width>7</width>
         <parentAlias>organName</parentAlias>
@@ -502,7 +505,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>organKPP</alias>
         <checking>false</checking>
-        <name>п. 060 &quot;КПП организации&quot;</name>
+        <name>п. 060 "КПП организации"</name>
         <order>53</order>
         <width>7</width>
         <parentAlias>organName</parentAlias>
@@ -511,7 +514,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>organRegNum</alias>
         <checking>false</checking>
-        <name>п. 070 &quot;Регистрационный номер организации в стране ее регистрации (инкорпорации)&quot;</name>
+        <name>п. 070 "Регистрационный номер организации в стране ее регистрации (инкорпорации)"</name>
         <order>54</order>
         <width>8</width>
         <parentAlias>organName</parentAlias>
@@ -520,8 +523,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>taxpayerCode</alias>
         <checking>false</checking>
-        <name>п. 080 &quot;Код налогоплательщика в стране регистрации (инкорпорации) или его аналог (если
-            имеется)&quot;</name>
+        <name>п. 080 "Код налогоплательщика в стране регистрации (инкорпорации) или его аналог (если имеется)"</name>
         <order>55</order>
         <width>9</width>
         <parentAlias>organName</parentAlias>
@@ -530,7 +532,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>address</alias>
         <checking>false</checking>
-        <name>п. 090 &quot;Адрес&quot;</name>
+        <name>п. 090 "Адрес"</name>
         <order>56</order>
         <width>15</width>
         <parentAlias>organName</parentAlias>

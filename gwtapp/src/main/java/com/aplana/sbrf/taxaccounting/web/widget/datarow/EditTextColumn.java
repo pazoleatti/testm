@@ -19,7 +19,7 @@ import com.google.gwt.cell.client.FieldUpdater;
 public class EditTextColumn extends DataRowColumn<String> {
 
     public EditTextColumn(StringColumn col, ColumnContext columnContext) {
-        super(new ValidatedInputCell(columnContext), col);
+        super(new ValidatedInputCell(columnContext, false), col);
 	    this.setHorizontalAlignment(ALIGN_LEFT);
         this.setFieldUpdater(new FieldUpdater<DataRow<Cell>, String>() {
 			@Override

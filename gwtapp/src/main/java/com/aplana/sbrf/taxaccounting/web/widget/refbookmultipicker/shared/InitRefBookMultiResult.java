@@ -7,25 +7,35 @@ import com.gwtplatform.dispatch.shared.Result;
 
 
 public class InitRefBookMultiResult implements Result {
-	private static final long serialVersionUID = 1099858218534060155L;
-	
-	private long refBookId;
+    private static final long serialVersionUID = 1099858218534060155L;
 
-	private Map<String, Integer> headers;
+    private long refBookId;
+    /* порядковые номера невидимых полей */
+    private List<Integer> unVisibleColumns;
 
-	public Map<String, Integer> getHeaders() {
-		return headers;
-	}
+    private Map<String, Integer> headers;
 
-	public void setHeaders(Map<String, Integer> headers) {
-		this.headers = headers;
-	}
+    public Map<String, Integer> getHeaders() {
+        return headers;
+    }
 
-	public long getRefBookId() {
-		return refBookId;
-	}
+    public void setHeaders(Map<String, Integer> headers) {
+        this.headers = headers;
+    }
 
-	public void setRefBookId(long refBookId) {
-		this.refBookId = refBookId;
-	}
+    public long getRefBookId() {
+        return refBookId;
+    }
+
+    public void setRefBookId(long refBookId) {
+        this.refBookId = refBookId;
+    }
+
+    public List<Integer> getUnVisibleColumns() {
+        return unVisibleColumns;
+    }
+
+    public void setUnVisibleColumns(List<Integer> unVisibleColumns) {
+        this.unVisibleColumns = unVisibleColumns;
+    }
 }
