@@ -461,27 +461,21 @@ void generateXML() {
                 // РАЗДЕЛ 4 - КОНЕЦ
 
                 // РАЗДЕЛ 7
-                ОперНеНал(ОплПостСв6Мес: empty) {
-                    // форма 724.2.1
-                    for (def row : dataRowsMap[601]) {
-                        if (row.getAlias() == 'itog') {
-                            continue
+                // не пустой раздел 7
+                if (dataRowsMap[601]) {
+                    ОперНеНал(ОплПостСв6Мес: empty) {
+                        // форма 724.2.1
+                        for (def row : dataRowsMap[601]) {
+                            if (row.getAlias() == 'itog') {
+                                continue
+                            }
+                            СумОпер7(
+                                    КодОпер: row.code,
+                                    СтРеалТов: round(row.realizeCost),
+                                    СтПриобТов: round(row.obtainCost ?: empty),
+                                    НалНеВыч: getNalNeVich(row) // TODO (Ramil Timerbaev)  недоделано
+                            )
                         }
-                        СумОпер7(
-                                КодОпер: row.code,
-                                СтРеалТов: round(row.realizeCost),
-                                СтПриобТов: round(row.obtainCost ?: empty),
-                                НалНеВыч: getNalNeVich(row) // TODO (Ramil Timerbaev)  недоделано
-                        )
-                    }
-                    // пустой раздел 7
-                    if (!dataRowsMap[601]) {
-                        СумОпер7(
-                                КодОпер: empty,
-                                СтРеалТов: empty,
-                                СтПриобТов: empty,
-                                НалНеВыч: empty
-                        )
                     }
                 }
                 // РАЗДЕЛ 7 - КОНЕЦ
