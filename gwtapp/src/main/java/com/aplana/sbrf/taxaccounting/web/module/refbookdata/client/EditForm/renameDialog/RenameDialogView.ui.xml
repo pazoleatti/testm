@@ -31,9 +31,9 @@
                                         формы должны содержать новое наименование подразделения."/>
                     <g:HorizontalPanel spacing="5" verticalAlignment="middle">
                         <g:Label text="C"/>
-                        <d:DateMaskBoxPicker ui:field="dateFrom"/>
+                        <d:DateMaskBoxPicker ui:field="dateFrom" canBeEmpty="true"/>
                         <g:Label text="по"/>
-                        <d:DateMaskBoxPicker ui:field="dateTo"/>
+                        <d:DateMaskBoxPicker ui:field="dateTo" canBeEmpty="true"/>
                     </g:HorizontalPanel>
                 </g:VerticalPanel>
             </g:cell>

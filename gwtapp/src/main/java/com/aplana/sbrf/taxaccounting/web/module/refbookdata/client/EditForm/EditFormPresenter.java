@@ -270,6 +270,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                         " по " + WidgetUtils.getDateString(dateTo) + "на имя \"" + modifiedFields.get("NAME") + "\"")*/
                                 action.setVersionFrom(WidgetUtils.getDateWithOutTime(dateFrom));
                                 action.setVersionTo(WidgetUtils.getDateWithOutTime(dateTo));
+                                renameDialogPresenter.getView().cleanDates();
 
                                 dispatchAsync.execute(action,
                                         CallbackUtils.defaultCallback(

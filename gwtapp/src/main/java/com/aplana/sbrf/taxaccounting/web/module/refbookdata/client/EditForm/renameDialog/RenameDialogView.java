@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.renameDialog;
 
 import com.aplana.gwt.client.ModalWindow;
-
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -10,10 +9,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.inject.Inject;
-
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
-
-import java.util.Date;
 
 /**
  * Вью диалогового окна "Период применения изменений в печатных формах"
@@ -62,14 +58,11 @@ public class RenameDialogView extends ViewWithUiHandlers<RenameDialogUiHandlers>
         deadlineDialog.center();
     }
 
-    @Override
-    public Date getDateFrom() {
-        return dateFrom.getValue();
-    }
 
     @Override
-    public Date getDateTo() {
-        return dateTo.getValue();
+    public void cleanDates() {
+        dateFrom.setValue(null);
+        dateTo.setValue(null);
     }
 
 
