@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -71,6 +72,11 @@ public class DeclarationTemplateController {
 			throws FileUploadException, IOException {
         if (declarationTemplateId == 0)
             throw new ServiceException("Сначала сохраните шаблон.");
+
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        declarationTemplateService.checkLockedByAnotherUser(declarationTemplateId, userInfo);
+        declarationTemplateService.lock(declarationTemplateId, userInfo);
+
         req.setCharacterEncoding("UTF-8");
 		FileItemFactory factory = new DiskFileItemFactory();
 		ServletFileUpload upload = new ServletFileUpload(factory);

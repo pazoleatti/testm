@@ -96,22 +96,18 @@
               value="РАЗДЕЛ 2. Сведения об организации - участнике контролируемой сделки (группы однородных сделок)"/>
         <cell alias="dealMemberNum" colSpan="1" rowSpan="1"
               value="РАЗДЕЛ 2. Сведения об организации - участнике контролируемой сделки (группы однородных сделок)"/>
-        <cell alias="organInfo" colSpan="1" rowSpan="1"
-              value="РАЗДЕЛ 2. Сведения об организации - участнике контролируемой сделки (группы однородных сделок)"/>
+        <cell alias="organInfo" colSpan="1" rowSpan="1" value="п. 020 &quot;Сведения об организации&quot;"/>
         <cell alias="countryCode3" colSpan="1" rowSpan="1"
-              value="РАЗДЕЛ 2. Сведения об организации - участнике контролируемой сделки (группы однородных сделок)"/>
+              value="п. 030 &quot;Код страны по классификатору ОКСМ&quot;"/>
         <cell alias="organName" colSpan="1" rowSpan="1"
               value="РАЗДЕЛ 2. Сведения об организации - участнике контролируемой сделки (группы однородных сделок)"/>
-        <cell alias="organINN" colSpan="1" rowSpan="1"
-              value="РАЗДЕЛ 2. Сведения об организации - участнике контролируемой сделки (группы однородных сделок)"/>
-        <cell alias="organKPP" colSpan="1" rowSpan="1"
-              value="РАЗДЕЛ 2. Сведения об организации - участнике контролируемой сделки (группы однородных сделок)"/>
+        <cell alias="organINN" colSpan="1" rowSpan="1" value="п. 050 &quot;ИНН организации&quot;"/>
+        <cell alias="organKPP" colSpan="1" rowSpan="1" value="п. 060 &quot;КПП организации&quot;"/>
         <cell alias="organRegNum" colSpan="1" rowSpan="1"
-              value="РАЗДЕЛ 2. Сведения об организации - участнике контролируемой сделки (группы однородных сделок)"/>
+              value="п. 070 &quot;Регистрационный номер организации в стране ее регистрации (инкорпорации)&quot;"/>
         <cell alias="taxpayerCode" colSpan="1" rowSpan="1"
-              value="РАЗДЕЛ 2. Сведения об организации - участнике контролируемой сделки (группы однородных сделок)"/>
-        <cell alias="address" colSpan="1" rowSpan="1"
-              value="РАЗДЕЛ 2. Сведения об организации - участнике контролируемой сделки (группы однородных сделок)"/>
+              value="п. 080 &quot;Код налогоплательщика в стране регистрации (инкорпорации) или его аналог (если имеется)&quot;"/>
+        <cell alias="address" colSpan="1" rowSpan="1" value="п. 090 &quot;Адрес&quot;"/>
     </row>
     <row alias="">
         <cell alias="groupName" colSpan="1" rowSpan="1" value=""/>
@@ -199,18 +195,22 @@
               value="II. Перечень предметов сделки (группы однородных сделок)"/>
         <cell alias="dealNum3" colSpan="10" rowSpan="1" value="I. Сведения об организации"/>
         <cell alias="dealMemberNum" colSpan="1" rowSpan="1" value="I. Сведения об организации"/>
-        <cell alias="organInfo" colSpan="1" rowSpan="1" value="I. Сведения об организации"/>
-        <cell alias="countryCode3" colSpan="1" rowSpan="1" value="I. Сведения об организации"/>
+        <cell alias="organInfo" colSpan="1" rowSpan="1" value="п. 020 &quot;Сведения об организации&quot;"/>
+        <cell alias="countryCode3" colSpan="1" rowSpan="1"
+              value="п. 030 &quot;Код страны по классификатору ОКСМ&quot;"/>
         <cell alias="organName" colSpan="1" rowSpan="1" value="I. Сведения об организации"/>
-        <cell alias="organINN" colSpan="1" rowSpan="1" value="I. Сведения об организации"/>
-        <cell alias="organKPP" colSpan="1" rowSpan="1" value="I. Сведения об организации"/>
-        <cell alias="organRegNum" colSpan="1" rowSpan="1" value="I. Сведения об организации"/>
-        <cell alias="taxpayerCode" colSpan="1" rowSpan="1" value="I. Сведения об организации"/>
-        <cell alias="address" colSpan="1" rowSpan="1" value="I. Сведения об организации"/>
+        <cell alias="organINN" colSpan="1" rowSpan="1" value="п. 050 &quot;ИНН организации&quot;"/>
+        <cell alias="organKPP" colSpan="1" rowSpan="1" value="п. 060 &quot;КПП организации&quot;"/>
+        <cell alias="organRegNum" colSpan="1" rowSpan="1"
+              value="п. 070 &quot;Регистрационный номер организации в стране ее регистрации (инкорпорации)&quot;"/>
+        <cell alias="taxpayerCode" colSpan="1" rowSpan="1"
+              value="п. 080 &quot;Код налогоплательщика в стране регистрации (инкорпорации) или его аналог (если имеется)&quot;"/>
+        <cell alias="address" colSpan="1" rowSpan="1" value="п. 090 &quot;Адрес&quot;"/>
     </row>
     <row alias="">
         <cell alias="groupName" colSpan="1" rowSpan="1" value=""/>
-        <cell alias="dealNum1" colSpan="1" rowSpan="1" value="п. 010 Порядковый номер сделки"/>
+        <cell alias="dealNum1" colSpan="1" rowSpan="1"
+              value="п. 010 &quot;Порядковый номер сделки по уведомлению (из раздела 1А)&quot;"/>
         <cell alias="interdependenceSing" colSpan="1" rowSpan="1" value="Взаимозависимость"/>
         <cell alias="f121" colSpan="4" rowSpan="1"
               value="Основания для признания сделки контролируемой согласно статье 105.14 НК РФ"/>
@@ -305,7 +305,8 @@
     </row>
     <row alias="">
         <cell alias="groupName" colSpan="1" rowSpan="1" value=""/>
-        <cell alias="dealNum1" colSpan="1" rowSpan="1" value="п. 010 Порядковый номер сделки"/>
+        <cell alias="dealNum1" colSpan="1" rowSpan="1"
+              value="п. 010 &quot;Порядковый номер сделки по уведомлению (из раздела 1А)&quot;"/>
         <cell alias="interdependenceSing" colSpan="1" rowSpan="1" value="п. 100"/>
         <cell alias="f121" colSpan="1" rowSpan="1" value="п. 121"/>
         <cell alias="f122" colSpan="1" rowSpan="1" value="п. 122"/>
@@ -317,7 +318,7 @@
         <cell alias="f134" colSpan="1" rowSpan="1" value="п. 134"/>
         <cell alias="f135" colSpan="1" rowSpan="1" value="п. 135 (до 2014 г. / после 2014 г.)"/>
         <cell alias="similarDealGroup" colSpan="1" rowSpan="1" value="п. 200 &quot;Группа однородных сделок&quot;"/>
-        <cell alias="dealNameCode" colSpan="1" rowSpan="1" value="п. 210 &quot;Коды наименования сделки&quot;"/>
+        <cell alias="dealNameCode" colSpan="1" rowSpan="1" value="п. 210 &quot;Код наименования сделки&quot;"/>
         <cell alias="taxpayerSideCode" colSpan="1" rowSpan="1"
               value="п. 211 &quot;Код стороны сделки, которой является налогоплательщик&quot;"/>
         <cell alias="dealPriceSign" colSpan="1" rowSpan="1"

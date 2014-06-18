@@ -51,20 +51,19 @@ public class GetFormHandler extends AbstractActionHandler<GetFormAction, GetForm
             logger.error(e);
             result.setLockedByAnotherUser(true);
         }
+        if (!result.isLockedByAnotherUser()) {
+            formTemplateService.lock(action.getId(), userInfo);
+        }
         FormTemplateExt formTemplateExt = new FormTemplateExt();
 		FormTemplate formTemplate = formTemplateService.getFullFormTemplate(action.getId(), logger);
         formTemplateExt.setActualEndVersionDate(formTemplateService.getFTEndDate(formTemplate.getId()));
         formTemplate.setScript(formTemplateService.getFormTemplateScript(action.getId(), logger));
+        formTemplateExt.setFormTemplate(formTemplate);
+        result.setForm(formTemplateExt);
+        result.setRefBookList(refBookFactory.getAll(false));
+
         if (!logger.getEntries().isEmpty())
             result.setUuid(logEntryService.save(logger.getEntries()));
-
-        result.setFormTypeId(formTemplate.getType().getId());
-        if (!result.isLockedByAnotherUser()) {
-		    formTemplateService.lock(action.getId(), userInfo);
-            formTemplateExt.setFormTemplate(formTemplate);
-            result.setForm(formTemplateExt);
-            result.setRefBookList(refBookFactory.getAll(false));
-        }
         return result;
     }
 

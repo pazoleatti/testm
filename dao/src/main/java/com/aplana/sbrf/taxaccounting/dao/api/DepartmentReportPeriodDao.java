@@ -1,10 +1,10 @@
 package com.aplana.sbrf.taxaccounting.dao.api;
 
-import java.util.Date;
-import java.util.List;
-
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+
+import java.util.Date;
+import java.util.List;
 
 public interface DepartmentReportPeriodDao {
 	
@@ -70,6 +70,14 @@ public interface DepartmentReportPeriodDao {
 	DepartmentReportPeriod get(int reportPeriodId, Long departmentId);
 
     DepartmentReportPeriod get(int reportPeriodId, Long departmentId, Date correctionDate);
+
+    /**
+     * Получение связок подразделение-отчетный период
+     * @param taxTypes типы НФ
+     * @param departmentIds набор подразделений
+     * @return списо связок
+     */
+    List<DepartmentReportPeriod> getListDRPByDepartmentIds(List<TaxType> taxTypes, List<Long> departmentIds);
 
 	/**
 	 * Удалить период

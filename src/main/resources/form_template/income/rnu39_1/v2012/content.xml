@@ -82,7 +82,7 @@
         <checking>false</checking>
         <name>Сумма ПКД полученного при открытии короткой позиции</name>
         <order>9</order>
-        <width>9</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -91,7 +91,7 @@
         <checking>false</checking>
         <name>Сумма ПКД уплаченного при закрытии короткой позиции</name>
         <order>10</order>
-        <width>9</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -125,7 +125,7 @@
         <checking>false</checking>
         <name>Объявленный доход по текущему купону, руб.коп.</name>
         <order>14</order>
-        <width>7</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -134,7 +134,7 @@
         <checking>false</checking>
         <name>Выплачиваемый купонный доход, руб.коп.</name>
         <order>15</order>
-        <width>7</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>

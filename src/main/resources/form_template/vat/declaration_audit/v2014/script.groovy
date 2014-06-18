@@ -1,19 +1,20 @@
 package form_template.vat.declaration_audit.v2014
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod
+import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import groovy.transform.Field
 import groovy.xml.MarkupBuilder
 
 /**
- * Декларация по налогу на НДС (аудит). Генератор XML.
+ * Декларация по НДС (аудит). Генератор XML.
  * http://jira.aplana.com/browse/SBRFACCTAX-7579
  *
- * совпадает с "Декларация по налогу на НДС" (declaration_fns), кроме заполнения секции "РАЗДЕЛ 2"
+ * совпадает с "Декларация по НДС" (declaration_fns), кроме заполнения секции "РАЗДЕЛ 2"
  *
- * TODO:
- *      - расчет для НалНеВыч не сделан, сказали пока не делать, потому что неясно как вычислять.
  */
 
 switch (formDataEvent) {
@@ -39,6 +40,27 @@ def providerCache = [:]
 // Кэш значений справочника
 @Field
 def refBookCache = [:]
+
+// Cправочник «Отчет о прибылях и убытках (Форма 0409102-СБ)»
+@Field
+def income102DataCache = [:]
+
+@Field
+def specialCode = '1010276'
+
+@Field
+def opuCodes = ['26411.01', '26411.02']
+
+@Field
+def knuCodes = ['20860', '20870']
+
+// Дата начала отчетного периода
+@Field
+def startDate = null
+
+// Дата окончания отчетного периода
+@Field
+def endDate = null
 
 @Field
 def empty = 0
@@ -119,7 +141,8 @@ List<String> getErrorDepartment(record) {
     if (record.SIGNATORY_FIRSTNAME.stringValue == null || record.SIGNATORY_FIRSTNAME.stringValue.isEmpty()) {
         errorList.add("«Имя подписанта»")
     }
-    if (record.APPROVE_DOC_NAME.stringValue == null || record.APPROVE_DOC_NAME.stringValue.isEmpty()) {
+    //Если ПрПодп (не пусто или не 1) и значение атрибута на форме настроек подразделений не задано
+    if ((record.SIGNATORY_ID?.referenceValue != null && getRefBookValue(35, record.SIGNATORY_ID?.value)?.CODE?.value != 1) && (record.APPROVE_DOC_NAME.stringValue == null || record.APPROVE_DOC_NAME.stringValue.isEmpty())) {
         errorList.add("«Наименование документа, подтверждающего полномочия представителя»")
     }
     if (record.TAX_PLACE_TYPE_CODE?.referenceValue == null) {
@@ -130,7 +153,7 @@ List<String> getErrorDepartment(record) {
 
 List<String> getErrorVersion(record) {
     List<String> errorList = new ArrayList<String>()
-    if (record.FORMAT_VERSION.stringValue == null || !record.FORMAT_VERSION.stringValue.equals('5.01')) {
+    if (record.FORMAT_VERSION.stringValue == null || !record.FORMAT_VERSION.stringValue.equals('5.03')) {
         errorList.add("«Версия формата»")
     }
     if (record.APP_VERSION.stringValue == null || !record.APP_VERSION.stringValue.equals('XLR_FNP_TAXCOM_5_03')) {
@@ -147,6 +170,9 @@ void generateXML() {
     def declarationType = 4
     def departmentId = declarationData.departmentId
     def reportPeriodId = declarationData.reportPeriodId
+
+    /** Отчётный период. */
+    def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
 
     // Код формы отчетности по КНД
     def String KND = '1151001'
@@ -186,6 +212,12 @@ void generateXML() {
     /*
      * Расчет значений декларации.
      */
+
+    def period = 0
+    if (reportPeriod.order != null) {
+        def values = [21, 31, 33, 34]
+        period = values[reportPeriod.order - 1]
+    }
 
     /** ПрПодп. */
     def prPodp = (signatoryId != null ? signatoryId : 1)
@@ -228,11 +260,10 @@ void generateXML() {
     /** СумНал (ОплНОТовар). Код строки 080 Графа 5. */
     def sumNal080 = empty
     if (rows724_1) {
-        def row = getDataRow(rows724_1, 'total_1_1')
-        def row2 = getDataRow(rows724_1, 'total_1_2')
-        def tmp = (row?.baseSum ?: empty) + (row2?.baseSum ?: empty)
+        def row = getDataRow(rows724_1, 'total_1')
+        def tmp = (row?.baseSum ?: empty)
         nalBaza010 = round(tmp)
-        tmp = (row?.ndsSum ?: empty) + (row2?.ndsSum ?: empty)
+        tmp = (row?.ndsSum ?: empty)
         sumNal010 = round(tmp)
 
         row = getDataRow(rows724_1, 'total_2')
@@ -245,7 +276,7 @@ void generateXML() {
 
         row = getDataRow(rows724_1, 'total_4')
         nalBaza040 = round(row?.baseSum ?: empty)
-        sumNal020 = round(row?.ndsSum ?: empty)
+        sumNal040 = round(row?.ndsSum ?: empty)
 
         row = getDataRow(rows724_1, 'total_5')
         nalBaza070 = round(row?.baseSum ?: empty)
@@ -260,7 +291,7 @@ void generateXML() {
     /** НалВыч171Общ. Код строки 130 Графа 5. */
     def nalVich171Obsh = empty
     if (rows724_4) {
-        def tmp = getDataRow(rows724_4, 'total1')?.sum2 + getDataRow(rows724_4, 'total1')?.sum2
+        def tmp = getDataRow(rows724_4, 'total1')?.sum2 + getDataRow(rows724_4, 'total2')?.sum2
         nalVich171Obsh = round(tmp)
     }
     /** НалИсчПрод. Код строки 200 Графа 5. */
@@ -294,6 +325,8 @@ void generateXML() {
                 КНД: KND,
                 // Дата формирования документа
                 ДатаДок: (docDate != null ? docDate : new Date()).format("dd.MM.yyyy"),
+                // Код налогового (отчетного) периода
+                Период : period,
                 // Отчетный год
                 ОтчетГод: reportPeriodService.get(reportPeriodId).taxPeriod.year,
                 // Код налогового органа
@@ -347,14 +380,14 @@ void generateXML() {
                         КБК: '18210301000011000110',
                         ОКАТО: okato,
                         СумИсчисл: ndsSum,
-                        КодОпер: empty,
+                        //КодОпер: empty,
                         СумИсчислОтгр: empty,
                         СумИсчислОпл: empty,
                         СумИсчислНА: empty
                 ) {
                     СведПродЮЛ(
                             НаимПрод: empty,
-                            ИННЮЛПрод: empty,
+                            //ИННЮЛПрод: empty,
                     )
                 }
                 // РАЗДЕЛ 2 - КОНЕЦ
@@ -426,57 +459,44 @@ void generateXML() {
                 // РАЗДЕЛ 3 - КОНЕЦ
 
                 // РАЗДЕЛ 4
-                НалПодтв0(
-                        СумУменИтог: empty
-                ) {
-                    // форма 724.2.2
-                    for (def row : dataRowsMap[602]) {
-                        if (row.getAlias() == 'itog') {
-                            continue
+                // непустой раздел 4
+                if (dataRowsMap[602]) {
+                    НалПодтв0(
+                            СумУменИтог: empty
+                    ) {
+                        // форма 724.2.2
+                        for (def row : dataRowsMap[602]) {
+                            if (row.getAlias() == 'itog') {
+                                continue
+                            }
+                            СумОпер4(
+                                    КодОпер: row.code,
+                                    НалБаза: round(row.base),
+                                    НалВычПод: empty,
+                                    НалНеПод: empty,
+                                    НалВосст: empty
+                            )
                         }
-                        СумОпер4(
-                                КодОпер: row.code,
-                                НалБаза: round(row.base),
-                                НалВычПод: empty,
-                                НалНеПод: empty,
-                                НалВосст: empty
-                        )
-                    }
-                    // пустой раздел 4
-                    if (!dataRowsMap[602]) {
-                        СумОпер4(
-                                КодОпер: empty,
-                                НалБаза: empty,
-                                НалВычПод: empty,
-                                НалНеПод: empty,
-                                НалВосст: empty
-                        )
                     }
                 }
                 // РАЗДЕЛ 4 - КОНЕЦ
 
                 // РАЗДЕЛ 7
-                ОперНеНал(ОплПостСв6Мес: empty) {
-                    // форма 724.2.1
-                    for (def row : dataRowsMap[601]) {
-                        if (row.getAlias() == 'itog') {
-                            continue
+                // не пустой раздел 7
+                if (dataRowsMap[601]) {
+                    ОперНеНал(ОплПостСв6Мес: empty) {
+                        // форма 724.2.1
+                        for (def row : dataRowsMap[601]) {
+                            if (row.getAlias() == 'itog') {
+                                continue
+                            }
+                            СумОпер7(
+                                    КодОпер: row.code,
+                                    СтРеалТов: round(row.realizeCost),
+                                    СтПриобТов: round(row.obtainCost ?: empty),
+                                    НалНеВыч: getNalNeVich(row)
+                            )
                         }
-                        СумОпер7(
-                                КодОпер: row.code,
-                                СтРеалТов: round(row.realizeCost),
-                                СтПриобТов: round(row.obtainCost ?: empty),
-                                НалНеВыч: getNalNeVich(row) // TODO (Ramil Timerbaev)  недоделано
-                        )
-                    }
-                    // пустой раздел 7
-                    if (!dataRowsMap[601]) {
-                        СумОпер7(
-                                КодОпер: empty,
-                                СтРеалТов: empty,
-                                СтПриобТов: empty,
-                                НалНеВыч: empty
-                        )
                     }
                 }
                 // РАЗДЕЛ 7 - КОНЕЦ
@@ -516,11 +536,109 @@ def round(def value) {
  * @param row строка формы 724.2.1
  */
 def getNalNeVich(def row) {
-    // TODO (Ramil Timerbaev) сказали пока не делать, потому что неясно как вычислять.
-    // сумма из отчета 102
-    // сумма из расходов простых
-    // разность сумм
-    return empty
+    if (row.code == specialCode){
+        // сумма кодов ОПУ из отчета 102
+        def sumOpu = getSumByOpuCodes(opuCodes)
+        // сумма из расходов простых
+        def sumOutcome = getSumOutcomeSimple(knuCodes)
+        // разность сумм
+        return sumOpu - sumOutcome
+    } else {
+        return empty
+    }
+}
+
+def getSumOutcomeSimple(def knuCodes) {
+    def tmp = 0
+    def List<ReportPeriod> periodList = reportPeriodService.getReportPeriodsByDate(TaxType.INCOME, getReportPeriodStartDate(), getReportPeriodEndDate())
+    if (periodList.isEmpty()) {
+        return 0
+    }
+    def reportPeriodIncome = periodList.get(0)
+    def formDataSimple = getFormDataSimple(reportPeriodIncome.id)
+    def dataRowsSimple = (formDataSimple ? formDataService.getDataRowHelper(formDataSimple)?.getAll() : null)
+    for (def row : dataRowsSimple){
+        if (row.consumptionTypeId in knuCodes) {
+            tmp += row.rnu5Field5Accepted
+        }
+    }
+    if (reportPeriodIncome.order != 1) {
+        def prevReportPeriodId = reportPeriodService.getPrevReportPeriod(reportPeriodIncome.id)?.id
+        if (prevReportPeriodId != null) {
+            formDataSimple = getFormDataSimple(prevReportPeriodId)
+            dataRowsSimple = (formDataSimple ? formDataService.getDataRowHelper(formDataSimple)?.getAll() : null)
+            for (def row : dataRowsSimple){
+                if (row.consumptionTypeId in knuCodes) {
+                    tmp -= row.rnu5Field5Accepted
+                }
+            }
+        }
+    }
+    return tmp
+}
+
+/**
+ * Получить данные формы "расходы простые" (id = 304)
+ */
+def getFormDataSimple(def reportPeriodId) {
+    return formDataService.find(304, FormDataKind.SUMMARY, declarationData.departmentId, reportPeriodId)
+}
+
+// Получение данных из справочника «Отчет о прибылях и убытках» для текужего подразделения и отчетного периода
+def getIncome102Data(def date) {
+    if (!income102DataCache.containsKey(date)) {
+        def filter = "DEPARTMENT_ID = ${declarationData.departmentId}"
+        income102DataCache.put(date, refBookFactory.getDataProvider(52L)?.getRecords(date, null, filter, null))
+    }
+    return income102DataCache.get(date)
+}
+
+/**
+ * Посчитать сумму по кодам ОПУ.
+ */
+def getSumByOpuCodes(def opuCodes) {
+    def tmp = BigDecimal.ZERO
+    def hasData = false
+    // сначало берутся данные за текущий периода, а потом вычитаются данные запредыдущий период (например: 9 месяцев - полгода)
+    for (def income102Row : getIncome102Data(getReportPeriodEndDate())) {
+        if (income102Row?.OPU_CODE?.value in opuCodes) {
+            tmp += (income102Row?.TOTAL_SUM?.value ?: 0)
+            hasData = true
+        }
+    }
+    if (!hasData) {
+        return BigDecimal.ZERO
+    }
+    if (reportPeriodService.get(declarationData.reportPeriodId)?.order > 1) {
+        for (def income102Row : getIncome102Data(getPrevReportPeriodEndDate())) {
+            if (income102Row?.OPU_CODE?.value in opuCodes) {
+                tmp -= (income102Row?.TOTAL_SUM?.value ?: 0)
+            }
+        }
+    }
+    return tmp
+}
+
+def getReportPeriodStartDate() {
+    if (!startDate) {
+        startDate = reportPeriodService.getStartDate(declarationData.reportPeriodId).time
+    }
+    return startDate
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(declarationData.reportPeriodId).time
+    }
+    return endDate
+}
+
+def getPrevReportPeriodEndDate() {
+    if (prevEndDate == null) {
+        def prevReportId = reportPeriodService.getPrevReportPeriod(declarationData.reportPeriodId)?.id
+        prevEndDate = reportPeriodService.getEndDate(prevReportId).time
+    }
+    return prevEndDate
 }
 
 /** Логические проверки. */
@@ -579,7 +697,7 @@ void logicCheck() {
 
     if (nalIschProd < (sumNal010 + sumNal020 + sumNal030 + sumNal040)) {
         logger.warn('КС 1.14. Возможно нарушение ст. 171 п. 8, 172 п. 6 либо ст. 146 п. 1 НК РФ: ' +
-                'Налоговые вычеты не обоснованы, либо налоговая баща занижена, так как суммы отработанных авансов не включены в реализацию')
+                'Налоговые вычеты не обоснованы, либо налоговая база занижена, так как суммы отработанных авансов не включены в реализацию')
     }
 }
 

@@ -127,10 +127,10 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     @Override
     public Integer getParentTBId(int departmentId) {
         try {
-            return getJdbcTemplate().queryForInt("SELECT id FROM department WHERE parent_id = 0 " +
-                    "START WITH id = ? CONNECT BY parent_id = id", departmentId);
+            return getJdbcTemplate().queryForInt("SELECT id FROM department WHERE parent_id = 0 and type = 2 " +
+                    "START WITH id = ? CONNECT BY id = prior parent_id", departmentId);
         } catch (EmptyResultDataAccessException e){
-            return 0;
+            return null;
         } catch (DataAccessException e){
             throw new DaoException("", e);
         }
@@ -344,6 +344,31 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
             );
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<Department>(0);
+        }
+    }
+
+    @Override
+    public List<Integer> getAllChildrenIds(int parentDepartmentId) {
+        try {
+            return getJdbcTemplate().queryForList(
+                    "select id from department CONNECT BY prior id = parent_id start with id = ?",
+                    new Object[] { parentDepartmentId },
+                    Integer.class
+            );
+        } catch (DataAccessException e) {
+            throw new DaoException("Ошибка получения дочерних подразделений", e);
+        }
+    }
+
+    @Override
+    public List<Integer> getAllParentIds(int depId) {
+        try {
+            return getJdbcTemplate().queryForList(
+                    "SELECT id FROM department START WITH id = ? CONNECT BY  id = prior parent_id",
+                    new Object[]{depId},
+                    Integer.class);
+        } catch (DataAccessException e){
+            throw new DaoException("Ошибка получения родительских подразделений.", e);
         }
     }
 

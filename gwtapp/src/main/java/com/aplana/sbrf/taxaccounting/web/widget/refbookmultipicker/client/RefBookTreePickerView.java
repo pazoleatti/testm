@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.LazyTree;
 import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.event.LazyTreeSelectionEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.event.LazyTreeSelectionHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.event.CheckValuesCountHandler;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.event.ChildrenLoadedEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.event.RootLoadedEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.PickerState;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.RefBookRecordDereferenceValue;
@@ -98,9 +99,9 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
         tree.clear();
         for (RefBookTreeItem value : values) {
             RefBookUiTreeItem uiTreeItem = new RefBookUiTreeItem(value, multiSelect);
-            getUiHandlers().highLightItem(uiTreeItem);
+            //getUiHandlers().highLightItem(uiTreeItem);
             tree.addTreeItem(uiTreeItem);
-            if (openOnLoad  && uiTreeItem.getRefBookTreeItem().isNeedToOpen()) {
+            if (openOnLoad) {
                 uiTreeItem.setState(true);
             }
         }
@@ -120,12 +121,13 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
     public void insertChildrens(RefBookUiTreeItem uiTreeItem, List<RefBookTreeItem> values, boolean openOnLoad) {
         for (RefBookTreeItem value : values) {
             RefBookUiTreeItem item = new RefBookUiTreeItem(value, multiSelect);
-            getUiHandlers().highLightItem(item);
+            //getUiHandlers().highLightItem(item);
             tree.addTreeItem(uiTreeItem, item);
-            if (openOnLoad && item.getRefBookTreeItem().isNeedToOpen()) {
+            if (openOnLoad) {
                 item.setState(true);
             }
         }
+        ChildrenLoadedEvent.fire(this, uiTreeItem);
         if (!openOnLoad) {
             tryOpen();
         }
@@ -519,6 +521,10 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
 
     public HandlerRegistration addRootLoadedHandler(RootLoadedEvent.RootLoadedHandler handler) {
         return asWidget().addHandler(handler, RootLoadedEvent.getType());
+    }
+
+    public HandlerRegistration addChildrenLoadedHandler(ChildrenLoadedEvent.Handler handler) {
+        return asWidget().addHandler(handler, ChildrenLoadedEvent.getType());
     }
 
     @Override

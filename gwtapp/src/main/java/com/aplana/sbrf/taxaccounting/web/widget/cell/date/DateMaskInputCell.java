@@ -162,7 +162,7 @@ public class DateMaskInputCell extends
      * @param columnContext
      */
 	public DateMaskInputCell(SafeHtmlRenderer<String> renderer, ColumnContext columnContext) {
-		super(CLICK, KEYDOWN, BLUR, KEYPRESS);
+		super(MOUSEUP, KEYDOWN, BLUR, KEYPRESS);
 		if (template == null) {
 			template = GWT.create(Template.class);
 		}
@@ -256,7 +256,7 @@ public class DateMaskInputCell extends
             } else {
                 //System.out.println("Not Editing - keyCode: " + event.getKeyCode() + " type: " + event.getType() +  " char: " + event.getCharCode());
 
-                if (CLICK.equals(event.getType()) || event.getKeyCode() == KeyCodes.KEY_ENTER) {
+                if (MOUSEUP.equals(event.getType()) || event.getKeyCode() == KeyCodes.KEY_ENTER) {
                     // Перейти в режим редактирования
                     if (vd == null) {
                         vd = new ViewData(value);

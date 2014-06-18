@@ -101,7 +101,7 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
 
                                     ScriptStatusHolder scriptStatusHolder = new ScriptStatusHolder();
                                     try {
-                                        is = new BufferedInputStream(file.getStream());
+                                        is = new BufferedInputStream(file.getInputStream());
                                         if (!refBookMapPair.getFirst()) {  // Если это не сам файл, а архив
                                             ZipInputStream zis = new ZipInputStream(is);
                                             ZipEntry zipFileName = zis.getNextEntry();

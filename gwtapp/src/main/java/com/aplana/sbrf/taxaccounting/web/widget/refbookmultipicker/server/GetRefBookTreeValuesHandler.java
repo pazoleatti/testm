@@ -57,7 +57,6 @@ public class GetRefBookTreeValuesHandler extends AbstractActionHandler<GetRefBoo
         RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(refBook.getId());
 
         String filter = buildFilter.buildTreePickerFilter(action.getFilter(), action.getSearchPattern(), refBook);
-        String filterWithoutPattern = buildFilter.buildTreePickerFilter(action.getFilter(), null, refBook);
 
         if (filter != null && filter.equals(RefBookPickerUtils.NO_REGION_MATCHES_FLAG)) {
             //Среди подразделений пользователя нет относящихся к какому то региону и нет смысла получать записи справочника - ни одна не должна быть ему доступна
@@ -67,7 +66,6 @@ public class GetRefBookTreeValuesHandler extends AbstractActionHandler<GetRefBoo
         }
 
         PagingResult<Map<String, RefBookValue>> refBookPage;
-        List<Long> filterIds = new ArrayList<Long>();
         // Получаем нужные объекты по идентификаторам, что бы потом получить разименнованные значения
         if (action.getIdsTofind() != null && !action.getIdsTofind().isEmpty()) {
             refBookPage = new PagingResult<Map<String, RefBookValue>>();
@@ -91,16 +89,11 @@ public class GetRefBookTreeValuesHandler extends AbstractActionHandler<GetRefBoo
             // идея такая: если есть пользовательский фильтр то грузим все все равно, потом узнаем
             // какие попадают и потом при разиминовывании устанавливаем флаг итему что он попадает по фильтр
             RefBookTreeItem parent = action.getParent();
-            refBookPage = refBookDataProvider.getChildrenRecords(parent != null ? parent.getId() : null, action.getVersion(), null, filterWithoutPattern, sort);
-            // TODO aivanov заменить на более оптимальный вариант
-            for (Map<String, RefBookValue> record : refBookDataProvider.getChildrenRecords(parent != null ? parent.getId() : null,
-                    action.getVersion(), null, filter, sort == null ? refBook.getSortAttribute() : sort)) {
-                filterIds.add(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
-            }
+            refBookPage = refBookDataProvider.getChildrenRecords(parent != null ? parent.getId() : null, action.getVersion(), null, filter, sort);
         }
 
         result.setUuid(logEntryService.save(logger.getEntries()));
-        result.setPage(asseblRefBookPage(action, refBookPage, refBook, filterIds));
+        result.setPage(asseblRefBookPage(action, refBookPage, refBook));
 
         return result;
     }
@@ -118,8 +111,7 @@ public class GetRefBookTreeValuesHandler extends AbstractActionHandler<GetRefBoo
     // Преобразуем в гуи модельку
     private PagingResult<RefBookTreeItem> asseblRefBookPage(GetRefBookTreeValuesAction action,
                                                             PagingResult<Map<String, RefBookValue>> refBookPage,
-                                                            RefBook refBook,
-                                                            List<Long> filterIds) {
+                                                            RefBook refBook) {
 
         List<RefBookTreeItem> items = new LinkedList<RefBookTreeItem>();
         List<RefBookAttribute> attributes = refBook.getAttributes();
@@ -136,9 +128,10 @@ public class GetRefBookTreeValuesHandler extends AbstractActionHandler<GetRefBoo
 
             item.setId(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
 
-            if(filterIds.contains(item.getId())){
-                item.setNeedToOpen(true);
-            }
+            // список ид которые нужно открыть так как они попадают под фильтр пользователя
+//            if(filterIds.contains(item.getId())){
+//                item.setNeedToOpen(true);
+//            }
 
             for (RefBookAttribute refBookAttribute : attributes) {
                 String alias = refBookAttribute.getAlias();

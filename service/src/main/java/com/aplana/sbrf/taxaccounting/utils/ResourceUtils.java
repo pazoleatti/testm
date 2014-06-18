@@ -17,6 +17,10 @@ import java.util.regex.Pattern;
 public class ResourceUtils {
 
     public static FileWrapper getSharedResource(String destinationUri) {
+        return getSharedResource(destinationUri, true);
+    }
+
+    public static FileWrapper getSharedResource(String destinationUri, boolean checkExist) {
         try {
             if (destinationUri.startsWith("smb:")) {
                 String checkedUri = Pattern.compile("smb:/*").matcher(destinationUri).replaceFirst("smb://");
@@ -40,7 +44,7 @@ public class ResourceUtils {
                 }
 
                 File file = new File(uri);
-                if (file.exists()) {
+                if (!checkExist || file.exists()) {
                     return new FileWrapper(file);
                 } else {
                     throw new ServiceException("Запрашиваемый ресурс не найден либо отсутствуют необходимые права");

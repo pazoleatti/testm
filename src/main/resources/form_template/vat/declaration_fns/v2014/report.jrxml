@@ -223,11 +223,11 @@
 			<fieldDescription><![CDATA[@ОплПостСв6Мес]]></fieldDescription>
 		</field>
 		<variable name="ОплПостСв6Мес" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ОплПостСв6Мес} == null ?
+			<variableExpression><![CDATA[($F{ОплПостСв6Мес} == null || $F{ОплПостСв6Мес}.equals("0")) ?
 "-------------------------"
 :
 ($F{ОплПостСв6Мес}+"-------------------------").substring(0,10)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ОплПостСв6Мес} == null ?
+			<initialValueExpression><![CDATA[($F{ОплПостСв6Мес} == null || $F{ОплПостСв6Мес}.equals("0")) ?
 "-------------------------"
 :
 ($F{ОплПостСв6Мес}+"-------------------------").substring(0,10)]]></initialValueExpression>

@@ -224,9 +224,10 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
                     public void onSuccess(GetRefBookTreeValuesResult result) {
                         // очищаем чилдов, так как там лежит чилд с надписью "Загрузка..."
                         uiTreeItem.removeItems();
-                        if (ps.getSearchPattern() != null && !ps.getSearchPattern().isEmpty()) {
-                            highLightItem(uiTreeItem);
-                        }
+                        // убираю подстветку
+//                        if (ps.getSearchPattern() != null && !ps.getSearchPattern().isEmpty()) {
+//                            highLightItem(uiTreeItem);
+//                        }
                         if (!result.getPage().isEmpty()) {
                             // если у нас searchPattern не пуст то будет загрузка каскадная так как результаты будут фильтровать по нему
                             getView().insertChildrens(uiTreeItem, result.getPage(), ps.getSearchPattern()!= null && !ps.getSearchPattern().trim().isEmpty());

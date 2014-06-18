@@ -96,7 +96,7 @@
 
                     <g:cell width="99%">
                         <g:HorizontalPanel verticalAlignment="middle" addStyleNames="{style.marginRight5}">
-                            <g:HTML addStyleNames="{style.verSep}"/>
+                            <g:HTML ui:field="separatorVersion" addStyleNames="{style.verSep}"/>
                             <g:TextBox width="210px" ui:field="filterText" addStyleNames="{style.marginRight5}"/>
                             <g:Button title="Найти" width="70px" text="Найти" ui:field="search"/>
                         </g:HorizontalPanel>

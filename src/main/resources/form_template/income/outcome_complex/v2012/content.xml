@@ -34,7 +34,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>consumptionBuhSumAccountNumber</alias>
         <checking>false</checking>
-        <name>Расход по данным бухгалтерского учёта. Номер счёта учёта</name>
+        <name>номер счёта учёта</name>
         <order>4</order>
         <width>7</width>
         <maxLength>15</maxLength>
@@ -43,7 +43,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>consumptionBuhSumRnuSource</alias>
         <checking>false</checking>
-        <name>Расход по данным бухгалтерского учёта. Источник информации в РНУ</name>
+        <name>источник информации в РНУ</name>
         <order>5</order>
         <width>7</width>
         <maxLength>255</maxLength>
@@ -52,25 +52,25 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>consumptionBuhSumAccepted</alias>
         <checking>false</checking>
-        <name>Расход по данным бухгалтерского учёта. Сумма</name>
+        <name>сумма</name>
         <order>6</order>
-        <width>10</width>
+        <width>8</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>consumptionBuhSumPrevTaxPeriod</alias>
         <checking>false</checking>
-        <name>Расход по данным бухгалтерского учёта. В т.ч. учтено в предыдущих налоговых периодах</name>
+        <name>в т.ч. учтено в предыдущих налоговых периодах</name>
         <order>7</order>
-        <width>10</width>
+        <width>8</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>consumptionTaxSumRnuSource</alias>
         <checking>false</checking>
-        <name>Расход по данным налогового учёта. Источник информации в РНУ</name>
+        <name>источник информации в РНУ</name>
         <order>8</order>
         <width>7</width>
         <maxLength>255</maxLength>
@@ -79,16 +79,16 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>consumptionTaxSumS</alias>
         <checking>false</checking>
-        <name>Расход по данным налогового учёта. Сумма</name>
+        <name>сумма</name>
         <order>9</order>
-        <width>10</width>
+        <width>8</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>rnuNo</alias>
         <checking>false</checking>
-        <name>Расход по данным налогового учёта. Форма РНУ</name>
+        <name>Форма РНУ</name>
         <order>10</order>
         <width>5</width>
         <maxLength>50</maxLength>
@@ -115,27 +115,27 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>opuSumByEnclosure3</alias>
         <checking>true</checking>
-        <name>Сумма по бухгалтерскому учёту в Приложении №6</name>
+        <name>в Приложении №6</name>
         <order>13</order>
-        <width>10</width>
+        <width>8</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>opuSumByTableP</alias>
         <checking>true</checking>
-        <name>Сумма по бухгалтерскому учёту в Таблице "Р"</name>
+        <name>в Таблице "Р"</name>
         <order>14</order>
-        <width>10</width>
+        <width>8</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>opuSumTotal</alias>
         <checking>true</checking>
-        <name>Сумма по бухгалтерскому учёту в бухгалтерской отчётности</name>
+        <name>в бухгалтерской отчётности</name>
         <order>15</order>
-        <width>10</width>
+        <width>8</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -144,7 +144,7 @@
         <checking>true</checking>
         <name>Расхождение</name>
         <order>16</order>
-        <width>10</width>
+        <width>8</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>

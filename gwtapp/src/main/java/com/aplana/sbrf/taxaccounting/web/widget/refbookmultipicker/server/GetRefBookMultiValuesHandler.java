@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.server;
 
+import com.aplana.sbrf.taxaccounting.model.Formats;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.exception.TAException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -25,6 +26,7 @@ import org.springframework.stereotype.Component;
 
 import java.text.NumberFormat;
 import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -122,9 +124,7 @@ public class GetRefBookMultiValuesHandler extends AbstractActionHandler<GetRefBo
         if (attributeId != null) {
             int i = 0;
             for (RefBookAttribute refBookAttribute : refBook.getAttributes()) {
-                if (refBookAttribute.isVisible() && i++ == attributeId) {
-                    return refBookAttribute;
-                }
+                return refBookAttribute;
             }
         }
         return null;
@@ -173,31 +173,29 @@ public class GetRefBookMultiValuesHandler extends AbstractActionHandler<GetRefBo
                 Long id = refBookAttribute.getId();
                 Long refBookId = refBookAttribute.getRefBookId();
 
-                if (refBookAttribute.isVisible()) {
-                    if (RefBookAttributeType.REFERENCE.equals(refBookAttribute.getAttributeType())) {
-                        Long refValue = record.get(alias).getReferenceValue();
-                        if (refValue != null) {
-                            attributeIds.add(refBookAttribute.getRefBookAttributeId());
-                            //Получаем связки для основных атрибутов
-                            if (attributesMap.containsKey(refBookId)) {
-                                attributesMap.get(refBookId).add(new RefBookAttributePair(refBookAttribute.getRefBookAttributeId(), refValue));
-                            } else {
-                                List<RefBookAttributePair> list = new ArrayList<RefBookAttributePair>();
-                                list.add(new RefBookAttributePair(refBookAttribute.getRefBookAttributeId(), refValue));
-                                attributesMap.put(refBookId, list);
-                            }
-                            //Получаем связки для атрибутов второго уровня
-                            if (attrId2Map.get(id) != null) {
-                                for (Long id2 : attrId2Map.get(id)) {
-                                    RefBook refBook2 = refBookHelper.getRefBookByAttributeId(id2);
-                                    attributeIds.add(id2);
-                                    if (attributesMap.containsKey(refBook2.getId())) {
-                                        attributesMap.get(refBook2.getId()).add(new RefBookAttributePair(id2, refValue));
-                                    } else {
-                                        List<RefBookAttributePair> list = new ArrayList<RefBookAttributePair>();
-                                        list.add(new RefBookAttributePair(refBookAttribute.getRefBookAttributeId(), refValue));
-                                        attributesMap.put(refBook2.getId(), list);
-                                    }
+                if (RefBookAttributeType.REFERENCE.equals(refBookAttribute.getAttributeType())) {
+                    Long refValue = record.get(alias).getReferenceValue();
+                    if (refValue != null) {
+                        attributeIds.add(refBookAttribute.getRefBookAttributeId());
+                        //Получаем связки для основных атрибутов
+                        if (attributesMap.containsKey(refBookId)) {
+                            attributesMap.get(refBookId).add(new RefBookAttributePair(refBookAttribute.getRefBookAttributeId(), refValue));
+                        } else {
+                            List<RefBookAttributePair> list = new ArrayList<RefBookAttributePair>();
+                            list.add(new RefBookAttributePair(refBookAttribute.getRefBookAttributeId(), refValue));
+                            attributesMap.put(refBookId, list);
+                        }
+                        //Получаем связки для атрибутов второго уровня
+                        if (attrId2Map.get(id) != null) {
+                            for (Long id2 : attrId2Map.get(id)) {
+                                RefBook refBook2 = refBookHelper.getRefBookByAttributeId(id2);
+                                attributeIds.add(id2);
+                                if (attributesMap.containsKey(refBook2.getId())) {
+                                    attributesMap.get(refBook2.getId()).add(new RefBookAttributePair(id2, refValue));
+                                } else {
+                                    List<RefBookAttributePair> list = new ArrayList<RefBookAttributePair>();
+                                    list.add(new RefBookAttributePair(refBookAttribute.getRefBookAttributeId(), refValue));
+                                    attributesMap.put(refBook2.getId(), list);
                                 }
                             }
                         }
@@ -222,7 +220,7 @@ public class GetRefBookMultiValuesHandler extends AbstractActionHandler<GetRefBo
         //System.out.println("get values: "+((double)(System.nanoTime()-time)/1000000000.0)+"s");
         //time = System.nanoTime();
 
-
+        HashMap<Formats, SimpleDateFormat> formatHashMap = new HashMap<Formats, SimpleDateFormat>();
         /**
          * Раздаем разыменованные значения по требованию
          */
@@ -238,31 +236,47 @@ public class GetRefBookMultiValuesHandler extends AbstractActionHandler<GetRefBo
                 Long id = refBookAttribute.getId();
                 String value = null;
 
-                if (refBookAttribute.isVisible()) {
+                RefBookRecordDereferenceValue dereferenceValue = new RefBookRecordDereferenceValue(
+                        refBookAttribute.getId(),
+                        refBookAttribute.getAlias());
 
-                    RefBookRecordDereferenceValue dereferenceValue = new RefBookRecordDereferenceValue(
-                            refBookAttribute.getId(),
-                            refBookAttribute.getAlias());
-
-                    if (RefBookAttributeType.REFERENCE.equals(refBookAttribute.getAttributeType())) {
-                        Long refValue = record.get(alias).getReferenceValue();
-                        if (refValue != null) {
-                            value = dereferencedAttributes.get(new RefBookAttributePair(refBookAttribute.getRefBookAttributeId(), refValue));
-                            // для каждого найденного дополнительного аттрибута разименуем значение
-                            if (attrId2Map.get(id) != null) {
-                                for (Long id2 : attrId2Map.get(id)) {
-                                    String value2 = dereferencedAttributes.get(new RefBookAttributePair(id2, refValue));
-                                    dereferenceValue.getAttrId2DerefValueMap().put(id2, value2 == null ? "" : value2);
-                                }
+                if (RefBookAttributeType.REFERENCE.equals(refBookAttribute.getAttributeType())) {
+                    Long refValue = record.get(alias).getReferenceValue();
+                    if (refValue != null) {
+                        value = dereferencedAttributes.get(new RefBookAttributePair(refBookAttribute.getRefBookAttributeId(), refValue));
+                        // для каждого найденного дополнительного аттрибута разименуем значение
+                        if (attrId2Map.get(id) != null) {
+                            for (Long id2 : attrId2Map.get(id)) {
+                                String value2 = dereferencedAttributes.get(new RefBookAttributePair(id2, refValue));
+                                dereferenceValue.getAttrId2DerefValueMap().put(id2, value2 == null ? "" : value2);
                             }
                         }
-                    } else {
-                        RefBookValue refBookValue = record.get(alias);
-                        value = (refBookValue == null ? "" : String.valueOf(refBookValue));
                     }
-                    dereferenceValue.setDereferenceValue(value);
-                    refBookDereferenceValues.add(dereferenceValue);
+                } else {
+                    RefBookValue refBookValue = record.get(alias);
+                    if (refBookValue != null) {
+                        if (refBookValue.getAttributeType() == RefBookAttributeType.DATE) {
+                            Formats format = refBookAttribute.getFormat();
+                            if (format != null) {
+                                if (formatHashMap.containsKey(format)) {
+                                    value = formatHashMap.get(format).format(refBookValue.getDateValue());
+                                } else {
+                                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format.getFormat());
+                                    formatHashMap.put(format, simpleDateFormat);
+                                    value = simpleDateFormat.format(refBookValue.getDateValue());
+                                }
+                            } else {
+                                value = String.valueOf(refBookValue);
+                            }
+                        } else {
+                            value = String.valueOf(refBookValue);
+                        }
+                    } else {
+                        value = "";
+                    }
                 }
+                dereferenceValue.setDereferenceValue(value);
+                refBookDereferenceValues.add(dereferenceValue);
                 if (id.equals(action.getRefBookAttrId())) {
                     item.setDereferenceValue(value);
                 }

@@ -198,6 +198,16 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                 Dialog.warningMessage("Версия не сохранена", "Дата окончания должна быть больше даты начала актуальности");
                 return;
             }
+            Map<String, RefBookValueSerializable> map = getView().getFieldsValues();
+            //TODO : Специфические для справочника подразделений проверки. Подумать над возможностью избавиться
+            if (currentRefBookId == 30) {
+                if (modifiedFields.containsKey("TYPE")){
+                    if (map.get("TYPE").getNumberValue().intValue() != 1 &&  map.get("PARENT_ID").getReferenceValue() == null){
+                        Dialog.errorMessage("Родительское подразделение должно быть заполнено!");
+                        return;
+                    }
+                }
+            }
 			if (currentUniqueRecordId == null) {
                 //Создание новой версии
                 AddRefBookRowVersionAction action = new AddRefBookRowVersionAction();
@@ -208,7 +218,6 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                     action.setRecordId(null);
                 }
 
-                Map<String, RefBookValueSerializable> map = getView().getFieldsValues();
                 List<Map<String, RefBookValueSerializable>> valuesToAdd = new ArrayList<Map<String, RefBookValueSerializable>>();
                 valuesToAdd.add(map);
 
@@ -237,13 +246,21 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                 final SaveRefBookRowVersionAction action = new SaveRefBookRowVersionAction();
                 action.setRefBookId(currentRefBookId);
                 action.setRecordId(currentUniqueRecordId);
-                Map<String, RefBookValueSerializable> map = getView().getFieldsValues();
                 action.setValueToSave(map);
                 action.setVersionFrom(getView().getVersionFrom());
                 action.setVersionTo(getView().getVersionTo());
 
+                final RecordChanges recordChanges = fillRecordChanges(currentUniqueRecordId, map, action.getVersionFrom(), action.getVersionTo());
+
                 // TODO заменить, сделано для примера
                 if (currentRefBookId == 30) {
+                    if (modifiedFields.containsKey("TYPE")){
+                        if (map.get("TYPE").getNumberValue().intValue() != 1 &&  map.get("PARENT_ID").getReferenceValue() == null){
+                           Dialog.errorMessage("Родительское подразделение должно быть заполнено!");
+                            return;
+                        }
+
+                    }
                     if(modifiedFields.containsKey("NAME")){
                         renameDialogPresenter.open(new ConfirmButtonClickHandler() {
                             @Override
@@ -253,12 +270,29 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                         " по " + WidgetUtils.getDateString(dateTo) + "на имя \"" + modifiedFields.get("NAME") + "\"")*/
                                 action.setVersionFrom(WidgetUtils.getDateWithOutTime(dateFrom));
                                 action.setVersionTo(WidgetUtils.getDateWithOutTime(dateTo));
+                                renameDialogPresenter.getView().cleanDates();
+
+                                dispatchAsync.execute(action,
+                                        CallbackUtils.defaultCallback(
+                                                new AbstractCallback<SaveRefBookRowVersionResult>() {
+                                                    @Override
+                                                    public void onSuccess(SaveRefBookRowVersionResult result) {
+                                                        LogCleanEvent.fire(EditFormPresenter.this);
+                                                        LogAddEvent.fire(EditFormPresenter.this, result.getUuid());
+                                                        UpdateForm.fire(EditFormPresenter.this, !result.isException(), recordChanges);
+                                                        if (result.isException()) {
+                                                            Dialog.errorMessage("Версия не сохранена", "Обнаружены фатальные ошибки!");
+                                                        } else {
+                                                            setIsFormModified(false);
+                                                        }
+                                                    }
+                                                }, EditFormPresenter.this));
                             }
                         });
+                        return;
                     }
                 }
 
-                final RecordChanges recordChanges = fillRecordChanges(currentUniqueRecordId, map, action.getVersionFrom(), action.getVersionTo());
                 dispatchAsync.execute(action,
                         CallbackUtils.defaultCallback(
                                 new AbstractCallback<SaveRefBookRowVersionResult>() {
@@ -266,16 +300,17 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                     public void onSuccess(SaveRefBookRowVersionResult result) {
                                         LogCleanEvent.fire(EditFormPresenter.this);
                                         LogAddEvent.fire(EditFormPresenter.this, result.getUuid());
-                                        setIsFormModified(false);
                                         UpdateForm.fire(EditFormPresenter.this, !result.isException(), recordChanges);
                                         if (result.isException()) {
                                             Dialog.errorMessage("Версия не сохранена", "Обнаружены фатальные ошибки!");
+                                        } else {
+                                            setIsFormModified(false);
                                         }
                                     }
                                 }, this));
 			}
 		} catch (BadValueException bve) {
-            setIsFormModified(false);
+            Dialog.errorMessage("Версия не сохранена", "Обнаружены фатальные ошибки!");
             List<LogEntry> logEntries = new ArrayList<LogEntry>();
             logEntries.add(new LogEntry(LogLevel.ERROR, "\" " + bve.getFieldName() + "\": " + bve.getDescription()));
             SaveLogEntriesAction action = new SaveLogEntriesAction();
@@ -337,7 +372,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
         setIsFormModified(true);
 	}
 
-    private void setIsFormModified(boolean isFormModified) {
+    public void setIsFormModified(boolean isFormModified) {
         this.isFormModified = isFormModified;
         if (isFormModified) {
             placeManager.setOnLeaveConfirmation("Вы подтверждаете отмену изменений?");

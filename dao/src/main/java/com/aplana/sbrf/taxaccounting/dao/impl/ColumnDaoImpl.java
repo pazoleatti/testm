@@ -240,7 +240,12 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
                             ps.setLong(12, ((RefBookColumn) col).getRefBookAttributeId());
                             ps.setString(13, ((RefBookColumn) col).getFilter());
                             ps.setNull(14, Types.NUMERIC);
-                            ps.setNull(15, Types.NUMERIC);
+                            if (((RefBookColumn) col).getRefBookAttributeId2()== null){
+                                ps.setNull(15, Types.NUMERIC);
+                            }
+                            else {
+                                ps.setLong(15, ((RefBookColumn) col).getRefBookAttributeId2());
+                            }
                         } else if (col instanceof ReferenceColumn) {
                             ps.setLong(12, ((ReferenceColumn) col).getRefBookAttributeId());
                             ps.setNull(13, Types.CHAR);
@@ -323,7 +328,11 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 								ps.setLong(10, ((RefBookColumn) col).getRefBookAttributeId());
                                 ps.setString(11, ((RefBookColumn) col).getFilter());
                                 ps.setNull(12, Types.NUMERIC);
-                                ps.setNull(13, Types.NUMERIC);
+                                if (((RefBookColumn) col).getRefBookAttributeId2() != null) {
+                                    ps.setLong(13, ((RefBookColumn) col).getRefBookAttributeId2());
+                                } else {
+                                    ps.setNull(13, Types.NULL);
+                                }
                                 ps.setNull(14, Types.NUMERIC);
                                 //ps.setLong(13, ((RefBookColumn) col).getRefBookAttributeId2());
 							} else if (col instanceof ReferenceColumn) {

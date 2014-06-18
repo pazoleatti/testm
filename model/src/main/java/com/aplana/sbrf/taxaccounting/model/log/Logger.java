@@ -1,11 +1,12 @@
 package com.aplana.sbrf.taxaccounting.model.log;
 
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * Объект для логирования информации в ходе расчётов, проверок и других операций
@@ -19,6 +20,17 @@ public class Logger {
 	private LogMessageDecorator messageDecorator;
 	
 	private List<LogEntry> entries = new ArrayList<LogEntry>();
+
+    //Добавили пока на пробу, поскольку необходимо логгирование в справочнике Подразделений
+    private TAUserInfo taUserInfo;
+
+    public TAUserInfo getTaUserInfo() {
+        return taUserInfo;
+    }
+
+    public void setTaUserInfo(TAUserInfo taUserInfo) {
+        this.taUserInfo = taUserInfo;
+    }
 
     // Ограничение по длине для каждого сообщения об ошибке из Exception
     private static int MAX_EXCEPTION_LOG_MESSAGE_LENGTH = 10000;

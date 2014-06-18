@@ -52,7 +52,8 @@ public enum FormDataEvent implements Serializable {
 	DELETE_ROW(303, "Удалить строку"),
 	AFTER_LOAD(302, "Загрузка"),	/* Вызывается после того как форма была получена из БД. */
 
-	IMPORT_TRANSPORT_FILE(401, "Загрузка ТФ"),
+	IMPORT_TRANSPORT_FILE(401, "Импорт из транспортных файлов"),
+    UPLOAD_TRANSPORT_FILE(402, "Загрузка транспортных файлов в каталог загрузки"),
 
     LOGIN(501, "Вход пользователя в Систему"),
     LOGOUT(502, "Выход пользователя из Системы"),
@@ -60,6 +61,8 @@ public enum FormDataEvent implements Serializable {
 
 	LOG_SYSTEM_BACKUP(601, "Архивирование журнала событий"),
 
+    ADD_DEPARTMENT(901, "Создание подразделения"),
+    UPDATE_DEPARTMENT(902, "Модификация подразделения"),
     DELETE_DEPARTMENT(903, "Удаление подразделения");
 
 	private String title;
