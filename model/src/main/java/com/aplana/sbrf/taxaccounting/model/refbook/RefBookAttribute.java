@@ -68,6 +68,11 @@ public class RefBookAttribute implements Serializable {
      */
     private boolean readOnly;
 
+    /**
+     * Максимальная длина строки
+     */
+    private Integer maxLength;
+
 	/**
 	 * Возвращает код атрибута
 	 * @return код атрибута
@@ -266,6 +271,14 @@ public class RefBookAttribute implements Serializable {
         this.readOnly = readOnly;
     }
 
+    public Integer getMaxLength() {
+        return maxLength;
+    }
+
+    public void setMaxLength(Integer maxLength) {
+        this.maxLength = maxLength;
+    }
+
     @Override
 	public boolean equals(Object o) {
 		if (this == o) {
@@ -317,6 +330,9 @@ public class RefBookAttribute implements Serializable {
         if (format != null ? format.equals(that.format) : that.format != null){
             return false;
         }
+        if (maxLength != that.maxLength){
+            return false;
+        }
 		return true;
 	}
 
@@ -342,6 +358,7 @@ public class RefBookAttribute implements Serializable {
         sb.append(", unique=").append(unique);
 		sb.append(", sortOrder=").append(sortOrder);
         sb.append(", format=").append(format != null ? format.getFormat() : null);
+        sb.append(", length=").append(maxLength);
 		sb.append('}');
 		return sb.toString();
 	}
