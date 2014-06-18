@@ -13,9 +13,9 @@ public class AutoNumerationColumn extends Column {
     public AutoNumerationColumn() {
     }
 
-    public AutoNumerationColumn(String numerationName, Integer numerationRow) {
-        this.typeName = numerationName;
-        this.type = numerationRow;
+    public AutoNumerationColumn(String name, Integer type) {
+        this.typeName = name;
+        this.type = type;
     }
 
     public int getType() {

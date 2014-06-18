@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -184,13 +185,36 @@ public interface FormDataDao {
     void updateFDPerformerDepartmentNames(int departmentId, String newDepartmentName, Date dateFrom, Date dateTo);
 
     /**
-     * Получить список экземпляров НФ, в пределах которых устанавливается сквозная нумерация строк.
+     * Получить упорядоченный список экземпляров НФ предшествующих до указанного экземпляра, в пределах которых
+     * устанавливается сквозная нумерация строк.
      *
      * @param year Календарный год налогового периода
      * @param departmentId идентификатор подразделения
-     * @param type тип налоговой формы
+     * @param code тип налоговой формы
      * @param kind вид налоговой формы
-     * @return список налоговых форм
+     * @param formDataId идентификатор налоговой формы
+     * @return
      */
-    List<FormData> getFormDataListForCrossNumeration(Integer year, Integer departmentId, String type, Integer kind);
+    List<FormData> getPrevFormDataListForCrossNumeration(Integer year, Integer departmentId, String code, Integer kind, Long formDataId);
+
+    /**
+     * Получить упорядоченный список экземпляров НФ, следующих после указанного экземпляра, в пределах которых
+     * устанавливается сквозная нумерация строк.
+     *
+     * @param year Календарный год налогового периода
+     * @param departmentId идентификатор подразделения
+     * @param code тип налоговой формы
+     * @param kind вид налоговой формы
+     * @param formDataId идентификатор налоговой формы
+     * @return
+     */
+    List<FormData> getNextFormDataListForCrossNumeration(Integer year, Integer departmentId, String code, Integer kind, Long formDataId);
+
+    /**
+     * TODO - возможно лучше сделать batchUpdate
+     * Обновить значение атрибута "Номер последней строки предыдущей НФ"
+     * @param formDataId идентификатор налоговой формы
+     * @param previousRowNumber номер последней строки предыдущей НФ
+     */
+    void updatePreviousRowNumber(Long formDataId, Integer previousRowNumber);
 }

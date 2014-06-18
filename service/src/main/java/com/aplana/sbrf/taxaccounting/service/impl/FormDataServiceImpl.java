@@ -243,28 +243,28 @@ public class FormDataServiceImpl implements FormDataService {
 	public long createFormDataWithoutCheck(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentId,
                                            FormDataKind kind, int reportPeriodId, Integer periodOrder, boolean importFormData) {
 		FormTemplate formTemplate = formTemplateService.getFullFormTemplate(formTemplateId);
-		FormData formData = new FormData(formTemplate);
+        FormData formData = new FormData(formTemplate);
 
-		formData.setState(WorkflowState.CREATED);
-		formData.setDepartmentId(departmentId);
-		formData.setKind(kind);
-		formData.setReportPeriodId(reportPeriodId);
+        formData.setState(WorkflowState.CREATED);
+        formData.setDepartmentId(departmentId);
+        formData.setKind(kind);
+        formData.setReportPeriodId(reportPeriodId);
         formData.setPeriodOrder(periodOrder);
         formData.setManual(false);
-		
-		// Execute scripts for the form event CREATE
+
+        // Execute scripts for the form event CREATE
         ReportPeriod prevReportPeriod = reportPeriodService.getPrevReportPeriod(reportPeriodId);
         FormDataPerformer performer = null;
         if (prevReportPeriod != null) {
             FormData formDataOld;
-            if (periodOrder==null)
+            if (periodOrder == null)
                 formDataOld = formDataDao.find(formTemplate.getType().getId(), kind, departmentId, prevReportPeriod.getId());
             else
-                formDataOld = formDataDao.findMonth(formTemplate.getType().getId(), kind, departmentId, prevReportPeriod.getId(),periodOrder);
+                formDataOld = formDataDao.findMonth(formTemplate.getType().getId(), kind, departmentId, prevReportPeriod.getId(), periodOrder);
             if (formDataOld != null) {
                 List<FormDataSigner> signer = new ArrayList<FormDataSigner>();
                 List<FormDataSigner> signerOld = formDataOld.getSigners();
-                for(FormDataSigner formDataSignerOld: signerOld) {
+                for (FormDataSigner formDataSignerOld : signerOld) {
                     FormDataSigner formDataSigner = new FormDataSigner();
                     formDataSigner.setName(formDataSignerOld.getName());
                     formDataSigner.setPosition(formDataSignerOld.getPosition());
@@ -310,7 +310,9 @@ public class FormDataServiceImpl implements FormDataService {
 		}
 
 		dataRowDao.commit(formData.getId());
-		return formData.getId();
+
+        updatePreviousRowNumber(formData);
+        return formData.getId();
 	}
 
 	/**
@@ -391,7 +393,11 @@ public class FormDataServiceImpl implements FormDataService {
 		formDataScriptingService.executeScript(userInfo, formData,
 				FormDataEvent.CALCULATE, logger, null);
 
-		if (logger.containsLevel(LogLevel.ERROR)) {
+        String msg = updatePreviousRowNumber(formData);
+        if (msg != null) {
+            logger.info(msg);
+        }
+        if (logger.containsLevel(LogLevel.ERROR)) {
 			throw new ServiceLoggerException("Найдены ошибки при выполнении расчета формы", logEntryService.save(logger.getEntries()));
 		} else {
 			logger.info("Расчет завершен, фатальных ошибок не обнаружено");
@@ -454,6 +460,8 @@ public class FormDataServiceImpl implements FormDataService {
 		auditService.add(FormDataEvent.SAVE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
                 null, formData.getFormType().getId(), formData.getKind().getId(), null);
 
+        updatePreviousRowNumber(formData);
+
 		return formData.getId();
 	}
 
@@ -514,65 +522,68 @@ public class FormDataServiceImpl implements FormDataService {
         }
 	}
 
-	/**
-	 * Перемещает форму из одного состояния в другое.
-	 *
-	 * @param formDataId
-	 *            идентификатор налоговой формы
-	 * @param userInfo
-	 *            информация о текущем пользователе
-	 * @param workflowMove
-	 *            переход
-	 */
-	@Override
-	public void doMove(long formDataId, boolean manual, TAUserInfo userInfo, WorkflowMove workflowMove, String note, Logger logger) {
-		// Форма не должна быть заблокирована даже текущим пользователем;
-		lockCoreService.checkUnlocked(FormData.class, formDataId, userInfo);
-   		// Временный срез формы должен быть в актуальном состоянии
-		dataRowDao.rollback(formDataId);
-		
-		List<WorkflowMove> availableMoves = formDataAccessService.getAvailableMoves(userInfo, formDataId);
-		if (!availableMoves.contains(workflowMove)) {
-			throw new ServiceException(
-					"Переход \""
+    /**
+     * Перемещает форму из одного состояния в другое.
+     *
+     * @param formDataId   идентификатор налоговой формы
+     * @param userInfo     информация о текущем пользователе
+     * @param workflowMove переход
+     */
+    @Override
+    public void doMove(long formDataId, boolean manual, TAUserInfo userInfo, WorkflowMove workflowMove, String note, Logger logger) {
+        List<FormData> formDataList = null;
+        // Форма не должна быть заблокирована даже текущим пользователем;
+        lockCoreService.checkUnlocked(FormData.class, formDataId, userInfo);
+        // Временный срез формы должен быть в актуальном состоянии
+        dataRowDao.rollback(formDataId);
+
+        List<WorkflowMove> availableMoves = formDataAccessService.getAvailableMoves(userInfo, formDataId);
+        if (!availableMoves.contains(workflowMove)) {
+            throw new ServiceException(
+                    "Переход \""
                             + workflowMove.getRoute()
                             + "\" из текущего состояния невозможен, или у пользователя " +
                             "не хватает полномочий для его осуществления");
-		}
+        }
 
-		FormData formData = formDataDao.get(formDataId, manual);
+        FormData formData = formDataDao.get(formDataId, manual);
 
-		formDataScriptingService.executeScript(userInfo,formData, workflowMove.getEvent(), logger, null);
-		
-		if (logger.containsLevel(LogLevel.ERROR)) {
-			throw new ServiceLoggerException(
-					"Произошли ошибки в скрипте, который выполняется перед переходом",
+        formDataScriptingService.executeScript(userInfo, formData, workflowMove.getEvent(), logger, null);
+
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            throw new ServiceLoggerException(
+                    "Произошли ошибки в скрипте, который выполняется перед переходом",
                     logEntryService.save(logger.getEntries()));
-		}
-	
-		eventHandlerLauncher.process(userInfo, formData, workflowMove.getEvent(), logger, null);
+        }
 
-		if (workflowMove.getAfterEvent() != null) {
-			formDataScriptingService.executeScript(
-					userInfo, formData,
-					workflowMove.getAfterEvent(), logger, null);
-			if (logger.containsLevel(LogLevel.ERROR)) {
-				throw new ServiceLoggerException(
-						"Произошли ошибки в скрипте, который выполняется после перехода",
+        eventHandlerLauncher.process(userInfo, formData, workflowMove.getEvent(), logger, null);
+
+        if (workflowMove.getAfterEvent() != null) {
+            formDataScriptingService.executeScript(
+                    userInfo, formData,
+                    workflowMove.getAfterEvent(), logger, null);
+            if (logger.containsLevel(LogLevel.ERROR)) {
+                throw new ServiceLoggerException(
+                        "Произошли ошибки в скрипте, который выполняется после перехода",
                         logEntryService.save(logger.getEntries()));
-			} else {
+            } else {
                 compose(workflowMove, formData, userInfo, logger);
             }
-		}
+        }
 
         dataRowDao.commit(formData.getId());
 
-        logger.info("Форма \"" + formData.getFormType().getName() + "\" переведена в статус \"" + workflowMove.getToState().getName()+"\"");
+        logger.info("Форма \"" + formData.getFormType().getName() + "\" переведена в статус \"" + workflowMove.getToState().getName() + "\"");
 
-		logBusinessService.add(formData.getId(), null, userInfo, workflowMove.getEvent(), note);
-		auditService.add(workflowMove.getEvent(), userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-				null, formData.getFormType().getId(), formData.getKind().getId(), note);
-	}
+        logBusinessService.add(formData.getId(), null, userInfo, workflowMove.getEvent(), note);
+        auditService.add(workflowMove.getEvent(), userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
+                null, formData.getFormType().getId(), formData.getKind().getId(), note);
+
+        String msg = updatePreviousRowNumber(formData);
+        if (msg != null) {
+            logger.info(msg);
+        }
+    }
 
     /**
      * Логика консолидации при переходе жц
@@ -806,30 +817,62 @@ public class FormDataServiceImpl implements FormDataService {
         }
     }
 
-    @Override
-    public boolean updatePreviousRowNumber(FormData formData) {
+    public Integer getPreviousRowNumber(FormData formData) {
         int previousRowNumber = 0;
+        // Получить налоговый период
+        ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
+        TaxPeriod taxPeriod = reportPeriod.getTaxPeriod();
+        // Получить упорядоченный список экземпляров НФ, которые участвуют в сквозной нумерации и находятся до указанного экземпляра НФ
+        List<FormData> formDataList = formDataDao.getPrevFormDataListForCrossNumeration(taxPeriod.getYear(),
+                formData.getDepartmentId(), String.valueOf(taxPeriod.getTaxType().getCode()), formData.getKind().getId(), formData.getId());
 
-        int year = reportPeriodService.getTaxPeriod(formData.getReportPeriodId()).getYear();
-        List<FormData> formDataList = formDataDao.getFormDataListForCrossNumeration(year, formData.getDepartmentId(), formData.getFormType().getName(), formData.getKind().getId());
-
-        for (int i = 0; i < formDataList.size(); i++) {
-
-            if (formDataList.get(i).getState() != WorkflowState.CREATED) {
-                previousRowNumber = dataRowDao.getSize(formDataList.get(i), null);
-            }
-
-            if (i == 0 && formDataList.get(i).getId().equals(formData.getId())) {
-                formData.setPreviousRowNumber(previousRowNumber);
-                formDataDao.save(formData);
-                return true;
-
-            } else if (formDataList.get(i).getId().equals(formData.getId())) {
-                formData.setPreviousRowNumber(previousRowNumber);
-                formDataDao.save(formData);
-                return true;
+        // Если экземпляр НФ является не первым экземпляром в сквозной нумерации
+        if (formDataList.size() > 0) {
+            for (FormData aFormData : formDataList) {
+                if (aFormData.getState() != WorkflowState.CREATED) {
+                    previousRowNumber += dataRowDao.getSizeWithoutTotal(aFormData, null);
+                }
+                if (aFormData.getId().equals(formData.getId())) {
+                    return previousRowNumber;
+                }
             }
         }
-        return false;
+
+        return previousRowNumber;
+    }
+
+    @Override
+    public String updatePreviousRowNumber(FormData formData) {
+        String msg = null;
+
+        FormTemplate formTemplate = formTemplateService.get(formData.getFormTemplateId());
+        if (formTemplateService.isAnyAutoNumerationColumn(formTemplate, AutoNumerationColumnType.CROSS)) {
+            // Получить налоговый период
+            TaxPeriod taxPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId()).getTaxPeriod();
+            // Получить список экземпляров НФ следующих периодов
+            List<FormData> formDataList = formDataDao.getNextFormDataListForCrossNumeration(taxPeriod.getYear(),
+                    formData.getDepartmentId(), String.valueOf(taxPeriod.getTaxType().getCode()), formData.getKind().getId(), formData.getId());
+
+            // Устанавливаем значение для текущего экземпляра НФ
+            formDataDao.updatePreviousRowNumber(formData.getId(), getPreviousRowNumber(formData));
+
+            StringBuilder stringBuilder = new StringBuilder();
+            // Обновляем последующие периоды
+            for (FormData data : formDataList) {
+                // Для экземпляров в статусе "Создано" не обновляем
+                if (data.getState() != WorkflowState.CREATED) {
+                    formDataDao.updatePreviousRowNumber(data.getId(), getPreviousRowNumber(data));
+                    ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(data.getReportPeriodId());
+                    stringBuilder.append(reportPeriod.getName() + " " + reportPeriod.getTaxPeriod().getYear());
+                    // TODO - разобраться с запятой!
+                    if (formDataList.iterator().hasNext()) {
+                        stringBuilder.append(", ");
+                    }
+                    msg = "Сквозная нумерация обновлена в налоговых формах следующих периодов текущей сквозной нумерации: " +
+                            stringBuilder.toString();
+                }
+            }
+        }
+        return msg;
     }
 }

@@ -264,9 +264,16 @@ public interface FormDataService {
     void updateFDDepartmentNames(int depTBId, String depName, Date dateFrom, Date dateTo);
 
     /**
-     * Обновить Номер последней строки предыдущей НФ
-     * @param formData экземпляр НФ, для которой необходимо обновить
+     * Получить значение "Номер последней строки предыдущей НФ"
+     * @param formData {@link com.aplana.sbrf.taxaccounting.model.FormData экземпляр НФ}
      * @return
      */
-    boolean updatePreviousRowNumber(FormData formData);
+    Integer getPreviousRowNumber(FormData formData);
+
+    /**
+     * Обновить значение "Номер последней строки предыдущей НФ" для указанного экземпляра НФ и следующих периодов
+     * @param formData {@link com.aplana.sbrf.taxaccounting.model.FormData экземпляр НФ}
+     * @return текстовое уведомление с указанием периодов, для которых было обновлено значение
+     */
+    String updatePreviousRowNumber(FormData formData);
 }
