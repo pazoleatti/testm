@@ -283,6 +283,7 @@ public class FormDataDaoTest {
         Assert.assertEquals("Ban/Bank1", formPerformerDao.get(11).getReportDepartmentName());
     }
 
+    @Ignore
     @Test
     public void testGetFormDataListForCrossNumeration() {
         List<FormData> formDataList = formDataDao.getPrevFormDataListForCrossNumeration(2014, 3, "I", FormDataKind.PRIMARY.getId(), (long) 1);
