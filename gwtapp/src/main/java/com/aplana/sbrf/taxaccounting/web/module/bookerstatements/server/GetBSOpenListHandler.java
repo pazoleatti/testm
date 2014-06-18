@@ -52,7 +52,7 @@ public class GetBSOpenListHandler extends AbstractActionHandler<GetBSOpenListAct
         TAUser currUser = securityService.currentUserInfo().getUser();
 
         // Все отчетные периоды
-        result.setReportPeriods(periodService.getAllPeriodsByTaxType(TaxType.INCOME, false));
+        result.setReportPeriods(periodService.getAllPeriodsByTaxType(TaxType.INCOME, true));
 
         // Признак контролера
         if (currUser.hasRole(TARole.ROLE_CONTROL_UNP)) {

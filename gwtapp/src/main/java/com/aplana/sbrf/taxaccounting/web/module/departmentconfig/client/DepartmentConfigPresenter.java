@@ -300,7 +300,7 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
 
                                 // По-умолчанию последний
                                 if (result.getReportPeriods() != null && !result.getReportPeriods().isEmpty()) {
-                                    getView().setReportPeriod(result.getReportPeriods().get(result.getReportPeriods().size()-1).getId());
+                                    getView().setReportPeriod(result.getReportPeriods().get(0).getId());
                                 }
                             }
                         }, this).addCallback(new ManualRevealCallback<GetDepartmentTreeDataAction>(this)));
