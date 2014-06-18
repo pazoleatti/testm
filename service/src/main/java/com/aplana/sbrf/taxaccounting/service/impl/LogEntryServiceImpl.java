@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
+import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -21,6 +23,9 @@ public class LogEntryServiceImpl implements LogEntryService {
 
     @Autowired
     private LogEntryDao logEntryDao;
+    
+    @Autowired
+    private TransactionHelper tx;
 
     @Override
     public PagingResult<LogEntry> get(String uuid, int offset, int length) {
@@ -48,14 +53,22 @@ public class LogEntryServiceImpl implements LogEntryService {
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public String save(List<LogEntry> logEntry) {
-        if (logEntry == null || logEntry.isEmpty()) {
-            return null;
-        }
-        String uuid = UUID.randomUUID().toString().toLowerCase();
-        logEntryDao.save(logEntry, uuid);
-        return uuid;
+    @Transactional(propagation = Propagation.REQUIRED)
+    public String save(final List<LogEntry> logEntry) {
+        return tx.returnInNewTransaction(new TransactionLogic<String>() {
+            @Override
+            public String executeWithReturn() {
+                if (logEntry == null || logEntry.isEmpty()) {
+                    return null;
+                }
+                String uuid = UUID.randomUUID().toString().toLowerCase();
+                logEntryDao.save(logEntry, uuid);
+                return uuid;
+            }
+
+            @Override
+            public void execute() {}
+        });
     }
 
     @Override
