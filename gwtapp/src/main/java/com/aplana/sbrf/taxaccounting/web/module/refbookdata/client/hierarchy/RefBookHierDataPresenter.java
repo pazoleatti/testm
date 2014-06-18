@@ -125,7 +125,8 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
 
     @Override
     public void onUpdateForm(UpdateForm event) {
-        if (event.isSuccess()) {
+        if (event.isSuccess() && this.isVisible()) {
+            getView().clearFilterInputBox();
             RecordChanges rc = event.getRecordChanges();
             RefBookTreeItem selectedItem = getView().getSelectedItem();
             if (canVersion && !WidgetUtils.isInLimitPeriod(rc.getStart(), rc.getEnd(), getView().getRelevanceDate())) {
@@ -145,7 +146,7 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
                     getView().updateItem(rc.getId(), rc.getParentId(), rc.getName());
                 }
             }
-
+            getView().setSelected(rc.getId());
         }
     }
 
