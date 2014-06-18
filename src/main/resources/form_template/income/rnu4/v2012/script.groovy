@@ -357,21 +357,23 @@ void addData(def xml, int headRowCount) {
         }
 
         // графа 3
-        newRow.balance = getRecordIdImport(28, 'NUMBER', row.cell[3].text(), xlsIndexRow, 3 + colOffset)
+        newRow.balance = getRecordIdImport(28, 'CODE', row.cell[2].text(), xlsIndexRow, 2 + colOffset)
         def map = getRefBookValue(28, newRow.balance)
 
         // графа 2
         if (map != null) {
-            def text = row.cell[2].text()
-            if ((text != null && !text.isEmpty() && !text.equals(map.CODE?.stringValue)) || ((text == null || text.isEmpty()) && map.CODE?.stringValue != null)) {
-                logger.error("Проверка файла: Строка ${xlsIndexRow}, столбец ${2 + colOffset} содержит значение, отсутствующее в справочнике «" + refBookFactory.get(28).getName() + "»!")
+            def text = row.cell[3].text()
+            if ((text != null && !text.isEmpty() && !text.equals(map.NUMBER?.stringValue)) || ((text == null || text.isEmpty()) && map.NUMBER?.stringValue != null)) {
+                logger.error("Проверка файла: Строка ${xlsIndexRow}, столбец ${3 + colOffset} содержит значение, отсутствующее в справочнике «" + refBookFactory.get(28).getName() + "»!")
             }
         }
 
         // графа 4
         if (map != null) {
-            def text = row.cell[4].text()
-            if ((text != null && !text.isEmpty() && !text.equals(map.TYPE_INCOME?.stringValue)) || ((text == null || text.isEmpty()) && map.TYPE_INCOME?.stringValue != null)) {
+            def String text = row.cell[4].text().replaceAll("  ", " ")
+            def String text2 = map.TYPE_INCOME?.stringValue
+            text2 = text2.replaceAll("  ", " ")
+            if ((text != null && !text.isEmpty() && !text.equals(text2)) || ((text == null || text.isEmpty()) && text2 != null)) {
                 logger.error("Проверка файла: Строка ${xlsIndexRow}, столбец ${4 + colOffset} содержит значение, отсутствующее в справочнике «" + refBookFactory.get(28).getName() + "»!")
             }
         }
