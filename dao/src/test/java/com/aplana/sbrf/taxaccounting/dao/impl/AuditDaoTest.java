@@ -175,4 +175,26 @@ public class AuditDaoTest {
         PagingResult<LogSearchResultItem> records = auditDao.getLogsBusiness(filterDao);
         assertEquals(0, records.size());
     }
+    @Test
+    @Transactional(readOnly = false)
+    public void testAddNull() {
+        LogSystem logSystem = new LogSystem();
+        logSystem.setId(10l);
+        Date date = new Date();
+        logSystem.setLogDate(date);
+        logSystem.setIp("192.168.72.16");
+        logSystem.setEventId(FormDataEvent.MIGRATION.getCode());
+        logSystem.setUserId(1);
+        logSystem.setRoles("operator");
+        logSystem.setDepartmentName("");
+        logSystem.setReportPeriodName(null);
+        logSystem.setDeclarationTypeId(null);
+        logSystem.setFormTypeId(null);
+        logSystem.setFormKindId(null);
+        logSystem.setNote("the best note");
+        logSystem.setUserDepartmentName("Подразделение");
+
+        auditDao.add(logSystem);
+    }
+
 }
