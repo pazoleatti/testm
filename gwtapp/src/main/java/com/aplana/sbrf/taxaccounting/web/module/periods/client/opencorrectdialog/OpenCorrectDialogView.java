@@ -125,7 +125,7 @@ public class OpenCorrectDialogView extends PopupViewWithUiHandlers<OpenCorrectDi
     public ReportPeriod getSelectedPeriod() {
         if (periodList.getValue().size() == 1) {
             for(ReportPeriod reportPeriod : reportPeriods) {
-                if (reportPeriod.getId() == periodList.getValue().get(0))
+                if (reportPeriod.getId().equals(periodList.getValue().get(0)))
                     return reportPeriod;
             }
         }
