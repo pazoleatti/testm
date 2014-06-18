@@ -1,10 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
-import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
-import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
-import com.aplana.sbrf.taxaccounting.model.TARole;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.TransportDataService;
@@ -15,10 +12,12 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.LinkedList;
 import java.util.List;
 
 @Service
@@ -71,23 +70,27 @@ public class TransportDataServiceImpl implements TransportDataService {
             return;
         }
 
+        List<String> fileNames = new LinkedList<String>();
+
         if (fileName.toLowerCase().endsWith(".zip")) {
             // Архив — извлекаем все содержимое
             ZipArchiveInputStream zais = new ZipArchiveInputStream(inputStream, "cp866");
             ArchiveEntry entry;
             while ((entry = zais.getNextEntry()) != null) {
+                fileNames.add(entry.getName());
                 copyFileFromStream(zais, uploadPathList.get(0), entry.getName(), logger);
             }
             IOUtils.closeQuietly(zais);
         } else {
             // Не архив
             copyFileFromStream(inputStream, uploadPathList.get(0), fileName, logger);
+            fileNames.add(fileName);
         }
         IOUtils.closeQuietly(inputStream);
 
         // ЖА
-//        auditService.add(FormDataEvent.IMPORT, userInfo, userInfo.getUser().getDepartmentId(),
-//                null, null, null, null, errorMsg);
+        String msg = StringUtils.collectionToDelimitedString(fileNames, "; ");
+        auditService.add(FormDataEvent.IMPORT, userInfo, userInfo.getUser().getDepartmentId(), null, null, null, null, msg);
     }
 
     private void copyFileFromStream(InputStream inputStream, String folderPath, String fileName, Logger logger) throws IOException {

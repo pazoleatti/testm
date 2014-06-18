@@ -158,7 +158,7 @@ public class AuditServiceImpl implements AuditService {
             logSystemFilterDao.setFormDataKinds(new ArrayList<FormDataKind>(CollectionUtils.collect(logSystemFilter.getFormKind(), new Transformer() {
 				@Override
 				public Object transform(Object input) {
-					return FormDataKind.fromId((Integer) input);
+					return FormDataKind.fromId(((Long) input).intValue());
 				}
 			})));
         } else {
