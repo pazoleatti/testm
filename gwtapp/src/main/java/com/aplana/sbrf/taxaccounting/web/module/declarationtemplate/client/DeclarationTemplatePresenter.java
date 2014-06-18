@@ -280,6 +280,10 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 					.defaultCallback(new AbstractCallback<GetDeclarationResult>() {
 						@Override
 						public void onSuccess(GetDeclarationResult result) {
+                            LogAddEvent.fire(DeclarationTemplatePresenter.this, result.getUuid());
+                            if (result.isLockedByAnotherUser()) {
+                                Dialog.errorMessage("Шаблон формы заблокирован другим пользователем");
+                            }
                             declarationTemplateExt = new DeclarationTemplateExt();
 							declarationTemplate = result.getDeclarationTemplate();
                             getView().activateButtonName(declarationTemplate.getStatus().getId() == 0? "Вывести из действия" : "Ввести в действие");

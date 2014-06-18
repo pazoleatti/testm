@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.server;
 
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
@@ -41,6 +42,10 @@ public class SetStatusFormHandler extends AbstractActionHandler<SetStatusFormAct
 
     @Override
     public SetStatusFormResult execute(SetStatusFormAction action, ExecutionContext context) throws ActionException {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        formTemplateService.checkLockedByAnotherUser(action.getFormTemplateId(), userInfo);
+        formTemplateService.lock(action.getFormTemplateId(), userInfo);
+
         SetStatusFormResult result = new SetStatusFormResult();
         Logger logger =  new Logger();
         result.setIsSetStatusSuccessfully(mainOperatingService.setStatusTemplate(action.getFormTemplateId(), logger, securityService.currentUserInfo().getUser(), action.getForce()));

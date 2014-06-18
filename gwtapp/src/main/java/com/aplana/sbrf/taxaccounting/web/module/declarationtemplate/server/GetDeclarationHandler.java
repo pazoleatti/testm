@@ -2,7 +2,10 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.server;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.GetDeclarationAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.GetDeclarationResult;
@@ -22,6 +25,9 @@ public class GetDeclarationHandler extends AbstractActionHandler<GetDeclarationA
 	@Autowired
 	private SecurityService securityService;
 
+    @Autowired
+    private LogEntryService logEntryService;
+
     public GetDeclarationHandler() {
         super(GetDeclarationAction.class);
     }
@@ -30,13 +36,23 @@ public class GetDeclarationHandler extends AbstractActionHandler<GetDeclarationA
     public GetDeclarationResult execute(GetDeclarationAction action, ExecutionContext context) throws ActionException {
 		TAUserInfo userInfo = securityService.currentUserInfo();
 
-		GetDeclarationResult result = new GetDeclarationResult();
-		declarationTemplateService.checkLockedByAnotherUser(action.getId(), userInfo);
+        Logger logger = new Logger();
+        GetDeclarationResult result = new GetDeclarationResult();
+        try {
+            declarationTemplateService.checkLockedByAnotherUser(action.getId(), userInfo);
+        } catch (AccessDeniedException e) {
+            logger.error(e);
+            result.setLockedByAnotherUser(true);
+        }
+        if (!result.isLockedByAnotherUser()) {
+            declarationTemplateService.lock(action.getId(), userInfo);
+        }
 		DeclarationTemplate declarationTemplate = declarationTemplateService.get(action.getId());
         declarationTemplate.setCreateScript(declarationTemplateService.getDeclarationTemplateScript(action.getId()));
-		declarationTemplateService.lock(action.getId(), userInfo);
 		result.setDeclarationTemplate(declarationTemplate);
         result.setEndDate(declarationTemplateService.getDTEndDate(declarationTemplate.getId()));
+        if (!logger.getEntries().isEmpty())
+            result.setUuid(logEntryService.save(logger.getEntries()));
 		return result;
     }
 

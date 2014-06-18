@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -83,6 +84,11 @@ public class FormTemplateController {
 			throws FileUploadException, IOException {
         if (formTemplateId == 0)
             throw new ServiceException("Сначала сохраните шаблон.");
+
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        formTemplateService.checkLockedByAnotherUser(formTemplateId, userInfo);
+        formTemplateService.lock(formTemplateId, userInfo);
+
         Logger logger = new Logger();
         Date endDate = formTemplateService.getFTEndDate(formTemplateId);
         FileItemFactory factory = new DiskFileItemFactory();
