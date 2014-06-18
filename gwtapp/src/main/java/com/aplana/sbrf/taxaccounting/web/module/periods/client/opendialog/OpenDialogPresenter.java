@@ -71,10 +71,19 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
 
 	@Override
 	public void onContinue(final OpenFilterData openFilterData) {
-        if (openFilterData.getDictionaryTaxPeriod() == null) {
-            Dialog.warningMessage("Не заданы все обязательные параметры!");
-			return;
-		}
+        if ((openFilterData.getDepartmentId() == null)
+                || (openFilterData.getYear() == null)
+                || (openFilterData.getDictionaryTaxPeriod() == null)) {
+            Dialog.errorMessage("Указание параметров", "Не заполнены следующие обязательные к заполнению поля:"
+                            + ((openFilterData.getDepartmentId() == null) ? " Подразделение" : "")
+                            + ((openFilterData.getDepartmentId() == null && openFilterData.getYear() == null) ? ", " : "")
+                            + ((openFilterData.getYear() == null) ? " Год" : "")
+                            + (((openFilterData.getDepartmentId() == null || openFilterData.getYear() == null) && openFilterData.getDictionaryTaxPeriod() == null) ? ", " : "")
+                            + ((openFilterData.getDictionaryTaxPeriod() == null) ? " Период" : "")
+                            + "!"
+            );
+            return;
+        }
 
 		CheckPeriodStatusAction checkPeriodStatusAction = new CheckPeriodStatusAction();
 		checkPeriodStatusAction.setYear(openFilterData.getYear());
