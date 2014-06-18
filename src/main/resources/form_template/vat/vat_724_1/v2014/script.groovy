@@ -18,6 +18,7 @@ import groovy.transform.Field
 // графа 6 - ndsSum
 // графа 7 - ndsRate
 // графа 8 - ndsBookSum
+// графа 8 - ndsBookSum
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
@@ -95,7 +96,7 @@ def totalColumns = ['baseSum', 'ndsSum', 'ndsBookSum']
 
 // список алиасов подразделов
 @Field
-def sections = ['1_1', '1_2', '2', '3', '4', '5', '6', '7']
+def sections = ['1', '2', '3', '4', '5', '6', '7']
 
 // Дата окончания отчетного периода
 @Field
@@ -196,7 +197,6 @@ void logicCheck() {
         if (row.getAlias() != null) {
             isSection1or2 = (row.getAlias() == 'head_1' || row.getAlias() == 'head_2')
             isSection5or6 = (row.getAlias() == 'head_5' || row.getAlias() == 'head_6')
-            isSection1subOr5or6 = (row.getAlias() == 'total_1_1' || row.getAlias() == 'head_5' || row.getAlias() == 'head_6')
             isSection7 = row.getAlias() == 'head_7'
             continue
         }
@@ -204,7 +204,7 @@ void logicCheck() {
         def errorMsg = "Строка $index: "
 
         // 1. Обязательность заполнения полей
-        def columns = (isSection1subOr5or6 ? nonEmptyColumns2 : (isSection7 ? nonEmptyColumns3 : nonEmptyColumns1))
+        def columns = (isSection5or6 ? nonEmptyColumns2 : (isSection7 ? nonEmptyColumns3 : nonEmptyColumns1))
         checkNonEmptyColumns(row, index, columns, logger, true)
 
         // 2. Проверка суммы НДС по данным бухгалтерского учета и книге продаж
@@ -319,7 +319,7 @@ void copyRows(def sourceDataRows, def destinationDataRows, def fromAlias, def to
 def calc5(def section) {
     def tmp = null
     switch (section) {
-        case '1_1':
+        case '1':
         case '2':
         case '3':
         case '4':
@@ -331,9 +331,6 @@ def calc5(def section) {
         case '6':
             tmp = ['60309.05']
             break
-        case '1_2':
-            tmp = ['60309.06']
-            break
     }
     return tmp
 }
@@ -341,8 +338,7 @@ def calc5(def section) {
 def calc7(def row, def section) {
     def tmp = null
     switch (section) {
-        case '1_1':
-        case '1_2':
+        case '1':
             tmp = '18'
             break
         case '2':
@@ -408,9 +404,7 @@ void addData(def xml, int headRowCount) {
 
     def aliasR = [
             '1. Суммы, полученные от реализации товаров (услуг, имущественных прав) по ставке 18%': [getDataRow(dataRows, 'head_1')],
-            'total_1_1': [getDataRow(dataRows, 'total_1_1')],
-            '1_2': [], // безымяный раздел после первого раздела
-            'total_1_2': [getDataRow(dataRows, 'total_1_2')],
+            'total_1': [getDataRow(dataRows, 'total_1')],
             '2. Суммы, полученные от реализации товаров (услуг, имущественных прав) по ставке 10%': [getDataRow(dataRows, 'head_2')],
             'total_2': [getDataRow(dataRows, 'total_2')],
             '3. Суммы, полученные от реализации товаров (услуг, имущественных прав) по расчётной ставке исчисления налога от суммы полученного дохода 18/118': [getDataRow(dataRows, 'head_3')],
@@ -443,7 +437,7 @@ void addData(def xml, int headRowCount) {
             title = row.cell[1].text()
             if (isFirstSection && title == 'Итого') {
                 isFirstSection = false
-                title = '1_2'
+                title = '1'
             }
             isSection7 = (title == rowHead7.fix)
             continue
@@ -502,13 +496,7 @@ def getTotalRow(sectionsRows, def index) {
 }
 
 def getFirstRowAlias(def section) {
-    if (section == '1_1') {
-        return 'head_1'
-    } else if (section == '1_2') {
-        return 'total_1_1'
-    } else {
-        return 'head_' + section
-    }
+    return 'head_' + section
 }
 
 def getLastRowAlias(def section) {

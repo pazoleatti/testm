@@ -1,0 +1,25 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:st='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'>
+
+    <ui:style>
+        .heightInherit {
+            height: inherit;
+            display: inline;
+            line-height: normal;
+        }
+        .heightInherit tbody, tr, td {
+            height: inherit;
+        }
+    </ui:style>
+
+    <ui:with field="imageResources"
+             type="com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget.IconResource"/>
+
+    <g:FormPanel ui:field="formPanel" encoding="multipart/form-data" method="post">
+        <g:HorizontalPanel ui:field="uploadPanel" addStyleNames="{style.heightInherit}" verticalAlignment="middle">
+            <g:FileUpload ui:field="uploader" name="uploader" visible="false" addStyleNames="{style.heightInherit}"/>
+            <st:LinkButton ui:field="uploadButton" imageResource="{imageResources.icon}" text="Загрузить файл" addStyleNames="{style.heightInherit}"/>
+        </g:HorizontalPanel>
+    </g:FormPanel>
+</ui:UiBinder>

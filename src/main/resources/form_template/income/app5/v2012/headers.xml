@@ -11,10 +11,11 @@
         <cell alias="workersCount" colSpan="1" rowSpan="2" value="Среднесписочная численность работников (чел.)"/>
         <cell alias="subjectTaxCredit" colSpan="1" rowSpan="2" value="Начислено налога в бюджет субъекта (руб.)"/>
         <cell alias="decreaseTaxSum" colSpan="2" rowSpan="1" value="Льготы по налогу в бюджет субъекта (руб.)"/>
-        <cell alias="taxRate" colSpan="1" rowSpan="1" value="Льготы по налогу в бюджет субъекта (руб.)"/>
+        <cell alias="taxRate" colSpan="1" rowSpan="1"
+              value="Льготы по налогу в бюджет субъекта (руб.). Ставка налога (%)"/>
     </row>
     <row alias="">
-        <cell alias="number" colSpan="1" rowSpan="1" value="№ пп"/>
+        <cell alias="number" colSpan="1" rowSpan="1" value="№ пп "/>
         <cell alias="fix" colSpan="1" rowSpan="1" value=""/>
         <cell alias="regionBank" colSpan="1" rowSpan="1" value="Территориальный банк"/>
         <cell alias="regionBankDivision" colSpan="1" rowSpan="1" value="Подразделение территориального банка"/>

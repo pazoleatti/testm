@@ -3,7 +3,7 @@
     <fixedRows>false</fixedRows>
     <name>Оказание услуг (расходы)</name>
     <fullName>Оказание услуг (расходы)</fullName>
-    <code>TODO</code>
+    <code></code>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rowNum</alias>
         <checking>false</checking>
@@ -32,15 +32,15 @@
         <parentAlias>jurName</parentAlias>
         <refBookAttributeId>37</refBookAttributeId>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>countryCode</alias>
         <checking>false</checking>
         <name>Код страны по классификатору ОКСМ</name>
         <order>4</order>
         <width>5</width>
-        <hierarchical>false</hierarchical>
-        <nameAttributeId>53</nameAttributeId>
-        <refBookAttributeId>50</refBookAttributeId>
+        <parentAlias>jurName</parentAlias>
+        <refBookAttributeId>33</refBookAttributeId>
+        <refBookAttributeId2>50</refBookAttributeId2>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>bankIncomeSum</alias>
@@ -68,15 +68,14 @@
         <width>7</width>
         <formatId>0</formatId>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>serviceName</alias>
         <checking>false</checking>
         <name>Вид услуг</name>
         <order>8</order>
-        <width>5</width>
-        <hierarchical>false</hierarchical>
-        <nameAttributeId>61</nameAttributeId>
-        <refBookAttributeId>60</refBookAttributeId>
+        <width>15</width>
+        <maxLength>128</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>price</alias>

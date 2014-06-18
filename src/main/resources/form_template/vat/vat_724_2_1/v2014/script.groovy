@@ -85,10 +85,10 @@ def prevEndDate = null
 def dateFormat = "dd.MM.yyyy"
 
 @Field
-def calcRowAlias4 = ['R1', 'R2', 'R3', 'R4', 'R7', 'R8', 'R9', 'R10', 'R16']
+def calcRowAlias4 = ['R1', 'R3', 'R4', 'R5', 'R8', 'R9', 'R10', 'R11', 'R13', 'R14', 'R18']
 
 @Field
-def calcRowAlias5 = ['R7', 'R8']
+def calcRowAlias5 = ['R8', 'R9', 'R13']
 
 @Field
 def repordPeriod = null
@@ -132,7 +132,7 @@ def logicCheck() {
             continue
         }
 
-        // 1. Проверка заполнения граф (по графе 5 обязательны тока строки 7 и 8)
+        // 1. Проверка заполнения граф (по графе 5 обязательны тока строки 8, 9 и 13)
         def columns = (row.getAlias() in calcRowAlias5 ? nonEmptyColumns : nonEmptyColumns - 'obtainCost')
         checkNonEmptyColumns(row, row.getIndex(), columns, logger, true)
     }
@@ -191,7 +191,7 @@ void checkIncome102() {
     if (getIncome102Data(getReportPeriodEndDate()) == []) {
         throw new ServiceException("Экземпляр Отчета о прибылях и убытках за период " +
                 "${getReportPeriodStartDate().format(dateFormat)} - ${getReportPeriodEndDate().format(dateFormat)} " +
-                "не существует (отсутствуют данные для расчета)!")
+                "не существует (отсутствуют данные для расчета)! Расчеты не могут быть выполнены.")
     }
 }
 
@@ -211,6 +211,10 @@ void consolidation() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
+    dataRows.each{
+        it.realizeCost = null
+        it.obtainCost = null
+    }
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
         def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
         if (source != null && source.state == WorkflowState.ACCEPTED && source.formType.taxType == TaxType.VAT) {

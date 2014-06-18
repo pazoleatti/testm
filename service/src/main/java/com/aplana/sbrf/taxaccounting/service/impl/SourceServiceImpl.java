@@ -2,10 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.*;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
@@ -15,9 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 @Service
 @Transactional
@@ -46,6 +41,9 @@ public class SourceServiceImpl implements SourceService {
 
     @Autowired
     FormDataDao formDataDao;
+
+    @Autowired
+    ReportPeriodDao reportPeriodDao;
 
     @Override
     public List<DepartmentFormType> getDFTSourcesByDFT(int departmentId, int formTypeId, FormDataKind kind) {
@@ -166,19 +164,17 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public List<DepartmentFormType> getDestinationsFormWithDestDepartment(int sourceDepartmentId, int destinationDepartmentId, List<FormType> formTypes) {
-        List<Integer> formTypeIds = new ArrayList<Integer>();
-        for (FormType formType : formTypes)
-            formTypeIds.add(formType.getId());
-        return departmentFormTypeDao.getFormDestinationsWithDestDepId(sourceDepartmentId, destinationDepartmentId, formTypeIds);
-    }
-
-    @Override
-    public List<DepartmentDeclarationType> getDestinationsDeclarationWithDestDepartment(int sourceDepartmentId, int destinationDepartmentId, List<FormType> formTypes) {
-        List<Integer> formTypeIds = new ArrayList<Integer>();
-        for (FormType formType : formTypes)
-            formTypeIds.add(formType.getId());
-        return departmentFormTypeDao.getDeclarationDestinationsWithDestDepId(sourceDepartmentId, destinationDepartmentId, formTypeIds);
+    public Map<String, List> getSourcesDestinations(int departmentId, int terrBankId, List<TaxType> taxTypes) {
+        HashMap<String, List> map = new HashMap<String, List>();
+        List<Pair<DepartmentFormType, DepartmentFormType>> destinationFT = departmentFormTypeDao.getFormDestinationsWithDepId(departmentId, terrBankId,taxTypes);
+        map.put("destinationFTs", destinationFT);
+        List<Pair<DepartmentFormType, DepartmentFormType>> sourceFTs = departmentFormTypeDao.getFormSourcesWithDepId(departmentId, terrBankId,taxTypes);
+        map.put("sourceFTs", sourceFTs);
+        List<Pair<DepartmentFormType, DepartmentDeclarationType>> destinationDTs = departmentFormTypeDao.getDeclarationDestinationsWithDepId(departmentId, terrBankId,taxTypes);
+        map.put("destinationDTs", destinationDTs);
+        List<Pair<DepartmentFormType, DepartmentDeclarationType>> sourceDTs = departmentFormTypeDao.getDeclarationSourcesWithDepId(departmentId, terrBankId,taxTypes);
+        map.put("sourceDTs", sourceDTs);
+        return map;
     }
 
     @Override
@@ -197,18 +193,18 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public List<FormToFormRelation> getRelations(int departmentId, int formTypeId, FormDataKind kind, boolean includeDestinations, boolean includeSources, boolean includeUncreated) {
+    public List<FormToFormRelation> getRelations(int departmentId, int formTypeId, FormDataKind kind, int reportPeriodId, Integer periodOrder, boolean includeDestinations, boolean includeSources, boolean includeUncreated) {
         List<FormToFormRelation> formToFormRelations = new ArrayList<FormToFormRelation>();
         // включения источников
         if (includeSources){
             List<DepartmentFormType> sourcesForm = getDFTSourcesByDFT(departmentId, formTypeId, kind);
-            formToFormRelations.addAll(createFormToFormRelationModel(sourcesForm, true, includeUncreated));
+            formToFormRelations.addAll(createFormToFormRelationModel(sourcesForm, reportPeriodId, periodOrder, true, includeUncreated));
         }
 
         // включения приемников
         if (includeDestinations){
             List<DepartmentFormType> destinationsForm = getFormDestinations(departmentId, formTypeId, kind);
-            formToFormRelations.addAll(createFormToFormRelationModel(destinationsForm, false, includeUncreated));
+            formToFormRelations.addAll(createFormToFormRelationModel(destinationsForm, reportPeriodId, periodOrder, false, includeUncreated));
         }
 
         return formToFormRelations;
@@ -217,11 +213,13 @@ public class SourceServiceImpl implements SourceService {
     /**
      * Метод для составления списка с информацией об источниках приемниках
      * @param departmentFormTypes
+     * @param reportPeriodId
+     * @param periodOrder
      * @param isSource - true источник иначе приемник
      * @param includeUncreatedForms флаг включения не созданных нф в список
      * @return
      */
-    private List<FormToFormRelation> createFormToFormRelationModel(List<DepartmentFormType> departmentFormTypes, boolean isSource, boolean includeUncreatedForms){
+    private List<FormToFormRelation> createFormToFormRelationModel(List<DepartmentFormType> departmentFormTypes, int reportPeriodId, Integer periodOrder, boolean isSource, boolean includeUncreatedForms){
         List<FormToFormRelation> formToFormRelations = new ArrayList<FormToFormRelation>(departmentFormTypes.size());
         for (DepartmentFormType departmentFormType : departmentFormTypes) {
             FormToFormRelation formToFormRelation = new FormToFormRelation();
@@ -229,10 +227,12 @@ public class SourceServiceImpl implements SourceService {
             formToFormRelation.setSource(isSource);
             /** исполнитель */
             formToFormRelation.setPerformer(departmentDao.getDepartment(departmentFormType.getPerformerId()));
-            /** Полнино название подразделения */
+            /** Полное название подразделения */
             formToFormRelation.setFullDepartmentName(departmentService.getParentsHierarchy(departmentFormType.getDepartmentId()));
-            // TODO Добавить период
-            FormData formData = formDataDao.find(departmentFormType.getFormTypeId(), departmentFormType.getKind(), departmentFormType.getDepartmentId(), 1);
+            ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
+            FormData formData = (periodOrder == null) ?
+                    formDataDao.find(departmentFormType.getFormTypeId(), departmentFormType.getKind(), departmentFormType.getDepartmentId(), reportPeriod.getId()) :
+                    formDataDao.findMonth(departmentFormType.getFormTypeId(), departmentFormType.getKind(), departmentFormType.getDepartmentId(), reportPeriod.getTaxPeriod().getId(), periodOrder);
             if (formData != null){
                 /** Форма существует */
                 formToFormRelation.setCreated(true);
@@ -242,6 +242,8 @@ public class SourceServiceImpl implements SourceService {
                 formToFormRelation.setFormType(formData.getFormType());
                 /** тип нф */
                 formToFormRelation.setFormDataKind(departmentFormType.getKind());
+                /** установить id */
+                formToFormRelation.setFormDataId(formData.getId());
 
                 formToFormRelations.add(formToFormRelation);
             } else if (includeUncreatedForms){

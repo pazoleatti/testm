@@ -230,14 +230,12 @@ public class LazyTree<H extends LazyTreeItem> extends Tree implements HasLazyTre
     }
 
     public List<H> getAllLoadedItems() {
-        System.out.println("s " + loadedItems.size() +" c " + itemsCount);
         if(loadedItems.size()!= itemsCount){
             loadedItems.clear();
             List<H> loadedItems1 = getLoadedItems(null);
             loadedItems.addAll(loadedItems1);
             itemsCount = loadedItems1.size();
         }
-        System.out.println("s " + loadedItems.size() +" c " + itemsCount);
         return loadedItems;
     }
 

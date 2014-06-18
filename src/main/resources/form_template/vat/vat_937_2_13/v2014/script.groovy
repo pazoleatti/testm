@@ -136,10 +136,12 @@ void calc() {
             row.rowNum = rowNum
         }
     }
+    def other = getDataRow(dataRows, 'R3')
+    def sum = calcOther(dataRows)
+    checkOverflowAlgorithm(sum, other, 'sum', other.getIndex(), sizeSum, "Сумма значений всех нефиксированных строк по Графе 3")
+    other?.sum = sum
     def itog = getDataRow(dataRows, 'total')
     itog?.sum = calcItog(dataRows)
-    def other = getDataRow(dataRows, 'R3')
-    other?.sum = checkOverflowAlgorithm(calcOther(dataRows), other, 'sum', other.getIndex(), sizeSum, "Сумма значений всех нефиксированных строк по Графе 3")
     dataRowHelper.update(dataRows)
 }
 

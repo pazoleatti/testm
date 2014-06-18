@@ -115,6 +115,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 	@Override
 	public void onUpdateForm(UpdateForm event) {
         if (event.isSuccess() && this.isVisible()) {
+            getView().resetSearchInputBox();
+            recordId = event.getRecordChanges().getId();
             getView().updateTable();
         }
 	}
@@ -287,5 +289,11 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         editFormPresenter.setMode(mode);
         versionPresenter.setMode(mode);
         getView().updateMode(mode);
+    }
+
+    @Override
+    public void cancelChanges() {
+        editFormPresenter.setIsFormModified(false);
+        editFormPresenter.onCancelClicked();
     }
 }

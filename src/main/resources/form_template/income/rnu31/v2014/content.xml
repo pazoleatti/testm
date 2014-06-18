@@ -20,6 +20,7 @@
         <order>2</order>
         <width>15</width>
         <maxLength>255</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>ofz</alias>
@@ -116,13 +117,6 @@
         <precision>2</precision>
     </columns>
     <styles>
-        <alias>Автозаполняемая</alias>
-        <backColor>WHITE</backColor>
-        <bold>false</bold>
-        <fontColor>DARK_GREEN</fontColor>
-        <italic>false</italic>
-    </styles>
-    <styles>
         <alias>Контрольные суммы</alias>
         <backColor>LIGHT_BROWN</backColor>
         <bold>true</bold>
@@ -134,6 +128,13 @@
         <backColor>LIGHT_BLUE</backColor>
         <bold>false</bold>
         <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Автозаполняемая</alias>
+        <backColor>WHITE</backColor>
+        <bold>false</bold>
+        <fontColor>DARK_GREEN</fontColor>
         <italic>false</italic>
     </styles>
 </formTemplateContent>

@@ -13,6 +13,9 @@ import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -253,6 +256,22 @@ public class RefBookUtils extends AbstractDao {
         });
     }
 
+
+
+    /**
+     * Получает количество уникальных записей, удовлетворяющих условиям фильтра
+     * @param refBookId ид справочника
+     * @param tableName название таблицы
+     * @param filter условие фильтрации строк. Может быть не задано
+     * @return количество
+     */
+    public int getRecordsCount(Long refBookId, String tableName, String filter) {
+        RefBook refBook = refBookDao.get(refBookId);
+
+        PreparedStatementData ps = getSimpleQuery(refBook, tableName, null, filter, null, false, null);
+        return getRecordsCount(ps);
+    }
+
 	/**
      * Возвращает дочерние записи справочника учитывая иерархичность таблицы
      * @param tableName название таблицы
@@ -486,6 +505,10 @@ public class RefBookUtils extends AbstractDao {
                 if (a.getId() == 164L && !Arrays.asList(DepartmentType.values()).contains(DepartmentType.fromCode(value.getNumberValue().intValue()))){
                    errors.add("Атрибута справочника \"Тип подразделенеия\" должно принимать одно из значений: 1,2,3,4,5");
                 }
+
+                if (a.getAttributeType().equals(RefBookAttributeType.STRING) && value.getStringValue() != null && a.getMaxLength() != null && value.getStringValue().length() > a.getMaxLength()) {
+                    errors.add("Атрибут \"" + a.getName() + "\" должен иметь длину до " + a.getMaxLength() + " символов");
+                }
             }
         }
 
@@ -544,6 +567,64 @@ public class RefBookUtils extends AbstractDao {
     public void deleteRecordVersions(String tableName, @NotNull List<Long> uniqueRecordIds) {
         String sql = String.format(DELETE_VERSION, tableName, SqlUtils.transformToSqlInStatement("id", uniqueRecordIds));
         getJdbcTemplate().update(sql);
+    }
+
+    /**
+     * Формирует имя для записи справочника, основанное на уникальных атрибутах
+     * @param refBook справочник
+     * @param values список значений уникальных атрибутов
+     * @return
+     */
+    public String buildUniqueRecordName(RefBook refBook, List<Pair<RefBookAttribute, RefBookValue>> values) {
+        RefBookFactory refBookFactory = applicationContext.getBean("refBookFactory", RefBookFactory.class);
+        //кэшируем список провайдеров для атрибутов-ссылок, чтобы для каждой строки их заново не создавать
+        Map<String, RefBookDataProvider> refProviders = new HashMap<String, RefBookDataProvider>();
+        Map<String, String> refAliases = new HashMap<String, String>();
+        for (RefBookAttribute attribute : refBook.getAttributes()) {
+            if (attribute.getAttributeType() == RefBookAttributeType.REFERENCE) {
+                refProviders.put(attribute.getAlias(), refBookFactory.getDataProvider(attribute.getRefBookId()));
+                RefBook refRefBook = refBookFactory.get(attribute.getRefBookId());
+                RefBookAttribute refAttribute = refRefBook.getAttribute(attribute.getRefBookAttributeId());
+                refAliases.put(attribute.getAlias(), refAttribute.getAlias());
+            }
+        }
+
+        StringBuilder uniqueValues = new StringBuilder();
+
+        for(int i = 0; i < values.size(); i++) {
+            RefBookAttribute attribute = values.get(i).getFirst();
+            RefBookValue value = values.get(i).getSecond();
+            switch (attribute.getAttributeType()) {
+                case NUMBER:
+                    if (value.getNumberValue() != null) {
+                        uniqueValues.append(value.getNumberValue().toString());
+                    }
+                    break;
+                case DATE:
+                    if (value.getDateValue() != null) {
+                        uniqueValues.append(value.getDateValue().toString());
+                    }
+                    break;
+                case STRING:
+                    if (value.getStringValue() != null) {
+                        uniqueValues.append(value.getStringValue());
+                    }
+                    break;
+                case REFERENCE:
+                    if (value.getReferenceValue() != null) {
+                        Map<String, RefBookValue> refValue = refProviders.get(attribute.getAlias()).getRecordData(value.getReferenceValue());
+                        uniqueValues.append(refValue.get(refAliases.get(attribute.getAlias())).toString());
+                    }
+                    break;
+                default:
+                    uniqueValues.append("undefined");
+                    break;
+            }
+            if (i < values.size() - 1) {
+                uniqueValues.append("/");
+            }
+        }
+        return uniqueValues.toString();
     }
 
     public static class RecordVersionMapper implements RowMapper<RefBookRecordVersion> {

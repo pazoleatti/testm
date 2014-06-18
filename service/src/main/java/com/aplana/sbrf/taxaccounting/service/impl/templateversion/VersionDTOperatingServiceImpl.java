@@ -144,8 +144,9 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
     public void cleanVersions(int templateId, int typeId, VersionedObjectStatus status, Date versionActualDateStart, Date versionActualDateEnd, Logger logger) {
         if (templateId == 0)
             return;
-        DeclarationTemplate declarationTemplateFake = declarationTemplateService.getNearestDTRight(templateId, VersionedObjectStatus.FAKE);
-        if (declarationTemplateFake != null)
+        DeclarationTemplate declarationTemplateFake = declarationTemplateService.getNearestDTRight(templateId,
+                VersionedObjectStatus.NORMAL, VersionedObjectStatus.DRAFT, VersionedObjectStatus.FAKE);
+        if (declarationTemplateFake != null && declarationTemplateFake.getStatus() == VersionedObjectStatus.FAKE)
             declarationTemplateService.delete(declarationTemplateFake.getId());
     }
 

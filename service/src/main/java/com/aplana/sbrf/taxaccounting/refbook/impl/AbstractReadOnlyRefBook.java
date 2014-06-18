@@ -126,6 +126,11 @@ public abstract class AbstractReadOnlyRefBook implements RefBookDataProvider {
     }
 
     @Override
+    public void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds, boolean force) {
         throw new UnsupportedOperationException();
     }
@@ -137,6 +142,11 @@ public abstract class AbstractReadOnlyRefBook implements RefBookDataProvider {
 
     @Override
     public List<Long> getUniqueRecordIds(Date version, String filter) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public int getRecordsCount(Date version, String filter) {
         throw new UnsupportedOperationException();
     }
 

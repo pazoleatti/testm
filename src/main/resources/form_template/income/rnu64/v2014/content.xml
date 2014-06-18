@@ -1,13 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
-    <type>
-        <id>355</id>
-        <name>(РНУ-64) Регистр налогового учёта затрат, связанных с проведением сделок РЕПО</name>
-        <taxType>INCOME</taxType>
-    </type>
-    <version>0.1</version>
-    <active>true</active>
-    <numberedColumns>false</numberedColumns>
     <fixedRows>false</fixedRows>
     <name>(РНУ-64) Регистр налогового учёта затрат, связанных с проведением сделок РЕПО</name>
     <fullName>(РНУ-64) Регистр налогового учёта затрат, связанных с проведением сделок РЕПО</fullName>
@@ -15,7 +7,6 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>number</alias>
         <checking>false</checking>
-        <id>17152</id>
         <name>№ пп</name>
         <order>1</order>
         <width>5</width>
@@ -25,16 +16,15 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>fix</alias>
         <checking>false</checking>
-        <id>17462</id>
         <name>fix</name>
         <order>2</order>
         <width>0</width>
         <maxLength>255</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>date</alias>
         <checking>false</checking>
-        <id>17153</id>
         <name>Дата сделки</name>
         <order>3</order>
         <width>8</width>
@@ -43,27 +33,27 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>part</alias>
         <checking>false</checking>
-        <id>17154</id>
         <name>Часть сделки</name>
         <order>4</order>
         <width>10</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>602</nameAttributeId>
         <refBookAttributeId>601</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>dealingNumber</alias>
         <checking>false</checking>
-        <id>17155</id>
         <name>Номер сделки</name>
         <order>5</order>
         <width>15</width>
-        <maxLength>20</maxLength>
+        <maxLength>3</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>costs</alias>
         <checking>false</checking>
-        <id>17157</id>
         <name>Затраты (руб.коп.)</name>
-        <order>7</order>
+        <order>6</order>
         <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -73,7 +63,6 @@
         <backColor>LIGHT_BROWN</backColor>
         <bold>true</bold>
         <fontColor>BLACK</fontColor>
-        <id>10767</id>
         <italic>false</italic>
     </styles>
     <styles>
@@ -81,7 +70,6 @@
         <backColor>LIGHT_BLUE</backColor>
         <bold>false</bold>
         <fontColor>BLACK</fontColor>
-        <id>10768</id>
         <italic>false</italic>
     </styles>
     <styles>
@@ -89,7 +77,6 @@
         <backColor>WHITE</backColor>
         <bold>true</bold>
         <fontColor>DARK_GREEN</fontColor>
-        <id>11660</id>
         <italic>false</italic>
     </styles>
 </formTemplateContent>

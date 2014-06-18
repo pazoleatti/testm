@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.server;
 
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -45,6 +46,10 @@ public class UpdateFormHandler extends AbstractActionHandler<UpdateFormAction, U
 
     @Override
     public UpdateFormResult execute(UpdateFormAction action, ExecutionContext context) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        formTemplateService.checkLockedByAnotherUser(action.getForm().getId(), userInfo);
+        formTemplateService.lock(action.getForm().getId(), userInfo);
+
 		Logger logger = new Logger();
 		UpdateFormResult result = new UpdateFormResult();
 

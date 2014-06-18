@@ -17,6 +17,7 @@ import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.*;
@@ -248,7 +249,7 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
     }
 
     @Override
-    public void setHeaders(Map<String, Integer> headers) {
+    public void setHeaders(Map<String, Integer> headers, List<Integer> unVisibleColumns) {
         for (int i = cellTable.getColumnCount() - 1; i >= 0; i--) {
             cellTable.removeColumn(i);
         }
@@ -270,18 +271,24 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
             Cell<String> cell = new AbstractCell<String>() {
                 @Override
                 public void render(Context context, String value, SafeHtmlBuilder sb) {
-                    if (filterText != null && !filterText.isEmpty()) {
-                        String link = RegExp.compile(filterText, "gi").replace(value, "<span style=\"color: #ff0000;\">$&</span>");
-                        sb.appendHtmlConstant(link);
+                    if (value != null) {
+                        if (filterText != null && !filterText.isEmpty()) {
+                            String link = RegExp.compile(filterText, "gi").replace(value, "<span style=\"color: #ff0000;\">$&</span>");
+                            sb.appendHtmlConstant(link);
+                        } else {
+                            sb.appendHtmlConstant(value);
+                        }
                     } else {
-                        sb.appendHtmlConstant(value);
+                        sb.append(SafeHtmlUtils.EMPTY_SAFE_HTML);
                     }
                 }
             };
-            RefBookItemTextColumn refBookItemTextColumn = new RefBookItemTextColumn(i, true, cell);
-            sortColumns.put(refBookItemTextColumn, i);
-            cellTable.addResizableColumn(refBookItemTextColumn, entry.getKey());
-            cellTable.setColumnWidth(refBookItemTextColumn, entry.getValue(), Style.Unit.PC);
+            if (!unVisibleColumns.contains(i)) {
+                RefBookItemTextColumn refBookItemTextColumn = new RefBookItemTextColumn(i, true, cell);
+                sortColumns.put(refBookItemTextColumn, i);
+                cellTable.addResizableColumn(refBookItemTextColumn, entry.getKey());
+                cellTable.setColumnWidth(refBookItemTextColumn, entry.getValue(), Style.Unit.PC);
+            }
             i++;
         }
     }

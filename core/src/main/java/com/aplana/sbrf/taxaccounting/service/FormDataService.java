@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
 import java.io.InputStream;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -246,7 +245,7 @@ public interface FormDataService {
     boolean existFormDataByTaxAndDepartment(List<TaxType> taxTypes, List<Integer> departmentIds);
 
     /**
-     * Обновляет имена террбанков в печатных формах(полях для печатных форм)
+     * Обновляет имена террбанков в печатных формах(полях для печатных форм, первая часть)
      * @param newDepTBId новый террбанк
      * @param oldDepTBId террбанк, который был
      * @param dateFrom дата отчетного периода, начиная с которой надл=о поменять наименование отчетного периода
@@ -255,7 +254,7 @@ public interface FormDataService {
     void updateFDTBNames(int newDepTBId, int oldDepTBId, Date dateFrom, Date dateTo);
 
     /**
-     * Обновляет имена террбанков в печатных формах(полях для печатных форм)
+     * Обновляет имена террбанков в печатных формах(полях для печатных форм, вторая часть имени)
      * @param depTBId идентификатор редактируемого подразделения
      * @param depName новое наименование
      * @param dateFrom дата отчетного периода, начиная с которой надо поменять наименование отчетного периода

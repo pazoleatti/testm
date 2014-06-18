@@ -16,6 +16,8 @@ import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.impl.eventhandler.EventLauncher;
 import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
+import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
+import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
 import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,6 +85,8 @@ public class FormDataServiceImpl implements FormDataService {
     private LogEntryService logEntryService;
     @Autowired
     SourceService sourceService;
+    @Autowired
+    TransactionHelper tx;
 
 	/**
 	 * Создать налоговую форму заданного типа При создании формы выполняются
@@ -284,7 +288,7 @@ public class FormDataServiceImpl implements FormDataService {
 
         // Execute scripts for the form event CREATE
 		formDataScriptingService.executeScript(userInfo, formData,
-				importFormData ? FormDataEvent.IMPORT : FormDataEvent.CREATE, logger, null);
+                importFormData ? FormDataEvent.IMPORT : FormDataEvent.CREATE, logger, null);
 		if (logger.containsLevel(LogLevel.ERROR)) {
 			throw new ServiceLoggerException(
 					"Произошли ошибки в скрипте создания налоговой формы",
@@ -680,14 +684,24 @@ public class FormDataServiceImpl implements FormDataService {
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public void unlock(long formDataId, TAUserInfo userInfo) {
-			lockCoreService.unlock(FormData.class, formDataId, userInfo);
-			dataRowDao.rollback(formDataId);
+	@Transactional(propagation = Propagation.REQUIRED)
+	public void unlock(final long formDataId, final TAUserInfo userInfo) {
+        tx.executeInNewTransaction(new TransactionLogic() {
+            @Override
+            public void execute() {
+                lockCoreService.unlock(FormData.class, formDataId, userInfo);
+                dataRowDao.rollback(formDataId);
+            }
+
+            @Override
+            public Object executeWithReturn() {
+                return null;
+            }
+        });
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	@Transactional(propagation = Propagation.REQUIRED)
 	public boolean unlockAllByUser(TAUserInfo userInfo) {
 		//Это зло
 		//lockDao.unlockAllObjectByUserId(userInfo.getUser().getId());
@@ -695,9 +709,18 @@ public class FormDataServiceImpl implements FormDataService {
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public ObjectLock<Long> getObjectLock(long formDataId, TAUserInfo userInfo) {
-		return lockCoreService.getLock(FormData.class, formDataId, userInfo);
+	@Transactional(propagation = Propagation.REQUIRED)
+	public ObjectLock<Long> getObjectLock(final long formDataId, final TAUserInfo userInfo) {
+        return tx.returnInNewTransaction(new TransactionLogic<ObjectLock<Long>>() {
+            @Override
+            public ObjectLock<Long> executeWithReturn() {
+                return lockCoreService.getLock(FormData.class, formDataId, userInfo);
+            }
+
+            @Override
+            public void execute() {
+            }
+        });
 	}
 
     @Override
@@ -874,5 +897,10 @@ public class FormDataServiceImpl implements FormDataService {
             }
         }
         return msg;
+    }
+
+    @Override
+    public List<FormData> getManualInputForms(List<Integer> departments, int reportPeriodId, TaxType taxType, FormDataKind kind) {
+        return formDataDao.getManualInputForms(departments, reportPeriodId, taxType, kind);
     }
 }

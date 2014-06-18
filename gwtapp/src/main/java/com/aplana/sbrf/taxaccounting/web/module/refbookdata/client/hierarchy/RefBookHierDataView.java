@@ -59,6 +59,8 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
     @UiField
     HTML separator;
     @UiField
+    HTML separatorVersion;
+    @UiField
     Button search;
     @UiField
     TextBox filterText;
@@ -271,12 +273,16 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
 
     @Override
     public void clearFilterInputBox() {
-        pickerState.setSearchPattern("");
-        filterText.setValue("");
+        if (!filterText.getText().equals("")) {
+            pickerState.setSearchPattern("");
+            filterText.setValue("");
+            refbookDataTree.load(pickerState);
+        }
     }
 
     @Override
     public void setVersionedFields(boolean isVisible) {
+        separatorVersion.setVisible(isVisible);
         relevanceDate.setVisible(isVisible);
         relevanceDateLabel.setVisible(isVisible);
     }

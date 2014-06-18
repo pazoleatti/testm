@@ -4,4 +4,6 @@ import com.gwtplatform.mvp.client.UiHandlers;
 
 public interface TestPageUiHandlers extends UiHandlers {
     void openMessageDialog();
+
+    void updateIdsFromPath();
 }

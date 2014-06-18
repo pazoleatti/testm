@@ -55,6 +55,13 @@ public class ReportExcelController {
 		createResponse(req, resp, filePath);
 	}
 
+    @RequestMapping(value = "CSV/{formDataId}/{isShowChecked}/{manual}",method = RequestMethod.GET)
+    public void processCSVFormDataDownload(@PathVariable int formDataId,@PathVariable boolean isShowChecked , @PathVariable boolean manual, HttpServletRequest req, HttpServletResponse resp)
+            throws IOException {
+        String filePath = printingService.generateCSV(securityService.currentUserInfo(), formDataId, manual, isShowChecked);
+        createResponse(req, resp, filePath);
+    }
+
 	private void createResponse(final HttpServletRequest req, final HttpServletResponse response, final String filePath) throws IOException{
         File file = new File(filePath);
 		String fileName = file.getName();

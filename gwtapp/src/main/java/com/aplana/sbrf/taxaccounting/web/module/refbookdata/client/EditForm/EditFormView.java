@@ -321,10 +321,12 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 						String string = (field.getValue().getValue() == null || ((String)field.getValue().getValue()).trim().isEmpty()) ?
 								null : (String)field.getValue().getValue();
 						checkRequired(field.getKey(), string);
-						if (string!= null && string.length() > MAX_STRING_VALUE_LENGTH) {
+                        Integer maxLength = field.getKey().getMaxLength();
+                        if (maxLength == null) maxLength = MAX_STRING_VALUE_LENGTH;
+						if (string!= null && string.length() > maxLength) {
 							BadValueException badValueException = new BadValueException();
 							badValueException.setFieldName(field.getKey().getName());
-							badValueException.setDescription("Значение более " + MAX_STRING_VALUE_LENGTH + " символов");
+							badValueException.setDescription("Значение более " + maxLength + " символов");
 							throw badValueException;
 						}
 						value.setAttributeType(RefBookAttributeType.STRING);

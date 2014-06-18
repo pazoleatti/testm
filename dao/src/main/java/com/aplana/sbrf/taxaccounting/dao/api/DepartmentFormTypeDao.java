@@ -100,12 +100,23 @@ public interface DepartmentFormTypeDao {
      * Возвращает информацию о формах-потребителях, которые должны использовать
      * информацию из данной налоговой формы в качестве источника  для определенного подразделения приемника
      *
-     * @param sourceDepartmentId идентификатор подразделения формы-источника
-     * @param destinationDepartmentId  подразделение приемник
+     * @param departmentId идентификатор подразделения формы-источника
+     * @param terrBankId  подразделение приемник
      * @return информация о формах-потребителях в виде списка
      *         {@link DepartmentFormType}
      */
-    List<DepartmentFormType> getFormDestinationsWithDestDepId(int sourceDepartmentId, int destinationDepartmentId, List<Integer> formTypes);
+    List<Pair<DepartmentFormType, DepartmentFormType>> getFormDestinationsWithDepId(int departmentId, int terrBankId, List<TaxType> taxTypes);
+
+    /**
+     * Возвращает информацию о формах-потребителях, которые должны использовать
+     * информацию из данной налоговой формы в качестве источника  для определенного подразделения приемника
+     *
+     * @param departmentId идентификатор подразделения формы-источника
+     * @param terrBankId  подразделение приемник
+     * @return информация о формах-потребителях в виде списка
+     *         {@link DepartmentFormType}
+     */
+    List<Pair<DepartmentFormType, DepartmentFormType>> getFormSourcesWithDepId(int departmentId, int terrBankId, List<TaxType> taxTypes);
 
     /**
      * Возвращает информацию о декларациях-потребителях, которые должны использовать
@@ -120,15 +131,28 @@ public interface DepartmentFormTypeDao {
     List<DepartmentDeclarationType> getDeclarationDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind);
 
     /**
-     * Возвращает информацию о декларациях-потребителях, которые должны использовать
+     * Возвращает информацию о декларациях-потребителях относящихся к переданному терр.банку и всем его подразделениям,
+     * которые должны использовать
      * информацию из данной налоговой формы в качестве источника для определенного подразделения приемника
      *
-     * @param sourceDepartmentId идентификатор подразделения формы-источника
-     * @param destinationDepartmentId   подразделение-приемник
+     * @param departmentId идентификатор подразделения формы-источника
+     * @param terrBankId   подразделение-приемник
      * @return информация о декларациях-потребителях в виде списка
      *         {@link DepartmentDeclarationType}
      */
-    List<DepartmentDeclarationType> getDeclarationDestinationsWithDestDepId(int sourceDepartmentId, int destinationDepartmentId, List<Integer> formTypes);
+    List<Pair<DepartmentFormType, DepartmentDeclarationType>> getDeclarationDestinationsWithDepId(int departmentId, int terrBankId, List<TaxType> taxTypes);
+
+    /**
+     * Возвращает информацию о декларациях-источниках относящихся к переданному терр.банку и всем его подразделениям
+     * которые используются в формах назначениях приемниках
+     * для редактируемого подразделения
+     *
+     * @param departmentId идентификатор подразделения формы-источника
+     * @param terrBankId   подразделение-приемник
+     * @return информация о декларациях-потребителях в виде списка
+     *         {@link DepartmentDeclarationType}
+     */
+    List<Pair<DepartmentFormType, DepartmentDeclarationType>> getDeclarationSourcesWithDepId(int departmentId, int terrBankId, List<TaxType> taxTypes);
 
     /**
      * Возвращает информацию о формах-источниках, которые должны использоваться

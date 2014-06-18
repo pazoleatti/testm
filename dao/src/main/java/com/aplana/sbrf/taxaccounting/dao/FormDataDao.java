@@ -217,4 +217,14 @@ public interface FormDataDao {
      * @param previousRowNumber номер последней строки предыдущей НФ
      */
     void updatePreviousRowNumber(Long formDataId, Integer previousRowNumber);
+
+    /**
+     * Получить налоговые формы которые имеют признак ручного ввода
+     * @param departments список подразделений
+     * @param reportPeriodId отчетный период
+     * @param taxType тип налога
+     * @param kind тип налоговой формы
+     * @return список налоговых форм
+     */
+    List<FormData> getManualInputForms(List<Integer> departments, int reportPeriodId, TaxType taxType, FormDataKind kind);
 }

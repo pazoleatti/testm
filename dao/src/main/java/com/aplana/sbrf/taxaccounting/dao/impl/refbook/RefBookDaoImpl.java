@@ -138,7 +138,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         try {
             return getJdbcTemplate().query(
                     "select id, name, alias, type, reference_id, attribute_id, visible, precision, width, required, " +
-							"is_unique, sort_order, format, read_only " +
+							"is_unique, sort_order, format, read_only, max_length " +
                             "from ref_book_attribute where ref_book_id = ? order by ord",
                     new Object[]{refBookId}, new int[]{Types.NUMERIC},
                     new RefBookAttributeRowMapper());
@@ -167,6 +167,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             result.setReadOnly(rs.getBoolean("read_only"));
             result.setUnique(rs.getBoolean("is_unique"));
 			result.setSortOrder(SqlUtils.getInteger(rs,"sort_order"));
+            result.setMaxLength(SqlUtils.getInteger(rs,"max_length"));
             Integer formatId = SqlUtils.getInteger(rs,"format");
             if (formatId!=null){
                 result.setFormat(Formats.getById(formatId));
@@ -212,7 +213,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         try {
             return getJdbcTemplate().queryForObject(
                     "select id, name, alias, type, reference_id, attribute_id, visible, precision, width, required, " +
-                            "is_unique, sort_order, format, read_only " +
+                            "is_unique, sort_order, format, read_only, max_length " +
                             "from ref_book_attribute where id = ?",
                     new Object[]{attributeId}, new int[]{Types.NUMERIC},
                     new RefBookAttributeRowMapper()
@@ -244,7 +245,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     @Override
-    public List<Pair<Long, Long>> getRecordIdPairs(Long refBookId, Date version, String filter) {                       // модель которая будет возвращаться как результат
+    public List<Pair<Long, Long>> getRecordIdPairs(Long refBookId, Date version, Boolean needAccurateVersion, String filter) {                       // модель которая будет возвращаться как результат
         PreparedStatementData ps = new PreparedStatementData();
 
         RefBook refBook = get(refBookId);
@@ -259,7 +260,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         StringBuilder fromSql = new StringBuilder();
         fromSql.append("\nfrom ref_book_record r\n");
 
-        if (version != null) {
+        if (version != null && !needAccurateVersion) {
             fromSql.append("join t on (r.version = t.version and r.record_id = t.record_id)\n");
             ps.appendQuery(WITH_STATEMENT);
             ps.appendQuery("\n");
@@ -299,6 +300,10 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         ps.appendQuery(fromSql.toString());
         ps.appendQuery("where\n  r.ref_book_id = ?");
         ps.addParam(refBookId);
+        if (version != null && needAccurateVersion) {
+            ps.appendQuery(" and  r.version = ?");
+            ps.addParam(version);
+        }
         ps.appendQuery(" and\n  status <> -1\n");
 
         // обработка параметров фильтра
@@ -323,6 +328,14 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             return null;
         }
     }
+
+    @Override
+    public int getRecordsCount(Long refBookId, Date version, String filter) {
+        PreparedStatementData psForCount = getRefBookSql(refBookId, null, version, null, filter, null, true);
+        psForCount.setQuery(new StringBuilder("SELECT count(*) FROM (" + psForCount.getQuery() + ")"));
+        return getJdbcTemplate().queryForInt(psForCount.getQuery().toString(), psForCount.getParams().toArray());
+    }
+
     private PagingResult<Map<String, RefBookValue>> getChildren(@NotNull Long refBookId, @NotNull Date version, PagingParams pagingParams,
 																String filter, RefBookAttribute sortAttribute, boolean isSortAscending, Long parentId) {
         PreparedStatementData ps = getChildrenStatement(refBookId, null, version, sortAttribute, filter, pagingParams, isSortAscending, parentId);
@@ -1217,6 +1230,26 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                     }
                 });
         return result;
+    }
+
+    private static final String CHECK_LOOPS = "SELECT CASE WHEN EXISTS (\n" +
+            "  WITH value_hierarchy (id, parent_id) AS (\n" +
+            "    SELECT rbr.id,rbv.reference_value AS parent_id\n" +
+            "    FROM ref_book_record rbr\n" +
+            "    join ref_book_attribute rba ON rba.ref_book_id = rbr.ref_book_id AND rba.alias = 'PARENT_ID'\n" +
+            "    join ref_book_value rbv ON rbv.record_id = rbr.id AND rbv.attribute_id = rba.id\n" +
+            "  )\n" +
+            "  SELECT vh.*,LEVEL\n" +
+            "  FROM   value_hierarchy vh\n" +
+            "  WHERE  id = ?\n" +
+            "  START WITH id = ?\n" +
+            "  CONNECT BY parent_id = PRIOR id) \n" +
+            "  THEN 1 ELSE 0 END AS has_cycle \n" +
+            "FROM dual";
+
+    @Override
+    public boolean hasLoops(Long uniqueRecordId, Long parentRecordId) {
+        return getJdbcTemplate().queryForInt(CHECK_LOOPS, parentRecordId, uniqueRecordId) == 1;
     }
 
     @Override

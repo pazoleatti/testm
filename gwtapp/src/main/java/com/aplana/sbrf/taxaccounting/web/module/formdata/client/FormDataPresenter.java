@@ -244,13 +244,22 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 	}
 
 	@Override
-	public void onPrintClicked() {
+	public void onPrintExcelClicked() {
 		Window.open(
                 GWT.getHostPageBaseURL() + "download/downloadController/"
                         + formData.getId() + "/"
                         + getView().getCheckedColumnsClicked() + "/"
                         + formData.isManual(), "", "");
 	}
+
+    @Override
+    public void onPrintCSVClicked() {
+        Window.open(
+                GWT.getHostPageBaseURL() + "download/downloadController/CSV/"
+                        + formData.getId() + "/"
+                        + getView().getCheckedColumnsClicked() + "/"
+                        + formData.isManual(), "", "");
+    }
 
 	@Override
 	public void onSignersClicked() {

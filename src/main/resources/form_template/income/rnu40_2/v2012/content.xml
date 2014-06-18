@@ -69,7 +69,7 @@
         <checking>false</checking>
         <name>Процентный доход, руб. коп.</name>
         <order>7</order>
-        <width>8</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>

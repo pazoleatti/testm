@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.server;
 
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.MainOperatingService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -31,12 +33,18 @@ public class DeleteFormTypeHandler extends AbstractActionHandler<DeleteFormTypeA
     @Autowired
     private SecurityService securityService;
 
+    @Autowired
+    private FormTemplateService formTemplateService;
+
     public DeleteFormTypeHandler() {
         super(DeleteFormTypeAction.class);
     }
 
     @Override
     public DeleteFormTypeResult execute(DeleteFormTypeAction action, ExecutionContext context) throws ActionException {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        formTemplateService.checkLockedByAnotherUser(action.getFormTypeId(), userInfo);
+        formTemplateService.lock(action.getFormTypeId(), userInfo);
         DeleteFormTypeResult result = new DeleteFormTypeResult();
         Logger logger = new Logger();
         mainOperatingService.deleteTemplate(action.getFormTypeId(), logger, securityService.currentUserInfo().getUser());

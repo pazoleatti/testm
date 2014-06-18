@@ -1,13 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
-    <type>
-        <id>311</id>
-        <name>(РНУ-7) Справка бухгалтера для отражения расходов, учитываемых в РНУ-5, учёт которых требует применения
-            метода начисления
-        </name>
-        <status>NORMAL</status>
-        <taxType>INCOME</taxType>
-    </type>
     <fixedRows>false</fixedRows>
     <name>(РНУ-7) Справка бухгалтера для отражения расходов, учитываемых в РНУ-5, учёт которых требует применения метода
         начисления
@@ -19,7 +11,6 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>number</alias>
         <checking>false</checking>
-        <id>16600</id>
         <name>№ пп</name>
         <order>1</order>
         <width>5</width>
@@ -29,26 +20,24 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>helper</alias>
         <checking>false</checking>
-        <id>18500</id>
         <name></name>
         <order>2</order>
         <width>0</width>
         <maxLength>1000</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>kny</alias>
         <checking>false</checking>
-        <id>16603</id>
         <name>Код налогового учета</name>
         <order>3</order>
         <width>10</width>
-        <parentId>16601</parentId>
+        <parentAlias>code</parentAlias>
         <refBookAttributeId>130</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>date</alias>
         <checking>false</checking>
-        <id>16602</id>
         <name>Дата совершения операции</name>
         <order>4</order>
         <width>7</width>
@@ -57,7 +46,6 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>code</alias>
         <checking>false</checking>
-        <id>16601</id>
         <name>Балансовый счёт (номер)</name>
         <order>5</order>
         <width>10</width>
@@ -68,16 +56,15 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>docNumber</alias>
         <checking>false</checking>
-        <id>16604</id>
         <name>Первичный документ. Номер</name>
         <order>6</order>
         <width>10</width>
         <maxLength>15</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>docDate</alias>
         <checking>false</checking>
-        <id>16605</id>
         <name>Первичный документ. Дата</name>
         <order>7</order>
         <width>7</width>
@@ -86,7 +73,6 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>currencyCode</alias>
         <checking>false</checking>
-        <id>16606</id>
         <name>Код валюты</name>
         <order>8</order>
         <width>10</width>
@@ -97,7 +83,6 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rateOfTheBankOfRussia</alias>
         <checking>false</checking>
-        <id>16607</id>
         <name>Курс Банка России</name>
         <order>9</order>
         <width>10</width>
@@ -107,7 +92,6 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>taxAccountingCurrency</alias>
         <checking>false</checking>
-        <id>16608</id>
         <name>Сумма расхода, в налоговом учёте. Валюта</name>
         <order>10</order>
         <width>10</width>
@@ -117,7 +101,6 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>taxAccountingRuble</alias>
         <checking>false</checking>
-        <id>16609</id>
         <name>Сумма расхода, в налоговом учёте. Рубли</name>
         <order>11</order>
         <width>10</width>
@@ -127,7 +110,6 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>accountingCurrency</alias>
         <checking>false</checking>
-        <id>16611</id>
         <name>Сумма расхода, в бухгалтерском учёте. Валюта</name>
         <order>12</order>
         <width>10</width>
@@ -137,7 +119,6 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>ruble</alias>
         <checking>false</checking>
-        <id>16612</id>
         <name>Сумма расхода, в бухгалтерском учёте. Рубли</name>
         <order>13</order>
         <width>10</width>
@@ -149,7 +130,6 @@
         <backColor>LIGHT_BLUE</backColor>
         <bold>false</bold>
         <fontColor>BLACK</fontColor>
-        <id>10261</id>
         <italic>false</italic>
     </styles>
     <styles>
@@ -157,7 +137,6 @@
         <backColor>LIGHT_BROWN</backColor>
         <bold>true</bold>
         <fontColor>BLACK</fontColor>
-        <id>10340</id>
         <italic>false</italic>
     </styles>
 </formTemplateContent>

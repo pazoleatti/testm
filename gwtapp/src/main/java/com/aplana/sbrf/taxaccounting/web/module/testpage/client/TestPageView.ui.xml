@@ -146,6 +146,14 @@
                             </g:VerticalPanel>
                         </g:HTMLPanel>
                     </g:cell>
+                    <g:cell>
+                        <g:HTMLPanel>
+                            <g:Label text="Dropdown button" addStyleNames="{style.labelName}"/>
+                            <g:VerticalPanel spacing="2" addStyleNames="{style.borderr}">
+                                <style:DropdownButton ui:field="dropdownButton" text="dropdown button"/>
+                            </g:VerticalPanel>
+                        </g:HTMLPanel>
+                    </g:cell>
                 </g:HorizontalPanel>
 
                 <g:Label text="Иерархический справочник" addStyleNames="{style.labelName}"/>

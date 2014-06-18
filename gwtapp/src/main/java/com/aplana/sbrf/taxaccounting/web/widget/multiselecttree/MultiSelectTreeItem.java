@@ -48,14 +48,8 @@ public class MultiSelectTreeItem extends TreeItem implements HasClickHandlers,
         setMultiSelection(multiSelection);
         setWidget(multiSelection == null ? label : multiSelection ? checkBox : radioButton);
 
-        // установка стилей курсора
-        label.getElement().getStyle().setCursor(Style.Cursor.POINTER);
-        DOM.getChild(checkBox.getElement(), 0).getStyle().setCursor(Style.Cursor.POINTER);
-        DOM.getChild(checkBox.getElement(), 1).getStyle().setCursor(Style.Cursor.POINTER);
-        DOM.getChild(radioButton.getElement(), 0).getStyle().setCursor(Style.Cursor.POINTER);
-        DOM.getChild(radioButton.getElement(), 1).getStyle().setCursor(Style.Cursor.POINTER);
-
         // установка стилей отображения элемента
+        label.getElement().getStyle().setCursor(Style.Cursor.POINTER);
         checkBox.getElement().getStyle().setWidth(100, Style.Unit.PCT);
         checkBox.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
         checkBox.getElement().getStyle().setDisplay(Style.Display.BLOCK);
@@ -63,10 +57,27 @@ public class MultiSelectTreeItem extends TreeItem implements HasClickHandlers,
         radioButton.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
         radioButton.getElement().getStyle().setDisplay(Style.Display.BLOCK);
 
-        DOM.getChild(checkBox.getElement(), 1).getStyle().setWidth(100, Style.Unit.PCT);
-        DOM.getChild(radioButton.getElement(), 1).getStyle().setWidth(100, Style.Unit.PCT);
-        DOM.getChild(checkBox.getElement(), 1).getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-        DOM.getChild(radioButton.getElement(), 1).getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+        Style checkboxInputStyle = DOM.getChild(checkBox.getElement(), 0).getStyle();
+        Style checkboxLabelStyle = DOM.getChild(checkBox.getElement(), 1).getStyle();
+        Style radioInputStyle = DOM.getChild(radioButton.getElement(), 0).getStyle();
+        Style radioLabelStyle = DOM.getChild(radioButton.getElement(), 1).getStyle();
+
+        checkboxInputStyle.setCursor(Style.Cursor.POINTER);
+        checkboxLabelStyle.setWidth(100, Style.Unit.PCT);
+        checkboxLabelStyle.setDisplay(Style.Display.INLINE_BLOCK);
+        checkboxLabelStyle.setCursor(Style.Cursor.POINTER);
+        // хак для одинокого итема так как там ширина в 100%
+        checkboxLabelStyle.setPaddingRight(15, Style.Unit.PX);
+        checkboxLabelStyle.setMarginRight(-34, Style.Unit.PX);
+
+        radioInputStyle.setCursor(Style.Cursor.POINTER);
+        radioLabelStyle.setWidth(100, Style.Unit.PCT);
+        radioLabelStyle.setDisplay(Style.Display.INLINE_BLOCK);
+        radioLabelStyle.setCursor(Style.Cursor.POINTER);
+        // хак для одинокого итема
+        radioLabelStyle.setPaddingRight(15, Style.Unit.PX);
+        radioLabelStyle.setMarginRight(-34, Style.Unit.PX);
+
 
         // усчтановка хендлеров
         label.addDoubleClickHandler(new DoubleClickHandler() {

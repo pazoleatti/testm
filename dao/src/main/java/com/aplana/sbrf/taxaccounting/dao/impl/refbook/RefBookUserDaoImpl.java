@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,16 @@ class RefBookUserDaoImpl extends AbstractDao implements RefBookUserDao {
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
         return getRecords(pagingParams, filter, sortAttribute, true);
+    }
+
+    @Override
+    public List<Long> getUniqueRecordIds(Date version, String filter) {
+        return refBookUtils.getUniqueRecordIds(REF_BOOK_ID, TABLE_NAME, filter);
+    }
+
+    @Override
+    public int getRecordsCount(Date version, String filter) {
+        return refBookUtils.getRecordsCount(REF_BOOK_ID, TABLE_NAME, filter);
     }
 
     @Override

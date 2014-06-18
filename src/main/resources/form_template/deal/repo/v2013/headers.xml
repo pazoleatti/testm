@@ -3,9 +3,9 @@
     <row alias="">
         <cell alias="rowNum" colSpan="5" rowSpan="1" value="Общая информация о контрагенте - юридическом лице"/>
         <cell alias="jurName" colSpan="1" rowSpan="1" value="Общая информация о контрагенте - юридическом лице"/>
-        <cell alias="innKio" colSpan="1" rowSpan="1" value="Общая информация о контрагенте - юридическом лице"/>
-        <cell alias="country" colSpan="1" rowSpan="1" value="Общая информация о контрагенте - юридическом лице"/>
-        <cell alias="countryCode" colSpan="1" rowSpan="1" value="Общая информация о контрагенте - юридическом лице"/>
+        <cell alias="innKio" colSpan="1" rowSpan="1" value="ИНН/КИО"/>
+        <cell alias="country" colSpan="1" rowSpan="1" value="Наименование страны регистрации"/>
+        <cell alias="countryCode" colSpan="1" rowSpan="1" value="Код страны по классификатору  ОКСМ"/>
         <cell alias="contractNum" colSpan="14" rowSpan="1" value="Сведения о сделке"/>
         <cell alias="contractDate" colSpan="1" rowSpan="1" value="Сведения о сделке"/>
         <cell alias="transactionNum" colSpan="1" rowSpan="1" value="Сведения о сделке"/>

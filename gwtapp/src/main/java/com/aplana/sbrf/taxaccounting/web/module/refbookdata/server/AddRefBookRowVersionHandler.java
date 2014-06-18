@@ -71,6 +71,7 @@ public class AddRefBookRowVersionHandler extends AbstractActionHandler<AddRefBoo
                 action.getVersionTo(), true, securityService.currentUserInfo(), logger);
 
         AddRefBookRowVersionResult result = new AddRefBookRowVersionResult();
+        logger.setTaUserInfo(securityService.currentUserInfo());
         result.setNewIds(refBookDataProvider.createRecordVersion(logger, action.getVersionFrom(), action.getVersionTo(), records));
         result.setUuid(logEntryService.save(logger.getEntries()));
 
