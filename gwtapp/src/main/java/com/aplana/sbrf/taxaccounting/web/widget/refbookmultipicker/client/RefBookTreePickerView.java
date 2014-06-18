@@ -101,7 +101,7 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
             RefBookUiTreeItem uiTreeItem = new RefBookUiTreeItem(value, multiSelect);
             //getUiHandlers().highLightItem(uiTreeItem);
             tree.addTreeItem(uiTreeItem);
-            if (openOnLoad  && uiTreeItem.getRefBookTreeItem().isNeedToOpen()) {
+            if (openOnLoad) {
                 uiTreeItem.setState(true);
             }
         }
@@ -123,7 +123,7 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
             RefBookUiTreeItem item = new RefBookUiTreeItem(value, multiSelect);
             //getUiHandlers().highLightItem(item);
             tree.addTreeItem(uiTreeItem, item);
-            if (openOnLoad && item.getRefBookTreeItem().isNeedToOpen()) {
+            if (openOnLoad) {
                 item.setState(true);
             }
         }
