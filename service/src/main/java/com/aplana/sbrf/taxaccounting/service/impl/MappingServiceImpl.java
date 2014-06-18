@@ -136,6 +136,8 @@ public class MappingServiceImpl implements MappingService {
                 log.error(ServiceLoggerException.getLogEntriesString(logEntryService.getAll(sle.getUuid())));
             }
 
+            System.out.println("userInfo: " + userInfo + " departmentId: " + departmentId + " reportPeriodId: " + reportPeriodId
+                + "formTypeId: " + formTypeId);
             // Ошибка импорта
             log.error("Ошибка импорта файла " + filename + " : " + e.getClass() + " " +  e.getMessage(), e);
             addLog(userInfo, departmentId, reportPeriodId, formTypeId, "Ошибка импорта файла " + filename + ": "
