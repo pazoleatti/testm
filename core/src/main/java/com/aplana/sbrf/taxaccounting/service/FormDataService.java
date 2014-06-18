@@ -270,9 +270,19 @@ public interface FormDataService {
     Integer getPreviousRowNumber(FormData formData);
 
     /**
-     * Обновить значение "Номер последней строки предыдущей НФ" для указанного экземпляра НФ и следующих периодов
-     * @param formData {@link com.aplana.sbrf.taxaccounting.model.FormData экземпляр НФ}
-     * @return текстовое уведомление с указанием периодов, для которых было обновлено значение
+     * Обновить Номер последней строки предыдущей НФ
+     * @param formData экземпляр НФ, для которой необходимо обновить
+     * @return
      */
     String updatePreviousRowNumber(FormData formData);
+
+    /**
+     * Получить налоговые формы которые имеют признак ручного ввода
+     * @param departments список подразделений
+     * @param reportPeriodId отчетный период
+     * @param taxType тип налога
+     * @param kind тип налоговой формы
+     * @return список налоговых форм
+     */
+    List<FormData> getManualInputForms(List<Integer> departments, int reportPeriodId, TaxType taxType, FormDataKind kind);
 }
