@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.client.editdialog;
 
-import com.aplana.gwt.client.ListBoxWithTooltip;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.Department;
@@ -9,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -37,26 +37,18 @@ public class EditCorrectionDialogView extends PopupViewWithUiHandlers<EditCorrec
     @UiField
     Button cancelButton;
 
-    @UiField(provided = true)
-    ListBoxWithTooltip<ReportPeriod> periodList;
+    @UiField
+    PeriodPickerPopupWidget periodList;
 
     @UiField
     DateMaskBoxPicker term;
 
+    List<ReportPeriod> reportPeriods;
+
     @Inject
     public EditCorrectionDialogView(Binder uiBinder, EventBus eventBus) {
         super(eventBus);
-        periodList = new ListBoxWithTooltip<ReportPeriod>(new AbstractRenderer<ReportPeriod>() {
-            @Override
-            public String render(ReportPeriod object) {
-                if (object == null) return "";
-                return object.getName() + "(" + (1900 + object.getStartDate().getYear()) + ")";
-            }
-        });
         initWidget(uiBinder.createAndBindUi(this));
-
-
-
     }
 
     @Override
@@ -81,9 +73,11 @@ public class EditCorrectionDialogView extends PopupViewWithUiHandlers<EditCorrec
     @UiHandler("continueButton")
     public void onContinue(ClickEvent event) {
         EditDialogData data = new EditDialogData();
-        data.setReportPeriodId(periodList.getValue() == null ? null : periodList.getValue().getId());
+        ReportPeriod reportPeriod = getSelectedPeriod();
+        data.setReportPeriodId(reportPeriod == null ? null : reportPeriod.getId());
         data.setDepartmentId(departmentPicker.getValue().get(0));
         data.setCorrectionDate(term.getValue());
+        data.setPeriodYear(reportPeriod == null ? 0 : reportPeriod.getStartDate().getYear()+1900);
         getUiHandlers().onContinue(data);
     }
 
@@ -105,20 +99,23 @@ public class EditCorrectionDialogView extends PopupViewWithUiHandlers<EditCorrec
 
     @Override
     public void setPeriods(List<ReportPeriod> reportPeriods, Integer reportPeriodId) {
-        periodList.setValue(null);
-        periodList.setAcceptableValues(reportPeriods);
-        for(ReportPeriod reportPeriod: reportPeriods) {
-            if (reportPeriod.getId() == reportPeriodId) {
-                periodList.setValue(reportPeriod);
-                break;
+        this.reportPeriods = reportPeriods;
+        periodList.setPeriods(reportPeriods);
+        periodList.setValue(Arrays.asList(reportPeriodId), true);
+    }
+
+    private ReportPeriod getSelectedPeriod() {
+        if (periodList.getValue().size() == 1) {
+            for(ReportPeriod reportPeriod : reportPeriods) {
+                if (reportPeriod.getId().equals(periodList.getValue().get(0)))
+                    return reportPeriod;
             }
         }
+        return null;
     }
 
     @Override
     public void setCorrectionDate(Date date) {
         term.setValue(date);
     }
-
-
 }

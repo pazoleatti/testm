@@ -198,6 +198,16 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                 Dialog.warningMessage("Версия не сохранена", "Дата окончания должна быть больше даты начала актуальности");
                 return;
             }
+            Map<String, RefBookValueSerializable> map = getView().getFieldsValues();
+            //TODO : Специфические для справочника подразделений проверки. Подумать над возможностью избавиться
+            if (currentRefBookId == 30) {
+                if (modifiedFields.containsKey("TYPE")){
+                    if (map.get("TYPE").getNumberValue().intValue() != 1 &&  map.get("PARENT_ID").getReferenceValue() == null){
+                        Dialog.errorMessage("Родительское подразделение должно быть заполнено!");
+                        return;
+                    }
+                }
+            }
 			if (currentUniqueRecordId == null) {
                 //Создание новой версии
                 AddRefBookRowVersionAction action = new AddRefBookRowVersionAction();
@@ -208,7 +218,6 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                     action.setRecordId(null);
                 }
 
-                Map<String, RefBookValueSerializable> map = getView().getFieldsValues();
                 List<Map<String, RefBookValueSerializable>> valuesToAdd = new ArrayList<Map<String, RefBookValueSerializable>>();
                 valuesToAdd.add(map);
 
@@ -237,7 +246,6 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                 final SaveRefBookRowVersionAction action = new SaveRefBookRowVersionAction();
                 action.setRefBookId(currentRefBookId);
                 action.setRecordId(currentUniqueRecordId);
-                Map<String, RefBookValueSerializable> map = getView().getFieldsValues();
                 action.setValueToSave(map);
                 action.setVersionFrom(getView().getVersionFrom());
                 action.setVersionTo(getView().getVersionTo());
@@ -246,6 +254,13 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 
                 // TODO заменить, сделано для примера
                 if (currentRefBookId == 30) {
+                    if (modifiedFields.containsKey("TYPE")){
+                        if (map.get("TYPE").getNumberValue().intValue() != 1 &&  map.get("PARENT_ID").getReferenceValue() == null){
+                           Dialog.errorMessage("Родительское подразделение должно быть заполнено!");
+                            return;
+                        }
+
+                    }
                     if(modifiedFields.containsKey("NAME")){
                         renameDialogPresenter.open(new ConfirmButtonClickHandler() {
                             @Override
@@ -255,6 +270,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                         " по " + WidgetUtils.getDateString(dateTo) + "на имя \"" + modifiedFields.get("NAME") + "\"")*/
                                 action.setVersionFrom(WidgetUtils.getDateWithOutTime(dateFrom));
                                 action.setVersionTo(WidgetUtils.getDateWithOutTime(dateTo));
+                                renameDialogPresenter.getView().cleanDates();
 
                                 dispatchAsync.execute(action,
                                         CallbackUtils.defaultCallback(

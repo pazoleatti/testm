@@ -63,18 +63,32 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
 		return refBookUtils.getRecordData(REF_BOOK_ID, TABLE_NAME, recordId);
     }
 
-    private final static String CHECK_UNIQUE_MATCHES_FOR_NON_VERSION = "select id record_id from %s t where ";
+    private final static String CHECK_UNIQUE_MATCHES_FOR_NON_VERSION = "select id record_id, name from %s t where %s %s (%s)";
     @Override
-    public List<Pair<Long, String>> getMatchedRecordsByUniqueAttributes(Long refBookId, List<RefBookAttribute> attributes, List<RefBookRecord> records) {
+    public List<Pair<Long, String>> getMatchedRecordsByUniqueAttributes(Long recordId, List<RefBookAttribute> attributes, List<RefBookRecord> records) {
         boolean hasUniqueAttributes = false;
         PreparedStatementData ps = new PreparedStatementData();
         ps.appendQuery(CHECK_UNIQUE_MATCHES_FOR_NON_VERSION);
+        ArrayList<RefBookAttribute> uniqueAttrs = new ArrayList<RefBookAttribute>();
         for (RefBookAttribute attribute : attributes) {
+            if (attribute.isUnique())
+                uniqueAttrs.add(attribute);
+        }
+        String idOddsTag = "";
+        if (recordId != null){
+            ps.addParam(recordId);
+            idOddsTag = "t.id <> ?";
+        }
+
+        String andTag = !uniqueAttrs.isEmpty() && recordId != null ? "AND" : "";
+        StringBuilder sb = new StringBuilder();
+        for (int i=0; i < uniqueAttrs.size(); i++) {
+            RefBookAttribute attribute = uniqueAttrs.get(i);
             if (attribute.isUnique()) {
                 hasUniqueAttributes = true;
-                for (int i=0; i < records.size(); i++) {
-                    Map<String, RefBookValue> values = records.get(i).getValues();
-                    ps.appendQuery(String.format("t.%s = ?",  attribute.getAlias()));
+                for (RefBookRecord record : records) {
+                    Map<String, RefBookValue> values = record.getValues();
+                    sb.append(String.format("t.%s = ?", attribute.getAlias()));
 
                     if (attribute.getAttributeType().equals(RefBookAttributeType.STRING)) {
                         ps.addParam(values.get(attribute.getAlias()).getStringValue());
@@ -89,8 +103,8 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
                         ps.addParam(values.get(attribute.getAlias()).getDateValue());
                     }
 
-                    if (i < records.size() - 1) {
-                        ps.appendQuery(" or ");
+                    if (i < uniqueAttrs.size() - 1) {
+                        sb.append(" or ");
                     }
                 }
             }
@@ -99,12 +113,14 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
 
         try {
             if (hasUniqueAttributes) {
-                return getJdbcTemplate().query(String.format(ps.getQuery().toString(), TABLE_NAME), ps.getParams().toArray(), new RowMapper<Pair<Long, String>>() {
-                    @Override
-                    public Pair<Long, String> mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return new Pair<Long, String>(SqlUtils.getLong(rs, "ID"), rs.getString("NAME"));
-                    }
-                });
+                return getJdbcTemplate().query(
+                        String.format(ps.getQuery().toString(), TABLE_NAME, idOddsTag, andTag, sb.toString()), ps.getParams().toArray(),
+                        new RowMapper<Pair<Long, String>>() {
+                            @Override
+                            public Pair<Long, String> mapRow(ResultSet rs, int rowNum) throws SQLException {
+                                return new Pair<Long, String>(SqlUtils.getLong(rs, "record_id"), rs.getString("NAME"));
+                            }
+                        });
             } else {
                 return new PagingResult<Pair<Long, String>>(new ArrayList<Pair<Long, String>>(0));
             }

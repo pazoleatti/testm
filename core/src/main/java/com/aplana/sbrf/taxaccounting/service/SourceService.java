@@ -268,11 +268,13 @@ public interface SourceService {
      * @param departmentId id подразделения
      * @param formTypeId вид налоговой формы
      * @param kind тип налоговой формы
+     * @param reportPeriodId отчетный период формы
+     * @param periodOrder
      * @param includeDestinations флаг влючения приемников
      * @param includeSources флаг включения источнико
      * @param includeUncreated флаг включения не созданных налогоных форм
      *
      * @return
      */
-    List<FormToFormRelation> getRelations(int departmentId, int formTypeId, FormDataKind kind, boolean includeDestinations, boolean includeSources, boolean includeUncreated);
+    List<FormToFormRelation> getRelations(int departmentId, int formTypeId, FormDataKind kind, int reportPeriodId, Integer periodOrder, boolean includeDestinations, boolean includeSources, boolean includeUncreated);
 }

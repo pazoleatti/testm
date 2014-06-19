@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.text.shared.AbstractRenderer;
@@ -39,8 +40,8 @@ public class OpenCorrectDialogView extends PopupViewWithUiHandlers<OpenCorrectDi
 	@UiField
 	Button cancelButton;
 
-	@UiField(provided = true)
-    ListBoxWithTooltip<ReportPeriod> periodList;
+	@UiField
+    PeriodPickerPopupWidget periodList;
 
 	@UiField
     DateMaskBoxPicker term;
@@ -51,17 +52,11 @@ public class OpenCorrectDialogView extends PopupViewWithUiHandlers<OpenCorrectDi
     @UiField
     Panel termPnl;
 
+    List<ReportPeriod> reportPeriods;
+
 	@Inject
 	public OpenCorrectDialogView(Binder uiBinder, EventBus eventBus) {
 		super(eventBus);
-        periodList = new ListBoxWithTooltip<ReportPeriod>(new AbstractRenderer<ReportPeriod>() {
-            @Override
-            public String render(ReportPeriod object) {
-                if (object == null) return "";
-                return object.getName() + "(" + (1900 + object.getStartDate().getYear()) + ")";
-            }
-        });
-
         initWidget(uiBinder.createAndBindUi(this));
     }
 
@@ -73,8 +68,10 @@ public class OpenCorrectDialogView extends PopupViewWithUiHandlers<OpenCorrectDi
 	}
 
 	@Override
-	public void setPeriodsList(List<ReportPeriod> reportPeriods) {
-        periodList.setAcceptableValues(reportPeriods);
+    public void setPeriodsList(List<ReportPeriod> reportPeriods, Integer reportPeriodId) {
+        this.reportPeriods = reportPeriods;
+        periodList.setPeriods(reportPeriods);
+        periodList.setValue(Arrays.asList(reportPeriodId), true);
 	}
 
     @Override
@@ -126,7 +123,13 @@ public class OpenCorrectDialogView extends PopupViewWithUiHandlers<OpenCorrectDi
 
     @Override
     public ReportPeriod getSelectedPeriod() {
-        return periodList.getValue();
+        if (periodList.getValue().size() == 1) {
+            for(ReportPeriod reportPeriod : reportPeriods) {
+                if (reportPeriod.getId().equals(periodList.getValue().get(0)))
+                    return reportPeriod;
+            }
+        }
+        return null;
     }
 
     @Override

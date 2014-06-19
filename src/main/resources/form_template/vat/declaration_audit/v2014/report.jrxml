@@ -179,11 +179,11 @@
 ($V{ИНН_плательщика}+"-------------------------").substring(0,12)]]></initialValueExpression>
 		</variable>
 		<variable name="НаимПрод" class="java.lang.String">
-			<variableExpression><![CDATA[$F{СведПродЮЛ_НаимПрод} == null ?
+			<variableExpression><![CDATA[($F{СведПродЮЛ_НаимПрод} == null || $F{СведПродЮЛ_НаимПрод}.equals("0")) ?
 "----------------------------------------------------------------------------------------------------------------------------------------------------------------"
 :
 ($F{СведПродЮЛ_НаимПрод}+"----------------------------------------------------------------------------------------------------------------------------------------------------------------").substring(0,160)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{СведПродЮЛ_НаимПрод} == null ?
+			<initialValueExpression><![CDATA[($F{СведПродЮЛ_НаимПрод} == null || $F{СведПродЮЛ_НаимПрод}.equals("0"))?
 "----------------------------------------------------------------------------------------------------------------------------------------------------------------"
 :
 ($F{СведПродЮЛ_НаимПрод}+"----------------------------------------------------------------------------------------------------------------------------------------------------------------").substring(0,160)]]></initialValueExpression>
@@ -197,10 +197,12 @@
 ($F{СумИсчисл}+"------------").substring(0,12)]]></initialValueExpression>
 		</variable>
 		<variable name="КодОпер" class="java.lang.String">
-			<variableExpression><![CDATA[$F{КодОпер} == null ?
+			<variableExpression><![CDATA[($F{КодОпер} == null || $F{КодОпер}.equals("0")) ?
 "-----------" :
 ($F{КодОпер}+"----------").substring(0,7)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{КодОпер} == null ? "-----------" : ($F{КодОпер}+"----------").substring(0,7)]]></initialValueExpression>
+			<initialValueExpression><![CDATA[($F{КодОпер} == null || $F{КодОпер}.equals("0")) ?
+"-----------" :
+($F{КодОпер}+"----------").substring(0,7)]]></initialValueExpression>
 		</variable>
 		<variable name="СумИсчислОтгр" class="java.lang.String">
 			<variableExpression><![CDATA["------------"]]></variableExpression>
@@ -223,11 +225,11 @@
 			<fieldDescription><![CDATA[@ОплПостСв6Мес]]></fieldDescription>
 		</field>
 		<variable name="ОплПостСв6Мес" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ОплПостСв6Мес} == null ?
+			<variableExpression><![CDATA[($F{ОплПостСв6Мес} == null || $F{ОплПостСв6Мес}.equals("0")) ?
 "-------------------------"
 :
 ($F{ОплПостСв6Мес}+"-------------------------").substring(0,10)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ОплПостСв6Мес} == null ?
+			<initialValueExpression><![CDATA[($F{ОплПостСв6Мес} == null || $F{ОплПостСв6Мес}.equals("0")) ?
 "-------------------------"
 :
 ($F{ОплПостСв6Мес}+"-------------------------").substring(0,10)]]></initialValueExpression>
@@ -276,21 +278,21 @@
 ($F{СтРеалТов}+"----------").substring(0,10)]]></initialValueExpression>
 		</variable>
 		<variable name="СтПриобТов" class="java.lang.String">
-			<variableExpression><![CDATA[$F{СтПриобТов} == null ?
+			<variableExpression><![CDATA[$F{СтПриобТов} == null?
 "----------"
 :
 ($F{СтПриобТов}+"----------").substring(0,10)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{СтПриобТов} == null ?
+			<initialValueExpression><![CDATA[$F{СтПриобТов} == null?
 "----------"
 :
 ($F{СтПриобТов}+"----------").substring(0,10)]]></initialValueExpression>
 		</variable>
 		<variable name="НалНеВыч" class="java.lang.String">
-			<variableExpression><![CDATA[$F{НалНеВыч} == null ?
+			<variableExpression><![CDATA[$F{НалНеВыч} == null?
 "----------"
 :
 ($F{НалНеВыч}+"----------").substring(0,10)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{НалНеВыч} == null ?
+			<initialValueExpression><![CDATA[$F{НалНеВыч} == null?
 "----------"
 :
 ($F{НалНеВыч}+"----------").substring(0,10)]]></initialValueExpression>

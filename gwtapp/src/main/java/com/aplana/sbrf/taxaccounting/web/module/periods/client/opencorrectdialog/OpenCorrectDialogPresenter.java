@@ -32,7 +32,7 @@ public class OpenCorrectDialogPresenter extends PresenterWidget<OpenCorrectDialo
 
 	public interface MyView extends PopupView, HasUiHandlers<OpenCorrectDialogUiHandlers> {
 		void setDepartments(List<Department> departments, Set<Integer> avalDepartments, List<DepartmentPair> selectedDepartments, boolean enable);
-        void setPeriodsList(List<ReportPeriod> reportPeriods);
+        void setPeriodsList(List<ReportPeriod> reportPeriods, Integer reportPeriodId);
 		void setTaxType(TaxType taxType);
         void setSelectedDepartment(Integer departmentId);
         void resetForm();
@@ -93,9 +93,8 @@ public class OpenCorrectDialogPresenter extends PresenterWidget<OpenCorrectDialo
 		getView().setCanChangeDepartment(canChange);
 	}
 
-	public void setPeriodsList(List<ReportPeriod> reportPeriods) {
-        getView().setPeriodsList(reportPeriods);
-
+	public void setPeriodsList(List<ReportPeriod> reportPeriods, Integer reportPeriodId) {
+        getView().setPeriodsList(reportPeriods, reportPeriodId);
 	}
 
 	@Override
@@ -129,7 +128,7 @@ public class OpenCorrectDialogPresenter extends PresenterWidget<OpenCorrectDialo
             return;
         }
 
-        if (getView().getSelectedPeriod().getCalendarStartDate().after(getView().getTerm())) {
+        if (getView().getSelectedPeriod().getCalendarStartDate().getYear() > getView().getTerm().getYear()) {
             Dialog.errorMessage("Календарный год периода сдачи корректировки не должен быть меньше календарного года корректируемого периода!");
             return;
         }

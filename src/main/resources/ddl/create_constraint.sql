@@ -15,7 +15,8 @@ alter table tax_period add constraint tax_period_chk_taxtype check (tax_type in 
 
 alter table form_template add constraint form_template_pk primary key (id);
 alter table form_template add constraint form_template_fk_type_id foreign key (type_id) references form_type(id);
-alter table form_template add constraint form_template_uniq_version unique(type_id, version);
+--ограничение не работает, в таком виде оно бесполезно
+--alter table form_template add constraint form_template_uniq_version unique(type_id, version);
 alter table form_template add constraint form_template_chk_fixed_rows check(fixed_rows in (0, 1));
 alter table form_template add constraint form_template_check_status check (status in (-1, 0, 1, 2));
 alter table form_template add constraint form_template_chk_monthly check (monthly in (0, 1));
@@ -209,9 +210,9 @@ alter table log_business add constraint log_business_chk_event_id check (event_i
 alter table log_business add constraint log_business_chk_frm_dcl_ev check (form_data_id is not null or declaration_data_id is not null);
 alter table log_business add constraint log_business_fk_usr_departm_id foreign key (user_department_id) references department(id);
 
-alter table log_system add constraint log_system_chk_event_id check (event_id in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 203, 204, 205, 206, 207, 208, 209, 210, 301, 302, 303, 401, 501, 502, 503, 601));
-alter table log_system add constraint log_system_chk_dcl_form check (event_id in (7, 501, 502, 503, 601) or declaration_type_id is not null or (form_type_id is not null and form_kind_id is not null));
-alter table log_system add constraint log_system_chk_rp check (event_id in (7, 501, 502, 503, 601) or report_period_name is not null);
+alter table log_system add constraint log_system_chk_event_id check (event_id in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 203, 204, 205, 206, 207, 208, 209, 210, 301, 302, 303, 401, 501, 502, 503, 601, 901, 902, 903));
+alter table log_system add constraint log_system_chk_dcl_form check (event_id in (7, 11, 501, 502, 503, 601, 901, 902, 903) or declaration_type_id is not null or (form_type_id is not null and form_kind_id is not null));
+alter table log_system add constraint log_system_chk_rp check (event_id in (7, 11, 501, 502, 503, 601, 901, 902, 903) or report_period_name is not null);
 alter table log_system add constraint log_system_fk_kind foreign key (form_kind_id) references form_kind(id);
 alter table log_system add constraint log_system_fk_user_id foreign key (user_id) references sec_user(id);
 alter table log_system add constraint log_system_fk_decl_type_id foreign key (declaration_type_id) references declaration_type(id);

@@ -273,8 +273,11 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
 
     @Override
     public void clearFilterInputBox() {
-        pickerState.setSearchPattern("");
-        filterText.setValue("");
+        if (!filterText.getText().equals("")) {
+            pickerState.setSearchPattern("");
+            filterText.setValue("");
+            refbookDataTree.load(pickerState);
+        }
     }
 
     @Override

@@ -119,7 +119,8 @@ List<String> getErrorDepartment(record) {
     if (record.SIGNATORY_FIRSTNAME.stringValue == null || record.SIGNATORY_FIRSTNAME.stringValue.isEmpty()) {
         errorList.add("«Имя подписанта»")
     }
-    if (record.APPROVE_DOC_NAME.stringValue == null || record.APPROVE_DOC_NAME.stringValue.isEmpty()) {
+    //Если ПрПодп (не пусто или не 1) и значение атрибута на форме настроек подразделений не задано
+    if ((record.SIGNATORY_ID?.referenceValue != null && getRefBookValue(35, record.SIGNATORY_ID?.value)?.CODE?.value != 1) && (record.APPROVE_DOC_NAME.stringValue == null || record.APPROVE_DOC_NAME.stringValue.isEmpty())) {
         errorList.add("«Наименование документа, подтверждающего полномочия представителя»")
     }
     if (record.TAX_PLACE_TYPE_CODE?.referenceValue == null) {
@@ -130,7 +131,7 @@ List<String> getErrorDepartment(record) {
 
 List<String> getErrorVersion(record) {
     List<String> errorList = new ArrayList<String>()
-    if (record.FORMAT_VERSION.stringValue == null || !record.FORMAT_VERSION.stringValue.equals('5.01')) {
+    if (record.FORMAT_VERSION.stringValue == null || !record.FORMAT_VERSION.stringValue.equals('5.03')) {
         errorList.add("«Версия формата»")
     }
     if (record.APP_VERSION.stringValue == null || !record.APP_VERSION.stringValue.equals('XLR_FNP_TAXCOM_5_03')) {
@@ -147,6 +148,9 @@ void generateXML() {
     def declarationType = 4
     def departmentId = declarationData.departmentId
     def reportPeriodId = declarationData.reportPeriodId
+
+    /** Отчётный период. */
+    def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
 
     // Код формы отчетности по КНД
     def String KND = '1151001'
@@ -186,6 +190,16 @@ void generateXML() {
     /*
      * Расчет значений декларации.
      */
+
+    /*
+     * Расчет значений для текущей декларации.
+     */
+
+    def period = 0
+    if (reportPeriod.order != null) {
+        def values = [21, 31, 33, 34]
+        period = values[reportPeriod.order - 1]
+    }
 
     /** ПрПодп. */
     def prPodp = (signatoryId != null ? signatoryId : 1)
@@ -245,7 +259,7 @@ void generateXML() {
 
         row = getDataRow(rows724_1, 'total_4')
         nalBaza040 = round(row?.baseSum ?: empty)
-        sumNal020 = round(row?.ndsSum ?: empty)
+        sumNal040 = round(row?.ndsSum ?: empty)
 
         row = getDataRow(rows724_1, 'total_5')
         nalBaza070 = round(row?.baseSum ?: empty)
@@ -260,7 +274,7 @@ void generateXML() {
     /** НалВыч171Общ. Код строки 130 Графа 5. */
     def nalVich171Obsh = empty
     if (rows724_4) {
-        def tmp = getDataRow(rows724_4, 'total1')?.sum2 + getDataRow(rows724_4, 'total1')?.sum2
+        def tmp = getDataRow(rows724_4, 'total1')?.sum2 + getDataRow(rows724_4, 'total2')?.sum2
         nalVich171Obsh = round(tmp)
     }
     /** НалИсчПрод. Код строки 200 Графа 5. */
@@ -294,6 +308,8 @@ void generateXML() {
                 КНД: KND,
                 // Дата формирования документа
                 ДатаДок: (docDate != null ? docDate : new Date()).format("dd.MM.yyyy"),
+                // Код налогового (отчетного) периода
+                Период : period,
                 // Отчетный год
                 ОтчетГод: reportPeriodService.get(reportPeriodId).taxPeriod.year,
                 // Код налогового органа
@@ -353,10 +369,16 @@ void generateXML() {
                             СумИсчислОпл: empty,
                             СумИсчислНА: empty
                     ) {
-                        СведПродЮЛ(
-                                НаимПрод: row.naimProd,
-                                ИННЮЛПрод: row.innULProd,
-                        )
+                        if (row.innULProd != null) {
+                            СведПродЮЛ(
+                                    НаимПрод: row.naimProd,
+                                    ИННЮЛПрод: row.innULProd
+                            )
+                        } else {
+                            СведПродЮЛ(
+                                    НаимПрод: row.naimProd
+                            )
+                        }
                     }
                 }
                 // пустой раздел 2
@@ -446,57 +468,43 @@ void generateXML() {
                 // РАЗДЕЛ 3 - КОНЕЦ
 
                 // РАЗДЕЛ 4
-                НалПодтв0(
-                        СумУменИтог: empty
-                ) {
-                    // форма 724.2.2
-                    for (def row : dataRowsMap[602]) {
-                        if (row.getAlias() == 'itog') {
-                            continue
+                if (dataRowsMap[602]) {
+                    НалПодтв0(
+                            СумУменИтог: empty
+                    ) {
+                        // форма 724.2.2
+                        for (def row : dataRowsMap[602]) {
+                            if (row.getAlias() == 'itog') {
+                                continue
+                            }
+                            СумОпер4(
+                                    КодОпер: row.code,
+                                    НалБаза: round(row.base),
+                                    НалВычПод: empty,
+                                    НалНеПод: empty,
+                                    НалВосст: empty
+                            )
                         }
-                        СумОпер4(
-                                КодОпер: row.code,
-                                НалБаза: round(row.base),
-                                НалВычПод: empty,
-                                НалНеПод: empty,
-                                НалВосст: empty
-                        )
-                    }
-                    // пустой раздел 4
-                    if (!dataRowsMap[602]) {
-                        СумОпер4(
-                                КодОпер: empty,
-                                НалБаза: empty,
-                                НалВычПод: empty,
-                                НалНеПод: empty,
-                                НалВосст: empty
-                        )
                     }
                 }
                 // РАЗДЕЛ 4 - КОНЕЦ
 
                 // РАЗДЕЛ 7
-                ОперНеНал(ОплПостСв6Мес: empty) {
-                    // форма 724.2.1
-                    for (def row : dataRowsMap[601]) {
-                        if (row.getAlias() == 'itog') {
-                            continue
+                // не пустой раздел 7
+                if (dataRowsMap[601]) {
+                    ОперНеНал(ОплПостСв6Мес: empty) {
+                        // форма 724.2.1
+                        for (def row : dataRowsMap[601]) {
+                            if (row.getAlias() == 'itog') {
+                                continue
+                            }
+                            СумОпер7(
+                                    КодОпер: row.code,
+                                    СтРеалТов: round(row.realizeCost),
+                                    СтПриобТов: round(row.obtainCost ?: empty),
+                                    НалНеВыч: getNalNeVich(row) // TODO (Ramil Timerbaev)  недоделано
+                            )
                         }
-                        СумОпер7(
-                                КодОпер: row.code,
-                                СтРеалТов: round(row.realizeCost),
-                                СтПриобТов: round(row.obtainCost ?: empty),
-                                НалНеВыч: getNalNeVich(row) // TODO (Ramil Timerbaev)  недоделано
-                        )
-                    }
-                    // пустой раздел 7
-                    if (!dataRowsMap[601]) {
-                        СумОпер7(
-                                КодОпер: empty,
-                                СтРеалТов: empty,
-                                СтПриобТов: empty,
-                                НалНеВыч: empty
-                        )
                     }
                 }
                 // РАЗДЕЛ 7 - КОНЕЦ
@@ -522,7 +530,7 @@ def getSection2Rows(def dataRowsMap) {
         newRow.sumIschisl = round(row.sum2)
         newRow.codeOper = '1011712'
         newRow.naimProd = row.contragent
-        newRow.innULProd = empty
+        //newRow.innULProd = empty
         rows.add(newRow)
     }
     // форма 724.7
@@ -613,7 +621,7 @@ void logicCheck() {
 
     if (nalIschProd < (sumNal010 + sumNal020 + sumNal030 + sumNal040)) {
         logger.warn('КС 1.14. Возможно нарушение ст. 171 п. 8, 172 п. 6 либо ст. 146 п. 1 НК РФ: ' +
-                'Налоговые вычеты не обоснованы, либо налоговая баща занижена, так как суммы отработанных авансов не включены в реализацию')
+                'Налоговые вычеты не обоснованы, либо налоговая база занижена, так как суммы отработанных авансов не включены в реализацию')
     }
 }
 

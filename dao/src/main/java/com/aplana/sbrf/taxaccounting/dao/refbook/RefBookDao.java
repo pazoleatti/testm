@@ -397,6 +397,15 @@ public interface RefBookDao {
     Map<RefBookAttributePair, String> getAttributesValues(List<RefBookAttributePair> attributePairs);
 
     /**
+     * Проверяет существует ли циклическая зависимость для указанных записей справочника
+     * Если среди дочерних элементов указанной записи существует указанный родительский элемент, то существует цикл
+     * @param uniqueRecordId идентификатор записи
+     * @param parentRecordId идентификатор родительской записи
+     * @return циклическая зависимость существует?
+     */
+    boolean hasLoops(Long uniqueRecordId, Long parentRecordId);
+
+    /**
      * Создает новые записи в справочнике
      * @param refBookId код справочника
      * @param version дата актуальности новых записей

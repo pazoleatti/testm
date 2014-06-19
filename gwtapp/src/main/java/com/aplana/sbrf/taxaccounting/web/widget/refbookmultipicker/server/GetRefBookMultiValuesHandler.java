@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.server;
 
+import com.aplana.sbrf.taxaccounting.model.Formats;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.exception.TAException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -25,6 +26,7 @@ import org.springframework.stereotype.Component;
 
 import java.text.NumberFormat;
 import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -218,7 +220,7 @@ public class GetRefBookMultiValuesHandler extends AbstractActionHandler<GetRefBo
         //System.out.println("get values: "+((double)(System.nanoTime()-time)/1000000000.0)+"s");
         //time = System.nanoTime();
 
-
+        HashMap<Formats, SimpleDateFormat> formatHashMap = new HashMap<Formats, SimpleDateFormat>();
         /**
          * Раздаем разыменованные значения по требованию
          */
@@ -252,7 +254,26 @@ public class GetRefBookMultiValuesHandler extends AbstractActionHandler<GetRefBo
                     }
                 } else {
                     RefBookValue refBookValue = record.get(alias);
-                    value = (refBookValue == null ? "" : String.valueOf(refBookValue));
+                    if (refBookValue != null) {
+                        if (refBookValue.getAttributeType() == RefBookAttributeType.DATE) {
+                            Formats format = refBookAttribute.getFormat();
+                            if (format != null) {
+                                if (formatHashMap.containsKey(format)) {
+                                    value = formatHashMap.get(format).format(refBookValue.getDateValue());
+                                } else {
+                                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format.getFormat());
+                                    formatHashMap.put(format, simpleDateFormat);
+                                    value = simpleDateFormat.format(refBookValue.getDateValue());
+                                }
+                            } else {
+                                value = String.valueOf(refBookValue);
+                            }
+                        } else {
+                            value = String.valueOf(refBookValue);
+                        }
+                    } else {
+                        value = "";
+                    }
                 }
                 dereferenceValue.setDereferenceValue(value);
                 refBookDereferenceValues.add(dereferenceValue);

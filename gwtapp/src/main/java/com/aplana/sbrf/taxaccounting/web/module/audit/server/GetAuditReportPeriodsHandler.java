@@ -28,7 +28,7 @@ public class GetAuditReportPeriodsHandler extends AbstractActionHandler<GetRepor
     @Override
     public GetReportPeriodsResult execute(GetReportPeriodsAction getReportPeriodsAction, ExecutionContext executionContext) throws ActionException {
         GetReportPeriodsResult result =  new GetReportPeriodsResult();
-        result.setReportPeriods(periodService.getAllPeriodsByTaxType(getReportPeriodsAction.getTaxType(), false));
+        result.setReportPeriods(periodService.getAllPeriodsByTaxType(getReportPeriodsAction.getTaxType(), true));
         return result;
     }
 

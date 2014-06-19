@@ -60,6 +60,8 @@ public enum FormDataEvent implements Serializable {
 
 	LOG_SYSTEM_BACKUP(601, "Архивирование журнала событий"),
 
+    ADD_DEPARTMENT(901, "Создание подразделения"),
+    UPDATE_DEPARTMENT(902, "Модификация подразделения"),
     DELETE_DEPARTMENT(903, "Удаление подразделения");
 
 	private String title;

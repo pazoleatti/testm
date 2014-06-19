@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.periods.client.editdialog;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
+import com.aplana.sbrf.taxaccounting.model.PeriodStatusBeforeOpen;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
@@ -64,9 +65,11 @@ public class EditDialogPresenter extends PresenterWidget<EditDialogPresenter.MyV
                 || (data.getReportPeriodId() == null)
                 || (data.getDepartmentId() == null)) {
             Dialog.errorMessage("Редактирование параметров", "Не заполнены следующие обязательные к заполнению поля: "
-                    + ((data.getDepartmentId() == null) ? "Подразделение " : "")
-                    + ((data.getYear() == null) ? " Год " : "")
-                    + ((data.getReportPeriodId() == null) ? "Период " : "")
+                    + ((data.getDepartmentId() == null) ? "\"Подразделение\"" : "")
+                    + ((data.getDepartmentId() == null) && (data.getYear() == null) ? ", " : "")
+                    + ((data.getYear() == null) ? "\"Год\"" : "")
+                    + ((data.getDepartmentId() == null) || (data.getYear() == null) && (data.getReportPeriodId() == null) ? ", " : "")
+                    + ((data.getReportPeriodId() == null) ? "\"Период\"" : "")
                     + "!"
             );
             return;
@@ -74,7 +77,7 @@ public class EditDialogPresenter extends PresenterWidget<EditDialogPresenter.MyV
 
         if ((data.isBalance() == initData.isBalance())
                 && (data.getYear().equals(initData.getYear()))
-                && (data.getReportPeriodId().equals(initData.getReportPeriodId()))
+                && (data.getReportPeriodId() == initData.getDictTaxPeriodId().intValue())
                 && (data.getDepartmentId().equals(initData.getDepartmentId()))) {
             Dialog.errorMessage("Редактирование параметров", "Ни один параметр не был изменен!");
             return;
@@ -83,13 +86,15 @@ public class EditDialogPresenter extends PresenterWidget<EditDialogPresenter.MyV
 
         CanRemovePeriodAction action = new CanRemovePeriodAction();
         action.setReportPeriodId(initData.getReportPeriodId().intValue());
+        action.setOperationName("редактируемом");
+        action.setTaxType(taxType);
         dispatcher.execute(action, CallbackUtils
                         .defaultCallback(new AbstractCallback<CanRemovePeriodResult>() {
                             @Override
                             public void onSuccess(CanRemovePeriodResult result) {
                                 if (!result.isCanRemove()) {
+                                    LogAddEvent.fire(EditDialogPresenter.this, result.getUuid());
                                     Dialog.errorMessage("Редактирование периода", "Редактирование периода невозможно!");
-                                    return;
                                 } else {
                                     checkHasCorrectionPeriod(data);
                                 }
@@ -105,13 +110,37 @@ public class EditDialogPresenter extends PresenterWidget<EditDialogPresenter.MyV
         CheckHasCorrectionPeriodAction hasCorrectionPeriodAction = new CheckHasCorrectionPeriodAction();
         hasCorrectionPeriodAction.setTaxType(taxType);
         hasCorrectionPeriodAction.setDepartmentId(data.getDepartmentId().intValue());
-        hasCorrectionPeriodAction.setReportPeriodId(data.getReportPeriodId().intValue() );
+        hasCorrectionPeriodAction.setReportPeriodId(initData.getReportPeriodId() );
         dispatcher.execute(hasCorrectionPeriodAction, CallbackUtils
                         .defaultCallback(new AbstractCallback<CheckHasCorrectionPeriodResult>() {
                             @Override
                             public void onSuccess(CheckHasCorrectionPeriodResult result) {
                                 if (result.isHasCorrectionPeriods()) {
                                     Dialog.errorMessage("Редактирование периода", "Перед изменением периода необходимо удалить все связанные корректирующие периоды!");
+                                } else {
+                                    checkPeriodStatus(data);
+                                }
+                            }
+                        }, EditDialogPresenter.this)
+        );
+    }
+
+    private void checkPeriodStatus(final EditDialogData data) {
+        CheckPeriodStatusAction checkPeriodStatusAction = new CheckPeriodStatusAction();
+        checkPeriodStatusAction.setBalancePeriod(data.isBalance());
+        checkPeriodStatusAction.setDepartmentId(data.getDepartmentId());
+        checkPeriodStatusAction.setTaxType(taxType);
+        checkPeriodStatusAction.setDictionaryTaxPeriodId(data.getDictTaxPeriodId());
+        checkPeriodStatusAction.setYear(data.getYear());
+
+
+        dispatcher.execute(checkPeriodStatusAction, CallbackUtils
+                        .defaultCallback(new AbstractCallback<CheckPeriodStatusResult>() {
+                            @Override
+                            public void onSuccess(CheckPeriodStatusResult result) {
+                                if ((result.getStatus() == PeriodStatusBeforeOpen.OPEN)
+                                        || (result.getStatus() == PeriodStatusBeforeOpen.CLOSE)) {
+                                    Dialog.errorMessage("Редактирование периода", "Указанный период уже заведён в Системе!");
                                 } else {
                                     edit(data);
                                 }

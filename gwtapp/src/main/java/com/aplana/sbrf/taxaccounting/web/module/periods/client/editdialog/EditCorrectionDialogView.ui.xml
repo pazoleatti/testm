@@ -5,7 +5,8 @@
              xmlns:w="urn:import:com.aplana.gwt.client"
              xmlns:date="urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker"
              xmlns:r="urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client"
-             xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
+             xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
+             xmlns:per="urn:import:com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client">
 
     <ui:style>
         .content {
@@ -43,7 +44,7 @@
                             <g:Label text="Период корректировки: " width="180px"/>
                         </g:cell>
                         <g:cell width="100%" horizontalAlignment="left">
-                            <w:ListBoxWithTooltip ui:field="periodList" width="250px"/>
+                            <per:PeriodPickerPopupWidget ui:field="periodList" width="250px" multiselect="false"/>
                         </g:cell>
                     </g:HorizontalPanel>
 
@@ -53,7 +54,7 @@
                             <g:Label text="Период сдачи корректировки: " width="180px"/>
                         </g:cell>
                         <g:cell width="100%" horizontalAlignment="left">
-                            <date:DateMaskBoxPicker width="60px" ui:field="term"/>
+                            <date:DateMaskBoxPicker width="60px" ui:field="term" canBeEmpty="true"/>
                         </g:cell>
                     </g:HorizontalPanel>
 

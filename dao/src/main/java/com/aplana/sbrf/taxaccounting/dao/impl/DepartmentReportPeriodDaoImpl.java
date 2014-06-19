@@ -2,10 +2,12 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.RowMapper;
@@ -36,8 +38,8 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements
 			reportPeriod.setDepartmentId(SqlUtils.getLong(rs,"DEPARTMENT_ID"));
 			reportPeriod.setReportPeriod(reportPeriodDao.get(SqlUtils
                     .getInteger(rs,"REPORT_PERIOD_ID")));
-			reportPeriod.setActive(SqlUtils.getInteger(rs,"IS_ACTIVE") == 0 ? false : true);
-			reportPeriod.setBalance(SqlUtils.getInteger(rs,"IS_BALANCE_PERIOD") == 0 ? false : true);
+			reportPeriod.setActive(SqlUtils.getInteger(rs, "IS_ACTIVE") != 0);
+			reportPeriod.setBalance(SqlUtils.getInteger(rs, "IS_BALANCE_PERIOD") != 0);
             reportPeriod.setCorrectPeriod(rs.getDate("CORRECTION_DATE"));
 			return reportPeriod;
 		}
@@ -94,10 +96,17 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements
 	@Transactional(readOnly=false)
 	public void updateActive(int reportPeriodId, Long departmentId, Date correctionDate,
 			boolean active) {
-		getJdbcTemplate()
-				.update("update DEPARTMENT_REPORT_PERIOD set IS_ACTIVE=? where REPORT_PERIOD_ID=? and DEPARTMENT_ID=? " +
-                                "and (? is null or CORRECTION_DATE = ?)",
-						active ? 1 : 0, reportPeriodId, departmentId, correctionDate, correctionDate);
+        if (correctionDate == null) {
+            getJdbcTemplate()
+                    .update("update DEPARTMENT_REPORT_PERIOD set IS_ACTIVE=? where REPORT_PERIOD_ID=? and DEPARTMENT_ID=? " +
+                                    "and CORRECTION_DATE is null",
+                            active ? 1 : 0, reportPeriodId, departmentId);
+        } else {
+            getJdbcTemplate()
+                    .update("update DEPARTMENT_REPORT_PERIOD set IS_ACTIVE=? where REPORT_PERIOD_ID=? and DEPARTMENT_ID=? " +
+                                    "and CORRECTION_DATE = ?",
+                            active ? 1 : 0, reportPeriodId, departmentId, correctionDate);
+        }
 	}
 
     @Override
@@ -147,7 +156,31 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements
         }
     }
 
-	@Override
+    private static final String DRP_BY_DEPARTMENT_IDS_AND_TAX_TYPES =
+            "SELECT * FROM DEPARTMENT_REPORT_PERIOD drp \n" +
+                    "LEFT JOIN REPORT_PERIOD rp ON rp.ID = drp.REPORT_PERIOD_ID\n" +
+                    "LEFT JOIN TAX_PERIOD tp ON tp.ID = rp.TAX_PERIOD_ID\n" +
+                    "  WHERE %s AND tp.TAX_TYPE IN %s";
+    @Override
+    public List<DepartmentReportPeriod> getListDRPByDepartmentIds(List<TaxType> taxTypes, List<Long> departmentIds) {
+        try {
+            MapSqlParameterSource params = new MapSqlParameterSource();
+            params.addValue("departmentIds", departmentIds);
+            params.addValue("taxTypes", taxTypes);
+            return getNamedParameterJdbcTemplate().query(
+                    String.format(DRP_BY_DEPARTMENT_IDS_AND_TAX_TYPES,
+                            SqlUtils.transformToSqlInStatement("DEPARTMENT_ID", departmentIds),
+                            SqlUtils.transformTaxTypeToSqlInStatement(taxTypes)),
+                    params,
+                    mapper
+            );
+        } catch (DataAccessException e){
+            logger.error("", e);
+            throw new DaoException("", e);
+        }
+    }
+
+    @Override
 	public void delete(int reportPeriodId, Integer departmentId) {
 		getJdbcTemplate().update(
 				"delete from department_report_period where department_id = ? and report_period_id = ?",
@@ -178,12 +211,19 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements
 
 	@Override
 	public boolean isPeriodOpen(int departmentId, long reportPeriodId) {
-		int is_active = getJdbcTemplate().queryForInt(
-				"select is_active from department_report_period where department_id = ? and report_period_id = ?",
-				new Object[] {departmentId, reportPeriodId},
-				new int[] {Types.NUMERIC, Types.NUMERIC}
-		);
-		return is_active != 0;
+		try {
+            int is_active = getJdbcTemplate().queryForInt(
+                    "select distinct is_active from department_report_period where department_id = ? and report_period_id = ?",
+                    new Object[] {departmentId, reportPeriodId},
+                    new int[] {Types.NUMERIC, Types.NUMERIC}
+            );
+
+            return is_active != 0;
+        } catch (DataAccessException e){
+            logger.error("", e);
+            throw new DaoException("", e);
+        }
+
 	}
 
     @Override

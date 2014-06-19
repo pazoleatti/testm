@@ -32,6 +32,7 @@ public class TestPagePresenter extends Presenter<TestPagePresenter.MyView,
     private final DispatchAsync dispatcher;
 
     public interface MyView extends View, HasUiHandlers<TestPageUiHandlers> {
+        void setIds(int fpicker, int hpicker);
     }
 
     @Inject
@@ -40,13 +41,20 @@ public class TestPagePresenter extends Presenter<TestPagePresenter.MyView,
         super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
         this.dispatcher = dispatcher;
         getView().setUiHandlers(this);
+
     }
+
+    private int fpicker;
+    private int hpicker;
 
     @Override
     public void prepareFromRequest(final PlaceRequest request) {
         super.prepareFromRequest(request);
         LogCleanEvent.fire(this);
         LogShowEvent.fire(this, false);
+
+        fpicker = Integer.valueOf(request.getParameter("f", "-1"));
+        hpicker = Integer.valueOf(request.getParameter("h", "-1"));
     }
 
     @Override
@@ -60,5 +68,16 @@ public class TestPagePresenter extends Presenter<TestPagePresenter.MyView,
                 "\n efufufufufufufdsfsdfsdfsdf,efufufufufufufdsfsdfsdfsdf,efufufufufufufdsfsdfsdfsdf,efufufufufufufdsfsdfsdfsdf," +
                 "\n efufufufufufufdsfsdfsdfsdf");
         MessageEvent.fire(this,true, "Ошибочная ошибка ошибки в ошибочной ошибке ошибочно ошибается за ошибки ошибки ололололололо ",ffffffff);
+    }
+
+    @Override
+    protected void onReveal() {
+        super.onReveal();
+        getView().setIds(fpicker, hpicker);
+    }
+
+    @Override
+    public void updateIdsFromPath() {
+        getView().setIds(fpicker, hpicker);
     }
 }

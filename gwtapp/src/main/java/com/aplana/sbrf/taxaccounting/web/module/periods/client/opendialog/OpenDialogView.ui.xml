@@ -80,7 +80,7 @@
                     </g:HorizontalPanel>
 
                     <g:HorizontalPanel verticalAlignment="middle"
-                                       width="100%" spacing="3">
+                                       width="100%" spacing="3" visible="false">
                         <g:cell horizontalAlignment="right">
                             <g:Label text="Корректирующий" width="180px"/>
                         </g:cell>
