@@ -138,7 +138,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         try {
             return getJdbcTemplate().query(
                     "select id, name, alias, type, reference_id, attribute_id, visible, precision, width, required, " +
-							"is_unique, sort_order, format, read_only " +
+							"is_unique, sort_order, format, read_only, max_length " +
                             "from ref_book_attribute where ref_book_id = ? order by ord",
                     new Object[]{refBookId}, new int[]{Types.NUMERIC},
                     new RefBookAttributeRowMapper());
@@ -167,6 +167,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             result.setReadOnly(rs.getBoolean("read_only"));
             result.setUnique(rs.getBoolean("is_unique"));
 			result.setSortOrder(SqlUtils.getInteger(rs,"sort_order"));
+            result.setMaxLength(SqlUtils.getInteger(rs,"max_length"));
             Integer formatId = SqlUtils.getInteger(rs,"format");
             if (formatId!=null){
                 result.setFormat(Formats.getById(formatId));
@@ -212,7 +213,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         try {
             return getJdbcTemplate().queryForObject(
                     "select id, name, alias, type, reference_id, attribute_id, visible, precision, width, required, " +
-                            "is_unique, sort_order, format, read_only " +
+                            "is_unique, sort_order, format, read_only, max_length " +
                             "from ref_book_attribute where id = ?",
                     new Object[]{attributeId}, new int[]{Types.NUMERIC},
                     new RefBookAttributeRowMapper()

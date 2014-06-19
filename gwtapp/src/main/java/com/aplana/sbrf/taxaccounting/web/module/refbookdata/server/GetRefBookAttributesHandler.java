@@ -64,6 +64,7 @@ public class GetRefBookAttributesHandler extends AbstractActionHandler<GetRefBoo
             col.setRequired(attribute.isRequired());
             col.setReadOnly(attribute.isReadOnly());
             col.setFormat(attribute.getFormat());
+            col.setMaxLength(attribute.getMaxLength());
 			columns.add(col);
 		}
 

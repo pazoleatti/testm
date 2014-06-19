@@ -65,6 +65,15 @@ public interface DataRowDao {
 	 */
 	int getSize(FormData formData, DataRowFilter filter);
 
+    /**
+     * Метод получает количество строк редактируемого среза без учета итоговых.
+     *
+     * @param formData
+     * @param filter
+     * @return
+     */
+    int getSizeWithoutTotal(FormData formData, DataRowFilter filter);
+
 	/**
 	 * Обновляет строки НФ. Строки остаются приаттаченными к текущему срезу НФ
 	 * При этом поле id у DataRow может быть обновлено.

@@ -9,25 +9,25 @@ insert into ref_book(id, name, script_id, visible) values
 insert into ref_book (id, name, type, visible, read_only) values
 (4, 'Коды ОКАТО', 1, 1, 0);
 
-insert into ref_book_attribute(id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width, is_unique) values
-  (4, 2, 1, 'ФИО', 'name', 1, null, null, 1, null, 10, 0);
-insert into ref_book_attribute(id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width, is_unique) values
-  (1, 1, 1, 'Наименование', 'name', 1, null, null, 1, null, 10, 1);
-insert into ref_book_attribute(id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width, is_unique) values
-  (2, 1, 2, 'Количество страниц', 'order', 2, null, null, 1, 0, 10, 0);
-insert into ref_book_attribute(id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width, is_unique) values
-  (3, 1, 4, 'Автор', 'author', 4, 2, 4, 1, null, 10, 0);
-insert into ref_book_attribute(id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width, is_unique) values
-  (5, 1, 5, 'Вес', 'weight', 2, null, null, 1, 3, 10, 0);
-insert into ref_book_attribute(id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width, is_unique) values
-  (9, 1, 6, 'Ничего', 'null', 1, null, null, 1, null, 10, 0);
+insert into ref_book_attribute(id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width, is_unique, max_length) values
+  (4, 2, 1, 'ФИО', 'name', 1, null, null, 1, null, 10, 0, 40);
+insert into ref_book_attribute(id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width, is_unique, max_length) values
+  (1, 1, 1, 'Наименование', 'name', 1, null, null, 1, null, 10, 1, 40);
+insert into ref_book_attribute(id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width, is_unique, max_length) values
+  (2, 1, 2, 'Количество страниц', 'order', 2, null, null, 1, 0, 10, 0, null);
+insert into ref_book_attribute(id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width, is_unique, max_length) values
+  (3, 1, 4, 'Автор', 'author', 4, 2, 4, 1, null, 10, 0, null);
+insert into ref_book_attribute(id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width, is_unique, max_length) values
+  (5, 1, 5, 'Вес', 'weight', 2, null, null, 1, 3, 10, 0, null);
+insert into ref_book_attribute(id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width, is_unique, max_length) values
+  (9, 1, 6, 'Ничего', 'null', 1, null, null, 1, null, 10, 0, 50);
 --ОКАТО
-insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique) values
-  (8, 4, 'Наименование муниципального образования', 'NAME', 1, 3, null, null, 1, null, 510, 1, 0);
-insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique) values
-  (6, 4, 'Идентификатор родительской записи', 'PARENT_ID', 4, 1, 4, 8, 1, null, 510, 0, 0);
-insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique) values
-  (7, 4, 'Код ОКАТО', 'OKATO', 1, 2, null, null, 1, null, 11, 1, 1);
+insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, max_length) values
+  (8, 4, 'Наименование муниципального образования', 'NAME', 1, 3, null, null, 1, null, 510, 1, 0, 50);
+insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, max_length) values
+  (6, 4, 'Идентификатор родительской записи', 'PARENT_ID', 4, 1, 4, 8, 1, null, 510, 0, 0, null);
+insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, max_length) values
+  (7, 4, 'Код ОКАТО', 'OKATO', 1, 2, null, null, 1, null, 11, 1, 1, 8);
 
 insert into ref_book_record(id, record_id, ref_book_id, version, status) values
   (1, 1, 1, date '2013-01-01', 0);
