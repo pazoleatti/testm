@@ -133,11 +133,11 @@ void calc() {
         if (code != getKnu(row.number)) {
             totalRows.put(i, getNewRow(code, sum))
             sum = 0
+            code = getKnu(row.number)
         }
         // если строка последняя то сделать для ее кода расхода новую строку "итого по коду"
         if (i == dataRows.size() - 1) {
             sum += (row.sum ?: 0)
-            code = getKnu(row.number)
             def totalRowCode = getNewRow(code, sum)
             totalRows.put(i + 1, totalRowCode)
             sum = 0

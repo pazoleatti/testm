@@ -2,13 +2,9 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.ren
 
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
-import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.View;
-import com.gwtplatform.mvp.client.proxy.PlaceManager;
-
-import java.util.Date;
 
 /**
  * Презентер для диалогового окна "Период применения изменений в печатных формах"
@@ -26,32 +22,16 @@ public class RenameDialogPresenter
          */
         void open(ConfirmButtonClickHandler buttonClickHandler);
 
-        Date getDateFrom();
-
-        Date getDateTo();
+        void cleanDates();
     }
 
-    private DispatchAsync dispatcher;
-    private PlaceManager placeManager;
-
     @Inject
-    public RenameDialogPresenter(final EventBus eventBus, final MyView view,
-                                 DispatchAsync dispatcher, PlaceManager placeManager) {
+    public RenameDialogPresenter(final EventBus eventBus, final MyView view) {
         super(eventBus, view);
-        this.dispatcher = dispatcher;
-        this.placeManager = placeManager;
         getView().setUiHandlers(this);
     }
 
     public void open(ConfirmButtonClickHandler buttonClickHandler) {
         getView().open(buttonClickHandler);
-    }
-
-    public Date getDateFrom(){
-        return getView().getDateFrom();
-    }
-
-    public Date getDateTo(){
-        return getView().getDateTo();
     }
 }

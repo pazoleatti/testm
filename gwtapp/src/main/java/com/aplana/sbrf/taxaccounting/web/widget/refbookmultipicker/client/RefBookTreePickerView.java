@@ -99,9 +99,9 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
         tree.clear();
         for (RefBookTreeItem value : values) {
             RefBookUiTreeItem uiTreeItem = new RefBookUiTreeItem(value, multiSelect);
-            getUiHandlers().highLightItem(uiTreeItem);
+            //getUiHandlers().highLightItem(uiTreeItem);
             tree.addTreeItem(uiTreeItem);
-            if (openOnLoad  && uiTreeItem.getRefBookTreeItem().isNeedToOpen()) {
+            if (openOnLoad) {
                 uiTreeItem.setState(true);
             }
         }
@@ -121,9 +121,9 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
     public void insertChildrens(RefBookUiTreeItem uiTreeItem, List<RefBookTreeItem> values, boolean openOnLoad) {
         for (RefBookTreeItem value : values) {
             RefBookUiTreeItem item = new RefBookUiTreeItem(value, multiSelect);
-            getUiHandlers().highLightItem(item);
+            //getUiHandlers().highLightItem(item);
             tree.addTreeItem(uiTreeItem, item);
-            if (openOnLoad && item.getRefBookTreeItem().isNeedToOpen()) {
+            if (openOnLoad) {
                 item.setState(true);
             }
         }

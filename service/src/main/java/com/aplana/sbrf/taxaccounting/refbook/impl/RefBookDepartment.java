@@ -227,7 +227,7 @@ public class RefBookDepartment implements RefBookDataProvider {
             throw new ServiceLoggerException("Подразделение не создано, обнаружены фатальные ошибки!",
                     logEntryService.save(logger.getEntries()));
 
-        auditService.add(FormDataEvent.UPDATE_DEPARTMENT, logger.getTaUserInfo(), 0,
+        auditService.add(FormDataEvent.ADD_DEPARTMENT, logger.getTaUserInfo(), 0,
                 null, null, null, null,
                 String.format("Создано подразделение %s, значения атрибутов: %s",
                         refBookValueMap.get(DEPARTMENT_NAME_ATTRIBUTE).toString(),
