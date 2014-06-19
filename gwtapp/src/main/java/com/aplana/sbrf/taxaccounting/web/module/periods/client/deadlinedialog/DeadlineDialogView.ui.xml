@@ -45,14 +45,10 @@
             <g:cell>
                 <g:VerticalPanel addStyleNames="{style.typicalFormBody}">
                     <g:cell>
-                        <g:HorizontalPanel spacing="4">
-                            <g:cell verticalAlignment="middle">
+                        <g:HorizontalPanel spacing="4" verticalAlignment="middle">
                                 <g:Label addStyleNames="{style.labelDate}" wordWrap="false"
                                          text="Срок сдачи отчетности:"/>
-                            </g:cell>
-                            <g:cell verticalAlignment="middle">
-                                <d:DateMaskBoxPicker ui:field="deadline"/>
-                            </g:cell>
+                                <d:DateMaskBoxPicker ui:field="deadline" canBeEmpty="true"/>
                         </g:HorizontalPanel>
                     </g:cell>
                     <g:cell>

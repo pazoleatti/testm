@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client;
 
+import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.client.PdfViewerView;
@@ -149,10 +150,14 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 
 	@UiHandler("refreshButton")
 	public void onRefresh(ClickEvent event){
-		if(getUiHandlers() != null){
-			getUiHandlers().refreshDeclaration(dateBox.getValue());
-		}
-	}
+        if (dateBox.getValue() == null) {
+            Dialog.warningMessage("Введите дату.");
+        } else {
+            if (getUiHandlers() != null) {
+                getUiHandlers().refreshDeclaration(dateBox.getValue());
+            }
+        }
+    }
 
 	@UiHandler("acceptButton")
 	public void onAccept(ClickEvent event){
