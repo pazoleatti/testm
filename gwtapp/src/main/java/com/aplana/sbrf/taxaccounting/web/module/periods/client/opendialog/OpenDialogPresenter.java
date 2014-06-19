@@ -75,11 +75,11 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
                 || (openFilterData.getYear() == null)
                 || (openFilterData.getDictionaryTaxPeriod() == null)) {
             Dialog.errorMessage("Указание параметров", "Не заполнены следующие обязательные к заполнению поля:"
-                            + ((openFilterData.getDepartmentId() == null) ? " Подразделение" : "")
+                            + ((openFilterData.getDepartmentId() == null) ? " \"Подразделение\"" : "")
                             + ((openFilterData.getDepartmentId() == null && openFilterData.getYear() == null) ? ", " : "")
-                            + ((openFilterData.getYear() == null) ? " Год" : "")
+                            + ((openFilterData.getYear() == null) ? " \"Год\"" : "")
                             + (((openFilterData.getDepartmentId() == null || openFilterData.getYear() == null) && openFilterData.getDictionaryTaxPeriod() == null) ? ", " : "")
-                            + ((openFilterData.getDictionaryTaxPeriod() == null) ? " Период" : "")
+                            + ((openFilterData.getDictionaryTaxPeriod() == null) ? " \"Период\"" : "")
                             + "!"
             );
             return;

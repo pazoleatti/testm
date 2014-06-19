@@ -19,8 +19,8 @@ public class LogSystemAuditFilter implements Serializable {
     private AuditFormType auditFormTypeId;
     private List<Long> formTypeIds;
     private String departmentName;
-    private Date fromSearchDate;
-    private Date toSearchDate;
+    private Date fromSearchDate = new Date();
+    private Date toSearchDate = new Date();
 
 
     public LogSystemAuditFilter() {
