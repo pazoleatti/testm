@@ -307,6 +307,10 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
                     cellTable.setVisibleRangeAndClearData(cellTable.getVisibleRange(), true);
                 }
             }
+        } else if (force) {
+            // все равно очищаем таблицу даже если она не показывается,
+            // потому как при открытии все равно будет происходит загрузка силой
+            cellTable.setRowCount(0);
         }
     }
 
