@@ -54,9 +54,9 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     private static final String CHECK_BALANCE_PERIOD_ERROR = "Налоговая форма не может создаваться в периоде ввода остатков!";
     private static final String WRONG_FORM_IS_NOT_ACCEPTED = "Не найдены экземпляры «%s» за %s в статусе «Принята». " +
             "Расчеты не могут быть выполнены.";
-    private static final String REF_BOOK_TOO_MANY_FOUND_ERROR = "В справочнике «%s» содержится более одно раза значение «%s», соответствующее атрибуту «%s»!";
-    private static final String REF_BOOK_ROW_TOO_MANY_FOUND_ERROR = "Строка %d, графа «%s» содержит значение, встречающееся более одно раза в справочнике «%s»!";
-    private static final String REF_BOOK_TOO_MANY_FOUND_IMPORT_ERROR = "Проверка файла: Строка %d, столбец %d содержит значение, встречающееся более одно раза в справочнике «%s»!";
+    private static final String REF_BOOK_TOO_MANY_FOUND_ERROR = "В справочнике «%s» содержится более одного раза значение «%s», соответствующее атрибуту «%s»!";
+    private static final String REF_BOOK_ROW_TOO_MANY_FOUND_ERROR = "Строка %d, графа «%s» содержит значение, встречающееся более одного раза в справочнике «%s»!";
+    private static final String REF_BOOK_TOO_MANY_FOUND_IMPORT_ERROR = "Проверка файла: Строка %d, столбец %d содержит значение, встречающееся более одного раза в справочнике «%s»!";
 
     private static final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 

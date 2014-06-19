@@ -616,9 +616,9 @@ public final class ScriptUtils {
             if (rowCell.getValue() == null || rowCell.getValue().toString().isEmpty()) {
                 String msg = String.format(WRONG_NON_EMPTY, index, getColumnName(row, alias));
                 if (required) {
-                    logger.error(msg);
+                    rowError(logger, row, msg);
                 } else {
-                    logger.warn(msg);
+                    rowWarning(logger, row, msg);
                 }
             }
         }
@@ -649,9 +649,9 @@ public final class ScriptUtils {
             String msg = String.format(WRONG_CALC, row.getIndex(),
                     StringUtils.collectionToDelimitedString(errorColumns, ", "));
             if (required) {
-                logger.error(msg);
+                rowError(logger, row, msg);
             } else {
-                logger.warn(msg);
+                rowWarning(logger, row, msg);
             }
         }
     }

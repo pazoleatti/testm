@@ -15,10 +15,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import javax.ejb.ActivationConfigProperty;
-import javax.ejb.MessageDriven;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
+import javax.ejb.*;
 import javax.interceptor.Interceptors;
 import javax.jms.Message;
 import javax.jms.MessageListener;
@@ -38,7 +35,7 @@ import java.util.Map;
         @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
         @ActivationConfigProperty(propertyName = "destination", propertyValue = "jms/rateQueue")})
 @Interceptors(TransportInterceptor.class)
-@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+@TransactionManagement(TransactionManagementType.CONTAINER)
 public class RateMDB implements MessageListener {
 
     private static final Log logger = LogFactory.getLog(RateMDB.class);
