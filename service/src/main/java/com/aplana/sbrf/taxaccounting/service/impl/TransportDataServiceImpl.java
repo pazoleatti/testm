@@ -90,7 +90,7 @@ public class TransportDataServiceImpl implements TransportDataService {
 
         // ЖА
         String msg = StringUtils.collectionToDelimitedString(fileNames, "; ");
-        auditService.add(FormDataEvent.IMPORT, userInfo, userInfo.getUser().getDepartmentId(), null, null, null, null, msg);
+        auditService.add(FormDataEvent.UPLOAD_TRANSPORT_FILE, userInfo, userInfo.getUser().getDepartmentId(), null, null, null, null, msg);
     }
 
     private void copyFileFromStream(InputStream inputStream, String folderPath, String fileName, Logger logger) throws IOException {
