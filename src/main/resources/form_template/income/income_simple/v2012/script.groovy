@@ -573,6 +573,7 @@ void addData(def xml, int headRowCount) {
         }
 
         def curRow = getDataRow(rows, "R" + rowIndex)
+        curRow.setImportIndex(xlsIndexRow)
 
         //очищаем столбцы
         resetColumns.each {

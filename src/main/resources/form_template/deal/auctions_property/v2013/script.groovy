@@ -240,6 +240,7 @@ void addData(def xml, int headRowCount) {
 
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
+        newRow.setImportIndex(xlsIndexRow)
         editableColumns.each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')

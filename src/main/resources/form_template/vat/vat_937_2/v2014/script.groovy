@@ -329,6 +329,8 @@ void addData(def xml, int headRowCount) {
         def row = xml.row[headRowCount + i]
         def int xlsIndexRow = rowOffset + headRowCount + i
 
+        dataRows[i - 1].setImportIndex(xlsIndexRow)
+
         // графа 1
         def xmlIndexCol = 0
         if (i != 2) { // пропускаем вторую строку

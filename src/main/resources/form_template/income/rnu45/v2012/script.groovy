@@ -416,6 +416,7 @@ void addData(def xml, int headRowCount) {
 
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
+        newRow.setImportIndex(xlsIndexRow)
         autoFillColumns.each {
             newRow.getCell(it).setStyleAlias('Автозаполняемая')
         }

@@ -600,6 +600,7 @@ void addData(def xml, int headRowCount) {
 
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
+        newRow.setImportIndex(xlsIndexRow)
         if (isMonthBalance()){
             balanceColumns.each {
                 newRow.getCell(it).editable = true

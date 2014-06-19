@@ -444,6 +444,7 @@ void addData(def xml, int headRowCount) {
         }
 
         def newRow = getNewRow(isSection7)
+        newRow.setImportIndex(xlsIndexRow)
 
         // Графа 3 - атрибут 900 - ACCOUNT - «Номер балансового счета», справочник 101 «План счетов бухгалтерского учета»
         record = getRecordImport(101, 'ACCOUNT', row.cell[3].text(), xlsIndexRow, 3 + colOffset)

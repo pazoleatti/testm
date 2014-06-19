@@ -578,6 +578,7 @@ void addData(def xml, int headRowCount) {
 
     for (def row : xml.row) {
         xmlIndexRow++
+        def int xlsIndexRow = xmlIndexRow + rowOffset
 
         // Пропуск строк шапки
         if (xmlIndexRow <= headRowCount - 1) {
@@ -595,6 +596,7 @@ void addData(def xml, int headRowCount) {
 
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
+        newRow.setImportIndex(xlsIndexRow)
         autoFillColumns.each {
             newRow.getCell(it).setStyleAlias('Автозаполняемая')
         }
@@ -603,8 +605,6 @@ void addData(def xml, int headRowCount) {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
         }
-
-        def int xlsIndexRow = xmlIndexRow + rowOffset
 
         // графа 2 - атрибут 611 - CODE - "Код сделки", справочник 61 "Коды сделок"
         def xmlIndexCol = 2

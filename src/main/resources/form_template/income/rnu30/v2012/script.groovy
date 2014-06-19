@@ -513,6 +513,7 @@ def addData(def xml, int headRowCount) {
         // первые строки  (графа 2, 3, 4, 5, 8, 12, 16)
         // раздел А или Б (графа 2,    4,       12, 16)
         def newRow = formData.createDataRow()
+        newRow.setImportIndex(xlsIndexRow)
         setEdit(newRow, section)
 
         // графа 2
