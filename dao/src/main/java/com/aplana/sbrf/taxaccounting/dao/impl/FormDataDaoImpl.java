@@ -469,7 +469,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
     @Override
     public List<FormData> getNextFormDataListForCrossNumeration(Integer year, Integer departmentId, String code, Integer kind, Long formDataId) {
 
-        return getJdbcTemplate().query("WITH list AS (SELECT row_number() over (ORDER BY rp.ORD) AS row_number, fd.*, manual\n" +
+        return getJdbcTemplate().query("WITH list AS (SELECT row_number() over (ORDER BY tp.year desc, rp.calendar_start_date) AS row_number, fd.*, manual\n" +
                         "FROM form_data fd\n" +
                         "LEFT JOIN (SELECT MAX(manual) AS manual, form_data_id FROM data_row WHERE manual = 0 GROUP BY form_data_id) r ON r.form_data_id = fd.id\n" +
                         "JOIN form_column fc ON fc.form_template_id = fd.form_template_id\n" +
@@ -485,7 +485,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
     @Override
     public List<FormData> getPrevFormDataListForCrossNumeration(Integer year, Integer departmentId, String code, Integer kind, Long formDataId) {
 
-        StringBuilder sql = new StringBuilder("WITH list AS (SELECT row_number() over (ORDER BY rp.ORD) AS row_number, fd.*, manual\n" +
+        StringBuilder sql = new StringBuilder("WITH list AS (SELECT row_number() over (ORDER BY tp.year desc, rp.calendar_start_date) AS row_number, fd.*, manual\n" +
                 "FROM form_data fd\n" +
                 "LEFT JOIN (SELECT MAX(manual) AS manual, form_data_id FROM data_row WHERE manual = 0 GROUP BY form_data_id) r ON r.form_data_id = fd.id\n" +
                 "JOIN form_column fc ON fc.form_template_id = fd.form_template_id\n" +
