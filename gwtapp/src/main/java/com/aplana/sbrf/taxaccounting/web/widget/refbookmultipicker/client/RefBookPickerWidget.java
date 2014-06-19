@@ -212,6 +212,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
                 @Override
                 public void onGetValuesCount(Integer count) {
                     if (count != null && count < (isHierarchical() ? 50 : 100)) {
+                        state.setSearchPattern(text);
                         refBookView.find(text);
                     } else {
                         Dialog.warningMessage("Уточните параметры поиска: найдено слишком много значений.");

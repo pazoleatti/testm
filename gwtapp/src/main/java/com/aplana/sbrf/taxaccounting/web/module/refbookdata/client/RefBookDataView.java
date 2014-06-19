@@ -84,9 +84,13 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 		relevanceDate.addValueChangeHandler(new ValueChangeHandler<Date>() {
 			@Override
 			public void onValueChange(ValueChangeEvent<Date> event) {
-				if (getUiHandlers() != null) {
-					getUiHandlers().onRelevanceDateChanged();
-				}
+                if(event.getValue()==null){
+                    relevanceDate.setValue(new Date());
+                } else {
+                    if (getUiHandlers() != null) {
+                        getUiHandlers().onRelevanceDateChanged();
+                    }
+                }
 			}
 		});
 		refbookDataTable.setSelectionModel(selectionModel);
