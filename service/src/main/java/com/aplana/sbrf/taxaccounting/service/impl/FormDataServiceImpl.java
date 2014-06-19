@@ -846,8 +846,8 @@ public class FormDataServiceImpl implements FormDataService {
         ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
         TaxPeriod taxPeriod = reportPeriod.getTaxPeriod();
         // Получить упорядоченный список экземпляров НФ, которые участвуют в сквозной нумерации и находятся до указанного экземпляра НФ
-        List<FormData> formDataList = formDataDao.getPrevFormDataListForCrossNumeration(taxPeriod.getYear(),
-                formData.getDepartmentId(), String.valueOf(taxPeriod.getTaxType().getCode()), formData.getKind().getId(), formData.getId());
+        List<FormData> formDataList = formDataDao.getPrevFormDataListForCrossNumeration(formData, taxPeriod.getYear(),
+                String.valueOf(taxPeriod.getTaxType().getCode()));
 
         // Если экземпляр НФ является не первым экземпляром в сквозной нумерации
         if (formDataList.size() > 0) {
@@ -873,8 +873,8 @@ public class FormDataServiceImpl implements FormDataService {
             // Получить налоговый период
             TaxPeriod taxPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId()).getTaxPeriod();
             // Получить список экземпляров НФ следующих периодов
-            List<FormData> formDataList = formDataDao.getNextFormDataListForCrossNumeration(taxPeriod.getYear(),
-                    formData.getDepartmentId(), String.valueOf(taxPeriod.getTaxType().getCode()), formData.getKind().getId(), formData.getId());
+            List<FormData> formDataList = formDataDao.getNextFormDataListForCrossNumeration(formData, taxPeriod.getYear(),
+                    String.valueOf(taxPeriod.getTaxType().getCode()));
 
             // Устанавливаем значение для текущего экземпляра НФ
             formDataDao.updatePreviousRowNumber(formData.getId(), getPreviousRowNumber(formData));

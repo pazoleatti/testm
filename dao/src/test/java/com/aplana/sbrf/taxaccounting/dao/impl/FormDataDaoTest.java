@@ -283,14 +283,13 @@ public class FormDataDaoTest {
         Assert.assertEquals("Ban/Bank1", formPerformerDao.get(11).getReportDepartmentName());
     }
 
-    @Ignore
-    @Test
-    public void testGetFormDataListForCrossNumeration() {
-        List<FormData> formDataList = formDataDao.getPrevFormDataListForCrossNumeration(2014, 3, "I", FormDataKind.PRIMARY.getId(), (long) 1);
-        Assert.assertEquals(3, formDataList.size());
-        Assert.assertEquals(1, formDataList.get(0).getPeriodOrder().intValue());
-        Assert.assertEquals(2, formDataList.get(1).getPeriodOrder().intValue());
-        Assert.assertEquals(3, formDataList.get(2).getPeriodOrder().intValue());
-    }
-
+//    @Ignore
+//    @Test
+//    public void testGetFormDataListForCrossNumeration() {
+//        List<FormData> formDataList = formDataDao.getPrevFormDataListForCrossNumeration(2014, 3, "I", FormDataKind.PRIMARY.getId(), (long) 1);
+//        Assert.assertEquals(3, formDataList.size());
+//        Assert.assertEquals(1, formDataList.get(0).getPeriodOrder().intValue());
+//        Assert.assertEquals(2, formDataList.get(1).getPeriodOrder().intValue());
+//        Assert.assertEquals(3, formDataList.get(2).getPeriodOrder().intValue());
+//    }
 }

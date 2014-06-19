@@ -188,27 +188,23 @@ public interface FormDataDao {
      * Получить упорядоченный список экземпляров НФ предшествующих до указанного экземпляра, в пределах которых
      * устанавливается сквозная нумерация строк.
      *
+     * @param formData
      * @param year Календарный год налогового периода
-     * @param departmentId идентификатор подразделения
      * @param code тип налоговой формы
-     * @param kind вид налоговой формы
-     * @param formDataId идентификатор налоговой формы
      * @return
      */
-    List<FormData> getPrevFormDataListForCrossNumeration(Integer year, Integer departmentId, String code, Integer kind, Long formDataId);
+    List<FormData> getPrevFormDataListForCrossNumeration(FormData formData, Integer year, String code);
 
     /**
      * Получить упорядоченный список экземпляров НФ, следующих после указанного экземпляра, в пределах которых
      * устанавливается сквозная нумерация строк.
      *
+     * @param formData
      * @param year Календарный год налогового периода
-     * @param departmentId идентификатор подразделения
      * @param code тип налоговой формы
-     * @param kind вид налоговой формы
-     * @param formDataId идентификатор налоговой формы
      * @return
      */
-    List<FormData> getNextFormDataListForCrossNumeration(Integer year, Integer departmentId, String code, Integer kind, Long formDataId);
+    List<FormData> getNextFormDataListForCrossNumeration(FormData formData, Integer year, String code);
 
     /**
      * TODO - возможно лучше сделать batchUpdate

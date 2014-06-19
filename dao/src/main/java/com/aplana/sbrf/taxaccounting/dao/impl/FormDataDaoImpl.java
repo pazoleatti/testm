@@ -466,43 +466,44 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
                 String.class);
     }
 
-    @Override
-    public List<FormData> getNextFormDataListForCrossNumeration(Integer year, Integer departmentId, String code, Integer kind, Long formDataId) {
+    String GET_FORM_DATA_LIST_QUERY = "WITH list AS (SELECT row_number() over (ORDER BY rp.calendar_start_date)\n" +
+            " AS row_number, fd.id, fd.department_id, fd.state, fd.return_sign, fd.kind, fd.report_period_id, fd.period_order, fd.number_previous_row, manual\n" +
+            "FROM form_data fd\n" +
+            "LEFT JOIN (SELECT MAX(manual) AS manual, form_data_id FROM data_row WHERE manual = 0 GROUP BY form_data_id) r ON r.form_data_id = fd.id\n" +
+            "JOIN form_column fc ON fc.form_template_id = fd.form_template_id\n" +
+            "LEFT JOIN report_period rp ON fd.report_period_id = rp.id\n" +
+            "LEFT JOIN tax_period tp ON tp.id = rp.tax_period_id\n" +
+            "WHERE fc.type = 'A' AND tp.year = ? AND tp.tax_type = ? AND fd.department_id = ? AND fd.kind = ? AND fd.form_template_id = ?)\n" +
+            "SELECT * FROM list\n";
 
-        return getJdbcTemplate().query("WITH list AS (SELECT row_number() over (ORDER BY rp.ORD) AS row_number, fd.*, manual\n" +
-                        "FROM form_data fd\n" +
-                        "LEFT JOIN (SELECT MAX(manual) AS manual, form_data_id FROM data_row WHERE manual = 0 GROUP BY form_data_id) r ON r.form_data_id = fd.id\n" +
-                        "JOIN form_column fc ON fc.form_template_id = fd.form_template_id\n" +
-                        "LEFT JOIN report_period rp ON fd.report_period_id = rp.id\n" +
-                        "LEFT JOIN tax_period tp ON tp.id = rp.tax_period_id\n" +
-                        "WHERE fc.type = 'A' AND tp.year = ? AND fd.department_id = ? AND tp.tax_type = ? AND fd.kind = ?)\n" +
-                        "SELECT * FROM list\n" +
-                        "WHERE row_number > (SELECT row_number FROM list WHERE id = ?)",
-                new Object[]{year, departmentId, code, kind, formDataId},
+    @Override
+    public List<FormData> getNextFormDataListForCrossNumeration(FormData formData, Integer year, String code) {
+
+        StringBuilder sql = new StringBuilder(GET_FORM_DATA_LIST_QUERY);
+        sql.append("WHERE row_number > (SELECT row_number FROM list WHERE id = ?)");
+
+
+        return getJdbcTemplate().query(sql.toString(),
+                new Object[]{year, code, formData.getDepartmentId(), formData.getKind().getId(),
+                        formData.getFormTemplateId(), formData.getId()},
                 new FormDataWithoutRowMapper());
     }
 
     @Override
-    public List<FormData> getPrevFormDataListForCrossNumeration(Integer year, Integer departmentId, String code, Integer kind, Long formDataId) {
+    public List<FormData> getPrevFormDataListForCrossNumeration(FormData formData, Integer year, String code) {
 
-        StringBuilder sql = new StringBuilder("WITH list AS (SELECT row_number() over (ORDER BY rp.ORD) AS row_number, fd.*, manual\n" +
-                "FROM form_data fd\n" +
-                "LEFT JOIN (SELECT MAX(manual) AS manual, form_data_id FROM data_row WHERE manual = 0 GROUP BY form_data_id) r ON r.form_data_id = fd.id\n" +
-                "JOIN form_column fc ON fc.form_template_id = fd.form_template_id\n" +
-                "LEFT JOIN report_period rp ON fd.report_period_id = rp.id\n" +
-                "LEFT JOIN tax_period tp ON tp.id = rp.tax_period_id\n" +
-                "WHERE fc.type = 'A' AND tp.year = ? AND fd.department_id = ? AND tp.tax_type = ? AND fd.kind = ?)\n" +
-                "SELECT * FROM list\n");
+        StringBuilder sql = new StringBuilder(GET_FORM_DATA_LIST_QUERY);
 
         List<Object> params = new ArrayList<Object>();
         params.add(year);
-        params.add(departmentId);
         params.add(code);
-        params.add(kind);
+        params.add(formData.getDepartmentId());
+        params.add(formData.getKind().getId());
+        params.add(formData.getFormTemplateId());
 
-        if (formDataId != null) {
+        if (formData.getId() != null) {
             sql.append("WHERE row_number < (SELECT row_number FROM list WHERE id = ?)");
-            params.add(formDataId);
+            params.add(formData.getId());
         }
 
         return getJdbcTemplate().query(sql.toString(),

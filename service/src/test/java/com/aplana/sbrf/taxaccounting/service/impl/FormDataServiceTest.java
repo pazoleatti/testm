@@ -260,7 +260,7 @@ public class FormDataServiceTest {
         newFormData.setReportPeriodId(1);
         newFormData.setKind(FormDataKind.PRIMARY);
 
-        when(formDataDao.getPrevFormDataListForCrossNumeration(anyInt(), anyInt(), anyString(), anyInt(), anyLong()))
+        when(formDataDao.getPrevFormDataListForCrossNumeration(any(FormData.class),anyInt(), anyString()))
                 .thenReturn(new ArrayList<FormData>());
         assertTrue("\"Номер последней строки предыдущей НФ\" должен быть равен 0",
                 formDataService.getPreviousRowNumber(newFormData).equals(0));
@@ -297,7 +297,7 @@ public class FormDataServiceTest {
         formDataList.add(formData);
         formDataList.add(formData1);
 
-        when(formDataDao.getPrevFormDataListForCrossNumeration(anyInt(), anyInt(), anyString(), anyInt(), anyLong()))
+        when(formDataDao.getPrevFormDataListForCrossNumeration(any(FormData.class), anyInt(), anyString()))
                 .thenReturn(formDataList);
         when(dataRowDao.getSizeWithoutTotal(formData, null)).thenReturn(3);
         when(dataRowDao.getSizeWithoutTotal(formData1, null)).thenReturn(5);
@@ -338,7 +338,7 @@ public class FormDataServiceTest {
         formDataList.add(formData);
         formDataList.add(formData1);
 
-        when(formDataDao.getPrevFormDataListForCrossNumeration(anyInt(), anyInt(), anyString(), anyInt(), anyLong()))
+        when(formDataDao.getPrevFormDataListForCrossNumeration(any(FormData.class), anyInt(), anyString()))
                 .thenReturn(formDataList);
         when(dataRowDao.getSizeWithoutTotal(formData, null)).thenReturn(3);
         when(dataRowDao.getSizeWithoutTotal(formData1, null)).thenReturn(5);
