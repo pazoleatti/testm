@@ -94,10 +94,11 @@ public class DeleteDepartmentCombinedHandler extends AbstractActionHandler<Delet
             List<Long> deleteList = new ArrayList<Long>();
             deleteList.add(recordVersion.getRecordId());
 
-            if (period.getStartDate().equals(recordVersion.getVersionStart()))
+            if (period.getCalendarStartDate().equals(recordVersion.getVersionStart())) {
                 provider.deleteRecordVersions(logger, deleteList, false);
-            else
-                provider.updateRecordsVersionEnd(logger, addDayToDate(period.getStartDate(),-1), deleteList);
+            } else {
+                provider.updateRecordsVersionEnd(logger, addDayToDate(period.getCalendarStartDate(),-2), deleteList);
+            }
 
             if (!logger.containsLevel(LogLevel.ERROR)) {
                 if (recordVersion.getVersionEnd()==null)
