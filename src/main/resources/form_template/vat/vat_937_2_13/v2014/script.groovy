@@ -291,6 +291,7 @@ void addData(def xml, int headRowCount) {
             }
             newRow.setIndex(rowIndex)
         }
+        newRow.setImportIndex(xlsIndexRow)
 
         if (!isFixed) {
             newRow.rowNum = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, true)

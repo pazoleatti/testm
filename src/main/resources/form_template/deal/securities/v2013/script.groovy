@@ -155,16 +155,16 @@ void logicCheck() {
         def msgIn = incomeSumCell.column.name
         def msgOut = outcomeSumCell.column.name
         if (incomeSumCell.value != null && outcomeSumCell.value != null) {
-            logger.warn("Строка $rowNum: «$msgIn» и «$msgOut» не могут быть одновременно заполнены!")
+            rowWarning(logger, row, "Строка $rowNum: «$msgIn» и «$msgOut» не могут быть одновременно заполнены!")
         }
         if (incomeSumCell.value == null && outcomeSumCell.value == null) {
-            logger.warn("Строка $rowNum: Одна из граф «$msgIn» и «$msgOut» должна быть заполнена!")
+            rowWarning(logger, row, "Строка $rowNum: Одна из граф «$msgIn» и «$msgOut» должна быть заполнена!")
         }
         // Проверка выбранной единицы измерения           
         def okei = getRefBookValue(12, row.okeiCode)?.CODE?.stringValue
         if (okei != '796' && okei != '744') {
             def msg = okeiCodeCell.column.name
-            logger.warn("Строка $rowNum: В графе «$msg» могут быть указаны только следующие элементы: шт., процент!")
+            rowWarning(logger, row, "Строка $rowNum: В графе «$msg» могут быть указаны только следующие элементы: шт., процент!")
         }
 
         // Проверка цены
@@ -177,11 +177,11 @@ void logicCheck() {
                 def msg1 = priceCell.column.name
                 def msg2 = sumCell.column.name
                 def msg3 = countCell.column.name
-                logger.warn("Строка $rowNum: «$msg1» не равно отношению «$msg2» и «$msg3»!")
+                rowWarning(logger, row, "Строка $rowNum: «$msg1» не равно отношению «$msg2» и «$msg3»!")
             } else if (okei == '744' && priceCell.value != sumCell.value) {
                 def msg1 = priceCell.column.name
                 def msg2 = sumCell.column.name
-                logger.warn("Строка $rowNum: «$msg1» не равно «$msg2»!")
+                rowWarning(logger, row, "Строка $rowNum: «$msg1» не равно «$msg2»!")
             }
         }
         // Корректность даты совершения сделки
@@ -189,7 +189,7 @@ void logicCheck() {
         if (docDateCell.value > dealDateCell.value) {
             def msg1 = dealDateCell.column.name
             def msg2 = docDateCell.column.name
-            logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
+            rowWarning(logger, row, "Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
         }
     }
 }
@@ -283,6 +283,7 @@ void addData(def xml, int headRowCount) {
 
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
+        newRow.setImportIndex(xlsIndexRow)
         editableColumns.each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
@@ -291,7 +292,7 @@ void addData(def xml, int headRowCount) {
             newRow.getCell(it).setStyleAlias('Автозаполняемая')
         }
 
-        def xmlIndexCol = 0
+        def int xmlIndexCol = 0
         // графа 1
         newRow.rowNumber = xmlIndexRow - 2
 

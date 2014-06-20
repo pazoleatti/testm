@@ -205,7 +205,7 @@ void logicCheck() {
             def logicCheck6 = (!isSection1 && row.number2 in ['60309.02', '60309.03'] && row.nds == '18/118')
             if (isSection1 ? !logicCheck5 : !logicCheck6) {
                 def columns = "«${getColumnName(row, 'number2')}», «${getColumnName(row, 'nds')}»"
-                logger.error('Строка %d: Графы %s заполнены неверно!', row.getIndex(), columns)
+                rowError(logger, row, errorMsg + 'Графы ' + columns + ' заполнены неверно!')
             }
         }
     }
@@ -344,6 +344,7 @@ void addData(def xml, int headRowCount) {
 
     for (def row : xml.row) {
         xmlIndexRow++
+        def int xlsIndexRow = xmlIndexRow + rowOffset
 
         // Пропуск строк шапки
         if (xmlIndexRow <= headRowCount - 1) {
@@ -365,7 +366,7 @@ void addData(def xml, int headRowCount) {
         }
 
         def newRow = getNewRow()
-        def int xlsIndexRow = xmlIndexRow + rowOffset
+        newRow.setImportIndex(xlsIndexRow)
 
         // Графа 3 - атрибут 900 - ACCOUNT - «Номер балансового счета», справочник 101 «План счетов бухгалтерского учета»
         record = getRecordImport(101, 'ACCOUNT', row.cell[3].text(), xlsIndexRow, 3 + colOffset)

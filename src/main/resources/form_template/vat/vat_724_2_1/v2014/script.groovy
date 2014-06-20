@@ -376,6 +376,7 @@ void addData(def xml, int headRowCount) {
 
     for (def row : xml.row) {
         xmlIndexRow++
+        def int xlsIndexRow = xmlIndexRow + rowOffset
 
         // Пропуск строк шапки
         if (xmlIndexRow <= headRowCount - 1) {
@@ -392,10 +393,10 @@ void addData(def xml, int headRowCount) {
         }
 
         def dataRow = dataRows.get(indexRow)
+        dataRow.setImportIndex(xlsIndexRow)
         indexRow++
 
         def xmlIndexCol = -1
-        def int xlsIndexRow = xmlIndexRow + rowOffset
 
         def values = [:]
         xmlIndexCol++

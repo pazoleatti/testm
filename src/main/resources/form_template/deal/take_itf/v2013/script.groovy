@@ -131,17 +131,17 @@ void logicCheck() {
 
         // Проверка цены
         if (row.outcomeSum != row.price) {
-            logger.warn("Строка $rowNum: Цена не может отличаться от суммы расходов Банка!")
+            rowWarning(logger, row, "Строка $rowNum: Цена не может отличаться от суммы расходов Банка!")
         }
 
         // Проверка стоимости
         if (row.outcomeSum != row.total) {
-            logger.warn("Строка $rowNum: Стоимость не может отличаться от суммы расходов Банка!")
+            rowWarning(logger, row, "Строка $rowNum: Стоимость не может отличаться от суммы расходов Банка!")
         }
 
         // Корректность даты сделки
         if (row.dealDoneDate < row.docDate) {
-            logger.warn("Строка $rowNum: Дата совершения сделки не может быть меньше даты договора!")
+            rowWarning(logger, row, "Строка $rowNum: Дата совершения сделки не может быть меньше даты договора!")
         }
     }
 
@@ -358,6 +358,7 @@ void addData(def xml, int headRowCount) {
 
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
+        newRow.setImportIndex(xlsIndexRow)
         editableColumns.each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')

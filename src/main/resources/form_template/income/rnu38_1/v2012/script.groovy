@@ -279,6 +279,7 @@ void addData(def xml, int headRowCount) {
 
     for (def row : xml.row) {
         xmlIndexRow++
+        def int xlsIndexRow = xmlIndexRow + rowOffset
 
         // Пропуск строк шапки
         if (xmlIndexRow <= headRowCount - 1) {
@@ -290,7 +291,7 @@ void addData(def xml, int headRowCount) {
         }
 
         def newRow = formDataService.addRow(formData, null, editableColumns, null)
-        def int xlsIndexRow = xmlIndexRow + rowOffset
+        newRow.setImportIndex(xlsIndexRow)
 
         // графа 1
         newRow.series = row.cell[0].text()

@@ -544,6 +544,7 @@ void addData(def xml, int headRowCount) {
 
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
+        newRow.setImportIndex(xlsIndexRow)
         def cols = (getBalancePeriod() ? balanceEditableColumns : editableColumns)
         cols.each {
             newRow.getCell(it).editable = true

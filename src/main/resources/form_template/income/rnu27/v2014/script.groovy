@@ -472,6 +472,7 @@ void addData(def xml, int headRowCount) {
 
     for (def row : xml.row) {
         xmlIndexRow++
+        def int xlsIndexRow = xmlIndexRow + rowOffset
 
         /* Пропуск строк шапок */
         if (xmlIndexRow <= headRowCount - 1) {
@@ -488,12 +489,12 @@ void addData(def xml, int headRowCount) {
         }
 
         def newRow = formData.createDataRow()
+        newRow.setImportIndex(xlsIndexRow)
         editableColumns.each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
         }
 
-        def int xlsIndexRow = xmlIndexRow + rowOffset
         def xmlIndexCol
 
         /* Графа 1 */
