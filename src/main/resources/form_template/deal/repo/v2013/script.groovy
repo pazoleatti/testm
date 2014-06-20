@@ -161,33 +161,33 @@ void logicCheck() {
         if (percentIncomeSum == null && percentConsumptionSum == null) {
             def msg1 = row.getCell('percentIncomeSum').column.name
             def msg2 = row.getCell('percentConsumptionSum').column.name
-            logger.warn("Строка $rowNum: Должна быть заполнена графа «$msg1» или графа «$msg2»!")
+            rowWarning(logger, row, "Строка $rowNum: Должна быть заполнена графа «$msg1» или графа «$msg2»!")
         }
         if (percentIncomeSum != null && percentConsumptionSum != null) {
             def msg1 = row.getCell('percentIncomeSum').column.name
             def msg2 = row.getCell('percentConsumptionSum').column.name
-            logger.warn("Строка $rowNum: Графа «$msg1» и графа «$msg2» не могут быть заполнены одновременно!")
+            rowWarning(logger, row, "Строка $rowNum: Графа «$msg1» и графа «$msg2» не могут быть заполнены одновременно!")
         }
 
         // Корректность даты (заключения) сделки
         if (transactionDeliveryDate < contractDate) {
             def msg1 = row.getCell('transactionDeliveryDate').column.name
             def msg2 = row.getCell('contractDate').column.name
-            logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
+            rowWarning(logger, row, "Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
         }
 
         // Корректность даты исполнения 1–ой части сделки
         def dt1 = row.date1
         if (dt1 != null && (dt1 < dFrom || dt1 > dTo)) {
             def msg = row.getCell('date1').column.name
-            logger.warn("Строка $rowNum: «$msg» не может быть больше даты окончания отчётного периода или меньше даты его начала!")
+            rowWarning(logger, row, "Строка $rowNum: «$msg» не может быть больше даты окончания отчётного периода или меньше даты его начала!")
         }
 
         // Корректность даты совершения сделки
         if (transactionDate < transactionDeliveryDate) {
             def msg1 = row.getCell('transactionDate').column.name
             def msg2 = row.getCell('transactionDeliveryDate').column.name
-            logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
+            rowWarning(logger, row, "Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
         }
     }
 }
@@ -293,7 +293,7 @@ void addData(def xml, int headRowCount) {
             newRow.getCell(it).setStyleAlias('Автозаполняемая')
         }
 
-        def xmlIndexCol = 0
+        def int xmlIndexCol = 0
 
         // графа 1
         newRow.rowNum = xmlIndexRow - headRowCount

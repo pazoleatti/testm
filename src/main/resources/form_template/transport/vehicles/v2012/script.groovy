@@ -178,12 +178,12 @@ def logicCheck() {
 
         // 2. Проверка на соответствие дат при постановке (снятии) с учёта
         if (!(row.regDateEnd == null || (row.regDate != null && row.regDateEnd.compareTo(row.regDate) >= 0))) {
-            logger.error(errorMsg + 'Дата постановки (снятия) с учёта неверная!')
+            rowError(logger, row, errorMsg + 'Дата постановки (снятия) с учёта неверная!')
         }
 
         // 3. Проврека на наличие даты угона при указании даты возврата
         if (row.stealDateEnd != null && row.stealDateStart == null) {
-            logger.error(errorMsg + 'Не заполнено поле «Дата угона»!')
+            rowError(logger, row, errorMsg + 'Не заполнено поле «Дата угона»!')
         }
 
         // 4. Проверка на наличие в списке ТС строк, для которых графы codeOKATO, identNumber, regNumber одинаковы
@@ -196,7 +196,7 @@ def logicCheck() {
                 }
             }
             if (!''.equals(errorRows)) {
-                logger.error("Обнаружены строки $index$errorRows, у которых " +
+                rowError(logger, row, "Обнаружены строки $index$errorRows, у которых " +
                         "Код ОКТМО = ${getRefBookValue(96, row.codeOKATO)?.CODE?.stringValue}, " +
                         "Идентификационный номер = $row.identNumber, " +
                         "Мощность (величина) = $row.powerVal, " +
@@ -208,7 +208,7 @@ def logicCheck() {
 
         // 5. Проверка на наличие в списке ТС строк, период владения которых не пересекается с отчётным
         if (row.regDate != null && row.regDate > dTo || row.regDateEnd != null && row.regDateEnd < dFrom) {
-            logger.error(errorMsg + 'Период регистрации ТС ('
+            rowError(logger, row, errorMsg + 'Период регистрации ТС ('
                     + row.regDate.format(dFormat) + ' - ' + ((row.regDateEnd != null) ? row.regDateEnd.format(dFormat) : '...') + ') ' +
                     ' не пересекается с периодом (' + dFrom.format(dFormat) + " - " + dTo.format(dFormat) +
                     '), за который сформирована налоговая форма!')
@@ -219,7 +219,7 @@ def logicCheck() {
             Calendar calenadarMake = Calendar.getInstance()
             calenadarMake.setTime(row.year)
             if (calenadarMake.get(Calendar.YEAR) > reportPeriod.taxPeriod.year) {
-                logger.error(errorMsg + 'Год изготовления ТС не может быть больше отчетного года!')
+                rowError(logger, row, errorMsg + 'Год изготовления ТС не может быть больше отчетного года!')
             }
         }
     }

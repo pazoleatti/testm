@@ -166,13 +166,13 @@ def logicCheck() {
         if (row.benefitStartDate != null && row.benefitEndDate != null) {
             // 2. Поверка на соответствие дат использования льготы
             if (row.benefitEndDate.compareTo(row.benefitStartDate) < 0) {
-                logger.error(errorMsg + 'Неверно указаны даты начала и окончания использования льготы!')
+                rowError(logger, row, errorMsg + 'Неверно указаны даты начала и окончания использования льготы!')
             }
 
             // 4. Проверка на наличие в списке ТС строк, период использования льготы которых не пересекается
             // с отчётным / налоговым периодом, к которому относится налоговая форма
             if (row.benefitStartDate > dTo || row.benefitEndDate < dFrom) {
-                logger.error(errorMsg + 'Период использования льготы ТС ('
+                rowError(logger, row, errorMsg + 'Период использования льготы ТС ('
                         + row.benefitStartDate.format(dFormat) + ' - ' + row.benefitEndDate.format(dFormat) + ') ' +
                         ' не пересекается с периодом (' + dFrom.format(dFormat) + " - " + dTo.format(dFormat) +
                         '), за который сформирована налоговая форма!')
@@ -190,7 +190,7 @@ def logicCheck() {
                 }
             }
             if (!''.equals(errorRows)) {
-                logger.error("Обнаружены строки $index$errorRows, у которых " +
+                rowError(logger, row, "Обнаружены строки $index$errorRows, у которых " +
                         "Код ОКТМО = ${getRefBookValue(96, row.codeOKATO)?.CODE?.stringValue}, " +
                         "Идентификационный номер = $row.identNumber, " +
                         "Мощность (величина) = $row.powerVal, " +
@@ -209,7 +209,7 @@ def logicCheck() {
             if (region != null) {
                 query = "TAX_BENEFIT_ID =" + row.taxBenefitCode + " AND DICT_REGION_ID = " + region.record_id
                 if (getRecord(7, query, getReportDate()) == null) {
-                    logger.error(errorMsg + "Выбранная льгота для текущего региона не предусмотрена!")
+                    rowError(logger, row, errorMsg + "Выбранная льгота для текущего региона не предусмотрена!")
                 }
             }
         }

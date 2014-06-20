@@ -162,7 +162,7 @@ void logicCheck() {
         if (docDateCell.value > dealDateCell.value) {
             def msg1 = dealDateCell.column.name
             def msg2 = docDateCell.column.name
-            logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
+            rowWarning(logger, row, "Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
         }
 
         // Зависимости от признака физической поставки
@@ -186,7 +186,7 @@ void logicCheck() {
                         builder.append(", ")
                     }
                 }
-                logger.warn("Строка $rowNum: В графе «$msg1» указан «ОМС», графы ${builder.toString()} заполняться не должны!")
+                rowWarning(logger, row, "Строка $rowNum: В графе «$msg1» указан «ОМС», графы ${builder.toString()} заполняться не должны!")
             }
         }
 
@@ -196,26 +196,26 @@ void logicCheck() {
         def msgIn = incomeSumCell.column.name
         def msgOut = outcomeSumCell.column.name
         if (incomeSumCell.value == null && outcomeSumCell.value == null) {
-            logger.warn("Строка $rowNum: Одна из граф «$msgIn» и «$msgOut» должна быть заполнена!")
+            rowWarning(logger, row, "Строка $rowNum: Одна из граф «$msgIn» и «$msgOut» должна быть заполнена!")
         }
 
         // Проверка доходов/расходов и стоимости
         def msgPrice = row.getCell('price').column.name
         if (incomeSumCell.value != null && outcomeSumCell.value != null && row.price != null) {
             if (row.price.abs() != (incomeSumCell.value - outcomeSumCell.value).abs())
-                logger.warn("Строка $rowNum: Графа «$msgPrice» должна быть равна разнице графы «$msgIn» и «$msgOut» по модулю!")
+                rowWarning(logger, row, "Строка $rowNum: Графа «$msgPrice» должна быть равна разнице графы «$msgIn» и «$msgOut» по модулю!")
         } else if (incomeSumCell.value != null) {
             if (row.price != incomeSumCell.value)
-                logger.warn("Строка $rowNum: Графа «$msgPrice» должна быть равна «$msgIn»!")
+                rowWarning(logger, row, "Строка $rowNum: Графа «$msgPrice» должна быть равна «$msgIn»!")
         } else if (outcomeSumCell.value != null) {
             if (row.price != outcomeSumCell.value)
-                logger.warn("Строка $rowNum: Графа «$msgPrice» должна быть равна «$msgOut»!")
+                rowWarning(logger, row, "Строка $rowNum: Графа «$msgPrice» должна быть равна «$msgOut»!")
         }
 
         // Проверка количества
         if (row.count != 1) {
             def msg = row.getCell('count').column.name
-            logger.warn("Строка $rowNum: В графе «$msg» может быть указано только значение «1»!")
+            rowWarning(logger, row, "Строка $rowNum: В графе «$msg» может быть указано только значение «1»!")
         }
 
         // Проверка внешнеторговой сделки
@@ -226,14 +226,14 @@ void logicCheck() {
         def msg14 = row.getCell('foreignDeal').column.name
         if (row.countryCodeNumeric == row.countryCodeNumeric2) {
             if (row.foreignDeal != recNoId) {
-                logger.warn("Строка $rowNum: «$msg14» должно иметь значение «Нет»!")
+                rowWarning(logger, row, "Строка $rowNum: «$msg14» должно иметь значение «Нет»!")
             }
         } else if (deliveryPhis != null && deliveryPhis) {
             if (row.foreignDeal != recNoId) {
-                logger.warn("Строка $rowNum: «$msg14» должно иметь значение «Нет»!")
+                rowWarning(logger, row, "Строка $rowNum: «$msg14» должно иметь значение «Нет»!")
             }
         } else if (row.foreignDeal != recYesId) {
-            logger.warn("Строка $rowNum: «$msg14» должно иметь значение «Да»!")
+            rowWarning(logger, row, "Строка $rowNum: «$msg14» должно иметь значение «Да»!")
         }
 
         // Корректность даты совершения сделки
@@ -241,7 +241,7 @@ void logicCheck() {
         if (dealDoneDateCell.value < dealDateCell.value) {
             def msg1 = dealDoneDateCell.column.name
             def msg2 = dealDateCell.column.name
-            logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
+            rowWarning(logger, row, "Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
         }
 
         // Проверка заполнения стоимости сделки
@@ -250,7 +250,7 @@ void logicCheck() {
         if (total.value != price.value) {
             def msg1 = total.column.name
             def msg2 = price.column.name
-            logger.warn("Строка $rowNum: «$msg1» не может отличаться от «$msg2»!")
+            rowWarning(logger, row, "Строка $rowNum: «$msg1» не может отличаться от «$msg2»!")
         }
 
         // Проверка заполнения региона отправки
@@ -259,10 +259,10 @@ void logicCheck() {
             def regionName = row.getCell('regionCode').column.name
             def countryName = row.getCell('countryCodeNumeric').column.name
             if (country == '643' && row.regionCode == null) {
-                logger.warn("Строка $rowNum: «$regionName» должен быть заполнен, т.к. в «$countryName» " +
+                rowWarning(logger, row, "Строка $rowNum: «$regionName» должен быть заполнен, т.к. в «$countryName» " +
                         "указан код 643!")
             } else if (country != '643' && row.regionCode != null) {
-                logger.warn("Строка $rowNum: «$regionName» не должен быть заполнен, т.к. в «$countryName» " +
+                rowWarning(logger, row, "Строка $rowNum: «$regionName» не должен быть заполнен, т.к. в «$countryName» " +
                         "указан код, отличный от 643!")
             }
         }
@@ -273,10 +273,10 @@ void logicCheck() {
             def regionName = row.getCell('region2').column.name
             def countryName = row.getCell('countryCodeNumeric2').column.name
             if (country == '643' && row.region2 == null) {
-                logger.warn("Строка $rowNum: «$regionName» должен быть заполнен, т.к. в «$countryName» " +
+                rowWarning(logger, row, "Строка $rowNum: «$regionName» должен быть заполнен, т.к. в «$countryName» " +
                         "указан код 643!")
             } else if (country != '643' && row.region2 != null) {
-                logger.warn("Строка $rowNum: «$regionName» не должен быть заполнен, т.к. в «$countryName» " +
+                rowWarning(logger, row, "Строка $rowNum: «$regionName» не должен быть заполнен, т.к. в «$countryName» " +
                         "указан код, отличный от 643!")
             }
         }

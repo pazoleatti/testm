@@ -146,7 +146,6 @@ void logicCheck() {
         checkNonEmptyColumns(row, rowNum, ['contractNum', 'contractDate'], logger, true)
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns - ['contractNum', 'contractDate'], logger, false)
 
-        def count = row.count
         def cost = row.cost
         def incomeBankSum = row.incomeBankSum
         def outcomeBankSum = row.outcomeBankSum
@@ -166,43 +165,35 @@ void logicCheck() {
         // Наименования колонок
         def contractDateName = row.getCell('contractDate').column.name
         def transactionDateName = row.getCell('transactionDate').column.name
-        def countName = row.getCell('count').column.name
         def costName = row.getCell('cost').column.name
-
-        // Проверка цены
-        def res = null
-
-        if (bankSum != null && count != null && count != 0) {
-            res = (bankSum / count).setScale(0, RoundingMode.HALF_UP)
-        }
 
         // Проверка доходности
         if (cost != bankSum) {
-            logger.warn("Строка $rowNum: «$costName» не может отличаться от «$msgBankSum»!")
+            rowWarning(logger, row, "Строка $rowNum: «$costName» не может отличаться от «$msgBankSum»!")
         }
 
         // Заполнение граф 5.1 и 5.2
         if (incomeBankSum == null && outcomeBankSum == null) {
             def msg1 = row.getCell('incomeBankSum').column.name
             def msg2 = row.getCell('outcomeBankSum').column.name
-            logger.warn("Строка $rowNum: Должна быть заполнена графа «$msg1» или графа «$msg2»!")
+            rowWarning(logger, row, "Строка $rowNum: Должна быть заполнена графа «$msg1» или графа «$msg2»!")
         }
         if (incomeBankSum != null && outcomeBankSum != null) {
             def msg1 = row.getCell('incomeBankSum').column.name
             def msg2 = row.getCell('outcomeBankSum').column.name
-            logger.warn("Строка $rowNum: Графа «$msg1» и графа «$msg2» не могут быть заполнены одновременно!")
+            rowWarning(logger, row, "Строка $rowNum: Графа «$msg1» и графа «$msg2» не могут быть заполнены одновременно!")
         }
 
         // Корректность даты совершения сделки
         if (transactionDate < contractDate) {
-            logger.warn("Строка $rowNum: «$transactionDateName» не может быть меньше «$contractDateName»!")
+            rowWarning(logger, row, "Строка $rowNum: «$transactionDateName» не может быть меньше «$contractDateName»!")
         }
 
         // Проверка заполненности одного из атрибутов
         if (row.city != null && !row.city.toString().isEmpty() && row.settlement != null && !row.settlement.toString().isEmpty()) {
             def cityName = row.getCell('city').column.name
             def settleName = row.getCell('settlement').column.name
-            logger.warn("Строка $rowNum: Если заполнена графа «$cityName», то графа «$settleName» не должна быть заполнена!")
+            rowWarning(logger, row, "Строка $rowNum: Если заполнена графа «$cityName», то графа «$settleName» не должна быть заполнена!")
         }
 
         // Проверка заполнения региона
@@ -211,9 +202,9 @@ void logicCheck() {
             def regionName = row.getCell('region').column.name
             def countryName = row.getCell('country').column.name
             if (country == '643' && row.region == null) {
-                logger.warn("Строка $rowNum: «$regionName» должен быть заполнен, т.к. в «$countryName» указан код 643!")
+                rowWarning(logger, row, "Строка $rowNum: «$regionName» должен быть заполнен, т.к. в «$countryName» указан код 643!")
             } else if (country != '643' && row.region != null) {
-                logger.warn("Строка $rowNum: «$regionName» не должен быть заполнен, т.к. в «$countryName» указан код, отличный от 643!")
+                rowWarning(logger, row, "Строка $rowNum: «$regionName» не должен быть заполнен, т.к. в «$countryName» указан код, отличный от 643!")
             }
         }
     }
@@ -332,7 +323,7 @@ void addData(def xml, int headRowCount) {
             newRow.getCell(it).setStyleAlias('Автозаполняемая')
         }
 
-        def xmlIndexCol = 0
+        def int xmlIndexCol = 0
 
         // графа 1
         newRow.rowNum = xmlIndexRow - 2

@@ -161,32 +161,32 @@ void logicCheck() {
         if (incomeSumCell.value != null && outcomeSumCell.value != null) {
             def msgIn = incomeSumCell.column.name
             def msgOut = outcomeSumCell.column.name
-            logger.warn("Строка $rowNum: Графы «$msgIn» и «$msgOut» не могут быть одновременно заполнены!")
+            rowWarning(logger, row, "Строка $rowNum: Графы «$msgIn» и «$msgOut» не могут быть одновременно заполнены!")
         }
         if (incomeSumCell.value == null && outcomeSumCell.value == null) {
             def msgIn = incomeSumCell.column.name
             def msgOut = outcomeSumCell.column.name
-            logger.warn("Строка $rowNum: Одна из граф «$msgIn» и «$msgOut» должна быть заполнена!")
+            rowWarning(logger, row, "Строка $rowNum: Одна из граф «$msgIn» и «$msgOut» должна быть заполнена!")
         }
         // Корректность даты заключения сделки
         def dealDateCell = row.getCell('dealDate')
         if (docDateCell.value > dealDateCell.value) {
             def msg1 = dealDateCell.column.name
             def msg2 = docDateCell.column.name
-            logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
+            rowWarning(logger, row, "Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
         }
         // Проверка заполнения стоимости сделки
         if (row.total != row.price) {
             def msg1 = row.getCell('price').column.name
             def msg2 = row.getCell('total').column.name
-            logger.warn("Строка $rowNum: «$msg1» не может отличаться от «$msg2»!")
+            rowWarning(logger, row, "Строка $rowNum: «$msg1» не может отличаться от «$msg2»!")
         }
         // Корректность дат сделки dealDate - 9гр, dealDoneDate - 16гр
         def dealDoneDate = row.getCell('dealDoneDate')
         if (dealDateCell.value > dealDoneDate.value) {
             def msg1 = dealDoneDate.column.name
             def msg2 = dealDateCell.column.name
-            logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
+            rowWarning(logger, row, "Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
         }
     }
 

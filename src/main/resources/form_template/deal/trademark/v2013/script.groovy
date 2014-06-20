@@ -155,18 +155,18 @@ void logicCheck() {
         def msgSum = sumCell.column.name
         if (priceCell.value != sumCell.value) {
             def msg = priceCell.column.name
-            logger.warn("Строка $rowNum: «$msg» не может отличаться от «$msgSum»!")
+            rowWarning(logger, row, "Строка $rowNum: «$msg» не может отличаться от «$msgSum»!")
         }
         if (costCell.value != sumCell.value) {
             def msg = costCell.column.name
-            logger.warn("Строка $rowNum: «$msg» не может отличаться от «$msgSum»!")
+            rowWarning(logger, row, "Строка $rowNum: «$msg» не может отличаться от «$msgSum»!")
         }
         // Корректность даты совершения сделки
         def dealDateCell = row.getCell('dealDate')
         if (docDateCell.value > dealDateCell.value) {
             def msg1 = dealDateCell.column.name
             def msg2 = docDateCell.column.name
-            logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
+            rowWarning(logger, row, "Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
         }
     }
 }
@@ -254,7 +254,7 @@ void addData(def xml, int headRowCount) {
             newRow.getCell(it).setStyleAlias('Автозаполняемая')
         }
 
-        def xmlIndexCol = 0
+        def int xmlIndexCol = 0
 
         // графа 1
         newRow.rowNumber = xmlIndexRow - 2

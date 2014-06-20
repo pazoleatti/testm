@@ -152,27 +152,27 @@ void logicCheck() {
 
         // Проверка выбранной единицы измерения        
         if (getRefBookValue(12, row.okeiCode)?.CODE?.stringValue != '796') {
-            logger.warn("Строка $rowNum: В поле «Код единицы измерения по ОКЕИ» могут быть указаны только следующие элементы: шт.!")
+            rowWarning(logger, row, "Строка $rowNum: В поле «Код единицы измерения по ОКЕИ» могут быть указаны только следующие элементы: шт.!")
         }
 
         // Проверка количества
         if (row.count != 1) {
             def msg = row.getCell('transactionDate').column.name
-            logger.warn("Строка $rowNum: В графе «$msg» может быть указано только значение «1»!")
+            rowWarning(logger, row, "Строка $rowNum: В графе «$msg» может быть указано только значение «1»!")
         }
 
         // Корректность даты совершения сделки
         if (transactionDate < contractDate) {
             def msg1 = row.getCell('transactionDate').column.name
             def msg2 = row.getCell('contractDate').column.name
-            logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
+            rowWarning(logger, row, "Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
         }
 
         // Проверка заполнения стоимости сделки
         if (totalCost != price) {
             def msg1 = row.getCell('totalCost').column.name
             def msg2 = row.getCell('price').column.name
-            logger.warn("Строка $rowNum: «$msg1» не может отличаться от «$msg2» сделки!")
+            rowWarning(logger, row, "Строка $rowNum: «$msg1» не может отличаться от «$msg2» сделки!")
         }
     }
 }
@@ -256,7 +256,7 @@ void addData(def xml, int headRowCount) {
             newRow.getCell(it).setStyleAlias('Автозаполняемая')
         }
 
-        def xmlIndexCol = 0
+        def int xmlIndexCol = 0
 
         // графа 1
         newRow.rowNum = xmlIndexRow - headRowCount

@@ -210,7 +210,7 @@ void logicCheck() {
         // 2. Проверка суммы НДС по данным бухгалтерского учета и книге продаж
         if (row.ndsSum != row.ndsBookSum &&
                 (isSection1or2 && row.ndsNum == '60309.01' || isSection5or6)) {
-            logger.warn(errorMsg + 'Сумма НДС по данным бухгалтерского учета не соответствует данным книги продаж!')
+            rowWarning(logger, row, errorMsg + 'Сумма НДС по данным бухгалтерского учета не соответствует данным книги продаж!')
         }
     }
 
@@ -243,7 +243,7 @@ void logicCheck() {
         def values5 = calc5(section)
         for (def row : sectionsRows) {
             if (!(row.ndsNum in values5)) {
-                logger.error('Строка %d: Графа «%s» заполнена неверно!', row.getIndex(), getColumnName(row, 'ndsNum'))
+                rowError(logger, row, 'Строка ' + row.getIndex() + ': Графа «' + getColumnName(row, 'ndsNum') + '» заполнена неверно!')
             }
         }
     }
