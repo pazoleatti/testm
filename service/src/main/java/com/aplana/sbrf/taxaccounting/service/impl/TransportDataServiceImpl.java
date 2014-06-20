@@ -100,4 +100,40 @@ public class TransportDataServiceImpl implements TransportDataService {
         IOUtils.closeQuietly(outputStream);
         logger.info("Файл «" + fileName + "» помещен в каталог загрузки «" + folderPath + "».");
     }
+
+    @Override
+    public void importDataFromFolder(TAUserInfo userInfo, ConfigurationParam folderParam, Logger logger) {
+        // Конфигурационные параметры
+        ConfigurationParamModel model = configurationDao.loadParams();
+        List<String> uploadPathList = model.get(folderParam);
+
+        // Проверка наличия каталога в параметрах
+        if (uploadPathList == null || uploadPathList.isEmpty()) {
+            logger.error(NO_CATALOG_ERROR);
+            return;
+        }
+
+        List<String> workFilesList;
+
+        // Обработка всех подходящих файлов, с получением списка на каждой итерации
+        while (!(workFilesList = getWorkFilesFromFolder(uploadPathList.get(0))).isEmpty()) {
+            FileWrapper currentFile = ResourceUtils.getSharedResource(uploadPathList.get(0) + workFilesList.get(0));
+            // Обработка файла
+            TransportDataParam transportDataParam = TransportDataParam.valueOf(workFilesList.get(0));
+            // TODO Маппинг, выполнение скрипта, перемещение в каталог архива или в каталог ошибок
+        }
+    }
+
+    @Override
+    public List<String> getWorkFilesFromFolder(String folderPath) {
+        List<String> retVal = new LinkedList<String>();
+        FileWrapper catalogFile = ResourceUtils.getSharedResource(folderPath);
+        for (String candidateStr : catalogFile.list()) {
+            FileWrapper candidateFile = ResourceUtils.getSharedResource(folderPath + candidateStr);
+            if (candidateFile.isFile() && TransportDataParam.isValidName(candidateStr)) {
+                retVal.add(candidateStr);
+            }
+        }
+        return retVal;
+    }
 }

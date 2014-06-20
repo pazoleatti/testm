@@ -15,6 +15,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.LinkedList;
 import java.util.List;
 
 import static java.util.Arrays.asList;
@@ -37,7 +38,7 @@ public class TransportDataServiceTest {
         TemporaryFolder temporaryFolder = new TemporaryFolder();
         temporaryFolder.create();
         folder = temporaryFolder.getRoot();
-        System.out.println("Test folder is \"" + folder.getAbsoluteFile() + "\"");
+        System.out.println("Test folder1 is \"" + folder.getAbsoluteFile() + "\"");
         ConfigurationDao configurationDao = mock(ConfigurationDao.class);
         ConfigurationParamModel model = new ConfigurationParamModel();
         model.put(ConfigurationParam.FORM_DATA_DIRECTORY, asList("file://" + folder.getAbsolutePath() + "/"));
@@ -157,6 +158,33 @@ public class TransportDataServiceTest {
         Assert.assertTrue(fileList.contains(FILE_NAME_1));
         Assert.assertTrue(fileList.contains(FILE_NAME_2_EXTRACT_1));
         Assert.assertTrue(fileList.contains(FILE_NAME_2_EXTRACT_2));
+    }
+
+    @Test
+    public void getWorkFilesFromFolderTest() throws IOException {
+        // Подготовка тестового каталога
+        TemporaryFolder temporaryFolder = new TemporaryFolder();
+        temporaryFolder.create();
+        System.out.println("Test folder2 is \"" + temporaryFolder.getRoot().getAbsoluteFile() + "\"");
+        // Создание тестовых файлов
+        String[] fileNames = {"file1.txt", "file2.doc", "file3.zip", "file4.zip",
+                "____852-4______________147212014__.rnu", "1290-40.1______________151222015_6.rnu"};
+        List<File> fileList = new LinkedList<File>();
+        for (String fileName : fileNames) {
+            fileList.add(temporaryFolder.newFile(fileName));
+        }
+        temporaryFolder.newFolder("folder");
+        // Получение «рабочих» (подходящих файлов)
+        List<String> result = transportDataService.getWorkFilesFromFolder(temporaryFolder.getRoot().getAbsolutePath() + "/");
+        Assert.assertEquals(2, result.size());
+        Assert.assertTrue(result.contains(fileNames[4]));
+        Assert.assertTrue(result.contains(fileNames[5]));
+        temporaryFolder.delete();
+    }
+
+    @Test
+    public void importDataFromFolderTest() {
+        // TODO Подготовить тесты после реализации в сервисе
     }
 
     private static InputStream getFileAsStream(String fileName) {
