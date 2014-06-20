@@ -670,6 +670,7 @@ void addData(def xml, int headRowCount) {
 
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
+        newRow.setImportIndex(xlsIndexRow)
         (getBalancePeriod() ? (allColumns - ['rowNumber', 'currency']) : editableColumns).each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')

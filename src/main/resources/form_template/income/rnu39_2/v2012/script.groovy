@@ -497,6 +497,7 @@ def addData(def xml, int headRowCount) {
     def sectionRowsMap = [:]
     for (def row : xml.row) {
         xmlIndexRow++
+        def int xlsIndexRow = xmlIndexRow + rowOffset
 
         // Пропуск строк шапки
         if (xmlIndexRow <= headRowCount - 1) {
@@ -520,6 +521,7 @@ def addData(def xml, int headRowCount) {
         }
 
         def newRow = formData.createDataRow()
+        newRow.setImportIndex(xlsIndexRow)
         newRow.keySet().each {
             newRow.getCell(it).setStyleAlias('Автозаполняемая')
         }
@@ -527,8 +529,6 @@ def addData(def xml, int headRowCount) {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
         }
-
-        def int xlsIndexRow = xmlIndexRow + rowOffset
 
         // графа 3 - атрибут 813 - REG_NUM - «Государственный регистрационный номер», справочник 84 «Ценные бумаги»
         // TODO (Ramil Timerbaev) могут быть проблемы с нахождением записи,

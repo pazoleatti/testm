@@ -265,28 +265,28 @@ void generateXML() {
     def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData)
 
     /** Доходы сложные уровня Банка "Сводная форма начисленных доходов". */
-    def dataRowsComplexIncome = getDataRows(formDataCollection, departmentId, 302, FormDataKind.SUMMARY)
+    def dataRowsComplexIncome = getDataRows(formDataCollection, 302, FormDataKind.SUMMARY)
 
     /** Доходы простые уровня Банка "Расшифровка видов доходов, учитываемых в простых РНУ". */
-    def dataRowsSimpleIncome = getDataRows(formDataCollection, departmentId, 301, FormDataKind.SUMMARY)
+    def dataRowsSimpleIncome = getDataRows(formDataCollection, 301, FormDataKind.SUMMARY)
 
     /** Расходы сложные уровня Банка "Сводная форма начисленных расходов". */
-    def dataRowsComplexConsumption = getDataRows(formDataCollection, departmentId, 303, FormDataKind.SUMMARY)
+    def dataRowsComplexConsumption = getDataRows(formDataCollection, 303, FormDataKind.SUMMARY)
 
     /** Расходы простые уровня Банка "Расшифровка видов расходов, учитываемых в простых РНУ". */
-    def dataRowsSimpleConsumption = getDataRows(formDataCollection, departmentId, 304, FormDataKind.SUMMARY)
+    def dataRowsSimpleConsumption = getDataRows(formDataCollection, 304, FormDataKind.SUMMARY)
 
     /** Сводная налоговая формы Банка «Расчёт распределения авансовых платежей и налога на прибыль по обособленным подразделениям организации». */
-    def dataRowsAdvance = getDataRows(formDataCollection, departmentId, 500, FormDataKind.SUMMARY)
+    def dataRowsAdvance = getDataRows(formDataCollection, 500, FormDataKind.SUMMARY)
 
     /** Сведения для расчёта налога с доходов в виде дивидендов. */
-    def dataRowsDividend = getDataRows(formDataCollection, departmentId, 306, FormDataKind.ADDITIONAL)
+    def dataRowsDividend = getDataRows(formDataCollection, 306, FormDataKind.ADDITIONAL)
 
     /** Расчет налога на прибыль с доходов, удерживаемого налоговым агентом. */
-    def dataRowsTaxAgent = getDataRows(formDataCollection, departmentId, 307, FormDataKind.ADDITIONAL)
+    def dataRowsTaxAgent = getDataRows(formDataCollection, 307, FormDataKind.ADDITIONAL)
 
     /** Выходная налоговая форма «Сумма налога, подлежащая уплате в бюджет, по данным налогоплательщика». */
-    def dataRowsTaxSum = getDataRows(formDataCollection, departmentId, 308, FormDataKind.ADDITIONAL)
+    def dataRowsTaxSum = getDataRows(formDataCollection, 308, FormDataKind.ADDITIONAL)
 
     /*
      * Получение значении декларации за предыдущий период.
@@ -1873,9 +1873,11 @@ def getXmlValue(def value) {
 }
 
 /** Получить строки формы. */
-def getDataRows(def formDataCollection, def departmentId, def formTemplateId, def kind) {
-    def form = formDataCollection?.find(departmentId, formTemplateId, kind)
-    if (form) {
-        formDataService.getDataRowHelper(form)?.getAll()
+def getDataRows(def formDataCollection, def formTemplateId, def kind) {
+    def formList = formDataCollection?.findAllByFormTypeAndKind(formTemplateId, kind)
+    def dataRows = []
+    for (def form : formList) {
+        dataRows += (formDataService.getDataRowHelper(form)?.getAll()?:[])
     }
+    return dataRows.isEmpty() ? null : dataRows
 }

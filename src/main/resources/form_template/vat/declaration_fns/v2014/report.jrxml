@@ -276,21 +276,21 @@
 ($F{СтРеалТов}+"----------").substring(0,10)]]></initialValueExpression>
 		</variable>
 		<variable name="СтПриобТов" class="java.lang.String">
-			<variableExpression><![CDATA[($F{СтПриобТов} == null || $F{СтПриобТов}.equals("0")) ?
+			<variableExpression><![CDATA[$F{СтПриобТов} == null ?
 "----------"
 :
 ($F{СтПриобТов}+"----------").substring(0,10)]]></variableExpression>
-			<initialValueExpression><![CDATA[($F{СтПриобТов} == null || $F{СтПриобТов}.equals("0")) ?
+			<initialValueExpression><![CDATA[$F{СтПриобТов} == null ?
 "----------"
 :
 ($F{СтПриобТов}+"----------").substring(0,10)]]></initialValueExpression>
 		</variable>
 		<variable name="НалНеВыч" class="java.lang.String">
-			<variableExpression><![CDATA[($F{НалНеВыч} == null || $F{НалНеВыч}.equals("0")) ?
+			<variableExpression><![CDATA[$F{НалНеВыч} == null ?
 "----------"
 :
 ($F{НалНеВыч}+"----------").substring(0,10)]]></variableExpression>
-			<initialValueExpression><![CDATA[($F{НалНеВыч} == null || $F{НалНеВыч}.equals("0")) ?
+			<initialValueExpression><![CDATA[$F{НалНеВыч} == null ?
 "----------"
 :
 ($F{НалНеВыч}+"----------").substring(0,10)]]></initialValueExpression>

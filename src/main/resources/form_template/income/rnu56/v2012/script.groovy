@@ -533,6 +533,7 @@ void addData(def xml, int headRowCount) {
 
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
+        newRow.setImportIndex(xlsIndexRow)
         def cols = isBalancePeriod() ? (allColumns - 'number') : editableColumns
         def autoColumns = isBalancePeriod() ? ['number'] : autoFillColumns
         cols.each {

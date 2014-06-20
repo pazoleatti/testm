@@ -62,7 +62,13 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
                 new TypeFlag[]{TypeFlag.ADD, TypeFlag.SAME}, filter);
 	}
 
-	@Override
+    @Override
+    public int getSizeWithoutTotal(FormData formData, DataRowFilter filter) {
+        return physicalGetSizeWithoutTotal(formData,
+                new TypeFlag[]{TypeFlag.ADD, TypeFlag.SAME}, filter);
+    }
+
+    @Override
 	public void updateRows(FormData fd, Collection<DataRow<Cell>> rows) {
 		// Если строка помечена как ADD, необходимо обновление
 		// Если строка помечена как SAME, то помечаем её как DEL создаем новую с
@@ -312,7 +318,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		Pair<String, Map<String, Object>> sql = dataRowMapper.createSql();
 
         if(!isSupportOver()){
-            sql.first = sql.getFirst().replaceFirst("over \\(order by sub.ORD\\)", "over ()");
+            sql.first = sql.getFirst().replaceAll("over \\(order by sub.ORD\\)", "over ()");
         }
 
 		List<DataRow<Cell>> dataRows = getNamedParameterJdbcTemplate().query(
@@ -333,6 +339,25 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 						"select count(ID) from DATA_ROW where FORM_DATA_ID = :formDataId and TYPE in (:types) and manual = :manual",
 						params);
 	}
+
+    /**
+     * Получить количество строк без учета итоговых
+     * @param formData
+     * @param types
+     * @param filter
+     * @return
+     */
+    private int physicalGetSizeWithoutTotal(FormData formData, TypeFlag[] types,
+                                DataRowFilter filter) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("formDataId", formData.getId());
+        params.put("types", TypeFlag.rtsToKeys(types));
+        params.put("manual", formData.isManual() ? 1 : 0);
+        return getNamedParameterJdbcTemplate()
+                .queryForInt(
+                        "select count(ID) from DATA_ROW where FORM_DATA_ID = :formDataId and TYPE in (:types) and manual = :manual AND alias IS NULL ",
+                        params);
+    }
 
     private void physicalInsertRows(final FormData formData,
                                     final List<DataRow<Cell>> dataRows, final Long ordBegin,

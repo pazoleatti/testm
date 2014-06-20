@@ -116,6 +116,16 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 
         StringBuilder sql = new StringBuilder();
         sql.append(select);
+        // Генерация нумерации строк
+        sql.insert(0, "SELECT * FROM (\n");
+        sql.append(") table1 LEFT OUTER JOIN (\n");
+        sql.append("SELECT row_number() over (order by sub.ORD) AS IDX2, sub.id AS ID2\n");
+        sql.append("FROM (SELECT d.ID AS ID, d.ALIAS AS A, d.ord AS ord\n");
+        sql.append("FROM data_row d\n");
+        sql.append("WHERE d.FORM_DATA_ID = :formDataId AND manual = :manual AND d.TYPE IN (:types) AND d.ALIAS IS NULL) sub\n");
+        sql.append("GROUP BY sub.id, sub.ord, sub.a ORDER BY sub.ord");
+        sql.append(") table2 ON table1.id = table2.id2");
+
         if (range != null) {
             sql.insert(0, "select * from( ");
             sql.append(") where IDX between :from and :to");
@@ -134,7 +144,9 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
         for (Cell cell : cells) {
             // Values
             if (cell.getColumn() instanceof AutoNumerationColumn) {
-                cell.setValue(SqlUtils.getInteger(rs, "IDX") + previousRowNumber, rowNum);
+                if (rs.getString("A") == null) {
+                    cell.setValue(SqlUtils.getInteger(rs, "IDX2") + previousRowNumber, rowNum);
+                }
             } else {
                 DataRowDaoImplUtils.CellValueExtractor extr = getCellValueExtractor(cell.getColumn());
                 cell.setValue(extr.getValue(rs,

@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.script.util;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.script.range.Range;
 import com.aplana.sbrf.taxaccounting.model.script.range.Rect;
@@ -77,6 +78,8 @@ public final class ScriptUtils {
     private static final String WRONG_FIXED_VALUE = "Строка %d: Графа «%s» содержит значение «%s», не соответствующее значению «%s» данной графы в макете налоговой формы!";
     private static final String EMPTY_VALUE = "Строка %d: Графа «%s» содержит пустое значение, не соответствующее значению «%s» данной графы в макете налоговой формы!";
     private static final String EMPTY_EXPECTED_VALUE = "Строка %d: Графа «%s» содержит значение «%s», не соответствующее пустому значению данной графы в макете налоговой формы!";
+
+    private static final String IMPORT_ROW_PREFIX = "Строка файла %d: %s";
 
     /**
      * Интерфейс для переопределения алгоритма расчета
@@ -613,9 +616,9 @@ public final class ScriptUtils {
             if (rowCell.getValue() == null || rowCell.getValue().toString().isEmpty()) {
                 String msg = String.format(WRONG_NON_EMPTY, index, getColumnName(row, alias));
                 if (required) {
-                    logger.error(msg);
+                    rowError(logger, row, msg);
                 } else {
-                    logger.warn(msg);
+                    rowWarning(logger, row, msg);
                 }
             }
         }
@@ -646,9 +649,9 @@ public final class ScriptUtils {
             String msg = String.format(WRONG_CALC, row.getIndex(),
                     StringUtils.collectionToDelimitedString(errorColumns, ", "));
             if (required) {
-                logger.error(msg);
+                rowError(logger, row, msg);
             } else {
-                logger.warn(msg);
+                rowWarning(logger, row, msg);
             }
         }
     }
@@ -903,6 +906,44 @@ public final class ScriptUtils {
             } else {
                 logger.warn("%s", msg);
             }
+        }
+    }
+
+    /**
+     * Вывод предупреждения с учетом возможного присутствия информации о исходной позиции строки
+     */
+    public static void rowWarning(Logger logger, DataRow<Cell> row, String msg) {
+        rowLog(logger, row, msg, LogLevel.WARNING);
+    }
+
+    /**
+     * Вывод ошибки с учетом возможного присутствия информации о исходной позиции строки
+     */
+    public static void rowError(Logger logger, DataRow<Cell> row, String msg) {
+        rowLog(logger, row, msg, LogLevel.ERROR);
+    }
+
+    /**
+     * Вывод исключения с учетом возможного присутствия информации о исходной позиции строки
+     */
+    public static void rowServiceException(DataRow<Cell> row, String msg) {
+        if (row.getImportIndex() != null) {
+            msg = String.format(IMPORT_ROW_PREFIX, row.getImportIndex(), msg);
+        }
+        throw new ServiceException(msg);
+    }
+
+    private static void rowLog(Logger logger, DataRow<Cell> row, String msg, LogLevel logLevel) {
+        if (row.getImportIndex() != null) {
+            msg = String.format(IMPORT_ROW_PREFIX, row.getImportIndex(), msg);
+        }
+        switch (logLevel) {
+            case ERROR:
+                logger.error("%s", msg);
+                break;
+            case WARNING:
+                logger.warn("%s", msg);
+                break;
         }
     }
 }

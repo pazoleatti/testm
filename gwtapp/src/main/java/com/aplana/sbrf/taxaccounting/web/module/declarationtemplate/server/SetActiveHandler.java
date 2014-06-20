@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.server;
 
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
@@ -40,6 +41,9 @@ public class SetActiveHandler extends AbstractActionHandler<SetActiveAction, Set
 
     @Override
     public SetActiveResult execute(SetActiveAction action, ExecutionContext context) throws ActionException {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        declarationTemplateService.checkLockedByAnotherUser(action.getDtId(), userInfo);
+        declarationTemplateService.lock(action.getDtId(), userInfo);
         SetActiveResult result = new SetActiveResult();
         Logger logger = new Logger();
         result.setIsSetActiveSuccessfully(mainOperatingService.setStatusTemplate(action.getDtId(), logger, securityService.currentUserInfo().getUser(), action.getForce()));

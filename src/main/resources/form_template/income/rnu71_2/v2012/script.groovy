@@ -506,6 +506,7 @@ void addData(def xml, int headRowCount) {
 
     for (def row : xml.row) {
         xmlIndexRow++
+        def int xlsIndexRow = xmlIndexRow + rowOffset
 
         // Пропуск строк шапки
         if (xmlIndexRow <= headRowCount - 1) {
@@ -522,6 +523,7 @@ void addData(def xml, int headRowCount) {
         }
 
         def newRow = formData.createDataRow()
+        newRow.setImportIndex(xlsIndexRow)
         def columns = (isBalancePeriod() ? allColumns - 'rowNumber' : editableColumns)
         columns.each {
             newRow.getCell(it).editable = true
@@ -532,7 +534,6 @@ void addData(def xml, int headRowCount) {
         }
 
         def int xmlIndexCol = 0
-        def int xlsIndexRow = xmlIndexRow + rowOffset
 
         // графа 1
         xmlIndexCol++

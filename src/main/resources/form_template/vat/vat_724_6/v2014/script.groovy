@@ -75,7 +75,7 @@ void logicCheck() {
         // 2. Проверка суммы НДС
         if (row.sum != null && row.sum2 != null &&
                 !(row.sum2 > row.sum * 0.15 && row.sum2 < row.sum * 0.21)) {
-            logger.warn("Строка $index: Сумма НДС по данным бухгалтерского учета не соответствует налоговой базе!")
+            rowWarning(logger, row, "Строка $index: Сумма НДС по данным бухгалтерского учета не соответствует налоговой базе!")
         }
     }
     // 3. Проверка итоговых значений
@@ -157,6 +157,7 @@ void addData(def xml, int headRowCount) {
 
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
+        newRow.setImportIndex(xlsIndexRow)
         editableColumns.each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')

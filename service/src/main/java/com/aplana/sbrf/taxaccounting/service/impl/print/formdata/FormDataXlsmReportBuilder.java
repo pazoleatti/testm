@@ -47,6 +47,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
 		DATE,
 		STRING,
 		BIGDECIMAL,
+        NUMERATION,
 		EMPTY ,
 		DEFAULT
 	}
@@ -88,6 +89,12 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                     style.setWrapText(true);
                     style.setAlignment(CellStyle.ALIGN_RIGHT);
                     style.setDataFormat(dataFormat.getFormat(XlsxReportMetadata.Presision.getPresision(((NumericColumn)currColumn).getPrecision())));
+                    break;
+                case NUMERATION:
+                    currColumn = formTemplate.getColumn(alias);
+                    style.setAlignment(CellStyle.ALIGN_RIGHT);
+                    style.setWrapText(true);
+                    style.setAlignment(CellStyle.ALIGN_RIGHT);
                     break;
                 case STRING:
                     style.setAlignment(CellStyle.ALIGN_LEFT);
@@ -326,6 +333,11 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                     cell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.BIGDECIMAL, column.getAlias()));
 
                     cell.setCellValue(bd != null ? String.valueOf(bd) : "");
+                } else if (column instanceof AutoNumerationColumn) {
+                    BigDecimal bd = (BigDecimal) obj;
+                    cell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.NUMERATION, column.getAlias()));
+
+                    cell.setCellValue(bd != null ? String.valueOf(bd) : "");
                 } else if (column instanceof RefBookColumn || column instanceof ReferenceColumn) {
                     CellStyle cellStyle = cellStyleBuilder.createCellStyle(CellType.STRING, column.getAlias());
                     cell.setCellStyle(cellStyle);
@@ -455,12 +467,12 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
             RegionUtil.setBorderTop(CellStyle.BORDER_THICK, region, sheet, workBook);
             RegionUtil.setBorderRight(CellStyle.BORDER_THICK, region, sheet, workBook);
             RegionUtil.setBorderLeft(CellStyle.BORDER_THICK, region, sheet, workBook);
-        }else {
+        }/*else {
             RegionUtil.setBorderBottom(CellStyle.BORDER_THIN, region, sheet, workBook);
             RegionUtil.setBorderTop(CellStyle.BORDER_THIN, region, sheet, workBook);
             RegionUtil.setBorderRight(CellStyle.BORDER_THIN, region, sheet, workBook);
             RegionUtil.setBorderLeft(CellStyle.BORDER_THIN, region, sheet, workBook);
-        }
+        }*/
         sheet.addMergedRegion(region);
     }
 

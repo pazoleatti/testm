@@ -177,4 +177,13 @@ public interface FormTemplateService {
      * @return идентифиактор
      */
     int updateVersionStatus(VersionedObjectStatus versionStatus, int formTemplateId);
+
+    /**
+     * Есть ли хоть одна автонумеруемая графа указанного типа в макете
+     *
+     * @param formTemplate макета НФ
+     * @param type      тип нумерации
+     * @return true - есть, false - нет
+     */
+    public boolean isAnyAutoNumerationColumn(FormTemplate formTemplate, AutoNumerationColumnType type);
 }

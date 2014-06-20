@@ -40,6 +40,7 @@ public class DataRow<C extends AbstractCell> extends IdentityObject<Long> implem
 	private List<C> data;
 	private String alias;
 	private Integer index;
+    private Integer importIndex;
 
 	/**
 	 * Конструктор нужен для сериализации
@@ -293,7 +294,21 @@ public class DataRow<C extends AbstractCell> extends IdentityObject<Long> implem
 
 	@Override
 	public String toString() {
-		return "DataRow [data=" + data + ", alias=" + alias + ", index="
-				+ index + ", id " + id + "]";
-	}
+        return "DataRow [data=" + data + ", alias=" + alias + ", index="
+                + index + ", importIndex=" + importIndex + ", id " + id + "]";
+    }
+
+    /**
+     * Номер строки файла импорта. Проставляется только при импорте. Не хранится в БД. Используется для вывода ошибок.
+     */
+    public Integer getImportIndex() {
+        return importIndex;
+    }
+
+    /**
+     * Номер строки файла импорта. Проставляется только при импорте. Не хранится в БД. Используется для вывода ошибок.
+     */
+    public void setImportIndex(Integer importIndex) {
+        this.importIndex = importIndex;
+    }
 }

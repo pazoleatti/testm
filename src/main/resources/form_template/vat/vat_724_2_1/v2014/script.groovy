@@ -85,10 +85,10 @@ def prevEndDate = null
 def dateFormat = "dd.MM.yyyy"
 
 @Field
-def calcRowAlias4 = ['R1', 'R2', 'R3', 'R4', 'R7', 'R8', 'R9', 'R10', 'R16']
+def calcRowAlias4 = ['R1', 'R3', 'R4', 'R5', 'R8', 'R9', 'R10', 'R11', 'R13', 'R14', 'R18']
 
 @Field
-def calcRowAlias5 = ['R7', 'R8']
+def calcRowAlias5 = ['R8', 'R9', 'R13']
 
 @Field
 def repordPeriod = null
@@ -132,7 +132,7 @@ def logicCheck() {
             continue
         }
 
-        // 1. Проверка заполнения граф (по графе 5 обязательны тока строки 7 и 8)
+        // 1. Проверка заполнения граф (по графе 5 обязательны тока строки 8, 9 и 13)
         def columns = (row.getAlias() in calcRowAlias5 ? nonEmptyColumns : nonEmptyColumns - 'obtainCost')
         checkNonEmptyColumns(row, row.getIndex(), columns, logger, true)
     }
@@ -376,6 +376,7 @@ void addData(def xml, int headRowCount) {
 
     for (def row : xml.row) {
         xmlIndexRow++
+        def int xlsIndexRow = xmlIndexRow + rowOffset
 
         // Пропуск строк шапки
         if (xmlIndexRow <= headRowCount - 1) {
@@ -392,10 +393,10 @@ void addData(def xml, int headRowCount) {
         }
 
         def dataRow = dataRows.get(indexRow)
+        dataRow.setImportIndex(xlsIndexRow)
         indexRow++
 
         def xmlIndexCol = -1
-        def int xlsIndexRow = xmlIndexRow + rowOffset
 
         def values = [:]
         xmlIndexCol++

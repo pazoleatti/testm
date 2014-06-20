@@ -150,13 +150,13 @@ void logicCheck() {
         // Проверка количества
         if (row.count != 1) {
             def msg = row.getCell('count').column.name
-            logger.warn("Строка $rowNum: В графе «$msg» может быть указано только значение «1»!")
+            rowWarning(logger, row, "Строка $rowNum: В графе «$msg» может быть указано только значение «1»!")
         }
         // Корректность даты заключения сделки
         if (docDateCell.value > dealDateCell.value) {
             def msg1 = dealDateCell.column.name
             def msg2 = docDateCell.column.name
-            logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
+            rowWarning(logger, row, "Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
         }
         // Проверка доходности
         def sumCell = row.getCell('sum')
@@ -165,18 +165,18 @@ void logicCheck() {
         def msgSum = sumCell.column.name
         if (priceCell.value != sumCell.value) {
             def msg = priceCell.column.name
-            logger.warn("Строка $rowNum: «$msg» не может отличаться от «$msgSum»!")
+            rowWarning(logger, row, "Строка $rowNum: «$msg» не может отличаться от «$msgSum»!")
         }
         if (totalCell.value != sumCell.value) {
             def msg = totalCell.column.name
-            logger.warn("Строка $rowNum: «$msg» не может отличаться от «$msgSum»!")
+            rowWarning(logger, row, "Строка $rowNum: «$msg» не может отличаться от «$msgSum»!")
         }
         // Корректность даты совершения сделки
         def dealDoneDateCell = row.getCell('dealDoneDate')
         if (dealDoneDateCell.value < dealDateCell.value) {
             def msg1 = dealDoneDateCell.column.name
             def msg2 = dealDateCell.column.name
-            logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
+            rowWarning(logger, row, "Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
         }
     }
 }
@@ -264,6 +264,7 @@ void addData(def xml, int headRowCount) {
 
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
+        newRow.setImportIndex(xlsIndexRow)
         editableColumns.each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
@@ -272,7 +273,7 @@ void addData(def xml, int headRowCount) {
             newRow.getCell(it).setStyleAlias('Автозаполняемая')
         }
 
-        def xmlIndexCol = 0
+        def int xmlIndexCol = 0
 
         // графа 1
         newRow.rowNumber = xmlIndexRow - headRowCount

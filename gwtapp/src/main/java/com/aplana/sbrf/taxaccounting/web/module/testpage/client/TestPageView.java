@@ -9,6 +9,7 @@ import com.aplana.gwt.client.mask.ui.MonthYearMaskBox;
 import com.aplana.gwt.client.mask.ui.YearMaskBox;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.style.DropdownButton;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LabelSeparator;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
@@ -114,6 +115,8 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
     @UiField
     Button showDialog3;
 
+    @UiField
+    DropdownButton dropdownButton;
 
     @Inject
     public TestPageView(final Binder uiBinder) {
@@ -143,6 +146,16 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
         testMaskBox();
 
         linkButtons();
+
+        dropdownButton.addItem(new LinkButton("item1"));
+        Button btn = new Button("item2");
+        btn.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                Dialog.confirmMessage("It's OK!");
+            }
+        });
+        dropdownButton.addItem(btn);
 
     }
 

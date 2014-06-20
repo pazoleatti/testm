@@ -8,9 +8,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.AuditService;
-import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
-import com.aplana.sbrf.taxaccounting.service.PeriodService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,44 +27,63 @@ import static org.mockito.Mockito.*;
 
 public class FormDataServiceTest {
 
-    private FormDataServiceImpl formDataService = new FormDataServiceImpl();
+    private final FormDataServiceImpl formDataService = new FormDataServiceImpl();
 
     private FormTemplate formTemplate;
+
+    private FormTemplateService formTemplateService;
 
     private FormDataDao formDataDao;
 
     private DataRowDao dataRowDao;
 
+    private FormData formData;
+
+    private ReportPeriod reportPeriod;
+
     private PeriodService reportPeriodService;
+
+    private static final int FORM_TEMPLATE_ID = 1;
+    private static final int DEPARTMENT_ID = 1;
+    private static final int REPORT_PERIOD_ID = 1;
 
     @Before
     public void init() {
         // Макет
         formTemplate = new FormTemplate();
-        formTemplate.setId(1);
+        formTemplate.setId(FORM_TEMPLATE_ID);
 
         // Тип формы
         FormType formType = new FormType();
         formType.setName(TaxType.INCOME.getName());
         formTemplate.setType(formType);
 
-        // Автонумеруемая графа
-        AutoNumerationColumn autoNumerationColumn = new AutoNumerationColumn();
-        autoNumerationColumn.setId(1);
-        autoNumerationColumn.setTypeName(AutoNumerationColumnType.SERIAL.getName());
-        autoNumerationColumn.setType(AutoNumerationColumnType.SERIAL.getType());
-        formTemplate.addColumn(autoNumerationColumn);
+        // Налоговый периол
+        TaxPeriod taxPeriod = new TaxPeriod();
+        taxPeriod.setYear(2014);
+        taxPeriod.setTaxType(TaxType.INCOME);
+
+        reportPeriod = new ReportPeriod();
+        reportPeriod.setTaxPeriod(taxPeriod);
 
         // Mock
         formDataDao = mock(FormDataDao.class);
         dataRowDao = mock(DataRowDao.class);
         reportPeriodService = mock(PeriodService.class);
+        formTemplateService = mock(FormTemplateService.class);
+        DepartmentDao departmentDao = mock(DepartmentDao.class);
+        formData = mock(FormData.class);
 
         ReflectionTestUtils.setField(formDataService, "formDataDao", formDataDao);
         ReflectionTestUtils.setField(formDataService, "dataRowDao", dataRowDao);
         ReflectionTestUtils.setField(formDataService, "reportPeriodService", reportPeriodService);
-    }
+        ReflectionTestUtils.setField(formDataService, "formTemplateService", formTemplateService);
+        ReflectionTestUtils.setField(formDataService, "departmentDao", departmentDao);
 
+        when(reportPeriodService.getTaxPeriod(anyInt())).thenReturn(taxPeriod);
+        when(formData.getReportPeriodId()).thenReturn(1);
+        when(reportPeriodService.getReportPeriod(anyInt())).thenReturn(reportPeriod);
+    }
     /**
      * Тест удаления приемника при распринятии последнего источника
      */
@@ -235,103 +252,99 @@ public class FormDataServiceTest {
      * Тестирование случая, когда экземпляр НФ является первым в сквозной нумерации
      */
     @Test
-    public void testUpdatePreviousRowNumber_1() {
+    public void getPreviousRowNumberFirstCase() {
 
-        FormData formData = new FormData(formTemplate);
-        formData.setId((long) 1);
-        formData.setDepartmentId(1);
-        formData.setReportPeriodId(1);
-        formData.setKind(FormDataKind.PRIMARY);
-        formData.setState(WorkflowState.CREATED);
+        // Создаваемая форма
+        FormData newFormData = new FormData(formTemplate);
+        newFormData.setId((long) 1);
+        newFormData.setReportPeriodId(1);
+        newFormData.setKind(FormDataKind.PRIMARY);
 
-        List<FormData> formDataList = new ArrayList<FormData>();
-        formDataList.add(formData);
-
-        TaxPeriod taxPeriod = new TaxPeriod();
-        taxPeriod.setYear(2014);
-
-        when(formDataDao.getFormDataListForCrossNumeration(taxPeriod.getYear(), formData.getDepartmentId(), formData.getFormType().getName(), formData.getKind().getId())).thenReturn(formDataList);
-        when(reportPeriodService.getTaxPeriod(formData.getReportPeriodId())).thenReturn(taxPeriod);
-
-        formDataService.updatePreviousRowNumber(formData);
-        assertTrue(formData.getPreviousRowNumber().equals(0));
+        when(formDataDao.getPrevFormDataListForCrossNumeration(any(FormData.class),anyInt(), anyString()))
+                .thenReturn(new ArrayList<FormData>());
+        assertTrue("\"Номер последней строки предыдущей НФ\" должен быть равен 0",
+                formDataService.getPreviousRowNumber(newFormData).equals(0));
     }
 
     /**
-     * Тестирование случая, когда экземпляр НФ не является первым и предыдущие экземпляры НФ в состоянии отличном от "Создана"
+     * Тестирование случая, когда экземпляр НФ не является первым и предыдущие экземпляры НФ в состоянии отличном от
+     * "Создана"
      */
     @Test
-    public void testUpdatePreviousRowNumber_2() {
+    public void getPreviousRowNumberSecondCase() {
 
+        // Существующие формы
         FormData formData = new FormData(formTemplate);
         formData.setId((long) 1);
-        formData.setDepartmentId(1);
         formData.setReportPeriodId(1);
         formData.setKind(FormDataKind.PRIMARY);
         formData.setState(WorkflowState.ACCEPTED);
 
         FormData formData1 = new FormData(formTemplate);
         formData1.setId((long) 2);
-        formData1.setDepartmentId(1);
-        formData1.setReportPeriodId(1);
+        formData1.setReportPeriodId(2);
         formData1.setKind(FormDataKind.PRIMARY);
-        formData1.setState(WorkflowState.CREATED);
+        formData1.setState(WorkflowState.ACCEPTED);
+
+        // Создаваемая форма
+        FormData newFormData = new FormData(formTemplate);
+        newFormData.setId((long) 3);
+        newFormData.setReportPeriodId(3);
+        newFormData.setKind(FormDataKind.PRIMARY);
+        newFormData.setState(WorkflowState.CREATED);
 
         List<FormData> formDataList = new ArrayList<FormData>();
         formDataList.add(formData);
         formDataList.add(formData1);
 
-        TaxPeriod taxPeriod = new TaxPeriod();
-        taxPeriod.setYear(2014);
+        when(formDataDao.getPrevFormDataListForCrossNumeration(any(FormData.class), anyInt(), anyString()))
+                .thenReturn(formDataList);
+        when(dataRowDao.getSizeWithoutTotal(formData, null)).thenReturn(3);
+        when(dataRowDao.getSizeWithoutTotal(formData1, null)).thenReturn(5);
 
-        when(formDataDao.getFormDataListForCrossNumeration(taxPeriod.getYear(), formData1.getDepartmentId(), formData1.getFormType().getName(), formData1.getKind().getId())).thenReturn(formDataList);
-        when(dataRowDao.getSize(formData, null)).thenReturn(5);
-        when(reportPeriodService.getTaxPeriod(formData1.getReportPeriodId())).thenReturn(taxPeriod);
-
-        formDataService.updatePreviousRowNumber(formData1);
-        assertTrue(formData1.getPreviousRowNumber().equals(5));
+        assertTrue("\"Номер последней строки предыдущей НФ\" должен быть равен 8",
+                formDataService.getPreviousRowNumber(newFormData).equals(8));
 
     }
 
     /**
-     * Тестирование случая, когда экземпляр НФ не является первым и существуют предыдущие экземпляры НФ в состоянии "Создана"
+     * Тестирование случая, когда экземпляр НФ не является первым и существуют предыдущие экземпляры НФ в состоянии
+     * "Создана"
      */
     @Test
-    public void testUpdatePreviousRowNumber_3() {
+    public void getPreviousRowNumberThirdCase() {
+
+        // Существующие формы
         FormData formData = new FormData(formTemplate);
         formData.setId((long) 1);
-        formData.setDepartmentId(1);
         formData.setReportPeriodId(1);
         formData.setKind(FormDataKind.PRIMARY);
         formData.setState(WorkflowState.ACCEPTED);
 
         FormData formData1 = new FormData(formTemplate);
         formData1.setId((long) 2);
-        formData1.setDepartmentId(1);
         formData1.setReportPeriodId(2);
         formData1.setKind(FormDataKind.PRIMARY);
         formData1.setState(WorkflowState.CREATED);
 
-        FormData formData2 = new FormData(formTemplate);
-        formData2.setId((long) 3);
-        formData2.setDepartmentId(1);
-        formData2.setReportPeriodId(3);
-        formData2.setKind(FormDataKind.PRIMARY);
-        formData2.setState(WorkflowState.CREATED);
+        // Создаваемая форма
+        FormData newFormData = new FormData(formTemplate);
+        newFormData.setId((long) 3);
+        newFormData.setReportPeriodId(3);
+        newFormData.setKind(FormDataKind.PRIMARY);
+        newFormData.setState(WorkflowState.CREATED);
 
         List<FormData> formDataList = new ArrayList<FormData>();
         formDataList.add(formData);
         formDataList.add(formData1);
-        formDataList.add(formData2);
 
-        TaxPeriod taxPeriod = new TaxPeriod();
-        taxPeriod.setYear(2014);
+        when(formDataDao.getPrevFormDataListForCrossNumeration(any(FormData.class), anyInt(), anyString()))
+                .thenReturn(formDataList);
+        when(dataRowDao.getSizeWithoutTotal(formData, null)).thenReturn(3);
+        when(dataRowDao.getSizeWithoutTotal(formData1, null)).thenReturn(5);
 
-        when(formDataDao.getFormDataListForCrossNumeration(taxPeriod.getYear(), formData2.getDepartmentId(), formData2.getFormType().getName(), formData2.getKind().getId())).thenReturn(formDataList);
-        when(dataRowDao.getSize(formData, null)).thenReturn(5);
-        when(reportPeriodService.getTaxPeriod(formData2.getReportPeriodId())).thenReturn(taxPeriod);
-
-        formDataService.updatePreviousRowNumber(formData2);
-        assertTrue(formData2.getPreviousRowNumber().equals(5));
+        assertTrue("\"Номер последней строки предыдущей НФ\" должен быть равен 3",
+                formDataService.getPreviousRowNumber(newFormData).equals(3));
     }
+
 }

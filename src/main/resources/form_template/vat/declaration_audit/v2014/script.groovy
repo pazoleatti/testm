@@ -1,6 +1,9 @@
 package form_template.vat.declaration_audit.v2014
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod
+import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import groovy.transform.Field
@@ -12,8 +15,6 @@ import groovy.xml.MarkupBuilder
  *
  * совпадает с "Декларация по НДС" (declaration_fns), кроме заполнения секции "РАЗДЕЛ 2"
  *
- * TODO:
- *      - расчет для НалНеВыч не сделан, сказали пока не делать, потому что неясно как вычислять.
  */
 
 switch (formDataEvent) {
@@ -39,6 +40,27 @@ def providerCache = [:]
 // Кэш значений справочника
 @Field
 def refBookCache = [:]
+
+// Cправочник «Отчет о прибылях и убытках (Форма 0409102-СБ)»
+@Field
+def income102DataCache = [:]
+
+@Field
+def specialCode = '1010276'
+
+@Field
+def opuCodes = ['26411.01', '26411.02']
+
+@Field
+def knuCodes = ['20860', '20870']
+
+// Дата начала отчетного периода
+@Field
+def startDate = null
+
+// Дата окончания отчетного периода
+@Field
+def endDate = null
 
 @Field
 def empty = 0
@@ -238,11 +260,10 @@ void generateXML() {
     /** СумНал (ОплНОТовар). Код строки 080 Графа 5. */
     def sumNal080 = empty
     if (rows724_1) {
-        def row = getDataRow(rows724_1, 'total_1_1')
-        def row2 = getDataRow(rows724_1, 'total_1_2')
-        def tmp = (row?.baseSum ?: empty) + (row2?.baseSum ?: empty)
+        def row = getDataRow(rows724_1, 'total_1')
+        def tmp = (row?.baseSum ?: empty)
         nalBaza010 = round(tmp)
-        tmp = (row?.ndsSum ?: empty) + (row2?.ndsSum ?: empty)
+        tmp = (row?.ndsSum ?: empty)
         sumNal010 = round(tmp)
 
         row = getDataRow(rows724_1, 'total_2')
@@ -473,7 +494,7 @@ void generateXML() {
                                     КодОпер: row.code,
                                     СтРеалТов: round(row.realizeCost),
                                     СтПриобТов: round(row.obtainCost ?: empty),
-                                    НалНеВыч: getNalNeVich(row) // TODO (Ramil Timerbaev)  недоделано
+                                    НалНеВыч: getNalNeVich(row)
                             )
                         }
                     }
@@ -515,11 +536,109 @@ def round(def value) {
  * @param row строка формы 724.2.1
  */
 def getNalNeVich(def row) {
-    // TODO (Ramil Timerbaev) сказали пока не делать, потому что неясно как вычислять.
-    // сумма из отчета 102
-    // сумма из расходов простых
-    // разность сумм
-    return empty
+    if (row.code == specialCode){
+        // сумма кодов ОПУ из отчета 102
+        def sumOpu = getSumByOpuCodes(opuCodes)
+        // сумма из расходов простых
+        def sumOutcome = getSumOutcomeSimple(knuCodes)
+        // разность сумм
+        return sumOpu - sumOutcome
+    } else {
+        return empty
+    }
+}
+
+def getSumOutcomeSimple(def knuCodes) {
+    def tmp = 0
+    def List<ReportPeriod> periodList = reportPeriodService.getReportPeriodsByDate(TaxType.INCOME, getReportPeriodStartDate(), getReportPeriodEndDate())
+    if (periodList.isEmpty()) {
+        return 0
+    }
+    def reportPeriodIncome = periodList.get(0)
+    def formDataSimple = getFormDataSimple(reportPeriodIncome.id)
+    def dataRowsSimple = (formDataSimple ? formDataService.getDataRowHelper(formDataSimple)?.getAll() : null)
+    for (def row : dataRowsSimple){
+        if (row.consumptionTypeId in knuCodes) {
+            tmp += row.rnu5Field5Accepted
+        }
+    }
+    if (reportPeriodIncome.order != 1) {
+        def prevReportPeriodId = reportPeriodService.getPrevReportPeriod(reportPeriodIncome.id)?.id
+        if (prevReportPeriodId != null) {
+            formDataSimple = getFormDataSimple(prevReportPeriodId)
+            dataRowsSimple = (formDataSimple ? formDataService.getDataRowHelper(formDataSimple)?.getAll() : null)
+            for (def row : dataRowsSimple){
+                if (row.consumptionTypeId in knuCodes) {
+                    tmp -= row.rnu5Field5Accepted
+                }
+            }
+        }
+    }
+    return tmp
+}
+
+/**
+ * Получить данные формы "расходы простые" (id = 304)
+ */
+def getFormDataSimple(def reportPeriodId) {
+    return formDataService.find(304, FormDataKind.SUMMARY, declarationData.departmentId, reportPeriodId)
+}
+
+// Получение данных из справочника «Отчет о прибылях и убытках» для текужего подразделения и отчетного периода
+def getIncome102Data(def date) {
+    if (!income102DataCache.containsKey(date)) {
+        def filter = "DEPARTMENT_ID = ${declarationData.departmentId}"
+        income102DataCache.put(date, refBookFactory.getDataProvider(52L)?.getRecords(date, null, filter, null))
+    }
+    return income102DataCache.get(date)
+}
+
+/**
+ * Посчитать сумму по кодам ОПУ.
+ */
+def getSumByOpuCodes(def opuCodes) {
+    def tmp = BigDecimal.ZERO
+    def hasData = false
+    // сначало берутся данные за текущий периода, а потом вычитаются данные запредыдущий период (например: 9 месяцев - полгода)
+    for (def income102Row : getIncome102Data(getReportPeriodEndDate())) {
+        if (income102Row?.OPU_CODE?.value in opuCodes) {
+            tmp += (income102Row?.TOTAL_SUM?.value ?: 0)
+            hasData = true
+        }
+    }
+    if (!hasData) {
+        return BigDecimal.ZERO
+    }
+    if (reportPeriodService.get(declarationData.reportPeriodId)?.order > 1) {
+        for (def income102Row : getIncome102Data(getPrevReportPeriodEndDate())) {
+            if (income102Row?.OPU_CODE?.value in opuCodes) {
+                tmp -= (income102Row?.TOTAL_SUM?.value ?: 0)
+            }
+        }
+    }
+    return tmp
+}
+
+def getReportPeriodStartDate() {
+    if (!startDate) {
+        startDate = reportPeriodService.getStartDate(declarationData.reportPeriodId).time
+    }
+    return startDate
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(declarationData.reportPeriodId).time
+    }
+    return endDate
+}
+
+def getPrevReportPeriodEndDate() {
+    if (prevEndDate == null) {
+        def prevReportId = reportPeriodService.getPrevReportPeriod(declarationData.reportPeriodId)?.id
+        prevEndDate = reportPeriodService.getEndDate(prevReportId).time
+    }
+    return prevEndDate
 }
 
 /** Логические проверки. */

@@ -31,6 +31,7 @@ import com.aplana.sbrf.taxaccounting.web.module.sources.client.SourcesModule;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.TaxFormNominationModule;
 import com.aplana.sbrf.taxaccounting.web.module.testpage.client.TestPageModule;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.client.TemplateVersionListModule;
+import com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.client.UploadTransportDataModule;
 import com.aplana.sbrf.taxaccounting.web.widget.history.client.HistoryClientModule;
 import com.aplana.sbrf.taxaccounting.web.widget.logarea.client.LogAreaClientModule;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.client.MainMenuClientModule;
@@ -103,5 +104,6 @@ public class ClientModule extends AbstractPresenterModule {
         install(new TestPageModule());
         install(new DeclarationVersionListModule());
         install(new ScriptExecutionModule());
+        install(new UploadTransportDataModule());
 	}
 }

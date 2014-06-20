@@ -163,7 +163,7 @@ void logicCheck() {
         if (transactionDeliveryDate < transactionDate) {
             def msg1 = row.getCell('transactionDeliveryDate').column.name
             def msg2 = row.getCell('transactionDate').column.name
-            logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
+            rowWarning(logger, row, "Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
         }
 
         // Проверка конверсии
@@ -171,14 +171,14 @@ void logicCheck() {
             def msg1 = row.getCell('transactionSumRub').column.name
             def msg2 = row.getCell('transactionSumCurrency').column.name
             def msg3 = row.getCell('courseCB').column.name
-            logger.warn("Строка $rowNum: «$msg1» не соответствует «$msg2» с учетом данных «$msg3»!")
+            rowWarning(logger, row, "Строка $rowNum: «$msg1» не соответствует «$msg2» с учетом данных «$msg3»!")
         }
 
         // Корректность даты заключения сделки
         if (transactionDate < contractDate) {
             def msg1 = row.getCell('transactionDate').column.name
             def msg2 = row.getCell('contractDate').column.name
-            logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
+            rowWarning(logger, row, "Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
         }
 
         // Проверка цены сделки
@@ -192,7 +192,7 @@ void logicCheck() {
             def msg1 = row.getCell('priceOne').column.name
             def msg2 = row.getCell('transactionSumRub').column.name
             def msg3 = row.getCell('bondCount').column.name
-            logger.warn("Строка $rowNum: «$msg1» не равно отношению «$msg2» и «$msg3»!")
+            rowWarning(logger, row, "Строка $rowNum: «$msg1» не равно отношению «$msg2» и «$msg3»!")
         }
     }
 }
@@ -287,6 +287,7 @@ void addData(def xml, int headRowCount) {
 
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
+        newRow.setImportIndex(xlsIndexRow)
         editableColumns.each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
@@ -295,7 +296,8 @@ void addData(def xml, int headRowCount) {
             newRow.getCell(it).setStyleAlias('Автозаполняемая')
         }
 
-        def xmlIndexCol = 0
+        def int xmlIndexCol = 0
+
         // графа 1
         newRow.rowNum = xmlIndexRow - headRowCount
 

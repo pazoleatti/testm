@@ -410,10 +410,10 @@ public class FormTemplateServiceImpl implements FormTemplateService {
         Integer formTemplateId = formTemplate.getId();
 
         // Если есть хоть одна автонумеруемая графа
-        if (isAnyAutoNumerationColumn(formTemplate, AutoNumerationColumnType.CROSS.getType())) {
+        if (isAnyAutoNumerationColumn(formTemplate, AutoNumerationColumnType.CROSS)) {
             // Проверяем наличие в версии макета до редактирования хотя бы одной автонумеруемой графы, у которой "Тип нумерации строк" != "Сквозная".
             FormTemplate fullFormTemplate = getFullFormTemplate(formTemplateId);
-            if (isAnyAutoNumerationColumn(fullFormTemplate, AutoNumerationColumnType.SERIAL.getType())) {
+            if (isAnyAutoNumerationColumn(fullFormTemplate, AutoNumerationColumnType.SERIAL)) {
                 List<ReportPeriod> reportPeriodList = reportPeriodDao.getClosedPeriodsForFormTemplate(formTemplateId);
 
                 if (reportPeriodList.size() != 0) {
@@ -439,18 +439,12 @@ public class FormTemplateServiceImpl implements FormTemplateService {
         }
     }
 
-    /**
-     * Есть ли хоть одна автонумеруемая графа указанного типа в макете
-     *
-     * @param formTemplate макета НФ
-     * @param type      тип нумерации
-     * @return true - есть, false - нет
-     */
-    protected boolean isAnyAutoNumerationColumn(FormTemplate formTemplate, int type) {
+    @Override
+    public boolean isAnyAutoNumerationColumn(FormTemplate formTemplate, AutoNumerationColumnType type) {
         List<Column> columns = formTemplate.getColumns();
         for (Column column : columns) {
             if (column instanceof AutoNumerationColumn) {
-                return (((AutoNumerationColumn) column).getType() == (type));
+                return (((AutoNumerationColumn) column).getType() == (type.getType()));
             }
         }
         return false;
