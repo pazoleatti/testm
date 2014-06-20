@@ -187,8 +187,8 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 
 			jt.batchUpdate(
 				"INSERT INTO form_column (id, name, form_template_id, alias, type, width, precision, ord, max_length, " +
-                "checking, format, attribute_id, filter, parent_column_id, attribute_id2) " +
-				"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "checking, format, attribute_id, filter, parent_column_id, attribute_id2, numeration_row) " +
+				"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 				new BatchPreparedStatementSetter() {
 					@Override
 					public void setValues(PreparedStatement ps, int index) throws SQLException {
@@ -246,6 +246,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
                             else {
                                 ps.setLong(15, ((RefBookColumn) col).getRefBookAttributeId2());
                             }
+                            ps.setNull(16, Types.NUMERIC);
                         } else if (col instanceof ReferenceColumn) {
                             ps.setLong(12, ((ReferenceColumn) col).getRefBookAttributeId());
                             ps.setNull(13, Types.CHAR);
@@ -256,11 +257,19 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
                             else {
                                 ps.setLong(15, ((ReferenceColumn) col).getRefBookAttributeId2());
                             }
+                            ps.setNull(16, Types.NUMERIC);
+                        } else if (col instanceof AutoNumerationColumn) {
+                            ps.setNull(12, Types.NUMERIC);
+                            ps.setNull(13, Types.CHAR);
+                            ps.setNull(14, Types.NUMERIC);
+                            ps.setNull(15, Types.NUMERIC);
+                            ps.setInt(16, ((AutoNumerationColumn) col).getType());
                         } else {
                             ps.setNull(12, Types.NUMERIC);
                             ps.setNull(13, Types.CHAR);
                             ps.setNull(14, Types.NUMERIC);
                             ps.setNull(15, Types.NUMERIC);
+                            ps.setNull(16, Types.NUMERIC);
                         }
                     }
 
