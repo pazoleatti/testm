@@ -466,7 +466,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
                 String.class);
     }
 
-    String GET_FORM_DATA_LIST_QUERY = "WITH list AS (SELECT row_number() over (ORDER BY rp.calendar_start_date)\n" +
+    String GET_FORM_DATA_LIST_QUERY = "WITH list AS (SELECT row_number() over (ORDER BY rp.calendar_start_date, fd.period_order)\n" +
             " AS row_number, fd.id, fd.department_id, fd.state, fd.return_sign, fd.kind, fd.report_period_id, fd.period_order, fd.number_previous_row, manual\n" +
             "FROM form_data fd\n" +
             "LEFT JOIN (SELECT MAX(manual) AS manual, form_data_id FROM data_row WHERE manual = 0 GROUP BY form_data_id) r ON r.form_data_id = fd.id\n" +

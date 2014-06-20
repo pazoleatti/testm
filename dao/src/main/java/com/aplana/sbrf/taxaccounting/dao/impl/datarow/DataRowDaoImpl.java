@@ -318,7 +318,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		Pair<String, Map<String, Object>> sql = dataRowMapper.createSql();
 
         if(!isSupportOver()){
-            sql.first = sql.getFirst().replaceFirst("over \\(order by sub.ORD\\)", "over ()");
+            sql.first = sql.getFirst().replaceAll("over \\(order by sub.ORD\\)", "over ()");
         }
 
 		List<DataRow<Cell>> dataRows = getNamedParameterJdbcTemplate().query(
