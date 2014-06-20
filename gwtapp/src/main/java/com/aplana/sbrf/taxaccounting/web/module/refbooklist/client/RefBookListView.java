@@ -3,14 +3,12 @@ package com.aplana.sbrf.taxaccounting.web.module.refbooklist.client;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookType;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataTokens;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.TableModel;
+import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.uibinder.client.UiBinder;
-import com.google.gwt.uibinder.client.UiConstructor;
-import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.uibinder.client.UiTemplate;
+import com.google.gwt.uibinder.client.*;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Widget;
@@ -24,6 +22,9 @@ import com.google.inject.Inject;
 public class RefBookListView extends AbstractRefBookListView implements RefBookListPresenter.MyView {
 
     public static final String[] COLUMN_NAMES = {"Наименование справочника", "Тип справочника"};
+
+    @UiField
+    LinkAnchor loadButton;
 
     @Inject
     @UiConstructor
@@ -71,6 +72,11 @@ public class RefBookListView extends AbstractRefBookListView implements RefBookL
         if (getUiHandlers() != null) {
             getUiHandlers().onLoadClicked();
         }
+    }
+
+    @Override
+    public void hideLoadButton(boolean hide) {
+        loadButton.setVisible(!hide);
     }
 
     @UiTemplate("RefBookListView.ui.xml")
