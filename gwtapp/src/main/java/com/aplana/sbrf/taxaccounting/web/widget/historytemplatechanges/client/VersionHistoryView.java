@@ -50,7 +50,7 @@ public class VersionHistoryView extends PopupViewImpl implements VersionHistoryP
                         if (templateChanges == null) {
                             return;
                         }
-                        String url = templateChanges.getTemplateChanges().getFormTemplateId() != 0 ?
+                        String url = templateChanges.getTemplateChanges().getFormTemplateId() != null ?
                                 AdminConstants.NameTokens.formTemplateInfoPage + ";" + AdminConstants.NameTokens.formTemplateId + "="
                                 + templateChanges.getTemplateChanges().getFormTemplateId() + "\">" :
                                 DeclarationTemplateTokens.declarationTemplate + ";" + DeclarationTemplateTokens.declarationTemplateId + "="
