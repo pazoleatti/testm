@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.TransportDataService;
+import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -15,6 +16,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -38,12 +41,13 @@ public class TransportDataServiceTest {
         TemporaryFolder temporaryFolder = new TemporaryFolder();
         temporaryFolder.create();
         folder = temporaryFolder.getRoot();
-        System.out.println("Test folder1 is \"" + folder.getAbsoluteFile() + "\"");
+        System.out.println("Test common folder is \"" + folder.getAbsolutePath() + "\"");
         ConfigurationDao configurationDao = mock(ConfigurationDao.class);
         ConfigurationParamModel model = new ConfigurationParamModel();
-        model.put(ConfigurationParam.FORM_DATA_DIRECTORY, asList("file://" + folder.getAbsolutePath() + "/"));
+        model.put(ConfigurationParam.FORM_DATA_DIRECTORY, asList("file://" + folder.getPath() + "/"));
         model.put(ConfigurationParam.REF_BOOK_DIASOFT_DIRECTORY, null);
         model.put(ConfigurationParam.REF_BOOK_KEY_FILE, asList("smb://", "/"));
+        model.put(ConfigurationParam.ERROR_DIRECTORY, asList("file://" + folder.getPath() + "/", "smb://"));
 
         when(configurationDao.loadParams()).thenReturn(model);
         ReflectionTestUtils.setField(transportDataService, "configurationDao", configurationDao);
@@ -122,7 +126,7 @@ public class TransportDataServiceTest {
         transportDataService.uploadFile(userInfo, ConfigurationParam.REF_BOOK_DIASOFT_DIRECTORY, FILE_NAME_1, getFileAsStream(FILE_NAME_1), logger);
         Assert.assertEquals(1, logger.getEntries().size());
         Assert.assertEquals(LogLevel.ERROR, logger.getEntries().get(0).getLevel());
-        Assert.assertEquals(TransportDataServiceImpl.NO_CATALOG_ERROR, logger.getEntries().get(0).getMessage());
+        Assert.assertEquals(TransportDataServiceImpl.NO_CATALOG_UPLOAD_ERROR, logger.getEntries().get(0).getMessage());
     }
 
     // Успешный импорт файла
@@ -165,7 +169,7 @@ public class TransportDataServiceTest {
         // Подготовка тестового каталога
         TemporaryFolder temporaryFolder = new TemporaryFolder();
         temporaryFolder.create();
-        System.out.println("Test folder2 is \"" + temporaryFolder.getRoot().getAbsoluteFile() + "\"");
+        System.out.println("Test src folder getWorkFilesFromFolderTest is \"" + temporaryFolder.getRoot().getAbsoluteFile() + "\"");
         // Создание тестовых файлов
         String[] fileNames = {"file1.txt", "file2.doc", "file3.zip", "file4.zip",
                 "____852-4______________147212014__.rnu", "1290-40.1______________151222015_6.rnu"};
@@ -175,7 +179,7 @@ public class TransportDataServiceTest {
         }
         temporaryFolder.newFolder("folder");
         // Получение «рабочих» (подходящих файлов)
-        List<String> result = transportDataService.getWorkFilesFromFolder(temporaryFolder.getRoot().getAbsolutePath() + "/");
+        List<String> result = transportDataService.getWorkFilesFromFolder(temporaryFolder.getRoot().getPath() + "/");
         Assert.assertEquals(2, result.size());
         Assert.assertTrue(result.contains(fileNames[4]));
         Assert.assertTrue(result.contains(fileNames[5]));
@@ -184,7 +188,42 @@ public class TransportDataServiceTest {
 
     @Test
     public void importDataFromFolderTest() {
-        // TODO Подготовить тесты после реализации в сервисе
+        // Не реализуется, т.к. логика сложная и сильно завязана на другие сервисы
+    }
+
+    @Test
+    public void moveToErrorDirectoryTest() throws IOException {
+        TemporaryFolder temporaryFolder = new TemporaryFolder();
+        temporaryFolder.create();
+        System.out.println("Test src folder moveToErrorDirectoryTest is \"" + temporaryFolder.getRoot().getAbsolutePath() + "\"");
+        FileWrapper errorFile = new FileWrapper(temporaryFolder.newFile("Тестовый файл.rnu"));
+        Logger logger = new Logger();
+        logger.error("Тестовая ошибка!");
+        logger.warn("Тестовое предупреждение!");
+        logger.info("Тестовое сообщение!");
+
+        TAUserInfo userInfo = new TAUserInfo();
+        TAUser user = new TAUser();
+        userInfo.setUser(user);
+        TARole role = new TARole();
+        role.setAlias(TARole.ROLE_CONTROL_UNP);
+        user.setRoles(asList(role));
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+
+        ((TransportDataServiceImpl) transportDataService).moveToErrorDirectory(errorFile, userInfo, logger);
+
+        File dstFolder = new File(folder.getPath() + "/" + calendar.get(Calendar.YEAR) + "/"
+                + Months.fromId(calendar.get(Calendar.MONTH)).getName() + "/"
+                + String.format("%02d", calendar.get(Calendar.DAY_OF_MONTH)) + "/");
+
+        Assert.assertTrue(dstFolder.exists());
+        List<String> fileNameList = asList(dstFolder.list());
+        Assert.assertEquals(1, fileNameList.size());
+        Assert.assertTrue(fileNameList.get(0).endsWith(".zip"));
+        File srcFolder = new File(temporaryFolder.getRoot().getPath());
+        Assert.assertEquals(0, srcFolder.list().length);
     }
 
     private static InputStream getFileAsStream(String fileName) {

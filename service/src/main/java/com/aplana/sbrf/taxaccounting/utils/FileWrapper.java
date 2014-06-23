@@ -22,6 +22,7 @@ public class FileWrapper {
     private static String ERROR_RESOURCE_INIT = "Ошибка получения ресурса. Ресурс не проинициализирован!";
     private static String ERROR_LIST_SMB = "Ошибка получения списка файлов через протокол smb!";
     private static String ERROR_LIST_INIT = "Ошибка получения списка файлов. Ресурс не проинициализирован!";
+    private static String ERROR_DELETE = "Ошибка удаления файла!";
 
     private FileWrapper() {}
 
@@ -33,6 +34,43 @@ public class FileWrapper {
         this.smbFile = smbFile;
     }
 
+    public String getPath() {
+        if (file != null) {
+            return file.getPath();
+        }
+        if (smbFile != null) {
+
+            return smbFile.getPath();
+        }
+        throw new ServiceException(ERROR_RESOURCE_INIT);
+    }
+
+    public String getName() {
+        if (file != null) {
+            return file.getName();
+        }
+        if (smbFile != null) {
+
+            return smbFile.getName();
+        }
+        throw new ServiceException(ERROR_RESOURCE_INIT);
+    }
+
+    public void mkDirs() {
+        if (file != null) {
+            file.mkdirs();
+            return;
+        }
+        if (smbFile != null) {
+            try {
+                smbFile.mkdirs();
+            } catch (SmbException e) {
+                throw new ServiceException(ERROR_RESOURCE_SMB, e);
+            }
+        }
+        throw new ServiceException(ERROR_RESOURCE_INIT);
+    }
+
     public String[] list() {
         if (file != null) {
             return file.list();
@@ -42,6 +80,24 @@ public class FileWrapper {
                 return smbFile.list();
             } catch (SmbException e) {
                 throw new ServiceException(ERROR_LIST_SMB, e);
+            }
+        }
+        throw new ServiceException(ERROR_LIST_INIT);
+    }
+
+    public void delete() {
+        if (file != null) {
+            if (!file.delete()) {
+                throw new ServiceException(ERROR_DELETE);
+            }
+            return;
+        }
+        if (smbFile != null) {
+            try {
+                smbFile.delete();
+                return;
+            } catch (SmbException e) {
+                throw new ServiceException(ERROR_RESOURCE_SMB, e);
             }
         }
         throw new ServiceException(ERROR_LIST_INIT);
