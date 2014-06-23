@@ -16,7 +16,7 @@ import groovy.transform.Field
 // графа    - fix
 // графа 2  - code                              атрибут 611 - CODE - "Код сделки", справочник 61 "Коды сделок"
 // графа 3  - valuablePaper                     атрибут 621 - CODE - "Код признака", справочник 62 "Признаки ценных бумаг"
-// графа 4  - issue                             абсолютное значение - атрибут 814 - ISSUE - «Выпуск», из справочника 84 «Ценные бумаги» текст
+// графа 4  - issue                             абсолютное значение - атрибут 812 - SHORTNAME - «Выпуск», из справочника 84 «Ценные бумаги» текст
 // графа 5  - purchaseDate
 // графа 6  - implementationDate
 // графа 7  - bondsCount
@@ -282,8 +282,7 @@ void logicCheck() {
             needValue['excessOfTheSellingPrice'] = calc27(row, code)
             checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
         }
-        def record = dataProvider.getRecords(reportPeriodEndDate, null, "ISSUE = ${row.issue}", null)
-        if (record.size() == 0) {
+        if (!row.issue || dataProvider.getRecords(reportPeriodEndDate, null, "SHORTNAME = '${row.issue}'", null).size() == 0) {
             logger.error(errorMsg + "Значение графы «Выпуск» отсутствует в справочнике «Ценные бумаги»")
         }
     }

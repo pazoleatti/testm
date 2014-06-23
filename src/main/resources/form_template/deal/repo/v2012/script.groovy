@@ -102,10 +102,12 @@ void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     // Налоговый период
-    def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
+    def startDate = reportPeriodService.getStartDate(formData.reportPeriodId)
+    def dFrom = startDate.time
+    startDate.add(Calendar.YEAR, 1)
+    startDate.add(Calendar.DAY_OF_YEAR, -1)
+    def dTo = startDate.time
 
-    def dFrom = taxPeriod.getStartDate()
-    def dTo = taxPeriod.getEndDate()
     int index = 1
 
     for (row in dataRowHelper.getAllCached()) {
