@@ -114,7 +114,8 @@ public class DeclarationTemplateController {
         FileItemFactory factory = new DiskFileItemFactory();
 		ServletFileUpload upload = new ServletFileUpload(factory);
 		List<FileItem> items = upload.parseRequest(req);
-
+        resp.setContentType("text/plain");
+        resp.setCharacterEncoding("UTF-8");
         try {
             if (items.get(0) != null && items.get(0).getSize() == 0)
                 throw new ServiceException("Файл jrxml пустой.");
@@ -130,12 +131,14 @@ public class DeclarationTemplateController {
 
     @ExceptionHandler(ServiceLoggerException.class)
     public void logServiceExceptionHandler(ServiceLoggerException e, final HttpServletResponse response) throws IOException {
-        response.getWriter().printf("errorUuid %s}", e.getUuid());
+        response.setContentType("text/plain");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().printf("errorUuid %s", e.getUuid());
     }
 
 	@ExceptionHandler(Exception.class)
 	public void exceptionHandler(Exception e, final HttpServletResponse response) {
-		response.setContentType("text/html");
+		response.setContentType("text/plain");
 		response.setCharacterEncoding("UTF-8");
 		logger.warn(e.getLocalizedMessage(), e);
 		try {
