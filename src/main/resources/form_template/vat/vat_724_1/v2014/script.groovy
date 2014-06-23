@@ -2,6 +2,7 @@ package form_template.vat.vat_724_1.v2014
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
@@ -437,7 +438,6 @@ void addData(def xml, int headRowCount) {
             title = row.cell[1].text()
             if (isFirstSection && title == 'Итого') {
                 isFirstSection = false
-                title = '1'
             }
             isSection7 = (title == rowHead7.fix)
             continue
@@ -472,7 +472,11 @@ void addData(def xml, int headRowCount) {
         // Графа 8
         newRow.ndsBookSum = parseNumber(row.cell[8].text(), xlsIndexRow, 8 + colOffset, logger, true)
 
-        aliasR[title].add(newRow)
+        if (aliasR[title] == null) {
+            logger.error("Строка %d: Структура файла не соответствует макету налоговой формы", xlsIndexRow)
+        } else {
+            aliasR[title].add(newRow)
+        }
     }
 
     aliasR.each { k, v ->
