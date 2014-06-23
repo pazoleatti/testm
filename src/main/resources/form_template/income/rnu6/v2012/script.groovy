@@ -3,7 +3,6 @@ package form_template.income.rnu6.v2012
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.TaxType
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 import java.text.SimpleDateFormat
@@ -547,17 +546,21 @@ void addData(def xml, int headRowCount) {
         // графа 1
         newRow.number = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, true)
 
+        // графа 4
+        newRow.code = getRecordIdImport(28, 'CODE', row.cell[2].text(), xlsIndexRow, 2 + colOffset)
+        def map = getRefBookValue(28, newRow.code)
+
         // графа 2
-        def record = getRecordImport(28, 'NUMBER', row.cell[4].text(), xlsIndexRow, 4 + colOffset, true)
-        if (record != null) {
-            formDataService.checkReferenceValue(28, row.cell[2].text(), record?.CODE?.value, xlsIndexRow, 2 + colOffset, logger, true)
+        if (map != null) {
+            def text = row.cell[4].text()
+            if ((text != null && !text.isEmpty() && !text.equals(map.NUMBER?.stringValue)) || ((text == null || text.isEmpty()) && map.NUMBER?.stringValue != null)) {
+                logger.error("Проверка файла: Строка ${xlsIndexRow}, столбец ${4 + colOffset} содержит значение, " +
+                        "отсутствующее в справочнике «" + refBookFactory.get(28).getName() + "»!")
+            }
         }
 
         // графа 3
         newRow.date = parseDate(row.cell[3].text(), "dd.MM.yyyy", xlsIndexRow, 3 + colOffset, logger, true)
-
-        // графа 4
-        newRow.code = record?.record_id?.value
 
         // графа 5
         newRow.docNumber = row.cell[5].text()
