@@ -23,12 +23,38 @@
             <artifactId>migration-ejb</artifactId>
             <version>${project.version}</version>
             <type>ejb</type>
+            <classifier>jar-with-dependencies</classifier>
+            <exclusions>
+                <exclusion>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>dao</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>mdb</artifactId>
             <version>${project.version}</version>
             <type>ejb</type>
+            <classifier>jar-with-dependencies</classifier>
+            <exclusions>
+                <exclusion>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>service</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>dao</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>core</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <!-- TODO: вернуть когда будет внедрен планировщик -->
         <!--<dependency>
@@ -73,11 +99,13 @@
                             <groupId>${project.groupId}</groupId>
                             <artifactId>migration-ejb</artifactId>
                             <bundleFileName>migration-ejb.jar</bundleFileName>
+                            <classifier>jar-with-dependencies</classifier>
                         </ejbModule>
                         <ejbModule>
                             <groupId>${project.groupId}</groupId>
                             <artifactId>mdb</artifactId>
                             <bundleFileName>mdb.jar</bundleFileName>
+                            <classifier>jar-with-dependencies</classifier>
                         </ejbModule>
                         <!-- TODO: вернуть когда будет внедрен планировщик -->
                         <!--<ejbModule>
