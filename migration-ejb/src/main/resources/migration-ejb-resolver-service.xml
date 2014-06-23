@@ -17,9 +17,13 @@
    <bean id="dataSource" class="com.aplana.sbrf.taxaccounting.service.MigrationDataSource" factory-method="getDataSource">
        <constructor-arg ref="dsHolder"/>
    </bean>
-
-    <import resource="classpath:com/aplana/sbrf/taxaccounting/dao.xml"/>
-
+    <!-- NamedJdbcTemplate, используемый в jdbc-Dao (в частности - в наследниках AbstractDao) -->
+    <bean id="namedParameterJdbcTemplate" class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate">
+        <constructor-arg index="0" ref="dataSource"/>
+    </bean>
     <context:annotation-config/>
     <tx:jta-transaction-manager/>
+    <tx:annotation-driven/>
+
+    <context:component-scan base-package="com.aplana.sbrf.taxaccounting"/>
 </beans>

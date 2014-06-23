@@ -14,6 +14,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -21,6 +22,7 @@ import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 
 @Service
+@Transactional
 public class MappingServiceImpl implements MappingService {
 
     private final Log log = LogFactory.getLog(getClass());
