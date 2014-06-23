@@ -2,6 +2,7 @@ package form_template.vat.vat_724_1.v2014
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
@@ -210,7 +211,7 @@ void logicCheck() {
         // 2. Проверка суммы НДС по данным бухгалтерского учета и книге продаж
         if (row.ndsSum != row.ndsBookSum &&
                 (isSection1or2 && row.ndsNum == '60309.01' || isSection5or6)) {
-            logger.warn(errorMsg + 'Сумма НДС по данным бухгалтерского учета не соответствует данным книги продаж!')
+            rowWarning(logger, row, errorMsg + 'Сумма НДС по данным бухгалтерского учета не соответствует данным книги продаж!')
         }
     }
 
@@ -243,7 +244,7 @@ void logicCheck() {
         def values5 = calc5(section)
         for (def row : sectionsRows) {
             if (!(row.ndsNum in values5)) {
-                logger.error('Строка %d: Графа «%s» заполнена неверно!', row.getIndex(), getColumnName(row, 'ndsNum'))
+                rowError(logger, row, 'Строка ' + row.getIndex() + ': Графа «' + getColumnName(row, 'ndsNum') + '» заполнена неверно!')
             }
         }
     }
@@ -437,13 +438,13 @@ void addData(def xml, int headRowCount) {
             title = row.cell[1].text()
             if (isFirstSection && title == 'Итого') {
                 isFirstSection = false
-                title = '1'
             }
             isSection7 = (title == rowHead7.fix)
             continue
         }
 
         def newRow = getNewRow(isSection7)
+        newRow.setImportIndex(xlsIndexRow)
 
         // Графа 3 - атрибут 900 - ACCOUNT - «Номер балансового счета», справочник 101 «План счетов бухгалтерского учета»
         record = getRecordImport(101, 'ACCOUNT', row.cell[3].text(), xlsIndexRow, 3 + colOffset)
@@ -471,7 +472,11 @@ void addData(def xml, int headRowCount) {
         // Графа 8
         newRow.ndsBookSum = parseNumber(row.cell[8].text(), xlsIndexRow, 8 + colOffset, logger, true)
 
-        aliasR[title].add(newRow)
+        if (aliasR[title] == null) {
+            logger.error("Строка %d: Структура файла не соответствует макету налоговой формы", xlsIndexRow)
+        } else {
+            aliasR[title].add(newRow)
+        }
     }
 
     aliasR.each { k, v ->

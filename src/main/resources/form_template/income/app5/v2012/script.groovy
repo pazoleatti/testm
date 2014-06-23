@@ -401,6 +401,7 @@ void addData(def xml, int headRowCount) {
 
         def newRow = getNewRow()
         newRow.setIndex(rowIndex++)
+        newRow.setImportIndex(xlsIndexRow)
 
         // графа 3
         def indexCol = 3

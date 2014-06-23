@@ -923,6 +923,9 @@ public final class ScriptUtils {
         rowLog(logger, row, msg, LogLevel.ERROR);
     }
 
+    /**
+     * Вывод исключения с учетом возможного присутствия информации о исходной позиции строки
+     */
     public static void rowServiceException(DataRow<Cell> row, String msg) {
         if (row.getImportIndex() != null) {
             msg = String.format(IMPORT_ROW_PREFIX, row.getImportIndex(), msg);
@@ -930,9 +933,6 @@ public final class ScriptUtils {
         throw new ServiceException(msg);
     }
 
-    /**
-     * Вывод исключения с учетом возможного присутствия информации о исходной позиции строки
-     */
     private static void rowLog(Logger logger, DataRow<Cell> row, String msg, LogLevel logLevel) {
         if (row.getImportIndex() != null) {
             msg = String.format(IMPORT_ROW_PREFIX, row.getImportIndex(), msg);

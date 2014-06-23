@@ -13,7 +13,9 @@ public enum ConfigurationParam {
 	REF_BOOK_KEY_FILE ("Путь к файлу ключей ЭЦП для справочников"),
 	FORM_DATA_DIRECTORY ("Путь папке транспортных файлов для форм"),
 	REF_BOOK_DIRECTORY ("Путь папке транспортных файлов для справочников"),
-    REF_BOOK_DIASOFT_DIRECTORY ("Путь папке транспортных файлов для справочников Diasoft Custody");
+    REF_BOOK_DIASOFT_DIRECTORY ("Путь папке транспортных файлов для справочников Diasoft Custody"),
+    ARCHIVE_DIRECTORY ("Каталог архива"),
+    ERROR_DIRECTORY ("Каталог ошибок");
 
 	private String caption;
 

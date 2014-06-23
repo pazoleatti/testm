@@ -214,32 +214,35 @@ void importData() {
 def addData(def xml, int headRowCount) {
     if (xml.row.size() > 0) {
         def xmlRow = xml.row[headRowCount]
-        def indexCell = 2
-        def indexRow = 1
+        def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+        def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
+        def xmlIndexCol = 2
+        def int xlsIndexRow = 1 + rowOffset
         def dataRowHelper = formDataService.getDataRowHelper(formData)
         def dataRows = dataRowHelper.allCached
         def row = getDataRow(dataRows, 'total')
+        row.setImportIndex(xlsIndexRow)
 
         // графа 3
-        row.ofz = getNumber(xmlRow.cell[indexCell++].text(), indexRow, indexCell + 1)
+        row.ofz = getNumber(xmlRow.cell[xmlIndexCol++].text(), xlsIndexRow, xmlIndexCol + colOffset)
         // графа 4
-        row.municipalBonds = getNumber(xmlRow.cell[indexCell++].text(), indexRow, indexCell + 1)
+        row.municipalBonds = getNumber(xmlRow.cell[xmlIndexCol++].text(), xlsIndexRow, xmlIndexCol + colOffset)
         // графа 5
-        row.governmentBonds = getNumber(xmlRow.cell[indexCell++].text(), indexRow, indexCell + 1)
+        row.governmentBonds = getNumber(xmlRow.cell[xmlIndexCol++].text(), xlsIndexRow, xmlIndexCol + colOffset)
         // графа 6
-        row.mortgageBonds = getNumber(xmlRow.cell[indexCell++].text(), indexRow, indexCell + 1)
+        row.mortgageBonds = getNumber(xmlRow.cell[xmlIndexCol++].text(), xlsIndexRow, xmlIndexCol + colOffset)
         // графа 7
-        row.municipalBondsBefore = getNumber(xmlRow.cell[indexCell++].text(), indexRow, indexCell + 1)
+        row.municipalBondsBefore = getNumber(xmlRow.cell[xmlIndexCol++].text(), xlsIndexRow, xmlIndexCol + colOffset)
         // графа 8
-        row.rtgageBondsBefore = getNumber(xmlRow.cell[indexCell++].text(), indexRow, indexCell + 1)
+        row.rtgageBondsBefore = getNumber(xmlRow.cell[xmlIndexCol++].text(), xlsIndexRow, xmlIndexCol + colOffset)
         // графа 9
-        row.ovgvz = getNumber(xmlRow.cell[indexCell++].text(), indexRow, indexCell + 1)
+        row.ovgvz = getNumber(xmlRow.cell[xmlIndexCol++].text(), xlsIndexRow, xmlIndexCol + colOffset)
         // графа 10
-        row.eurobondsRF = getNumber(xmlRow.cell[indexCell++].text(), indexRow, indexCell + 1)
+        row.eurobondsRF = getNumber(xmlRow.cell[xmlIndexCol++].text(), xlsIndexRow, xmlIndexCol + colOffset)
         // графа 11
-        row.itherEurobonds = getNumber(xmlRow.cell[indexCell++].text(), indexRow, indexCell + 1)
+        row.itherEurobonds = getNumber(xmlRow.cell[xmlIndexCol++].text(), xlsIndexRow, xmlIndexCol + colOffset)
         // графа 12
-        row.corporateBonds = getNumber(xmlRow.cell[indexCell++].text(), indexRow, indexCell + 1)
+        row.corporateBonds = getNumber(xmlRow.cell[xmlIndexCol++].text(), xlsIndexRow, xmlIndexCol + colOffset)
 
         dataRowHelper.save(dataRows)
     }

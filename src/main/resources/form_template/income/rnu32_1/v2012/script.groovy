@@ -557,6 +557,7 @@ void addData(def xml, int headRowCount) {
 
     for (def row : xml.row) {
         xmlIndexRow++
+        def int xlsIndexRow = xmlIndexRow + rowOffset
 
         /* Пропуск строк шапок */
         if (xmlIndexRow <= headRowCount - 1) {
@@ -578,7 +579,7 @@ void addData(def xml, int headRowCount) {
         }
 
         def newRow = getNewRow()
-        def int xlsIndexRow = xmlIndexRow + rowOffset
+        newRow.setImportIndex(xlsIndexRow)
 
         // графа 2 - атрибут 161 - NAME - "Наименование подразделения", справочник 30 "Подразделения"
         xmlIndexCol = 2

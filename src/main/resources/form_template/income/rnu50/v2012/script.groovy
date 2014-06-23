@@ -364,7 +364,9 @@ void addData(def xml, int headRowCount) {
 
         def int xlsIndexRow = xmlIndexRow + rowOffset
         def xmlIndexCol = 0
+
         def newRow = formData.createDataRow()
+        newRow.setImportIndex(xlsIndexRow)
 
         // графа 1
         xmlIndexCol++
