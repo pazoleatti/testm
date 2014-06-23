@@ -163,8 +163,10 @@ def getReportPeriodEndDate() {
 
 def getPrevReportPeriodEndDate() {
     if (prevEndDate == null) {
-        def prevPerortId = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)?.id
-        prevEndDate = reportPeriodService.getEndDate(prevPerortId).time
+        def prevReportPeriodId = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)?.id
+        if (prevReportPeriodId != null) {
+            prevEndDate = reportPeriodService.getEndDate(prevReportPeriodId).time
+        }
     }
     return prevEndDate
 }
@@ -178,6 +180,9 @@ def getRepordPeriod() {
 
 // Получение данных из справочника «Отчет о прибылях и убытках» для текужего подразделения и отчетного периода
 def getIncome102Data(def date) {
+    if(date==null){
+        return []
+    }
     if (!income102DataCache.containsKey(date)) {
         def filter = "DEPARTMENT_ID = ${formData.departmentId}"
         income102DataCache.put(date, refBookFactory.getDataProvider(52L)?.getRecords(date, null, filter, null))
