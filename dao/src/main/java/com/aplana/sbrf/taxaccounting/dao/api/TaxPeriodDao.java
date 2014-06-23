@@ -30,9 +30,9 @@ public interface TaxPeriodDao {
 	 * Получить налоговые периоды
 	 * @param taxType тип налога
 	 * @param year год
-	 * @return список налоговых периодов по типу налога за год
+	 * @return налоговый период по типу налога за год
 	 */
-	public List<TaxPeriod> listByTaxTypeAndYear(TaxType taxType, int year);
+	public TaxPeriod getByTaxTypeAndYear(TaxType taxType, int year);
 
 	/**
 	 * Добавить новый налоговый период
