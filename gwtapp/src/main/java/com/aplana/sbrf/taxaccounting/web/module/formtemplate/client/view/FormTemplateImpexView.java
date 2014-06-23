@@ -24,6 +24,8 @@ public class FormTemplateImpexView extends ViewWithUiHandlers<FormTemplateImpexU
 	@UiField
 	Button downloadFormTemplateButton;
 
+    private static String respPattern = "(<pre.*>)(.+?)(</pre>)";
+
     @Inject
 	public FormTemplateImpexView(Binder binder) {
 		initWidget(binder.createAndBindUi(this));
@@ -36,11 +38,14 @@ public class FormTemplateImpexView extends ViewWithUiHandlers<FormTemplateImpexU
                     return;
                 }
                 if (event.getResults().contains(ERROR_RESP)) {
-                    getUiHandlers().uploadDectResponseWithErrorUuid(event.getResults().replaceFirst(ERROR_RESP, ""));
+                    String errorUuid = event.getResults().replaceAll(respPattern, "$2");
+                    getUiHandlers().uploadDectResponseWithErrorUuid(errorUuid.replaceFirst(ERROR_RESP, ""));
                 }else if (event.getResults().toLowerCase().contains(ERROR)) {
-                    getUiHandlers().uploadFormTemplateFail(event.getResults().replaceFirst(ERROR, ""));
+                    String errorText = event.getResults().replaceAll(respPattern, "$2");
+                    getUiHandlers().uploadFormTemplateFail(errorText.replaceFirst(ERROR, ""));
                 } else {
-                    getUiHandlers().uploadFormTemplateSuccess(event.getResults().replaceFirst(SUCCESS_RESP, ""));
+                    String uuid = event.getResults().replaceAll(respPattern, "$2");
+                    getUiHandlers().uploadFormTemplateSuccess(uuid.replaceFirst(SUCCESS_RESP, ""));
                 }
 			}
 		});
