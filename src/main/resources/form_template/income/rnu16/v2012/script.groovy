@@ -241,14 +241,17 @@ void addData(def xml, int headRowCount) {
             newRow.getCell(it).setStyleAlias('Редактируемая')
         }
 
-        // графа 2
-        def record = getRecordImport(28, 'TYPE_INCOME', row.cell[3].text(), xlsIndexRow, 3 + colOffset)
-        if (record != null) {
-            formDataService.checkReferenceValue(28, row.cell[2].text(), record?.CODE?.value, xlsIndexRow, 2 + colOffset, logger, true)
-        }
+        // графа 4
+        newRow.incomeType = getRecordIdImport(28, 'CODE', row.cell[2].text(), xlsIndexRow, 2 + colOffset)
+        def map = getRefBookValue(28, newRow.code)
 
-        // графа 3
-        newRow.incomeType = record?.record_id?.value
+        if (map != null) {
+            def text = row.cell[3].text()
+            if ((text != null && !text.isEmpty() && !text.equals(map.TYPE_INCOME?.stringValue)) || ((text == null || text.isEmpty()) && map.TYPE_INCOME?.stringValue != null)) {
+                logger.error("Проверка файла: Строка ${xlsIndexRow}, столбец ${3 + colOffset} содержит значение, " +
+                        "отсутствующее в справочнике «" + refBookFactory.get(28).getName() + "»!")
+            }
+        }
 
         // графа 4
         newRow.sum = parseNumber(row.cell[4].text(), xlsIndexRow, 4 + colOffset, logger, true)
