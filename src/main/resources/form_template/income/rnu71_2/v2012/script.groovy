@@ -114,7 +114,7 @@ def sortColumns = ['contragent', 'assignContractDate', 'assignContractNumber']
 // Проверяемые на пустые значения атрибуты (графа 1..8, 10, 11, 16, 17, 19)
 @Field
 def nonEmptyColumns = ['rowNumber', 'contragent', 'inn', 'assignContractNumber', 'assignContractDate', 'amount',
-        'amountForReserve', 'repaymentDate', 'income', 'result', 'taxClaimPrice', 'finResult', 'correctThisThis']
+        'amountForReserve', 'repaymentDate', 'income', 'result', 'taxClaimPrice', 'finResult']
 
 /** Признак периода ввода остатков. */
 @Field
