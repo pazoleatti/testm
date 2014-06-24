@@ -3,7 +3,7 @@ package form_template.income.rnu7.v2012
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.TaxType
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import groovy.transform.Field
 
 import java.text.SimpleDateFormat
@@ -559,26 +559,23 @@ void addData(def xml, int headRowCount) {
         // графа fix
         xmlIndexCol++
 
+        // графа 2
         xmlIndexCol++
 
         // графа 3
         newRow.date = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
-        // графа 2
-        def id = getRecordIdImport(27, 'NUMBER', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-        def map = formDataService.getRefBookValue(27, id, refBookCache)
-        if (map != null) {
-            def text = row.cell[2].text()
-            if ((text != null && !text.isEmpty() && !text.equals(map.CODE?.stringValue)) || ((text == null || text.isEmpty()) && map.CODE?.stringValue != null)) {
-                logger.error("Проверка файла: Строка ${xlsIndexRow}, столбец ${2 + colOffset} " +
-                        "содержит значение, отсутствующее в справочнике «" + refBookFactory.get(27).getName() + "»!")
-            }
+        // графа 4
+        String filter = "LOWER(CODE) = LOWER('" + row.cell[2].text() + "') and LOWER(NUMBER) = LOWER('" + row.cell[xmlIndexCol].text() + "')"
+        def records = refBookFactory.getDataProvider(27).getRecords(reportPeriodEndDate, null, filter, null)
+        if (records.size() == 1) {
+            newRow.code = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+        } else {
+            logger.error("Проверка файла: Строка ${xlsIndexRow} содержит значение, отсутствующее в справочнике " +
+                    "«" + refBookFactory.get(27).getName() + "»!")
         }
         xmlIndexCol++
-
-        // графа 4
-        newRow.code = id
 
         // графа 5
         newRow.docNumber = row.cell[xmlIndexCol].text()

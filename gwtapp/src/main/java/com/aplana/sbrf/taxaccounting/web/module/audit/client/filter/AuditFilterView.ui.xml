@@ -46,13 +46,13 @@
                 <g:cell horizontalAlignment="right" width="95px">
                     <g:Label text="От даты:" wordWrap="false" addStyleNames="{style.labelBlockMargin}"/>
                 </g:cell>
-                <d:DateMaskBoxPicker ui:field="fromSearchDate" width="148px" canBeEmpty="false"/>
+                <d:DateMaskBoxPicker ui:field="fromSearchDate" width="148px"/>
             </g:HorizontalPanel>
             <g:HorizontalPanel spacing="2" verticalAlignment="middle" width="245px">
                 <g:cell horizontalAlignment="right" width="95px">
                     <g:Label text="По дату:" wordWrap="false" addStyleNames="{style.labelBlockMargin}"/>
                 </g:cell>
-                <d:DateMaskBoxPicker ui:field="toSearchDate" width="148px" canBeEmpty="false"/>
+                <d:DateMaskBoxPicker ui:field="toSearchDate" width="148px"/>
             </g:HorizontalPanel>
             <g:HorizontalPanel spacing="2" verticalAlignment="middle" width="245px">
                 <g:cell horizontalAlignment="right" width="95px">

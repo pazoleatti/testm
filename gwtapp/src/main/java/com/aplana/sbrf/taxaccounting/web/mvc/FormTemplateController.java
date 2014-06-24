@@ -98,19 +98,23 @@ public class FormTemplateController {
         mainOperatingService.edit(formTemplate, endDate, logger, securityService.currentUserInfo().getUser());
 
 		IOUtils.closeQuietly(items.get(0).getInputStream());
+        resp.setContentType("text/plain");
+        resp.setCharacterEncoding("UTF-8");
         if (!logger.getEntries().isEmpty())
             resp.getWriter().printf("uuid %s", logEntryService.save(logger.getEntries()));
 	}
 
     @ExceptionHandler(ServiceLoggerException.class)
     public void logServiceExceptionHandler(ServiceLoggerException e, final HttpServletResponse response) throws IOException {
+        response.setContentType("text/plain");
+        response.setCharacterEncoding("UTF-8");
         response.getWriter().printf("errorUuid %s", e.getUuid());
     }
 
 	@ExceptionHandler(Exception.class)
 	public void exceptionHandler(Exception e, final HttpServletResponse response) {
         /*response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);*/
-		response.setContentType("text/html");
+		response.setContentType("text/plain");
 		response.setCharacterEncoding("UTF-8");
 		logger.warn(e.getLocalizedMessage(), e);
 		try {
