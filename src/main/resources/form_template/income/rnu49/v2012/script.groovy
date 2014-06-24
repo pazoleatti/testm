@@ -290,12 +290,12 @@ void logicCheck() {
         }
 
         if (++i != row.rowNumber) {
-            logger.error(errorMsg + 'Нарушена уникальность номера по порядку!')
+            rowError(logger, row, errorMsg + 'Нарушена уникальность номера по порядку!')
         }
 
         // 2. Проверка на уникальность поля «инвентарный номер» (графа 6)
         if (row.invNumber in numbers) {
-            logger.error(errorMsg + "Инвентарный номер ${row.invNumber} не уникальный!")
+            rowError(logger, row, errorMsg + "Инвентарный номер ${row.invNumber} не уникальный!")
         } else {
             numbers += row.invNumber
         }
@@ -303,11 +303,11 @@ void logicCheck() {
         // 3. Проверка на нулевые значения (графа 8, 13, 15, 17, 20)
         if (row.price == 0 && row.costProperty != 0 && row.sumIncProfit == 0 &&
                 row.loss != 0 && row.expensesSum == 0) {
-            logger.error(errorMsg + 'Все суммы по операции нулевые!')
+            rowError(logger, row, errorMsg + 'Все суммы по операции нулевые!')
         }
         // 4. Проверка формата номера первой записи	Формат графы 2: ГГ-НННН
         if (row.firstRecordNumber == null || !row.firstRecordNumber.matches('\\w{2}-\\w{6}')) {
-            logger.error(errorMsg + 'Неправильно указан номер предыдущей записи!')
+            rowError(logger, row, errorMsg + 'Неправильно указан номер предыдущей записи!')
         }
 
         def row45 = getRow45(row, dataRows45)
@@ -315,10 +315,10 @@ void logicCheck() {
 
         // 5,6. Проверка существования необходимых данных (РНУ-45, РНУ-46)
         if (getSaledPropertyCode(row.saledPropertyCode) == 2 && row45 == null) {
-            logger.error(errorMsg + 'Отсутствуют данные РНУ-45!')
+            rowError(logger, row, errorMsg + 'Отсутствуют данные РНУ-45!')
         }
         if (getSaledPropertyCode(row.saledPropertyCode) == 1 && row46 == null) {
-            logger.error(errorMsg + 'Отсутствуют данные РНУ-46!')
+            rowError(logger, row, errorMsg + 'Отсутствуют данные РНУ-46!')
         }
 
         def values = [:]
@@ -335,10 +335,10 @@ void logicCheck() {
         checkCalc(row, autoFillColumns, values, logger, false)
 
         if (row.usefullLifeEnd != values.usefullLifeEnd) {
-            logger.error(errorMsg + "Неверное значение графы ${getColumnName(row, 'usefullLifeEnd')}!")
+            rowError(logger, row, errorMsg + "Неверное значение графы ${getColumnName(row, 'usefullLifeEnd')}!")
         }
         if (row.monthsLoss != values.monthsLoss) {
-            logger.error(errorMsg + "Неверное значение графы ${getColumnName(row, 'monthsLoss')}!")
+            rowError(logger, row, errorMsg + "Неверное значение графы ${getColumnName(row, 'monthsLoss')}!")
         }
 
         // 1. Проверка шифра при реализации амортизируемого имущества
@@ -346,36 +346,36 @@ void logicCheck() {
         def saledPropertyCode = getSaledPropertyCode(row.saledPropertyCode)
         def saleCode = getSaleCode(row.saleCode)
         if (isSection(dataRows, 'A', row) && ((saledPropertyCode != 1 && saledPropertyCode != 2) || saleCode != 1)) {
-            logger.error(errorMsg + 'Для реализованного амортизируемого имущества (группа «А») указан неверный шифр!')
+            rowError(logger, row, errorMsg + 'Для реализованного амортизируемого имущества (группа «А») указан неверный шифр!')
         }
 
         // 2. Проверка шифра при реализации прочего имущества
         // Графа 21 (группа «Б») = 3 или 4, и графа 22 = 1
         if (isSection(dataRows, 'B', row) && ((saledPropertyCode != 3 && saledPropertyCode != 4) || saleCode != 1)) {
-            logger.error(errorMsg + 'Для реализованного прочего имущества (группа «Б») указан неверный шифр!')
+            rowError(logger, row, errorMsg + 'Для реализованного прочего имущества (группа «Б») указан неверный шифр!')
         }
 
         // 3. Проверка шифра при списании (ликвидации) амортизируемого имущества
         // Графа 21 (группа «В») = 1 или 2, и графа 22 = 2
         if (isSection(dataRows, 'V', row) && ((saledPropertyCode != 1 && saledPropertyCode != 2) || saleCode != 2)) {
-            logger.error(errorMsg + 'Для списанного (ликвидированного) амортизируемого имущества (группа «В») указан неверный шифр!')
+            rowError(logger, row, errorMsg + 'Для списанного (ликвидированного) амортизируемого имущества (группа «В») указан неверный шифр!')
         }
 
         // 4. Проверка шифра при реализации имущественных прав (кроме прав требования, долей паёв)
         // Графа 21 (группа «Г») = 5, и графа 22 = 1
         if (isSection(dataRows, 'G', row) && (saledPropertyCode != 5 || saleCode != 1)) {
-            logger.error(errorMsg + 'Для реализованных имущественных прав (кроме прав требования, долей паёв) (группа «Г») указан неверный шифр!')
+            rowError(logger, row, errorMsg + 'Для реализованных имущественных прав (кроме прав требования, долей паёв) (группа «Г») указан неверный шифр!')
         }
 
         // 5. Проверка шифра при реализации прав на земельные участки
         // Графа 21 (группа «Д») = 6, и графа 22 = 1
         if (isSection(dataRows, 'D', row) && (saledPropertyCode != 6 || saleCode != 1)) {
-            logger.error(errorMsg + 'Для реализованных прав на земельные участки (группа «Д») указан неверный шифр!')
+            rowError(logger, row, errorMsg + 'Для реализованных прав на земельные участки (группа «Д») указан неверный шифр!')
         }
 
         // 6. Проверка шифра при реализации долей, паёв
         if (isSection(dataRows, 'E', row) && (saledPropertyCode != 7 || saleCode != 1)) {
-            logger.error(errorMsg + 'Для реализованных имущественных прав (кроме прав требования, долей паёв) (группа «Е») указан неверный шифр!')
+            rowError(logger, row, errorMsg + 'Для реализованных имущественных прав (кроме прав требования, долей паёв) (группа «Е») указан неверный шифр!')
         }
     }
 

@@ -315,24 +315,25 @@ void logicCheck() {
 
         // 2. Проверка на уникальность поля «№ пп»
         if (++i != row.number) {
-            loggerError(errorMsg + "Нарушена уникальность номера по порядку!")
+            loggerError(row, errorMsg + "Нарушена уникальность номера по порядку!")
         }
 
         // 3. Проверка на нулевые значения
         if (!(row.taxAccountingCurrency) && !(row.taxAccountingRuble) &&
                 !(row.accountingCurrency) && !(row.ruble)) {
-            loggerError(errorMsg + 'Все суммы по операции нулевые!')
+            loggerError(row, errorMsg + 'Все суммы по операции нулевые!')
         }
 
         // 4. Проверка, что не отображаются данные одновременно по бухгалтерскому и по налоговому учету
         if (row.taxAccountingRuble && row.ruble) {
-            logger.warn(errorMsg + 'Одновременно указаны данные по налоговому  «%s» и бухгалтерскому «%s» учету.',
-                    row.getCell('taxAccountingRuble').column.name, row.getCell('ruble').column.name)
+            rowWarning(logger, row, errorMsg + "Одновременно указаны данные по налоговому  «"  +
+                    row.getCell('taxAccountingRuble').column.name + "» и бухгалтерскому «" +
+                    row.getCell('ruble').column.name+"» учету.")
         }
 
         // 5. Проверка даты совершения операции и границ отчётного периода
         if (row.date != null && (row.date.after(endDate) || row.date.before(startDate))) {
-            loggerError(errorMsg + 'Дата совершения операции вне границ отчётного периода!')
+            loggerError(row, errorMsg + 'Дата совершения операции вне границ отчётного периода!')
         }
 
         // 6. Проверка на превышение суммы дохода по данным бухгалтерского учёта над суммой начисленного дохода
@@ -354,8 +355,8 @@ void logicCheck() {
                         }
                     }
                     if (c10 < c12) {
-                        loggerError(errorMsg + 'Сумма данных бухгалтерского учёта превышает сумму начисленных платежей ' +
-                                'для документа %s от %s!', row.docNumber as String, dateFormat.format(row.docDate))
+                        loggerError(row, errorMsg + "Сумма данных бухгалтерского учёта превышает сумму начисленных платежей"
+                                + " для документа " + row.docNumber + " от " + dateFormat.format(row.docDate) + "!")
                     }
                 }
                 if (row.taxAccountingRuble > 0 && row.code != null) {
@@ -410,12 +411,12 @@ void logicCheck() {
                 }
             }
             if (!(sum > row.ruble)) {
-                logger.warn(errorMsg + "Операция в налоговом учете имеет сумму, меньше чем указано " +
+                rowWarning(logger, row, errorMsg + "Операция в налоговом учете имеет сумму, меньше чем указано " +
                         "в бухгалтерском учете!" + (isFind ? " См. РНУ-6 в отчетных периодах: ${periods.join(", ")}." : ""))
             }
             if (!isFind) {
-                logger.warn('Операция, указанная в строке %s, в налоговом учете за последние 3 года не проходила!',
-                        row.number.toString())
+                rowWarning(logger, row, "Операция, указанная в строке " + row.number.toString() +
+                        ", в налоговом учете за последние 3 года не проходила!")
             }
         }
     }
@@ -424,7 +425,7 @@ void logicCheck() {
     for (def map : uniq456.keySet()) {
         def rowList = uniq456.get(map)
         if (rowList.size() > 1) {
-            loggerError("Несколько строк " + rowList.join(", ") + " содержат записи в налоговом учете для балансового " +
+            loggerError(null, "Несколько строк " + rowList.join(", ") + " содержат записи в налоговом учете для балансового " +
                     "счета=%s, документа № %s от %s.", refBookService.getStringValue(28, map.get(4), 'NUMBER').toString(),
                     map.get(5).toString(), dateFormat.format(map.get(6)))
         }
@@ -456,11 +457,11 @@ def getBalancePeriod() {
 }
 
 /** Вывести сообщение. В периоде ввода остатков сообщения должны быть только НЕфатальными. */
-void loggerError(def msg, Object... args) {
+void loggerError(def row, def msg) {
     if (getBalancePeriod()) {
-        logger.warn(msg, args)
+        rowWarning(logger, row, msg)
     } else {
-        logger.error(msg, args)
+        rowError(logger, row, msg)
     }
 }
 

@@ -210,23 +210,23 @@ void logicCheck() {
 
         // 2. Проверка даты совершения операции и границ отчетного периода
         if (row.operationDate != null && (row.operationDate < dFrom || dTo < row.operationDate)) {
-            loggerError(errorMsg + "Дата совершения операции вне границ отчетного периода!")
+            loggerError(row, errorMsg + "Дата совершения операции вне границ отчетного периода!")
         }
 
         // 3. Проверка на уникальность поля «№ пп»
         if (++i != row.rowNumber) {
-            loggerError(errorMsg + 'Нарушена уникальность номера по порядку!')
+            loggerError(row, errorMsg + "Нарушена уникальность номера по порядку!")
         }
         // 4. Проверка на нулевые значения
         if (!row.sumStartInCurrency && !row.sumStartInRub && !row.sumEndInCurrency && !row.sumEndInRub && !row.sum) {
-            loggerError(errorMsg + "Все суммы по операции нулевые!")
+            loggerError(row, errorMsg + "Все суммы по операции нулевые!")
         }
 
         if (!isBalancePeriod() && formData.kind == FormDataKind.PRIMARY) {
             // 5. Проверка существования необходимых экземпляров форм
             def rowPrev = getRowPrev(dataRowsPrev, row)
             if (rowPrev == null) {
-                logger.error(errorMsg + "Отсутствуют данные в РНУ-62 за предыдущий отчетный период!")
+                rowError(logger, row, errorMsg + "Отсутствуют данные в РНУ-62 за предыдущий отчетный период!")
             }
 
             // 6. Арифметическая проверка граф 14-18
@@ -241,10 +241,10 @@ void logicCheck() {
 
         // Проверки НСИ (графа 7, 8)
         if (row.rateBRBillDate != calc7(row)) {
-            logger.warn(errorMsg + "В справочнике «Курсы валют» не найдено значение «${row.rateBRBillDate}» в поле «${getColumnName(row, 'rateBRBillDate')}»!")
+            rowWarning(logger, row, errorMsg + "В справочнике «Курсы валют» не найдено значение «${row.rateBRBillDate}» в поле «${getColumnName(row, 'rateBRBillDate')}»!")
         }
         if (row.rateBROperationDate != calc8(row)) {
-            logger.warn(errorMsg + "В справочнике «Курсы валют» не найдено значение «${row.rateBROperationDate}» в поле «${getColumnName(row, 'rateBROperationDate')}»!")
+            rowWarning(logger, row, errorMsg + "В справочнике «Курсы валют» не найдено значение «${row.rateBROperationDate}» в поле «${getColumnName(row, 'rateBROperationDate')}»!")
         }
 
         // 7. Проверка итоговых значений по всей форме
@@ -481,11 +481,12 @@ void prevPeriodCheck() {
     }
 }
 
-def loggerError(def msg) {
+/** Вывести сообщение. В периоде ввода остатков сообщения должны быть только НЕфатальными. */
+def loggerError(def row, def msg) {
     if (isBalancePeriod()) {
-        logger.warn(msg)
+        rowWarning(logger, row, msg)
     } else {
-        logger.error(msg)
+        rowError(logger, row, msg)
     }
 }
 

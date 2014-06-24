@@ -387,7 +387,7 @@ void logicCheck() {
 
         // 2. Проверка на уникальность поля «инвентарный номер»
         if (invSet.contains(row.invNumber)) {
-            loggerError(errorMsg + "Инвентарный номер не уникальный!")
+            loggerError(row, errorMsg + "Инвентарный номер не уникальный!")
         } else {
             invSet.add(row.invNumber)
         }
@@ -399,7 +399,7 @@ void logicCheck() {
                 row.amortNorm &&
                 row.amortMonth == 0 &&
                 row.amortTaxPeriod) {
-            loggerError(errorMsg + 'Все суммы по операции нулевые!')
+            loggerError(row, errorMsg + 'Все суммы по операции нулевые!')
         }
 
         if (formData.kind == FormDataKind.PRIMARY) {
@@ -415,7 +415,7 @@ void logicCheck() {
                     row.cost10perTaxPeriod < row.cost10perMonth ||
                     row.cost10perTaxPeriod != row.cost10perMonth + prevRow.cost10perTaxPeriod ||
                     row.cost10perTaxPeriod != prevSum.cost10perMonth) {
-                loggerError(errorMsg + 'Неверная сумма расходов в виде капитальных вложений с начала года!')
+                loggerError(row, errorMsg + 'Неверная сумма расходов в виде капитальных вложений с начала года!')
             }
 
             // 7. Проверка суммы начисленной амортизации с начала года
@@ -425,7 +425,7 @@ void logicCheck() {
                     row.amortTaxPeriod < row.amortMonth ||
                     row.amortTaxPeriod != row.amortMonth + prevRow.amortTaxPeriod ||
                     row.amortTaxPeriod != prevSum.amortMonth) {
-                loggerError(errorMsg + 'Неверная сумма начисленной амортизации с начала года!')
+                loggerError(row, errorMsg + 'Неверная сумма начисленной амортизации с начала года!')
             }
 
             // 8. Арифметические проверки расчета граф 8, 10-16, 18
@@ -451,7 +451,7 @@ void logicCheck() {
             checkCalc(row, arithmeticCheckAlias, needValue, logger, !isMonthBalance())
 
             if (row.usefullLifeEnd != calc18(row)) {
-                loggerError(errorMsg + "Неверное значение графы: ${getColumnName(row, 'usefullLifeEnd')}!")
+                loggerError(row, errorMsg + "Неверное значение графы: ${getColumnName(row, 'usefullLifeEnd')}!")
             }
         }
     }
@@ -700,11 +700,11 @@ def getReportPeriodEndDate() {
     return endDate
 }
 
-def loggerError(def msg) {
+def loggerError(def row, def msg) {
     if (isMonthBalance()) {
-        logger.warn(msg)
+        rowWarning(logger, row, msg)
     } else {
-        logger.error(msg)
+        rowError(logger, row, msg)
     }
 }
 
