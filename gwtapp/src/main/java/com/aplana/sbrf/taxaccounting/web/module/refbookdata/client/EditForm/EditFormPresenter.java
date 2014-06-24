@@ -77,6 +77,8 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
         void updateMode(FormMode mode);
         void updateRefBookPickerPeriod();
         void setVisibleFields(boolean isVisible);
+        // Устанавливает видимость для поля "Все версии"
+        void setAllVersionField(boolean isVisible);
     }
 
     protected final RenameDialogPresenter renameDialogPresenter;
@@ -390,6 +392,10 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
     public void setCanVersion(boolean canVersion) {
         this.canVersion = canVersion;
         getView().setVisibleFields(canVersion);
+    }
+
+    public void setAllVersionVisible(boolean isVisible) {
+        getView().setAllVersionField(isVisible);
     }
 
     public void setCurrentUniqueRecordId(Long currentUniqueRecordId) {
