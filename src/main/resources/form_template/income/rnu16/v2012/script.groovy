@@ -171,7 +171,7 @@ void logicCheck() {
 
         // 2. Проверка на уникальность поля «№ пп»
         if (++i != row.rowNumber) {
-            logger.error(errorMsg + "Нарушена уникальность номера по порядку!")
+            rowError(logger, row, errorMsg + "Нарушена уникальность номера по порядку!")
         }
     }
 

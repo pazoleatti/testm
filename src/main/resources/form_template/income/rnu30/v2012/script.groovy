@@ -83,7 +83,8 @@ def refBookCache = [:]
 
 // Атрибуты итоговых строк для которых вычисляются суммы (всего графа 5, 7, 8, 10..16)
 @Field
-def totalColumnsAll = ['debt45_90DaysSum', 'debt45_90DaysReserve', 'debtOver90DaysSum', 'debtOver90DaysReserve', 'totalReserve', 'reservePrev', 'reserveCurrent', 'calcReserve', 'reserveRecovery', 'useReserve']
+def totalColumnsAll = ['debt45_90DaysSum', 'debt45_90DaysReserve', 'debtOver90DaysSum', 'debtOver90DaysReserve',
+                       'totalReserve', 'reservePrev', 'reserveCurrent', 'calcReserve', 'reserveRecovery', 'useReserve']
 
 // Атрибуты итоговых строк для которых вычисляются суммы (раздел А и Б: графа 12, 13, 16)
 @Field
@@ -112,8 +113,8 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 }
 
 // Поиск записи в справочнике по значению (для расчетов) + по дате
-def getRefBookRecord(def Long refBookId, def String alias, def String value, def Date day, def int rowIndex, def String cellName,
-                     boolean required) {
+def getRefBookRecord(def Long refBookId, def String alias, def String value, def Date day, def int rowIndex,
+                     def String cellName, boolean required) {
     return formDataService.getRefBookRecord(refBookId, recordCache, providerCache, refBookCache, alias, value,
             day, rowIndex, cellName, logger, required)
 }
@@ -237,12 +238,17 @@ void logicCheck() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     // для первых строк - графы 1..16
-    requiredColumns1 = ['number', 'debtor', 'provision', 'nameBalanceAccount', 'debt45_90DaysSum', 'debt45_90DaysNormAllocation50per', 'debt45_90DaysReserve', 'debtOver90DaysSum', 'debtOver90DaysNormAllocation100per', 'debtOver90DaysReserve', 'totalReserve', 'reservePrev', 'reserveCurrent', 'calcReserve', 'reserveRecovery', 'useReserve']
+    requiredColumns1 = ['number', 'debtor', 'provision', 'nameBalanceAccount', 'debt45_90DaysSum',
+                        'debt45_90DaysNormAllocation50per', 'debt45_90DaysReserve', 'debtOver90DaysSum',
+                        'debtOver90DaysNormAllocation100per', 'debtOver90DaysReserve', 'totalReserve', 'reservePrev',
+                        'reserveCurrent', 'calcReserve', 'reserveRecovery', 'useReserve']
     // для раздера А и Б - графы 1, 2, 4, 12, 16
     requiredColumnsAB = ['number', 'debtor', 'nameBalanceAccount', 'reservePrev', 'useReserve']
 
     // алиасы графов для арифметической проверки (6, 7, 9..11, 13..15)
-    def arithmeticCheckAlias = ['debt45_90DaysNormAllocation50per', 'debt45_90DaysReserve', 'debtOver90DaysNormAllocation100per', 'debtOver90DaysReserve', 'totalReserve', 'reserveCurrent', 'calcReserve', 'reserveRecovery']
+    def arithmeticCheckAlias = ['debt45_90DaysNormAllocation50per', 'debt45_90DaysReserve',
+                                'debtOver90DaysNormAllocation100per', 'debtOver90DaysReserve', 'totalReserve',
+                                'reserveCurrent', 'calcReserve', 'reserveRecovery']
 
     def dataProvider = refBookFactory.getDataProvider(29)
     def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
@@ -260,7 +266,7 @@ void logicCheck() {
 
         // 2. Проверка на уникальность поля "№ пп" (графа 1)
         if (++rowNumber != row.number) {
-            logger.error(errorMsg + 'Нарушена уникальность номера по порядку!')
+            rowError(logger, row, errorMsg + 'Нарушена уникальность номера по порядку!')
         }
 
         def needValue = [:]
@@ -279,15 +285,6 @@ void logicCheck() {
             // 3. Арифметическая проверка раздела А и Б (графа 13)
             needValue['reserveCurrent'] = calc13AB(row)
             checkCalc(row, ['reserveCurrent'], needValue, logger, true)
-        }
-
-        // проверки НСИ
-        // 1. Проверка значения графы «Наименование балансового счёта» (графа 4)
-        def record = dataProvider.getRecords(getReportPeriodEndDate(), null, "BALANCE_ACCOUNT = '$row.nameBalanceAccount'", null)
-        if (record == null || record.isEmpty()) {
-            def name = getColumnName(row, 'nameBalanceAccount')
-            def ref = refBookFactory.get(29).name
-            logger.error("Значение графы «$name» отсутствует в справочнике «$ref»")
         }
     }
 

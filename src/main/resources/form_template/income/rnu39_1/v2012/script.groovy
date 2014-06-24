@@ -156,11 +156,11 @@ void logicCheck() {
 
         // 2. Проверка даты первой части сделки
         if (row.shortPositionOpen > reportDateNextDay) {
-            logger.error(errorMsg + "Неверно указана дата первой части сделки!")
+            rowError(logger, row, errorMsg + "Неверно указана дата первой части сделки!")
         }
         // 3. Проверка даты второй части сделки
         if ((isInASector && row.shortPositionClose != null) || (!isInASector && row.shortPositionClose > reportDateNextDay)) {
-            logger.error(errorMsg + "Неверно указана дата второй части сделки!")
+            rowError(logger, row, errorMsg + "Неверно указана дата второй части сделки!")
         }
 
         // 4. Арифметическая проверка вычислимых граф (графа  14, 15)
