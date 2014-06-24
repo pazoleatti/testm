@@ -368,6 +368,10 @@ void logicCheck() {
             checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
         }
 
+        if (getRate(row, getReportPeriodEndDate()) != row.rubCourse) {
+            loggerError(errorMsg + "Значение графы «${getColumnName(row, 'rubCourse')}» отсутствует в справочнике «Курсы валют»!")
+        }
+
         // 18. Проверка итоговых значений по эмитентам
         def issuerId = getRefBookValue(84, row.currency)?.ISSUER?.value
         if (issuerId != null && !totalGroups.contains(issuerId)) {
@@ -839,4 +843,21 @@ def getPrevRowByColumn4(def prevDataRows, def column4Value) {
 def getIssuerName(def record84Id) {
     def issuerId = getRefBookValue(84, record84Id.toLong())?.ISSUER?.value
     return getRefBookValue(100, issuerId)?.FULL_NAME?.value
+}
+
+def getRate(def row, def date) {
+    def currency = row.currency
+    if (date == null || currency == null) {
+        return null
+    }
+    if (!isRubleCurrency(currency)) {
+        def res = formDataService.getRefBookRecord(22, recordCache, providerCache, refBookCache,
+                'CODE_NUMBER', currency.toString(), date, row.getIndex(), getColumnName(row, "currency"), logger, false)
+        return res?.RATE?.numberValue
+    }
+    return 1;
+}
+
+def isRubleCurrency(def currencyCode) {
+    return currencyCode != null ? (getRefBookValue(15, currencyCode)?.CODE?.stringValue in ['810', '643']) : false
 }

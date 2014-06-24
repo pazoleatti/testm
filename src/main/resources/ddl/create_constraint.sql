@@ -77,7 +77,7 @@ alter table form_column add constraint form_column_fk_attribute_id foreign key (
 alter table form_column add constraint form_column_fk_attribute_id2 foreign key (attribute_id2) references ref_book_attribute(id);
 alter table form_column add constraint form_column_fk_parent_id foreign key (parent_column_id) references form_column(id);
 alter table form_column add constraint form_column_chk_filt_parent check ((type='R' and ((parent_column_id is null) and (filter is not null)) or ((parent_column_id is not null) and (filter is null)) or ((parent_column_id is null) and (filter is null))) or (type<>'R'));
-alter table form_column add constraint form_column_chk_numrow check (numeration_row in (0, 1));
+alter table form_column add constraint form_column_chk_numrow check (numeration_row in (0, 1) or type <> 'A');
 
 alter table department add constraint department_pk primary key (id);
 alter table department add constraint dept_fk_parent_id foreign key (parent_id) references department(id);

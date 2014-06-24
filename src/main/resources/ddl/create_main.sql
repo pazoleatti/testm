@@ -249,7 +249,7 @@ comment on column form_column.filter is 'Условие фильтрации э�
 comment on column form_column.max_length IS 'Максимальная длина строки';
 comment on column form_column.parent_column_id is 'Ссылка на родительскую графу';
 comment on column form_column.attribute_id2 is 'Код отображаемого атрибута для столбцов-ссылок второго уровня';
-comment on column form_column.numeration_row is 'Тип нумерации строк для автонумеруемой графы';
+comment on column form_column.numeration_row is 'Тип нумерации строк для автонумеруемой графы (0 - последовательная, 1 - сквозная)';
 
 create sequence seq_form_column start with 10000;
 ---------------------------------------------------------------------------------------------------
