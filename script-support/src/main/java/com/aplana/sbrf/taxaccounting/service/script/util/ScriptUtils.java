@@ -934,7 +934,7 @@ public final class ScriptUtils {
     }
 
     private static void rowLog(Logger logger, DataRow<Cell> row, String msg, LogLevel logLevel) {
-        if (row.getImportIndex() != null) {
+        if (row != null && row.getImportIndex() != null) {
             msg = String.format(IMPORT_ROW_PREFIX, row.getImportIndex(), msg);
         }
         switch (logLevel) {

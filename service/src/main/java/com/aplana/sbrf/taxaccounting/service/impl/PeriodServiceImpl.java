@@ -88,18 +88,12 @@ public class PeriodServiceImpl implements PeriodService{
 	@Override
 	public void open(int year, int dictionaryTaxPeriodId, TaxType taxType, TAUserInfo user,
 	                 long departmentId, List<LogEntry> logs, boolean isBalance, Date correctionDate) {
-		List<TaxPeriod> taxPeriods = taxPeriodDao.listByTaxTypeAndYear(taxType, year);
-		TaxPeriod taxPeriod;
-		if (taxPeriods.size() > 1) {
-			// Что-то пошло не так
-			throw new ServiceException("На " + year + " год найдено несколько налоговых периодов");
-		} else if (taxPeriods.isEmpty()) {
+		TaxPeriod taxPeriod = taxPeriodDao.getByTaxTypeAndYear(taxType, year);
+		if (taxPeriod == null) {
 			taxPeriod = new TaxPeriod();
 			taxPeriod.setTaxType(taxType);
 			taxPeriod.setYear(year);
 			taxPeriodDao.add(taxPeriod);
-		} else {
-			taxPeriod = taxPeriods.get(0);
 		}
 
 		List<ReportPeriod> reportPeriods = listByTaxPeriod(taxPeriod.getId());
@@ -355,15 +349,9 @@ public class PeriodServiceImpl implements PeriodService{
 
 	@Override
 	public PeriodStatusBeforeOpen checkPeriodStatusBeforeOpen(TaxType taxType, int year, boolean balancePeriod, long departmentId, long dictionaryTaxPeriodId) {
-		List<TaxPeriod> taxPeriods = taxPeriodDao.listByTaxTypeAndYear(taxType, year);
-		TaxPeriod taxPeriod;
-		if (taxPeriods.size() > 1) {
-			// Что-то пошло не так
-			throw new ServiceException("На " + year + " год найдено несколько налоговых периодов");
-		} else if (taxPeriods.isEmpty()) {
+		TaxPeriod taxPeriod = taxPeriodDao.getByTaxTypeAndYear(taxType, year);
+		if (taxPeriod == null) {
 			return PeriodStatusBeforeOpen.NOT_EXIST;
-		} else {
-			taxPeriod = taxPeriods.get(0);
 		}
 
 		List<ReportPeriod> reportPeriods = listByTaxPeriod(taxPeriod.getId());

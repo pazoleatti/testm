@@ -348,17 +348,17 @@ void logicCheck() {
 
         // 2.
         if (row.marketPriceRealizationInPerc != getGraph27(row, row)) {
-            logger.error(errorMsg + "Неверно указана рыночная цена в процентах при погашении!")
+            rowError(logger, row, errorMsg + "Неверно указана рыночная цена в процентах при погашении!")
         }
 
         // 3.
         if (row.marketPriceRealizationInRub != getGraph28(row, row)) {
-            logger.error(errorMsg + "Неверно указана рыночная цена в рублях при погашении!")
+            rowError(logger, row, errorMsg + "Неверно указана рыночная цена в рублях при погашении!")
         }
 
         // 4.
         if (row.excessSellingPrice < 0) {
-            logger.error(errorMsg + "Превышение цены реализации для целей налогообложения над ценой реализации отрицательное!")
+            rowError(logger, row, errorMsg + "Превышение цены реализации для целей налогообложения над ценой реализации отрицательное!")
         }
 
         // 6.
@@ -385,9 +385,9 @@ void logicCheck() {
 
         def record = dataProvider29.getRecords(getReportPeriodEndDate(), null, "BALANCE_ACCOUNT = '$row.balanceNumber'", null)
         if (record.size() == 0) {
-            logger.error(errorMsg + "Значение графы «Номер балансового счета» отсутствует в справочнике «Классификатор соответствия счетов бухгалтерского учёта кодам налогового учёта»")
+            rowError(logger, row, errorMsg + "Значение графы «Номер балансового счета» отсутствует в справочнике " +
+                    "«Классификатор соответствия счетов бухгалтерского учёта кодам налогового учёта»")
         }
-
     }
     // 7.
     calcOrCheckTotalDataRows(dataRows, true)

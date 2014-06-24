@@ -65,13 +65,17 @@ public class TaxPeriodDaoImpl extends AbstractDao implements TaxPeriodDao {
 	}
 
 	@Override
-	public List<TaxPeriod> listByTaxTypeAndYear(TaxType taxType, int year) {
-		return getJdbcTemplate().query(
-				"select id, tax_type, year from tax_period where tax_type = ? and year = ?",
-				new Object[]{taxType.getCode(), year},
-				new int[] { Types.VARCHAR, Types.NUMERIC},
-				new TaxPeriodRowMapper()
-		);
+	public TaxPeriod getByTaxTypeAndYear(TaxType taxType, int year) {
+        try {
+            return getJdbcTemplate().queryForObject(
+                    "select id, tax_type, year from tax_period where tax_type = ? and year = ?",
+                    new Object[]{taxType.getCode(), year},
+                    new int[]{Types.VARCHAR, Types.NUMERIC},
+                    new TaxPeriodRowMapper()
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
 	}
 
 	@Override

@@ -54,16 +54,13 @@ public class PeriodServiceImplTest {
         taxPeriodList.add(taxPeriod1);
         taxPeriodList.add(taxPeriod2);
 
-        List<TaxPeriod> taxPeriodList1 = new ArrayList<TaxPeriod>();
-        taxPeriodList1.add(taxPeriod1);
-
         // Mock для taxPeriodDao
         TaxPeriodDao taxPeriodDao = mock(TaxPeriodDao.class);
         when(taxPeriodDao.get(1)).thenReturn(taxPeriod1);
         when(taxPeriodDao.get(2)).thenReturn(taxPeriod2);
         when(taxPeriodDao.get(3)).thenReturn(taxPeriod3);
         when(taxPeriodDao.listByTaxType(TaxType.TRANSPORT)).thenReturn(taxPeriodList);
-        when(taxPeriodDao.listByTaxTypeAndYear(TaxType.TRANSPORT, 2012)).thenReturn(taxPeriodList1);
+        when(taxPeriodDao.getByTaxTypeAndYear(TaxType.TRANSPORT, 2012)).thenReturn(taxPeriod1);
 
         ReflectionTestUtils.setField(service, "taxPeriodDao", taxPeriodDao);
 

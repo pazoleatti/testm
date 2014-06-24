@@ -277,55 +277,55 @@ void logicCheck() {
 
         // 2. Проверка на уникальность поля «№ пп» (графа 1)
         if (++rowNumber != row.rowNumber) {
-            loggerError(errorMsg + 'Нарушена уникальность номера по порядку!')
+            loggerError(row, errorMsg + 'Нарушена уникальность номера по порядку!')
         }
 
         // 4. Проверка при нулевом значении размера лота на текущую отчётную дату (графа 7, 8, 17)
         if (row.lotSizeCurrent == 0 && row.reserveCalcValuePrev != row.reserveRecovery) {
-            logger.warn(errorMsg + 'Графы 8 и 17 неравны!')
+            rowWarning(logger, row, errorMsg + 'Графы 8 и 17 неравны!')
         }
 
         // 5. Проверка при нулевом значении размера лота на текущую отчётную дату (графа 7, 9, 14, 15)
         if (row.lotSizeCurrent == 0 && (row.cost != 0 || row.costOnMarketQuotation != 0 || row.reserveCalcValue != 0)) {
-            logger.warn(errorMsg + 'Графы 9, 14 и 15 ненулевые!')
+            rowWarning(logger, row, errorMsg + 'Графы 9, 14 и 15 ненулевые!')
         }
 
         // 6. Проверка при нулевом значении размера лота на предыдущую отчётную дату (графа 6, 8, 17)
         if (row.lotSizePrev == 0 && (row.reserveCalcValuePrev != 0 || row.reserveRecovery != 0)) {
-            loggerError(errorMsg + 'Графы 8 и 17 ненулевые!')
+            loggerError(row, errorMsg + 'Графы 8 и 17 ненулевые!')
         }
 
         // 7. Проверка необращающихся акций (графа 10, 15, 16)
         def sign = getSign(row)
         if (sign == '-' && (row.reserveCalcValue != 0 || row.reserveCreation != 0)) {
-            logger.warn(errorMsg + 'Акции необращающиеся, графы 15 и 16 ненулевые!')
+            rowWarning(logger, row, errorMsg + 'Акции необращающиеся, графы 15 и 16 ненулевые!')
         }
 
         // 8. Проверка создания (восстановления) резерва по обращающимся акциям (графа 8, 10, 15, 17)
         def tmp = (row.reserveCalcValue ?: 0) - (row.reserveCalcValuePrev ?: 0)
         if (sign == '+' && tmp > 0 && row.reserveRecovery != 0) {
-            loggerError(errorMsg + 'Акции обращающиеся – резерв сформирован (восстановлен) некорректно!')
+            loggerError(row, errorMsg + 'Акции обращающиеся – резерв сформирован (восстановлен) некорректно!')
         }
 
         // 9. Проверка создания (восстановления) резерва по обращающимся акциям (графа 8, 10, 15, 16)
         if (sign == '+' && tmp < 0 && row.reserveCreation != 0) {
-            loggerError(errorMsg + 'Акции обращающиеся – резерв сформирован (восстановлен) некорректно!')
+            loggerError(row, errorMsg + 'Акции обращающиеся – резерв сформирован (восстановлен) некорректно!')
         }
 
         // 10. Проверка создания (восстановления) резерва по обращающимся акциям (графа 8, 10, 15, 17)
         if (sign == '+' && tmp == 0 && (row.reserveCreation != 0 || row.reserveRecovery != 0)) {
-            loggerError(errorMsg + 'Акции обращающиеся – резерв сформирован (восстановлен) некорректно!')
+            loggerError(row, errorMsg + 'Акции обращающиеся – резерв сформирован (восстановлен) некорректно!')
         }
 
         // 11. Проверка корректности формирования резерва (графа 8, 15, 16, 17)
         if ((row.reserveCalcValuePrev ?: 0) + (row.reserveCreation ?: 0) != (row.reserveCalcValue ?: 0) + (row.reserveRecovery ?: 0)) {
-            loggerError(errorMsg + 'Резерв сформирован неверно!')
+            loggerError(row, errorMsg + 'Резерв сформирован неверно!')
         }
 
         // 12. Проверка на положительные значения при наличии созданного резерва
         if (row.reserveCreation > 0 && (row.lotSizeCurrent < 0 || row.cost < 0 ||
                 row.costOnMarketQuotation < 0 || row.reserveCalcValue < 0)) {
-            logger.warn(errorMsg + 'Резерв сформирован. Графы 7, 9, 14 и 15 неположительные!')
+            logger.warn(row, errorMsg + 'Резерв сформирован. Графы 7, 9, 14 и 15 неположительные!')
         }
 
         def prevRow = null
@@ -334,14 +334,14 @@ void logicCheck() {
 
             // 13. Проверка корректности заполнения РНУ (графа 4, 4 (за предыдущий период), 6, 7 (за предыдущий период) )
             if (prevRow != null && row.lotSizePrev != prevRow.lotSizeCurrent) {
-                logger.warn(errorMsg + "РНУ сформирован некорректно! Не выполняется условие: " +
+                rowWarning(logger, row, errorMsg + "РНУ сформирован некорректно! Не выполняется условие: " +
                         "Если «графа 4» = «графа 4» формы РНУ-26 за предыдущий отчётный период, " +
                         "то «графа 6» = «графа 7» формы РНУ-26 за предыдущий отчётный период.")
             }
 
             // 14. Проверка корректности заполнения РНУ (графа 4, 4 (за предыдущий период), 8, 15 (за предыдущий период) )
             if (prevRow != null && row.reserveCalcValuePrev != prevRow.reserveCalcValue) {
-                loggerError(errorMsg + "РНУ сформирован некорректно! Не выполняется условие: " +
+                loggerError(row, errorMsg + "РНУ сформирован некорректно! Не выполняется условие: " +
                         "Если «графа 4» = «графа 4» формы РНУ-26 за предыдущий отчётный период, " +
                         "то «графа 8» = «графа 15» формы РНУ-26 за предыдущий отчётный период.")
             }
@@ -392,7 +392,7 @@ void logicCheck() {
             subTotalRow = getDataRow(dataRows, totalRowAlias)
         } catch(IllegalArgumentException e) {
             def issuerName = getRefBookValue(100, group.toLong())?.FULL_NAME?.value
-            loggerError("Итоговые значения по эмитенту $issuerName не рассчитаны! Необходимо рассчитать данные формы.")
+            loggerError(null, "Итоговые значения по эмитенту $issuerName не рассчитаны! Необходимо рассчитать данные формы.")
             continue
         }
         // сформировать подитоговую строку ГРН с суммами
@@ -401,7 +401,7 @@ void logicCheck() {
         // сравнить строки
         if (isDiffRow(subTotalRow, tmpRow, totalColumns)) {
             def issuerName = getRefBookValue(100, group.toLong())?.FULL_NAME?.value
-            loggerError("Итоговые значения по эмитенту $issuerName рассчитаны неверно!")
+            loggerError(subTotalRow, "Итоговые значения по эмитенту $issuerName рассчитаны неверно!")
         }
     }
 
@@ -410,7 +410,7 @@ void logicCheck() {
     try {
         totalRow = getDataRow(dataRows, 'total')
     } catch(IllegalArgumentException e) {
-        loggerError("Итоговые значения не рассчитаны! Необходимо рассчитать данные формы.")
+        loggerError(null, "Итоговые значения не рассчитаны! Необходимо рассчитать данные формы.")
     }
 
     if (totalRow != null && prevDataRows) {
@@ -418,13 +418,13 @@ void logicCheck() {
 
         // 15. Проверка корректности заполнения РНУ (графа 6, 7 (за предыдущий период))
         if (totalRow.lotSizePrev != totalRowOld.lotSizeCurrent) {
-            loggerError("РНУ сформирован некорректно! Не выполняется условие: " +
+            loggerError(totalRow, "РНУ сформирован некорректно! Не выполняется условие: " +
                     "«Итого» по графе 6 = «Итого» по графе 7 формы РНУ-26 за предыдущий отчётный период.")
         }
 
         // 16. Проверка корректности заполнения РНУ (графа 8, 15 (за предыдущий период))
         if (totalRow.reserveCalcValuePrev != totalRowOld.reserveCalcValue) {
-            loggerError("РНУ сформирован некорректно! Не выполняется условие: " +
+            loggerError(totalRow, "РНУ сформирован некорректно! Не выполняется условие: " +
                     "«Итого» по графе 8 = «Итого» по графе 15 формы РНУ-26 за предыдущий отчётный период.")
         }
     }
@@ -568,11 +568,11 @@ def roundValue(def value, def int precision) {
 }
 
 /** Вывести сообщение. В периоде ввода остатков сообщения должны быть только НЕфатальными. */
-void loggerError(def msg) {
+void loggerError(def row, def msg) {
     if (getBalancePeriod()) {
-        logger.warn(msg)
+        rowWarning(logger, row, msg)
     } else {
-        logger.error(msg)
+        rowError(logger, row, msg)
     }
 }
 

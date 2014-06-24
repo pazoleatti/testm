@@ -202,7 +202,8 @@ void logicCheck() {
     def dataRows = dataRowHelper.allCached
 
     // алиасы графов для арифметической проверки (графа 13..20)
-    def arithmeticCheckAlias = ['incomeCurrency', 'incomeRuble', 'accountingCurrency', 'accountingRuble', 'preChargeCurrency', 'preChargeRuble', 'taxPeriodCurrency', 'taxPeriodRuble']
+    def arithmeticCheckAlias = ['incomeCurrency', 'incomeRuble', 'accountingCurrency', 'accountingRuble',
+                                'preChargeCurrency', 'preChargeRuble', 'taxPeriodCurrency', 'taxPeriodRuble']
     // для хранения правильных значении и сравнения с имеющимися при арифметических проверках
     def needValue = [:]
 
@@ -235,7 +236,7 @@ void logicCheck() {
                         (row.accrualAccountingEndDate != null && (row.accrualAccountingEndDate < a || b < row.accrualAccountingEndDate)) ||
                         (row.preAccrualsEndDate != null && (row.preAccrualsEndDate < a || b < row.preAccrualsEndDate)))
         ) {
-            loggerError(errorMsg + 'Дата совершения операции вне границ отчётного периода!')
+            loggerError(row, errorMsg + 'Дата совершения операции вне границ отчётного периода!')
         }
 
         // 2. Проверка на нулевые значения (графа 13..20)
@@ -248,23 +249,23 @@ void logicCheck() {
             }
         }
         if (hasNull) {
-            loggerError(errorMsg + 'Все суммы по операции нулевые!')
+            loggerError(row, errorMsg + 'Все суммы по операции нулевые!')
         }
 
         // 3. Проверка на сумму гарантии (графа 4)
         if (row.amountOfTheGuarantee != null && row.amountOfTheGuarantee == 0) {
-            logger.warn(errorMsg + 'Суммы гарантии равны нулю!')
+            rowWarning(logger, row, errorMsg + 'Суммы гарантии равны нулю!')
         }
 
         // 4. Проверка задания расчётного периода (графа 9, 10, 11, 12)
         if (row.accrualAccountingStartDate > row.accrualAccountingEndDate ||
                 row.preAccrualsStartDate > row.preAccrualsEndDate) {
-            logger.warn(errorMsg + 'Неправильно задан расчётный период!')
+            rowWarning(logger, row, errorMsg + 'Неправильно задан расчётный период!')
         }
 
         // 5. Проверка на корректность даты договора (графа 3)
         if (row.contractDate > b) {
-            loggerError(errorMsg + 'Дата договора неверная!')
+            loggerError(row, errorMsg + 'Дата договора неверная!')
         }
 
         // 7. Обязательность заполнения полей
@@ -278,12 +279,12 @@ void logicCheck() {
         def checkColumn11and12 = (row.accrualAccountingStartDate != null || row.accrualAccountingEndDate != null) &&
                 row.preAccrualsStartDate != null && row.preAccrualsEndDate != null
         if (checkColumn9and10 || checkColumn11and12) {
-            loggerError(errorMsg + 'Поля в графе 9, 10, 11, 12 заполены неверно!')
+            loggerError(row, errorMsg + 'Поля в графе 9, 10, 11, 12 заполены неверно!')
         }
 
         // 9. Проверка на уникальность поля «№ пп» (графа 1)
         if (++rowNumber != row.number) {
-            loggerError(errorMsg + 'Нарушена уникальность номера по порядку!')
+            loggerError(row, errorMsg + 'Нарушена уникальность номера по порядку!')
         }
 
         if (formData.kind == FormDataKind.PRIMARY) {
@@ -599,10 +600,10 @@ def getBalancePeriod() {
 }
 
 /** Вывести сообщение. В периоде ввода остатков сообщения должны быть только НЕфатальными. */
-void loggerError(def msg, Object...args) {
+void loggerError(def row, def msg) {
     if (getBalancePeriod()) {
-        logger.warn(msg, args)
+        rowWarning(logger, row, msg)
     } else {
-        logger.error(msg, args)
+        rowError(logger, row, msg)
     }
 }

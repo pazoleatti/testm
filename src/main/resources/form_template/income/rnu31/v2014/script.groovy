@@ -102,7 +102,7 @@ void logicCheck() {
 
     // 2. Проверка на уникальность поля «№ п.п»
     if (formData.periodOrder != row.number) {
-        logger.error("Нарушена уникальность номера по порядку!")
+        rowError(logger, row, "Нарушена уникальность номера по порядку!")
     }
 
     // 3-12. Проверка процентного (купонного) дохода по виду ценной бумаги
@@ -117,9 +117,9 @@ void logicCheck() {
                     def msg = "Процентный (купонный) доход по «${getColumnName(row, column)}» уменьшился!"
                     // нефатальная для графы 5, 9, 10, 11
                     if (column in ['governmentBonds', 'ovgvz', 'eurobondsRF', 'itherEurobonds']) {
-                        logger.warn(msg)
+                        rowWarning(logger, row, msg)
                     } else {
-                        logger.error(msg)
+                        rowError(logger, row, msg)
                     }
                 }
             }
@@ -131,14 +131,14 @@ void logicCheck() {
         def value = row.getCell(column).value
         if (value != null && value < 0) {
             def columnName = getColumnName(row, column)
-            logger.error("Значение графы «$columnName» по строке 1 отрицательное!")
+            rowError(logger, row, "Значение графы «$columnName» по строке 1 отрицательное!")
         }
     }
     for (def column : ['governmentBonds','ovgvz','eurobondsRF','itherEurobonds']) {
         def value = row.getCell(column).value
         if (value != null && value < 0) {
             def columnName = getColumnName(row, column)
-            logger.warn("Значение графы «$columnName» по строке 1 отрицательное!")
+            rowWarning(logger, row, "Значение графы «$columnName» по строке 1 отрицательное!")
         }
     }
 }

@@ -128,11 +128,8 @@ void logicCheck() {
 
         String zipCode = (String) row.zipCode;
         if (zipCode != null && (zipCode.length() != 6 || !zipCode.matches('[0-9]*'))) {
-            logger.error("Строка $rowNum: Неправильно указан почтовый индекс!")
+            rowError(logger, row, "Строка $rowNum: Неправильно указан почтовый индекс!")
         }
-
-        // Проверки соответствия НСИ
-        // checkNSI(4, row, "subdivisionRF")
     }
 }
 

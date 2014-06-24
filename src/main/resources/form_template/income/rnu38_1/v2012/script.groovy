@@ -121,12 +121,12 @@ void logicCheck() {
 
         //  2. Проверка даты открытия короткой позиции
         if (row.shortPositionDate > reportDay) {
-            logger.error(errorMsg + 'Неверно указана дата приобретения (открытия короткой позиции)!')
+            rowError(logger, row, errorMsg + 'Неверно указана дата приобретения (открытия короткой позиции)!')
         }
 
         // 3. Проверка даты погашения
         if (row.maturityDate > reportDay) {
-            logger.error(errorMsg + 'Неверно указана дата погашения предыдущего купона!')
+            rowError(logger, row, errorMsg + 'Неверно указана дата погашения предыдущего купона!')
         }
 
         // 4. Арифметические проверки графы 7..9

@@ -1,7 +1,6 @@
 package form_template.income.app5.v2012
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
@@ -172,14 +171,16 @@ void logicCheckBeforeCalc() {
                     row.getIndex(), getColumnName(row, 'regionBankDivision'), false)
         }
         if (departmentParam == null || departmentParam.isEmpty()) {
-            throw new ServiceException(errorMsg + "Не найдено подразделение территориального банка!")
+            rowServiceException(row, errorMsg + "Не найдено подразделение территориального банка!")
         } else {
             long centralId = 113 // ID Центрального аппарата.
             // У Центрального аппарата родительским подразделением должен быть он сам
             if (centralId != row.regionBankDivision) {
                 // графа 2 - название подразделения
                 if (departmentParam.get('PARENT_ID')?.getReferenceValue() == null) {
-                    throw new ServiceException(errorMsg + "Для подразделения территориального банка «${departmentParam.NAME.stringValue}» в справочнике «Подразделения» отсутствует значение наименования родительского подразделения!")
+                    rowServiceException(row, errorMsg + "Для подразделения территориального банка " +
+                            "«${departmentParam.NAME.stringValue}» в справочнике «Подразделения» отсутствует значение " +
+                            "наименования родительского подразделения!")
                 }
             }
         }
@@ -191,11 +192,12 @@ void logicCheckBeforeCalc() {
                     row.getIndex(), getColumnName(row, 'regionBankDivision'), false)
         }
         if (incomeParam == null || incomeParam.isEmpty()) {
-            throw new ServiceException(errorMsg + "Не найдены настройки подразделения!")
+            rowServiceException(row, errorMsg + "Не найдены настройки подразделения!")
         } else {
             // графа 4 - кпп
             if (incomeParam?.get('record_id')?.getNumberValue() == null || incomeParam?.get('KPP')?.getStringValue() == null) {
-                throw new ServiceException(errorMsg + "Для подразделения «${departmentParam.NAME.stringValue}» на форме настроек подразделений отсутствует значение атрибута «КПП»!")
+                rowServiceException(row, errorMsg + "Для подразделения «${departmentParam.NAME.stringValue}» " +
+                        "на форме настроек подразделений отсутствует значение атрибута «КПП»!")
             }
         }
     }
@@ -222,7 +224,7 @@ void logicCheck() {
 
         // 2. Проверка на уникальность поля «№ пп»
         if (rowNumber != row.number) {
-            logger.error(errorMsg + "Нарушена уникальность номера по порядку!")
+            rowError(logger, row, errorMsg + "Нарушена уникальность номера по порядку!")
         }
 
         // Проверки НСИ
@@ -232,7 +234,7 @@ void logicCheck() {
                     row.getIndex(), getColumnName(row, 'regionBankDivision'), false)
             if (incomeParam?.KPP?.stringValue != row.kpp) {
                 def name = getColumnName(row, 'kpp')
-                logger.error("Значение графы «$name» не соответствует значению на форме Настроек подразделений.")
+                rowError(logger, row, "Значение графы «$name» не соответствует значению на форме Настроек подразделений.")
             }
         }
     }
