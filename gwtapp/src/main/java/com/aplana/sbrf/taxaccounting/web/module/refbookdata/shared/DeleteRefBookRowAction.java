@@ -13,6 +13,8 @@ public class DeleteRefBookRowAction extends UnsecuredActionImpl<DeleteRefBookRow
     /** Признак того, что удаляется одна версия, а не все версии записи */
     boolean deleteVersion;
 
+    Date date;
+
     public boolean isDeleteVersion() {
         return deleteVersion;
     }
@@ -37,7 +39,15 @@ public class DeleteRefBookRowAction extends UnsecuredActionImpl<DeleteRefBookRow
 		this.recordsId = recordsId;
 	}
 
-	@Override
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+    @Override
 	public String getName() {
 		return "Удалить запись из справочника";
 	}

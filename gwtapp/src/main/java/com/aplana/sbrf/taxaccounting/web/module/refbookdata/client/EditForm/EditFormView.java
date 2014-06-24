@@ -132,6 +132,11 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
     }
 
     @Override
+    public void setAllVersionField(boolean isVisible) {
+        allVersion.setVisible(isVisible);
+    }
+
+    @Override
 	public Map<RefBookColumn, HasValue> createInputFields(List<RefBookColumn> attributes) {
 		editPanel.clear();
 		if (widgets != null) widgets.clear();
