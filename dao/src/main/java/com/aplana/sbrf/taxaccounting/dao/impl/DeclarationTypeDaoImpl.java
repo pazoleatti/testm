@@ -84,6 +84,18 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
         }
     }
 
+    @CacheEvict(value = "DeclarationType", beforeInvocation = true ,key = "#declarationTypeId")
+    @Override
+    public void updateDeclarationTypeName(int declarationTypeId, String newName) {
+        getJdbcTemplate().update(
+            "update declaration_type set name = ? where id = ?",
+            new Object[]{
+                newName,
+                declarationTypeId
+            }
+        );
+    }
+
     @CacheEvict("DeclarationType")
     @Override
     public void delete(int typeId) {

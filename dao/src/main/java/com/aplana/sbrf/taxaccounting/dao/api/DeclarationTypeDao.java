@@ -37,6 +37,8 @@ public interface DeclarationTypeDao {
 
     int save(DeclarationType type);
 
+    void updateDeclarationTypeName(int declarationTypeId, String newName);
+
     void delete(int typeId);
 
     List<Integer> getByFilter(TemplateFilter filter);
