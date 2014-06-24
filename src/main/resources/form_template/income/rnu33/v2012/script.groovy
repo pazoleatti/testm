@@ -240,32 +240,27 @@ void logicCheck() {
 
         def code = getRefBookValue(61, row.code)?.CODE?.value
 
-        // 4. Проверка Номера сделки
-        if (code != null && code.toString() in codesFromRnu54) {
-            loggerError("Строка $index учитывается в РНУ-64!")
-        }
-
-        // 5. Проверка даты приобретения и даты реализации (графа 2, 5, 6)
+        // 4. Проверка даты приобретения и даты реализации (графа 2, 5, 6)
         if (code == 5 && row.purchaseDate <= row.implementationDate) {
             loggerError(errorMsg + 'Неверно указаны даты приобретения и реализации')
         }
 
-        // 6. Проверка рыночной цены в рублях к номиналу (графа 14)
+        // 5. Проверка рыночной цены в рублях к номиналу (графа 14)
         if (row.marketPriceOnDateAcquisitionInPerc > 0 && row.marketPriceOnDateAcquisitionInPerc != row.exercisePrice) {
             loggerError(errorMsg + 'Неверно указана цена в рублях при погашении!')
         }
 
-        // 7. Проверка определения срока короткой позиции (графа 2, 21)
+        // 6. Проверка определения срока короткой позиции (графа 2, 21)
         if (code == 5 && row.parPaper >= 0) {
             loggerError(errorMsg + 'Неверно определен срок короткой позиции!')
         }
 
-        // 8. Проверка определения процентного дохода по короткой позиции (графа 2, 22)
+        // 7. Проверка определения процентного дохода по короткой позиции (графа 2, 22)
         if (code == 5 && row.averageWeightedPricePaper >= 0) {
             loggerError(errorMsg + 'Неверно определен процентный доход по короткой позиции!')
         }
 
-        // 9. Арифметическая проверка графы 12, 16, 17, 18, 20, 24, 25, 26, 27
+        // 8. Арифметическая проверка графы 12, 16, 17, 18, 20, 24, 25, 26, 27
         if (!isMonthBalance()) {
             // алиасы графов для арифметической проверки
             def arithmeticCheckAlias = ['taxPrice', 'marketPricePercent', 'marketPriceRuble', 'exercisePriceRetirement',
