@@ -446,8 +446,6 @@ public class RefBookUniversal implements RefBookDataProvider {
             //Обновление периода актуальности
             if (isRelevancePeriodChanged) {
                 List<Long> uniqueIdAsList = Arrays.asList(uniqueRecordId);
-                //Обновляем дату начала актуальности
-                refBookUtils.updateVersionRelevancePeriod(REF_BOOK_RECORD_TABLE_NAME, uniqueRecordId, versionFrom);
                 //Получаем запись - окончание версии. Если = null, то версия не имеет конца
                 List<Long> relatedVersions = refBookDao.getRelatedVersions(uniqueIdAsList);
                 if (!relatedVersions.isEmpty() && relatedVersions.size() > 1) {
@@ -467,6 +465,8 @@ public class RefBookUniversal implements RefBookDataProvider {
                     //Изменяем существующую фиктивную версию
                     refBookUtils.updateVersionRelevancePeriod(REF_BOOK_RECORD_TABLE_NAME, relatedVersions.get(0), versionTo);
                 }
+                //Обновляем дату начала актуальности в конце http://jira.aplana.com/browse/SBRFACCTAX-7890
+                refBookUtils.updateVersionRelevancePeriod(REF_BOOK_RECORD_TABLE_NAME, uniqueRecordId, versionFrom);
             }
 
             //Обновление значений атрибутов версии
