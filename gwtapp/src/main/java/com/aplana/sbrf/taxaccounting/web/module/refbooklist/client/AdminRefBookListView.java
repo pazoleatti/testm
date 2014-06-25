@@ -16,8 +16,6 @@ import com.google.inject.Inject;
  */
 public class AdminRefBookListView extends AbstractRefBookListView implements AdminRefBookListPresenter.MyView {
 
-    public static final String[] COLUMN_NAMES = {"Наименование справочника", "Видимость справочника", "Тип справочника", "Региональность справочника", "Вид справочника"};
-
     @UiField
     Label formHeader;
 
