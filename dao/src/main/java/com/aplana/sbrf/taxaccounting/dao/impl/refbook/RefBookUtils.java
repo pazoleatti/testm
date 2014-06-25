@@ -505,6 +505,10 @@ public class RefBookUtils extends AbstractDao {
                 if (a.getId() == 164L && !Arrays.asList(DepartmentType.values()).contains(DepartmentType.fromCode(value.getNumberValue().intValue()))){
                    errors.add("Атрибута справочника \"Тип подразделенеия\" должно принимать одно из значений: 1,2,3,4,5");
                 }
+
+                if ((a.getId() == 161L || a.getId() == 162L) &&  values.get(a.getAlias()).getStringValue().contains("/")) {
+                    errors.add("Значение атрибута «" + a.getName() + "» не должен содержать символ «/»!");
+                }
             }
         }
 
