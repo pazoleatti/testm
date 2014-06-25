@@ -25,8 +25,6 @@ import com.google.inject.Inject;
  */
 public class RefBookListView extends AbstractRefBookListView implements RefBookListPresenter.MyView {
 
-    public static final String[] COLUMN_NAMES = {"Наименование справочника", "Тип справочника"};
-
     @UiField
     LinkAnchor loadButton;
 
