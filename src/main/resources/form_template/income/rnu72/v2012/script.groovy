@@ -141,7 +141,7 @@ void logicCheck() {
 
         // 2. Проверка на уникальность поля «№ пп» (графа 1)
         if (++rowNumber != row.number) {
-            logger.error(errorMsg + 'Нарушена уникальность номера по порядку!')
+            rowError(logger, row, errorMsg + "Нарушена уникальность номера по порядку!")
         }
 
         // 3. Проверка на нулевые значения
@@ -153,7 +153,7 @@ void logicCheck() {
             }
         }
         if (hasError) {
-            logger.error(errorMsg + 'Все суммы по операции нулевые!')
+            rowError(logger, row, errorMsg + "Все суммы по операции нулевые!")
         }
 
         // 4. Арифметическая проверка графы 8, 9

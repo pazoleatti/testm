@@ -165,17 +165,17 @@ void logicCheck() {
 
             // 2. Проверка даты совершения операции и границ отчетного периода
             if (row.date != null && dFrom != null && dTo != null && !(row.date >= dFrom && row.date <= dTo)) {
-                loggerError(errorMsg + "Дата совершения операции вне границ отчетного периода!")
+                loggerError(row, errorMsg + "Дата совершения операции вне границ отчетного периода!")
             }
 
             // 3. Проверка на уникальность поля «№ пп»
             if (++i != row.number) {
-                loggerError(errorMsg + 'Нарушена уникальность номера по порядку!')
+                loggerError(row, errorMsg + "Нарушена уникальность номера по порядку!")
             }
 
             // 4. Проверка на нулевые значения
             if (row.costs == 0) {
-                loggerError(errorMsg + "Все суммы по операции нулевые!")
+                loggerError(row, errorMsg + "Все суммы по операции нулевые!")
             }
         } else if (row.getAlias() == 'total') {
             totalRow = row
@@ -190,13 +190,13 @@ void logicCheck() {
         def testRow = formData.createDataRow()
         calcTotalSum(testRows, testRow, totalColumns)
         if (totalQuarterRow == null || totalQuarterRow != null && totalQuarterRow.costs != testRow.costs) {
-            loggerError('Итоговые значения за текущий квартал рассчитаны неверно!')
+            loggerError(null, "Итоговые значения за текущий квартал рассчитаны неверно!")
         }
         // 6. Проверка итоговых значений за текущий отчётный (налоговый) период
         if (!isConsolidated) {
             def dataRowsPrev = getDataRowsPrev()
             if (totalRow == null || totalRow != null && totalRow.costs != getTotalValue(dataRows, dataRowsPrev)) {
-                loggerError('Итоговые значения за текущий отчётный (налоговый ) период рассчитаны неверно!')
+                loggerError(null, "Итоговые значения за текущий отчётный (налоговый ) период рассчитаны неверно!")
             }
         }
     }
@@ -300,11 +300,12 @@ void addData(def xml, int headRowCount) {
     dataRowHelper.save(rows)
 }
 
-def loggerError(def msg) {
+/** Вывести сообщение. В периоде ввода остатков сообщения должны быть только НЕфатальными. */
+def loggerError(def row, def msg) {
     if (isBalancePeriod()) {
-        logger.warn(msg)
+        rowWarning(logger, row, msg)
     } else {
-        logger.error(msg)
+        rowError(logger, row, msg)
     }
 }
 
