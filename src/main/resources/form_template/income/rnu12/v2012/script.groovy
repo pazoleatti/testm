@@ -1,6 +1,7 @@
 package form_template.income.rnu12.v2012
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import groovy.transform.Field
 
 import java.math.RoundingMode
@@ -391,16 +392,19 @@ void addData(def xml, int headRowCount) {
         // графа 1
 
         // графа 2
-        def record = getRecordImport(27, 'OPU', row.cell[4].text(), xlsIndexRow, 4 + colOffset)
-        if (record != null) {
-            formDataService.checkReferenceValue(27, row.cell[2].text(), record?.CODE?.value, xlsIndexRow, 2 + colOffset, logger, true)
-        }
 
         // графа 3
         newRow.numberFirstRecord = row.cell[3].text()
 
         // графа 4
-        newRow.opy = record?.record_id?.value
+        String filter = "LOWER(CODE) = LOWER('" + row.cell[2].text() + "') and LOWER(OPU) = LOWER('" + row.cell[4].text() + "')"
+        def records = refBookFactory.getDataProvider(27).getRecords(reportPeriodEndDate, null, filter, null)
+        if (records.size() == 1) {
+            newRow.opy = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+        } else {
+            logger.error("Проверка файла: Строка ${xlsIndexRow} содержит значение, отсутствующее в справочнике " +
+                    "«" + refBookFactory.get(27).getName() + "»!")
+        }
 
         // графа 5
         newRow.operationDate = parseDate(row.cell[5].text(), "dd.MM.yyyy", xlsIndexRow, 5 + colOffset, logger, true)

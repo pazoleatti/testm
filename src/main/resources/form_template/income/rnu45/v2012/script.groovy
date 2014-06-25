@@ -297,14 +297,14 @@ def logicCheck() {
 
             // 2. Проверка на уникальность поля «инвентарный номер»
             if (invSet.contains(row.inventoryNumber)) {
-                loggerError(errorMsg + "Инвентарный номер не уникальный!")
+                loggerError(row, errorMsg + "Инвентарный номер не уникальный!")
             } else {
                 invSet.add(row.inventoryNumber)
             }
 
             // 3. Проверка на нулевые значения
             if (row.startCost == 0 && row.amortizationMonth == 0 && row.amortizationSinceYear == 0 && row.amortizationSinceUsed == 0) {
-                loggerError(errorMsg + "Все суммы по операции нулевые!")
+                loggerError(row, errorMsg + "Все суммы по операции нулевые!")
             }
 
             // 5. Арифметические проверки расчета неитоговых граф
@@ -481,10 +481,10 @@ def getMonthEndDate() {
     return endDate
 }
 
-def loggerError(def msg) {
+def loggerError(def row, def msg) {
     if (isMonthBalance()) {
-        logger.warn(msg)
+        rowWarning(logger, row, msg)
     } else {
-        logger.error(msg)
+        rowError(logger, row, msg)
     }
 }

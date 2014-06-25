@@ -271,22 +271,22 @@ void logicCheck() {
 
         // 2. Проверка даты приобретения и границ отчетного периода (графа 3)
         if (row.buyDate > endDate) {
-            loggerError(errorMsg + 'Дата приобретения вне границ отчетного периода!')
+            loggerError(row, errorMsg + 'Дата приобретения вне границ отчетного периода!')
         }
 
         // 3. Проверка даты реализации (погашения)  и границ отчетного периода (графа 7)
         if (row.implementationDate < startDate || endDate < row.implementationDate) {
-            loggerError(errorMsg + 'Дата реализации (погашения) вне границ отчетного периода!')
+            loggerError(row, errorMsg + 'Дата реализации (погашения) вне границ отчетного периода!')
         }
 
         // 4. Проверка на уникальность поля «№ пп» (графа 1) (в рамках текущего года)
         if (++i != row.number) {
-            loggerError(errorMsg + 'Нарушена уникальность номера по порядку!')
+            loggerError(row, errorMsg + 'Нарушена уникальность номера по порядку!')
         }
 
         // 5. Проверка на уникальность векселя
         if (billsList.contains(row.bill)) {
-            loggerError(errorMsg + "Повторяющееся значения в графе «Вексель»")
+            loggerError(row, errorMsg + "Повторяющееся значения в графе «Вексель»")
         } else {
             billsList.add(row.bill)
         }
@@ -311,7 +311,7 @@ void logicCheck() {
                             isFind = true
                             // лп 8
                             if (findRow.buyDate != row.buyDate) {
-                                loggerError(errorMsg + "Неверное указана Дата приобретения в РНУ-55 за "
+                                loggerError(row, errorMsg + "Неверное указана Дата приобретения в РНУ-55 за "
                                         + reportPeriod.name)
                             }
                             break
@@ -319,7 +319,7 @@ void logicCheck() {
                     }
                     // лп 7
                     if (!isFind) {
-                        logger.warn(errorMsg + "Экземпляр за период " + reportPeriod.name +
+                        rowWarning(logger, row, errorMsg + "Экземпляр за период " + reportPeriod.name +
                                 " не существует (отсутствуют первичные данные для расчёта)!")
                     }
                 }
@@ -331,7 +331,7 @@ void logicCheck() {
             def cell = row.getCell(it)
             if (cell.getValue() != null && cell.getValue() < 0) {
                 def name = cell.getColumn().getName()
-                loggerError(errorMsg + "Значение графы \"$name\" отрицательное!")
+                loggerError(row, errorMsg + "Значение графы \"$name\" отрицательное!")
             }
         }
 
@@ -552,11 +552,11 @@ void addData(def xml, int headRowCount) {
 }
 
 // Вывести сообщение. В периоде ввода остатков сообщения должны быть только НЕфатальными
-void loggerError(def msg, Object...args) {
+void loggerError(def row, def msg) {
     if (isBalancePeriod()) {
-        logger.warn(msg, args)
+        rowWarning(logger, row, msg)
     } else {
-        logger.error(msg, args)
+        rowError(logger, row, msg)
     }
 }
 

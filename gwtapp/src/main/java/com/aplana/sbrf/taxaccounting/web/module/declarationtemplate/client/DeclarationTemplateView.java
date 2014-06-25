@@ -118,7 +118,8 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
                     String errorUuid = event.getResults().replaceAll(respPattern, "$2");
                     getUiHandlers().uploadDectResponseWithErrorUuid(errorUuid.replaceFirst(ERROR_RESP, ""));
                 }else if (event.getResults().toLowerCase().contains(ERROR)) {
-                    getUiHandlers().uploadDectFail(event.getResults().replaceFirst(ERROR, ""));
+                    String errorText = event.getResults().replaceAll(respPattern, "$2");
+                    getUiHandlers().uploadDectFail(errorText.replaceFirst(ERROR, ""));
                 } else {
                     String uuid = event.getResults().replaceAll(respPattern, "$2");
                     getUiHandlers().uploadDectResponseWithUuid(uuid.replaceFirst(SUCCESS_RESP, ""));

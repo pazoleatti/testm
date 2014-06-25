@@ -119,7 +119,7 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     private String sqlParentHierarchy(String columnName){
         return "SELECT LTRIM(SYS_CONNECT_BY_PATH("+columnName+", '/'), '/') as path \n" +
                 "FROM department\n" +
-                "WHERE id = ?\n" +
+                "WHERE id = ? \n" +
                 "START WITH parent_id in (select id from department where parent_id is null)  \n" +
                 "CONNECT BY PRIOR id = parent_id";
     }

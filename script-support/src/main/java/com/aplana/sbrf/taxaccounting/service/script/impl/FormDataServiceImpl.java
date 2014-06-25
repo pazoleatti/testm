@@ -618,10 +618,10 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     @Override
     public void checkReferenceValue(Long refBookId, String referenceValue, String expectedValue, int rowIndex, int colIndex,
                              Logger logger, boolean required) {
-        if (referenceValue == null && expectedValue == null) {
-            return;
-        }
-        if (referenceValue != null && expectedValue != null && referenceValue.equals(expectedValue)) {
+        if ((referenceValue == null && expectedValue == null) ||
+                (referenceValue == null && "".equals(expectedValue)) ||
+                ("".equals(referenceValue) && expectedValue == null) ||
+                (referenceValue != null && expectedValue != null && referenceValue.equals(expectedValue))) {
             return;
         }
         RefBook rb = refBookFactory.get(refBookId);

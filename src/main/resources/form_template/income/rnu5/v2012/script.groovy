@@ -2,6 +2,7 @@ package form_template.income.rnu5.v2012
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import groovy.transform.Field
 
 /**
@@ -76,12 +77,9 @@ def totalColumns = ['sum']
 //// Обертки методов
 
 // Поиск записи в справочнике по значению (для импорта)
-def getRecordImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                    def boolean required = true) {
-    if (value == null || value == '') {
-        return null
-    }
-    return formDataService.getRefBookRecordImport(refBookId, recordCache, providerCache, refBookCache, alias, value,
+def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+                      def boolean required = true) {
+    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
             reportPeriodEndDate, rowIndex, colIndex, logger, required)
 }
 
@@ -133,11 +131,11 @@ void calc() {
         if (code != getKnu(row.number)) {
             totalRows.put(i, getNewRow(code, sum))
             sum = 0
+            code = getKnu(row.number)
         }
         // если строка последняя то сделать для ее кода расхода новую строку "итого по коду"
         if (i == dataRows.size() - 1) {
             sum += (row.sum ?: 0)
-            code = getKnu(row.number)
             def totalRowCode = getNewRow(code, sum)
             totalRows.put(i + 1, totalRowCode)
             sum = 0
@@ -198,7 +196,7 @@ void logicCheck() {
 
         // 2. Проверка на уникальность поля «№ пп»
         if (++i != row.rowNumber) {
-            logger.error(errorMsg + "Нарушена уникальность номера по порядку!")
+            rowError(logger, row, errorMsg + "Нарушена уникальность номера по порядку!")
         }
 
         // 4. Арифметическая проверка итоговых значений по каждому <Коду классификации расходов>
@@ -342,14 +340,14 @@ void addData(def xml, int headRowCount) {
         // графа 1
         newRow.rowNumber = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, true)
 
-        def record27 = getRecordImport(27, 'NUMBER', row.cell[3].text(), xlsIndexRow, 3 + colOffset)
-        if (record27 != null) {
-            // графа 2 Зависимая
-            formDataService.checkReferenceValue(27, row.cell[2].text(), record27?.CODE?.value, xlsIndexRow, 2 + colOffset, logger, true)
-            // графа 3
-            newRow.number = record27?.record_id?.value
-            // графа 4 Зависимая
-            formDataService.checkReferenceValue(27, row.cell[4].text(), record27?.TYPE_EXP?.value, xlsIndexRow, 4 + colOffset, logger, true)
+        // графа 3
+        String filter = "LOWER(CODE) = LOWER('" + row.cell[2].text() + "') and LOWER(NUMBER) = LOWER('" + row.cell[3].text() + "')"
+        def records = refBookFactory.getDataProvider(27).getRecords(reportPeriodEndDate, null, filter, null)
+        if (records.size() == 1) {
+            newRow.number = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+        } else {
+            logger.error("Проверка файла: Строка ${xlsIndexRow + 3} содержит значение, отсутствующее в справочнике " +
+                    "«" + refBookFactory.get(27).getName() + "»!")
         }
 
         // графа 5

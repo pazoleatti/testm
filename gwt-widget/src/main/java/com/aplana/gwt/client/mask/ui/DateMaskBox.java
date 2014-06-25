@@ -17,7 +17,6 @@ import java.util.Date;
  */
 public class DateMaskBox extends MaskBox<Date> {
 
-    private Date deferredValue;
     private DateTimeFormat format;
     private boolean mayBeNull = false;
 
@@ -33,9 +32,6 @@ public class DateMaskBox extends MaskBox<Date> {
 
     @Override
     public Date getValue() {
-        if (!checkValue(super.getValue())) {
-            return deferredValue;
-        }
         return super.getValue();
     }
 
@@ -56,31 +52,17 @@ public class DateMaskBox extends MaskBox<Date> {
 
     @Override
     public void setValue(Date value, boolean fireEvents) {
-        if (checkValue(value)) {
-            super.setValue(value, false);
-            setText(value == null ? getTextPicture() : format.format(value));
-            removeExceptionStyle();
-            if (fireEvents) {
-                ValueChangeEvent.fire(this, value);
-            }
-        } else {
-            addExceptionStyle();
-        }
-    }
-
-    /**
-     * Проверить что дата не пуста и после запомнить удачное значение
-     *
-     * @param value дата
-     * @return если null то вернет false
-     */
-    private boolean checkValue(Date value) {
+        super.setValue(value, false);
+        setText(value == null ? getTextPicture() : format.format(value));
         if (value == null && !mayBeNull) {
-            return false;
+            addExceptionStyle();
         } else {
-            deferredValue = value;
-            return true;
+            removeExceptionStyle();
         }
+        if (fireEvents) {
+            ValueChangeEvent.fire(this, value);
+        }
+
     }
 
     public boolean isMayBeNull() {

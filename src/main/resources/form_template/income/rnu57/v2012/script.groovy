@@ -351,17 +351,17 @@ boolean logicCheck() {
 
         // 2. Проверка даты приобретения и границ отчетного периода
         if (row.purchaseDate != null && row.purchaseDate.compareTo(endDate) > 0) {
-            logger.error(errorMsg + 'Дата приобретения вне границ отчетного периода!')
+            rowError(logger, row, errorMsg + 'Дата приобретения вне границ отчетного периода!')
         }
 
         // 3. Проверка даты реализации (погашения) и границ отчетного периода
         if (row.implementationDate != null && (row.implementationDate.compareTo(startDate) < 0 || row.implementationDate.compareTo(endDate) > 0)) {
-            logger.error(errorMsg + 'Дата реализации (погашения) вне границ отчетного периода!')
+            rowError(logger, row, errorMsg + 'Дата реализации (погашения) вне границ отчетного периода!')
         }
 
         // 4. Проверка на уникальность поля «№ пп»
         if (++i != row.number) {
-            logger.error(errorMsg + 'Нарушена уникальность номера по порядку!')
+            rowError(logger, row, errorMsg + 'Нарушена уникальность номера по порядку!')
         }
 
         def rnu55Row = getRnuSourceRow(rnu55DataRows, row)
@@ -369,7 +369,7 @@ boolean logicCheck() {
 
         // 7. Проверка существования необходимых экземпляров форм
         if (rnu55Row == null && rnu56Row == null) {
-            logger.error(errorMsg + 'Отсутствуют данные в РНУ-55 (РНУ-56)!')
+            rowError(logger, row, errorMsg + 'Отсутствуют данные в РНУ-55 (РНУ-56)!')
         } else {
             // 5. Арифметическая проверка граф 4, 5, 9-14
             needValue['purchasePrice'] = calc4(rnu55Row != null ? rnu55Row : rnu56Row)

@@ -257,25 +257,25 @@ boolean logicCheck(){
             (row != it && row.inventoryNumber == it.inventoryNumber)
         }
         if (find != null) {
-            logger.error(errorMsg + "Инвентарный номер не уникальный!")
+            rowError(logger, row, errorMsg + "Инвентарный номер не уникальный!")
         }
 
         // 2. Проверка на уникальность поля «№ пп»
         if (rowNumber != row.number) {
-            logger.error(errorMsg + "Нарушена уникальность номера по порядку!")
+            rowError(logger, row, errorMsg + "Нарушена уникальность номера по порядку!")
         }
 
         // 3. Арифметические проверки расчета неитоговых граф
         def rnu49Row = getRnu49Row(rnu49Rows, row)
         if (rnu49Row == [:]) {
-            logger.error(errorMsg + "Отсутствуют данные в РНУ-49!")
+            rowError(logger, row, errorMsg + "Отсутствуют данные в РНУ-49!")
         }
         def calcValues = getValues(rnu49Row)
         checkCalc(row, arithmeticCheckAlias, calcValues, logger, true)
         for (def colName : otherCheckAlias) {
             if (row[colName] != calcValues[colName]) {
                 String msg = getColumnName(row, colName)
-                logger.error(errorMsg+"Неверно рассчитана графа «$msg»!")
+                rowError(logger, row, errorMsg+"Неверно рассчитана графа «$msg»!")
             }
         }
     }
