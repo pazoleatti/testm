@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -10,9 +11,10 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.util.OrderUtils;
 import com.aplana.sbrf.taxaccounting.util.BDUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
@@ -20,7 +22,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 @Repository
 public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
@@ -111,84 +116,103 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 
 		JdbcTemplate jt = getJdbcTemplate();
 
-		final Set<Integer> removedColumns = new HashSet<Integer>(jt.queryForList(
-			"SELECT id FROM form_column WHERE form_template_id = ?",
+        //Обнуляем все parent_id, чтобы можно было спокойно удалить записи
+        try {
+            int updatedColumns = jt.update(
+                    "update form_column set parent_column_id = null where parent_column_id is not null and form_template_id = ?",
+                    formTemplateId);
+            logger.info("Модифицированно " + updatedColumns + " колонок");
+        } catch (DataAccessException e){
+            logger.error("", e);
+            throw new DaoException("", e);
+        }
+
+		final Set<String> removedColumns = new HashSet<String>(jt.queryForList(
+			"SELECT alias FROM form_column WHERE form_template_id = ?",
 			new Object[] { formTemplateId },
 			new int[] { Types.NUMERIC },
-			Integer.class
+                String.class
 		));
 
-		final List<Column> newColumns = new ArrayList<Column>();
-		final List<Column> oldColumns = new ArrayList<Column>();
+		final List<Column> newColumns = formTemplate.getColumns();
+		/*final List<Column> oldColumns = new ArrayList<Column>();*/
 
-		List<Column> columns = formTemplate.getColumns();
-		OrderUtils.reorder(columns);
+		OrderUtils.reorder(newColumns);
 
-		int order = 0;
+		/*int order = 0;
 		for (Column col: columns) {
 			col.setOrder(++order);
-			if (col.getId() == null || col.getId() < 0) {
+			if (!removedColumns.contains(col.getAlias())) {
 				newColumns.add(col);
 			} else {
 				oldColumns.add(col);
-				removedColumns.remove(col.getId());
+				removedColumns.remove(col.getAlias());
 			}
-		}
+		}*/
+
 		if(!removedColumns.isEmpty()){
-			jt.batchUpdate(
-					"DELETE FROM form_column WHERE id = ?",
-					new BatchPreparedStatementSetter() {
+            final String[] alias = new String[1];
+			try {
+                jt.batchUpdate(
+                        "DELETE FROM form_column WHERE alias = ? and form_template_id = ?",
+                        new BatchPreparedStatementSetter() {
 
-						@Override
-						public void setValues(PreparedStatement ps, int index) throws SQLException {
-							ps.setInt(1, iterator.next());
-						}
+                            @Override
+                            public void setValues(PreparedStatement ps, int index) throws SQLException {
+                                alias[0] = iterator.next();
+                                ps.setString(1, alias[0]);
+                                ps.setInt(2, formTemplateId);
+                            }
 
-						@Override
-						public int getBatchSize() {
-							return removedColumns.size();
-						}
+                            @Override
+                            public int getBatchSize() {
+                                return removedColumns.size();
+                            }
 
-						private Iterator<Integer> iterator = removedColumns.iterator();
-					}
-			);
+                            private Iterator<String> iterator = removedColumns.iterator();
+                        }
+                );
+            } catch (DataIntegrityViolationException e){
+                logger.error("", e);
+                throw new DaoException("Обнаружено использование колонки с алиасом " + alias[0], e);
+            }
 		}
 
         // Сгенерированый ключ -> реальный ключ в БД
-        Map<Integer, Integer> idsMapping = new HashMap<Integer, Integer>();
+        /*Map<Integer, Integer> idsMapping = new HashMap<Integer, Integer>();*/
 
 		if (!newColumns.isEmpty()) {
             List<Long> genKeys = bdUtils.getNextIds(BDUtils.Sequence.FORM_COLUMN, (long) newColumns.size());
             int counter = 0;
             for (Column column : newColumns) {
                 if (column.getId() == null || column.getId() < 0) {
-                    if (column.getId() != null) {
+                    /*if (column.getId() != null) {
                         idsMapping.put(column.getId(), genKeys.get(counter).intValue());
-                    }
+                    }*/
                     column.setId(genKeys.get(counter).intValue());
                 }
                 counter++;
             }
             // Подмена ссылок
-            for (Column column : columns) {
+            for (Column column : newColumns) {
                 if (column instanceof ReferenceColumn) {
-                    ReferenceColumn referenceColumn = ((ReferenceColumn)column);
+                    ReferenceColumn referenceColumn = (ReferenceColumn)column;
                     // При экспорте parentId не сериализуется, а прописывается алиас для parentId, здесь в случии импорта подставляем нужный id
                     if(referenceColumn.getParentId()==0 && referenceColumn.getParentAlias()!=null){
                         referenceColumn.setParentId(
                                 formTemplate.getColumn(
                                         referenceColumn.getParentAlias()).getId());
                     }
-                    else if(referenceColumn.getParentId() < 0) {
+                    /*else if(referenceColumn.getParentId() < 0) {
                         referenceColumn.setParentId(idsMapping.get(referenceColumn.getParentId()));
-                    }
+                    }*/
                 }
             }
 
 			jt.batchUpdate(
 				"INSERT INTO form_column (id, name, form_template_id, alias, type, width, precision, ord, max_length, " +
-                "checking, format, attribute_id, filter, parent_column_id, attribute_id2) " +
-				"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "checking, format, attribute_id, filter, parent_column_id, attribute_id2, numeration_row) " +
+				"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 				new BatchPreparedStatementSetter() {
 					@Override
 					public void setValues(PreparedStatement ps, int index) throws SQLException {
@@ -246,6 +270,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
                             else {
                                 ps.setLong(15, ((RefBookColumn) col).getRefBookAttributeId2());
                             }
+                            ps.setNull(16, Types.NUMERIC);
                         } else if (col instanceof ReferenceColumn) {
                             ps.setLong(12, ((ReferenceColumn) col).getRefBookAttributeId());
                             ps.setNull(13, Types.CHAR);
@@ -256,11 +281,19 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
                             else {
                                 ps.setLong(15, ((ReferenceColumn) col).getRefBookAttributeId2());
                             }
+                            ps.setNull(16, Types.NUMERIC);
+                        } else if (col instanceof AutoNumerationColumn) {
+                            ps.setNull(12, Types.NUMERIC);
+                            ps.setNull(13, Types.CHAR);
+                            ps.setNull(14, Types.NUMERIC);
+                            ps.setNull(15, Types.NUMERIC);
+                            ps.setInt(16, ((AutoNumerationColumn) col).getType());
                         } else {
                             ps.setNull(12, Types.NUMERIC);
                             ps.setNull(13, Types.CHAR);
                             ps.setNull(14, Types.NUMERIC);
                             ps.setNull(15, Types.NUMERIC);
+                            ps.setNull(16, Types.NUMERIC);
                         }
                     }
 
@@ -272,11 +305,12 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 			);
 		}
 
-		if(!oldColumns.isEmpty()){
+		/*if(!oldColumns.isEmpty()){
 			jt.batchUpdate(
 					"UPDATE form_column SET name = ?, alias = ?, type = ?, width = ?, precision = ?, ord = ?, " +
                             "max_length = ?, checking = ?, format = ?, attribute_id = ?, filter = ?, " +
-                            "parent_column_id = ?, attribute_id2 = ?, numeration_row = ? WHERE id = ?",
+                            "parent_column_id = ?, attribute_id2 = ?, numeration_row = ? " +
+                            "WHERE alias = ? and form_template_id = ?",
 					new BatchPreparedStatementSetter() {
 						@Override
 						public void setValues(PreparedStatement ps, int index) throws SQLException {
@@ -364,7 +398,8 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
                                 ps.setNull(13, Types.NUMERIC);
                                 ps.setNull(14, Types.NUMERIC);
 							}
-							ps.setInt(15, col.getId());
+							ps.setString(15, col.getAlias());
+                            ps.setInt(16, formTemplateId);
 						}
 
 						@Override
@@ -373,9 +408,9 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 						}
 					}
 			);
-		}
+		}*/
 
-		jt.query(
+		/*jt.query(
 			"SELECT id, alias FROM form_column WHERE form_template_id = " + formTemplateId,
 			new RowCallbackHandler() {
 				@Override
@@ -385,7 +420,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 					formTemplate.getColumn(alias).setId(columnId);
 				}
 			}
-		);
+		);*/
 	}
 
     @Override

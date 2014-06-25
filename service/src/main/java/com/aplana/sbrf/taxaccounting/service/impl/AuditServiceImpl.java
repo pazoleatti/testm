@@ -46,7 +46,7 @@ public class AuditServiceImpl implements AuditService {
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-	public void add(final FormDataEvent event, final TAUserInfo userInfo, final int departmentId, final Integer reportPeriodId,
+	public void add(final FormDataEvent event, final TAUserInfo userInfo, final Integer departmentId, final Integer reportPeriodId,
 					final Integer declarationTypeId, final Integer formTypeId, final Integer formKindId, final String note) {
         tx.executeInNewTransaction(new TransactionLogic() {
             @Override
@@ -67,7 +67,7 @@ public class AuditServiceImpl implements AuditService {
                 }
                 log.setRoles(roles.toString());
 
-                log.setDepartmentName(departmentService.getParentsHierarchy(departmentId));
+                log.setDepartmentName(departmentId == null? "" : departmentService.getParentsHierarchy(departmentId));
                 if (reportPeriodId == null)
                     log.setReportPeriodName(null);
                 else {
@@ -87,7 +87,7 @@ public class AuditServiceImpl implements AuditService {
             public Object executeWithReturn() {
                 return null;
             }
-        });
+        });            
 	}
 
 	@Override

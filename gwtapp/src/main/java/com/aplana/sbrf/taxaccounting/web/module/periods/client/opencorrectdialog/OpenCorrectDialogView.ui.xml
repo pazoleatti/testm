@@ -53,7 +53,7 @@
                             <g:Label text="Период сдачи корректировки: " width="180px"/>
                         </g:cell>
                         <g:cell width="100%" horizontalAlignment="left">
-                            <date:DateMaskBoxPicker width="60px" ui:field="term"/>
+                            <date:DateMaskBoxPicker width="60px" ui:field="term" />
                         </g:cell>
                     </g:HorizontalPanel>
 

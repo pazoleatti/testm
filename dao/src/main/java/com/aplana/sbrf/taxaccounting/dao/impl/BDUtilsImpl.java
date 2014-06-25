@@ -3,7 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.util.BDUtils;
 import org.springframework.stereotype.Repository;
 
-import javax.sound.midi.Sequence;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -24,6 +24,13 @@ class BDUtilsImpl extends AbstractDao implements BDUtils {
 
     @Override
     public List<Long> getNextIds(Sequence sequence, Long count) {
-        return getJdbcTemplate().queryForList("select "+sequence.getName()+".nextval from dual connect by level<= ?", new Object[]{count}, java.lang.Long.class);
+        if (isSupportOver())
+            return getJdbcTemplate().queryForList("select "+sequence.getName()+".nextval from dual connect by level<= ?", new Object[]{count}, java.lang.Long.class);
+        else {
+            ArrayList<Long> listIds = new ArrayList<Long>(count.intValue());
+            for (Integer i = 0; i < count;i++)
+                listIds.add(getJdbcTemplate().queryForLong("select "+sequence.getName()+".nextval from dual"));
+            return listIds;
+        }
     }
 }

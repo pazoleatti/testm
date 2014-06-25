@@ -95,4 +95,31 @@ public class FormStyleDaoTest {
 		Assert.assertEquals(false, newFormsStyle.isItalic());
 		Assert.assertEquals(false, newFormsStyle.isBold());
 	}
+
+    @Test
+    @Transactional
+    public void saveFormStylesWithDelete(){
+        //Given FORM_ID_FOR_TEST
+        List<FormStyle> formStyleList = formStyleDao.getFormStyles(FORM_ID_FOR_TEST);
+        formStyleList.remove(0);
+        //Создадим один новый стиль, которого нету в БД
+        FormStyle newFormsStyle = new FormStyle();
+        newFormsStyle.setAlias("newFormStyle");
+        newFormsStyle.setFontColor(Color.WHITE);
+        newFormsStyle.setBackColor(Color.WHITE);
+        newFormsStyle.setItalic(false);
+        newFormsStyle.setBold(false);
+        formStyleList.add(newFormsStyle);
+
+        FormTemplate formTemplate = new FormTemplate();
+        formTemplate.setId(FORM_ID_FOR_TEST);
+        formTemplate.getStyles().addAll(formStyleList);
+
+        //When
+        formStyleDao.saveFormStyles(formTemplate);
+
+        //Then
+        formStyleList = formStyleDao.getFormStyles(FORM_ID_FOR_TEST);
+        Assert.assertEquals(3, formStyleList.size());
+    }
 }

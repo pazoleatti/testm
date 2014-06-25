@@ -339,7 +339,7 @@ def BigDecimal calc14(def row, def rowPrev) {
 }
 
 def BigDecimal calc15(def rowPrev) {
-    return round(rowPrev != null ? rowPrev.sumEndInRub : BigDecimal.ZERO)
+    return round((rowPrev != null && rowPrev.sumEndInRub) ? rowPrev.sumEndInRub : BigDecimal.ZERO)
 }
 
 def BigDecimal calc16(def row, def countDaysInYear) {

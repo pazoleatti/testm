@@ -1,6 +1,7 @@
 package form_template.income.rnu17.v2012
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import groovy.transform.Field
 
 /**
@@ -242,14 +243,15 @@ void addData(def xml, int headRowCount) {
             newRow.getCell(it).setStyleAlias('Редактируемая')
         }
 
-        // графа 2
-        def record = getRecordImport(27, 'TYPE_EXP', row.cell[3].text(), xlsIndexRow, 3 + colOffset)
-        if (record != null) {
-            formDataService.checkReferenceValue(27, row.cell[2].text(), record?.CODE?.value, xlsIndexRow, 2 + colOffset, logger, true)
-        }
-
         // графа 3
-        newRow.incomeType = record?.record_id?.value
+        String filter = "LOWER(CODE) = LOWER('" + row.cell[2].text() + "') and LOWER(TYPE_EXP) = LOWER('" + row.cell[3].text() + "')"
+        def records = refBookFactory.getDataProvider(27).getRecords(reportPeriodEndDate, null, filter, null)
+        if (records.size() == 1) {
+            newRow.incomeType = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+        } else {
+            logger.error("Проверка файла: Строка ${xlsIndexRow} содержит значение, отсутствующее в справочнике " +
+                    "«" + refBookFactory.get(27).getName() + "»!")
+        }
 
         // графа 4
         newRow.sum = parseNumber(row.cell[4].text(), xlsIndexRow, 4 + colOffset, logger, true)
