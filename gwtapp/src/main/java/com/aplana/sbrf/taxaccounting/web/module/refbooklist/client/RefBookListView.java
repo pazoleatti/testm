@@ -65,7 +65,7 @@ public class RefBookListView extends AbstractRefBookListView implements RefBookL
         };
 
         formDataTable.addResizableColumn(nameColumn, COLUMN_NAMES[0]);
-        formDataTable.addResizableColumn(editableColumn, COLUMN_NAMES[1]);
+        formDataTable.addResizableColumn(editableColumn, COLUMN_NAMES[2]);
         formDataTable.setColumnWidth(editableColumn, 400, Style.Unit.PX);
     }
 

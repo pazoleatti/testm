@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
@@ -71,8 +72,12 @@ public class GetRefBookRecordVersionHandler extends AbstractActionHandler<GetRef
                                 else tableCell = value.getNumberValue().toString();
                                 break;
                             case DATE:
-                                if (value.getDateValue() == null) tableCell = "";
-                                else tableCell = value.getDateValue().toString();
+                                if (value.getDateValue() == null) {
+                                    tableCell = "";
+                                } else {
+                                    SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+                                    tableCell = dateFormat.format(value.getDateValue());
+                                }
                                 break;
                             case STRING:
                                 if (value.getStringValue() == null) tableCell = "";
