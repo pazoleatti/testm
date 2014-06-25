@@ -32,6 +32,11 @@ public class FormTypeServiceImpl implements FormTypeService {
     }
 
     @Override
+    public void updateFormTypeName(int formTypeId, String newName) {
+        formTypeDao.updateFormTypeName(formTypeId, newName);
+    }
+
+    @Override
     public FormType get(int formTypeId) {
         return formTypeDao.get(formTypeId);
     }

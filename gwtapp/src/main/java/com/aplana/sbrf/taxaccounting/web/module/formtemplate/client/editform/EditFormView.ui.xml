@@ -1,6 +1,4 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-             xmlns:d='urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker'
-             xmlns:style='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
     <ui:style>
@@ -37,8 +35,8 @@
             <g:VerticalPanel styleName="{style.editPadding}">
                 <g:cell>
                     <g:HorizontalPanel>
-                        <g:Label width="80px" text="Вид налога"/>
-                        <g:TextBox width="300px" ui:field="declarationType"/>
+                        <g:Label width="100px" text="Наименование макета"/>
+                        <g:TextBox width="300px" ui:field="formType"/>
                     </g:HorizontalPanel>
                 </g:cell>
             </g:VerticalPanel>

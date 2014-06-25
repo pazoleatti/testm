@@ -138,6 +138,9 @@ public class DeclarationTemplateListView extends ViewWithUiHandlers<DeclarationT
                 }
             }
         }
+        if (!result.isEmpty() && (selectedItem == null)) {
+            selectionModel.setSelected(result.get(0), true);
+        }
 	}
 
     @Override

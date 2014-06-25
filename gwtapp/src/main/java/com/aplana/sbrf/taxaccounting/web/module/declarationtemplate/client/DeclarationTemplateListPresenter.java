@@ -181,6 +181,5 @@ public class DeclarationTemplateListPresenter
             editFormPresenter.setDeclarationTypeId(selectedItem.getTypeId());
             editFormPresenter.setDeclarationTypeName(selectedItem.getTypeName());
         }
-
     }
 }

@@ -1,34 +1,34 @@
-package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.editform;
+package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.editform;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
-import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.event.UpdateTableEvent;
-import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.EditDeclarationTypeNameAction;
-import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.EditDeclarationTypeNameResult;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.UpdateTableEvent;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.EditFormTypeNameAction;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.EditFormTypeNameResult;
 import com.google.inject.Inject;
-import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.google.web.bindery.event.shared.EventBus;
+import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.View;
 
 /**
  * @author Eugene Stetsenko
- * Форма редактирования макета декларации
+ * Форма редактирования макета формы
  */
 public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView> implements EditFormUiHandlers {
 
     public interface MyView extends View, HasUiHandlers<EditFormUiHandlers> {
-        void setDeclarationTypeName(String declarationTypeName);
-        String getDeclarationTypeName();
+        void setFormTypeName(String formTypeName);
+        String getFormTypeName();
     }
 
     DispatchAsync dispatchAsync;
 
-    int declarationTypeId;
-    String initDeclarationTypeName;
+    int formTypeId;
+    String initFormTypeName;
 
     @Inject
     public EditFormPresenter(final EventBus eventBus, final MyView view, final DispatchAsync dispatchAsync) {
@@ -37,25 +37,25 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
         getView().setUiHandlers(this);
     }
 
-    public void setDeclarationTypeId(int declarationTypeId) {
-        this.declarationTypeId = declarationTypeId;
+    public void setFormTypeId(int formTypeId) {
+        this.formTypeId = formTypeId;
     }
 
-    public void setDeclarationTypeName(String declarationTypeName) {
-        this.initDeclarationTypeName = declarationTypeName;
-        getView().setDeclarationTypeName(declarationTypeName);
+    public void setFormTypeName(String formTypeName) {
+        this.initFormTypeName = formTypeName;
+        getView().setFormTypeName(formTypeName);
     }
 
     @Override
     public void onSave() {
-        EditDeclarationTypeNameAction action = new EditDeclarationTypeNameAction();
-        action.setDeclarationTypeId(declarationTypeId);
-        action.setNewDeclarationTypeName(getView().getDeclarationTypeName());
+        EditFormTypeNameAction action = new EditFormTypeNameAction();
+        action.setFormTypeId(formTypeId);
+        action.setNewFormTypeName(getView().getFormTypeName());
         dispatchAsync.execute(action, CallbackUtils
-                .defaultCallback(new AbstractCallback<EditDeclarationTypeNameResult>() {
+                .defaultCallback(new AbstractCallback<EditFormTypeNameResult>() {
                     @Override
-                    public void onSuccess(EditDeclarationTypeNameResult result) {
-                        initDeclarationTypeName = getView().getDeclarationTypeName();
+                    public void onSuccess(EditFormTypeNameResult result) {
+                        initFormTypeName = getView().getFormTypeName();
                         UpdateTableEvent.fire(EditFormPresenter.this);
                     }
                 }, this));
@@ -71,8 +71,9 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 
             @Override
             public void no() {
-                getView().setDeclarationTypeName(initDeclarationTypeName);
+                getView().setFormTypeName(initFormTypeName);
             }
         });
+
     }
 }

@@ -38,6 +38,8 @@ public class AdminView extends ViewWithUiHandlers<AdminUIHandlers> implements Ad
 
     @UiField
     Panel filterContentPanel;
+    @UiField
+    Panel editFormContentPanel;
 
 	@UiField
     GenericCellTable<FormTypeTemplate> formTemplateTable;
@@ -60,6 +62,7 @@ public class AdminView extends ViewWithUiHandlers<AdminUIHandlers> implements Ad
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 selectedItem = getSelectedElement();
+                getUiHandlers().onSelectionChanged(selectedItem);
             }
         });
 
@@ -143,6 +146,11 @@ public class AdminView extends ViewWithUiHandlers<AdminUIHandlers> implements Ad
             if (content != null) {
                 filterContentPanel.add(content);
             }
+        } else if (slot == AdminPresenter.TYPE_editPresenter) {
+            editFormContentPanel.clear();
+            if (content != null) {
+                editFormContentPanel.add(content);
+            }
         } else {
             super.setInSlot(slot, content);
         }
@@ -163,6 +171,9 @@ public class AdminView extends ViewWithUiHandlers<AdminUIHandlers> implements Ad
                     break;
                 }
             }
+        }
+        if (!formTypeTemplates.isEmpty() && (selectedItem == null)) {
+            selectionModel.setSelected(formTypeTemplates.get(0), true);
         }
 	}
 
