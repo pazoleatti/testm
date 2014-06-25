@@ -45,7 +45,7 @@ public class AuditServiceImpl implements AuditService {
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = false)
+	@Transactional(propagation = Propagation.REQUIRED, readOnly = false)
 	public void add(final FormDataEvent event, final TAUserInfo userInfo, final Integer departmentId, final Integer reportPeriodId,
 					final Integer declarationTypeId, final Integer formTypeId, final Integer formKindId, final String note) {
         tx.executeInNewTransaction(new TransactionLogic() {
