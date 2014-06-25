@@ -673,13 +673,13 @@ create table log_system (
   event_id            number(3,0) not null,
   user_id             number(9,0),
   roles               varchar2(200),
-  department_name     varchar2(500) not null,
+  department_name     varchar2(4000 byte) not null,
   report_period_name  varchar2(50),
   declaration_type_id number(9,0),
   form_type_id        number(9,0),
   form_kind_id        number(9,0),
-  note                varchar2(510),
-  user_department_name varchar2(500)
+  note                varchar2(4000 byte),
+  user_department_name varchar2(4000 byte)
 );
 comment on table log_system is  'Системный журнал';
 comment on column log_system.id is 'Код записи';
