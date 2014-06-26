@@ -9,7 +9,9 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.editform.EditFormPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.FormTemplateMainEvent;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.UpdateTableEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.filter.FilterFormTemplatePresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.filter.FilterFormTemplateReadyEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.filter.FormTemplateApplyEvent;
@@ -41,7 +43,7 @@ import java.util.List;
 public class AdminPresenter
         extends Presenter<AdminPresenter.MyView, AdminPresenter.MyProxy>
         implements FormTemplateApplyEvent.FormDataApplyHandler, FilterFormTemplateReadyEvent.MyHandler,
-        AdminUIHandlers {
+        AdminUIHandlers, UpdateTableEvent.MyHandler {
 
     /**
 	 * {@link AdminPresenter}'s proxy.
@@ -63,13 +65,17 @@ public class AdminPresenter
 
 	private final DispatchAsync dispatcher;
     protected final FilterFormTemplatePresenter filterPresenter;
+    protected final EditFormPresenter editFormPresenter;
     public static final Object TYPE_filterPresenter = new Object();
+    public static final Object TYPE_editPresenter = new Object();
 
     @Inject
-	public AdminPresenter(EventBus eventBus, MyView view, MyProxy proxy, DispatchAsync dispatcher, FilterFormTemplatePresenter filterPresenter) {
+	public AdminPresenter(EventBus eventBus, MyView view, MyProxy proxy, DispatchAsync dispatcher,
+                          FilterFormTemplatePresenter filterPresenter, EditFormPresenter editFormPresenter) {
 		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
 		this.dispatcher = dispatcher;
         this.filterPresenter = filterPresenter;
+        this.editFormPresenter = editFormPresenter;
         getView().setUiHandlers(this);
     }
 
@@ -99,20 +105,21 @@ public class AdminPresenter
         super.onBind();
         addRegisteredHandler(FilterFormTemplateReadyEvent.getType(), this);
         addRegisteredHandler(FormTemplateApplyEvent.getType(), this);
-
-
+        addRegisteredHandler(UpdateTableEvent.getType(), this);
     }
 
     @Override
     protected void onReveal() {
         super.onReveal();
         setInSlot(TYPE_filterPresenter, filterPresenter);
+        setInSlot(TYPE_editPresenter, editFormPresenter);
     }
 
     @Override
     protected void onHide() {
         super.onHide();
         clearSlot(TYPE_filterPresenter);
+        clearSlot(TYPE_editPresenter);
     }
 
     @Override
@@ -170,4 +177,18 @@ public class AdminPresenter
             }
         }, this));
     }
+
+    @Override
+    public void onSelectionChanged(FormTypeTemplate selectedItem) {
+        if (selectedItem != null) {
+            editFormPresenter.setFormTypeId(selectedItem.getFormTypeId());
+            editFormPresenter.setFormTypeName(selectedItem.getFormTypeName());
+        }
+    }
+
+    @Override
+    public void onUpdateTable(UpdateTableEvent event) {
+        updateFormData();
+    }
+
 }

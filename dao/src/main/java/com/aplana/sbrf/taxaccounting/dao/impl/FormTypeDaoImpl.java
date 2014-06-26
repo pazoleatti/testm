@@ -102,6 +102,18 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
         }
     }
 
+    @CacheEvict(value = "FormType", beforeInvocation = true ,key = "#formTypeId")
+    @Override
+    public void updateFormTypeName(int formTypeId, String newName) {
+        getJdbcTemplate().update(
+                "update form_type set name = ? where id = ?",
+                new Object[]{
+                        newName,
+                        formTypeId
+                }
+        );
+    }
+
     @CacheEvict("FormType")
     @Override
     public void delete(int formTypeId) {
