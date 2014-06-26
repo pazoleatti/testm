@@ -506,8 +506,8 @@ public class RefBookUtils extends AbstractDao {
                    errors.add("Атрибута справочника \"Тип подразделенеия\" должно принимать одно из значений: 1,2,3,4,5");
                 }
 
-                if ((a.getId() == 161L || a.getId() == 162L) &&  values.get(a.getAlias()).getStringValue().contains("/")) {
-                    errors.add("Значение атрибута «" + a.getName() + "» не должен содержать символ «/»!");
+                if ((a.getId() == 161L || a.getId() == 162L) && values.get(a.getAlias()).getStringValue() != null &&  values.get(a.getAlias()).getStringValue().contains("/")) {
+                    errors.add("Значение атрибута «" + a.getName() + "» не должно содержать символ «/»!");
                 }
             }
         }
