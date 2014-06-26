@@ -11,6 +11,147 @@
 	<description>АС "Учёт налогов" - Дистрибутив</description>
 	<packaging>ear</packaging>
 
+    <profiles>
+        <profile>
+        <id>development</id>
+            <dependencies>
+                <dependency>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>migration-ejb</artifactId>
+                    <version>${project.version}</version>
+                    <type>ejb</type>
+                </dependency>
+                <dependency>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>mdb</artifactId>
+                    <version>${project.version}</version>
+                    <type>ejb</type>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-ear-plugin</artifactId>
+                        <configuration>
+                            <version>5</version>
+                            <defaultLibBundleDir>lib</defaultLibBundleDir>
+                            <skinnyWars>true</skinnyWars>
+                            <displayName>${parent.artifactId}</displayName>
+                            <applicationName>${parent.description}</applicationName>
+                            <modules>
+                                <webModule>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>gwtapp</artifactId>
+                                    <bundleFileName>gwtapp.war</bundleFileName>
+                                    <contextRoot>/taxaccounting/gwtapp</contextRoot>
+                                </webModule>
+                                <ejbModule>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>migration-ejb</artifactId>
+                                    <bundleFileName>migration-ejb.jar</bundleFileName>
+                                </ejbModule>
+                                <ejbModule>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>mdb</artifactId>
+                                    <bundleFileName>mdb.jar</bundleFileName>
+                                </ejbModule>
+                                <ejbModule>
+                                    <groupId>com.aplana.taxaccounting</groupId>
+                                    <artifactId>scheduler-task</artifactId>
+                                    <bundleFileName>scheduler-task.jar</bundleFileName>
+                                </ejbModule>
+                            </modules>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>production</id>
+            <dependencies>
+                <dependency>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>migration-ejb</artifactId>
+                    <version>${project.version}</version>
+                    <type>ejb</type>
+                    <classifier>jar-with-dependencies</classifier>
+                    <exclusions>
+                    <exclusion>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>core</artifactId>
+                    </exclusion>
+                    <exclusion>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>dao</artifactId>
+                    </exclusion>
+                    </exclusions>
+                </dependency>
+                <dependency>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>mdb</artifactId>
+                    <version>${project.version}</version>
+                    <type>ejb</type>
+                    <classifier>jar-with-dependencies</classifier>
+                    <exclusions>
+                    <exclusion>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>service</artifactId>
+                    </exclusion>
+                    <exclusion>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>dao</artifactId>
+                    </exclusion>
+                    <exclusion>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>core</artifactId>
+                    </exclusion>
+                    </exclusions>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-ear-plugin</artifactId>
+                        <configuration>
+                            <version>5</version>
+                            <defaultLibBundleDir>lib</defaultLibBundleDir>
+                            <skinnyWars>true</skinnyWars>
+                            <displayName>${parent.artifactId}</displayName>
+                            <applicationName>${parent.description}</applicationName>
+                            <modules>
+                                <webModule>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>gwtapp</artifactId>
+                                    <bundleFileName>gwtapp.war</bundleFileName>
+                                    <contextRoot>/taxaccounting/gwtapp</contextRoot>
+                                </webModule>
+                                <ejbModule>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>migration-ejb</artifactId>
+                                    <bundleFileName>migration-ejb.jar</bundleFileName>
+                                    <classifier>jar-with-dependencies</classifier>
+                                </ejbModule>
+                                <ejbModule>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>mdb</artifactId>
+                                    <bundleFileName>mdb.jar</bundleFileName>
+                                    <classifier>jar-with-dependencies</classifier>
+                                </ejbModule>
+                                <ejbModule>
+                                    <groupId>com.aplana.taxaccounting</groupId>
+                                    <artifactId>scheduler-task</artifactId>
+                                    <bundleFileName>scheduler-task.jar</bundleFileName>
+                                </ejbModule>
+                            </modules>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+    </profiles>
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
@@ -18,44 +159,6 @@
 			<version>${project.version}</version>
 			<type>war</type>
 		</dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>migration-ejb</artifactId>
-            <version>${project.version}</version>
-            <type>ejb</type>
-            <classifier>jar-with-dependencies</classifier>
-            <exclusions>
-                <exclusion>
-                    <groupId>${project.groupId}</groupId>
-                    <artifactId>core</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>${project.groupId}</groupId>
-                    <artifactId>dao</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>mdb</artifactId>
-            <version>${project.version}</version>
-            <type>ejb</type>
-            <classifier>jar-with-dependencies</classifier>
-            <exclusions>
-                <exclusion>
-                    <groupId>${project.groupId}</groupId>
-                    <artifactId>service</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>${project.groupId}</groupId>
-                    <artifactId>dao</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>${project.groupId}</groupId>
-                    <artifactId>core</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
         <!-- TODO: вернуть когда будет внедрен планировщик -->
         <!--<dependency>
             <groupId>com.aplana.taxaccounting</groupId>
@@ -79,49 +182,7 @@
 
 	<build>
 		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-ear-plugin</artifactId>
-				<configuration>
-					<version>5</version>
-					<defaultLibBundleDir>lib</defaultLibBundleDir>
-                    <skinnyWars>true</skinnyWars>
-                    <displayName>${parent.artifactId}</displayName>
-                    <applicationName>${parent.description}</applicationName>
-					<modules>
-						<webModule>
-							<groupId>${project.groupId}</groupId>
-							<artifactId>gwtapp</artifactId>
-							<bundleFileName>gwtapp.war</bundleFileName>
-							<contextRoot>/taxaccounting/gwtapp</contextRoot>
-						</webModule>
-                        <ejbModule>
-                            <groupId>${project.groupId}</groupId>
-                            <artifactId>migration-ejb</artifactId>
-                            <bundleFileName>migration-ejb.jar</bundleFileName>
-                            <classifier>jar-with-dependencies</classifier>
-                        </ejbModule>
-                        <ejbModule>
-                            <groupId>${project.groupId}</groupId>
-                            <artifactId>mdb</artifactId>
-                            <bundleFileName>mdb.jar</bundleFileName>
-                            <classifier>jar-with-dependencies</classifier>
-                        </ejbModule>
-                        <!-- TODO: вернуть когда будет внедрен планировщик -->
-                        <!--<ejbModule>
-                            <groupId>com.aplana.taxaccounting</groupId>
-                            <artifactId>scheduler-core</artifactId>
-                            <bundleFileName>scheduler-core.jar</bundleFileName>
-                        </ejbModule>-->
-                        <ejbModule>
-                            <groupId>com.aplana.taxaccounting</groupId>
-                            <artifactId>scheduler-task</artifactId>
-                            <bundleFileName>scheduler-task.jar</bundleFileName>
-                        </ejbModule>
-					</modules>
-				</configuration>
-			</plugin>
-<!--			
+<!--
 			<plugin>
 				<artifactId>maven-antrun-plugin</artifactId>
 				<version>1.7</version>
