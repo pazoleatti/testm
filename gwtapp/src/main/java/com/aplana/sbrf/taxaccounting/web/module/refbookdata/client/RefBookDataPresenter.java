@@ -139,7 +139,6 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 		rowsId.add(getView().getSelectedRow().getRefBookRowId());
 		action.setRecordsId(rowsId);
         action.setDeleteVersion(false);
-        action.setDate(getView().getRelevanceDate());
 		dispatcher.execute(action,
 				CallbackUtils.defaultCallback(
 						new AbstractCallback<DeleteRefBookRowResult>() {
@@ -158,9 +157,6 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 								editFormPresenter.show(null);
 								editFormPresenter.setMode(mode);
 								getView().updateTable();
-                                if (result.getCount() == 0) {
-                                    editFormPresenter.setAllVersionVisible(false);
-                                }
 							}
 						}, this));
 	}
@@ -205,7 +201,6 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
             setMode(FormMode.VIEW);
         }
 		action.setRefBookId(refBookDataId);
-        action.setDate(editFormPresenter.getRelevanceDate());
 		dispatcher.execute(action,
 				CallbackUtils.defaultCallback(
 						new AbstractCallback<GetRefBookAttributesResult>() {
@@ -278,7 +273,10 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                     }
                                     recordId = null;
                                     //LogAddEvent.fire(RefBookDataPresenter.this, result.getUuid());
-								}
+                                    if (result.getDataRows().size() == 0) {
+                                        editFormPresenter.setAllVersionVisible(false);
+                                    }
+                                }
 							}, RefBookDataPresenter.this));
 		}
 	}
