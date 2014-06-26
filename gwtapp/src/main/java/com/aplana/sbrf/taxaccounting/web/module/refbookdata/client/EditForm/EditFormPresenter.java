@@ -99,6 +99,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 
 		GetRefBookAttributesAction action = new GetRefBookAttributesAction();
 		action.setRefBookId(refbookId);
+        action.setDate(getRelevanceDate());
         currentRefBookId = refbookId;
 		dispatchAsync.execute(action,
                 CallbackUtils.defaultCallback(
@@ -111,6 +112,9 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                 setIsFormModified(false);
                                 if (readOnly) {
                                     setMode(FormMode.READ);
+                                }
+                                if (result.getCount() == 0) {
+                                    setAllVersionVisible(false);
                                 }
                             }
                         }, this));

@@ -81,6 +81,10 @@ public class GetRefBookAttributesHandler extends AbstractActionHandler<GetRefBoo
         }
 
 		result.setColumns(columns);
+
+        int count = refBookFactory.getDataProvider(action.getRefBookId()).getRecordsCount(action.getDate(), null);
+        result.setCount(count);
+
 		return result;
 	}
 

@@ -205,6 +205,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
             setMode(FormMode.VIEW);
         }
 		action.setRefBookId(refBookDataId);
+        action.setDate(editFormPresenter.getRelevanceDate());
 		dispatcher.execute(action,
 				CallbackUtils.defaultCallback(
 						new AbstractCallback<GetRefBookAttributesResult>() {
