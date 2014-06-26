@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.historytemplatechanges.shared.Te
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -34,6 +35,8 @@ public class VersionHistoryView extends PopupViewImpl implements VersionHistoryP
 
     interface Binder extends UiBinder<PopupPanel, VersionHistoryView> {
     }
+
+    private static final DateTimeFormat format = DateTimeFormat.getFormat("dd.MM.yyyy HH:mm");
 
     @Inject
     public VersionHistoryView(EventBus eventBus, Binder binder) {
@@ -76,7 +79,7 @@ public class VersionHistoryView extends PopupViewImpl implements VersionHistoryP
         versionHistoryCellTable.addResizableColumn(new TextColumn<TemplateChangesExt>() {
             @Override
             public String getValue(TemplateChangesExt object) {
-                return object.getTemplateChanges().getEventDate().toString();
+                return format.format(object.getTemplateChanges().getEventDate());
             }
         }, "Дата и время события");
 
