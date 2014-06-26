@@ -171,9 +171,9 @@ public class RefBookUniversal implements RefBookDataProvider {
                 //Проверка корректности
                 checkCorrectness(logger, refBook, null, versionFrom, versionTo, attributes, records);
 
-                if (recordIds.size() > 0 && refBookDao.isVersionsExist(refBookId, recordIds, versionFrom)) {
+                /*if (recordIds.size() > 0 && refBookDao.isVersionsExist(refBookId, recordIds, versionFrom)) {
                     throw new ServiceException("Версия с указанной датой актуальности уже существует");
-                }
+                }*/
 
                 for (RefBookRecord record : records) {
                     //Проверка пересечения версий
@@ -463,7 +463,7 @@ public class RefBookUniversal implements RefBookDataProvider {
 
                 if (!relatedVersions.isEmpty() && versionTo != null) {
                     //Изменяем существующую фиктивную версию
-                    refBookUtils.updateVersionRelevancePeriod(REF_BOOK_RECORD_TABLE_NAME, relatedVersions.get(0), versionTo);
+                    refBookUtils.updateVersionRelevancePeriod(REF_BOOK_RECORD_TABLE_NAME, relatedVersions.get(0), SimpleDateUtils.addDayToDate(versionTo, 1));
                 }
                 //Обновляем дату начала актуальности в конце http://jira.aplana.com/browse/SBRFACCTAX-7890
                 refBookUtils.updateVersionRelevancePeriod(REF_BOOK_RECORD_TABLE_NAME, uniqueRecordId, versionFrom);
