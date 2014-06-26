@@ -22,10 +22,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Repository
 public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
@@ -117,7 +114,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 		JdbcTemplate jt = getJdbcTemplate();
 
         //Обнуляем все parent_id, чтобы можно было спокойно удалить записи
-        try {
+        /*try {
             int updatedColumns = jt.update(
                     "update form_column set parent_column_id = null where parent_column_id is not null and form_template_id = ?",
                     formTemplateId);
@@ -125,7 +122,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
         } catch (DataAccessException e){
             logger.error("", e);
             throw new DaoException("", e);
-        }
+        }*/
 
 		final Set<String> removedColumns = new HashSet<String>(jt.queryForList(
 			"SELECT alias FROM form_column WHERE form_template_id = ?",
@@ -134,12 +131,14 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
                 String.class
 		));
 
-		final List<Column> newColumns = formTemplate.getColumns();
-		/*final List<Column> oldColumns = new ArrayList<Column>();*/
+		final List<Column> newColumns =  new ArrayList<Column>();
+		final List<Column> oldColumns = new ArrayList<Column>();
+
+        List<Column> columns = formTemplate.getColumns();
 
 		OrderUtils.reorder(newColumns);
 
-		/*int order = 0;
+		int order = 0;
 		for (Column col: columns) {
 			col.setOrder(++order);
 			if (!removedColumns.contains(col.getAlias())) {
@@ -148,7 +147,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 				oldColumns.add(col);
 				removedColumns.remove(col.getAlias());
 			}
-		}*/
+		}
 
 		if(!removedColumns.isEmpty()){
             final String[] alias = new String[1];
@@ -179,22 +178,22 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 		}
 
         // Сгенерированый ключ -> реальный ключ в БД
-        /*Map<Integer, Integer> idsMapping = new HashMap<Integer, Integer>();*/
+        Map<Integer, Integer> idsMapping = new HashMap<Integer, Integer>();
 
 		if (!newColumns.isEmpty()) {
             List<Long> genKeys = bdUtils.getNextIds(BDUtils.Sequence.FORM_COLUMN, (long) newColumns.size());
             int counter = 0;
             for (Column column : newColumns) {
                 if (column.getId() == null || column.getId() < 0) {
-                    /*if (column.getId() != null) {
+                    if (column.getId() != null) {
                         idsMapping.put(column.getId(), genKeys.get(counter).intValue());
-                    }*/
+                    }
                     column.setId(genKeys.get(counter).intValue());
                 }
                 counter++;
             }
             // Подмена ссылок
-            for (Column column : newColumns) {
+            for (Column column : columns) {
                 if (column instanceof ReferenceColumn) {
                     ReferenceColumn referenceColumn = (ReferenceColumn)column;
                     // При экспорте parentId не сериализуется, а прописывается алиас для parentId, здесь в случии импорта подставляем нужный id
@@ -203,9 +202,9 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
                                 formTemplate.getColumn(
                                         referenceColumn.getParentAlias()).getId());
                     }
-                    /*else if(referenceColumn.getParentId() < 0) {
+                    else if(referenceColumn.getParentId() < 0) {
                         referenceColumn.setParentId(idsMapping.get(referenceColumn.getParentId()));
-                    }*/
+                    }
                 }
             }
 
@@ -305,7 +304,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 			);
 		}
 
-		/*if(!oldColumns.isEmpty()){
+		if(!oldColumns.isEmpty()){
 			jt.batchUpdate(
 					"UPDATE form_column SET name = ?, alias = ?, type = ?, width = ?, precision = ?, ord = ?, " +
                             "max_length = ?, checking = ?, format = ?, attribute_id = ?, filter = ?, " +
@@ -374,7 +373,10 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
                                 ps.setNull(9, Types.INTEGER);
                                 ps.setLong(10, ((ReferenceColumn) col).getRefBookAttributeId());
                                 ps.setNull(11, Types.CHAR);
-                                ps.setLong(12, ((ReferenceColumn) col).getParentId());
+                                if (((ReferenceColumn) col).getParentId() != 0)
+                                    ps.setLong(12, ((ReferenceColumn) col).getParentId());
+                                else
+                                    ps.setLong(12, getColumnIdByAlias(formTemplateId, ((ReferenceColumn) col).getParentAlias()));
                                 if (((ReferenceColumn) col).getRefBookAttributeId2() != null) {
                                     ps.setLong(13, ((ReferenceColumn) col).getRefBookAttributeId2());
                                 } else {
@@ -408,7 +410,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 						}
 					}
 			);
-		}*/
+		}
 
 		/*jt.query(
 			"SELECT id, alias FROM form_column WHERE form_template_id = " + formTemplateId,
@@ -457,6 +459,17 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
             return "A";
         } else {
             throw new IllegalArgumentException("Unknown column type: " + col.getClass().getName());
+        }
+    }
+
+    private int getColumnIdByAlias(int formTemplateId, String columnAlias){
+        try {
+            return getJdbcTemplate().queryForInt(
+                    "SELECT id FROM form_column WHERE form_template_id = ? and alias = ?",
+                    formTemplateId, columnAlias);
+        } catch (DataAccessException e){
+            logger.error("", e);
+            throw new DaoException("", e);
         }
     }
 }
