@@ -206,7 +206,7 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
         // Регулярка → Пара(Признак архива, Id справочника)
         Map<String, List<Pair<Boolean, Long>>> mappingMap = new HashMap<String, List<Pair<Boolean, Long>>>();
         // Ценные бумаги + Эмитенты
-        mappingMap.put("DS[0-9]{6}\\.nsi", asList(new Pair<Boolean, Long>(true, REF_BOOK_BOND), new Pair<Boolean, Long>(true, REF_BOOK_EMITENT)));
+        mappingMap.put("DS[0-9]{6}\\.nsi", asList(new Pair<Boolean, Long>(true, REF_BOOK_EMITENT), new Pair<Boolean, Long>(true, REF_BOOK_BOND)));
 
         importRefBook(userInfo, logger, ConfigurationParam.REF_BOOK_DIASOFT_DIRECTORY, mappingMap);
     }
