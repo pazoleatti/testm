@@ -345,8 +345,8 @@ void addData(def xml, int headRowCount) {
         if (records.size() == 1) {
             newRow.number = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
         } else {
-            logger.error("Проверка файла: Строка ${xlsIndexRow + 3} содержит значение, отсутствующее в справочнике " +
-                    "«" + refBookFactory.get(27).getName() + "»!")
+            logger.error("Проверка файла: Строка ${xlsIndexRow} содержит значение, отсутствующее в справочнике " +
+                    "«" + refBookFactory.get(27).getName() + "»!" + filter + " - " + records.size())
         }
 
         // графа 5
