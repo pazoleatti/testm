@@ -132,7 +132,7 @@ void calc() {
         total.costs = getTotalValue(dataRows, dataRowsPrev)
     }
 
-    dataRowHelper.update(dataRows)
+    dataRowHelper.save(dataRows)
 }
 
 def getDataRowsPrev() {
