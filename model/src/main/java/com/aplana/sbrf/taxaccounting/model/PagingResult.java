@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import javax.validation.constraints.Min;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -52,7 +53,7 @@ public class PagingResult<T> extends ArrayList<T>{
 		return totalCount;
 	}
 
-	public void setTotalCount(int totalCount) {
+	public void setTotalCount(@Min(0) int totalCount) {
 		this.totalCount = totalCount;
 	}
 
