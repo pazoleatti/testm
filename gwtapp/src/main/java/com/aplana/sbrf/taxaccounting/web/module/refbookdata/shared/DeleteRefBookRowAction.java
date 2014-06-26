@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
-import java.util.Date;
 import java.util.List;
 
 public class DeleteRefBookRowAction extends UnsecuredActionImpl<DeleteRefBookRowResult> implements ActionName {
@@ -12,8 +11,6 @@ public class DeleteRefBookRowAction extends UnsecuredActionImpl<DeleteRefBookRow
 	List<Long> recordsId;
     /** Признак того, что удаляется одна версия, а не все версии записи */
     boolean deleteVersion;
-
-    Date date;
 
     public boolean isDeleteVersion() {
         return deleteVersion;
@@ -39,15 +36,7 @@ public class DeleteRefBookRowAction extends UnsecuredActionImpl<DeleteRefBookRow
 		this.recordsId = recordsId;
 	}
 
-    public Date getDate() {
-        return date;
-    }
-
-    public void setDate(Date date) {
-        this.date = date;
-    }
-
-    @Override
+	@Override
 	public String getName() {
 		return "Удалить запись из справочника";
 	}

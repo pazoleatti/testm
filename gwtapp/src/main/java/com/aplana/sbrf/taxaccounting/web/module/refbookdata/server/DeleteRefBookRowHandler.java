@@ -49,10 +49,6 @@ public class DeleteRefBookRowHandler extends AbstractActionHandler<DeleteRefBook
             }
             result.setUuid(logEntryService.save(logger.getEntries()));
         }
-
-        int count = refBookDataProvider.getRecordsCount(action.getDate(), null);
-        result.setCount(count);
-
 		return result;
 	}
 
