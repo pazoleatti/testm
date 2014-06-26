@@ -467,7 +467,7 @@ create table form_data_performer (
   name varchar2(200) not null,
   phone varchar2(40),
   print_department_id number(9),
-  report_department_name varchar2(510)
+  report_department_name varchar2(4000 byte)
 );
 comment on table form_data_performer is 'Исполнитель налоговой формы';
 comment on column form_data_performer.form_data_id is 'Первичный ключ';
