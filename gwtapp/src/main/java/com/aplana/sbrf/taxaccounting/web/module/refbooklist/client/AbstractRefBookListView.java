@@ -35,6 +35,8 @@ public abstract class AbstractRefBookListView extends ViewWithUiHandlers<RefBook
     @Override
     public void setTableData(List<TableModel> tableData, Long selectedItemId) {
         formDataTable.setRowData(tableData);
+        /* При единственном значении не перерисовывается таблица http://jira.aplana.com/browse/SBRFACCTAX-7913 */
+        formDataTable.flush();
         selectionModel.clear();
         if (selectedItemId != null) {
             for(TableModel item: tableData) {
