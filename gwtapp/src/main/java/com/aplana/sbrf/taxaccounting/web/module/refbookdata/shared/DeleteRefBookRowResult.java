@@ -9,8 +9,6 @@ public class DeleteRefBookRowResult implements Result {
 
     private boolean exception;
 
-    int count;
-
     public String getUuid() {
         return uuid;
     }
@@ -33,13 +31,5 @@ public class DeleteRefBookRowResult implements Result {
 
     public void setException(boolean exception) {
         this.exception = exception;
-    }
-
-    public int getCount() {
-        return count;
-    }
-
-    public void setCount(int count) {
-        this.count = count;
     }
 }
