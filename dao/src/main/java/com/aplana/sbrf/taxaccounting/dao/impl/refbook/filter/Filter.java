@@ -26,7 +26,8 @@ public class Filter
                                 RecognitionException e){
             List<String> stack = ((Parser)recognizer).getRuleInvocationStack();
             Collections.reverse(stack);
-            throw new IllegalArgumentException("Ошибка в строке фильтра в позиции "+line+":"+charPositionInLine+". (Rule stack:"+stack+". Message: "+msg+")");
+            Exception iae = new IllegalArgumentException("Ошибка в строке фильтра в позиции "+line+":"+charPositionInLine+". (Rule stack:"+stack+". Message: "+msg+")", e);
+			throw new IllegalArgumentException("Ошибка в строке фильтра.", iae);
         }
     }
 
@@ -37,7 +38,8 @@ public class Filter
                                 int line, int charPositionInLine,
                                 String msg,
                                 RecognitionException e){
-            throw new IllegalArgumentException("Ошибка в строке фильтра. (System msg = "+e.getMessage()+" )");
+			Exception iae = new IllegalArgumentException("Ошибка в строке фильтра. (System msg = "+e.getMessage()+" )");
+			throw new IllegalArgumentException("Ошибка в строке фильтра.", iae);
         }
     }
 
