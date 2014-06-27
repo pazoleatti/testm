@@ -88,7 +88,7 @@ def editableColumns = ['codeOKATO', 'identNumber', 'regNumber', 'powerVal', 'bas
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNumber', 'codeOKATO', 'identNumber', 'regNumber', 'powerVal', 'baseUnit',
+def nonEmptyColumns = ['codeOKATO', 'identNumber', 'regNumber', 'powerVal', 'baseUnit',
         'taxBenefitCode', 'benefitStartDate', 'benefitEndDate']
 
 // Автозаполняемые атрибуты
@@ -124,16 +124,7 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 
 // Алгоритмы заполнения полей формы
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
-    if (!dataRows.isEmpty()) {
-        sort(dataRows)
-        def i = 1
-        for (def row in dataRows) {
-            row.rowNumber = i++
-        }
-        dataRowHelper.save(dataRows);
-    }
+    // нет полей для заполнения
 }
 
 // сортировка ОКТМО
@@ -349,12 +340,15 @@ def copyData() {
 
 def copyRow(def row) {
     def newRow = formData.createDataRow()
-    editableColumns.each { alias ->
-        newRow.getCell(alias).editable = true
-        newRow.getCell(alias).setStyleAlias("Редактируемая")
+    editableColumns.each {
+        newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias("Редактируемая")
     }
-    copyColumns.each { alias ->
-        newRow.getCell(alias).setValue(row.getCell(alias).value, row.getIndex())
+    copyColumns.each {
+        newRow.getCell(it).setValue(row.getCell(it).value, row.getIndex())
+    }
+    autoFillColumns.each {
+        newRow.getCell(it).setStyleAlias('Автозаполняемая')
     }
     return newRow
 }
