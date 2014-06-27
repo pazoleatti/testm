@@ -102,8 +102,12 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 
             if (versionEnd.getValue() != null && start.after(versionEnd.getValue())) {
                 Dialog.errorMessage("Неправильно указан диапазон дат!");
-                versionEnd.setValue(null);
+                save.setEnabled(false);
+                cancel.setEnabled(false);
                 return;
+            } else {
+                save.setEnabled(true);
+                cancel.setEnabled(true);
             }
 
             for (Map.Entry<RefBookColumn, HasValue> w : widgets.entrySet()) {
@@ -131,6 +135,11 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
         startVersionDateLabel.setVisible(canVersion);
         endVersionDateLabel.setVisible(canVersion);
         allVersion.setVisible(canVersion);
+    }
+
+    @Override
+    public void setAllVersionField(boolean isVisible) {
+        allVersion.setVisible(isVisible);
     }
 
     @Override

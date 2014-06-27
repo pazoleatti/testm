@@ -17,7 +17,7 @@ public class RefBookValue implements Serializable {
 	/** Тип хранящегося значения */
 	private RefBookAttributeType attributeType;
 
-	/** Хранит значение вещественного типа */
+	/** Хранит значение */
 	private Object value;
 
 	public RefBookValue(RefBookAttributeType attributeType, Object value) {

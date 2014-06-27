@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
-import java.util.Date;
 import java.util.List;
 
 public class DeleteRefBookRowAction extends UnsecuredActionImpl<DeleteRefBookRowResult> implements ActionName {

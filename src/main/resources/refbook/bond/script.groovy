@@ -238,7 +238,9 @@ void importFromNSI() {
     }
 
     if (!logger.containsLevel(LogLevel.ERROR) && !updList.isEmpty()) {
-        dataProviderBond.updateRecords(actualDate, updList)
+        updList.each {
+            dataProviderBond.updateRecordVersion(logger, it.get(RefBook.RECORD_ID_ALIAS)?.numberValue, actualDate, null, it)
+        }
     }
 
     if (!logger.containsLevel(LogLevel.ERROR)) {

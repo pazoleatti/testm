@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import javax.validation.constraints.Min;
 import java.io.Serializable;
 
 /**
@@ -7,8 +8,14 @@ import java.io.Serializable;
  */
 public class PagingParams implements Serializable{
 	private static final long serialVersionUID = 5113425251692266554L;
-	
+
+	/**
+	 * Начальный номер строки, с которой должен быть возвращен результат. По умолчанию = 0
+	 */
 	private int startIndex = 0;
+	/**
+	 * Количество возвращаемых элементов, начиная с индекса startIndex. По умолчанию = 10
+	 */
 	private int count = 10;
 	
 	public PagingParams() {
@@ -32,7 +39,7 @@ public class PagingParams implements Serializable{
 	 * Задать стартовый индекс
 	 * @param startIndex стартовый индекс записи (начиная с 0)
 	 */
-	public void setStartIndex(int startIndex) {
+	public void setStartIndex(@Min(0) int startIndex) {
 		this.startIndex = startIndex;
 	}
 	

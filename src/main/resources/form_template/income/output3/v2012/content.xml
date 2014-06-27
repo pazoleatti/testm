@@ -12,7 +12,7 @@
         <name>Вид платежа</name>
         <order>1</order>
         <width>6</width>
-        <filter>CODE = '1' OR CODE = '3' OR CODE = '4''</filter>
+        <filter>CODE = '1' OR CODE = '3' OR CODE = '4'</filter>
         <hierarchical>false</hierarchical>
         <nameAttributeId>101</nameAttributeId>
         <refBookAttributeId>100</refBookAttributeId>

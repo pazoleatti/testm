@@ -114,7 +114,7 @@ def sortColumns = ['contragent', 'assignContractDate', 'assignContractNumber']
 // Проверяемые на пустые значения атрибуты (графа 1..8, 10, 11, 16, 17, 19)
 @Field
 def nonEmptyColumns = ['rowNumber', 'contragent', 'inn', 'assignContractNumber', 'assignContractDate', 'amount',
-        'amountForReserve', 'repaymentDate', 'income', 'result', 'taxClaimPrice', 'finResult', 'correctThisThis']
+        'amountForReserve', 'repaymentDate', 'income', 'result', 'taxClaimPrice', 'finResult']
 
 /** Признак периода ввода остатков. */
 @Field
@@ -577,19 +577,41 @@ void addData(def xml, int headRowCount) {
         newRow.income = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
 
+        // графы рассчитываемые, однако не при импорте в консолидированную - должны загружаться
         // графа 11
+        newRow.result = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
+
         // графа 12
+        newRow.part2Date = getDate(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
+
         // графа 13
+        newRow.lossThisQuarter = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
+
         // графа 14
+        newRow.lossNextQuarter = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
+
         // графа 15
+        newRow.lossThisTaxPeriod = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
 
         // графа 16
         newRow.taxClaimPrice = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
+        // графа 17
+        newRow.finResult = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
+        // графа 18
+        newRow.correctThisPrev = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
+        // графа 19
+        newRow.correctThisThis = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
+        // графа 20
+        newRow.correctThisNext = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
 
         rows.add(newRow)
     }

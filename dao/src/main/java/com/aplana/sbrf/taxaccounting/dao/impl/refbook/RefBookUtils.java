@@ -509,6 +509,10 @@ public class RefBookUtils extends AbstractDao {
                 if (a.getAttributeType().equals(RefBookAttributeType.STRING) && value.getStringValue() != null && a.getMaxLength() != null && value.getStringValue().length() > a.getMaxLength()) {
                     errors.add("Атрибут \"" + a.getName() + "\" должен иметь длину до " + a.getMaxLength() + " символов");
                 }
+
+                if ((a.getId() == 161L || a.getId() == 162L) && values.get(a.getAlias()).getStringValue() != null &&  values.get(a.getAlias()).getStringValue().contains("/")) {
+                    errors.add("Значение атрибута «" + a.getName() + "» не должно содержать символ «/»!");
+                }
             }
         }
 

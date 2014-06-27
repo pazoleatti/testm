@@ -495,6 +495,27 @@ void addData(def xml, int headRowCount) {
         // графа 10
         newRow.income = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
 
+        // графы рассчитываемые, однако не при импорте в консолидированную - должны загружаться
+        // графа 11
+        newRow.result = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
+
+        // графа 12
+        newRow.part2Date = getDate(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
+
+        // графа 13
+        newRow.lossThisQuarter = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
+
+        // графа 14
+        newRow.lossNextQuarter = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
+
+        // графа 15
+        newRow.lossThisTaxPeriod = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
+
         rows.add(newRow)
     }
     dataRowHelper.save(rows)
