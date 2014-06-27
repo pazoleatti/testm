@@ -28,6 +28,7 @@ public class RefBookFormDataKind extends AbstractPermanentRefBook {
 	@PostConstruct
 	private void init() {
 		refBook = refBookFactory.get(REF_BOOK_ID);
+		setRefBookId(REF_BOOK_ID);
 	}
 
     @Override

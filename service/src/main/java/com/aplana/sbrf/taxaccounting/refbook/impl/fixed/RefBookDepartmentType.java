@@ -28,6 +28,7 @@ public class RefBookDepartmentType extends AbstractPermanentRefBook {
 	@PostConstruct
 	private void init() {
 		refBook = refBookFactory.get(REF_BOOK_ID);
+		setRefBookId(REF_BOOK_ID);
 	}
 
     @Override

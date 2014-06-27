@@ -453,7 +453,8 @@ public class RefBookUniversal implements RefBookDataProvider {
                 if (!relatedVersions.isEmpty() && relatedVersions.size() > 1) {
                     throw new ServiceException("Обнаружено несколько фиктивных версий");
                 }
-                if (relatedVersions.isEmpty() && versionTo != null) {
+                boolean isVersionEndAlreadyExists = refBookDao.isVersionsExist(refBookId, Arrays.asList(recordId), SimpleDateUtils.addDayToDate(versionTo, 1));
+                if (relatedVersions.isEmpty() && versionTo != null && !isVersionEndAlreadyExists) {
                     //Создаем новую фиктивную версию - дату окончания
                     refBookDao.createFakeRecordVersion(refBookId, recordId, SimpleDateUtils.addDayToDate(versionTo, 1));
                 }
