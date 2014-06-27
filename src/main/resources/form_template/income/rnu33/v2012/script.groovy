@@ -233,8 +233,8 @@ void logicCheck() {
         // 2. Обязательность заполнения полей
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
 
-        // 3. Проверка рыночной цены в процентах к номиналу (графа 10, 14)
-        if (row.marketPriceOnDateAcquisitionInPerc > 0 && row.exercisePrice != 100) {
+        // 3. Проверка рыночной цены в процентах к номиналу (графа 10, 13)
+        if (row.marketPriceOnDateAcquisitionInPerc > 0 && row.redemptionVal != 100) {
             loggerError(errorMsg + 'Неверно указана цена в процентах при погашении!')
         }
 
