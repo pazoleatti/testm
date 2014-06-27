@@ -59,7 +59,7 @@ public class RefBookFormDataKindTest {
 	@Test
 	public void test3() {
 		PagingParams pagingParams = new PagingParams();
-		pagingParams.setStartIndex(3);
+		pagingParams.setStartIndex(4);
 		pagingParams.setCount(2);
 		PagingResult<Map<String, RefBookValue>> records = refBookFormDataKind.getRecords(new Date(), pagingParams, null, null);
 		assertEquals(2, records.size());
@@ -72,7 +72,7 @@ public class RefBookFormDataKindTest {
 	@Test
 	public void test4() {
 		PagingParams pagingParams = new PagingParams();
-		pagingParams.setStartIndex(4);
+		pagingParams.setStartIndex(5);
 		pagingParams.setCount(3);
 		PagingResult<Map<String, RefBookValue>> records = refBookFormDataKind.getRecords(new Date(), pagingParams, null, null);
 		assertEquals(1, records.size());
