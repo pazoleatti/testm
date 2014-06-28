@@ -79,9 +79,13 @@ public class RefBookFactoryImpl implements RefBookFactory {
             }
             return dataProvider;
 		} else if (RefBookFormDataKind.REF_BOOK_ID.equals(refBookId)) { // Справавочник "Типы налоговых форм"
-            return applicationContext.getBean("refBookFormDataKind", RefBookFormDataKind.class);
+            RefBookFormDataKind dataProvider = applicationContext.getBean("refBookFormDataKind", RefBookFormDataKind.class);
+            dataProvider.setRefBookId(refBookId);
+            return dataProvider;
 		} else if (RefBookDepartmentType.REF_BOOK_ID.equals(refBookId)) { // Справочник "Типы подразделений"
-			return applicationContext.getBean("refBookDepartmentType", RefBookDepartmentType.class);
+            RefBookDepartmentType dataProvider = applicationContext.getBean("refBookDepartmentType", RefBookDepartmentType.class);
+            dataProvider.setRefBookId(refBookId);
+            return dataProvider;
         } else{
 			RefBookUniversal refBookUniversal = (RefBookUniversal) applicationContext.getBean("refBookUniversal", RefBookDataProvider.class);
 			refBookUniversal.setRefBookId(refBookId);
