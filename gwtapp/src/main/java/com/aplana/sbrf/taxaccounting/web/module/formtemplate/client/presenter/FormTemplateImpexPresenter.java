@@ -37,7 +37,7 @@ public class FormTemplateImpexPresenter extends Presenter<FormTemplateImpexPrese
 	}
 
 	public interface MyView extends View, HasUiHandlers<FormTemplateImpexUiHandlers> {
-        static final String ERROR_RESP = "errorUuid ";
+        static final String ERROR_RESP = "erroruuid ";
         static final String SUCCESS_RESP = "uuid ";
         static final String ERROR = "error ";
 

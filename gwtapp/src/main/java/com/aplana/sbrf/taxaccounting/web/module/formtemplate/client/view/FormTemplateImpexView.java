@@ -37,14 +37,14 @@ public class FormTemplateImpexView extends ViewWithUiHandlers<FormTemplateImpexU
                     getUiHandlers().uploadFormTemplateFail("Ошибки при импорте формы.");
                     return;
                 }
-                if (event.getResults().contains(ERROR_RESP)) {
-                    String errorUuid = event.getResults().replaceAll(respPattern, "$2");
+                if (event.getResults().toLowerCase().contains(ERROR_RESP)) {
+                    String errorUuid = event.getResults().toLowerCase().replaceAll(respPattern, "$2");
                     getUiHandlers().uploadDectResponseWithErrorUuid(errorUuid.replaceFirst(ERROR_RESP, ""));
                 }else if (event.getResults().toLowerCase().contains(ERROR)) {
-                    String errorText = event.getResults().replaceAll(respPattern, "$2");
+                    String errorText = event.getResults().toLowerCase().replaceAll(respPattern, "$2");
                     getUiHandlers().uploadFormTemplateFail(errorText.replaceFirst(ERROR, ""));
                 } else {
-                    String uuid = event.getResults().replaceAll(respPattern, "$2");
+                    String uuid = event.getResults().toLowerCase().replaceAll(respPattern, "$2");
                     getUiHandlers().uploadFormTemplateSuccess(uuid.replaceFirst(SUCCESS_RESP, ""));
                 }
 			}

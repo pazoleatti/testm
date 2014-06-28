@@ -192,6 +192,9 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
                 }
                 counter++;
             }
+            for (Column column : oldColumns){
+                column.setId(getColumnIdByAlias(formTemplateId, column.getAlias()));
+            }
             // Подмена ссылок
             for (Column column : columns) {
                 if (column instanceof ReferenceColumn) {
