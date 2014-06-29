@@ -194,6 +194,7 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
                 @Override
                 public void onSuccess(DeleteNonVersionRefBookRowResult result) {
                     if (result.isWarning()){
+                        LogAddEvent.fire(RefBookHierDataPresenter.this, result.getUuid());
                         Dialog.confirmMessage("Удаление подразделения","Удалить все связанные записи?", new DialogHandler() {
                             @Override
                             public void yes() {

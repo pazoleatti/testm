@@ -221,7 +221,7 @@ public class RefBookDepartment implements RefBookDataProvider {
             return new ArrayList<Long>(0);
         int depId = refBookDepartmentDao.create(refBookValueMap, attributes);
         int terrBankId = departmentService.getParentTB(depId) != null ? departmentService.getParentTB(depId).getId() : 0;
-        createPeriods(depId, fromCode(refBookValueMap.get(DEPARTMENT_TYPE_ATTRIBUTE).getNumberValue().intValue()),
+        createPeriods(depId, fromCode(refBookValueMap.get(DEPARTMENT_TYPE_ATTRIBUTE).getReferenceValue().intValue()),
                 terrBankId, logger);
         if (logger.containsLevel(LogLevel.ERROR))
             throw new ServiceLoggerException("Подразделение не создано, обнаружены фатальные ошибки!",
@@ -249,7 +249,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                 departmentService.getDepartment(records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue().intValue())
                 : null;
         DepartmentType oldType = dep.getType();
-        DepartmentType newType = fromCode(records.get(DEPARTMENT_TYPE_ATTRIBUTE).getNumberValue().intValue());
+        DepartmentType newType = fromCode(records.get(DEPARTMENT_TYPE_ATTRIBUTE).getReferenceValue().intValue());
         boolean isChangeType = oldType != newType;
 
         Department oldTb = departmentService.getParentTB(uniqueRecordId.intValue());
@@ -502,8 +502,11 @@ public class RefBookDepartment implements RefBookDataProvider {
 
     private void checkCorrectness(Logger logger, Long recordId, List<RefBookAttribute> attributes, List<RefBookRecord> records) {
         Department rootBank = departmentService.getBankDepartment();
-        DepartmentType type = DepartmentType.fromCode(records.get(0).getValues().get(DEPARTMENT_TYPE_ATTRIBUTE).getNumberValue().intValue());
-        if (records.get(0).getValues().get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue() != null &&
+        DepartmentType type = records.get(0).getValues().get(DEPARTMENT_TYPE_ATTRIBUTE) != null ?
+                DepartmentType.fromCode(records.get(0).getValues().get(DEPARTMENT_TYPE_ATTRIBUTE).getReferenceValue().intValue()) :
+                null;
+        Long parentDepartmentId = records.get(0).getValues().get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue();
+        if (parentDepartmentId != null &&
                 type == DepartmentType.ROOT_BANK){
             logger.error("Подразделение с типом \"Банк\" не может иметь родительское подразделение!");
             return;
@@ -513,8 +516,8 @@ public class RefBookDepartment implements RefBookDataProvider {
             logger.error("Подразделение с типом \"Банк\" уже существует!");
             return;
         }
-        if (records.get(0).getValues().get(DEPARTMENT_TYPE_ATTRIBUTE) != null &&
-                Integer.valueOf(TERR_BANK.getCode()).equals(records.get(0).getValues().get(DEPARTMENT_TYPE_ATTRIBUTE).getNumberValue())){
+        if (type != null && TERR_BANK.getCode() == type.getCode() &&
+                parentDepartmentId != null && rootBank != null && parentDepartmentId.intValue() != rootBank.getId()){
             logger.error("Территориальный банк может быть подчинен только Банку!");
             return;
         }
@@ -533,12 +536,11 @@ public class RefBookDepartment implements RefBookDataProvider {
         }
 
         //Получаем записи у которых совпали значения уникальных атрибутов
-        List<Pair<Long,String>> matchedRecords = refBookDepartmentDao.getMatchedRecordsByUniqueAttributes(recordId, attributes, records);
+        List<Pair<String,String>> matchedRecords = refBookDepartmentDao.getMatchedRecordsByUniqueAttributes(recordId, attributes, records);
         if (matchedRecords != null && !matchedRecords.isEmpty()) {
-            for (Pair<Long,String> pair : matchedRecords) {
+            for (Pair<String,String> pair : matchedRecords) {
                 logger.error(String.format("Нарушено требование к уникальности, уже существует подразделение %s с такими значениями атрибута \"%s\"!",
-                        departmentService.getDepartment(pair.getFirst().intValue()).getName(),
-                        pair.getSecond()));
+                        pair.getFirst(), pair.getSecond()));
             }
             throw new ServiceLoggerException(ERROR_MESSAGE, logEntryService.save(logger.getEntries()));
         }

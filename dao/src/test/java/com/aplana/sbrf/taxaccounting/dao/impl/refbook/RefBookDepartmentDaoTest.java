@@ -89,7 +89,7 @@ public class RefBookDepartmentDaoTest {
         PagingResult<Map<String, RefBookValue>> allValues = new PagingResult<Map<String, RefBookValue>>();
         allValues.add(new HashMap<String, RefBookValue>(){{
             put("code", new RefBookValue(RefBookAttributeType.NUMBER, 1));
-            put("name", new RefBookValue(RefBookAttributeType.STRING, "Банк"));
+            put("name", new RefBookValue(RefBookAttributeType.STRING, "Главный Банк"));
         }});
         List<RefBookRecord> records = new ArrayList<RefBookRecord>();
         for (Map<String, RefBookValue> values : allValues) {
@@ -98,12 +98,12 @@ public class RefBookDepartmentDaoTest {
             record.setRecordId(null);
             records.add(record);
         }
-        List<Pair<Long,String>> matches =
+        List<Pair<String,String>> matches =
                 refBookDepartmentDao.getMatchedRecordsByUniqueAttributes(100l, refBook.getAttributes(), records);
-        assertEquals(1, matches.size());
-        List<Pair<Long,String>> matchesNull =
+        assertEquals(2, matches.size());
+        List<Pair<String,String>> matchesNull =
                 refBookDepartmentDao.getMatchedRecordsByUniqueAttributes(null, refBook.getAttributes(), records);
-        assertEquals(1, matchesNull.size());
+        assertEquals(2, matchesNull.size());
     }
 
     @Test
