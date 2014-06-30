@@ -491,6 +491,15 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     }
 
     @Override
+    public List<Integer> getDepartmentIdsByExecutors(List<Integer> departments) {
+        String sql = String.format("select distinct department_id from department_form_type dft " +
+                "left join form_type ft on dft.form_type_id = ft.id " +
+                "where %s ", SqlUtils.transformToSqlInStatement("performer_dep_id", departments));
+
+        return getJdbcTemplate().queryForList(sql, Integer.class);
+    }
+
+    @Override
     public List<Integer> getDepartmentsByName(String departmentName) {
         try {
             MapSqlParameterSource names = new MapSqlParameterSource();

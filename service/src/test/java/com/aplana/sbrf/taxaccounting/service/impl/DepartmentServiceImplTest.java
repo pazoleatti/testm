@@ -125,7 +125,7 @@ public class DepartmentServiceImplTest {
 
         // Роли
         taRoles = new ArrayList<TARole>();
-        for (String alias : asList(TARole.ROLE_CONTROL_UNP, TARole.ROLE_CONTROL_NS, TARole.ROLE_CONTROL, TARole.ROLE_OPER)) {
+        for (String alias : asList(TARole.ROLE_CONTROL_UNP, TARole.ROLE_ADMIN, TARole.ROLE_CONTROL_NS, TARole.ROLE_CONTROL, TARole.ROLE_OPER)) {
             TARole taRole = new TARole();
             taRole.setAlias(alias);
             taRoles.add(taRole);
@@ -160,6 +160,14 @@ public class DepartmentServiceImplTest {
         // Доступность по связям
         when(departmentDao.getDepartmentsBySourceControl(anyInt(), anyListOf(TaxType.class))).thenReturn(asList(departmentTB2.getId(), departmentTB3.getId()));
         when(departmentDao.getDepartmentsBySourceControlNs(anyInt(), anyListOf(TaxType.class))).thenReturn(asList(departmentTB2.getId(), departmentTB3.getId()));
+
+        when(departmentDao.getDepartmentIdsByExecutors(Arrays.asList(311))).thenReturn(Arrays.asList(3));
+        when(departmentDao.getDepartmentIdsByExecutors(Arrays.asList(31))).thenReturn(Arrays.asList(3));
+
+        when(departmentDao.getParentTBId(311)).thenReturn(3);
+        when(departmentDao.getParentTBId(31)).thenReturn(3);
+        when(departmentDao.getParentTBId(3)).thenReturn(3);
+
         // Для дерева
         when(departmentDao.getRequiredForTreeDepartments(anyListOf(Integer.class))).thenAnswer(new Answer<List<Department>>() {
             @Override
@@ -348,6 +356,8 @@ public class DepartmentServiceImplTest {
         Assert.assertEquals(true, result.contains(root) && result.contains(departmentTB2)
                 && result.contains(departmentTB3));
 
+        // REMOVE TARole.ROLE_CONTROL_UNP, TARole.ROLE_ADMIN
+        taUser.getRoles().remove(0);
         taUser.getRoles().remove(0);
 
         for (int i = 0; i < departmentID.length; i++) {
