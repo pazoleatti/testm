@@ -97,7 +97,7 @@ def autoFillColumns = allColumns - editableColumns
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNumber', 'name', 'inn', 'number', 'date', 'cost', 'repaymentDate', 'concessionsDate', 'income',
+def nonEmptyColumns = ['name', 'inn', 'number', 'date', 'cost', 'repaymentDate', 'concessionsDate', 'income',
         'financialResult1', 'currencyDebtObligation', 'perc', 'loss']
 
 // алиасы графов для арифметической проверки
@@ -160,9 +160,7 @@ void calc() {
     // сортировка
     sortRows(dataRows, groupColums)
 
-    def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
     for (def row : dataRows) {
-        row.rowNumber = ++rowNumber
         row.financialResult1 = getFinancialResult1(row)
         row.rateBR = getRateBR(row, reportDate)
         row.perc = getPerc(row)
@@ -194,19 +192,14 @@ void logicCheck() {
     reportDate = getReportDate()
     startDate = reportPeriodService.getStartDate(formData.reportPeriodId).getTime()
 
-    def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
     for (def row : dataRows) {
-        if (row?.getAlias() != null) continue
-        rowNumber++
+        if (row?.getAlias() != null){
+            continue
+        }
         def index = row.getIndex()
         def errorMsg = "Строка ${index}: "
 
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
-
-        // 2. Проверка на уникальность поля «№ пп»
-        if (rowNumber != row.rowNumber) {
-            rowError(logger, row, errorMsg + "Нарушена уникальность номера по порядку!")
-        }
 
         //  Проверка даты погашения основного долга «Графа 7» >= «Графа 8»
         if (row.concessionsDate != null && row.repaymentDate?.before(row.concessionsDate)) {

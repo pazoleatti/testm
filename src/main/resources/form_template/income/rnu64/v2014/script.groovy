@@ -94,7 +94,7 @@ def sortColumns = ['date', 'dealingNumber']
 def totalColumns = ['costs']
 
 @Field
-def nonEmptyColumns = ['number', 'date', 'part', 'dealingNumber', 'costs']
+def nonEmptyColumns = ['date', 'part', 'dealingNumber', 'costs']
 
 // Дата окончания отчетного периода
 @Field
@@ -113,13 +113,6 @@ void calc() {
 
     if (formDataEvent != FormDataEvent.IMPORT) {
         sortRows(dataRows, sortColumns)
-    }
-
-    def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
-    for (def row in dataRows) {
-        if (row.getAlias() == null) {
-            row.number = ++i
-        }
     }
 
     // пересчитываем строки итого
@@ -153,7 +146,7 @@ void logicCheck() {
     def totalQuarterRow = null
     def dFrom = reportPeriodService.getCalendarStartDate(formData.reportPeriodId)?.time
     def dTo = getEndDate()
-    def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
+
     for (def row : dataRows) {
         // 1. Проверка на заполнение поля
         if (row.getAlias() == null) {
@@ -166,11 +159,6 @@ void logicCheck() {
             // 2. Проверка даты совершения операции и границ отчетного периода
             if (row.date != null && dFrom != null && dTo != null && !(row.date >= dFrom && row.date <= dTo)) {
                 loggerError(row, errorMsg + "Дата совершения операции вне границ отчетного периода!")
-            }
-
-            // 3. Проверка на уникальность поля «№ пп»
-            if (++i != row.number) {
-                loggerError(row, errorMsg + "Нарушена уникальность номера по порядку!")
             }
 
             // 4. Проверка на нулевые значения

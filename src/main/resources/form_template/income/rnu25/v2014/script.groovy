@@ -85,9 +85,9 @@ def refBookCache = [:]
 
 // все атрибуты
 @Field
-def allColumns = ['rowNumber', 'fix', 'regNumber', 'tradeNumber', 'lotSizePrev', 'lotSizeCurrent',
-        'reserve', 'cost', 'signSecurity', 'marketQuotation', 'costOnMarketQuotation',
-        'reserveCalcValue', 'reserveCreation', 'reserveRecovery']
+def allColumns = ['rowNumber', 'fix', 'regNumber', 'tradeNumber', 'lotSizePrev', 'lotSizeCurrent', 'reserve', 'cost',
+                  'signSecurity', 'marketQuotation', 'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation',
+                  'reserveRecovery']
 
 // Редактируемые атрибуты (графа 2..5, 7..9)
 @Field
@@ -103,9 +103,8 @@ def groupColumns = ['regNumber', 'tradeNumber']
 
 // Проверяемые на пустые значения атрибуты (графа 1..3, 5..13)
 @Field
-def nonEmptyColumns = ['rowNumber', 'regNumber', 'tradeNumber', 'lotSizeCurrent', 'reserve',
-        'cost', 'signSecurity', 'costOnMarketQuotation',
-        'reserveCalcValue', 'reserveCreation', 'reserveRecovery']
+def nonEmptyColumns = ['regNumber', 'tradeNumber', 'lotSizeCurrent', 'reserve', 'cost', 'signSecurity',
+                       'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'reserveRecovery']
 
 // Атрибуты итоговых строк для которых вычисляются суммы (графа 4..7, 10..13)
 @Field
@@ -166,12 +165,8 @@ void calc() {
     def totalGroupsName = []
     // строки предыдущего периода
     def prevDataRows = getPrevDataRows()
-    // получить номер последний строки предыдущей формы если это не событие импорта
-    def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
 
     dataRows.each { row ->
-        // графа 1
-        row.rowNumber = ++rowNumber
 
         if (!isBalancePeriod() && formData.kind == FormDataKind.PRIMARY) {
             // графа 4
@@ -273,7 +268,6 @@ void logicCheck() {
     // список групп кодов классификации для которых надо будет посчитать суммы
     def totalGroupsName = []
 
-    def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
     for (def row : dataRows) {
         if (row.getAlias() != null) {
             continue
@@ -346,11 +340,6 @@ void logicCheck() {
 
         // 15. Обязательность заполнения поля графы 1..3, 5..13
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !isBalancePeriod())
-
-        // 16. Проверка на уникальность поля «№ пп» (графа 1)
-        if (++rowNumber != row.rowNumber) {
-            loggerError(row, errorMsg + 'Нарушена уникальность номера по порядку!')
-        }
 
         // 17. Арифметические проверки граф 6, 10..13
         if (!isBalancePeriod()) {

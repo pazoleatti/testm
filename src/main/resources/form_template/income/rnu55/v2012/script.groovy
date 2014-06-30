@@ -74,8 +74,7 @@ def editableColumns = ['bill', 'buyDate', 'currency', 'nominal', 'percent', 'imp
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['number', 'bill', 'buyDate', 'currency', 'nominal', 'percent', 'sumIncomeinCurrency',
-        'sumIncomeinRuble']
+def nonEmptyColumns = ['bill', 'buyDate', 'currency', 'nominal', 'percent', 'sumIncomeinCurrency', 'sumIncomeinRuble']
 
 // Атрибуты для итогов
 @Field
@@ -151,11 +150,8 @@ void calc() {
         def reportDate = getReportDate()
         // Дата начала отчетного периода
         def startDate = getStartDate()
-        def index = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
 
         for (def row in dataRows) {
-            // графа 1
-            row.number = ++index
             if (formData.kind != FormDataKind.PRIMARY) {
                 continue
             }
@@ -239,8 +235,6 @@ void logicCheck() {
         return
     }
 
-    def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
-
     // Алиасы граф для арифметической проверки
     def arithmeticCheckAlias = ['percentInRuble', 'sumIncomeinCurrency', 'sumIncomeinRuble']
     // Для хранения правильных значении и сравнения с имеющимися при арифметических проверках
@@ -277,11 +271,6 @@ void logicCheck() {
         // 3. Проверка даты реализации (погашения)  и границ отчетного периода (графа 7)
         if (row.implementationDate < startDate || endDate < row.implementationDate) {
             loggerError(row, errorMsg + 'Дата реализации (погашения) вне границ отчетного периода!')
-        }
-
-        // 4. Проверка на уникальность поля «№ пп» (графа 1) (в рамках текущего года)
-        if (++i != row.number) {
-            loggerError(row, errorMsg + 'Нарушена уникальность номера по порядку!')
         }
 
         // 5. Проверка на уникальность векселя
@@ -511,7 +500,6 @@ void addData(def xml, int headRowCount) {
         }
 
         // графа 1
-        newRow.number = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
         // fix
         xmlIndexCol++

@@ -90,7 +90,7 @@ def balanceEditableColumns = ['date', 'code', 'docNumber', 'docDate', 'currencyC
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['number', 'date', 'code', 'docNumber', 'docDate', 'currencyCode', 'rateOfTheBankOfRussia']
+def nonEmptyColumns = ['date', 'code', 'docNumber', 'docDate', 'currencyCode', 'rateOfTheBankOfRussia']
 
 // Сумируемые колонки в фиксированной с троке
 @Field
@@ -144,11 +144,8 @@ void calc() {
         }
 
         dataRows = dataRowHelper.getAllCached() // не убирать, группировка падает
-        // номер последний строки предыдущей формы
-        def number = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
 
         for (row in dataRows) {
-            row.number = ++number
             row.rateOfTheBankOfRussia = calc8(row)
             row.taxAccountingRuble = calc10(row)
             row.ruble = calc12(row)
@@ -272,8 +269,6 @@ void logicCheck() {
     // для хранения правильных значении и сравнения с имеющимися при арифметических проверках
     def needValue = [:]
 
-    def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
-
     // Дата начала отчетного периода
     def startDate = getStartDate()
     // Дата окончания отчетного периода
@@ -300,11 +295,6 @@ void logicCheck() {
 
         // 1. Проверка на заполнение поля
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !getBalancePeriod())
-
-        // 2. Проверка на уникальность поля «№ пп»
-        if (++i != row.number) {
-            loggerError(row, errorMsg + "Нарушена уникальность номера по порядку!")
-        }
 
         // 3. Проверка на нулевые значения
         if (!(row.taxAccountingCurrency) && !(row.taxAccountingRuble) &&

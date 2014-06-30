@@ -80,7 +80,7 @@ def groupColumns = ['date', 'nominal']
 
 // Проверяемые на пустые значения атрибуты (графа 1..9)
 @Field
-def nonEmptyColumns = ['number', 'date', 'nominal', 'price', 'income', 'cost279', 'costReserve', 'loss', 'profit']
+def nonEmptyColumns = ['date', 'nominal', 'price', 'income', 'cost279', 'costReserve', 'loss', 'profit']
 
 // Атрибуты итоговых строк для которых вычисляются суммы (графа 5..9)
 @Field
@@ -96,10 +96,7 @@ void calc() {
     // отсортировать/группировать
     sortRows(dataRows, groupColumns)
 
-    def index = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
     dataRows.eachWithIndex { row, i ->
-        // графа 1
-        row.number = ++index
         def tmp = calcFor8or9(row)
         // графа 8
         row.loss = calc8(tmp)
@@ -126,8 +123,6 @@ void logicCheck() {
 
     def arithmeticCheckAlias = ['loss', 'profit']
     def values = [:]
-    // номер последний строки предыдущей формы
-    def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
 
     for (def row : dataRows) {
         if (row.getAlias() != null) {
@@ -138,11 +133,6 @@ void logicCheck() {
 
         // 1. Обязательность заполнения полей
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
-
-        // 2. Проверка на уникальность поля «№ пп» (графа 1)
-        if (++rowNumber != row.number) {
-            rowError(logger, row, errorMsg + "Нарушена уникальность номера по порядку!")
-        }
 
         // 3. Проверка на нулевые значения
         def hasError = true

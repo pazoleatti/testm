@@ -175,16 +175,6 @@ void calc() {
     }
     updateIndexes(dataRows)
 
-    // подсчет номера по порядку
-    def number = 0
-    for (def row : dataRows) {
-        if (row.getAlias() != null) {
-            continue
-        }
-        // графа 1
-        row.rowNum = ++number
-    }
-
     dataRowHelper.save(dataRows)
 }
 

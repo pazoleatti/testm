@@ -101,7 +101,7 @@ def balanceColumns = ['invNumber', 'name', 'cost', 'amortGroup', 'monthsUsed', '
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNumber', 'invNumber', 'name', 'cost', 'amortGroup', 'monthsUsed',
+def nonEmptyColumns = ['invNumber', 'name', 'cost', 'amortGroup', 'monthsUsed',
         'usefulLifeWithUsed', 'specCoef', 'cost10perMonth', 'cost10perTaxPeriod', 'cost10perExploitation',
         'amortNorm', 'amortMonth', 'amortTaxPeriod', 'amortExploitation', 'exploitationStart', 'usefullLifeEnd']
 
@@ -195,13 +195,7 @@ void calc() {
         dataPrev = getDataRowHelperPrev()
     }
 
-    // Сквозная нумерация с начала года
-    def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
-
     for (def row in dataRows) {
-        // Графа 1
-        row.rowNumber = ++rowNumber
-
         if (isMonthBalance() || formData.kind != FormDataKind.PRIMARY) {
             // Для периода ввода остатков расчитывается только порядковый номер
             continue;
@@ -619,7 +613,6 @@ void addData(def xml, int headRowCount) {
         }
 
         // графа 1
-        newRow.rowNumber = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
         // графа 2
         newRow.invNumber = row.cell[xmlIndexCol].text()

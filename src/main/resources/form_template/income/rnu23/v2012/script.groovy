@@ -85,11 +85,17 @@ def refBookCache = [:]
 
 // Все атрибуты
 @Field
-def allColumns = ['number', 'contract', 'contractDate', 'amountOfTheGuarantee', 'dateOfTransaction', 'rateOfTheBankOfRussia', 'interestRate', 'baseForCalculation', 'accrualAccountingStartDate', 'accrualAccountingEndDate', 'preAccrualsStartDate', 'preAccrualsEndDate', 'incomeCurrency', 'incomeRuble', 'accountingCurrency', 'accountingRuble', 'preChargeCurrency', 'preChargeRuble', 'taxPeriodCurrency', 'taxPeriodRuble']
+def allColumns = ['number', 'contract', 'contractDate', 'amountOfTheGuarantee', 'dateOfTransaction',
+                  'rateOfTheBankOfRussia', 'interestRate', 'baseForCalculation', 'accrualAccountingStartDate',
+                  'accrualAccountingEndDate', 'preAccrualsStartDate', 'preAccrualsEndDate', 'incomeCurrency',
+                  'incomeRuble', 'accountingCurrency', 'accountingRuble', 'preChargeCurrency', 'preChargeRuble',
+                  'taxPeriodCurrency', 'taxPeriodRuble']
 
 // Редактируемые атрибуты (графа 2..12)
 @Field
-def editableColumns = ['contract', 'contractDate', 'amountOfTheGuarantee', 'dateOfTransaction', 'rateOfTheBankOfRussia', 'interestRate', 'baseForCalculation', 'accrualAccountingStartDate', 'accrualAccountingEndDate', 'preAccrualsStartDate', 'preAccrualsEndDate']
+def editableColumns = ['contract', 'contractDate', 'amountOfTheGuarantee', 'dateOfTransaction', 'rateOfTheBankOfRussia',
+                       'interestRate', 'baseForCalculation', 'accrualAccountingStartDate', 'accrualAccountingEndDate',
+                       'preAccrualsStartDate', 'preAccrualsEndDate']
 @Field
 def balanceEditableColumns = allColumns - 'number'
 
@@ -103,11 +109,14 @@ def groupColumns = ['dateOfTransaction', 'contractDate', 'contract']
 
 // Проверяемые на пустые значения атрибуты (графа 1..8, 13..20)
 @Field
-def nonEmptyColumns = ['number', 'contract', 'contractDate', 'amountOfTheGuarantee', 'dateOfTransaction', 'rateOfTheBankOfRussia', 'interestRate', 'baseForCalculation', 'incomeCurrency', 'incomeRuble', 'accountingCurrency', 'accountingRuble', 'preChargeCurrency', 'preChargeRuble', 'taxPeriodCurrency', 'taxPeriodRuble']
+def nonEmptyColumns = ['contract', 'contractDate', 'amountOfTheGuarantee', 'dateOfTransaction', 'rateOfTheBankOfRussia',
+                       'interestRate', 'baseForCalculation', 'incomeCurrency', 'incomeRuble', 'accountingCurrency',
+                       'accountingRuble', 'preChargeCurrency', 'preChargeRuble', 'taxPeriodCurrency', 'taxPeriodRuble']
 
 // Атрибуты итоговых строк для которых вычисляются суммы (графа 13..20)
 @Field
-def totalSumColumns = ['incomeCurrency', 'incomeRuble', 'accountingCurrency', 'accountingRuble', 'preChargeCurrency', 'preChargeRuble', 'taxPeriodCurrency', 'taxPeriodRuble']
+def totalSumColumns = ['incomeCurrency', 'incomeRuble', 'accountingCurrency', 'accountingRuble', 'preChargeCurrency',
+                       'preChargeRuble', 'taxPeriodCurrency', 'taxPeriodRuble']
 
 // Дата окончания отчетного периода
 @Field
@@ -169,10 +178,8 @@ void calc() {
     sortRows(dataRows, groupColumns)
 
     // графа 1, 13..20
-    dataRows.eachWithIndex { row, i ->
-        // графа 1
-        row.number = i + 1
-        if (formData.kind == FormDataKind.PRIMARY) {
+    if (formData.kind == FormDataKind.PRIMARY) {
+        dataRows.eachWithIndex { row, i ->
             // графа 13
             row.incomeCurrency = calc13or15(row)
             // графа 14
@@ -220,7 +227,6 @@ void logicCheck() {
     /** Дата окончания отчетного периода. */
     def b = reportPeriodService.getEndDate(formData.reportPeriodId).time
 
-    def rowNumber = 0
     def tmp
 
     for (def row : dataRows) {
@@ -280,11 +286,6 @@ void logicCheck() {
                 row.preAccrualsStartDate != null && row.preAccrualsEndDate != null
         if (checkColumn9and10 || checkColumn11and12) {
             loggerError(row, errorMsg + 'Поля в графе 9, 10, 11, 12 заполены неверно!')
-        }
-
-        // 9. Проверка на уникальность поля «№ пп» (графа 1)
-        if (++rowNumber != row.number) {
-            loggerError(row, errorMsg + 'Нарушена уникальность номера по порядку!')
         }
 
         if (formData.kind == FormDataKind.PRIMARY) {

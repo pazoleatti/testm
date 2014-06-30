@@ -94,7 +94,7 @@ def autoFillColumns = ['rowNumber', 'rateBRBill', 'rateBROperation', 'sumLimit',
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNumber', 'billNumber', 'creationDate', 'nominal', 'currencyCode', 'rateBRBill',
+def nonEmptyColumns = ['billNumber', 'creationDate', 'nominal', 'currencyCode', 'rateBRBill',
         'rateBROperation', 'paymentStart', 'paymentEnd', 'interestRate', 'operationDate',
         'percAdjustment']
 
@@ -150,12 +150,7 @@ def calc() {
     deleteAllAliased(dataRows)
 
     if (!dataRows.isEmpty()) {
-        // номер последний строки предыдущей формы
-        def index = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
-
         for (def row in dataRows) {
-            // графа 1
-            row.rowNumber = ++index
             // графа 6
             row.rateBRBill = calc6and7(row.currencyCode, row.creationDate)
             // графа 7
@@ -300,8 +295,6 @@ void logicCheck() {
         return
     }
 
-    def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
-
     // алиасы графов для арифметической проверки (графа 8, 9, 12-15)
     def arithmeticCheckAlias = ['rateBRBill', 'rateBROperation', 'sumLimit', 'percAdjustment']
     // для хранения правильных значении и сравнения с имеющимися при арифметических проверках
@@ -323,11 +316,6 @@ void logicCheck() {
 
         // 1. Проверка на заполнение поля
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !isBalancePeriod())
-
-        // Проверка на уникальность поля «№ пп»
-        if (++i != row.rowNumber) {
-            loggerError(row, errorMsg + "Нарушена уникальность номера по порядку!")
-        }
 
         // Проверка на уникальность поля «инвентарный номер»
         if (invList.contains(row.billNumber)) {
