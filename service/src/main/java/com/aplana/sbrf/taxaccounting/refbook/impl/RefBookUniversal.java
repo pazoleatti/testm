@@ -425,14 +425,15 @@ public class RefBookUniversal implements RefBookDataProvider {
                     //Проверка пересечения версий
                     //Проверяем следующую версию после даты окочания
                     RefBookRecordVersion nextVersion = refBookDao.getNextVersion(refBookId, recordId, oldVersionPeriod.getVersionStart());
-                    if (versionTo != null && nextVersion != null && versionTo.after(nextVersion.getVersionStart())) {
+                    if (versionTo != null && nextVersion != null && (versionTo.equals(nextVersion.getVersionStart()) || versionTo.after(nextVersion.getVersionStart()))) {
                         throw new ServiceException(CROSS_ERROR_MSG);
                     }
                     //Проверяем предыдущую версию до даты начала
                     RefBookRecordVersion previousVersion = refBookDao.getPreviousVersion(refBookId, recordId, oldVersionPeriod.getVersionStart());
                     if (previousVersion != null &&
-                            (previousVersion.isVersionEndFake() && versionFrom.before(previousVersion.getVersionEnd())
-                            || versionFrom.before(previousVersion.getVersionStart()))) {
+                            (previousVersion.isVersionEndFake() && (versionFrom.equals(previousVersion.getVersionEnd())
+                                    || versionFrom.before(previousVersion.getVersionEnd())
+                                    || versionFrom.before(previousVersion.getVersionStart())))) {
                         throw new ServiceException(CROSS_ERROR_MSG);
                     }
                     //Выполняем стандартную проверку пересечечения
@@ -463,10 +464,12 @@ public class RefBookUniversal implements RefBookDataProvider {
                 if (!relatedVersions.isEmpty() && relatedVersions.size() > 1) {
                     throw new ServiceException("Обнаружено несколько фиктивных версий");
                 }
-                boolean isVersionEndAlreadyExists = refBookDao.isVersionsExist(refBookId, Arrays.asList(recordId), SimpleDateUtils.addDayToDate(versionTo, 1));
-                if (relatedVersions.isEmpty() && versionTo != null && !isVersionEndAlreadyExists) {
-                    //Создаем новую фиктивную версию - дату окончания
-                    refBookDao.createFakeRecordVersion(refBookId, recordId, SimpleDateUtils.addDayToDate(versionTo, 1));
+                if (versionTo != null) {
+                    boolean isVersionEndAlreadyExists = refBookDao.isVersionsExist(refBookId, Arrays.asList(recordId), SimpleDateUtils.addDayToDate(versionTo, 1));
+                    if (relatedVersions.isEmpty() && !isVersionEndAlreadyExists) {
+                        //Создаем новую фиктивную версию - дату окончания
+                        refBookDao.createFakeRecordVersion(refBookId, recordId, SimpleDateUtils.addDayToDate(versionTo, 1));
+                    }
                 }
 
                 if (!relatedVersions.isEmpty() && versionTo == null) {

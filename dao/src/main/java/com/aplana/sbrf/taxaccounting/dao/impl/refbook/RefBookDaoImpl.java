@@ -1759,6 +1759,11 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }
     }
 
+    @Override
+    public Long findRecord(Long refBookId, Long recordId, Date version) {
+        return getJdbcTemplate().queryForLong("select id from ref_book_record where ref_book_id = ? and record_id = ? and version = ?", refBookId, recordId, version);
+    }
+
     private static final String DELETE_ALL_VERSIONS = "delete from ref_book_record where ref_book_id=? and record_id in (select record_id from ref_book_record where %s)";
 
     @Override
