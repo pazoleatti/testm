@@ -297,7 +297,7 @@ public class DepartmentServiceImplTest {
 
         // Контролер
         taUser.getRoles().remove(0);
-
+        taUser.getRoles().remove(0);
         for (int i = 0; i < departmentID.length; i++) {
             taUser.setDepartmentId(departmentID[i]);
             Assert.assertEquals(0, departmentService.getBADepartments(taUser).size());
@@ -339,7 +339,7 @@ public class DepartmentServiceImplTest {
 
         // Контролер
         taUser.getRoles().remove(0);
-
+        taUser.getRoles().remove(0);
         for (int i = 0; i < departmentID.length; i++) {
             taUser.setDepartmentId(departmentID[i]);
             Assert.assertEquals(0, departmentService.getBADepartmentIds(taUser).size());
@@ -478,6 +478,7 @@ public class DepartmentServiceImplTest {
         }
 
         // Контролер
+        taUser.getRoles().remove(0);
         taUser.getRoles().remove(0);
         for (int i = 0; i < departmentID.length; i++) {
             taUser.setDepartmentId(departmentID[i]);
