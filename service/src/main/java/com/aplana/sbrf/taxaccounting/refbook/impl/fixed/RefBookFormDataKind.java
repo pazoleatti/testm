@@ -1,10 +1,14 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl.fixed;
 
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.HashMap;
+import javax.annotation.PostConstruct;
 import java.util.Map;
 
 /**
@@ -13,34 +17,44 @@ import java.util.Map;
 @Service("refBookFormDataKind")
 public class RefBookFormDataKind extends AbstractPermanentRefBook {
 
-    public static final Long REF_BOOK_ID = 94L;
+	public static final Long REF_BOOK_ID = 94L;
+	public static final String ATTRIBUTE_NAME = "NAME";
+
+	@Autowired
+	private RefBookFactory refBookFactory;
+
+	private RefBook refBook;
+
+	@PostConstruct
+	private void init() {
+		refBook = refBookFactory.get(REF_BOOK_ID);
+	}
 
     @Override
-    protected Map<Long, Map<String, String>> getRecords(String filter) {
-        Map<Long, Map<String, String>> records = new HashMap<Long, Map<String, String>>();
+    protected PagingResult<Map<String, RefBookValue>> getRecords(String filter) {
+		PagingResult<Map<String, RefBookValue>> records = new PagingResult<Map<String, RefBookValue>>();
 
-        if (filter != null && !"".equals(filter)) {
-            for (String s : filter.split(",")) {
-                Map<String, String> attrs = new HashMap<String, String>();
-                FormDataKind item = FormDataKind.fromId(Integer.valueOf(s));
-                attrs.put("NAME", item.getName());
-                records.put(Long.valueOf(item.getId()), attrs);
+		if (filter != null && filter.trim().length() > 0) {
+            for (String s : filter.trim().split(",")) {
+				Long id = Long.valueOf(s);
+				FormDataKind item = FormDataKind.fromId(id.intValue());
 
+				Map<String, RefBookValue> record = refBook.createRecord();
+				record.get(RefBook.RECORD_ID_ALIAS).setValue(id);
+				record.get(ATTRIBUTE_NAME).setValue(item.getName());
+                records.add(record);
             }
-        } else if (filter == null) {
-            for (int i = 1; i <= FormDataKind.values().length; i++) {
-                Map<String, String> attrs = new HashMap<String, String>();
-                FormDataKind item = FormDataKind.fromId(i);
-                attrs.put("NAME", item.getName());
-                records.put(Long.valueOf(item.getId()), attrs);
-            }
+        } else {
+			for (FormDataKind item : FormDataKind.values()) {
+				Long id = Long.valueOf(item.getId());
+
+				Map<String, RefBookValue> record = refBook.createRecord();
+				record.get(RefBook.RECORD_ID_ALIAS).setValue(id);
+				record.get(ATTRIBUTE_NAME).setValue(item.getName());
+				records.add(record);
+			}
         }
-
         return records;
     }
 
-    @Override
-    public int getRecordsCount(Date version, String filter) {
-        return getRecords(filter).size();
-    }
 }

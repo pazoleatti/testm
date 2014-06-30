@@ -69,6 +69,7 @@ public abstract class AbstractRefBookListView extends ViewWithUiHandlers<RefBook
         dataProvider.setList(tableData);
         sortHandler.setList(dataProvider.getList());
         formDataTable.setVisibleRange(0, dataProvider.getList().size());
+        formDataTable.flush();
         selectionModel.clear();
         if (selectedItemId != null) {
             for(TableModel item: tableData) {

@@ -122,7 +122,7 @@ void logicCheck() {
 
         // 2. Проверка даты ввода в эксплуатацию и границ отчетного периода
         if (! (row.usefulDate in reportPeriodRange)){
-            logger.error("Строка ${row.getIndex()}: Дата ввода в эксплуатацию вне границ отчетного периода!")
+            rowError(logger, row, "Строка ${row.getIndex()}: Дата ввода в эксплуатацию вне границ отчетного периода!")
         }
     }
 

@@ -29,8 +29,9 @@ import java.util.List;
  *
  */
 public class DeclarationTemplateListView extends ViewWithUiHandlers<DeclarationTemplateListUiHandlers>
-		implements DeclarationTemplateListPresenter.MyView {
-	interface Binder extends UiBinder<Widget, DeclarationTemplateListView> {
+		implements DeclarationTemplateListPresenter.MyView{
+
+    interface Binder extends UiBinder<Widget, DeclarationTemplateListView> {
 	}
 	
 	/**
@@ -40,6 +41,8 @@ public class DeclarationTemplateListView extends ViewWithUiHandlers<DeclarationT
     GenericCellTable<DeclarationTypeTemplate> declarationTemplateTable;
     @UiField
     Panel filterContentPanel;
+    @UiField
+    Panel editFormContentPanel;
 
     private SingleSelectionModel<DeclarationTypeTemplate> selectionModel;
     private ListDataProvider<DeclarationTypeTemplate> dataProvider = new ListDataProvider<DeclarationTypeTemplate>();
@@ -57,6 +60,7 @@ public class DeclarationTemplateListView extends ViewWithUiHandlers<DeclarationT
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 selectedItem = getSelectedElement();
+                getUiHandlers().onSelectionChanged(selectedItem);
             }
         });
 
@@ -134,6 +138,9 @@ public class DeclarationTemplateListView extends ViewWithUiHandlers<DeclarationT
                 }
             }
         }
+        if (!result.isEmpty() && (selectedItem == null)) {
+            selectionModel.setSelected(result.get(0), true);
+        }
 	}
 
     @Override
@@ -147,6 +154,11 @@ public class DeclarationTemplateListView extends ViewWithUiHandlers<DeclarationT
             filterContentPanel.clear();
             if (content != null) {
                 filterContentPanel.add(content);
+            }
+        } else if (slot == DeclarationTemplateListPresenter.OBJECT_EDIT_FORM) {
+            editFormContentPanel.clear();
+            if (content != null) {
+                editFormContentPanel.add(content);
             }
         } else {
             super.setInSlot(slot, content);

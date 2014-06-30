@@ -46,7 +46,7 @@ public class AuditServiceImpl implements AuditService {
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-	public void add(final FormDataEvent event, final TAUserInfo userInfo, final int departmentId, final Integer reportPeriodId,
+	public void add(final FormDataEvent event, final TAUserInfo userInfo, final Integer departmentId, final Integer reportPeriodId,
 					final Integer declarationTypeId, final Integer formTypeId, final Integer formKindId, final String note) {
         tx.executeInNewTransaction(new TransactionLogic() {
             @Override
@@ -67,18 +67,20 @@ public class AuditServiceImpl implements AuditService {
                 }
                 log.setRoles(roles.toString());
 
-                log.setDepartmentName(departmentService.getParentsHierarchy(departmentId));
-                if (reportPeriodId == null)
-                    log.setReportPeriodName(null);
-                else {
-                    ReportPeriod reportPeriod = periodService.getReportPeriod(reportPeriodId);
-                    log.setReportPeriodName(String.format(AuditService.RP_NAME_PATTERN, reportPeriod.getTaxPeriod().getYear(), reportPeriod.getName()));
-                }
-                log.setDeclarationTypeId(declarationTypeId);
-                log.setFormTypeId(formTypeId);
-                log.setFormKindId(formKindId);
-                log.setNote(note);
-                log.setUserDepartmentName(departmentService.getParentsHierarchy(userInfo.getUser().getDepartmentId()));
+        String departmentName = departmentId == null ? "" : departmentService.getParentsHierarchy(departmentId);
+		log.setDepartmentName(departmentName.substring(0, Math.min(departmentName.length(), 2000)));
+        if (reportPeriodId == null)
+            log.setReportPeriodName(null);
+        else {
+            ReportPeriod reportPeriod = periodService.getReportPeriod(reportPeriodId);
+            log.setReportPeriodName(String.format(AuditService.RP_NAME_PATTERN, reportPeriod.getTaxPeriod().getYear(), reportPeriod.getName()));
+        }
+		log.setDeclarationTypeId(declarationTypeId);
+		log.setFormTypeId(formTypeId);
+		log.setFormKindId(formKindId);
+		log.setNote(note != null ? note.substring(0, Math.min(note.length(), 2000)) : null);
+        String userDepartmentName = departmentService.getParentsHierarchy(userInfo.getUser().getDepartmentId());
+		log.setUserDepartmentName(userDepartmentName.substring(0, Math.min(userDepartmentName.length(), 2000)));
 
                 auditDao.add(log);
             }
@@ -87,7 +89,7 @@ public class AuditServiceImpl implements AuditService {
             public Object executeWithReturn() {
                 return null;
             }
-        });
+        });            
 	}
 
 	@Override

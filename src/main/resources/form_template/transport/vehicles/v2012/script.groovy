@@ -91,8 +91,12 @@ def editableColumns = ['codeOKATO', 'tsTypeCode', 'identNumber', 'model', 'ecoCl
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNumber', 'codeOKATO', 'tsTypeCode', 'identNumber', 'model',
+def nonEmptyColumns = ['codeOKATO', 'tsTypeCode', 'identNumber', 'model',
         'regNumber', 'powerVal', 'baseUnit', 'year', 'regDate']
+
+// Автозаполняемые атрибуты
+@Field
+def autoFillColumns = ['rowNumber']
 
 // дата начала отчетного периода
 @Field
@@ -130,17 +134,7 @@ def getRecordImport(def Long refBookId, def String alias, def String value, def 
 
 // Алгоритмы заполнения полей формы
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
-
-    if (!dataRows.isEmpty()) {
-        sort(dataRows)
-        def i = 1
-        for (def row in dataRows) {
-            row.rowNumber = i++
-        }
-        dataRowHelper.update(dataRows);
-    }
+    // нет полей для заполнения
 }
 
 // сортировка ОКТМО - Муниципальное образование - Код вида ТС
@@ -277,12 +271,15 @@ def copyData() {
 
 def copyRow(def row) {
     def newRow = formData.createDataRow()
-    editableColumns.each { alias ->
-        newRow.getCell(alias).editable = true
-        newRow.getCell(alias).setStyleAlias("Редактируемая")
+    editableColumns.each {
+        newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias("Редактируемая")
     }
-    copyColumns.each { alias ->
-        newRow.getCell(alias).setValue(row.getCell(alias).value, null)
+    copyColumns.each {
+        newRow.getCell(it).setValue(row.getCell(it).value, null)
+    }
+    autoFillColumns.each {
+        newRow.getCell(it).setStyleAlias('Автозаполняемая')
     }
     return newRow
 }
@@ -424,6 +421,9 @@ void addData(def xml, int headRowCount) {
         editableColumns.each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
+        autoFillColumns.each {
+            newRow.getCell(it).setStyleAlias('Автозаполняемая')
         }
 
         def int xmlIndexCol = 0

@@ -75,7 +75,7 @@ def groupColumns = ['fullName', 'docNumber', 'docDate', 'dealType']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNumber', 'fullName', 'docNumber', 'docDate', 'dealType', 'currencyCode', 'countryDealCode',
+def nonEmptyColumns = ['fullName', 'docNumber', 'docDate', 'dealType', 'currencyCode', 'countryDealCode',
         'price', 'total', 'dealDoneDate']
 
 // Дата окончания отчетного периода
@@ -259,10 +259,7 @@ void calc() {
     // Сортировка
     sortRows(dataRows, groupColumns)
 
-    def index = 1
     for (row in dataRows) {
-        // Порядковый номер строки
-        row.rowNumber = index++
         // Расчет поля "Цена"
         if (row.incomeSum != null && row.outcomeSum != null) {
             row.price = (row.incomeSum - row.outcomeSum).abs()
@@ -413,7 +410,6 @@ void addData(def xml, int headRowCount) {
         def int xmlIndexCol = 0
 
         // графа 1
-        newRow.rowNumber = xmlIndexRow - headRowCount
         xmlIndexCol++
 
         // графа fix

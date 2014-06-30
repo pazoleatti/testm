@@ -3,6 +3,7 @@ package refbook.emitent
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.ScriptStatus
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
@@ -102,7 +103,9 @@ void importFromNSI() {
     }
 
     if (!logger.containsLevel(LogLevel.ERROR) && !updList.isEmpty()) {
-        dataProvider.updateRecords(actualDate, updList)
+        updList.each {
+            dataProviderBond.updateRecordVersion(logger, it.get(RefBook.RECORD_ID_ALIAS)?.numberValue, actualDate, null, it)
+        }
     }
 
     if (!logger.containsLevel(LogLevel.ERROR)) {

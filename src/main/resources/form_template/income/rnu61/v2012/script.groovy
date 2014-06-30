@@ -326,24 +326,24 @@ void logicCheck() {
 
         // Проверка на уникальность поля «№ пп»
         if (++i != row.rowNumber) {
-            loggerError(errorMsg + 'Нарушена уникальность номера по порядку!')
+            loggerError(row, errorMsg + "Нарушена уникальность номера по порядку!")
         }
 
         // Проверка на уникальность поля «инвентарный номер»
         if (invList.contains(row.billNumber)) {
-            loggerError(errorMsg + "Инвентарный номер не уникальный!")
+            loggerError(row, errorMsg + "Инвентарный номер не уникальный!")
         } else {
             invList.add(row.billNumber)
         }
 
         // 2. Проверка даты совершения операции и границ отчетного периода
         if (row.operationDate < reportDateStart || row.operationDate > reportDate) {
-            loggerError(errorMsg + "Дата совершения операции вне границ отчетного периода!")
+            loggerError(row, errorMsg + "Дата совершения операции вне границ отчетного периода!")
         }
 
         // 4. Проверка на нулевые значения
         if (row.sum70606 == 0 && row.sumLimit == 0 && row.percAdjustment == 0) {
-            loggerError(errorMsg + "Все суммы по операции нулевые!")
+            loggerError(row, errorMsg + "Все суммы по операции нулевые!")
         }
 
         // 5. Арифметические проверки
@@ -495,11 +495,11 @@ void addData(def xml, int headRowCount) {
 }
 
 /** Вывести сообщение. В периоде ввода остатков сообщения должны быть только НЕфатальными. */
-void loggerError(def msg, Object...args) {
+void loggerError(def row, def msg) {
     if (isBalancePeriod()) {
-        logger.warn(msg, args)
+        rowWarning(logger, row, msg)
     } else {
-        logger.error(msg, args)
+        rowError(logger, row, msg)
     }
 }
 

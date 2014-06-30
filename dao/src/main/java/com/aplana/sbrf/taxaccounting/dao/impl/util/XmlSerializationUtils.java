@@ -221,6 +221,8 @@ public final class XmlSerializationUtils {
 			Transformer transformer = TransformerFactory.newInstance()
 					.newTransformer();
 			transformer.setOutputProperty(OutputKeys.ENCODING, ENCODING);
+            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+            transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
 
 			// create string from xml tree
 			StringWriter writer = new StringWriter();

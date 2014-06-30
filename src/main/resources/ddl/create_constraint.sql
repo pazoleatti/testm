@@ -79,7 +79,7 @@ alter table form_column add constraint form_column_fk_attribute_id foreign key (
 alter table form_column add constraint form_column_fk_attribute_id2 foreign key (attribute_id2) references ref_book_attribute(id);
 alter table form_column add constraint form_column_fk_parent_id foreign key (parent_column_id) references form_column(id);
 alter table form_column add constraint form_column_chk_filt_parent check ((type='R' and ((parent_column_id is null) and (filter is not null)) or ((parent_column_id is not null) and (filter is null)) or ((parent_column_id is null) and (filter is null))) or (type<>'R'));
-alter table form_column add constraint form_column_chk_numrow check (numeration_row in (0, 1));
+alter table form_column add constraint form_column_chk_numrow check (numeration_row in (0, 1) or type <> 'A');
 
 alter table department add constraint department_pk primary key (id);
 alter table department add constraint dept_fk_parent_id foreign key (parent_id) references department(id);
@@ -213,8 +213,8 @@ alter table log_business add constraint log_business_chk_frm_dcl_ev check (form_
 alter table log_business add constraint log_business_fk_usr_departm_id foreign key (user_department_id) references department(id);
 
 alter table log_system add constraint log_system_chk_event_id check (event_id in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 203, 204, 205, 206, 207, 208, 209, 210, 301, 302, 303, 401, 402, 501, 502, 503, 601, 901, 902, 903));
-alter table log_system add constraint log_system_chk_dcl_form check (event_id in (7, 401, 402, 501, 502, 503, 601, 901, 902, 903) or declaration_type_id is not null or (form_type_id is not null and form_kind_id is not null));
-alter table log_system add constraint log_system_chk_rp check (event_id in (7, 401, 402, 501, 502, 503, 601) or report_period_name is not null);
+alter table log_system add constraint log_system_chk_dcl_form check (event_id in (7, 11, 501, 502, 503, 601, 901, 902, 903) or declaration_type_id is not null or (form_type_id is not null and form_kind_id is not null));
+alter table log_system add constraint log_system_chk_rp check (event_id in (7, 11, 501, 502, 503, 601, 901, 902, 903) or report_period_name is not null);
 alter table log_system add constraint log_system_fk_kind foreign key (form_kind_id) references form_kind(id);
 alter table log_system add constraint log_system_fk_user_id foreign key (user_id) references sec_user(id);
 alter table log_system add constraint log_system_fk_decl_type_id foreign key (declaration_type_id) references declaration_type(id);

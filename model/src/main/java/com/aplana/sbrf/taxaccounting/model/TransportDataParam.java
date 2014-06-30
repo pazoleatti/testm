@@ -8,7 +8,7 @@ package com.aplana.sbrf.taxaccounting.model;
  */
 public class TransportDataParam {
     public static int NAME_LENGTH = 38;
-    public static String NAME_EXTENTION = ".rnu";
+    public static String NAME_EXTENSION = ".rnu";
     public static String NAME_FORMAT_ERROR = "Имя транспортного файла «%s» не соответствует формату «<Код налоговой формы><Код подразделения><Код периода><Календарный год><Месяц>.rnu»!";
 
     private final String formCode;
@@ -38,7 +38,7 @@ public class TransportDataParam {
      * @param name Имя ТФ
      */
     public static TransportDataParam valueOf(String name) {
-        if (name == null || !name.toLowerCase().endsWith(NAME_EXTENTION) || name.length() != NAME_LENGTH) {
+        if (name == null || !name.toLowerCase().endsWith(NAME_EXTENSION) || name.length() != NAME_LENGTH) {
             throw new IllegalArgumentException(String.format(NAME_FORMAT_ERROR, name));
         }
         String formCode = name.substring(0, 9).replaceAll("_", "").trim();
@@ -48,7 +48,6 @@ public class TransportDataParam {
         Integer month = null;
         try {
             year = Integer.parseInt(name.substring(28, 32));
-
         } catch (NumberFormatException nfe) {
             throw new IllegalArgumentException(String.format(NAME_FORMAT_ERROR, name));
         }

@@ -170,28 +170,28 @@ void logicCheck() {
 
         // 2. Проверка даты совершения операции и границ отчетного периода
         if (!(row.repaymentDate in (dFrom..dTo))) {
-            loggerError(errorMsg + "Дата совершения операции вне границ отчетного периода!")
+            loggerError(row, errorMsg + "Дата совершения операции вне границ отчетного периода!")
         }
 
         // 3. Проверка на уникальность поля «№ пп»
         if (++i != row.rowNumber) {
-            loggerError(errorMsg + 'Нарушена уникальность номера по порядку!')
+            loggerError(row, errorMsg + "Нарушена уникальность номера по порядку!")
         }
 
         // 4. Проверка на нулевые значения
         if (row.income == 0 && row.lossThisQuarter == 0 && row.lossNextQuarter == 0) {
-            loggerError(errorMsg + "Все суммы по операции нулевые!")
+            loggerError(row, errorMsg + "Все суммы по операции нулевые!")
         }
 
         // 5. Проверка даты погашения основного долга
         if (row.dateOfAssignment != null && row.repaymentDate != null && row.dateOfAssignment < row.repaymentDate) {
-            loggerError(errorMsg + "Неверно указана дата погашения основного долга!")
+            loggerError(row, errorMsg + "Неверно указана дата погашения основного долга!")
         }
 
         // 6. Проверка корректности заполнения графы 15
         if (row.amount > 0 && row.income > 0 && row.repaymentDate == null &&
                 row.dateOfAssignment == null && row.lossThisTaxPeriod != null) {
-            loggerError(errorMsg + "В момент уступки права требования «Графа 15» не заполняется!")
+            loggerError(row, errorMsg + "В момент уступки права требования «Графа 15» не заполняется!")
         }
 
         // 7. Проверка корректности заполнения граф РНУ при отнесении второй части убытка на расходы
@@ -199,7 +199,7 @@ void logicCheck() {
                 ((row.amount == null && row.result == null) ||
                         row.lossThisQuarter != null ||
                         row.lossNextQuarter != null)) {
-            loggerError(errorMsg + "В момент отнесения второй половины убытка на расходы графы кроме графы 15 и графы 12 не заполняются!")
+            loggerError(row, errorMsg + "В момент отнесения второй половины убытка на расходы графы кроме графы 15 и графы 12 не заполняются!")
         }
 
         // 8. Арифметические проверки граф
@@ -214,7 +214,7 @@ void logicCheck() {
 
             // арифметическая проверка графы 12 - сравнение дат отдельно, потому что checkCalc не подходит для нечисловых значений
             if (row.part2Date != values.part2Date){
-                loggerError(errorMsg + "Неверное значение графы «${getColumnName(row, 'part2Date')}»!")
+                loggerError(row, errorMsg + "Неверное значение графы «${getColumnName(row, 'part2Date')}»!")
             }
         }
     }
@@ -369,11 +369,11 @@ def isBalancePeriod() {
     return isBalancePeriod
 }
 
-def loggerError(def msg) {
+def loggerError(def row, def msg) {
     if (isBalancePeriod()) {
-        logger.warn(msg)
+        rowWarning(logger, row, msg)
     } else {
-        logger.error(msg)
+        rowError(logger, row, msg)
     }
 }
 
@@ -494,6 +494,27 @@ void addData(def xml, int headRowCount) {
 
         // графа 10
         newRow.income = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
+        // графы рассчитываемые, однако не при импорте в консолидированную - должны загружаться
+        // графа 11
+        newRow.result = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
+
+        // графа 12
+        newRow.part2Date = getDate(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
+
+        // графа 13
+        newRow.lossThisQuarter = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
+
+        // графа 14
+        newRow.lossNextQuarter = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
+
+        // графа 15
+        newRow.lossThisTaxPeriod = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
 
         rows.add(newRow)
     }

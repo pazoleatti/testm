@@ -79,6 +79,9 @@ def startDate = null
 def endDate = null
 
 @Field
+def prevStartDate = null
+
+@Field
 def prevEndDate = null
 
 @Field
@@ -161,10 +164,22 @@ def getReportPeriodEndDate() {
     return endDate
 }
 
+def getPrevReportPeriodStartDate() {
+    if (prevStartDate == null) {
+        def prevReportPeriodId = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)?.id
+        if (prevReportPeriodId != null) {
+            prevStartDate = reportPeriodService.getCalendarStartDate(prevReportPeriodId).time
+        }
+    }
+    return prevStartDate
+}
+
 def getPrevReportPeriodEndDate() {
     if (prevEndDate == null) {
-        def prevPerortId = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)?.id
-        prevEndDate = reportPeriodService.getEndDate(prevPerortId).time
+        def prevReportPeriodId = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)?.id
+        if (prevReportPeriodId != null) {
+            prevEndDate = reportPeriodService.getEndDate(prevReportPeriodId).time
+        }
     }
     return prevEndDate
 }
@@ -178,6 +193,9 @@ def getRepordPeriod() {
 
 // Получение данных из справочника «Отчет о прибылях и убытках» для текужего подразделения и отчетного периода
 def getIncome102Data(def date) {
+    if(date==null){
+        return []
+    }
     if (!income102DataCache.containsKey(date)) {
         def filter = "DEPARTMENT_ID = ${formData.departmentId}"
         income102DataCache.put(date, refBookFactory.getDataProvider(52L)?.getRecords(date, null, filter, null))
@@ -191,6 +209,12 @@ void checkIncome102() {
     if (getIncome102Data(getReportPeriodEndDate()) == []) {
         throw new ServiceException("Экземпляр Отчета о прибылях и убытках за период " +
                 "${getReportPeriodStartDate().format(dateFormat)} - ${getReportPeriodEndDate().format(dateFormat)} " +
+                "не существует (отсутствуют данные для расчета)! Расчеты не могут быть выполнены.")
+    }
+    // Наличие экземпляра Отчета о прибылях и убытках подразделения и предыдущего периода
+    if (getRepordPeriod().order > 1 && getIncome102Data(getPrevReportPeriodEndDate()) == []) {
+        throw new ServiceException("Экземпляр Отчета о прибылях и убытках за период " +
+                "${getPrevReportPeriodStartDate().format(dateFormat)} - ${getPrevReportPeriodEndDate().format(dateFormat)} " +
                 "не существует (отсутствуют данные для расчета)! Расчеты не могут быть выполнены.")
     }
 }
@@ -232,11 +256,11 @@ void consolidation() {
 }
 
 def calc4(def row) {
-    return calc4or5(row, 4)
+    return calc4or5(row, 0)
 }
 
 def calc5(def row) {
-    return calc4or5(row, 5)
+    return calc4or5(row, 1)
 }
 
 /**
@@ -245,11 +269,11 @@ def calc5(def row) {
  * @param row строка
  * @param columnFlag признак графы: 0 – Графа 4, 1 – Графа 5
  */
-def calc4or5(def row, def columnNumber) {
+def calc4or5(def row, def columnFlag) {
     // список кодов ОПУ из справочника
-    def opuCodes = getOpuCodes(row.code, row.getIndex(), columnNumber)
+    def opuCodes = getOpuCodes(row.code, row, columnFlag)
     // сумма кодов ОПУ из отчета 102
-    def sum = getSumByOpuCodes(opuCodes, row.getIndex(), columnNumber)
+    def sum = getSumByOpuCodes(opuCodes, row.getIndex(), columnFlag)
     return roundValue(sum, 2)
 }
 
@@ -257,19 +281,18 @@ def calc4or5(def row, def columnNumber) {
  * Получить список кодов ОПУ.
  *
  * @param code код операции
- * @param index номер строки
- * @param columnFlag номер графы (4 или 5)
+ * @param row строка
+ * @param columnFlag признак графы: 0 – Графа 4, 1 – Графа 5
  */
-def getOpuCodes(def code, def index, def columnNumber) {
-    // признак графы: 0 – Графа 4, 1 – Графа 5
-    def columnFlag = (columnNumber == 4 ? 0 : 1)
+def getOpuCodes(def code, def row, def columnFlag) {
+    def columnAlias = (columnFlag == 0 ? 'realizeCost' : 'obtainCost')
     // потом поправить фильтр и id справочника
     def filter = "BOX_724_2_1 = $columnFlag AND CODE = '$code'"
     def records = refBookFactory.getDataProvider(102L)?.getRecords(getReportPeriodEndDate(), null, filter, null)
     if (records == null || records.isEmpty()) {
         // условия выполнения расчетов
         // 2. Проверка наличия в справочнике «Классификатор соответствия кодов операций налоговой формы 724.2.1 по НДС символам ОПУ» данных для графы 4 и 5
-        throw new ServiceException("Строка $index: В справочнике «%s» нет данных для заполнения графы $columnNumber! Расчеты не могут быть выполнены.",
+        throw new ServiceException("Строка ${row.getIndex()}: В справочнике «%s» нет данных для заполнения графы «${getColumnName(row, columnAlias)}»! Расчеты не могут быть выполнены.",
                 refBookFactory.get(102L).name)
     }
     def opuCodes = []
@@ -284,8 +307,11 @@ def getOpuCodes(def code, def index, def columnNumber) {
  * Посчитать сумму по кодам ОПУ.
  *
  * @param opuCodes список кодов ОПУ
+ * @param row строка
+ * @param columnFlag признак графы: 0 – Графа 4, 1 – Графа 5
  */
-def getSumByOpuCodes(def opuCodes, def index, def columnNumber) {
+def getSumByOpuCodes(def opuCodes, def row, def columnFlag) {
+    def columnAlias = (columnFlag == 0 ? 'realizeCost' : 'obtainCost')
     def tmp = BigDecimal.ZERO
     def hasData = false
     // В отчете 102 данные хранятся по периодам как у прибыли (1 квартал, полгода, 9 месяцев, год)
@@ -302,8 +328,8 @@ def getSumByOpuCodes(def opuCodes, def index, def columnNumber) {
         // 3. Проверка наличия символов ОПУ в Экземпляре Отчета о прибылях и убытках, необходимых для заполнения «Графы 4» и «Графы 5»
         def start = getReportPeriodStartDate().format(dateFormat)
         def end = getReportPeriodEndDate().format(dateFormat)
-        logger.warn("Строка $index: Экземпляр Отчета о прибылях и убытках за период $start - $end не содержит записей " +
-                "для заполнения графы $columnNumber по следующим символам ОПУ: «${opuCodes.join(', ')}»! Расчеты не могут быть выполнены.")
+        logger.warn("Строка ${row.getIndex()}: Экземпляр Отчета о прибылях и убытках за период $start - $end не содержит записей " +
+                "для заполнения графы «${getColumnName(row, columnAlias)}» по следующим символам ОПУ: «${opuCodes.join(', ')}»!")
         return BigDecimal.ZERO
     }
     if (getRepordPeriod().order > 1) {

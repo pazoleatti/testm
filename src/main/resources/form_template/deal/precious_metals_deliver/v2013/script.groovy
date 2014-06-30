@@ -62,9 +62,10 @@ def refBookCache = [:]
 
 // Редактируемые атрибуты
 @Field
-def editableColumns = ['name', 'dependence', 'dealType', 'contractNum', 'contractDate', 'transactionNum', 'transactionDeliveryDate', 'innerCode',
-        'unitCountryCode', 'signPhis', 'countryCode2', 'region1', 'city1', 'settlement1', 'countryCode3', 'region2',
-        'city2', 'settlement2', 'conditionCode', 'incomeSum', 'consumptionSum', 'transactionDate']
+def editableColumns = ['name', 'dependence', 'dealType', 'contractNum', 'contractDate', 'transactionNum',
+        'transactionDeliveryDate', 'innerCode','unitCountryCode', 'signPhis', 'countryCode2', 'region1', 'city1',
+        'settlement1', 'countryCode3', 'region2', 'city2', 'settlement2', 'conditionCode', 'incomeSum',
+        'consumptionSum', 'transactionDate']
 
 // Автозаполняемые атрибуты
 @Field
@@ -76,8 +77,8 @@ def groupColumns = ['name', 'dependence', 'country', 'countryCode1', 'signPhis',
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNum', 'name', 'dependence', 'dealType', 'contractNum', 'contractDate', 'innerCode', 'unitCountryCode', 'signPhis',
-        'signTransaction', 'count', 'priceOne', 'totalNds', 'transactionDate']
+def nonEmptyColumns = ['name', 'dependence', 'dealType', 'contractNum', 'contractDate', 'innerCode', 'unitCountryCode',
+                       'signPhis', 'signTransaction', 'count', 'priceOne', 'totalNds', 'transactionDate']
 
 // Дата окончания отчетного периода
 @Field
@@ -182,9 +183,9 @@ void logicCheck() {
             if (isHaveNotEmptyField) {
                 StringBuilder builder = new StringBuilder()
                 for (int i = 0; i < checkField.size(); i++) {
-                    builder.append("«").append(getAtributes().get(checkField.get(i))[2])
+                    builder.append("«").append(getAttributes().get(checkField.get(i))[2])
                             .append("» ").append("(")
-                            .append(getAtributes().get(checkField.get(i))[1])
+                            .append(getAttributes().get(checkField.get(i))[1])
                             .append(")")
                     if (i != (checkField.size() - 1)) {
                         builder.append(", ")
@@ -351,11 +352,7 @@ void calc() {
     // Сортировка
     sortRows(dataRows, groupColumns)
 
-    def index = 1
     for (row in dataRows) {
-        // Порядковый номер строки
-        row.rowNum = index++
-
         // Количество
         row.count = 1
 
@@ -602,7 +599,6 @@ void addData(def xml, int headRowCount) {
         def int xmlIndexCol = 0
 
         // графа 1
-        newRow.rowNum = xmlIndexRow - headRowCount
         xmlIndexCol++
 
         // графа fix
@@ -766,7 +762,7 @@ def getReportPeriodEndDate() {
     return endDate
 }
 
-def getAtributes() {
+def getAttributes() {
     [
             rowNum:                     ['rowNum', 'гр. 1', '№ п/п'],
             name:                       ['name', 'гр. 2', 'Полное наименование с указанием ОПФ'],

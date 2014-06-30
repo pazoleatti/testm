@@ -100,14 +100,14 @@
         <cell alias="code" colSpan="1" rowSpan="1" stringValue="1010290"/>
         <cell alias="name" colSpan="1" rowSpan="1"
               stringValue="Реализация услуг, оказываемых на рынке ценных бумаг, товарных и валютных рынках, а именно: услуг, оказываемых регистраторами, депозитариями, дилерами, брокерами, управляющими ценными бумагами (п/п. 12.2 п. 2 ст. 149 НК РФ)"/>
-        <cell alias="realizeCost" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
+        <cell alias="realizeCost" colSpan="1" rowSpan="1"/>
         <cell alias="obtainCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
     </row>
     <row alias="R14">
         <cell alias="rowNum" colSpan="1" numericValue="14" rowSpan="1"/>
         <cell alias="code" colSpan="1" rowSpan="1" stringValue="1010298"/>
         <cell alias="name" colSpan="1" rowSpan="1" stringValue="Реализация жилых домов (п/п. 22 п. 3 ст. 149 НК РФ)"/>
-        <cell alias="realizeCost" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
+        <cell alias="realizeCost" colSpan="1" rowSpan="1"/>
         <cell alias="obtainCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
     </row>
     <row alias="R15">

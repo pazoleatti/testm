@@ -15,6 +15,8 @@ import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
@@ -126,14 +128,15 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
     @Override
     public PagingResult<LogSearchResultItem> getLogsBusiness(LogSystemFilterDao filter) {
 
-        Map<String, Object> names = new HashMap<String, Object>();
-        names.put("fromDate", filter.getFromSearchDate());
-        names.put("endDate", filter.getToSearchDate());
-        names.put("number", filter.getCountOfRecords());
-        names.put("rpName", "%" + filter.getReportPeriodName() + "%");
-        names.put("startIdx", filter.getStartIndex() + 1);
-        names.put("endIdx", filter.getStartIndex() + filter.getCountOfRecords());
-        names.put("userIds", filter.getUserIds());
+        MapSqlParameterSource names = new MapSqlParameterSource();
+        names.addValue("fromDate", filter.getFromSearchDate());
+        names.addValue("endDate", filter.getToSearchDate());
+        names.addValue("number", filter.getCountOfRecords());
+        names.addValue("rpName", "%" + filter.getReportPeriodName() + "%");
+        names.addValue("depName", "%" + (filter.getDepartmentName() == null ? "" : filter.getDepartmentName().toLowerCase()) + "%");
+        names.addValue("startIdx", filter.getStartIndex() + 1);
+        names.addValue("endIdx", filter.getStartIndex() + filter.getCountOfRecords());
+        names.addValue("userIds", filter.getUserIds());
 
         StringBuilder sql = new StringBuilder();
         appendWithClause(sql, filter);
@@ -318,7 +321,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 		);
 	}
 
-    private int getCount(LogSystemFilterDao filter, Map<String, Object> names) {
+    private int getCount(LogSystemFilterDao filter, SqlParameterSource names) {
         StringBuilder sql = new StringBuilder();
         appendWithClause(sql, filter);
 
@@ -473,7 +476,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         }
         sql.append(" WHERE (ls.report_period_name = CAST(tp.year AS VARCHAR(4)) || ' ' || rp.name) ");
         sql.append(filterDao.getDepartmentName() != null && !filterDao.getDepartmentName().isEmpty() ?
-                " AND lower(ls.department_name) LIKE lower(\'%" + filterDao.getDepartmentName() + "%\')" : "");
+                " AND lower(ls.department_name) LIKE :depName " : "");
         sql.append(filterDao.getReportPeriodName() != null && !filterDao.getReportPeriodName().isEmpty() ?
                 "AND ls.report_period_name LIKE :rpName ":"");
         sql.append(filterDao.getUserIds() != null && !filterDao.getUserIds().isEmpty() ?

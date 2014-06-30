@@ -68,8 +68,7 @@ def autoFillColumns = ['rowNum', 'innKio', 'countryCode', 'cost']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNum', 'jurName', 'contractNum', 'contractDate', 'country', 'count', 'price',
-        'cost', 'transactionDate']
+def nonEmptyColumns = ['jurName', 'contractNum', 'contractDate', 'country', 'count', 'price', 'cost', 'transactionDate']
 
 // Дата окончания отчетного периода
 @Field
@@ -218,11 +217,7 @@ void calc() {
         return
     }
 
-    def index = 1
     for (row in dataRows) {
-        // Порядковый номер строки
-        row.rowNum = index++
-
         def bankSum = null
         if (row.incomeBankSum != null && row.outcomeBankSum == null)
             bankSum = row.incomeBankSum
@@ -324,9 +319,6 @@ void addData(def xml, int headRowCount) {
         }
 
         def int xmlIndexCol = 0
-
-        // графа 1
-        newRow.rowNum = xmlIndexRow - 2
 
         // графа 2
         newRow.jurName = getRecordIdImport(9, 'NAME', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)

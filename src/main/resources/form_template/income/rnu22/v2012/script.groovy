@@ -150,7 +150,7 @@ void logicCheck() {
         if (row.transactionDate != null && dFrom > row.transactionDate
                 || row.calcPeriodAccountingEndDate != null && row.calcPeriodAccountingEndDate > dTo
                 || row.calcPeriodEndDate != null && row.calcPeriodEndDate > dTo) {
-            loggerError(errorMsg + 'Дата совершения операции вне границ отчётного периода!')
+            loggerError(row, errorMsg + 'Дата совершения операции вне границ отчётного периода!')
         }
 
         // 2. Проверка на нулевые значения (графа 13..20)
@@ -166,28 +166,28 @@ void logicCheck() {
             }
         }
         if (allNull) {
-            loggerError(errorMsg + 'Все суммы по операции нулевые!')
+            loggerError(row, errorMsg + 'Все суммы по операции нулевые!')
         }
 
         // 3. Проверка на сумму платы (графа 4)
         if (row.base != null && !(row.base > 0)) {
-            logger.warn(errorMsg + 'Суммы платы равны 0!')
+            rowWarning(logger, row, errorMsg + 'Суммы платы равны 0!')
         }
 
         // 4. Проверка задания расчётного периода
         if (row.calcPeriodAccountingBeginDate > row.calcPeriodAccountingEndDate ||
                 row.calcPeriodBeginDate > row.calcPeriodEndDate) {
-            logger.warn(errorMsg + 'Неправильно задан расчётный период!')
+            rowWarning(logger, row, errorMsg + 'Неправильно задан расчётный период!')
         }
 
         // 5. Проверка на корректность даты договора
         if (row.contractData > dTo) {
-            loggerError(errorMsg + 'Дата договора неверная!')
+            loggerError(row, errorMsg + 'Дата договора неверная!')
         }
 
         // 6. Проверка на превышение суммы дохода по данным бухгалтерского учёта над суммой начисленного дохода (графа 14, 16)
         if (row.accruedCommisRub < row.commisInAccountingRub) {
-            logger.warn(errorMsg + "Сумма данных бухгалтерского учёта превышает сумму начисленных платежей для документа ${row.contractNumber}")
+            rowWarning(logger, row, errorMsg + "Сумма данных бухгалтерского учёта превышает сумму начисленных платежей для документа ${row.contractNumber}")
         }
 
         // 8. Проверка на заполнение поля «<Наименование поля>»
@@ -198,18 +198,18 @@ void logicCheck() {
         def checkColumn11and12 = (row.calcPeriodAccountingBeginDate != null || row.calcPeriodAccountingEndDate != null) &&
                 row.calcPeriodBeginDate != null && row.calcPeriodEndDate != null
         if (checkColumn9and10 || checkColumn11and12) {
-            loggerError(errorMsg + 'Поля в графах 9, 10, 11, 12 заполены неверно!')
+            loggerError(row, errorMsg + 'Поля в графах 9, 10, 11, 12 заполены неверно!')
         }
 
         def date1 = row.calcPeriodBeginDate
         def date2 = row.calcPeriodEndDate
         if (date1 != null && date2 != null && row.basisForCalc != null && row.basisForCalc * (date2 - date1 + 1) == 0) {
-            loggerError(errorMsg + "Деление на ноль. Возможно неправильно выбраны даты.")
+            loggerError(row, errorMsg + "Деление на ноль. Возможно неправильно выбраны даты.")
         }
 
         // 9. Проверка на уникальность поля «№ пп» (графа 1)
         if (++i != row.rowNumber) {
-            loggerError(errorMsg + 'Нарушена уникальность номера по порядку!')
+            loggerError(row, errorMsg + 'Нарушена уникальность номера по порядку!')
         }
 
         if (formData.kind == FormDataKind.PRIMARY) {
@@ -515,11 +515,11 @@ void importData() {
 }
 
 /** Вывести сообщение. В периоде ввода остатков сообщения должны быть только НЕфатальными. */
-void loggerError(def msg, Object...args) {
+void loggerError(def row, def msg) {
     if (isBalancePeriod()) {
-        logger.warn(msg, args)
+        rowWarning(logger, row, msg)
     } else {
-        logger.error(msg, args)
+        rowError(logger, row, msg)
     }
 }
 

@@ -13,7 +13,7 @@ import groovy.xml.MarkupBuilder
  * Декларация по НДС. Генератор XML.
  * http://jira.aplana.com/browse/SBRFACCTAX-6453
  *
- * совпадает с "Декларация по НДС" (аудит) (declaration_audit), кроме заполнения секции "РАЗДЕЛ 2"
+ * совпадает с "Декларация по НДС" (короткая) (declaration_audit), кроме заполнения секции "РАЗДЕЛ 2"
  *
  */
 
@@ -219,7 +219,7 @@ void generateXML() {
 
     def period = 0
     if (reportPeriod.order != null) {
-        def values = [21, 31, 33, 34]
+        def values = [21, 22, 23, 24]
         period = values[reportPeriod.order - 1]
     }
 

@@ -110,6 +110,32 @@ public class ColumnDaoTest {
     }
 
     @Test
+    public void saveFormColumnsWithDeleteTest() {
+        //Given FORM_ID_FOR_TEST
+        List<Column> columnList = columnDao.getFormColumns(FORM_ID_FOR_TEST);
+        columnList.remove(0);
+        //Создадим column, которого нету в БД
+        StringColumn newColumn = new StringColumn();
+        newColumn.setAlias("newColumn");
+        newColumn.setName("Новый столбец");
+        newColumn.setOrder(5);
+        newColumn.setMaxLength(100);
+        newColumn.setChecking(false);
+        columnList.add(newColumn);
+
+        FormTemplate formTemplate = new FormTemplate();
+        formTemplate.setId(FORM_ID_FOR_TEST);
+        formTemplate.getColumns().addAll(columnList);
+
+        //When
+        columnDao.saveFormColumns(formTemplate);
+
+        //Then
+        columnList = columnDao.getFormColumns(FORM_ID_FOR_TEST);
+        Assert.assertEquals(4, columnList.size());
+    }
+
+    @Test
     public void saveFormColumns2Test() {
 
         List<Column> columnList = columnDao.getFormColumns(FORM_ID_FOR_TEST);
@@ -123,7 +149,7 @@ public class ColumnDaoTest {
         columnList.add(refBookColumn);
 
         ReferenceColumn referenceColumn = new ReferenceColumn();
-        referenceColumn.setParentId((int) BDUtilsMock.getIteratorValue());
+        referenceColumn.setParentId(1);
         referenceColumn.setRefBookAttributeId(5);
         referenceColumn.setAlias("referenceColumn");
         referenceColumn.setName("Зависимая графа");
@@ -146,7 +172,7 @@ public class ColumnDaoTest {
         Assert.assertEquals("Зависимая графа", referenceColumn.getName());
         Assert.assertEquals(6, referenceColumn.getOrder());
         Assert.assertEquals(false, referenceColumn.isChecking());
-        Assert.assertEquals((int) BDUtilsMock.getIteratorValue() - 2, referenceColumn.getParentId());
+        Assert.assertEquals(1, referenceColumn.getParentId());
         Assert.assertEquals(5, referenceColumn.getRefBookAttributeId());
     }
 }

@@ -283,65 +283,65 @@ void logicCheck() {
 
         // 2. Проверка при нулевом значении размера лота на текущую отчётную дату (графа 5, 6, 13)
         if (row.lotSizeCurrent == 0 && row.reserve != row.reserveRecovery) {
-            logger.warn(errorMsg + 'графы 6 и 13 неравны!')
+            rowWarning(logger, row, errorMsg + 'графы 6 и 13 неравны!')
         }
 
         // 3. Проверка при нулевом значении размера лота на текущую отчётную дату (графа 5, 7, 10, 11)
         if (row.lotSizeCurrent == 0 && (row.cost != 0 || row.costOnMarketQuotation != 0 || row.reserveCalcValue != 0)) {
-            logger.warn(errorMsg + 'графы 7, 10 и 11 ненулевые!')
+            rowWarning(logger, row, errorMsg + 'графы 7, 10 и 11 ненулевые!')
         }
 
         // 4. Проверка при нулевом значении размера лота на предыдущую отчётную дату (графа 4, 6, 13)
         if (row.lotSizePrev == 0 && (row.reserve != 0 || row.reserveRecovery != 0)) {
-            loggerError(errorMsg + 'графы 6 и 13 ненулевые!')
+            loggerError(row, errorMsg + 'графы 6 и 13 ненулевые!')
         }
 
         // 5. Проверка необращающихся акций (графа 8, 11, 12)
         def sign = getSign(row.signSecurity)
         if (sign == '-' && (row.reserveCalcValue != 0 || row.reserveCreation != 0)) {
-            logger.warn(errorMsg + 'облигации необращающиеся, графы 11 и 12 ненулевые!')
+            rowWarning(logger, row, errorMsg + 'облигации необращающиеся, графы 11 и 12 ненулевые!')
         }
 
         // 6. Проверка создания (восстановления) резерва по обращающимся акциям (графа 8, 6, 11, 13)
         if (row.reserveCalcValue != null && row.reserve != null &&
                 sign == '+' && row.reserveCalcValue - row.reserve > 0 && row.reserveRecovery != 0) {
-            loggerError(errorMsg + 'облигации обращающиеся – резерв сформирован (восстановлен) некорректно!')
+            loggerError(row, errorMsg + 'облигации обращающиеся – резерв сформирован (восстановлен) некорректно!')
         }
 
         // 7. Проверка создания (восстановления) резерва по обращающимся акциям (графа 8, 6, 11, 12)
         if (row.reserveCalcValue != null && row.reserve != null &&
                 sign == '+' && row.reserveCalcValue - row.reserve < 0 && row.reserveCreation != 0) {
-            loggerError(errorMsg + 'облигации обращающиеся – резерв сформирован (восстановлен) некорректно!')
+            loggerError(row, errorMsg + 'облигации обращающиеся – резерв сформирован (восстановлен) некорректно!')
         }
 
         // 8. Проверка создания (восстановления) резерва по обращающимся акциям (графа 8, 6, 11, 13)
         if (row.reserveCalcValue != null && row.reserve != null &&
                 sign == '+' && row.reserveCalcValue - row.reserve == 0 &&
                 (row.reserveCreation != 0 || row.reserveRecovery != 0)) {
-            loggerError(errorMsg + 'облигации обращающиеся – резерв сформирован (восстановлен) некорректно!')
+            loggerError(row, errorMsg + 'облигации обращающиеся – резерв сформирован (восстановлен) некорректно!')
         }
 
         // 9. Проверка на положительные значения при наличии созданного резерва
         if (row.reserveCreation > 0 && row.lotSizeCurrent < 0 && row.cost < 0 &&
                 row.costOnMarketQuotation < 0 && row.reserveCalcValue < 0) {
-            logger.warn(errorMsg + 'резерв сформирован. Графы 5, 7, 10 и 11 неположительные!')
+            rowWarning(logger, row, errorMsg + 'резерв сформирован. Графы 5, 7, 10 и 11 неположительные!')
         }
 
         // 10. Проверка корректности создания резерва (графа 6, 11, 12, 13)
         if (row.reserve != null && row.reserveCreation != null &&
                 row.reserveCalcValue != null && row.reserveRecovery != null &&
                 row.reserve + row.reserveCreation != row.reserveCalcValue + row.reserveRecovery) {
-            loggerError(errorMsg + 'резерв сформирован некорректно!')
+            loggerError(row, errorMsg + 'резерв сформирован некорректно!')
         }
 
         // 11. Проверка корректности заполнения РНУ (графа 3, 3 (за предыдущий период), 4, 5 (за предыдущий период) )
         if (!isBalancePeriod() && !isConsolidated && checkOld(row, 'tradeNumber', 'lotSizePrev', 'lotSizeCurrent', prevDataRows)) {
-            loggerError("РНУ сформирован некорректно! " + errorMsg + "Не выполняется условие: Если «графа 3» = «графа 3» формы РНУ-25 за предыдущий отчётный период, то «графа 4» = «графа 5» формы РНУ-25 за предыдущий отчётный период.")
+            loggerError(row, "РНУ сформирован некорректно! " + errorMsg + "Не выполняется условие: Если «графа 3» = «графа 3» формы РНУ-25 за предыдущий отчётный период, то «графа 4» = «графа 5» формы РНУ-25 за предыдущий отчётный период.")
         }
 
         // 12. Проверка корректности заполнения РНУ (графа 3, 3 (за предыдущий период), 6, 11 (за предыдущий период) )
         if (!isBalancePeriod() && !isConsolidated && checkOld(row, 'tradeNumber', 'reserve', 'reserveCalcValue', prevDataRows)) {
-            loggerError("РНУ сформирован некорректно! " + errorMsg + "Не выполняется условие: Если «графа 3» = «графа 6» формы РНУ-25 за предыдущий отчётный период, то «графа 3» = «графа 11» формы РНУ-25 за предыдущий отчётный период.")
+            loggerError(row, "РНУ сформирован некорректно! " + errorMsg + "Не выполняется условие: Если «графа 3» = «графа 6» формы РНУ-25 за предыдущий отчётный период, то «графа 3» = «графа 11» формы РНУ-25 за предыдущий отчётный период.")
         }
 
         // 15. Обязательность заполнения поля графы 1..3, 5..13
@@ -349,7 +349,7 @@ void logicCheck() {
 
         // 16. Проверка на уникальность поля «№ пп» (графа 1)
         if (++rowNumber != row.rowNumber) {
-            loggerError(errorMsg + 'Нарушена уникальность номера по порядку!')
+            loggerError(row, errorMsg + 'Нарушена уникальность номера по порядку!')
         }
 
         // 17. Арифметические проверки граф 6, 10..13
@@ -374,11 +374,13 @@ void logicCheck() {
 
         // 13. Проверка корректности заполнения РНУ (графа 4, 5 (за предыдущий период))
         if (totalRow.lotSizePrev != totalRowOld.lotSizeCurrent) {
-            loggerError("РНУ сформирован некорректно! Не выполняется условие: «Общий итог» по графе 4 = «Общий итог» по графе 5 формы РНУ-25 за предыдущий отчётный период.")
+            loggerError(totalRow, "РНУ сформирован некорректно! Не выполняется условие: «Общий итог» по графе 4 = " +
+                    "«Общий итог» по графе 5 формы РНУ-25 за предыдущий отчётный период.")
         }
         // 14. Проверка корректности заполнения РНУ (графа 6, 11 (за предыдущий период))
         if (totalRow.reserve != totalRowOld.reserveCalcValue) {
-            loggerError("РНУ сформирован некорректно! Не выполняется условие: «Общий итог» по графе 6 = «Общий итог» по графе 11 формы РНУ-25 за предыдущий отчётный период.")
+            loggerError(totalRow, "РНУ сформирован некорректно! Не выполняется условие: «Общий итог» по графе 6 = " +
+                    "«Общий итог» по графе 11 формы РНУ-25 за предыдущий отчётный период.")
         }
     }
 
@@ -393,7 +395,7 @@ void logicCheck() {
         try {
             row = getDataRow(dataRows, totalRowAlias)
         } catch (IllegalArgumentException e) {
-            loggerError("Итоговые значения по ГРН $codeName не рассчитаны! Необходимо рассчитать данные формы.")
+            loggerError(null, "Итоговые значения по ГРН $codeName не рассчитаны! Необходимо рассчитать данные формы.")
             continue
         }
         // сформировать подитоговую строку ГРН с суммами
@@ -401,7 +403,7 @@ void logicCheck() {
 
         // сравнить строки
         if (isDiffRow(row, tmpRow, totalSumColumns)) {
-            loggerError("Итоговые значения по ГРН $codeName рассчитаны неверно!")
+            loggerError(row, "Итоговые значения по ГРН $codeName рассчитаны неверно!")
         }
     }
 
@@ -750,7 +752,7 @@ void checkTotalRow(def totalRow) {
     }
     if (!errorColums.isEmpty()) {
         def columns = errorColums.join(', ')
-        loggerError("Итоговая сумма в графе $columns в транспортном файле некорректна")
+        loggerError(null, "Итоговая сумма в графе $columns в транспортном файле некорректна")
     }
 }
 
@@ -761,11 +763,11 @@ void prevPeriodCheck() {
     }
 }
 
-def loggerError(def msg) {
+def loggerError(def row, def msg) {
     if (isBalancePeriod()) {
-        logger.warn(msg)
+        rowWarning(logger, row, msg)
     } else {
-        logger.error(msg)
+        rowError(logger, row, msg)
     }
 }
 

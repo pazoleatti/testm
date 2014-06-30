@@ -46,16 +46,20 @@ public class AuditArchiveDialogView extends PopupViewWithUiHandlers<AuditArchive
 
     @UiHandler("archiveButton")
     public void onArchiveButton(ClickEvent event){
-        Dialog.confirmMessage("Подтверждение", "При архивации данные будут выгружены в файл и удалены из Системы. Продолжить выполнение операции?", new DialogHandler() {
-            @Override
-            public void yes() {
-                super.yes();
-                hide();
-                if( getUiHandlers()!= null){
-                    getUiHandlers().onArchiveButtonClick();
+        if (toSearchDate.getValue() != null) {
+            Dialog.confirmMessage("При архивации данные будут выгружены в файл и удалены из Системы. Продолжить выполнение операции?", new DialogHandler() {
+                @Override
+                public void yes() {
+                    super.yes();
+                    hide();
+                    if (getUiHandlers() != null) {
+                        getUiHandlers().onArchiveButtonClick();
+                    }
                 }
-            }
-        });
+            });
+        } else {
+            Dialog.warningMessage("Введите дату.");
+        }
 
     }
 

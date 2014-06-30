@@ -7,7 +7,9 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.editform.EditFormPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.event.DTCreateNewTypeEvent;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.event.UpdateTableEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.filter.DeclarationTemplateApplyEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.filter.FilterDeclarationTemplatePresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.filter.FilterDeclarationTemplateReadyEvent;
@@ -38,7 +40,7 @@ import java.util.List;
 public class DeclarationTemplateListPresenter
         extends Presenter<DeclarationTemplateListPresenter.MyView, DeclarationTemplateListPresenter.MyProxy>
         implements DeclarationTemplateApplyEvent.MyHandler, FilterDeclarationTemplateReadyEvent.MyHandler,
-        DeclarationTemplateListUiHandlers {
+        DeclarationTemplateListUiHandlers, UpdateTableEvent.MyHandler {
 
     private final PlaceManager placeManager;
 
@@ -58,14 +60,19 @@ public class DeclarationTemplateListPresenter
 
 	private final DispatchAsync dispatcher;
     protected final FilterDeclarationTemplatePresenter filterPresenter;
+    protected final EditFormPresenter editFormPresenter;
     public static final Object OBJECT = new Object();
+    public static final Object OBJECT_EDIT_FORM = new Object();
 
     @Inject
-	public DeclarationTemplateListPresenter(EventBus eventBus, MyView view, MyProxy proxy, PlaceManager placeManager, DispatchAsync dispatcher, FilterDeclarationTemplatePresenter filterPresenter) {
+	public DeclarationTemplateListPresenter(EventBus eventBus, MyView view, MyProxy proxy, PlaceManager placeManager,
+                                            DispatchAsync dispatcher, FilterDeclarationTemplatePresenter filterPresenter,
+                                            EditFormPresenter editFormPresenter) {
 		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
         this.placeManager = placeManager;
         this.dispatcher = dispatcher;
         this.filterPresenter = filterPresenter;
+        this.editFormPresenter = editFormPresenter;
         getView().setUiHandlers(this);
 	}
 
@@ -94,6 +101,7 @@ public class DeclarationTemplateListPresenter
     protected void onBind() {
         addRegisteredHandler(FilterDeclarationTemplateReadyEvent.getType(), this);
         addRegisteredHandler(DeclarationTemplateApplyEvent.getType(), this);
+        addRegisteredHandler(UpdateTableEvent.getType(), this);
         super.onBind();
     }
 
@@ -101,12 +109,14 @@ public class DeclarationTemplateListPresenter
     protected void onReveal() {
         super.onReveal();
         setInSlot(OBJECT, filterPresenter);
+        setInSlot(OBJECT_EDIT_FORM, editFormPresenter);
     }
 
     @Override
     protected void onHide() {
         super.onHide();
         clearSlot(OBJECT);
+        clearSlot(OBJECT_EDIT_FORM);
     }
 
     @Override
@@ -158,5 +168,18 @@ public class DeclarationTemplateListPresenter
                 placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplateList).build());
             }
         }, this).addCallback(new ManualRevealCallback<DTDeleteResult>(DeclarationTemplateListPresenter.this)));
+    }
+
+    @Override
+    public void onUpdateTable(UpdateTableEvent event) {
+        updateDeclarationData();
+    }
+
+    @Override
+    public void onSelectionChanged(DeclarationTypeTemplate selectedItem) {
+        if (selectedItem != null) {
+            editFormPresenter.setDeclarationTypeId(selectedItem.getTypeId());
+            editFormPresenter.setDeclarationTypeName(selectedItem.getTypeName());
+        }
     }
 }

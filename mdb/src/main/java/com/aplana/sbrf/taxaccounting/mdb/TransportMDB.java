@@ -33,6 +33,7 @@ public class TransportMDB implements MessageListener {
     private static final Log logger = LogFactory.getLog(TransportMDB.class);
 
     @Override
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void onMessage(Message message) {
         if (message == null || !(message instanceof MapMessage)) {
             return;

@@ -55,13 +55,6 @@ public class DateMaskBoxPicker extends Composite implements HasEnabled, HasVisib
     private final PopupPanel datePickerPanel = new PopupPanel(true, true);
     private boolean widgetEnabled = true;
     private boolean canBeEmpty = false;
-    /**
-     *  Признак для возможности присваивать значение без проведения проверки isDateWasChange(),
-     *  необходимо для сбрасывания некорректных значений dateBox при setValue()
-     */
-    private boolean isForceSetValue = false;
-
-    private Date prevValue;
 
     /* Даты ограничивающего периода */
     private Date startLimitDate;
@@ -154,10 +147,8 @@ public class DateMaskBoxPicker extends Composite implements HasEnabled, HasVisib
                 datePicker.setCurrentMonth(dateBox.getValue());
                 datePicker.setValue(dateBox.getValue());
             } else {
-                if (startLimitDate != null) {
-                    datePicker.setCurrentMonth(startLimitDate);
-                    datePicker.setValue(startLimitDate);
-                }
+                datePicker.setCurrentMonth(new Date());
+                datePicker.setValue(null);
             }
 
             datePickerPanel.setPopupPosition(leftPosition, topPosition);
@@ -232,18 +223,16 @@ public class DateMaskBoxPicker extends Composite implements HasEnabled, HasVisib
 
     @Override
     public void setValue(Date value, boolean fireEvents) {
-        if (isForceSetValue || isDateWasChange(prevValue, value)) {
-            if (isInLimitPeriod(startLimitDate, endLimitDate, value)) {
-                setCheckedValue(value, fireEvents);
+        if (isInLimitPeriod(startLimitDate, endLimitDate, value)) {
+            setCheckedValue(value, fireEvents);
+        } else {
+            if (value == null) {
+                setCheckedValue(null, fireEvents);
             } else {
-                if (value == null) {
-                    setCheckedValue(canBeEmpty ? null : prevValue, fireEvents);
-                } else {
-                    if (startLimitDate != null && compareDates(startLimitDate, value) == 1) {
-                        setCheckedValue(startLimitDate, fireEvents);
-                    } else if (endLimitDate != null && compareDates(endLimitDate, value) == -1) {
-                        setCheckedValue(endLimitDate, fireEvents);
-                    }
+                if (startLimitDate != null && compareDates(startLimitDate, value) == 1) {
+                    setCheckedValue(startLimitDate, fireEvents);
+                } else if (endLimitDate != null && compareDates(endLimitDate, value) == -1) {
+                    setCheckedValue(endLimitDate, fireEvents);
                 }
             }
         }
@@ -251,7 +240,6 @@ public class DateMaskBoxPicker extends Composite implements HasEnabled, HasVisib
 
     private void setCheckedValue(Date value, boolean fireEvents) {
         dateBox.setValue(value, false);
-        prevValue = value;
         clearImage.setVisible(value != null && canBeEmpty);
         if (fireEvents) {
             ValueChangeEvent.fire(this, value);
@@ -320,9 +308,5 @@ public class DateMaskBoxPicker extends Composite implements HasEnabled, HasVisib
     @Override
     public void setVisible(boolean visible) {
         mainPanel.setVisible(visible);
-    }
-
-    public void setForceSetValue(boolean isForceSetValue) {
-        this.isForceSetValue = isForceSetValue;
     }
 }

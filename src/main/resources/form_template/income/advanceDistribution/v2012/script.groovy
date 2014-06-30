@@ -288,7 +288,7 @@ void calc() {
 def calc2(def row) {
     def departmentParam
     if (row.regionBankDivision != null) {
-        departmentParam = getRefBookRecord(30, "ID", "$row.regionBankDivision", getReportPeriodEndDate(), -1, null, false)
+        departmentParam = getRefBookValue(30L, row.regionBankDivision)
     }
     if (departmentParam == null || departmentParam.isEmpty()) {
         return null
@@ -397,7 +397,7 @@ void logicalCheckBeforeCalc() {
 
         def departmentParam
         if (row.regionBankDivision != null) {
-            departmentParam = getRefBookRecord(30, "ID", "$row.regionBankDivision", getReportPeriodEndDate(), -1, null, false)
+            departmentParam = getRefBookValue(30L, row.regionBankDivision)
         }
         if (departmentParam == null || departmentParam.isEmpty()) {
             logger.error(errorMsg + "Не найдено подразделение территориального банка!")

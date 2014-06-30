@@ -1,6 +1,7 @@
 package form_template.income.rnu12.v2012
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import groovy.transform.Field
 
 import java.math.RoundingMode
@@ -270,27 +271,27 @@ void logicCheck() {
 
         // 2. Проверка на уникальность поля «№ пп» (графа 1)
         if (++number != row.rowNumber) {
-            logger.error(errorMsg + "Нарушена уникальность номера по порядку!")
+            rowError(logger, row, errorMsg + "Нарушена уникальность номера по порядку!")
         }
 
         // 3. Проверка даты совершения операции и границ отчетного периода (графа 5)
         if (row.operationDate != null && (row.operationDate.after(endDate) || row.operationDate.before(startDate))) {
-            logger.error(errorMsg + 'Дата совершения операции вне границ отчётного периода!')
+            rowError(logger, row, errorMsg + 'Дата совершения операции вне границ отчётного периода!')
         }
 
         // 4. Проверка количества отчетных периодов при авансовых платежах (графа 9)
         if (row.periodCounts != null && (row.periodCounts < 1 || 999 < row.periodCounts)) {
-            logger.error(errorMsg + 'Неверное количество отчетных периодов при авансовых платежах!')
+            rowError(logger, row, errorMsg + 'Неверное количество отчетных периодов при авансовых платежах!')
         }
 
         // 5. Проверка на нулевые значения (графа 11, 12)
         if (row.outcomeInNalog == 0 && row.outcomeInBuh == 0) {
-            logger.error(errorMsg + 'Все суммы по операции нулевые!')
+            rowError(logger, row, errorMsg + 'Все суммы по операции нулевые!')
         }
 
         // 6. Проверка формата номера первой записи
         if (row.numberFirstRecord != null && !row.numberFirstRecord.matches('\\d{2}-\\w{6}')) {
-            logger.error(errorMsg + 'Неправильно указан номер первой записи (формат: ГГ-НННННН, см. №852-р в актуальной редакции)!')
+            rowError(logger, row, errorMsg + 'Неправильно указан номер первой записи (формат: ГГ-НННННН, см. №852-р в актуальной редакции)!')
         }
 
         needValue['outcomeInNalog'] = calc11(row)
@@ -391,16 +392,19 @@ void addData(def xml, int headRowCount) {
         // графа 1
 
         // графа 2
-        def record = getRecordImport(27, 'OPU', row.cell[4].text(), xlsIndexRow, 4 + colOffset)
-        if (record != null) {
-            formDataService.checkReferenceValue(27, row.cell[2].text(), record?.CODE?.value, xlsIndexRow, 2 + colOffset, logger, true)
-        }
 
         // графа 3
         newRow.numberFirstRecord = row.cell[3].text()
 
         // графа 4
-        newRow.opy = record?.record_id?.value
+        String filter = "LOWER(CODE) = LOWER('" + row.cell[2].text() + "') and LOWER(OPU) = LOWER('" + row.cell[4].text() + "')"
+        def records = refBookFactory.getDataProvider(27).getRecords(reportPeriodEndDate, null, filter, null)
+        if (records.size() == 1) {
+            newRow.opy = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+        } else {
+            logger.error("Проверка файла: Строка ${xlsIndexRow} содержит значение, отсутствующее в справочнике " +
+                    "«" + refBookFactory.get(27).getName() + "»!")
+        }
 
         // графа 5
         newRow.operationDate = parseDate(row.cell[5].text(), "dd.MM.yyyy", xlsIndexRow, 5 + colOffset, logger, true)

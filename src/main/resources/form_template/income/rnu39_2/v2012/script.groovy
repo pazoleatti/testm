@@ -220,14 +220,14 @@ void logicCheck() {
 
         // 1. Проверка даты первой части сделки
         if (row.shortPositionOpen > reportDay) {
-            logger.error(errorMsg + 'Неверно указана дата первой части сделки!')
+            rowError(logger, row, errorMsg + 'Неверно указана дата первой части сделки!')
         }
 
         // 2. Проверка даты второй части сделки
         // Графа 7 (раздел А) = не заполнена;
         // Графа 7 (раздел Б) - принадлежит отчётному периоду
         if ((isA && row.shortPositionClose != null) || (!isA && row.shortPositionClose > reportDay)) {
-            logger.error(errorMsg + 'Неверно указана дата второй части сделки!')
+            rowError(logger, row, errorMsg + 'Неверно указана дата второй части сделки!')
         }
 
         // для раздела А графа 7 необязательна

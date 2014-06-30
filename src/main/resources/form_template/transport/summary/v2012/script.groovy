@@ -89,7 +89,7 @@ def sortColumns = ["okato", "tsTypeCode"]
 
 // Проверяемые на пустые значения атрибуты (графа 1..9, 11..15, 21)
 @Field
-def nonEmptyColumns = ['rowNumber', 'okato', 'tsTypeCode', 'vi', 'model', 'regNumber', 'taxBase',
+def nonEmptyColumns = ['okato', 'tsTypeCode', 'vi', 'model', 'regNumber', 'taxBase',
         'taxBaseOkeiUnit', 'years', 'ownMonths', 'coef362', 'taxRate', 'calculatedTaxSum', 'taxSumToPay']
 
 @Field
@@ -196,15 +196,12 @@ def calc() {
     /** Пониженная ставка. */
     def loweringRates
 
-    def i = 1
     dataRows.each { row ->
         def index = row.getIndex()
         def errorMsg = "Строка $index: "
 
         // получение региона по ОКТМО
         def region = getRegionByOKTMO(row.okato, errorMsg)
-
-        row.rowNumber = i++
 
         /*
          * Гафа 9 Единица измерения налоговой базы по ОКЕИ

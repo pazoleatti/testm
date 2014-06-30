@@ -33,33 +33,33 @@ import groovy.transform.Field
 // графа 18 - totalPercIncome
 
 switch (formDataEvent) {
-    case FormDataEvent.CREATE :
+    case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
-    case FormDataEvent.CHECK :
+    case FormDataEvent.CHECK:
         logicCheck()
         break
-    case FormDataEvent.CALCULATE :
+    case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
         break
-    case FormDataEvent.ADD_ROW :
+    case FormDataEvent.ADD_ROW:
         addRow()
         break
-    case FormDataEvent.DELETE_ROW :
+    case FormDataEvent.DELETE_ROW:
         if (currentDataRow != null && currentDataRow.getAlias() == null) {
             formDataService.getDataRowHelper(formData)?.delete(currentDataRow)
         }
         break
-    case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
-    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
-    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
-    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
-    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
-    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
         logicCheck()
         break
-    case FormDataEvent.COMPOSE :
+    case FormDataEvent.COMPOSE:
         consolidation()
         break
     case FormDataEvent.IMPORT:
@@ -67,7 +67,7 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
-    case FormDataEvent.MIGRATION :
+    case FormDataEvent.MIGRATION:
         break
 }
 
@@ -249,7 +249,7 @@ void logicCheck() {
             def sum = roundValue(getSum(dataRows, alias, firstRow, lastRow), 6)
             if (sum != value) {
                 def name = getColumnName(lastRow, alias)
-                logger.error("Неверно рассчитаны итоговые значения для раздела $section в графе \"$name\"!")
+                rowError(logger, row, "Неверно рассчитаны итоговые значения для раздела $section в графе \"$name\"!")
             }
         }
     }

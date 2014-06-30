@@ -1,10 +1,12 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.FormStyleDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.Color;
 import com.aplana.sbrf.taxaccounting.model.FormStyle;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
@@ -68,15 +70,15 @@ public class FormStyleDaoImpl extends AbstractDao implements FormStyleDao {
 	@Transactional(readOnly = false)
 	@Override
 	public void saveFormStyles(final FormTemplate formTemplate) {
-		int formTemplateId = formTemplate.getId();
+		final int formTemplateId = formTemplate.getId();
 
 		JdbcTemplate jt = getJdbcTemplate();
 
-		final Set<Integer> removedStyles = new HashSet<Integer>(jt.queryForList(
-				"select id from form_style where form_template_id = ?",
+		final Set<String> removedStyles = new HashSet<String>(jt.queryForList(
+				"select alias from form_style where form_template_id = ?",
 				new Object[] { formTemplateId },
 				new int[] { Types.NUMERIC },
-				Integer.class
+				String.class
 		));
 
 		final List<FormStyle> newStyles = new ArrayList<FormStyle>();
@@ -85,32 +87,40 @@ public class FormStyleDaoImpl extends AbstractDao implements FormStyleDao {
 		List<FormStyle> styles = formTemplate.getStyles();
 
 		for (FormStyle style: styles) {
-			if (style.getId() == null) {
+			if (!removedStyles.contains(style.getAlias())) {
 				newStyles.add(style);
 			} else {
 				oldStyles.add(style);
-				removedStyles.remove(style.getId());
+				removedStyles.remove(style.getAlias());
 			}
 		}
 
 		if(!removedStyles.isEmpty()){
-			jt.batchUpdate(
-					"delete from form_style where id = ?",
-					new BatchPreparedStatementSetter() {
+            final String[] alias = new String[1];
+			try {
+                jt.batchUpdate(
+                        "delete from form_style where alias = ? and form_template_id = ?",
+                        new BatchPreparedStatementSetter() {
 
-						@Override
-						public void setValues(PreparedStatement ps, int index) throws SQLException {
-							ps.setInt(1, iterator.next());
-						}
+                            @Override
+                            public void setValues(PreparedStatement ps, int index) throws SQLException {
+                                alias[0] = iterator.next();
+                                ps.setString(1, alias[0]);
+                                ps.setInt(2, formTemplateId);
+                            }
 
-						@Override
-						public int getBatchSize() {
-							return removedStyles.size();
-						}
+                            @Override
+                            public int getBatchSize() {
+                                return removedStyles.size();
+                            }
 
-						private Iterator<Integer> iterator = removedStyles.iterator();
-					}
-			);
+                            private Iterator<String> iterator = removedStyles.iterator();
+                        }
+                );
+            } catch (DataIntegrityViolationException e){
+                logger.error("", e);
+                throw new DaoException("Обнаружено использование стиля с алиасом " + alias[0], e);
+            }
 		}
 		if (!newStyles.isEmpty()) {
 			jt.batchUpdate(
@@ -137,18 +147,18 @@ public class FormStyleDaoImpl extends AbstractDao implements FormStyleDao {
 
 		if(!oldStyles.isEmpty()){
 			jt.batchUpdate(
-					"update form_style set alias = ?, font_color = ?, back_color = ?, italic = ?, bold = ? " +
-							"where id = ?",
+					"update form_style set font_color = ?, back_color = ?, italic = ?, bold = ? " +
+							"where alias = ? and form_template_id = ?",
 					new BatchPreparedStatementSetter() {
 						@Override
 						public void setValues(PreparedStatement ps, int index) throws SQLException {
 							FormStyle formStyle = oldStyles.get(index);
-							ps.setString(1, formStyle.getAlias());
-							ps.setInt(2, formStyle.getFontColor().getId());
-							ps.setInt(3, formStyle.getBackColor().getId());
-							ps.setInt(4, formStyle.isItalic() ? 1 : 0);
-							ps.setInt(5, formStyle.isBold() ? 1 : 0);
-							ps.setInt(6, formStyle.getId());
+							ps.setInt(1, formStyle.getFontColor().getId());
+							ps.setInt(2, formStyle.getBackColor().getId());
+							ps.setInt(3, formStyle.isItalic() ? 1 : 0);
+							ps.setInt(4, formStyle.isBold() ? 1 : 0);
+                            ps.setString(5, formStyle.getAlias());
+							ps.setInt(6, formTemplateId);
 						}
 
 						@Override

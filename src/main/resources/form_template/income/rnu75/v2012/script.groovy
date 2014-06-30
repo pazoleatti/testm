@@ -146,17 +146,17 @@ void logicCheck() {
 
         // 1. Проверка даты совершения операции и границ отчётного периода
         if (row.date != null && (row.date.after(endDate) || row.date.before(startDate))) {
-            logger.error(errorMsg + 'Дата совершения операции вне границ отчётного периода!')
+            rowError(logger, row, errorMsg + "Дата совершения операции вне границ отчётного периода!")
         }
 
         // 2. Проверка на нулевые значения
         if ((row.taxSum == null || row.taxSum == 0) && (row.factSum == null || row.factSum == 0)) {
-            logger.error(errorMsg + 'Суммы по операции нулевые!!')
+            rowError(logger, row, errorMsg + "Суммы по операции нулевые!!")
         }
 
         // 4. Проверка на уникальность поля «№ пп»
         if (++i != row.number) {
-            logger.error(errorMsg + 'Нарушена уникальность номера по порядку!')
+            rowError(logger, row, errorMsg + "Нарушена уникальность номера по порядку!")
         }
     }
 

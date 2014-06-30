@@ -213,17 +213,17 @@ void logicCheck() {
 
         // 2. Проверка на уникальность поля «№ пп»
         if (rowNumber != row.rowNumber) {
-            logger.error(errorMsg + "Нарушена уникальность номера по порядку!")
+            rowError(logger, row, errorMsg + "Нарушена уникальность номера по порядку!")
         }
 
         //  Проверка даты погашения основного долга «Графа 7» >= «Графа 8»
         if (row.concessionsDate != null && row.repaymentDate?.before(row.concessionsDate)) {
-            logger.error(errorMsg + 'Неверно указана дата погашения основного долга')
+            rowError(logger, row, errorMsg + "Неверно указана дата погашения основного долга")
         }
 
         //  Проверка даты совершения операции «Графа 8» <= дата окончания отчётного периода
         if (row.concessionsDate != null && reportDate.before(row.concessionsDate)) {
-            logger.error(errorMsg + 'Неверно указана дата погашения основного долга')
+            rowError(logger, row, errorMsg + "Неверно указана дата погашения основного долга")
         }
 
         def calcValues = [
@@ -241,7 +241,7 @@ void logicCheck() {
 
         //Проверка принадлежности даты графы 8 отчетному периоду
         if (row.concessionsDate != null && !isInPeriod(row.concessionsDate)) {
-            logger.error(errorMsg + '«Графа 8» не принадлежит отчетному периоду')
+            rowError(logger, row, errorMsg + "«Графа 8» не принадлежит отчетному периоду")
         }
     }
 

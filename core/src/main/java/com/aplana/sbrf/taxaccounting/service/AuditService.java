@@ -22,7 +22,7 @@ public interface AuditService {
 	/**
 	 * Добавить информацию об логировании
 	 */
-	void add(FormDataEvent event, TAUserInfo userInfo, int departmentId, Integer reportPeriodId,
+	void add(FormDataEvent event, TAUserInfo userInfo, Integer departmentId, Integer reportPeriodId,
 			 Integer declarationTypeId, Integer formTypeId, Integer formKindId, String note);
 
 	/**

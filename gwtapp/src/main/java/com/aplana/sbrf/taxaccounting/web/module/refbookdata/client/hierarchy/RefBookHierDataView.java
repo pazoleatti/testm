@@ -78,9 +78,13 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
         relevanceDate.addValueChangeHandler(new ValueChangeHandler<Date>() {
             @Override
             public void onValueChange(ValueChangeEvent<Date> event) {
-                if (getUiHandlers() != null) {
-                    pickerState.setVersionDate(getRelevanceDate());
-                    getUiHandlers().onRelevanceDateChanged();
+                if(event.getValue()==null){
+                    relevanceDate.setValue(new Date());
+                } else {
+                    if (getUiHandlers() != null) {
+                        pickerState.setVersionDate(getRelevanceDate());
+                        getUiHandlers().onRelevanceDateChanged();
+                    }
                 }
             }
         });

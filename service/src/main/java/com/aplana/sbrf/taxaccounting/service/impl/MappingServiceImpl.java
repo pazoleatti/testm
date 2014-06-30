@@ -14,6 +14,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -21,6 +22,7 @@ import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 
 @Service
+@Transactional
 public class MappingServiceImpl implements MappingService {
 
     private final Log log = LogFactory.getLog(getClass());
@@ -167,7 +169,7 @@ public class MappingServiceImpl implements MappingService {
      * @param formTypeId
      * @param msg
      */
-    private void addLog(TAUserInfo userInfo, Integer departmentId, Integer reportPeriodId, Integer formTypeId,
+    public void addLog(TAUserInfo userInfo, Integer departmentId, Integer reportPeriodId, Integer formTypeId,
                         String msg) {
         try {
             // Ошибка записи в журнал аудита не должна откатывать импорт
@@ -186,7 +188,7 @@ public class MappingServiceImpl implements MappingService {
      * @param fileContent содержимое файла
      * @return
      */
-    private RestoreExemplar restoreExemplarFromRnu(String rnuFilename, byte[] fileContent) throws ServiceException {
+    public RestoreExemplar restoreExemplarFromRnu(String rnuFilename, byte[] fileContent) throws ServiceException {
         RestoreExemplar exemplar = new RestoreExemplar();
 
         String firstRow;

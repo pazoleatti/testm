@@ -133,17 +133,17 @@ void logicCheck() {
 
         // 2. Проверка на уникальность поля «№ пп» (графа 1)
         if (++rowNumber != row.rowNumber) {
-            logger.warn(errorMsg + 'Нарушена уникальность номера по порядку!')
+            rowWarning(logger, row, errorMsg + 'Нарушена уникальность номера по порядку!')
         }
 
         // 3. Проверка на нулевые значения
         if (row.lossReportPeriod == 0 && row.lossTaxPeriod == 0) {
-            logger.error(errorMsg + "Все суммы по операции нулевые!")
+            rowError(logger, row, errorMsg + "Все суммы по операции нулевые!")
         }
 
         // 4. Проверка формата номера записи в РНУ-49 (графа 2)
         if (!row.rnu49rowNumber.matches('\\w{2}-\\w{6}')) {
-            logger.error(errorMsg + "Неправильно указан номер записи в РНУ-49 (формат: ГГ-НННННН, см. №852-р в актуальной редакции)!")
+            rowError(logger, row, errorMsg + "Неправильно указан номер записи в РНУ-49 (формат: ГГ-НННННН, см. №852-р в актуальной редакции)!")
         }
     }
 
@@ -179,7 +179,7 @@ void logicCheck() {
             if (!msg.isEmpty()) {
                 def columns = msg.join(', ')
                 def index = row.getIndex()
-                logger.error("Строка $index: Неверное значение граф: $columns")
+                rowError(logger, row, "Строка $index: Неверное значение граф: $columns")
             }
             tmpRows.remove(tmpRow)
         }

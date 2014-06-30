@@ -2,14 +2,14 @@ package com.aplana.sbrf.taxaccounting.refbook.impl.fixed;
 
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributePair;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.impl.AbstractReadOnlyRefBook;
 
+import javax.validation.constraints.NotNull;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -22,70 +22,44 @@ import java.util.Map;
 public abstract class AbstractPermanentRefBook extends AbstractReadOnlyRefBook {
 
     /**
-     * Метод возвращает данные для справочника (id записи, карту алиасов и значений)
+     * Метод возвращает данные из справочника (id записи, карту алиасов и значений) с учетом фильтрации
      * @return Map<recordId, Map<Alias, Value>>
      */
-    abstract protected Map<Long, Map<String, String>> getRecords(String filter);
+    abstract protected PagingResult<Map<String, RefBookValue>> getRecords(String filter);
 
     /**
      * В реализации игнорируются: версия, сортировка
      */
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
-        // записи справочника
-        Map<Long, Map<String, String>> records = getRecords(filter);
-
-        PagingResult<Map<String, RefBookValue>> pagingResult = new PagingResult<Map<String, RefBookValue>>();
-
-        int cnt = 0;
-
-        for (Map.Entry<Long, Map<String, String>> entry: records.entrySet()){
-            if (++cnt > pagingParams.getCount()){
-                break;
-            }
-
-            Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
-            RefBookValue recordId = new RefBookValue(RefBookAttributeType.NUMBER, entry.getKey());
-            map.put("record_id", recordId);
-
-            for (Map.Entry<String, String> attribute: entry.getValue().entrySet()){
-                RefBookValue value = new RefBookValue(RefBookAttributeType.STRING, attribute.getValue());
-                map.put(attribute.getKey(), value);
-            }
-
-            pagingResult.add(map);
-        }
-
-        pagingResult.setTotalCount(records.size());
-
-        return pagingResult;
+		PagingResult<Map<String, RefBookValue>> filteredRecords = getRecords(filter);
+		if (pagingParams == null) {
+			return filteredRecords;
+		} else {
+			PagingResult<Map<String, RefBookValue>> pagingResult = new PagingResult<Map<String, RefBookValue>>();
+			int rightBound = Math.min(pagingParams.getStartIndex() + pagingParams.getCount(), filteredRecords.size());
+			for (int i = pagingParams.getStartIndex(); i < rightBound; ++i) {
+				pagingResult.add(filteredRecords.get(i));
+			}
+			pagingResult.setTotalCount(rightBound - pagingParams.getStartIndex());
+			return pagingResult;
+		}
     }
 
     @Override
     public int getRecordsCount(Date version, String filter) {
-        throw new UnsupportedOperationException();
+        return getRecords(version, null, filter, null, true).size();
     }
 
     @Override
-    public Map<String, RefBookValue> getRecordData(Long recordId) {
-        Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
-        Map<Long, Map<String, String>> records = getRecords(null);
-
-        for(Map.Entry<Long, Map<String, String>> entry: records.entrySet()){
-            if (entry.getKey().equals(recordId)){
-                RefBookValue rId = new RefBookValue(RefBookAttributeType.NUMBER, entry.getKey());
-                map.put("record_id", rId);
-
-                for (Map.Entry<String, String> attribute: entry.getValue().entrySet()){
-                    RefBookValue value = new RefBookValue(RefBookAttributeType.STRING, attribute.getValue());
-                    map.put(attribute.getKey(), value);
-                }
-
-                return map;
-            }
-        }
-
-        throw new IllegalArgumentException("There does not exist a record with ID = "+recordId);
+    public Map<String, RefBookValue> getRecordData(@NotNull Long recordId) {
+		PagingResult<Map<String, RefBookValue>> records = getRecords(null);
+		for (Map<String, RefBookValue> record: records) {
+			if (recordId.equals(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue())) {
+				return record;
+			}
+		}
+        throw new IllegalArgumentException("There does not exist a record with ID = " + recordId);
     }
 
     @Override
@@ -104,8 +78,8 @@ public abstract class AbstractPermanentRefBook extends AbstractReadOnlyRefBook {
     }
 
     @Override
-    public Long getRowNum(Date version, Long recordId,
-                          String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
+    public Long getRowNum(Date version, Long recordId, String filter, RefBookAttribute sortAttribute,
+			boolean isSortAscending) {
         throw new UnsupportedOperationException();
     }
 }
