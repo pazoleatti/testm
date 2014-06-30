@@ -466,20 +466,26 @@ public class RefBookUniversal implements RefBookDataProvider {
                 }
                 if (versionTo != null) {
                     boolean isVersionEndAlreadyExists = refBookDao.isVersionsExist(refBookId, Arrays.asList(recordId), SimpleDateUtils.addDayToDate(versionTo, 1));
-                    if (relatedVersions.isEmpty() && !isVersionEndAlreadyExists) {
+                    if (relatedVersions.isEmpty()) {
                         //Создаем новую фиктивную версию - дату окончания
                         refBookDao.createFakeRecordVersion(refBookId, recordId, SimpleDateUtils.addDayToDate(versionTo, 1));
+                    }
+
+                    if (!relatedVersions.isEmpty()) {
+                        if (!isVersionEndAlreadyExists) {
+                            //Изменяем существующую фиктивную версию
+                            refBookUtils.updateVersionRelevancePeriod(REF_BOOK_RECORD_TABLE_NAME, relatedVersions.get(0), SimpleDateUtils.addDayToDate(versionTo, 1));
+                        } else {
+                            //Удаляем существующую фиктивную версию, теперь дата окончания задается началом следующей версии
+                            Long currentVersionEnd = refBookDao.findRecord(refBookId, recordId, SimpleDateUtils.addDayToDate(oldVersionPeriod.getVersionEnd(), 1));
+                            refBookUtils.deleteRecordVersions(REF_BOOK_RECORD_TABLE_NAME, Arrays.asList(currentVersionEnd));
+                        }
                     }
                 }
 
                 if (!relatedVersions.isEmpty() && versionTo == null) {
                     //Удаляем фиктивную запись - теперь у версии нет конца
                     refBookUtils.deleteRecordVersions(REF_BOOK_RECORD_TABLE_NAME, relatedVersions);
-                }
-
-                if (!relatedVersions.isEmpty() && versionTo != null) {
-                    //Изменяем существующую фиктивную версию
-                    refBookUtils.updateVersionRelevancePeriod(REF_BOOK_RECORD_TABLE_NAME, relatedVersions.get(0), SimpleDateUtils.addDayToDate(versionTo, 1));
                 }
             }
 
