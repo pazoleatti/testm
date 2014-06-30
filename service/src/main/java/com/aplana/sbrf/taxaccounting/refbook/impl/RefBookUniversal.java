@@ -154,6 +154,7 @@ public class RefBookUniversal implements RefBookDataProvider {
             RefBook refBook = refBookDao.get(refBookId);
             List<RefBookAttribute> attributes = refBook.getAttributes();
             List<Long> recordIds = new ArrayList<Long>();
+            List<Long> excludedVersionEndRecords = new ArrayList<Long>();
 
             long countIds = 0;
             for (RefBookRecord record : records) {
@@ -178,14 +179,18 @@ public class RefBookUniversal implements RefBookDataProvider {
                 for (RefBookRecord record : records) {
                     //Проверка пересечения версий
                     if (record.getRecordId() != null) {
-                        crossVersionsProcessing(refBookDao.checkCrossVersions(refBookId, record.getRecordId(), versionFrom, versionTo, null),
+                        boolean needToCreateFakeVersion = crossVersionsProcessing(refBookDao.checkCrossVersions(refBookId, record.getRecordId(), versionFrom, versionTo, null),
                                 versionFrom, versionTo, logger);
+                        if (!needToCreateFakeVersion) {
+                            //Добавляем запись в список тех, для которых не будут созданы фиктивные версии
+                            excludedVersionEndRecords.add(record.getRecordId());
+                        }
                     }
                 }
             }
 
             //Создание настоящей и фиктивной версии
-            return createVersions(versionFrom, versionTo, records, countIds, logger);
+            return createVersions(versionFrom, versionTo, records, countIds, excludedVersionEndRecords, logger);
             //System.out.println("all: "+((double)(System.nanoTime()-allTime)/1000000000.0)+"s");
         } catch (Exception e) {
             if (logger != null) {
@@ -282,7 +287,7 @@ public class RefBookUniversal implements RefBookDataProvider {
         throw new ServiceException("Не найдена запись с заданным родительским элементом");
     }
 
-    private List<Long> createVersions(Date versionFrom, Date versionTo, List<RefBookRecord> records, long countIds, Logger logger) {
+    private List<Long> createVersions(Date versionFrom, Date versionTo, List<RefBookRecord> records, long countIds, List<Long> excludedVersionEndRecords, Logger logger) {
         //Генерим record_id для новых записей. Нужно для связи настоящей и фиктивной версий
         List<Long> generatedIds = dbUtils.getNextIds(BDUtils.Sequence.REF_BOOK_RECORD_ROW, countIds);
 
@@ -300,13 +305,15 @@ public class RefBookUniversal implements RefBookDataProvider {
                     logger.info("Установлена дата окончания актуальности версии "+sdf.format(SimpleDateUtils.addDayToDate(nextVersion.getVersionStart(), -1))+" в связи с наличием следующей версии");
                 }
             } else {
-                if (nextVersion == null) {
-                    //Следующая версия не существует - создаем фиктивную версию
-                    refBookDao.createFakeRecordVersion(refBookId, record.getRecordId(), SimpleDateUtils.addDayToDate(versionTo, 1));
-                } else {
-                    int days = SimpleDateUtils.daysBetween(versionTo, nextVersion.getVersionStart());
-                    if (days != 1) {
+                if (!excludedVersionEndRecords.contains(record.getRecordId())) {
+                    if (nextVersion == null) {
+                        //Следующая версия не существует - создаем фиктивную версию
                         refBookDao.createFakeRecordVersion(refBookId, record.getRecordId(), SimpleDateUtils.addDayToDate(versionTo, 1));
+                    } else {
+                        int days = SimpleDateUtils.daysBetween(versionTo, nextVersion.getVersionStart());
+                        if (days != 1) {
+                            refBookDao.createFakeRecordVersion(refBookId, record.getRecordId(), SimpleDateUtils.addDayToDate(versionTo, 1));
+                        }
                     }
                 }
             }
@@ -317,8 +324,9 @@ public class RefBookUniversal implements RefBookDataProvider {
 
     /**
      * Обработка пересечений версий
+     * @return нужна ли дальнейшая обработка даты окончания (фиктивной версии)? Она могла быть выполнена в процессе проверки пересечения
      */
-    private void crossVersionsProcessing(List<CheckCrossVersionsResult> results, Date versionFrom, Date versionTo, Logger logger) {
+    private boolean crossVersionsProcessing(List<CheckCrossVersionsResult> results, Date versionFrom, Date versionTo, Logger logger) {
         for (CheckCrossVersionsResult result : results) {
             if (result.getResult() == CrossResult.FATAL_ERROR) {
                 throw new ServiceException(CROSS_ERROR_MSG);
@@ -339,12 +347,14 @@ public class RefBookUniversal implements RefBookDataProvider {
             if (result.getResult() == CrossResult.NEED_CHANGE) {
                 refBookUtils.updateVersionRelevancePeriod(REF_BOOK_RECORD_TABLE_NAME, result.getRecordId(), SimpleDateUtils.addDayToDate(versionTo, 1));
                 //updateResults(results, result);
+                return false;
             }
             if (result.getResult() == CrossResult.NEED_DELETE) {
                 refBookUtils.deleteVersion(REF_BOOK_RECORD_TABLE_NAME, result.getRecordId());
                 //updateResults(results, result);
             }
         }
+        return true;
     }
 
     /**
