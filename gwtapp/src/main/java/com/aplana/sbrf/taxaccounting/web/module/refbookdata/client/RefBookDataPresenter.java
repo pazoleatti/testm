@@ -195,6 +195,10 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 		refBookDataId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_DATA_ID, null));
         if (request.getParameterNames().contains(RefBookDataTokens.REFBOOK_RECORD_ID)) {
             recordId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_RECORD_ID, null));
+            if (mode == null) {
+                mode = FormMode.VIEW;
+            }
+            setMode(mode);
         } else {
             recordId = null;
             getView().resetSearchInputBox();

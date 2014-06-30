@@ -65,70 +65,77 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
 		return refBookUtils.getRecordData(REF_BOOK_ID, TABLE_NAME, recordId);
     }
 
-    private final static String CHECK_UNIQUE_MATCHES_FOR_NON_VERSION = "select id record_id, name from %s t where %s %s (%s)";
+    private final static String CHECK_UNIQUE_MATCHES_FOR_NON_VERSION = "select name from department t where %s %s %s";
     @Override
-    public List<Pair<Long, String>> getMatchedRecordsByUniqueAttributes(Long recordId, List<RefBookAttribute> attributes, List<RefBookRecord> records) {
-        boolean hasUniqueAttributes = false;
+    public List<Pair<String, String>> getMatchedRecordsByUniqueAttributes(Long recordId, List<RefBookAttribute> attributes, List<RefBookRecord> records) {
         PreparedStatementData ps = new PreparedStatementData();
         ps.appendQuery(CHECK_UNIQUE_MATCHES_FOR_NON_VERSION);
         ArrayList<RefBookAttribute> uniqueAttrs = new ArrayList<RefBookAttribute>();
         for (RefBookAttribute attribute : attributes) {
-            if (attribute.isUnique())
+            if (attribute.isUnique()){
                 uniqueAttrs.add(attribute);
+            }
         }
+        //Если уникальных атрибутов нет, то поиск не нужен
+        if (uniqueAttrs.isEmpty())
+            return new ArrayList<Pair<String, String>>(0);
         String idOddsTag = "";
         if (recordId != null){
-            ps.addParam(recordId);
-            idOddsTag = "t.id <> ?";
+            idOddsTag = "t.id <> " + recordId;
         }
 
+        ArrayList<Pair<String, String>> pairList = new ArrayList<Pair<String, String>>();
         String andTag = !uniqueAttrs.isEmpty() && recordId != null ? "AND" : "";
-        StringBuilder sb = new StringBuilder();
-        for (int i=0; i < uniqueAttrs.size(); i++) {
-            RefBookAttribute attribute = uniqueAttrs.get(i);
-            if (attribute.isUnique()) {
-                hasUniqueAttributes = true;
-                for (RefBookRecord record : records) {
-                    Map<String, RefBookValue> values = record.getValues();
-                    sb.append(String.format("t.%s = ?", attribute.getAlias()));
+        for (final RefBookAttribute attribute : uniqueAttrs) {
+            String querySql = null;
+            Object value = null;
+            for (RefBookRecord record : records) {
+                Map<String, RefBookValue> values = record.getValues();
 
-                    if (attribute.getAttributeType().equals(RefBookAttributeType.STRING)) {
-                        ps.addParam(values.get(attribute.getAlias()).getStringValue());
-                    }
-                    if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
-                        ps.addParam(values.get(attribute.getAlias()).getReferenceValue());
-                    }
-                    if (attribute.getAttributeType().equals(RefBookAttributeType.NUMBER)) {
-                        ps.addParam(values.get(attribute.getAlias()).getNumberValue());
-                    }
-                    if (attribute.getAttributeType().equals(RefBookAttributeType.DATE)) {
-                        ps.addParam(values.get(attribute.getAlias()).getDateValue());
-                    }
-
-                    if (i < uniqueAttrs.size() - 1) {
-                        sb.append(" or ");
-                    }
+                if (attribute.getAttributeType().equals(RefBookAttributeType.STRING)) {
+                    querySql = String.format(CHECK_UNIQUE_MATCHES_FOR_NON_VERSION,
+                            idOddsTag,
+                            andTag,
+                            "t." + attribute.getAlias() + " = ?" );
+                    value =  values.get(attribute.getAlias()).getStringValue();
+                }
+                if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
+                    querySql = String.format(CHECK_UNIQUE_MATCHES_FOR_NON_VERSION,
+                            idOddsTag,
+                            andTag,
+                            "t." + attribute.getAlias() + "=?");
+                    value = values.get(attribute.getAlias()).getReferenceValue();
+                }
+                if (attribute.getAttributeType().equals(RefBookAttributeType.NUMBER)) {
+                    querySql = String.format(CHECK_UNIQUE_MATCHES_FOR_NON_VERSION,
+                            idOddsTag,
+                            andTag,
+                            "t." + attribute.getAlias() + "=?");
+                    value = values.get(attribute.getAlias()).getNumberValue();
+                }
+                if (attribute.getAttributeType().equals(RefBookAttributeType.DATE)) {
+                    querySql = String.format(CHECK_UNIQUE_MATCHES_FOR_NON_VERSION,
+                            idOddsTag,
+                            andTag,
+                            "t." + attribute.getAlias() + "=?");
+                    value = values.get(attribute.getAlias()).getDateValue();
                 }
             }
-        }
 
-
-        try {
-            if (hasUniqueAttributes) {
-                return getJdbcTemplate().query(
-                        String.format(ps.getQuery().toString(), TABLE_NAME, idOddsTag, andTag, sb.toString()), ps.getParams().toArray(),
-                        new RowMapper<Pair<Long, String>>() {
+            try {
+                pairList.addAll(getJdbcTemplate().query(querySql, new Object[]{value},
+                        new RowMapper<Pair<String, String>>() {
                             @Override
-                            public Pair<Long, String> mapRow(ResultSet rs, int rowNum) throws SQLException {
-                                return new Pair<Long, String>(SqlUtils.getLong(rs, "record_id"), rs.getString("NAME"));
+                            public Pair<String, String> mapRow(ResultSet rs, int rowNum) throws SQLException {
+                                return new Pair<String, String>(rs.getString("NAME"), attribute.getName());
                             }
-                        });
-            } else {
-                return new PagingResult<Pair<Long, String>>(new ArrayList<Pair<Long, String>>(0));
+                        }));
+            } catch (DataAccessException e) {
+                throw new DaoException("Ошибка при поиске уникальных значений в справочнике " + TABLE_NAME, e);
             }
-        } catch (DataAccessException e){
-            throw new DaoException("Ошибка при поиске уникальных значений в справочнике " + TABLE_NAME, e);
         }
+
+        return pairList;
     }
 
     @Override

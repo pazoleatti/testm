@@ -17,10 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
@@ -63,8 +60,8 @@ public class GetDeclarationDataHandler
 		
 		DeclarationData declaration = declarationDataService.get(
 				action.getId(), userInfo);
-		result.setDocDate(declarationDataService.getXmlDataDocDate(
-				action.getId(), userInfo));
+        Date docDate = declarationDataService.getXmlDataDocDate(action.getId(), userInfo);
+		result.setDocDate(docDate != null ? docDate : new Date());
 		
 		result.setCanAccept(permittedEvents.contains(FormDataEvent.MOVE_CREATED_TO_ACCEPTED));
 		result.setCanReject(permittedEvents.contains(FormDataEvent.MOVE_ACCEPTED_TO_CREATED));
@@ -103,19 +100,21 @@ public class GetDeclarationDataHandler
 		Pdf pdf = new Pdf();
 		pdf.setTitle(!taxType.equals(TaxType.DEAL) ? "Список листов декларации" : "Список листов уведомления");
 		List<PdfPage> pdfPages = new ArrayList<PdfPage>();
-		InputStream pdfData = new ByteArrayInputStream(
-				declarationDataService.getPdfData(action.getId(), userInfo));
-		int pageNumber = PDFImageUtils.getPageNumber(pdfData);
-		String randomUUID = UUID.randomUUID().toString().toLowerCase(); // добавлено чтобы браузер не кешировал данные
-		for (int i = 0; i < pageNumber; i++) {
-			PdfPage pdfPage = new PdfPage();
-			pdfPage.setTitle("Лист " + (i + 1));
+        byte buf[] = declarationDataService.getPdfData(action.getId(), userInfo);
+        if (buf != null) {
+    		InputStream pdfData = new ByteArrayInputStream(buf);
+            int pageNumber = PDFImageUtils.getPageNumber(pdfData);
+            String randomUUID = UUID.randomUUID().toString().toLowerCase(); // добавлено чтобы браузер не кешировал данные
+            for (int i = 0; i < pageNumber; i++) {
+                PdfPage pdfPage = new PdfPage();
+                pdfPage.setTitle("Лист " + (i + 1));
 
-			pdfPage.setSrc(String.format("download/declarationData/pageImage/%d/%d/%s",
-					action.getId(), i, randomUUID));
-			pdfPages.add(pdfPage);
-		}
-		pdf.setPdfPages(pdfPages);
+                pdfPage.setSrc(String.format("download/declarationData/pageImage/%d/%d/%s",
+                        action.getId(), i, randomUUID));
+                pdfPages.add(pdfPage);
+            }
+            pdf.setPdfPages(pdfPages);
+        }
 		return pdf;
 	}
 
