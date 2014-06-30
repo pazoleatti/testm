@@ -98,38 +98,10 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
 					.defaultCallback(new AbstractCallback<CheckExistenceDeclarationResult>() {
 						@Override
 						public void onSuccess(final CheckExistenceDeclarationResult checkResult) {
-							if (checkResult.getStatus() == CheckExistenceDeclarationResult.DeclarationStatus.EXIST_CREATED) {
-                                Dialog.confirmMessage("Переформировать?","Декларация с указанными параметрами уже существует. Переформировать?", new DialogHandler() {
-                                    @Override
-                                    public void yes() {
-                                        RefreshDeclaration refreshDeclarationCommand = new RefreshDeclaration();
-                                        refreshDeclarationCommand.setDeclarationDataId(checkResult.getDeclarationDataId());
-                                        dispatcher.execute(refreshDeclarationCommand, CallbackUtils
-                                                .defaultCallback(new AbstractCallback<RefreshDeclarationResult>() {
-                                                    @Override
-                                                    public void onSuccess(RefreshDeclarationResult result) {
-                                                        onHide();
-                                                        placeManager
-                                                                .revealPlace(new PlaceRequest.Builder().nameToken(DeclarationDataTokens.declarationData)
-                                                                        .with(DeclarationDataTokens.declarationId,
-                                                                                String.valueOf(checkResult.getDeclarationDataId())).build());
-                                                        LogAddEvent.fire(DeclarationCreationPresenter.this, result.getUuid());
-                                                    }
-                                                }, DeclarationCreationPresenter.this));
-                                    }
-                                    @Override
-                                    public void no() {
-                                        Dialog.hideMessage();
-                                    }
-
-                                    @Override
-                                    public void close() {
-                                        Dialog.hideMessage();
-                                    }
-                                });
-							} else if (checkResult.getStatus() == CheckExistenceDeclarationResult.DeclarationStatus.EXIST_ACCEPTED) {
-								MessageEvent.fire(DeclarationCreationPresenter.this, "Переформирование невозможно, так как декларация уже принята.");
-							} else {
+                            if (checkResult.getStatus() != CheckExistenceDeclarationResult.DeclarationStatus.NOT_EXIST) {
+                                LogAddEvent.fire(DeclarationCreationPresenter.this, checkResult.getUuid());
+                                Dialog.warningMessage("Создание декларации", "Декларация не создана");
+                            } else {
 								CreateDeclaration command = new CreateDeclaration();
 								command.setDeclarationTypeId(filter.getDeclarationTypeId());
 								command.setDepartmentId(filter.getDepartmentIds().iterator().next());

@@ -3,8 +3,10 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationlist.server;
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTypeService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.CheckExistenceDeclaration;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.CheckExistenceDeclarationResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -31,6 +33,9 @@ public class CheckExistenceDeclarationHandler extends AbstractActionHandler<Chec
     @Autowired
     DeclarationTypeService declarationTypeService;
 
+    @Autowired
+    private LogEntryService logEntryService;
+
 	@Override
 	public CheckExistenceDeclarationResult execute(CheckExistenceDeclaration command, ExecutionContext executionContext) throws ActionException {
         Integer declarationTypeId = command.getDeclarationTypeId();
@@ -44,18 +49,19 @@ public class CheckExistenceDeclarationHandler extends AbstractActionHandler<Chec
         }
         DeclarationData declarationData = declarationService.find(declarationTypeId, command.getDepartmentId(), command.getReportPeriodId());
 		CheckExistenceDeclarationResult result = new CheckExistenceDeclarationResult();
+        Logger logger = new Logger();
 		if ((declarationData != null)) {
 			if (declarationData.isAccepted()) {
 				result.setStatus(CheckExistenceDeclarationResult.DeclarationStatus.EXIST_ACCEPTED);
 			} else {
 				result.setStatus(CheckExistenceDeclarationResult.DeclarationStatus.EXIST_CREATED);
 			}
-			result.setDeclarationDataId(declarationData.getId());
+            logger.error("Декларация с заданными параметрами уже существует");
 		} else {
 			result.setStatus(CheckExistenceDeclarationResult.DeclarationStatus.NOT_EXIST);
-			result.setDeclarationDataId(null);
 		}
 
+        result.setUuid(logEntryService.save(logger.getEntries()));
 		return result;
 	}
 

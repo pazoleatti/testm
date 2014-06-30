@@ -99,7 +99,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
 	@Override
 	@Transactional(readOnly = false)
-	public long create(Logger logger, int declarationTemplateId,
+	public long create(int declarationTemplateId,
 			int departmentId, TAUserInfo userInfo, int reportPeriodId) {
 		declarationDataAccessService.checkEvents(userInfo, declarationTemplateId, departmentId, reportPeriodId, FormDataEvent.CREATE);
 
@@ -110,7 +110,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 		newDeclaration.setDeclarationTemplateId(declarationTemplateId);
 		long id = declarationDataDao.saveNew(newDeclaration);
 
-		setDeclarationBlobs(logger, newDeclaration, new Date(), userInfo);
 		logBusinessService.add(null, id, userInfo, FormDataEvent.CREATE, null);
 		auditService.add(FormDataEvent.CREATE , userInfo, newDeclaration.getDepartmentId(),
 				newDeclaration.getReportPeriodId(),
@@ -145,7 +144,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             declarationData.setXmlDataUuid(null);
         }
         declarationDataDao.update(declarationData);
-        blobDataService.delete(strings);
+        if (!strings.isEmpty()) blobDataService.delete(strings);
 
 		setDeclarationBlobs(logger, declarationData, docDate, userInfo);
 		logBusinessService.add(null, id, userInfo, FormDataEvent.SAVE, null);
@@ -249,6 +248,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	public Date getXmlDataDocDate(long declarationDataId, TAUserInfo userInfo) {
 		declarationDataAccessService.checkEvents(userInfo, declarationDataId, FormDataEvent.GET_LEVEL0);
 			Document document = getDocument(declarationDataId);
+            if (document == null) return null;
 			Node fileNode = document.getElementsByTagName(TAG_DOCUMENT).item(0);
 			NamedNodeMap attributes = fileNode.getAttributes();
 			Node fileNameNode = attributes.getNamedItem(ATTR_DOC_DATE);
@@ -396,6 +396,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	private Document getDocument(long declarationDataId) {
 		try {
 			String xmlUuid = declarationDataDao.get(declarationDataId).getXmlDataUuid();
+            if (xmlUuid == null) return null;
             String xml = new String(getBytesFromInputstream(xmlUuid));
 			InputSource inputSource = new InputSource(new StringReader(xml));
 
@@ -499,6 +500,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     private byte[] getBytesFromInputstream(String blobId){
+        if (blobId == null) return null;
         BlobData blobPdfData = blobDataService.get(blobId);
         ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
         try {

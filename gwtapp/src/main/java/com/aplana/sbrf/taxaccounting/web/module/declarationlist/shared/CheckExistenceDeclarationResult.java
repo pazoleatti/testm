@@ -11,16 +11,7 @@ public class CheckExistenceDeclarationResult implements Result {
 		NOT_EXIST// Не существует
 	}
 	DeclarationStatus status;
-
-	Long declarationDataId;
-
-	public Long getDeclarationDataId() {
-		return declarationDataId;
-	}
-
-	public void setDeclarationDataId(Long declarationDataId) {
-		this.declarationDataId = declarationDataId;
-	}
+    private String uuid;
 
 	public DeclarationStatus getStatus() {
 		return status;
@@ -29,4 +20,12 @@ public class CheckExistenceDeclarationResult implements Result {
 	public void setStatus(DeclarationStatus status) {
 		this.status = status;
 	}
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
 }

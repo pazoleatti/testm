@@ -58,12 +58,17 @@ public class PdfViewerWidget extends Composite implements PdfViewerView {
 			TreeItem rootItem = new TreeItem();
 			rootItem.setText(pdf.getTitle());
 			rootItem.setState(true);
-			for (PdfPage page : pdf.getPdfPages()) {
-				TreeItem pageItem = new TreeItem();
-				pageItem.setText(page.getTitle());
-				pageItem.setUserObject(page);
-				rootItem.addItem(pageItem);
-			}
+            if (pdf.getPdfPages() != null) {
+                pdfPage.setVisible(true);
+                for (PdfPage page : pdf.getPdfPages()) {
+                    TreeItem pageItem = new TreeItem();
+                    pageItem.setText(page.getTitle());
+                    pageItem.setUserObject(page);
+                    rootItem.addItem(pageItem);
+                }
+            } else {
+                pdfPage.setVisible(false);
+            }
 			pages.addItem(rootItem);
 			rootItem.setState(true);
 			pages.setSelectedItem(rootItem.getChild(0));

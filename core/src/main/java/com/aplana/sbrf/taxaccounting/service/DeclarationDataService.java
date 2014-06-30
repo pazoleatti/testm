@@ -16,7 +16,6 @@ import java.util.List;
 public interface DeclarationDataService {
 	/**
 	 * Создать декларацию в текущем отчётном периоде. Созданная декларация сразу же сохраняется в БД и возвращается идентификатор созданной записи.
-	 * @param logger - объект журнала
 	 * @param declarationTemplateId идентификатор шаблона декларации
 	 * @param departmentId идентификатор подразделения, в котором создаваётся декларация
 	 * @param userInfo информация о пользователе, выполняющего действие
@@ -25,8 +24,8 @@ public interface DeclarationDataService {
 	 * @throws AccessDeniedException - если у пользователя нет прав на создание декларации с заданными параметрами
 	 * 	ServiceException - если при создании декларации произошла ошибка (например декларация с такими параметрами уже существует)
 	 */
-	long create(Logger logger, int declarationTemplateId, int departmentId, TAUserInfo userInfo, int reportPeriodId);
-	
+    long create(int declarationTemplateId, int departmentId, TAUserInfo userInfo, int reportPeriodId);
+
 	/**
 	 * Обновить декларацию (сформировать декларацию заново на основе данных, которые есть в БД)
 	 * @param logger - объект журнала
