@@ -1,25 +1,23 @@
 package com.aplana.sbrf.taxaccounting.web.module.configuration.shared;
 
-import java.util.List;
-
+import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
-public class SaveConfigurationAction extends UnsecuredActionImpl<SaveConfigurationResult> implements ActionName{
-	
-	private List<ConfigTuple> data;
+public class SaveConfigurationAction extends UnsecuredActionImpl<SaveConfigurationResult> implements ActionName {
 
-	public List<ConfigTuple> getData() {
-		return data;
-	}
+    private ConfigurationParamModel model;
 
-	public void setData(List<ConfigTuple> data) {
-		this.data = data;
-	}
-	
-	@Override
-	public String getName() {
-		return "Сохранение конфигурационных параметров";
-	}
-	
+    @Override
+    public String getName() {
+        return "Сохранение конфигурационных параметров";
+    }
+
+    public ConfigurationParamModel getModel() {
+        return model;
+    }
+
+    public void setModel(ConfigurationParamModel model) {
+        this.model = model;
+    }
 }

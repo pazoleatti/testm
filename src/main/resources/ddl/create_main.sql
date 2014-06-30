@@ -26,14 +26,15 @@ comment on column ref_book_oktmo.record_id is 'Идентификатор стр
 
 create sequence seq_ref_book_oktmo start with 300000 increment by 100;
 --------------------------------------------------------------------------------------------------------------
-
 create table configuration (
   code varchar2(50) not null,
-  value clob
+  value clob,
+  department_id number(9) not null
 );
 comment on table configuration is 'Настройки приложения, конфигурация';
 comment on column configuration.code is 'Код параметра';
 comment on column configuration.value is 'Значение параметра';
+comment on column configuration.department_id is 'ТБ';
 -------------------------------------------------------------------------------------------------------------------------------------------
 create table form_type (
   id       number(9) not null,

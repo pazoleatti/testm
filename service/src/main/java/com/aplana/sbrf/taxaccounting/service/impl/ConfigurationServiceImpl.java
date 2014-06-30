@@ -22,7 +22,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 		if (!userInfo.getUser().hasRole(TARole.ROLE_ADMIN)&&!userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)){
 			throw new AccessDeniedException("Нет прав на просмотр конфигурационных параметров приложения");
 		}
-		return configDao.loadParams();
+		return configDao.getAll();
 	}
 
 	@Override
@@ -30,6 +30,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 		if (!userInfo.getUser().hasRole(TARole.ROLE_ADMIN)){
 			throw new AccessDeniedException("Нет прав на изменение конфигурационных параметров приложения");
 		}
-		configDao.saveParams(model);
+		configDao.save(model);
 	}
 }
