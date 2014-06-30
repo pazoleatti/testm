@@ -929,8 +929,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                     break;
                     case NUMBER: {
                         if (entry.getValue().getNumberValue() != null) {
-                            values[3] = BigDecimal.valueOf(entry.getValue().getNumberValue().doubleValue())
-                                    .setScale(attribute.getPrecision(), RoundingMode.HALF_UP).doubleValue();
+                            BigDecimal v = new BigDecimal(entry.getValue().getNumberValue().toString());
+                            values[3] = v.setScale(attribute.getPrecision(), RoundingMode.HALF_UP);
                         }
                     }
                     break;
