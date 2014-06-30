@@ -136,4 +136,25 @@ public interface DeclarationDataService {
      * @return наличие форм декларации
      */
     boolean existDeclaration(int declarationTypeId, int departmentId, List<LogEntry> logs);
+
+    /**
+     * Заблокировать DeclarationData.
+     * @param declarationDataId - идентификатор декларации
+     * @param userInfo информация о пользователе
+     */
+    void lock(long declarationDataId, TAUserInfo userInfo);
+
+    /**
+     * Снять блокировку с DeclarationData.
+     * @param declarationDataId - идентификатор декларации
+     * @param userInfo информация о пользователе
+     * */
+    void unlock(long declarationDataId, TAUserInfo userInfo);
+
+    /**
+     * Проверяет, не заблокирована ли декларация другим пользователем
+     * @param declarationDataId - идентификатор декларации
+     * @param userInfo - информация о пользователе
+     */
+    void checkLockedMe(Long declarationDataId, TAUserInfo userInfo);
 }

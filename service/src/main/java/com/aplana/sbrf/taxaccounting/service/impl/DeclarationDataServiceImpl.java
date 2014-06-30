@@ -1,10 +1,13 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.core.api.LockCoreService;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
+import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
@@ -22,6 +25,7 @@ import net.sf.jasperreports.engine.util.JRXmlUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
@@ -89,6 +93,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Autowired
     private LogEntryService logEntryService;
+
+    @Autowired
+    private LockCoreService lockCoreService;
+
+    @Autowired
+    private TAUserDao userDao;
 
 	public static final String TAG_FILE = "Файл";
 	public static final String TAG_DOCUMENT = "Документ";
@@ -177,6 +187,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	@Override
 	@Transactional(readOnly = false)
 	public void delete(long id, TAUserInfo userInfo) {
+        checkLockedMe(id, userInfo);
 		declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.DELETE);
 			DeclarationData declarationData = declarationDataDao.get(id);
 
@@ -192,7 +203,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	@Override
 	@Transactional(readOnly = false)
 	public void setAccepted(Logger logger, long id, boolean accepted, TAUserInfo userInfo) {
-
+        checkLockedMe(id, userInfo);
 		// TODO (sgoryachkin) Это 2 метода должо быть
 		if (accepted) {
             DeclarationData declarationData  = declarationDataDao.get(id);
@@ -509,5 +520,22 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             throw new ServiceException("Не удалось извлечь pdf.", e);
         }
         return arrayOutputStream.toByteArray();
+    }
+
+    @Override
+    @Transactional
+    public void lock(long declarationDataId, TAUserInfo userInfo) {
+        lockCoreService.lock(DeclarationData.class, declarationDataId, userInfo);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void unlock(long declarationDataId, TAUserInfo userInfo) {
+        lockCoreService.unlock(DeclarationData.class, declarationDataId, userInfo);
+    }
+
+    @Override
+    public void checkLockedMe(Long declarationDataId, TAUserInfo userInfo) {
+        lockCoreService.checkNoLockedAnother(DeclarationData.class, declarationDataId, userInfo);
     }
 }

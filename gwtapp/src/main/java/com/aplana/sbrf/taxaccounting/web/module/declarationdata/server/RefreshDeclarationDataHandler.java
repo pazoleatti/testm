@@ -35,10 +35,16 @@ public class RefreshDeclarationDataHandler extends AbstractActionHandler<Refresh
     public RefreshDeclarationDataResult execute(RefreshDeclarationDataAction action, ExecutionContext context) {
 		TAUserInfo userInfo = securityService.currentUserInfo();
         RefreshDeclarationDataResult result = new RefreshDeclarationDataResult();
-        Logger logger = new Logger();
-		declarationDataService.reCreate(logger, action.getDeclarationId(), userInfo, action.getDocDate());
-        result.setUuid(logEntryService.save(logger.getEntries()));
-	    return result;
+        declarationDataService.checkLockedMe(action.getDeclarationId(), userInfo);
+        declarationDataService.lock(action.getDeclarationId(), userInfo);
+        try {
+            Logger logger = new Logger();
+            declarationDataService.reCreate(logger, action.getDeclarationId(), userInfo, action.getDocDate());
+            result.setUuid(logEntryService.save(logger.getEntries()));
+        } finally {
+            declarationDataService.unlock(action.getDeclarationId(), userInfo);
+        }
+        return result;
     }
 
     @Override
