@@ -233,8 +233,8 @@ void logicCheck() {
         // 2. Обязательность заполнения полей
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
 
-        // 3. Проверка рыночной цены в процентах к номиналу (графа 10, 13)
-        if (row.marketPriceOnDateAcquisitionInPerc > 0 && row.redemptionVal != 100) {
+        // 3. Проверка рыночной цены в процентах к номиналу (графа 10, 16)
+        if (row.marketPriceOnDateAcquisitionInPerc > 0 && row.marketPricePercent != 100) {
             loggerError(errorMsg + 'Неверно указана цена в процентах при погашении!')
         }
 
@@ -640,6 +640,10 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol = 11
         newRow.marketPriceOnDateAcquisitionInRub = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
 
+        // графа 12
+        xmlIndexCol = 12
+        newRow.taxPrice = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
         // графа 13
         xmlIndexCol = 13
         newRow.redemptionVal = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
@@ -660,9 +664,17 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol = 17
         newRow.marketPriceRuble = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
 
+        // графа 18
+        xmlIndexCol = 18
+        newRow.exercisePriceRetirement = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
         // графа 19
         xmlIndexCol = 19
         newRow.costsRetirement = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
+        // графа 20
+        xmlIndexCol = 20
+        newRow.allCost = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
 
         // графа 21
         xmlIndexCol = 21
@@ -675,6 +687,22 @@ void addData(def xml, int headRowCount) {
         // графа 23
         xmlIndexCol = 23
         newRow.issueDays = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
+        // графа 24
+        xmlIndexCol = 24
+        newRow.tenureSkvitovannymiBonds = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
+        // графа 25
+        xmlIndexCol = 25
+        newRow.interestEarned = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
+        // графа 26
+        xmlIndexCol = 26
+        newRow.profitLoss = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
+        // графа 27
+        xmlIndexCol = 27
+        newRow.excessOfTheSellingPrice = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
 
         rows.add(newRow)
     }
