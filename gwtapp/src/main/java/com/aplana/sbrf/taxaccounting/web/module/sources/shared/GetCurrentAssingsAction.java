@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.sources.shared;
 
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
+import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.PeriodsInterval;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
 public class GetCurrentAssingsAction extends UnsecuredActionImpl<GetCurrentSourcesResult> implements ActionName {
@@ -10,6 +11,7 @@ public class GetCurrentAssingsAction extends UnsecuredActionImpl<GetCurrentSourc
     private int typeId;
     private FormDataKind kind;
     private boolean isForm = true;
+    private PeriodsInterval periodsInterval;
 
     public int getDepartmentId() {
         return departmentId;
@@ -41,6 +43,14 @@ public class GetCurrentAssingsAction extends UnsecuredActionImpl<GetCurrentSourc
 
     public void setForm(boolean isForm) {
         this.isForm = isForm;
+    }
+
+    public PeriodsInterval getPeriodsInterval() {
+        return periodsInterval;
+    }
+
+    public void setPeriodsInterval(PeriodsInterval periodsInterval) {
+        this.periodsInterval = periodsInterval;
     }
 
     @Override

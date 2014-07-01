@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -41,9 +42,12 @@ public class DeleteDeclarationSourcesHandler extends AbstractActionHandler<Delet
 	public DeleteDeclarationSourcesResult execute(DeleteDeclarationSourcesAction action, ExecutionContext executionContext) throws ActionException {
 		DeleteDeclarationSourcesResult result = new DeleteDeclarationSourcesResult();
 		List<LogEntry> logs = new ArrayList<LogEntry>();
+        //TODO передавать данные с клиента
+        Date periodStart = new Date();
+        Date periodEnd = new Date();
 		for (FormTypeKind ddt : action.getKind()) {
 			List<DepartmentFormType> departmentFormTypes = departmentFormTypeService
-					.getDFTSourceByDDT(ddt.getDepartment().getId(), ddt.getFormTypeId().intValue());
+					.getDFTSourceByDDT(ddt.getDepartment().getId(), ddt.getFormTypeId().intValue(), periodStart, periodEnd);
 			if (departmentFormTypes.isEmpty()) { // Нет назначений
 				departmentFormTypeService.deleteDDT(Arrays.asList(ddt.getId()));
 			} else {

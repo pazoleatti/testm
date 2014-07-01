@@ -63,7 +63,23 @@ public interface DepartmentFormTypeDao {
      * @return информация о формах-источниках в виде списка
      *         {@link DepartmentFormType}
      */
+    @Deprecated
     List<DepartmentFormType> getFormSources(int departmentId, int formTypeId, FormDataKind kind);
+
+    /**
+     * Возвращает информацию об источниках, которые должны использоваться при
+     * формировании налоговой формы назначения с заданными параметрами
+     *
+     * @param departmentId идентификатор подразделения формируемой налоговой формы
+     *                     назначения
+     * @param formTypeId   вид налоговой формы
+     * @param kind         тип налоговой формы
+     * @param periodStart  начало периода, в котором действуют назначения
+     * @param periodEnd    окончание периода, в котором действуют назначения
+     * @return информация о формах-источниках в виде списка
+     *         {@link DepartmentFormType}
+     */
+    List<DepartmentFormType> getFormSources(int departmentId, int formTypeId, FormDataKind kind, Date periodStart, Date periodEnd);
 
     /**
      * Возвращает информацию о всех налоговых формах, которые являются источниками
@@ -157,7 +173,21 @@ public interface DepartmentFormTypeDao {
      * @return информация о формах-источниках в виде списка
      *         {@link DepartmentFormType}
      */
+    @Deprecated
     List<DepartmentFormType> getDeclarationSources(int departmentId, int declarationTypeId);
+
+    /**
+     * Возвращает информацию о формах-источниках, которые должны использоваться
+     * при формировании декларации
+     *
+     * @param departmentId      идентификатор декларации
+     * @param declarationTypeId идентификатор вида декларации
+     * @param periodStart  начало периода, в котором действуют назначения
+     * @param periodEnd    окончание периода, в котором действуют назначения
+     * @return информация о формах-источниках в виде списка
+     *         {@link DepartmentFormType}
+     */
+    List<DepartmentFormType> getDeclarationSources(int departmentId, int declarationTypeId, Date periodStart, Date periodEnd);
 
     /**
      * Обновляет информацию об источниках для декларации

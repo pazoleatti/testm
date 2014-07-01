@@ -239,12 +239,12 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 
 	@Override
 	public void getCurrentAssigns(DepartmentAssign departmentAssign) {
-
         GetCurrentAssingsAction action = new GetCurrentAssingsAction();
         action.setDepartmentId(departmentAssign.getDepartmentId());
         action.setTypeId(departmentAssign.getTypeId());
         action.setForm(departmentAssign.isForm());
         action.setKind(departmentAssign.getKind());
+        action.setPeriodsInterval(getView().getPeriodInterval());
 
 		dispatcher.execute(action, CallbackUtils
 				.defaultCallback(new AbstractCallback<GetCurrentSourcesResult>() {

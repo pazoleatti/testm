@@ -79,8 +79,13 @@ public class SourceServiceImpl implements SourceService {
 
 
     @Override
-    public List<DepartmentFormType> getDFTSourcesByDFT(int departmentId, int formTypeId, FormDataKind kind) {
-        return departmentFormTypeDao.getFormSources(departmentId, formTypeId, kind);
+    public List<DepartmentFormType> getDFTSourcesByDFT(int departmentId, int formTypeId, FormDataKind kind, Date periodStart, Date periodEnd) {
+        return departmentFormTypeDao.getFormSources(departmentId, formTypeId, kind, periodStart, periodEnd);
+    }
+
+    @Override
+    public List<DepartmentFormType> getDFTSourceByDDT(int departmentId, int declarationTypeId, Date periodStart, Date periodEnd) {
+        return departmentFormTypeDao.getDeclarationSources(departmentId, declarationTypeId, periodStart, periodEnd);
     }
 
     /**
@@ -805,11 +810,6 @@ public class SourceServiceImpl implements SourceService {
     @Override
     public List<DepartmentDeclarationType> getDeclarationDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind, Date periodStart, Date periodEnd) {
         return departmentFormTypeDao.getDeclarationDestinations(sourceDepartmentId, sourceFormTypeId, sourceKind, periodStart, periodEnd);
-    }
-
-    @Override
-    public List<DepartmentFormType> getDFTSourceByDDT(int departmentId, int declarationTypeId) {
-        return departmentFormTypeDao.getDeclarationSources(departmentId, declarationTypeId);
     }
 
     @Override

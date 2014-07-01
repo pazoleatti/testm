@@ -81,11 +81,12 @@ public interface SourceService {
      *                     назначения
      * @param formTypeId   вид налоговой формы
      * @param kind         тип налоговой формы
+     * @param periodStart  начало периода, в котором действуют назначения
+     * @param periodEnd    окончание периода, в котором действуют назначения
      * @return информация о формах-источниках в виде списка
      *         {@link com.aplana.sbrf.taxaccounting.model.DepartmentFormType}
      */
-    @Deprecated
-    List<DepartmentFormType> getDFTSourcesByDFT(int departmentId, int formTypeId, FormDataKind kind);
+    List<DepartmentFormType> getDFTSourcesByDFT(int departmentId, int formTypeId, FormDataKind kind, Date periodStart, Date periodEnd);
 
     /**
      * Возвращает НФ назначения (DFT), которые являются источником для ДЕ назначения (DDT)
@@ -93,11 +94,12 @@ public interface SourceService {
      *
      * @param departmentId      идентификатор декларации
      * @param declarationTypeId идентификатор вида декларации
+     * @param periodStart  начало периода, в котором действуют назначения
+     * @param periodEnd    окончание периода, в котором действуют назначения
      * @return информация о формах-источниках в виде списка
      *         {@link com.aplana.sbrf.taxaccounting.model.DepartmentFormType}
      */
-    @Deprecated
-    List<DepartmentFormType> getDFTSourceByDDT(int departmentId, int declarationTypeId);
+    List<DepartmentFormType> getDFTSourceByDDT(int departmentId, int declarationTypeId, Date periodStart, Date periodEnd);
 
     /**
      * Возвращает информацию о декларациях-потребителях, которые должны использовать

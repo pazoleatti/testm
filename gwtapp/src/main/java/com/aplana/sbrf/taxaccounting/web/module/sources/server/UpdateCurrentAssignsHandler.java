@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 public class UpdateCurrentAssignsHandler extends AbstractActionHandler<UpdateCurrentAssignsAction, UpdateCurrentAssignsResult> {
 
 	@Autowired
-	private SourceService departmentFormTypeService;
+	private SourceService sourceService;
 
     public UpdateCurrentAssignsHandler() {
         super(UpdateCurrentAssignsAction.class);
@@ -23,11 +23,11 @@ public class UpdateCurrentAssignsHandler extends AbstractActionHandler<UpdateCur
 
     @Override
     public UpdateCurrentAssignsResult execute(UpdateCurrentAssignsAction action, ExecutionContext context) {
-        if(action.isForm()){
-            departmentFormTypeService.saveFormSources(action.getDepartmentAssignId(), action.getRightDepartmentAssignIds());
+        /*if(action.isForm()){
+            sourceService.saveFormSources(action.getDepartmentAssignId(), action.getRightDepartmentAssignIds());
         } else {
-            departmentFormTypeService.saveDeclarationSources(action.getDepartmentAssignId(), action.getRightDepartmentAssignIds());
-        }
+            sourceService.saveDeclarationSources(action.getDepartmentAssignId(), action.getRightDepartmentAssignIds());
+        }*/
 
 		return new UpdateCurrentAssignsResult();
     }

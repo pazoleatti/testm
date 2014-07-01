@@ -33,6 +33,7 @@ public class GetDepartmentAssignsHandler extends AbstractActionHandler<GetDepart
 
         List<DepartmentAssign> departmentAssigns = new LinkedList<DepartmentAssign>();
         // TODO а можно сделать что бы с базы данные приходили отсортированными?
+        //TODO Должны отображаться только те нф, у которых есть действующий макет в периоде
         if(action.isForm()){
             List<DepartmentFormType> depFormAssigns = sourceService.getDFTByDepartment(action.getDepartmentId(), action.getTaxType());
             // если без пейджинга то это формирование норм, с пейджингом нужно выносить в дао формирование
