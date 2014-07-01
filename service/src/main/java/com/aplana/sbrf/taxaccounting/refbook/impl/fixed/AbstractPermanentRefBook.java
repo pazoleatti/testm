@@ -41,7 +41,7 @@ public abstract class AbstractPermanentRefBook extends AbstractReadOnlyRefBook {
 			for (int i = pagingParams.getStartIndex(); i <= rightBound; ++i) {
 				pagingResult.add(filteredRecords.get(i-1)); // индекс в пейджинге идет с 1, а не с 0
 			}
-			pagingResult.setTotalCount(filteredRecords.size());
+			pagingResult.setTotalCount(rightBound - pagingParams.getStartIndex() + 1);
 			return pagingResult;
 		}
     }
