@@ -88,7 +88,7 @@ def balanceEditableColumns = ['inventoryNumber', 'name', 'buyDate', 'usefulLife'
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNumber', 'inventoryNumber', 'name', 'buyDate', 'usefulLife', 'expirationDate', 'startCost',
+def nonEmptyColumns = ['inventoryNumber', 'name', 'buyDate', 'usefulLife', 'expirationDate', 'startCost',
         'depreciationRate', 'amortizationMonth', 'amortizationSinceYear', 'amortizationSinceUsed']
 
 // Сумируемые колонки в фиксированной с троке
@@ -189,12 +189,7 @@ void calc() {
         dataOld = getFormDataPrev() != null ? getDataRowHelperPrev() : null
     }
 
-    def index = 0
-
     for (def row in dataRows) {
-        // графа 1
-        row.rowNumber = ++index
-
         if (formData.kind != FormDataKind.PRIMARY) {
             continue;
         }
@@ -427,7 +422,6 @@ void addData(def xml, int headRowCount) {
         }
 
         // графа 1
-        newRow.rowNumber = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
         // fix
         xmlIndexCol++

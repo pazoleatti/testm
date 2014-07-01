@@ -1,20 +1,28 @@
 package com.aplana.sbrf.taxaccounting.web.module.configuration.shared;
 
-import java.util.List;
-
+import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
 import com.gwtplatform.dispatch.shared.Result;
 
+import java.util.Map;
+
 public class GetConfigurationResult implements Result {
-	private static final long serialVersionUID = 4328465660539237715L;
 	
-	private List<ConfigTuple> data;
+	private ConfigurationParamModel model;
+    private Map<Integer, String> dereferenceDepartmentNameMap;
 
-	public List<ConfigTuple> getData() {
-		return data;
-	}
+    public ConfigurationParamModel getModel() {
+        return model;
+    }
 
-	public void setData(List<ConfigTuple> data) {
-		this.data = data;
-	}
+    public void setModel(ConfigurationParamModel model) {
+        this.model = model;
+    }
 
+    public Map<Integer, String> getDereferenceDepartmentNameMap() {
+        return dereferenceDepartmentNameMap;
+    }
+
+    public void setDereferenceDepartmentNameMap(Map<Integer, String> dereferenceDepartmentNameMap) {
+        this.dereferenceDepartmentNameMap = dereferenceDepartmentNameMap;
+    }
 }

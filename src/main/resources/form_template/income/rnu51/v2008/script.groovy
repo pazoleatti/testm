@@ -211,16 +211,8 @@ void calc() {
         return codeA <=> codeB
     })
 
-    // Номер последний строки предыдущей формы
-    def index = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
-
     for (row in dataRows) {
-        if (row.getAlias() != null) {
-            continue
-        }
-        // Графа 1
-        row.rowNumber = ++index
-        if (isBalancePeriod() || formData.kind != FormDataKind.PRIMARY) {
+        if (row.getAlias() != null || isBalancePeriod() || formData.kind != FormDataKind.PRIMARY) {
             continue;
         }
         // Графа 12
@@ -543,7 +535,6 @@ def addData(def xml, def fileName) {
         }
 
         // графа 1
-        newRow.rowNumber = parseNumber(getCellValue(row, fileColIndex, type), fileRowIndex + rowOffset, fileColIndex + colOffset, logger, true)
         fileColIndex++
 
         // графа 2 - справочник 61 "Коды сделок"

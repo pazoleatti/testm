@@ -9,22 +9,32 @@ package com.aplana.sbrf.taxaccounting.model;
 
 public enum ConfigurationParam {
 
-	FORM_DATA_KEY_FILE ("Путь к файлу ключей ЭЦП для форм"),
-	REF_BOOK_KEY_FILE ("Путь к файлу ключей ЭЦП для справочников"),
-	FORM_DATA_DIRECTORY ("Путь папке транспортных файлов для форм"),
-	REF_BOOK_DIRECTORY ("Путь папке транспортных файлов для справочников"),
-    REF_BOOK_DIASOFT_DIRECTORY ("Путь папке транспортных файлов для справочников Diasoft Custody"),
-    ARCHIVE_DIRECTORY ("Каталог архива"),
-    ERROR_DIRECTORY ("Каталог ошибок");
+    FORM_DATA_KEY_FILE ("Путь к файлу ключей ЭЦП для форм"),
+    REF_BOOK_KEY_FILE ("Путь к файлу ключей ЭЦП для справочников"),
+    ACCOUNT_PLAN_TRANSPORT_DIRECTORY ("Путь к каталогу загрузки транспортных файлов, содержащих данные справочника «План счетов»"),
+    OKATO_TRANSPORT_DIRECTORY ("Путь к каталогу загрузки транспортных файлов, содержащих данные справочника «ОКАТО»"),
+    REGION_TRANSPORT_DIRECTORY ("Путь к каталогу загрузки транспортных файлов, содержащих данные справочника «Субъекты РФ»"),
+    UPLOAD_DIRECTORY("Путь к каталогу загрузки", false),
+    ARCHIVE_DIRECTORY("Путь к каталогу архива", false),
+    ERROR_DIRECTORY ("Путь к каталогу ошибок", false);
 
-	private String caption;
+    private String caption;
+    private boolean common;
 
-	private ConfigurationParam(String caption) {
-		this.caption = caption;
-	}
+    private ConfigurationParam(String caption) {
+        this(caption, true);
+    }
 
-	public String getCaption() {
-		return caption;
-	}
+    private ConfigurationParam(String caption, boolean common) {
+        this.caption = caption;
+        this.common = common;
+    }
 
+    public String getCaption() {
+        return caption;
+    }
+
+    public boolean isCommon() {
+        return common;
+    }
 }

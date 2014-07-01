@@ -89,7 +89,7 @@ def editableColumns = ['bill', 'buyDate', 'currency', 'nominal', 'price', 'matur
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['number', 'bill', 'buyDate', 'currency', 'nominal', 'price', 'maturity', 'termDealBill',
+def nonEmptyColumns = ['bill', 'buyDate', 'currency', 'nominal', 'price', 'maturity', 'termDealBill',
         'implementationDate', 'sum', 'sumIncomeinCurrency', 'sumIncomeinRuble']
 
 // Атрибуты для итогов
@@ -103,7 +103,8 @@ def allColumns = ['number', 'bill', 'buyDate', 'currency', 'nominal', 'price', '
 
 // Автозаполняемые атрибуты
 @Field
-def autoFillColumns = ['number', 'termDealBill', 'percIncome', 'discountInCurrency', 'discountInRub', 'sumIncomeinCurrency', 'sumIncomeinRuble']
+def autoFillColumns = ['number', 'termDealBill', 'percIncome', 'discountInCurrency', 'discountInRub',
+                       'sumIncomeinCurrency', 'sumIncomeinRuble']
 
 @Field
 def startDate = null
@@ -174,12 +175,8 @@ void calc() {
     def startDate = getStartDate()
     // Дата окончания отчетного периода
     def endDate = getEndDate()
-    // Номер последний строки предыдущей формы
-    def index = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
 
     for (row in dataRows) {
-        // графа 1
-        row.number = ++index
         if (formData.kind != FormDataKind.PRIMARY) {
             continue
         }
@@ -310,8 +307,6 @@ void logicCheck() {
         return
     }
 
-    def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
-
     // алиасы графов для арифметической проверки (графа 8, 9, 12-15)
     def arithmeticCheckAlias = ['termDealBill', 'percIncome', 'discountInCurrency', 'discountInRub',
             'sumIncomeinCurrency', 'sumIncomeinRuble']
@@ -338,11 +333,6 @@ void logicCheck() {
         // 2. Проверка даты приобретения и границ отчетного периода
         if (endDate != null && row.buyDate != null && row.buyDate.after(endDate)) {
             loggerError(row, errorMsg + 'Дата приобретения вне границ отчетного периода!')
-        }
-
-        // 3. Проверка на уникальность поля «№ пп» (графа 1) (в рамках текущего года)
-        if (++i != row.number) {
-            loggerError(row, errorMsg + 'Нарушена уникальность номера по порядку!')
         }
 
         // 4. Проверка на уникальность векселя
@@ -545,7 +535,6 @@ void addData(def xml, int headRowCount) {
         }
 
         // графа 1
-        newRow.number = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
         // fix
         xmlIndexCol++

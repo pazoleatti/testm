@@ -200,7 +200,6 @@ void calc(def dataRows) {
     def dataRows46 = getDataRowsByFormTemplateId(342, reportPeriod, start, end)
     def dataRows45 = getDataRowsByFormTemplateId(341, reportPeriod, start, end)
 
-    def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
     // графа 1, 15..17, 20
     for (row in dataRows) {
         if (row.getAlias() != null) {
@@ -210,7 +209,6 @@ void calc(def dataRows) {
         def row46 = getRow46(row, dataRows46)
 
         row.with {
-            rowNumber = ++i
             price = getGraph8(row, row46, row45)
             amort = getGraph9(row, row46, row45)
             sumIncProfit = getGraph15(row)
@@ -256,9 +254,6 @@ void logicCheck() {
     def reportPeriod = getReportPeriod()
     def dataRows46 = getDataRowsByFormTemplateId(342, reportPeriod, start, end)
     def dataRows45 = getDataRowsByFormTemplateId(341, reportPeriod, start, end)
-
-    // Номер последний строки предыдущей формы
-    def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
     def List<ReportPeriod> reportPeriodList = reportPeriodService.listByTaxPeriod(reportPeriod.taxPeriod.id)
     def numbers = []
     for (ReportPeriod period in reportPeriodList) {
@@ -287,10 +282,6 @@ void logicCheck() {
         // для консолидированной формы пропускаем остальные проверки
         if (formData.kind == FormDataKind.CONSOLIDATED) {
             return
-        }
-
-        if (++i != row.rowNumber) {
-            rowError(logger, row, errorMsg + 'Нарушена уникальность номера по порядку!')
         }
 
         // 2. Проверка на уникальность поля «инвентарный номер» (графа 6)

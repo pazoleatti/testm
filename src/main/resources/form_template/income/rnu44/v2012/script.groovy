@@ -107,7 +107,7 @@ def allColumns = ['number', 'operationDate', 'name', 'inventoryNumber', 'baseNum
 @Field def autoFillColumns = allColumns - editableColumns//['operationDate', 'baseNumber', 'baseDate', 'summ']
 
 // Проверяемые на пустые значения атрибуты
-@Field def nonEmptyColumns = ['number', 'operationDate', 'name', 'inventoryNumber', 'baseNumber', 'baseDate', 'summ']
+@Field def nonEmptyColumns = ['operationDate', 'name', 'inventoryNumber', 'baseNumber', 'baseDate', 'summ']
 
 // Атрибуты итоговых строк для которых вычисляются суммы
 @Field
@@ -154,11 +154,8 @@ def calc() {
     // удалить строку "итого"
     deleteAllAliased(dataRows)
 
-    def index = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
     for (def dataRow : dataRows) {
         def rnu49Row = getRnu49Row(rnu49Rows, dataRow)
-
-        dataRow.number = ++index
 
         if (rnu49Row) {
             def values = getValues(rnu49Row)
@@ -240,12 +237,10 @@ boolean logicCheck(){
     def rnu49Rows = getRnu49FormData()?.getAllCached()
     if (rnu49Rows == null) return
 
-    def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
     for (def row : dataRows) {
         if (row.getAlias() != null) {
             continue
         }
-        rowNumber++
         def index = row.getIndex()
         def errorMsg = "Строка ${index}: "
 
@@ -258,11 +253,6 @@ boolean logicCheck(){
         }
         if (find != null) {
             rowError(logger, row, errorMsg + "Инвентарный номер не уникальный!")
-        }
-
-        // 2. Проверка на уникальность поля «№ пп»
-        if (rowNumber != row.number) {
-            rowError(logger, row, errorMsg + "Нарушена уникальность номера по порядку!")
         }
 
         // 3. Арифметические проверки расчета неитоговых граф

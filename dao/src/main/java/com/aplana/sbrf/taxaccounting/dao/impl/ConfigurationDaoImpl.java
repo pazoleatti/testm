@@ -1,20 +1,18 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import java.io.IOException;
-import java.sql.Clob;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.*;
-
+import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
-import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
-import org.springframework.util.StringUtils;
+import java.io.IOException;
+import java.sql.Clob;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.*;
 
 /**
  * Реализация ДАО для работа с параметрами приложения
@@ -26,67 +24,75 @@ import org.springframework.util.StringUtils;
 @Repository
 @Transactional
 public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDao {
-	
-	/**
-	 * Название столбца в базе данных, соответствующее коду параметра
-	 */
-	private static final String CODE_COLUMN_NAME = "code";
+    private final static String GET_ALL_ERROR = "Ошибка получения конфигурационных параметров!";
 
-	/**
-	 * Название столбца в базе данных, соответствующее значению параметра
-	 */
-	private static final String VALUE_COLUMN_NAME = "value";
-
-	@Override
-	public ConfigurationParamModel loadParams() {
+    @Override
+    public ConfigurationParamModel getAll() {
         final ConfigurationParamModel model = new ConfigurationParamModel();
-        getJdbcTemplate().query("select code, value from configuration", new RowCallbackHandler() {
+        getJdbcTemplate().query("select code, value, department_id from configuration", new RowCallbackHandler() {
             @Override
             public void processRow(ResultSet rs) throws SQLException {
                 try {
-                    String code = rs.getString(CODE_COLUMN_NAME);
-                    Clob clobValue = rs.getClob(VALUE_COLUMN_NAME);
+                    Clob clobValue = rs.getClob("value");
+                    String value = null;
                     if (clobValue != null) {
                         char clobVal[] = new char[(int) clobValue.length()];
                         clobValue.getCharacterStream().read(clobVal);
-                        model.setFullStringValue(ConfigurationParam.valueOf(code), new String(clobVal));
-                    } else {
-                        model.put(ConfigurationParam.valueOf(code), null);
+                        value = new String(clobVal);
                     }
-                } catch (IOException e) {
-                    throw new DaoException("Ошибка получения конфигурационных параметров!");
+                    model.setFullStringValue(ConfigurationParam.valueOf(rs.getString("code")), rs.getInt("department_id"), value);
                 } catch (IllegalArgumentException e) {
                     // Если параметр не найден в ConfigurationParam, то он просто пропускается (не виден на клиенте)
+                } catch (IOException e) {
+                    throw new DaoException(GET_ALL_ERROR);
+                } catch (SQLException e) {
+                    throw new DaoException(GET_ALL_ERROR);
                 }
             }
         });
         return model;
     }
 
-	@Override
-	public void saveParams(ConfigurationParamModel model) {
-		Map<ConfigurationParam, List<String>> oldParams = loadParams();
+    @Override
+    public void save(ConfigurationParamModel model) {
+        ConfigurationParamModel oldModel = getAll();
+        List<Object[]> insertParams = new LinkedList<Object[]>();
+        List<Object[]> updateParams = new LinkedList<Object[]>();
+        List<Object[]> deleteParams = new LinkedList<Object[]>();
 
-		List<Object[]> insertParams = new ArrayList<Object[]>();
-		List<Object[]> updateParams = new ArrayList<Object[]>();
-
-		for (Map.Entry<ConfigurationParam, List<String>> entry : model.entrySet()) {
-			ConfigurationParam param = entry.getKey();
-			String value = null;
-            if (entry.getValue() != null && !entry.getValue().isEmpty()) {
-                value = model.getFullStringValue(entry.getKey());
+        for (ConfigurationParam configurationParam : model.keySet()) {
+            Map<Integer, List<String>> map = model.get(configurationParam);
+            for (int departmentId : map.keySet()) {
+                Object[] entity = new Object[]{model.getFullStringValue(configurationParam, departmentId),
+                        configurationParam.name(), departmentId};
+                if (!oldModel.containsKey(configurationParam)
+                        || !oldModel.get(configurationParam).containsKey(departmentId)) {
+                    insertParams.add(entity);
+                } else {
+                    updateParams.add(entity);
+                }
             }
-            if (oldParams.containsKey(entry.getKey())) {
-				updateParams.add(new Object[] {value, param.toString()});
-			} else {
-				insertParams.add(new Object[]{value, param.toString()});
-			}
-		}
-		if (insertParams.size() > 0) {
-			getJdbcTemplate().batchUpdate("insert into configuration (value, code) values (?, ?)", insertParams);
-		}
-		if (updateParams.size() > 0) {
-			getJdbcTemplate().batchUpdate("update configuration set value = ? where code = ?", updateParams);
-		}
-	}
+        }
+
+        for (Map.Entry<ConfigurationParam, Map<Integer, List<String>>> entry : oldModel.entrySet()) {
+            for (Integer departmentId : entry.getValue().keySet()) {
+                if (!model.containsKey(entry.getKey(), departmentId)) {
+                    deleteParams.add(new Object[]{entry.getKey().name(), departmentId});
+                }
+            }
+        }
+
+        if (insertParams.size() > 0) {
+            getJdbcTemplate().batchUpdate("insert into configuration (value, code, department_id) values (?, ?, ?)",
+                    insertParams);
+        }
+        if (updateParams.size() > 0) {
+            getJdbcTemplate().batchUpdate("update configuration set value = ? where code = ? and department_id = ?",
+                    updateParams);
+        }
+        if (deleteParams.size() > 0) {
+            getJdbcTemplate().batchUpdate("delete from configuration where code = ? and department_id = ?",
+                    deleteParams);
+        }
+    }
 }

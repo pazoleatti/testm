@@ -115,9 +115,9 @@ def sortColumns = ['billNumber', 'operationDate']
 
 // Автозаполняемые атрибуты (графа 1..12, 15, 18)
 @Field
-def nonEmptyColumns = ['rowNumber', 'billNumber', 'creationDate', 'nominal',
-        'sellingPrice', 'currencyCode', 'rateBRBillDate', 'rateBROperationDate',
-        'paymentTermStart', 'paymentTermEnd', 'interestRate', 'operationDate', 'sumStartInRub', 'sum']
+def nonEmptyColumns = ['billNumber', 'creationDate', 'nominal', 'sellingPrice', 'currencyCode', 'rateBRBillDate',
+                       'rateBROperationDate', 'paymentTermStart', 'paymentTermEnd', 'interestRate', 'operationDate',
+                       'sumStartInRub', 'sum']
 
 /** Признак периода ввода остатков. */
 @Field
@@ -193,9 +193,6 @@ void logicCheck() {
         countDaysInYear = getCountDaysInYear(dFrom)
     }
 
-    // Номер последний строки предыдущей формы
-    def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
-
     for (def DataRow row : dataRows) {
         if (row?.getAlias()?.contains('itg')) {
             totalRow = row
@@ -213,10 +210,6 @@ void logicCheck() {
             loggerError(row, errorMsg + "Дата совершения операции вне границ отчетного периода!")
         }
 
-        // 3. Проверка на уникальность поля «№ пп»
-        if (++i != row.rowNumber) {
-            loggerError(row, errorMsg + "Нарушена уникальность номера по порядку!")
-        }
         // 4. Проверка на нулевые значения
         if (!row.sumStartInCurrency && !row.sumStartInRub && !row.sumEndInCurrency && !row.sumEndInRub && !row.sum) {
             loggerError(row, errorMsg + "Все суммы по операции нулевые!")
@@ -268,9 +261,6 @@ void calc() {
     // Удаление итогов
     deleteAllAliased(dataRows)
 
-    // Номер последней строки предыдущей формы
-    def index = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
-
     if (!isBalancePeriod() && formData.kind == FormDataKind.PRIMARY) {
         def dataRowsPrev = getDataRowsPrev()
         def dFrom = getReportPeriodStartDate()
@@ -283,7 +273,6 @@ void calc() {
             }
             def rowPrev = getRowPrev(dataRowsPrev, row)
 
-            row.rowNumber = ++index
             row.rateBRBillDate = calc7(row)
             row.rateBROperationDate = calc8(row)
             row.sumStartInCurrency = calc14(row, rowPrev)
@@ -291,14 +280,6 @@ void calc() {
             row.sumEndInCurrency = calc16(row, countDaysInYear)
             row.sumEndInRub = calc17(row)
             row.sum = calc18(row)
-        }
-    } else {
-        for (def row : dataRows) {
-            if (row.getAlias() != null) {
-                continue
-            }
-
-            row.rowNumber = ++index
         }
     }
     // Добавление итогов
