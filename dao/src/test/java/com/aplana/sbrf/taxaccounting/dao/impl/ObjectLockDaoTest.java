@@ -175,4 +175,12 @@ public class ObjectLockDaoTest {
 		objectLockDao.refreshLock(35L, FormData.class, 1);
 	}
 
+    @Test
+    public void unlockIfOlderThan() {
+        objectLockDao.lockObject(5L, FormData.class, 1);
+        assertTrue(objectLockDao.isLockedByUser(5L, FormData.class, 1));
+        objectLockDao.unlockIfOlderThan(10);
+        assertFalse(objectLockDao.isLockedByUser(5L, FormData.class, 1));
+    }
+
 }
