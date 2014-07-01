@@ -76,12 +76,16 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
                 getUiHandlers().updateHistory();
             }
         });
+        versionStart.setStartLimitDate(new Date(0));//01.01.1970
+        versionStart.setEndLimitDate(new Date(4133894400000L));//31.12.2100
         versionStart.addValueChangeHandler(new ValueChangeHandler<Date>() {
             @Override
             public void onValueChange(ValueChangeEvent<Date> event) {
                 updateRefBookPickerPeriod();
             }
         });
+        versionEnd.setStartLimitDate(new Date(0));//01.01.1970
+        versionEnd.setEndLimitDate(new Date(4133894400000L));//31.12.2100
         versionEnd.addValueChangeHandler(new ValueChangeHandler<Date>() {
             @Override
             public void onValueChange(ValueChangeEvent<Date> event) {
