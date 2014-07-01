@@ -1295,6 +1295,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "  when (status=2 and (:versionTo is not null and version >= :versionFrom and version < :versionTo and nextversion is not null and nextversion > :versionTo)) then 3 \t\t-- 17\n" +
             "  when (status=2 and (\n" +
             "  \t(nextversion is not null and :versionTo is null and version > :versionFrom) or  \t-- 18\n" +
+            "  \t(version = :versionFrom) or \n" +
             "  \t(nextversion is null and version >= :versionFrom)\t\t\t\t\t\t\t\t\t-- 21, 22\n" +
             "  )) then 4\n" +
             "  else 0\n" +
