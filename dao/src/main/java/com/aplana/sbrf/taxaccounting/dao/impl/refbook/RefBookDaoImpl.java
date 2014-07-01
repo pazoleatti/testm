@@ -388,7 +388,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 }
                 break;
                 case NUMBER: {
-                    value = rs.getBigDecimal(columnName).setScale(attribute.getPrecision());
+                    value = rs.getBigDecimal(columnName).setScale(attribute.getPrecision(), BigDecimal.ROUND_HALF_UP);
                 }
                 break;
                 case DATE: {
@@ -1020,7 +1020,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                                 }
                                 break;
                                 case NUMBER: {
-                                    value = rs.getBigDecimal(columnName).setScale(attribute.getPrecision());
+                                    value = rs.getBigDecimal(columnName).setScale(attribute.getPrecision(), RoundingMode.HALF_UP);
                                 }
                                 break;
                                 case DATE: {
