@@ -25,10 +25,7 @@ import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static java.util.Arrays.asList;
 
@@ -209,6 +206,7 @@ public class ConfigurationPresenter	extends	Presenter<ConfigurationPresenter.MyV
         }
 
         // Параметры загрузки НФ
+        Set<Integer> departmentSet = new HashSet<Integer>();
         for (DataRow<Cell> dataRow : formRowsData) {
             BigDecimal departmentId = dataRow.getCell(getView().getDepartmentColumn().getAlias()).getNumericValue();
             String uploadPath = cleanString(dataRow.getCell(getView().getUploadPathColumn().getAlias()).getStringValue());
@@ -226,6 +224,9 @@ public class ConfigurationPresenter	extends	Presenter<ConfigurationPresenter.MyV
             }
             if (errorPath != null) {
                 model.put(ConfigurationParam.ERROR_DIRECTORY, departmentId.intValue(), asList(errorPath));
+            }
+            if (!departmentSet.add(departmentId.intValue())) {
+                action.getDublicateDepartmentIdSet().add(departmentId.intValue());
             }
         }
 

@@ -67,13 +67,13 @@ public final class ScriptUtils {
 
     private static final String IMPORT_IS_NOT_PROVIDED = "Импорт данных не предусмотрен!";
 
-    private static final String WRONG_XLS_PARSE = "Отсутствие значения после обработки потока данных!";
+    private static final String WRONG_DATA_PARSE = "Отсутствие значения после обработки потока данных!";
 
-    private static final String WRONG_XLS_FILE_NAME = "Имя файла не должно быть пустым!";
-
-    private static final String WRONG_XLS_INPUT_STREAM = "Поток данных пуст!";
+    private static final String EMPTY_FILE_NAME = "Имя файла не должно быть пустым!";
+    private static final String EMPTY_INPUT_STREAM = "Поток данных пуст!";
 
     private static final String WRONG_XLS_FORMAT = "Выбранный файл не соответствует формату xls/xlsx/xlsm!";
+    private static final String WRONG_RNU_FORMAT = "Выбранный файл не соответствует формату rnu!";
 
     private static final String WRONG_FIXED_VALUE = "Строка %d: Графа «%s» содержит значение «%s», не соответствующее значению «%s» данной графы в макете налоговой формы!";
     private static final String EMPTY_VALUE = "Строка %d: Графа «%s» содержит пустое значение, не соответствующее значению «%s» данной графы в макете налоговой формы!";
@@ -840,14 +840,7 @@ public final class ScriptUtils {
      * Используется при импорте из собственного формата системы
      */
     public static GPathResult getXML(BufferedInputStream inputStream, ImportService importService, String fileName, String startStr, String endStr, Integer columnsCount, Integer headerRowCount) {
-        fileName = fileName != null ? fileName.toLowerCase() : null;
-        if (fileName == null || fileName == "") {
-            throw new ServiceException(WRONG_XLS_FILE_NAME);
-        }
-
-        if (inputStream == null) {
-            throw new ServiceException(WRONG_XLS_INPUT_STREAM);
-        }
+        checkBeforeGetXml(inputStream, fileName);
 
         if (!fileName.endsWith(".xls") && !fileName.endsWith(".xlsx") && !fileName.endsWith(".xlsm")) {
             throw new ServiceException(WRONG_XLS_FORMAT);
@@ -859,10 +852,45 @@ public final class ScriptUtils {
         } catch (IOException e) {
             throw new ServiceException(e.getMessage());
         }
-        if (xmlString == null) {
-            throw new ServiceException(WRONG_XLS_PARSE);
+
+        return getXML(xmlString);
+    }
+
+    /**
+     * Получение xml с общими проверками
+     * Используется при импорте из транспортного файла
+     */
+    public static GPathResult getTransportXML(BufferedInputStream inputStream, ImportService importService, String fileName) {
+        checkBeforeGetXml(inputStream, fileName);
+
+        if (!fileName.endsWith(".rnu")) {
+            throw new ServiceException(WRONG_RNU_FORMAT);
         }
 
+        String xmlString;
+        try {
+            xmlString = importService.getData(inputStream, fileName, "cp866");
+        } catch (IOException e) {
+            throw new ServiceException(e.getMessage());
+        }
+
+        return getXML(xmlString);
+    }
+
+    private static void checkBeforeGetXml(BufferedInputStream inputStream, String fileName) {
+        fileName = fileName != null ? fileName.toLowerCase() : null;
+        if (fileName == null || fileName == "") {
+            throw new ServiceException(EMPTY_FILE_NAME);
+        }
+        if (inputStream == null) {
+            throw new ServiceException(EMPTY_INPUT_STREAM);
+        }
+    }
+
+    private static GPathResult getXML(String xmlString) {
+        if (xmlString == null) {
+            throw new ServiceException(WRONG_DATA_PARSE);
+        }
         GPathResult xml;
         try {
             xml = new XmlSlurper().parseText(xmlString);
@@ -874,9 +902,8 @@ public final class ScriptUtils {
             throw new ServiceException(e.getMessage());
         }
         if (xml == null) {
-            throw new ServiceException(WRONG_XLS_PARSE);
+            throw new ServiceException(WRONG_DATA_PARSE);
         }
-
         return xml;
     }
 
