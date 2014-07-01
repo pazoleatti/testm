@@ -65,6 +65,9 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
+        break
 }
 
 // Редактируемые атрибуты (графа 1..12)
@@ -246,6 +249,45 @@ def addData(def xml, int headRowCount) {
 
         dataRowHelper.save(dataRows)
     }
+}
+
+void importTransportData() {
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    addTransportData(xml)
+}
+
+void addTransportData(def xml) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    def int rnuIndexRow = 3
+    def int colOffset = 1
+    def row = getDataRow(dataRows, 'total')
+
+    def xmlRow = xml.row[0]
+
+    // графа 3
+    row.ofz = getNumber(xmlRow.cell[3].text(), rnuIndexRow, 3 + colOffset)
+    // графа 4
+    row.municipalBonds = getNumber(xmlRow.cell[4].text(), rnuIndexRow, 4 + colOffset)
+    // графа 5
+    row.governmentBonds = getNumber(xmlRow.cell[5].text(), rnuIndexRow, 5 + colOffset)
+    // графа 6
+    row.mortgageBonds = getNumber(xmlRow.cell[6].text(), rnuIndexRow, 6 + colOffset)
+    // графа 7
+    row.municipalBondsBefore = getNumber(xmlRow.cell[7].text(), rnuIndexRow, 7 + colOffset)
+    // графа 8
+    row.rtgageBondsBefore = getNumber(xmlRow.cell[8].text(), rnuIndexRow, 8 + colOffset)
+    // графа 9
+    row.ovgvz = getNumber(xmlRow.cell[9].text(), rnuIndexRow, 9 + colOffset)
+    // графа 10
+    row.eurobondsRF = getNumber(xmlRow.cell[10].text(), rnuIndexRow, 10 + colOffset)
+    // графа 11
+    row.itherEurobonds = getNumber(xmlRow.cell[11].text(), rnuIndexRow, 11 + colOffset)
+    // графа 12
+    row.corporateBonds = getNumber(xmlRow.cell[12].text(), rnuIndexRow, 12 + colOffset)
+
+    dataRowHelper.save(dataRows)
+
 }
 
 // Получить строку за прошлый месяц
