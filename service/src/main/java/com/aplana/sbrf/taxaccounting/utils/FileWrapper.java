@@ -34,12 +34,25 @@ public class FileWrapper {
         this.smbFile = smbFile;
     }
 
+    public boolean canWrite() {
+        if (file != null) {
+            return file.canWrite();
+        }
+        if (smbFile != null) {
+            try {
+                return smbFile.canWrite();
+            } catch (SmbException e) {
+                throw new ServiceException(ERROR_RESOURCE_SMB, e);
+            }
+        }
+        throw new ServiceException(ERROR_RESOURCE_INIT);
+    }
+
     public String getPath() {
         if (file != null) {
             return file.getPath();
         }
         if (smbFile != null) {
-
             return smbFile.getPath();
         }
         throw new ServiceException(ERROR_RESOURCE_INIT);
@@ -50,7 +63,6 @@ public class FileWrapper {
             return file.getName();
         }
         if (smbFile != null) {
-
             return smbFile.getName();
         }
         throw new ServiceException(ERROR_RESOURCE_INIT);
