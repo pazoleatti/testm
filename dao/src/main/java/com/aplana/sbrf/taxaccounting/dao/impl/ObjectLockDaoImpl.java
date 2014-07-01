@@ -208,4 +208,14 @@ public class ObjectLockDaoImpl extends AbstractDao implements ObjectLockDao{
 		ObjectLock<?> lock = getObjectLock(id, clazz);
 		return lock != null && lock.getUserId() == userId && !isLockTimedOut(lock);
 	}
+
+    @Override
+    public void unlockIfOlderThan(int sec) {
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.SECOND, -sec);
+        getJdbcTemplate().update(
+                "delete from object_lock where lock_time < ?",
+                cal.getTime()
+        );
+    }
 }

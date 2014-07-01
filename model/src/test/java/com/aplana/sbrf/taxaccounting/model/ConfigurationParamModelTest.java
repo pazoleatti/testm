@@ -11,22 +11,24 @@ import static java.util.Arrays.asList;
 public class ConfigurationParamModelTest {
 
     private static final ConfigurationParam KEY1 = ConfigurationParam.FORM_DATA_KEY_FILE;
-    private static final ConfigurationParam KEY2 = ConfigurationParam.FORM_DATA_DIRECTORY;
+    private static final ConfigurationParam KEY2 = ConfigurationParam.REF_BOOK_KEY_FILE;
+    private static final int DEPARTMENT_ID1 = 1;
+    private static final int DEPARTMENT_ID2 = 2;
 
     @Test
     public void getFullStringValueTest() {
         ConfigurationParamModel model = new ConfigurationParamModel();
         String[] values1 = {"value1"};
         String[] values2 = {"value2", "value3", "value4"};
-        model.put(KEY1, asList(values1));
-        model.put(KEY2, asList(values2));
+        model.put(KEY1, DEPARTMENT_ID1, asList(values1));
+        model.put(KEY2, DEPARTMENT_ID2, asList(values2));
 
-        String result1 = model.getFullStringValue(KEY1);
-        String result2 = model.getFullStringValue(KEY2);
+        String result1 = model.getFullStringValue(KEY1, DEPARTMENT_ID1);
+        String result2 = model.getFullStringValue(KEY2, DEPARTMENT_ID2);
 
         Assert.assertEquals(result1, values1[0]);
         Assert.assertEquals(result2, values2[0] + "\n" + values2[1] + "\n" + values2[2]);
-        Assert.assertNull(model.getFullStringValue(null));
+        Assert.assertNull(model.getFullStringValue(null, DEPARTMENT_ID1));
     }
 
     @Test
@@ -39,16 +41,16 @@ public class ConfigurationParamModelTest {
         String str1 = "\n\n" + path1 + "\n" + path2 + "\n\n";
         String str2 = "<html><body>test</body></html>";
 
-        model.setFullStringValue(KEY1, str1);
-        model.setFullStringValue(KEY2, str2);
+        model.setFullStringValue(KEY1, DEPARTMENT_ID1, str1);
+        model.setFullStringValue(KEY2, DEPARTMENT_ID2, str2);
 
-        Assert.assertEquals(2, model.get(KEY1).size());
+        Assert.assertEquals(1, model.get(KEY1).size());
         Assert.assertEquals(1, model.get(KEY2).size());
 
-        Assert.assertEquals(model.get(KEY1).get(0), path1);
-        Assert.assertEquals(model.get(KEY1).get(1), path2);
-        Assert.assertEquals(model.get(KEY2).get(0), str2);
+        Assert.assertEquals(model.get(KEY1, DEPARTMENT_ID1).get(0), path1);
+        Assert.assertEquals(model.get(KEY1, DEPARTMENT_ID1).get(1), path2);
+        Assert.assertEquals(model.get(KEY2, DEPARTMENT_ID2).get(0), str2);
 
-        model.setFullStringValue(null, null);
+        model.setFullStringValue(null, DEPARTMENT_ID1, null);
     }
 }

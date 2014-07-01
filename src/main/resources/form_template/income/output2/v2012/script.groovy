@@ -77,12 +77,12 @@ def refBookCache = [:]
 // Редактируемые атрибуты 2-18, 20-23
 @Field
 def editableColumns = ['title', 'zipCode', 'subdivisionRF', 'area', 'city', 'region', 'street', 'homeNumber',
-        'corpNumber', 'apartment', 'surname', 'name', 'patronymic', 'phone', 'sumDividend', 'dividendDate',
-        'dividendNum', 'taxDate', 'taxNum', 'sumTax', 'reportYear']
+                       'corpNumber', 'apartment', 'surname', 'name', 'patronymic', 'phone', 'sumDividend',
+                       'dividendDate', 'dividendNum', 'taxDate', 'taxNum', 'sumTax', 'reportYear']
 
 // Проверяемые на пустые значения атрибуты 1, 2, 4, 12, 13, 16, 17, 22
 @Field
-def nonEmptyColumns = ['rowNumber', 'title', 'subdivisionRF', 'surname', 'name', 'sumDividend', 'dividendDate', 'sumTax']
+def nonEmptyColumns = ['title', 'subdivisionRF', 'surname', 'name', 'sumDividend', 'dividendDate', 'sumTax']
 
 // Дата окончания отчетного периода
 @Field
@@ -108,9 +108,7 @@ void calc(){
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     if (!dataRows.isEmpty()) {
-        def number = 0
         for (def row in dataRows) {
-            row.rowNumber = ++number
             row.dividendSum = (row.sumDividend ?: 0) - (row.sumTax ?: 0)
         }
     }
@@ -212,9 +210,9 @@ void addData(def xml, headRowCount) {
                 newRow.getCell(it).setStyleAlias('Редактируемая')
             }
 
-            // графа 1
             def xmlIndexCol = 0
-            newRow.rowNumber = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+
+            // графа 1
             xmlIndexCol++
 
             // графа 2

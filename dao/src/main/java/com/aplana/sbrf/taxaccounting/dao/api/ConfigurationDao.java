@@ -10,14 +10,14 @@ import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
  */
 
 public interface ConfigurationDao {
+    /**
+     * Читает из БД значения всех параметров.
+     */
+    ConfigurationParamModel getAll();
 
-	/**
-	 * Читает из БД значения всех параметров.
-	 */
-	ConfigurationParamModel loadParams();
-
-	/**
-	 * Сохраняет значения параметров в БД. Если параметр в БД отсутствует, то он создается
-	 */
-	void saveParams(ConfigurationParamModel model);
+    /**
+     * Сохраняет значения параметров в БД. Если параметр в БД отсутствует, то он создается.
+     * Если в модели нет какого-либо параметра, но он есть в БД, то параметр удаляется из БД.
+     */
+    void save(ConfigurationParamModel model);
 }

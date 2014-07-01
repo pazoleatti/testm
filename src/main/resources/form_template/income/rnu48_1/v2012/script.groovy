@@ -70,7 +70,7 @@ def groupColumns = ['usefulDate', 'inventoryNumber']
 
 // Проверяемые на пустые значения атрибуты (графа 1..4)
 @Field
-def nonEmptyColumns = ['number', 'inventoryNumber', 'usefulDate', 'amount']
+def nonEmptyColumns = ['inventoryNumber', 'usefulDate', 'amount']
 
 // Атрибуты итоговых строк для которых вычисляются суммы (графа )
 @Field
@@ -96,10 +96,6 @@ void calc() {
     // сортировка
     sortRows(dataRows, groupColumns)
 
-    def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
-    for (def row : dataRows) {
-        row.number = ++rowNumber
-    }
     // добавить строку "итого"
     calcTotalSum(dataRows, totalRow, totalColumns)
     dataRows.add(totalRow)
@@ -205,7 +201,6 @@ void addData(def xml, int headRowCount) {
         }
 
         // графа 1
-        newRow.number = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
         // fix
         xmlIndexCol++

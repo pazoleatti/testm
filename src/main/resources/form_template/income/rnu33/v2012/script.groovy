@@ -94,11 +94,19 @@ def refBookCache = [:]
 
 // Все атрибуты
 @Field
-def allColumns = ['rowNumber', 'fix', 'code', 'valuablePaper', 'issue', 'purchaseDate', 'implementationDate', 'bondsCount', 'purchaseCost', 'costs', 'marketPriceOnDateAcquisitionInPerc', 'marketPriceOnDateAcquisitionInRub', 'taxPrice', 'redemptionVal', 'exercisePrice', 'exerciseRuble', 'marketPricePercent', 'marketPriceRuble', 'exercisePriceRetirement', 'costsRetirement', 'allCost', 'parPaper', 'averageWeightedPricePaper', 'issueDays', 'tenureSkvitovannymiBonds', 'interestEarned', 'profitLoss', 'excessOfTheSellingPrice']
+def allColumns = ['rowNumber', 'fix', 'code', 'valuablePaper', 'issue', 'purchaseDate', 'implementationDate',
+                  'bondsCount', 'purchaseCost', 'costs', 'marketPriceOnDateAcquisitionInPerc',
+                  'marketPriceOnDateAcquisitionInRub', 'taxPrice', 'redemptionVal', 'exercisePrice', 'exerciseRuble',
+                  'marketPricePercent', 'marketPriceRuble', 'exercisePriceRetirement', 'costsRetirement', 'allCost',
+                  'parPaper', 'averageWeightedPricePaper', 'issueDays', 'tenureSkvitovannymiBonds', 'interestEarned',
+                  'profitLoss', 'excessOfTheSellingPrice']
 
 // Редактируемые атрибуты (графа 2..11, 13..17, 19, 21..23)
 @Field
-def editableColumns = ['code', 'valuablePaper', 'issue', 'purchaseDate', 'implementationDate', 'bondsCount', 'purchaseCost', 'costs', 'marketPriceOnDateAcquisitionInPerc', 'marketPriceOnDateAcquisitionInRub', 'redemptionVal', 'exercisePrice', 'exerciseRuble', 'marketPricePercent', 'marketPriceRuble', 'costsRetirement', 'parPaper', 'averageWeightedPricePaper', 'issueDays']
+def editableColumns = ['code', 'valuablePaper', 'issue', 'purchaseDate', 'implementationDate', 'bondsCount',
+                       'purchaseCost', 'costs', 'marketPriceOnDateAcquisitionInPerc', 'marketPriceOnDateAcquisitionInRub',
+                       'redemptionVal', 'exercisePrice', 'exerciseRuble', 'marketPricePercent', 'marketPriceRuble',
+                       'costsRetirement', 'parPaper', 'averageWeightedPricePaper', 'issueDays']
 
 // Автозаполняемые атрибуты
 @Field
@@ -106,11 +114,18 @@ def autoFillColumns = allColumns - editableColumns
 
 // Проверяемые на пустые значения атрибуты (графа 1..27)
 @Field
-def nonEmptyColumns = ['rowNumber', 'code', 'valuablePaper', 'issue', 'purchaseDate', 'implementationDate', 'bondsCount', 'purchaseCost', 'costs', 'marketPriceOnDateAcquisitionInPerc', 'marketPriceOnDateAcquisitionInRub', 'taxPrice', 'redemptionVal', 'exercisePrice', 'exerciseRuble', 'marketPricePercent', 'marketPriceRuble', 'exercisePriceRetirement', 'costsRetirement', 'allCost', 'parPaper', 'averageWeightedPricePaper', 'issueDays', 'tenureSkvitovannymiBonds', 'interestEarned', 'profitLoss', 'excessOfTheSellingPrice']
+def nonEmptyColumns = ['code', 'valuablePaper', 'issue', 'purchaseDate', 'implementationDate', 'bondsCount',
+                       'purchaseCost', 'costs', 'marketPriceOnDateAcquisitionInPerc', 'marketPriceOnDateAcquisitionInRub',
+                       'taxPrice', 'redemptionVal', 'exercisePrice', 'exerciseRuble', 'marketPricePercent',
+                       'marketPriceRuble', 'exercisePriceRetirement', 'costsRetirement', 'allCost', 'parPaper',
+                       'averageWeightedPricePaper', 'issueDays', 'tenureSkvitovannymiBonds', 'interestEarned',
+                       'profitLoss', 'excessOfTheSellingPrice']
 
 // Атрибуты итоговых строк для которых вычисляются суммы (графа 7..9, 13, 15, 17..20, 25..27)
 @Field
-def totalSumColumns = ['bondsCount', 'purchaseCost', 'costs', 'redemptionVal', 'exerciseRuble', 'marketPriceRuble', 'exercisePriceRetirement', 'costsRetirement', 'allCost', 'interestEarned', 'profitLoss', 'excessOfTheSellingPrice']
+def totalSumColumns = ['bondsCount', 'purchaseCost', 'costs', 'redemptionVal', 'exerciseRuble', 'marketPriceRuble',
+                       'exercisePriceRetirement', 'costsRetirement', 'allCost', 'interestEarned', 'profitLoss',
+                       'excessOfTheSellingPrice']
 
 // Признак периода ввода остатков
 @Field
@@ -161,14 +176,10 @@ void calc() {
     // отсортировать/группировать
     sort(dataRows)
 
-    def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
     for (def row : dataRows) {
         if (row.getAlias() != null) {
             continue
         }
-
-        // графа 1
-        row.rowNumber = ++rowNumber
 
         if (isMonthBalance()) {
             continue
@@ -210,7 +221,6 @@ void calc() {
 void logicCheck() {
     def dataRows = formDataService.getDataRowHelper(formData)?.allCached
 
-    def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
     def dataProvider = refBookFactory.getDataProvider(84)
     def rowsRnu64 = getRnuRowsById(355)
     def codesFromRnu54 = []
@@ -225,16 +235,11 @@ void logicCheck() {
         def index = row.getIndex()
         def errorMsg = "Строка $index: "
 
-        // 1. Проверка на уникальность поля «№ пп» (графа 1)
-        if (++rowNumber != row.rowNumber) {
-            loggerError(row, errorMsg + 'Нарушена уникальность номера по порядку!')
-        }
-
         // 2. Обязательность заполнения полей
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
 
         // 3. Проверка рыночной цены в процентах к номиналу (графа 10, 14)
-        if (row.marketPriceOnDateAcquisitionInPerc > 0 && row.exercisePrice != 100) {
+        if (row.marketPriceOnDateAcquisitionInPerc > 0 && row.redemptionVal != 100) {
             loggerError(row, errorMsg + 'Неверно указана цена в процентах при погашении!')
         }
 
@@ -242,7 +247,7 @@ void logicCheck() {
 
         // 4. Проверка Номера сделки
         if (code != null && code.toString() in codesFromRnu54) {
-            loggerError(row, "Строка $index учитывается в РНУ-64!")
+            loggerError("Строка $index учитывается в РНУ-64!")
         }
 
         // 5. Проверка даты приобретения и даты реализации (графа 2, 5, 6)
@@ -250,22 +255,22 @@ void logicCheck() {
             loggerError(row, errorMsg + 'Неверно указаны даты приобретения и реализации')
         }
 
-        // 6. Проверка рыночной цены в рублях к номиналу (графа 14)
+        // 5. Проверка рыночной цены в рублях к номиналу (графа 14)
         if (row.marketPriceOnDateAcquisitionInPerc > 0 && row.marketPriceOnDateAcquisitionInPerc != row.exercisePrice) {
             loggerError(row, errorMsg + 'Неверно указана цена в рублях при погашении!')
         }
 
-        // 7. Проверка определения срока короткой позиции (графа 2, 21)
+        // 6. Проверка определения срока короткой позиции (графа 2, 21)
         if (code == 5 && row.parPaper >= 0) {
             loggerError(row, errorMsg + 'Неверно определен срок короткой позиции!')
         }
 
-        // 8. Проверка определения процентного дохода по короткой позиции (графа 2, 22)
+        // 7. Проверка определения процентного дохода по короткой позиции (графа 2, 22)
         if (code == 5 && row.averageWeightedPricePaper >= 0) {
             loggerError(row, errorMsg + 'Неверно определен процентный доход по короткой позиции!')
         }
 
-        // 9. Арифметическая проверка графы 12, 16, 17, 18, 20, 24, 25, 26, 27
+        // 8. Арифметическая проверка графы 12, 16, 17, 18, 20, 24, 25, 26, 27
         if (!isMonthBalance()) {
             // алиасы графов для арифметической проверки
             def arithmeticCheckAlias = ['taxPrice', 'marketPricePercent', 'marketPriceRuble', 'exercisePriceRetirement',

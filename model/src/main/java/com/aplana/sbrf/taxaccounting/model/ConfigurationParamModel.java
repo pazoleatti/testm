@@ -1,28 +1,29 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import java.io.Serializable;
 import java.util.*;
 
 /**
  * Сущность для хранения конфигурационных параметров
  * @author Dmitriy Levykin
  */
-public class ConfigurationParamModel implements Map<ConfigurationParam, List<String>> {
+public class ConfigurationParamModel implements Map<ConfigurationParam, Map<Integer, List<String>>>, Serializable {
 
     // Хранилище значений
-    private Map<ConfigurationParam, List<String>> map = new HashMap<ConfigurationParam, List<String>>();
+    private Map<ConfigurationParam, Map<Integer, List<String>>> map = new HashMap<ConfigurationParam, Map<Integer, List<String>>>();
 
-    private static String SPLITTER = "\n";
+    private final static String SPLITTER = "\n";
 
     /**
      * Получение объединенных значений из списка
      */
-    public String getFullStringValue(ConfigurationParam key) {
-        List<String> list = get(key);
-        if (list == null || list.isEmpty()) {
+    public String getFullStringValue(ConfigurationParam key, int departmentId) {
+        Map<Integer, List<String>> listMap = get(key);
+        if (listMap == null || listMap.isEmpty() || listMap.get(departmentId) == null) {
             return null;
         }
         StringBuilder sb = new StringBuilder();
-        for (String str : list) {
+        for (String str : listMap.get(departmentId)) {
             sb.append(str).append(SPLITTER);
         }
         return sb.toString().trim();
@@ -31,9 +32,9 @@ public class ConfigurationParamModel implements Map<ConfigurationParam, List<Str
     /**
      * Задание списка значения одной строкой, содержащей несколько строк
      */
-    public void setFullStringValue(ConfigurationParam key, String value) {
+    public void setFullStringValue(ConfigurationParam key, int departmentId, String value) {
         if (value == null) {
-            map.put(key, null);
+            put(key, null);
             return;
         }
 
@@ -47,7 +48,7 @@ public class ConfigurationParamModel implements Map<ConfigurationParam, List<Str
             }
         }
 
-        map.put(key, new ArrayList<String>(resultList));
+        put(key, departmentId, new ArrayList<String>(resultList));
     }
 
     @Override
@@ -65,28 +66,50 @@ public class ConfigurationParamModel implements Map<ConfigurationParam, List<Str
         return map.containsKey(key);
     }
 
+    public boolean containsKey(ConfigurationParam param, int departmentId) {
+        Map<Integer, List<String>> departmenMap = map.get(param);
+        if (departmenMap == null) {
+            return false;
+        }
+        return departmenMap.containsKey(departmentId);
+    }
+
     @Override
     public boolean containsValue(Object value) {
         return map.containsValue(value);
     }
 
     @Override
-    public List<String> get(Object key) {
+    public Map<Integer, List<String>> get(Object key) {
         return map.get(key);
     }
 
-    @Override
-    public List<String> put(ConfigurationParam key, List<String> value) {
-        return map.put(key, value);
+    public List<String> get(Object key, int departmentId) {
+        if (map.get(key) == null) {
+            return null;
+        }
+        return map.get(key).get(departmentId);
     }
 
     @Override
-    public List<String> remove(Object key) {
+    public Map<Integer, List<String>> put(ConfigurationParam key, Map<Integer, List<String>> value) {
+        return map.put(key, value);
+    }
+
+    public List<String> put(ConfigurationParam key, int departmentId, List<String> value) {
+        if (get(key) == null) {
+            put(key, new HashMap<Integer, List<String>>());
+        }
+        return get(key).put(departmentId, value);
+    }
+
+    @Override
+    public Map<Integer, List<String>> remove(Object key) {
         return map.remove(key);
     }
 
     @Override
-    public void putAll(Map<? extends ConfigurationParam, ? extends List<String>> m) {
+    public void putAll(Map<? extends ConfigurationParam, ? extends Map<Integer, List<String>>> m) {
         map.putAll(m);
     }
 
@@ -101,12 +124,12 @@ public class ConfigurationParamModel implements Map<ConfigurationParam, List<Str
     }
 
     @Override
-    public Collection<List<String>> values() {
+    public Collection<Map<Integer, List<String>>> values() {
         return map.values();
     }
 
     @Override
-    public Set<Entry<ConfigurationParam, List<String>>> entrySet() {
+    public Set<Entry<ConfigurationParam, Map<Integer, List<String>>>> entrySet() {
         return map.entrySet();
     }
 }

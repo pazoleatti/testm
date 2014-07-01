@@ -26,14 +26,15 @@ comment on column ref_book_oktmo.record_id is 'Идентификатор стр
 
 create sequence seq_ref_book_oktmo start with 300000 increment by 100;
 --------------------------------------------------------------------------------------------------------------
-
 create table configuration (
   code varchar2(50) not null,
-  value clob
+  value clob,
+  department_id number(9) not null
 );
 comment on table configuration is 'Настройки приложения, конфигурация';
 comment on column configuration.code is 'Код параметра';
 comment on column configuration.value is 'Значение параметра';
+comment on column configuration.department_id is 'ТБ';
 -------------------------------------------------------------------------------------------------------------------------------------------
 create table form_type (
   id       number(9) not null,
@@ -251,7 +252,7 @@ comment on column form_column.filter is 'Условие фильтрации э�
 comment on column form_column.max_length IS 'Максимальная длина строки';
 comment on column form_column.parent_column_id is 'Ссылка на родительскую графу';
 comment on column form_column.attribute_id2 is 'Код отображаемого атрибута для столбцов-ссылок второго уровня';
-comment on column form_column.numeration_row is 'Тип нумерации строк для автонумеруемой графы';
+comment on column form_column.numeration_row is 'Тип нумерации строк для автонумеруемой графы (0 - последовательная, 1 - сквозная)';
 
 create sequence seq_form_column start with 10000;
 ---------------------------------------------------------------------------------------------------
@@ -467,7 +468,7 @@ create table form_data_performer (
   name varchar2(200) not null,
   phone varchar2(40),
   print_department_id number(9),
-  report_department_name varchar2(510)
+  report_department_name varchar2(4000 byte)
 );
 comment on table form_data_performer is 'Исполнитель налоговой формы';
 comment on column form_data_performer.form_data_id is 'Первичный ключ';
@@ -673,13 +674,13 @@ create table log_system (
   event_id            number(3,0) not null,
   user_id             number(9,0),
   roles               varchar2(200),
-  department_name     varchar2(500) not null,
+  department_name     varchar2(4000 byte) not null,
   report_period_name  varchar2(50),
   declaration_type_id number(9,0),
   form_type_id        number(9,0),
   form_kind_id        number(9,0),
-  note                varchar2(510),
-  user_department_name varchar2(500)
+  note                varchar2(4000 byte),
+  user_department_name varchar2(4000 byte)
 );
 comment on table log_system is  'Системный журнал';
 comment on column log_system.id is 'Код записи';

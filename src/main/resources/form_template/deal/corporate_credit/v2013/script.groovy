@@ -67,8 +67,7 @@ def autoFillColumns = ['rowNumber', 'inn', 'countryName', 'count', 'price', 'cos
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNumber', 'fullNamePerson', 'sum', 'docNumber', 'docDate', 'count',
-        'price', 'cost', 'dealDate']
+def nonEmptyColumns = ['fullNamePerson', 'sum', 'docNumber', 'docDate', 'count', 'price', 'cost', 'dealDate']
 
 // Дата окончания отчетного периода
 @Field
@@ -179,10 +178,7 @@ void logicCheck() {
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
-    def int index = 1
     for (row in dataRows) {
-        // Порядковый номер строки
-        row.rowNumber = index++
         // В поле "Количество" подставляется значение «1»
         row.count = 1
         // Расчет поля "Цена"
@@ -256,9 +252,6 @@ void addData(def xml, int headRowCount) {
         }
 
         def int xmlIndexCol = 0
-
-        // графа 1
-        newRow.rowNumber = xmlIndexRow - headRowCount
 
         // графа 2
         newRow.fullNamePerson = getRecordIdImport(9, 'NAME', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)

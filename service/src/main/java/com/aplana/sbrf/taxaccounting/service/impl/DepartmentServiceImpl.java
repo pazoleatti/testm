@@ -150,10 +150,25 @@ public class DepartmentServiceImpl implements DepartmentService {
         if (tAUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
             // подразделение с типом 1
             retList.addAll(departmentDao.getDepartmentsByType(DepartmentType.ROOT_BANK.getCode()));
+            // подразделение с типом 2
+            retList.addAll(departmentDao.getDepartmentsByType(DepartmentType.TERR_BANK.getCode()));
+        } else if (tAUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+            // подразделение с типом 1
+            retList.addAll(departmentDao.getDepartmentsByType(DepartmentType.ROOT_BANK.getCode()));
             // подразделения с типом 2
             retList.addAll(departmentDao.getDepartmentsByType(DepartmentType.TERR_BANK.getCode()));
-        } else if (tAUser.hasRole(TARole.ROLE_CONTROL_NS)) {
-            if (departmentDao.getDepartment(tAUser.getDepartmentId()).getType() == DepartmentType.TERR_BANK) {
+        } else if (tAUser.hasRole(TARole.ROLE_CONTROL_NS)
+                || tAUser.hasRole(TARole.ROLE_CONTROL)
+                || tAUser.hasRole(TARole.ROLE_OPER)) {
+            if (departmentDao.getDepartment(tAUser.getDepartmentId()).getType() == DepartmentType.CSKO_PCP) {
+                List<Integer> departmentIds = departmentDao.getDepartmentIdsByExecutors(Arrays.asList(tAUser.getDepartmentId()));
+                for (Integer depId : departmentIds) {
+                    Department department = getParentTB(depId);
+                    if (department != null) {
+                        retList.add(department);
+                    }
+                }
+            } else if (departmentDao.getDepartment(tAUser.getDepartmentId()).getType() == DepartmentType.TERR_BANK) {
                 // поразделение пользователя
                 retList.add(departmentDao.getDepartment(tAUser.getDepartmentId()));
 

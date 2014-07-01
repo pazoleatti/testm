@@ -64,7 +64,7 @@ def editableColumns = ['number', 'sum']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNumber', 'number', 'sum']
+def nonEmptyColumns = ['number', 'sum']
 
 // Дата окончания отчетного периода
 @Field
@@ -109,14 +109,6 @@ void calc() {
 
         // сортируем по кодам
         dataRowHelper.save(dataRows.sort { getKnu(it.number) })
-
-        // номер последний строки предыдущей формы
-        def index = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
-
-        for (row in dataRows) {
-            // графа 1
-            row.rowNumber = ++index
-        }
     }
 
     // посчитать "итого по коду"
@@ -174,8 +166,6 @@ void logicCheck() {
         return
     }
 
-    def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
-
     //две карты: одна с реальными значениями итого по кодам, а вторая - с рассчитанными
     def totalRows = [:]
     def sumRowsByCode = [:]
@@ -193,11 +183,6 @@ void logicCheck() {
 
         // 1. Проверка на заполнение поля
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
-
-        // 2. Проверка на уникальность поля «№ пп»
-        if (++i != row.rowNumber) {
-            rowError(logger, row, errorMsg + "Нарушена уникальность номера по порядку!")
-        }
 
         // 4. Арифметическая проверка итоговых значений по каждому <Коду классификации расходов>
         def code = getKnu(row.number)
@@ -337,16 +322,13 @@ void addData(def xml, int headRowCount) {
             newRow.getCell(it).setStyleAlias('Редактируемая')
         }
 
-        // графа 1
-        newRow.rowNumber = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, true)
-
         // графа 3
         String filter = "LOWER(CODE) = LOWER('" + row.cell[2].text() + "') and LOWER(NUMBER) = LOWER('" + row.cell[3].text() + "')"
         def records = refBookFactory.getDataProvider(27).getRecords(reportPeriodEndDate, null, filter, null)
         if (records.size() == 1) {
             newRow.number = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
         } else {
-            logger.error("Проверка файла: Строка ${xlsIndexRow + 3} содержит значение, отсутствующее в справочнике " +
+            logger.error("Проверка файла: Строка ${xlsIndexRow} содержит значение, отсутствующее в справочнике " +
                     "«" + refBookFactory.get(27).getName() + "»!")
         }
 

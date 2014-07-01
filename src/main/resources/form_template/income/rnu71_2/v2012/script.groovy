@@ -1,5 +1,6 @@
 package form_template.income.rnu71_2.v2012
 
+import com.aplana.sbrf.taxaccounting.model.DataRow
 import groovy.transform.Field
 
 import java.math.RoundingMode
@@ -113,8 +114,8 @@ def sortColumns = ['contragent', 'assignContractDate', 'assignContractNumber']
 
 // Проверяемые на пустые значения атрибуты (графа 1..8, 10, 11, 16, 17, 19)
 @Field
-def nonEmptyColumns = ['rowNumber', 'contragent', 'inn', 'assignContractNumber', 'assignContractDate', 'amount',
-        'amountForReserve', 'repaymentDate', 'income', 'result', 'taxClaimPrice', 'finResult', 'correctThisThis']
+def nonEmptyColumns = ['contragent', 'inn', 'assignContractNumber', 'assignContractDate', 'amount', 'amountForReserve',
+                       'repaymentDate', 'income', 'result', 'taxClaimPrice', 'finResult']
 
 /** Признак периода ввода остатков. */
 @Field
@@ -154,9 +155,6 @@ void logicCheck() {
         dataRowsPrev = getDataRowsPrev()
     }
 
-    // Номер последний строки предыдущей формы
-    def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
-
     for (def DataRow row : dataRows) {
         if (row.getAlias() != null) {
             continue
@@ -171,11 +169,6 @@ void logicCheck() {
         // 2. Проверка даты совершения операции и границ отчетного периода
         if (!(row.repaymentDate in (dFrom..dTo))) {
             loggerError(row, errorMsg + "Дата совершения операции вне границ отчетного периода!")
-        }
-
-        // 3. Проверка на уникальность поля «№ пп»
-        if (++i != row.rowNumber) {
-            loggerError(row, errorMsg + "Нарушена уникальность номера по порядку!")
         }
 
         // 4. Проверка на нулевые значения
@@ -271,9 +264,6 @@ void calc() {
     // Сортировка
     sortRows(dataRows, sortColumns)
 
-    // Номер последний строки предыдущей формы
-    def index = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
-
     if (!isBalancePeriod() && !isConsolidated) {
         def dataRowsPrev = getDataRowsPrev()
         def dFrom = getReportPeriodStartDate()
@@ -284,8 +274,6 @@ void calc() {
             def rowPrev = getRowPrev(dataRowsPrev, row)
             def values = getCalc11_15(row, rowPrev, dFrom, dTo)
 
-            // графа 1
-            row.rowNumber = ++index
             // графа 11
             row.result = values.result
             // графа 12
@@ -301,10 +289,6 @@ void calc() {
             row.correctThisPrev = calc18(row, rowPrev, dFrom, dTo)
             row.correctThisThis = calc19(row, dTo)
             row.correctThisNext = calc20(row, dTo)
-        }
-    } else {
-        for (def row : dataRows) {
-            row.rowNumber = ++index
         }
     }
 
@@ -577,19 +561,41 @@ void addData(def xml, int headRowCount) {
         newRow.income = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
 
+        // графы рассчитываемые, однако не при импорте в консолидированную - должны загружаться
         // графа 11
+        newRow.result = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
+
         // графа 12
+        newRow.part2Date = getDate(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
+
         // графа 13
+        newRow.lossThisQuarter = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
+
         // графа 14
+        newRow.lossNextQuarter = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
+
         // графа 15
+        newRow.lossThisTaxPeriod = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
 
         // графа 16
         newRow.taxClaimPrice = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
+        // графа 17
+        newRow.finResult = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
+        // графа 18
+        newRow.correctThisPrev = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
+        // графа 19
+        newRow.correctThisThis = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
+        // графа 20
+        newRow.correctThisNext = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
 
         rows.add(newRow)
     }

@@ -88,7 +88,7 @@ def editableColumns = ['bill', 'purchaseDate', 'implementationDate', 'implementa
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['number', 'bill', 'purchaseDate', 'purchasePrice', 'purchaseOutcome', 'implementationDate',
+def nonEmptyColumns = ['bill', 'purchaseDate', 'purchasePrice', 'purchaseOutcome', 'implementationDate',
         'implementationPrice', 'implementationOutcome', 'price', 'percent', 'implementationpPriceTax', 'allIncome',
         'implementationPriceUp', 'income']
 
@@ -140,12 +140,7 @@ void calc() {
 
         def rnu55DataRows = getRNU(348)
         def rnu56DataRows = getRNU(349)
-        // номер последний строки предыдущей формы
-        def index = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
         for (row in dataRows) {
-            // графа 1
-            row.number = ++index
-
             def rnu55Row = getRnuSourceRow(rnu55DataRows, row)
             def rnu56Row = getRnuSourceRow(rnu56DataRows, row)
 
@@ -332,8 +327,6 @@ boolean logicCheck() {
     // для хранения правильных значении и сравнения с имеющимися при арифметических проверках
     def needValue = [:]
 
-    def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
-
     // Дата начала отчетного периода
     def startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
     // Дата окончания отчетного периода
@@ -357,11 +350,6 @@ boolean logicCheck() {
         // 3. Проверка даты реализации (погашения) и границ отчетного периода
         if (row.implementationDate != null && (row.implementationDate.compareTo(startDate) < 0 || row.implementationDate.compareTo(endDate) > 0)) {
             rowError(logger, row, errorMsg + 'Дата реализации (погашения) вне границ отчетного периода!')
-        }
-
-        // 4. Проверка на уникальность поля «№ пп»
-        if (++i != row.number) {
-            rowError(logger, row, errorMsg + 'Нарушена уникальность номера по порядку!')
         }
 
         def rnu55Row = getRnuSourceRow(rnu55DataRows, row)

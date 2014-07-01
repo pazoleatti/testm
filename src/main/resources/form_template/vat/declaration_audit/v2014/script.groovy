@@ -10,7 +10,7 @@ import groovy.transform.Field
 import groovy.xml.MarkupBuilder
 
 /**
- * Декларация по НДС (аудит). Генератор XML.
+ * Декларация по НДС (короткая). Генератор XML.
  * http://jira.aplana.com/browse/SBRFACCTAX-7579
  *
  * совпадает с "Декларация по НДС" (declaration_fns), кроме заполнения секции "РАЗДЕЛ 2"
@@ -215,7 +215,7 @@ void generateXML() {
 
     def period = 0
     if (reportPeriod.order != null) {
-        def values = [21, 31, 33, 34]
+        def values = [21, 22, 23, 24]
         period = values[reportPeriod.order - 1]
     }
 
@@ -536,7 +536,8 @@ def round(def value) {
  * @param row строка формы 724.2.1
  */
 def getNalNeVich(def row) {
-    if (row.code == specialCode){
+    def order = reportPeriodService.get(declarationData.reportPeriodId)?.order
+    if (order != 1 && row.code == specialCode){
         // сумма кодов ОПУ из отчета 102
         def sumOpu = getSumByOpuCodes(opuCodes)
         // сумма из расходов простых
@@ -550,28 +551,21 @@ def getNalNeVich(def row) {
 
 def getSumOutcomeSimple(def knuCodes) {
     def tmp = 0
-    def List<ReportPeriod> periodList = reportPeriodService.getReportPeriodsByDate(TaxType.INCOME, getReportPeriodStartDate(), getReportPeriodEndDate())
+    // получаем период из прибыли соотвествующий текущему периоду НДС
+    def List<ReportPeriod> periodList = reportPeriodService.getReportPeriodsByDate(TaxType.INCOME, getEndDate(), getEndDate())
     if (periodList.isEmpty()) {
         return 0
     }
-    def reportPeriodIncome = periodList.get(0)
-    def formDataSimple = getFormDataSimple(reportPeriodIncome.id)
+    // получаем предыдущий период по прибыли
+    def reportPeriodPrevIncome = reportPeriodService.getPrevReportPeriod(periodList.get(0).id)
+    if (reportPeriodPrevIncome?.id == null) {
+        return 0
+    }
+    def formDataSimple = getFormDataSimple(reportPeriodPrevIncome.id)
     def dataRowsSimple = (formDataSimple ? formDataService.getDataRowHelper(formDataSimple)?.getAll() : null)
     for (def row : dataRowsSimple){
         if (row.consumptionTypeId in knuCodes) {
             tmp += row.rnu5Field5Accepted
-        }
-    }
-    if (reportPeriodIncome.order != 1) {
-        def prevReportPeriodId = reportPeriodService.getPrevReportPeriod(reportPeriodIncome.id)?.id
-        if (prevReportPeriodId != null) {
-            formDataSimple = getFormDataSimple(prevReportPeriodId)
-            dataRowsSimple = (formDataSimple ? formDataService.getDataRowHelper(formDataSimple)?.getAll() : null)
-            for (def row : dataRowsSimple){
-                if (row.consumptionTypeId in knuCodes) {
-                    tmp -= row.rnu5Field5Accepted
-                }
-            }
         }
     }
     return tmp
@@ -598,42 +592,23 @@ def getIncome102Data(def date) {
  */
 def getSumByOpuCodes(def opuCodes) {
     def tmp = BigDecimal.ZERO
-    def hasData = false
-    // сначало берутся данные за текущий периода, а потом вычитаются данные запредыдущий период (например: 9 месяцев - полгода)
-    for (def income102Row : getIncome102Data(getReportPeriodEndDate())) {
+    // берутся данные за текущий период
+    for (def income102Row : getIncome102Data(getEndDate())) {
         if (income102Row?.OPU_CODE?.value in opuCodes) {
             tmp += (income102Row?.TOTAL_SUM?.value ?: 0)
-            hasData = true
-        }
-    }
-    if (!hasData) {
-        return BigDecimal.ZERO
-    }
-    if (reportPeriodService.get(declarationData.reportPeriodId)?.order > 1) {
-        for (def income102Row : getIncome102Data(getPrevReportPeriodEndDate())) {
-            if (income102Row?.OPU_CODE?.value in opuCodes) {
-                tmp -= (income102Row?.TOTAL_SUM?.value ?: 0)
-            }
         }
     }
     return tmp
 }
 
-def getReportPeriodStartDate() {
+def getStartDate() {
     if (!startDate) {
         startDate = reportPeriodService.getStartDate(declarationData.reportPeriodId).time
     }
     return startDate
 }
 
-def getReportPeriodEndDate() {
-    if (endDate == null) {
-        endDate = reportPeriodService.getEndDate(declarationData.reportPeriodId).time
-    }
-    return endDate
-}
-
-def getPrevReportPeriodEndDate() {
+def getPrevEndDate() {
     if (prevEndDate == null) {
         def prevReportId = reportPeriodService.getPrevReportPeriod(declarationData.reportPeriodId)?.id
         prevEndDate = reportPeriodService.getEndDate(prevReportId).time

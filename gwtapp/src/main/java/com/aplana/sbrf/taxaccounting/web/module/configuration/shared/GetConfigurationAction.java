@@ -9,7 +9,4 @@ public class GetConfigurationAction extends UnsecuredActionImpl<GetConfiguration
 	public String getName() {
 		return "Получение конфигурационных параметров";
 	}
-	
-
-	
 }

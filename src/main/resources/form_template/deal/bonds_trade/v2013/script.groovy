@@ -71,7 +71,7 @@ def autoFillColumns = ['rowNum', 'innKio', 'contraCountry', 'contraCountryCode',
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNum', 'transactionDeliveryDate', 'contraName', 'transactionMode', 'transactionSumCurrency',
+def nonEmptyColumns = ['transactionDeliveryDate', 'contraName', 'transactionMode', 'transactionSumCurrency',
         'currency', 'courseCB', 'transactionSumRub', 'contractNum', 'contractDate', 'transactionDate', 'bondRegCode',
         'bondCount', 'priceOne', 'transactionType']
 
@@ -201,10 +201,7 @@ void logicCheck() {
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
-    def int index = 1
     for (row in dataRows) {
-        // Порядковый номер строки
-        row.rowNum = index++
         // Расчет поля "Цена за 1 шт., руб."
         transactionSumRub = row.transactionSumRub
         bondCount = row.bondCount
@@ -297,9 +294,6 @@ void addData(def xml, int headRowCount) {
         }
 
         def int xmlIndexCol = 0
-
-        // графа 1
-        newRow.rowNum = xmlIndexRow - headRowCount
 
         // графа 2
         newRow.transactionDeliveryDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)

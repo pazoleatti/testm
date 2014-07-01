@@ -65,7 +65,7 @@ public class FormTemplateImpexPresenter extends Presenter<FormTemplateImpexPrese
 
     @Override
 	public void uploadFormTemplateSuccess(String uuid) {
-        if (uuid != null && !uuid.isEmpty() && !uuid.equals("<pre></pre>")){
+        if (uuid != null && !uuid.isEmpty() && !uuid.toLowerCase().equals("<pre></pre>")){
             LogAddEvent.fire(this, uuid);
         }else {
             Dialog.infoMessage("Макет загружен");

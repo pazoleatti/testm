@@ -273,7 +273,10 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                     }
                                     recordId = null;
                                     //LogAddEvent.fire(RefBookDataPresenter.this, result.getUuid());
-								}
+                                    if (result.getDataRows().size() == 0) {
+                                        editFormPresenter.setAllVersionVisible(false);
+                                    }
+                                }
 							}, RefBookDataPresenter.this));
 		}
 	}

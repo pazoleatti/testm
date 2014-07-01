@@ -175,6 +175,11 @@ public interface DepartmentDao {
      */
     List<Integer> getDepartmentIdsByExcutors(List<Integer> departments, List<TaxType> taxTypes);
 
+    /**
+     * Все подразделения, для форм которых, подразделения departments назначены исполнителями
+     */
+    List<Integer> getDepartmentIdsByExecutors(List<Integer> departments);
+
     List<Integer> getDepartmentsByName(String departmentName);
 
     /**

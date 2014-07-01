@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.api;
 
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
 public interface ConfigurationService {
 
@@ -13,5 +14,5 @@ public interface ConfigurationService {
     /**
      * Сохранение конфигурационных параметров (табл. CONFIGURATION)
      */
-	void saveAllConfig(TAUserInfo userInfo, ConfigurationParamModel model);
+	void saveAllConfig(TAUserInfo userInfo, ConfigurationParamModel model, Logger logger);
 }

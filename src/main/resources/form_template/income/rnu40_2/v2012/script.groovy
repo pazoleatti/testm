@@ -181,7 +181,7 @@ void logicCheck() {
             def tmpRow = getCalcRowFromRNU_40_1(row.name, row.code, rows40_1)
             for (def alias: arithmeticCheckAlias) {
                 def value1 = row.getCell(alias).value
-                def value2 = tmpRow.getCell(alias).value
+                def value2 = tmpRow?.getCell(alias)?.value
                 if (value1 != value2) {
                     logger.error('Значения не соответствуют данным РНУ-40.1')
                     return

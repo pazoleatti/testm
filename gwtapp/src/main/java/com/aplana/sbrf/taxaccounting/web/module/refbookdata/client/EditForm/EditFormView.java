@@ -76,12 +76,16 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
                 getUiHandlers().updateHistory();
             }
         });
+        versionStart.setStartLimitDate(new Date(0));//01.01.1970
+        versionStart.setEndLimitDate(new Date(4133894400000L));//31.12.2100
         versionStart.addValueChangeHandler(new ValueChangeHandler<Date>() {
             @Override
             public void onValueChange(ValueChangeEvent<Date> event) {
                 updateRefBookPickerPeriod();
             }
         });
+        versionEnd.setStartLimitDate(new Date(0));//01.01.1970
+        versionEnd.setEndLimitDate(new Date(4133894400000L));//31.12.2100
         versionEnd.addValueChangeHandler(new ValueChangeHandler<Date>() {
             @Override
             public void onValueChange(ValueChangeEvent<Date> event) {
@@ -102,8 +106,12 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 
             if (versionEnd.getValue() != null && start.after(versionEnd.getValue())) {
                 Dialog.errorMessage("Неправильно указан диапазон дат!");
-                versionEnd.setValue(null);
+                save.setEnabled(false);
+                cancel.setEnabled(false);
                 return;
+            } else {
+                save.setEnabled(true);
+                cancel.setEnabled(true);
             }
 
             for (Map.Entry<RefBookColumn, HasValue> w : widgets.entrySet()) {
@@ -131,6 +139,11 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
         startVersionDateLabel.setVisible(canVersion);
         endVersionDateLabel.setVisible(canVersion);
         allVersion.setVisible(canVersion);
+    }
+
+    @Override
+    public void setAllVersionField(boolean isVisible) {
+        allVersion.setVisible(isVisible);
     }
 
     @Override

@@ -70,7 +70,7 @@ def editableColumns = ['incomeType', 'sum']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNumber', 'incomeType', 'sum']
+def nonEmptyColumns = ['incomeType', 'sum']
 
 // Сумируемые колонки в фиксированной с троке
 @Field
@@ -125,13 +125,6 @@ void calc() {
 
         // сортируем по кодам
         dataRowHelper.save(dataRows.sort { getKnu(it.incomeType) })
-
-        // номер последний строки предыдущей формы
-        def number = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
-
-        for (row in dataRows) {
-            row.rowNumber = ++number
-        }
     }
 
     dataRowHelper.insert(calcTotalRow(dataRows), dataRows.size() + 1)
@@ -157,22 +150,13 @@ void logicCheck() {
     if (dataRows.isEmpty()) {
         return
     }
-    def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
 
     for (def row : dataRows) {
         if (row.getAlias() != null) {
             continue
         }
-        def index = row.getIndex()
-        def errorMsg = "Строка $index: "
-
         // Проверка на заполнение поля
-        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
-
-        // 2. Проверка на уникальность поля «№ пп»
-        if (++i != row.rowNumber) {
-            rowError(logger, row, errorMsg + "Нарушена уникальность номера по порядку!")
-        }
+        checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
     }
 
     // 3. Арифметические проверки расчета итоговой строки

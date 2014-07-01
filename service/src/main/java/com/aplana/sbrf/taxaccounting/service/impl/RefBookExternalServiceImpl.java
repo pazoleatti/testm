@@ -22,10 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.InputStream;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -48,7 +45,7 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
     private RefBookFactory refBookFactory;
 
     private static long REF_BOOK_OKATO = 3L; // Коды ОКАТО
-    private static long REF_BOOK_OUKS = 9L;  // Организации-участники контролируемых сделок
+    // private static long REF_BOOK_OUKS = 9L;  // Организации-участники контролируемых сделок
     private static long REF_BOOK_RF_SUBJ_CODE = 4L; // Коды субъектов Российской Федерации
     private static long REF_BOOK_EMITENT = 100L; // Эмитенты
     private static long REF_BOOK_BOND = 84L; // Ценные бумаги
@@ -63,7 +60,7 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
     private void importRefBook(TAUserInfo userInfo, Logger logger, ConfigurationParam refBookDirectoryParam, Map<String, List<Pair<Boolean, Long>>> mappingMap) {
         // TODO добавить проверку ЭЦП (Marat Fayzullin 2013-10-19)
         ConfigurationParamModel model = configurationService.getAllConfig(userInfo);
-        List<String> refBookDirectoryList = model.get(refBookDirectoryParam);
+        List<String> refBookDirectoryList = model.get(refBookDirectoryParam, DepartmentType.ROOT_BANK.getCode());
 
         BufferedReader reader = null;
 
@@ -193,14 +190,16 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
         mappingMap.put("OKA.*", asList(new Pair<Boolean, Long>(false, REF_BOOK_OKATO)));
         // архив для загр. спр. "Коды ОКАТО"
         mappingMap.put("payments.*", asList(new Pair<Boolean, Long>(false, REF_BOOK_OKATO)));
-        // файл для загр. спр. "Организации-участники контролируемых сделок"
-        mappingMap.put("organization.xls", asList(new Pair<Boolean, Long>(true, REF_BOOK_OUKS)));
+        // ОКАТО
+        importRefBook(userInfo, logger, ConfigurationParam.OKATO_TRANSPORT_DIRECTORY, mappingMap);
+
+        mappingMap = new HashMap<String, List<Pair<Boolean, Long>>>();
         // архив для загр. спр. "Коды субъектов Российской Федерации" (Регионы)
         mappingMap.put("RNU.*", asList(new Pair<Boolean, Long>(false, REF_BOOK_RF_SUBJ_CODE)));
         // архив для загр. спр. "Коды субъектов Российской Федерации" (Регионы)
         mappingMap.put("generaluse.AS_RNU.*.*", asList(new Pair<Boolean, Long>(false, REF_BOOK_RF_SUBJ_CODE)));
-
-        importRefBook(userInfo, logger, ConfigurationParam.REF_BOOK_DIRECTORY, mappingMap);
+        // Субъекты РФ
+        importRefBook(userInfo, logger, ConfigurationParam.OKATO_TRANSPORT_DIRECTORY, mappingMap);
     }
 
     @Override
@@ -208,9 +207,10 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
         // Регулярка → Пара(Признак архива, Id справочника)
         Map<String, List<Pair<Boolean, Long>>> mappingMap = new HashMap<String, List<Pair<Boolean, Long>>>();
         // Ценные бумаги + Эмитенты
-        mappingMap.put("DS[0-9]{6}\\.nsi", asList(new Pair<Boolean, Long>(true, REF_BOOK_BOND), new Pair<Boolean, Long>(true, REF_BOOK_EMITENT)));
+        mappingMap.put("DS[0-9]{6}\\.nsi", asList(new Pair<Boolean, Long>(true, REF_BOOK_EMITENT), new Pair<Boolean, Long>(true, REF_BOOK_BOND)));
 
-        importRefBook(userInfo, logger, ConfigurationParam.REF_BOOK_DIASOFT_DIRECTORY, mappingMap);
+        // TODO Вопросы по аналитике, пока нет ясности как хранить параметр http://conf.aplana.com/pages/viewpage.action?pageId=13112570
+        //importRefBook(userInfo, logger, ConfigurationParam.REF_BOOK_DIASOFT_DIRECTORY, mappingMap);
     }
 
     @Override

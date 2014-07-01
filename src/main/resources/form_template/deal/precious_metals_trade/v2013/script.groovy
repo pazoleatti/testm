@@ -77,7 +77,7 @@ def groupColumns = ['fullName', 'docNumber', 'docDate', 'dealFocus', 'deliverySi
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNum', 'fullName', 'interdependence', 'docNumber', 'docDate', 'dealFocus', 'deliverySign',
+def nonEmptyColumns = ['fullName', 'interdependence', 'docNumber', 'docDate', 'dealFocus', 'deliverySign',
         'metalName', 'foreignDeal', 'count', 'price', 'total', 'dealDoneDate']
 
 // Дата окончания отчетного периода
@@ -178,9 +178,9 @@ void logicCheck() {
             if (isHaveNotEmptyField) {
                 StringBuilder builder = new StringBuilder()
                 for (int i = 0; i < checkField.size(); i++) {
-                    builder.append("«").append(getAtributes().get(checkField.get(i))[2])
+                    builder.append("«").append(getAttributes().get(checkField.get(i))[2])
                             .append("» ").append("(")
-                            .append(getAtributes().get(checkField.get(i))[1])
+                            .append(getAttributes().get(checkField.get(i))[1])
                             .append(")")
                     if (i != (checkField.size() - 1)) {
                         builder.append(", ")
@@ -347,10 +347,7 @@ void calc() {
     // Сортировка
     sortRows(dataRows, groupColumns)
 
-    def index = 1
     for (row in dataRows) {
-        // Порядковый номер строки
-        row.rowNum = index++
         // Расчет поля "Цена"
         if (row.incomeSum != null && row.outcomeSum != null) {
             row.price = (row.incomeSum - row.outcomeSum).abs()
@@ -571,7 +568,6 @@ void addData(def xml, int headRowCount) {
         def int xmlIndexCol = 0
 
         // графа 1
-        newRow.rowNum = xmlIndexRow - headRowCount
         xmlIndexCol++
 
         // графа fix
@@ -728,7 +724,7 @@ def getReportPeriodEndDate() {
     return endDate
 }
 
-def getAtributes() {
+def getAttributes() {
     [
             rowNum:             ['rowNum',              'гр. 1', '№ п/п'],
             fullName:           ['fullName',            'гр. 2.1', 'Полное наименование с указанием ОПФ'],

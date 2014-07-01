@@ -53,7 +53,7 @@ public class TransportDataController {
             fileName = fileName.substring(fileName.lastIndexOf("\\") + 1);
         }
 
-        transportDataService.uploadFile(securityService.currentUserInfo(), ConfigurationParam.FORM_DATA_DIRECTORY,
+        transportDataService.uploadFile(securityService.currentUserInfo(), ConfigurationParam.UPLOAD_DIRECTORY,
                 fileName, items.get(0).getInputStream(), logger);
 
         if (!logger.getEntries().isEmpty()){

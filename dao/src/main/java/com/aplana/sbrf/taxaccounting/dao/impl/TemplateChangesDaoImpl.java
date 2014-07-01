@@ -16,6 +16,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -35,7 +36,7 @@ public class TemplateChangesDaoImpl extends AbstractDao implements TemplateChang
         public TemplateChanges mapRow(ResultSet rs, int rowNum) throws SQLException {
             TemplateChanges changes = new TemplateChanges();
             changes.setId(SqlUtils.getInteger(rs, "id"));
-            changes.setEventDate(rs.getDate("date_event"));
+            changes.setEventDate(new Date(rs.getTimestamp("date_event").getTime()));
             changes.setAuthor(taUserDao.getUser(SqlUtils.getInteger(rs,"author")));
             changes.setEvent(TemplateChangesEvent.fromId(SqlUtils.getInteger(rs,"event")));
             changes.setFormTemplateId(SqlUtils.getInteger(rs,"form_template_id"));
@@ -52,7 +53,7 @@ public class TemplateChangesDaoImpl extends AbstractDao implements TemplateChang
                     " VALUES(?, ?, ?, ?, ?, ?)",
                     new Object[]{templateEventId, templateChanges.getEvent().getId(), templateChanges.getEventDate(), templateChanges.getAuthor().getId(),
                             templateChanges.getFormTemplateId(), templateChanges.getDeclarationTemplateId()},
-                    new int[]{Types.NUMERIC, Types.NUMERIC, Types.DATE, Types.NUMERIC, Types.NUMERIC, Types.NUMERIC});
+                    new int[]{Types.NUMERIC, Types.NUMERIC, Types.TIMESTAMP, Types.NUMERIC, Types.NUMERIC, Types.NUMERIC});
             return templateEventId;
         } catch (DataAccessException e){
             logger.error("Ошибка при добавлении истории событий.", e);

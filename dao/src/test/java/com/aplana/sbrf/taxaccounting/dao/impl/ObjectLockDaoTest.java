@@ -174,5 +174,4 @@ public class ObjectLockDaoTest {
 	public void testtestRefreshLockLockedByDifferentUserButTimedOut() {
 		objectLockDao.refreshLock(35L, FormData.class, 1);
 	}
-
 }

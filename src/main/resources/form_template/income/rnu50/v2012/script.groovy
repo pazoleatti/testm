@@ -68,7 +68,7 @@ def groupColumns = ['rnu49rowNumber', 'invNumber']
 
 // Проверяемые на пустые значения атрибуты (графа 1..5)
 @Field
-def nonEmptyColumns = ['rowNumber', 'rnu49rowNumber', 'invNumber', 'lossReportPeriod', 'lossTaxPeriod']
+def nonEmptyColumns = ['rnu49rowNumber', 'invNumber', 'lossReportPeriod', 'lossTaxPeriod']
 
 // Атрибуты итоговых строк для которых вычисляются суммы (графа 4, 5)
 @Field
@@ -102,12 +102,8 @@ void calc() {
         // сортировка
         sortRows(dataRows, groupColumns)
 
-        def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')?.intValue()
         dataRows.eachWithIndex { row, i ->
             row.setIndex(i + 1)
-
-            // графа 1
-            row.rowNumber = ++rowNumber
         }
     }
 
@@ -120,7 +116,6 @@ void calc() {
 
 void logicCheck() {
     def dataRows = formDataService.getDataRowHelper(formData)?.allCached
-    def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')?.intValue()
     for (def row : dataRows) {
         if (row.getAlias() != null) {
             continue
@@ -130,11 +125,6 @@ void logicCheck() {
 
         // 1. Обязательность заполнения полей (графа 1..5)
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
-
-        // 2. Проверка на уникальность поля «№ пп» (графа 1)
-        if (++rowNumber != row.rowNumber) {
-            rowWarning(logger, row, errorMsg + 'Нарушена уникальность номера по порядку!')
-        }
 
         // 3. Проверка на нулевые значения
         if (row.lossReportPeriod == 0 && row.lossTaxPeriod == 0) {
