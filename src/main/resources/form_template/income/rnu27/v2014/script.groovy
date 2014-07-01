@@ -120,8 +120,8 @@ def groupColumns = ['issuer', 'regNumber', 'tradeNumber']
 
 // Проверяемые на пустые значения атрибуты (графа 1..5, 8, 13..17)
 @Field
-def nonEmptyColumns = ['number', /*'issuer',*/ 'regNumber', 'tradeNumber', /*'currency',*/ 'reserveCalcValuePrev',
-        'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery']
+def nonEmptyColumns = ['regNumber', 'tradeNumber', 'reserveCalcValuePrev', 'costOnMarketQuotation', 'reserveCalcValue',
+                       'reserveCreation', 'recovery']
 
 // Атрибуты итоговых строк для которых вычисляются суммы (графа 6..9, 14..17)
 @Field
@@ -195,12 +195,8 @@ void calc() {
         dataPrevRows = dataPrev?.allCached
     }
 
-    // номер последний строки предыдущей формы
-    def number = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
-
-    for (row in dataRows) {
-        row.number = ++number
-        if (!isBalancePeriod() && !isConsolidated) {
+    if (!isBalancePeriod() && !isConsolidated) {
+        for (row in dataRows) {
             row.reserveCalcValuePrev = calc8(row, dataPrevRows)
             row.marketQuotation = calc11(row)
             row.rubCourse = calc12(row)
@@ -233,10 +229,8 @@ def logicCheck() {
         dataPrevRows = dataPrev?.allCached
     }
 
-    def number = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
     for (DataRow row in dataRows) {
         if (row?.getAlias() == null) {
-            number++
             def index = row.getIndex()
             def errorMsg = "Строка ${index}: "
 
@@ -305,11 +299,6 @@ def logicCheck() {
 
             // 1. Проверка на заполнение поля «<Наименование поля>»
             checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !isBalancePeriod())
-
-            // 2. Проверка на уникальность поля «№ пп»
-            if (number != row.number) {
-                rowError(logger, row, errorMsg + "Нарушена уникальность номера по порядку!")
-            }
 
             if (getCurrencyCode(row.regNumber) in ['810', '643']) {
                 // 17. Проверка графы 11
@@ -501,9 +490,8 @@ void addData(def xml, int headRowCount) {
 
         def xmlIndexCol
 
-        /* Графа 1 */
+        // Графа 1
         xmlIndexCol = 0
-        newRow.number = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
 
         // Графа 3 - атрибут 813 - REG_NUM - «Государственный регистрационный номер», справочник 84 «Ценные бумаги»
         // TODO (Ramil Timerbaev) могут быть проблемы с нахождением записи,
@@ -521,7 +509,7 @@ void addData(def xml, int headRowCount) {
             formDataService.checkReferenceValue(84, value1, value2, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         }
 
-        /* Графа 4 */
+        // Графа 4
         newRow.tradeNumber = row.cell[4].text()
 
         // Графа 5 - зависит от графы 3 - атрибут 810 - CODE_CUR - «Цифровой код валюты выпуска», справочник 84 «Ценные бумаги»
@@ -533,20 +521,20 @@ void addData(def xml, int headRowCount) {
             formDataService.checkReferenceValue(84, value1, value2, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         }
 
-        /* Графа 6 */
+        // Графа 6
         xmlIndexCol = 6
         newRow.prev = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
 
-        /* Графа 7 */
+        // Графа 7
         xmlIndexCol = 7
         newRow.current = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
 
-        /* Графа 8 */
+        // Графа 8
         xmlIndexCol = 8
         newRow.reserveCalcValuePrev = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
 
-        /* Графа 9 */
-        xmlIndexCol = 9
+        // Графа 9
+        xlIndexCol = 9
         newRow.cost = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
 
         // Графа 10 - зависит от графы 3 - атрибут 869 - SIGN - «Признак ценной бумаги», справочник 84 «Ценные бумаги»
@@ -558,27 +546,27 @@ void addData(def xml, int headRowCount) {
             formDataService.checkReferenceValue(84, value1, value2, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         }
 
-        /* Графа 11 */
+        // Графа 11
         xmlIndexCol = 11
         newRow.marketQuotation = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
 
-        /* Графа 12 */
+        // Графа 12
         xmlIndexCol = 12
         newRow.rubCourse = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
 
-        /* Графа 14 */
+        // Графа 14
         xmlIndexCol = 14
         newRow.costOnMarketQuotation = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
 
-        /* Графа 15 */
+        // Графа 15
         xmlIndexCol = 15
         newRow.reserveCalcValue = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
 
-        /* Графа 16 */
+        // Графа 16
         xmlIndexCol = 16
         newRow.reserveCreation = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
 
-        /* Графа 17 */
+        // Графа 17
         xmlIndexCol = 17
         newRow.recovery = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
 

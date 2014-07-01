@@ -85,7 +85,7 @@ def autoFillColumns = ['rowNumber', 'code']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNumber', 'numberFirstRecord', 'opy', 'operationDate', 'name', 'documentNumber',
+def nonEmptyColumns = ['numberFirstRecord', 'opy', 'operationDate', 'name', 'documentNumber',
         'date', 'periodCounts', 'advancePayment', 'outcomeInBuh']
 
 // Сумируемые колонки в фиксированной с троке
@@ -145,11 +145,7 @@ void calc() {
         // сортируем по кодам
         dataRows.sort { getKnu(it.opy) }
 
-        // номер последний строки предыдущей формы
-        def number = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
-
         for (row in dataRows) {
-            row.rowNumber = ++number
             // графа 11
             row.outcomeInNalog = calc11(row)
         }
@@ -247,8 +243,6 @@ void logicCheck() {
         return
     }
 
-    def number = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
-
     // календарная дата начала отчетного периода
     def startDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
     // дата окончания отчетного периода
@@ -268,11 +262,6 @@ void logicCheck() {
 
         // 1. Проверка на заполнение поля
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
-
-        // 2. Проверка на уникальность поля «№ пп» (графа 1)
-        if (++number != row.rowNumber) {
-            rowError(logger, row, errorMsg + "Нарушена уникальность номера по порядку!")
-        }
 
         // 3. Проверка даты совершения операции и границ отчетного периода (графа 5)
         if (row.operationDate != null && (row.operationDate.after(endDate) || row.operationDate.before(startDate))) {

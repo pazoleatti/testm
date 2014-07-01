@@ -133,8 +133,6 @@ void logicCheck() {
     def tmp
     def dFrom = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
     def dTo = reportPeriodService.getEndDate(formData.reportPeriodId).time
-    // Номер последний строки предыдущей формы
-    def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
 
     for (def DataRow row : dataRows) {
         if (row.getAlias() != null) {
@@ -207,11 +205,6 @@ void logicCheck() {
             loggerError(row, errorMsg + "Деление на ноль. Возможно неправильно выбраны даты.")
         }
 
-        // 9. Проверка на уникальность поля «№ пп» (графа 1)
-        if (++i != row.rowNumber) {
-            loggerError(row, errorMsg + 'Нарушена уникальность номера по порядку!')
-        }
-
         if (formData.kind == FormDataKind.PRIMARY) {
             def rowPrev = null
             for (def rowOld in dataRowsOld) {
@@ -253,14 +246,8 @@ void calc() {
         row.setIndex(i + 1)
     }
 
-    // Номер последний строки предыдущей формы
-    def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
-
     // графа 1, 13..20
     dataRows.each { DataRow row ->
-
-        // графа 1
-        row.rowNumber = ++i
 
         if (formData.kind == FormDataKind.PRIMARY) {
             def rowPrev = null

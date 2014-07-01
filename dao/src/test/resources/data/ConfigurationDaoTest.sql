@@ -1,5 +1,10 @@
-insert into configuration (code, value) values ('FORM_DATA_KEY_FILE', 'test1');
-insert into configuration (code, value) values ('REF_BOOK_KEY_FILE', 'test2');
-insert into configuration (code, value) values ('FORM_DATA_DIRECTORY', 'test3'||CHAR(10)||CHAR(10)||'test5'||CHAR(10));
-insert into configuration (code, value) values ('REF_BOOK_DIRECTORY', null);
---insert into configuration (code, value) values ('REF_BOOK_DIRECTORY', 'test4');
+insert into configuration (code, value, department_id) values ('FORM_DATA_KEY_FILE', 'test1', 1);
+insert into configuration (code, value, department_id) values ('REF_BOOK_KEY_FILE', 'test2', 1);
+insert into configuration (code, value, department_id) values ('ACCOUNT_PLAN_TRANSPORT_DIRECTORY', 'test3', 1);
+insert into configuration (code, value, department_id) values ('OKATO_TRANSPORT_DIRECTORY', 'test4', 1);
+--insert into configuration (code, value, department_id) values ('REGION_TRANSPORT_DIRECTORY', 'test5', 1);
+insert into configuration (code, value, department_id) values ('UPLOAD_DIRECTORY', 'test6', 1);
+insert into configuration (code, value, department_id) values ('UPLOAD_DIRECTORY', 'test7', 2);
+insert into configuration (code, value, department_id) values ('ARCHIVE_DIRECTORY', 'test8', 1);
+insert into configuration (code, value, department_id) values ('ERROR_DIRECTORY', 'test9', 1);
+insert into configuration (code, value, department_id) values ('ERROR_DIRECTORY', 'test10', 6);

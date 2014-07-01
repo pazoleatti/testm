@@ -210,22 +210,12 @@ void logicCheck() {
         return
     }
 
-    def rowNumber = 0
     for (row in dataRows) {
         if (row.getAlias() != null) {
             continue
         }
-        rowNumber++
-        def index = row.getIndex()
-        def errorMsg = "Строка $index: "
-
         // 1. Проверка на заполнение поля «<Наименование поля>»
-        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
-
-        // 2. Проверка на уникальность поля «№ пп»
-        if (rowNumber != row.number) {
-            rowError(logger, row, errorMsg + "Нарушена уникальность номера по порядку!")
-        }
+        checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
 
         // Проверки НСИ
         // 1. Проверка значения графы «КПП» - графа 4 - kpp - абсолютное значение - атрибут 234 KPP "КПП" - справочник 33 "Параметры подразделения по налогу на прибыль"
@@ -283,11 +273,6 @@ void calc() {
         return (regionBankA <=> regionBankB)
     }
 
-    def index = 0
-    for (row in dataRows) {
-        // графа 1
-        row.number = ++index
-    }
     dataRows.add(getTotalRow(dataRows))
     dataRowHelper.save(dataRows)
 }

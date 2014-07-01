@@ -55,7 +55,7 @@ def autoFillColumns = ['rowNum']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = autoFillColumns + editableColumns
+def nonEmptyColumns = ['operDate', 'name', 'inn', 'kpp', 'balanceNumber', 'sum', 'orderNumber', 'ndsSum', 'sfDate', 'sfNumber']
 
 // Сумируемые колонки в фиксированной строке
 @Field
@@ -86,10 +86,6 @@ void calc() {
     def dataRows = dataRowHelper.allCached
     def totalRow = getDataRow(dataRows, 'total')
     deleteAllAliased(dataRows)
-    def rowNum = 1
-    for (def row in dataRows) {
-        row.rowNum = rowNum++
-    }
     calcTotalSum(dataRows, totalRow, totalColumns)
     dataRows.add(totalRow)
     dataRowHelper.save(dataRows)

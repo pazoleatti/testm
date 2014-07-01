@@ -180,12 +180,8 @@ void calc() {
     // отсортировать/группировать
     sort(dataRows)
 
-    def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
     dataRows.each { row ->
         if (row.getAlias() == null) {
-            // графа 1
-            row.number = ++rowNumber
-
             if (isFirstSection(dataRows, row)) {
                 // графа 6
                 row.debt45_90DaysNormAllocation50per = calc6()
@@ -238,36 +234,27 @@ void logicCheck() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     // для первых строк - графы 1..16
-    requiredColumns1 = ['number', 'debtor', 'provision', 'nameBalanceAccount', 'debt45_90DaysSum',
+    requiredColumns1 = ['debtor', 'provision', 'nameBalanceAccount', 'debt45_90DaysSum',
                         'debt45_90DaysNormAllocation50per', 'debt45_90DaysReserve', 'debtOver90DaysSum',
                         'debtOver90DaysNormAllocation100per', 'debtOver90DaysReserve', 'totalReserve', 'reservePrev',
                         'reserveCurrent', 'calcReserve', 'reserveRecovery', 'useReserve']
     // для раздера А и Б - графы 1, 2, 4, 12, 16
-    requiredColumnsAB = ['number', 'debtor', 'nameBalanceAccount', 'reservePrev', 'useReserve']
+    requiredColumnsAB = ['debtor', 'nameBalanceAccount', 'reservePrev', 'useReserve']
 
     // алиасы графов для арифметической проверки (6, 7, 9..11, 13..15)
     def arithmeticCheckAlias = ['debt45_90DaysNormAllocation50per', 'debt45_90DaysReserve',
                                 'debtOver90DaysNormAllocation100per', 'debtOver90DaysReserve', 'totalReserve',
                                 'reserveCurrent', 'calcReserve', 'reserveRecovery']
 
-    def dataProvider = refBookFactory.getDataProvider(29)
-    def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
     for (def row : dataRows) {
         if (row.getAlias() != null) {
             continue
         }
         def isFirst = isFirstSection(dataRows, row)
-        def index = row.getIndex()
-        def errorMsg = "Строка $index: "
 
         // 1. Обязательность заполнения полей
         def nonEmptyColumns = (isFirst ? requiredColumns1 : requiredColumnsAB)
-        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
-
-        // 2. Проверка на уникальность поля "№ пп" (графа 1)
-        if (++rowNumber != row.number) {
-            rowError(logger, row, errorMsg + 'Нарушена уникальность номера по порядку!')
-        }
+        checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
 
         def needValue = [:]
         if (isFirst) {

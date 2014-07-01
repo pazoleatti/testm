@@ -82,7 +82,7 @@ def autoFillColumns = allColumns - editableColumns
 
 // Проверяемые на пустые значения атрибуты (графа 1, 3, 4, 6, 8)
 @Field
-def nonEmptyColumns = ['rowNum', 'number', 'sum', 'number2', 'sum2', 'nds']
+def nonEmptyColumns = ['number', 'sum', 'number2', 'sum2', 'nds']
 
 // Атрибуты итоговых строк для которых вычисляются суммы (графа 4, 6)
 @Field
@@ -168,16 +168,6 @@ void calc() {
         calcTotalSum(rows, lastRow, totalColumns)
     }
     updateIndexes(dataRows)
-
-    // подсчет номера по порядку
-    def number = 0
-    for (def row : dataRows) {
-        if (row.getAlias() != null) {
-            continue
-        }
-        // графа 1
-        row.rowNum = ++number
-    }
 
     dataRowHelper.save(dataRows)
 }

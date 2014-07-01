@@ -64,7 +64,7 @@ def autoFillColumns = ['realizeCost', 'obtainCost']
 
 // Проверяемые на пустые значения атрибуты (группа 1..5)
 @Field
-def nonEmptyColumns = ['rowNum', 'code', 'name', 'realizeCost', 'obtainCost']
+def nonEmptyColumns = ['code', 'name', 'realizeCost', 'obtainCost']
 
 // Поля, для которых подсчитываются итоговые значения (графа 4, 5)
 @Field

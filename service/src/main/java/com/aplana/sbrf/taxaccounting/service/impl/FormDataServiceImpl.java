@@ -180,9 +180,9 @@ public class FormDataServiceImpl implements FormDataService {
             if(!ext.equals(XLS_EXT) && !ext.equals(XLSX_EXT)){
 
                 String pKeyFileUrl = null;
-                List<String> paramList = configurationDao.loadParams().get(ConfigurationParam.FORM_DATA_KEY_FILE);
+                List<String> paramList = configurationDao.getAll().get(ConfigurationParam.FORM_DATA_KEY_FILE, DepartmentType.ROOT_BANK.getCode());
                 if (paramList != null && !paramList.isEmpty()) {
-                    pKeyFileUrl =  paramList.get(0); // Хранение списка, но для ЭЦП может использоваться лишь одно значение
+                    pKeyFileUrl =  paramList.get(0); // TODO Ключи нужно искать в нескольких каталогах
                 }
 
                 if (pKeyFileUrl != null) { // Необходимо проверить подпись

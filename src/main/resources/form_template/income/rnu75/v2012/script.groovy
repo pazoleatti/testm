@@ -74,7 +74,7 @@ def autoFillColumns = ['number']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['number', 'date', 'depo', 'reasonNumber', 'reasonDate', 'taxSum', 'factSum']
+def nonEmptyColumns = ['date', 'depo', 'reasonNumber', 'reasonDate', 'taxSum', 'factSum']
 
 // Сумируемые колонки в фиксированной с троке
 @Field
@@ -102,17 +102,8 @@ void calc() {
     def dataRows = dataRowHelper.getAllCached()
 
     if (!dataRows.isEmpty()) {
-
         // Удаление подитогов
         deleteAllAliased(dataRows)
-
-        // номер последний строки предыдущей формы
-        def index = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
-
-        for (row in dataRows) {
-            // графа 1
-            row.number = ++index
-        }
     }
 
     dataRowHelper.insert(calcTotalRow(dataRows), dataRows.size() + 1)
@@ -126,8 +117,6 @@ void logicCheck() {
     if (dataRows.isEmpty()) {
         return
     }
-
-    def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
 
     // Дата начала отчетного периода
     def startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
@@ -152,11 +141,6 @@ void logicCheck() {
         // 2. Проверка на нулевые значения
         if ((row.taxSum == null || row.taxSum == 0) && (row.factSum == null || row.factSum == 0)) {
             rowError(logger, row, errorMsg + "Суммы по операции нулевые!!")
-        }
-
-        // 4. Проверка на уникальность поля «№ пп»
-        if (++i != row.number) {
-            rowError(logger, row, errorMsg + "Нарушена уникальность номера по порядку!")
         }
     }
 

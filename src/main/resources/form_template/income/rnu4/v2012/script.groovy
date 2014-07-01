@@ -72,7 +72,7 @@ def autoFillColumns = ['rowNumber', 'code', 'name']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNumber', 'balance', 'sum']
+def nonEmptyColumns = ['balance', 'sum']
 
 // Дата окончания отчетного периода
 @Field
@@ -120,14 +120,6 @@ void calc() {
 
         // сортируем по кодам
         dataRows.sort { getKnu(it.balance) }
-
-        // номер последний строки предыдущей формы
-        def index = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
-
-        for (row in dataRows) {
-            // графа 1
-            row.rowNumber = ++index
-        }
     }
 
     // посчитать "итого по коду"
@@ -186,8 +178,6 @@ void logicCheck() {
         return
     }
 
-    def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
-
     //две карты: одна с реальными значениями итого по кодам, а вторая - с рассчитанными
     def totalRows = [:]
     def sumRowsByCode = [:]
@@ -200,16 +190,9 @@ void logicCheck() {
         if (row.getAlias() != null) {
             continue
         }
-        def index = row.getIndex()
-        def errorMsg = "Строка $index: "
 
         // 1. Проверка на заполнение поля
-        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
-
-        // 2. Проверка на уникальность поля «№ пп»
-        if (++i != row.rowNumber) {
-            rowError(logger, row, errorMsg + "Нарушена уникальность номера по порядку!")
-        }
+        checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
 
         // 4. Арифметическая проверка итоговых значений по каждому <Коду классификации доходов>
         def code = getKnu(row.balance)

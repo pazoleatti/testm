@@ -54,7 +54,7 @@ def editableColumns = ['differences', 'sum']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNum', 'differences', 'sum']
+def nonEmptyColumns = ['differences', 'sum']
 
 // Дата начала отчетного периода
 @Field
@@ -129,13 +129,6 @@ void logicCheck() {
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    def rowNum = 0
-    for (def row in dataRows) {
-        rowNum++
-        if (row.getAlias() == null) {
-            row.rowNum = rowNum
-        }
-    }
     def other = getDataRow(dataRows, 'R3')
     def sum = calcOther(dataRows)
     checkOverflowAlgorithm(sum, other, 'sum', other.getIndex(), sizeSum, "Сумма значений всех нефиксированных строк по Графе 3")
@@ -294,7 +287,6 @@ void addData(def xml, int headRowCount) {
         newRow.setImportIndex(xlsIndexRow)
 
         if (!isFixed) {
-            newRow.rowNum = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, true)
             newRow.differences = row.cell[2].text()
         } else {
             def dataRow = dataRows.get(indexRow)

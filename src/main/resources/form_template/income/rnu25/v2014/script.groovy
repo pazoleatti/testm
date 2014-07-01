@@ -72,6 +72,8 @@ switch (formDataEvent) {
         importData()
         calc()
         logicCheck()
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
         break
 }
 
@@ -85,9 +87,9 @@ def refBookCache = [:]
 
 // все атрибуты
 @Field
-def allColumns = ['rowNumber', 'fix', 'regNumber', 'tradeNumber', 'lotSizePrev', 'lotSizeCurrent',
-        'reserve', 'cost', 'signSecurity', 'marketQuotation', 'costOnMarketQuotation',
-        'reserveCalcValue', 'reserveCreation', 'reserveRecovery']
+def allColumns = ['rowNumber', 'fix', 'regNumber', 'tradeNumber', 'lotSizePrev', 'lotSizeCurrent', 'reserve', 'cost',
+                  'signSecurity', 'marketQuotation', 'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation',
+                  'reserveRecovery']
 
 // Редактируемые атрибуты (графа 2..5, 7..9)
 @Field
@@ -103,9 +105,8 @@ def groupColumns = ['regNumber', 'tradeNumber']
 
 // Проверяемые на пустые значения атрибуты (графа 1..3, 5..13)
 @Field
-def nonEmptyColumns = ['rowNumber', 'regNumber', 'tradeNumber', 'lotSizeCurrent', 'reserve',
-        'cost', 'signSecurity', 'costOnMarketQuotation',
-        'reserveCalcValue', 'reserveCreation', 'reserveRecovery']
+def nonEmptyColumns = ['regNumber', 'tradeNumber', 'lotSizeCurrent', 'reserve', 'cost', 'signSecurity',
+                       'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'reserveRecovery']
 
 // Атрибуты итоговых строк для которых вычисляются суммы (графа 4..7, 10..13)
 @Field
@@ -134,12 +135,6 @@ def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache);
 }
 
-// Получение числа из строки при импорте
-def getNumber(def value, def indexRow, def indexCol) {
-    def retValue = parseNumber(value, indexRow, indexCol, logger, true)
-    return retValue
-}
-
 // Признак периода ввода остатков.
 def isBalancePeriod() {
     if (isBalancePeriod == null) {
@@ -166,12 +161,8 @@ void calc() {
     def totalGroupsName = []
     // строки предыдущего периода
     def prevDataRows = getPrevDataRows()
-    // получить номер последний строки предыдущей формы если это не событие импорта
-    def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
 
     dataRows.each { row ->
-        // графа 1
-        row.rowNumber = ++rowNumber
 
         if (!isBalancePeriod() && formData.kind == FormDataKind.PRIMARY) {
             // графа 4
@@ -273,7 +264,6 @@ void logicCheck() {
     // список групп кодов классификации для которых надо будет посчитать суммы
     def totalGroupsName = []
 
-    def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
     for (def row : dataRows) {
         if (row.getAlias() != null) {
             continue
@@ -346,11 +336,6 @@ void logicCheck() {
 
         // 15. Обязательность заполнения поля графы 1..3, 5..13
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !isBalancePeriod())
-
-        // 16. Проверка на уникальность поля «№ пп» (графа 1)
-        if (++rowNumber != row.rowNumber) {
-            loggerError(row, errorMsg + 'Нарушена уникальность номера по порядку!')
-        }
 
         // 17. Арифметические проверки граф 6, 10..13
         if (!isBalancePeriod()) {
@@ -621,10 +606,8 @@ def BigDecimal calc13(def row) {
     return roundTo2(tmp < 0 ? -tmp : 0)
 }
 
-/*
- * Получение импортируемых данных
- */
 
+// Получение импортируемых данных
 void importData() {
     def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null)
 
@@ -655,8 +638,7 @@ void importData() {
     addData(xml, 1)
 }
 
-/* Заполнить форму данными */
-
+// Заполнить форму данными
 void addData(def xml, int headRowCount) {
     reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     def dataRowHelper = formDataService.getDataRowHelper(formData)
@@ -695,28 +677,116 @@ void addData(def xml, int headRowCount) {
             newRow.getCell(it).setStyleAlias('Редактируемая')
         }
 
-        /* Графа 2 */
+        // Графа 2
         newRow.regNumber = row.cell[2].text()
-
-        /* Графа 3 */
+        // Графа 3
         newRow.tradeNumber = row.cell[3].text()
-
-        /* Графа 4 */
+        // Графа 4
         newRow.lotSizePrev = parseNumber(row.cell[4].text(), xlsIndexRow, 4 + colOffset, logger, true)
-
-        /* Графа 5 */
+        // Графа 5
         newRow.lotSizeCurrent = parseNumber(row.cell[5].text(), xlsIndexRow, 5 + colOffset, logger, true)
-
-        /* Графа 7 */
+        // Графа 7
         newRow.cost = parseNumber(row.cell[7].text(), xlsIndexRow, 7 + colOffset, logger, true)
-
-        /* Графа 8 */
+        // Графа 8
         newRow.signSecurity = getRecordIdImport(62, 'CODE', row.cell[8].text(), xlsIndexRow, 8 + colOffset)
-
-        /* Графа 9 */
+        // Графа 9
         newRow.marketQuotation = parseNumber(row.cell[9].text(), xlsIndexRow, 9 + colOffset, logger, true)
 
         rows.add(newRow)
+    }
+    dataRowHelper.save(rows)
+}
+
+void importTransportData() {
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    addTransportData(xml)
+
+    def dataRows = formDataService.getDataRowHelper(formData)?.allCached
+    checkTotalSum(dataRows, totalSumColumns, logger, true)
+}
+
+void addTransportData(def xml) {
+    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def int rnuIndexRow = 2
+    def int colOffset = 1
+    def rows = []
+    def int rowIndex = 1
+
+    for (def row : xml.row) {
+        rnuIndexRow++
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
+        def columns = (isBalancePeriod() ? allColumns - 'rowNumber' : editableColumns)
+        columns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
+
+        // графа 2
+        newRow.regNumber = row.cell[2].text()
+        // графа 3
+        newRow.tradeNumber = row.cell[3].text()
+        // графа 4
+        newRow.lotSizePrev = parseNumber(row.cell[4].text(), rnuIndexRow, 4 + colOffset, logger, true)
+        // графа 5
+        newRow.lotSizeCurrent = parseNumber(row.cell[5].text(), rnuIndexRow, 5 + colOffset, logger, true)
+        // графа 6
+        newRow.reserve = parseNumber(row.cell[6].text(), rnuIndexRow, 6 + colOffset, logger, true)
+        // графа 7
+        newRow.cost = parseNumber(row.cell[7].text(), rnuIndexRow, 7 + colOffset, logger, true)
+        // графа 8
+        newRow.signSecurity = getRecordIdImport(62, 'CODE', row.cell[8].text(), rnuIndexRow, 8 + colOffset)
+        // графа 9
+        newRow.marketQuotation = parseNumber(row.cell[9].text(), rnuIndexRow, 9 + colOffset, logger, true)
+        // графа 10
+        newRow.costOnMarketQuotation = parseNumber(row.cell[10].text(), rnuIndexRow, 10 + colOffset, logger, true)
+        // графа 11
+        newRow.reserveCalcValue = parseNumber(row.cell[11].text(), rnuIndexRow, 11 + colOffset, logger, true)
+        // графа 12
+        newRow.reserveCreation = parseNumber(row.cell[12].text(), rnuIndexRow, 12 + colOffset, logger, true)
+        // графа 13
+        newRow.reserveRecovery = parseNumber(row.cell[13].text(), rnuIndexRow, 13 + colOffset, logger, true)
+
+        rows.add(newRow)
+    }
+
+    if (xml.rowTotal.size() == 1) {
+        rnuIndexRow = rnuIndexRow + 2
+
+        def row = xml.rowTotal[0]
+
+        def total = formData.createDataRow()
+        total.setAlias('total')
+        total.fix = 'Общий итог'
+        total.getCell('fix').colSpan = 2
+        allColumns.each {
+            total.getCell(it).setStyleAlias('Контрольные суммы')
+        }
+
+        // графа 4
+        total.lotSizePrev =  parseNumber(row.cell[4].text(), rnuIndexRow, 4 + colOffset, logger, true)
+        // графа 5
+        total.lotSizeCurrent =  parseNumber(row.cell[5].text(), rnuIndexRow, 5 + colOffset, logger, true)
+        // графа 6
+        total.reserve = parseNumber(row.cell[6].text(), rnuIndexRow, 6 + colOffset, logger, true)
+        // графа 7
+        total.cost = parseNumber(row.cell[7].text(), rnuIndexRow, 7 + colOffset, logger, true)
+        // графа 10
+        total.costOnMarketQuotation = parseNumber(row.cell[10].text(), rnuIndexRow, 10 + colOffset, logger, true)
+        // графа 11
+        total.reserveCalcValue = parseNumber(row.cell[11].text(), rnuIndexRow, 11 + colOffset, logger, true)
+        // графа 12
+        total.reserveCreation = parseNumber(row.cell[12].text(), rnuIndexRow, 12 + colOffset, logger, true)
+        // графа 13
+        total.reserveRecovery = parseNumber(row.cell[13].text(), rnuIndexRow, 13 + colOffset, logger, true)
+
+        rows.add(total)
     }
     dataRowHelper.save(rows)
 }

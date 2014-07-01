@@ -22,10 +22,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -104,8 +101,9 @@ public class TransportDataServiceImpl implements TransportDataService {
         }
 
         // Конфигурационные параметры
-        ConfigurationParamModel model = configurationDao.loadParams();
-        List<String> uploadPathList = model.get(folderParam);
+        ConfigurationParamModel model = configurationDao.getAll();
+        // TODO Постановка обновилась
+        List<String> uploadPathList = model.get(folderParam, DepartmentType.ROOT_BANK.getCode());
 
         if (uploadPathList == null || uploadPathList.isEmpty()) {
             logger.error(NO_CATALOG_UPLOAD_ERROR);
@@ -145,9 +143,19 @@ public class TransportDataServiceImpl implements TransportDataService {
 
     @Override
     public void importDataFromFolder(TAUserInfo userInfo, ConfigurationParam folderParam, Logger logger) {
+        importDataFromFolder(userInfo, null, folderParam, logger);
+    }
+
+    @Override
+    public void importDataFromFolder(TAUserInfo userInfo, List<Department> departmentList, ConfigurationParam folderParam, Logger logger) {
+        if (departmentList == null) {
+            // Ручная загрузка
+            // TODO Выборка
+        }
+
         // Конфигурационные параметры
-        ConfigurationParamModel model = configurationDao.loadParams();
-        List<String> uploadPathList = model.get(folderParam);
+        ConfigurationParamModel model = configurationDao.getAll();
+        List<String> uploadPathList = model.get(folderParam, DepartmentType.ROOT_BANK.getCode()); // TODO По подразделениям выборки
 
         // Проверка наличия каталога в параметрах
         if (uploadPathList == null || uploadPathList.isEmpty()) {
@@ -257,8 +265,11 @@ public class TransportDataServiceImpl implements TransportDataService {
     void moveToErrorDirectory(FileWrapper errorFileSrc, TAUserInfo userInfo, Logger logger) {
         try {
             // Конфигурационные параметры
-            ConfigurationParamModel model = configurationDao.loadParams();
-            List<String> errorPathList = model.get(ConfigurationParam.ERROR_DIRECTORY);
+            ConfigurationParamModel model = configurationDao.getAll();
+            List<String> errorPathList = null;
+            if (model != null) {
+                errorPathList = model.get(ConfigurationParam.ERROR_DIRECTORY, DepartmentType.ROOT_BANK.getCode());
+            }
 
             // Проверка наличия каталога в параметрах
             if (errorPathList == null || errorPathList.isEmpty()) {

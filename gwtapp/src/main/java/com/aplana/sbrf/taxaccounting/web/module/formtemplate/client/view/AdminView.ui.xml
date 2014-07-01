@@ -6,12 +6,13 @@
     <ui:style>
         .header {
             font-size: 14px;
-            color:  #636460;
+            color: #636460;
         }
 
         .btnPanel {
             padding-left: 7px;
             height: 30px;
+            margin-top: 2px;
         }
 
         .btnPanel td {
@@ -24,12 +25,6 @@
             right: 0;
             left: 0;
             top: 35px;
-        }
-
-        .horSep {
-            height: 1px;
-            margin: 4px 9px;
-            border-top: 1px solid #aeaeac;
         }
 
         .splitter {
@@ -71,19 +66,16 @@
             <fm:BodyContainer>
                 <g:FlowPanel width="100%" ui:field="filterContentPanel" addStyleNames="{style.btnPanel}"/>
 
-                <g:Label addStyleNames="{style.horSep}"/>
-
-                <!--Панель кнопок-->
-                <g:HorizontalPanel addStyleNames="{style.btnPanel}">
-                    <style:LeftBar childValign="middle" marginRight="9">
-                        <g:Button ui:field="create" text="Создать макет"/>
-                        <g:Button ui:field="delete" text="Удалить макет"/>
-                    </style:LeftBar>
-                </g:HorizontalPanel>
-
                 <g:SplitLayoutPanel addStyleNames="{style.splitter}">
                     <g:center>
                         <g:HTMLPanel>
+                            <!--Панель кнопок-->
+                            <g:HorizontalPanel addStyleNames="{style.btnPanel}">
+                                <style:LeftBar childValign="middle" marginRight="9">
+                                    <g:Button ui:field="create" text="Создать макет"/>
+                                    <g:Button ui:field="delete" text="Удалить макет"/>
+                                </style:LeftBar>
+                            </g:HorizontalPanel>
                             <g:ScrollPanel addStyleNames="{style.table}">
                                 <style:GenericCellTable ui:field="formTemplateTable" width="100%" height="100%"/>
                             </g:ScrollPanel>

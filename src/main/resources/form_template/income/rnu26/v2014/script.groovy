@@ -103,8 +103,8 @@ def autoFillColumns = allColumns - editableColumns
 
 // Проверяемые на пустые значения атрибуты (графа 1..3, 5..9, 13, 14)
 @Field
-def nonEmptyColumns = ['rowNumber', /*'issuer',*/ 'shareType', 'currency', 'lotSizePrev', 'lotSizeCurrent',
-        'reserveCalcValuePrev', 'cost', /*'signSecurity',*/ 'marketQuotationInRub', 'costOnMarketQuotation']
+def nonEmptyColumns = ['shareType', 'currency', 'lotSizePrev', 'lotSizeCurrent', 'reserveCalcValuePrev', 'cost',
+                       'marketQuotationInRub', 'costOnMarketQuotation']
 
 // Атрибуты итоговых строк для которых вычисляются суммы (графа 6..9, 14..17)
 @Field
@@ -183,17 +183,11 @@ void calc() {
     // данные предыдущего отчетного периода
     def prevDataRows = getPrevDataRows()
 
-    // номер последний строки предыдущей формы
-    def number = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
-
     // список групп кодов классификации для которых надо будет посчитать суммы
     def totalGroups = []
 
-    for (row in dataRows) {
-        // графа 1
-        row.rowNumber = ++number
-
-        if (!getBalancePeriod() && !isConsolidated) {
+    if (!getBalancePeriod() && !isConsolidated) {
+        for (row in dataRows) {
             // строка из предыдущего периода
             def prevRow = getPrevRowByColumn4(prevDataRows, row.tradeNumber)
             // графа 6
@@ -260,8 +254,6 @@ void logicCheck() {
     // список групп кодов классификации для которых надо будет посчитать суммы
     def totalGroups = []
 
-    def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
-
     // данные предыдущего отчетного периода
     def prevDataRows = getPrevDataRows()
 
@@ -274,11 +266,6 @@ void logicCheck() {
 
         // 1. Проверка на заполнение поля
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !getBalancePeriod())
-
-        // 2. Проверка на уникальность поля «№ пп» (графа 1)
-        if (++rowNumber != row.rowNumber) {
-            loggerError(row, errorMsg + 'Нарушена уникальность номера по порядку!')
-        }
 
         // 4. Проверка при нулевом значении размера лота на текущую отчётную дату (графа 7, 8, 17)
         if (row.lotSizeCurrent == 0 && row.reserveCalcValuePrev != row.reserveRecovery) {
