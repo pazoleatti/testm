@@ -90,6 +90,9 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
+        break
 }
 
 /**
@@ -157,6 +160,7 @@ def getRecordImport(def Long refBookId, def String alias, def String value, def 
     if (value == null || value == '') {
         return null
     }
+    logger.info("id = "+ refBookId + "; v = "+ value)
     return formDataService.getRefBookRecordImport(refBookId, recordCache, providerCache, refBookCache, alias, value,
             getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
 }
@@ -894,4 +898,145 @@ def isBalancePeriod() {
         isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
     }
     return isBalancePeriod
+}
+
+void importTransportData() {
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    addTransportData(xml)
+
+    def dataRows = formDataService.getDataRowHelper(formData)?.allCached
+    checkTotalSum(dataRows, totalColumns, logger, true)
+}
+
+void addTransportData(def xml) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def int rnuIndexRow = 2
+    def int colOffset = 1
+    def rows = []
+    def int rowIndex = 1
+
+    for (def row : xml.row) {
+        rnuIndexRow++
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
+        editableColumns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
+
+        // Графа 3 - атрибут 813 - REG_NUM - «Государственный регистрационный номер», справочник 84 «Ценные бумаги»
+        // TODO (Ramil Timerbaev) могут быть проблемы с нахождением записи,
+        // если в справочнике 84 есть несколько записей с одинаковыми значениями в поле REG_NUM
+        xmlIndexCol = 3
+        def record84 = getRecordImport(84, 'REG_NUM', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, true)
+        newRow.regNumber = record84?.record_id?.value
+        // Графа 2 - зависит от графы 3 - атрибут 809 - ISSUER - «Эмитент», справочник 84 «Ценные бумаги»
+        xmlIndexCol = 2
+        def record100 = getRecordImport(100, 'FULL_NAME', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        if (record84 != null && record100 != null) {
+            def value1 = record100?.record_id?.value?.toString()
+            def value2 = record84?.ISSUER?.value?.toString()
+            formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        }
+        // Графа 4
+        newRow.tradeNumber = row.cell[4].text()
+        // Графа 5 - зависит от графы 3 - атрибут 810 - CODE_CUR - «Цифровой код валюты выпуска», справочник 84 «Ценные бумаги»
+        xmlIndexCol = 5
+        def record15 = getRecordImport(15, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        if (record84 != null && record15 != null) {
+            def value1 = record15?.record_id?.value?.toString()
+            def value2 = record84?.CODE_CUR?.value?.toString()
+            formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        }
+        // Графа 6
+        xmlIndexCol = 6
+        newRow.prev = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        // Графа 7
+        xmlIndexCol = 7
+        newRow.current = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        // Графа 8
+        xmlIndexCol = 8
+        newRow.reserveCalcValuePrev = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        // Графа 9
+        xlIndexCol = 9
+        newRow.cost = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        // Графа 10 - зависит от графы 3 - атрибут 869 - SIGN - «Признак ценной бумаги», справочник 84 «Ценные бумаги»
+        xmlIndexCol = 10
+        def record62 = getRecordImport(62, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        if (record84 != null && record62 != null) {
+            def value1 = record62?.record_id?.value?.toString()
+            def value2 = record84?.SIGN?.value?.toString()
+            formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        }
+        // Графа 11
+        xmlIndexCol = 11
+        newRow.marketQuotation = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        // Графа 12
+        xmlIndexCol = 12
+        newRow.rubCourse = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        // Графа 13
+        xmlIndexCol = 13
+        newRow.marketQuotationInRub = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        // Графа 14
+        xmlIndexCol = 14
+        newRow.costOnMarketQuotation = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        // Графа 15
+        xmlIndexCol = 15
+        newRow.reserveCalcValue = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        // Графа 16
+        xmlIndexCol = 16
+        newRow.reserveCreation = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        // Графа 17
+        xmlIndexCol = 17
+        newRow.recovery = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        rows.add(newRow)
+    }
+
+    if (xml.rowTotal.size() == 1) {
+        rnuIndexRow = rnuIndexRow + 2
+
+        def row = xml.rowTotal[0]
+
+        def total = formData.createDataRow()
+        total.setAlias('total')
+        total.fix = 'Общий итог'
+        total.getCell('fix').colSpan = 2
+        allColumns.each {
+            total.getCell(it).setStyleAlias('Контрольные суммы')
+        }
+
+        // Графа 6
+        xmlIndexCol = 6
+        total.prev = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        // Графа 7
+        xmlIndexCol = 7
+        total.current = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        // Графа 8
+        xmlIndexCol = 8
+        total.reserveCalcValuePrev = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        // Графа 9
+        xlIndexCol = 9
+        total.cost = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        // Графа 14
+        xmlIndexCol = 14
+        total.costOnMarketQuotation = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        // Графа 15
+        xmlIndexCol = 15
+        total.reserveCalcValue = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        // Графа 16
+        xmlIndexCol = 16
+        total.reserveCreation = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        // Графа 17
+        xmlIndexCol = 17
+        total.recovery = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        rows.add(total)
+    }
+    dataRowHelper.save(rows)
 }
