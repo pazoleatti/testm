@@ -2,6 +2,7 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:style='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'
              xmlns:fm="urn:import:com.aplana.gwt.client.form"
+             xmlns:picker="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
              xmlns:fileupload="urn:import:com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.client.fileupload">
 
     <ui:style>
@@ -32,7 +33,13 @@
             </fm:HeaderContainer>
         </fm:header>
         <fm:body>
-            <fm:BodyContainer/>
+            <fm:BodyContainer>
+                <g:HorizontalPanel spacing="5">
+                    <g:Label text="Подразделение:"/>
+                    <picker:DepartmentPickerPopupWidget ui:field="departmentPicker" multiselection="false"
+                                                        width="250px" enabled="false" />
+                </g:HorizontalPanel>
+            </fm:BodyContainer>
         </fm:body>
     </fm:MainContainer>
 

@@ -21,6 +21,7 @@ import com.aplana.sbrf.taxaccounting.web.module.scriptExecution.client.ScriptExe
 import com.aplana.sbrf.taxaccounting.web.module.sources.client.SourcesTokens;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.TaxFormNominationToken;
 import com.aplana.sbrf.taxaccounting.web.module.testpage.client.TestPageTokens;
+import com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.client.UploadTransportDataTokens;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.GetMainMenuAction;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.GetMainMenuResult;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.MenuItem;
@@ -133,6 +134,7 @@ public class GetMainMenuActionHandler extends
                                             + SourcesTokens.FORM_FLAG + "=" + true));
                 }
             }
+            taxMenu.getSubMenu().add(new MenuItem("Загрузить ТФ", NUMBER_SIGN + UploadTransportDataTokens.uploadTransportData));
             menuItems.add(taxMenu);
         }
 		

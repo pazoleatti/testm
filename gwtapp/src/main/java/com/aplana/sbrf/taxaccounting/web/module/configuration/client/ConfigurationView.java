@@ -85,6 +85,7 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
         departmentColumn.setNameAttributeId(161L);
         departmentColumn.setRefBookAttributeId(161L);
         departmentColumn.setHierarchical(true);
+        departmentColumn.setFilter("TYPE=2"); // ТБ
         departmentColumn.setAlias("departmentColumn");
         departmentColumn.setName("Наименование ТБ");
         departmentColumn.setWidth(1);

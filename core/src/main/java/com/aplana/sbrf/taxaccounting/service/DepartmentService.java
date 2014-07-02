@@ -119,7 +119,7 @@ public interface DepartmentService {
     List<Integer> getBADepartmentIds(TAUser tAUser);
 
     /**
-     * Получение ТБ
+     * Получение ТБ универсальное
      * http://conf.aplana.com/pages/viewpage.action?pageId=11380723
      * Для роли "Контролер УНП" может быть несколько подразделений
      * Для роли "Контролер НС" только одно подразделение
@@ -128,6 +128,15 @@ public interface DepartmentService {
      * @return список подразделений
      */
     List<Department> getTBDepartments(TAUser tAUser);
+
+    /**
+     * Получение ТБ пользователя
+     * http://conf.aplana.com/pages/viewpage.action?pageId=11380666
+     * Может быть не более одного подразделения
+     * @param tAUser пользователь
+     * @return список подразделений
+     */
+    List<Department> getTBUserDepartments(TAUser tAUser);
 
     /**
      * Получение идентификаторов ТБ

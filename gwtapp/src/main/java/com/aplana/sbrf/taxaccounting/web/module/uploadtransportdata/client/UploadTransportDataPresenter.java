@@ -1,10 +1,17 @@
 package com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.client;
 
 import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
+import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.SaveDepartmentCombinedResult;
 import com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.client.fileupload.FileUploadHandler;
+import com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.client.shared.GetDepartmentsAction;
+import com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.client.shared.GetDepartmentsResult;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.EndLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.StartLoadFileEvent;
 import com.google.inject.Inject;
@@ -17,6 +24,9 @@ import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
 import com.gwtplatform.mvp.client.proxy.*;
 
+import java.util.List;
+import java.util.Set;
+
 /**
  * Загрузка ТФ в каталог загрузки
  *
@@ -25,7 +35,7 @@ import com.gwtplatform.mvp.client.proxy.*;
 public class UploadTransportDataPresenter extends Presenter<UploadTransportDataPresenter.MyView,
         UploadTransportDataPresenter.MyProxy> implements UploadTransportDataUiHandlers {
 
-    private static String ACTION_URL = "upload/transportDataController/upload/";
+    private final DispatchAsync dispatcher;
 
     @ProxyCodeSplit
     @NameToken(UploadTransportDataTokens.uploadTransportData)
@@ -33,16 +43,17 @@ public class UploadTransportDataPresenter extends Presenter<UploadTransportDataP
     }
 
     public interface MyView extends View, HasUiHandlers<UploadTransportDataUiHandlers> {
-        public void setUploadActionUrl(String actionUrl);
-        public void setFileUploadHandler(FileUploadHandler fileUploadHandler);
+        void setFileUploadHandler(FileUploadHandler fileUploadHandler);
+        void setDepartments(List<Department> departments, Set<Integer> avalableDepartments, Integer defaultDepartmentId);
+        void setCanChooseDepartment(boolean canChooseDepartment);
     }
 
     @Inject
     public UploadTransportDataPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy,
                                         DispatchAsync dispatcher, PlaceManager placeManager) {
         super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
+        this.dispatcher = dispatcher;
         getView().setUiHandlers(this);
-        getView().setUploadActionUrl(ACTION_URL);
         getView().setFileUploadHandler(new FileUploadHandler() {
             @Override
             public void onSuccess() {
@@ -68,5 +79,19 @@ public class UploadTransportDataPresenter extends Presenter<UploadTransportDataP
         if (event.getUuid() != null) {
             LogAddEvent.fire(UploadTransportDataPresenter.this, event.getUuid());
         }
+    }
+
+    @Override
+    public void prepareFromRequest(PlaceRequest request) {
+        super.prepareFromRequest(request);
+        GetDepartmentsAction action = new GetDepartmentsAction();
+        dispatcher.execute(action, CallbackUtils
+                .defaultCallback(new AbstractCallback<GetDepartmentsResult>() {
+                    @Override
+                    public void onSuccess(GetDepartmentsResult result) {
+                        getView().setCanChooseDepartment(result.isCanChooseDepartment());
+                        getView().setDepartments(result.getDepartments(), result.getAvailableDepartments(), result.getDefaultDepartmentId());
+                    }
+                }, this));
     }
 }

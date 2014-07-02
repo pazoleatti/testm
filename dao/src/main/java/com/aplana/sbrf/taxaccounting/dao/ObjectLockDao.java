@@ -65,4 +65,10 @@ public interface ObjectLockDao {
 	 * @return true, если на объекте есть действующая (непросроченная) блокировка сделанная пользователем userId, false - в противном случае
 	 */
 	<IdType extends Number> boolean isLockedByUser(IdType id, Class<? extends IdentityObject<IdType>> clazz, int userId);
+
+    /**
+     * Удаляет все блокировки, которые старше заданого времени
+     * @param sec
+     */
+    void unlockIfOlderThan(int sec);
 }
