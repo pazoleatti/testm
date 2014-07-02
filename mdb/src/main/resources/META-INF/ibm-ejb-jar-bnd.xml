@@ -1,17 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ejb-jar-bnd xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://websphere.ibm.com/xml/ns/javaee"
     xsi:schemaLocation="http://websphere.ibm.com/xml/ns/javaee http://websphere.ibm.com/xml/ns/javaee/ibm-ejb-jar-bnd_1_0.xsd" version="1.0">
-  <session name="DataSourceHolderBean">
-    <resource-ref name="jdbc/TaxAccDS_MIGRATION" binding-name="jdbc/TaxAccDS"/>
-    <resource-ref name="jdbc/TaxAccDS" binding-name="jdbc/TaxAccDS"/>
-  </session>
 
-  <message-driven name="TransportMDB">
-    <jca-adapter activation-spec-binding-name="jms/transportAS" destination-binding-name="jms/transportQueue"/>
-  </message-driven>
+    <session name="DataSourceHolderBean">
+        <resource-ref name="jdbc/TaxAccDS_MIGRATION" binding-name="jdbc/TaxAccDS_MIGRATION${jndiPostfix}"/>
+        <resource-ref name="jdbc/TaxAccDS" binding-name="jdbc/TaxAccDS${jndiPostfix}"/>
+    </session>
 
-  <message-driven name="RateMDB">
-    <jca-adapter activation-spec-binding-name="jms/transportMQ" destination-binding-name="jms/rateQueue"/>
-  </message-driven>
+    <message-driven name="TransportMDB">
+        <jca-adapter activation-spec-binding-name="jms/transportAS"
+                     destination-binding-name="jms/transportQueue${jndiPostfix}"/>
+    </message-driven>
+
+    <message-driven name="RateMDB">
+        <jca-adapter activation-spec-binding-name="jms/transportMQ"
+                     destination-binding-name="jms/rateQueue${jndiPostfix}"/>
+    </message-driven>
 
 </ejb-jar-bnd>

@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ejb-jar-bnd xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://websphere.ibm.com/xml/ns/javaee"
     xsi:schemaLocation="http://websphere.ibm.com/xml/ns/javaee http://websphere.ibm.com/xml/ns/javaee/ibm-ejb-jar-bnd_1_0.xsd" version="1.0">
-  <session name="MigrationBean">
-    <resource-ref name="jms/transportConnectionFactory" binding-name="jms/transportConnectionFactory"/>
-    <message-destination-ref binding-name="jms/transportQueue" name="jms/transportQueue"/>
-  </session>
+
+    <session name="MigrationBean">
+        <resource-ref name="jms/transportConnectionFactory${jndiPostfix}" binding-name="jms/transportConnectionFactory"/>
+        <message-destination-ref binding-name="jms/transportQueue" name="jms/transportQueue${jndiPostfix}"/>
+    </session>
 
 </ejb-jar-bnd>
