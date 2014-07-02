@@ -184,6 +184,23 @@ public class DepartmentServiceImpl implements DepartmentService {
         return retList;
     }
 
+    // http://conf.aplana.com/pages/viewpage.action?pageId=13112983
+    @Override
+    public List<Department> getTBUserDepartments(TAUser tAUser) {
+        List<Department> retList = new ArrayList<Department>();
+        Department userDepartment = departmentDao.getDepartment(tAUser.getDepartmentId());
+        if (userDepartment.getType() == DepartmentType.TERR_BANK) {
+            // Если пользователю назначено подразделение, которое имеет тип 2, то оно должно быть результатом выборки
+            retList.add(userDepartment);
+        } else {
+            // Если пользователю назначено подразделение, которое имеет тип не 2, то результатом выборки должно быть
+            // подразделение, которое является родительским (любого уровня вверх) для подразделения пользователя и
+            // имеет тип 2
+            retList.add(getParentTB(tAUser.getDepartmentId()));
+        }
+        return retList;
+    }
+
     @Override
     public List<Integer> getTBDepartmentIds(TAUser tAUser) {
         List<Integer> retList = new ArrayList<Integer>();
