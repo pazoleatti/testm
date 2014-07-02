@@ -16,13 +16,13 @@ public interface TransportDataService {
     /**
      * Загрузка ТФ в каталог загрузки
      * @param userInfo Пользователь
-     * @param folderParam Ключ конф. параметра, по которому ищется каталог
+     * @param departmentId Подразделение, в каталог которого пойдет загрузка
      * @param fileName Имя ТФ
      * @param inputStream Поток ТФ
      * @param logger Логгер для области уведомлений
      * @throws IOException
      */
-    void uploadFile(TAUserInfo userInfo, ConfigurationParam folderParam, String fileName, InputStream inputStream, Logger logger) throws IOException;
+    void uploadFile(TAUserInfo userInfo, int departmentId, String fileName, InputStream inputStream, Logger logger) throws IOException;
 
     /**
      * Импорт ТФ из каталога загрузки (Планировщик)
