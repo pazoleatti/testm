@@ -1,11 +1,16 @@
 package com.aplana.sbrf.taxaccounting.dao.api;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
 import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
+import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * Dao для работы с {@link DepartmentDeclarationType информацией о назначении деклараций подразделениям}  
@@ -53,4 +58,9 @@ public interface DepartmentDeclarationTypeDao {
      * Удаляет назначение декларации
      */
     void delete(Long id);
+
+    List<Pair<DepartmentDeclarationType, Date>> findDestinationDTsForFormType(int typeId, @NotNull Date dateFrom, @NotNull Date dateTo);
+    List<Pair<DepartmentFormType, Date>> findSourceFTsForDeclaration(int typeId, @NotNull Date dateFrom, @NotNull Date dateTo);
+
+    List<DepartmentDeclarationType> getDDTByDeclarationType(@NotNull Integer declarationTypeId);
 }

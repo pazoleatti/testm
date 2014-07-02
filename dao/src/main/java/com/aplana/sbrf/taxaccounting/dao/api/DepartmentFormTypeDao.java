@@ -3,6 +3,8 @@ package com.aplana.sbrf.taxaccounting.dao.api;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
+import javax.validation.constraints.NotNull;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -17,7 +19,7 @@ public interface DepartmentFormTypeDao {
      * @param departmentId id подразделения
      * @return список назначенных подразделению форм (с учётом вида и типа)
      */
-    List<DepartmentFormType> get(int departmentId);
+    List<DepartmentFormType> getByDepartment(int departmentId);
 
     /**
      * Возвращает информацию он назначенных подразделению формах по заданному виду налога
@@ -233,4 +235,29 @@ public interface DepartmentFormTypeDao {
      * @return приемники существуют?
      */
     List<Pair<String, String>> existAcceptedDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind, Integer reportPeriodId);
+
+    /**
+     * Находим приемники, у которых этот макет является источником
+     * @param typeId идентификатор макета
+     * @param dateFrom дата начала периода поиска приемников
+     * @param dateTo дата окончания периода
+     * @return список пар подразделений с началом периода
+     */
+    List<Pair<DepartmentFormType, Date>> findDestinationsForFormType(int typeId, @NotNull Date dateFrom, @NotNull Date dateTo);
+
+    /**
+     * Находим источники, у которых этот макет является приемником
+     * @param typeId идентификатор макета
+     * @param dateFrom дата начала периода поиска источников
+     * @param dateTo дата окончания периода
+     * @return список пар подразделений с началом периода
+     */
+    List<Pair<DepartmentFormType, Date>> findSourcesForFormType(int typeId, @NotNull Date dateFrom, @NotNull Date dateTo);
+
+    /**
+     * Получает назначения подразделений типов НФ
+     * @param formTypeId {@link FormType}
+     * @return список
+     */
+    List<DepartmentFormType> getDFTByFormType(@NotNull Integer formTypeId);
 }

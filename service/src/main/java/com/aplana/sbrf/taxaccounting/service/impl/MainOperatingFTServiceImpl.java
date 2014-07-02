@@ -21,23 +21,26 @@ import java.util.List;
 @Transactional
 public class MainOperatingFTServiceImpl implements MainOperatingService {
 
-    private static String ERROR_MESSAGE = "Версия макета не сохранена, обнаружены фатальные ошибки!";
+    private static String SAVE_MESSAGE = "Версия макета не сохранена, обнаружены фатальные ошибки!";
+    private static String DELETE_TEMPLATE_MESSAGE = "Версия макета не сохранена, обнаружены фатальные ошибки!";
+    private static String DELETE_TEMPLATE_VERSION_MESSAGE = "Удаление невозможно, обнаружены ссылки на удаляемую версию макета!";
+    private static String HAVE_DFT_MESSAGE = "Существует назначение налоговой формы подразделению %s!";
 
     @Autowired
     private LogEntryService logEntryService;
-
     @Autowired
     @Qualifier("formTemplateOperatingService")
     private VersionOperatingService versionOperatingService;
-
     @Autowired
     private FormTemplateService formTemplateService;
-
     @Autowired
     private FormTypeService formTypeService;
-
     @Autowired
     private TemplateChangesService templateChangesService;
+    @Autowired
+    private SourceService sourceService;
+    @Autowired
+    private DepartmentService departmentService;
 
     @Override
     public <T> int edit(T template, Date templateActualEndDate, Logger logger, TAUser user) {
@@ -52,12 +55,25 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
                 || (dbVersionEndDate != null && dbVersionEndDate.compareTo(templateActualEndDate) != 0) ){
             versionOperatingService.isIntersectionVersion(formTemplate.getId(), formTemplate.getType().getId(),
                     formTemplate.getStatus(), formTemplate.getVersion(), templateActualEndDate, logger);
-            checkError(logger);
+            checkError(logger, SAVE_MESSAGE);
+            versionOperatingService.checkDestinationsSources(formTemplate.getType().getId(), formTemplate.getVersion(), templateActualEndDate, logger);
+            checkError(logger, SAVE_MESSAGE);
         }
 
-        versionOperatingService.isUsedVersion(formTemplate.getId(), formTemplate.getType().getId(),
-                formTemplate.getStatus(), formTemplate.getVersion(), templateActualEndDate, logger);
-        checkError(logger);
+        switch (formTemplate.getStatus()){
+            case NORMAL:
+                versionOperatingService.isUsedVersion(formTemplate.getId(), formTemplate.getType().getId(),
+                        formTemplate.getStatus(), formTemplate.getVersion(), templateActualEndDate, logger);
+                checkError(logger, SAVE_MESSAGE);
+                //Что то с нумерацией строк
+                checkError(logger, SAVE_MESSAGE);
+                break;
+            case DRAFT:
+                //Что то с нумерацией строк
+                checkError(logger, SAVE_MESSAGE);
+                break;
+        }
+
         int id = formTemplateService.save(formTemplate);
 
         logging(id, TemplateChangesEvent.MODIFIED, user);
@@ -77,7 +93,7 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
 
         versionOperatingService.isIntersectionVersion(0, formTypeId, VersionedObjectStatus.NORMAL,
                 formTemplate.getVersion(), templateActualEndDate, logger);
-        checkError(logger);
+        checkError(logger, SAVE_MESSAGE);
         int id = formTemplateService.save(formTemplate);
 
         logging(id, TemplateChangesEvent.CREATED, user);
@@ -91,7 +107,7 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
         checkError(logger);*/
         versionOperatingService.isIntersectionVersion(0, formTemplate.getType().getId(), VersionedObjectStatus.DRAFT,
                 formTemplate.getVersion(), templateActualEndDate, logger);
-        checkError(logger);
+        checkError(logger, SAVE_MESSAGE);
         int id = formTemplateService.save(formTemplate);
 
         logging(id, TemplateChangesEvent.CREATED, user);
@@ -102,16 +118,22 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
     public void deleteTemplate(int typeId, Logger logger, TAUser user) {
         List<FormTemplate> formTemplates = formTemplateService.getFormTemplateVersionsByStatus(typeId,
                 VersionedObjectStatus.NORMAL, VersionedObjectStatus.DRAFT);
+        //Проверка использования
         if (formTemplates != null && !formTemplates.isEmpty()){
             for (FormTemplate formTemplate : formTemplates){
                 versionOperatingService.isUsedVersion(formTemplate.getId(), typeId, formTemplate.getStatus(), formTemplate.getVersion(), null, logger);
-                if (logger.containsLevel(LogLevel.ERROR))
-                    throw new ServiceLoggerException("Удаление невозможно, обнаружено использование макета",
-                            logEntryService.save(logger.getEntries()));
+                checkError(logger, DELETE_TEMPLATE_MESSAGE);
                 formTemplate.setStatus(VersionedObjectStatus.DELETED);
             }
             formTemplateService.update(formTemplates);
         }
+        versionOperatingService.checkDestinationsSources(typeId, null, null, logger);
+        checkError(logger, DELETE_TEMPLATE_MESSAGE);
+        //Проверка назначений НФ
+        for (DepartmentFormType departmentFormType : sourceService.getDFTByFormType(typeId))
+            logger.error(
+                    String.format(HAVE_DFT_MESSAGE,
+                            departmentService.getDepartment(departmentFormType.getDepartmentId())));
         formTypeService.delete(typeId);
         /*logging(typeId, TemplateChangesEvent.DELETED, user);*/
     }
@@ -121,18 +143,30 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
         FormTemplate template = formTemplateService.get(templateId);
         Date dateEndActualize = formTemplateService.getFTEndDate(templateId);
         versionOperatingService.isUsedVersion(templateId, template.getType().getId(), template.getStatus(), template.getVersion(), dateEndActualize, logger);
-        if (logger.containsLevel(LogLevel.ERROR))
-            throw new ServiceLoggerException("Удаление невозможно, обнаружены ссылки на удаляемую версию макета",
-                    logEntryService.save(logger.getEntries()));
-        versionOperatingService.cleanVersions(templateId, template.getType().getId(), template.getStatus(), template.getVersion(), dateEndActualize, logger);
+        checkError(logger, DELETE_TEMPLATE_VERSION_MESSAGE);
+        versionOperatingService.checkDestinationsSources(template.getType().getId(), template.getVersion(), templateActualEndDate, logger);
+        checkError(logger, DELETE_TEMPLATE_VERSION_MESSAGE);
+
         template.setStatus(VersionedObjectStatus.DELETED);
         formTemplateService.save(template);
-        if (formTemplateService.getFormTemplateVersionsByStatus(template.getType().getId(),
-                VersionedObjectStatus.DRAFT, VersionedObjectStatus.NORMAL).isEmpty()){
+        List<FormTemplate> formTemplates = formTemplateService.getFormTemplateVersionsByStatus(template.getType().getId(),
+                VersionedObjectStatus.DRAFT, VersionedObjectStatus.NORMAL);
+        //Проверка существуют ли еще версии со статусом 0 или 1
+        if (formTemplates.isEmpty()){
+            for (DepartmentFormType departmentFormType : sourceService.getDFTByFormType(template.getType().getId())){
+                logger.error(
+                        String.format(HAVE_DFT_MESSAGE,
+                                departmentService.getDepartment(departmentFormType.getDepartmentId())));
+                checkError(logger, DELETE_TEMPLATE_VERSION_MESSAGE);
+            }
+        }
+
+        versionOperatingService.cleanVersions(templateId, template.getType().getId(), template.getStatus(), template.getVersion(), dateEndActualize, logger);
+        //Если нет версий макетов, то можно удалить весь макет
+        if (formTemplates.isEmpty()){
             formTypeService.delete(template.getType().getId());
             logger.info("Макет удален в связи с удалением его последней версии");
         }
-
         logging(templateId, TemplateChangesEvent.DELETED, user);
     }
 
@@ -153,9 +187,9 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
         return true;
     }
 
-    private void checkError(Logger logger){
+    private void checkError(Logger logger, String errorMsg){
         if (logger.containsLevel(LogLevel.ERROR))
-            throw new ServiceLoggerException(ERROR_MESSAGE, logEntryService.save(logger.getEntries()));
+            throw new ServiceLoggerException(errorMsg, logEntryService.save(logger.getEntries()));
     }
 
     private void logging(int id, TemplateChangesEvent event, TAUser user){

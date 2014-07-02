@@ -12,11 +12,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.validation.constraints.NotNull;
 import java.util.*;
 
 @Service
 @Transactional
 public class SourceServiceImpl implements SourceService {
+
+    private static final Calendar CALENDAR = Calendar.getInstance();
+    private static Date MAX_DATE;
+    private static Date MIN_DATE;
+    static {
+        CALENDAR.clear();
+        CALENDAR.set(9999, Calendar.DECEMBER, 31);
+        MAX_DATE = CALENDAR.getTime();
+        CALENDAR.clear();
+        CALENDAR.set(CALENDAR.getGreatestMinimum(Calendar.YEAR), Calendar.JANUARY, 31);
+        MIN_DATE = CALENDAR.getTime();
+    }
 
     @Autowired
     DepartmentFormTypeDao departmentFormTypeDao;
@@ -208,6 +221,60 @@ public class SourceServiceImpl implements SourceService {
         }
 
         return formToFormRelations;
+    }
+
+    @Override
+    public List<Pair<DepartmentFormType, Date>> findDestinationFTsForFormType(int typeId, Date dateFrom, Date dateTo) {
+        if (dateFrom == null){
+            dateTo = MIN_DATE;
+        }
+        if (dateTo == null){
+            dateTo = MAX_DATE;
+        }
+        return departmentFormTypeDao.findDestinationsForFormType(typeId, dateFrom, dateTo);
+    }
+
+    @Override
+    public List<Pair<DepartmentFormType, Date>> findSourceFTsForFormType(int typeId, Date dateFrom, Date dateTo) {
+        if (dateFrom == null){
+            dateTo = MIN_DATE;
+        }
+        if (dateTo == null){
+            dateTo = MAX_DATE;
+        }
+        return departmentFormTypeDao.findSourcesForFormType(typeId, dateFrom, dateTo);
+    }
+
+    @Override
+    public List<Pair<DepartmentFormType, Date>> findSourceFTsForDeclaration(int typeId, Date dateFrom, Date dateTo) {
+        if (dateFrom == null){
+            dateTo = MIN_DATE;
+        }
+        if (dateTo == null){
+            dateTo = MAX_DATE;
+        }
+        return departmentDeclarationTypeDao.findSourceFTsForDeclaration(typeId, dateFrom, dateTo);
+    }
+
+    @Override
+    public List<Pair<DepartmentDeclarationType, Date>> findDestinationDTsForFormType(int typeId, Date dateFrom, Date dateTo) {
+        if (dateFrom == null){
+            dateTo = MIN_DATE;
+        }
+        if (dateTo == null){
+            dateTo = MAX_DATE;
+        }
+        return departmentDeclarationTypeDao.findDestinationDTsForFormType(typeId, dateFrom, dateTo);
+    }
+
+    @Override
+    public List<DepartmentFormType> getDFTByFormType(@NotNull Integer formTypeId) {
+        return departmentFormTypeDao.getDFTByFormType(formTypeId);
+    }
+
+    @Override
+    public List<DepartmentDeclarationType> getDDTByDeclarationType(@NotNull Integer declarationTypeId) {
+        return departmentDeclarationTypeDao.getDDTByDeclarationType(declarationTypeId);
     }
 
     /**
