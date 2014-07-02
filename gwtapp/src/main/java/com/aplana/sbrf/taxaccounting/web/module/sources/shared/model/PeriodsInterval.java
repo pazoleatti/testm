@@ -1,12 +1,15 @@
 package com.aplana.sbrf.taxaccounting.web.module.sources.shared.model;
 
+import java.io.Serializable;
+
 /**
  * Модель для хранения состояния выбранного интервала периодов
  *
  * @author aivanov
  * @since 28.05.2014
  */
-public class PeriodsInterval {
+public class PeriodsInterval implements Serializable {
+    private static final long serialVersionUID = 7617988671379164269L;
     private Integer yearFrom;
     private PeriodInfo periodFrom;
     private Integer yearTo;
