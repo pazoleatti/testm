@@ -80,6 +80,10 @@ public class ConfigurationServiceTest {
 
         service.saveAllConfig(getUser(), model, logger);
 
+        uploadFolder.delete();
+        archiveFolder.delete();
+        errorFolder.delete();
+
         Assert.assertTrue(logger.getEntries().isEmpty());
     }
 
@@ -90,17 +94,23 @@ public class ConfigurationServiceTest {
         ConfigurationParamModel model = new ConfigurationParamModel();
 
         TemporaryFolder uploadFolder = new TemporaryFolder();
+        TemporaryFolder errorFolder = new TemporaryFolder();
         uploadFolder.create();
+        errorFolder.create();
 
-        model.put(ConfigurationParam.ARCHIVE_DIRECTORY, testDepartment1.getId(), asList("file://" + uploadFolder.getRoot().getPath() + "/"));
-        model.put(ConfigurationParam.UPLOAD_DIRECTORY, testDepartment1.getId(), asList("file://" + uploadFolder.getRoot().getPath() + "/"));
-        model.put(ConfigurationParam.ERROR_DIRECTORY, testDepartment1.getId(), asList("path"));
+        String path = "file://" + uploadFolder.getRoot().getPath() + "/";
+        model.put(ConfigurationParam.ARCHIVE_DIRECTORY, testDepartment1.getId(), asList(path));
+        model.put(ConfigurationParam.UPLOAD_DIRECTORY, testDepartment1.getId(), asList(path));
+        model.put(ConfigurationParam.ERROR_DIRECTORY, testDepartment1.getId(), asList(errorFolder.getRoot().getPath()));
 
         service.saveAllConfig(getUser(), model, logger);
 
+        uploadFolder.delete();
+        errorFolder.delete();
+
         Assert.assertEquals(1, logger.getEntries().size());
         Assert.assertTrue(logger.getEntries().get(0).getMessage().contains(testDepartment1.getName()));
-        Assert.assertTrue(logger.getEntries().get(0).getMessage().contains(uploadFolder.getRoot().getPath()));
+        Assert.assertTrue(logger.getEntries().get(0).getMessage().contains(path));
         Assert.assertTrue(logger.getEntries().get(0).getMessage().contains(ConfigurationParam.ARCHIVE_DIRECTORY.getCaption()));
         Assert.assertTrue(logger.getEntries().get(0).getMessage().contains(ConfigurationParam.UPLOAD_DIRECTORY.getCaption()));
     }
@@ -122,6 +132,9 @@ public class ConfigurationServiceTest {
                 asList("file://" + archiveFolder.getRoot().getPath() + "/"));
 
         service.saveAllConfig(getUser(), model, logger);
+
+        uploadFolder.delete();
+        archiveFolder.delete();
 
         Assert.assertEquals(1, logger.getEntries().size());
         Assert.assertTrue(logger.getEntries().get(0).getMessage().contains(ConfigurationParam.ERROR_DIRECTORY.getCaption()));
@@ -149,6 +162,10 @@ public class ConfigurationServiceTest {
 
         service.saveAllConfig(getUser(), model, logger);
 
+        uploadFolder.delete();
+        archiveFolder.delete();
+        errorFolder.delete();
+
         Assert.assertEquals(1, logger.getEntries().size());
         Assert.assertTrue(logger.getEntries().get(0).getMessage().contains("badPath"));
     }
@@ -175,6 +192,10 @@ public class ConfigurationServiceTest {
                 asList("file://" + errorFolder.getRoot().getPath() + "/testFile"));
 
         service.saveAllConfig(getUser(), model, logger);
+
+        uploadFolder.delete();
+        archiveFolder.delete();
+        errorFolder.delete();
 
         Assert.assertEquals(1, logger.getEntries().size());
         Assert.assertTrue(logger.getEntries().get(0).getMessage().contains("testFile"));
