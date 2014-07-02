@@ -793,8 +793,8 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public List<DepartmentFormType> getDFTByDepartment(int departmentId, TaxType taxType) {
-        return departmentFormTypeDao.getByTaxType(departmentId, taxType);
+    public List<DepartmentFormType> getDFTByDepartment(int departmentId, TaxType taxType, Date periodStart, Date periodEnd) {
+        return departmentFormTypeDao.getByTaxType(departmentId, taxType, periodStart, periodEnd);
     }
 
     @Override
@@ -870,8 +870,8 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public List<DepartmentDeclarationType> getDDTByDepartment(int departmentId, TaxType taxType) {
-        return departmentDeclarationTypeDao.getByTaxType(departmentId, taxType);
+    public List<DepartmentDeclarationType> getDDTByDepartment(int departmentId, TaxType taxType, Date periodStart, Date periodEnd) {
+        return departmentDeclarationTypeDao.getByTaxType(departmentId, taxType, periodStart, periodEnd);
     }
 
     @Override

@@ -15,10 +15,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static com.aplana.sbrf.taxaccounting.test.DeclarationDataMockUtils.mockDeclarationData;
 import static com.aplana.sbrf.taxaccounting.test.DeclarationTemplateMockUtils.mockDeclarationTemplate;
@@ -198,13 +195,13 @@ public class DeclarationDataAccessServiceImplTest {
 		
 		SourceService sourceService = mock(SourceService.class);
 		List<DepartmentDeclarationType> bankDeclarationTypes = Collections.singletonList(mockDepartmentDeclarationType(Department.ROOT_BANK_ID, DECLARATION_TYPE_1_ID));
-		when(sourceService.getDDTByDepartment(Matchers.eq(Department.ROOT_BANK_ID), Matchers.any(TaxType.class))).thenReturn(bankDeclarationTypes);
+		when(sourceService.getDDTByDepartment(Matchers.eq(Department.ROOT_BANK_ID), Matchers.any(TaxType.class), new Date(), new Date())).thenReturn(bankDeclarationTypes);
 		
 		List<DepartmentDeclarationType> departmentTB1DeclarationTypes = Collections.singletonList(mockDepartmentDeclarationType(DEPARTMENT_TB1_ID, DECLARATION_TYPE_1_ID));
-		when(sourceService.getDDTByDepartment(Matchers.eq(DEPARTMENT_TB1_ID), Matchers.any(TaxType.class))).thenReturn(departmentTB1DeclarationTypes);
+		when(sourceService.getDDTByDepartment(Matchers.eq(DEPARTMENT_TB1_ID), Matchers.any(TaxType.class), new Date(), new Date())).thenReturn(departmentTB1DeclarationTypes);
 		
 		List<DepartmentDeclarationType> departmentTB2DeclarationTypes = Collections.singletonList(mockDepartmentDeclarationType(DEPARTMENT_TB2_ID, DECLARATION_TYPE_2_ID));
-		when(sourceService.getDDTByDepartment(Matchers.eq(DEPARTMENT_TB2_ID), Matchers.any(TaxType.class))).thenReturn(departmentTB2DeclarationTypes);
+		when(sourceService.getDDTByDepartment(Matchers.eq(DEPARTMENT_TB2_ID), Matchers.any(TaxType.class), new Date(), new Date())).thenReturn(departmentTB2DeclarationTypes);
 		ReflectionTestUtils.setField(service, "sourceService", sourceService);
     }
 

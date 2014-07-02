@@ -31,6 +31,9 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
     @Autowired
     private SourceService sourceService;
 
+    @Autowired
+    private PeriodService periodService;
+
 	@Override
 	public PagingResult<FormDataSearchResultItem> findDataByUserIdAndFilter(TAUserInfo userInfo, FormDataFilter formDataFilter) {
         return formDataSearchDao.findPage(createFormDataDaoFilter(userInfo, formDataFilter), formDataFilter.getSearchOrdering(),
@@ -141,9 +144,13 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
                 } else {
                     departments10.addAll(departmentService.getAllChildren(tAUser.getDepartmentId()));
                 }
-                List<DepartmentFormType> departmentFormTypeList = new ArrayList<DepartmentFormType>();
+                Set<DepartmentFormType> departmentFormTypeList = new HashSet<DepartmentFormType>();
                 for (Department department : departments10) {
-                    departmentFormTypeList.addAll(sourceService.getDFTByDepartment(department.getId(), formDataFilter.getTaxType()));
+                    for (Integer reportPeriodId : formDataFilter.getReportPeriodIds()) {
+                        ReportPeriod reportPeriod = periodService.getReportPeriod(reportPeriodId);
+                        departmentFormTypeList.addAll(sourceService.getDFTByDepartment(department.getId(), formDataFilter.getTaxType(),
+                                reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate()));
+                    }
                 }
                 for(DepartmentFormType departmentFormType : departmentFormTypeList) {
                     formTypes.add((long)departmentFormType.getFormTypeId());

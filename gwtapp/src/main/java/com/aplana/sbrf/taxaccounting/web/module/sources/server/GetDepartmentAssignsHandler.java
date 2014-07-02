@@ -34,8 +34,10 @@ public class GetDepartmentAssignsHandler extends AbstractActionHandler<GetDepart
         List<DepartmentAssign> departmentAssigns = new LinkedList<DepartmentAssign>();
         // TODO а можно сделать что бы с базы данные приходили отсортированными?
         //TODO Должны отображаться только те нф, у которых есть действующий макет в периоде
+        Date periodFrom = PeriodConvertor.getDateFrom(action.getPeriodsInterval());
+        Date periodTo = PeriodConvertor.getDateTo(action.getPeriodsInterval());
         if(action.isForm()){
-            List<DepartmentFormType> depFormAssigns = sourceService.getDFTByDepartment(action.getDepartmentId(), action.getTaxType());
+            List<DepartmentFormType> depFormAssigns = sourceService.getDFTByDepartment(action.getDepartmentId(), action.getTaxType(), periodFrom, periodTo);
             // если без пейджинга то это формирование норм, с пейджингом нужно выносить в дао формирование
             for (DepartmentFormType dfa : depFormAssigns) {
                 DepartmentAssign departmentAssign = new DepartmentAssign();
@@ -48,7 +50,7 @@ public class GetDepartmentAssignsHandler extends AbstractActionHandler<GetDepart
                 departmentAssigns.add(departmentAssign);
             }
         } else {
-            List<DepartmentDeclarationType> depDecAssigns = sourceService.getDDTByDepartment(action.getDepartmentId(), action.getTaxType());
+            List<DepartmentDeclarationType> depDecAssigns = sourceService.getDDTByDepartment(action.getDepartmentId(), action.getTaxType(), periodFrom, periodTo);
             for (DepartmentDeclarationType dda : depDecAssigns) {
                 DepartmentAssign departmentAssign = new DepartmentAssign();
                 departmentAssign.setId((long) dda.getId());

@@ -339,15 +339,33 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         );
     }
 
-    private final static String GET_SQL_BY_TAX_TYPE_SQL = "select * from department_form_type dft where department_id = ?" +
+    private final static String GET_SQL_BY_TAX_TYPE_SQL = "select * from department_form_type dft where department_id = :departmentId and exists (\n" +
+            "  select 1 from form_type ft \n" +
+            "  join form_template ftemp on ftemp.type_id = ft.id \n" +
+            "  where ft.id = dft.form_type_id and ft.tax_type in %s \n" +
+            "  and ftemp.version >= :periodStart and (:periodEnd is null or ftemp.version <= :periodEnd)\n" +
+            ")";
+
+    @Override
+    public List<DepartmentFormType> getByTaxType(int departmentId, TaxType taxType, Date periodStart, Date periodEnd) {
+        String sql = String.format(GET_SQL_BY_TAX_TYPE_SQL,
+                (taxType != null ? SqlUtils.transformTaxTypeToSqlInStatement(Arrays.asList(taxType)) : SqlUtils.transformTaxTypeToSqlInStatement(Arrays.asList(TaxType.values()))));
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("departmentId", departmentId);
+        params.put("periodStart", periodStart);
+        params.put("periodEnd", periodEnd);
+        return getNamedParameterJdbcTemplate().query(sql, params, DFT_MAPPER);
+    }
+
+    private final static String GET_SQL_BY_TAX_TYPE_SQL_OLD = "select * from department_form_type dft where department_id = ?" +
             " and exists (select 1 from form_type ft where ft.id = dft.form_type_id and ft.tax_type in ";
 
     @Override
     public List<DepartmentFormType> getByTaxType(int departmentId, TaxType taxType) {
         return getJdbcTemplate().query(
-                GET_SQL_BY_TAX_TYPE_SQL +
+                GET_SQL_BY_TAX_TYPE_SQL_OLD +
                         (taxType != null ? SqlUtils.transformTaxTypeToSqlInStatement(Arrays.asList(taxType)) : SqlUtils.transformTaxTypeToSqlInStatement(Arrays.asList(TaxType.values())))
-                + ")",
+                        + ")",
                 new Object[]{
                         departmentId
                 },

@@ -2,12 +2,22 @@ package com.aplana.sbrf.taxaccounting.web.module.sources.shared;
 
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
+import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.PeriodsInterval;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
 public class GetDepartmentAssignsAction extends UnsecuredActionImpl<GetDepartmentAssignsResult> implements ActionName {
     private int departmentId;
     private TaxType taxType;
     private boolean isForm = true;
+    private PeriodsInterval periodsInterval;
+
+    public PeriodsInterval getPeriodsInterval() {
+        return periodsInterval;
+    }
+
+    public void setPeriodsInterval(PeriodsInterval periodsInterval) {
+        this.periodsInterval = periodsInterval;
+    }
 
     public int getDepartmentId() {
         return departmentId;

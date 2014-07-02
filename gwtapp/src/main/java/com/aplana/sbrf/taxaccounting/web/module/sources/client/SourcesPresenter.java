@@ -168,6 +168,7 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
         action.setForm(true);
 		action.setDepartmentId(departmentId);
 		action.setTaxType(taxType);
+        action.setPeriodsInterval(getView().getPeriodInterval());
 		dispatcher.execute(action, CallbackUtils
 				.defaultCallback(new AbstractCallback<GetDepartmentAssignsResult>() {
 					@Override
@@ -188,6 +189,7 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
         action.setForm(true);
 		action.setDepartmentId(departmentId);
 		action.setTaxType(taxType);
+        action.setPeriodsInterval(getView().getPeriodInterval());
 		dispatcher.execute(action, CallbackUtils
 				.defaultCallback(new AbstractCallback<GetDepartmentAssignsResult>() {
 					@Override
@@ -208,6 +210,7 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
         action.setForm(false);
         action.setDepartmentId(departmentId);
         action.setTaxType(taxType);
+        action.setPeriodsInterval(getView().getPeriodInterval());
         dispatcher.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<GetDepartmentAssignsResult>() {
                     @Override
@@ -228,6 +231,7 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
         action.setForm(false);
         action.setDepartmentId(departmentId);
         action.setTaxType(taxType);
+        action.setPeriodsInterval(getView().getPeriodInterval());
         dispatcher.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<GetDepartmentAssignsResult>() {
                     @Override

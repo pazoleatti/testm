@@ -26,8 +26,20 @@ public interface DepartmentFormTypeDao {
      *
      * @param departmentId идентификатор подразделения
      * @param taxType      вид налога
+     * @param periodStart  начало периода, в котором действуют назначения
+     * @param periodEnd    окончание периода, в котором действуют назначения
      * @return список назначенных подразделению форм (с учётом вида и типа) по заданному виду налога
      */
+    List<DepartmentFormType> getByTaxType(int departmentId, TaxType taxType, Date periodStart, Date periodEnd);
+
+    /**
+     * Возвращает информацию он назначенных подразделению формах по заданному виду налога
+     *
+     * @param departmentId идентификатор подразделения
+     * @param taxType      вид налога
+     * @return список назначенных подразделению форм (с учётом вида и типа) по заданному виду налога
+     */
+    @Deprecated
     List<DepartmentFormType> getByTaxType(int departmentId, TaxType taxType);
 
     /**

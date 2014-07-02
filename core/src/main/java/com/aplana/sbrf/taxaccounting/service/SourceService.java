@@ -57,21 +57,23 @@ public interface SourceService {
      *
      * @param departmentId идентификатор подразделения
      * @param taxType      вид налога
+     * @param periodStart  начало периода, в котором действуют назначения
+     * @param periodEnd    окончание периода, в котором действуют назначения
      * @return информация о формах-источниках в виде списка
      *         {@link com.aplana.sbrf.taxaccounting.model.DepartmentFormType}
      */
-    @Deprecated
-    List<DepartmentFormType> getDFTByDepartment(int departmentId, TaxType taxType);
+    List<DepartmentFormType> getDFTByDepartment(int departmentId, TaxType taxType, Date periodStart, Date periodEnd);
 
     /**
      * Возвращает информацию о назначенных подразделению декларациях по заданному виду налога
      *
      * @param departmentId идентификатор подразделения
      * @param taxType      вид налога
+     * @param periodStart  начало периода, в котором действуют назначения
+     * @param periodEnd    окончание периода, в котором действуют назначения
      * @return список назначенных подразделению деклараций (с учётом вида и типа) по заданному виду налога
      */
-    @Deprecated
-    List<DepartmentDeclarationType> getDDTByDepartment(int departmentId, TaxType taxType);
+    List<DepartmentDeclarationType> getDDTByDepartment(int departmentId, TaxType taxType, Date periodStart, Date periodEnd);
 
     /**
      * Возвращает информацию об источниках, которые должны использоваться при

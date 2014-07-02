@@ -73,20 +73,37 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
 		return departmentIds;
 	}
 
-	private final static String GET_SQL_BY_TAX_TYPE_SQL = "select * from department_declaration_type ddt where department_id = ?" +
-			" and exists (select 1 from declaration_type dt where dt.id = ddt.declaration_type_id and dt.tax_type = ?)";
+	private final static String GET_SQL_BY_TAX_TYPE_SQL = "select * from department_declaration_type ddt where department_id = :departmentId and exists (\n" +
+            "  select 1 from declaration_type dt \n" +
+            "  join declaration_template dtemp on dtemp.declaration_type_id = dt.id\n" +
+            "  where dt.id = ddt.declaration_type_id and dt.tax_type = :taxType \n" +
+            "  and dtemp.version >= :periodStart and (:periodEnd is null or dtemp.version <= :periodEnd)\n" +
+            ")";
 
 	@Override
-	public List<DepartmentDeclarationType> getByTaxType(int departmentId, TaxType taxType) {
-		return getJdbcTemplate().query(
-				GET_SQL_BY_TAX_TYPE_SQL,
-				new Object[] {
-						departmentId,
-						String.valueOf(taxType.getCode())
-				},
-				DEPARTMENT_DECLARATION_TYPE_ROW_MAPPER
-		);
+	public List<DepartmentDeclarationType> getByTaxType(int departmentId, TaxType taxType, Date periodStart, Date periodEnd) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("departmentId", departmentId);
+        params.put("periodEnd", periodEnd);
+        params.put("periodStart", periodStart);
+        params.put("taxType", String.valueOf(taxType.getCode()));
+		return getNamedParameterJdbcTemplate().query(GET_SQL_BY_TAX_TYPE_SQL, params, DEPARTMENT_DECLARATION_TYPE_ROW_MAPPER);
 	}
+
+    private final static String GET_SQL_BY_TAX_TYPE_SQL_OLD = "select * from department_declaration_type ddt where department_id = ?" +
+            " and exists (select 1 from declaration_type dt where dt.id = ddt.declaration_type_id and dt.tax_type = ?)";
+
+    @Override
+    public List<DepartmentDeclarationType> getByTaxType(int departmentId, TaxType taxType) {
+        return getJdbcTemplate().query(
+                GET_SQL_BY_TAX_TYPE_SQL_OLD,
+                new Object[] {
+                        departmentId,
+                        String.valueOf(taxType.getCode())
+                },
+                DEPARTMENT_DECLARATION_TYPE_ROW_MAPPER
+        );
+    }
 
 	@Override
 	public void save(int departmentId, int declarationTypeId) {

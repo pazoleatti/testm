@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.api;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -36,12 +37,23 @@ public interface DepartmentDeclarationTypeDao {
 	 */
 	Set<Integer> getDepartmentIdsByTaxType(TaxType taxType);
 
+    /**
+     * Возвращает информацию о назначенных подразделению декларациях по заданному виду налога
+     * @param departmentId идентификатор подразделения
+     * @param taxType вид налога
+     * @param periodStart  начало периода, в котором действуют назначения
+     * @param periodEnd    окончание периода, в котором действуют назначения
+     * @return список назначенных подразделению деклараций (с учётом вида и типа) по заданному виду налога
+     */
+    List<DepartmentDeclarationType> getByTaxType(int departmentId, TaxType taxType, Date periodStart, Date periodEnd);
+
 	/**
 	 * Возвращает информацию о назначенных подразделению декларациях по заданному виду налога
 	 * @param departmentId идентификатор подразделения
 	 * @param taxType вид налога
 	 * @return список назначенных подразделению деклараций (с учётом вида и типа) по заданному виду налога
 	 */
+    @Deprecated
 	List<DepartmentDeclarationType> getByTaxType(int departmentId, TaxType taxType);
 	
     /**
