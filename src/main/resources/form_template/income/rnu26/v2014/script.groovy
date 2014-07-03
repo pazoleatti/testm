@@ -843,25 +843,25 @@ void addTransportData(def xml) {
 
         // графа 6
         xmlIndexCol = 6
-        newRow.lotSizePrev = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        total.lotSizePrev = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
         // графа 7
         xmlIndexCol = 7
-        newRow.lotSizeCurrent = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        total.lotSizeCurrent = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
         // графа 9
         xmlIndexCol = 9
-        newRow.cost = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        total.cost = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
         // графа 8
         xmlIndexCol = 8
-        newRow.reserveCalcValuePrev = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        total.reserveCalcValuePrev = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
         // графа 15
         xmlIndexCol = 15
-        newRow.reserveCalcValue = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        total.reserveCalcValue = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
         // графа 16
         xmlIndexCol = 16
-        newRow.reserveCreation = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        total.reserveCreation = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
         // графа 17
         xmlIndexCol = 17
-        newRow.reserveRecovery = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        total.reserveRecovery = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
 
         rows.add(total)
     }
