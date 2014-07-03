@@ -334,7 +334,7 @@ public final class ScriptUtils {
         }
         Date retVal = null;
         try {
-            retVal = new SimpleDateFormat(format).parse(tmp);
+            retVal = parseDate(format, tmp);
         } catch (ParseException ex) {
         }
         if (retVal == null) {
@@ -349,6 +349,22 @@ public final class ScriptUtils {
             }
         }
         return retVal;
+    }
+
+    /**
+     * Возвращает дату по строгому шаблону, иначе дата вида 01.13.2014 становится 01.01.2015
+     * @param format
+     * @param value
+     * @return
+     * @throws ParseException
+     */
+    public static Date parseDate(String format, String value) throws ParseException {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format);
+        Date date = simpleDateFormat.parse(value);
+        if (!simpleDateFormat.format(date).equals(value)) {
+            throw new ParseException(String.format("Строка %s не соответствует формату даты %s", value, format), 0);
+        }
+        return date;
     }
 
     /**

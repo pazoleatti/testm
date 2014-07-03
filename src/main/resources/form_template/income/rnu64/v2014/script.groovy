@@ -64,6 +64,9 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
+        break
 }
 
 @Field
@@ -348,4 +351,65 @@ void prevPeriodCheck() {
     if (reportPeriod && reportPeriod.order != 1) {
         formDataService.checkFormExistAndAccepted(formData.formType.id, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, true, logger, true)
     }
+}
+
+void importTransportData() {
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    addTransportData(xml)
+
+    def dataRows = formDataService.getDataRowHelper(formData)?.allCached
+    checkTotalSum(dataRows, totalColumns, logger, true)
+}
+
+void addTransportData(def xml) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def int rnuIndexRow = 2
+    def int colOffset = 1
+    def rows = []
+    def int rowIndex = 1
+
+    for (def row : xml.row) {
+        rnuIndexRow++
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
+        editableColumns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
+        autoFillColumns.each {
+            newRow.getCell(it).setStyleAlias('Автозаполняемая')
+        }
+
+        // графа 2 - Дата сделки
+        newRow.date = parseDate(row.cell[2].text(), "dd.MM.yyyy", rnuIndexRow, 2 + colOffset, logger, true)
+        // графа 3 - Часть сделки
+        newRow.part = getRecordIdImport(60, 'CODE', row.cell[3].text(), rnuIndexRow, 3 + colOffset)
+        // графа 4 - Номер сделки
+        newRow.dealingNumber = row.cell[4].text()
+        // графа 5 - Затраты (руб.коп.)
+        newRow.costs = parseNumber(row.cell[5].text(), rnuIndexRow, 5 + colOffset, logger, true)
+
+        rows.add(newRow)
+    }
+
+    if (xml.rowTotal.size() == 1) {
+        rnuIndexRow = rnuIndexRow + 2
+
+        def row = xml.rowTotal[0]
+
+        def total = getDataRow(dataRowHelper.getAllCached(), 'total')
+        def totalQuarter = getDataRow(dataRowHelper.getAllCached(), 'totalQuarter')
+
+        // графа 5 - Затраты (руб.коп.)
+        total.costs = totalQuarter.costs =  parseNumber(row.cell[5].text(), rnuIndexRow, 5 + colOffset, logger, true)
+
+        rows.add(totalQuarter)
+        rows.add(total)
+    }
+    dataRowHelper.save(rows)
 }
