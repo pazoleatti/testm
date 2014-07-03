@@ -3,7 +3,9 @@ package com.aplana.sbrf.taxaccounting.service;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
+import javax.validation.constraints.NotNull;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -167,7 +169,7 @@ public interface SourceService {
     /**
      * Удаляет налоговые формы, назначенные подразделению
      *
-     * @param id id на удаление
+     * @param ids id на удаление
      */
     void deleteDFT(Collection<Long> ids);
 
@@ -182,13 +184,13 @@ public interface SourceService {
     /**
      * Удаляет декларации, назначенные подразделению
      *
-     * @param id id на удаление
+     * @param ids id на удаление
      */
     void deleteDDT(Collection<Long> ids);
     
 	/**
 	 * Получить вид налоговой формы по идентификатору
-	 * @param typeId идентификатор вида
+	 * @param formTypeId идентификатор вида
 	 * @return Объект, представляющий вид налоговой формы
 	 * @throws DaoException если в БД нет записи с соответствующим ключом
 	 */
@@ -227,7 +229,7 @@ public interface SourceService {
      *
      * @param departmentId
      * @param typeId
-     * @param kindId
+     * @param kind
      * @return true - существует форма, false в противном случае
      */
     boolean existAssignedForm(int departmentId, int typeId, FormDataKind kind);
@@ -237,10 +239,10 @@ public interface SourceService {
      * которые будут источниками, либо приемниками форм назначений принадлежащих подразделению departmentId/
      *
      * @param departmentId департамент-источник
-     * @param terrBankId департамент-приемник
-     * @param taxTypes типы НФ
+     * @param terrBankId   департамент-приемник
+     * @param taxTypes     типы НФ
      * @return список {@link Map<String, List<Pair>>} в которых первым параметром идет форма назначение источник, вторым приемник
-     *          с определенными ключами
+     *         с определенными ключами
      */
     Map<String, List> getSourcesDestinations(int departmentId, int terrBankId, List<TaxType> taxTypes);
 
@@ -277,4 +279,23 @@ public interface SourceService {
      * @return
      */
     List<FormToFormRelation> getRelations(int departmentId, int formTypeId, FormDataKind kind, int reportPeriodId, Integer periodOrder, boolean includeDestinations, boolean includeSources, boolean includeUncreated);
+
+    List<Pair<DepartmentFormType, Date>> findDestinationFTsForFormType(int typeId, Date dateFrom, Date dateTo);
+    List<Pair<DepartmentFormType, Date>> findSourceFTsForFormType(int typeId, Date dateFrom, Date dateTo);
+    List<Pair<DepartmentFormType, Date>> findSourceFTsForDeclaration(int typeId, Date dateFrom, Date dateTo);
+    List<Pair<DepartmentDeclarationType, Date>> findDestinationDTsForFormType(int typeId, Date dateFrom, Date dateTo);
+
+    /**
+     * Получение назначений НФ
+     * @param formTypeId идентификатор {@link FormType}
+     * @return список
+     */
+    List<DepartmentFormType> getDFTByFormType(@NotNull Integer formTypeId);
+
+    /**
+     * ПОлучение назначений деклараций
+     * @param declarationTypeId идентификатор {@link FormType}
+     * @return список
+     */
+    List<DepartmentDeclarationType> getDDTByDeclarationType(@NotNull Integer declarationTypeId);
 }
