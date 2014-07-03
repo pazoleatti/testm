@@ -71,6 +71,9 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
+        break
 }
 
 //// Кэши и константы
@@ -206,6 +209,23 @@ void calc() {
         }
     }
 
+    calcSubTotal(dataRows)
+
+    def totalRow = getDataRow(dataRows, 'total')
+    def totalARow = getDataRow(dataRows, 'totalA')
+    def totalBRow = getDataRow(dataRows, 'totalB')
+    def totalAllRow = getDataRow(dataRows, 'totalAll')
+
+    totalColumnsAll.each { alias ->
+        def tmp = (totalRow.getCell(alias).value ?: 0) +
+                (totalARow.getCell(alias).value ?: 0) +
+                (totalBRow.getCell(alias).value ?: 0)
+        totalAllRow.getCell(alias).setValue(tmp, null)
+    }
+    dataRowHelper.save(dataRows)
+}
+
+void calcSubTotal (def dataRows) {
     def totalRow = getDataRow(dataRows, 'total')
     totalColumns1.each { alias ->
         totalRow.getCell(alias).setValue(getSum(dataRows, alias, totalRow), null)
@@ -219,15 +239,6 @@ void calc() {
         totalARow.getCell(alias).setValue(getSum(dataRows, alias, aRow, totalARow), null)
         totalBRow.getCell(alias).setValue(getSum(dataRows, alias, bRow, totalBRow), null)
     }
-
-    def totalAllRow = getDataRow(dataRows, 'totalAll')
-    totalColumnsAll.each { alias ->
-        def tmp = (totalRow.getCell(alias).value ?: 0) +
-                (totalARow.getCell(alias).value ?: 0) +
-                (totalBRow.getCell(alias).value ?: 0)
-        totalAllRow.getCell(alias).setValue(tmp, null)
-    }
-    dataRowHelper.save(dataRows)
 }
 
 void logicCheck() {
@@ -540,6 +551,177 @@ def addData(def xml, int headRowCount) {
         updateIndexes(dataRows)
     }
     dataRowHelper.save(dataRows)
+}
+
+void importTransportData() {
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    addTransportData(xml)
+
+    def dataRows = formDataService.getDataRowHelper(formData)?.allCached
+    checkTotalSum(dataRows, totalColumnsAll, logger, true)
+}
+
+void addTransportData(def xml) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper?.allCached
+    def int rnuIndexRow = 2
+    def int colOffset = 1
+
+    def mapRows = [:]
+
+    for (def row : xml.row) {
+        rnuIndexRow++
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+        def newRow = formData.createDataRow()
+
+        // Техническое поле(группа)
+        xmlIndexCol = 17
+        def section = row.cell[xmlIndexCol].text()
+
+        // графа 2
+        xmlIndexCol = 2
+        newRow.debtor = row.cell[xmlIndexCol].text()
+
+        // графа 4
+        xmlIndexCol = 4
+        newRow.nameBalanceAccount = row.cell[xmlIndexCol].text()
+
+        // графа 12
+        xmlIndexCol = 12
+        newRow.reservePrev = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        // графа 13
+        xmlIndexCol = 13
+        newRow.reserveCurrent = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        // графа 16
+        xmlIndexCol = 16
+        newRow.useReserve = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        if (isFirstSection(section)) {
+            // графа 3
+            xmlIndexCol = 3
+            newRow.provision = getRecordIdImport(86, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+            // графа 5
+            xmlIndexCol = 5
+            newRow.debt45_90DaysSum = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+            // графа 6
+            xmlIndexCol = 6
+            newRow.debt45_90DaysNormAllocation50per = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+            // графа 7
+            xmlIndexCol = 7
+            newRow.debt45_90DaysReserve = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+            // графа 8
+            xmlIndexCol = 8
+            newRow.debtOver90DaysSum = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+            // графа 9
+            xmlIndexCol = 9
+            newRow.debtOver90DaysNormAllocation100per = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+            // графа 10
+            xmlIndexCol = 10
+            newRow.debtOver90DaysReserve = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+            // графа 11
+            xmlIndexCol = 11
+            newRow.totalReserve = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+            // графа 14
+            xmlIndexCol = 14
+            newRow.calcReserve = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+            // графа 15
+            xmlIndexCol = 15
+            newRow.reserveRecovery = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        }
+
+        setEdit(newRow, section)
+        if (mapRows[section] == null) {
+            mapRows[section] = []
+        }
+        mapRows[section].add(newRow)
+    }
+
+    if (xml.rowTotal.size() == 1) {
+        rnuIndexRow = rnuIndexRow + 2
+
+        def row = xml.rowTotal[0]
+
+        def total = getDataRow(dataRows, 'totalAll')
+
+        // графа 5
+        xmlIndexCol = 5
+        total.debt45_90DaysSum = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        // графа 7
+        xmlIndexCol = 7
+        total.debt45_90DaysReserve = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        // графа 8
+        xmlIndexCol = 8
+        total.debtOver90DaysSum = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        // графа 10
+        xmlIndexCol = 10
+        total.debtOver90DaysReserve = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        // графа 11
+        xmlIndexCol = 11
+        total.totalReserve = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        // графа 12
+        xmlIndexCol = 12
+        total.reservePrev = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        // графа 13
+        xmlIndexCol = 13
+        total.reserveCurrent = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        // графа 14
+        xmlIndexCol = 14
+        total.calcReserve = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        // графа 15
+        xmlIndexCol = 15
+        total.reserveRecovery = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        // графа 16
+        xmlIndexCol = 16
+        total.useReserve = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+    }
+
+    // удалить нефиксированные строки
+    deleteNotFixedRows(dataRows)
+    mapRows.keySet().each { sectionKey ->
+        def insertIndex = getDataRow(dataRows, getTotalRowAlias(sectionKey)).getIndex() - 1
+        dataRows.addAll(insertIndex, mapRows.get(sectionKey))
+        updateIndexes(dataRows)
+    }
+
+    calcSubTotal(dataRows)
+    dataRowHelper.save(dataRows)
+}
+
+def isFirstSection(def alias) {
+    return alias == null || alias == '0' || alias == ''
+}
+
+def getTotalRowAlias(def sectionKey) {
+    if (isFirstSection(sectionKey)) {
+        return 'total'
+    } else if (sectionKey == 'А') {// русская А
+        return 'totalA' // англицкая A
+    } else if (sectionKey == 'Б') {// русская Б
+        return 'totalB' // англицкая B
+    }
 }
 
 def roundValue(def value, int precision) {
