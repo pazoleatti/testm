@@ -29,6 +29,9 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * @author Dmitriy Levykin
+ */
 @Service
 @Transactional
 public class TransportDataServiceImpl implements TransportDataService {
@@ -138,8 +141,11 @@ public class TransportDataServiceImpl implements TransportDataService {
                 null, null, null, msg);
     }
 
+    /**
+     * Проверка имени файла и проверка доступа к соответствующим НФ
+     */
     private boolean checkFormDataAccess(String fileName, Logger logger) {
-
+        // TODO Проверки http://conf.aplana.com/pages/viewpage.action?pageId=13111363
         return true;
     }
 

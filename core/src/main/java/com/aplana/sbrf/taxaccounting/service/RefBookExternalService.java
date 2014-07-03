@@ -8,19 +8,17 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Сервис работы со скриптами справочников. Частная логика и импорт.
+ */
 public interface RefBookExternalService {
 	/**
-	 * Ворк эраунд
-	 * http://jira.aplana.com/browse/SBRFACCTAX-3841
-	 *
-	 * Это должно выполняться асинхронно шедуллером.
-	 *
-	 * Реализация временная. Перебирает все папки в директории и грузит в ней все файлы
+	 * Загрузка справочников из ЦАС НСИ
 	 */
-	public void importRefBook(TAUserInfo userInfo, Logger logger);
+	public void importRefBookNsi(TAUserInfo userInfo, Logger logger);
 
     /**
-     * Загрузка справочников из папки Diasoft Custody
+     * Загрузка справочников из Diasoft Custody
      */
     public void importRefBookDiasoft(TAUserInfo userInfo, Logger logger);
 
@@ -35,4 +33,25 @@ public interface RefBookExternalService {
      */
     public void saveRefBookRecords(long refBookId, List<Map<String, RefBookValue>> saveRecords, Date validDateFrom,
                                    Date validDateTo, boolean isNewRecords, TAUserInfo userInfo, Logger logger);
+
+    /**
+     * Соответствие имени файла ТФ справочников, поставляемых ЦАС НСИ:
+     * «Коды ОКАТО»
+     * «Коды субъектов Российской Федерации»
+     * «План счетов бухгалтерского учета»
+     *
+     * @param name Имя файла
+     * @return
+     */
+    public boolean isNSIFile(String name);
+
+    /**
+     * Соответствие имени файла ТФ справочников, поставляемых АС Diasoft Custody:
+     * «Ценные бумаги»
+     * «Эмитенты»
+     *
+     * @param name
+     * @return
+     */
+    public boolean isDiasoftFile(String name);
 }
