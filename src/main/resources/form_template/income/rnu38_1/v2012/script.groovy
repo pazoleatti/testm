@@ -57,6 +57,9 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
+        break
 }
 
 // Все атрибуты
@@ -312,6 +315,100 @@ void addData(def xml, int headRowCount) {
         newRow.currentPeriod = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
 
         dataRows.add(newRow)
+    }
+    dataRowHelper.save(dataRows)
+}
+
+void importTransportData() {
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+
+    // загрузить данные
+    addTransportData(xml)
+}
+
+void addTransportData(def xml) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = []
+
+    def int rnuIndexRow = 2
+    def int colOffset = 1
+
+    for (def row : xml.row) {
+        rnuIndexRow++
+
+        def rnuIndexCol
+        def newRow = formData.createDataRow()
+        editableColumns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).styleAlias = 'Редактируемая'
+        }
+
+        // графа 1
+        newRow.series = row.cell[1].text()
+        // графа 2
+        rnuIndexCol = 2
+        newRow.amount = getNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset)
+        // графа 3
+        rnuIndexCol = 3
+        newRow.shortPositionDate = getDate(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset)
+        // графа 4
+        rnuIndexCol = 4
+        newRow.maturityDate = getDate(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset)
+        // графа 5
+        rnuIndexCol = 5
+        newRow.incomeCurrentCoupon = getNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset)
+        // графа 6
+        rnuIndexCol = 6
+        newRow.currentPeriod = getNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset)
+        // графа 7
+        rnuIndexCol = 7
+        newRow.incomePrev = getNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset)
+        // графа 8
+        rnuIndexCol = 8
+        newRow.incomeShortPosition = getNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset)
+        // графа 9
+        rnuIndexCol = 9
+        newRow.totalPercIncome = getNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset)
+
+        dataRows.add(newRow)
+    }
+
+    def totalRow = getTotalRow(dataRows)
+    dataRows.add(totalRow)
+
+    // сравнение итогов
+    if (xml.rowTotal.size() == 1) {
+        rnuIndexRow = rnuIndexRow + 2
+        def row = xml.rowTotal[0]
+        def total = formData.createDataRow()
+
+
+        // графа 2
+        def rnuIndexCol = 2
+        total.amount = getNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset)
+        // графа 7
+        rnuIndexCol = 7
+        total.incomePrev = getNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset)
+        // графа 8
+        rnuIndexCol = 8
+        total.incomeShortPosition = getNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset)
+        // графа 9
+        rnuIndexCol = 9
+        total.totalPercIncome = getNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset)
+
+        def colIndexMap = ['amount' : 2, 'incomePrev' : 7, 'incomeShortPosition' : 8, 'totalPercIncome' : 9]
+        for (def alias : totalColumns) {
+            def v1 = total.getCell(alias).value
+            def v2 = totalRow.getCell(alias).value
+            if (v1 == null && v2 == null) {
+                continue
+            }
+            if (v1 == null || v1 != null && v1 != v2) {
+                logger.error(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
+                break
+            }
+        }
+
     }
     dataRowHelper.save(dataRows)
 }
