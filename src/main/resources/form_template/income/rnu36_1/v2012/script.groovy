@@ -59,6 +59,9 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
+        break
 }
 
 // все атрибуты
@@ -84,10 +87,6 @@ def totalColumns = ['amount', 'percIncome']
 // Дата окончания отчетного периода
 @Field
 def endDate = null
-
-// Текущая дата
-@Field
-def currentDate = new Date()
 
 @Field
 def providerCache = [:]
@@ -135,17 +134,9 @@ void calc() {
         }
     }
 
-    // графы для которых надо вычислять итого А и Б (графа 2, 8)
-    def rowA = getDataRow(dataRows, 'A')
-    def rowB = getDataRow(dataRows, 'B')
-    def totalRowA = getDataRow(dataRows, 'totalA')
-    def totalRowB = getDataRow(dataRows, 'totalB')
-    totalColumns.each { alias ->
-        totalRowA.getCell(alias).setValue(getSum(dataRows, rowA, totalRowA, alias), null)
-        totalRowB.getCell(alias).setValue(getSum(dataRows, rowB, totalRowB, alias), null)
-    }
-    // посчитать Итого
-    getDataRow(dataRows, 'total').percIncome = (totalRowA.percIncome ?: 0) - (totalRowB.percIncome ?: 0)
+    // расчет итогов
+    calcTotalRows(dataRows)
+
     dataRowHelper.save(dataRows)
 }
 
@@ -379,7 +370,7 @@ void addData(def xml, int headRowCount) {
         rowIndex++
     }
 
-    // добавить спроки для группы А
+    // добавить строки для группы А
     while (i < xml.row.size() && xml.row[++i].cell[0].text() != 'Итого "А"') {
         def newRow = createNewRow(rowIndex)
         rows.add(rowIndex, newRow)
@@ -443,7 +434,6 @@ def createNewRow(def rowIndex) {
  * Считать данные в форму
  */
 def filForm(def newRow, def row, int i, int colOffset) {
-    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     // графа 1
     newRow.series = row.cell[0].text()
     // графа 2
@@ -453,7 +443,7 @@ def filForm(def newRow, def row, int i, int colOffset) {
     // графа 4
     newRow.shortPositionDate = parseDate(row.cell[3].text(), "dd.MM.yyyy", i, colOffset, logger, true)
     //  графа 5
-    newRow.balance2 = formDataService.getRefBookRecordIdImport(28L, recordCache, providerCache, 'NUMBER', row.cell[4].text(), reportPeriodEndDate, newRow.getIndex(), 5, logger, true)
+    newRow.balance2 = formDataService.getRefBookRecordIdImport(28L, recordCache, providerCache, 'NUMBER', row.cell[4].text(), getReportPeriodEndDate(), newRow.getIndex(), 5, logger, true)
     // графа 6
     newRow.averageWeightedPrice = parseNumber(row.cell[5].text(), i, colOffset, logger, true)
     // графа 7
@@ -489,4 +479,140 @@ void importData() {
     checkHeaderEquals(headerMapping)
 
     addData(xml, 1)
+}
+
+void importTransportData() {
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+
+    // загрузить данные
+    addTransportData(xml)
+}
+
+void addTransportData(def xml) {
+    def int rnuIndexRow = 2
+    def int colOffset = 1
+    def rowsA = []
+    def rowsB = []
+    def totalTmp = formData.createDataRow()
+    totalColumns.each { alias ->
+        totalTmp.getCell(alias).setValue(BigDecimal.ZERO, null)
+    }
+
+    for (def row : xml.row) {
+        rnuIndexRow++
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        def rnuIndexCol
+        def newRow = getNewRow()
+
+        // графа 1
+        rnuIndexCol = 1
+        newRow.series = row.cell[rnuIndexCol].text()
+
+        // графа 2
+        rnuIndexCol = 2
+        newRow.amount = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
+        // графа 3
+        rnuIndexCol = 3
+        newRow.nominal = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
+        // графа 4
+        rnuIndexCol = 4
+        newRow.shortPositionDate = parseDate(row.cell[rnuIndexCol].text(), "dd.MM.yyyy", rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
+        //  графа 5
+        rnuIndexCol = 5
+        newRow.balance2 = formDataService.getRefBookRecordIdImport(28L, recordCache, providerCache, 'NUMBER', row.cell[rnuIndexCol].text(), getReportPeriodEndDate(), rnuIndexRow, rnuIndexCol, logger, true)
+
+        // графа 6
+        rnuIndexCol = 6
+        newRow.averageWeightedPrice = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
+        // графа 7
+        rnuIndexCol = 7
+        newRow.termBondsIssued = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
+        // графа 8
+        rnuIndexCol = 8
+        newRow.percIncome = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
+        totalColumns.each { alias ->
+            def value1 = totalTmp.getCell(alias).value
+            def value2 = (newRow.getCell(alias).value ?: BigDecimal.ZERO)
+            totalTmp.getCell(alias).setValue(value1 + value2, null)
+        }
+
+        // раздел
+        rnuIndexCol = 9
+        def section = row.cell[rnuIndexCol].text()
+        if (section == 'А') {
+            rowsA.add(newRow)
+        } else {
+            rowsB.add(newRow)
+        }
+    }
+
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    dataRows = dataRows.grep { row -> row.getAlias() != null }
+    updateIndexes(dataRows)
+
+    def indexA = getDataRow(dataRows, 'A').getIndex()
+    dataRows.addAll(indexA, rowsA)
+    updateIndexes(dataRows)
+
+    def indexB = getDataRow(dataRows, 'B').getIndex()
+    dataRows.addAll(indexB, rowsB)
+    updateIndexes(dataRows)
+
+    // сравнение итогов
+    if (xml.rowTotal.size() == 1) {
+        rnuIndexRow = rnuIndexRow + 2
+        def row = xml.rowTotal[0]
+        def total = formData.createDataRow()
+
+        // графа 2
+        rnuIndexCol = 2
+        total.amount = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
+        // графа 8
+        rnuIndexCol = 8
+        total.percIncome = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
+        def colIndexMap = ['amount' : 2, 'percIncome' : 8]
+
+        for (def alias : totalColumns) {
+            def v1 = total.getCell(alias).value
+            def v2 = totalTmp.getCell(alias).value
+            if (v1 == null && v2 == null) {
+                continue
+            }
+            if (v1 == null || v1 != null && v1 != v2) {
+                logger.error(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
+                break
+            }
+        }
+
+    }
+    calcTotalRows(dataRows)
+    dataRowHelper.save(dataRows)
+}
+
+// Расчет итогов
+void calcTotalRows(def dataRows) {
+    // графы для которых надо вычислять итого А и Б (графа 2, 8)
+    def rowA = getDataRow(dataRows, 'A')
+    def rowB = getDataRow(dataRows, 'B')
+    def totalRowA = getDataRow(dataRows, 'totalA')
+    def totalRowB = getDataRow(dataRows, 'totalB')
+    totalColumns.each { alias ->
+        totalRowA.getCell(alias).setValue(getSum(dataRows, rowA, totalRowA, alias), null)
+        totalRowB.getCell(alias).setValue(getSum(dataRows, rowB, totalRowB, alias), null)
+    }
+    // посчитать Итого
+    getDataRow(dataRows, 'total').percIncome = (totalRowA.percIncome ?: 0) - (totalRowB.percIncome ?: 0)
 }

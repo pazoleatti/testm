@@ -18,13 +18,11 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.validation.constraints.NotNull;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 @Repository
 @Transactional(readOnly = true)
@@ -45,7 +43,20 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
             departmentFormType.setFormTypeId(SqlUtils.getInteger(rs,"form_type_id"));
             departmentFormType.setDepartmentId(SqlUtils.getInteger(rs,"department_id"));
             departmentFormType.setKind(FormDataKind.fromId(SqlUtils.getInteger(rs,"kind")));
+            departmentFormType.setPerformerId(rs.getInt("performer_dep_id"));
             return departmentFormType;
+        }
+    };
+
+    private static final RowMapper<Pair<DepartmentFormType, Date>> DFT_SOURCES_MAPPER = new RowMapper<Pair<DepartmentFormType, Date>>() {
+
+        @Override
+        public Pair<DepartmentFormType, Date> mapRow(ResultSet rs, int i) throws SQLException {
+            DepartmentFormType departmentFormType = new DepartmentFormType();
+            departmentFormType.setFormTypeId(SqlUtils.getInteger(rs,"form_type_id"));
+            departmentFormType.setDepartmentId(SqlUtils.getInteger(rs,"department_id"));
+            departmentFormType.setKind(FormDataKind.fromId(SqlUtils.getInteger(rs,"kind")));
+            return new Pair<DepartmentFormType, Date>(departmentFormType, rs.getDate("start_date"));
         }
     };
 
@@ -461,7 +472,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
     private final static String GET_SQL = "select * from department_form_type where department_id=?";
 
     @Override
-    public List<DepartmentFormType> get(int departmentId) {
+    public List<DepartmentFormType> getByDepartment(int departmentId) {
         return getJdbcTemplate().query(
                 GET_SQL,
                 new Object[]{
@@ -500,8 +511,8 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         sqlParams[cnt] = String.valueOf(taxType.getCode());
         return getJdbcTemplate().queryForList(
                 "select dft.form_type_id from department_form_type dft where performer_dep_id = ? " +
-                " and dft.kind in (" + SqlUtils.preparePlaceHolders(kinds.size()) + ")" +
-                " and exists (select 1 from form_type ft where ft.id = dft.form_type_id and ft.tax_type = ?)",
+                        " and dft.kind in (" + SqlUtils.preparePlaceHolders(kinds.size()) + ")" +
+                        " and exists (select 1 from form_type ft where ft.id = dft.form_type_id and ft.tax_type = ?)",
                 Long.class,
                 sqlParams
         );
@@ -623,6 +634,72 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                 return new Pair<String, String>(rs.getString("declarationType"), rs.getString("departmentName"));
             }
         }, sourceDepartmentId, sourceKind.getId(), sourceFormTypeId, reportPeriodId);
+    }
+
+    private static final String FIND_DESTINATIONS_SQL = "SELECT tgt.DEPARTMENT_ID department_id, tgt.FORM_TYPE_ID form_type_id, tgt.KIND kind, fds.PERIOD_START start_date \n" +
+            "from department_form_type src \n" +
+            "join form_data_source fds on src.id = fds.src_department_form_type_id\n" +
+            "join department_form_type tgt on fds.department_form_type_id = tgt.id \n" +
+            "   WHERE src.form_type_id = :formTypeId " +
+            "   AND (fds.PERIOD_START BETWEEN :dateFrom AND :dateTo " +
+            "   OR fds.PERIOD_END BETWEEN :dateFrom AND :dateTo \n" +
+            "   OR (fds.PERIOD_START BETWEEN :dateFrom AND :dateTo \n" +
+            "   AND fds.PERIOD_END IS null))";
+    @Override
+    public List<Pair<DepartmentFormType, Date>> findDestinationsForFormType(int typeId, Date dateFrom, Date dateTo) {
+        try {
+            HashMap<String, Object> values = new HashMap<String, Object>();
+            values.put("formTypeId", typeId);
+            values.put("dateFrom", dateFrom);
+            values.put("dateTo", dateTo);
+
+            return getNamedParameterJdbcTemplate().query(
+                    FIND_DESTINATIONS_SQL,
+                    values,
+                    DFT_SOURCES_MAPPER);
+        } catch (DataAccessException e){
+            logger.error("", e);
+            throw new DaoException("", e);
+        }
+    }
+
+    private static final String FIND_SOURCES_SQL = "SELECT src.DEPARTMENT_ID department_id, src.FORM_TYPE_ID form_type_id, src.KIND kind, fds.PERIOD_START start_date \n" +
+            "from department_form_type src \n" +
+            "join form_data_source fds on src.id = fds.src_department_form_type_id\n" +
+            "join department_form_type tgt on fds.department_form_type_id = tgt.id \n" +
+            "   WHERE tgt.form_type_id = :formTypeId " +
+            "   AND (fds.PERIOD_START BETWEEN :dateFrom AND :dateTo " +
+            "   OR fds.PERIOD_END BETWEEN :dateFrom AND :dateTo \n" +
+            "   OR (fds.PERIOD_START BETWEEN :dateFrom AND :dateTo \n" +
+            "   AND fds.PERIOD_END IS null))";
+    @Override
+    public List<Pair<DepartmentFormType, Date>> findSourcesForFormType(int typeId, Date dateFrom, Date dateTo) {
+        try {
+            HashMap<String, Object> values = new HashMap<String, Object>();
+            values.put("formTypeId", typeId);
+            values.put("dateFrom", dateFrom);
+            values.put("dateTo", dateTo);
+
+            return getNamedParameterJdbcTemplate().query(
+                    FIND_SOURCES_SQL,
+                    values,
+                    DFT_SOURCES_MAPPER);
+        } catch (DataAccessException e){
+            logger.error("", e);
+            throw new DaoException("", e);
+        }
+    }
+
+    @Override
+    public List<DepartmentFormType> getDFTByFormType(@NotNull Integer formTypeId) {
+        try {
+            return getJdbcTemplate().query("select id, department_id, form_type_id, kind, performer_dep_id from DEPARTMENT_FORM_TYPE where FORM_TYPE_ID = ?",
+                    new Object[]{formTypeId},
+                    DFT_MAPPER);
+        }catch (DataAccessException e){
+            logger.error("Получение назначений НФ", e);
+            throw new DaoException("Получение назначений НФ", e);
+        }
     }
 
     @Override

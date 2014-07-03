@@ -21,7 +21,10 @@ import java.util.List;
 @Transactional
 public class MainOperatingDTServiceImpl implements MainOperatingService {
 
-    private static String ERROR_MESSAGE = "Версия макета не сохранена, обнаружены фатальные ошибки!";
+    private static String SAVE_MESSAGE = "Версия макета не сохранена, обнаружены фатальные ошибки!";
+    private static String DELETE_TEMPLATE_MESSAGE = "Версия макета не сохранена, обнаружены фатальные ошибки!";
+    private static String DELETE_TEMPLATE_VERSION_MESSAGE = "Удаление невозможно, обнаружены ссылки на удаляемую версию макета!";
+    private static String HAVE_DDT_MESSAGE = "Существует назначение налоговой формы подразделению %s!";
 
     @Autowired
     private LogEntryService logEntryService;
@@ -38,6 +41,10 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
 
     @Autowired
     private TemplateChangesService templateChangesService;
+    @Autowired
+    private SourceService sourceService;
+    @Autowired
+    private DepartmentService departmentService;
 
     @Override
     public <T> int edit(T template, Date templateActualEndDate, Logger logger, TAUser user) {
@@ -51,12 +58,25 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
                 || (dbVersionEndDate != null && dbVersionEndDate.compareTo(templateActualEndDate) != 0) ){
             versionOperatingService.isIntersectionVersion(declarationTemplate.getId(), declarationTemplate.getType().getId(),
                     declarationTemplate.getStatus(), declarationTemplate.getVersion(), templateActualEndDate, logger);
-            checkError(logger);
+            checkError(logger, SAVE_MESSAGE);
+            versionOperatingService.checkDestinationsSources(declarationTemplate.getType().getId(), declarationTemplate.getVersion(), templateActualEndDate, logger);
+            checkError(logger, SAVE_MESSAGE);
         }
 
-        versionOperatingService.isUsedVersion(declarationTemplate.getId(), declarationTemplate.getType().getId(),
-                declarationTemplate.getStatus(), declarationTemplate.getVersion(), templateActualEndDate, logger);
-        checkError(logger);
+        switch (declarationTemplate.getStatus()){
+            case NORMAL:
+                versionOperatingService.isUsedVersion(declarationTemplate.getId(), declarationTemplate.getType().getId(),
+                        declarationTemplate.getStatus(), declarationTemplate.getVersion(), templateActualEndDate, logger);
+                checkError(logger, SAVE_MESSAGE);
+                //Что то с нумерацией строк
+                checkError(logger, SAVE_MESSAGE);
+                break;
+            case DRAFT:
+                //Что то с нумерацией строк
+                checkError(logger, SAVE_MESSAGE);
+                break;
+        }
+
         int id = declarationTemplateService.save(declarationTemplate);
 
         logging(id, TemplateChangesEvent.MODIFIED, user);
@@ -74,7 +94,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
         int formTypeId = declarationTypeService.save(type);
         declarationTemplate.getType().setId(formTypeId);
         versionOperatingService.isIntersectionVersion(0, formTypeId, VersionedObjectStatus.NORMAL, declarationTemplate.getVersion(), templateActualEndDate, logger);
-        checkError(logger);
+        checkError(logger, SAVE_MESSAGE);
         declarationTemplate.setEdition(1);//т.к. первый
         declarationTemplate.setStatus(VersionedObjectStatus.DRAFT);
         int id = declarationTemplateService.save(declarationTemplate);
@@ -87,11 +107,11 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
     public <T> int createNewTemplateVersion(T template, Date templateActualEndDate, Logger logger, TAUser user) {
         DeclarationTemplate declarationTemplate = (DeclarationTemplate)template;
         /*versionOperatingService.isCorrectVersion(action.getForm(), action.getVersionEndDate(), logger);*/
-        checkError(logger);
+        checkError(logger, SAVE_MESSAGE);
         declarationTemplate.setStatus(VersionedObjectStatus.DRAFT);
         versionOperatingService.isIntersectionVersion(0, declarationTemplate.getType().getId(),
                 declarationTemplate.getStatus(), declarationTemplate.getVersion(), templateActualEndDate, logger);
-        checkError(logger);
+        checkError(logger, SAVE_MESSAGE);
         int id = declarationTemplateService.save(declarationTemplate);
 
         logging(id, TemplateChangesEvent.CREATED, user);
@@ -106,13 +126,18 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
             for (DeclarationTemplate declarationTemplate : templates){
                 versionOperatingService.isUsedVersion(declarationTemplate.getId(), declarationTemplate.getType().getId(),
                         declarationTemplate.getStatus(), declarationTemplate.getVersion(), null, logger);
-                if (logger.containsLevel(LogLevel.ERROR))
-                    throw new ServiceLoggerException("Удаление невозможно, обнаружено использование макета",
-                            logEntryService.save(logger.getEntries()));
+                checkError(logger, DELETE_TEMPLATE_MESSAGE);
                 declarationTemplate.setStatus(VersionedObjectStatus.DELETED);
             }
             declarationTemplateService.update(templates);
         }
+        versionOperatingService.checkDestinationsSources(typeId, null, null, logger);
+        checkError(logger, DELETE_TEMPLATE_MESSAGE);
+        //Проверка назначений деклараций
+        for (DepartmentDeclarationType departmentFormType : sourceService.getDDTByDeclarationType(typeId))
+            logger.error(
+                    String.format(HAVE_DDT_MESSAGE,
+                            departmentService.getDepartment(departmentFormType.getDepartmentId())));
         declarationTypeService.delete(typeId);
 
         /*logging(typeId, TemplateChangesEvent.DELETED, user);*/
@@ -124,15 +149,27 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
         Date dateEndActualize = declarationTemplateService.getDTEndDate(templateId);
         versionOperatingService.isUsedVersion(template.getId(), template.getType().getId(),
                 template.getStatus(), template.getVersion(), dateEndActualize, logger);
-        if (logger.containsLevel(LogLevel.ERROR))
-            throw new ServiceLoggerException("Удаление невозможно, обнаружены ссылки на удаляемую версию макета",
-                    logEntryService.save(logger.getEntries()));
-        versionOperatingService.cleanVersions(template.getId(), template.getType().getId(),
-                template.getStatus(), template.getVersion(), dateEndActualize, logger);
+        checkError(logger, DELETE_TEMPLATE_VERSION_MESSAGE);
+        versionOperatingService.checkDestinationsSources(template.getType().getId(), template.getVersion(), templateActualEndDate, logger);
+        checkError(logger, DELETE_TEMPLATE_VERSION_MESSAGE);
+
         template.setStatus(VersionedObjectStatus.DELETED);
         declarationTemplateService.save(template);
-        if (declarationTemplateService.getDecTemplateVersionsByStatus(template.getType().getId(),
-                VersionedObjectStatus.DRAFT, VersionedObjectStatus.NORMAL).isEmpty()){
+        List<DeclarationTemplate> declarationTemplates = declarationTemplateService.getDecTemplateVersionsByStatus(template.getType().getId(),
+                VersionedObjectStatus.DRAFT, VersionedObjectStatus.NORMAL);
+        if (declarationTemplates.isEmpty()){
+            for (DepartmentFormType departmentFormType : sourceService.getDFTByFormType(template.getType().getId())){
+                logger.error(
+                        String.format(HAVE_DDT_MESSAGE,
+                                departmentService.getDepartment(departmentFormType.getDepartmentId())));
+                checkError(logger, DELETE_TEMPLATE_VERSION_MESSAGE);
+            }
+        }
+
+        versionOperatingService.cleanVersions(template.getId(), template.getType().getId(),
+                template.getStatus(), template.getVersion(), dateEndActualize, logger);
+        //Если нет версий макетов, то можно удалить весь макет
+        if (declarationTemplates.isEmpty()){
             declarationTypeService.delete(template.getType().getId());
             logger.info("Макет удален в связи с удалением его последней версии");
         }
@@ -158,9 +195,9 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
         return true;
     }
 
-    private void checkError(Logger logger){
+    private void checkError(Logger logger, String errorMsg){
         if (logger.containsLevel(LogLevel.ERROR))
-            throw new ServiceLoggerException(ERROR_MESSAGE, logEntryService.save(logger.getEntries()));
+            throw new ServiceLoggerException(errorMsg, logEntryService.save(logger.getEntries()));
     }
 
     private void logging(int id, TemplateChangesEvent event, TAUser user){

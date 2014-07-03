@@ -4,7 +4,7 @@
   <module>
     <web>
       <web-uri>gwtapp.war</web-uri>
-      <context-root>/taxaccounting/gwtapp</context-root>
+      <context-root>/taxaccounting${releasePostfix}/gwtapp</context-root>
     </web>
   </module>
   <module>

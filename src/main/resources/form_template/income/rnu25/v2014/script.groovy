@@ -72,6 +72,7 @@ switch (formDataEvent) {
         importData()
         calc()
         logicCheck()
+        break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
         break

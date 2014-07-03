@@ -1,22 +1,24 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.*;
-
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
+import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
+import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import javax.validation.constraints.NotNull;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.*;
 
 /**
  * Реализация DAO для работы с информацией о назначении деклараций подразделениям
@@ -39,6 +41,29 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
 			return departmentDeclarationType;
 		}
 	};
+
+    private static final RowMapper<Pair<DepartmentFormType, Date>> DFT_SOURCES_MAPPER = new RowMapper<Pair<DepartmentFormType, Date>>() {
+
+        @Override
+        public Pair<DepartmentFormType, Date> mapRow(ResultSet rs, int i) throws SQLException {
+            DepartmentFormType departmentFormType = new DepartmentFormType();
+            departmentFormType.setFormTypeId(SqlUtils.getInteger(rs,"form_type_id"));
+            departmentFormType.setDepartmentId(SqlUtils.getInteger(rs,"department_id"));
+            departmentFormType.setKind(FormDataKind.fromId(SqlUtils.getInteger(rs,"kind")));
+            return new Pair<DepartmentFormType, Date>(departmentFormType, rs.getDate("start_date"));
+        }
+    };
+
+    private static final RowMapper<Pair<DepartmentDeclarationType, Date>> DDT_SOURCES_MAPPER = new RowMapper<Pair<DepartmentDeclarationType, Date>>() {
+
+        @Override
+        public Pair<DepartmentDeclarationType, Date> mapRow(ResultSet rs, int i) throws SQLException {
+            DepartmentDeclarationType departmentDeclarationType = new DepartmentDeclarationType();
+            departmentDeclarationType.setDeclarationTypeId(SqlUtils.getInteger(rs,"declaration_type_id"));
+            departmentDeclarationType.setDepartmentId(SqlUtils.getInteger(rs,"department_id"));
+            return new Pair<DepartmentDeclarationType, Date>(departmentDeclarationType, rs.getDate("start_date"));
+        }
+    };
 
 	@Override
 	public List<DepartmentDeclarationType> getDepartmentDeclarationTypes(int departmentId) {
@@ -111,4 +136,68 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
 			throw new DaoException("Назначение является приемником данных для форм", e);
 		}
 	}
+
+    @Override
+    public List<Pair<DepartmentDeclarationType, Date>> findDestinationDTsForFormType(int typeId, Date dateFrom, Date dateTo) {
+        try {
+            HashMap<String, Object> values = new HashMap<String, Object>();
+            values.put("formTypeId", typeId);
+            values.put("dateFrom", dateFrom);
+            values.put("dateTo", dateTo);
+
+            return getNamedParameterJdbcTemplate().query("select tgt.DEPARTMENT_ID department_id, tgt.DECLARATION_TYPE_ID declaration_type_id, ds.PERIOD_START start_date\n" +
+                    "from department_form_type src \n" +
+                    "join declaration_source ds on src.id = ds.src_department_form_type_id\n" +
+                    "join department_declaration_type tgt on ds.department_declaration_type_id = tgt.id \n" +
+                    "  where \n" +
+                    "    src.form_type_id=:formTypeId \n" +
+                    "   AND (ds.PERIOD_START BETWEEN :dateFrom AND :dateTo " +
+                    "   OR ds.PERIOD_END BETWEEN :dateFrom AND :dateTo \n" +
+                    "   OR (ds.PERIOD_START BETWEEN :dateFrom AND :dateTo \n" +
+                    "   AND ds.PERIOD_END IS null));",
+                    values,
+                    DDT_SOURCES_MAPPER);
+        } catch (DataAccessException e){
+            logger.error("", e);
+            throw new DaoException("", e);
+        }
+    }
+
+    @Override
+    public List<Pair<DepartmentFormType, Date>> findSourceFTsForDeclaration(int typeId, Date dateFrom, Date dateTo) {
+        try {
+            HashMap<String, Object> values = new HashMap<String, Object>();
+            values.put("formTypeId", typeId);
+            values.put("dateFrom", dateFrom);
+            values.put("dateTo", dateTo);
+
+            return getNamedParameterJdbcTemplate().query("select src.DEPARTMENT_ID department_id, src.FORM_TYPE_ID form_type_id, src.KIND kind, ds.PERIOD_START start_date\n" +
+                    "from department_form_type src \n" +
+                    "join declaration_source ds on src.id = ds.src_department_form_type_id\n" +
+                    "join department_declaration_type tgt on ds.department_declaration_type_id = tgt.id \n" +
+                    "  where \n" +
+                    "    tgt.declaration_type_id = :formTypeId \n" +
+                    "   AND (ds.PERIOD_START BETWEEN :dateFrom AND :dateTo " +
+                    "   OR ds.PERIOD_END BETWEEN :dateFrom AND :dateTo \n" +
+                    "   OR (ds.PERIOD_START BETWEEN :dateFrom AND :dateTo \n" +
+                    "   AND ds.PERIOD_END IS null));",
+                    values,
+                    DFT_SOURCES_MAPPER);
+        } catch (DataAccessException e){
+            logger.error("", e);
+            throw new DaoException("", e);
+        }
+    }
+
+    @Override
+    public List<DepartmentDeclarationType> getDDTByDeclarationType(@NotNull Integer declarationTypeId) {
+        try {
+            return getJdbcTemplate().query("select id, department_id, DECLARATION_TYPE_ID from DEPARTMENT_DECLARATION_TYPE where DECLARATION_TYPE_ID = ?",
+                    new Object[]{declarationTypeId},
+                    DEPARTMENT_DECLARATION_TYPE_ROW_MAPPER);
+        } catch (DataAccessException e){
+            logger.error("Получение списка деклараций назначений", e);
+            throw new DaoException("Получение списка деклараций назначений", e);
+        }
+    }
 }

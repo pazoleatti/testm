@@ -47,8 +47,8 @@ insert into department_form_type (id, department_id, form_type_id, kind) values 
 insert into department_form_type (id, department_id, form_type_id, kind) values (9, 13, 2, 2);
 
 -- DECLARATION_SOURCE
-insert into declaration_source (department_declaration_type_id, src_department_form_type_id) values (1, 1);
-insert into declaration_source (department_declaration_type_id, src_department_form_type_id) values (2, 2);
+insert into declaration_source (department_declaration_type_id, src_department_form_type_id, period_start, period_end) values (1, 1, date '2013-01-01', date '2014-01-01');
+insert into declaration_source (department_declaration_type_id, src_department_form_type_id,  period_start, period_end) values (2, 2, date '2013-01-01', date '2014-01-01');
 insert into declaration_source (department_declaration_type_id, src_department_form_type_id) values (3, 1);
 insert into declaration_source (department_declaration_type_id, src_department_form_type_id) values (1, 4);
 insert into declaration_source (department_declaration_type_id, src_department_form_type_id) values (2, 4);

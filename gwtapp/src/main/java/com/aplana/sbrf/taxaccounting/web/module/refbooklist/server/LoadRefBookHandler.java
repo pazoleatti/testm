@@ -40,7 +40,7 @@ public class LoadRefBookHandler extends AbstractActionHandler<LoadRefBookAction,
 		LoadRefBookResult result = new LoadRefBookResult();
 		Logger logger = new Logger();
         // Импорт справочников из ЦАС НСИ
-		refBookExternalService.importRefBook(securityService.currentUserInfo(), logger);
+		refBookExternalService.importRefBookNsi(securityService.currentUserInfo(), logger);
         // Импорт справочников из Diasoft Custody
         refBookExternalService.importRefBookDiasoft(securityService.currentUserInfo(), logger);
         result.setUuid(logEntryService.save(logger.getEntries()));

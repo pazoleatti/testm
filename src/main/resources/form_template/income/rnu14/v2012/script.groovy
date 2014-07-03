@@ -52,6 +52,9 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
+        break
 }
 
 // все атрибуты
@@ -279,5 +282,24 @@ void addData(def xml, int headRowCount) {
     } else {
         dataRows[4].normBase = null
     }
+    dataRowHelper.update(dataRows)
+}
+
+void importTransportData() {
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    addTransportData(xml)
+}
+
+void addTransportData(def xml) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+
+    // графа 4 строки 5
+    if (xml.row[4] != null) {
+        dataRows[4].normBase = parseNumber(xml.row[4].cell[4].text(), 7, 5, logger, true)
+    } else {
+        dataRows[4].normBase = null
+    }
+
     dataRowHelper.update(dataRows)
 }

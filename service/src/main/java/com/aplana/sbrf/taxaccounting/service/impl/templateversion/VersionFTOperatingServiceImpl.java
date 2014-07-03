@@ -4,12 +4,14 @@ import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.templateversion.VersionOperatingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -21,7 +23,11 @@ import java.util.List;
 @Transactional
 public class VersionFTOperatingServiceImpl implements VersionOperatingService {
 
-    public static final String MSG_IS_USED_VERSION = "Существует экземпляр налоговой формы типа \"%s\" в подразделении \"%s\" периоде %s для макета!";
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+
+    private static final String MSG_IS_USED_VERSION = "Существует экземпляр налоговой формы типа \"%s\" в подразделении \"%s\" периоде %s для макета!";
+    private static final String MSG_HAVE_DESTINATION = "Существует назначение налоговой формы в качестве приёмника данных для налоговой формы типа %s вида %s в подразделении %s начиная с периода %s!";
+    private static final String MSG_HAVE_SOURCE = "Существует назначение налоговой формы в качестве источника данных для налоговой формы типа %s вида %s в подразделении %s начиная с периода %s!";
 
     @Autowired
     private FormDataDao formDataDao;
@@ -40,13 +46,15 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
 
     @Autowired
     private PeriodService periodService;
+    @Autowired
+    private SourceService sourceService;
 
     private Calendar calendar = Calendar.getInstance();
 
     @Override
     public void isUsedVersion(int templateId, int typeId, VersionedObjectStatus status, Date versionActualDateStart, Date versionActualDateEnd, Logger logger) {
-        if (status == VersionedObjectStatus.DRAFT)
-            return;
+        /*if (status == VersionedObjectStatus.DRAFT)
+            return;*/
         List<Long> fdIds = formDataService.getFormDataListInActualPeriodByTemplate(templateId, versionActualDateStart);
         if (!fdIds.isEmpty()){
             for(Long id: fdIds) {
@@ -140,11 +148,6 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
     }
 
     @Override
-    public void createNewVersion(int templateId, int typeId, VersionedObjectStatus status, Date versionActualDateStart, Date versionActualDateEnd, Logger logger) {
-        isIntersectionVersion(templateId, typeId, status, versionActualDateStart, versionActualDateEnd, logger);
-    }
-
-    @Override
     public void cleanVersions(int templateId, int typeId, VersionedObjectStatus status, Date versionActualDateStart, Date versionActualDateEnd, Logger logger) {
         if (templateId == 0)
             return;
@@ -152,6 +155,34 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
                 VersionedObjectStatus.NORMAL, VersionedObjectStatus.DRAFT, VersionedObjectStatus.FAKE);
         if (formTemplateFake != null && formTemplateFake.getStatus() == VersionedObjectStatus.FAKE)
             formTemplateService.delete(formTemplateFake.getId());
+    }
+
+    @Override
+    public void checkDestinationsSources(int typeId, Date versionActualDateStart, Date versionActualDateEnd, Logger logger) {
+        List<Pair<DepartmentFormType, Date>> sourcePairs = sourceService.findSourceFTsForFormType(typeId, versionActualDateStart, versionActualDateEnd);
+        List<Pair<DepartmentFormType, Date>> destinationPairs = sourceService.findDestinationFTsForFormType(typeId, versionActualDateStart, versionActualDateEnd);
+        for (Pair<DepartmentFormType, Date> pair : sourcePairs){
+            DepartmentFormType first = pair.getFirst();
+            logger.error(
+                    String.format(MSG_HAVE_SOURCE,
+                            first.getKind().getName(),
+                            formTypeService.get(first.getFormTypeId()).getName(),
+                            departmentService.getDepartment(first.getDepartmentId()).getName(),
+                            sdf.format(pair.getSecond())
+                    )
+            );
+        }
+        for (Pair<DepartmentFormType, Date> pair : destinationPairs){
+            DepartmentFormType first = pair.getFirst();
+            logger.error(
+                    String.format(MSG_HAVE_DESTINATION,
+                            first.getKind().getName(),
+                            formTypeService.get(first.getFormTypeId()).getName(),
+                            departmentService.getDepartment(first.getDepartmentId()).getName(),
+                            sdf.format(pair.getSecond())
+                    )
+            );
+        }
     }
 
     private FormTemplate createFakeTemplate(Date date, int formTypeId){
