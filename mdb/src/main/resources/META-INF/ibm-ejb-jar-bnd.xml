@@ -8,12 +8,12 @@
     </session>
 
     <message-driven name="TransportMDB">
-        <jca-adapter activation-spec-binding-name="jms/transportAS"
+        <jca-adapter activation-spec-binding-name="jms/transportAS${jndiPostfix}"
                      destination-binding-name="jms/transportQueue${jndiPostfix}"/>
     </message-driven>
 
     <message-driven name="RateMDB">
-        <jca-adapter activation-spec-binding-name="jms/transportMQ"
+        <jca-adapter activation-spec-binding-name="jms/transportMQ${jndiPostfix}"
                      destination-binding-name="jms/rateQueue${jndiPostfix}"/>
     </message-driven>
 
