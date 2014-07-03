@@ -80,6 +80,7 @@ public final class ScriptUtils {
     private static final String EMPTY_EXPECTED_VALUE = "Строка %d: Графа «%s» содержит значение «%s», не соответствующее пустому значению данной графы в макете налоговой формы!";
 
     private static final String IMPORT_ROW_PREFIX = "Строка файла %d: %s";
+    private static final String TRANSPORT_FILE_SUM_ERROR = "Итоговая сумма в графе %s строки %s в транспортном файле некорректна. Загрузка файла не выполнена.";
 
     /**
      * Интерфейс для переопределения алгоритма расчета

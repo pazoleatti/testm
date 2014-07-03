@@ -522,7 +522,7 @@ def getRowValues(def row, def index, def section, def templateId) {
         rowValues.append(section)
     }
     rowValues.append(END_ROW)
-    return rowValues.toString()
+    return rowValues.toString().replace("«", "\"").replace("»", "\"")
 }
 
 /**
