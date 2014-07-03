@@ -7,14 +7,14 @@
 
 	<virtual-host name="default_host" />
 
-    <resource-ref name="jdbc/TaxAccDS" binding-name="jdbc/TaxAccDS${jndiPostfix}"/>
-    <resource-ref name="services/cache/aplana/taxaccounting/FormType" binding-name="services/cache/aplana/taxaccounting/FormType${jndiPostfix}"/>
-    <resource-ref name="services/cache/aplana/taxaccounting/FormTemplate" binding-name="services/cache/aplana/taxaccounting/FormTemplate${jndiPostfix}"/>
-    <resource-ref name="services/cache/aplana/taxaccounting/Department" binding-name="services/cache/aplana/taxaccounting/Department${jndiPostfix}"/>
-    <resource-ref name="services/cache/aplana/taxaccounting/User" binding-name="services/cache/aplana/taxaccounting/User${jndiPostfix}"/>
-    <resource-ref name="services/cache/aplana/taxaccounting/PermanentData" binding-name="services/cache/aplana/taxaccounting/PermanentData${jndiPostfix}"/>
-    <resource-ref name="services/cache/aplana/taxaccounting/DeclarationType" binding-name="services/cache/aplana/taxaccounting/DeclarationType${jndiPostfix}"/>
-    <resource-ref name="services/cache/aplana/taxaccounting/DeclarationTemplate" binding-name="services/cache/aplana/taxaccounting/DeclarationTemplate${jndiPostfix}"/>
-    <resource-ref name="services/cache/aplana/taxaccounting/DataBlobsCache" binding-name="services/cache/aplana/taxaccounting/DataBlobsCache${jndiPostfix}"/>
+    <resource-ref name="jdbc/TaxAccDS" binding-name="jdbc/TaxAccDS${releasePostfix}"/>
+    <resource-ref name="services/cache/aplana/taxaccounting/FormType" binding-name="services/cache/aplana/taxaccounting/FormType${releasePostfix}"/>
+    <resource-ref name="services/cache/aplana/taxaccounting/FormTemplate" binding-name="services/cache/aplana/taxaccounting/FormTemplate${releasePostfix}"/>
+    <resource-ref name="services/cache/aplana/taxaccounting/Department" binding-name="services/cache/aplana/taxaccounting/Department${releasePostfix}"/>
+    <resource-ref name="services/cache/aplana/taxaccounting/User" binding-name="services/cache/aplana/taxaccounting/User${releasePostfix}"/>
+    <resource-ref name="services/cache/aplana/taxaccounting/PermanentData" binding-name="services/cache/aplana/taxaccounting/PermanentData${releasePostfix}"/>
+    <resource-ref name="services/cache/aplana/taxaccounting/DeclarationType" binding-name="services/cache/aplana/taxaccounting/DeclarationType${releasePostfix}"/>
+    <resource-ref name="services/cache/aplana/taxaccounting/DeclarationTemplate" binding-name="services/cache/aplana/taxaccounting/DeclarationTemplate${releasePostfix}"/>
+    <resource-ref name="services/cache/aplana/taxaccounting/DataBlobsCache" binding-name="services/cache/aplana/taxaccounting/DataBlobsCache${releasePostfix}"/>
 
 </web-bnd>

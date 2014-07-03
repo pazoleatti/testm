@@ -40,7 +40,7 @@
 		<poi.version>3.8</poi.version>
 		<org.slf4j.version>1.7.2</org.slf4j.version>
         <java.version>1.6</java.version>
-        <jndiPostfix>-${project.version}</jndiPostfix>
+        <releasePostfix>-${project.version}</releasePostfix>
 	</properties>
 
 	<dependencyManagement>
