@@ -72,6 +72,9 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
+        break
 }
 
 //// Кэши и константы
@@ -592,5 +595,90 @@ void addData(def xml, int headRowCount) {
         rows.add(newRow)
     }
 
+    dataRowHelper.save(rows)
+}
+
+void importTransportData() {
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    addTransportData(xml)
+
+    def dataRows = formDataService.getDataRowHelper(formData)?.allCached
+    checkTotalSum(dataRows, totalColumns, logger, true)
+}
+
+void addTransportData(def xml) {
+    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def int rnuIndexRow = 2
+    def int colOffset = 1
+    def rows = []
+    def int rowIndex = 1
+
+    for (def row : xml.row) {
+        rnuIndexRow++
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
+        def cols = (getBalancePeriod() ? balanceEditableColumns : editableColumns)
+        cols.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
+
+        // графа 3
+        newRow.date = parseDate(row.cell[3].text(), "dd.MM.yyyy", rnuIndexRow, 3 + colOffset, logger, true)
+        // графа 4
+        String filter = "LOWER(CODE) = LOWER('" + row.cell[2].text() + "') and LOWER(NUMBER) = LOWER('" + row.cell[4].text() + "')"
+        def records = refBookFactory.getDataProvider(27).getRecords(reportPeriodEndDate, null, filter, null)
+        if (records.size() == 1) {
+            newRow.code = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+        } else {
+            logger.error("Проверка файла: Строка ${rnuIndexRow} содержит значение, отсутствующее в справочнике " +
+                    "«" + refBookFactory.get(27).getName() + "»!")
+        }
+        // графа 5
+        newRow.docNumber = row.cell[5].text()
+        // графа 6
+        newRow.docDate = parseDate(row.cell[6].text(), "dd.MM.yyyy", rnuIndexRow, 6 + colOffset, logger, true)
+        // графа 7
+        newRow.currencyCode = getRecordIdImport(15, 'CODE', row.cell[7].text(), rnuIndexRow, 7 + colOffset)
+        // графа 8
+        newRow.rateOfTheBankOfRussia =  parseNumber(row.cell[8].text(), rnuIndexRow, 8 + colOffset, logger, true)
+        // графа 9
+        newRow.taxAccountingCurrency = parseNumber(row.cell[9].text(), rnuIndexRow, 9 + colOffset, logger, true)
+        // графа 10
+        newRow.taxAccountingRuble  =  parseNumber(row.cell[10].text(), rnuIndexRow, 10+ colOffset, logger, true)
+        // графа 11
+        newRow.accountingCurrency = parseNumber(row.cell[11].text(), rnuIndexRow, 11 + colOffset, logger, true)
+        // графа 12
+        newRow.ruble  =  parseNumber(row.cell[12].text(), rnuIndexRow, 12 + colOffset, logger, true)
+
+        rows.add(newRow)
+    }
+
+    if (xml.rowTotal.size() == 1) {
+        rnuIndexRow = rnuIndexRow + 2
+
+        def row = xml.rowTotal[0]
+
+        def total = formData.createDataRow()
+        total.setAlias('total')
+        total.helper = 'Итого'
+        total.getCell('helper').colSpan = 9
+        ['number', 'helper', 'taxAccountingRuble', 'accountingCurrency', 'ruble'].each {
+            total.getCell(it).setStyleAlias('Контрольные суммы')
+        }
+
+        // графа 10
+        total.taxAccountingRuble = parseNumber(row.cell[10].text(), rnuIndexRow, 10 + colOffset, logger, true)
+        // графа 12
+        total.ruble = parseNumber(row.cell[12].text(), rnuIndexRow, 12 + colOffset, logger, true)
+
+        rows.add(total)
+    }
     dataRowHelper.save(rows)
 }

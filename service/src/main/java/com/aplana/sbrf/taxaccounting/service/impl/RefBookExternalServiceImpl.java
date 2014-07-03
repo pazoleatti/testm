@@ -28,6 +28,9 @@ import java.util.zip.ZipInputStream;
 
 import static java.util.Arrays.asList;
 
+/**
+ * @author Dmitriy Levykin
+ */
 @Service
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class RefBookExternalServiceImpl implements RefBookExternalService {
@@ -45,10 +48,43 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
     private RefBookFactory refBookFactory;
 
     private static long REF_BOOK_OKATO = 3L; // Коды ОКАТО
-    // private static long REF_BOOK_OUKS = 9L;  // Организации-участники контролируемых сделок
     private static long REF_BOOK_RF_SUBJ_CODE = 4L; // Коды субъектов Российской Федерации
     private static long REF_BOOK_EMITENT = 100L; // Эмитенты
     private static long REF_BOOK_BOND = 84L; // Ценные бумаги
+    private static long REF_BOOK_ACCOUNT_PLAN = 101L; // План счетов
+
+    //// Справочники ЦАС НСИ
+    // ОКАТО
+    private final static Map<String, List<Pair<Boolean, Long>>> nsiOkatoMappingMap = new HashMap<String, List<Pair<Boolean, Long>>>();
+    // Субъекты РФ
+    private final static Map<String, List<Pair<Boolean, Long>>> nsiRegionMappingMap = new HashMap<String, List<Pair<Boolean, Long>>>();
+    // План счетов
+    private final static Map<String, List<Pair<Boolean, Long>>> nsiAccountPlanMappingMap = new HashMap<String, List<Pair<Boolean, Long>>>();
+
+    //// Справочники АС Diasoft Custody
+    // Ценные бумаги и Эмитенты
+    private final static  Map<String, List<Pair<Boolean, Long>>> diasoftMappingMap = new HashMap<String, List<Pair<Boolean, Long>>>();
+
+    static {
+        // TODO Каждый конкретный справочник будет загружаться только архивом или только простым файлом, не обоими способами
+
+        // Ценные бумаги + Эмитенты
+        diasoftMappingMap.put("ds\\d{6}\\.nsi", asList(new Pair<Boolean, Long>(true, REF_BOOK_EMITENT),
+                new Pair<Boolean, Long>(true, REF_BOOK_BOND)));
+
+        // Архив "Коды ОКАТО"
+        nsiOkatoMappingMap.put("oka.{5}\\..{2}", asList(new Pair<Boolean, Long>(false, REF_BOOK_OKATO)));
+        // "Коды ОКАТО"
+        nsiOkatoMappingMap.put("payments\\.okato\\..{4}\\..{3}\\..{2}", asList(new Pair<Boolean, Long>(true, REF_BOOK_OKATO)));
+
+        // Архив "Коды субъектов Российской Федерации" (Регионы)
+        nsiRegionMappingMap.put("rnu.{5}\\..{2}", asList(new Pair<Boolean, Long>(false, REF_BOOK_RF_SUBJ_CODE)));
+        // "Коды субъектов Российской Федерации" (Регионы)
+        nsiRegionMappingMap.put("generaluse\\.as_rnu\\..{3}\\..{2}", asList(new Pair<Boolean, Long>(true, REF_BOOK_RF_SUBJ_CODE)));
+
+        // Архив «План счетов»
+        nsiRegionMappingMap.put("bookkeeping\\.bookkeeping\\..{3}\\..{2}", asList(new Pair<Boolean, Long>(false, REF_BOOK_ACCOUNT_PLAN)));
+    }
 
     /**
      * Импорт справочников из папки
@@ -79,7 +115,6 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
             // Признак наличия ошибок при импорте
             boolean withError = false;
             try {
-                // SmbFile folder = new SmbFile(refBookDirectory);
                 FileWrapper folder = ResourceUtils.getSharedResource(refBookDirectory);
                 if (folder.list() != null) {
                     for (String fileName : folder.list()) {
@@ -183,34 +218,18 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
     }
 
     @Override
-    public void importRefBook(TAUserInfo userInfo, Logger logger) {
-        // регулярка файла/архива - true/false - id
-        Map<String, List<Pair<Boolean, Long>>> mappingMap = new HashMap<String, List<Pair<Boolean, Long>>>();
-        // архив для загр. спр. "Коды ОКАТО"
-        mappingMap.put("OKA.*", asList(new Pair<Boolean, Long>(false, REF_BOOK_OKATO)));
-        // архив для загр. спр. "Коды ОКАТО"
-        mappingMap.put("payments.*", asList(new Pair<Boolean, Long>(false, REF_BOOK_OKATO)));
+    public void importRefBookNsi(TAUserInfo userInfo, Logger logger) {
         // ОКАТО
-        importRefBook(userInfo, logger, ConfigurationParam.OKATO_TRANSPORT_DIRECTORY, mappingMap);
-
-        mappingMap = new HashMap<String, List<Pair<Boolean, Long>>>();
-        // архив для загр. спр. "Коды субъектов Российской Федерации" (Регионы)
-        mappingMap.put("RNU.*", asList(new Pair<Boolean, Long>(false, REF_BOOK_RF_SUBJ_CODE)));
-        // архив для загр. спр. "Коды субъектов Российской Федерации" (Регионы)
-        mappingMap.put("generaluse.AS_RNU.*.*", asList(new Pair<Boolean, Long>(false, REF_BOOK_RF_SUBJ_CODE)));
+        importRefBook(userInfo, logger, ConfigurationParam.OKATO_TRANSPORT_DIRECTORY, nsiOkatoMappingMap);
         // Субъекты РФ
-        importRefBook(userInfo, logger, ConfigurationParam.OKATO_TRANSPORT_DIRECTORY, mappingMap);
+        importRefBook(userInfo, logger, ConfigurationParam.REGION_TRANSPORT_DIRECTORY, nsiRegionMappingMap);
+        // План счетов
+        importRefBook(userInfo, logger, ConfigurationParam.ACCOUNT_PLAN_TRANSPORT_DIRECTORY, nsiAccountPlanMappingMap);
     }
 
     @Override
     public void importRefBookDiasoft(TAUserInfo userInfo, Logger logger) {
-        // Регулярка → Пара(Признак архива, Id справочника)
-        Map<String, List<Pair<Boolean, Long>>> mappingMap = new HashMap<String, List<Pair<Boolean, Long>>>();
-        // Ценные бумаги + Эмитенты
-        mappingMap.put("DS[0-9]{6}\\.nsi", asList(new Pair<Boolean, Long>(true, REF_BOOK_EMITENT), new Pair<Boolean, Long>(true, REF_BOOK_BOND)));
-
-        // TODO Вопросы по аналитике, пока нет ясности как хранить параметр http://conf.aplana.com/pages/viewpage.action?pageId=13112570
-        //importRefBook(userInfo, logger, ConfigurationParam.REF_BOOK_DIASOFT_DIRECTORY, mappingMap);
+        importRefBook(userInfo, logger, ConfigurationParam.DIASOFT_TRANSPORT_DIRECTORY, diasoftMappingMap);
     }
 
     @Override
@@ -223,5 +242,31 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
         additionalParameters.put("isNewRecords", isNewRecords);
         additionalParameters.put("scriptStatusHolder", new ScriptStatusHolder()); // Статус пока не обрабатывается
         refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.SAVE, logger, additionalParameters);
+    }
+
+    /**
+     * Проверка строки на соответствие регулярке из набора
+     */
+    private boolean mappingMatch(String str, Set<String> mappingSet) {
+        str = str.toLowerCase();
+        for (String key : mappingSet) {
+            if (str.matches(key)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean isNSIFile(String name) {
+        return name != null &&
+                (mappingMatch(name, nsiOkatoMappingMap.keySet())
+                        || mappingMatch(name, nsiRegionMappingMap.keySet())
+                        || mappingMatch(name, nsiAccountPlanMappingMap.keySet()));
+    }
+
+    @Override
+    public boolean isDiasoftFile(String name) {
+        return name != null && mappingMatch(name, diasoftMappingMap.keySet());
     }
 }

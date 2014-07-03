@@ -45,10 +45,6 @@
             margin-bottom: 5px;
         }
 
-        .paramsButton {
-            margin-top: 5px;
-        }
-
         .label {
             text-align: right;
             width: 150px;
@@ -81,7 +77,7 @@
                 </fm:right>
                 <fm:resizable>
                     <fm:Resizable>
-                        <g:Label text="Данные задачи" ui:field="titleDesc"/>
+                        <g:Label text="Создать задачу" ui:field="titleDesc"/>
                     </fm:Resizable>
                 </fm:resizable>
             </fm:HeaderContainer>

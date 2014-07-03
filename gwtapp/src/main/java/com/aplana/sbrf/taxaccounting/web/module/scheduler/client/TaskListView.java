@@ -1,9 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.scheduler.client;
 
+import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.TaskSearchResultItem;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.google.gwt.cell.client.AbstractCell;
-import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -13,11 +14,13 @@ import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.*;
+import com.google.gwt.view.client.DefaultSelectionEventManager;
+import com.google.gwt.view.client.ProvidesKey;
+import com.google.gwt.view.client.SelectionModel;
+import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -33,6 +36,7 @@ public class TaskListView extends ViewWithUiHandlers<TaskListUiHandlers>
     interface Binder extends UiBinder<Widget, TaskListView> {
     }
 
+    public static final String NUMBER = "№";
     public static final String NAME_TITLE = "Название";
     public static final String STATE_TITLE = "Статус";
     public static final String REPEATS_LEFT_TITLE = "Повторений выполнено";
@@ -71,6 +75,13 @@ public class TaskListView extends ViewWithUiHandlers<TaskListUiHandlers>
                     }
                 }
         );
+
+        TextColumn<TaskSearchResultItem> numberColumn = new TextColumn<TaskSearchResultItem>() {
+            @Override
+            public String getValue(TaskSearchResultItem taskItem) {
+                return String.valueOf(taskItem.getId());
+            }
+        };
 
         Column<TaskSearchResultItem, Boolean> checkColumn = new Column<TaskSearchResultItem, Boolean>(
             new CheckboxCell(true, false)) {
@@ -138,6 +149,8 @@ public class TaskListView extends ViewWithUiHandlers<TaskListUiHandlers>
 
         taskDataTable.addColumn(checkColumn);
         taskDataTable.setColumnWidth(checkColumn, 40, Style.Unit.PX);
+        taskDataTable.addColumn(numberColumn, NUMBER);
+        taskDataTable.setColumnWidth(numberColumn, 30, Style.Unit.PX);
         taskDataTable.addResizableColumn(nameColumn, NAME_TITLE);
         taskDataTable.addResizableColumn(stateColumn, STATE_TITLE);
         taskDataTable.addResizableColumn(repeatsLeftColumn, REPEATS_LEFT_TITLE);
@@ -184,9 +197,14 @@ public class TaskListView extends ViewWithUiHandlers<TaskListUiHandlers>
 
     @UiHandler("deleteButton")
     public void onDelete(ClickEvent event){
-        if(getUiHandlers() != null){
-            getUiHandlers().onDeleteTask();
-        }
+        Dialog.confirmMessage("Удаление задачи", "Удалить задачу?", new DialogHandler() {
+            @Override
+            public void yes() {
+                if(getUiHandlers() != null){
+                    getUiHandlers().onDeleteTask();
+                }
+            }
+        });
     }
 
     @Override

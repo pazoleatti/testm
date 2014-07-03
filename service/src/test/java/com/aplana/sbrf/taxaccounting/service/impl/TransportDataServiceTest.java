@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.TransportDataService;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -26,8 +27,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class TransportDataServiceTest {
-
-// TODO Вернуть тесты
     private static TransportDataService transportDataService = new TransportDataServiceImpl();
     private static String FILE_NAME_1 = "Тестовый файл 1.ууу";
     private static String FILE_NAME_2 = "Тестовый файл 2.zip";
@@ -39,9 +38,11 @@ public class TransportDataServiceTest {
 
     private static final int TEST_DEPARTMENT_ID = DepartmentType.ROOT_BANK.getCode();
 
+    private static TemporaryFolder temporaryFolder;
+
     @BeforeClass
     public static void init() throws IOException {
-        TemporaryFolder temporaryFolder = new TemporaryFolder();
+        temporaryFolder = new TemporaryFolder();
         temporaryFolder.create();
         folder = temporaryFolder.getRoot();
         System.out.println("Test common folder is \"" + folder.getAbsolutePath() + "\"");
@@ -58,11 +59,16 @@ public class TransportDataServiceTest {
         ReflectionTestUtils.setField(transportDataService, "auditService", auditService);
     }
 
+    @AfterClass
+    public static void clean() {
+        temporaryFolder.delete();
+    }
+
     // Не задан пользователь
     @Test
     public void uploadFile1Test() throws IOException {
         Logger logger = new Logger();
-        transportDataService.uploadFile(null, ConfigurationParam.UPLOAD_DIRECTORY, FILE_NAME_1, getFileAsStream(FILE_NAME_1), logger);
+        transportDataService.uploadFile(null, 1, FILE_NAME_1, getFileAsStream(FILE_NAME_1), logger);
         Assert.assertEquals(1, logger.getEntries().size());
         Assert.assertEquals(LogLevel.ERROR, logger.getEntries().get(0).getLevel());
         Assert.assertEquals(TransportDataServiceImpl.USER_NOT_FOUND_ERROR, logger.getEntries().get(0).getMessage());
@@ -78,7 +84,7 @@ public class TransportDataServiceTest {
         role.setAlias(TARole.ROLE_CONF);
         user.setRoles(asList(role));
         Logger logger = new Logger();
-        transportDataService.uploadFile(userInfo, ConfigurationParam.UPLOAD_DIRECTORY, FILE_NAME_1, getFileAsStream(FILE_NAME_1), logger);
+        transportDataService.uploadFile(userInfo, 1, FILE_NAME_1, getFileAsStream(FILE_NAME_1), logger);
         Assert.assertEquals(1, logger.getEntries().size());
         Assert.assertEquals(LogLevel.ERROR, logger.getEntries().get(0).getLevel());
         Assert.assertEquals(TransportDataServiceImpl.ACCESS_DENIED_ERROR, logger.getEntries().get(0).getMessage());
@@ -94,7 +100,7 @@ public class TransportDataServiceTest {
         role.setAlias(TARole.ROLE_CONTROL_UNP);
         user.setRoles(asList(role));
         Logger logger = new Logger();
-        transportDataService.uploadFile(userInfo, ConfigurationParam.UPLOAD_DIRECTORY, null, getFileAsStream(FILE_NAME_1), logger);
+        transportDataService.uploadFile(userInfo, 1, null, getFileAsStream(FILE_NAME_1), logger);
         Assert.assertEquals(1, logger.getEntries().size());
         Assert.assertEquals(LogLevel.ERROR, logger.getEntries().get(0).getLevel());
         Assert.assertEquals(TransportDataServiceImpl.NO_FILE_NAME_ERROR, logger.getEntries().get(0).getMessage());
@@ -110,7 +116,7 @@ public class TransportDataServiceTest {
         role.setAlias(TARole.ROLE_CONTROL_UNP);
         user.setRoles(asList(role));
         Logger logger = new Logger();
-        transportDataService.uploadFile(userInfo, ConfigurationParam.UPLOAD_DIRECTORY, FILE_NAME_1, null, logger);
+        transportDataService.uploadFile(userInfo, 1, FILE_NAME_1, null, logger);
         Assert.assertEquals(1, logger.getEntries().size());
         Assert.assertEquals(LogLevel.ERROR, logger.getEntries().get(0).getLevel());
         Assert.assertEquals(TransportDataServiceImpl.EMPTY_INPUT_STREAM_ERROR, logger.getEntries().get(0).getMessage());
@@ -126,7 +132,7 @@ public class TransportDataServiceTest {
         role.setAlias(TARole.ROLE_CONTROL_UNP);
         user.setRoles(asList(role));
         Logger logger = new Logger();
-        transportDataService.uploadFile(userInfo, ConfigurationParam.ARCHIVE_DIRECTORY, FILE_NAME_1, getFileAsStream(FILE_NAME_1), logger);
+        transportDataService.uploadFile(userInfo, 2, FILE_NAME_1, getFileAsStream(FILE_NAME_1), logger);
         Assert.assertEquals(1, logger.getEntries().size());
         Assert.assertEquals(LogLevel.ERROR, logger.getEntries().get(0).getLevel());
         Assert.assertEquals(TransportDataServiceImpl.NO_CATALOG_UPLOAD_ERROR, logger.getEntries().get(0).getMessage());
@@ -142,7 +148,7 @@ public class TransportDataServiceTest {
         role.setAlias(TARole.ROLE_CONTROL_UNP);
         user.setRoles(asList(role));
         Logger logger = new Logger();
-        transportDataService.uploadFile(userInfo, ConfigurationParam.UPLOAD_DIRECTORY, FILE_NAME_1, getFileAsStream(FILE_NAME_1), logger);
+        transportDataService.uploadFile(userInfo, 1, FILE_NAME_1, getFileAsStream(FILE_NAME_1), logger);
         String[] files = folder.list();
         Assert.assertEquals(1, files.length);
         Assert.assertEquals(FILE_NAME_1, files[0]);
@@ -158,7 +164,7 @@ public class TransportDataServiceTest {
         role.setAlias(TARole.ROLE_CONTROL_UNP);
         user.setRoles(asList(role));
         Logger logger = new Logger();
-        transportDataService.uploadFile(userInfo, ConfigurationParam.UPLOAD_DIRECTORY, FILE_NAME_2, getFileAsStream(FILE_NAME_2), logger);
+        transportDataService.uploadFile(userInfo, 1, FILE_NAME_2, getFileAsStream(FILE_NAME_2), logger);
         String[] files = folder.list();
         List<String> fileList = asList(files);
         Assert.assertEquals(3, fileList.size());
@@ -183,10 +189,10 @@ public class TransportDataServiceTest {
         temporaryFolder.newFolder("folder");
         // Получение «рабочих» (подходящих файлов)
         List<String> result = transportDataService.getWorkFilesFromFolder(temporaryFolder.getRoot().getPath() + "/");
+        temporaryFolder.delete();
         Assert.assertEquals(2, result.size());
         Assert.assertTrue(result.contains(fileNames[4]));
         Assert.assertTrue(result.contains(fileNames[5]));
-        temporaryFolder.delete();
     }
 
     @Test
@@ -227,6 +233,7 @@ public class TransportDataServiceTest {
         Assert.assertTrue(fileNameList.get(0).endsWith(".zip"));
         File srcFolder = new File(temporaryFolder.getRoot().getPath());
         Assert.assertEquals(0, srcFolder.list().length);
+        temporaryFolder.delete();
     }
 
     private static InputStream getFileAsStream(String fileName) {

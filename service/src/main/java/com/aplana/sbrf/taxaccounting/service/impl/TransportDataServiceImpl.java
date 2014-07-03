@@ -29,6 +29,9 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * @author Dmitriy Levykin
+ */
 @Service
 @Transactional
 public class TransportDataServiceImpl implements TransportDataService {
@@ -69,13 +72,12 @@ public class TransportDataServiceImpl implements TransportDataService {
     final static String MOVE_ARCHIVE_ERROR = "Ошибка при архивировании транспортного файла!";
     final static String MOVE_ARCHIVE_SUCCESS = "Перенос «%s» в каталог архива успешно выполнен!";
 
-
     final static String ZIP_ENCODING = "cp866";
     final static String LOG_FILE_NAME = "Ошибки.txt";
 
-
     @Override
-    public void uploadFile(TAUserInfo userInfo, ConfigurationParam folderParam, String fileName, InputStream inputStream, Logger logger) throws IOException {
+    public void uploadFile(TAUserInfo userInfo, int departmentId, String fileName, InputStream inputStream, Logger logger)
+            throws IOException {
         // Проверка прав
         if (userInfo == null) {
             logger.error(USER_NOT_FOUND_ERROR);
@@ -102,14 +104,15 @@ public class TransportDataServiceImpl implements TransportDataService {
 
         // Конфигурационные параметры
         ConfigurationParamModel model = configurationDao.getAll();
-        // TODO Постановка обновилась
-        List<String> uploadPathList = model.get(folderParam, DepartmentType.ROOT_BANK.getCode());
+
+        List<String> uploadPathList = model.get(ConfigurationParam.UPLOAD_DIRECTORY, departmentId);
 
         if (uploadPathList == null || uploadPathList.isEmpty()) {
             logger.error(NO_CATALOG_UPLOAD_ERROR);
             return;
         }
 
+        // Список загруженных ТФ для ЖА
         List<String> fileNames = new LinkedList<String>();
 
         if (fileName.toLowerCase().endsWith(".zip")) {
@@ -117,23 +120,40 @@ public class TransportDataServiceImpl implements TransportDataService {
             ZipArchiveInputStream zais = new ZipArchiveInputStream(inputStream, ZIP_ENCODING);
             ArchiveEntry entry;
             while ((entry = zais.getNextEntry()) != null) {
-                fileNames.add(entry.getName());
-                copyFileFromStream(zais, uploadPathList.get(0), entry.getName(), logger);
+                if (checkFormDataAccess(entry.getName(), logger)) {
+                    copyFileFromStream(zais, uploadPathList.get(0), entry.getName(), logger);
+                    fileNames.add(entry.getName());
+                }
             }
             IOUtils.closeQuietly(zais);
         } else {
             // Не архив
-            copyFileFromStream(inputStream, uploadPathList.get(0), fileName, logger);
-            fileNames.add(fileName);
+            if (checkFormDataAccess(fileName, logger)) {
+                copyFileFromStream(inputStream, uploadPathList.get(0), fileName, logger);
+                fileNames.add(fileName);
+            }
         }
         IOUtils.closeQuietly(inputStream);
 
         // ЖА
         String msg = StringUtils.collectionToDelimitedString(fileNames, "; ");
-        auditService.add(FormDataEvent.UPLOAD_TRANSPORT_FILE, userInfo, userInfo.getUser().getDepartmentId(), null, null, null, null, msg);
+        auditService.add(FormDataEvent.UPLOAD_TRANSPORT_FILE, userInfo, userInfo.getUser().getDepartmentId(), null,
+                null, null, null, msg);
     }
 
-    private void copyFileFromStream(InputStream inputStream, String folderPath, String fileName, Logger logger) throws IOException {
+    /**
+     * Проверка имени файла и проверка доступа к соответствующим НФ
+     */
+    private boolean checkFormDataAccess(String fileName, Logger logger) {
+        // TODO Проверки http://conf.aplana.com/pages/viewpage.action?pageId=13111363
+        return true;
+    }
+
+    /**
+     * Копирование файла из потока в каталог загрузки
+     */
+    private void copyFileFromStream(InputStream inputStream, String folderPath, String fileName, Logger logger)
+            throws IOException {
         FileWrapper file = ResourceUtils.getSharedResource(folderPath + fileName, false);
         OutputStream outputStream = file.getOutputStream();
         IOUtils.copy(inputStream, outputStream);
@@ -147,7 +167,8 @@ public class TransportDataServiceImpl implements TransportDataService {
     }
 
     @Override
-    public void importDataFromFolder(TAUserInfo userInfo, List<Department> departmentList, ConfigurationParam folderParam, Logger logger) {
+    public void importDataFromFolder(TAUserInfo userInfo, List<Department> departmentList,
+                                     ConfigurationParam folderParam, Logger logger) {
         if (departmentList == null) {
             // Ручная загрузка
             // TODO Выборка
@@ -311,10 +332,12 @@ public class TransportDataServiceImpl implements TransportDataService {
             errorFileSrc.delete();
 
             // ЖА
-            auditService.add(FormDataEvent.IMPORT_TRANSPORT_FILE, userInfo, userInfo.getUser().getDepartmentId(), null, null, null, null, MOVE_ARCHIVE_SUCCESS);
+            auditService.add(FormDataEvent.IMPORT_TRANSPORT_FILE, userInfo, userInfo.getUser().getDepartmentId(),
+                    null, null, null, null, MOVE_ARCHIVE_SUCCESS);
         } catch (IOException e) {
             // ЖА
-            auditService.add(FormDataEvent.IMPORT_TRANSPORT_FILE, userInfo, userInfo.getUser().getDepartmentId(), null, null, null, null, MOVE_ARCHIVE_ERROR);
+            auditService.add(FormDataEvent.IMPORT_TRANSPORT_FILE, userInfo, userInfo.getUser().getDepartmentId(),
+                    null, null, null, null, MOVE_ARCHIVE_ERROR);
             // Ошибка перемещения прерывает загрузку всех файлов
             throw new ServiceException(MOVE_ARCHIVE_ERROR, e);
         }

@@ -29,7 +29,7 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
     private String value;
     private static String jsonPattern = "(<pre.*>)(.+?)(</pre>)";
     private static String UUID_STRING = "uuid";
-    private static String ERROR_STRING = "error";
+    private static String ERROR_STRING = "<pre>error";
     private static Binder uiBinder = GWT.create(Binder.class);
     private FileUploadHandler fileUploadHandler;
 
@@ -49,7 +49,6 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
             @Override
             public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
                 String resultSring = event.getResults().toLowerCase();
-                System.out.println("resultSring = "+resultSring);
                 if (fileUploadHandler != null) {
                     if (resultSring.startsWith(ERROR_STRING)) {
                         fileUploadHandler.onFailure();

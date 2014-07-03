@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -37,7 +38,8 @@ public class FormTemplateDaoTest {
 	@Autowired
 	private FormTemplateDao formTemplateDao;
 
-    @CacheEvict(value = CacheConstants.FORM_TEMPLATE, key = "1", beforeInvocation = true)
+    @Caching(evict = {@CacheEvict(value = CacheConstants.FORM_TEMPLATE, key = "1", beforeInvocation = true),
+            @CacheEvict(value = CacheConstants.FORM_TEMPLATE, key = "2", beforeInvocation = true)})
 	@Test
 	public void testGet(){
 		FormTemplate ft1 = formTemplateDao.get(1);
@@ -57,7 +59,7 @@ public class FormTemplateDaoTest {
 		Assert.assertEquals("name_2", ft2.getName());
 		Assert.assertEquals("fullname_2", ft2.getFullName());
 		Assert.assertEquals("code_2", ft2.getCode());
-	}
+    }
 
 	@Test(expected=DaoException.class)
 	public void testNotexistingGet() {

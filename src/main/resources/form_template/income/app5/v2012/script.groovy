@@ -58,6 +58,9 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
+        break
 }
 
 //// Кэши и константы
@@ -434,4 +437,74 @@ def getNewRow() {
         newRow.getCell(it).setStyleAlias('Автозаполняемая')
     }
     return newRow
+}
+
+void importTransportData() {
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    addTransportData(xml)
+
+    def dataRows = formDataService.getDataRowHelper(formData)?.allCached
+    checkTotalSum(dataRows, totalColumns, logger, true)
+}
+
+void addTransportData(def xml) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper?.allCached
+    def int rnuIndexRow = 2
+    def int colOffset = 1
+    def rows = []
+    def int rowIndex = 1
+
+    for (def row : xml.row) {
+        rnuIndexRow++
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        def newRow = getNewRow()
+        newRow.setIndex(rowIndex++)
+
+        // графа 2
+        newRow.regionBank = getRecordIdImport(30, 'NAME', row.cell[2].text(), rnuIndexRow, 2 + colOffset)
+        // графа 3
+        newRow.regionBankDivision = getRecordIdImport(30, 'NAME', row.cell[3].text(), rnuIndexRow, 3 + colOffset)
+        // графа 4
+        newRow.kpp = row.cell[4].text()
+        // графа 5
+        newRow.avepropertyPricerageCost = getNumber(row.cell[5].text(), rnuIndexRow, 5 + colOffset)
+        // графа 6
+        newRow.workersCount = getNumber(row.cell[6].text(), rnuIndexRow, 6 + colOffset)
+        // графа 7
+        newRow.subjectTaxCredit = getNumber(row.cell[7].text(), rnuIndexRow, 7 + colOffset)
+        // графа 8
+        newRow.decreaseTaxSum = getNumber(row.cell[8].text(), rnuIndexRow, 8 + colOffset)
+        // графа 9
+        newRow.taxRate = getNumber(row.cell[9].text(), rnuIndexRow, 9 + colOffset)
+
+        rows.add(newRow)
+    }
+
+    if (xml.rowTotal.size() == 1) {
+        rnuIndexRow += 2
+
+        def row = xml.rowTotal[0]
+
+        def total = getDataRow(dataRows, 'total')
+        totalColumns.each {
+            total[it] = null
+        }
+
+        // графа 5
+        total.avepropertyPricerageCost = getNumber(row.cell[5].text(), rnuIndexRow, 5 + colOffset)
+        // графа 6
+        total.workersCount = getNumber(row.cell[6].text(), rnuIndexRow, 6 + colOffset)
+        // графа 7
+        total.subjectTaxCredit = getNumber(row.cell[7].text(), rnuIndexRow, 7 + colOffset)
+        // графа 8
+        total.decreaseTaxSum = getNumber(row.cell[8].text(), rnuIndexRow, 8 + colOffset)
+
+        rows.add(total)
+    }
+    dataRowHelper.save(rows)
 }

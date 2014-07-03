@@ -1,13 +1,11 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.FormType;
-import com.aplana.sbrf.taxaccounting.model.VersionSegment;
-import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import com.aplana.sbrf.taxaccounting.service.FormTypeService;
+import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.templateversion.VersionOperatingService;
 import org.junit.Assert;
 import org.junit.Before;
@@ -37,6 +35,8 @@ public class VersionValidatingServiceImplTest {
     @Qualifier("versionValidatingService")
     @Autowired
     VersionOperatingService versionOperatingService;
+    @Autowired
+    SourceService sourceService;
 
     private static int FORM_TEMPLATE_ID_F = 1;
     private static int FORM_TEMPLATE_ID_S = 2;
@@ -139,6 +139,8 @@ public class VersionValidatingServiceImplTest {
         when(formTemplateService.get(FORM_TEMPLATE_ID_FORTH)).thenReturn(formTemplate4);
         when(formTemplateService.getNearestFTRight(FORM_TEMPLATE_ID_F, VersionedObjectStatus.FAKE)).thenReturn(formTemplate2);
         when(formTypeService.get(FORM_TYPE_ID_F)).thenReturn(type1);
+
+        when(sourceService.getDFTByFormType(FORM_TYPE_ID_F)).thenReturn(new ArrayList<DepartmentFormType>(0));
 
         /*when(formTemplateService.getNearestFTRight(formTemplate2,
                 VersionedObjectStatus.FAKE, VersionedObjectStatus.DRAFT, VersionedObjectStatus.NORMAL)).thenReturn(formTemplate1);

@@ -1,10 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-bnd 
+<web-bnd
 	xmlns="http://websphere.ibm.com/xml/ns/javaee"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://websphere.ibm.com/xml/ns/javaee http://websphere.ibm.com/xml/ns/javaee/ibm-web-bnd_1_0.xsd"
 	version="1.0">
 
 	<virtual-host name="default_host" />
+
+    <resource-ref name="jdbc/TaxAccDS" binding-name="jdbc/TaxAccDS${releasePostfix}"/>
+    <resource-ref name="services/cache/aplana/taxaccounting/FormType" binding-name="services/cache/aplana/taxaccounting/FormType${releasePostfix}"/>
+    <resource-ref name="services/cache/aplana/taxaccounting/FormTemplate" binding-name="services/cache/aplana/taxaccounting/FormTemplate${releasePostfix}"/>
+    <resource-ref name="services/cache/aplana/taxaccounting/Department" binding-name="services/cache/aplana/taxaccounting/Department${releasePostfix}"/>
+    <resource-ref name="services/cache/aplana/taxaccounting/User" binding-name="services/cache/aplana/taxaccounting/User${releasePostfix}"/>
+    <resource-ref name="services/cache/aplana/taxaccounting/PermanentData" binding-name="services/cache/aplana/taxaccounting/PermanentData${releasePostfix}"/>
+    <resource-ref name="services/cache/aplana/taxaccounting/DeclarationType" binding-name="services/cache/aplana/taxaccounting/DeclarationType${releasePostfix}"/>
+    <resource-ref name="services/cache/aplana/taxaccounting/DeclarationTemplate" binding-name="services/cache/aplana/taxaccounting/DeclarationTemplate${releasePostfix}"/>
+    <resource-ref name="services/cache/aplana/taxaccounting/DataBlobsCache" binding-name="services/cache/aplana/taxaccounting/DataBlobsCache${releasePostfix}"/>
 
 </web-bnd>

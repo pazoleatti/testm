@@ -125,7 +125,6 @@
                                     <groupId>${project.groupId}</groupId>
                                     <artifactId>gwtapp</artifactId>
                                     <bundleFileName>gwtapp.war</bundleFileName>
-                                    <contextRoot>/taxaccounting/gwtapp</contextRoot>
                                 </webModule>
                                 <ejbModule>
                                     <groupId>${project.groupId}</groupId>
