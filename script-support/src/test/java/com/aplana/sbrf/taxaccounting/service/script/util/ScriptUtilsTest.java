@@ -144,7 +144,7 @@ public class ScriptUtilsTest {
     @Test
     public void parseDate1() {
         String str1 = "05.02.2009";
-        String str2 = " 5.2.2009 ";
+        String str2 = " 05.02.2009 ";
         Date date1 = new Date(2009 - 1900, 2 - 1, 5);
         String format = "dd.MM.yyyy";
         Assert.assertEquals(ScriptUtils.parseDate(str1, format, 1, 1, null, true), date1);
