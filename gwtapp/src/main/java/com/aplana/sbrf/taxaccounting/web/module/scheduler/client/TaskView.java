@@ -51,6 +51,9 @@ public class TaskView extends ViewWithUiHandlers<TaskUiHandlers>
 
     @UiField LinkStyle css;
 
+    @UiField
+    Label titleDesc;
+
     private List<TaskInfoItem> jndiList;
 
     interface LinkStyle extends CssResource {
@@ -123,7 +126,7 @@ public class TaskView extends ViewWithUiHandlers<TaskUiHandlers>
 
     @Override
     public String getJndi() {
-        return jndi.getValue().getJndi();
+        return jndi.getValue() != null ? jndi.getValue().getJndi() : "";
     }
 
     @Override
@@ -147,7 +150,7 @@ public class TaskView extends ViewWithUiHandlers<TaskUiHandlers>
         taskName.setReadOnly(false);
         taskSchedule.setReadOnly(false);
         numberOfRepeats.setReadOnly(false);
-        jndi.setEnabled(false);
+        jndi.setEnabled(true);
     }
 
     @Override
@@ -167,6 +170,11 @@ public class TaskView extends ViewWithUiHandlers<TaskUiHandlers>
         for (TaskParamModel param : taskData.getParams()) {
             getUiHandlers().onAddParam(param);
         }
+    }
+
+    @Override
+    public void setTitle(String title) {
+        titleDesc.setText(title);
     }
 
     private TaskInfoItem findJndiInfo(String jndi) {

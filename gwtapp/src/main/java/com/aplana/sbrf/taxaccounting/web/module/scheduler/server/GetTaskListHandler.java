@@ -33,6 +33,15 @@ public class GetTaskListHandler extends AbstractActionHandler<GetTaskListAction,
     public GetTaskListResult execute(GetTaskListAction getTaskListAction, ExecutionContext executionContext) throws ActionException {
         GetTaskListResult result = new GetTaskListResult();
         List<TaskSearchResultItem> records = new ArrayList<TaskSearchResultItem>();
+        TaskSearchResultItem item = new TaskSearchResultItem();
+        item.setId((long) 1);
+        item.setName("Test");
+        item.setState("State");
+        item.setNumberOfRepeats(1);
+        item.setRepeatsLeft(2);
+        item.setTimeCreated("11.11.2014");
+        item.setNextFireTime("11.11.2015");
+        records.add(item);
         result.setTasks(records);
         return result;
         /*try {
