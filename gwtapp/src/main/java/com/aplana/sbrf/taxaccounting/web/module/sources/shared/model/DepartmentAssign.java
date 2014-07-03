@@ -16,7 +16,7 @@ public class DepartmentAssign implements Serializable {
 	private int typeId;
 	private String typeName;
 	private FormDataKind kind;
-    private boolean isForm = true;
+    private boolean isDeclaration;
 
     public Long getId() {
         return id;
@@ -58,11 +58,11 @@ public class DepartmentAssign implements Serializable {
         this.kind = kind;
     }
 
-    public boolean isForm() {
-        return isForm;
+    public boolean isDeclaration() {
+        return isDeclaration;
     }
 
-    public void setForm(boolean isForm) {
-        this.isForm = isForm;
+    public void setDeclaration(boolean declaration) {
+        isDeclaration = declaration;
     }
 }

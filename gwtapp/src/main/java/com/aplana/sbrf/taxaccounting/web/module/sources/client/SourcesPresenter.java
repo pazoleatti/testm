@@ -2,9 +2,14 @@ package com.aplana.sbrf.taxaccounting.web.module.sources.client;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.source.SourceClientData;
+import com.aplana.sbrf.taxaccounting.model.source.SourceMode;
+import com.aplana.sbrf.taxaccounting.model.source.SourcePair;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.sources.client.assingDialog.AssignDialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.sources.client.assingDialog.AssignDialogView;
 import com.aplana.sbrf.taxaccounting.web.module.sources.client.assingDialog.ButtonClickHandlers;
@@ -54,6 +59,8 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
          * @return интервал периодов
          */
         PeriodsInterval getPeriodInterval();
+
+        boolean isSource();
 
         /**
          * Установка значений для комопонента выбора подразделения
@@ -243,17 +250,17 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 
 	@Override
 	public void getCurrentAssigns(DepartmentAssign departmentAssign) {
-        GetCurrentAssingsAction action = new GetCurrentAssingsAction();
+        GetCurrentAssignsAction action = new GetCurrentAssignsAction();
         action.setDepartmentId(departmentAssign.getDepartmentId());
         action.setTypeId(departmentAssign.getTypeId());
-        action.setForm(departmentAssign.isForm());
+        action.setDeclaration(departmentAssign.isDeclaration());
         action.setKind(departmentAssign.getKind());
         action.setPeriodsInterval(getView().getPeriodInterval());
 
 		dispatcher.execute(action, CallbackUtils
-				.defaultCallback(new AbstractCallback<GetCurrentSourcesResult>() {
+				.defaultCallback(new AbstractCallback<GetCurrentAssignsResult>() {
 					@Override
-					public void onSuccess(GetCurrentSourcesResult result) {
+					public void onSuccess(GetCurrentAssignsResult result) {
 						getView().setCurrentSources(result.getCurrentSources());
 					}
 				}, this));
@@ -264,7 +271,26 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
         return taxType;
     }
 
-	@Override
+    @Override
+    public void deleteCurrentAssign(final DepartmentAssign departmentAssign, Set<CurrentAssign> currentAssigns) {
+        DeleteCurrentAssignsAction action = new DeleteCurrentAssignsAction();
+        action.setDeclaration(departmentAssign.isDeclaration());
+        action.setMode(getView().isSource() ? SourceMode.SOURCES : SourceMode.DESTINATIONS);
+        action.setPeriodsInterval(getView().getPeriodInterval());
+        action.setCurrentAssigns(currentAssigns);
+        action.setDepartmentAssign(departmentAssign);
+        dispatcher.execute(action, CallbackUtils
+                .defaultCallback(new AbstractCallback<DeleteCurrentAssignsResult>() {
+                    @Override
+                    public void onSuccess(DeleteCurrentAssignsResult result) {
+                        getCurrentAssigns(departmentAssign);
+                        LogCleanEvent.fire(SourcesPresenter.this);
+                        LogAddEvent.fire(SourcesPresenter.this, result.getUuid());
+                    }
+                }, this));
+    }
+
+    @Override
 	public void updateCurrentAssign(final DepartmentAssign departmentAssign, PeriodsInterval pi, List<Long> sourceDepartmentFormTypeIds) {
         PeriodInfo periodFrom = pi.getPeriodFrom();
         PeriodInfo periodTo = pi.getPeriodTo();
@@ -275,7 +301,7 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
             return;
         }
 		UpdateCurrentAssignsAction action = new UpdateCurrentAssignsAction();
-        action.setForm(departmentAssign.isForm());
+        action.setDeclaration(departmentAssign.isDeclaration());
 		action.setDepartmentAssignId(departmentAssign.getId());
 		action.setRightDepartmentAssignIds(sourceDepartmentFormTypeIds);
         action.setPeriodFrom(periodFrom);

@@ -5,12 +5,12 @@ import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.PeriodsInterval;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
-public class GetCurrentAssingsAction extends UnsecuredActionImpl<GetCurrentSourcesResult> implements ActionName {
+public class GetCurrentAssignsAction extends UnsecuredActionImpl<GetCurrentAssignsResult> implements ActionName {
 
     private int departmentId;
     private int typeId;
     private FormDataKind kind;
-    private boolean isForm = true;
+    private boolean isDeclaration;
     private PeriodsInterval periodsInterval;
 
     public int getDepartmentId() {
@@ -37,12 +37,12 @@ public class GetCurrentAssingsAction extends UnsecuredActionImpl<GetCurrentSourc
         this.kind = kind;
     }
 
-    public boolean isForm() {
-        return isForm;
+    public boolean isDeclaration() {
+        return isDeclaration;
     }
 
-    public void setForm(boolean isForm) {
-        this.isForm = isForm;
+    public void setDeclaration(boolean declaration) {
+        isDeclaration = declaration;
     }
 
     public PeriodsInterval getPeriodsInterval() {

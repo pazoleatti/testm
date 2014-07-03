@@ -266,7 +266,7 @@ public interface SourceService {
     void createSources(Logger logger, SourceClientData sourceClientData);
 
     /**
-     * Создает новые назначения источников-приемников
+     * Удаляет указанные назначения источников-приемников
      *
      * @param sourceClientData данные связок источников-приемников
      */

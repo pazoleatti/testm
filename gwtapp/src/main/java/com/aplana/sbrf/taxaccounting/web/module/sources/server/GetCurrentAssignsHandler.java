@@ -1,10 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.sources.server;
 
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import com.aplana.sbrf.taxaccounting.web.module.sources.shared.GetCurrentAssingsAction;
+import com.aplana.sbrf.taxaccounting.web.module.sources.shared.GetCurrentAssignsAction;
+import com.aplana.sbrf.taxaccounting.web.module.sources.shared.GetCurrentAssignsResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.web.module.sources.server.assembler.DeparmentFormTypeAssembler;
-import com.aplana.sbrf.taxaccounting.web.module.sources.shared.GetCurrentSourcesResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
@@ -20,7 +19,7 @@ import com.gwtplatform.dispatch.shared.ActionException;
 @Service
 @PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class GetCurrentAssignsHandler extends
-        AbstractActionHandler<GetCurrentAssingsAction, GetCurrentSourcesResult> {
+        AbstractActionHandler<GetCurrentAssignsAction, GetCurrentAssignsResult> {
 
     @Autowired
     private SourceService departmentFormTypeService;
@@ -29,16 +28,16 @@ public class GetCurrentAssignsHandler extends
     private DeparmentFormTypeAssembler deparmentFormTypeAssembler;
 
     public GetCurrentAssignsHandler() {
-        super(GetCurrentAssingsAction.class);
+        super(GetCurrentAssignsAction.class);
     }
 
     @Override
-    public GetCurrentSourcesResult execute(GetCurrentAssingsAction action, ExecutionContext context) throws ActionException {
-        GetCurrentSourcesResult result = new GetCurrentSourcesResult();
+    public GetCurrentAssignsResult execute(GetCurrentAssignsAction action, ExecutionContext context) throws ActionException {
+        GetCurrentAssignsResult result = new GetCurrentAssignsResult();
 
         Date periodFrom = PeriodConvertor.getDateFrom(action.getPeriodsInterval());
         Date periodTo = PeriodConvertor.getDateTo(action.getPeriodsInterval());
-        if(action.isForm()){
+        if(!action.isDeclaration()){
             List<DepartmentFormType> departmentFormTypes = departmentFormTypeService
                     .getDFTSourcesByDFT(action.getDepartmentId(), action.getTypeId(), action.getKind(), periodFrom, periodTo);
             result.setCurrentSources(deparmentFormTypeAssembler.assemble(departmentFormTypes));
@@ -52,7 +51,7 @@ public class GetCurrentAssignsHandler extends
     }
 
     @Override
-    public void undo(GetCurrentAssingsAction arg0, GetCurrentSourcesResult arg1, ExecutionContext arg2)
+    public void undo(GetCurrentAssignsAction arg0, GetCurrentAssignsResult arg1, ExecutionContext arg2)
             throws ActionException {
         // Nothing!
     }

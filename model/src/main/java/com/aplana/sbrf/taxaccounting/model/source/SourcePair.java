@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model.source;
 
+import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.FormType;
 
@@ -26,7 +27,7 @@ public class SourcePair implements Serializable {
     /** Тип формы-приемника */
     private FormType destinationFormType = null;
     /** Тип декларации-источника */
-    private FormType destinationDeclarationType = null;
+    private DeclarationType destinationDeclarationType = null;
     /** Вид назначения-источника */
     private FormDataKind sourceKind = null;
     /** Вид назначения-приемника */
@@ -71,11 +72,11 @@ public class SourcePair implements Serializable {
         this.destinationFormType = destinationFormType;
     }
 
-    public FormType getDestinationDeclarationType() {
+    public DeclarationType getDestinationDeclarationType() {
         return destinationDeclarationType;
     }
 
-    public void setDestinationDeclarationType(FormType destinationDeclarationType) {
+    public void setDestinationDeclarationType(DeclarationType destinationDeclarationType) {
         this.destinationDeclarationType = destinationDeclarationType;
     }
 
