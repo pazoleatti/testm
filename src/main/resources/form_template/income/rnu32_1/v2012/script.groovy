@@ -727,7 +727,6 @@ void addTransportData(def xml) {
             break
         }
         def newRow = getNewRow()
-        newRow.setImportIndex(rnuIndexRow)
 
         // графа 2 - атрибут 161 - NAME - "Наименование подразделения", справочник 30 "Подразделения"
         xmlIndexCol = 2

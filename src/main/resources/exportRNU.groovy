@@ -49,6 +49,7 @@ enum Exclude {
     FIX("all"), // исключать все фиксированные строки
     TOTAL("total"), // исключать строки содержащие в алиасе total
     SECTION_TOTAL("total"), // исключать строки содержащие в алиасе total (для форм с разделами)
+    SECTION2_TOTAL("total"), // исключать строки содержащие в алиасе total (для форм с разделами и подразделами - рну 39.1 и 39.2)
     EXCEPT_CONTAIN_TOTAL("total"), // исключать строки не содержащие в алиасе total но не равные total (для рну 36.2)
     NO(""); // не исплючать строки
     private Exclude(def v) {
@@ -195,12 +196,16 @@ def createFiles() {
         Exclude exclude = formTemplatesExcludeRowMap[id]
         def index = 0
         def sectionIndex = 0
-        def sectionName = (id == 329 ? '0' : null) // для макета 329 (рну 30) первые строки это раздел 0
+        def sectionValue = (id == 329 ? '0' : null) // для макета 329 (рну 30) первые строки это раздел 0
         for (def row : dataRows) {
+            def alias = row.getAlias()
             // для форм имеющих разделы, если строка не содержит в алиасе 'total' (значит это заголовок), то это новый раздел
-            if (exclude == Exclude.SECTION_TOTAL && row.getAlias() != null && !row.getAlias().contains(Exclude.SECTION_TOTAL.value)) {
+            if (exclude == Exclude.SECTION_TOTAL && alias != null && !alias.contains(Exclude.SECTION_TOTAL.value)) {
                 // наращивает номер раздела
-                sectionName = (sectionsMap[id] != null ? sectionsMap[id][sectionIndex++] : ++sectionIndex)
+                sectionValue = (sectionsMap[id] != null ? sectionsMap[id][sectionIndex++] : ++sectionIndex)
+            } else if (exclude == Exclude.SECTION2_TOTAL && alias != null && !alias.contains(Exclude.SECTION_TOTAL.value) && alias.size() == 2) {
+                // определяет номер раздела и подраздела для рну 39.1 и 39.2 - если алиас строки A1 или B1,  то в конце строки тф A|1 или Б|1
+                sectionValue = (alias[0] == 'A' ? 'А' : 'Б') + SEPARATOR + alias[1]
             }
 
             // обработать строки имеющие алиас (итоги/подитоги/фиксированные строки)
@@ -212,7 +217,7 @@ def createFiles() {
             currRow = row
 
             // получить строку
-            def rowValues = getRowValues(row, index, sectionName, id)
+            def rowValues = getRowValues(row, index, sectionValue, id)
             sb.append(rowValues)
         }
 
@@ -747,7 +752,7 @@ void calcData() {
 /** Пропускать ли строки имеющие алиас (итоги/подитоги/фиксированные строки). */
 def isExcludeRow(def row, Exclude exclude) {
     if (row.getAlias() != null) {
-        if (exclude == Exclude.FIX || exclude == Exclude.SECTION_TOTAL) {
+        if (exclude == Exclude.FIX || exclude == Exclude.SECTION_TOTAL || exclude == Exclude.SECTION2_TOTAL) {
             return true
         } else if (exclude == Exclude.TOTAL && row.getAlias().contains(Exclude.TOTAL.value)) {
             return true

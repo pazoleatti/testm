@@ -82,6 +82,9 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
+        break
 }
 
 //// Кэши и константы
@@ -706,6 +709,222 @@ void addData(def xml, int headRowCount) {
     // добавить итоговые строки
     dataRows.each { row ->
         rows.add(row)
+    }
+
+    dataRowHelper.save(rows)
+}
+
+void importTransportData() {
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    addTransportData(xml)
+}
+
+void addTransportData(def xml) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper?.allCached
+    def int rnuIndexRow = 2
+    def int colOffset = 1
+    def rows = []
+    def int rowIndex = 1  // Строки НФ, от 1
+
+    for (def row : xml.row) {
+        rnuIndexRow++
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
+        autoFillColumns.each {
+            newRow.getCell(it).setStyleAlias('Автозаполняемая')
+        }
+        def columns = (isMonthBalance() ? allColumns - 'rowNumber' : editableColumns)
+        columns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
+
+        // графа 2 - атрибут 611 - CODE - "Код сделки", справочник 61 "Коды сделок"
+        def xmlIndexCol = 2
+        newRow.code = getRecordIdImport(61, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 3 - атрибут 621 - CODE - "Код признака", справочник 62 "Признаки ценных бумаг"
+        xmlIndexCol = 3
+        newRow.valuablePaper = getRecordIdImport(62, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 4 - атрибут 814 - ISSUE - «Выпуск», из справочника 84 «Ценные бумаги» текстовое значение
+        xmlIndexCol = 4
+        newRow.issue = row.cell[xmlIndexCol].text()
+
+        // графа 5
+        xmlIndexCol = 5
+        newRow.purchaseDate = getDate(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 6
+        xmlIndexCol = 6
+        newRow.implementationDate = getDate(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 7
+        xmlIndexCol = 7
+        newRow.bondsCount = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 8
+        xmlIndexCol = 8
+        newRow.purchaseCost = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 9
+        xmlIndexCol = 9
+        newRow.costs = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 10
+        xmlIndexCol = 10
+        newRow.marketPriceOnDateAcquisitionInPerc = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 11
+        xmlIndexCol = 11
+        newRow.marketPriceOnDateAcquisitionInRub = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 12
+        xmlIndexCol = 12
+        newRow.taxPrice = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 13
+        xmlIndexCol = 13
+        newRow.redemptionVal = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 14
+        xmlIndexCol = 14
+        newRow.exercisePrice = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 15
+        xmlIndexCol = 15
+        newRow.exerciseRuble = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 16
+        xmlIndexCol = 16
+        newRow.marketPricePercent = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 17
+        xmlIndexCol = 17
+        newRow.marketPriceRuble = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 18
+        xmlIndexCol = 18
+        newRow.exercisePriceRetirement = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 19
+        xmlIndexCol = 19
+        newRow.costsRetirement = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 20
+        xmlIndexCol = 20
+        newRow.allCost = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 21
+        xmlIndexCol = 21
+        newRow.parPaper = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 22
+        xmlIndexCol = 22
+        newRow.averageWeightedPricePaper = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 23
+        xmlIndexCol = 23
+        newRow.issueDays = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 24
+        xmlIndexCol = 24
+        newRow.tenureSkvitovannymiBonds = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 25
+        xmlIndexCol = 25
+        newRow.interestEarned = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 26
+        xmlIndexCol = 26
+        newRow.profitLoss = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 27
+        xmlIndexCol = 27
+        newRow.excessOfTheSellingPrice = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        rows.add(newRow)
+    }
+
+    def totalRow = getTotalMonthRow(rows)
+    rows.add(totalRow)
+
+    if (xml.rowTotal.size() == 1) {
+        rnuIndexRow += 2
+
+        def row = xml.rowTotal[0]
+
+        def total = formData.createDataRow()
+
+        // графа 7
+        xmlIndexCol = 7
+        total.bondsCount = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 8
+        xmlIndexCol = 8
+        total.purchaseCost = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 9
+        xmlIndexCol = 9
+        total.costs = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 13
+        xmlIndexCol = 13
+        total.redemptionVal = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 15
+        xmlIndexCol = 15
+        total.exerciseRuble = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 17
+        xmlIndexCol = 17
+        total.marketPriceRuble = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 18
+        xmlIndexCol = 18
+        total.exercisePriceRetirement = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 19
+        xmlIndexCol = 19
+        total.costsRetirement = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 20
+        xmlIndexCol = 20
+        total.allCost = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 25
+        xmlIndexCol = 25
+        total.interestEarned = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 26
+        xmlIndexCol = 26
+        total.profitLoss = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 27
+        xmlIndexCol = 27
+        total.excessOfTheSellingPrice = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        def colIndexMap = ['bondsCount' : 7, 'purchaseCost' : 8, 'costs' : 9, 'redemptionVal' : 13,
+                        'exerciseRuble' : 15, 'marketPriceRuble' : 17, 'exercisePriceRetirement' : 18,
+                        'costsRetirement' : 19, 'allCost' : 20, 'interestEarned' : 25, 'profitLoss' : 26,
+                        'excessOfTheSellingPrice' : 27]
+        for (def alias : totalSumColumns) {
+            def v1 = total[alias]
+            def v2 = totalRow[alias]
+            if (v1 == null && v2 == null) {
+                continue
+            }
+            if (v1 == null || v1 != null && v1 != v2) {
+                logger.error(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
+                break
+            }
+        }
     }
 
     dataRowHelper.save(rows)

@@ -54,6 +54,9 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
+        break
 }
 
 //// Кэши и константы
@@ -247,6 +250,77 @@ void addData(def xml, int headRowCount) {
         newRow.factSum = parseNumber(row.cell[7].text(), xlsIndexRow, 7 + colOffset, logger, true)
 
         rows.add(newRow)
+    }
+    dataRowHelper.save(rows)
+}
+
+void importTransportData() {
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    addTransportData(xml)
+
+    def dataRows = formDataService.getDataRowHelper(formData)?.allCached
+    checkTotalSum(dataRows, totalColumns, logger, true)
+}
+
+void addTransportData(def xml) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def int rnuIndexRow = 2
+    def int colOffset = 1
+    def rows = []
+    def int rowIndex = 1
+
+    for (def row : xml.row) {
+        rnuIndexRow++
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
+        editableColumns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
+        autoFillColumns.each {
+            newRow.getCell(it).setStyleAlias('Автозаполняемая')
+        }
+
+        // графа 2
+        newRow.date = parseDate(row.cell[2].text(), "dd.MM.yyyy", rnuIndexRow, 2 + colOffset, logger, true)
+        // графа 3
+        newRow.depo = row.cell[3].text()
+        // графа 4
+        newRow.reasonNumber = row.cell[4].text()
+        // графа 5
+        newRow.reasonDate = parseDate(row.cell[5].text(), "dd.MM.yyyy", rnuIndexRow, 5 + colOffset, logger, true)
+        // графа 6
+        newRow.taxSum = parseNumber(row.cell[6].text(), rnuIndexRow, 6 + colOffset, logger, true)
+        // графа 7
+        newRow.factSum = parseNumber(row.cell[7].text(), rnuIndexRow, 7 + colOffset, logger, true)
+
+        rows.add(newRow)
+    }
+
+    if (xml.rowTotal.size() == 1) {
+        rnuIndexRow = rnuIndexRow + 2
+
+        def row = xml.rowTotal[0]
+
+        def total = formData.createDataRow()
+        total.setAlias('total')
+        total.fix = 'Итого'
+        total.getCell('fix').colSpan = 5
+        ['number', 'fix', 'taxSum', 'factSum'].each {
+            total.getCell(it).setStyleAlias('Контрольные суммы')
+        }
+
+        // графа 6
+        total.taxSum = parseNumber(row.cell[6].text(), rnuIndexRow, 6 + colOffset, logger, true)
+        // графа 7
+        total.factSum = parseNumber(row.cell[7].text(), rnuIndexRow, 7 + colOffset, logger, true)
+
+        rows.add(total)
     }
     dataRowHelper.save(rows)
 }

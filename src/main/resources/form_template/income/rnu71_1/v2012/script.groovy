@@ -78,6 +78,9 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
+        break
 }
 
 // Все поля
@@ -588,4 +591,124 @@ def getCalc11_15(def row, def rowPrev, def startDate, def endDate) {
     values.lossThisTaxPeriod = tmp?.setScale(2, RoundingMode.HALF_UP)
 
     return values
+}
+
+void importTransportData() {
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    addTransportData(xml)
+
+    def dataRows = formDataService.getDataRowHelper(formData)?.allCached
+    checkTotalSum(dataRows, totalColumns, logger, true)
+}
+
+void addTransportData(def xml) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def int rnuIndexRow = 2
+    def int colOffset = 1
+    def rows = []
+    def int rowIndex = 1
+
+    for (def row : xml.row) {
+        rnuIndexRow++
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
+        def columns = (isBalancePeriod() ? allColumns - 'rowNumber' : editableColumns)
+        columns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
+        (allColumns - columns).each {
+            newRow.getCell(it).setStyleAlias('Автозаполняемая')
+        }
+
+        def int xmlIndexCol = 2
+
+        // графа 2
+        newRow.contragent = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
+        // графа 3
+        newRow.inn = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
+        // графа 4
+        newRow.assignContractNumber = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
+        // графа 5
+        newRow.assignContractDate = getDate(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
+        // графа 6
+        newRow.amount = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
+        // графа 7
+        newRow.amountForReserve = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
+        // графа 8
+        newRow.repaymentDate = getDate(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
+        // графа 9
+        newRow.dateOfAssignment = getDate(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
+        // графа 10
+        newRow.income = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
+        // графа 11
+        newRow.result = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
+        // графа 12
+        newRow.part2Date = getDate(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
+        // графа 13
+        newRow.lossThisQuarter = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
+        // графа 14
+        newRow.lossNextQuarter = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
+        // графа 15
+        newRow.lossThisTaxPeriod = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        rows.add(newRow)
+    }
+
+    if (xml.rowTotal.size() == 1) {
+        rnuIndexRow = rnuIndexRow + 2
+
+        def row = xml.rowTotal[0]
+
+        def total = formData.createDataRow()
+        total.setAlias('itg')
+        total.fix = 'Всего'
+        total.getCell('fix').colSpan = 2
+        allColumns.each {
+            total.getCell(it).setStyleAlias('Контрольные суммы')
+        }
+        // графа 6
+        def xmlIndexCol = 6
+        total.amount = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        // графа 7
+        xmlIndexCol = 7
+        total.amountForReserve = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        // графа 10
+        xmlIndexCol = 10
+        total.income = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        // графа 11
+        xmlIndexCol = 11
+        total.result = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        // графа 13
+        xmlIndexCol = 13
+        total.lossThisQuarter = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        // графа 14
+        xmlIndexCol = 14
+        total.lossNextQuarter = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        // графа 15
+        xmlIndexCol = 15
+        total.lossThisTaxPeriod = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        rows.add(total)
+    }
+
+    dataRowHelper.save(rows)
 }
