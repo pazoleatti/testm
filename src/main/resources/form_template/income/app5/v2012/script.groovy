@@ -53,12 +53,12 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.IMPORT:
-        importData()
-        logicCheckBeforeCalc()
-        calc()
-        logicCheck()
-        break
-    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+//        importData()
+//        logicCheckBeforeCalc()
+//        calc()
+//        logicCheck()
+//        break
+//    case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
         break
 }
@@ -442,14 +442,10 @@ def getNewRow() {
 void importTransportData() {
     def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
     addTransportData(xml)
-
-    def dataRows = formDataService.getDataRowHelper(formData)?.allCached
-    checkTotalSum(dataRows, totalColumns, logger, true)
 }
 
 void addTransportData(def xml) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper?.allCached
     def int rnuIndexRow = 2
     def int colOffset = 1
     def rows = []
@@ -485,15 +481,15 @@ void addTransportData(def xml) {
         rows.add(newRow)
     }
 
+    def totalRow = getTotalRow(rows)
+    rows.add(totalRow)
+
     if (xml.rowTotal.size() == 1) {
         rnuIndexRow += 2
 
         def row = xml.rowTotal[0]
 
-        def total = getDataRow(dataRows, 'total')
-        totalColumns.each {
-            total[it] = null
-        }
+        def total = formData.createDataRow()
 
         // графа 5
         total.avepropertyPricerageCost = getNumber(row.cell[5].text(), rnuIndexRow, 5 + colOffset)
@@ -504,7 +500,19 @@ void addTransportData(def xml) {
         // графа 8
         total.decreaseTaxSum = getNumber(row.cell[8].text(), rnuIndexRow, 8 + colOffset)
 
-        rows.add(total)
+        def colIndexMap = ['avepropertyPricerageCost' : 5, 'workersCount' : 6, 'subjectTaxCredit' : 7,
+                           'decreaseTaxSum' : 8]
+        for (def alias : totalColumns) {
+            def v1 = total[alias]
+            def v2 = totalRow[alias]
+            if (v1 == null && v2 == null) {
+                continue
+            }
+            if (v1 == null || v1 != null && v1 != v2) {
+                logger.error(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
+                break
+            }
+        }
     }
     dataRowHelper.save(rows)
 }
