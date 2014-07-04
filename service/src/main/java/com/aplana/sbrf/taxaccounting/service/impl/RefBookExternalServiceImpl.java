@@ -83,7 +83,7 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
         nsiRegionMappingMap.put("generaluse\\.as_rnu\\..{3}\\..{2}", asList(new Pair<Boolean, Long>(true, REF_BOOK_RF_SUBJ_CODE)));
 
         // Архив «План счетов»
-        nsiRegionMappingMap.put("bookkeeping\\.bookkeeping\\..{3}\\..{2}", asList(new Pair<Boolean, Long>(false, REF_BOOK_ACCOUNT_PLAN)));
+        nsiAccountPlanMappingMap.put("bookkeeping\\.bookkeeping\\..{3}\\..{2}", asList(new Pair<Boolean, Long>(false, REF_BOOK_ACCOUNT_PLAN)));
     }
 
     /**
@@ -124,7 +124,7 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
                             continue;
                         }
                         for (String key : mappingMap.keySet()) {
-                            if (fileName.matches(key)) { // Нашли в мапе соответствие
+                            if (fileName.toLowerCase().matches(key)) { // Нашли в мапе соответствие
                                 List<Pair<Boolean, Long>> matchList = mappingMap.get(key);
                                 for (Pair<Boolean, Long> refBookMapPair : matchList) {
                                     InputStream is = null;
