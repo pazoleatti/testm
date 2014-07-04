@@ -556,9 +556,6 @@ def addData(def xml, int headRowCount) {
 void importTransportData() {
     def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
     addTransportData(xml)
-
-    def dataRows = formDataService.getDataRowHelper(formData)?.allCached
-    checkTotalSum(dataRows, totalColumnsAll, logger, true)
 }
 
 void addTransportData(def xml) {
@@ -650,12 +647,23 @@ void addTransportData(def xml) {
         mapRows[section].add(newRow)
     }
 
+    // удалить нефиксированные строки
+    deleteNotFixedRows(dataRows)
+    mapRows.keySet().each { sectionKey ->
+        def insertIndex = getDataRow(dataRows, getTotalRowAlias(sectionKey)).getIndex() - 1
+        dataRows.addAll(insertIndex, mapRows.get(sectionKey))
+        updateIndexes(dataRows)
+    }
+    calcSubTotal(dataRows)
+    def totalRow = getDataRow(dataRows, 'totalAll')
+    calcTotalSum(dataRows, totalRow, totalColumnsAll)
+
     if (xml.rowTotal.size() == 1) {
         rnuIndexRow = rnuIndexRow + 2
 
         def row = xml.rowTotal[0]
 
-        def total = getDataRow(dataRows, 'totalAll')
+        def total = formData.createDataRow()
 
         // графа 5
         xmlIndexCol = 5
@@ -696,17 +704,23 @@ void addTransportData(def xml) {
         // графа 16
         xmlIndexCol = 16
         total.useReserve = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        def colIndexMap = ['debt45_90DaysSum' : 5, 'debt45_90DaysReserve' : 7, 'debtOver90DaysSum' : 8,
+                           'debtOver90DaysReserve' : 10, 'totalReserve' : 11, 'reservePrev' : 12,
+                           'reserveCurrent' : 13, 'calcReserve' : 14, 'reserveRecovery' : 15, 'useReserve' : 16]
+        for (def alias : totalColumnsAll) {
+            def v1 = total[alias]
+            def v2 = totalRow[alias]
+            if (v1 == null && v2 == null) {
+                continue
+            }
+            if (v1 == null || v1 != null && v1 != v2) {
+                logger.error(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
+                break
+            }
+        }
     }
 
-    // удалить нефиксированные строки
-    deleteNotFixedRows(dataRows)
-    mapRows.keySet().each { sectionKey ->
-        def insertIndex = getDataRow(dataRows, getTotalRowAlias(sectionKey)).getIndex() - 1
-        dataRows.addAll(insertIndex, mapRows.get(sectionKey))
-        updateIndexes(dataRows)
-    }
-
-    calcSubTotal(dataRows)
     dataRowHelper.save(dataRows)
 }
 
