@@ -62,6 +62,9 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
+        break
 }
 
 //// Кэши и константы
@@ -126,12 +129,12 @@ def getNumber(def value, def indexRow, def indexCol) {
     return parseNumber(value, indexRow, indexCol, logger, true)
 }
 
-/** Получить дату по строковому представлению (формата дд.ММ.гггг) */
+// Получить дату по строковому представлению (формата дд.ММ.гггг)
 def getDate(def value, def indexRow, def indexCol) {
     return parseDate(value, 'dd.MM.yyyy', indexRow, indexCol + 1, logger, true)
 }
 
-/** Добавить новую строку. */
+// Добавить новую строку.
 def addRow() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
@@ -168,6 +171,12 @@ void calc() {
         row.percent = calc10(row, lastDay)
     }
 
+    calcTotal(dataRows)
+
+    dataRowHelper.save(dataRows)
+}
+
+void calcTotal(def dataRows) {
     // посчитать итоги по разделам
     sections.each { section ->
         def firstRow = getDataRow(dataRows, section)
@@ -176,7 +185,6 @@ void calc() {
             lastRow.getCell(alias).setValue(getSum(dataRows, alias, firstRow, lastRow), null)
         }
     }
-    dataRowHelper.save(dataRows)
 }
 
 void logicCheck() {
@@ -255,7 +263,7 @@ void copyRows(def sourceDataRows, def destinationDataRows, def fromAlias, def to
     updateIndexes(destinationDataRows)
 }
 
-/** Получить новую стролу с заданными стилями. */
+// Получить новую стролу с заданными стилями.
 def getNewRow() {
     def newRow = formData.createDataRow()
     editableColumns.each {
@@ -268,7 +276,7 @@ def getNewRow() {
     return newRow
 }
 
-/** Отсорировать данные (по графе 1, 2). */
+// Отсорировать данные (по графе 1, 2).
 void sort(def dataRows) {
     // список со списками строк каждого раздела для сортировки
     def sortRows = []
@@ -301,7 +309,7 @@ void sort(def dataRows) {
     }
 }
 
-/** Получить сумму столбца. */
+// Получить сумму столбца.
 def getSum(def dataRows, def columnAlias, def rowStart, def rowEnd) {
     def from = rowStart.getIndex()
     def to = rowEnd.getIndex() - 2
@@ -348,7 +356,7 @@ def calc10(def row, def lastDay) {
     return roundValue(tmp * rate, 2)
 }
 
-/** Поправить индексы. */
+// Поправить индексы.
 void updateIndexes(def dataRows) {
     dataRows.eachWithIndex { row, i ->
         row.setIndex(i + 1)
@@ -524,6 +532,155 @@ void deleteNotFixedRows(def dataRows) {
         dataRows.removeAll(deleteRows)
         updateIndexes(dataRows)
     }
+}
+
+void importTransportData() {
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    addTransportData(xml)
+}
+
+void addTransportData(def xml) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper?.allCached
+    def int rnuIndexRow = 2
+    def int colOffset = 1
+
+    def mapRows = [:]
+
+    for (def row : xml.row) {
+        rnuIndexRow++
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+        def newRow = getNewRow()
+        newRow.setImportIndex(rnuIndexRow)
+
+        // графа 2 - атрибут 161 - NAME - "Наименование подразделения", справочник 30 "Подразделения"
+        def xmlIndexCol = 2
+        def record30 = getRecordImport(30, 'NAME', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        newRow.name = record30?.record_id?.value
+
+        // графа 1 - зависит от графы 2 - атрибут 166 - SBRF_CODE - "Код подразделения в нотации Сбербанка", справочник 30 "Подразделения"
+        if (record30 != null) {
+            xmlIndexCol = 1
+            formDataService.checkReferenceValue(30, row.cell[xmlIndexCol].text(), record30?.SBRF_CODE?.value, rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        }
+
+        // графа 4 - атрибут 813 - REG_NUM - «Государственный регистрационный номер», справочник 84 «Ценные бумаги»
+        // TODO (Ramil Timerbaev) могут быть проблемы с нахождением записи,
+        // если в справочнике 84 есть несколько записей с одинаковыми значениями в поле REG_NUM
+        xmlIndexCol = 4
+        def record84 = getRecordImport(84, 'REG_NUM', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, true)
+        newRow.registrationNumber = record84?.record_id?.value
+
+        // графа 3 - зависит от графы 4 - атрибут 809 - ISSUER - «Эмитент», справочник 84 «Ценные бумаги»
+        xmlIndexCol = 3
+        def record100 = getRecordImport(100, 'FULL_NAME', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        if (record84 != null && record100 != null) {
+            def value1 = record100?.record_id?.value?.toString()
+            def value2 = record84?.ISSUER?.value?.toString()
+            formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        }
+
+        // графа 11 - зависит от графы 4 - атрибут 810 - CODE_CUR - «Цифровой код валюты выпуска», справочник 84 «Ценные бумаги»
+        xmlIndexCol = 11
+        def record15 = getRecordImport(15, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        if (record84 != null && record15 != null) {
+            def value1 = record15?.record_id?.value?.toString()
+            def value2 = record84?.CODE_CUR?.value?.toString()
+            formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        }
+
+        // графа 5
+        xmlIndexCol = 5
+        newRow.buyDate = getDate(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 6
+        xmlIndexCol = 6
+        newRow.cost = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 7
+        xmlIndexCol = 7
+        newRow.bondsCount = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 8
+        xmlIndexCol = 8
+        newRow.upCost = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 9
+        xmlIndexCol = 9
+        newRow.circulationTerm = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 10
+        xmlIndexCol = 10
+        newRow.percent = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // Техническое поле(группа)
+        xmlIndexCol = 12
+        sectionIndex = row.cell[xmlIndexCol].text()
+
+        if (mapRows[sectionIndex] == null) {
+            mapRows[sectionIndex] = []
+        }
+        mapRows[sectionIndex].add(newRow)
+    }
+
+    deleteNotFixedRows(dataRows)
+    dataRows.each { row ->
+        if (row.getAlias()?.contains('total')) {
+            totalSumColumns.each {
+                row[it] = null
+            }
+        }
+    }
+
+    // копирование данных по разделам
+    sections.each { section ->
+        def copyRows = mapRows[section]
+        if (copyRows != null && !copyRows.isEmpty()) {
+            def insertIndex = getDataRow(dataRows, 'total' + section).getIndex() - 1
+            dataRows.addAll(insertIndex, copyRows)
+            // поправить индексы, потому что они после вставки не пересчитываются
+            updateIndexes(dataRows)
+        }
+    }
+
+    calcTotal(dataRows)
+
+    // проверка итогов в файле
+    if (xml.rowTotal.size() == 1) {
+        rnuIndexRow += 2
+
+        def row = xml.rowTotal[0]
+
+        def total = formData.createDataRow()
+        def totalRow = formData.createDataRow()
+        calcTotalSum(dataRows, totalRow, totalSumColumns)
+
+        // графа 7
+        xmlIndexCol = 7
+        total.bondsCount = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 10
+        xmlIndexCol = 10
+        total.percent = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        def colIndexMap = ['bondsCount' : 7, 'percent' : 10]
+        for (def alias : totalSumColumns) {
+            def v1 = total[alias]
+            def v2 = totalRow[alias]
+            if (v1 == null && v2 == null) {
+                continue
+            }
+            if (v1 == null || v1 != null && v1 != v2) {
+                logger.error(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
+                break
+            }
+        }
+    }
+
+    dataRowHelper.save(dataRows)
 }
 
 // Получить курс валюты по id записи из справочнкиа ценной бумаги (84)

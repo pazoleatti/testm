@@ -70,14 +70,17 @@ switch (formDataEvent) {
         break
 }
 
-// Редактируемые атрибуты (графа 1..12)
+// Редактируемые атрибуты (графа 3..12)
 @Field
 def editableColumns = ['ofz', 'municipalBonds', 'governmentBonds', 'mortgageBonds', 'municipalBondsBefore',
         'rtgageBondsBefore', 'ovgvz', 'eurobondsRF', 'itherEurobonds', 'corporateBonds']
 
-// Проверяемые на пустые значения атрибуты (графа 1..12)
+// Проверяемые на пустые значения атрибуты (графа 3..12)
 @Field
 def nonEmptyColumns = editableColumns
+
+@Field
+def totalSumColumns = editableColumns
 
 // Получение числа из строки при импорте
 def getNumber(def value, def indexRow, def indexCol) {
@@ -285,6 +288,51 @@ void addTransportData(def xml) {
     row.itherEurobonds = getNumber(xmlRow.cell[11].text(), rnuIndexRow, 11 + colOffset)
     // графа 12
     row.corporateBonds = getNumber(xmlRow.cell[12].text(), rnuIndexRow, 12 + colOffset)
+
+    // проверка итогов в файле
+    if (xml.rowTotal.size() == 1) {
+        rnuIndexRow += 2
+
+        xmlRow = xml.rowTotal[0]
+
+        def total = formData.createDataRow()
+
+        // графа 3
+        total.ofz = getNumber(xmlRow.cell[3].text(), rnuIndexRow, 3 + colOffset)
+        // графа 4
+        total.municipalBonds = getNumber(xmlRow.cell[4].text(), rnuIndexRow, 4 + colOffset)
+        // графа 5
+        total.governmentBonds = getNumber(xmlRow.cell[5].text(), rnuIndexRow, 5 + colOffset)
+        // графа 6
+        total.mortgageBonds = getNumber(xmlRow.cell[6].text(), rnuIndexRow, 6 + colOffset)
+        // графа 7
+        total.municipalBondsBefore = getNumber(xmlRow.cell[7].text(), rnuIndexRow, 7 + colOffset)
+        // графа 8
+        total.rtgageBondsBefore = getNumber(xmlRow.cell[8].text(), rnuIndexRow, 8 + colOffset)
+        // графа 9
+        total.ovgvz = getNumber(xmlRow.cell[9].text(), rnuIndexRow, 9 + colOffset)
+        // графа 10
+        total.eurobondsRF = getNumber(xmlRow.cell[10].text(), rnuIndexRow, 10 + colOffset)
+        // графа 11
+        total.itherEurobonds = getNumber(xmlRow.cell[11].text(), rnuIndexRow, 11 + colOffset)
+        // графа 12
+        total.corporateBonds = getNumber(xmlRow.cell[12].text(), rnuIndexRow, 12 + colOffset)
+
+        def colIndexMap = ['ofz' : 3, 'municipalBonds' : 4, 'governmentBonds' : 5, 'mortgageBonds' : 6,
+                           'municipalBondsBefore' : 7, 'rtgageBondsBefore' : 8, 'ovgvz' : 9, 'eurobondsRF' : 10,
+                           'itherEurobonds' : 11, 'corporateBonds' : 12]
+        for (def alias : totalSumColumns) {
+            def v1 = total[alias]
+            def v2 = row[alias]
+            if (v1 == null && v2 == null) {
+                continue
+            }
+            if (v1 == null || v1 != null && v1 != v2) {
+                logger.error(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
+                break
+            }
+        }
+    }
 
     dataRowHelper.save(dataRows)
 
