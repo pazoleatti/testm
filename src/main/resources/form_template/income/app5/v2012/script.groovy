@@ -53,12 +53,12 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.IMPORT:
-//        importData()
-//        logicCheckBeforeCalc()
-//        calc()
-//        logicCheck()
-//        break
-//    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importData()
+        logicCheckBeforeCalc()
+        calc()
+        logicCheck()
+        break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
         break
 }
