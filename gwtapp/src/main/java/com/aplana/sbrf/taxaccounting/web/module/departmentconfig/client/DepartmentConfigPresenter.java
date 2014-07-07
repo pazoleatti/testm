@@ -160,9 +160,7 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                 .defaultCallback(new AbstractCallback<SaveDepartmentCombinedResult>() {
                     @Override
                     public void onSuccess(SaveDepartmentCombinedResult result) {
-                        if (result.getUuid() != null) {
-                            LogAddEvent.fire(DepartmentConfigPresenter.this, result.getUuid());
-                        }
+                        LogAddEvent.fire(DepartmentConfigPresenter.this, result.getUuid());
                         if (!result.isHasError()) {
                             //MessageEvent.fire(DepartmentConfigPresenter.this, "Параметры подразделения сохранены");
                             if (result.isDeclarationFormFound()) {
@@ -189,9 +187,7 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                         new AbstractCallback<GetCheckDeclarationResult>() {
                             @Override
                             public void onSuccess(GetCheckDeclarationResult result) {
-                                if (result.getUuid() != null) {
-                                    LogAddEvent.fire(DepartmentConfigPresenter.this, result.getUuid());
-                                }
+                                LogAddEvent.fire(DepartmentConfigPresenter.this, result.getUuid());
                                 if (result.isDeclarationFormFound()) {
                                     Dialog.confirmMessage(getView().getTaxType().equals(TaxType.DEAL) ? EDIT_FOUND_TEXT_D : EDIT_FOUND_TEXT,
                                             new DialogHandler() {
@@ -235,9 +231,7 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                         getView().setReportPeriodActive(result.isReportPeriodActive());
                         getView().updateVisibleEditButton();
                         result.getRbTextValues();
-                        if (result.getUuid() != null) {
-                            LogAddEvent.fire(DepartmentConfigPresenter.this, result.getUuid());
-                        }
+                        LogAddEvent.fire(DepartmentConfigPresenter.this, result.getUuid());
                     }
                 }, this));
     }

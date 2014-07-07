@@ -53,9 +53,9 @@ public final class MessageOnFailureCallback<T> implements AsyncCallback<T> {
 			callback.onFailure(caught);
 		}
 		if (caught instanceof TaActionException) {
-			String uuid = ((TaActionException) caught).getUuid();
+            String uuid = ((TaActionException) caught).getUuid();
 			if (uuid != null) {
-				LogAddEvent.fire(hasHandlers, ((TaActionException) caught).getUuid());
+				LogAddEvent.fire(hasHandlers, uuid);
 				// Флаг showLogOnly актуален только когда ошибка вызвана
 				// присутствием
 				// сообщений об ошибке в логе. В других случаях всё равно нужно
