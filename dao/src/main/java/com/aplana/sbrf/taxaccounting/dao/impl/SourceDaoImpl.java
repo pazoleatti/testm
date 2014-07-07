@@ -141,18 +141,21 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
         @Override
         public void setValues(PreparedStatement ps, int i) throws SQLException {
             SourceObject sourceObject = sources.get(i);
+            java.sql.Date periodEndSql = sourceObject.getPeriodEnd() != null ? new java.sql.Date(sourceObject.getPeriodEnd().getTime()) : null;
             if (updateMode) {
                 ps.setDate(1, new java.sql.Date(periodStart.getTime()));
                 ps.setDate(2, new java.sql.Date(periodEnd.getTime()));
                 ps.setLong(3, sourceObject.getSourcePair().getSource());
                 ps.setLong(4, sourceObject.getSourcePair().getDestination());
                 ps.setDate(5, new java.sql.Date(sourceObject.getPeriodStart().getTime()));
-                ps.setDate(6, new java.sql.Date(sourceObject.getPeriodEnd().getTime()));
+                ps.setDate(6, periodEndSql);
+                ps.setDate(7, periodEndSql);
             } else {
                 ps.setLong(1, sourceObject.getSourcePair().getSource());
                 ps.setLong(2, sourceObject.getSourcePair().getDestination());
                 ps.setDate(3, new java.sql.Date(sourceObject.getPeriodStart().getTime()));
-                ps.setDate(4, new java.sql.Date(sourceObject.getPeriodEnd().getTime()));
+                ps.setDate(4, periodEndSql);
+                ps.setDate(5, periodEndSql);
             }
         }
 
@@ -165,10 +168,10 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
     @Override
     public void deleteAll(final List<SourceObject> sources, boolean declaration) {
         if (declaration) {
-            getJdbcTemplate().batchUpdate("delete from declaration_source where src_department_form_type_id = ? and department_declaration_type_id = ? and period_start = ? and period_end = ?",
+            getJdbcTemplate().batchUpdate("delete from declaration_source where src_department_form_type_id = ? and department_declaration_type_id = ? and period_start = ? and ((? is null and period_end is null) or period_end = ?)",
                     new SourceBatchPreparedStatementSetter(sources));
         } else {
-            getJdbcTemplate().batchUpdate("delete from form_data_source where src_department_form_type_id = ? and department_form_type_id = ? and period_start = ? and period_end = ?",
+            getJdbcTemplate().batchUpdate("delete from form_data_source where src_department_form_type_id = ? and department_form_type_id = ? and period_start = ? and ((? is null and period_end is null) or period_end = ?)",
                     new SourceBatchPreparedStatementSetter(sources));
         }
     }

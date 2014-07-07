@@ -624,7 +624,7 @@ public class SourceServiceImpl implements SourceService {
             instancesNotification(logger, sourcePairs, sourceClientData.getPeriodStartName(), sourceClientData.getPeriodEndName(),
                     sourceClientData.getMode(), sourceClientData.isDeclaration());
 
-            List<SourceObject> sourceObjects = pairsToObjects(sourcePairs, sourceClientData.getPeriodStart(), sourceClientData.getPeriodEnd());
+            List<SourceObject> sourceObjects = sourceClientData.getSourceObjects();
 
             /** Удаляем все назначения, с периодами которых были найдены пересечения. */
             sourceDao.deleteAll(sourceObjects, sourceClientData.isDeclaration());

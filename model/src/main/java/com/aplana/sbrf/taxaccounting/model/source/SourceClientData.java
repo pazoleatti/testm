@@ -28,10 +28,12 @@ public class SourceClientData implements Serializable{
     /** Режим работы */
     private SourceMode mode;
     /** Признак того, что идет обработка назначений источников для деклараций */
-    private Boolean isDeclaration;
+    private boolean isDeclaration;
 
 
     /** --- Используется только при редактировании --- */
+    /** Данные связок источников-приемников + их периоды*/
+    private List<SourceObject> sourceObjects;
     /** Начало старого периода действия назначений */
     private Date oldPeriodStart;
     /** Окончание старого периода действия назначений */
@@ -71,10 +73,6 @@ public class SourceClientData implements Serializable{
 
     public void setOldPeriodEnd(Date oldPeriodEnd) {
         this.oldPeriodEnd = oldPeriodEnd;
-    }
-
-    public Boolean getDeclaration() {
-        return isDeclaration;
     }
 
     public List<SourcePair> getSourcePairs() {
@@ -141,11 +139,19 @@ public class SourceClientData implements Serializable{
         this.periodEndName = periodEndName;
     }
 
-    public Boolean isDeclaration() {
+    public boolean isDeclaration() {
         return isDeclaration;
     }
 
-    public void setDeclaration(Boolean declaration) {
+    public void setDeclaration(boolean declaration) {
         isDeclaration = declaration;
+    }
+
+    public List<SourceObject> getSourceObjects() {
+        return sourceObjects;
+    }
+
+    public void setSourceObjects(List<SourceObject> sourceObjects) {
+        this.sourceObjects = sourceObjects;
     }
 }

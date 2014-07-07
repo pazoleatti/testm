@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.FormType;
 
 /**
  * Общая модель для нижней таблицы
@@ -30,7 +31,17 @@ public class CurrentAssign implements Serializable{
     /* Дата окончания */
     private Date endDateAssign;
 
+    private FormType formType;
+
     private Boolean isForm;
+
+    public FormType getFormType() {
+        return formType;
+    }
+
+    public void setFormType(FormType formType) {
+        this.formType = formType;
+    }
 
     public Long getId() {
         return id;

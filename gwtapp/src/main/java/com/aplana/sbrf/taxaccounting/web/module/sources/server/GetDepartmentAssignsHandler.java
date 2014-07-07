@@ -32,8 +32,6 @@ public class GetDepartmentAssignsHandler extends AbstractActionHandler<GetDepart
     public GetDepartmentAssignsResult execute(GetDepartmentAssignsAction action, ExecutionContext context) throws ActionException {
 
         List<DepartmentAssign> departmentAssigns = new LinkedList<DepartmentAssign>();
-        // TODO а можно сделать что бы с базы данные приходили отсортированными?
-        //TODO Должны отображаться только те нф, у которых есть действующий макет в периоде
         Date periodFrom = PeriodConvertor.getDateFrom(action.getPeriodsInterval());
         Date periodTo = PeriodConvertor.getDateTo(action.getPeriodsInterval());
         if(action.isForm()){
@@ -46,7 +44,7 @@ public class GetDepartmentAssignsHandler extends AbstractActionHandler<GetDepart
                 departmentAssign.setTypeId(dfa.getFormTypeId());
                 departmentAssign.setTypeName(sourceService.getFormType(dfa.getFormTypeId()).getName());
                 departmentAssign.setKind(dfa.getKind());
-                departmentAssign.setForm(true);
+                departmentAssign.setDeclaration(false);
                 departmentAssigns.add(departmentAssign);
             }
         } else {
@@ -57,7 +55,7 @@ public class GetDepartmentAssignsHandler extends AbstractActionHandler<GetDepart
                 departmentAssign.setDepartmentId(dda.getDepartmentId());
                 departmentAssign.setTypeId(dda.getDeclarationTypeId());
                 departmentAssign.setTypeName(sourceService.getDeclarationType(dda.getDeclarationTypeId()).getName());
-                departmentAssign.setForm(false);
+                departmentAssign.setDeclaration(true);
                 departmentAssigns.add(departmentAssign);
             }
         }

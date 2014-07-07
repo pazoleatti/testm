@@ -12,7 +12,7 @@ public class UpdateCurrentAssignsAction extends UnsecuredActionImpl<UpdateCurren
     private PeriodInfo periodTo;
     private int yearFrom;
     private int yearTo;
-    private boolean isForm = true;
+    private boolean isDeclaration;
 
     public PeriodInfo getPeriodFrom() {
         return periodFrom;
@@ -62,11 +62,11 @@ public class UpdateCurrentAssignsAction extends UnsecuredActionImpl<UpdateCurren
         this.rightDepartmentAssignIds = rightDepartmentAssignIds;
     }
 
-    public boolean isForm() {
-        return isForm;
+    public boolean isDeclaration() {
+        return isDeclaration;
     }
 
-    public void setForm(boolean isForm) {
-        this.isForm = isForm;
+    public void setDeclaration(boolean declaration) {
+        isDeclaration = declaration;
     }
 }

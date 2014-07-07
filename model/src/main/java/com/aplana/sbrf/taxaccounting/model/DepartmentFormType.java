@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * НФ назначения
@@ -17,6 +18,10 @@ public class DepartmentFormType implements Serializable {
 	private int departmentId;
 	private int formTypeId;
 	private FormDataKind kind;
+
+    /** Период действия назначения. Может быть null */
+    private Date periodStart;
+    private Date periodEnd;
 	
 	/**
 	 * Получить идентификатор записи
@@ -82,12 +87,21 @@ public class DepartmentFormType implements Serializable {
 		this.kind = kind;
 	}
 
-	@Override
-	public String toString() {
-		return "DepartmentFormType [id=" + id + ", departmentId="
-				+ departmentId + ", formTypeId=" + formTypeId + ", kind="
-				+ kind + "]";
-	}
+    public Date getPeriodStart() {
+        return periodStart;
+    }
+
+    public void setPeriodStart(Date periodStart) {
+        this.periodStart = periodStart;
+    }
+
+    public Date getPeriodEnd() {
+        return periodEnd;
+    }
+
+    public void setPeriodEnd(Date periodEnd) {
+        this.periodEnd = periodEnd;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -100,6 +114,8 @@ public class DepartmentFormType implements Serializable {
         if (formTypeId != that.formTypeId) return false;
         if (id != null ? !id.equals(that.id) : that.id != null) return false;
         if (kind != that.kind) return false;
+        if (periodEnd != null ? !periodEnd.equals(that.periodEnd) : that.periodEnd != null) return false;
+        if (periodStart != null ? !periodStart.equals(that.periodStart) : that.periodStart != null) return false;
 
         return true;
     }
@@ -110,6 +126,20 @@ public class DepartmentFormType implements Serializable {
         result = 31 * result + departmentId;
         result = 31 * result + formTypeId;
         result = 31 * result + (kind != null ? kind.hashCode() : 0);
+        result = 31 * result + (periodStart != null ? periodStart.hashCode() : 0);
+        result = 31 * result + (periodEnd != null ? periodEnd.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "DepartmentFormType{" +
+                "id=" + id +
+                ", departmentId=" + departmentId +
+                ", formTypeId=" + formTypeId +
+                ", kind=" + kind +
+                ", periodStart=" + periodStart +
+                ", periodEnd=" + periodEnd +
+                '}';
     }
 }

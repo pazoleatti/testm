@@ -616,6 +616,11 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
     }
 
     @Override
+    public boolean isSource() {
+        return AppointmentType.SOURCES.equals(appointmentTypePicker.getValue());
+    }
+
+    @Override
     public void setDepartments(List<Department> departments, Set<Integer> availableDepartments) {
         leftDepPicker.setAvalibleValues(departments, availableDepartments);
         leftDepPicker.setValue(null);
@@ -680,7 +685,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         Dialog.confirmMessage("Удаление назначений", "Вы действительно хотите удалить выбранные назначения?", new DialogHandler() {
             @Override
             public void yes() {
-                getUiHandlers().updateCurrentAssign(leftSM.getSelectedObject(), getPeriodInterval(), sourceIds);
+                getUiHandlers().deleteCurrentAssign(leftSM.getSelectedObject(), downSM.getSelectedSet());
             }
         });
 
@@ -776,10 +781,6 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
     private void clearDownTable() {
         downTable.setRowCount(0);
         downSM.clear();
-    }
-
-    private boolean isSource() {
-        return AppointmentType.SOURCES.equals(appointmentTypePicker.getValue());
     }
 
     /**

@@ -10,9 +10,9 @@ import java.io.Serializable;
  */
 public class PeriodsInterval implements Serializable {
     private static final long serialVersionUID = 7617988671379164269L;
-    private Integer yearFrom;
+    private int yearFrom;
     private PeriodInfo periodFrom;
-    private Integer yearTo;
+    private int yearTo;
     private PeriodInfo periodTo;
 
     public PeriodsInterval() {
@@ -25,12 +25,20 @@ public class PeriodsInterval implements Serializable {
         this.periodTo = periodTo;
     }
 
-    public Integer getYearFrom() {
+    public int getYearFrom() {
         return yearFrom;
     }
 
-    public void setYearFrom(Integer yearFrom) {
+    public void setYearFrom(int yearFrom) {
         this.yearFrom = yearFrom;
+    }
+
+    public String getPeriodStartName() {
+        return periodFrom.getName() + " " + yearFrom;
+    }
+
+    public String getPeriodEndName() {
+        return periodTo.getName() + " " + yearTo;
     }
 
     public PeriodInfo getPeriodFrom() {
@@ -41,11 +49,11 @@ public class PeriodsInterval implements Serializable {
         this.periodFrom = periodFrom;
     }
 
-    public Integer getYearTo() {
+    public int getYearTo() {
         return yearTo;
     }
 
-    public void setYearTo(Integer yearTo) {
+    public void setYearTo(int yearTo) {
         this.yearTo = yearTo;
     }
 
