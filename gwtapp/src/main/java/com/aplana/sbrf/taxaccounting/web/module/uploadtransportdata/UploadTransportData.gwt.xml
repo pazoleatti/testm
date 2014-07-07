@@ -13,4 +13,5 @@
     <inherits name="com.aplana.sbrf.taxaccounting.web.main.api.MainApi" />
 
     <source path='client'/>
+    <source path='shared'/>
 </module>

@@ -95,6 +95,11 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
+    public Department getDepartmentByCode(int code) {
+        return departmentDao.getDepartmentByCode(code);
+    }
+
+    @Override
     public List<Department> getAllChildren(int parentDepartmentId) {
         return departmentDao.getAllChildren(parentDepartmentId);
     }

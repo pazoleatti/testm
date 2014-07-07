@@ -219,4 +219,19 @@ public class DepartmentDaoTest {
         Assert.assertEquals("ТБ1/ЦСКО 1", departmentDao.getReportDepartmentName(6));
         Assert.assertEquals("ТБ1", departmentDao.getReportDepartmentName(2));
     }
+
+    @Test
+    public void getDepartmentByCode1Test() {
+        Assert.assertEquals(1, departmentDao.getDepartmentByCode(1).getId());
+        Assert.assertEquals(2, departmentDao.getDepartmentByCode(2).getId());
+        Assert.assertEquals(3, departmentDao.getDepartmentByCode(3).getId());
+        Assert.assertEquals(4, departmentDao.getDepartmentByCode(4).getId());
+        Assert.assertEquals(5, departmentDao.getDepartmentByCode(5).getId());
+        Assert.assertEquals(6, departmentDao.getDepartmentByCode(6).getId());
+    }
+
+    @Test
+    public void getDepartmentByCode2Test() {
+        Assert.assertNull(departmentDao.getDepartmentByCode(-1));
+    }
 }

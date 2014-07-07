@@ -193,6 +193,19 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 		);
 	}
 
+    @Override
+    public Department getDepartmentByCode(int code) {
+        try {
+            return getJdbcTemplate().queryForObject(
+                    "SELECT * FROM department dp WHERE dp.code = ?",
+                    new Object[]{code},
+                    new DepartmentJdbcMapper()
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
+
 	@Override
 	public Department getDepartmentByName(String name) {
 		return getJdbcTemplate().queryForObject(
