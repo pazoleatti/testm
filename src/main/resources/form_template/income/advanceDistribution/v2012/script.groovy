@@ -319,8 +319,7 @@ def calc11(def row, def taxBase) {
 def calc12(def row) {
     def temp = 0
     def minimizeTaxSum = row.minimizeTaxSum ?: 0
-    def amountTax = row.amountTax ?: 0
-    if (amountTax == 0) {
+    if (row.amountTax == null) {
         if (row.baseTaxOfRub > 0) {
             if (minimizeTaxSum > 0) {
                 temp = roundValue((row.baseTaxOfRub * 0.18 - minimizeTaxSum) * 100 / row.baseTaxOfRub, 2)
@@ -334,7 +333,7 @@ def calc12(def row) {
             temp = 0
         }
     } else {
-        temp = amountTax
+        temp = row.amountTax
     }
     return temp
 }
@@ -343,9 +342,6 @@ def calc13(def row) {
     def temp = 0
     def minimizeTaxSum = row.minimizeTaxSum ?: 0
     if (row.baseTaxOfRub > 0) {
-        if(minimizeTaxSum == null){
-            return null
-        }
         if (minimizeTaxSum == 0) {
             temp = roundValue(row.baseTaxOfRub * row.subjectTaxStavka / 100, 0)
         } else {
