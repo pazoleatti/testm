@@ -5,7 +5,7 @@ import com.gwtplatform.mvp.client.UiHandlers;
 public interface FormTemplateImpexUiHandlers extends UiHandlers {
     void uploadFormTemplateSuccess();
 	void uploadFormTemplateSuccess(String uuid);
+	void uploadFormTemplateFail(String msg);
 	void downloadFormTemplate();
     void uploadDectResponseWithErrorUuid(String uuid);
-    void uploadFormTemplateFail();
 }

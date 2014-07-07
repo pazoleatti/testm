@@ -33,434 +33,439 @@ import static com.google.gwt.view.client.DefaultSelectionEventManager.createCust
  * @author Stanislav Yasinskiy
  */
 public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationUiHandlers>
-        implements TaxFormNominationPresenter.MyView {
+		implements TaxFormNominationPresenter.MyView {
 
-    interface Binder extends UiBinder<Widget, TaxFormNominationView> {
-    }
+	interface Binder extends UiBinder<Widget, TaxFormNominationView> {
+	}
 
-    @UiField
-    Button assignAnchor;
-    @UiField
-    LinkButton cancelAnchor;
-    @UiField
-    GenericDataGrid<FormTypeKind> formGrid;
-    @UiField
-    GenericDataGrid<FormTypeKind> decGrid;
-    @UiField
-    LinkButton editAnchor;
-    @UiField
-    DepartmentPickerPopupWidget departmentPicker;
-    @UiField
-    Button search;
-    @UiField
-    Label taxTypeLabel;
-    @UiField
-    LinkButton switchMode;
-    @UiField
-    Label formHeader;
-    @UiField
-    ResizeLayoutPanel formGridWrapper;
-    @UiField
-    ResizeLayoutPanel declarationGridWrapper;
-    @UiField
-    FlexiblePager formPager;
-    @UiField
-    FlexiblePager declarationPager;
+	@UiField
+	Button assignAnchor;
+	@UiField
+	LinkButton cancelAnchor;
+	@UiField
+	GenericDataGrid<FormTypeKind> formGrid;
+	@UiField
+	GenericDataGrid<FormTypeKind> decGrid;
+	@UiField
+	LinkButton editAnchor;
+	@UiField
+	DepartmentPickerPopupWidget departmentPicker;
+	@UiField
+	Button search;
+	@UiField
+	Label taxTypeLabel;
+	@UiField
+	LinkButton switchMode;
+	@UiField
+	Label formHeader;
+	@UiField
+	ResizeLayoutPanel formGridWrapper;
+	@UiField
+	ResizeLayoutPanel declarationGridWrapper;
+	@UiField
+	FlexiblePager formPager;
+	@UiField
+	FlexiblePager declarationPager;
 
-    /* признак формы: true - налоговые формы, false - декларации  */
-    private Boolean isForm;
-    private TaxType taxType;
+	/* признак формы: true - налоговые формы, false - декларации  */
+	private Boolean isForm;
+	private TaxType taxType;
 
-    /* иерархия имен подразделения */
-    Map<Integer, String> departmentFullNames = new HashMap<Integer, String>();
+	/* иерархия имен подразделения */
+	Map<Integer, String> departmentFullNames = new HashMap<Integer, String>();
 
-    // изменяемые колонки в таблице
-    private GenericDataGrid.DataGridResizableHeader receiverSourcesKindTitle, receiverSourcesTypeTitle, declarationTypeHeader;
+	// изменяемые колонки в таблице
+	private GenericDataGrid.DataGridResizableHeader receiverSourcesKindTitle, receiverSourcesTypeTitle, declarationTypeHeader;
 
-    private TextColumn<FormTypeKind> receiverSourcesKindColumn;
-    private TextColumn<FormTypeKind> receiverSourcesTypeColumn;
-    private TextColumn<FormTypeKind> departmentColumn;
-    private TextColumn<FormTypeKind> performerColumn;
-    private TextColumn<FormTypeKind> declarationType;
+	private TextColumn<FormTypeKind> receiverSourcesKindColumn;
+	private TextColumn<FormTypeKind> receiverSourcesTypeColumn;
+	private TextColumn<FormTypeKind> departmentColumn;
+	private TextColumn<FormTypeKind> performerColumn;
+	private TextColumn<FormTypeKind> declarationType;
 
-    private MultiSelectionModel<FormTypeKind> formSM = new MultiSelectionModel<FormTypeKind>();
-    private MultiSelectionModel<FormTypeKind> decSM = new MultiSelectionModel<FormTypeKind>();
+	private MultiSelectionModel<FormTypeKind> formSM = new MultiSelectionModel<FormTypeKind>();
+	private MultiSelectionModel<FormTypeKind> decSM = new MultiSelectionModel<FormTypeKind>();
 
-    private final AsyncDataProvider<FormTypeKind> formDataProvider = new AsyncDataProvider<FormTypeKind>() {
-        @Override
-        protected void onRangeChanged(HasData<FormTypeKind> display) {
-            if (getUiHandlers() != null){
-                final Range range = display.getVisibleRange();
-                TaxNominationColumnEnum sort = TaxNominationColumnEnum.DEPARTMENT;
-                boolean asc = true;
-                if(formGrid.getColumnSortList().size()>0){
-                    ColumnSortList.ColumnSortInfo columnSortInfo = formGrid.getColumnSortList().get(0);
-                    sort = TaxNominationColumnEnum.valueOf(columnSortInfo.getColumn().getDataStoreName());
-                    asc = columnSortInfo.isAscending();
-                }
+	private final AsyncDataProvider<FormTypeKind> formDataProvider = new AsyncDataProvider<FormTypeKind>() {
+		@Override
+		protected void onRangeChanged(HasData<FormTypeKind> display) {
+			if (getUiHandlers() != null){
+				final Range range = display.getVisibleRange();
+				TaxNominationColumnEnum sort = TaxNominationColumnEnum.DEPARTMENT;
+				boolean asc = true;
+				if(formGrid.getColumnSortList().size()>0){
+					ColumnSortList.ColumnSortInfo columnSortInfo = formGrid.getColumnSortList().get(0);
+					sort = TaxNominationColumnEnum.valueOf(columnSortInfo.getColumn().getDataStoreName());
+					asc = columnSortInfo.isAscending();
+				}
 
-                getUiHandlers().onFormRangeChange(range.getStart(), range.getLength(), sort, asc);
-            }
-        }
-    };
+				getUiHandlers().onFormRangeChange(range.getStart(), range.getLength(), sort, asc);
+			}
+		}
+	};
 
-    private final AsyncDataProvider<FormTypeKind> decDataProvider = new AsyncDataProvider<FormTypeKind>() {
-        @Override
-        protected void onRangeChanged(HasData<FormTypeKind> display) {
-            if (getUiHandlers() != null){
-                final Range range = display.getVisibleRange();
-                TaxNominationColumnEnum sort = TaxNominationColumnEnum.DEPARTMENT;
-                boolean asc = true;
-                if(decGrid.getColumnSortList().size()>0){
-                    ColumnSortList.ColumnSortInfo columnSortInfo = decGrid.getColumnSortList().get(0);
-                    sort = TaxNominationColumnEnum.valueOf(columnSortInfo.getColumn().getDataStoreName());
-                    asc = columnSortInfo.isAscending();
-                }
+	private final AsyncDataProvider<FormTypeKind> decDataProvider = new AsyncDataProvider<FormTypeKind>() {
+		@Override
+		protected void onRangeChanged(HasData<FormTypeKind> display) {
+			if (getUiHandlers() != null){
+				final Range range = display.getVisibleRange();
+				TaxNominationColumnEnum sort = TaxNominationColumnEnum.DEPARTMENT;
+				boolean asc = true;
+				if(decGrid.getColumnSortList().size()>0){
+					ColumnSortList.ColumnSortInfo columnSortInfo = decGrid.getColumnSortList().get(0);
+					sort = TaxNominationColumnEnum.valueOf(columnSortInfo.getColumn().getDataStoreName());
+					asc = columnSortInfo.isAscending();
+				}
 
-                getUiHandlers().onDeclarationRangeChange(range.getStart(), range.getLength(), sort, asc);
-            }
-        }
-    };
+				getUiHandlers().onDeclarationRangeChange(range.getStart(), range.getLength(), sort, asc);
+			}
+		}
+	};
 
-    @Inject
-    @UiConstructor
-    public TaxFormNominationView(final Binder uiBinder) {
-        initWidget(uiBinder.createAndBindUi(this));
+	@Inject
+	@UiConstructor
+	public TaxFormNominationView(final Binder uiBinder) {
+		initWidget(uiBinder.createAndBindUi(this));
 
-        DefaultSelectionEventManager<FormTypeKind> multiSelectManager = createCustomManager(
-                new DefaultSelectionEventManager.CheckboxEventTranslator<FormTypeKind>(0) {
-                    public boolean clearCurrentSelection(CellPreviewEvent<FormTypeKind> event) {
-                        return false;
-                    }
+		DefaultSelectionEventManager<FormTypeKind> multiSelectManager = createCustomManager(
+				new DefaultSelectionEventManager.CheckboxEventTranslator<FormTypeKind>(0) {
+					public boolean clearCurrentSelection(CellPreviewEvent<FormTypeKind> event) {
+						return false;
+					}
 
-                    public DefaultSelectionEventManager.SelectAction translateSelectionEvent(CellPreviewEvent<FormTypeKind> event) {
-                        return DefaultSelectionEventManager.SelectAction.TOGGLE;
-                    }
-                });
+					public DefaultSelectionEventManager.SelectAction translateSelectionEvent(CellPreviewEvent<FormTypeKind> event) {
+						return DefaultSelectionEventManager.SelectAction.TOGGLE;
+					}
+				});
 
-        formDataProvider.addDataDisplay(formGrid);
-        formGrid.setSelectionModel(formSM, multiSelectManager);
-        formSM.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-            @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-                updateButtonsEnabled();
-            }
-        });
+		formDataProvider.addDataDisplay(formGrid);
+		formGrid.setSelectionModel(formSM, multiSelectManager);
+		formSM.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+			@Override
+			public void onSelectionChange(SelectionChangeEvent event) {
+				updateButtonsEnabled();
+			}
+		});
 
-        decDataProvider.addDataDisplay(decGrid);
-        decGrid.setSelectionModel(decSM, multiSelectManager);
-        decSM.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-            @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-                updateButtonsEnabled();
-            }
-        });
+		decDataProvider.addDataDisplay(decGrid);
+		decGrid.setSelectionModel(decSM, multiSelectManager);
+		decSM.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+			@Override
+			public void onSelectionChange(SelectionChangeEvent event) {
+				updateButtonsEnabled();
+			}
+		});
 
-        initFormGrid();
-        initDecGrid();
-    }
+		initFormGrid();
+		initDecGrid();
+	}
 
-    /* Инициализация таблицы отображающий данные вкладки "Назначение налоговых форм"   */
-    private void initFormGrid() {
+	/* Инициализация таблицы отображающий данные вкладки "Назначение налоговых форм"   */
+	private void initFormGrid() {
 
-        // добавить колонку с чекбоксами
-        Column<FormTypeKind, Boolean> checkBoxColumn = new Column<FormTypeKind, Boolean>(new CheckboxCell(true, false)) {
-            @Override
-            public Boolean getValue(FormTypeKind object) {
-                return (object == null || object.getId() == null) ? null : formSM.isSelected(object);
-            }
-        };
+		// добавить колонку с чекбоксами
+		Column<FormTypeKind, Boolean> checkBoxColumn = new Column<FormTypeKind, Boolean>(new CheckboxCell(true, false)) {
+			@Override
+			public Boolean getValue(FormTypeKind object) {
+				return (object == null || object.getId() == null) ? null : formSM.isSelected(object);
+			}
+		};
 
-        receiverSourcesKindColumn = new TextColumn<FormTypeKind>() {
-            @Override
-            public String getValue(FormTypeKind object) {
-                return object.getKind() != null ? object.getKind().getName() : "";
-            }
-        };
+		receiverSourcesKindColumn = new TextColumn<FormTypeKind>() {
+			@Override
+			public String getValue(FormTypeKind object) {
+				return object.getKind() != null ? object.getKind().getName() : "";
+			}
+		};
 
-        receiverSourcesTypeColumn = new TextColumn<FormTypeKind>() {
-            @Override
-            public String getValue(FormTypeKind object) {
-                return object != null && object.getId() != 0 ? object.getName() : "";
-            }
-        };
+		receiverSourcesTypeColumn = new TextColumn<FormTypeKind>() {
+			@Override
+			public String getValue(FormTypeKind object) {
+				return object != null && object.getId() != 0 ? object.getName() : "";
+			}
+		};
 
-        departmentColumn = new TextColumn<FormTypeKind>(){
-            @Override
-            public String getValue(FormTypeKind object) {
-                return departmentFullNames.get(object.getDepartment().getId());
-            }
-        };
+		departmentColumn = new TextColumn<FormTypeKind>(){
+			@Override
+			public String getValue(FormTypeKind object) {
+				return departmentFullNames.get(object.getDepartment().getId());
+			}
+		};
 
-        performerColumn = new TextColumn<FormTypeKind>() {
-            @Override
-            public String getValue(FormTypeKind object) {
-                return object.getPerformer() != null ? departmentFullNames.get(object.getPerformer().getId()):"";
-            }
-        };
+		performerColumn = new TextColumn<FormTypeKind>() {
+			@Override
+			public String getValue(FormTypeKind object) {
+				return object.getPerformer() != null ? departmentFullNames.get(object.getPerformer().getId()):"";
+			}
+		};
 
-        formGrid.addColumn(checkBoxColumn);
-        formGrid.setColumnWidth(checkBoxColumn, 40, Style.Unit.PX);
+		formGrid.addColumn(checkBoxColumn);
+		formGrid.setColumnWidth(checkBoxColumn, 40, Style.Unit.PX);
 
-        formGrid.addResizableColumn(departmentColumn, "Подразделение");
+		formGrid.addResizableColumn(departmentColumn, "Подразделение");
 
-        receiverSourcesKindTitle = formGrid.createResizableHeader("Тип налоговой формы", receiverSourcesKindColumn);
-        formGrid.addColumn(receiverSourcesKindColumn, receiverSourcesKindTitle);
+		receiverSourcesKindTitle = formGrid.createResizableHeader("Тип налоговой формы", receiverSourcesKindColumn);
+		formGrid.addColumn(receiverSourcesKindColumn, receiverSourcesKindTitle);
 
-        receiverSourcesTypeTitle = formGrid.createResizableHeader("Вид налоговой формы", receiverSourcesTypeColumn);
-        formGrid.addColumn(receiverSourcesTypeColumn, receiverSourcesTypeTitle);
+		receiverSourcesTypeTitle = formGrid.createResizableHeader("Вид налоговой формы", receiverSourcesTypeColumn);
+		formGrid.addColumn(receiverSourcesTypeColumn, receiverSourcesTypeTitle);
 
-        formGrid.addResizableColumn(performerColumn, "Исполнитель");
+		formGrid.addResizableColumn(performerColumn, "Исполнитель");
 
-        receiverSourcesKindColumn.setSortable(true);
-        receiverSourcesTypeColumn.setSortable(true);
-        departmentColumn.setSortable(true);
-        performerColumn.setSortable(true);
-        receiverSourcesKindColumn.setDataStoreName(TaxNominationColumnEnum.FORM_KIND.name());
-        receiverSourcesTypeColumn.setDataStoreName(TaxNominationColumnEnum.FORM_TYPE.name());
-        departmentColumn.setDataStoreName(TaxNominationColumnEnum.DEPARTMENT.name());
-        performerColumn.setDataStoreName(TaxNominationColumnEnum.PERFORMER.name());
+		receiverSourcesKindColumn.setSortable(true);
+		receiverSourcesTypeColumn.setSortable(true);
+		departmentColumn.setSortable(true);
+		performerColumn.setSortable(true);
+		receiverSourcesKindColumn.setDataStoreName(TaxNominationColumnEnum.FORM_KIND.name());
+		receiverSourcesTypeColumn.setDataStoreName(TaxNominationColumnEnum.FORM_TYPE.name());
+		departmentColumn.setDataStoreName(TaxNominationColumnEnum.DEPARTMENT.name());
+		performerColumn.setDataStoreName(TaxNominationColumnEnum.PERFORMER.name());
 
-        formGrid.addColumnSortHandler(new ColumnSortEvent.AsyncHandler(formGrid));
-        formGrid.getColumnSortList().setLimit(1);
-    }
+		formGrid.addColumnSortHandler(new ColumnSortEvent.AsyncHandler(formGrid));
+		formGrid.getColumnSortList().setLimit(1);
+	}
 
-    private void initDecGrid(){
+	private void initDecGrid(){
 
-        // добавить колонку с чекбоксами
-        Column<FormTypeKind, Boolean> checkBoxColumn = new Column<FormTypeKind, Boolean>(new CheckboxCell(true, false)) {
-            @Override
-            public Boolean getValue(FormTypeKind object) {
-                return (object == null || object.getId() == null) ? null : formSM.isSelected(object);
-            }
-        };
+		// добавить колонку с чекбоксами
+		Column<FormTypeKind, Boolean> checkBoxColumn = new Column<FormTypeKind, Boolean>(new CheckboxCell(true, false)) {
+			@Override
+			public Boolean getValue(FormTypeKind object) {
+				return (object == null || object.getId() == null) ? null : formSM.isSelected(object);
+			}
+		};
 
-        departmentColumn = new TextColumn<FormTypeKind>(){
-            @Override
-            public String getValue(FormTypeKind object) {
-                return departmentFullNames.get(object.getDepartment().getId());
-            }
-        };
+		departmentColumn = new TextColumn<FormTypeKind>(){
+			@Override
+			public String getValue(FormTypeKind object) {
+				return departmentFullNames.get(object.getDepartment().getId());
+			}
+		};
 
-        declarationType = new TextColumn<FormTypeKind>() {
-            @Override
-            public String getValue(FormTypeKind object) {
-                return object != null && object.getId() != 0 ? object.getName() : "";
-            }
-        };
+		declarationType = new TextColumn<FormTypeKind>() {
+			@Override
+			public String getValue(FormTypeKind object) {
+				return object != null && object.getId() != 0 ? object.getName() : "";
+			}
+		};
 
-        decGrid.addColumn(checkBoxColumn);
-        decGrid.setColumnWidth(checkBoxColumn, 40, Style.Unit.PX);
+		decGrid.addColumn(checkBoxColumn);
+		decGrid.setColumnWidth(checkBoxColumn, 40, Style.Unit.PX);
 
-        decGrid.addResizableColumn(departmentColumn, "Подразделение");
+		decGrid.addResizableColumn(departmentColumn, "Подразделение");
 
-        declarationTypeHeader = decGrid.createResizableHeader("Вид декларации", declarationType);
-        decGrid.addColumn(declarationType, declarationTypeHeader);
+		declarationTypeHeader = decGrid.createResizableHeader("Вид декларации", declarationType);
+		decGrid.addColumn(declarationType, declarationTypeHeader);
 
-        departmentColumn.setSortable(true);
-        declarationType.setSortable(true);
+		departmentColumn.setSortable(true);
+		declarationType.setSortable(true);
 
-        departmentColumn.setDataStoreName(TaxNominationColumnEnum.DEPARTMENT.name());
-        declarationType.setDataStoreName(TaxNominationColumnEnum.DEC_TYPE.name());
+		departmentColumn.setDataStoreName(TaxNominationColumnEnum.DEPARTMENT.name());
+		declarationType.setDataStoreName(TaxNominationColumnEnum.DEC_TYPE.name());
 
-        decGrid.addColumnSortHandler(new ColumnSortEvent.AsyncHandler(decGrid));
-        decGrid.getColumnSortList().setLimit(1);
-    }
+		decGrid.addColumnSortHandler(new ColumnSortEvent.AsyncHandler(decGrid));
+		decGrid.getColumnSortList().setLimit(1);
+	}
 
-    /* Обновление линков редактировать/отменить назначение */
-    @Override
-    public void updateButtonsEnabled() {
-        if (isForm) {
-            int selectedCount = getSelectedItemsOnFormGrid().size();
-            cancelAnchor.setEnabled(selectedCount > 0);
-            editAnchor.setEnabled(selectedCount > 0);
-        } else {
-            int selectedCount = getSelectedItemsOnDeclarationGrid().size();
-            cancelAnchor.setEnabled(selectedCount > 0);
-        }
-    }
+	/* Обновление линков редактировать/отменить назначение */
+	@Override
+	public void updateButtonsEnabled() {
+		if (isForm) {
+			int selectedCount = getSelectedItemsOnFormGrid().size();
+			cancelAnchor.setEnabled(selectedCount > 0);
+			editAnchor.setEnabled(selectedCount > 0);
+		} else {
+			int selectedCount = getSelectedItemsOnDeclarationGrid().size();
+			cancelAnchor.setEnabled(selectedCount > 0);
+		}
+	}
 
-    @Override
-    public void clearFilter() {
-        departmentPicker.clearFilter();
-    }
+	@Override
+	public void clearFilter() {
+		departmentPicker.clearFilter();
+	}
 
-    @Override
-    public void setDepartments(List<Integer> department){
-        departmentPicker.setValue(department);
-    }
+	@Override
+	public void setDepartments(List<Integer> department){
+		departmentPicker.setValue(department);
+	}
 
-    @Override
-    public void setDepartments(List<Department> departments, Set<Integer> availableDepartment) {
-        departmentPicker.setAvalibleValues(departments, availableDepartment);
-    }
+	@Override
+	public void setDepartments(List<Department> departments, Set<Integer> availableDepartment) {
+		departmentPicker.setAvalibleValues(departments, availableDepartment);
+	}
 
-    @Override
-    public List<Integer> getDepartments(){
-        return departmentPicker.getValue();
-    }
+	@Override
+	public List<Integer> getDepartments(){
+		return departmentPicker.getValue();
+	}
 
-    /**
-     * Событие "Открытие формы"
-     * Инициализируется при создании формы
-     */
-    @Override
-    public void init(TaxType nType, boolean isForm) {
-        this.isForm = isForm;
-        this.taxType = nType;
-        // Вид налога: в зависимости от налога, выбранного в главном меню ("Вид налога": "Налог на прибыль")
-        taxTypeLabel.setText(nType!= null ? nType.getName() : "Неизвестный вид налога");
-        initView(isForm);
-    }
+	/**
+	 * Событие "Открытие формы"
+	 * Инициализируется при создании формы
+	 */
+	@Override
+	public void init(TaxType nType, boolean isForm) {
+		this.isForm = isForm;
+		this.taxType = nType;
+		// Вид налога: в зависимости от налога, выбранного в главном меню ("Вид налога": "Налог на прибыль")
+		taxTypeLabel.setText(nType!= null ? nType.getName() : "Неизвестный вид налога");
+		initView(isForm);
+	}
 
-    /**
-     * Установить вид представления на "Назначение налоговых форм"
-     * и применить изменения к представлению
-     */
-    private void initView(boolean isForm) {
-        boolean isTaxTypeDeal = taxType.equals(TaxType.DEAL);
-        receiverSourcesKindTitle.setTitle(isTaxTypeDeal ? "Тип формы" : "Тип налоговой формы");
-        receiverSourcesTypeTitle.setTitle(isTaxTypeDeal ? "Вид формы" : "Вид налоговой формы");
-        declarationTypeHeader.setTitle(isTaxTypeDeal ? "Вид уведомления" : "Вид декларации");
-        formGrid.redrawHeaders();
-        decGrid.redrawHeaders();
+	/**
+	 * Установить вид представления на "Назначение налоговых форм"
+	 * и применить изменения к представлению
+	 */
+	private void initView(boolean isForm) {
+		boolean isTaxTypeDeal = taxType.equals(TaxType.DEAL);
+		receiverSourcesKindTitle.setTitle(isTaxTypeDeal ? "Тип формы" : "Тип налоговой формы");
+		receiverSourcesTypeTitle.setTitle(isTaxTypeDeal ? "Вид формы" : "Вид налоговой формы");
+		declarationTypeHeader.setTitle(isTaxTypeDeal ? "Вид уведомления" : "Вид декларации");
+		formGrid.redrawHeaders();
+		decGrid.redrawHeaders();
 
-        // леваяя ссылка
-        switchMode.setText(getHeader(isForm, isTaxTypeDeal));
-        // средний лейбл
-        formHeader.setText(getHeader(!isForm, isTaxTypeDeal));
+		// леваяя ссылка
+		switchMode.setText(getHeader(isForm, isTaxTypeDeal));
+		// средний лейбл
+		formHeader.setText(getHeader(!isForm, isTaxTypeDeal));
 
-        if (isForm) {
-            this.isForm = true;
-            // Кнопка "Редактировать" — неактивна
-            editAnchor.setEnabled(false);
-            editAnchor.setVisible(true);
-            // Кнопка "Отменить назначение" — неактивна (в 0.3.7 удаляем)
-            cancelAnchor.setEnabled(false);
-            // показать соответствующую таблицу
-            formGridWrapper.setVisible(true);
-            declarationGridWrapper.setVisible(false);
-            formGrid.setRowCount(0);
-            formPager.setDisplay(formGrid);
-            formPager.setVisible(true);
-            declarationPager.setVisible(false);
-        } else {
-            this.isForm = false;
-            // Кнопка "Редактировать" — не отображается
-            editAnchor.setVisible(false);
-            // Кнопка "Отменить назначение" — неактивна (в 0.3.7 удаляем)
-            cancelAnchor.setEnabled(false);
-            // показать соответствующую таблицу
-            formGridWrapper.setVisible(false);
-            declarationGridWrapper.setVisible(true);
-            // очистить таблицу с декларациями
-            decGrid.setRowCount(0);
+		if (isForm) {
+			this.isForm = true;
+			// Кнопка "Редактировать" — неактивна
+			editAnchor.setEnabled(false);
+			editAnchor.setVisible(true);
+			// Кнопка "Отменить назначение" — неактивна (в 0.3.7 удаляем)
+			cancelAnchor.setEnabled(false);
+			// показать соответствующую таблицу
+			formGridWrapper.setVisible(true);
+			declarationGridWrapper.setVisible(false);
+			formGrid.setRowCount(0);
+			formPager.setDisplay(formGrid);
+			formPager.setVisible(true);
+			declarationPager.setVisible(false);
+		} else {
+			this.isForm = false;
+			// Кнопка "Редактировать" — не отображается
+			editAnchor.setVisible(false);
+			// Кнопка "Отменить назначение" — неактивна (в 0.3.7 удаляем)
+			cancelAnchor.setEnabled(false);
+			// показать соответствующую таблицу
+			formGridWrapper.setVisible(false);
+			declarationGridWrapper.setVisible(true);
+			// очистить таблицу с декларациями
+			decGrid.setRowCount(0);
 
-            formPager.setVisible(false);
-            declarationPager.setVisible(true);
-            declarationPager.setDisplay(decGrid);
-        }
-    }
+			formPager.setVisible(false);
+			declarationPager.setVisible(true);
+			declarationPager.setDisplay(decGrid);
+		}
+	}
 
-    private String getHeader(boolean isForm, boolean isTaxTypeDeal){
-        return isForm ?
-                (isTaxTypeDeal ? "Назначение уведомлений" : "Назначение деклараций") :
-                (isTaxTypeDeal ? "Назначение форм" : "Назначение налоговых форм");
-    }
+	private String getHeader(boolean isForm, boolean isTaxTypeDeal){
+		return isForm ?
+				(isTaxTypeDeal ? "Назначение уведомлений" : "Назначение деклараций") :
+				(isTaxTypeDeal ? "Назначение форм" : "Назначение налоговых форм");
+	}
 
 
-    @Override
+	@Override
 	public List<FormTypeKind> getSelectedItemsOnDeclarationGrid() {
 		return getSelectedItems(false);
 	}
 
-    @Override
-    public List<FormTypeKind> getSelectedItemsOnFormGrid() {
-        return getSelectedItems(true);
-    }
+	@Override
+	public List<FormTypeKind> getSelectedItemsOnFormGrid() {
+		return getSelectedItems(true);
+	}
 
-    private List<FormTypeKind> getSelectedItems(boolean isForm) {
-        return new ArrayList<FormTypeKind>(isForm ? formSM.getSelectedSet() : decSM.getSelectedSet());
-    }
+	private List<FormTypeKind> getSelectedItems(boolean isForm) {
+		return new ArrayList<FormTypeKind>(isForm ? formSM.getSelectedSet() : decSM.getSelectedSet());
+	}
 
-    @Override
-    public void setDataToFormTable(int start, int totalCount, List<FormTypeKind> departmentFormTypes, Map<Integer, String> departmentFullNames) {
-        if (departmentFormTypes.isEmpty()) {
-            formGrid.setRowCount(0);
-            return;
-        }
-        this.departmentFullNames.putAll(departmentFullNames);
-        formGrid.setRowCount(totalCount);
-        formGrid.setRowData(start, departmentFormTypes);
-    }
+	@Override
+	public void setDataToFormTable(int start, int totalCount, List<FormTypeKind> departmentFormTypes, Map<Integer, String> departmentFullNames) {
+		if (departmentFormTypes.isEmpty()) {
+			formGrid.setRowCount(0);
+			return;
+		}
+		this.departmentFullNames.putAll(departmentFullNames);
+		formGrid.setRowCount(totalCount);
+		formGrid.setRowData(start, departmentFormTypes);
+	}
 
-    @Override
-    public void setDataToDeclarationTable(int start, int totalCount, List<FormTypeKind> departmentFormTypes, Map<Integer, String> departmentFullNames) {
-	    if (departmentFormTypes.isEmpty()) {
-		    decGrid.setRowCount(0);
-		    return;
-	    }
-        this.departmentFullNames.putAll(departmentFullNames);
+	@Override
+	public void setDataToDeclarationTable(int start, int totalCount, List<FormTypeKind> departmentFormTypes, Map<Integer, String> departmentFullNames) {
+		if (departmentFormTypes.isEmpty()) {
+			decGrid.setRowCount(0);
+			return;
+		}
+		this.departmentFullNames.putAll(departmentFullNames);
 
-        decGrid.setRowCount(totalCount);
-        decGrid.setRowData(start, departmentFormTypes);
-    }
+		decGrid.setRowCount(totalCount);
+		decGrid.setRowData(start, departmentFormTypes);
+	}
 
-    @Override
-    public boolean isForm() {
-        return isForm;
-    }
+	@Override
+	public boolean isForm() {
+		return isForm;
+	}
 
-    @UiHandler("search")
-    public void onSearchClick(ClickEvent event) {
-        if (isForm) {
-            getUiHandlers().reloadFormTableData();
-            formPager.firstPage();
-        } else {
-            getUiHandlers().reloadDeclarationTableData();
-            declarationPager.firstPage();
-        }
-    }
+	@UiHandler("search")
+	public void onSearchClick(ClickEvent event) {
+		if (isForm) {
+			getUiHandlers().reloadFormTableData();
+			formPager.firstPage();
+		} else {
+			getUiHandlers().reloadDeclarationTableData();
+			declarationPager.firstPage();
+		}
+	}
 
-    @UiHandler("switchMode")
-    public void onSwitchModeClick(ClickEvent event) {
-        // если уже режим формы то включаем режим декларации
-        initView(!isForm);
-    }
+	@UiHandler("switchMode")
+	public void onSwitchModeClick(ClickEvent event) {
+		// если уже режим формы то включаем режим декларации
+		initView(!isForm);
+	}
 
 
-    @UiHandler("editAnchor")
-    public void clickEdit(ClickEvent event) {
-        if(getUiHandlers() != null){
-            getUiHandlers().onClickEditFormDestinations(getSelectedItemsOnFormGrid());
-        }
-    }
+	@UiHandler("editAnchor")
+	public void clickEdit(ClickEvent event) {
+		if(getUiHandlers() != null){
+			getUiHandlers().onClickEditFormDestinations(getSelectedItemsOnFormGrid());
+		}
+	}
 
-    @UiHandler("assignAnchor")
-    public void clickAssignAnchor(ClickEvent event){
-        if(getUiHandlers() != null){
-            if (isForm){
-                getUiHandlers().onClickOpenFormDestinations();
-            } else {
-                getUiHandlers().onClickOpenDeclarationDestinations();
-            }
-        }
-    }
+	@UiHandler("assignAnchor")
+	public void clickAssignAnchor(ClickEvent event){
+		if(getUiHandlers() != null){
+			if (isForm){
+				getUiHandlers().onClickOpenFormDestinations();
+			} else {
+				getUiHandlers().onClickOpenDeclarationDestinations();
+			}
+		}
+	}
 
-    @UiHandler("cancelAnchor")
-    public void clickCancelAnchor(ClickEvent event) {
-        if (getUiHandlers() != null) {
-            if (isForm) {
-                getUiHandlers().onClickFormCancelAnchor();
-            } else {
-                getUiHandlers().onClickDeclarationCancelAnchor();
-            }
-        }
-    }
+	@UiHandler("cancelAnchor")
+	public void clickCancelAnchor(ClickEvent event) {
+		if (getUiHandlers() != null) {
+			if (isForm) {
+				getUiHandlers().onClickFormCancelAnchor();
+			} else {
+				getUiHandlers().onClickDeclarationCancelAnchor();
+			}
+		}
+	}
 
-    @Override
-    public void onReveal() {
-        departmentPicker.setValue(null, false);
-    }
+	@Override
+	public void onReveal() {
+		departmentPicker.setValue(null, false);
+	}
+
+	@Override
+	public void clearFormFilter() {
+		departmentPicker.setValue(null);
+	}
 
 }

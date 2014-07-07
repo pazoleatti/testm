@@ -6,7 +6,9 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.FormPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -20,13 +22,7 @@ public class FormTemplateImpexView extends ViewWithUiHandlers<FormTemplateImpexU
 	FormPanel uploadFormTemplatePanel;
 
     @UiField
-    FileUpload uploadFormFile;
-
-	@UiField
 	Button downloadFormTemplateButton;
-
-    @UiField
-    SubmitButton importFormTemplateButton;
 
     private static String respPattern = "(<pre.*>)(.+?)(</pre>)";
 
@@ -38,17 +34,17 @@ public class FormTemplateImpexView extends ViewWithUiHandlers<FormTemplateImpexU
 			@Override
 			public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
                 if(event.getResults() == null){
-                    getUiHandlers().uploadFormTemplateFail();
+                    getUiHandlers().uploadFormTemplateFail("Ошибки при импорте формы.");
                     return;
                 }
-                if (event.getResults().contains(ERROR_RESP)) {
-                    String errorUuid = event.getResults().replaceAll(respPattern, "$2");
+                if (event.getResults().toLowerCase().contains(ERROR_RESP)) {
+                    String errorUuid = event.getResults().toLowerCase().replaceAll(respPattern, "$2");
                     getUiHandlers().uploadDectResponseWithErrorUuid(errorUuid.replaceFirst(ERROR_RESP, ""));
                 }else if (event.getResults().toLowerCase().contains(ERROR)) {
-                    String errorText = event.getResults().replaceAll(respPattern, "$2");
+                    String errorText = event.getResults().toLowerCase().replaceAll(respPattern, "$2");
                     getUiHandlers().uploadFormTemplateFail(errorText.replaceFirst(ERROR, ""));
                 } else {
-                    String uuid = event.getResults().replaceAll(respPattern, "$2");
+                    String uuid = event.getResults().toLowerCase().replaceAll(respPattern, "$2");
                     getUiHandlers().uploadFormTemplateSuccess(uuid.replaceFirst(SUCCESS_RESP, ""));
                 }
 			}
@@ -63,15 +59,5 @@ public class FormTemplateImpexView extends ViewWithUiHandlers<FormTemplateImpexU
 	@UiHandler("downloadFormTemplateButton")
 	public void onDownloadFormTemplateButton(ClickEvent event){
 		getUiHandlers().downloadFormTemplate();
-	}
-
-	@UiHandler("importFormTemplateButton")
-	public void onImportFormTemplateButton(ClickEvent event){
-        if (uploadFormFile.getFilename() == null || "".equals(uploadFormFile.getFilename())) {
-            getUiHandlers().uploadFormTemplateFail();
-            event.preventDefault();
-            return;
-        }
-        uploadFormTemplatePanel.submit();
 	}
 }
