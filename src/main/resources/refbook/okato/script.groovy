@@ -78,7 +78,7 @@ void importFromXML() {
                     def name = reader.getAttributeValue(null, 'name')
                     if ('NAME1'.equals(name)) {
                         def refBookValue = new RefBookValue(RefBookAttributeType.STRING,
-                                reader.getAttributeValue(null, 'value'))
+                                replaceQuotes(reader.getAttributeValue(null, 'value')))
                         recordValueMap.NAME = refBookValue
                     } else if ('KOD'.equals(name)) {
                         def refBookValue = new RefBookValue(RefBookAttributeType.STRING,

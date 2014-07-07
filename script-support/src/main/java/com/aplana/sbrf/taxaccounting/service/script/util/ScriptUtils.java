@@ -990,4 +990,14 @@ public final class ScriptUtils {
                 break;
         }
     }
+
+    /**
+     *  Замена "ёлочек" («») на двойные кавычки (")
+     */
+    public static String replaceQuotes(String value) {
+        if (value != null) {
+            value = value.replaceAll("«", "\"").replaceAll("»", "\"");
+        }
+        return value;
+    }
 }
