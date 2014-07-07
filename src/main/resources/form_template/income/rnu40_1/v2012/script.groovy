@@ -648,38 +648,6 @@ void addTransportData(def xml) {
 
     calcTotal(dataRows)
 
-    // проверка итогов в файле
-    if (xml.rowTotal.size() == 1) {
-        rnuIndexRow += 2
-
-        def row = xml.rowTotal[0]
-
-        def total = formData.createDataRow()
-        def totalRow = formData.createDataRow()
-        calcTotalSum(dataRows, totalRow, totalSumColumns)
-
-        // графа 7
-        xmlIndexCol = 7
-        total.bondsCount = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-
-        // графа 10
-        xmlIndexCol = 10
-        total.percent = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-
-        def colIndexMap = ['bondsCount' : 7, 'percent' : 10]
-        for (def alias : totalSumColumns) {
-            def v1 = total[alias]
-            def v2 = totalRow[alias]
-            if (v1 == null && v2 == null) {
-                continue
-            }
-            if (v1 == null || v1 != null && v1 != v2) {
-                logger.error(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
-                break
-            }
-        }
-    }
-
     dataRowHelper.save(dataRows)
 }
 

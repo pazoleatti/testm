@@ -848,49 +848,5 @@ void addTransportData(def xml) {
 
     calcTotal(dataRows)
 
-    // проверка итогов в файле
-    if (xml.rowTotal.size() == 1) {
-        rnuIndexRow += 2
-
-        def row = xml.rowTotal[0]
-
-        def total = formData.createDataRow()
-        def totalRow = formData.createDataRow()
-        calcTotalSum(dataRows, totalRow, totalSumColumns)
-
-        // графа 8
-        xmlIndexCol = 8
-        total.countsBonds = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
-
-        // графа 15
-        xmlIndexCol = 15
-        total.incomePrev = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
-
-        // графа 16
-        xmlIndexCol = 16
-        total.incomeShortPosition = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
-
-        // графа 17
-        xmlIndexCol = 17
-        total.percIncome = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
-
-        // графа 18
-        xmlIndexCol = 18
-        total.totalPercIncome = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
-
-        def colIndexMap = ['countsBonds' : 8, 'incomePrev' : 15, 'incomeShortPosition' : 16, 'percIncome' : 17, 'totalPercIncome' : 18]
-        for (def alias : totalSumColumns) {
-            def v1 = total[alias]
-            def v2 = totalRow[alias]
-            if (v1 == null && v2 == null) {
-                continue
-            }
-            if (v1 == null || v1 != null && v1 != v2) {
-                logger.error(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
-                break
-            }
-        }
-    }
-
     dataRowHelper.save(dataRows)
 }
