@@ -73,6 +73,9 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
+        break
 }
 
 //// Кэши и константы
@@ -614,4 +617,106 @@ def isBalancePeriod() {
         isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
     }
     return isBalancePeriod
+}
+
+void importTransportData() {
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    addTransportData(xml)
+
+    def dataRows = formDataService.getDataRowHelper(formData)?.allCached
+    checkTotalSum(dataRows, totalColumns, logger, true)
+}
+
+void addTransportData(def xml) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def int rnuIndexRow = 2
+    def int colOffset = 1
+    def rows = []
+    def int rowIndex = 1
+
+    for (def row : xml.row) {
+        rnuIndexRow++
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
+        def cols = isBalancePeriod() ? (allColumns - 'number') : editableColumns
+        def autoColumns = isBalancePeriod() ? ['number'] : autoFillColumns
+        cols.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
+        autoColumns.each {
+            newRow.getCell(it).setStyleAlias('Автозаполняемая')
+        }
+
+        def int xmlIndexCol = 0
+
+        // графа 1
+        xmlIndexCol++
+        // fix
+        xmlIndexCol++
+        // графа 2
+        newRow.bill = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
+        // графа 3
+        newRow.buyDate = getDate(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
+        // графа 4
+        newRow.currency = getRecordIdImport(15, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
+        // графа 5
+        newRow.nominal = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
+        // графа 6
+        newRow.price = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
+        // графа 7
+        newRow.maturity = getDate(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
+        // графа 8
+        newRow.termDealBill = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
+        // графа 9
+        newRow.percIncome = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
+        // графа 10
+        newRow.implementationDate = getDate(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
+        // графа 11
+        newRow.sum = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
+        // графа 12
+        newRow.discountInCurrency = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
+        // графа 13
+        newRow.discountInRub = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
+        // графа 14
+        newRow.sumIncomeinCurrency = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
+        // графа 15
+        newRow.sumIncomeinRuble = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        rows.add(newRow)
+    }
+
+    if (xml.rowTotal.size() == 1) {
+        rnuIndexRow = rnuIndexRow + 2
+
+        def row = xml.rowTotal[0]
+
+        def total = getDataRow(dataRowHelper.getAllCached(), 'total')
+
+        // графа 13
+        total.discountInRub = parseNumber(row.cell[13].text(), rnuIndexRow, 13 + colOffset, logger, true)
+        // графа 15
+        total.sumIncomeinRuble = parseNumber(row.cell[15].text(), rnuIndexRow, 15 + colOffset, logger, true)
+
+        rows.add(total)
+    }
+    dataRowHelper.save(rows)
 }
