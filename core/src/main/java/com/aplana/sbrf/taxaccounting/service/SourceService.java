@@ -91,6 +91,18 @@ public interface SourceService {
     List<DepartmentFormType> getDFTSourcesByDFT(int departmentId, int formTypeId, FormDataKind kind, Date periodStart, Date periodEnd);
 
     /**
+     * Возвращает информацию об источниках, которые должны использоваться при
+     * формировании налоговой формы назначения с заданными параметрами
+     *
+     * @param departmentId
+     * @param formTypeId
+     * @param kind
+     * @param reportPeriodId
+     * @return
+     */
+    List<DepartmentFormType> getDFTSourcesByDFT(int departmentId, int formTypeId, FormDataKind kind, int reportPeriodId);
+
+    /**
      * Возвращает НФ назначения (DFT), которые являются источником для ДЕ назначения (DDT)
      * (в данном случае DDT и связка департамента и типа декларации - одно и тоже)
      *
@@ -116,6 +128,19 @@ public interface SourceService {
      *         {@link com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType}
      */
     List<DepartmentDeclarationType> getDeclarationDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind, Date periodStart, Date periodEnd);
+
+    /**
+     * Возвращает информацию о декларациях-потребителях, которые должны использовать
+     * информацию из данной налоговой формы в качестве источника
+     *
+     * @param sourceDepartmentId идентификатор подразделения формы-источника
+     * @param sourceFormTypeId   вид налоговой формы-источника
+     * @param sourceKind         тип налоговой формы-источника
+     * @param reportPeriodId  отчетный период
+     * @return информация о декларациях-потребителях в виде списка
+     *         {@link com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType}
+     */
+    List<DepartmentDeclarationType> getDeclarationDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind, int reportPeriodId);
 
     /**
      * Обновляет информацию об источниках для декларации
@@ -224,6 +249,20 @@ public interface SourceService {
      *         {@link com.aplana.sbrf.taxaccounting.model.DepartmentFormType}
      */
     List<DepartmentFormType> getFormDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind, Date periodStart, Date periodEnd);
+
+    /**
+     * Возвращает информацию о формах-потребителях, которые должны использовать
+     * информацию из данной налоговой формы в качестве источника
+     *
+     * @param sourceDepartmentId идентификатор подразделения формы-источника
+     * @param sourceFormTypeId   вид налоговой формы-источника
+     * @param sourceKind         тип налоговой формы-источника
+     * @param reportPeriodId  отчетный период
+     * @return информация о формах-потребителях в виде списка
+     *         {@link com.aplana.sbrf.taxaccounting.model.DepartmentFormType}
+     */
+    List<DepartmentFormType> getFormDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind, int reportPeriodId);
+
 
     /**
      * Проверяет существование формы назначения для позразделения с id = departmentId

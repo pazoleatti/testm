@@ -110,7 +110,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
     private static final String GET_FORM_DESTINATIONS_SQL = "select * from department_form_type dest_dft where exists "
             + "(select 1 from department_form_type dft, form_data_source fds where "
             + "fds.src_department_form_type_id=dft.id and fds.department_form_type_id=dest_dft.id "
-            + "and dft.department_id=:sourceDepartmentId and dft.form_type_id=:sourceFormTypeId and dft.kind=:sourceKind)"
+            + "and dft.department_id=:sourceDepartmentId and dft.form_type_id=:sourceFormTypeId and dft.kind=:sourceKind "
             + "and (:periodStart is null or ((fds.period_end >= :periodStart or fds.period_end is null) and fds.period_start <= nvl(:periodEnd, '31.12.9999'))))";
 
     @Override

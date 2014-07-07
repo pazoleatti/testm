@@ -77,10 +77,16 @@ public class SourceServiceImpl implements SourceService {
     @Autowired
     private LogEntryService logEntryService;
 
-
     @Override
     public List<DepartmentFormType> getDFTSourcesByDFT(int departmentId, int formTypeId, FormDataKind kind, Date periodStart, Date periodEnd) {
         return departmentFormTypeDao.getFormSources(departmentId, formTypeId, kind, periodStart, periodEnd);
+    }
+
+    @Override
+    public List<DepartmentFormType> getDFTSourcesByDFT(int departmentId, int formTypeId, FormDataKind kind, int reportPeriodId) {
+        ReportPeriod period = reportPeriodDao.get(reportPeriodId);
+
+        return getDFTSourcesByDFT(departmentId, formTypeId, kind, period.getStartDate(), period.getEndDate());
     }
 
     @Override
@@ -788,6 +794,13 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
+    public List<DepartmentFormType> getFormDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind, int reportPeriodId) {
+        ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
+
+        return getFormDestinations(sourceDepartmentId, sourceFormTypeId, sourceKind, reportPeriod.getStartDate(), reportPeriod.getEndDate());
+    }
+
+    @Override
     public List<DepartmentFormType> getDFTSourcesByDepartment(int departmentId, TaxType taxType, Date periodStart, Date periodEnd) {
         return departmentFormTypeDao.getDepartmentSources(departmentId, taxType, periodStart, periodEnd);
     }
@@ -810,6 +823,13 @@ public class SourceServiceImpl implements SourceService {
     @Override
     public List<DepartmentDeclarationType> getDeclarationDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind, Date periodStart, Date periodEnd) {
         return departmentFormTypeDao.getDeclarationDestinations(sourceDepartmentId, sourceFormTypeId, sourceKind, periodStart, periodEnd);
+    }
+
+    @Override
+    public List<DepartmentDeclarationType> getDeclarationDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind, int reportPeriodId) {
+        ReportPeriod period = reportPeriodDao.get(reportPeriodId);
+
+        return getDeclarationDestinations(sourceDepartmentId, sourceFormTypeId, sourceKind, period.getStartDate(), period.getEndDate());
     }
 
     @Override
