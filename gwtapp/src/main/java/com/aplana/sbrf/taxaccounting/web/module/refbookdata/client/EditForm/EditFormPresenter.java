@@ -204,7 +204,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
             //TODO : Специфические для справочника подразделений проверки. Подумать над возможностью избавиться
             if (currentRefBookId == 30) {
                 if (modifiedFields.containsKey("TYPE")){
-                    if (map.get("TYPE").getNumberValue().intValue() != 1 &&  map.get("PARENT_ID").getReferenceValue() == null){
+                    if (map.get("TYPE").getReferenceValue().intValue() != 1 &&  map.get("PARENT_ID").getReferenceValue() == null){
                         Dialog.errorMessage("Родительское подразделение должно быть заполнено!");
                         return;
                     }
@@ -257,7 +257,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                 // TODO заменить, сделано для примера
                 if (currentRefBookId == 30) {
                     if (modifiedFields.containsKey("TYPE")){
-                        if (map.get("TYPE").getNumberValue().intValue() != 1 &&  map.get("PARENT_ID").getReferenceValue() == null){
+                        if (map.get("TYPE").getReferenceValue().intValue() != 1 &&  map.get("PARENT_ID").getReferenceValue() == null){
                            Dialog.errorMessage("Родительское подразделение должно быть заполнено!");
                             return;
                         }

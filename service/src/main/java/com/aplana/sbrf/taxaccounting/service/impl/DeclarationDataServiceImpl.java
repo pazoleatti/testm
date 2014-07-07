@@ -1,10 +1,13 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.core.api.LockCoreService;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
+import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
@@ -22,6 +25,7 @@ import net.sf.jasperreports.engine.util.JRXmlUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
@@ -90,6 +94,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Autowired
     private LogEntryService logEntryService;
 
+    @Autowired
+    private LockCoreService lockCoreService;
+
+    @Autowired
+    private TAUserDao userDao;
+
 	public static final String TAG_FILE = "Файл";
 	public static final String TAG_DOCUMENT = "Документ";
 	public static final String ATTR_FILE_ID = "ИдФайл";
@@ -99,7 +109,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
 	@Override
 	@Transactional(readOnly = false)
-	public long create(Logger logger, int declarationTemplateId,
+	public long create(int declarationTemplateId,
 			int departmentId, TAUserInfo userInfo, int reportPeriodId) {
 		declarationDataAccessService.checkEvents(userInfo, declarationTemplateId, departmentId, reportPeriodId, FormDataEvent.CREATE);
 
@@ -110,7 +120,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 		newDeclaration.setDeclarationTemplateId(declarationTemplateId);
 		long id = declarationDataDao.saveNew(newDeclaration);
 
-		setDeclarationBlobs(logger, newDeclaration, new Date(), userInfo);
 		logBusinessService.add(null, id, userInfo, FormDataEvent.CREATE, null);
 		auditService.add(FormDataEvent.CREATE , userInfo, newDeclaration.getDepartmentId(),
 				newDeclaration.getReportPeriodId(),
@@ -145,7 +154,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             declarationData.setXmlDataUuid(null);
         }
         declarationDataDao.update(declarationData);
-        blobDataService.delete(strings);
+        if (!strings.isEmpty()) blobDataService.delete(strings);
 
 		setDeclarationBlobs(logger, declarationData, docDate, userInfo);
 		logBusinessService.add(null, id, userInfo, FormDataEvent.SAVE, null);
@@ -178,6 +187,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	@Override
 	@Transactional(readOnly = false)
 	public void delete(long id, TAUserInfo userInfo) {
+        checkLockedMe(id, userInfo);
 		declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.DELETE);
 			DeclarationData declarationData = declarationDataDao.get(id);
 
@@ -193,7 +203,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	@Override
 	@Transactional(readOnly = false)
 	public void setAccepted(Logger logger, long id, boolean accepted, TAUserInfo userInfo) {
-
+        checkLockedMe(id, userInfo);
 		// TODO (sgoryachkin) Это 2 метода должо быть
 		if (accepted) {
             DeclarationData declarationData  = declarationDataDao.get(id);
@@ -249,6 +259,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	public Date getXmlDataDocDate(long declarationDataId, TAUserInfo userInfo) {
 		declarationDataAccessService.checkEvents(userInfo, declarationDataId, FormDataEvent.GET_LEVEL0);
 			Document document = getDocument(declarationDataId);
+            if (document == null) return null;
 			Node fileNode = document.getElementsByTagName(TAG_DOCUMENT).item(0);
 			NamedNodeMap attributes = fileNode.getAttributes();
 			Node fileNameNode = attributes.getNamedItem(ATTR_DOC_DATE);
@@ -396,6 +407,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	private Document getDocument(long declarationDataId) {
 		try {
 			String xmlUuid = declarationDataDao.get(declarationDataId).getXmlDataUuid();
+            if (xmlUuid == null) return null;
             String xml = new String(getBytesFromInputstream(xmlUuid));
 			InputSource inputSource = new InputSource(new StringReader(xml));
 
@@ -499,6 +511,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     private byte[] getBytesFromInputstream(String blobId){
+        if (blobId == null) return null;
         BlobData blobPdfData = blobDataService.get(blobId);
         ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
         try {
@@ -507,5 +520,22 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             throw new ServiceException("Не удалось извлечь pdf.", e);
         }
         return arrayOutputStream.toByteArray();
+    }
+
+    @Override
+    @Transactional
+    public void lock(long declarationDataId, TAUserInfo userInfo) {
+        lockCoreService.lock(DeclarationData.class, declarationDataId, userInfo);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void unlock(long declarationDataId, TAUserInfo userInfo) {
+        lockCoreService.unlock(DeclarationData.class, declarationDataId, userInfo);
+    }
+
+    @Override
+    public void checkLockedMe(Long declarationDataId, TAUserInfo userInfo) {
+        lockCoreService.checkNoLockedAnother(DeclarationData.class, declarationDataId, userInfo);
     }
 }

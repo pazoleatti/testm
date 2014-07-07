@@ -319,6 +319,15 @@ public interface RefBookDao {
     Long getRecordId(Long uniqueRecordId);
 
     /**
+     * Возвращает уникальный идентификатор записи, удовлетворяющей указанным условиям
+     * @param refBookId идентификатор справочника
+     * @param recordId идентификатор записи справочника (без учета версий)
+     * @param version дата
+     * @return уникальный идентификатор записи, удовлетворяющей указанным условиям
+     */
+    Long findRecord(Long refBookId, Long recordId, Date version);
+
+    /**
      * Возвращает идентификаторы фиктивных версии, являющихся окончанием указанных версии
      * @param uniqueRecordIds идентификаторы версии записи справочника
      * @return идентификаторы фиктивных версии

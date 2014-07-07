@@ -369,7 +369,9 @@ def BigDecimal calc16(def row, def countDaysInYear) {
         if (row.interestRate != null && row.interestRate < row.rateWithDiscCoef) {
             tmpForMultiplication = row.interestRate
         }
-        tmp = row.sellingPrice * (row.operationDate - row.creationDate) / countDaysInYear * tmpForMultiplication / 100
+        if (row.operationDate != null && row.creationDate != null) {
+            tmp = row.sellingPrice * (row.operationDate - row.creationDate) / countDaysInYear * tmpForMultiplication / 100
+        }
         return round(tmp)
     }
 

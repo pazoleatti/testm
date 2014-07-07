@@ -87,7 +87,7 @@ def autoFillColumns = ['regionBank', 'kpp']
 // Проверяемые на пустые значения атрибуты
 @Field
 def nonEmptyColumns = ['regionBank', 'regionBankDivision', 'kpp', 'avepropertyPricerageCost', 'workersCount',
-        'subjectTaxCredit', 'decreaseTaxSum', 'taxRate']
+        'subjectTaxCredit']
 
 // Группируемые атрибуты
 @Field
@@ -253,16 +253,6 @@ void calc() {
 
         // графа 4 - кпп
         row.kpp = calc4(row)
-
-        // графа 8  - decreaseTaxSum
-        if (row.decreaseTaxSum == null) {
-            row.decreaseTaxSum = 0
-        }
-
-        // графа 9  - taxRate
-        if (row.taxRate == null) {
-            row.taxRate = 0
-        }
     }
     // Сортировка
     dataRows.sort { a, b ->
@@ -424,10 +414,6 @@ void addData(def xml, int headRowCount) {
 
 def getNewRow() {
     def newRow = formData.createDataRow()
-    // графа 8
-    newRow.decreaseTaxSum = 0
-    // графа 9
-    newRow.taxRate = 0
 
     editableColumns.each {
         newRow.getCell(it).editable = true

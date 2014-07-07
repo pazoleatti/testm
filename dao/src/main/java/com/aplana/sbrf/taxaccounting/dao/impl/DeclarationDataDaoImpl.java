@@ -186,7 +186,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 				new int[] {Types.INTEGER, Types.INTEGER, Types.INTEGER});
 
 		if(countOfExisted != 0){
-			throw new DaoException("Декларация с указанными параметрами уже существует");
+			throw new DaoException("Декларация с заданными параметрами уже существует");
 		}
 
 		id = generateId("seq_declaration_data", Long.class);

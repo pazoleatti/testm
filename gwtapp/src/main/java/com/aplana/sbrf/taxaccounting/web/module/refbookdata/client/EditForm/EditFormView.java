@@ -317,10 +317,10 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
                         }
                         checkRequired(field.getKey(), number);
 						if (number != null) {
-							String numberStr = Double.toString(number.doubleValue());
-							String fractionalStr = numberStr.substring(numberStr.indexOf('.')+1);
-							String intStr = Integer.toString(Math.abs(number.intValue()));
-							if ((intStr.length() > 10) || (fractionalStr.length() > 17)) {
+							String numberStr = number.toString();
+							String fractionalStr = numberStr.contains(".") ? numberStr.substring(numberStr.indexOf('.')+1) : "";
+							String intStr = String.valueOf(Math.abs(number.longValue()));
+                            if ((intStr.length() > 17) || (fractionalStr.length() > 10)) {
 								BadValueException badValueException = new BadValueException();
 								badValueException.setFieldName(field.getKey().getName());
 								badValueException.setDescription("Значение не соответствует формату (27, 10)");

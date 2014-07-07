@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl.fixed;
 
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
@@ -14,10 +14,10 @@ import java.util.Map;
 /**
  * Фильтр принимает строку идентификаторов, разделенных запятой, либо "LOWER(NAME) like %...%"
  */
-@Service("refBookFormDataKind")
-public class RefBookFormDataKind extends AbstractPermanentRefBook {
+@Service("refBookDepartmentType")
+public class RefBookDepartmentType extends AbstractPermanentRefBook {
 
-	public static final Long REF_BOOK_ID = 94L;
+	public static final Long REF_BOOK_ID = 103L;
 	public static final String ATTRIBUTE_NAME = "NAME";
 
 	@Autowired
@@ -48,12 +48,12 @@ public class RefBookFormDataKind extends AbstractPermanentRefBook {
 
 	private PagingResult<Map<String, RefBookValue>> getAllRecords() {
 		PagingResult<Map<String, RefBookValue>> records = new PagingResult<Map<String, RefBookValue>>();
-		for (FormDataKind item : FormDataKind.values()) {
-			Long id = Long.valueOf(item.getId());
+		for (DepartmentType item : DepartmentType.values()) {
+			Long id = Long.valueOf(item.getCode());
 
 			Map<String, RefBookValue> record = refBook.createRecord();
 			record.get(RefBook.RECORD_ID_ALIAS).setValue(id);
-			record.get(ATTRIBUTE_NAME).setValue(item.getName());
+			record.get(ATTRIBUTE_NAME).setValue(item.getLabel());
 			records.add(record);
 		}
 		return records;
@@ -64,11 +64,11 @@ public class RefBookFormDataKind extends AbstractPermanentRefBook {
 		PagingResult<Map<String, RefBookValue>> records = new PagingResult<Map<String, RefBookValue>>();
 		for (String s : ids) {
 			Long id = Long.valueOf(s);
-			FormDataKind item = FormDataKind.fromId(id.intValue());
+			DepartmentType item = DepartmentType.fromCode(id.intValue());
 
 			Map<String, RefBookValue> record = refBook.createRecord();
 			record.get(RefBook.RECORD_ID_ALIAS).setValue(id);
-			record.get(ATTRIBUTE_NAME).setValue(item.getName());
+			record.get(ATTRIBUTE_NAME).setValue(item.getLabel());
 			records.add(record);
 		}
 		return records;
@@ -76,15 +76,15 @@ public class RefBookFormDataKind extends AbstractPermanentRefBook {
 
 	private PagingResult<Map<String, RefBookValue>> getNameFilteredRecords(String filter) {
 		PagingResult<Map<String, RefBookValue>> records = new PagingResult<Map<String, RefBookValue>>();
-		for (FormDataKind item : FormDataKind.values()) {
-			if (!item.getName().toLowerCase().contains(filter)) {  //фильтрация. попадают в выборку только содержащие строку фильтра в названии
+		for (DepartmentType item : DepartmentType.values()) {
+			if (!item.getLabel().toLowerCase().contains(filter)) {  //фильтрация. попадают в выборку только содержащие строку фильтра в названии
 				continue;
 			}
-			Long id = Long.valueOf(item.getId());
+			Long id = Long.valueOf(item.getCode());
 
 			Map<String, RefBookValue> record = refBook.createRecord();
 			record.get(RefBook.RECORD_ID_ALIAS).setValue(id);
-			record.get(ATTRIBUTE_NAME).setValue(item.getName());
+			record.get(ATTRIBUTE_NAME).setValue(item.getLabel());
 			records.add(record);
 		}
 		return records;

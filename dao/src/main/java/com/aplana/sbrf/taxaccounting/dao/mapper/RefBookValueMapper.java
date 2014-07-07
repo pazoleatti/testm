@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import org.springframework.jdbc.core.RowMapper;
 
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -35,7 +36,7 @@ public class RefBookValueMapper implements RowMapper<Map<String, RefBookValue>> 
                     }
                     break;
                     case NUMBER: {
-                        value = rs.getBigDecimal(attribute.getAlias()).setScale(attribute.getPrecision());
+                        value = rs.getBigDecimal(attribute.getAlias()).setScale(attribute.getPrecision(), BigDecimal.ROUND_HALF_UP);
                     }
                     break;
                     case DATE: {

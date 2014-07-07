@@ -145,7 +145,7 @@ def getRecordImport(def Long refBookId, def String alias, def String value, def 
         return null
     }
     return formDataService.getRefBookRecordImport(refBookId, recordCache, providerCache, refBookCache, alias, value,
-            getMonthEndDate(), rowIndex, colIndex, logger, required)
+            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
 }
 
 // Получение формы предыдущего месяца

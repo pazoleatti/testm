@@ -77,6 +77,8 @@ public class TaxFormNominationPresenter
         void onReveal();
 
         void clearFilter();
+
+        void clearFormFilter();
     }
 
     private TaxType taxType;
@@ -113,7 +115,7 @@ public class TaxFormNominationPresenter
         super.prepareFromRequest(request);
         LogCleanEvent.fire(this);
         LogShowEvent.fire(this, false);
-
+        getView().clearFormFilter();
         dispatcher.execute(new GetOpenDataAction(),
                 CallbackUtils.defaultCallback(
                         new AbstractCallback<GetOpenDataResult>() {

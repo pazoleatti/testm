@@ -59,7 +59,7 @@ public class RefBookFormDataKindTest {
 	@Test
 	public void test3() {
 		PagingParams pagingParams = new PagingParams();
-		pagingParams.setStartIndex(3);
+		pagingParams.setStartIndex(4);
 		pagingParams.setCount(2);
 		PagingResult<Map<String, RefBookValue>> records = refBookFormDataKind.getRecords(new Date(), pagingParams, null, null);
 		assertEquals(2, records.size());
@@ -72,7 +72,7 @@ public class RefBookFormDataKindTest {
 	@Test
 	public void test4() {
 		PagingParams pagingParams = new PagingParams();
-		pagingParams.setStartIndex(4);
+		pagingParams.setStartIndex(5);
 		pagingParams.setCount(3);
 		PagingResult<Map<String, RefBookValue>> records = refBookFormDataKind.getRecords(new Date(), pagingParams, null, null);
 		assertEquals(1, records.size());
@@ -95,6 +95,26 @@ public class RefBookFormDataKindTest {
 	@Test
 	public void test7() {
 		assertEquals(2, refBookFormDataKind.getRecordsCount(null, "2,4"));
+	}
+
+	@Test
+	public void test8() {
+		assertEquals(1, refBookFormDataKind.getRecordsCount(null, "LOWER(NAME) like '%ичн%'"));
+	}
+
+	@Test
+	public void test9() {
+		assertEquals(4, refBookFormDataKind.getRecordsCount(null, "LOWER(NAME) like '%ная%'"));
+	}
+
+	@Test
+	public void test10() {
+		assertEquals(0, refBookFormDataKind.getRecordsCount(null, "LOWER(NAME) like '%qw1%'"));
+	}
+
+	@Test
+	public void test11() {
+		assertEquals(1, refBookFormDataKind.getRecordsCount(null, "LOWER(NAME) like '%Форма%'"));
 	}
 
 }

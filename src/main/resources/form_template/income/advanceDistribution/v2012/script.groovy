@@ -117,8 +117,7 @@ def nonEmptyColumns = ['number', 'regionBank', 'regionBankDivision',
         'taxSum', 'taxSumOutside', 'taxSumToPay',
         'taxSumToReduction', 'everyMontherPaymentAfterPeriod', 'everyMonthForKvartalNextPeriod',
         'everyMonthForSecondKvartalNextPeriod', 'everyMonthForThirdKvartalNextPeriod',
-        'everyMonthForFourthKvartalNextPeriod', 'minimizeTaxSum', 'amountTax'
-]
+        'everyMonthForFourthKvartalNextPeriod']
 
 // Группируемые атрибуты
 @Field
@@ -319,10 +318,12 @@ def calc11(def row, def taxBase) {
 
 def calc12(def row) {
     def temp = 0
-    if (row.amountTax == 0) {
+    def minimizeTaxSum = row.minimizeTaxSum ?: 0
+    def amountTax = row.amountTax ?: 0
+    if (amountTax == 0) {
         if (row.baseTaxOfRub > 0) {
-            if (row.minimizeTaxSum > 0) {
-                temp = roundValue((row.baseTaxOfRub * 0.18 - row.minimizeTaxSum) * 100 / row.baseTaxOfRub, 2)
+            if (minimizeTaxSum > 0) {
+                temp = roundValue((row.baseTaxOfRub * 0.18 - minimizeTaxSum) * 100 / row.baseTaxOfRub, 2)
                 if (temp < 13.5) {
                     temp = 13.5
                 }
@@ -333,24 +334,25 @@ def calc12(def row) {
             temp = 0
         }
     } else {
-        temp = row.amountTax
+        temp = amountTax
     }
     return temp
 }
 
 def calc13(def row) {
     def temp = 0
+    def minimizeTaxSum = row.minimizeTaxSum ?: 0
     if (row.baseTaxOfRub > 0) {
-        if(row.minimizeTaxSum == null){
+        if(minimizeTaxSum == null){
             return null
         }
-        if (row.minimizeTaxSum == 0) {
+        if (minimizeTaxSum == 0) {
             temp = roundValue(row.baseTaxOfRub * row.subjectTaxStavka / 100, 0)
         } else {
-            if (row.baseTaxOfRub * 0.135 - row.minimizeTaxSum < 0) {
+            if (row.baseTaxOfRub * 0.135 - minimizeTaxSum < 0) {
                 temp = roundValue(row.baseTaxOfRub * 0.135, 0)
             } else {
-                temp = roundValue(row.baseTaxOfRub * 0.18, 0) - row.minimizeTaxSum
+                temp = roundValue(row.baseTaxOfRub * 0.18, 0) - minimizeTaxSum
             }
         }
     } else {
@@ -498,8 +500,10 @@ void consolidation() {
                         newRow.propertyPrice = newRow.propertyPrice ? (newRow.propertyPrice + row.avepropertyPricerageCost) : row.avepropertyPricerageCost
                         newRow.workersCount = newRow.workersCount ? (newRow.workersCount + row.workersCount) : row.workersCount
                         newRow.subjectTaxCredit = newRow.subjectTaxCredit ? (newRow.subjectTaxCredit + row.subjectTaxCredit) : row.subjectTaxCredit
-                        newRow.minimizeTaxSum = newRow.minimizeTaxSum ? (newRow.minimizeTaxSum + row.decreaseTaxSum) : row.decreaseTaxSum
-                        newRow.amountTax = newRow.amountTax ? (newRow.amountTax + row.taxRate) : row.taxRate
+                        decreaseTaxSum = row.decreaseTaxSum ?: 0
+                        newRow.minimizeTaxSum = newRow.minimizeTaxSum ? (newRow.minimizeTaxSum + decreaseTaxSum) : decreaseTaxSum
+                        taxRate = row.taxRate ?: 0
+                        newRow.amountTax = newRow.amountTax ? (newRow.amountTax + taxRate) : taxRate
                         if (isNew) {
                             dataRows.add(newRow)
                         }
