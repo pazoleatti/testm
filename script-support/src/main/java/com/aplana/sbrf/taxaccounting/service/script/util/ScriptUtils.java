@@ -80,6 +80,7 @@ public final class ScriptUtils {
     private static final String EMPTY_EXPECTED_VALUE = "Строка %d: Графа «%s» содержит значение «%s», не соответствующее пустому значению данной графы в макете налоговой формы!";
 
     private static final String IMPORT_ROW_PREFIX = "Строка файла %d: %s";
+    private static final String TRANSPORT_FILE_SUM_ERROR = "Итоговая сумма в графе %s строки %s в транспортном файле некорректна. Загрузка файла не выполнена.";
 
     /**
      * Интерфейс для переопределения алгоритма расчета
@@ -334,7 +335,7 @@ public final class ScriptUtils {
         }
         Date retVal = null;
         try {
-            retVal = new SimpleDateFormat(format).parse(tmp);
+            retVal = parseDate(format, tmp);
         } catch (ParseException ex) {
         }
         if (retVal == null) {
@@ -349,6 +350,22 @@ public final class ScriptUtils {
             }
         }
         return retVal;
+    }
+
+    /**
+     * Возвращает дату по строгому шаблону, иначе дата вида 01.13.2014 становится 01.01.2015
+     * @param format
+     * @param value
+     * @return
+     * @throws ParseException
+     */
+    public static Date parseDate(String format, String value) throws ParseException {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format);
+        Date date = simpleDateFormat.parse(value);
+        if (!simpleDateFormat.format(date).equals(value)) {
+            throw new ParseException(String.format("Строка %s не соответствует формату даты %s", value, format), 0);
+        }
+        return date;
     }
 
     /**
@@ -972,5 +989,15 @@ public final class ScriptUtils {
                 logger.warn("%s", msg);
                 break;
         }
+    }
+
+    /**
+     *  Замена "ёлочек" («») на двойные кавычки (")
+     */
+    public static String replaceQuotes(String value) {
+        if (value != null) {
+            value = value.replaceAll("«", "\"").replaceAll("»", "\"");
+        }
+        return value;
     }
 }

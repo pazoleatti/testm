@@ -56,6 +56,9 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
+        break
 }
 
 // Все атрибуты
@@ -376,5 +379,76 @@ void addData(def xml, int headRowCount) {
 
         rows.add(newRow)
     }
+    dataRowHelper.save(rows)
+}
+
+void importTransportData() {
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    addTransportData(xml)
+
+    def dataRows = formDataService.getDataRowHelper(formData)?.allCached
+    checkTotalSum(dataRows, totalColumns, logger, true)
+}
+
+void addTransportData(def xml) {
+    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def int rnuIndexRow = 2
+    def int colOffset = 1
+    def rows = []
+    def int rowIndex = 1
+
+    for (def row : xml.row) {
+        rnuIndexRow++
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
+
+        def xmlIndexCol = 0
+
+        // графа 1
+        xmlIndexCol++
+        // fix
+        xmlIndexCol++
+        // графа 2
+        newRow.rnu49rowNumber = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
+        // графа 3
+        newRow.invNumber = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
+        // графа 4
+        newRow.lossReportPeriod = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        xmlIndexCol++
+        // графа 5
+        newRow.lossTaxPeriod = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+
+        rows.add(newRow)
+    }
+
+    if (xml.rowTotal.size() == 1) {
+        rnuIndexRow = rnuIndexRow + 2
+
+        def row = xml.rowTotal[0]
+
+        def total = formData.createDataRow()
+        total.setAlias('total')
+        total.rnu49rowNumber = 'Итого'
+        allColumns.each {
+            total.getCell(it).setStyleAlias('Контрольные суммы')
+        }
+
+        // графа 4
+        total.lossReportPeriod = parseNumber(row.cell[4].text(), rnuIndexRow, 4 + colOffset, logger, true)
+        // графа 5
+        total.lossTaxPeriod = parseNumber(row.cell[5].text(), rnuIndexRow, 5 + colOffset, logger, true)
+
+        rows.add(total)
+    }
+
     dataRowHelper.save(rows)
 }

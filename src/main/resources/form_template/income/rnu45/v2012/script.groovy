@@ -69,6 +69,9 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
+        break
 }
 
 //// Кэши и константы
@@ -458,6 +461,110 @@ void addData(def xml, int headRowCount) {
         rows.add(newRow)
     }
     rows.add(totalRow)
+    dataRowHelper.save(rows)
+}
+
+void importTransportData() {
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    addTransportData(xml)
+}
+
+void addTransportData(def xml) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    def int rnuIndexRow = 2
+    def int colOffset = 1
+    def rows = []
+    def int rowIndex = 1  // Строки НФ, от 1
+
+    for (def row : xml.row) {
+        rnuIndexRow++
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
+        autoFillColumns.each {
+            newRow.getCell(it).setStyleAlias('Автозаполняемая')
+        }
+        def columns = isMonthBalance() ? balanceEditableColumns : editableColumns
+        columns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
+
+        // графа 2
+        def xmlIndexCol = 2
+        newRow.inventoryNumber = row.cell[xmlIndexCol].text()
+        // графа 3
+        xmlIndexCol = 3
+        newRow.name = row.cell[xmlIndexCol].text()
+        // графа 4
+        xmlIndexCol = 4
+        newRow.buyDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        // графа 5
+        xmlIndexCol = 5
+        newRow.usefulLife = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        // графа 6
+        xmlIndexCol = 6
+        newRow.expirationDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        // графа 7
+        xmlIndexCol = 7
+        newRow.startCost = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        // графа 8
+        xmlIndexCol = 8
+        newRow.depreciationRate = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        // графа 9
+        xmlIndexCol = 9
+        newRow.amortizationMonth = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        // графа 10
+        xmlIndexCol = 10
+        newRow.amortizationSinceYear = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        // графа 11
+        xmlIndexCol = 11
+        newRow.amortizationSinceUsed = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        rows.add(newRow)
+    }
+    def totalRow = getDataRow(dataRows, 'total')
+    calcTotalSum(rows, totalRow, totalColumns)
+    rows.add(totalRow)
+
+    if (xml.rowTotal.size() == 1) {
+        rnuIndexRow += 2
+
+        def row = xml.rowTotal[0]
+
+        def total = formData.createDataRow()
+
+        // графа 7
+        xmlIndexCol = 7
+        total.startCost = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        // графа 9
+        xmlIndexCol = 9
+        total.amortizationMonth = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        // графа 10
+        xmlIndexCol = 10
+        total.amortizationSinceYear = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        // графа 11
+        xmlIndexCol = 11
+        total.amortizationSinceUsed = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        def colIndexMap = ['startCost' : 7, 'amortizationMonth' : 9, 'amortizationSinceYear' : 10, 'amortizationSinceUsed' : 11]
+        for (def alias : totalColumns) {
+            def v1 = total[alias]
+            def v2 = totalRow[alias]
+            if (v1 == null && v2 == null) {
+                continue
+            }
+            if (v1 == null || v1 != null && v1 != v2) {
+                logger.error(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
+                break
+            }
+        }
+    }
     dataRowHelper.save(rows)
 }
 

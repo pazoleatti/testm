@@ -70,14 +70,17 @@ switch (formDataEvent) {
         break
 }
 
-// Редактируемые атрибуты (графа 1..12)
+// Редактируемые атрибуты (графа 3..12)
 @Field
 def editableColumns = ['ofz', 'municipalBonds', 'governmentBonds', 'mortgageBonds', 'municipalBondsBefore',
         'rtgageBondsBefore', 'ovgvz', 'eurobondsRF', 'itherEurobonds', 'corporateBonds']
 
-// Проверяемые на пустые значения атрибуты (графа 1..12)
+// Проверяемые на пустые значения атрибуты (графа 3..12)
 @Field
 def nonEmptyColumns = editableColumns
+
+@Field
+def totalSumColumns = editableColumns
 
 // Получение числа из строки при импорте
 def getNumber(def value, def indexRow, def indexCol) {

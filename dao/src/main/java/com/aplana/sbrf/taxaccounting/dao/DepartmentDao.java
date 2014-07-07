@@ -85,10 +85,15 @@ public interface DepartmentDao {
      * «Код подразделения в нотации Сбербанка» 
      */
     Department getDepartmentBySbrfCode(String sbrfCode);
+
+    /**
+     * Подразделения по значению атрибута «Код подразделения»
+     */
+    Department getDepartmentByCode(int code);
     
     /**
      * Получение обособленного подразделения по значению 
-     * ««Наименование подразделения»» 
+     * «Наименование подразделения»»
      */
     Department getDepartmentByName(String name);
 

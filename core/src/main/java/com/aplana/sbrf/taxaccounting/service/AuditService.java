@@ -23,7 +23,7 @@ public interface AuditService {
 	 * Добавить информацию об логировании
 	 */
 	void add(FormDataEvent event, TAUserInfo userInfo, Integer departmentId, Integer reportPeriodId,
-			 Integer declarationTypeId, Integer formTypeId, Integer formKindId, String note);
+             String declarationType, String formType, Integer formKindId, String note);
 
 	/**
 	 * Получить данные используемые для фильтрации журналом аудита

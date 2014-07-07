@@ -62,6 +62,9 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT:
         importData()
         break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
+        break
 }
 
 //// Кэши и константы
@@ -488,6 +491,42 @@ void addData(def xml, int headRowCount) {
         // графа 6
         xmlIndexCol = 4
         dataRows[i - 1].amortTaxPeriod = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+    }
+
+    dataRowHelper.update(dataRows)
+}
+
+void importTransportData() {
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    addTransportData(xml)
+}
+
+void addTransportData(def xml) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def int rnuIndexRow = 2
+    def int colOffset = 1
+    def dataRows = dataRowHelper.allCached
+
+    for (int i = 0; i < 17; i++) {
+        rnuIndexRow++
+
+        def row = xml.row[i]
+
+        // графа 3
+        def xmlIndexCol = 3
+        dataRows[i].sumCurrentPeriodTotal = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 4
+        xmlIndexCol = 4
+        dataRows[i].sumTaxPeriodTotal = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 5
+        xmlIndexCol = 5
+        dataRows[i].amortPeriod = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 6
+        xmlIndexCol = 6
+        dataRows[i].amortTaxPeriod = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol)
     }
 
     dataRowHelper.update(dataRows)

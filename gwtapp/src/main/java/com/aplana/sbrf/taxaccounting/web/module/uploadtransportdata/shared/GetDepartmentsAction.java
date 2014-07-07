@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.client.shared;
+package com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.shared;
 
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;

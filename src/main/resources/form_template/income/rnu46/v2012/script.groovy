@@ -79,6 +79,9 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
+        break
 }
 
 //// Кэши и константы
@@ -674,6 +677,109 @@ void addData(def xml, int headRowCount) {
 
         rows.add(newRow)
     }
+    dataRowHelper.save(rows)
+}
+
+void importTransportData() {
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    addTransportData(xml)
+}
+
+void addTransportData(def xml) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def int rnuIndexRow = 2
+    def int colOffset = 1
+    def rows = []
+    def int rowIndex = 1  // Строки НФ, от 1
+
+    for (def row : xml.row) {
+        rnuIndexRow++
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
+        if (isMonthBalance()){
+            balanceColumns.each {
+                newRow.getCell(it).editable = true
+                newRow.getCell(it).setStyleAlias('Редактируемая')
+            }
+            newRow.getCell('rowNumber').setStyleAlias('Автозаполняемая')
+            newRow.getCell('usefulLife').setStyleAlias('Автозаполняемая')
+        }else{
+            editableColumns.each {
+                newRow.getCell(it).editable = true
+                newRow.getCell(it).setStyleAlias('Редактируемая')
+            }
+            autoFillColumns.each {
+                newRow.getCell(it).setStyleAlias('Автозаполняемая')
+            }
+        }
+
+        // графа 2
+        def xmlIndexCol = 2
+        newRow.invNumber = row.cell[xmlIndexCol].text()
+        // графа 3
+        xmlIndexCol = 3
+        newRow.name = row.cell[xmlIndexCol].text()
+        // графа 4
+        xmlIndexCol = 4
+        newRow.cost = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        // графа 5
+        xmlIndexCol = 5
+        def record71 = getRecordImport(71, 'GROUP', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        newRow.amortGroup = record71?.record_id?.value
+        // графа 6
+        xmlIndexCol = 6
+        if (record71 != null) {
+            // графа 6 - зависит от графы 5 - атрибут 645 - TERM - "Срок полезного использования (месяцев)", справочник 71 "Амортизационные группы"
+            formDataService.checkReferenceValue(71, row.cell[xmlIndexCol].text(), record71?.TERM?.value?.toString(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        }
+        // графа 7
+        xmlIndexCol = 7
+        newRow.monthsUsed = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        // графа 8
+        xmlIndexCol = 8
+        newRow.usefulLifeWithUsed = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        // графа 9
+        xmlIndexCol = 9
+        newRow.specCoef = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        // графа 10
+        xmlIndexCol = 10
+        newRow.cost10perMonth = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        // графа 11
+        xmlIndexCol = 11
+        newRow.cost10perTaxPeriod = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        // графа 12
+        xmlIndexCol = 12
+        newRow.cost10perExploitation = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        // графа 13
+        xmlIndexCol = 13
+        newRow.amortNorm = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        // графа 14
+        xmlIndexCol = 14
+        newRow.amortMonth = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        // графа 15
+        xmlIndexCol = 15
+        newRow.amortTaxPeriod = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        // графа 16
+        xmlIndexCol = 16
+        newRow.amortExploitation = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        // графа 17
+        xmlIndexCol = 17
+        newRow.exploitationStart = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        // графа 18
+        xmlIndexCol = 18
+        newRow.usefullLifeEnd = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        // графа 19
+        xmlIndexCol = 19
+        newRow.rentEnd = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        rows.add(newRow)
+    }
+
     dataRowHelper.save(rows)
 }
 

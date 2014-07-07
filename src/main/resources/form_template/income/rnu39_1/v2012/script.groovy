@@ -71,6 +71,9 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
+        break
 }
 
 //// Кэши и константы
@@ -209,13 +212,7 @@ void calc() {
     }
 
     // расчет итогов
-    groups.each { section ->
-        firstRow = getDataRow(dataRows, section)
-        lastRow = getDataRow(dataRows, 'total' + section)
-        totalColumns.each {
-            lastRow[it] = getSum(dataRows, it, firstRow, lastRow)
-        }
-    }
+    calcTotalRows(dataRows)
 
     dataRowHelper.save(dataRows)
 }
@@ -223,14 +220,7 @@ void calc() {
 void addNewRow() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    DataRow<Cell> newRow = formData.createDataRow()
-    newRow.keySet().each {
-        newRow.getCell(it).setStyleAlias('Автозаполняемая')
-    }
-    editableColumns.each {
-        newRow.getCell(it).editable = true
-        newRow.getCell(it).setStyleAlias('Редактируемая')
-    }
+    DataRow<Cell> newRow = getNewRow()
 
     def index
     if (currentDataRow == null || currentDataRow.getIndex() == -1) {
@@ -246,6 +236,18 @@ void addNewRow() {
     }
 
     dataRowHelper.insert(newRow, index + 1)
+}
+
+def getNewRow() {
+    newRow = formData.createDataRow()
+    newRow.keySet().each {
+        newRow.getCell(it).setStyleAlias('Автозаполняемая')
+    }
+    editableColumns.each {
+        newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias('Редактируемая')
+    }
+    return newRow
 }
 
 void consolidation() {
@@ -468,15 +470,8 @@ def addData(def xml, int headRowCount) {
             continue
         }
 
-        def newRow = formData.createDataRow()
+        def newRow = getNewRow()
         newRow.setImportIndex(xlsIndexRow)
-        newRow.keySet().each {
-            newRow.getCell(it).setStyleAlias('Автозаполняемая')
-        }
-        editableColumns.each {
-            newRow.getCell(it).editable = true
-            newRow.getCell(it).setStyleAlias('Редактируемая')
-        }
 
         // графа 3 - атрибут 813 - REG_NUM - «Государственный регистрационный номер», справочник 84 «Ценные бумаги»
         // TODO (Ramil Timerbaev) могут быть проблемы с нахождением записи,
@@ -605,4 +600,190 @@ def getRate(def row, def Date date) {
     def record22 = formDataService.getRefBookRecord(22, recordCache, providerCache, refBookCache, 'CODE_NUMBER',
             code?.toString(), date, row.getIndex(), getColumnName(row, 'currencyCode'), logger, true)
     return record22?.RATE?.value
+}
+
+void importTransportData() {
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+
+    // загрузить данные
+    addTransportData(xml)
+}
+
+void addTransportData(def xml) {
+    def int rnuIndexRow = 2
+    def int colOffset = 1
+
+    // мапа для хранения строк по разделам, доступ к списку строк по алиасу раздела
+    def sectionRowsMap = [:]
+    groups.each {
+        sectionRowsMap[it] = []
+    }
+
+    def totalTmp = formData.createDataRow()
+    totalColumns.each { alias ->
+        totalTmp.getCell(alias).setValue(BigDecimal.ZERO, null)
+    }
+    for (def row : xml.row) {
+        rnuIndexRow++
+
+        def rnuIndexCol
+        def newRow = getNewRow()
+
+        // графа 3 - атрибут 813 - REG_NUM - «Государственный регистрационный номер», справочник 84 «Ценные бумаги»
+        // TODO (Ramil Timerbaev) могут быть проблемы с нахождением записи,
+        // если в справочнике 84 есть несколько записей с одинаковыми значениями в поле REG_NUM
+        rnuIndexCol = 3
+        def record84 = getRecordImport(84, 'REG_NUM', row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, true)
+        newRow.regNumber = record84?.record_id?.value
+
+        // графа 1 - зависит от графы 3 - атрибут 810 - CODE_CUR - «Цифровой код валюты выпуска», справочник 84 «Ценные бумаги»
+        rnuIndexCol = 1
+        def record15 = getRecordImport(15, 'CODE', row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset)
+        if (record84 != null && record15 != null) {
+            def value1 = record15?.record_id?.value?.toString()
+            def value2 = record84?.CODE_CUR?.value?.toString()
+            formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+        }
+
+        // графа 2 - зависит от графы 3 - атрибут 809 - ISSUER - «Эмитент», справочник 84 «Ценные бумаги»
+        rnuIndexCol = 2
+        def record100 = getRecordImport(100, 'FULL_NAME', row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset)
+        if (record84 != null && record100 != null) {
+            def value1 = record100?.record_id?.value?.toString()
+            def value2 = record84?.ISSUER?.value?.toString()
+            formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+        }
+
+        // графа 4
+        rnuIndexCol = 4
+        newRow.amount = getNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset)
+
+        // графа 5
+        rnuIndexCol = 5
+        newRow.cost = getNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset)
+
+        // графа 6
+        rnuIndexCol = 6
+        newRow.shortPositionOpen = getDate(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset)
+
+        // графа 7
+        rnuIndexCol = 7
+        newRow.shortPositionClose = getDate(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset)
+
+        // графа 8
+        rnuIndexCol = 8
+        newRow.pkdSumOpen = getNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset)
+
+        // графа 9
+        rnuIndexCol = 9
+        newRow.pkdSumClose = getNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset)
+
+        // графа 10
+        rnuIndexCol = 10
+        newRow.maturityDatePrev = getDate(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset)
+
+        // графа 11
+        rnuIndexCol = 11
+        newRow.maturityDateCurrent = getDate(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset)
+
+        // графа 12
+        rnuIndexCol = 12
+        newRow.currentCouponRate = getNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset)
+
+        // графа 13
+        rnuIndexCol = 13
+        newRow.incomeCurrentCoupon = getNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset)
+
+        // графа 14
+        rnuIndexCol = 14
+        newRow.couponIncome = getNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset)
+
+        // графа 15
+        rnuIndexCol = 15
+        newRow.totalPercIncome = getNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset)
+
+        totalColumns.each { alias ->
+            def value1 = totalTmp.getCell(alias).value
+            def value2 = (newRow.getCell(alias).value ?: BigDecimal.ZERO)
+            totalTmp.getCell(alias).setValue(value1 + value2, null)
+        }
+
+        // раздел
+        def section = (row.cell[16].text() == 'Б' ? 'B' : 'A') + row.cell[17].text()
+        if (section in groups) {
+            sectionRowsMap[section].add(newRow)
+        }
+    }
+
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    deleteNotFixedRows(dataRows)
+
+    groups.each { section ->
+        index = getDataRow(dataRows, section).getIndex()
+        def rows = sectionRowsMap[section]
+        if (rows) {
+            dataRows.addAll(index, rows)
+            updateIndexes(dataRows)
+        }
+    }
+
+    // сравнение итогов
+    if (xml.rowTotal.size() == 1) {
+        rnuIndexRow = rnuIndexRow + 2
+        def row = xml.rowTotal[0]
+        def total = formData.createDataRow()
+
+        // графа 4
+        rnuIndexCol = 4
+        total.amount = getNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset)
+
+        // графа 5
+        rnuIndexCol = 5
+        total.cost = getNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset)
+
+        // графа 8
+        rnuIndexCol = 8
+        total.pkdSumOpen = getNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset)
+
+        // графа 9
+        rnuIndexCol = 9
+        total.pkdSumClose = getNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset)
+
+        // графа 14
+        rnuIndexCol = 14
+        total.couponIncome = getNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset)
+
+        // графа 15
+        rnuIndexCol = 15
+        total.totalPercIncome = getNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset)
+
+        def colIndexMap = ["amount" : 4, "cost" : 5, "pkdSumOpen" : 8, "pkdSumClose" : 9, "couponIncome" : 14, "totalPercIncome" : 15]
+
+        for (def alias : totalColumns) {
+            def v1 = total.getCell(alias).value
+            def v2 = totalTmp.getCell(alias).value
+            if (v1 == null && v2 == null) {
+                continue
+            }
+            if (v1 == null || v1 != null && v1 != v2) {
+                logger.error(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
+                break
+            }
+        }
+
+    }
+    calcTotalRows(dataRows)
+    dataRowHelper.save(dataRows)
+}
+
+// расчет итогов
+void calcTotalRows(def dataRows) {
+    groups.each { section ->
+        firstRow = getDataRow(dataRows, section)
+        lastRow = getDataRow(dataRows, 'total' + section)
+        totalColumns.each {
+            lastRow[it] = getSum(dataRows, it, firstRow, lastRow)
+        }
+    }
 }

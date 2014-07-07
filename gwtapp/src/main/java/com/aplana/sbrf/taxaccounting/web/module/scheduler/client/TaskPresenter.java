@@ -86,6 +86,8 @@ public class TaskPresenter extends Presenter<TaskPresenter.MyView,
         void clearForm();
 
         void setTaskData(GetTaskInfoResult taskData);
+
+        void setTitle(String title);
     }
 
     @Inject
@@ -102,6 +104,11 @@ public class TaskPresenter extends Presenter<TaskPresenter.MyView,
         super.prepareFromRequest(request);
         LogCleanEvent.fire(this);
         LogShowEvent.fire(this, false);
+        if (request.getParameterNames().size() != 0) {
+            getView().setTitle("Изменить задачу");
+        } else {
+            getView().setTitle("Создать задачу");
+        }
         GetAvailableTasksAction initAction = new GetAvailableTasksAction();
         dispatcher.execute(initAction, CallbackUtils
                 .defaultCallback(new AbstractCallback<GetAvailableTasksResult>() {

@@ -103,6 +103,11 @@ public interface DepartmentService {
     Department getDepartmentBySbrfCode(String sbrfCode);
 
     /**
+     * Подразделения по значению атрибута «Код подразделения»
+     */
+    Department getDepartmentByCode(int code);
+
+    /**
      * Выборка подразделений для бизнес-администрирования
      *
      * @param tAUser пользователь

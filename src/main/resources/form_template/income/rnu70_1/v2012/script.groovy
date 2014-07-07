@@ -71,6 +71,9 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
+        break
 }
 
 //// Кэши и константы
@@ -603,5 +606,102 @@ void addData(def xml, int headRowCount) {
 
         rows.add(newRow)
     }
+    dataRowHelper.save(rows)
+}
+
+void importTransportData() {
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    addTransportData(xml)
+
+    def dataRows = formDataService.getDataRowHelper(formData)?.allCached
+    checkTotalSum(dataRows, totalColumns, logger, true)
+}
+
+void addTransportData(def xml) {
+    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def int rnuIndexRow = 2
+    def int colOffset = 1
+    def rows = []
+    def int rowIndex = 1
+
+    for (def row : xml.row) {
+        rnuIndexRow++
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
+        editableColumns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
+        autoFillColumns.each {
+            newRow.getCell(it).setStyleAlias('Автозаполняемая')
+        }
+
+        // графа 2
+        newRow.name = row.cell[2].text()
+        // графа 3
+        newRow.inn = row.cell[3].text()
+        // графа 4
+        newRow.number = row.cell[4].text()
+        // графа 5
+        newRow.date = parseDate(row.cell[5].text(), "dd.MM.yyyy", rnuIndexRow, 5 + colOffset, logger, true)
+        // графа 6
+        newRow.cost = parseNumber(row.cell[6].text(), rnuIndexRow, 6 + colOffset, logger, true)
+        // графа 7
+        newRow.repaymentDate = parseDate(row.cell[7].text(), "dd.MM.yyyy", rnuIndexRow, 7 + colOffset, logger, true)
+        // графа 8
+        newRow.concessionsDate = parseDate(row.cell[8].text(), "dd.MM.yyyy", rnuIndexRow, 8 + colOffset, logger, true)
+        // графа 9
+        newRow.income = parseNumber(row.cell[9].text(), rnuIndexRow, 9 + colOffset, logger, true)
+        // графа 10
+        newRow.financialResult1 = parseNumber(row.cell[10].text(), rnuIndexRow, 10 + colOffset, logger, true)
+        // графа 11
+        if (row.cell[11].text() == "Российский рубль") { // TODO http://jira.aplana.com/browse/SBRFACCTAX-6288
+            newRow.currencyDebtObligation = getRecordIdImport(15, 'CODE', "810", rnuIndexRow, 11 + colOffset)
+        } else {
+            newRow.currencyDebtObligation = getRecordIdImport(15, 'NAME', row.cell[11].text(), rnuIndexRow, 11 + colOffset)
+        }
+        // графа 12
+        newRow.rateBR = parseNumber(row.cell[12].text(), rnuIndexRow, 12 + colOffset, logger, true)
+        // графа 13
+        newRow.interestRate = parseNumber(row.cell[13].text(), rnuIndexRow, 13 + colOffset, logger, true)
+        // графа 14
+        newRow.perc = parseNumber(row.cell[14].text(), rnuIndexRow, 14 + colOffset, logger, true)
+        // графа 15
+        newRow.loss = parseNumber(row.cell[15].text(), rnuIndexRow, 15 + colOffset, logger, true)
+
+        rows.add(newRow)
+    }
+
+    if (xml.rowTotal.size() == 1) {
+        rnuIndexRow = rnuIndexRow + 2
+
+        def row = xml.rowTotal[0]
+
+        def total = formData.createDataRow()
+        total.setAlias('total')
+        total.fix = "Всего"
+        total.getCell('fix').colSpan = 2
+        allColumns.each {
+            total.getCell(it).setStyleAlias('Контрольные суммы')
+        }
+
+        // графа 9
+        total.income = parseNumber(row.cell[9].text(), rnuIndexRow, 9 + colOffset, logger, true)
+        // графа 10
+        total.financialResult1 = parseNumber(row.cell[10].text(), rnuIndexRow, 10 + colOffset, logger, true)
+        // графа 14
+        total.perc = parseNumber(row.cell[14].text(), rnuIndexRow, 14 + colOffset, logger, true)
+        // графа 15
+        total.loss = parseNumber(row.cell[15].text(), rnuIndexRow, 15 + colOffset, logger, true)
+
+        rows.add(total)
+    }
+
     dataRowHelper.save(rows)
 }

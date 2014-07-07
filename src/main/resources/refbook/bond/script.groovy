@@ -123,9 +123,9 @@ void importFromNSI() {
         def id = lineStrs[0] as String
         def issuer = lineStrs[1] as String
         def codeCur = lineStrs[2] as String
-        def fullName = lineStrs[3] as String
-        def shortName = lineStrs[4] as String
-        def regNum = lineStrs[5] as String
+        def fullName = replaceQuotes(lineStrs[3] as String)
+        def shortName = replaceQuotes(lineStrs[4] as String)
+        def regNum = replaceQuotes(lineStrs[5] as String)
         def sign = lineStrs[6]?.replace('0','-')?.replace('1','+') as String
         def type = lineStrs[7] as String
         def startDateStr = lineStrs[8] as String

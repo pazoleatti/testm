@@ -215,12 +215,10 @@ alter table log_business add constraint log_business_chk_frm_dcl_ev check (form_
 alter table log_business add constraint log_business_fk_usr_departm_id foreign key (user_department_id) references department(id);
 
 alter table log_system add constraint log_system_chk_event_id check (event_id in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 203, 204, 205, 206, 207, 208, 209, 210, 301, 302, 303, 401, 402, 501, 502, 503, 601, 901, 902, 903));
-alter table log_system add constraint log_system_chk_dcl_form check (event_id in (7, 11, 501, 502, 503, 601, 901, 902, 903) or declaration_type_id is not null or (form_type_id is not null and form_kind_id is not null));
+alter table log_system add constraint log_system_chk_dcl_form check (event_id in (7, 11, 501, 502, 503, 601, 901, 902, 903) or declaration_type_name is not null or (form_type_name is not null and form_kind_id is not null));
 alter table log_system add constraint log_system_chk_rp check (event_id in (7, 11, 501, 502, 503, 601, 901, 902, 903) or report_period_name is not null);
 alter table log_system add constraint log_system_fk_kind foreign key (form_kind_id) references form_kind(id);
 alter table log_system add constraint log_system_fk_user_id foreign key (user_id) references sec_user(id);
-alter table log_system add constraint log_system_fk_decl_type_id foreign key (declaration_type_id) references declaration_type(id);
-alter table log_system add constraint log_system_fk_form_type_id foreign key (form_type_id) references form_type(id);
 
 alter table department_report_period add constraint dep_rep_per_chk_is_active check (is_active in (0, 1));
 alter table department_report_period add constraint dep_rep_per_chk_is_balance_per check (is_balance_period in (0, 1));
@@ -241,6 +239,10 @@ alter table template_changes add constraint changes_fk_form_template_id foreign 
 alter table template_changes add constraint changes_fk_dec_template_id foreign key (declaration_template_id) references declaration_template(id) on delete cascade;
 alter table template_changes add constraint changes_check_event check (event in (1,2,3,4,5));
 alter table template_changes add constraint template_changes_chk_template check ((form_template_id is not null and declaration_template_id is null) or (form_template_id is null and declaration_template_id is not null));
+
+ALTER TABLE event ADD CONSTRAINT event_pk PRIMARY KEY (id);
+ALTER TABLE log_system ADD CONSTRAINT log_system_fk_event_id FOREIGN KEY (event_id) REFERENCES event(id);
+ALTER TABLE log_system DROP CONSTRAINT log_system_chk_event_id;
 
 ------------------------------------------------------------------------------------------------------
 create index i_department_parent_id on department(parent_id);

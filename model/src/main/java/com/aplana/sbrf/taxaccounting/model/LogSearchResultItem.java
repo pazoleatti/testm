@@ -14,11 +14,11 @@ public class LogSearchResultItem implements Serializable {
 	private Date logDate;
 	private String ip;
 	private FormDataEvent event;
-	private TAUser user;
+	private String user;
 	private String roles;
     private String departmentName;
-	private DeclarationType declarationType;
-	private FormType formType;
+	private String declarationTypeName;
+	private String formTypeName;
 	private FormDataKind formKind;
 	private String note;
 	private String userDepartmentName;
@@ -67,13 +67,13 @@ public class LogSearchResultItem implements Serializable {
 		this.event = eventId;
 	}
 
-	public TAUser getUser() {
-		return user;
-	}
+    public String getUser() {
+        return user;
+    }
 
-	public void setUser(TAUser user) {
-		this.user = user;
-	}
+    public void setUser(String user) {
+        this.user = user;
+    }
 
 	public String getRoles() {
 		return roles;
@@ -91,21 +91,21 @@ public class LogSearchResultItem implements Serializable {
         this.departmentName = departmentName;
     }
 
-	public DeclarationType getDeclarationType() {
-		return declarationType;
-	}
+    public String getDeclarationTypeName() {
+        return declarationTypeName;
+    }
 
-	public void setDeclarationType(DeclarationType declarationType) {
-		this.declarationType = declarationType;
-	}
+    public void setDeclarationTypeName(String declarationTypeName) {
+        this.declarationTypeName = declarationTypeName;
+    }
 
-	public FormType getFormType() {
-		return formType;
-	}
+    public String getFormTypeName() {
+        return formTypeName;
+    }
 
-	public void setFormType(FormType formType) {
-		this.formType = formType;
-	}
+    public void setFormTypeName(String formTypeName) {
+        this.formTypeName = formTypeName;
+    }
 
 	public FormDataKind getFormKind() {
 		return formKind;
@@ -133,10 +133,10 @@ public class LogSearchResultItem implements Serializable {
 
     @Override
     public String toString() {
-        return ("id: " + id) + ", user: " + (user != null ? user.getLogin() : "") + " ip: " + ip +
+        return ("id: " + id) + ", user: " + user + " ip: " + ip +
                 " department: " + " departmentName: " + departmentName +
                 " roles: " + roles + " event: " + (event != null ? event.getTitle() : "") + " logdate: " + logDate +
                 " note: " + note + " reportperiod: " +
-                " formKind: " + (formKind != null ? formKind.getName() : "");
+                " formKind: " + (formKind != null ? formKind.getName() : "") + " formTypeName: " + formTypeName + " declarationTypeName: " + declarationTypeName;
     }
 }
