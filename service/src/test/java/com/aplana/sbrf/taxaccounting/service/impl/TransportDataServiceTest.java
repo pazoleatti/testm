@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
+import com.aplana.sbrf.taxaccounting.service.RefBookExternalService;
 import com.aplana.sbrf.taxaccounting.service.TransportDataService;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
 import org.junit.AfterClass;
@@ -12,6 +13,8 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.File;
@@ -23,6 +26,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static java.util.Arrays.asList;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -57,6 +61,25 @@ public class TransportDataServiceTest {
         ReflectionTestUtils.setField(transportDataService, "configurationDao", configurationDao);
         AuditService auditService = mock(AuditService.class);
         ReflectionTestUtils.setField(transportDataService, "auditService", auditService);
+
+        RefBookExternalService refBookExternalService = mock(RefBookExternalService.class);
+        when(refBookExternalService.isDiasoftFile(anyString())).thenAnswer(new Answer<Object>() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                String name = (String)invocation.getArguments()[0];
+                if (FILE_NAME_1.equals(name)) {
+                    return true;
+                }
+                if (FILE_NAME_2_EXTRACT_1.equals(name)) {
+                    return true;
+                }
+                if (FILE_NAME_2_EXTRACT_2.equals(name)) {
+                    return true;
+                }
+                return null;
+            }
+        });
+        ReflectionTestUtils.setField(transportDataService, "refBookExternalService", refBookExternalService);
     }
 
     @AfterClass

@@ -2,16 +2,14 @@ package com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.client;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
-import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.SaveDepartmentCombinedResult;
 import com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.client.fileupload.FileUploadHandler;
-import com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.client.shared.GetDepartmentsAction;
-import com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.client.shared.GetDepartmentsResult;
+import com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.shared.GetDepartmentsAction;
+import com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.shared.GetDepartmentsResult;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.EndLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.StartLoadFileEvent;
 import com.google.inject.Inject;

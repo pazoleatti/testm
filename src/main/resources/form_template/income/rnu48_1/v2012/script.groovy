@@ -54,6 +54,9 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
+        break
 }
 
 // Все атрибуты
@@ -216,5 +219,78 @@ void addData(def xml, int headRowCount) {
         rows.add(newRow)
     }
     rows.add(totalRow)
+    dataRowHelper.save(rows)
+}
+
+void importTransportData() {
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    addTransportData(xml)
+}
+
+void addTransportData(def xml) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    def int rnuIndexRow = 2
+    def int colOffset = 1
+    def rows = []
+    def int rowIndex = 1  // Строки НФ, от 1
+
+    for (def row : xml.row) {
+        rnuIndexRow++
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
+        editableColumns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
+        autoFillColumns.each {
+            newRow.getCell(it).setStyleAlias('Автозаполняемая')
+        }
+
+        // графа 2
+        def xmlIndexCol = 2
+        newRow.inventoryNumber = row.cell[xmlIndexCol].text()
+        // графа 3
+        xmlIndexCol = 3
+        newRow.usefulDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        // графа 4
+        xmlIndexCol = 4
+        newRow.amount = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        rows.add(newRow)
+    }
+    def totalRow = getDataRow(dataRows, 'total')
+    calcTotalSum(rows, totalRow, totalColumns)
+    rows.add(totalRow)
+
+    if (xml.rowTotal.size() == 1) {
+        rnuIndexRow += 2
+
+        def row = xml.rowTotal[0]
+
+        def total = formData.createDataRow()
+
+        // графа 4
+        xmlIndexCol = 4
+        total.amount = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        def colIndexMap = ['amount' : 4]
+        for (def alias : totalColumns) {
+            def v1 = total[alias]
+            def v2 = totalRow[alias]
+            if (v1 == null && v2 == null) {
+                continue
+            }
+            if (v1 == null || v1 != null && v1 != v2) {
+                logger.error(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
+                break
+            }
+        }
+    }
     dataRowHelper.save(rows)
 }

@@ -51,6 +51,9 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
+        break
 }
 
 void calc() {
@@ -154,4 +157,55 @@ void addData(def xml, int headRowCount) {
         }
     }
     dataRowHelper.update(dataRows)
+}
+
+void importTransportData() {
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    addTransportData(xml)
+}
+
+void addTransportData(def xml) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    def int rnuIndexRow = 2
+    def int colOffset = 1
+
+    for (int i = 0; i < 4; i++) {
+        rnuIndexRow++
+        if (xml.row[i] != null) {
+            // графа 3 строки i
+            dataRows[i].summ = parseNumber(xml.row[i].cell[3].text(), rnuIndexRow, 3 + colOffset, logger, true)
+        } else {
+            dataRows[i].summ = null
+        }
+    }
+
+    def totalRow = getDataRow(dataRows, 'total')
+    totalRow.summ = dataRows.sum { (it.getAlias() != 'total') ? (it.summ ?: 0) : 0 }
+
+    if (xml.rowTotal.size() == 1) {
+        rnuIndexRow += 2
+
+        def row = xml.rowTotal[0]
+
+        def total = formData.createDataRow()
+
+        // графа 3
+        xmlIndexCol = 3
+        total.summ = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        def colIndexMap = ['summ' : 4]
+        for (def alias : ['summ']) {
+            def v1 = total[alias]
+            def v2 = totalRow[alias]
+            if (v1 == null && v2 == null) {
+                continue
+            }
+            if (v1 == null || v1 != null && v1 != v2) {
+                logger.error(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
+                break
+            }
+        }
+    }
+    dataRowHelper.save(dataRows)
 }

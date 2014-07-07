@@ -68,9 +68,9 @@ void importFromNSI() {
 
     lines.each { line ->
         def lineStrs = line.split(";")
-        def code = lineStrs[0] as String
-        def name = lineStrs[1] as String
-        def fullName = lineStrs[2] as String
+        def code = replaceQuotes(lineStrs[0] as String)
+        def name = replaceQuotes(lineStrs[1] as String)
+        def fullName = replaceQuotes(lineStrs[2] as String)
 
         if (code != null && !code.isEmpty()) {
             def actualRecord = actualEmitentnMap.get(code)
@@ -104,7 +104,7 @@ void importFromNSI() {
 
     if (!logger.containsLevel(LogLevel.ERROR) && !updList.isEmpty()) {
         updList.each {
-            dataProviderBond.updateRecordVersion(logger, it.get(RefBook.RECORD_ID_ALIAS)?.numberValue, actualDate, null, it)
+            dataProvider.updateRecordVersion(logger, it.get(RefBook.RECORD_ID_ALIAS)?.numberValue, actualDate, null, it)
         }
     }
 

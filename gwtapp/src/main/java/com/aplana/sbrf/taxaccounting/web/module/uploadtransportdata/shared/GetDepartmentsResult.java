@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.client.shared;
+package com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.shared;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.gwtplatform.dispatch.shared.Result;
