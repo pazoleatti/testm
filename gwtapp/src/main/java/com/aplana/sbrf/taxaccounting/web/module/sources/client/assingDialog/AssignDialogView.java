@@ -18,6 +18,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ValueListBox;
+import com.google.gwt.view.client.ProvidesKey;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -71,7 +72,12 @@ public class AssignDialogView extends ViewWithUiHandlers<AssignDialogUiHandlers>
     @Inject
     public AssignDialogView(Binder uiBinder) {
         ValueBoxRenderer<PeriodInfo> abstractRenderer = new ValueBoxRenderer<PeriodInfo>();
-        periodFrom = new ValueListBox<PeriodInfo>(abstractRenderer);
+        periodFrom = new ValueListBox<PeriodInfo>(abstractRenderer, new ProvidesKey<PeriodInfo>() {
+            @Override
+            public Object getKey(PeriodInfo item) {
+                return item != null ? item.getCode() : null;
+            }
+        });
         periodTo = new ValueListBox<PeriodInfo>(abstractRenderer);
         initWidget(uiBinder.createAndBindUi(this));
 
@@ -152,9 +158,14 @@ public class AssignDialogView extends ViewWithUiHandlers<AssignDialogUiHandlers>
     public void setPeriodsInterval(PeriodsInterval pi) {
         this.periodsInterval = pi;
         periodFrom.setValue(pi.getPeriodFrom());
-        periodTo.setValue(pi.getPeriodTo());
         yearFrom.setValue(pi.getYearFrom());
-        yearTo.setValue(pi.getYearTo());
+        if (pi.getPeriodTo() != null) {
+            periodTo.setValue(pi.getPeriodTo());
+            yearTo.setValue(pi.getYearTo());
+        } else {
+            periodTo.setValue(null);
+            yearTo.setValue(null);
+        }
     }
 
     private void setupView(State state) {

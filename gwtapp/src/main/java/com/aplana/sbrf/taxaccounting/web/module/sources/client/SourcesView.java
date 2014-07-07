@@ -621,6 +621,11 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
     }
 
     @Override
+    public boolean isDeclaration() {
+        return !isForm;
+    }
+
+    @Override
     public void setDepartments(List<Department> departments, Set<Integer> availableDepartments) {
         leftDepPicker.setAvalibleValues(departments, availableDepartments);
         leftDepPicker.setValue(null);
@@ -641,7 +646,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
             return;
         }
 
-        final Set<Long> rightSelectIds = new HashSet<Long>();
+        /*final Set<Long> rightSelectIds = new HashSet<Long>();
         Set<Long> currenAssignIds = new HashSet<Long>();
         for (DepartmentAssign selectedDepFormType : rightSM.getSelectedSet()) {
             rightSelectIds.add(selectedDepFormType.getId());
@@ -649,7 +654,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         for (CurrentAssign source : downTable.getVisibleItems()) {
             currenAssignIds.add(source.getId());
         }
-        rightSelectIds.addAll(currenAssignIds);
+        rightSelectIds.addAll(currenAssignIds);*/
 //        if (rightSelectIds.isEmpty()) {
 //            Dialog.warningMessage("Выбранные назначения налоговой формы уже является источниками " +
 //                    "для выбранного приемника!");
@@ -660,7 +665,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
                 new ButtonClickHandlers() {
                     @Override
                     public void ok(PeriodsInterval periodsInterval) {
-                        getUiHandlers().updateCurrentAssign(leftSM.getSelectedObject(), getPeriodInterval(), new ArrayList<Long>(rightSelectIds));
+                        getUiHandlers().createAssign(leftSM.getSelectedObject(), rightSM.getSelectedSet(), periodsInterval, leftDepPicker.getValue(), rightDepPicker.getValue());
                     }
 
                     @Override
@@ -696,22 +701,11 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         if (downSM.getSelectedSet().isEmpty()) {
             return;
         }
-        getUiHandlers().openAssignDialog(AssignDialogView.State.UPDATE, getPeriodInterval(), new ButtonClickHandlers() {
-            @Override
-            public void ok(PeriodsInterval periodsInterval) {
-//                List<Long> sourceIds = new ArrayList<Long>();
-//                for (CurrentAssign source : downSM.getSelectedSet()) {
-//                    sourceIds.add(source.getId());
-//                }
-//                getUiHandlers().updateCurrentAssign(leftSM.getSelectedObject(), getPeriodInterval(), sourceIds);
-                Dialog.infoMessage("Изменение периодов, проверки там всякие.");
-            }
-
-            @Override
-            public void cancel() {
-                getUiHandlers().closeAssignDialog();
-            }
-        });
+        if (downSM.getSelectedSet().size() > 1) {
+            Dialog.errorMessage("Возможно редактирование не более одной записи!");
+            return;
+        }
+        getUiHandlers().prepareUpdateAssign(leftSM.getSelectedObject(), downSM.getSelectedSet().iterator().next());
     }
 
     @UiHandler("appointmentTypePicker")

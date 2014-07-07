@@ -37,22 +37,25 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
         ps.appendQuery(String.format(query, in));
     }
 
-    private final static String GET_FORM_INTERSECTIONS = "select src_department_form_type_id as source, department_form_type_id as destination, period_start, period_end\n" +
-            "from form_data_source a\n" +
+    private final static String GET_FORM_INTERSECTIONS = "select src_department_form_type_id as source, department_form_type_id as destination, period_start, period_end \n" +
+            "from form_data_source a \n" +
             "where\n" +
-            "(src_department_form_type_id, department_form_type_id) in %s --список пар\n" +
-            "and (period_end >= ? or period_end is null) -– дата открытия периода\n" +
-            "and period_start <= nvl(?, '31.12.9999')-- дата окончания периода (может быть передана null)";
+            "(src_department_form_type_id, department_form_type_id) in %s --список пар \n" +
+            "and (period_end >= ? or period_end is null) --дата открытия периода \n" +
+            "and period_start <= nvl(?, '31.12.9999') --дата окончания периода (может быть передана null)\n" +
+            "and (? is null or (period_start, period_end) not in ((?, ?))) --исключить этот период";
 
     private final static String GET_DECLARATION_INTERSECTIONS = "select src_department_form_type_id as source, department_declaration_type_id as destination, period_start, period_end\n" +
             "from declaration_source a\n" +
             "where\n" +
             "(src_department_form_type_id, department_declaration_type_id) in %s --список пар\n" +
-            "and (period_end >= ? or period_end is null) -– дата открытия периода\n" +
-            "and period_start <= nvl(?, '31.12.9999')-- дата окончания периода (может быть передана null)";
+            "and (period_end >= ? or period_end is null) --дата открытия периода\n" +
+            "and period_start <= nvl(?, '31.12.9999') --дата окончания периода (может быть передана null)\n" +
+            "and (? is null or (period_start, period_end) not in ((?, ?))) --исключить этот период";
 
     @Override
-    public Map<SourcePair, List<SourceObject>> getIntersections(List<SourcePair> sourcePairs, Date periodStart, Date periodEnd, boolean declaration) {
+    public Map<SourcePair, List<SourceObject>> getIntersections(List<SourcePair> sourcePairs, Date periodStart, Date periodEnd,
+                                                                Date excludedPeriodStart, Date excludedPeriodEnd, boolean declaration) {
         final Map<SourcePair, List<SourceObject>> result = new HashMap<SourcePair, List<SourceObject>>();
         PreparedStatementData ps = new PreparedStatementData();
         //формируем in-часть вида ((1, 2), (1, 3))
@@ -63,6 +66,9 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
         }
         ps.addParam(periodStart);
         ps.addParam(periodEnd);
+        ps.addParam(excludedPeriodStart);
+        ps.addParam(excludedPeriodStart);
+        ps.addParam(excludedPeriodEnd);
 
         getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RowCallbackHandler() {
             @Override
@@ -84,8 +90,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "(\n" +
             "--существующие записи из таблицы соответствия\n" +
             "select tds.src_department_form_type_id, tds.department_form_type_id, period_start, period_end, 1 as base from form_data_source tds\n" +
-            "union all\n" +
-            "--записи через cross join для возможности фильтрации попарно (можно заменить за запрос из временной таблицы), фиктивные даты = даты для фильтрации \n" +
+            "union all --записи через cross join для возможности фильтрации попарно (можно заменить за запрос из временной таблицы), фиктивные даты = даты для фильтрации \n" +
             "select a.id, b.id, ?, ?, 0 as base from department_form_type a, department_form_type b where (a.id, b.id) in %s\n" +
             ")\n" +
             "select \n" +
@@ -96,7 +101,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "from subset \n" +
             "where connect_by_iscycle = 1 -- есть зацикливание\n" +
             "connect by nocycle prior src = tgt and (period_end >= ? or period_end is null) and period_start <= nvl(?, '31.12.9999') -- предыдущий источник = текущему приемнику, т.е. поднимаемся наверх\n" +
-            "start with base  = 0; -- начать с тех записей, которые были добавлены в граф фиктивно";
+            "start with base  = 0 -- начать с тех записей, которые были добавлены в граф фиктивно";
 
     @Override
     public Map<SourcePair, SourcePair> getLoops(List<SourcePair> sourcePairs, Date periodStart, Date periodEnd) {
@@ -126,16 +131,19 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
         private Date periodStart;
         private Date periodEnd;
         private boolean updateMode = false;
+        private boolean needEndComparison = false;
 
-        private SourceBatchPreparedStatementSetter(List<SourceObject> sources) {
+        private SourceBatchPreparedStatementSetter(List<SourceObject> sources, boolean needEndComparison) {
             this.sources = sources;
+            this.needEndComparison = needEndComparison;
         }
 
-        private SourceBatchPreparedStatementSetter(List<SourceObject> sources, Date periodStart, Date periodEnd) {
+        private SourceBatchPreparedStatementSetter(List<SourceObject> sources, Date periodStart, Date periodEnd, boolean needEndComparison) {
             this.sources = sources;
             this.periodStart = periodStart;
             this.periodEnd = periodEnd;
             updateMode = true;
+            this.needEndComparison = needEndComparison;
         }
 
         @Override
@@ -149,13 +157,17 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
                 ps.setLong(4, sourceObject.getSourcePair().getDestination());
                 ps.setDate(5, new java.sql.Date(sourceObject.getPeriodStart().getTime()));
                 ps.setDate(6, periodEndSql);
-                ps.setDate(7, periodEndSql);
+                if (needEndComparison) {
+                    ps.setDate(7, periodEndSql);
+                }
             } else {
                 ps.setLong(1, sourceObject.getSourcePair().getSource());
                 ps.setLong(2, sourceObject.getSourcePair().getDestination());
                 ps.setDate(3, new java.sql.Date(sourceObject.getPeriodStart().getTime()));
                 ps.setDate(4, periodEndSql);
-                ps.setDate(5, periodEndSql);
+                if (needEndComparison) {
+                    ps.setDate(5, periodEndSql);
+                }
             }
         }
 
@@ -169,10 +181,10 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
     public void deleteAll(final List<SourceObject> sources, boolean declaration) {
         if (declaration) {
             getJdbcTemplate().batchUpdate("delete from declaration_source where src_department_form_type_id = ? and department_declaration_type_id = ? and period_start = ? and ((? is null and period_end is null) or period_end = ?)",
-                    new SourceBatchPreparedStatementSetter(sources));
+                    new SourceBatchPreparedStatementSetter(sources, true));
         } else {
             getJdbcTemplate().batchUpdate("delete from form_data_source where src_department_form_type_id = ? and department_form_type_id = ? and period_start = ? and ((? is null and period_end is null) or period_end = ?)",
-                    new SourceBatchPreparedStatementSetter(sources));
+                    new SourceBatchPreparedStatementSetter(sources, true));
         }
     }
 
@@ -180,21 +192,21 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
     public void createAll(List<SourceObject> sources, boolean declaration) {
         if (declaration) {
             getJdbcTemplate().batchUpdate("insert into declaration_source (src_department_form_type_id, department_declaration_type_id, period_start, period_end) values (?,?,?,?)",
-                    new SourceBatchPreparedStatementSetter(sources));
+                    new SourceBatchPreparedStatementSetter(sources, false));
         } else {
             getJdbcTemplate().batchUpdate("insert into form_data_source (src_department_form_type_id, department_form_type_id, period_start, period_end) values (?,?,?,?)",
-                    new SourceBatchPreparedStatementSetter(sources));
+                    new SourceBatchPreparedStatementSetter(sources, false));
         }
     }
 
     @Override
     public void updateAll(List<SourceObject> sources, Date periodStart, Date periodEnd, boolean declaration) {
         if (declaration) {
-            getJdbcTemplate().batchUpdate("update declaration_source set period_start = ?, period_end = ? where src_department_form_type_id = ? and department_declaration_type_id = ? and period_start = ? and period_end = ?",
-                    new SourceBatchPreparedStatementSetter(sources, periodStart, periodEnd));
+            getJdbcTemplate().batchUpdate("update declaration_source set period_start = ?, period_end = ? where src_department_form_type_id = ? and department_declaration_type_id = ? and period_start = ? and ((? is null and period_end is null) or period_end = ?)",
+                    new SourceBatchPreparedStatementSetter(sources, periodStart, periodEnd, true));
         } else {
-            getJdbcTemplate().batchUpdate("update form_data_source set period_start = ?, period_end = ? where src_department_form_type_id = ? and department_form_type_id = ? and period_start = ? and period_end = ?",
-                    new SourceBatchPreparedStatementSetter(sources, periodStart, periodEnd));
+            getJdbcTemplate().batchUpdate("update form_data_source set period_start = ?, period_end = ? where src_department_form_type_id = ? and department_form_type_id = ? and period_start = ? and ((? is null and period_end is null) or period_end = ?)",
+                    new SourceBatchPreparedStatementSetter(sources, periodStart, periodEnd, true));
         }
     }
 

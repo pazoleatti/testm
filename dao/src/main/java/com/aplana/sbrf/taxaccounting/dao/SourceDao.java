@@ -21,12 +21,15 @@ public interface SourceDao {
      * Возвращает указанные связки источников-приемников, периоды которых пересекаются в определенном периоде
      *
      * @param sourcePairs пары источников-приемников, версии которых будут искаться в указанном периоде
-     * @param periodStart начало периода
-     * @param periodEnd   конец периода
+     * @param periodStart начало нового периода
+     * @param periodEnd   конец нового периода
+     * @param excludedPeriodStart начало нового периода, который будет исключен из проверки
+     * @param excludedPeriodEnd   конец нового периода, который будет исключен из проверки
      * @param declaration признак того, что выполняется назначение источников для декларации
      * @return список пересекающихся пар "приемник-источник" + их периоды
      */
-    Map<SourcePair, List<SourceObject>> getIntersections(List<SourcePair> sourcePairs, Date periodStart, Date periodEnd, boolean declaration);
+    Map<SourcePair, List<SourceObject>> getIntersections(List<SourcePair> sourcePairs, Date periodStart, Date periodEnd,
+                                                         Date excludedPeriodStart, Date excludedPeriodEnd, boolean declaration);
 
     /**
      * Получает информацию о возможных зацикливаниях в источниках приемниках

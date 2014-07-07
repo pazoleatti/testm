@@ -10,7 +10,7 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 import java.util.List;
 import java.util.Set;
 
-public class DeleteCurrentAssignsAction  extends UnsecuredActionImpl<DeleteCurrentAssignsResult> {
+public class DeleteCurrentAssignsAction extends UnsecuredActionImpl<DeleteCurrentAssignsResult> {
     private Set<CurrentAssign> currentAssigns;
     private DepartmentAssign departmentAssign;
     /** Признак того, что идет обработка назначений источников для деклараций */

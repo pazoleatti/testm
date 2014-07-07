@@ -37,7 +37,6 @@ public class DeleteCurrentAssignsHandler  extends AbstractActionHandler<DeleteCu
 
     @Override
     public DeleteCurrentAssignsResult execute(DeleteCurrentAssignsAction action, ExecutionContext context) throws ActionException {
-        System.out.println("Deleting started!!!!");
         DeleteCurrentAssignsResult result = new DeleteCurrentAssignsResult();
         PeriodsInterval period = action.getPeriodsInterval();
         SourceClientData sourceClientData = new SourceClientData();
@@ -77,6 +76,7 @@ public class DeleteCurrentAssignsHandler  extends AbstractActionHandler<DeleteCu
         sourceClientData.setPeriodStartName(period.getPeriodStartName());
         sourceClientData.setPeriodEnd(PeriodConvertor.getDateTo(period));
         sourceClientData.setPeriodEndName(period.getPeriodEndName());
+
         sourceService.deleteSources(logger, sourceClientData);
         result.setUuid(logEntryService.save(logger.getEntries()));
         return result;

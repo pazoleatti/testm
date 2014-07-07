@@ -2,9 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.sources.client;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.source.SourceClientData;
 import com.aplana.sbrf.taxaccounting.model.source.SourceMode;
-import com.aplana.sbrf.taxaccounting.model.source.SourcePair;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
@@ -60,7 +58,15 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
          */
         PeriodsInterval getPeriodInterval();
 
+        /**
+         * Назначаются приемники?
+         */
         boolean isSource();
+
+        /**
+         * Обработка деклараций
+         */
+        boolean isDeclaration();
 
         /**
          * Установка значений для комопонента выбора подразделения
@@ -253,7 +259,7 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
         GetCurrentAssignsAction action = new GetCurrentAssignsAction();
         action.setDepartmentId(departmentAssign.getDepartmentId());
         action.setTypeId(departmentAssign.getTypeId());
-        action.setDeclaration(departmentAssign.isDeclaration());
+        action.setDeclaration(getView().isDeclaration());
         action.setKind(departmentAssign.getKind());
         action.setPeriodsInterval(getView().getPeriodInterval());
 
@@ -274,7 +280,7 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
     @Override
     public void deleteCurrentAssign(final DepartmentAssign departmentAssign, Set<CurrentAssign> currentAssigns) {
         DeleteCurrentAssignsAction action = new DeleteCurrentAssignsAction();
-        action.setDeclaration(departmentAssign.isDeclaration());
+        action.setDeclaration(getView().isDeclaration());
         action.setMode(getView().isSource() ? SourceMode.SOURCES : SourceMode.DESTINATIONS);
         action.setPeriodsInterval(getView().getPeriodInterval());
         action.setCurrentAssigns(currentAssigns);
@@ -291,29 +297,92 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
     }
 
     @Override
-	public void updateCurrentAssign(final DepartmentAssign departmentAssign, PeriodsInterval pi, List<Long> sourceDepartmentFormTypeIds) {
-        PeriodInfo periodFrom = pi.getPeriodFrom();
-        PeriodInfo periodTo = pi.getPeriodTo();
-        int yearFrom = pi.getYearFrom();
-        int yearTo= pi.getYearTo();
+    public void prepareUpdateAssign(final DepartmentAssign departmentAssign, final CurrentAssign currentAssign) {
+        GetPeriodIntervalAction action = new GetPeriodIntervalAction();
+        action.setPeriodStart(currentAssign.getStartDateAssign());
+        action.setPeriodEnd(currentAssign.getEndDateAssign());
+        action.setTaxType(taxType);
+        dispatcher.execute(action, CallbackUtils
+                .defaultCallback(new AbstractCallback<GetPeriodIntervalResult>() {
+                    @Override
+                    public void onSuccess(final GetPeriodIntervalResult result) {
+                        openAssignDialog(AssignDialogView.State.UPDATE, result.getPeriodsInterval(), new ButtonClickHandlers() {
+                            @Override
+                            public void ok(PeriodsInterval periodsInterval) {
+                                updateCurrentAssign(departmentAssign, currentAssign, periodsInterval);
+                            }
+
+                            @Override
+                            public void cancel() {
+                                closeAssignDialog();
+                            }
+                        });
+                    }
+                }, this));
+    }
+
+    @Override
+    public void createAssign(final DepartmentAssign leftObject, Set<DepartmentAssign> rightSelectedObjects, PeriodsInterval periodInterval, List<Integer> leftDepartment, List<Integer> rightDepartment) {
+        if (checkInterval(periodInterval)) {
+            if (leftDepartment == null || leftDepartment.isEmpty()
+                    || rightDepartment == null || rightDepartment.isEmpty()) {
+                Dialog.errorMessage("Создание назначения", "Подразделение не выбрано!");
+                return;
+            }
+            CreateAssignAction action = new CreateAssignAction();
+            action.setDeclaration(getView().isDeclaration());
+            action.setMode(getView().isSource() ? SourceMode.SOURCES : SourceMode.DESTINATIONS);
+            action.setPeriodsInterval(periodInterval);
+            action.setLeftObject(leftObject);
+            action.setRightSelectedObjects(rightSelectedObjects);
+            action.setLeftDepartmentId(leftDepartment.get(0));
+            action.setRightDepartmentId(rightDepartment.get(0));
+            action.setTaxType(taxType);
+            dispatcher.execute(action, CallbackUtils
+                    .defaultCallback(new AbstractCallback<CreateAssignResult>() {
+                        @Override
+                        public void onSuccess(CreateAssignResult result) {
+                            getCurrentAssigns(leftObject);
+                            LogCleanEvent.fire(SourcesPresenter.this);
+                            LogAddEvent.fire(SourcesPresenter.this, result.getUuid());
+                        }
+                    }, this));
+        }
+    }
+
+    @Override
+	public void updateCurrentAssign(final DepartmentAssign departmentAssign, CurrentAssign currentAssign, PeriodsInterval periodInterval) {
+        if (checkInterval(periodInterval)) {
+            UpdateCurrentAssignsAction action = new UpdateCurrentAssignsAction();
+            action.setDeclaration(getView().isDeclaration());
+            action.setMode(getView().isSource() ? SourceMode.SOURCES : SourceMode.DESTINATIONS);
+            action.setNewPeriodsInterval(periodInterval);
+            action.setCurrentAssign(currentAssign);
+            action.setDepartmentAssign(departmentAssign);
+            action.setOldDateFrom(currentAssign.getStartDateAssign());
+            action.setOldDateTo(currentAssign.getEndDateAssign());
+            action.setTaxType(taxType);
+            dispatcher.execute(action, CallbackUtils
+                    .defaultCallback(new AbstractCallback<UpdateCurrentAssignsResult>() {
+                        @Override
+                        public void onSuccess(UpdateCurrentAssignsResult result) {
+                            getCurrentAssigns(departmentAssign);
+                            LogCleanEvent.fire(SourcesPresenter.this);
+                            LogAddEvent.fire(SourcesPresenter.this, result.getUuid());
+                        }
+                    }, this));
+        }
+	}
+
+    private boolean checkInterval(PeriodsInterval periodInterval) {
+        PeriodInfo periodFrom = periodInterval.getPeriodFrom();
+        PeriodInfo periodTo = periodInterval.getPeriodTo();
+        int yearFrom = periodInterval.getYearFrom();
+        int yearTo= periodInterval.getYearTo();
         if (yearFrom > yearTo || (yearFrom == yearTo && periodFrom.getStartDate().after(periodTo.getStartDate()))) {
             Dialog.errorMessage("Создание назначения", "Интервал периода указан неверно!");
-            return;
+            return false;
         }
-		UpdateCurrentAssignsAction action = new UpdateCurrentAssignsAction();
-        action.setDeclaration(departmentAssign.isDeclaration());
-		action.setDepartmentAssignId(departmentAssign.getId());
-		action.setRightDepartmentAssignIds(sourceDepartmentFormTypeIds);
-        action.setPeriodFrom(periodFrom);
-        action.setPeriodTo(periodTo);
-        action.setYearFrom(yearFrom);
-        action.setYearTo(yearTo);
-		dispatcher.execute(action, CallbackUtils
-				.defaultCallback(new AbstractCallback<UpdateCurrentAssignsResult>() {
-					@Override
-					public void onSuccess(UpdateCurrentAssignsResult result) {
-						getCurrentAssigns(departmentAssign);
-					}
-				}, this));
-	}
+        return true;
+    }
 }

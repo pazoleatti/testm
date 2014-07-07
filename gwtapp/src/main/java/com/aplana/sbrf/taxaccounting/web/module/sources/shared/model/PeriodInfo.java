@@ -10,6 +10,7 @@ import java.util.Date;
  */
 public class PeriodInfo implements HasName, Serializable {
     private static final long serialVersionUID = 342474480237083779L;
+    private String code;
     private String name;
     private Date startDate;
     private Date endDate;
@@ -36,5 +37,13 @@ public class PeriodInfo implements HasName, Serializable {
 
     public void setEndDate(Date endDate) {
         this.endDate = endDate;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
     }
 }

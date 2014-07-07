@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Set;
 
 public interface SourcesUiHandlers extends UiHandlers {
-    void updateCurrentAssign(DepartmentAssign departmentFormType, PeriodsInterval periodInterval, List<Long> sourceDepartmentFormTypeIds);
+    void updateCurrentAssign(DepartmentAssign departmentFormType, CurrentAssign currentAssign, PeriodsInterval periodInterval);
 
     void openAssignDialog(AssignDialogView.State state, PeriodsInterval pi, ButtonClickHandlers handlers);
 
@@ -31,4 +31,8 @@ public interface SourcesUiHandlers extends UiHandlers {
     TaxType getTaxType();
 
     void deleteCurrentAssign(DepartmentAssign departmentAssign, Set<CurrentAssign> currentAssigns);
+
+    void prepareUpdateAssign(DepartmentAssign departmentAssign, CurrentAssign currentAssign);
+
+    void createAssign(DepartmentAssign leftObject, Set<DepartmentAssign> rightSelectedObjects, PeriodsInterval periodsInterval, List<Integer> leftDepartment, List<Integer> rightDepartment);
 }

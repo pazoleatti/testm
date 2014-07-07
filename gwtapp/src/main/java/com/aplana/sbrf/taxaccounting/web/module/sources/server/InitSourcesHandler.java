@@ -75,6 +75,7 @@ public class InitSourcesHandler extends AbstractActionHandler<InitSourcesAction,
             }
             PeriodInfo period = new PeriodInfo();
             period.setName(record.get("NAME").getStringValue());
+            period.setCode(record.get("CODE").getStringValue());
             period.setStartDate(record.get("CALENDAR_START_DATE").getDateValue());
             period.setEndDate(record.get("END_DATE").getDateValue());
             periods.add(period);

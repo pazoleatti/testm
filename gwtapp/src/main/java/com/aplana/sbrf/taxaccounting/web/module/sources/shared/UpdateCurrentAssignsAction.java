@@ -1,65 +1,52 @@
 package com.aplana.sbrf.taxaccounting.web.module.sources.shared;
 
+import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.source.SourceMode;
+import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.CurrentAssign;
+import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.DepartmentAssign;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.PeriodInfo;
+import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.PeriodsInterval;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 public class UpdateCurrentAssignsAction extends UnsecuredActionImpl<UpdateCurrentAssignsResult> {
-    private Long departmentAssignId;
-    private List<Long> rightDepartmentAssignIds;
-    private PeriodInfo periodFrom;
-    private PeriodInfo periodTo;
-    private int yearFrom;
-    private int yearTo;
+    private DepartmentAssign departmentAssign;
+    /** Признак того, что идет обработка назначений источников для деклараций */
     private boolean isDeclaration;
+    /** Назначение источников или приемников? */
+    private SourceMode mode;
+    private PeriodsInterval newPeriodsInterval;
+    private CurrentAssign currentAssign;
 
-    public PeriodInfo getPeriodFrom() {
-        return periodFrom;
+    private Date oldDateFrom;
+    private Date oldDateTo;
+    private TaxType taxType;
+
+    public Date getOldDateFrom() {
+        return oldDateFrom;
     }
 
-    public void setPeriodFrom(PeriodInfo periodFrom) {
-        this.periodFrom = periodFrom;
+    public void setOldDateFrom(Date oldDateFrom) {
+        this.oldDateFrom = oldDateFrom;
     }
 
-    public PeriodInfo getPeriodTo() {
-        return periodTo;
+    public Date getOldDateTo() {
+        return oldDateTo;
     }
 
-    public void setPeriodTo(PeriodInfo periodTo) {
-        this.periodTo = periodTo;
+    public void setOldDateTo(Date oldDateTo) {
+        this.oldDateTo = oldDateTo;
     }
 
-    public int getYearFrom() {
-        return yearFrom;
+    public DepartmentAssign getDepartmentAssign() {
+        return departmentAssign;
     }
 
-    public void setYearFrom(int yearFrom) {
-        this.yearFrom = yearFrom;
-    }
-
-    public int getYearTo() {
-        return yearTo;
-    }
-
-    public void setYearTo(int yearTo) {
-        this.yearTo = yearTo;
-    }
-
-    public Long getDepartmentAssignId() {
-        return departmentAssignId;
-    }
-
-    public void setDepartmentAssignId(Long departmentAssignId) {
-        this.departmentAssignId = departmentAssignId;
-    }
-
-    public List<Long> getRightDepartmentAssignIds() {
-        return rightDepartmentAssignIds;
-    }
-
-    public void setRightDepartmentAssignIds(List<Long> rightDepartmentAssignIds) {
-        this.rightDepartmentAssignIds = rightDepartmentAssignIds;
+    public void setDepartmentAssign(DepartmentAssign departmentAssign) {
+        this.departmentAssign = departmentAssign;
     }
 
     public boolean isDeclaration() {
@@ -68,5 +55,37 @@ public class UpdateCurrentAssignsAction extends UnsecuredActionImpl<UpdateCurren
 
     public void setDeclaration(boolean declaration) {
         isDeclaration = declaration;
+    }
+
+    public SourceMode getMode() {
+        return mode;
+    }
+
+    public void setMode(SourceMode mode) {
+        this.mode = mode;
+    }
+
+    public PeriodsInterval getNewPeriodsInterval() {
+        return newPeriodsInterval;
+    }
+
+    public void setNewPeriodsInterval(PeriodsInterval newPeriodsInterval) {
+        this.newPeriodsInterval = newPeriodsInterval;
+    }
+
+    public CurrentAssign getCurrentAssign() {
+        return currentAssign;
+    }
+
+    public void setCurrentAssign(CurrentAssign currentAssign) {
+        this.currentAssign = currentAssign;
+    }
+
+    public TaxType getTaxType() {
+        return taxType;
+    }
+
+    public void setTaxType(TaxType taxType) {
+        this.taxType = taxType;
     }
 }
