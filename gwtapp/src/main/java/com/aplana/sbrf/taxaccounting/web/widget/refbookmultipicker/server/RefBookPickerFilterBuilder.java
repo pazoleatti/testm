@@ -119,34 +119,12 @@ public class RefBookPickerFilterBuilder {
             resultFilter.append("(" + regionFilter + ")");
         }
 
-        StringBuilder resultSearch = new StringBuilder();
-        if (searchPattern != null && !searchPattern.trim().isEmpty()) {
-
-            for (RefBookAttribute attribute : refBook.getAttributes()) {
-                if (RefBookAttributeType.STRING.equals(attribute.getAttributeType())) {
-                    if (resultSearch.length() > 0) {
-                        resultSearch.append(" or ");
-                    }
-                    resultSearch.append("LOWER(").append(attribute.getAlias()).append(")").append(" like ")
-                            .append("'%" + searchPattern.trim().toLowerCase() + "%'");
-                }/*
-                 * else if
-				 * (RefBookAttributeType.NUMBER.equals(attribute.getAttributeType
-				 * ()) && isNumeric(searchPattern)){ if (resultSearch.length() >
-				 * 0){ resultSearch.append(" or "); }
-				 * resultSearch.append(attribute
-				 * .getAlias()).append("=").append("\"" + searchPattern + "\"");
-				 * }
-				 */
-            }
-
-        }
-
-        if (resultFilter.length() > 0 && resultSearch.length() > 0) {
+        String resultSearch = refBookFactory.getSearchQueryStatement(searchPattern, refBook.getId());
+        if (resultFilter.length() > 0 && resultSearch != null && resultSearch.length() > 0) {
             return "(" + resultFilter.toString() + ") and (" + resultSearch.toString() + ")";
-        } else if (resultFilter.length() > 0 && resultSearch.length() == 0) {
+        } else if (resultFilter.length() > 0 && resultSearch != null && resultSearch.length() == 0) {
             return resultFilter.toString();
-        } else if (resultSearch.length() > 0 && resultFilter.length() == 0) {
+        } else if (resultSearch != null && resultSearch.length() > 0 && resultFilter.length() == 0) {
             return resultSearch.toString();
         } else {
             return null;
