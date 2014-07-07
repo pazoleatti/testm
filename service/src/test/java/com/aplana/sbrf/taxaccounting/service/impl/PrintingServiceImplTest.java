@@ -41,7 +41,7 @@ public class PrintingServiceImplTest {
         user.setActive(true);
 
         LogSearchResultItem item =  new LogSearchResultItem();
-        item.setUser(user);
+        item.setUser(user.getLogin());
         ReportPeriod rp =  new ReportPeriod();
         TaxPeriod taxPeriod = new TaxPeriod();
 		taxPeriod.setYear(Calendar.getInstance().get(Calendar.YEAR));
@@ -54,11 +54,11 @@ public class PrintingServiceImplTest {
         item.setFormKind(FormDataKind.ADDITIONAL);
         DeclarationType declarationType = new DeclarationType();
         declarationType.setName("РНУ");
-        item.setDeclarationType(declarationType);
+        item.setDeclarationTypeName(declarationType.getName());
 
         FormType type = new FormType();
         type.setName("Сводная");
-        item.setFormType(type);
+        item.setFormTypeName(type.getName());
 
         item.setDepartmentName("Начальный");
         item.setLogDate(new Date());

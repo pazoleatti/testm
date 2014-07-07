@@ -36,13 +36,13 @@ public class LogSystemReportBuilderTest {
         item.setLogDate(new Date());
         item.setNote("Проверочка!");
         item.setFormKind(FormDataKind.ADDITIONAL);
-        item.setFormType(type);
+        item.setFormTypeName(type.getName());
         item.setDepartmentName("Начальный");
         item.setDepartmentName("Подразделение");
-        item.setDeclarationType(declarationType);
+        item.setDeclarationTypeName(declarationType.getName());
         item.setRoles("Контролер");
         item.setEvent(FormDataEvent.ADD_ROW);
-        item.setUser(user);
+        item.setUser(user.getLogin());
         item.setReportPeriodName(String.valueOf(taxPeriod.getYear()) + " " + reportPeriod.getName());
 
         for (int i = 0; i < 130; i++)

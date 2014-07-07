@@ -675,12 +675,13 @@ create table log_system (
   user_id             number(9,0),
   roles               varchar2(200),
   department_name     varchar2(4000 byte) not null,
-  report_period_name  varchar2(50),
-  declaration_type_id number(9,0),
-  form_type_id        number(9,0),
+  report_period_name  varchar2(100),
   form_kind_id        number(9,0),
   note                varchar2(4000 byte),
-  user_department_name varchar2(4000 byte)
+  user_department_name varchar2(4000 byte),
+  declaration_type_name varchar2(80),
+  form_type_name      varchar2(1000),
+  form_department_id  number(9)
 );
 comment on table log_system is  'Системный журнал';
 comment on column log_system.id is 'Код записи';
@@ -691,11 +692,12 @@ comment on column log_system.user_id is 'Код пользователя';
 comment on column log_system.roles is 'Список ролей пользователя';
 comment on column log_system.department_name is 'Наименование подразделения НФ\декларации';
 comment on column log_system.report_period_name is 'Имя отчетного периода';
-comment on column log_system.declaration_type_id is 'Код вида декларации';
-comment on column log_system.form_type_id is 'Код вида налоговой формы';
 comment on column log_system.form_kind_id is 'Код типа налоговой формы (1,2,3,4,5)';
 comment on column log_system.note is 'Текст сообщения';
 comment on column log_system.user_department_name is 'Наименование подразделения пользователя';
+comment on column LOG_SYSTEM.DECLARATION_TYPE_NAME is 'Вид декларации';
+comment on column LOG_SYSTEM.FORM_TYPE_NAME is 'Вид налоговой формы';
+comment on column LOG_SYSTEM.FORM_DEPARTMENT_ID is 'Идентификатор подразделения налоговой формы/декларации';
 
 create sequence seq_log_system start with 10000;
 ------------------------------------------------------------------------------------------------------
@@ -773,6 +775,16 @@ comment on column template_changes.declaration_template_id is 'Идентифи�
 comment on column template_changes.event is 'Событие версии';
 comment on column template_changes.author is 'Автор изменения';
 comment on column template_changes.date_event is 'Дата изменения';
+
+create table event
+(
+id number(9) NOT NULL,
+name varchar2(510) NOT NULL
+);
+
+COMMENT ON TABLE event IS 'Справочник событий в системе';
+COMMENT ON COLUMN event.id IS 'Идентификатор события';
+COMMENT ON COLUMN event.name IS 'Наименование события';
 
  create sequence seq_template_changes start with 10000;
 --------------------------------------------------------------------------------------------------------

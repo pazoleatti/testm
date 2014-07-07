@@ -158,8 +158,8 @@ public class LogSystemXlsxReportBuilder extends AbstractReportBuilder {
 
             cell = row.createCell(cellNumber);
             cell.setCellStyle(cs);
-            cell.setCellValue(item.getFormType() != null?"Налоговые формы" :
-                    item.getDeclarationType() != null?"Декларации":"");
+            cell.setCellValue(item.getFormTypeName() != null?"Налоговые формы" :
+                    item.getDeclarationTypeName() != null?"Декларации":"");
             cellNumber++;
 
             cell = row.createCell(cellNumber);
@@ -169,13 +169,13 @@ public class LogSystemXlsxReportBuilder extends AbstractReportBuilder {
 
             cell = row.createCell(cellNumber);
             cell.setCellStyle(csFormType);
-            cell.setCellValue(item.getFormType() != null? item.getFormType().getName() :
-                    item.getDeclarationType() != null? item.getDeclarationType().getName() : "");
+            cell.setCellValue(item.getFormTypeName() != null? item.getFormTypeName() :
+                    item.getDeclarationTypeName() != null? item.getDeclarationTypeName() : "");
             cellNumber++;
 
             cell = row.createCell(cellNumber);
             cell.setCellStyle(cs);
-            cell.setCellValue(item.getUser().getLogin());
+            cell.setCellValue(item.getUser());
             cellNumber++;
 
             cell = row.createCell(cellNumber);

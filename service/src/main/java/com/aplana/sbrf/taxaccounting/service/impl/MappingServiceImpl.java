@@ -68,7 +68,7 @@ public class MappingServiceImpl implements MappingService {
 
         RestoreExemplar restoreExemplar;
         Integer departmentId = null;
-        Integer formTypeId = null;
+        String formTypeName = null;
         ReportPeriod reportPeriod = null;
         Integer reportPeriodId = null;
         Integer formTemplateId = null;
@@ -89,7 +89,7 @@ public class MappingServiceImpl implements MappingService {
             if (restoreExemplar != null) {
                 formTemplateId = restoreExemplar.getFormTemplateId();
                 FormTemplate template = formTemplateService.get(formTemplateId);
-                formTypeId = template.getType().getId();
+                formTypeName = template.getType().getName();
                 departmentId = restoreExemplar.getDepartmentId();
                 periodOrder = restoreExemplar.getPeriodOrder();
             }
@@ -140,7 +140,7 @@ public class MappingServiceImpl implements MappingService {
 
             // Ошибка импорта
             log.error("Ошибка импорта файла " + filename + " : " + e.getClass() + " " +  e.getMessage(), e);
-            addLog(userInfo, departmentId, reportPeriodId, formTypeId, "Ошибка импорта файла " + filename + ": "
+            addLog(userInfo, departmentId, reportPeriodId, formTypeName, "Ошибка импорта файла " + filename + ": "
                         + e.getMessage());
 
             return;
@@ -150,13 +150,13 @@ public class MappingServiceImpl implements MappingService {
             // Форма уже была создана
             log.info("Уже был создан экземпляр формы с такими параметрами как в " + filename + " departmentId = " + departmentId + " reportPeriodId = "
                     + reportPeriodId );
-            addLog(userInfo, departmentId, reportPeriodId, formTypeId, "Экзмепляр формы для файла " + filename + " уже существует. Импорт файла был пропущен.");
+            addLog(userInfo, departmentId, reportPeriodId, formTypeName, "Экзмепляр формы для файла " + filename + " уже существует. Импорт файла был пропущен.");
 
         } else {
             // Успешный импорт
             log.info("Успешно импортирован файл " + filename + " departmentId = " + departmentId + " reportPeriodId = "
-                    + reportPeriodId + " formTypeId = " + formTypeId);
-            addLog(userInfo, departmentId, reportPeriodId, formTypeId, "Успешно импортирован файл " + filename);
+                    + reportPeriodId + " formTypeName = " + formTypeName);
+            addLog(userInfo, departmentId, reportPeriodId, formTypeName, "Успешно импортирован файл " + filename);
         }
 
     }
@@ -166,14 +166,14 @@ public class MappingServiceImpl implements MappingService {
      * @param userInfo
      * @param departmentId
      * @param reportPeriodId
-     * @param formTypeId
+     * @param formTypeName
      * @param msg
      */
-    public void addLog(TAUserInfo userInfo, Integer departmentId, Integer reportPeriodId, Integer formTypeId,
+    private void addLog(TAUserInfo userInfo, Integer departmentId, Integer reportPeriodId, String formTypeName,
                         String msg) {
         try {
             // Ошибка записи в журнал аудита не должна откатывать импорт
-            auditService.add(FormDataEvent.MIGRATION, userInfo, departmentId, reportPeriodId, null, formTypeId,
+            auditService.add(FormDataEvent.MIGRATION, userInfo, departmentId, reportPeriodId, null, formTypeName,
                     FormDataKind.PRIMARY.getId(), msg);
         } catch (Exception e) {
             log.error("Ошибка записи в журнал аудита", e);

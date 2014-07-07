@@ -123,7 +123,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 		logBusinessService.add(null, id, userInfo, FormDataEvent.CREATE, null);
 		auditService.add(FormDataEvent.CREATE , userInfo, newDeclaration.getDepartmentId(),
 				newDeclaration.getReportPeriodId(),
-				declarationTemplateDao.get(newDeclaration.getDeclarationTemplateId()).getType().getId(),
+				declarationTemplateDao.get(newDeclaration.getDeclarationTemplateId()).getType().getName(),
 				null, null, null);
 		return id;
 	}
@@ -160,7 +160,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 		logBusinessService.add(null, id, userInfo, FormDataEvent.SAVE, null);
 		auditService.add(FormDataEvent.SAVE , userInfo, declarationData.getDepartmentId(),
 				declarationData.getReportPeriodId(),
-				declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getType().getId(),
+				declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getType().getName(),
 				null, null, null);
 	}
 
@@ -195,7 +195,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
 			auditService.add(FormDataEvent.DELETE , userInfo, declarationData.getDepartmentId(),
 					declarationData.getReportPeriodId(),
-					declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getType().getId(),
+					declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getType().getName(),
 					null, null, null);
 
 	}
@@ -216,10 +216,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
             declarationData.setAccepted(true);
 
-            Integer declarationTypeId = declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getType().getId();
+            String declarationTypeName = declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getType().getName();
             logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, null);
             auditService.add(FormDataEvent.MOVE_CREATED_TO_ACCEPTED , userInfo, declarationData.getDepartmentId(),
-                    declarationData.getReportPeriodId(), declarationTypeId, null, null, null);
+                    declarationData.getReportPeriodId(), declarationTypeName, null, null, null);
 		} else {
 			declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_ACCEPTED_TO_CREATED);
 
@@ -229,10 +229,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 			Map<String, Object> exchangeParams = new HashMap<String, Object>();
 			declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, logger, exchangeParams);
 
-			Integer declarationTypeId = declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getType().getId();
+            String declarationTypeName = declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getType().getName();
 			logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, null);
 			auditService.add(FormDataEvent.MOVE_ACCEPTED_TO_CREATED , userInfo, declarationData.getDepartmentId(),
-					declarationData.getReportPeriodId(), declarationTypeId, null, null, null);
+					declarationData.getReportPeriodId(), declarationTypeName, null, null, null);
 
 		}
 		declarationDataDao.setAccepted(id, accepted);
