@@ -73,6 +73,9 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
+        break
 }
 
 //// Кэши и константы
@@ -496,4 +499,91 @@ def isBalancePeriod() {
         isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
     }
     return isBalancePeriod
+}
+
+void importTransportData() {
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    addTransportData(xml)
+
+    def dataRows = formDataService.getDataRowHelper(formData)?.allCached
+    checkTotalSum(dataRows, totalColumns, logger, true)
+}
+
+void addTransportData(def xml) {
+    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def int rnuIndexRow = 2
+    def int colOffset = 1
+    def rows = []
+    def int rowIndex = 1
+
+    for (def row : xml.row) {
+        rnuIndexRow++
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
+        def cols = isBalancePeriod() ? (allColumns - 'rowNumber') : editableColumns
+        def autoColumns = isBalancePeriod() ? ['rowNumber'] : autoFillColumns
+        cols.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
+        autoColumns.each {
+            newRow.getCell(it).setStyleAlias('Автозаполняемая')
+        }
+
+        // графа 2
+        newRow.billNumber = row.cell[2].text()
+        // графа 3
+        newRow.creationDate = parseDate(row.cell[3].text(), "dd.MM.yyyy", rnuIndexRow, 3 + colOffset, logger, true)
+        // графа 4
+        newRow.nominal = parseNumber(row.cell[4].text(), rnuIndexRow, 4 + colOffset, logger, true)
+        // графа 5
+        newRow.currencyCode = getRecordIdImport(15, 'CODE', row.cell[5].text(), rnuIndexRow, 5 + colOffset)
+        // графа 6
+        newRow.rateBRBill = parseNumber(row.cell[6].text(), rnuIndexRow, 6 + colOffset, logger, true)
+        // графа 7
+        newRow.rateBROperation = parseNumber(row.cell[7].text(), rnuIndexRow, 7 + colOffset, logger, true)
+        // графа 8
+        newRow.paymentStart = parseDate(row.cell[8].text(), "dd.MM.yyyy", rnuIndexRow, 8 + colOffset, logger, true)
+        // графа 9
+        newRow.paymentEnd = parseDate(row.cell[9].text(), "dd.MM.yyyy", rnuIndexRow, 9 + colOffset, logger, true)
+        // графа 10
+        newRow.interestRate = parseNumber(row.cell[10].text(), rnuIndexRow, 10 + colOffset, logger, true)
+        // графа 11
+        newRow.operationDate = parseDate(row.cell[11].text(), "dd.MM.yyyy", rnuIndexRow, 11 + colOffset, logger, true)
+        // графа 12
+        newRow.sum70606 = parseNumber(row.cell[12].text(), rnuIndexRow, 12 + colOffset, logger, true)
+        // графа 13
+        newRow.sumLimit = parseNumber(row.cell[13].text(), rnuIndexRow, 13 + colOffset, logger, true)
+        // графа 14
+        newRow.percAdjustment = parseNumber(row.cell[14].text(), rnuIndexRow, 14 + colOffset, logger, true)
+
+        rows.add(newRow)
+    }
+
+    if (xml.rowTotal.size() == 1) {
+        rnuIndexRow = rnuIndexRow + 2
+
+        def row = xml.rowTotal[0]
+
+        def total = formData.createDataRow()
+        total.setAlias('total')
+        total.fix = 'Итого'
+        total.getCell('fix').colSpan = 2
+        allColumns.each {
+            total.getCell(it).setStyleAlias('Контрольные суммы')
+        }
+
+        // графа 14
+        total.percAdjustment = parseNumber(row.cell[14].text(), rnuIndexRow, 14 + colOffset, logger, true)
+
+        rows.add(total)
+    }
+
+    dataRowHelper.save(rows)
 }
