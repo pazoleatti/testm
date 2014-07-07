@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.audit.shared;
 import com.aplana.sbrf.taxaccounting.model.*;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -11,44 +12,27 @@ import java.util.List;
  */
 public class LogSystemAuditFilter implements Serializable {
 
-    private List<Long> userIds;
-    private String reportPeriodName;
-    private List<Long> formKind;
-    private TaxType taxType;
-    private Integer declarationTypeId;
-    private AuditFormType auditFormTypeId;
-    private List<Long> formTypeIds;
-    private String departmentName;
+    private List<Long> auditFieldList;
+    private String filter;
+    private LogSystemAuditFilter oldLogSystemAuditFilter;
     private Date fromSearchDate = new Date();
     private Date toSearchDate = new Date();
 
 
     public LogSystemAuditFilter() {
+        auditFieldList = new ArrayList<Long>();
     }
 
     public LogSystemAuditFilter(LogSystemAuditFilter filter) {
-        this.userIds = filter.getUserIds();
-        this.reportPeriodName = filter.getReportPeriodName();
-        this.formKind = filter.getFormKind();
-        this.taxType = filter.getTaxType();
-        this.declarationTypeId = filter.getDeclarationTypeId();
-        this.auditFormTypeId = filter.getAuditFormTypeId();
-        this.formTypeIds = filter.getFormTypeIds();
-        this.departmentName = filter.getDepartmentName();
         this.fromSearchDate = filter.getFromSearchDate();
         this.toSearchDate = filter.getToSearchDate();
         this.startIndex = filter.getStartIndex();
         this.countOfRecords = filter.getCountOfRecords();
         this.searchOrdering = filter.getSearchOrdering();
         this.ascSorting = filter.isAscSorting();
-    }
-
-    public TaxType getTaxType() {
-        return taxType;
-    }
-
-    public void setTaxType(TaxType taxType) {
-        this.taxType = taxType;
+        this.filter = filter.getFilter();
+        this.auditFieldList = filter.getAuditFieldList();
+        this.oldLogSystemAuditFilter = filter.getOldLogSystemAuditFilter();
     }
 
     /*Стартовый индекс списка записей */
@@ -62,52 +46,28 @@ public class LogSystemAuditFilter implements Serializable {
     /*true, если сортируем по возрастанию, false - по убыванию*/
     private boolean ascSorting;
 
-    public List<Long> getUserIds() {
-        return userIds;
+    public List<Long> getAuditFieldList() {
+        return auditFieldList;
     }
 
-    public void setUserIds(List<Long> userIds) {
-        this.userIds = userIds;
+    public void setAuditFieldList(List<Long> auditFieldList) {
+        this.auditFieldList = auditFieldList;
     }
 
-    public String getReportPeriodName() {
-        return reportPeriodName;
+    public String getFilter() {
+        return filter;
     }
 
-    public void setReportPeriodName(String reportPeriodName) {
-        this.reportPeriodName = reportPeriodName;
+    public void setFilter(String filter) {
+        this.filter = filter;
     }
 
-    public List<Long> getFormKind() {
-        return formKind;
+    public LogSystemAuditFilter getOldLogSystemAuditFilter() {
+        return oldLogSystemAuditFilter;
     }
 
-    public void setFormKind(List<Long> formKind) {
-        this.formKind = formKind;
-    }
-
-    public Integer getDeclarationTypeId() {
-        return declarationTypeId;
-    }
-
-    public void setDeclarationTypeId(Integer declarationTypeId) {
-        this.declarationTypeId = declarationTypeId;
-    }
-
-    public List<Long> getFormTypeIds() {
-        return formTypeIds;
-    }
-
-    public void setFormTypeIds(List<Long> formTypeIds) {
-        this.formTypeIds = formTypeIds;
-    }
-
-    public String getDepartmentName() {
-        return departmentName;
-    }
-
-    public void setDepartmentName(String departmentName) {
-        this.departmentName = departmentName;
+    public void setOldLogSystemAuditFilter(LogSystemAuditFilter oldLogSystemAuditFilter) {
+        this.oldLogSystemAuditFilter = oldLogSystemAuditFilter;
     }
 
     public Date getFromSearchDate() {
@@ -158,31 +118,47 @@ public class LogSystemAuditFilter implements Serializable {
         this.ascSorting = ascSorting;
     }
 
-    public AuditFormType getAuditFormTypeId() {
-        return auditFormTypeId;
-    }
-
-    public void setAuditFormTypeId(AuditFormType auditFormTypeId) {
-        this.auditFormTypeId = auditFormTypeId;
-    }
-
     public LogSystemFilter convertTo(){
         LogSystemFilter systemFilter = new LogSystemFilter();
         systemFilter.setCountOfRecords(this.getCountOfRecords());
-		systemFilter.setFormKind(formKind);
-		systemFilter.setDepartmentName(this.departmentName);
-        systemFilter.setTaxType(this.getTaxType());
         systemFilter.setAscSorting(this.isAscSorting());
-        systemFilter.setAuditFormTypeId(auditFormTypeId != null? auditFormTypeId.getId() : null);
-        systemFilter.setDeclarationTypeId(this.getDeclarationTypeId());
-        systemFilter.setFormTypeId(formTypeIds);
         systemFilter.setFromSearchDate(this.getFromSearchDate());
         systemFilter.setToSearchDate(this.getToSearchDate());
-        systemFilter.setReportPeriodName(this.getReportPeriodName());
-        systemFilter.setUserIds(this.getUserIds());
         systemFilter.setStartIndex(this.getStartIndex());
         systemFilter.setSearchOrdering(this.getSearchOrdering());
+        systemFilter.setFilter(this.getFilter());
+        systemFilter.setAuditFieldList(this.getAuditFieldList());
 
+        LogSystemFilter iter = systemFilter;
+        LogSystemAuditFilter iterT = this;
+        while (iterT.getOldLogSystemAuditFilter() != null) {
+            iterT = iterT.getOldLogSystemAuditFilter();
+            LogSystemFilter oldSystemFilter = new LogSystemFilter();
+            oldSystemFilter.setFromSearchDate(iterT.getFromSearchDate());
+            oldSystemFilter.setToSearchDate(iterT.getToSearchDate());
+            oldSystemFilter.setFilter(iterT.getFilter());
+            oldSystemFilter.setAuditFieldList(iterT.getAuditFieldList());
+
+            iter.setOldLogSystemFilter(oldSystemFilter);
+            iter = oldSystemFilter;
+        }
         return systemFilter;
+    }
+
+    public String toString() {
+        ArrayList<String> ls = new ArrayList<String>();
+        LogSystemAuditFilter logSystemAuditFilter = this;
+        while (logSystemAuditFilter != null) {
+            if (logSystemAuditFilter.getFilter() != null && !ls.contains(logSystemAuditFilter.getFilter())) {
+                ls.add(logSystemAuditFilter.getFilter());
+            }
+            logSystemAuditFilter = logSystemAuditFilter.getOldLogSystemAuditFilter();
+        }
+        StringBuffer strBuff = new StringBuffer();
+        for(int i=0; i < ls.size() ; i++) {
+            strBuff.append("'").append(ls.get(i)).append("'");
+            if (i != (ls.size() - 1)) strBuff.append("; ");
+        }
+        return strBuff.toString();
     }
 }

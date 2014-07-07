@@ -91,11 +91,11 @@ public class LogSystemCsvBuilder extends AbstractReportBuilder {
         entries.add(item.getNote());
         entries.add(item.getReportPeriodName() != null ? item.getReportPeriodName() : "");
         entries.add(item.getDepartmentName());
-        entries.add(item.getFormType() != null?"Налоговые формы" :
-                item.getDeclarationType() != null?"Декларации":"");
+        entries.add(item.getFormTypeName() != null?"Налоговые формы" :
+                item.getDeclarationTypeName() != null?"Декларации":"");
         entries.add(item.getFormKind() != null ? item.getFormKind().getName() : "");
-        entries.add(item.getFormType() != null ? item.getFormType().getName() : "");
-        entries.add(item.getUser().getName());
+        entries.add(item.getFormTypeName());
+        entries.add(item.getUser());
         entries.add(item.getRoles());
         entries.add(item.getIp());
 

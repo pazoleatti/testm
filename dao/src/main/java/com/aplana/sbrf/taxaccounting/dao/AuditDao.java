@@ -33,6 +33,6 @@ public interface AuditDao {
      */
     Date lastArchiveDate();
 
-    PagingResult<LogSearchResultItem> getLogsBusiness(LogSystemFilterDao filter);
+    PagingResult<LogSearchResultItem> getLogsBusiness(LogSystemFilter filter, List<Integer> departments);
 
 }

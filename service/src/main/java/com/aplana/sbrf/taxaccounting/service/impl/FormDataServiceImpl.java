@@ -223,7 +223,7 @@ public class FormDataServiceImpl implements FormDataService {
 
             logBusinessService.add(formDataId, null, userInfo, formDataEvent, null);
             auditService.add(formDataEvent, userInfo, fd.getDepartmentId(), fd.getReportPeriodId(),
-                    null, fd.getFormType().getId(), fd.getKind().getId(), fileName);
+                    null, fd.getFormType().getName(), fd.getKind().getId(), fileName);
         } catch (IOException e) {
             throw new ServiceException(e.getLocalizedMessage(), e);
         } finally {
@@ -299,7 +299,7 @@ public class FormDataServiceImpl implements FormDataService {
 		logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.CREATE, null);
 		auditService.add(FormDataEvent.CREATE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
 
-				null, formData.getFormType().getId(), formData.getKind().getId(), null);
+				null, formData.getFormType().getName(), formData.getKind().getId(), null);
 		// Заполняем начальные строки (но не сохраняем)
 		dataRowDao.saveRows(formData, formTemplate.getRows());
 
@@ -462,7 +462,7 @@ public class FormDataServiceImpl implements FormDataService {
 
 		logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.SAVE, null);
 		auditService.add(FormDataEvent.SAVE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-                null, formData.getFormType().getId(), formData.getKind().getId(), null);
+                null, formData.getFormType().getName(), formData.getKind().getId(), null);
 
         updatePreviousRowNumber(formData);
 
@@ -521,7 +521,7 @@ public class FormDataServiceImpl implements FormDataService {
 
             FormData formData = formDataDao.get(formDataId, manual);
             auditService.add(FormDataEvent.DELETE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-                    null, formData.getFormType().getId(), formData.getKind().getId(), null);
+                    null, formData.getFormType().getName(), formData.getKind().getId(), null);
             formDataDao.delete(formDataId);
         }
 	}
@@ -581,7 +581,7 @@ public class FormDataServiceImpl implements FormDataService {
 
         logBusinessService.add(formData.getId(), null, userInfo, workflowMove.getEvent(), note);
         auditService.add(workflowMove.getEvent(), userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-                null, formData.getFormType().getId(), formData.getKind().getId(), note);
+                null, formData.getFormType().getName(), formData.getKind().getId(), note);
 
         String msg = updatePreviousRowNumber(formData);
         if (msg != null) {

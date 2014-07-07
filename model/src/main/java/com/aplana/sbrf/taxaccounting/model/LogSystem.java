@@ -17,13 +17,14 @@ public class LogSystem implements Serializable {
 	private int eventId;
 	private int userId;
 	private String roles;
-	private String departmentName;
+	private String formDepartmentName;
     private String reportPeriodName;
-	private Integer declarationTypeId;
-	private Integer formTypeId;
+	private String declarationTypeName;
+	private String formTypeName;
 	private Integer formKindId;
 	private String note;
     private String userDepartmentName;
+    private Integer formDepartmentId;
 
     public String getReportPeriodName() {
         return reportPeriodName;
@@ -73,37 +74,37 @@ public class LogSystem implements Serializable {
 		this.userId = userId;
 	}
 
-	public String getRoles() {
-		return roles;
-	}
+    public String getRoles() {
+        return roles;
+    }
 
 	public void setRoles(String roles) {
 		this.roles = roles;
 	}
 
-    public String getDepartmentName() {
-        return departmentName;
+    public String getFormDepartmentName() {
+        return formDepartmentName;
     }
 
-    public void setDepartmentName(String departmentName) {
-        this.departmentName = departmentName;
+    public void setFormDepartmentName(String formDepartmentName) {
+        this.formDepartmentName = formDepartmentName;
     }
 
-    public Integer getDeclarationTypeId() {
-		return declarationTypeId;
-	}
+    public String getDeclarationTypeName() {
+        return declarationTypeName;
+    }
 
-	public void setDeclarationTypeId(Integer declarationTypeId) {
-		this.declarationTypeId = declarationTypeId;
-	}
+    public void setDeclarationTypeName(String declarationTypeName) {
+        this.declarationTypeName = declarationTypeName;
+    }
 
-	public Integer getFormTypeId() {
-		return formTypeId;
-	}
+    public String getFormTypeName() {
+        return formTypeName;
+    }
 
-	public void setFormTypeId(Integer formTypeId) {
-		this.formTypeId = formTypeId;
-	}
+    public void setFormTypeName(String formTypeName) {
+        this.formTypeName = formTypeName;
+    }
 
 	public Integer getFormKindId() {
 		return formKindId;
@@ -127,5 +128,13 @@ public class LogSystem implements Serializable {
 
     public void setUserDepartmentName(String userDepartmentName) {
         this.userDepartmentName = userDepartmentName;
+    }
+
+    public Integer getFormDepartmentId() {
+        return formDepartmentId;
+    }
+
+    public void setFormDepartmentId(Integer formDepartmentId) {
+        this.formDepartmentId = formDepartmentId;
     }
 }

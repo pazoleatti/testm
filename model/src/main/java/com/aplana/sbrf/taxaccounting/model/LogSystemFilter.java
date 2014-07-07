@@ -11,24 +11,11 @@ import java.util.List;
 public class LogSystemFilter implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private List<Long> userIds;
-    private String reportPeriodName;
-    private List<Long> formKind;
-    private TaxType taxType;
-    private Integer declarationTypeId;
-    private Integer auditFormTypeId;
-    private String departmentName;
-    private List<Long> formTypeId;
+    private List<Long> auditFieldList;
+    private String filter;
+    private LogSystemFilter oldLogSystemFilter;
     private Date fromSearchDate;
     private Date toSearchDate;
-
-    public TaxType getTaxType() {
-        return taxType;
-    }
-
-    public void setTaxType(TaxType taxType) {
-        this.taxType = taxType;
-    }
 
     /*Стартовый индекс списка записей */
     private int startIndex;
@@ -41,53 +28,21 @@ public class LogSystemFilter implements Serializable {
     /*true, если сортируем по возрастанию, false - по убыванию*/
     private boolean ascSorting;
 
-    public List<Long> getUserIds() {
-        return userIds;
+    public List<Long> getAuditFieldList() {
+        return auditFieldList;
     }
 
-    public void setUserIds(List<Long> userIds) {
-        this.userIds = userIds;
+    public void setAuditFieldList(List<Long> auditFieldList) {
+        this.auditFieldList = auditFieldList;
     }
 
-    public String getReportPeriodName() {
-        return reportPeriodName;
+    public String getFilter() {
+        return filter;
     }
 
-    public void setReportPeriodName(String reportPeriodName) {
-        this.reportPeriodName = reportPeriodName;
+    public void setFilter(String filter) {
+        this.filter = filter;
     }
-
-    public List<Long> getFormKind() {
-        return formKind;
-    }
-
-    public void setFormKind(List<Long> formKind) {
-        this.formKind = formKind;
-    }
-
-    public Integer getDeclarationTypeId() {
-        return declarationTypeId;
-    }
-
-    public void setDeclarationTypeId(Integer declarationTypeId) {
-        this.declarationTypeId = declarationTypeId;
-    }
-
-    public List<Long> getFormTypeId() {
-        return formTypeId;
-    }
-
-    public void setFormTypeId(List<Long> formTypeId) {
-        this.formTypeId = formTypeId;
-    }
-
-	public String getDepartmentName() {
-		return departmentName;
-	}
-
-	public void setDepartmentName(String departmentName) {
-		this.departmentName = departmentName;
-	}
 
     public Date getFromSearchDate() {
         return fromSearchDate;
@@ -137,11 +92,11 @@ public class LogSystemFilter implements Serializable {
         this.ascSorting = ascSorting;
     }
 
-    public Integer getAuditFormTypeId() {
-        return auditFormTypeId;
+    public LogSystemFilter getOldLogSystemFilter() {
+        return oldLogSystemFilter;
     }
 
-    public void setAuditFormTypeId(Integer auditFormTypeId) {
-        this.auditFormTypeId = auditFormTypeId;
+    public void setOldLogSystemFilter(LogSystemFilter oldLogSystemFilter) {
+        this.oldLogSystemFilter = oldLogSystemFilter;
     }
 }

@@ -47,7 +47,7 @@ public class AuditServiceImpl implements AuditService {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED, readOnly = false)
 	public void add(final FormDataEvent event, final TAUserInfo userInfo, final Integer departmentId, final Integer reportPeriodId,
-					final Integer declarationTypeId, final Integer formTypeId, final Integer formKindId, final String note) {
+                    final String declarationTypeName, final String formTypeName, final Integer formKindId, final String note) {
         tx.executeInNewTransaction(new TransactionLogic() {
             @Override
             public void execute() {
@@ -67,20 +67,21 @@ public class AuditServiceImpl implements AuditService {
                 }
                 log.setRoles(roles.toString());
 
-        String departmentName = departmentId == null ? "" : departmentService.getParentsHierarchy(departmentId);
-		log.setDepartmentName(departmentName.substring(0, Math.min(departmentName.length(), 2000)));
-        if (reportPeriodId == null)
-            log.setReportPeriodName(null);
-        else {
-            ReportPeriod reportPeriod = periodService.getReportPeriod(reportPeriodId);
-            log.setReportPeriodName(String.format(AuditService.RP_NAME_PATTERN, reportPeriod.getTaxPeriod().getYear(), reportPeriod.getName()));
-        }
-		log.setDeclarationTypeId(declarationTypeId);
-		log.setFormTypeId(formTypeId);
-		log.setFormKindId(formKindId);
-		log.setNote(note != null ? note.substring(0, Math.min(note.length(), 2000)) : null);
-        String userDepartmentName = departmentService.getParentsHierarchy(userInfo.getUser().getDepartmentId());
-		log.setUserDepartmentName(userDepartmentName.substring(0, Math.min(userDepartmentName.length(), 2000)));
+                String departmentName = departmentId == null ? "" : departmentService.getParentsHierarchy(departmentId);
+                log.setFormDepartmentName(departmentName.substring(0, Math.min(departmentName.length(), 2000)));
+                log.setFormDepartmentId(departmentId);
+                if (reportPeriodId == null)
+                    log.setReportPeriodName(null);
+                else {
+                    ReportPeriod reportPeriod = periodService.getReportPeriod(reportPeriodId);
+                    log.setReportPeriodName(String.format(AuditService.RP_NAME_PATTERN, reportPeriod.getTaxPeriod().getYear(), reportPeriod.getName()));
+                }
+                log.setDeclarationTypeName(declarationTypeName);
+                log.setFormTypeName(formTypeName);
+                log.setFormKindId(formKindId);
+                log.setNote(note != null ? note.substring(0, Math.min(note.length(), 2000)) : null);
+                String userDepartmentName = departmentService.getParentsHierarchy(userInfo.getUser().getDepartmentId());
+                log.setUserDepartmentName(userDepartmentName.substring(0, Math.min(userDepartmentName.length(), 2000)));
 
                 auditDao.add(log);
             }
@@ -135,87 +136,11 @@ public class AuditServiceImpl implements AuditService {
 
     @Override
     public PagingResult<LogSearchResultItem> getLogsBusiness(LogSystemFilter filter, TAUserInfo userInfo) {
-        LogSystemFilterDao filterDao = new LogSystemFilterDao();
-
-        filterDao.setAuditFormTypeId(filter.getAuditFormTypeId());
-        filterDao.setDeclarationTypeId(filter.getDeclarationTypeId());
-        filterDao.setFromSearchDate(filter.getFromSearchDate());
-        filterDao.setToSearchDate(filter.getToSearchDate());
-        filterDao.setCountOfRecords(filter.getCountOfRecords());
-        filterDao.setReportPeriodName(filter.getReportPeriodName());
-        filterDao.setSearchOrdering(filter.getSearchOrdering());
-        filterDao.setAscSorting(filter.isAscSorting());
-        filterDao.setStartIndex(filter.getStartIndex());
-        filterDao.setUserIds(filter.getUserIds());
-        createFormDataDaoFilter(userInfo, filter, filterDao);
-        filterDao.setDepartmentName(filter.getDepartmentName());
+        List<Integer> departments = departmentService.getTaxFormDepartments(userInfo.getUser(), asList(TaxType.values()));
         try {
-            return auditDao.getLogsBusiness(filterDao);
+            return auditDao.getLogsBusiness(filter, departments);
         } catch (DaoException e){
             throw new ServiceException("Поиск по НФ/декларациям.", e);
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    private LogSystemFilterDao createFormDataDaoFilter(TAUserInfo userInfo, LogSystemFilter logSystemFilter, LogSystemFilterDao logSystemFilterDao) {
-
-        // Подразделения (могут быть не заданы - тогда все доступные по выборке 40 - http://conf.aplana.com/pages/viewpage.action?pageId=11380670)
-        List<Integer> departments;
-        if (logSystemFilter.getDepartmentName() == null) {
-            departments = departmentService.getTaxFormDepartments(userInfo.getUser(),
-                    logSystemFilter.getTaxType() != null ? asList(logSystemFilter.getTaxType()) : asList(TaxType.values()));
-        } else
-            departments = departmentService.getDepartmentsByName(logSystemFilter.getDepartmentName());
-
-        logSystemFilterDao.setDepartmentIds(departments);
-        // Отчетные периоды
-        logSystemFilterDao.setReportPeriodName(logSystemFilter.getReportPeriodName());
-        // Типы форм
-        if (logSystemFilter.getFormKind() != null && !logSystemFilter.getFormKind().isEmpty()) {
-            logSystemFilterDao.setFormDataKinds(new ArrayList<FormDataKind>(CollectionUtils.collect(logSystemFilter.getFormKind(), new Transformer() {
-				@Override
-				public Object transform(Object input) {
-					return FormDataKind.fromId(((Long) input).intValue());
-				}
-			})));
-        } else {
-            logSystemFilterDao.setFormDataKinds(formDataAccessService.getAvailableFormDataKind(userInfo, asList(logSystemFilter.getTaxType())));
-        }
-        // Виды форм
-        TAUser tAUser = userInfo.getUser();
-        List<Long> formTypes = logSystemFilter.getFormTypeId() != null ?
-                logSystemFilter.getFormTypeId() : new ArrayList<Long>(0);
-        if (formTypes.isEmpty()) {
-            if (!tAUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
-                if (tAUser.hasRole(TARole.ROLE_CONTROL_NS) || tAUser.hasRole(TARole.ROLE_CONTROL)) {
-                    formTypes = sourceService.getDFTFormTypeBySource(tAUser.getDepartmentId(), logSystemFilter.getTaxType(), logSystemFilterDao.getFormDataKinds());
-                } else {
-                    formTypes = sourceService.getDFTByPerformerDep(tAUser.getDepartmentId(), logSystemFilter.getTaxType(), logSystemFilterDao.getFormDataKinds());
-                }
-                List<Department> departments10 = new ArrayList<Department>();
-                if (tAUser.hasRole(TARole.ROLE_CONTROL_NS)) {
-                    departments10 = departmentService.getBADepartments(tAUser);
-                } else {
-                    departments10.addAll(departmentService.getAllChildren(tAUser.getDepartmentId()));
-                }
-                List<DepartmentFormType> departmentFormTypeList = new ArrayList<DepartmentFormType>();
-                for (Department department : departments10) {
-                    departmentFormTypeList.addAll(sourceService.getDFTByDepartment(department.getId(), logSystemFilter.getTaxType()));
-                }
-                for(DepartmentFormType departmentFormType : departmentFormTypeList) {
-                    formTypes.add((long)departmentFormType.getFormTypeId());
-                }
-                Set<Long> tFormTypes =  new HashSet<Long>(formTypes);
-                formTypes.clear();
-                formTypes.addAll(tFormTypes);
-            }
-        }
-        logSystemFilterDao.setFormTypeIds(formTypes);
-
-        // Вид налога
-        if (logSystemFilter.getTaxType() != null) {
-            logSystemFilterDao.setTaxTypes(asList(logSystemFilter.getTaxType()));
-        }
-        return logSystemFilterDao;
     }
 }

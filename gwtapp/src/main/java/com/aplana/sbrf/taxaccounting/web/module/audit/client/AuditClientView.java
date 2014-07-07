@@ -133,10 +133,10 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
         TextColumn<LogSearchResultItem> typeColumn = new TextColumn<LogSearchResultItem>() {
             @Override
             public String getValue(LogSearchResultItem object) {
-                if (object.getFormType() != null) {
+                if (object.getFormTypeName() != null) {
                     return "Налоговые формы";
                 }
-                else if (object.getDeclarationType() != null) {
+                else if (object.getDeclarationTypeName() != null) {
                     return "Декларации";
                 }
                 return null;
@@ -157,17 +157,17 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
         TextColumn<LogSearchResultItem> formDeclTypeColumn = new TextColumn<LogSearchResultItem>() {
             @Override
             public String getValue(LogSearchResultItem object) {
-                if(object.getFormType() != null)
-                    return object.getFormType().getName();
+                if(object.getFormTypeName() != null)
+                    return object.getFormTypeName();
                 else
-                    return object.getDeclarationType()!= null?object.getDeclarationType().getName():"";
+                    return object.getDeclarationTypeName()!= null?object.getDeclarationTypeName():"";
             }
         };
 
         TextColumn<LogSearchResultItem> userLoginColumn = new TextColumn<LogSearchResultItem>() {
             @Override
             public String getValue(LogSearchResultItem object) {
-                return object.getUser().getLogin();
+                return object.getUser();
             }
         };
 
