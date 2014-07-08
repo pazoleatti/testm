@@ -187,7 +187,7 @@ comment on column ref_book_attribute.is_unique is 'Признак уникаль
 comment on column ref_book_attribute.sort_order is 'Определяет порядок сортировки по умолчанию';
 comment on column ref_book_attribute.format is 'Формат. (Для дат: 0 - "", 1 - "dd.MM.yyyy", 2 - "MM.yyyy", 3 - "MMMM yyyy", 4 - "yyyy", 5 - "dd.MM"; Для чисел: 6 - чекбокс)';
 comment on column ref_book_attribute.read_only is 'Только для чтения (0 - редактирование доступно пользователю; 1 - редактирование недоступно пользователю)';
-comment on column ref_book_attribute.max_length is 'Максимальная длина строки';
+comment on column ref_book_attribute.max_length is 'Максимальная длина строки/Максимальное количество цифр без учета знака и десятичного разделителя';
 ------------------------------------------------------------------------------------------------------
 create table ref_book_record (
   id number(18) not null,
