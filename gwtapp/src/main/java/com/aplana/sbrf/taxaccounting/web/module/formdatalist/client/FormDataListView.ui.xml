@@ -44,7 +44,7 @@
                 <fm:left>
                     <fm:Left>
                         <style:LeftBar marginRight="5" childValign="middle" height="100%">
-                            <g:Label ui:field="formHeader" addStyleNames="{style.titleText}, {style.marginRight5}"  />
+                            <g:Label ui:field="titleDesc" text="Список налоговых форм" addStyleNames="{style.titleText}, {style.marginRight5}"  />
                             <g:Label text="—" addStyleNames="{style.titleText}"/>
                         </style:LeftBar>
                     </fm:Left>
@@ -59,7 +59,7 @@
                 </fm:right>
                 <fm:resizable>
                     <fm:Resizable>
-                        <g:Label ui:field="titleDesc" text="Список налоговых форм"/>
+                        <g:Label ui:field="formHeader"/>
                     </fm:Resizable>
                 </fm:resizable>
             </fm:HeaderContainer>
