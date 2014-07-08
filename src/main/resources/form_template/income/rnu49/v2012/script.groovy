@@ -82,6 +82,9 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
+        break
 }
 
 //// Кэши и константы
@@ -810,6 +813,131 @@ void deleteNotFixedRows(def dataRows) {
         dataRows.removeAll(deleteRows)
         updateIndexes(dataRows)
     }
+}
+
+void importTransportData() {
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    addTransportData(xml)
+}
+
+void addTransportData(def xml) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper?.allCached
+    def int rnuIndexRow = 2
+    def int colOffset = 1
+
+    def mapRows = [:]
+
+    for (def row : xml.row) {
+        rnuIndexRow++
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+        def newRow = formData.createDataRow()
+        editableColumns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
+        autoFillColumns.each {
+            newRow.getCell(it).setStyleAlias('Автозаполняемая')
+        }
+        // графа 2
+        def xmlIndexCol = 2
+        newRow.firstRecordNumber = row.cell[xmlIndexCol].text()
+        // графа 3
+        xmlIndexCol = 3
+        newRow.operationDate = getDate(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        // графа 4
+        xmlIndexCol = 4
+        newRow.reasonNumber = row.cell[xmlIndexCol].text()
+        // графа 5
+        xmlIndexCol = 5
+        newRow.reasonDate = getDate(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        // графа 6
+        xmlIndexCol = 6
+        newRow.invNumber = row.cell[xmlIndexCol].text()
+        // графа 7
+        xmlIndexCol = 7
+        newRow.name = row.cell[xmlIndexCol].text()
+        // графа 8
+        xmlIndexCol = 8
+        newRow.price = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        // графа 9
+        xmlIndexCol = 9
+        newRow.amort = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        // графа 10
+        xmlIndexCol = 10
+        newRow.expensesOnSale = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        // графа 11
+        xmlIndexCol = 11
+        newRow.sum = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        // графа 12
+        xmlIndexCol = 12
+        newRow.sumInFact = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        // графа 13
+        xmlIndexCol = 13
+        newRow.costProperty = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        // графа 14
+        xmlIndexCol = 14
+        newRow.marketPrice = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        // графа 15
+        xmlIndexCol = 15
+        newRow.sumIncProfit = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        // графа 16
+        xmlIndexCol = 16
+        newRow.profit = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        // графа 17
+        xmlIndexCol = 17
+        newRow.loss = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        // графа 18
+        xmlIndexCol = 18
+        newRow.usefullLifeEnd = getDate(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        // графа 19
+        xmlIndexCol = 19
+        newRow.monthsLoss = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        // графа 20
+        xmlIndexCol = 20
+        newRow.expensesSum = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        // графа 21
+        xmlIndexCol = 21
+        newRow.saledPropertyCode = getRecordIdImport(82, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        // графа 22
+        xmlIndexCol = 22
+        newRow.saleCode = getRecordIdImport(83, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        // Техническое поле(группа)
+        xmlIndexCol = 23
+        sectionIndex = row.cell[xmlIndexCol].text()
+
+        if (mapRows[sectionIndex] == null) {
+            mapRows[sectionIndex] = []
+        }
+        mapRows[sectionIndex].add(newRow)
+    }
+
+    deleteNotFixedRows(dataRows)
+    dataRows.each { row ->
+        if (row.getAlias()?.contains('total')) {
+            totalColumns.each {
+                row[it] = null
+            }
+        }
+    }
+
+    // копирование данных по разделам
+    mapRows.keySet().each { sectionKey ->//число от 1 до 6
+        def copyRows = mapRows.get(sectionKey)
+        if (copyRows != null && !copyRows.isEmpty()) {
+            def sectionAlias = groups[Integer.valueOf(sectionKey) - 1]//алиас заголовка подраздела
+            def insertIndex = getDataRow(dataRows, sectionAlias).getIndex()
+            dataRows.addAll(insertIndex, copyRows)
+            // поправить индексы, потому что они после вставки не пересчитываются
+            updateIndexes(dataRows)
+        }
+    }
+
+    calcTotal(dataRows)
+    dataRowHelper.save(dataRows)
 }
 
 def roundValue(def value, int precision) {
