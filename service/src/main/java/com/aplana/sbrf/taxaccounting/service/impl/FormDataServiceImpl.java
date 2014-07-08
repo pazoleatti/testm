@@ -497,6 +497,8 @@ public class FormDataServiceImpl implements FormDataService {
 		formDataScriptingService.executeScript(userInfo,
 				formData, FormDataEvent.AFTER_LOAD, logger, null);
 
+        updatePreviousRowNumber(formData);
+
 		return formData;
 	}
 
@@ -922,6 +924,7 @@ public class FormDataServiceImpl implements FormDataService {
 
             StringBuilder stringBuilder = new StringBuilder();
             // Обновляем последующие периоды
+            int size = formDataList.size();
             for (FormData data : formDataList) {
                 // Для экземпляров в статусе "Создано" не обновляем
                 if (data.getState() != WorkflowState.CREATED) {
@@ -929,7 +932,7 @@ public class FormDataServiceImpl implements FormDataService {
                     ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(data.getReportPeriodId());
                     stringBuilder.append(reportPeriod.getName() + " " + reportPeriod.getTaxPeriod().getYear());
                     // TODO - разобраться с запятой!
-                    if (formDataList.iterator().hasNext()) {
+                    if (--size  > 0) {
                         stringBuilder.append(", ");
                     }
                     msg = "Сквозная нумерация обновлена в налоговых формах следующих периодов текущей сквозной нумерации: " +
