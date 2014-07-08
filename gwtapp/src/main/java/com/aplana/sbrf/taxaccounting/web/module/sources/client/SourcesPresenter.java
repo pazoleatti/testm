@@ -262,6 +262,7 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
         action.setDeclaration(getView().isDeclaration());
         action.setKind(departmentAssign.getKind());
         action.setPeriodsInterval(getView().getPeriodInterval());
+        action.setMode(getView().isSource() ? SourceMode.SOURCES : SourceMode.DESTINATIONS);
 
 		dispatcher.execute(action, CallbackUtils
 				.defaultCallback(new AbstractCallback<GetCurrentAssignsResult>() {

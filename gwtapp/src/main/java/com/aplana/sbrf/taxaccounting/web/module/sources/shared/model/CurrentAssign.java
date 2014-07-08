@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.sources.shared.model;
 import java.io.Serializable;
 import java.util.Date;
 
+import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.FormType;
 
@@ -32,6 +33,15 @@ public class CurrentAssign implements Serializable{
     private Date endDateAssign;
 
     private FormType formType;
+    private DeclarationType declarationType;
+
+    public DeclarationType getDeclarationType() {
+        return declarationType;
+    }
+
+    public void setDeclarationType(DeclarationType declarationType) {
+        this.declarationType = declarationType;
+    }
 
     private Boolean isForm;
 

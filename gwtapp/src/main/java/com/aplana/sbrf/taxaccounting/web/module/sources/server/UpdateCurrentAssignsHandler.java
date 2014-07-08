@@ -72,7 +72,11 @@ public class UpdateCurrentAssignsHandler extends AbstractActionHandler<UpdateCur
             sourcePair.setSourceKind(action.getDepartmentAssign().getKind());
             sourcePair.setSourceType(sourceService.getFormType(action.getDepartmentAssign().getTypeId()));
             sourcePair.setDestinationKind(assign.getFormKind());
-            sourcePair.setDestinationFormType(assign.getFormType());
+            if (action.isDeclaration()) {
+                sourcePair.setDestinationDeclarationType(assign.getDeclarationType());
+            } else {
+                sourcePair.setDestinationFormType(assign.getFormType());
+            }
         }
         SourceObject sourceObject = new SourceObject(sourcePair, assign.getStartDateAssign(), assign.getEndDateAssign());
         sourceObjects.add(sourceObject);

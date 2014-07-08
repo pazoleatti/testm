@@ -34,7 +34,7 @@ public class SourceServiceImpl implements SourceService {
     private static final String FORM_INSTANCES_EXIST_MSG = "Найдены экземпляры, которые назначены %s формы \"%s\" и имеют статус \"Принят\":  \"%s\". Назначение не может быть выполнено";
     private static final String INTERSECTION_MSG = "\"%s\" назначен %s формы \"%s\" в периоде с %s по %s.";
     private static final String SAVE_SUCCESS_MSG = "\"%s\" назначен %s формы \"%s\" в периоде с %s по %s.";
-    private static final String DELETE_SUCCESS_MSG = "Удалено назначение \"%s\" в роли \"%s\" форме %s в периоде с %s по %s.";
+    private static final String DELETE_SUCCESS_MSG = "Удалено назначение \"%s\" в роли %s %s %s в периоде с %s по %s.";
     private static final String UPDATE_SUCCESS_MSG = "\"%s\" назначен %s формы \"%s\" в периоде с %s по %s.";
     private static final String CIRCLE_MSG = "\"%s\" уже назначен как приёмник \"%s\"";
     private static final String SIMPLE_INSTANCES_MSG = "Для корректной передачи данных %s \"%s\" необходимо выполнить повторный перевод в статус \"Принята\" всех %s этой формы в периоде c %s по %s";
@@ -222,12 +222,37 @@ public class SourceServiceImpl implements SourceService {
      */
     public List<SourcePair> checkExistence(Logger logger, List<SourcePair> sourcePairs,
                                            SourceMode mode,
-                                           boolean isDeclaration,
+                                           final boolean isDeclaration,
                                            final Integer sourceDepartmentId,
                                            final Integer destinationDepartmentId) {
-        final List<Long> dftIn = unionSourcePairs(sourcePairs);
+        List<Long> dftIn = new ArrayList<Long>();
+        if (isDeclaration) {
+            if (mode == SourceMode.SOURCES) {
+                //Проверяем единственный приемник
+                if (sourceDao.checkDDTExistence(Arrays.asList(sourcePairs.get(0).getDestination())).isEmpty()) {
+                    /** Если единственное назначение было удалено, то продолжать нет смысла */
+                    throw new ServiceLoggerException(String.format(MAIN_SOURCE_NOT_EXIST_MSG, "приемника"),
+                            logEntryService.save(logger.getEntries()));
+                }
+                for (SourcePair pair : sourcePairs) {
+                    dftIn.add(pair.getSource());
+                }
+            } else {
+                //Проверяем единственный источник
+                if (sourceDao.checkDDTExistence(Arrays.asList(sourcePairs.get(0).getSource())).isEmpty()) {
+                    throw new ServiceLoggerException(String.format(MAIN_SOURCE_NOT_EXIST_MSG, "источника"),
+                            logEntryService.save(logger.getEntries()));
+                }
+                for (SourcePair pair : sourcePairs) {
+                    dftIn.add(pair.getDestination());
+                }
+            }
+        } else {
+            dftIn = unionSourcePairs(sourcePairs);
+        }
+
         @SuppressWarnings("unchecked")
-        List<Long> notExistingDFT = (List<Long>) CollectionUtils.subtract(dftIn, sourceDao.checkDepartmentFormTypesExistence(dftIn));
+        List<Long> notExistingDFT = (List<Long>) CollectionUtils.subtract(dftIn, sourceDao.checkDFTExistence(dftIn));
         return truncateSources(logger, sourcePairs, notExistingDFT, mode, isDeclaration,
                 new MessageBuilder() {
                     @Override
@@ -239,10 +264,9 @@ public class SourceServiceImpl implements SourceService {
 
                     @Override
                     public String getDestinationMessage(SourcePair sourcePair) {
-                        String formType = sourcePair.getDestinationFormType() != null
-                                ? sourcePair.getDestinationFormType().getName() : sourcePair.getDestinationDeclarationType().getName();
                         return String.format(CHECK_EXISTENCE_MSG,
-                                sourcePair.getDestinationKind().getName() + ": " + formType,
+                                isDeclaration ? sourcePair.getDestinationDeclarationType().getName() :
+                                        sourcePair.getDestinationKind().getName() + ": " + sourcePair.getDestinationFormType().getName(),
                                 departmentDao.getDepartment(destinationDepartmentId).getName());
                     }
                 });
@@ -491,12 +515,11 @@ public class SourceServiceImpl implements SourceService {
                         @Override
                         public String getSourceMessage(SourcePair sourcePair) {
                             SourceObject union = unionMap.get(sourcePair);
-                            String destinationFormType = sourcePair.getDestinationFormType() != null
-                                    ? sourcePair.getDestinationFormType().getName() : sourcePair.getDestinationDeclarationType().getName();
                             return String.format(INTERSECTION_MSG,
                                     sourcePair.getSourceKind().getName() + ": " + sourcePair.getSourceType().getName(),
                                     "источником",
-                                    sourcePair.getDestinationKind().getName() + ": " + destinationFormType,
+                                    sourcePair.getDestinationFormType() == null ? sourcePair.getDestinationDeclarationType().getName() :
+                                            sourcePair.getDestinationKind().getName() + ": " + sourcePair.getDestinationFormType().getName(),
                                     formatter.get().format(union.getPeriodStart()),
                                     formatter.get().format(union.getPeriodEnd())
                             );
@@ -505,10 +528,9 @@ public class SourceServiceImpl implements SourceService {
                         @Override
                         public String getDestinationMessage(SourcePair sourcePair) {
                             SourceObject union = unionMap.get(sourcePair);
-                            String destinationFormType = sourcePair.getDestinationFormType() != null
-                                    ? sourcePair.getDestinationFormType().getName() : sourcePair.getDestinationDeclarationType().getName();
                             return String.format(INTERSECTION_MSG,
-                                    sourcePair.getDestinationKind().getName() + ": " + destinationFormType,
+                                    sourcePair.getDestinationFormType() == null ? sourcePair.getDestinationDeclarationType().getName() :
+                                            sourcePair.getDestinationKind().getName() + ": " + sourcePair.getDestinationFormType().getName(),
                                     "приемником",
                                     sourcePair.getSourceKind().getName() + ": " + sourcePair.getSourceType().getName(),
                                     formatter.get().format(union.getPeriodStart()),
@@ -545,9 +567,8 @@ public class SourceServiceImpl implements SourceService {
                 for (SourcePair pair : sourcePairs) {
                     logger.warn(SIMPLE_INSTANCES_MSG,
                             "в",
-                            pair.getDestinationKind().getName() + ": " + (isDeclaration ?
-                                    pair.getDestinationDeclarationType().getName() :
-                                    pair.getDestinationFormType().getName()),
+                            isDeclaration ? pair.getDestinationDeclarationType().getName() :
+                                    pair.getDestinationKind().getName() + ": " + pair.getDestinationFormType().getName(),
                             "источников",
                             periodStartName,
                             periodEndName != null ? periodEndName : "-"
@@ -557,9 +578,8 @@ public class SourceServiceImpl implements SourceService {
                 SourcePair destination = sourcePairs.get(0);
                 logger.warn(SIMPLE_INSTANCES_MSG,
                         "в",
-                        destination.getDestinationKind().getName() + ": " + (isDeclaration ?
-                                destination.getDestinationDeclarationType().getName() :
-                                destination.getDestinationFormType().getName()),
+                        isDeclaration ? destination.getDestinationDeclarationType().getName() :
+                                destination.getDestinationKind().getName() + ": " + destination.getDestinationFormType().getName(),
                         "источников",
                         periodStartName,
                         periodEndName != null ? periodEndName : "-"
@@ -606,11 +626,10 @@ public class SourceServiceImpl implements SourceService {
             /** Создаем оставшиеся назначения */
             sourceDao.createAll(sourceObjects, sourceClientData.isDeclaration());
             for (SourceObject sourceObject : sourceObjects) {
-                String destinationFormType = sourceObject.getSourcePair().getDestinationFormType() != null
-                        ? sourceObject.getSourcePair().getDestinationFormType().getName() : sourceObject.getSourcePair().getDestinationDeclarationType().getName();
                 if (sourceClientData.getMode() == SourceMode.DESTINATIONS) {
                     logger.info(SAVE_SUCCESS_MSG,
-                            sourceObject.getSourcePair().getDestinationKind().getName() + ": " + destinationFormType,
+                            sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationDeclarationType().getName() :
+                                    sourceObject.getSourcePair().getDestinationKind().getName() + ": " + sourceObject.getSourcePair().getDestinationFormType().getName(),
                             "приемником",
                             sourceObject.getSourcePair().getSourceKind().getName() + ": " + sourceObject.getSourcePair().getSourceType().getName(),
                             formatter.get().format(sourceObject.getPeriodStart()),
@@ -620,7 +639,8 @@ public class SourceServiceImpl implements SourceService {
                     logger.info(SAVE_SUCCESS_MSG,
                             sourceObject.getSourcePair().getSourceKind().getName() + ": " + sourceObject.getSourcePair().getSourceType().getName(),
                             "источником",
-                            sourceObject.getSourcePair().getDestinationKind().getName() + ": " + destinationFormType,
+                            sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationDeclarationType().getName() :
+                                    sourceObject.getSourcePair().getDestinationKind().getName() + ": " + sourceObject.getSourcePair().getDestinationFormType().getName(),
                             formatter.get().format(sourceObject.getPeriodStart()),
                             formatter.get().format(sourceObject.getPeriodEnd())
                     );
@@ -647,24 +667,24 @@ public class SourceServiceImpl implements SourceService {
             sourceDao.deleteAll(sourceObjects, sourceClientData.isDeclaration());
             if (sourceClientData.getMode() == SourceMode.DESTINATIONS) {
                 for (SourceObject sourceObject : sourceObjects) {
-                    String destinationType = sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationDeclarationType().getName() :
-                            sourceObject.getSourcePair().getDestinationFormType().getName();
                     logger.info(DELETE_SUCCESS_MSG,
-                            sourceObject.getSourcePair().getDestinationKind().getName() + ": " + destinationType,
+                            sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationDeclarationType().getName() :
+                                    sourceObject.getSourcePair().getDestinationKind().getName() + ": " + sourceObject.getSourcePair().getDestinationFormType().getName(),
                             "приемника",
+                            sourceClientData.isDeclaration() ? "декларации" : "формы",
                             sourceObject.getSourcePair().getSourceKind().getName() + ": " + sourceObject.getSourcePair().getSourceType().getName(),
                             sourceClientData.getPeriodStartName(),
                             sourceClientData.getPeriodEndName() != null ? sourceClientData.getPeriodEndName() : "-"
                     );
                 }
             } else {
-                String destinationType = sourceClientData.isDeclaration() ? sourceObjects.get(0).getSourcePair().getDestinationDeclarationType().getName() :
-                        sourceObjects.get(0).getSourcePair().getDestinationFormType().getName();
                 for (SourceObject sourceObject : sourceObjects) {
                     logger.info(DELETE_SUCCESS_MSG,
                             sourceObject.getSourcePair().getSourceKind().getName() + ": " + sourceObject.getSourcePair().getSourceType().getName(),
                             "источника",
-                            sourceObject.getSourcePair().getDestinationKind().getName() + ": " + destinationType,
+                            sourceClientData.isDeclaration() ? "декларации" : "формы",
+                            sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationDeclarationType().getName() :
+                                    sourceObject.getSourcePair().getDestinationKind().getName() + ": " + sourceObject.getSourcePair().getDestinationFormType().getName(),
                             sourceClientData.getPeriodStartName(),
                             sourceClientData.getPeriodEndName() != null ? sourceClientData.getPeriodEndName() : "-"
                     );
@@ -798,10 +818,9 @@ public class SourceServiceImpl implements SourceService {
                 sourceDao.updateAll(sourceObjects, periodStart, periodEnd, sourceClientData.isDeclaration());
                 if (sourceClientData.getMode() == SourceMode.DESTINATIONS) {
                     for (SourceObject sourceObject : sourceObjects) {
-                        String destinationType = sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationDeclarationType().getName() :
-                                sourceObject.getSourcePair().getDestinationFormType().getName();
                         logger.info(UPDATE_SUCCESS_MSG,
-                                sourceObject.getSourcePair().getDestinationKind().getName() + ": " + destinationType,
+                                sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationDeclarationType().getName() :
+                                        sourceObject.getSourcePair().getDestinationKind().getName() + ": " + sourceObject.getSourcePair().getDestinationFormType().getName(),
                                 "приемником",
                                 sourceObject.getSourcePair().getSourceKind().getName() + ": " + sourceObject.getSourcePair().getSourceType().getName(),
                                 sourceClientData.getPeriodStartName(),
@@ -809,13 +828,12 @@ public class SourceServiceImpl implements SourceService {
                         );
                     }
                 } else {
-                    String destinationType = sourceClientData.isDeclaration() ? sourceObjects.get(0).getSourcePair().getDestinationDeclarationType().getName() :
-                            sourceObjects.get(0).getSourcePair().getDestinationFormType().getName();
                     for (SourceObject sourceObject : sourceObjects) {
                         logger.info(UPDATE_SUCCESS_MSG,
                                 sourceObject.getSourcePair().getSourceKind().getName() + ": " + sourceObject.getSourcePair().getSourceType().getName(),
                                 "источником",
-                                sourceObject.getSourcePair().getDestinationKind().getName() + ": " + destinationType,
+                                sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationDeclarationType().getName() :
+                                        sourceObject.getSourcePair().getDestinationKind().getName() + ": " + sourceObject.getSourcePair().getDestinationFormType().getName(),
                                 sourceClientData.getPeriodStartName(),
                                 sourceClientData.getPeriodEndName() != null ? sourceClientData.getPeriodEndName() : "-"
                         );

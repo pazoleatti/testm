@@ -40,27 +40,6 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
 	};
 
 	@Override
-	public List<DepartmentDeclarationType> getDepartmentDeclarationTypes(int departmentId) {
-		return getJdbcTemplate().query(
-				"select * from department_declaration_type where department_id = ?",
-				new Object[] { departmentId},
-				new int[] {Types.NUMERIC},
-				DEPARTMENT_DECLARATION_TYPE_ROW_MAPPER);
-	}
-
-	@Override
-	public List<DepartmentDeclarationType> getDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind) {
-		return getJdbcTemplate().query(
-				"select * from department_declaration_type src_ddt where exists (" +
-						"select 1 from department_form_type dft, declaration_source ds " +
-						"where ds.src_department_form_type_id=dft.id and dft.department_id=? and dft.form_type_id=? and dft.kind=? and ds.department_declaration_type_id = src_ddt.id" +
-						")",
-				new Object[] { sourceDepartmentId, sourceFormTypeId, sourceKind.getId()},
-				new int[]{Types.NUMERIC, Types.NUMERIC, Types.NUMERIC},
-				DEPARTMENT_DECLARATION_TYPE_ROW_MAPPER);
-	}
-
-	@Override
 	public Set<Integer> getDepartmentIdsByTaxType(TaxType taxType) {
 		Set<Integer> departmentIds = new HashSet<Integer>();
 		departmentIds.addAll(getJdbcTemplate().queryForList(

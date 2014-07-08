@@ -39,14 +39,16 @@ public class GetPeriodIntervalHandler extends AbstractActionHandler<GetPeriodInt
 
         Calendar calendarStart = Calendar.getInstance();
         calendarStart.setTime(action.getPeriodStart());
-        int year = calendarStart.get(Calendar.YEAR);
+        int yearFrom = calendarStart.get(Calendar.YEAR);
         calendarStart.set(Calendar.YEAR, 1970);
         Date dateFrom = calendarStart.getTime();
 
         Date dateTo = null;
+        Integer yearTo = null;
         if (action.getPeriodEnd() != null) {
             Calendar calendarEnd = Calendar.getInstance();
             calendarEnd.setTime(action.getPeriodEnd());
+            yearTo = calendarEnd.get(Calendar.YEAR);
             calendarEnd.set(Calendar.YEAR, 1970);
             dateTo = calendarEnd.getTime();
         }
@@ -78,8 +80,8 @@ public class GetPeriodIntervalHandler extends AbstractActionHandler<GetPeriodInt
         }
 
         PeriodsInterval periodsInterval = new PeriodsInterval();
-        periodsInterval.setYearFrom(year);
-        periodsInterval.setYearTo(year);
+        periodsInterval.setYearFrom(yearFrom);
+        periodsInterval.setYearTo(yearTo);
         periodsInterval.setPeriodFrom(periodFrom);
         periodsInterval.setPeriodTo(periodTo);
         result.setPeriodsInterval(periodsInterval);

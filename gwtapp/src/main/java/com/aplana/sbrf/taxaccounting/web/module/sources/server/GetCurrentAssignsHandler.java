@@ -3,6 +3,8 @@ package com.aplana.sbrf.taxaccounting.web.module.sources.server;
 import java.util.Date;
 import java.util.List;
 
+import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
+import com.aplana.sbrf.taxaccounting.model.source.SourceMode;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.GetCurrentAssignsAction;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.GetCurrentAssignsResult;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
-import com.aplana.sbrf.taxaccounting.web.module.sources.server.assembler.DeparmentFormTypeAssembler;
+import com.aplana.sbrf.taxaccounting.web.module.sources.server.assembler.SourcesAssembler;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
@@ -25,7 +27,7 @@ public class GetCurrentAssignsHandler extends
     private SourceService departmentFormTypeService;
 
     @Autowired
-    private DeparmentFormTypeAssembler deparmentFormTypeAssembler;
+    private SourcesAssembler deparmentFormTypeAssembler;
 
     public GetCurrentAssignsHandler() {
         super(GetCurrentAssignsAction.class);
@@ -38,13 +40,25 @@ public class GetCurrentAssignsHandler extends
         Date periodFrom = PeriodConvertor.getDateFrom(action.getPeriodsInterval());
         Date periodTo = PeriodConvertor.getDateTo(action.getPeriodsInterval());
         if(!action.isDeclaration()){
-            List<DepartmentFormType> departmentFormTypes = departmentFormTypeService
-                    .getDFTSourcesByDFT(action.getDepartmentId(), action.getTypeId(), action.getKind(), periodFrom, periodTo);
-            result.setCurrentSources(deparmentFormTypeAssembler.assemble(departmentFormTypes));
+            List<DepartmentFormType> departmentFormTypes;
+            if (action.getMode() == SourceMode.SOURCES) {
+                departmentFormTypes = departmentFormTypeService.
+                        getDFTSourcesByDFT(action.getDepartmentId(), action.getTypeId(), action.getKind(), periodFrom, periodTo);
+            } else {
+                departmentFormTypes = departmentFormTypeService.
+                        getFormDestinations(action.getDepartmentId(), action.getTypeId(), action.getKind(), periodFrom, periodTo);
+            }
+            result.setCurrentSources(deparmentFormTypeAssembler.assembleDFT(departmentFormTypes));
         } else {
-            List<DepartmentFormType> departmentFormTypes = departmentFormTypeService
-                    .getDFTSourceByDDT(action.getDepartmentId(), action.getTypeId(), periodFrom, periodTo);
-            result.setCurrentSources(deparmentFormTypeAssembler.assemble(departmentFormTypes));
+            if (action.getMode() == SourceMode.SOURCES) {
+                List<DepartmentFormType> departmentFormTypes = departmentFormTypeService
+                        .getDFTSourceByDDT(action.getDepartmentId(), action.getTypeId(), periodFrom, periodTo);
+                result.setCurrentSources(deparmentFormTypeAssembler.assembleDFT(departmentFormTypes));
+            } else {
+                List<DepartmentDeclarationType> departmentFormTypes = departmentFormTypeService.
+                        getDeclarationDestinations(action.getDepartmentId(), action.getTypeId(), action.getKind(), periodFrom, periodTo);
+                result.setCurrentSources(deparmentFormTypeAssembler.assembleDDT(departmentFormTypes));
+            }
         }
 
         return result;

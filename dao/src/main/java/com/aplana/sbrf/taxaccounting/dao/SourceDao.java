@@ -86,7 +86,15 @@ public interface SourceDao {
      * @param departmentFormTypeIds список идентификаторов назначений
      * @return список идентификаторов назначений, которые все еще существуют
      */
-    List<Long> checkDepartmentFormTypesExistence(List<Long> departmentFormTypeIds);
+    List<Long> checkDFTExistence(List<Long> departmentFormTypeIds);
+
+    /**
+     * Проверяет, существует ли список назначенных подразделению деклараций (с учётом вида и типа)
+     *
+     * @param departmentDeclarationTypeIds список идентификаторов назначений
+     * @return список идентификаторов назначений, которые все еще существуют
+     */
+    List<Long> checkDDTExistence(List<Long> departmentDeclarationTypeIds);
 
     /**
      * Получает список экземпляров налоговых форм, созданных в указанном периоде с определенными назначениями

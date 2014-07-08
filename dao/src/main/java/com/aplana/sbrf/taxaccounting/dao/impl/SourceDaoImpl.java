@@ -237,10 +237,26 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
     }
 
     @Override
-    public List<Long> checkDepartmentFormTypesExistence(List<Long> departmentFormTypeIds) {
+    public List<Long> checkDFTExistence(List<Long> departmentFormTypeIds) {
         try {
             //TODO поправить in часть после мержа
             String sql = "select id from department_form_type where id in "+ SqlUtils.transformToSqlInStatement(departmentFormTypeIds);
+            return getJdbcTemplate().query(sql, new RowMapper<Long>() {
+                @Override
+                public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+                    return rs.getLong("id");
+                }
+            });
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<Long>();
+        }
+    }
+
+    @Override
+    public List<Long> checkDDTExistence(List<Long> departmentDeclarationTypeIds) {
+        try {
+            //TODO поправить in часть после мержа
+            String sql = "select id from department_declaration_type where id in "+ SqlUtils.transformToSqlInStatement(departmentDeclarationTypeIds);
             return getJdbcTemplate().query(sql, new RowMapper<Long>() {
                 @Override
                 public Long mapRow(ResultSet rs, int rowNum) throws SQLException {

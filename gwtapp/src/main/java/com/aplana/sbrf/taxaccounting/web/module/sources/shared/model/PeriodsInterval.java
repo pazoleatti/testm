@@ -12,7 +12,7 @@ public class PeriodsInterval implements Serializable {
     private static final long serialVersionUID = 7617988671379164269L;
     private int yearFrom;
     private PeriodInfo periodFrom;
-    private int yearTo;
+    private Integer yearTo;
     private PeriodInfo periodTo;
 
     public PeriodsInterval() {
@@ -49,11 +49,11 @@ public class PeriodsInterval implements Serializable {
         this.periodFrom = periodFrom;
     }
 
-    public int getYearTo() {
+    public Integer getYearTo() {
         return yearTo;
     }
 
-    public void setYearTo(int yearTo) {
+    public void setYearTo(Integer yearTo) {
         this.yearTo = yearTo;
     }
 
