@@ -71,6 +71,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     ReportPeriodDao reportPeriodDao;
     @Autowired
     TransactionHelper tx;
+
 	@Override
 	public List<FormTemplate> listAll() {
         return formTemplateDao.listAll();

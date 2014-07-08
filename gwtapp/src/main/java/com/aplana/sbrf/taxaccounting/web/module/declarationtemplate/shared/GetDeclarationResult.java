@@ -10,6 +10,8 @@ public class GetDeclarationResult implements Result {
     private Date endDate;
     private boolean lockedByAnotherUser = false;
     private String uuid;
+    private String lockDate;
+    private String lockedByUser;
 
     public Date getEndDate() {
         return endDate;
@@ -41,5 +43,21 @@ public class GetDeclarationResult implements Result {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
+    }
+
+    public String getLockDate() {
+        return lockDate;
+    }
+
+    public void setLockDate(String lockDate) {
+        this.lockDate = lockDate;
+    }
+
+    public String getLockedByUser() {
+        return lockedByUser;
+    }
+
+    public void setLockedByUser(String lockedByUser) {
+        this.lockedByUser = lockedByUser;
     }
 }

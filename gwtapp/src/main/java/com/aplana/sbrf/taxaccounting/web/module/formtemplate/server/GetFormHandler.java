@@ -54,9 +54,6 @@ public class GetFormHandler extends AbstractActionHandler<GetFormAction, GetForm
         Logger logger = new Logger();
         GetFormResult result = new GetFormResult();
         fillLockData(action, userInfo, result);
-        if (!result.isLockedByAnotherUser()) {
-            formTemplateService.lock(action.getId(), userInfo);
-        }
         FormTemplateExt formTemplateExt = new FormTemplateExt();
 		FormTemplate formTemplate = formTemplateService.getFullFormTemplate(action.getId(), logger);
         formTemplateExt.setActualEndVersionDate(formTemplateService.getFTEndDate(formTemplate.getId()));
@@ -88,6 +85,9 @@ public class GetFormHandler extends AbstractActionHandler<GetFormAction, GetForm
             if (lockInformation.getUserId() != userInfo.getUser().getId()) {
                 result.setLockedByAnotherUser(true);
             }
+        }
+        if (!result.isLockedByAnotherUser()) {
+            formTemplateService.lock(action.getId(), userInfo);
         }
     }
 
