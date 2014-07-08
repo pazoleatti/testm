@@ -73,7 +73,7 @@ create table form_template (
   fixed_rows number(1) not null,
   name varchar2(1000) not null,
   fullname varchar2(1000) not null,
-  code varchar2(600) not null, --TO-DO: DROP
+  code varchar2(600) not null, 
   script clob,
   data_headers clob,
   status number(1) default 0 not null,
