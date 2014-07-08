@@ -77,7 +77,7 @@ create table form_template (
   script clob,
   data_headers clob,
   status number(1) default 0 not null,
-  monthly number(1) default 0 not null
+  monthly number(1) default 0 not null,
   header varchar2(1000)
 );
 comment on table form_template IS 'Описания шаблонов налоговых форм';
