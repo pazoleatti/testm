@@ -6,7 +6,7 @@ import com.gwtplatform.mvp.client.UiHandlers;
 import java.util.Date;
 
 public interface DeclarationDataUiHandlers extends UiHandlers {
-	void refreshDeclaration(Date docDate);
+	void onRecalculateClicked(Date docDate);
 	void accept(boolean accepted);
 	void delete();
 	void check();

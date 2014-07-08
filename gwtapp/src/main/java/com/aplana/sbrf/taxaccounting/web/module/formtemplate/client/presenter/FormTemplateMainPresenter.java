@@ -139,7 +139,8 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 		void setTitle(String title);
         void activateVersionName(String s);
         void activateVersion(boolean isVisible);
-	}
+        void setLockInformation(boolean isVisible, String lockDate, String lockedBy);
+    }
 
 	@RequestTabs
 	public static final Type<RequestTabsHandler> TYPE_RequestTabs = new Type<RequestTabsHandler>();
@@ -260,7 +261,9 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 						public void onSuccess(GetFormResult result) {
                             LogAddEvent.fire(FormTemplateMainPresenter.this, result.getUuid());
                             if (result.isLockedByAnotherUser()) {
-                                Dialog.errorMessage("Шаблон формы заблокирован другим пользователем");
+                                getView().setLockInformation(true, result.getLockDate(), result.getLockedByUser());
+                            } else {
+                                getView().setLockInformation(false, null, null);
                             }
                             formTemplateExt = result.getForm();
 							formTemplate = formTemplateExt.getFormTemplate();

@@ -16,6 +16,7 @@ import java.util.List;
 public interface DeclarationDataService {
 	/**
 	 * Создать декларацию в текущем отчётном периоде. Созданная декларация сразу же сохраняется в БД и возвращается идентификатор созданной записи.
+     * @param logger - объект журнала
 	 * @param declarationTemplateId идентификатор шаблона декларации
 	 * @param departmentId идентификатор подразделения, в котором создаваётся декларация
 	 * @param userInfo информация о пользователе, выполняющего действие
@@ -24,16 +25,16 @@ public interface DeclarationDataService {
 	 * @throws AccessDeniedException - если у пользователя нет прав на создание декларации с заданными параметрами
 	 * 	ServiceException - если при создании декларации произошла ошибка (например декларация с такими параметрами уже существует)
 	 */
-    long create(int declarationTemplateId, int departmentId, TAUserInfo userInfo, int reportPeriodId);
+    long create(Logger logger, int declarationTemplateId, int departmentId, TAUserInfo userInfo, int reportPeriodId);
 
 	/**
-	 * Обновить декларацию (сформировать декларацию заново на основе данных, которые есть в БД)
-	 * @param logger - объект журнала
-	 * @param declarationDataId - идентификатор декларации
-	 * @param docDate - дата обновления декларации
-	 * @param userInfo - информация о пользователе, выполняющего операцию
-	 */
-	void reCreate(Logger logger, long declarationDataId, TAUserInfo userInfo, Date docDate);
+	 * Рассчитать декларацию
+     * @param logger - объект журнала
+     * @param declarationDataId - идентификатор декларации
+     * @param userInfo - информация о пользователе, выполняющего операцию
+     * @param docDate - дата обновления декларации
+     */
+	void calculate(Logger logger, long declarationDataId, TAUserInfo userInfo, Date docDate);
 	
 	/**
 	 * Получить декларацию
@@ -48,7 +49,6 @@ public interface DeclarationDataService {
 	 * Удалить декларацию
 	 * @param declarationDataId идентификатор декларации
 	 * @param userInfo информация о пользователе, выполняющего действие
-	 * @throws DaoException если такой декларации не существует
 	 * @throws AccessDeniedException если у пользователя не хватает прав на удаление
 	 */
 	void delete(long declarationDataId, TAUserInfo userInfo);
@@ -58,7 +58,6 @@ public interface DeclarationDataService {
 	 * @param declarationDataId идентификатор декларации
 	 * @param userInfo информация о пользователе, выполняющего действие
 	 * @param logger - объект журнала
-	 * @throws DaoException если такой декларации не существует
 	 * @throws AccessDeniedException если у пользователя не хватает прав на удаление
 	 */
 	void check(Logger logger, long declarationDataId, TAUserInfo userInfo);
@@ -122,7 +121,6 @@ public interface DeclarationDataService {
 	 * @param departmentId идентификатор {@link com.aplana.sbrf.taxaccounting.model.Department подразделения}
 	 * @param reportPeriodId идентификатор {@link com.aplana.sbrf.taxaccounting.model.ReportPeriod отчетного периода}
 	 * @return декларацию или null, если такой декларации не найдено
-	 * @throws DaoException если будет найдено несколько записей, удовлетворяющих условию поиска
 	 */
 	DeclarationData find(int declarationTypeId, int departmentId, int reportPeriodId);
 

@@ -7,7 +7,6 @@ import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
@@ -109,15 +108,31 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
 	@Override
 	@Transactional(readOnly = false)
-	public long create(int declarationTemplateId,
-			int departmentId, TAUserInfo userInfo, int reportPeriodId) {
+	public long create(Logger logger, int declarationTemplateId, int departmentId, TAUserInfo userInfo, int reportPeriodId) {
 		declarationDataAccessService.checkEvents(userInfo, declarationTemplateId, departmentId, reportPeriodId, FormDataEvent.CREATE);
 
-		DeclarationData newDeclaration = new DeclarationData();
-		newDeclaration.setDepartmentId(departmentId);
-		newDeclaration.setReportPeriodId(reportPeriodId);
-		newDeclaration.setAccepted(false);
-		newDeclaration.setDeclarationTemplateId(declarationTemplateId);
+        DeclarationData newDeclaration = new DeclarationData();
+        newDeclaration.setDepartmentId(departmentId);
+        newDeclaration.setReportPeriodId(reportPeriodId);
+        newDeclaration.setAccepted(false);
+        newDeclaration.setDeclarationTemplateId(declarationTemplateId);
+
+        // Вызываем событие скрипта CREATE
+        declarationDataScriptingService.executeScript(userInfo, newDeclaration, FormDataEvent.CREATE, logger, null);
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            throw new ServiceLoggerException(
+                    "Произошли ошибки в скрипте создания декларации",
+                    logEntryService.save(logger.getEntries()));
+        }
+
+        // Вызываем событие скрипта AFTER_CREATE
+        declarationDataScriptingService.executeScript(userInfo, newDeclaration, FormDataEvent.AFTER_CREATE, logger, null);
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            throw new ServiceLoggerException(
+                    "Произошли ошибки в скрипте после создания декларации",
+                    logEntryService.save(logger.getEntries()));
+        }
+
 		long id = declarationDataDao.saveNew(newDeclaration);
 
 		logBusinessService.add(null, id, userInfo, FormDataEvent.CREATE, null);
@@ -130,8 +145,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
 	@Override
 	@Transactional(readOnly = false)
-	public void reCreate(Logger logger, long id, TAUserInfo userInfo,
-			Date docDate) {
+	public void calculate(Logger logger, long id, TAUserInfo userInfo, Date docDate) {
 		declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.CALCULATE);
         DeclarationData declarationData = declarationDataDao.get(id);
         List<String> strings = new ArrayList<String>();
@@ -166,7 +180,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
 	@Override
 	public void check(Logger logger, long id, TAUserInfo userInfo) {
-        declarationDataScriptingService.executeScript(userInfo, declarationDataDao.get(id), FormDataEvent.CHECK, logger, null);
+        declarationDataScriptingService.executeScript(userInfo,
+                declarationDataDao.get(id), FormDataEvent.CHECK, logger, null);
         validateDeclaration(declarationDataDao.get(id), logger, true);
         // Проверяем ошибки при пересчете
         if (logger.containsLevel(LogLevel.ERROR)) {
@@ -293,6 +308,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         return getBytesFromInputstream(declarationData.getPdfDataUuid());
 	}
 
+    // расчет декларации
 	private void setDeclarationBlobs(Logger logger,
 			DeclarationData declarationData, Date docDate, TAUserInfo userInfo) {
 
@@ -301,7 +317,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 		StringWriter writer = new StringWriter();
 		exchangeParams.put(DeclarationDataScriptParams.XML, writer);
 
-		declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.CREATE, logger, exchangeParams);
+		declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.CALCULATE, logger, exchangeParams);
 
 		String xml = XML_HEADER.concat(writer.toString());
         declarationData.setXmlDataUuid(blobDataService.create(new ByteArrayInputStream(xml.getBytes()), ""));

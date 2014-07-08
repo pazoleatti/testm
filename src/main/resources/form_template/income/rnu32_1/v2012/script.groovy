@@ -384,7 +384,7 @@ def calc16(def row, def lastDay, def dataRows) {
         return null
     }
     def tmp = null
-    if (row.shortPositionData < row.maturityDate) {
+    if (row.shortPositionData >= row.maturityDate) {
         def t = lastDay - row.shortPositionData
         tmp = calc15or16(row, lastDay, t, dataRows)
     }

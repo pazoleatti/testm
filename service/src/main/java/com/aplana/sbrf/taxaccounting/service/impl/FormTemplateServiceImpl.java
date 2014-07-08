@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.core.api.LockCoreService;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.ObjectLockDao;
@@ -15,11 +16,14 @@ import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
+import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -53,6 +57,8 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 	@Autowired
 	private ObjectLockDao lockDao;
     @Autowired
+    private LockCoreService lockCoreService;
+    @Autowired
     private FormDataScriptingService scriptingService;
     @Autowired
     TAUserService userService;
@@ -63,7 +69,8 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 
     @Autowired
     ReportPeriodDao reportPeriodDao;
-
+    @Autowired
+    TransactionHelper tx;
 	@Override
 	public List<FormTemplate> listAll() {
         return formTemplateDao.listAll();
@@ -109,6 +116,21 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 			}
 		}
 	}
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public ObjectLock<Integer> getObjectLock(final Integer formTemplateId, final TAUserInfo userInfo) {
+        return tx.returnInNewTransaction(new TransactionLogic<ObjectLock<Integer>>() {
+            @Override
+            public ObjectLock<Integer> executeWithReturn() {
+                return lockCoreService.getLock(FormTemplate.class, formTemplateId, userInfo);
+            }
+
+            @Override
+            public void execute() {
+            }
+        });
+    }
 
     @Override
     public void executeTestScript(FormTemplate formTemplate) {

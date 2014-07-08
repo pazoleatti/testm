@@ -75,6 +75,13 @@ public interface FormTemplateService {
 	void checkLockedByAnotherUser(Integer formTemplateId, TAUserInfo userInfo);
 
     /**
+     * Получить информацию о состоянии блокировки шаблон формы.
+     * @param formTemplateId - идентификатор шаблон формы
+     * @return информацию о блокировке объекта
+     */
+    ObjectLock<Integer> getObjectLock(final Integer formTemplateId, final TAUserInfo userInfo);
+
+    /**
      * Исполяет для теста написанный скрипт от имени пользователя controlUnp
      * @param formTemplate - шаблон налоговой формы
      */

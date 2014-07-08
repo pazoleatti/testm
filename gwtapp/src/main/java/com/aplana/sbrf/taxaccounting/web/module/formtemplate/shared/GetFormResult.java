@@ -13,6 +13,8 @@ public class GetFormResult implements Result {
     private List<RefBook> refBookList;
     private String uuid;
     private boolean lockedByAnotherUser = false;
+    private String lockDate;
+    private String lockedByUser;
 
     public String getUuid() {
         return uuid;
@@ -44,5 +46,21 @@ public class GetFormResult implements Result {
 
     public void setLockedByAnotherUser(boolean lockedByAnotherUser) {
         this.lockedByAnotherUser = lockedByAnotherUser;
+    }
+
+    public String getLockDate() {
+        return lockDate;
+    }
+
+    public void setLockDate(String lockDate) {
+        this.lockDate = lockDate;
+    }
+
+    public String getLockedByUser() {
+        return lockedByUser;
+    }
+
+    public void setLockedByUser(String lockedByUser) {
+        this.lockedByUser = lockedByUser;
     }
 }

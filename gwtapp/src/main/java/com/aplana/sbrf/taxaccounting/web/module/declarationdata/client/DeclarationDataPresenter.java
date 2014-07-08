@@ -46,8 +46,8 @@ public class DeclarationDataPresenter
 			Place {
 	}
 
-    public static final String DECLARATION_UPDATE_MSG = "Декларация обновлена";
-    public static final String DECLARATION_UPDATE_MSG_D = "Уведомление обновлено";
+    public static final String DECLARATION_UPDATE_MSG = "Декларация рассчитана";
+    public static final String DECLARATION_UPDATE_MSG_D = "Уведомление рассчитано";
 
     public static final String DECLARATION_DELETE_Q = "Вы уверены, что хотите удалить декларацию?";
     public static final String DECLARATION_DELETE_Q_D = "Вы уверены, что хотите удалить уведомление?";
@@ -60,7 +60,7 @@ public class DeclarationDataPresenter
 
 		void showReject(boolean show);
 
-		void showRefresh(boolean show);
+		void showRecalculateButton(boolean show);
 
 		void showDelete(boolean show);
 
@@ -146,7 +146,7 @@ public class DeclarationDataPresenter
 								getView().showAccept(result.isCanAccept());
 								getView().showReject(result.isCanReject());
 								getView().showDelete(result.isCanDelete());
-								getView().showRefresh(result.isCanDelete());
+								getView().showRecalculateButton(result.isCanDelete());
 								getView().setPdf(result.getPdf());
 							}
 						}, DeclarationDataPresenter.this).addCallback(
@@ -161,19 +161,19 @@ public class DeclarationDataPresenter
 	}
 
 	@Override
-	public void refreshDeclaration(Date docDate) {
+	public void onRecalculateClicked(Date docDate) {
 		LogCleanEvent.fire(this);
-		RefreshDeclarationDataAction action = new RefreshDeclarationDataAction();
+        RecalculateDeclarationDataAction action = new RecalculateDeclarationDataAction();
 		action.setDeclarationId(declarationId);
 		action.setDocDate(docDate);
 		dispatcher
 				.execute(
 						action,
 						CallbackUtils
-								.defaultCallback(new AbstractCallback<RefreshDeclarationDataResult>() {
+								.defaultCallback(new AbstractCallback<RecalculateDeclarationDataResult>() {
 									@Override
 									public void onSuccess(
-											RefreshDeclarationDataResult result) {
+											RecalculateDeclarationDataResult result) {
                                         LogAddEvent.fire(DeclarationDataPresenter.this, result.getUuid());
 										MessageEvent.fire(
 												DeclarationDataPresenter.this,

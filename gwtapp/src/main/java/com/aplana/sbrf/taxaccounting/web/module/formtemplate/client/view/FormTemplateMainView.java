@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstan
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter.FormTemplateMainPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.ui.BaseTab;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.ui.SimpleTabPanel;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -24,7 +25,9 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
 
 	public interface Binder extends UiBinder<Widget, FormTemplateMainView> { }
 
-	private int formId;
+    private final static int LOCK_INFO_BLOCK_HEIGHT = 25;
+
+    private int formId;
 
 	@UiField
 	Label title;
@@ -46,6 +49,9 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
 
     @UiField
     Anchor returnAnchor;
+
+    @UiField
+    Label lockInformation;
 
 	@Inject
 	public FormTemplateMainView(Binder binder) {
@@ -159,6 +165,31 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
     @Override
     public void activateVersion(boolean isVisible) {
         activateVersion.setVisible(isVisible);
+    }
+
+    @Override
+    public void setLockInformation(boolean isVisible, String lockDate, String lockedBy){
+        lockInformation.setVisible(isVisible);
+        if(lockedBy != null && lockDate != null){
+            String text = "Выбранный макет в текущий момент редактируется другим пользователем \"" + lockedBy
+                    + "\" (с "+ lockDate + " )";
+            lockInformation.setText(text);
+            lockInformation.setTitle(text);
+        }
+        changeTableTopPosition(isVisible);
+    }
+
+    /**
+     * Увеличивает верхний отступ у панели, когда показывается сообщение о блокировки
+     * @param isLockInfoVisible показано ли сообщение
+     */
+    private void changeTableTopPosition(Boolean isLockInfoVisible){
+        Style formDataTableStyle = tabPanel.getElement().getStyle();
+        int downShift = 0;
+        if (isLockInfoVisible){
+            downShift = LOCK_INFO_BLOCK_HEIGHT;
+        }
+        formDataTableStyle.setProperty("top", downShift, Style.Unit.PX);
     }
 
     @UiHandler("returnAnchor")
