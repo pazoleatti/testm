@@ -28,9 +28,11 @@ public class LogAddEvent extends
 	}
 
 	public static void fire(HasHandlers source,	String uuid) {
-		LogAddEvent event = new LogAddEvent();
-		event.setUuid(uuid);
-		source.fireEvent(event);
+        if (uuid != null){
+            LogAddEvent event = new LogAddEvent();
+            event.setUuid(uuid);
+            source.fireEvent(event);
+        }
 	}
 
     /**

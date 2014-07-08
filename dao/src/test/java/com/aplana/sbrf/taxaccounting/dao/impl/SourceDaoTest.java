@@ -14,9 +14,9 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration({ "SourceDaoTest.xml" })
-@Transactional
+//@RunWith(SpringJUnit4ClassRunner.class)
+//@ContextConfiguration({ "SourceDaoTest.xml" })
+//@Transactional
 public class SourceDaoTest {
     /*@Test
     public void testSaveFormSources() {

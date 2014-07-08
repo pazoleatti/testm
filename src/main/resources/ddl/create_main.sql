@@ -550,19 +550,27 @@ create sequence seq_department_form_type start with 10000;
 ---------------------------------------------------------------------------------------------------
 create table declaration_source (
   department_declaration_type_id number(9) not null,
-  src_department_form_type_id   number(9) not null
+  src_department_form_type_id   number(9) not null,
+  period_start date not null,
+  period_end date null
 );
 comment on table declaration_source is 'Информация о формах-источниках данных для деклараций разных видов';
 comment on column declaration_source.department_declaration_type_id is 'Иденфтикиатор сочетания вида декларации и подразделения, для которого задаётся источник';
 comment on column declaration_source.src_department_form_type_id is 'Идентификатор сочетания типа и вида формы, а также подразделения, которые являются источников данных для деклараций';
+comment on column declaration_source.period_start is 'Дата начала действия назначения';
+comment on column declaration_source.period_end is 'Дата окончания действия назначения';
 ----------------------------------------------------------------------------------------------------
 create table form_data_source (
   department_form_type_id number(9) not null,
-  src_department_form_type_id number(9) not null
+  src_department_form_type_id number(9) not null,
+  period_start date not null,
+  period_end date null
 );
 comment on table form_data_source is 'Информация об источниках данных для формирования консолидированных и сводных налоговоых форм';
 comment on column form_data_source.department_form_type_id is 'Идентификатор сочетания вида, типа формы и подразделения, для которого задётся источник данных';
 comment on column form_data_source.src_department_form_type_id is 'Идентификатор сочетания вида, типа формы и подразделения, которое является источником данных';
+comment on column form_data_source.period_start is 'Дата начала действия назначения';
+comment on column form_data_source.period_end is 'Дата окончания действия назначения';
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------
 create table sec_user (
   id number(9) not null,
