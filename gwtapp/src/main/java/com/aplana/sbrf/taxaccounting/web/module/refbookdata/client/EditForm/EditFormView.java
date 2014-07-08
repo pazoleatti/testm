@@ -305,25 +305,38 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 			try {
                 switch (field.getKey().getAttributeType()) {
 					case NUMBER:
-                        Number number;
+                        BigDecimal number;
                         if (field.getValue() instanceof CheckBox) {
                             number = field.getValue().getValue() == null ?
                                     null :
                                     (Boolean) field.getValue().getValue() ?
                                             BigDecimal.ONE : BigDecimal.ZERO;
                         } else {
-                            number = (field.getValue().getValue() == null || field.getValue().getValue().toString().trim().isEmpty())
-                                    ? null : new BigDecimal((String) field.getValue().getValue());
+                            if (field.getValue().getValue() != null && !field.getValue().getValue().toString().trim().isEmpty()) {
+                                String valStr = (String) field.getValue().getValue();
+                                number = new BigDecimal(valStr);
+                                valStr = (number).toPlainString();
+                                if (valStr.contains(".")) {
+                                    number = new BigDecimal(valStr.replaceAll("()(0+)(e|$)", "$1$3"));
+                                }
+                            } else {
+                                number = null;
+                            }
                         }
                         checkRequired(field.getKey(), number);
 						if (number != null) {
-							String numberStr = number.toString();
-							String fractionalStr = numberStr.contains(".") ? numberStr.substring(numberStr.indexOf('.')+1) : "";
-							String intStr = String.valueOf(Math.abs(number.longValue()));
-                            if ((intStr.length() > 17) || (fractionalStr.length() > 10)) {
+                            int fractionalPart = number.scale();
+                            int integerPart = fractionalPart < 0 ? (number.precision() - fractionalPart) : number.precision() ;
+                            fractionalPart = fractionalPart < 0 ? 0 : fractionalPart;
+
+                            Integer maxLength = field.getKey().getMaxLength();
+                            Integer precision = field.getKey().getPrecision();
+
+                            // пердпологается, что (maxLength - precision) <= 17
+                            if (fractionalPart > precision || (integerPart + fractionalPart) > maxLength) {
 								BadValueException badValueException = new BadValueException();
 								badValueException.setFieldName(field.getKey().getName());
-								badValueException.setDescription("Значение не соответствует формату (27, 10)");
+								badValueException.setDescription("Значение не соответствует формату (" + maxLength + ", " + precision + ")");
 								throw badValueException;
 							}
 						}

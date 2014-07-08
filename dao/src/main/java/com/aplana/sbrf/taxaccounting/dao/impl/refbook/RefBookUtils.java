@@ -24,6 +24,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
@@ -512,6 +513,25 @@ public class RefBookUtils extends AbstractDao {
 
                 if ((a.getId() == 161L || a.getId() == 162L) && values.get(a.getAlias()).getStringValue() != null &&  values.get(a.getAlias()).getStringValue().contains("/")) {
                     errors.add("Значение атрибута «" + a.getName() + "» не должно содержать символ «/»!");
+                }
+
+                if (a.getAttributeType().equals(RefBookAttributeType.NUMBER)) {
+                    BigDecimal number = (BigDecimal)(values.get(a.getAlias()).getNumberValue());
+                    String valStr = number.toPlainString();
+                    if (valStr.contains(".")) {
+                        number = new BigDecimal(valStr.replaceAll("()(0+)(e|$)", "$1$3"));
+                    }
+                    int fractionalPart = number.scale();
+                    int integerPart = fractionalPart < 0 ? (number.precision() - fractionalPart) : number.precision() ;
+                    fractionalPart = fractionalPart < 0 ? 0 : fractionalPart;
+
+                    Integer maxLength = a.getMaxLength();
+                    Integer precision = a.getPrecision();
+
+                    // пердпологается, что (maxLength - precision) <= 17
+                    if (fractionalPart > precision || (integerPart + fractionalPart) > maxLength) {
+                        errors.add("Значение атрибута «" + a.getName() + "» не соответствует формату (" + maxLength + ", " + precision + ")");
+                    }
                 }
             }
         }

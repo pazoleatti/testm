@@ -18,6 +18,7 @@ public class RefBookColumn implements Serializable{
     private boolean isHierarchical = false;
     private boolean readOnly;
     private Integer maxLength;
+    private Integer precision;
 
    /** Обязательность заполнения */
     private boolean required;
@@ -124,5 +125,13 @@ public class RefBookColumn implements Serializable{
 
     public void setMaxLength(Integer maxLength) {
         this.maxLength = maxLength;
+    }
+
+    public Integer getPrecision() {
+        return precision;
+    }
+
+    public void setPrecision(Integer precision) {
+        this.precision = precision;
     }
 }
