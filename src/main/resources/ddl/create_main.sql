@@ -40,13 +40,15 @@ create table form_type (
   id       number(9) not null,
   name     varchar2(1000) not null,
   tax_type char(1) not null,
-  status number(1) default 0 not null
+  status number(1) default 0 not null,
+  code varchar2(600)
 );
 comment on table form_type is 'Типы налоговых форм (названия)';
 comment on column form_type.id is 'Идентификатор';
 comment on column form_type.name is 'Наименование';
 comment on column form_type.tax_type is 'Вид налога (I-на прибыль, P-на имущество, T-транспортный, V-НДС, D-ТЦО)';
 comment on column form_type.status is 'Статус версии (0 - действующая версия; -1 - удаленная версия, 1 - черновик версии, 2 - фиктивная версия)';
+comment on column form_type.code is 'Номер формы';
 
 create sequence seq_form_type start with 10000;
 ---------------------------------------------------------------------------------------------------
@@ -71,11 +73,12 @@ create table form_template (
   fixed_rows number(1) not null,
   name varchar2(1000) not null,
   fullname varchar2(1000) not null,
-  code varchar2(600) not null,
+  code varchar2(600) not null, 
   script clob,
   data_headers clob,
   status number(1) default 0 not null,
-  monthly number(1) default 0 not null
+  monthly number(1) default 0 not null,
+  header varchar2(1000)
 );
 comment on table form_template IS 'Описания шаблонов налоговых форм';
 comment on column form_template.data_rows is 'Предопределённые строки формы в формате XML';
@@ -91,6 +94,7 @@ comment on column form_template.script is 'Скрипт, реализующий 
 comment on column form_template.data_headers is 'Описание заголовка таблицы';
 comment on column form_template.status is 'Статус версии (0 - действующая версия; 1 - удаленная версия, 2 - черновик версии, 3 - фиктивная версия)';
 comment on column form_template.monthly is 'Признак ежемесячной формы (0 - не ежемесячная, 1 - ежемесячная)';
+comment on column form_template.header is 'Верхний колонтитул печатной формы';
 
 create sequence seq_form_template start with 10000;
 ---------------------------------------------------------------------------------------------------
