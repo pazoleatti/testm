@@ -7,8 +7,8 @@ package com.aplana.sbrf.taxaccounting.model;
  */
 public enum AuditFieldList {
 
-    FORM_TYPE(2, "Вид налоговой формы"),
     ALL(1, "Все поля"),
+    FORM_TYPE(2, "Вид налоговой формы"),
     DECLARATION_TYPE(3, "Вид декларации"),
     PERIOD(4, "Период"),
     DEPARTMENT(5, "Подразделение"),

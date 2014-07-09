@@ -95,6 +95,9 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
+        break
 }
 
 //// Кэши и константы
@@ -829,7 +832,7 @@ void addData(def xml, int headRowCount) {
 
         // графа 15 - атрибут 65 CODE_2 - «Код валюты. Буквенный», справочник 15 «Единый справочник валют»
         record15 = getRecordImport(15, 'CODE_2', row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset)
-        newRow.securityName = record15?.record_id?.value
+        newRow.currencyCodeTrade = record15?.record_id?.value
         indexCell++
 
         // графа 16 - зависит от графы 15 - атрибут 66 NAME - «Наименование валюты», справочник 15 «Единый справочник валют»
@@ -932,6 +935,345 @@ void updateIndexes(def dataRows) {
     dataRows.eachWithIndex { row, i ->
         row.setIndex(i + 1)
     }
+}
+
+void importTransportData() {
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    addTransportData(xml)
+}
+
+void addTransportData(def xml) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper?.allCached
+    def int rnuIndexRow = 2
+    def int colOffset = 1
+
+    def mapRows = [:]
+
+    for (def row : xml.row) {
+        rnuIndexRow++
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+        def newRow = formData.createDataRow()
+        editableColumns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
+
+        // графа 1
+        indexCell = 1
+        newRow.balanceNumber = row.cell[indexCell].text()
+
+        // графа 2
+        indexCell = 2
+        newRow.operationType = getRecordIdImport(87, 'OPERATION_TYPE', row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset)
+
+        // графа 3
+        indexCell = 3
+        newRow.signContractor = getRecordIdImport(88, 'CODE', row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset)
+
+        // графа 4
+        indexCell = 4
+        newRow.contractorName = row.cell[indexCell].text()
+
+        // графа 5 - атрибут 809 - ISSUER - «Эмитент», справочник 84 «Ценные бумаги»
+        indexCell = 5
+        def record100 = getRecordImport(100, 'FULL_NAME', row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset)
+        // TODO (Ramil Timerbaev) могут быть проблемы с нахождением записи,
+        // если в справочнике 84 есть несколько записей с одинаковыми значениями в поле ISSUER
+        def record84 = getRecordImport(84, 'ISSUER', record100?.record_id?.value?.toString(), rnuIndexRow, indexCell + colOffset)
+        newRow.securityName = record84?.record_id?.value
+
+        if (record84 != null) {
+            // графа 6 - зависит от графы 5 - атрибут 812 - SHORTNAME - «Краткое название ценной бумаги / Выпуск», справочник 84 «Ценные бумаги»
+            indexCell = 6
+            def value1 = record84?.SHORTNAME?.value
+            def value2 = row.cell[indexCell].text()
+            formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, indexCell + colOffset, logger, true)
+
+            // графа 7 - зависит от графы 5 - атрибут 815 - TYPE - «Тип (вид) ценной бумаги», справочник 84 «Ценные бумаги»
+            indexCell = 7
+            def record89 = getRecordImport(89, 'CODE', row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset)
+            if (record89 != null) {
+                value1 = record89?.record_id?.value?.toString()
+                value2 = record84?.TYPE?.value?.toString()
+                formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, indexCell + colOffset, logger, true)
+            }
+
+            // графа 8 - зависит от графы 5 - атрибут 869 - SIGN - «Признак ценной бумаги», справочник 84 «Ценные бумаги»
+            indexCell = 8
+            def record62 = getRecordImport(62, 'CODE', row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset)
+            if (record62 != null) {
+                value1 = record62?.record_id?.value?.toString()
+                value2 = record84?.SIGN?.value?.toString()
+                formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, indexCell + colOffset, logger, true)
+            }
+
+            // графа 9 - зависит от графы 5 - атрибут 810 - CODE_CUR - «Цифровой код валюты выпуска», справочник 84 «Ценные бумаги»
+            indexCell = 9
+            def record15 = getRecordImport(15, 'CODE', row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset)
+            if (record15 != null) {
+                value1 = record15?.record_id?.value?.toString()
+                value2 = record84?.CODE_CUR?.value?.toString()
+                formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, indexCell + colOffset, logger, true)
+            }
+
+            // графа 10 - зависит от графы 5 - атрибут 810 - CODE_CUR - «Цифровой код валюты выпуска», справочник 84 «Ценные бумаги»
+            indexCell = 10
+            // TODO (Ramil Timerbaev) могут быть проблемы с нахождением записи,
+            // если в справочнике 15 есть несколько записей с одинаковыми значениями в поле NAME
+            record15 = getRecordImport(15, 'NAME', row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset)
+            if (record15 != null) {
+                value1 = record15?.record_id?.value?.toString()
+                value2 = record84?.CODE_CUR?.value?.toString()
+                formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, indexCell + colOffset, logger, true)
+            }
+        }
+
+        // графа 11
+        indexCell = 11
+        newRow.nominal = parseNumber(row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset, logger, true)
+
+        // графа 12
+        indexCell = 12
+        newRow.amount = parseNumber(row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset, logger, true)
+
+        // графа 13
+        indexCell = 13
+        newRow.acquisitionDate = parseDate(row.cell[indexCell].text(), "dd.MM.yyyy", rnuIndexRow, indexCell + colOffset, logger, true)
+
+        // графа 14
+        indexCell = 14
+        newRow.tradeDate = parseDate(row.cell[indexCell].text(), "dd.MM.yyyy", rnuIndexRow, indexCell + colOffset, logger, true)
+
+        // графа 15 - атрибут 65 CODE_2 - «Код валюты. Буквенный», справочник 15 «Единый справочник валют»
+        indexCell = 15
+        record15 = getRecordImport(15, 'CODE_2', row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset)
+        newRow.currencyCodeTrade = record15?.record_id?.value
+
+        // графа 16 - зависит от графы 15 - атрибут 66 NAME - «Наименование валюты», справочник 15 «Единый справочник валют»
+        indexCell = 16
+        if (record15 != null) {
+            def value1 = record15?.NAME?.value
+            def value2 = row.cell[indexCell].text()
+            formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, indexCell + colOffset, logger, true)
+        }
+
+        // графа 17
+        indexCell = 17
+        newRow.costWithoutNKD = parseNumber(row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset, logger, true)
+
+        // графа 18
+        indexCell = 18
+        newRow.loss = parseNumber(row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset, logger, true)
+
+        // графа 19
+        indexCell = 19
+        newRow.marketPriceInPerc = parseNumber(row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset, logger, true)
+
+        // графа 20
+        indexCell = 20
+        newRow.marketPriceInRub = parseNumber(row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset, logger, true)
+
+        // графа 21
+        indexCell = 21
+        newRow.costAcquisition = parseNumber(row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset, logger, true)
+
+        // графа 22
+        indexCell = 22
+        newRow.realizationDate = parseDate(row.cell[indexCell].text(), "dd.MM.yyyy", rnuIndexRow, indexCell + colOffset, logger, true)
+
+        // графа 23
+        indexCell = 23
+        newRow.tradeDate2 = parseDate(row.cell[indexCell].text(), "dd.MM.yyyy", rnuIndexRow, indexCell + colOffset, logger, true)
+
+        // графа 24
+        indexCell = 24
+        newRow.repaymentWithoutNKD = parseNumber(row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset, logger, true)
+
+        // графа 25
+        indexCell = 25
+        newRow.realizationPriceInPerc = parseNumber(row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset, logger, true)
+
+        // графа 26
+        indexCell = 26
+        newRow.realizationPriceInRub = parseNumber(row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset, logger, true)
+
+        // графа 27
+        indexCell = 27
+        newRow.marketPriceRealizationInPerc = parseNumber(row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset, logger, true)
+
+        // графа 28
+        indexCell = 28
+        newRow.marketPriceRealizationInRub = parseNumber(row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset, logger, true)
+
+        // графа 29
+        indexCell = 29
+        newRow.costRealization = parseNumber(row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset, logger, true)
+
+        // графа 30
+        indexCell = 30
+        newRow.lossRealization = parseNumber(row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset, logger, true)
+
+        // графа 31
+        indexCell = 31
+        newRow.totalLoss = parseNumber(row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset, logger, true)
+
+        // графа 32
+        indexCell = 32
+        newRow.averageWeightedPrice = parseNumber(row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset, logger, true)
+
+        // графа 33
+        indexCell = 33
+        newRow.termIssue = parseNumber(row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset, logger, true)
+
+        // графа 34
+        indexCell = 34
+        newRow.termHold = parseNumber(row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset, logger, true)
+
+        // графа 35
+        indexCell = 35
+        newRow.interestIncomeCurrency = parseNumber(row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset, logger, true)
+
+        // графа 36
+        indexCell = 36
+        newRow.interestIncomeInRub = parseNumber(row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset, logger, true)
+
+        // графа 37
+        indexCell = 37
+        newRow.realizationResult = parseNumber(row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset, logger, true)
+
+        // графа 38
+        indexCell = 38
+        newRow.excessSellingPrice = parseNumber(row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset, logger, true)
+
+        // Техническое поле(группа)
+        indexCell = 39
+        def sectionName = "R" + row.cell[indexCell].text()
+
+        if (mapRows[sectionName] == null) {
+            mapRows[sectionName] = []
+        }
+        mapRows[sectionName].add(newRow)
+    }
+
+    deleteNotFixedRows(dataRows)
+    dataRows.each { row ->
+        if (row.getAlias()?.contains('total')) {
+            totalColumns.each {
+                row[it] = null
+            }
+        }
+    }
+
+    // копирование данных по разделам
+    groups.each { section ->
+        def copyRows = mapRows[section]
+        if (copyRows != null && !copyRows.isEmpty()) {
+            def insertIndex = getDataRow(dataRows, "$section").getIndex()
+            dataRows.addAll(insertIndex, copyRows)
+            // поправить индексы, потому что они после вставки не пересчитываются
+            updateIndexes(dataRows)
+        }
+    }
+
+
+    calcOrCheckTotalDataRows(dataRows, false)
+    calcOrCheckTotalForMonth(dataRows, false)
+    def totalRow = getDataRow(dataRows, 'R10')
+    calcOrCheckTotalForTaxPeriod(dataRows, false)
+
+    if (xml.rowTotal.size() == 1) {
+        rnuIndexRow += 2
+
+        def row = xml.rowTotal[0]
+
+        def total = formData.createDataRow()
+
+        // графа 12
+        indexCell = 12
+        total.amount = parseNumber(row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset, logger, true)
+
+        // графа 17
+        indexCell = 17
+        total.costWithoutNKD = parseNumber(row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset, logger, true)
+
+        // графа 18
+        indexCell = 18
+        total.loss = parseNumber(row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset, logger, true)
+
+        // графа 20
+        indexCell = 20
+        total.marketPriceInRub = parseNumber(row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset, logger, true)
+
+        // графа 21
+        indexCell = 21
+        total.costAcquisition = parseNumber(row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset, logger, true)
+
+        // графа 24
+        indexCell = 24
+        total.repaymentWithoutNKD = parseNumber(row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset, logger, true)
+
+        // графа 25
+        indexCell = 25
+        total.realizationPriceInPerc = parseNumber(row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset, logger, true)
+
+        // графа 26
+        indexCell = 26
+        total.realizationPriceInRub = parseNumber(row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset, logger, true)
+
+        // графа 28
+        indexCell = 28
+        total.marketPriceRealizationInRub = parseNumber(row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset, logger, true)
+
+        // графа 29
+        indexCell = 29
+        total.costRealization = parseNumber(row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset, logger, true)
+
+        // графа 30
+        indexCell = 30
+        total.lossRealization = parseNumber(row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset, logger, true)
+
+        // графа 31
+        indexCell = 31
+        total.totalLoss = parseNumber(row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset, logger, true)
+
+        // графа 35
+        indexCell = 35
+        total.interestIncomeCurrency = parseNumber(row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset, logger, true)
+
+        // графа 36
+        indexCell = 36
+        total.interestIncomeInRub = parseNumber(row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset, logger, true)
+
+        // графа 37
+        indexCell = 37
+        total.realizationResult = parseNumber(row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset, logger, true)
+
+        // графа 38
+        indexCell = 38
+        total.excessSellingPrice = parseNumber(row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset, logger, true)
+
+        def colIndexMap = ['amount' : 12, 'costWithoutNKD' : 17, 'loss' : 18, 'marketPriceInRub' : 20,
+                           'costAcquisition' : 21, 'repaymentWithoutNKD' : 24, 'realizationPriceInRub' : 26,
+                           'marketPriceRealizationInRub' : 28, 'costRealization' : 29, 'lossRealization' : 30,
+                           'totalLoss' : 31, 'interestIncomeCurrency' : 35, 'interestIncomeInRub' : 36,
+                           'realizationResult' : 37, 'excessSellingPrice' : 38]
+        for (def alias : totalColumns) {
+            def v1 = total[alias]
+            def v2 = totalRow[alias]
+            if (v1 == null && v2 == null) {
+                continue
+            }
+            if (v1 == null || v1 != null && v1 != v2) {
+                logger.error(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
+                break
+            }
+        }
+    }
+    dataRowHelper.save(dataRows)
 }
 
 // Получить курс валюты по id записи из справочнкиа ценной бумаги (84)

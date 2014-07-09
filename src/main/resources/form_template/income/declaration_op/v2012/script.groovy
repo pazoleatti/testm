@@ -17,13 +17,16 @@ import groovy.xml.MarkupBuilder
 switch (formDataEvent) {
     case FormDataEvent.CREATE : // создать / обновить
         checkDeparmentParams(LogLevel.WARNING)
-        generateXML()
         break
     case FormDataEvent.CHECK : // проверить
         checkDeparmentParams(LogLevel.ERROR)
         break
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED : // принять из создана
         checkDeparmentParams(LogLevel.ERROR)
+        break
+    case FormDataEvent.CALCULATE:
+        checkDeparmentParams(LogLevel.WARNING)
+        generateXML()
         break
     default:
         return

@@ -1,12 +1,13 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.server;
 
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.ObjectLock;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.FormTemplateExt;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.GetFormAction;
@@ -17,6 +18,9 @@ import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * @author Vitalii Samolovskikh
@@ -32,8 +36,12 @@ public class GetFormHandler extends AbstractActionHandler<GetFormAction, GetForm
 
     @Autowired
     private RefBookFactory refBookFactory;
+
     @Autowired
     private LogEntryService logEntryService;
+
+    @Autowired
+    private TAUserService taUserService;
 
     public GetFormHandler() {
         super(GetFormAction.class);
@@ -45,15 +53,7 @@ public class GetFormHandler extends AbstractActionHandler<GetFormAction, GetForm
 
         Logger logger = new Logger();
         GetFormResult result = new GetFormResult();
-        try {
-            formTemplateService.checkLockedByAnotherUser(action.getId(), userInfo);
-        } catch (AccessDeniedException e) {
-            logger.error(e);
-            result.setLockedByAnotherUser(true);
-        }
-        if (!result.isLockedByAnotherUser()) {
-            formTemplateService.lock(action.getId(), userInfo);
-        }
+        fillLockData(action, userInfo, result);
         FormTemplateExt formTemplateExt = new FormTemplateExt();
 		FormTemplate formTemplate = formTemplateService.getFullFormTemplate(action.getId(), logger);
         formTemplateExt.setActualEndVersionDate(formTemplateService.getFTEndDate(formTemplate.getId()));
@@ -65,6 +65,37 @@ public class GetFormHandler extends AbstractActionHandler<GetFormAction, GetForm
         if (!logger.getEntries().isEmpty())
             result.setUuid(logEntryService.save(logger.getEntries()));
         return result;
+    }
+
+    /**
+     * Блокирует макет при необходимости, заполняет состояние блокировки
+     *
+     * @param action
+     * @param userInfo
+     * @param result
+     */
+    private void fillLockData(GetFormAction action, TAUserInfo userInfo,
+                              GetFormResult result) {
+        ObjectLock<Integer> lockInformation = formTemplateService.getObjectLock(action
+                .getId(), securityService.currentUserInfo());
+        if (lockInformation != null) {
+            // Если данная форма уже заблокирована
+            result.setLockedByUser(taUserService.getUser(lockInformation.getUserId()).getName());
+            result.setLockDate(getFormedDate(lockInformation.getLockTime()));
+            if (lockInformation.getUserId() != userInfo.getUser().getId()) {
+                result.setLockedByAnotherUser(true);
+            }
+        }
+        if (!result.isLockedByAnotherUser()) {
+            formTemplateService.lock(action.getId(), userInfo);
+        }
+    }
+
+    private static String getFormedDate(Date dateToForm) {
+        // Преобразуем Date в строку вида "dd.mm.yyyy hh:mm"
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm z");
+        formatter.format(dateToForm);
+        return (formatter.format(dateToForm));
     }
 
     @Override

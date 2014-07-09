@@ -94,6 +94,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
         void addDeclarationValueHandler(ValueChangeHandler<String> valueChangeHandler);
         void activateButtonName(String name);
         void activateButton(boolean isVisible);
+        void setLockInformation(boolean isVisible, String lockDate, String lockedBy);
 	}
 
 	private final DispatchAsync dispatcher;
@@ -282,7 +283,9 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 						public void onSuccess(GetDeclarationResult result) {
                             LogAddEvent.fire(DeclarationTemplatePresenter.this, result.getUuid());
                             if (result.isLockedByAnotherUser()) {
-                                Dialog.errorMessage("Шаблон формы заблокирован другим пользователем");
+                                getView().setLockInformation(true, result.getLockDate(), result.getLockedByUser());
+                            } else {
+                                getView().setLockInformation(false, null, null);
                             }
                             declarationTemplateExt = new DeclarationTemplateExt();
 							declarationTemplate = result.getDeclarationTemplate();

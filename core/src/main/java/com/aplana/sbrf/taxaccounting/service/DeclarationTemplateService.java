@@ -97,6 +97,13 @@ public interface DeclarationTemplateService {
 	void checkLockedByAnotherUser(Integer declarationTemplateId, TAUserInfo userInfo);
 
     /**
+     * Получить информацию о состоянии блокировки шаблона декларации
+     * @param declarationTemplateId - идентификатор вида декларации
+     * @return информацию о блокировке объекта
+     */
+    ObjectLock<Integer> getObjectLock(final Integer declarationTemplateId, final TAUserInfo userInfo);
+
+    /**
      * Получение тела скрипта.
      * @param declarationTemplateId идентификатор вида декларации
      * @return тело скрипта

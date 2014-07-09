@@ -43,7 +43,7 @@
                 <fm:left>
                     <fm:Left>
                         <style:LeftBar marginRight="5" childValign="middle" height="100%">
-                            <g:Label ui:field="declarationHeader" addStyleNames="{style.titleText}, {style.marginRight5}" text="Cписок деклараций" />
+                            <g:Label ui:field="titleDesc" addStyleNames="{style.titleText}, {style.marginRight5}" text="Cписок деклараций" />
                             <g:Label text="—" addStyleNames="{style.titleText}"/>
                         </style:LeftBar>
                     </fm:Left>
@@ -58,7 +58,7 @@
                 </fm:right>
                 <fm:resizable>
                     <fm:Resizable>
-                        <g:Label ui:field="titleDesc"/>
+                        <g:Label ui:field="declarationHeader"/>
                     </fm:Resizable>
                 </fm:resizable>
             </fm:HeaderContainer>

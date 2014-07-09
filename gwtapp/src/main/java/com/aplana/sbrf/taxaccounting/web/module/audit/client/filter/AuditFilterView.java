@@ -107,8 +107,23 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
 
     @UiHandler("search")
     void onSearchButtonClicked(ClickEvent event) {
-        if (fromSearchDate.getValue() == null || toSearchDate.getValue() == null) {
-            Dialog.errorMessage("Укажите корректную дату.");
+        if (fromSearchDate.getValue() == null || toSearchDate.getValue() == null || auditFieldList.getValue().isEmpty()) {
+            StringBuffer errorStr = new StringBuffer();
+            boolean sepFlag = false;
+            if (fromSearchDate.getValue() == null) {
+                errorStr.append("\"От даты\"");
+                sepFlag = true;
+            }
+            if (toSearchDate.getValue() == null) {
+                if (sepFlag) errorStr.append(", ");
+                errorStr.append("\"По дату\"");
+                sepFlag = true;
+            }
+            if (auditFieldList.getValue().isEmpty()) {
+                if (sepFlag) errorStr.append(", ");
+                errorStr.append("\"Искать по полям\"");
+            }
+            Dialog.errorMessage("Не заполнены обязательные поля", "Для выполнения поиска должны быть заполнены: " + errorStr.toString());
             return;
         }
 

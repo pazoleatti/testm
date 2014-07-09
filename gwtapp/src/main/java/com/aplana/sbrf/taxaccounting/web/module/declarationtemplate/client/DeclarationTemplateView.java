@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.FormElement;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -30,6 +31,9 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 	}
 
 	private final MyDriver driver = GWT.create(MyDriver.class);
+
+    private final static int DEFAULT_TABLE_TOP_POSITION = 140;
+    private final static int LOCK_INFO_BLOCK_HEIGHT = 25;
 
     @UiField
     @Path("declarationTemplate.version")
@@ -82,6 +86,10 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
     @UiField
     @Editor.Ignore
     Button activateVersion;
+
+    @UiField
+    @Editor.Ignore
+    Label lockInformation;
 
     @UiField
     @Path("declarationTemplate.name")
@@ -171,6 +179,31 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
     @Override
     public void activateButton(boolean isVisible) {
         activateVersion.setVisible(isVisible);
+    }
+
+    @Override
+    public void setLockInformation(boolean isVisible, String lockDate, String lockedBy) {
+        lockInformation.setVisible(isVisible);
+        if(lockedBy != null && lockDate != null){
+            String text = "Выбранный макет в текущий момент редактируется другим пользователем \"" + lockedBy
+                    + "\" (с "+ lockDate + " )";
+            lockInformation.setText(text);
+            lockInformation.setTitle(text);
+        }
+        changeTableTopPosition(isVisible);
+    }
+
+    /**
+     * Увеличивает верхний отступ у панели, когда показывается сообщение о блокировки
+     * @param isLockInfoVisible показано ли сообщение
+     */
+    private void changeTableTopPosition(Boolean isLockInfoVisible) {
+        Style formDataTableStyle = createScript.getElement().getStyle();
+        int downShift = 0;
+        if (isLockInfoVisible){
+            downShift = LOCK_INFO_BLOCK_HEIGHT;
+        }
+        formDataTableStyle.setProperty("top", DEFAULT_TABLE_TOP_POSITION + downShift, Style.Unit.PX);
     }
 
     @UiHandler("saveButton")

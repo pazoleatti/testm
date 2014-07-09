@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.core.api.LockCoreService;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.ObjectLockDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
@@ -8,6 +9,8 @@ import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
+import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
+import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.design.JasperDesign;
@@ -18,6 +21,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
@@ -44,9 +48,15 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 	private ObjectLockDao lockDao;
 
     @Autowired
+    private LockCoreService lockCoreService;
+
+    @Autowired
     BlobDataService blobDataService;
 
-	@Override
+    @Autowired
+    TransactionHelper tx;
+
+    @Override
 	public List<DeclarationTemplate> listAll() {
 		return declarationTemplateDao.listAll();
 	}
@@ -147,6 +157,21 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 			}
 		}
 	}
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public ObjectLock<Integer> getObjectLock(final Integer declarationTemplateId, final TAUserInfo userInfo) {
+        return tx.returnInNewTransaction(new TransactionLogic<ObjectLock<Integer>>() {
+            @Override
+            public ObjectLock<Integer> executeWithReturn() {
+                return lockCoreService.getLock(DeclarationTemplate.class, declarationTemplateId, userInfo);
+            }
+
+            @Override
+            public void execute() {
+            }
+        });
+    }
 
     @Override
     public String getDeclarationTemplateScript(int declarationTemplateId) {

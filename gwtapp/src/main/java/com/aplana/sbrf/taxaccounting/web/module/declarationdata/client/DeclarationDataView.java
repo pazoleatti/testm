@@ -26,7 +26,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     public static final String DATE_BOX_TITLE_D = "Дата формирования уведомления";
 
 	@UiField
-	Button refreshButton;
+	Button recalculateButton;
 	@UiField
 	Button acceptButton;
 	@UiField
@@ -90,9 +90,9 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	}
 
 	@Override
-	public void showRefresh(boolean show) {
+	public void showRecalculateButton(boolean show) {
 		//dateBox.setVisible(show);
-		refreshButton.setVisible(show);
+		recalculateButton.setVisible(show);
 		dateBox.setEnabled(show);
 	}
 
@@ -148,13 +148,13 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 		dateBox.setValue(date);
 	}
 
-	@UiHandler("refreshButton")
-	public void onRefresh(ClickEvent event){
+	@UiHandler("recalculateButton")
+	public void onRecalculateButtonClicked(ClickEvent event){
         if (dateBox.getValue() == null) {
             Dialog.warningMessage("Введите дату.");
         } else {
             if (getUiHandlers() != null) {
-                getUiHandlers().refreshDeclaration(dateBox.getValue());
+                getUiHandlers().onRecalculateClicked(dateBox.getValue());
             }
         }
     }

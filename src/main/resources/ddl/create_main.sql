@@ -40,13 +40,15 @@ create table form_type (
   id       number(9) not null,
   name     varchar2(1000) not null,
   tax_type char(1) not null,
-  status number(1) default 0 not null
+  status number(1) default 0 not null,
+  code varchar2(600)
 );
 comment on table form_type is 'Типы налоговых форм (названия)';
 comment on column form_type.id is 'Идентификатор';
 comment on column form_type.name is 'Наименование';
 comment on column form_type.tax_type is 'Вид налога (I-на прибыль, P-на имущество, T-транспортный, V-НДС, D-ТЦО)';
 comment on column form_type.status is 'Статус версии (0 - действующая версия; -1 - удаленная версия, 1 - черновик версии, 2 - фиктивная версия)';
+comment on column form_type.code is 'Номер формы';
 
 create sequence seq_form_type start with 10000;
 ---------------------------------------------------------------------------------------------------
@@ -71,11 +73,12 @@ create table form_template (
   fixed_rows number(1) not null,
   name varchar2(1000) not null,
   fullname varchar2(1000) not null,
-  code varchar2(600) not null,
+  code varchar2(600) not null, 
   script clob,
   data_headers clob,
   status number(1) default 0 not null,
-  monthly number(1) default 0 not null
+  monthly number(1) default 0 not null,
+  header varchar2(1000)
 );
 comment on table form_template IS 'Описания шаблонов налоговых форм';
 comment on column form_template.data_rows is 'Предопределённые строки формы в формате XML';
@@ -91,6 +94,7 @@ comment on column form_template.script is 'Скрипт, реализующий 
 comment on column form_template.data_headers is 'Описание заголовка таблицы';
 comment on column form_template.status is 'Статус версии (0 - действующая версия; 1 - удаленная версия, 2 - черновик версии, 3 - фиктивная версия)';
 comment on column form_template.monthly is 'Признак ежемесячной формы (0 - не ежемесячная, 1 - ежемесячная)';
+comment on column form_template.header is 'Верхний колонтитул печатной формы';
 
 create sequence seq_form_template start with 10000;
 ---------------------------------------------------------------------------------------------------
@@ -183,7 +187,7 @@ comment on column ref_book_attribute.is_unique is 'Признак уникаль
 comment on column ref_book_attribute.sort_order is 'Определяет порядок сортировки по умолчанию';
 comment on column ref_book_attribute.format is 'Формат. (Для дат: 0 - "", 1 - "dd.MM.yyyy", 2 - "MM.yyyy", 3 - "MMMM yyyy", 4 - "yyyy", 5 - "dd.MM"; Для чисел: 6 - чекбокс)';
 comment on column ref_book_attribute.read_only is 'Только для чтения (0 - редактирование доступно пользователю; 1 - редактирование недоступно пользователю)';
-comment on column ref_book_attribute.max_length is 'Максимальная длина строки';
+comment on column ref_book_attribute.max_length is 'Максимальная длина строки/Максимальное количество цифр без учета знака и десятичного разделителя';
 ------------------------------------------------------------------------------------------------------
 create table ref_book_record (
   id number(18) not null,
@@ -681,7 +685,8 @@ create table log_system (
   user_department_name varchar2(4000 byte),
   declaration_type_name varchar2(80),
   form_type_name      varchar2(1000),
-  form_department_id  number(9)
+  form_department_id  number(9),
+  tb_department_id number(9)
 );
 comment on table log_system is  'Системный журнал';
 comment on column log_system.id is 'Код записи';
@@ -698,6 +703,7 @@ comment on column log_system.user_department_name is 'Наименование �
 comment on column LOG_SYSTEM.DECLARATION_TYPE_NAME is 'Вид декларации';
 comment on column LOG_SYSTEM.FORM_TYPE_NAME is 'Вид налоговой формы';
 comment on column LOG_SYSTEM.FORM_DEPARTMENT_ID is 'Идентификатор подразделения налоговой формы/декларации';
+comment on column log_system.tb_department_id is 'Идентификатор ТБ подразделения налоговой формы/декларации';
 
 create sequence seq_log_system start with 10000;
 ------------------------------------------------------------------------------------------------------
