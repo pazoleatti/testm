@@ -183,7 +183,7 @@ public class FormDataServiceImpl implements FormDataService {
             if(!ext.equals(XLS_EXT) && !ext.equals(XLSX_EXT)){
 
                 String pKeyFileUrl = null;
-                List<String> paramList = configurationDao.getAll().get(ConfigurationParam.FORM_DATA_KEY_FILE, DepartmentType.ROOT_BANK.getCode());
+                List<String> paramList = configurationDao.getAll().get(ConfigurationParam.KEY_FILE, DepartmentType.ROOT_BANK.getCode());
                 if (paramList != null && !paramList.isEmpty()) {
                     pKeyFileUrl =  paramList.get(0); // TODO Ключи нужно искать в нескольких каталогах
                 }

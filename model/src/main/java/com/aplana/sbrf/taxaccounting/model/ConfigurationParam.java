@@ -6,36 +6,83 @@ package com.aplana.sbrf.taxaccounting.model;
  * @author <a href="mailto:Marat.Fayzullin@aplana.com">Файзуллин Марат</a>
  * @since 10.10.13 11:24
  */
-
 public enum ConfigurationParam {
-
-    FORM_DATA_KEY_FILE ("Путь к файлу ключей ЭЦП для форм"),
-    REF_BOOK_KEY_FILE ("Путь к файлу ключей ЭЦП для справочников"),
-    ACCOUNT_PLAN_TRANSPORT_DIRECTORY ("Путь к каталогу загрузки транспортных файлов, содержащих данные справочника «План счетов»"),
-    OKATO_TRANSPORT_DIRECTORY ("Путь к каталогу загрузки транспортных файлов, содержащих данные справочника «ОКАТО»"),
-    REGION_TRANSPORT_DIRECTORY ("Путь к каталогу загрузки транспортных файлов, содержащих данные справочника «Субъекты РФ»"),
-    DIASOFT_TRANSPORT_DIRECTORY ("Путь к каталогу загрузки транспортных файлов, содержащих данные справочников «Ценные бумаги» и «Эмитенты»"),
-    UPLOAD_DIRECTORY("Путь к каталогу загрузки", false),
-    ARCHIVE_DIRECTORY("Путь к каталогу архива", false),
-    ERROR_DIRECTORY ("Путь к каталогу ошибок", false);
+    // Общие
+    KEY_FILE("Путь к файлу ключей ЭЦП", true, false, false, 1),
+    ACCOUNT_PLAN_UPLOAD_DIRECTORY("Путь к каталогу загрузки транспортных файлов, содержащих данные справочника «План счетов»", true, true, true, 1),
+    OKATO_UPLOAD_DIRECTORY("Путь к каталогу загрузки транспортных файлов, содержащих данные справочника «ОКАТО»", true, true, true, 1),
+    REGION_UPLOAD_DIRECTORY("Путь к каталогу загрузки транспортных файлов, содержащих данные справочника «Субъекты РФ»", true, true, true, 1),
+    EMITENT_UPLOAD_DIRECTORY("Путь к каталогу загрузки транспортных файлов, содержащих данные справочника «Эмитенты»", true, true, true, 2),
+    BOND_UPLOAD_DIRECTORY("Путь к каталогу загрузки транспортных файлов, содержащих данные справочника «Ценные бумаги»", true, true, true, 2),
+    REF_BOOK_ARCHIVE_DIRECTORY("Путь к каталогу архива справочников", true, true, true, 2),
+    REF_BOOK_ERROR_DIRECTORY("Путь к каталогу ошибок справочников", true, true, true, 2),
+    // Загрузка НФ
+    FORM_UPLOAD_DIRECTORY("Путь к каталогу загрузки", false, true, true, 2),
+    FORM_ARCHIVE_DIRECTORY("Путь к каталогу архива", false, true, true, 2),
+    FORM_ERROR_DIRECTORY("Путь к каталогу ошибок", false, true, true, 2);
 
     private String caption;
     private boolean common;
+    private boolean unique;
+    private boolean folder;
+    private int checkAccess;
 
-    private ConfigurationParam(String caption) {
-        this(caption, true);
-    }
-
-    private ConfigurationParam(String caption, boolean common) {
+    /**
+     * Параметр
+     *
+     * @param caption     Имя параметра
+     * @param common      Признак общих параметров. true — общие, false — загрузка НФ.
+     * @param unique      Признак уникальности
+     * @param folder      Признак директории
+     * @param checkAccess Признак проверки доступа на: 0 — нет проверки, 1 — чтение, 2 — запись.
+     */
+    private ConfigurationParam(String caption, boolean common, boolean unique, boolean folder, int checkAccess) {
         this.caption = caption;
         this.common = common;
+        this.unique = unique;
+        this.folder = folder;
+        this.checkAccess = checkAccess;
     }
 
+    /**
+     * Имя параметра
+     */
     public String getCaption() {
         return caption;
     }
 
+    /**
+     * Признак общих параметров. true — общие, false — загрузка НФ
+     */
     public boolean isCommon() {
         return common;
+    }
+
+    /**
+     * Признак уникальности
+     */
+    public boolean isUnique() {
+        return unique;
+    }
+
+    /**
+     * Признак обязательности проверки пути на доступ на запись
+     */
+    public boolean hasWriteCheck() {
+        return checkAccess == 2;
+    }
+
+    /**
+     * Признак обязательности проверки пути на доступ на чтение
+     */
+    public boolean hasReadCheck() {
+        return checkAccess == 1;
+    }
+
+    /**
+     * Признак того, что значеним параметра является путь к какому-либо каталогу
+     */
+    public boolean isFolder() {
+        return folder;
     }
 }

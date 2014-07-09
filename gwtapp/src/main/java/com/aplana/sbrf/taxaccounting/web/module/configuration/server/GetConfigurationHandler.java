@@ -53,7 +53,7 @@ public class GetConfigurationHandler extends
         Map<Integer, String> dereferenceValue = new HashMap<Integer, String>();
         RefBookDataProvider provider = refBookFactory.getDataProvider(30L);
         for (Integer departmentId : needIds) {
-            // Хорохо бы разом грузить все подразделения, сейчас провайдер не поддерживает
+            // Хорошо бы разом грузить все подразделения, сейчас провайдер не поддерживает
             Map<String, RefBookValue> map = provider.getRecordData(departmentId.longValue());
             dereferenceValue.put(departmentId, map.get("NAME").getStringValue());
         }

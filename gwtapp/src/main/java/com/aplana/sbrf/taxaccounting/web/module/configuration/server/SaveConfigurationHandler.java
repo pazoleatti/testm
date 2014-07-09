@@ -18,15 +18,15 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class SaveConfigurationHandler extends
-		AbstractActionHandler<SaveConfigurationAction, SaveConfigurationResult> {
+        AbstractActionHandler<SaveConfigurationAction, SaveConfigurationResult> {
 
     private final static String UNIQUE_DEPARTMENT_ERROR = "Параметры для ТБ «%s» уже заданы!";
 
-	@Autowired
-	private SecurityService securityService;
+    @Autowired
+    private SecurityService securityService;
 
-	@Autowired
-	private ConfigurationService configurationService;
+    @Autowired
+    private ConfigurationService configurationService;
 
     @Autowired
     private DepartmentService departmentService;
@@ -34,14 +34,16 @@ public class SaveConfigurationHandler extends
     @Autowired
     LogEntryService logEntryService;
 
-	public SaveConfigurationHandler() {
-		super(SaveConfigurationAction.class);
-	}
+    public SaveConfigurationHandler() {
+        super(SaveConfigurationAction.class);
+    }
 
     @Override
     public SaveConfigurationResult execute(SaveConfigurationAction action,
                                            ExecutionContext context) throws ActionException {
         Logger logger = new Logger();
+        // Дубли ТБ можно проверить только на клиенте, т.к. структура хранения уже не допкскает дубли, поэтому проверка
+        // на клиенте, а сообщения на сервере
         if (!action.getDublicateDepartmentIdSet().isEmpty()) {
             for (int departmentId : action.getDublicateDepartmentIdSet()) {
                 Department department = departmentService.getDepartment(departmentId);
@@ -59,8 +61,8 @@ public class SaveConfigurationHandler extends
 
     @Override
     public void undo(SaveConfigurationAction arg0,
-			SaveConfigurationResult arg1, ExecutionContext arg2)
-			throws ActionException {
-		// Ничего не делаем
-	}
+                     SaveConfigurationResult arg1, ExecutionContext arg2)
+            throws ActionException {
+        // Ничего не делаем
+    }
 }

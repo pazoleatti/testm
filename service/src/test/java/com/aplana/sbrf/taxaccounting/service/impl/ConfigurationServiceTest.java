@@ -12,6 +12,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.io.File;
 import java.io.IOException;
 
 import static java.util.Arrays.asList;
@@ -58,28 +59,56 @@ public class ConfigurationServiceTest {
         service.saveAllConfig(userInfo, new ConfigurationParamModel(), logger);
     }
 
+//    private void printLog(Logger logger) {
+//        for (LogEntry entry : logger.getEntries()) {
+//            System.out.println(entry.getLevel() + " " + entry.getMessage());
+//        }
+//    }
+
     // Сохранение без ошибок
     @Test
     public void saveAllConfig2Test() throws IOException {
+
         Logger logger = new Logger();
         ConfigurationParamModel model = new ConfigurationParamModel();
 
+        TemporaryFolder commonFolder = new TemporaryFolder();
         TemporaryFolder uploadFolder = new TemporaryFolder();
         TemporaryFolder archiveFolder = new TemporaryFolder();
         TemporaryFolder errorFolder = new TemporaryFolder();
+        commonFolder.create();
         uploadFolder.create();
         archiveFolder.create();
         errorFolder.create();
 
-        model.put(ConfigurationParam.UPLOAD_DIRECTORY, testDepartment1.getId(),
+        String path = commonFolder.getRoot().getPath();
+        File file = commonFolder.newFile("file");
+
+        // Заполнение всех общих параметров
+        for (ConfigurationParam param : ConfigurationParam.values()) {
+            if (param.isCommon()) {
+                if (param.isFolder()) {
+                    model.put(param, DepartmentType.ROOT_BANK.getCode(),
+                            asList("file://" + path + "/"));
+                } else {
+                    model.put(param, DepartmentType.ROOT_BANK.getCode(),
+                            asList("file://" + path + "/" + file.getName()));
+                }
+            }
+        }
+
+        // Заполнение параметров загрузки НФ
+        model.put(ConfigurationParam.FORM_UPLOAD_DIRECTORY, testDepartment1.getId(),
                 asList("file://" + uploadFolder.getRoot().getPath() + "/"));
-        model.put(ConfigurationParam.ARCHIVE_DIRECTORY, testDepartment1.getId(),
+        model.put(ConfigurationParam.FORM_ARCHIVE_DIRECTORY, testDepartment1.getId(),
                 asList("file://" + archiveFolder.getRoot().getPath() + "/"));
-        model.put(ConfigurationParam.ERROR_DIRECTORY, testDepartment1.getId(),
+        model.put(ConfigurationParam.FORM_ERROR_DIRECTORY, testDepartment1.getId(),
                 asList("file://" + errorFolder.getRoot().getPath() + "/"));
 
         service.saveAllConfig(getUser(), model, logger);
 
+        file.delete();
+        commonFolder.delete();
         uploadFolder.delete();
         archiveFolder.delete();
         errorFolder.delete();
@@ -93,26 +122,45 @@ public class ConfigurationServiceTest {
         Logger logger = new Logger();
         ConfigurationParamModel model = new ConfigurationParamModel();
 
+        TemporaryFolder commonFolder = new TemporaryFolder();
         TemporaryFolder uploadFolder = new TemporaryFolder();
         TemporaryFolder errorFolder = new TemporaryFolder();
+        commonFolder.create();
         uploadFolder.create();
         errorFolder.create();
 
-        String path = "file://" + uploadFolder.getRoot().getPath() + "/";
-        model.put(ConfigurationParam.ARCHIVE_DIRECTORY, testDepartment1.getId(), asList(path));
-        model.put(ConfigurationParam.UPLOAD_DIRECTORY, testDepartment1.getId(), asList(path));
-        model.put(ConfigurationParam.ERROR_DIRECTORY, testDepartment1.getId(), asList(errorFolder.getRoot().getPath()));
+        String path = commonFolder.getRoot().getPath();
+        File file = commonFolder.newFile("file");
+
+        // Заполнение всех общих параметров
+        for (ConfigurationParam param : ConfigurationParam.values()) {
+            if (param.isCommon()) {
+                if (param.isFolder()) {
+                    model.put(param, DepartmentType.ROOT_BANK.getCode(),
+                            asList("file://" + path + "/"));
+                } else {
+                    model.put(param, DepartmentType.ROOT_BANK.getCode(),
+                            asList("file://" + path + "/" + file.getName()));
+                }
+            }
+        }
+
+        model.put(ConfigurationParam.FORM_ARCHIVE_DIRECTORY, testDepartment1.getId(), asList("file://" + path + "/"));
+        model.put(ConfigurationParam.FORM_UPLOAD_DIRECTORY, testDepartment1.getId(), asList("file://" + path + "/"));
+        model.put(ConfigurationParam.FORM_ERROR_DIRECTORY, testDepartment1.getId(), asList("file://" + errorFolder.getRoot().getPath() + "/"));
 
         service.saveAllConfig(getUser(), model, logger);
 
+        file.delete();
+        commonFolder.delete();
         uploadFolder.delete();
         errorFolder.delete();
 
         Assert.assertEquals(1, logger.getEntries().size());
         Assert.assertTrue(logger.getEntries().get(0).getMessage().contains(testDepartment1.getName()));
         Assert.assertTrue(logger.getEntries().get(0).getMessage().contains(path));
-        Assert.assertTrue(logger.getEntries().get(0).getMessage().contains(ConfigurationParam.ARCHIVE_DIRECTORY.getCaption()));
-        Assert.assertTrue(logger.getEntries().get(0).getMessage().contains(ConfigurationParam.UPLOAD_DIRECTORY.getCaption()));
+        Assert.assertTrue(logger.getEntries().get(0).getMessage().contains(ConfigurationParam.FORM_ARCHIVE_DIRECTORY.getCaption()));
+        Assert.assertTrue(logger.getEntries().get(0).getMessage().contains(ConfigurationParam.FORM_UPLOAD_DIRECTORY.getCaption()));
     }
 
     // Заданы не все параметры
@@ -121,23 +169,43 @@ public class ConfigurationServiceTest {
         Logger logger = new Logger();
         ConfigurationParamModel model = new ConfigurationParamModel();
 
+        TemporaryFolder commonFolder = new TemporaryFolder();
         TemporaryFolder uploadFolder = new TemporaryFolder();
         TemporaryFolder archiveFolder = new TemporaryFolder();
+        commonFolder.create();
         uploadFolder.create();
         archiveFolder.create();
 
-        model.put(ConfigurationParam.UPLOAD_DIRECTORY, testDepartment1.getId(),
+        String path = commonFolder.getRoot().getPath();
+        File file = commonFolder.newFile("file");
+
+        // Заполнение всех общих параметров
+        for (ConfigurationParam param : ConfigurationParam.values()) {
+            if (param.isCommon()) {
+                if (param.isFolder()) {
+                    model.put(param, DepartmentType.ROOT_BANK.getCode(),
+                            asList("file://" + path + "/"));
+                } else {
+                    model.put(param, DepartmentType.ROOT_BANK.getCode(),
+                            asList("file://" + path + "/" + file.getName()));
+                }
+            }
+        }
+
+        model.put(ConfigurationParam.FORM_UPLOAD_DIRECTORY, testDepartment1.getId(),
                 asList("file://" + uploadFolder.getRoot().getPath() + "/"));
-        model.put(ConfigurationParam.ARCHIVE_DIRECTORY, testDepartment1.getId(),
+        model.put(ConfigurationParam.FORM_ARCHIVE_DIRECTORY, testDepartment1.getId(),
                 asList("file://" + archiveFolder.getRoot().getPath() + "/"));
 
         service.saveAllConfig(getUser(), model, logger);
 
+        file.delete();
+        commonFolder.delete();
         uploadFolder.delete();
         archiveFolder.delete();
 
         Assert.assertEquals(1, logger.getEntries().size());
-        Assert.assertTrue(logger.getEntries().get(0).getMessage().contains(ConfigurationParam.ERROR_DIRECTORY.getCaption()));
+        Assert.assertTrue(logger.getEntries().get(0).getMessage().contains(ConfigurationParam.FORM_ERROR_DIRECTORY.getCaption()));
     }
 
     // Путь недоступен
@@ -146,22 +214,42 @@ public class ConfigurationServiceTest {
         Logger logger = new Logger();
         ConfigurationParamModel model = new ConfigurationParamModel();
 
+        TemporaryFolder commonFolder = new TemporaryFolder();
         TemporaryFolder uploadFolder = new TemporaryFolder();
         TemporaryFolder archiveFolder = new TemporaryFolder();
         TemporaryFolder errorFolder = new TemporaryFolder();
+        commonFolder.create();
         uploadFolder.create();
         archiveFolder.create();
         errorFolder.create();
 
-        model.put(ConfigurationParam.UPLOAD_DIRECTORY, testDepartment1.getId(),
+        String path = commonFolder.getRoot().getPath();
+        File file = commonFolder.newFile("file");
+
+        // Заполнение всех общих параметров
+        for (ConfigurationParam param : ConfigurationParam.values()) {
+            if (param.isCommon()) {
+                if (param.isFolder()) {
+                    model.put(param, DepartmentType.ROOT_BANK.getCode(),
+                            asList("file://" + path + "/"));
+                } else {
+                    model.put(param, DepartmentType.ROOT_BANK.getCode(),
+                            asList("file://" + path + "/" + file.getName()));
+                }
+            }
+        }
+
+        model.put(ConfigurationParam.FORM_UPLOAD_DIRECTORY, testDepartment1.getId(),
                 asList("file://" + uploadFolder.getRoot().getPath() + "/"));
-        model.put(ConfigurationParam.ARCHIVE_DIRECTORY, testDepartment1.getId(),
+        model.put(ConfigurationParam.FORM_ARCHIVE_DIRECTORY, testDepartment1.getId(),
                 asList("file://" + archiveFolder.getRoot().getPath() + "/"));
-        model.put(ConfigurationParam.ERROR_DIRECTORY, testDepartment1.getId(),
+        model.put(ConfigurationParam.FORM_ERROR_DIRECTORY, testDepartment1.getId(),
                 asList("badPath"));
 
         service.saveAllConfig(getUser(), model, logger);
 
+        file.delete();
+        commonFolder.delete();
         uploadFolder.delete();
         archiveFolder.delete();
         errorFolder.delete();
@@ -176,23 +264,43 @@ public class ConfigurationServiceTest {
         Logger logger = new Logger();
         ConfigurationParamModel model = new ConfigurationParamModel();
 
+        TemporaryFolder commonFolder = new TemporaryFolder();
         TemporaryFolder uploadFolder = new TemporaryFolder();
         TemporaryFolder archiveFolder = new TemporaryFolder();
         TemporaryFolder errorFolder = new TemporaryFolder();
+        commonFolder.create();
         uploadFolder.create();
         archiveFolder.create();
         errorFolder.create();
         errorFolder.newFile("testFile");
 
-        model.put(ConfigurationParam.UPLOAD_DIRECTORY, testDepartment1.getId(),
+        String path = commonFolder.getRoot().getPath();
+        File file = commonFolder.newFile("file");
+
+        // Заполнение всех общих параметров
+        for (ConfigurationParam param : ConfigurationParam.values()) {
+            if (param.isCommon()) {
+                if (param.isFolder()) {
+                    model.put(param, DepartmentType.ROOT_BANK.getCode(),
+                            asList("file://" + path + "/"));
+                } else {
+                    model.put(param, DepartmentType.ROOT_BANK.getCode(),
+                            asList("file://" + path + "/" + file.getName()));
+                }
+            }
+        }
+
+        model.put(ConfigurationParam.FORM_UPLOAD_DIRECTORY, testDepartment1.getId(),
                 asList("file://" + uploadFolder.getRoot().getPath() + "/"));
-        model.put(ConfigurationParam.ARCHIVE_DIRECTORY, testDepartment1.getId(),
+        model.put(ConfigurationParam.FORM_ARCHIVE_DIRECTORY, testDepartment1.getId(),
                 asList("file://" + archiveFolder.getRoot().getPath() + "/"));
-        model.put(ConfigurationParam.ERROR_DIRECTORY, testDepartment1.getId(),
+        model.put(ConfigurationParam.FORM_ERROR_DIRECTORY, testDepartment1.getId(),
                 asList("file://" + errorFolder.getRoot().getPath() + "/testFile"));
 
         service.saveAllConfig(getUser(), model, logger);
 
+        file.delete();
+        commonFolder.delete();
         uploadFolder.delete();
         archiveFolder.delete();
         errorFolder.delete();

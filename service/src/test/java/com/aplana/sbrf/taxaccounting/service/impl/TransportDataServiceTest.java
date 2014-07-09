@@ -52,10 +52,10 @@ public class TransportDataServiceTest {
         System.out.println("Test common folder is \"" + folder.getAbsolutePath() + "\"");
         ConfigurationDao configurationDao = mock(ConfigurationDao.class);
         ConfigurationParamModel model = new ConfigurationParamModel();
-        model.put(ConfigurationParam.UPLOAD_DIRECTORY, TEST_DEPARTMENT_ID, asList("file://" + folder.getPath() + "/"));
-        model.put(ConfigurationParam.ARCHIVE_DIRECTORY, null);
-        model.put(ConfigurationParam.REF_BOOK_KEY_FILE, TEST_DEPARTMENT_ID, asList("smb://", "/"));
-        model.put(ConfigurationParam.ERROR_DIRECTORY, TEST_DEPARTMENT_ID, asList("file://" + folder.getPath() + "/", "smb://"));
+        model.put(ConfigurationParam.FORM_UPLOAD_DIRECTORY, TEST_DEPARTMENT_ID, asList("file://" + folder.getPath() + "/"));
+        model.put(ConfigurationParam.FORM_ARCHIVE_DIRECTORY, null);
+        model.put(ConfigurationParam.KEY_FILE, TEST_DEPARTMENT_ID, asList("smb://", "/"));
+        model.put(ConfigurationParam.FORM_ERROR_DIRECTORY, TEST_DEPARTMENT_ID, asList("file://" + folder.getPath() + "/", "smb://"));
 
         when(configurationDao.getAll()).thenReturn(model);
         ReflectionTestUtils.setField(transportDataService, "configurationDao", configurationDao);
