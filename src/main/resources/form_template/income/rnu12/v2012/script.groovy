@@ -92,43 +92,17 @@ def nonEmptyColumns = ['numberFirstRecord', 'opy', 'operationDate', 'name', 'doc
 @Field
 def totalColumns = ['advancePayment', 'outcomeInNalog', 'outcomeInBuh']
 
-// Дата окончания отчетного периода
 @Field
-def reportPeriodEndDate = null
+def start = null
 
-// Текущая дата
 @Field
-def currentDate = new Date()
+def endDate = null
 
 //// Обертки методов
-
-// Поиск записи в справочнике по значению (для импорта)
-def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required = false) {
-    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
-            reportPeriodEndDate, rowIndex, colIndex, logger, required)
-}
-
-// Поиск записи в справочнике по значению (для расчетов)
-def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
-                def Date date, boolean required = true) {
-    return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value, date, rowIndex,
-            cellName, logger, required)
-}
 
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
-}
-
-// Поиск записи в справочнике по значению (для импорта)
-def getRecordImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                    def boolean required = true) {
-    if (value == null || value == '') {
-        return null
-    }
-    return formDataService.getRefBookRecordImport(refBookId, recordCache, providerCache, refBookCache, alias, value,
-            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
 }
 
 //// Кастомные методы
@@ -150,54 +124,59 @@ void calc() {
             row.outcomeInNalog = calc11(row)
         }
 
-        // посчитать "итого по коду"
-        def totalRows = [:]
-        def tmp = null
-        def sums = [:]
-        totalColumns.each {
-            sums[it] = 0
-        }
+        calcSubTotal(dataRows)
+    }
 
-        dataRows.eachWithIndex { row, i ->
-            def knu = getKnu(row.opy)
-            if (tmp == null) {
-                tmp = knu
+    dataRows.add(calcTotalRow(dataRows))
+    dataRowHelper.save(dataRows)
+}
+
+void calcSubTotal(def dataRows) {
+    // посчитать "итого по коду"
+    def totalRows = [:]
+    def code = null
+    def sums = [:]
+    totalColumns.each {
+        sums[it] = 0
+    }
+
+    dataRows.eachWithIndex { row, i ->
+        def knu = getKnu(row.opy)
+        if (code == null) {
+            code = knu
+        }
+        // если код расходы поменялся то создать новую строку "итого по коду"
+        if (code != knu) {
+            totalRows.put(i, getNewRow(code, sums))
+            totalColumns.each {
+                sums[it] = 0
             }
-            // если код расходы поменялся то создать новую строку "итого по коду"
-            if (tmp != knu) {
-                totalRows.put(i, getNewRow(tmp, sums))
-                totalColumns.each {
-                    sums[it] = 0
-                }
-            }
-            // если строка последняя то сделать для ее кода расхода новую строку "итого по коду"
-            if (i == dataRows.size() - 1) {
-                totalColumns.each {
-                    def val = row.getCell(it).getValue()
-                    if (val != null)
-                        sums[it] += val
-                }
-                totalRows.put(i + 1, getNewRow(knu, sums))
-                totalColumns.each {
-                    sums[it] = 0
-                }
-            }
+            code = knu
+        }
+        // если строка последняя то сделать для ее кода расхода новую строку "итого по коду"
+        if (i == dataRows.size() - 1) {
             totalColumns.each {
                 def val = row.getCell(it).getValue()
                 if (val != null)
                     sums[it] += val
             }
-            tmp = knu
+            totalRows.put(i + 1, getNewRow(knu, sums))
+            totalColumns.each {
+                sums[it] = 0
+            }
         }
-
-        // добавить "итого по коду" в таблицу
-        def i = 0
-        totalRows.each { index, row ->
-            dataRows.add(index + i++, row)
+        totalColumns.each {
+            def val = row.getCell(it).getValue()
+            if (val != null)
+                sums[it] += val
         }
     }
-    dataRows.add(dataRows.size(), calcTotalRow(dataRows))
-    dataRowHelper.save(dataRows)
+
+    // добавить "итого по коду" в таблицу
+    def i = 0
+    totalRows.each { index, row ->
+        dataRows.add(index + i++, row)
+    }
 }
 
 def calcTotalRow(def dataRows) {
@@ -296,6 +275,20 @@ void logicCheck() {
 
 def String getKnu(def code) {
     return getRefBookValue(27, code)?.CODE?.stringValue
+}
+
+def getStartDate() {
+    if (!start) {
+        start = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
+    }
+    return start
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
 }
 
 // Получение импортируемых данных
@@ -420,6 +413,109 @@ void addData(def xml, int headRowCount) {
         newRow.outcomeInBuh = parseNumber(row.cell[12].text(), xlsIndexRow, 12 + colOffset, logger, true)
 
         rows.add(newRow)
+    }
+    dataRowHelper.save(rows)
+}
+
+void importTransportData() {
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    addTransportData(xml)
+}
+
+void addTransportData(def xml) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def int rnuIndexRow = 2
+    def int colOffset = 1
+    def rows = []
+    def int rowIndex = 1  // Строки НФ, от 1
+
+    for (def row : xml.row) {
+        rnuIndexRow++
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+        def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
+        editableColumns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
+        autoFillColumns.each {
+            newRow.getCell(it).setStyleAlias('Автозаполняемая')
+        }
+
+        // графа 3
+        newRow.numberFirstRecord = row.cell[3].text()
+
+        // графа 4
+        String filter = "LOWER(CODE) = LOWER('" + row.cell[2].text() + "') and LOWER(OPU) = LOWER('" + row.cell[4].text() + "')"
+        def records = refBookFactory.getDataProvider(27).getRecords(reportPeriodEndDate, null, filter, null)
+        if (records.size() == 1) {
+            newRow.opy = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+        } else {
+            logger.error("Проверка файла: Строка ${rnuIndexRow} содержит значение, отсутствующее в справочнике " +
+                    "«" + refBookFactory.get(27).getName() + "»!")
+        }
+
+        // графа 5
+        newRow.operationDate = parseDate(row.cell[5].text(), "dd.MM.yyyy", rnuIndexRow, 5 + colOffset, logger, true)
+
+        // графа 6
+        newRow.name = row.cell[6].text()
+
+        // графа 7
+        newRow.documentNumber = row.cell[7].text()
+
+        // графа 8
+        newRow.date = parseDate(row.cell[8].text(), "dd.MM.yyyy", rnuIndexRow, 8 + colOffset, logger, true)
+
+        // графа 9
+        newRow.periodCounts = parseNumber(row.cell[9].text(), rnuIndexRow, 9 + colOffset, logger, true)
+
+        // графа 10
+        newRow.advancePayment = parseNumber(row.cell[10].text(), rnuIndexRow, 10 + colOffset, logger, true)
+
+        // графа 11
+        newRow.outcomeInNalog = parseNumber(row.cell[11].text(), rnuIndexRow, 11 + colOffset, logger, true)
+
+        // графа 12
+        newRow.outcomeInBuh = parseNumber(row.cell[12].text(), rnuIndexRow, 12 + colOffset, logger, true)
+
+        rows.add(newRow)
+    }
+    calcSubTotal(rows)
+    def totalRow = calcTotalRow(rows)
+    rows.add(totalRow)
+
+    if (xml.rowTotal.size() == 1) {
+        rnuIndexRow += 2
+
+        def row = xml.rowTotal[0]
+
+        def total = formData.createDataRow()
+
+        // графа 10
+        total.advancePayment = parseNumber(row.cell[10].text(), rnuIndexRow, 10 + colOffset, logger, true)
+
+        // графа 11
+        total.outcomeInNalog = parseNumber(row.cell[11].text(), rnuIndexRow, 11 + colOffset, logger, true)
+
+        // графа 12
+        total.outcomeInBuh = parseNumber(row.cell[12].text(), rnuIndexRow, 12 + colOffset, logger, true)
+
+        def colIndexMap = ['advancePayment' : 10, 'outcomeInNalog' : 11, 'outcomeInBuh' : 12]
+        for (def alias : totalColumns) {
+            def v1 = total[alias]
+            def v2 = totalRow[alias]
+            if (v1 == null && v2 == null) {
+                continue
+            }
+            if (v1 == null || v1 != null && v1 != v2) {
+                logger.error(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
+                break
+            }
+        }
     }
     dataRowHelper.save(rows)
 }
