@@ -202,14 +202,6 @@ public interface DepartmentFormTypeDao {
     List<DepartmentFormType> getDeclarationSources(int departmentId, int declarationTypeId, Date periodStart, Date periodEnd);
 
     /**
-     * Обновляет информацию об источниках для декларации
-     *
-     * @param declarationTypeId           идентификатор связки для которой нужно обновить источники
-     * @param sourceDepartmentFormTypeIds идентификаторы деклараций-источников в виде списка
-     */
-    void saveDeclarationSources(final Long declarationTypeId, final List<Long> sourceDepartmentFormTypeIds);
-
-    /**
      * Возвращает список назначенных налоговых форм для выбранного налога и подразделения
      *
      * @param departmentId идентификатор подразделения

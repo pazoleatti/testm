@@ -217,30 +217,6 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         return getNamedParameterJdbcTemplate().query(GET_DECLARATION_SOURCES_SQL, params, DFT_MAPPER_WITH_PERIOD);
     }
 
-    @Override
-    public void saveDeclarationSources(final Long declarationTypeId, final List<Long> sourceDepartmentFormTypeIds) {
-        JdbcTemplate jt = getJdbcTemplate();
-        jt.update("delete from declaration_source where department_declaration_type_id = ?",
-                declarationTypeId);
-
-        BatchPreparedStatementSetter bpss = new BatchPreparedStatementSetter() {
-            @Override
-            public void setValues(PreparedStatement ps, int orderIndex)
-                    throws SQLException {
-                ps.setLong(1, declarationTypeId);
-                ps.setLong(2, sourceDepartmentFormTypeIds.get(orderIndex));
-            }
-
-            @Override
-            public int getBatchSize() {
-                return sourceDepartmentFormTypeIds.size();
-            }
-        };
-
-        jt.batchUpdate(
-                "insert into declaration_source (department_declaration_type_id, src_department_form_type_id) values (?, ?)", bpss);
-    }
-
     private final RowMapper<FormTypeKind> FORM_ASSIGN_MAPPER = new RowMapper<FormTypeKind>() {
         @Override
         public FormTypeKind mapRow(ResultSet rs, int rowNum) throws SQLException {
