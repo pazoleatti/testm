@@ -685,7 +685,8 @@ create table log_system (
   user_department_name varchar2(4000 byte),
   declaration_type_name varchar2(80),
   form_type_name      varchar2(1000),
-  form_department_id  number(9)
+  form_department_id  number(9),
+  tb_department_id number(9)
 );
 comment on table log_system is  'Системный журнал';
 comment on column log_system.id is 'Код записи';
@@ -702,6 +703,7 @@ comment on column log_system.user_department_name is 'Наименование �
 comment on column LOG_SYSTEM.DECLARATION_TYPE_NAME is 'Вид декларации';
 comment on column LOG_SYSTEM.FORM_TYPE_NAME is 'Вид налоговой формы';
 comment on column LOG_SYSTEM.FORM_DEPARTMENT_ID is 'Идентификатор подразделения налоговой формы/декларации';
+comment on column log_system.tb_department_id is 'Идентификатор ТБ подразделения налоговой формы/декларации';
 
 create sequence seq_log_system start with 10000;
 ------------------------------------------------------------------------------------------------------
