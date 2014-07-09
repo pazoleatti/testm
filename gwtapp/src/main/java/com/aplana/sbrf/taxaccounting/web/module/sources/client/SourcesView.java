@@ -438,12 +438,30 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
             @Override
             public void onValueChange(ValueChangeEvent event) {
                 boolean isPeriodCorrect = SourcesUtils.isCorrectPeriod(getPeriodInterval());
+                //Фикс какой то странной ошибки - если таблицы уже активны и попытаться сделать их активными снова, то гвт падает
+                if (leftDepPicker.isEnabled() && !isPeriodCorrect) {
+                    leftDepPicker.setEnabled(false);
+                    rightDepPicker.setEnabled(false);
+                    leftTable.setEnabled(false);
+                    rightTable.setEnabled(false);
+                    downTable.setEnabled(false);
+                }
 
-                leftDepPicker.setEnabled(isPeriodCorrect);
-                rightDepPicker.setEnabled(isPeriodCorrect);
-                leftTable.setEnabled(isPeriodCorrect);
-                rightTable.setEnabled(isPeriodCorrect);
-                downTable.setEnabled(isPeriodCorrect);
+                if (!leftDepPicker.isEnabled() && isPeriodCorrect) {
+                    leftDepPicker.setEnabled(true);
+                    rightDepPicker.setEnabled(true);
+                    leftTable.setEnabled(true);
+                    rightTable.setEnabled(true);
+                    downTable.setEnabled(true);
+                }
+
+                if (isPeriodCorrect) {
+                    leftSM.clear();
+                    rightSM.clear();
+                    downSM.clear();
+                    loadLeftData();
+                    loadRightData();
+                }
             }
         };
 
