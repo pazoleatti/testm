@@ -18,13 +18,13 @@ public interface SourcesUiHandlers extends UiHandlers {
 
     void closeAssignDialog();
 
-    void getFormsRight(Integer departmentId);
+    void getFormsRight(Integer departmentId, DepartmentAssign selectedLeft);
 
     void getFormsLeft(Integer departmentId);
 
     void getDecsLeft(Integer departmentId);
 
-    void getDecsRight(Integer departmentId);
+    void getDecsRight(Integer departmentId, DepartmentAssign selectedLeft);
 
     void getCurrentAssigns(DepartmentAssign departmentAssign);
 

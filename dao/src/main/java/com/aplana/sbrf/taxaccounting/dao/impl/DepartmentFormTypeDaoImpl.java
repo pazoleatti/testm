@@ -316,7 +316,8 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
             + "and dft.department_id=:departmentId and src_ft.tax_type = :taxType) "
             + "or exists (select 1 from department_declaration_type ddt, declaration_source dds, form_type src_ft where "
             + "dds.department_declaration_type_id=ddt.id and dds.src_department_form_type_id=src_dft.id and src_ft.id = src_dft.form_type_id "
-            + "and ddt.department_id=:departmentId and src_ft.tax_type = :taxType) ";
+            + "and ddt.department_id=:departmentId and src_ft.tax_type = :taxType"
+            + "and (:periodStart is null or ((dds.period_end >= :periodStart or dds.period_end is null) and dds.period_start <= nvl(:periodEnd, '31.12.9999'))) ) ";
 
     @Override
     public List<DepartmentFormType> getDepartmentSources(int departmentId, TaxType taxType, Date periodStart, Date periodEnd) {

@@ -221,6 +221,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
                         assignButton.setEnabled(true);
                     }
                     getUiHandlers().getCurrentAssigns(leftSM.getSelectedObject());
+                    loadRightData();
                 } else {
                     clearDownTable();
                     assignButton.setEnabled(false);
@@ -608,6 +609,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
     public void setCurrentSources(List<CurrentAssign> departmentFormTypes) {
         clearDownTable();
         downTable.setRowData(departmentFormTypes);
+        loadRightData();
     }
 
     @Override
@@ -645,20 +647,6 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         if (leftSM.getSelectedObject() == null || rightSM.getSelectedSet().isEmpty()) {
             return;
         }
-
-        /*final Set<Long> rightSelectIds = new HashSet<Long>();
-        Set<Long> currenAssignIds = new HashSet<Long>();
-        for (DepartmentAssign selectedDepFormType : rightSM.getSelectedSet()) {
-            rightSelectIds.add(selectedDepFormType.getId());
-        }
-        for (CurrentAssign source : downTable.getVisibleItems()) {
-            currenAssignIds.add(source.getId());
-        }
-        rightSelectIds.addAll(currenAssignIds);*/
-//        if (rightSelectIds.isEmpty()) {
-//            Dialog.warningMessage("Выбранные назначения налоговой формы уже является источниками " +
-//                    "для выбранного приемника!");
-//        } else {
         getUiHandlers().openAssignDialog(
                 isSource() ? AssignDialogView.State.CREATE_SOURCES : AssignDialogView.State.CREATE_RECEPIENTS,
                 getPeriodInterval(),
@@ -746,17 +734,17 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         loadRightData();
     }
 
-    private void loadRightData() {
+    public void loadRightData() {
         clearRightTable();
         Integer selected = rightDepPicker.getSingleValue();
         if (selected != null) {
             if (isForm) {
-                getUiHandlers().getFormsRight(selected);
+                getUiHandlers().getFormsRight(selected, leftSM.getSelectedObject());
             } else {
                 if (isSource()) {
-                    getUiHandlers().getFormsRight(selected);
+                    getUiHandlers().getFormsRight(selected, leftSM.getSelectedObject());
                 } else {
-                    getUiHandlers().getDecsRight(selected);
+                    getUiHandlers().getDecsRight(selected, leftSM.getSelectedObject());
                 }
             }
         }

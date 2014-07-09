@@ -1,7 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.sources.shared;
 
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.source.SourceMode;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
+import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.DepartmentAssign;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.PeriodsInterval;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
@@ -10,6 +12,25 @@ public class GetDepartmentAssignsAction extends UnsecuredActionImpl<GetDepartmen
     private TaxType taxType;
     private boolean isForm = true;
     private PeriodsInterval periodsInterval;
+    private DepartmentAssign selectedLeft;
+    /** Назначение источников или приемников? */
+    private SourceMode mode;
+
+    public SourceMode getMode() {
+        return mode;
+    }
+
+    public void setMode(SourceMode mode) {
+        this.mode = mode;
+    }
+
+    public DepartmentAssign getSelectedLeft() {
+        return selectedLeft;
+    }
+
+    public void setSelectedLeft(DepartmentAssign selectedLeft) {
+        this.selectedLeft = selectedLeft;
+    }
 
     public PeriodsInterval getPeriodsInterval() {
         return periodsInterval;

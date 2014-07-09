@@ -171,7 +171,7 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 	}
 
 	@Override
-	public void getFormsRight(Integer departmentId) {
+	public void getFormsRight(Integer departmentId, DepartmentAssign selectedLeft) {
         if (departmentId == null) {
             getView().setAvailableFormRight(new ArrayList<DepartmentAssign>(0));
             return;
@@ -182,6 +182,8 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 		action.setDepartmentId(departmentId);
 		action.setTaxType(taxType);
         action.setPeriodsInterval(getView().getPeriodInterval());
+        action.setSelectedLeft(selectedLeft);
+        action.setMode(getView().isSource() ? SourceMode.SOURCES : SourceMode.DESTINATIONS);
 		dispatcher.execute(action, CallbackUtils
 				.defaultCallback(new AbstractCallback<GetDepartmentAssignsResult>() {
 					@Override
@@ -234,7 +236,7 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
     }
 
     @Override
-    public void getDecsRight(Integer departmentId) {
+    public void getDecsRight(Integer departmentId, DepartmentAssign selectedLeft) {
         if (departmentId == null) {
             getView().setAvailableDecsRight(new ArrayList<DepartmentAssign>(0));
             return;
@@ -245,6 +247,8 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
         action.setDepartmentId(departmentId);
         action.setTaxType(taxType);
         action.setPeriodsInterval(getView().getPeriodInterval());
+        action.setSelectedLeft(selectedLeft);
+        action.setMode(getView().isSource() ? SourceMode.SOURCES : SourceMode.DESTINATIONS);
         dispatcher.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<GetDepartmentAssignsResult>() {
                     @Override

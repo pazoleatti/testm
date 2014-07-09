@@ -24,10 +24,10 @@ public class GetCurrentAssignsHandler extends
         AbstractActionHandler<GetCurrentAssignsAction, GetCurrentAssignsResult> {
 
     @Autowired
-    private SourceService departmentFormTypeService;
+    private SourceService sourceService;
 
     @Autowired
-    private SourcesAssembler deparmentFormTypeAssembler;
+    private SourcesAssembler sourceAssembler;
 
     public GetCurrentAssignsHandler() {
         super(GetCurrentAssignsAction.class);
@@ -42,22 +42,22 @@ public class GetCurrentAssignsHandler extends
         if(!action.isDeclaration()){
             List<DepartmentFormType> departmentFormTypes;
             if (action.getMode() == SourceMode.SOURCES) {
-                departmentFormTypes = departmentFormTypeService.
+                departmentFormTypes = sourceService.
                         getDFTSourcesByDFT(action.getDepartmentId(), action.getTypeId(), action.getKind(), periodFrom, periodTo);
             } else {
-                departmentFormTypes = departmentFormTypeService.
+                departmentFormTypes = sourceService.
                         getFormDestinations(action.getDepartmentId(), action.getTypeId(), action.getKind(), periodFrom, periodTo);
             }
-            result.setCurrentSources(deparmentFormTypeAssembler.assembleDFT(departmentFormTypes));
+            result.setCurrentSources(sourceAssembler.assembleDFT(departmentFormTypes));
         } else {
             if (action.getMode() == SourceMode.SOURCES) {
-                List<DepartmentFormType> departmentFormTypes = departmentFormTypeService
+                List<DepartmentFormType> departmentFormTypes = sourceService
                         .getDFTSourceByDDT(action.getDepartmentId(), action.getTypeId(), periodFrom, periodTo);
-                result.setCurrentSources(deparmentFormTypeAssembler.assembleDFT(departmentFormTypes));
+                result.setCurrentSources(sourceAssembler.assembleDFT(departmentFormTypes));
             } else {
-                List<DepartmentDeclarationType> departmentFormTypes = departmentFormTypeService.
+                List<DepartmentDeclarationType> departmentFormTypes = sourceService.
                         getDeclarationDestinations(action.getDepartmentId(), action.getTypeId(), action.getKind(), periodFrom, periodTo);
-                result.setCurrentSources(deparmentFormTypeAssembler.assembleDDT(departmentFormTypes));
+                result.setCurrentSources(sourceAssembler.assembleDDT(departmentFormTypes));
             }
         }
 
