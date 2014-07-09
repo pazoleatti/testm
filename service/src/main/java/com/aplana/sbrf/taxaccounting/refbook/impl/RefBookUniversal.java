@@ -209,7 +209,7 @@ public class RefBookUniversal implements RefBookDataProvider {
      */
     private void checkCorrectness(Logger logger, RefBook refBook, Long uniqueRecordId, Date versionFrom, Date versionTo, List<RefBookAttribute> attributes, List<RefBookRecord> records) {
         //Проверка обязательности заполнения записей справочника
-        List<String> errors= refBookUtils.checkFillRequiredRefBookAtributes(attributes, records);
+        List<String> errors = refBookUtils.checkFillRequiredRefBookAtributes(attributes, records);
         if (errors.size() > 0){
             throw new ServiceException("Поля " + errors.toString() + " являются обязательными для заполнения");
         }

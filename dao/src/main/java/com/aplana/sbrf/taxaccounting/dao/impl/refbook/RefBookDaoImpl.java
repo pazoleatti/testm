@@ -1383,6 +1383,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                         if (attribute.getAttributeType().equals(RefBookAttributeType.DATE)) {
                             ps.addParam(values.get(attribute.getAlias()).getDateValue());
                         }
+                        ps.appendQuery(" and r.RECORD_ID != ?");
+                        ps.addParam(records.get(i).getRecordId());
                         ps.appendQuery(")");
 
                         if (i < records.size() - 1) {
