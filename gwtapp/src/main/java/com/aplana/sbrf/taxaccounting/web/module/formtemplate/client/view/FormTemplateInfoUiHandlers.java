@@ -10,5 +10,5 @@ public interface FormTemplateInfoUiHandlers extends UiHandlers {
 	void setMonthlyForm(boolean monthlyForm);
 	void setName(String name);
 	void setFullname(String fullName);
-	void setCode(String code);
+	void setHeader(String header);
 }

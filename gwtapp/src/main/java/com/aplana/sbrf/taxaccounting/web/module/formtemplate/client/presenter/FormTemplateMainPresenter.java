@@ -292,7 +292,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 	}
 
 	private void saveAfterFlush() {
-        if (formTemplate.getName().isEmpty() || formTemplate.getFullName().isEmpty() || formTemplate.getCode().isEmpty()){
+        if (formTemplate.getName().isEmpty() || formTemplate.getFullName().isEmpty()){
             Dialog.infoMessage("Не заполнено одно из обязательных полей. " +
                     "Проверьте поля \"Наименование формы\", \"Полное наименование формы\", \"Код формы\"");
             return;

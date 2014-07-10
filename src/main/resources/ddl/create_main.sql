@@ -73,7 +73,6 @@ create table form_template (
   fixed_rows number(1) not null,
   name varchar2(1000) not null,
   fullname varchar2(1000) not null,
-  code varchar2(600) not null, 
   script clob,
   data_headers clob,
   status number(1) default 0 not null,
@@ -89,7 +88,6 @@ comment on column form_template.edition is 'Номер редакции запи
 comment on column form_template.fixed_rows is 'Признак использования фиксированных строк: 0 - используется фиксированный набор строк, 1 - есть возможность добавлять и удалять строки из формы.';
 comment on column form_template.name is 'Наименование формы';
 comment on column form_template.fullname is 'Полное наименование формы';
-comment on column form_template.code is 'Номер формы';
 comment on column form_template.script is 'Скрипт, реализующий бизнес-логику налоговой формы';
 comment on column form_template.data_headers is 'Описание заголовка таблицы';
 comment on column form_template.status is 'Статус версии (0 - действующая версия; 1 - удаленная версия, 2 - черновик версии, 3 - фиктивная версия)';

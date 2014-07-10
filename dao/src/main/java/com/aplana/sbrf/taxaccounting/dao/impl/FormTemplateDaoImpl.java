@@ -60,7 +60,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
             formTemplate.setType(formTypeDao.get(SqlUtils.getInteger(rs,"type_id")));
             formTemplate.setEdition(SqlUtils.getInteger(rs,"edition"));
             formTemplate.setFixedRows(rs.getBoolean("fixed_rows"));
-            formTemplate.setCode(rs.getString("code"));
+            formTemplate.setHeader(rs.getString("header"));
             formTemplate.setStatus(VersionedObjectStatus.getStatusById(SqlUtils.getInteger(rs,"status")));
             formTemplate.setMonthly(rs.getBoolean("monthly"));
             formTemplate.getStyles().addAll(formStyleDao.getFormStyles(formTemplate.getId()));
@@ -91,7 +91,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 		JdbcTemplate jt = getJdbcTemplate();
 		try {
 			return jt.queryForObject(
-					"select id, version, name, fullname, type_id, edition, fixed_rows, code, script, status, monthly " +
+					"select id, version, name, fullname, type_id, edition, fixed_rows, header, script, status, monthly " +
                             "from form_template where id = ?",
 					new Object[]{formId},
 					new int[]{Types.NUMERIC},
@@ -141,7 +141,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 
             getJdbcTemplate().update(
                     "update form_template set data_rows = ?, data_headers = ?, version = ?, fixed_rows = ?, name = ?, " +
-                            " monthly = ?, fullname = ?, code = ?, script=?, status=? where id = ?",
+                            " monthly = ?, fullname = ?, header = ?, script=?, status=? where id = ?",
                     dataRowsXml,
                     dataHeadersXml,
                     formTemplate.getVersion(),
@@ -149,7 +149,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
                     formTemplate.getName() != null ? formTemplate.getName() : " ",
                     formTemplate.isMonthly(),
                     formTemplate.getFullName() != null ? formTemplate.getFullName() : " ",
-                    formTemplate.getCode(),
+                    formTemplate.getHeader(),
                     formTemplate.getScript() != null ? formTemplate.getScript() : " ",
                     formTemplate.getStatus().getId(),
                     formTemplateId
@@ -189,7 +189,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 
 	@Override
 	public List<FormTemplate> listAll() {
-		return getJdbcTemplate().query("select id, version, name, fullname, type_id, edition, fixed_rows, code, status, monthly" +
+		return getJdbcTemplate().query("select id, version, name, fullname, type_id, edition, fixed_rows, header, status, monthly" +
                 " from form_template where status in (0,1)", new FormTemplateMapper(true));
 	}
 
@@ -423,7 +423,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
         try {
             formTemplate.setId(formTemplateId);
             getJdbcTemplate().
-                    update("insert into form_template (id, data_rows, data_headers, edition, version, fixed_rows, name, fullname, code, script, status, type_id) " +
+                    update("insert into form_template (id, data_rows, data_headers, edition, version, fixed_rows, name, fullname, header, script, status, type_id) " +
                     "values (?,?,?,?,?,?,?,?,?,?,?,?)",
                             formTemplateId,
                             dataRowsXml,
@@ -433,7 +433,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
                             formTemplate.isFixedRows(),
                             formTemplate.getName() != null ? formTemplate.getName() : " ",
                             formTemplate.getFullName() != null ? formTemplate.getFullName() : " ",
-                            formTemplate.getCode() != null?formTemplate.getCode() : "",
+                            formTemplate.getHeader() != null?formTemplate.getHeader() : "",
                             formTemplate.getScript() != null ? formTemplate.getScript() : " ",
                             formTemplate.getStatus().getId(),
                             formTemplate.getType().getId()
