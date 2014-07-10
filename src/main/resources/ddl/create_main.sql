@@ -649,7 +649,7 @@ create table log_business (
   id                  number(18,0) primary key,
   log_date            date not null,
   event_id            number(3,0) not null,
-  user_id             number(9,0) not null,
+  user_login          varchar2(100) not null,
   roles               varchar2(200) not null,
   declaration_data_id number(9,0),
   form_data_id        number(9,0),
@@ -660,7 +660,7 @@ comment on table log_business is 'Журнал событий налоговых
 comment on column log_business.id is 'Код записи';
 comment on column log_business.log_date is 'Дата события';
 comment on column log_business.event_id is 'Код события (1 - создать,2 - удалить,3 - рассчитать,4 - обобщить,5 - проверить,6 - сохранить,7 - импорт данных,101 - утвердить,102 - вернуть из \утверждена\ в \создана\,103 - принять из \утверждена\,104 - вернуть из \принята\ в \утверждена\,105 - принять из \создана\,106 - вернуть из \принята\ в \создана\,107 - подготовить,108, вернуть из \подготовлена\ в \создана\,109, принять из \подготовлена\,110, вернуть из \принята\ в \подготовлена\,203 - после принять из \утверждена\,204 - после вернуть из \принята\ в \утверждена\,205 - после принять из \создана\,206 - после вернуть из \принята\ в \создана\,207 - после принять из \"подготовлена\,301 - добавить строку,303 - удалить строку,302 - загрузка)';
-comment on column log_business.user_id is 'Код пользователя';
+comment on column log_business.user_login is 'Логин пользователя';
 comment on column log_business.roles is 'Список ролей пользователя';
 comment on column log_business.declaration_data_id is 'Код декларации';
 comment on column log_business.form_data_id is 'Код налоговой формы';
@@ -674,7 +674,7 @@ create table log_system (
   log_date            date not null,
   ip                  varchar2(39),
   event_id            number(3,0) not null,
-  user_id             number(9,0),
+  user_login          varchar2(100) not null,
   roles               varchar2(200),
   department_name     varchar2(4000 byte) not null,
   report_period_name  varchar2(100),
@@ -691,7 +691,7 @@ comment on column log_system.id is 'Код записи';
 comment on column log_system.log_date is 'Дата события';
 comment on column log_system.ip is 'IP-адрес пользователя';
 comment on column log_system.event_id is 'Код события (1 - Создать,2 - Удалить,3 - Рассчитать,4 - Обобщить,5 - Проверить,6 - Сохранить,7 - Импорт данных,101 - Утвердить,102 - Вернуть из \Утверждена\ в \Создана\,103 - Принять из \Утверждена\,104 - Вернуть из \Принята\ в \Утверждена\,105 - Принять из \Создана\,106 - Вернуть из \Принята\ в \Создана\,107 - Подготовить,108 - Вернуть из \Подготовлена\ в \Создана\,109 - Принять из \Подготовлена\,110 - Вернуть из \Принята\ в \Подготовлена\,203 - После принять из \Утверждена\,204 - После вернуть из \Принята\ в \Утверждена\,205 - После принять из \Создана\,206 - После вернуть из \Принята\ в \Создана\,207 - После принять из \"Подготовлена\,301 - Добавить строку,303 - Удалить строку,302 - Загрузка)';
-comment on column log_system.user_id is 'Код пользователя';
+comment on column log_system.user_login is 'Логин пользователя';
 comment on column log_system.roles is 'Список ролей пользователя';
 comment on column log_system.department_name is 'Наименование подразделения НФ\декларации';
 comment on column log_system.report_period_name is 'Имя отчетного периода';

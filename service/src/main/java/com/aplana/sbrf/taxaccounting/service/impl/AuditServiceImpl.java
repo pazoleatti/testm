@@ -5,11 +5,11 @@ import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.AuditService;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Transformer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -32,10 +32,6 @@ public class AuditServiceImpl implements AuditService {
     @Autowired
     private PeriodService periodService;
     @Autowired
-    private FormDataAccessService formDataAccessService;
-    @Autowired
-    private SourceService sourceService;
-    @Autowired
     private TransactionHelper tx;
 
 
@@ -55,7 +51,7 @@ public class AuditServiceImpl implements AuditService {
                 log.setLogDate(new Date());
                 log.setIp(userInfo.getIp());
                 log.setEventId(event.getCode());
-                log.setUserId(userInfo.getUser().getId());
+                log.setUserLogin(userInfo.getUser().getLogin());
 
                 StringBuilder roles = new StringBuilder();
                 List<TARole> taRoles = userInfo.getUser().getRoles();

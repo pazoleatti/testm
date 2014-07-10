@@ -31,7 +31,7 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 			log.setId(SqlUtils.getLong(rs, "id"));
 			log.setLogDate(new Date(rs.getTimestamp("log_date").getTime()));
 			log.setEventId(SqlUtils.getInteger(rs,"event_id"));
-			log.setUserId(SqlUtils.getInteger(rs,"user_id"));
+			log.setUserLogin(rs.getString("user_login"));
 			log.setRoles(rs.getString("roles"));
 			log.setDeclarationId(SqlUtils.getLong(rs, "declaration_data_id"));
 			log.setFormId(SqlUtils.getLong(rs, "form_data_id"));
@@ -105,12 +105,12 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 		}
 
 		jt.update(
-				"insert into log_business (id, log_date, event_id, user_id, roles, declaration_data_id, form_data_id, user_department_id, note)" +
+				"insert into log_business (id, log_date, event_id, user_login, roles, declaration_data_id, form_data_id, user_department_id, note)" +
 						" values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
 				id,
 				logBusiness.getLogDate(),
 				logBusiness.getEventId(),
-				logBusiness.getUserId(),
+				logBusiness.getUserLogin(),
 				logBusiness.getRoles(),
 				logBusiness.getDeclarationId(),
 				logBusiness.getFormId(),

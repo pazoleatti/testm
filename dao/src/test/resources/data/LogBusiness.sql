@@ -17,8 +17,8 @@ insert into report_period (id, name, tax_period_id, dict_tax_period_id, start_da
 insert into declaration_template(id, edition, name, version, declaration_type_id) values (1, 1, 'Декларация 1', date '2014-01-01', 1);
 insert into form_data(id, form_template_id, department_id, state, kind, report_period_id, return_sign) values (1, 1, 1, 1, 3, 1, 0);
 insert into declaration_data(id, declaration_template_id, report_period_id, department_id, data, is_accepted) values (1, 1, 1, 2, null, 1);
-insert into log_business(id, log_date, event_id, user_id, roles, declaration_data_id, form_data_id, user_department_id, note) values (1, date '2013-01-01', 1, 1, 'operator', 1, null, 1, 'the best note');
-insert into log_business(id, log_date, event_id, user_id, roles, declaration_data_id, form_data_id, user_department_id, note) values (2, date '2013-01-01', 2, 1, 'operator', null, 1, 2, 'the best note');
+insert into log_business(id, log_date, event_id, user_login, roles, declaration_data_id, form_data_id, user_department_id, note) values (1, date '2013-01-01', 1, 'controlBank', 'operator', 1, null, 1, 'the best note');
+insert into log_business(id, log_date, event_id, user_login, roles, declaration_data_id, form_data_id, user_department_id, note) values (2, date '2013-01-01', 2, 'controlBank', 'operator', null, 1, 2, 'the best note');
 
 
 

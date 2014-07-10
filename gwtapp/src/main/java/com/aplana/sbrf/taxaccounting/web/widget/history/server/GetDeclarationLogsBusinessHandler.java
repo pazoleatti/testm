@@ -6,15 +6,15 @@ import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.web.widget.history.shared.GetDeclarationLogsBusinessAction;
 import com.aplana.sbrf.taxaccounting.web.widget.history.shared.GetLogsBusinessResult;
+import com.aplana.sbrf.taxaccounting.web.widget.history.shared.LogBusinessClient;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Component
 public class GetDeclarationLogsBusinessHandler extends
@@ -38,19 +38,18 @@ public class GetDeclarationLogsBusinessHandler extends
 			ExecutionContext context) throws ActionException {
 
 		List<LogBusiness> logs = logBusinessService.getDeclarationLogsBusiness(action.getId());
+        ArrayList<LogBusinessClient> logBusinessClients = new ArrayList<LogBusinessClient>(logs.size());
 
 		GetLogsBusinessResult result = new GetLogsBusinessResult();
-		result.setLogs(logs);
 
-		Map<Integer, String> names = new HashMap<Integer, String>();
-		Map<Integer, String> departments = new HashMap<Integer, String>();
 		for (LogBusiness log : logs) {
             //TODO dloshkarev: можно сразу получать список а не выполнять запросы в цикле
-			names.put(log.getUserId(), userService.getUser(log.getUserId()).getName());
-			departments.put(log.getDepartmentId(), departmentService.getParentsHierarchyShortNames(log.getDepartmentId()));
+            LogBusinessClient business = new LogBusinessClient(log);
+            business.setUserName(userService.getUser(log.getUserLogin()).getName());
+            business.setDepartmentName(departmentService.getParentsHierarchyShortNames(log.getDepartmentId()));
+            logBusinessClients.add(business);
 		}
-		result.setUserNames(names);
-		result.setUserDepartments(departments);
+        result.setLogs(logBusinessClients);
 
 		return result;
 
@@ -60,5 +59,4 @@ public class GetDeclarationLogsBusinessHandler extends
 	public void undo(GetDeclarationLogsBusinessAction action, GetLogsBusinessResult result,
 			ExecutionContext context) throws ActionException {
 	}
-
 }

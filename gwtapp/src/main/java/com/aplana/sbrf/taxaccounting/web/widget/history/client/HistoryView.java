@@ -2,8 +2,8 @@ package com.aplana.sbrf.taxaccounting.web.widget.history.client;
 
 import com.aplana.gwt.client.ModalWindow;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.LogBusiness;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.web.widget.history.shared.LogBusinessClient;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.google.gwt.dom.client.TableCellElement;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -11,7 +11,6 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -21,7 +20,6 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.PopupViewImpl;
 
 import java.util.List;
-import java.util.Map;
 
 public class HistoryView extends PopupViewImpl implements
 		HistoryPresenter.MyView {
@@ -33,8 +31,6 @@ public class HistoryView extends PopupViewImpl implements
 	}
 
 	private final PopupPanel widget;
-	private Map<Integer, String> userNames;
-	private Map<Integer, String> userDepartments;
 	private static final DateTimeFormat format = DateTimeFormat.getFormat("dd.MM.yyyy HH:mm");
 	private static final String DECLARATION_SAVE_EVENT = "Обновление";
 
@@ -42,7 +38,7 @@ public class HistoryView extends PopupViewImpl implements
     ModalWindow modalWindowTitle;
 
 	@UiField
-    GenericDataGrid<LogBusiness> logsTable;
+    GenericDataGrid<LogBusinessClient> logsTable;
 
 	@UiField
 	Button hideButton;
@@ -55,9 +51,7 @@ public class HistoryView extends PopupViewImpl implements
 	}
 
 	@Override
-	public void setHistory(List<LogBusiness> logs, Map<Integer, String> userNames, Map<Integer, String> userDepartments) {
-		this.userNames = userNames;
-		this.userDepartments = userDepartments;
+	public void setHistory(List<LogBusinessClient> logs) {
 		logsTable.setRowData(logs);
 		logsTable.redraw();
 	}
@@ -77,9 +71,9 @@ public class HistoryView extends PopupViewImpl implements
     }
 
     private void initTable() {
-		TextColumn<LogBusiness> eventColumn = new TextColumn<LogBusiness>() {
+		TextColumn<LogBusinessClient> eventColumn = new TextColumn<LogBusinessClient>() {
 			@Override
-			public String getValue(LogBusiness object) {
+			public String getValue(LogBusinessClient object) {
 				FormDataEvent event = FormDataEvent.getByCode(object.getEventId());
 				if (object.getDeclarationId() != null && FormDataEvent.SAVE == event) {
 					return DECLARATION_SAVE_EVENT;
@@ -88,37 +82,37 @@ public class HistoryView extends PopupViewImpl implements
 			}
 		};
 
-		TextColumn<LogBusiness> dateColumn = new TextColumn<LogBusiness>() {
+		TextColumn<LogBusinessClient> dateColumn = new TextColumn<LogBusinessClient>() {
 			@Override
-			public String getValue(LogBusiness object) {
+			public String getValue(LogBusinessClient object) {
 				return format.format(object.getLogDate());
 			}
 		};
 
-		TextColumn<LogBusiness> nameColumn = new TextColumn<LogBusiness>() {
+		TextColumn<LogBusinessClient> nameColumn = new TextColumn<LogBusinessClient>() {
 			@Override
-			public String getValue(LogBusiness object) {
-				return userNames.get(object.getUserId());
+			public String getValue(LogBusinessClient object) {
+				return object.getUserName();
 			}
 		};
 
-		TextColumn<LogBusiness> rolesColumn = new TextColumn<LogBusiness>() {
+		TextColumn<LogBusinessClient> rolesColumn = new TextColumn<LogBusinessClient>() {
 			@Override
-			public String getValue(LogBusiness object) {
+			public String getValue(LogBusinessClient object) {
 				return object.getRoles();
 			}
 		};
 
-		TextColumn<LogBusiness> departmentColumn = new TextColumn<LogBusiness>() {
+		TextColumn<LogBusinessClient> departmentColumn = new TextColumn<LogBusinessClient>() {
 			@Override
-			public String getValue(LogBusiness object) {
-				return userDepartments.get(object.getDepartmentId());
+			public String getValue(LogBusinessClient object) {
+				return object.getDepartmentName();
 			}
 		};
 
-		TextColumn<LogBusiness> noteColumn = new TextColumn<LogBusiness>() {
+		TextColumn<LogBusinessClient> noteColumn = new TextColumn<LogBusinessClient>() {
 			@Override
-			public String getValue(LogBusiness object) {
+			public String getValue(LogBusinessClient object) {
 				return object.getNote();
 			}
 		};
@@ -129,9 +123,9 @@ public class HistoryView extends PopupViewImpl implements
 		logsTable.addResizableColumn(rolesColumn, "Роли пользователя");
 		logsTable.addResizableColumn(departmentColumn, "Подразделение пользователя");
 		logsTable.addResizableColumn(noteColumn, "Текст события");
-		logsTable.addCellPreviewHandler(new CellPreviewEvent.Handler<LogBusiness>() {
+		logsTable.addCellPreviewHandler(new CellPreviewEvent.Handler<LogBusinessClient>() {
 			@Override
-			public void onCellPreview(CellPreviewEvent<LogBusiness> event) {
+			public void onCellPreview(CellPreviewEvent<LogBusinessClient> event) {
 				if ("mouseover".equals(event.getNativeEvent().getType())) {
 					long index = event.getIndex();
 					TableCellElement cellElement = logsTable.getRowElement((int) index).getCells().getItem(event.getColumn());

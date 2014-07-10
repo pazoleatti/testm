@@ -61,7 +61,7 @@ public class AuditDaoTest {
         logSystem.setLogDate(date);
         logSystem.setIp("192.168.72.16");
         logSystem.setEventId(3);
-        logSystem.setUserId(1);
+        logSystem.setUserLogin("controlBank");
         logSystem.setRoles("operator");
         logSystem.setFormDepartmentName("Подразделение");
         logSystem.setReportPeriodName("2013 первый квартал");
@@ -123,7 +123,7 @@ public class AuditDaoTest {
         logSystem.setLogDate(date);
         logSystem.setIp("192.168.72.16");
         logSystem.setEventId(3);
-        logSystem.setUserId(1);
+        logSystem.setUserLogin("controlBank");
         logSystem.setRoles("operator");
         logSystem.setFormDepartmentName("ТБ1");
         logSystem.setReportPeriodName("2014 полугодие");
@@ -182,7 +182,7 @@ public class AuditDaoTest {
         logSystem.setLogDate(date);
         logSystem.setIp("192.168.72.16");
         logSystem.setEventId(FormDataEvent.MIGRATION.getCode());
-        logSystem.setUserId(1);
+        logSystem.setUserLogin("controlBank");
         logSystem.setRoles("operator");
         logSystem.setFormDepartmentName("");
         logSystem.setReportPeriodName(null);

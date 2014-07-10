@@ -15,7 +15,7 @@ public class LogSystem implements Serializable {
 	private Date logDate;
 	private String ip;
 	private int eventId;
-	private int userId;
+    private String userLogin;
 	private String roles;
 	private String formDepartmentName;
     private String reportPeriodName;
@@ -25,6 +25,14 @@ public class LogSystem implements Serializable {
 	private String note;
     private String userDepartmentName;
     private Integer formDepartmentId;
+
+    public String getUserLogin() {
+        return userLogin;
+    }
+
+    public void setUserLogin(String userLogin) {
+        this.userLogin = userLogin;
+    }
 
     public String getReportPeriodName() {
         return reportPeriodName;
@@ -64,14 +72,6 @@ public class LogSystem implements Serializable {
 
 	public void setEventId(int eventId) {
 		this.eventId = eventId;
-	}
-
-	public int getUserId() {
-		return userId;
-	}
-
-	public void setUserId(int userId) {
-		this.userId = userId;
 	}
 
     public String getRoles() {

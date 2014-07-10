@@ -208,7 +208,7 @@ alter table cell_span_info add constraint cell_span_info_fk_row_id foreign key (
 alter table cell_span_info add constraint cell_span_info_fk_column_id foreign key (column_id) references form_column(id);
 alter table cell_span_info add constraint cell_span_info_chk_span check (colspan is not null or rowspan is not null);
 
-alter table log_business add constraint log_business_fk_user_id foreign key (user_id) references sec_user(id);
+alter table log_business add constraint log_business_fk_user_login foreign key (user_login) references sec_user(login);
 alter table log_business add constraint log_business_fk_declaration_id foreign key (declaration_data_id) references declaration_data(id) on delete cascade;
 alter table log_business add constraint log_business_fk_form_data_id foreign key (form_data_id) references form_data(id) on delete cascade;
 alter table log_business add constraint log_business_chk_event_id check (event_id in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 203, 204, 205, 206, 207, 208, 209, 210, 301, 302, 303, 401));
@@ -219,7 +219,7 @@ alter table log_system add constraint log_system_chk_event_id check (event_id in
 alter table log_system add constraint log_system_chk_dcl_form check (event_id in (7, 11, 401, 402, 501, 502, 503, 601, 901, 902, 903) or declaration_type_name is not null or (form_type_name is not null and form_kind_id is not null));
 alter table log_system add constraint log_system_chk_rp check (event_id in (7, 11, 401, 402, 501, 502, 503, 601, 901, 902, 903) or report_period_name is not null);
 alter table log_system add constraint log_system_fk_kind foreign key (form_kind_id) references form_kind(id);
-alter table log_system add constraint log_system_fk_user_id foreign key (user_id) references sec_user(id);
+alter table log_system add constraint log_system_fk_user_login foreign key (user_login) references sec_user(login);
 
 alter table department_report_period add constraint dep_rep_per_chk_is_active check (is_active in (0, 1));
 alter table department_report_period add constraint dep_rep_per_chk_is_balance_per check (is_balance_period in (0, 1));

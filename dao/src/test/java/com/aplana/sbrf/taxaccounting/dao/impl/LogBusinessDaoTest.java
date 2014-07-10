@@ -25,12 +25,14 @@ public class LogBusinessDaoTest {
 	@Autowired
 	private LogBusinessDao logBusinessDao;
 
+    private static String LOGIN_CONTROL_BANK = "controlBank";
+
 	@Test
 	public void testDeclarationGet() {
 		LogBusiness logBusiness = logBusinessDao.getDeclarationLogsBusiness(1).get(0);
 		assertEquals(Long.valueOf(1), logBusiness.getId());
 		assertEquals(1, logBusiness.getEventId());
-		assertEquals(1, logBusiness.getUserId());
+		assertEquals(LOGIN_CONTROL_BANK, logBusiness.getUserLogin());
 		assertEquals("operator", logBusiness.getRoles());
 		assertEquals(Long.valueOf(1), logBusiness.getDeclarationId());
 		assertEquals(null, logBusiness.getFormId());
@@ -45,7 +47,7 @@ public class LogBusinessDaoTest {
 		logBusiness.setLogDate(new Date());
 		logBusiness.setDeclarationId(1l);
 		logBusiness.setEventId(3);
-		logBusiness.setUserId(1);
+		logBusiness.setUserLogin(LOGIN_CONTROL_BANK);
 		logBusiness.setRoles("operator");
 		logBusiness.setDepartmentId(2);
 		logBusiness.setNote("the best note");
@@ -54,7 +56,7 @@ public class LogBusinessDaoTest {
 		logBusiness = logBusinessDao.getDeclarationLogsBusiness(1).get(0);
 		assertEquals(Long.valueOf(3), logBusiness.getId());
 		assertEquals(3, logBusiness.getEventId());
-		assertEquals(1, logBusiness.getUserId());
+		assertEquals(LOGIN_CONTROL_BANK, logBusiness.getUserLogin());
 		assertEquals("operator", logBusiness.getRoles());
 		assertEquals(Long.valueOf(1), logBusiness.getDeclarationId());
 		assertEquals(null, logBusiness.getFormId());
@@ -67,7 +69,7 @@ public class LogBusinessDaoTest {
 		LogBusiness logBusiness = logBusinessDao.getFormLogsBusiness(1).get(0);
 		assertEquals(Long.valueOf(2), logBusiness.getId());
 		assertEquals(2, logBusiness.getEventId());
-		assertEquals(1, logBusiness.getUserId());
+		assertEquals(LOGIN_CONTROL_BANK, logBusiness.getUserLogin());
 		assertEquals("operator", logBusiness.getRoles());
 		assertEquals(null, logBusiness.getDeclarationId());
 		assertEquals(Long.valueOf(1), logBusiness.getFormId());
@@ -81,7 +83,7 @@ public class LogBusinessDaoTest {
 		LogBusiness logBusiness = logBusinessDao.getFormLogsBusiness(1).get(0);
 		assertEquals(Long.valueOf(3), logBusiness.getId());
 		assertEquals(3, logBusiness.getEventId());
-		assertEquals(1, logBusiness.getUserId());
+        assertEquals(LOGIN_CONTROL_BANK, logBusiness.getUserLogin());
 		assertEquals("operator", logBusiness.getRoles());
 		assertEquals(null, logBusiness.getDeclarationId());
 		assertEquals(Long.valueOf(1), logBusiness.getFormId());
@@ -107,7 +109,7 @@ public class LogBusinessDaoTest {
 		logBusiness.setLogDate(date);
 		logBusiness.setFormId(1l);
 		logBusiness.setEventId(event_id);
-		logBusiness.setUserId(1);
+		logBusiness.setUserLogin(LOGIN_CONTROL_BANK);
 		logBusiness.setRoles("operator");
 		logBusiness.setDepartmentId(1);
 		logBusiness.setNote("the best note");

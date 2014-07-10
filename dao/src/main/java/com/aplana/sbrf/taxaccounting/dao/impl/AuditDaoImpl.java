@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.dao.AuditDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
@@ -19,7 +18,7 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 
-import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.*;
+import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSqlInStatement;
 
 @Repository
 public class AuditDaoImpl extends AbstractDao implements AuditDao {
@@ -38,8 +37,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         ps.appendQuery("ls.ip, ");
         ps.appendQuery("ls.event_id, ");
         ps.appendQuery("ev.name event, ");
-        ps.appendQuery("ls.user_id, ");
-        ps.appendQuery("su.login user_login, ");
+        ps.appendQuery("ls.user_login user_login, ");
         ps.appendQuery("ls.roles, ");
         ps.appendQuery("ls.department_name, ");
         ps.appendQuery("ls.report_period_name, ");
@@ -53,7 +51,6 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         ps.appendQuery(" from log_system ls ");
 
         ps.appendQuery("left join event ev on ls.event_id=ev.\"ID\" ");
-        ps.appendQuery("left join sec_user su on ls.user_id=su.\"ID\" ");
         ps.appendQuery("left join form_kind fk on ls.form_kind_id=fk.\"ID\" ");
 
         if (departments != null) {
@@ -92,14 +89,14 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
             }
 
             jt.update(
-                    "insert into log_system (id, log_date, ip, event_id, user_id, roles, department_name, report_period_name, " +
+                    "insert into log_system (id, log_date, ip, event_id, user_login, roles, department_name, report_period_name, " +
                             "declaration_type_name, form_type_name, form_kind_id, note, user_department_name, form_department_id)" +
                             " values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     id,
                     logSystem.getLogDate(),
                     logSystem.getIp(),
                     logSystem.getEventId(),
-                    logSystem.getUserId(),
+                    logSystem.getUserLogin(),
                     logSystem.getRoles(),
                     logSystem.getFormDepartmentName(),
                     logSystem.getReportPeriodName(),
@@ -188,7 +185,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 
             if (filter.getAuditFieldList().contains(AuditFieldList.ALL.getId())
                     || filter.getAuditFieldList().contains(AuditFieldList.USER.getId()) ) {
-                ps.appendQuery(String.format(" OR lower(su.login) LIKE lower(?)", prefix));
+                ps.appendQuery(" OR lower(ls.user_login) LIKE lower(?)");
                 ps.addParam("%"+filter.getFilter()+"%");
             }
 
@@ -200,7 +197,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 
             if (filter.getAuditFieldList().contains(AuditFieldList.ALL.getId())
                     || filter.getAuditFieldList().contains(AuditFieldList.EVENT.getId()) ) {
-                ps.appendQuery(String.format(" OR lower(ev.name) LIKE lower(?)", prefix));
+                ps.appendQuery(" OR lower(ev.name) LIKE lower(?)");
                 ps.addParam("%"+filter.getFilter()+"%");
             }
 
@@ -212,7 +209,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 
             if (filter.getAuditFieldList().contains(AuditFieldList.ALL.getId())
                     || filter.getAuditFieldList().contains(AuditFieldList.FORM_KIND.getId()) ) {
-                ps.appendQuery(String.format(" OR lower(fk.name) LIKE lower(?)", prefix));
+                ps.appendQuery(" OR lower(fk.name) LIKE lower(?)");
                 ps.addParam("%"+filter.getFilter()+"%");
             }
 
@@ -334,7 +331,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         PreparedStatementData ps = new PreparedStatementData();
         ps.appendQuery("select count(*) from log_system ls ");
         ps.appendQuery("left join event ev on ls.event_id=ev.\"ID\" ");
-        ps.appendQuery("left join sec_user su on ls.user_id=su.\"ID\" ");
+        /*ps.appendQuery("left join sec_user su on ls.user_id=su.\"ID\" ");*/
         ps.appendQuery("left join form_kind fk on ls.form_kind_id=fk.\"ID\" ");
         if (departments != null) {
             ps.appendQuery(" WHERE (ls.form_type_name is not null OR ls.declaration_type_name is not null ) AND ");

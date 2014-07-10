@@ -13,14 +13,22 @@ public class LogBusiness implements Serializable {
 	private Long id;
 	private Date logDate;
 	private int eventId;
-	private int userId;
+    private String userLogin;
 	private String roles;
 	private Long declarationId;
 	private Long formId;
 	private int departmentId;
 	private String note;
 
-	public Long getId() {
+    public String getUserLogin() {
+        return userLogin;
+    }
+
+    public void setUserLogin(String userLogin) {
+        this.userLogin = userLogin;
+    }
+
+    public Long getId() {
 		return id;
 	}
 
@@ -42,14 +50,6 @@ public class LogBusiness implements Serializable {
 
 	public void setEventId(int eventId) {
 		this.eventId = eventId;
-	}
-
-	public int getUserId() {
-		return userId;
-	}
-
-	public void setUserId(int userId) {
-		this.userId = userId;
 	}
 
 	public String getRoles() {

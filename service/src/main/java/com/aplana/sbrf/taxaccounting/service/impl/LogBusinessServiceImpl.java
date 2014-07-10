@@ -32,7 +32,7 @@ public class LogBusinessServiceImpl implements LogBusinessService {
 		log.setFormId(formDataId);
 		log.setDeclarationId(declarationId);
 		log.setEventId(event.getCode());
-		log.setUserId(userInfo.getUser().getId());
+		log.setUserLogin(userInfo.getUser().getLogin());
 		log.setLogDate(new Date());
 		log.setNote(note);
 		log.setDepartmentId(userInfo.getUser().getDepartmentId());
