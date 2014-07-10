@@ -55,13 +55,13 @@ public class RefBookConfigurationParamTest {
     @Test
     public void getRecords2Test() {
         PagingResult<Map<String, RefBookValue>> records = refBookConfigurationParam.getRecords(new Date(), null,
-                ConfigurationParam.UPLOAD_DIRECTORY.name() + ", " + ConfigurationParam.ERROR_DIRECTORY.name(), null);
+                ConfigurationParam.FORM_UPLOAD_DIRECTORY.name() + ", " + ConfigurationParam.FORM_ERROR_DIRECTORY.name(), null);
         Assert.assertEquals(2, records.size());
         records = refBookConfigurationParam.getRecords(new Date(), null,
-                ConfigurationParam.UPLOAD_DIRECTORY.name() + "," + ConfigurationParam.ARCHIVE_DIRECTORY.name(), null);
+                ConfigurationParam.FORM_UPLOAD_DIRECTORY.name() + "," + ConfigurationParam.FORM_ARCHIVE_DIRECTORY.name(), null);
         Assert.assertEquals(2, records.size());
         records = refBookConfigurationParam.getRecords(new Date(), null,
-                ConfigurationParam.UPLOAD_DIRECTORY.name(), null);
+                ConfigurationParam.FORM_UPLOAD_DIRECTORY.name(), null);
         Assert.assertEquals(1, records.size());
     }
 

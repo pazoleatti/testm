@@ -24,8 +24,6 @@ public class FileWrapper {
     private static String ERROR_LIST_INIT = "Ошибка получения списка файлов. Ресурс не проинициализирован!";
     private static String ERROR_DELETE = "Ошибка удаления файла!";
 
-    private FileWrapper() {}
-
     public FileWrapper(File file) {
         this.file = file;
     }
@@ -41,6 +39,20 @@ public class FileWrapper {
         if (smbFile != null) {
             try {
                 return smbFile.canWrite();
+            } catch (SmbException e) {
+                throw new ServiceException(ERROR_RESOURCE_SMB, e);
+            }
+        }
+        throw new ServiceException(ERROR_RESOURCE_INIT);
+    }
+
+    public boolean canRead() {
+        if (file != null) {
+            return file.canRead();
+        }
+        if (smbFile != null) {
+            try {
+                return smbFile.canRead();
             } catch (SmbException e) {
                 throw new ServiceException(ERROR_RESOURCE_SMB, e);
             }
@@ -129,6 +141,34 @@ public class FileWrapper {
         throw new ServiceException(ERROR_TYPE);
     }
 
+    public boolean exists() {
+        if (file != null) {
+            return file.exists();
+        }
+        if (smbFile != null) {
+            try {
+                return smbFile.exists();
+            } catch (SmbException e) {
+                throw new ServiceException(ERROR_TYPE_SMB, e);
+            }
+        }
+        throw new ServiceException(ERROR_TYPE);
+    }
+
+    public boolean isDirectory() {
+        if (file != null) {
+            return file.isDirectory();
+        }
+        if (smbFile != null) {
+            try {
+                return smbFile.isDirectory();
+            } catch (SmbException e) {
+                throw new ServiceException(ERROR_TYPE_SMB, e);
+            }
+        }
+        throw new ServiceException(ERROR_TYPE);
+    }
+
     public InputStream getInputStream() {
         if (file != null) {
             try {
@@ -163,5 +203,51 @@ public class FileWrapper {
             }
         }
         throw new ServiceException(ERROR_RESOURCE_INIT);
+    }
+
+    /**
+     * Проверка возможности чтения директории
+     */
+    public static boolean canReadFolder(String path) {
+        return checkAccess(path, false, true);
+    }
+
+    /**
+     * Проверка возможности чтения файла
+     */
+    public static boolean canReadFile(String path) {
+        return checkAccess(path, false, false);
+    }
+
+    /**
+     * Проверка возможности записи директории
+     */
+    public static boolean canWriteFolder(String path) {
+        return checkAccess(path, true, true);
+    }
+
+    /**
+     * Проверка возможности записи файла
+     */
+    public static boolean canWriteFile(String path) {
+        return checkAccess(path, true, false);
+    }
+
+    /**
+     * Проверка возможности записи/чтения файла/директории
+     */
+    private static boolean checkAccess(String path, boolean write, boolean folder) {
+        try {
+            FileWrapper folderOrFile = ResourceUtils.getSharedResource(path);
+            if (folder && folderOrFile.isFile()
+                    || !folder && folderOrFile.isDirectory()
+                    || write && !folderOrFile.canWrite()
+                    || !write && !folderOrFile.canRead()) {
+                return false;
+            }
+        } catch (ServiceException e) {
+            return false;
+        }
+        return true;
     }
 }

@@ -29,6 +29,13 @@
             left: 0;
             top: 35px;
         }
+        .mgnl {
+            margin-left: 15px;
+            margin-right: 5px;
+        }
+        .mgnr {
+            margin-right: 40px;
+        }
     </ui:style>
 
     <fm:MainContainer>
@@ -42,9 +49,17 @@
                         </style:LeftBar>
                     </fm:Left>
                 </fm:left>
+                <fm:right>
+                    <fm:Right>
+                        <style:LeftBar marginRight="10" childValign="middle" height="100%">
+                            <style:LinkAnchor ui:field="formCommonLink" text="Параметры загрузки налоговых форм"
+                                              disableImage="true" />
+                        </style:LeftBar>
+                    </fm:Right>
+                </fm:right>
                 <fm:resizable>
                     <fm:Resizable>
-                        <g:Label text="Конфигурационные параметры"/>
+                        <g:Label ui:field="titleLabel" text="Общие параметры"/>
                     </fm:Resizable>
                 </fm:resizable>
             </fm:HeaderContainer>
@@ -52,17 +67,13 @@
         <fm:body>
             <fm:BodyContainer>
                 <g:HorizontalPanel spacing="5" verticalAlignment="middle" addStyleNames="{style.btnPanel}">
-                    <g:cell width="100%">
-                        <g:HorizontalPanel>
-                            <style:LinkButton ui:field="commonLink" text="Общие параметры" visible="false"/>
-                            <style:LinkButton ui:field="formLink" text="Загрузка налоговых форм"/>
-                        </g:HorizontalPanel>
+                    <g:cell>
+                        <style:LinkAnchor ui:field="addLink" text="Добавить запись" img="resources/img/row-add.png"
+                                          addStyleNames="{style.mgnl}"/>
                     </g:cell>
                     <g:cell>
-                        <style:LinkButton ui:field="addLink" text="Добавить" img="resources/img/row-add.png"/>
-                    </g:cell>
-                    <g:cell>
-                        <style:LinkButton ui:field="delLink" text="Удалить" img="resources/img/row-delete.png"/>
+                        <style:LinkAnchor ui:field="delLink" text="Удалить запись" img="resources/img/row-delete.png"
+                                          addStyleNames="{style.mgnr}"/>
                     </g:cell>
                     <g:cell>
                         <g:Button ui:field="saveButton" text="Сохранить"/>

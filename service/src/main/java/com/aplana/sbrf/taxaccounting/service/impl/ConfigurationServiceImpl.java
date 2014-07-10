@@ -23,11 +23,13 @@ import static java.util.Arrays.asList;
 @Transactional
 public class ConfigurationServiceImpl implements ConfigurationService {
 
-	private final static String ACCESS_READ_ERROR = "Нет прав на просмотр конфигурационных параметров приложения!";
+    private final static String NOT_SET_ERROR = "Не задано значение поля «%s»!";
+    private final static String DUBLICATE_SET_ERROR = "Значение «%s» уже задано!";
+    private final static String ACCESS_READ_ERROR = "Нет прав на просмотр конфигурационных параметров приложения!";
     private final static String ACCESS_WRITE_ERROR = "Нет прав на изменение конфигурационных параметров приложения!";
-    private final static String UNIQUE_PATH_ERROR = "«%s»: Значение параметра «%s» не может быть равно значению параметра «%s» для «%s»!";
-    private final static String NOT_SET_ERROR = "%s не указан!";
+    private final static String READ_ERROR = "«%s»: Отсутствует доступ на чтение!";
     private final static String WRITE_ERROR = "«%s»: Отсутствует доступ на запись!";
+    private final static String UNIQUE_PATH_ERROR = "«%s»: Значение параметра «%s» не может быть равно значению параметра «%s» для «%s»!";
 
     @Autowired
 	private ConfigurationDao configurationDao;
@@ -54,7 +56,37 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			throw new AccessDeniedException(ACCESS_WRITE_ERROR);
 		}
 
-        // Уникальность ТБ для параметров загрузки НФ
+        // Проверки общих параметров
+        for (ConfigurationParam configurationParam : ConfigurationParam.values()) {
+            if (configurationParam.isCommon()) {
+                List<String> valuesList = model.get(configurationParam, DepartmentType.ROOT_BANK.getCode());
+                if (valuesList == null || valuesList.isEmpty()) {
+                    // Обязательность
+                    logger.error(NOT_SET_ERROR, configurationParam.getCaption());
+                } else {
+                    if (configurationParam.isUnique() && valuesList.size() != 1) {
+                        // Уникальность
+                        logger.error(DUBLICATE_SET_ERROR, configurationParam.getCaption());
+                    }
+
+                    for (String value : valuesList) {
+                        if (configurationParam.hasReadCheck() && (configurationParam.isFolder()
+                                && !FileWrapper.canReadFolder(value) || !configurationParam.isFolder()
+                                && !FileWrapper.canReadFile(value))) {
+                            // Доступ на чтение
+                            logger.error(READ_ERROR, value);
+                        } else  if (configurationParam.hasWriteCheck() && (configurationParam.isFolder()
+                                && !FileWrapper.canWriteFolder(value) || !configurationParam.isFolder()
+                                && !FileWrapper.canWriteFile(value))) {
+                            // Доступ на запись
+                            logger.error(WRITE_ERROR, value);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Уникальность ТБ для параметров загрузки НФ (дубли могут проверяться только на клиенте)
         Set<Integer> departmentIdSet = new HashSet<Integer>();
         for (Map.Entry<ConfigurationParam, Map<Integer, List<String>>> entry : model.entrySet()) {
             if (entry.getKey().isCommon()) {
@@ -68,9 +100,9 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
         // Пути к каталогам для параметров загрузки НФ
         Set<ConfigurationParam> configurationParamSet = new HashSet<ConfigurationParam>(asList(
-                ConfigurationParam.UPLOAD_DIRECTORY,
-                ConfigurationParam.ARCHIVE_DIRECTORY,
-                ConfigurationParam.ERROR_DIRECTORY));
+                ConfigurationParam.FORM_UPLOAD_DIRECTORY,
+                ConfigurationParam.FORM_ARCHIVE_DIRECTORY,
+                ConfigurationParam.FORM_ERROR_DIRECTORY));
 
         for (ConfigurationParam param : configurationParamSet) {
             for (int departmentId : departmentIdSet) {

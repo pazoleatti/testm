@@ -112,14 +112,7 @@ def endDate = null
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
                       def boolean required = true) {
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
-            reportPeriodEndDate, rowIndex, colIndex, logger, required)
-}
-
-// Поиск записи в справочнике по значению (для расчетов)
-def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
-                def Date date, boolean required = true) {
-    return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value, date, rowIndex,
-            cellName, logger, required)
+            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
 }
 
 // Разыменование записи справочника
@@ -140,57 +133,61 @@ void calc() {
         deleteAllAliased(dataRows)
 
         // сортируем по кодам
-        dataRowHelper.save(dataRows.sort { getKnu(it.code) })
+        dataRows.sort { getKnu(it.code) }
 
         dataRows.eachWithIndex { row, index ->
             row.setIndex(index + 1)
         }
 
-        dataRows = dataRowHelper.getAllCached() // не убирать, группировка падает
-
-        for (row in dataRows) {
-            row.rateOfTheBankOfRussia = calc8(row)
-            row.taxAccountingRuble = calc10(row)
-            row.ruble = calc12(row)
+        if (!getBalancePeriod()) {
+            for (row in dataRows) {
+                row.rateOfTheBankOfRussia = calc8(row)
+                row.taxAccountingRuble = calc10(row)
+                row.ruble = calc12(row)
+            }
         }
 
-        // посчитать "итого по коду"
-        def totalRows = [:]
-        def code = null
-        def sum = 0, sum2 = 0
-        dataRows.eachWithIndex { row, i ->
-            if (code == null) {
-                code = getKnu(row.code)
-            }
-            // если код расходы поменялся то создать новую строку "итого по коду"
-            if (code != getKnu(row.code)) {
-                totalRows.put(i, getNewRow(code, sum, sum2))
-                sum = 0
-                sum2 = 0
-                code = getKnu(row.code)
-            }
-            // если строка последняя то сделать для ее кода расхода новую строку "итого по коду"
-            if (i == dataRows.size() - 1) {
-                sum += (row.taxAccountingRuble ?: 0)
-                sum2 += (row.ruble ?: 0)
-                def totalRowCode = getNewRow(code, sum, sum2)
-                totalRows.put(i + 1, totalRowCode)
-                sum = 0
-                sum2 = 0
-            }
-            sum += (row.taxAccountingRuble ?: 0)
-            sum2 += (row.ruble ?: 0)
-        }
-
-        // добавить "итого по коду" в таблицу
-        def i = 1
-        totalRows.each { index, row ->
-            dataRowHelper.insert(row, index + i++)
-        }
+        calcSubTotal(dataRows)
     }
 
-    dataRowHelper.insert(calcTotalRow(dataRows), dataRows.size() + 1)
+    dataRows.add(calcTotalRow(dataRows))
     dataRowHelper.save(dataRows)
+}
+
+void calcSubTotal(def dataRows) {
+    // посчитать "итого по коду"
+    def totalRows = [:]
+    def code = null
+    def sum = 0, sum2 = 0
+    dataRows.eachWithIndex { row, i ->
+        if (code == null) {
+            code = getKnu(row.code)
+        }
+        // если код расходы поменялся то создать новую строку "итого по коду"
+        if (code != getKnu(row.code)) {
+            totalRows.put(i, getNewRow(code, sum, sum2))
+            sum = 0
+            sum2 = 0
+            code = getKnu(row.code)
+        }
+        // если строка последняя то сделать для ее кода расхода новую строку "итого по коду"
+        if (i == dataRows.size() - 1) {
+            sum += (row.taxAccountingRuble ?: 0)
+            sum2 += (row.ruble ?: 0)
+            def totalRowCode = getNewRow(code, sum, sum2)
+            totalRows.put(i + 1, totalRowCode)
+            sum = 0
+            sum2 = 0
+        }
+        sum += (row.taxAccountingRuble ?: 0)
+        sum2 += (row.ruble ?: 0)
+    }
+
+    // добавить "итого по коду" в таблицу
+    def i = 0
+    totalRows.each { index, row ->
+        dataRows.add(index + i++, row)
+    }
 }
 
 def BigDecimal calc8(DataRow row) {
@@ -504,7 +501,6 @@ void importData() {
 
 // Заполнить форму данными
 void addData(def xml, int headRowCount) {
-    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1
@@ -601,13 +597,9 @@ void addData(def xml, int headRowCount) {
 void importTransportData() {
     def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
     addTransportData(xml)
-
-    def dataRows = formDataService.getDataRowHelper(formData)?.allCached
-    checkTotalSum(dataRows, totalColumns, logger, true)
 }
 
 void addTransportData(def xml) {
-    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def int rnuIndexRow = 2
     def int colOffset = 1
@@ -660,25 +652,35 @@ void addTransportData(def xml) {
         rows.add(newRow)
     }
 
+    calcSubTotal(rows)
+    def totalRow = calcTotalRow(rows)
+    rows.add(totalRow)
+
     if (xml.rowTotal.size() == 1) {
         rnuIndexRow = rnuIndexRow + 2
 
         def row = xml.rowTotal[0]
 
         def total = formData.createDataRow()
-        total.setAlias('total')
-        total.helper = 'Итого'
-        total.getCell('helper').colSpan = 9
-        ['number', 'helper', 'taxAccountingRuble', 'accountingCurrency', 'ruble'].each {
-            total.getCell(it).setStyleAlias('Контрольные суммы')
-        }
 
         // графа 10
         total.taxAccountingRuble = parseNumber(row.cell[10].text(), rnuIndexRow, 10 + colOffset, logger, true)
+
         // графа 12
         total.ruble = parseNumber(row.cell[12].text(), rnuIndexRow, 12 + colOffset, logger, true)
 
-        rows.add(total)
+        def colIndexMap = ['taxAccountingRuble' : 10, 'ruble' : 12]
+        for (def alias : totalColumns) {
+            def v1 = total[alias]
+            def v2 = totalRow[alias]
+            if (v1 == null && v2 == null) {
+                continue
+            }
+            if (v1 == null || v1 != null && v1 != v2) {
+                logger.error(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
+                break
+            }
+        }
     }
     dataRowHelper.save(rows)
 }

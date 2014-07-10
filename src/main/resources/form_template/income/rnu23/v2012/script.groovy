@@ -73,6 +73,9 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
+        break
 }
 
 //// Кэши и константы
@@ -467,16 +470,8 @@ def getPrevDataRows() {
     return null
 }
 
-/**
- * Заполнить форму данными.
- *
- * @param xml данные
- *
- * return итоговая строка
- */
 // Заполнить форму данными
 void addData(def xml, int headRowCount) {
-    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1 // Строки xml, от 0
@@ -513,17 +508,9 @@ void addData(def xml, int headRowCount) {
             continue
         }
 
-        def newRow = formData.createDataRow()
+        def newRow = getNewRow()
         newRow.setIndex(rowIndex++)
         newRow.setImportIndex(xlsIndexRow)
-        autoFillColumns.each {
-            newRow.getCell(it).setStyleAlias('Автозаполняемая')
-        }
-        def cols = (getBalancePeriod() ? balanceEditableColumns : editableColumns)
-        cols.each {
-            newRow.getCell(it).editable = true
-            newRow.getCell(it).setStyleAlias('Редактируемая')
-        }
 
         // графа 2
         newRow.contract = row.cell[2].text()
@@ -607,4 +594,185 @@ void loggerError(def row, def msg) {
     } else {
         rowError(logger, row, msg)
     }
+}
+
+void importTransportData() {
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    addTransportData(xml)
+}
+
+void addTransportData(def xml) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper?.allCached
+    def int rnuIndexRow = 2
+    def int colOffset = 1
+
+    def rows = []
+
+    for (def row : xml.row) {
+        rnuIndexRow++
+
+        def rnuIndexCol
+        def newRow = getNewRow()
+
+        // графа 1
+        rnuIndexCol = 1
+        newRow.number = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
+        // графа 2
+        rnuIndexCol = 2
+        newRow.contract = row.cell[rnuIndexCol].text()
+
+        // графа 3
+        rnuIndexCol = 3
+        newRow.contractDate = parseDate(row.cell[rnuIndexCol].text(), "dd.MM.yyyy", rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
+        // графа 4
+        rnuIndexCol = 4
+        newRow.amountOfTheGuarantee = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
+        // графа 5
+        rnuIndexCol = 5
+        newRow.dateOfTransaction = parseDate(row.cell[rnuIndexCol].text(), "dd.MM.yyyy", rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
+        // графа 6
+        rnuIndexCol = 6
+        newRow.rateOfTheBankOfRussia = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
+        // графа 7
+        rnuIndexCol = 7
+        newRow.interestRate = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
+        // графа 8
+        rnuIndexCol = 8
+        newRow.baseForCalculation = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
+        // графа 9
+        rnuIndexCol = 9
+        newRow.accrualAccountingStartDate = parseDate(row.cell[rnuIndexCol].text(), "dd.MM.yyyy", rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
+        // графа 10
+        rnuIndexCol = 10
+        newRow.accrualAccountingEndDate = parseDate(row.cell[rnuIndexCol].text(), "dd.MM.yyyy", rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
+        // графа 11
+        rnuIndexCol = 11
+        newRow.preAccrualsStartDate = parseDate(row.cell[rnuIndexCol].text(), "dd.MM.yyyy", rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
+        // графа 12
+        rnuIndexCol = 12
+        newRow.preAccrualsEndDate = parseDate(row.cell[rnuIndexCol].text(), "dd.MM.yyyy", rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
+        // графа 13
+        rnuIndexCol = 13
+        newRow.incomeCurrency = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
+        // графа 14
+        rnuIndexCol = 14
+        newRow.incomeRuble = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
+        // графа 15
+        rnuIndexCol = 15
+        newRow.accountingCurrency = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
+        // графа 16
+        rnuIndexCol = 16
+        newRow.accountingRuble = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
+        // графа 17
+        rnuIndexCol = 17
+        newRow.preChargeCurrency = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
+        // графа 18
+        rnuIndexCol = 18
+        newRow.preChargeRuble = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
+        // графа 19
+        rnuIndexCol = 19
+        newRow.taxPeriodCurrency = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
+        // графа 20
+        rnuIndexCol = 20
+        newRow.taxPeriodRuble = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
+        rows.add(newRow)
+    }
+
+    // Итоговая строка
+    def totalRow = getDataRow(dataRows, 'total')
+    // Очистка итогов
+    totalSumColumns.each { alias ->
+        totalRow.getCell(alias).setValue(null, null)
+    }
+    calcTotalSum(rows, totalRow, totalSumColumns)
+    rows.add(totalRow)
+
+    // сравнение итогов
+    if (xml.rowTotal.size() == 1) {
+        rnuIndexRow = rnuIndexRow + 2
+        def row = xml.rowTotal[0]
+        def total = formData.createDataRow()
+
+        // графа 13
+        def rnuIndexCol = 13
+        total.incomeCurrency = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
+        // графа 14
+        rnuIndexCol = 14
+        total.incomeRuble = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
+        // графа 15
+        rnuIndexCol = 15
+        total.accountingCurrency = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
+        // графа 16
+        rnuIndexCol = 16
+        total.accountingRuble = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
+        // графа 17
+        rnuIndexCol = 17
+        total.preChargeCurrency = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
+        // графа 18
+        rnuIndexCol = 18
+        total.preChargeRuble = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
+        // графа 19
+        rnuIndexCol = 19
+        total.taxPeriodCurrency = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
+        // графа 20
+        rnuIndexCol = 20
+        total.taxPeriodRuble = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
+        def colIndexMap = ['incomeCurrency' : 13, 'incomeRuble' : 14, 'accountingCurrency' : 15,
+                'accountingRuble' : 16, 'preChargeCurrency' : 17, 'preChargeRuble' : 18,
+                'taxPeriodCurrency' : 19, 'taxPeriodRuble' : 20]
+        for (def alias : totalSumColumns) {
+            def v1 = total.getCell(alias).value
+            def v2 = totalRow.getCell(alias).value
+            if (v1 == null && v2 == null) {
+                continue
+            }
+            if (v1 == null || v1 != null && v1 != v2) {
+                logger.error(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
+                break
+            }
+        }
+    }
+
+    dataRowHelper.save(rows)
+}
+
+def getNewRow() {
+    def newRow = formData.createDataRow()
+    autoFillColumns.each {
+        newRow.getCell(it).setStyleAlias('Автозаполняемая')
+    }
+    def cols = (getBalancePeriod() ? balanceEditableColumns : editableColumns)
+    cols.each {
+        newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias('Редактируемая')
+    }
+    return newRow
 }

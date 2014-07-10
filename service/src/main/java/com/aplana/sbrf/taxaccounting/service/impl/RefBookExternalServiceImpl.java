@@ -220,16 +220,19 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
     @Override
     public void importRefBookNsi(TAUserInfo userInfo, Logger logger) {
         // ОКАТО
-        importRefBook(userInfo, logger, ConfigurationParam.OKATO_TRANSPORT_DIRECTORY, nsiOkatoMappingMap);
+        importRefBook(userInfo, logger, ConfigurationParam.OKATO_UPLOAD_DIRECTORY, nsiOkatoMappingMap);
         // Субъекты РФ
-        importRefBook(userInfo, logger, ConfigurationParam.REGION_TRANSPORT_DIRECTORY, nsiRegionMappingMap);
+        importRefBook(userInfo, logger, ConfigurationParam.REGION_UPLOAD_DIRECTORY, nsiRegionMappingMap);
         // План счетов
-        importRefBook(userInfo, logger, ConfigurationParam.ACCOUNT_PLAN_TRANSPORT_DIRECTORY, nsiAccountPlanMappingMap);
+        importRefBook(userInfo, logger, ConfigurationParam.ACCOUNT_PLAN_UPLOAD_DIRECTORY, nsiAccountPlanMappingMap);
     }
 
     @Override
     public void importRefBookDiasoft(TAUserInfo userInfo, Logger logger) {
-        importRefBook(userInfo, logger, ConfigurationParam.DIASOFT_TRANSPORT_DIRECTORY, diasoftMappingMap);
+        // Эмитенты
+        importRefBook(userInfo, logger, ConfigurationParam.EMITENT_UPLOAD_DIRECTORY, diasoftMappingMap);
+        // Ценные бумаги
+        importRefBook(userInfo, logger, ConfigurationParam.BOND_UPLOAD_DIRECTORY, diasoftMappingMap);
     }
 
     @Override

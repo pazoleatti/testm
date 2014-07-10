@@ -121,7 +121,7 @@ public class ConfigurationPresenter	extends	Presenter<ConfigurationPresenter.MyV
         List<DataRow<Cell>> rowsData = new LinkedList<DataRow<Cell>>();
 
         Map<Integer, Map<ConfigurationParam, String>> rowMap = new HashMap<Integer, Map<ConfigurationParam, String>>();
-        for (ConfigurationParam key : asList(ConfigurationParam.UPLOAD_DIRECTORY, ConfigurationParam.ARCHIVE_DIRECTORY, ConfigurationParam.ERROR_DIRECTORY)) {
+        for (ConfigurationParam key : asList(ConfigurationParam.FORM_UPLOAD_DIRECTORY, ConfigurationParam.FORM_ARCHIVE_DIRECTORY, ConfigurationParam.FORM_ERROR_DIRECTORY)) {
             Map<Integer, List<String>> map = model.get(key);
             if (map != null) {
                 for (int departmentId : map.keySet()) {
@@ -144,9 +144,9 @@ public class ConfigurationPresenter	extends	Presenter<ConfigurationPresenter.MyV
             // Значения
             dataRow.getCell(getView().getDepartmentColumn().getAlias()).setNumericValue(BigDecimal.valueOf(entry.getKey()));
             dataRow.getCell(getView().getDepartmentColumn().getAlias()).setRefBookDereference(departmentMap.get(entry.getKey()));
-            dataRow.getCell(getView().getUploadPathColumn().getAlias()).setStringValue(entry.getValue().get(ConfigurationParam.UPLOAD_DIRECTORY));
-            dataRow.getCell(getView().getArchivePathColumn().getAlias()).setStringValue(entry.getValue().get(ConfigurationParam.ARCHIVE_DIRECTORY));
-            dataRow.getCell(getView().getErrorPathColumn().getAlias()).setStringValue(entry.getValue().get(ConfigurationParam.ERROR_DIRECTORY));
+            dataRow.getCell(getView().getUploadPathColumn().getAlias()).setStringValue(entry.getValue().get(ConfigurationParam.FORM_UPLOAD_DIRECTORY));
+            dataRow.getCell(getView().getArchivePathColumn().getAlias()).setStringValue(entry.getValue().get(ConfigurationParam.FORM_ARCHIVE_DIRECTORY));
+            dataRow.getCell(getView().getErrorPathColumn().getAlias()).setStringValue(entry.getValue().get(ConfigurationParam.FORM_ERROR_DIRECTORY));
         }
         return rowsData;
     }
@@ -182,6 +182,7 @@ public class ConfigurationPresenter	extends	Presenter<ConfigurationPresenter.MyV
 
         // Общие параметры
         Map<ConfigurationParam, List<String>> commonMap = new HashMap<ConfigurationParam, List<String>>();
+
         // Группировка по параметру
         for (DataRow<Cell> dataRow : commonRowsData) {
             BigDecimal paramId = dataRow.getCell(getView().getParamColumn().getAlias()).getNumericValue();
@@ -217,14 +218,15 @@ public class ConfigurationPresenter	extends	Presenter<ConfigurationPresenter.MyV
                 continue;
             }
             if (uploadPath != null) {
-                model.put(ConfigurationParam.UPLOAD_DIRECTORY, departmentId.intValue(), asList(uploadPath));
+                model.put(ConfigurationParam.FORM_UPLOAD_DIRECTORY, departmentId.intValue(), asList(uploadPath));
             }
             if (archivePath != null) {
-                model.put(ConfigurationParam.ARCHIVE_DIRECTORY, departmentId.intValue(), asList(archivePath));
+                model.put(ConfigurationParam.FORM_ARCHIVE_DIRECTORY, departmentId.intValue(), asList(archivePath));
             }
             if (errorPath != null) {
-                model.put(ConfigurationParam.ERROR_DIRECTORY, departmentId.intValue(), asList(errorPath));
+                model.put(ConfigurationParam.FORM_ERROR_DIRECTORY, departmentId.intValue(), asList(errorPath));
             }
+            // Проверка дублей
             if (!departmentSet.add(departmentId.intValue())) {
                 action.getDublicateDepartmentIdSet().add(departmentId.intValue());
             }

@@ -175,7 +175,6 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
             public void onSuccess(GetDeclarationFilterDataResult result) {
                 getView().setAcceptableDepartments(result.getDepartments(), result.getFilterValues().getDepartmentIds());
                 getView().setAcceptableReportPeriods(result.getPeriodsForCreation());
-                setDeclarationFilter(dataFilter);
                 popupSlot.addToPopupSlot(DeclarationCreationPresenter.this);
             }
         }, this) );

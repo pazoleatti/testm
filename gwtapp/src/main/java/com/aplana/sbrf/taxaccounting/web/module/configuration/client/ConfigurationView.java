@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.configuration.client;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.module.configuration.client.ConfigurationPresenter.MyView;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumnFactory;
+import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -10,6 +11,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.DataGrid;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.Range;
 import com.google.inject.Inject;
@@ -22,6 +24,15 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
     @UiField
     DataGrid<DataRow<Cell>> commonTable, formTable;
 
+    @UiField
+    Label titleLabel;
+
+    @UiField
+    LinkAnchor formCommonLink;
+
+    @UiField
+    Widget commonPanel, formPanel;
+
     List<DataRow<Cell>> formRowsData;
     List<DataRow<Cell>> commonRowsData;
 
@@ -32,9 +43,6 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
     private StringColumn uploadPathColumn = new StringColumn();
     private StringColumn archivePathColumn = new StringColumn();
     private StringColumn errorPathColumn = new StringColumn();
-
-    @UiField
-    Widget commonLink, formLink, commonPanel, formPanel;
 
     private DataRowColumnFactory factory = new DataRowColumnFactory();
 
@@ -66,7 +74,7 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
         paramColumn.setAlias("paramColumn");
         paramColumn.setName("Параметр");
         Column<DataRow<Cell>, ?> paramColumnUI = factory.createTableColumn(paramColumn, commonTable);
-        commonTable.setColumnWidth(paramColumnUI, 50, Style.Unit.EM);
+        commonTable.setColumnWidth(paramColumnUI, 30, Style.Unit.EM);
         commonTable.addColumn(paramColumnUI, paramColumn.getName());
 
         valueColumn.setAlias("valueColumn");
@@ -74,7 +82,7 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
         commonTable.addColumn(factory.createTableColumn(valueColumn, commonTable), valueColumn.getName());
 
         commonTable.setRowData(0, new ArrayList<DataRow<Cell>>(0));
-        commonTable.setMinimumTableWidth(70, Style.Unit.EM);
+        commonTable.setMinimumTableWidth(40, Style.Unit.EM);
     }
 
     /**
@@ -110,9 +118,9 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
 
     // Переключение между вкладками
     private void showTab(int index) {
-        commonLink.setVisible(index == 1);
+        titleLabel.setText(formCommonLink.getText());
+        formCommonLink.setText(index == 1 ? "Общие параметры" : "Параметры загрузки налоговых форм");
         commonPanel.setVisible(index == 0);
-        formLink.setVisible(index == 0);
         formPanel.setVisible(index == 1);
         commonTable.redraw();
         formTable.redraw();
@@ -138,16 +146,11 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
         }
     }
 
-    @UiHandler("commonLink")
-    void onCommonLinkClick(ClickEvent event) {
-        showTab(0);
+    @UiHandler("formCommonLink")
+    void onFormCommonLinkClick(ClickEvent event) {
+        showTab(commonPanel.isVisible() ? 1 : 0);
     }
 
-    @UiHandler("formLink")
-    void onFormLinkClick(ClickEvent event) {
-        showTab(1);
-    }
-	
 	@UiHandler("saveButton")
 	void onSaveButtonClick(ClickEvent event) {
 		getUiHandlers().onSave();
