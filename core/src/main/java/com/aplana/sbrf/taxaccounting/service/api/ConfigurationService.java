@@ -12,6 +12,13 @@ public interface ConfigurationService {
     ConfigurationParamModel getAllConfig(TAUserInfo userInfo);
 
     /**
+     * Получение конф.параметров по подразделению
+     * @param departmentId идентификатор подразделения
+     * @return модель
+     */
+    ConfigurationParamModel getByDepartment(Integer departmentId, TAUserInfo userInfo);
+
+    /**
      * Сохранение конфигурационных параметров (табл. CONFIGURATION)
      */
 	void saveAllConfig(TAUserInfo userInfo, ConfigurationParamModel model, Logger logger);

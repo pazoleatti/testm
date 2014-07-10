@@ -46,7 +46,15 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 		return configurationDao.getAll();
 	}
 
-	@Override
+    @Override
+    public ConfigurationParamModel getByDepartment(Integer departmentId, TAUserInfo userInfo) {
+        if (!userInfo.getUser().hasRole(TARole.ROLE_ADMIN) && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+            throw new AccessDeniedException(ACCESS_READ_ERROR);
+        }
+        return configurationDao.getByDepartment(departmentId);
+    }
+
+    @Override
 	public void saveAllConfig(TAUserInfo userInfo, ConfigurationParamModel model, Logger logger) {
         if (model == null) {
             return;

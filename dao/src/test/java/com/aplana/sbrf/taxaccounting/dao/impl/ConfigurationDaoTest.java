@@ -61,6 +61,12 @@ public class ConfigurationDaoTest {
         dao.save(model);
     }
 
+    @Test
+    public void getByDepartmentTest() {
+        ConfigurationParamModel model = dao.getByDepartment(1);
+        Assert.assertNotNull(model);
+    }
+
     // Удаление
     public void save3Test() {
         ConfigurationParamModel model = dao.getAll();

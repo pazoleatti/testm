@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Transformer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,6 +96,8 @@ public class RefBookDepartment implements RefBookDataProvider {
     AuditService auditService;
     @Autowired
     private RefBookFactory rbFactory;
+    @Autowired
+    private ConfigurationService configurationService;
 
 
     @Override
@@ -724,7 +727,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         for (DepartmentDeclarationType departmentDeclarationType : departmentDeclarationTypesDest){
             logger.warn(String.format("назначение является источником для %s - %s приемника",
                     department.getName(),
-                    declarationTypeService.get(departmentDeclarationType.getDeclarationTypeId())));
+                    declarationTypeService.get(departmentDeclarationType.getDeclarationTypeId()).getName()));
         }
         for (DepartmentFormType departmentFormType : depFTSources){
             logger.warn(String.format("назначение является приёмником для %s - %s - %s приемника",
@@ -732,6 +735,11 @@ public class RefBookDepartment implements RefBookDataProvider {
                     departmentFormType.getKind().getName(),
                     formTypeService.get(departmentFormType.getFormTypeId()).getName()));
         }
+
+        //9 точка запроса
+        ConfigurationParamModel model = configurationService.getByDepartment(department.getId(), logger.getTaUserInfo());
+        if (!model.isEmpty())
+            logger.warn("Заданы пути к каталогам транспортных файлов для %s!", department.getName());
     }
 
     private void deletePeriods(int depId, Logger logger){

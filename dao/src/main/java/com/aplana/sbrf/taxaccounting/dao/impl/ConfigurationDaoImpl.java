@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,6 +52,40 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
             }
         });
         return model;
+    }
+
+    @Override
+    public ConfigurationParamModel getByDepartment(Integer departmentId) {
+        try {
+            final ConfigurationParamModel model = new ConfigurationParamModel();
+            getJdbcTemplate().query("select code, value, department_id from configuration where department_id = ?",
+                    new Object[]{departmentId},
+                    new RowCallbackHandler() {
+                        @Override
+                        public void processRow(ResultSet rs) throws SQLException {
+                            try {
+                                Clob clobValue = rs.getClob("value");
+                                String value = null;
+                                if (clobValue != null) {
+                                    char clobVal[] = new char[(int) clobValue.length()];
+                                    clobValue.getCharacterStream().read(clobVal);
+                                    value = new String(clobVal);
+                                }
+                                model.setFullStringValue(ConfigurationParam.valueOf(rs.getString("code")), rs.getInt("department_id"), value);
+                            } catch (IllegalArgumentException e) {
+                                // Если параметр не найден в ConfigurationParam, то он просто пропускается (не виден на клиенте)
+                            } catch (IOException e) {
+                                throw new DaoException(GET_ALL_ERROR);
+                            } catch (SQLException e) {
+                                throw new DaoException(GET_ALL_ERROR);
+                            }
+                        }
+                    });
+            return model;
+        } catch (DataAccessException e){
+            logger.error("", e);
+            throw new DaoException("", e);
+        }
     }
 
     @Override
