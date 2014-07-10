@@ -11,13 +11,17 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.DataGrid;
+import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.Range;
+import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandlers> implements MyView {
@@ -83,6 +87,10 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
 
         commonTable.setRowData(0, new ArrayList<DataRow<Cell>>(0));
         commonTable.setMinimumTableWidth(40, Style.Unit.EM);
+
+        commonTable.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.ENABLED);
+        SingleSelectionModel<DataRow<Cell>> singleSelectionModel = new SingleSelectionModel<DataRow<Cell>>();
+        commonTable.setSelectionModel(singleSelectionModel);
     }
 
     /**
@@ -114,6 +122,10 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
         formTable.addColumn(factory.createTableColumn(errorPathColumn, formTable), errorPathColumn.getName());
         formTable.setRowData(0, new ArrayList<DataRow<Cell>>(0));
         formTable.setMinimumTableWidth(70, Style.Unit.EM);
+
+        formTable.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.ENABLED);
+        SingleSelectionModel<DataRow<Cell>> singleSelectionModel = new SingleSelectionModel<DataRow<Cell>>();
+        formTable.setSelectionModel(singleSelectionModel);
     }
 
     // Переключение между вкладками
@@ -137,13 +149,19 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
 
     @UiHandler("delLink")
     void onDelLinkClick(ClickEvent event) {
-        if (commonPanel.isVisible() && commonRowsData != null && commonTable.getKeyboardSelectedRow() < commonRowsData.size()) {
-            commonRowsData.remove(commonRowsData.get(commonTable.getKeyboardSelectedRow()));
-            setCommonConfigData(commonRowsData);
-        } else if (formRowsData != null && formTable.getKeyboardSelectedRow() < formRowsData.size())  {
-            formRowsData.remove(formRowsData.get(formTable.getKeyboardSelectedRow()));
-            setFormConfigData(formRowsData);
+        DataGrid<DataRow<Cell>> table = commonPanel.isVisible() ? commonTable : formTable;
+        List<DataRow<Cell>> rowsData = commonPanel.isVisible() ? commonRowsData : formRowsData;
+        DataRow<Cell> selRow = ((SingleSelectionModel<DataRow<Cell>>) table.getSelectionModel()).getSelectedObject();
+        if (selRow == null) {
+            return;
         }
+        rowsData.remove(selRow);
+        if (rowsData == commonRowsData) {
+            setCommonConfigData(rowsData);
+        } else {
+            setFormConfigData(rowsData);
+        }
+        ((SingleSelectionModel<DataRow<Cell>>) table.getSelectionModel()).setSelected(selRow, false);
     }
 
     @UiHandler("formCommonLink")
@@ -151,7 +169,18 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
         showTab(commonPanel.isVisible() ? 1 : 0);
     }
 
-	@UiHandler("saveButton")
+
+    @UiHandler("checkButton")
+    void onCheckButtonClick(ClickEvent event) {
+        DataGrid<DataRow<Cell>> table = commonPanel.isVisible() ? commonTable : formTable;
+        DataRow<Cell> selRow = ((SingleSelectionModel<DataRow<Cell>>) table.getSelectionModel()).getSelectedObject();
+        if (selRow == null) {
+            return;
+        }
+        getUiHandlers().onCheckReadWriteAccess(selRow, commonPanel.isVisible());
+    }
+
+    @UiHandler("saveButton")
 	void onSaveButtonClick(ClickEvent event) {
 		getUiHandlers().onSave();
 	}
@@ -159,10 +188,30 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
 	@UiHandler("cancelButton")
 	void onCancelButtonClick(ClickEvent event) {
 		getUiHandlers().onCancel();
-	}
+    }
+
+
+    private static final Comparator<DataRow<Cell>> commonComparator = new Comparator<DataRow<Cell>>() {
+        @Override
+        public int compare(DataRow<Cell> o1, DataRow<Cell> o2) {
+            String name1 = o1.getCell("paramColumn").getRefBookDereference();
+            String name2 = o2.getCell("paramColumn").getRefBookDereference();
+            if (name1 == null && name2 == null) {
+                return 0;
+            }
+            if (name1 == null) {
+                return 1;
+            }
+            if (name2 == null) {
+                return -1;
+            }
+            return name1.compareTo(name2);
+        }
+    };
 
     @Override
     public void setCommonConfigData(List<DataRow<Cell>> rowsData) {
+        Collections.sort(rowsData, commonComparator);
         commonRowsData = rowsData;
         commonTable.setVisibleRange(new Range(0, rowsData.size()));
         commonTable.setRowCount(rowsData.size());

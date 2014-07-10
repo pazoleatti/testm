@@ -4,6 +4,8 @@ import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
 import org.junit.Assert;
@@ -59,11 +61,11 @@ public class ConfigurationServiceTest {
         service.saveAllConfig(userInfo, new ConfigurationParamModel(), logger);
     }
 
-//    private void printLog(Logger logger) {
-//        for (LogEntry entry : logger.getEntries()) {
-//            System.out.println(entry.getLevel() + " " + entry.getMessage());
-//        }
-//    }
+    private void printLog(Logger logger) {
+        for (LogEntry entry : logger.getEntries()) {
+            System.out.println(entry.getLevel() + " " + entry.getMessage());
+        }
+    }
 
     // Сохранение без ошибок
     @Test
@@ -210,7 +212,7 @@ public class ConfigurationServiceTest {
 
     // Путь недоступен
     @Test
-    public void saveAllConfig5Test() throws IOException {
+    public void checkReadWriteAccess1Test() throws IOException {
         Logger logger = new Logger();
         ConfigurationParamModel model = new ConfigurationParamModel();
 
@@ -246,7 +248,7 @@ public class ConfigurationServiceTest {
         model.put(ConfigurationParam.FORM_ERROR_DIRECTORY, testDepartment1.getId(),
                 asList("badPath"));
 
-        service.saveAllConfig(getUser(), model, logger);
+        service.checkReadWriteAccess(getUser(), model, logger);
 
         file.delete();
         commonFolder.delete();
@@ -254,13 +256,14 @@ public class ConfigurationServiceTest {
         archiveFolder.delete();
         errorFolder.delete();
 
-        Assert.assertEquals(1, logger.getEntries().size());
-        Assert.assertTrue(logger.getEntries().get(0).getMessage().contains("badPath"));
+        Assert.assertEquals(11, logger.getEntries().size());
+        Assert.assertTrue(logger.containsLevel(LogLevel.ERROR));
+        Assert.assertTrue(logger.containsLevel(LogLevel.INFO));
     }
 
     // Путь не папка
     @Test
-    public void saveAllConfig6Test() throws IOException {
+    public void checkReadWriteAccess2Test() throws IOException {
         Logger logger = new Logger();
         ConfigurationParamModel model = new ConfigurationParamModel();
 
@@ -297,7 +300,7 @@ public class ConfigurationServiceTest {
         model.put(ConfigurationParam.FORM_ERROR_DIRECTORY, testDepartment1.getId(),
                 asList("file://" + errorFolder.getRoot().getPath() + "/testFile"));
 
-        service.saveAllConfig(getUser(), model, logger);
+        service.checkReadWriteAccess(getUser(), model, logger);
 
         file.delete();
         commonFolder.delete();
@@ -305,8 +308,9 @@ public class ConfigurationServiceTest {
         archiveFolder.delete();
         errorFolder.delete();
 
-        Assert.assertEquals(1, logger.getEntries().size());
-        Assert.assertTrue(logger.getEntries().get(0).getMessage().contains("testFile"));
+        Assert.assertEquals(11, logger.getEntries().size());
+        Assert.assertTrue(logger.containsLevel(LogLevel.ERROR));
+        Assert.assertTrue(logger.containsLevel(LogLevel.INFO));
     }
 
     /**

@@ -15,4 +15,9 @@ public interface ConfigurationService {
      * Сохранение конфигурационных параметров (табл. CONFIGURATION)
      */
 	void saveAllConfig(TAUserInfo userInfo, ConfigurationParamModel model, Logger logger);
+
+    /**
+     * Проверка доступности путей в указанных конфигурационных параметрах (табл. CONFIGURATION)
+     */
+    void checkReadWriteAccess(TAUserInfo userInfo, ConfigurationParamModel model, Logger logger);
 }

@@ -21,6 +21,7 @@ public class SaveConfigurationHandler extends
         AbstractActionHandler<SaveConfigurationAction, SaveConfigurationResult> {
 
     private final static String UNIQUE_DEPARTMENT_ERROR = "Параметры для ТБ «%s» уже заданы!";
+    private final static String NOT_SET_ERROR = "Не задано значение поля «%s»!";
 
     @Autowired
     private SecurityService securityService;
@@ -49,9 +50,18 @@ public class SaveConfigurationHandler extends
                 Department department = departmentService.getDepartment(departmentId);
                 logger.error(UNIQUE_DEPARTMENT_ERROR, department.getName());
             }
-        } else {
+        }
+
+        if (!action.getNotSetFieldSet().isEmpty()) {
+            for (String fieldName : action.getNotSetFieldSet()) {
+                logger.error(NOT_SET_ERROR, fieldName);
+            }
+        }
+
+        if (!logger.containsLevel(LogLevel.ERROR)) {
             configurationService.saveAllConfig(securityService.currentUserInfo(), action.getModel(), logger);
         }
+
         if (logger.containsLevel(LogLevel.ERROR)) {
             throw new ServiceLoggerException("Ошибки при сохранении конфигурационных параметров.",
                     logEntryService.save(logger.getEntries()));
