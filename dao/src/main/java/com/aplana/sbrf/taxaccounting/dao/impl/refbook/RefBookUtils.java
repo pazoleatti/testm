@@ -6,7 +6,6 @@ import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.SimpleFilterTreeLis
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookValueMapper;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
-import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
@@ -384,7 +383,6 @@ public class RefBookUtils extends AbstractDao {
      * @param versionFrom дата актуальности новой версии
      * @param attributes атрибуты справочника
      * @param records новые значения полей элемента справочника
-     * @return ссылочные атрибуты в порядке?
      */
     public void isReferenceValuesCorrect(Logger logger, String tableName, @NotNull Date versionFrom, Date versionTo, @NotNull List<RefBookAttribute> attributes, List<RefBookRecord> records) {
         if (attributes.size() > 0) {
@@ -503,9 +501,9 @@ public class RefBookUtils extends AbstractDao {
                     }
                 }
 
-                if (a.getId() == 164L && !Arrays.asList(DepartmentType.values()).contains(DepartmentType.fromCode(value.getNumberValue().intValue()))){
+                /*if (a.getId() == 164L && !Arrays.asList(DepartmentType.values()).contains(DepartmentType.fromCode(value.getNumberValue().intValue()))){
                    errors.add("Атрибута справочника \"Тип подразделенеия\" должно принимать одно из значений: 1,2,3,4,5");
-                }
+                }*/
 
                 if (a.getAttributeType().equals(RefBookAttributeType.STRING) && value.getStringValue() != null && a.getMaxLength() != null && value.getStringValue().length() > a.getMaxLength()) {
                     errors.add("Атрибут \"" + a.getName() + "\" должен иметь длину до " + a.getMaxLength() + " символов");

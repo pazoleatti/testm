@@ -146,8 +146,8 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
     private static String UPDATE_DEPARTMENT = "update department t set %s where id = ?";
 
     @Override
-    @CacheEvict(value = CacheConstants.DEPARTMENT,key = "#uniqueId")
-    public void update(long uniqueId, Map<String, RefBookValue> records,  List<RefBookAttribute> attributes) {
+    @CacheEvict(value = CacheConstants.DEPARTMENT,key = "#uniqueId", beforeInvocation = true)
+    public void update(int uniqueId, Map<String, RefBookValue> records,  List<RefBookAttribute> attributes) {
         PreparedStatementData ps = new PreparedStatementData();
         ps.appendQuery(UPDATE_DEPARTMENT);
         StringBuilder sql = new StringBuilder();
