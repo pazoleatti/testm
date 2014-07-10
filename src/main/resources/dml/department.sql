@@ -1,7 +1,7 @@
 insert into DEPARTMENT (id, name, parent_id, type, shortname, dict_region_id, tb_index, sbrf_code)
 values (64, 'Северо-Западный банк', 1, 2, null, null, '55', '550000');
 insert into DEPARTMENT (id, name, parent_id, type, shortname, dict_region_id, tb_index, sbrf_code)
-values (1, 'Открытое акционерное общество «Сбербанк России»', null, 1, 'Банк', null, '01', 'sbrf_code_bank');
+values (1, 'Открытое акционерное общество "Сбербанк России"', null, 1, 'Банк', null, '01', 'sbrf_code_bank');
 insert into DEPARTMENT (id, name, parent_id, type, shortname, dict_region_id, tb_index, sbrf_code)
 values (4, 'Байкальский банк', 1, 2, null, null, '18', '180000');
 insert into DEPARTMENT (id, name, parent_id, type, shortname, dict_region_id, tb_index, sbrf_code)
@@ -246,7 +246,7 @@ values (127, 'Управление формирования сводной от�
 insert into DEPARTMENT (id, name, parent_id, type, shortname, dict_region_id, tb_index, sbrf_code)
 values (128, 'Управление контроля и отчётности', 113, 5, 'УКиО', '77', '99', null);
 insert into DEPARTMENT (id, name, parent_id, type, shortname, dict_region_id, tb_index, sbrf_code)
-values (129, 'Отдел отчётности – «Сектор формирования налоговой отчётности»', 128, 6, null, '77', '99', null);
+values (129, 'Отдел отчётности – "Сектор формирования налоговой отчётности"', 128, 6, null, '77', '99', null);
 insert into DEPARTMENT (id, name, parent_id, type, shortname, dict_region_id, tb_index, sbrf_code)
 values (130, 'Планово-экономический отдел ЦСКО "Южный порт"', 113, 5, 'ЦСКО "Южный порт"', '77', '99', '99009000');
 insert into DEPARTMENT (id, name, parent_id, type, shortname, dict_region_id, tb_index, sbrf_code)
