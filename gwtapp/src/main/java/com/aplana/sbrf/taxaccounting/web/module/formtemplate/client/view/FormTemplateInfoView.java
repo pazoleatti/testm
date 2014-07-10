@@ -33,9 +33,9 @@ public class FormTemplateInfoView extends ViewWithUiHandlers<FormTemplateInfoUiH
 	
 	@UiField
 	TextBox fullnameBox;
-	
+
 	@UiField
-	TextBox codeBox;
+	TextBox headerBox;
 
 	@Inject
 	public FormTemplateInfoView(Binder binder) {
@@ -43,14 +43,14 @@ public class FormTemplateInfoView extends ViewWithUiHandlers<FormTemplateInfoUiH
 	}
 
 	@Override
-	public void setViewData(Date version, Date versionEnd, boolean fixedRows, boolean monthlyForm, String name, String fullName, String code) {
+	public void setViewData(Date version, Date versionEnd, boolean fixedRows, boolean monthlyForm, String name, String fullName, String header) {
         versionDateBegin.setValue(version);
         versionDateEnd.setValue(versionEnd);
 		fixedRowsCheckBox.setValue(fixedRows);
 		monthlyCheckBox.setValue(monthlyForm);
 		nameBox.setValue(name);
 		fullnameBox.setValue(fullName);
-		codeBox.setValue(code);
+        headerBox.setValue(header);
 	}
 
 	@Override
@@ -60,7 +60,7 @@ public class FormTemplateInfoView extends ViewWithUiHandlers<FormTemplateInfoUiH
 		getUiHandlers().setMonthlyForm(monthlyCheckBox.getValue());
 		getUiHandlers().setName(nameBox.getValue());
 		getUiHandlers().setFullname(fullnameBox.getValue());
-		getUiHandlers().setCode(codeBox.getValue());
+		getUiHandlers().setHeader(headerBox.getValue());
 	}
 
 }

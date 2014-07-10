@@ -15,6 +15,8 @@ public interface ConfigurationDao {
      */
     ConfigurationParamModel getAll();
 
+    ConfigurationParamModel getByDepartment(Integer departmentId);
+
     /**
      * Сохраняет значения параметров в БД. Если параметр в БД отсутствует, то он создается.
      * Если в модели нет какого-либо параметра, но он есть в БД, то параметр удаляется из БД.

@@ -12,6 +12,7 @@ public class SaveConfigurationAction extends UnsecuredActionImpl<SaveConfigurati
     private ConfigurationParamModel model;
 
     private Set<Integer> dublicateDepartmentIdSet = new HashSet<Integer>();
+    private Set<String> notSetFieldSet = new HashSet<String>();
 
     @Override
     public String getName() {
@@ -28,5 +29,9 @@ public class SaveConfigurationAction extends UnsecuredActionImpl<SaveConfigurati
 
     public Set<Integer> getDublicateDepartmentIdSet() {
         return dublicateDepartmentIdSet;
+    }
+
+    public Set<String> getNotSetFieldSet() {
+        return notSetFieldSet;
     }
 }

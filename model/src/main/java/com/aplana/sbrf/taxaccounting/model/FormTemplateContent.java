@@ -17,7 +17,7 @@ public class FormTemplateContent {
 	@XmlElement
 	private String fullName;
 	@XmlElement
-	private String code;
+	private String header;
 	@XmlElement
 	private List<Column> columns;
 	@XmlElement
@@ -36,7 +36,7 @@ public class FormTemplateContent {
 		this.fixedRows = formTemplate.isFixedRows();
 		this.name = formTemplate.getName();
 		this.fullName = formTemplate.getFullName();
-		this.code = formTemplate.getCode();
+		this.header = formTemplate.getHeader();
 		this.columns = formTemplate.getColumns();
 		this.styles = formTemplate.getStyles();
 	}
@@ -46,7 +46,7 @@ public class FormTemplateContent {
 		formTemplate.setFixedRows(fixedRows);
 		formTemplate.setName(name);
 		formTemplate.setFullName(fullName);
-		formTemplate.setCode(code);
+		formTemplate.setHeader(header);
 		formTemplate.getStyles().clear();
 		formTemplate.getStyles().addAll(styles != null?styles:new ArrayList<FormStyle>());
 		formTemplate.getColumns().clear();

@@ -172,7 +172,7 @@ public class FormDataXlsxReportBuilderTestMock {
         reportPeriod.setName("1 квартал");
         reportPeriod.setTaxPeriod(taxPeriod);
         formTemplate.getStyles().addAll(formStyles);
-		formTemplate.setCode("Таблица 1\\2\\3 | Приложение 1 | Приложение 2");
+		formTemplate.setHeader("Таблица 1\\2\\3 | Приложение 1 | Приложение 2");
         formTemplate.getColumns().addAll(columns);
         formTemplate.setFullName("Печатная форма");
         formData.initFormTemplateParams(formTemplate);

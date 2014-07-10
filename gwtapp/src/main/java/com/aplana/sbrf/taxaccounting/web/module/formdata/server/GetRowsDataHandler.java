@@ -16,7 +16,8 @@ import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Set;
+import java.util.Collections;
+import java.util.Comparator;
 
 @Service
 public class GetRowsDataHandler extends
@@ -60,8 +61,15 @@ public class GetRowsDataHandler extends
 					action.getRange().getLimit());
 		}
 
-		result.setDataRows(dataRowService.getDataRows(userInfo,
-				action.getFormDataId(), dataRowRange, action.isReadOnly(), action.isManual()));
+        PagingResult<DataRow<Cell>> rows = dataRowService.getDataRows(userInfo,
+                action.getFormDataId(), dataRowRange, action.isReadOnly(), action.isManual());
+        Collections.sort(rows, new Comparator<DataRow<Cell>>() {
+            @Override
+            public int compare(DataRow<Cell> o1, DataRow<Cell> o2) {
+                return o1.getIndex().compareTo(o2.getIndex());
+            }
+        });
+		result.setDataRows(rows);
 
         Logger logger = new Logger();
         refBookHelper.dataRowsDereference(logger, result.getDataRows(),

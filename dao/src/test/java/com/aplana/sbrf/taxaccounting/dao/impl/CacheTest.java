@@ -118,7 +118,7 @@ public class CacheTest {
         formTemplate.setStatus(VersionedObjectStatus.NORMAL);
         formTemplate.setName("name_3");
         formTemplate.setFullName("fullname_3");
-        formTemplate.setCode("code_3");
+        formTemplate.setHeader("header_3");
         formTemplate.setScript("test_script");
         DataRow<Cell> rows = new DataRow<Cell>(FormDataUtils.createCells(formTemplate.getColumns(), formTemplate.getStyles()));
         formTemplate.getRows().add(rows);

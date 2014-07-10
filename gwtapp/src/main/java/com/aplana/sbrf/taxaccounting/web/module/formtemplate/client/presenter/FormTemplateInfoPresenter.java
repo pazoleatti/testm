@@ -33,7 +33,7 @@ public class FormTemplateInfoPresenter extends Presenter<FormTemplateInfoPresent
 	}
 
 	public interface MyView extends View, HasUiHandlers<FormTemplateInfoUiHandlers> {
-		void setViewData(Date versionBegin, Date versionEnd, boolean fixedRows, boolean monthlyForm, String name, String fullName, String code);
+		void setViewData(Date versionBegin, Date versionEnd, boolean fixedRows, boolean monthlyForm, String name, String fullName, String header);
 		void onFlush();
 	}
 
@@ -58,7 +58,7 @@ public class FormTemplateInfoPresenter extends Presenter<FormTemplateInfoPresent
         formTemplateExt = event.getFormTemplateExt();
         formTemplate = formTemplateExt.getFormTemplate();
 		getView().setViewData(formTemplate.getVersion(), formTemplateExt.getActualEndVersionDate(), formTemplate.isFixedRows(),
-                formTemplate.isMonthly(), formTemplate.getName(), formTemplate.getFullName(), formTemplate.getCode());
+                formTemplate.isMonthly(), formTemplate.getName(), formTemplate.getFullName(), formTemplate.getHeader());
 	}
 
 	@Override
@@ -94,7 +94,7 @@ public class FormTemplateInfoPresenter extends Presenter<FormTemplateInfoPresent
 	}
 
 	@Override
-	public void setCode(String code) {
-		formTemplate.setCode(code);
+	public void setHeader(String header) {
+		formTemplate.setHeader(header);
 	}
 }

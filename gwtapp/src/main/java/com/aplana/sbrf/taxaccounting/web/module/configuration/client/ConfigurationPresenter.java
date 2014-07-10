@@ -6,12 +6,10 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.TaManualRevealCallback;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
-import com.aplana.sbrf.taxaccounting.web.module.configuration.shared.GetConfigurationAction;
-import com.aplana.sbrf.taxaccounting.web.module.configuration.shared.GetConfigurationResult;
-import com.aplana.sbrf.taxaccounting.web.module.configuration.shared.SaveConfigurationAction;
-import com.aplana.sbrf.taxaccounting.web.module.configuration.shared.SaveConfigurationResult;
+import com.aplana.sbrf.taxaccounting.web.module.configuration.shared.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -29,12 +27,13 @@ import java.util.*;
 
 import static java.util.Arrays.asList;
 
-public class ConfigurationPresenter	extends	Presenter<ConfigurationPresenter.MyView, ConfigurationPresenter.MyProxy> implements ConfigurationUiHandlers{
-	
-	public static final String TOKEN = "!configuration";
+public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyView, ConfigurationPresenter.MyProxy>
+        implements ConfigurationUiHandlers {
 
-	@ProxyStandard
-	@NameToken(TOKEN)
+    public static final String TOKEN = "!configuration";
+
+    @ProxyStandard
+    @NameToken(TOKEN)
 	public interface MyProxy extends ProxyPlace<ConfigurationPresenter> {
 	}
 
@@ -74,7 +73,8 @@ public class ConfigurationPresenter	extends	Presenter<ConfigurationPresenter.MyV
                         new AbstractCallback<GetConfigurationResult>() {
 							@Override
 							public void onSuccess(GetConfigurationResult result) {
-								getView().setFormConfigData(getFormRowsData(result.getModel(), result.getDereferenceDepartmentNameMap()));
+								getView().setFormConfigData(getFormRowsData(result.getModel(),
+                                        result.getDereferenceDepartmentNameMap()));
                                 getView().setCommonConfigData(getCommonRowsData(result.getModel()));
 							}
 
@@ -121,7 +121,8 @@ public class ConfigurationPresenter	extends	Presenter<ConfigurationPresenter.MyV
         List<DataRow<Cell>> rowsData = new LinkedList<DataRow<Cell>>();
 
         Map<Integer, Map<ConfigurationParam, String>> rowMap = new HashMap<Integer, Map<ConfigurationParam, String>>();
-        for (ConfigurationParam key : asList(ConfigurationParam.FORM_UPLOAD_DIRECTORY, ConfigurationParam.FORM_ARCHIVE_DIRECTORY, ConfigurationParam.FORM_ERROR_DIRECTORY)) {
+        for (ConfigurationParam key : asList(ConfigurationParam.FORM_UPLOAD_DIRECTORY,
+                ConfigurationParam.FORM_ARCHIVE_DIRECTORY, ConfigurationParam.FORM_ERROR_DIRECTORY)) {
             Map<Integer, List<String>> map = model.get(key);
             if (map != null) {
                 for (int departmentId : map.keySet()) {
@@ -142,11 +143,16 @@ public class ConfigurationPresenter	extends	Presenter<ConfigurationPresenter.MyV
             DataRow<Cell> dataRow = createFormDataRow();
             rowsData.add(dataRow);
             // Значения
-            dataRow.getCell(getView().getDepartmentColumn().getAlias()).setNumericValue(BigDecimal.valueOf(entry.getKey()));
-            dataRow.getCell(getView().getDepartmentColumn().getAlias()).setRefBookDereference(departmentMap.get(entry.getKey()));
-            dataRow.getCell(getView().getUploadPathColumn().getAlias()).setStringValue(entry.getValue().get(ConfigurationParam.FORM_UPLOAD_DIRECTORY));
-            dataRow.getCell(getView().getArchivePathColumn().getAlias()).setStringValue(entry.getValue().get(ConfigurationParam.FORM_ARCHIVE_DIRECTORY));
-            dataRow.getCell(getView().getErrorPathColumn().getAlias()).setStringValue(entry.getValue().get(ConfigurationParam.FORM_ERROR_DIRECTORY));
+            dataRow.getCell(getView().getDepartmentColumn().getAlias())
+                    .setNumericValue(BigDecimal.valueOf(entry.getKey()));
+            dataRow.getCell(getView().getDepartmentColumn().getAlias())
+                    .setRefBookDereference(departmentMap.get(entry.getKey()));
+            dataRow.getCell(getView().getUploadPathColumn().getAlias())
+                    .setStringValue(entry.getValue().get(ConfigurationParam.FORM_UPLOAD_DIRECTORY));
+            dataRow.getCell(getView().getArchivePathColumn().getAlias())
+                    .setStringValue(entry.getValue().get(ConfigurationParam.FORM_ARCHIVE_DIRECTORY));
+            dataRow.getCell(getView().getErrorPathColumn().getAlias())
+                    .setStringValue(entry.getValue().get(ConfigurationParam.FORM_ERROR_DIRECTORY));
         }
         return rowsData;
     }
@@ -170,16 +176,11 @@ public class ConfigurationPresenter	extends	Presenter<ConfigurationPresenter.MyV
         return str;
     }
 
-	@Override
-	public void onSave() {
-        LogCleanEvent.fire(this);
-        ConfigurationParamModel model = new ConfigurationParamModel();
-        SaveConfigurationAction action = new SaveConfigurationAction();
-        action.setModel(model);
-        // Преобразование данных таблиц в ConfigurationParamModel
-        List<DataRow<Cell>> commonRowsData = getView().getCommonRowsData();
-        List<DataRow<Cell>> formRowsData = getView().getFormRowsData();
-
+    /**
+     * Заполнение модели конфигурационных параметров
+     */
+    private void fillModel(ConfigurationParamModel model, List<DataRow<Cell>> commonRowsData,
+                                    List<DataRow<Cell>> formRowsData, Set<Integer> dublicateDepartmentIdSet, Set<String> notSetFieldSet) {
         // Общие параметры
         Map<ConfigurationParam, List<String>> commonMap = new HashMap<ConfigurationParam, List<String>>();
 
@@ -193,6 +194,14 @@ public class ConfigurationPresenter	extends	Presenter<ConfigurationPresenter.MyV
             String value = cleanString(dataRow.getCell(getView().getValueColumn().getAlias()).getStringValue());
             if (param == null || value == null) {
                 // Не полностью заполненные параметры не сохраняем
+                if (notSetFieldSet != null) {
+                    if (param == null) {
+                        notSetFieldSet.add("Параметр");
+                    }
+                    if (value == null) {
+                        notSetFieldSet.add("Значение параметра");
+                    }
+                }
                 continue;
             }
             if (!commonMap.containsKey(param)) {
@@ -215,6 +224,13 @@ public class ConfigurationPresenter	extends	Presenter<ConfigurationPresenter.MyV
             String errorPath = cleanString(dataRow.getCell(getView().getErrorPathColumn().getAlias()).getStringValue());
 
             if (departmentId == null || (uploadPath == null && archivePath == null && errorPath == null)) {
+                if (departmentId == null) {
+                    notSetFieldSet.add("Подразделение ТБ");
+                } else {
+                    notSetFieldSet.add(ConfigurationParam.FORM_UPLOAD_DIRECTORY.getCaption());
+                    notSetFieldSet.add(ConfigurationParam.FORM_ARCHIVE_DIRECTORY.getCaption());
+                    notSetFieldSet.add(ConfigurationParam.FORM_ERROR_DIRECTORY.getCaption());
+                }
                 continue;
             }
             if (uploadPath != null) {
@@ -228,9 +244,23 @@ public class ConfigurationPresenter	extends	Presenter<ConfigurationPresenter.MyV
             }
             // Проверка дублей
             if (!departmentSet.add(departmentId.intValue())) {
-                action.getDublicateDepartmentIdSet().add(departmentId.intValue());
+                if (dublicateDepartmentIdSet != null)
+                    dublicateDepartmentIdSet.add(departmentId.intValue());
             }
         }
+    }
+
+	@Override
+	public void onSave() {
+        LogCleanEvent.fire(this);
+        ConfigurationParamModel model = new ConfigurationParamModel();
+        SaveConfigurationAction action = new SaveConfigurationAction();
+        action.setModel(model);
+        // Преобразование данных таблиц в ConfigurationParamModel
+        List<DataRow<Cell>> commonRowsData = getView().getCommonRowsData();
+        List<DataRow<Cell>> formRowsData = getView().getFormRowsData();
+
+        fillModel(model, commonRowsData, formRowsData, action.getDublicateDepartmentIdSet(), action.getNotSetFieldSet());
 
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<SaveConfigurationResult>() {
             @Override
@@ -301,5 +331,31 @@ public class ConfigurationPresenter	extends	Presenter<ConfigurationPresenter.MyV
         List<DataRow<Cell>> data = getView().getCommonRowsData();
         data.add(createCommonDataRow());
         getView().setCommonConfigData(data);
+    }
+
+    @Override
+    public void onCheckReadWriteAccess(DataRow<Cell> selRow, boolean common) {
+        LogCleanEvent.fire(this);
+        ConfigurationParamModel model = new ConfigurationParamModel();
+        CheckReadWriteAccessAction action = new CheckReadWriteAccessAction();
+        action.setModel(model);
+        // Преобразование данных таблиц в ConfigurationParamModel
+        List<DataRow<Cell>> commonRowsData = new ArrayList<DataRow<Cell>>();
+        List<DataRow<Cell>> formRowsData = new ArrayList<DataRow<Cell>>();
+        if (common) {
+            commonRowsData.add(selRow);
+        } else {
+            formRowsData.add(selRow);
+        }
+
+        fillModel(model, commonRowsData, formRowsData, null, null);
+
+        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<CheckReadWriteAccessResult>() {
+            @Override
+            public void onSuccess(CheckReadWriteAccessResult result) {
+                LogAddEvent.fire(ConfigurationPresenter.this, result.getUuid());
+                placeManager.revealCurrentPlace();
+            }
+        }, this));
     }
 }

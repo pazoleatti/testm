@@ -64,8 +64,8 @@
             </g:HorizontalPanel>
 
             <g:HorizontalPanel verticalAlignment="middle" height="26px">
-                <g:Label text="Код формы (идентификатор формы, номер формы):" width="250px" addStyleNames="{style.lineHeightDown}"/>
-                <g:TextBox width="500px" ui:field="codeBox" addStyleNames="{style.fix}"/>
+                <g:Label text="Верхний колонтитул:" width="250px" addStyleNames="{style.lineHeightDown}"/>
+                <g:TextBox width="500px" ui:field="headerBox" addStyleNames="{style.fix}"/>
             </g:HorizontalPanel>
 
         </g:FlowPanel>

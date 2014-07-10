@@ -22,10 +22,10 @@ insert into declaration_template(id, edition, name, version, jrxml, declaration_
 insert into declaration_template(id, edition, name, version, jrxml, declaration_type_id, status)
   values (3, 3, 'Декларация 3', date '2013-01-01', null, 2, 1);
 
-insert into form_template (id, type_id, data_rows, version, edition, fixed_rows, name, fullname, code, status)
-  values (1, 1, null, to_date('01.01.2013 12.01.01', 'DD.MM.YY HH.MI.SS'), 1, 1, 'name_1', 'fullname_1', 'code_1', 0);
-insert into form_template (id, type_id, data_rows, version, edition, fixed_rows, name, fullname, code, status)
-  values (2, 2, null, date '2013-01-01', 1, 0, 'name_2', 'fullname_2', 'code_2', 0);
+insert into form_template (id, type_id, data_rows, version, edition, fixed_rows, name, fullname, header, status)
+  values (1, 1, null, to_date('01.01.2013 12.01.01', 'DD.MM.YY HH.MI.SS'), 1, 1, 'name_1', 'fullname_1', 'header_1', 0);
+insert into form_template (id, type_id, data_rows, version, edition, fixed_rows, name, fullname, header, status)
+  values (2, 2, null, date '2013-01-01', 1, 0, 'name_2', 'fullname_2', 'header_2', 0);
 
 insert into template_changes(id, event, date_event, author, form_template_id, declaration_template_id)
   values (1, 1, date '2013-01-01', 1, 1, null);

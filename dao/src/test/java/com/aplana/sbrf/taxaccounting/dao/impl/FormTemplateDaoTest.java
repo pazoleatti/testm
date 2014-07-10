@@ -49,7 +49,7 @@ public class FormTemplateDaoTest {
 		Assert.assertFalse(ft1.isMonthly());
 		Assert.assertEquals("name_1", ft1.getName());
 		Assert.assertEquals("fullname_1", ft1.getFullName());
-		Assert.assertEquals("code_1", ft1.getCode());
+		Assert.assertEquals("header_1", ft1.getHeader());
 
 		FormTemplate ft2 = formTemplateDao.get(2);
 		Assert.assertEquals(2, ft2.getId().intValue());
@@ -58,7 +58,7 @@ public class FormTemplateDaoTest {
 		Assert.assertTrue(ft2.isMonthly());
 		Assert.assertEquals("name_2", ft2.getName());
 		Assert.assertEquals("fullname_2", ft2.getFullName());
-		Assert.assertEquals("code_2", ft2.getCode());
+		Assert.assertEquals("header_2", ft2.getHeader());
     }
 
 	@Test(expected=DaoException.class)
@@ -74,7 +74,7 @@ public class FormTemplateDaoTest {
 		formTemplate.setVersion(new Date());
 		formTemplate.setName("name_3");
 		formTemplate.setFullName("fullname_3");
-		formTemplate.setCode("code_3");
+		formTemplate.setHeader("header_3");
 		formTemplate.setScript("test_script");
 		formTemplateDao.save(formTemplate);
 		formTemplate = formTemplateDao.get(1);
@@ -83,7 +83,7 @@ public class FormTemplateDaoTest {
 		/*Assert.assertEquals("321", formTemplate.getVersion());*/
 		Assert.assertEquals("name_3", formTemplate.getName());
 		Assert.assertEquals("fullname_3", formTemplate.getFullName());
-		Assert.assertEquals("code_3", formTemplate.getCode());
+		Assert.assertEquals("header_3", formTemplate.getHeader());
 		Assert.assertEquals(0, formTemplate.getRows().size());
 		Assert.assertEquals(0, formTemplate.getHeaders().size());
 	}
@@ -104,7 +104,7 @@ public class FormTemplateDaoTest {
 		formTemplate.setStatus(VersionedObjectStatus.NORMAL);
 		formTemplate.setName("name_3");
 		formTemplate.setFullName("fullname_3");
-		formTemplate.setCode("code_3");
+		formTemplate.setHeader("header_3");
 		formTemplate.setScript("test_script");
 		formTemplateDao.save(formTemplate);
 		formTemplate = formTemplateDao.get(1);
@@ -112,7 +112,7 @@ public class FormTemplateDaoTest {
 		/*Assert.assertEquals("321", formTemplate.getVersion());*/
 		Assert.assertEquals("name_3", formTemplate.getName());
 		Assert.assertEquals("fullname_3", formTemplate.getFullName());
-		Assert.assertEquals("code_3", formTemplate.getCode());
+		Assert.assertEquals("header_3", formTemplate.getHeader());
 		/*Assert.assertEquals("test_script", formTemplate.getScript());*/
 		/*Assert.assertEquals(1, formTemplate.getRows().size());*/
 		/*Assert.assertEquals(2, formTemplate.getHeaders().size());*/
@@ -125,7 +125,7 @@ public class FormTemplateDaoTest {
         formTemplate.setFixedRows(false);
         formTemplate.setName("name_3");
         formTemplate.setFullName("fullname_3");
-        formTemplate.setCode("code_3");
+        formTemplate.setHeader("header_3");
         formTemplate.setScript("test_script");
         formTemplateDao.save(formTemplate);
         String scriptText = formTemplateDao.getFormTemplateScript(1);
@@ -139,7 +139,7 @@ public class FormTemplateDaoTest {
         formTemplate.setStatus(VersionedObjectStatus.NORMAL);
         formTemplate.setName("name_3");
         formTemplate.setFullName("fullname_3");
-        formTemplate.setCode("code_3");
+        formTemplate.setHeader("header_3");
         formTemplate.setScript("test_script");
         DataRow<Cell> rows = new DataRow<Cell>(FormDataUtils.createCells(formTemplate.getColumns(), formTemplate.getStyles()));
         formTemplate.getRows().add(rows);
@@ -154,7 +154,7 @@ public class FormTemplateDaoTest {
         formTemplate.setStatus(VersionedObjectStatus.NORMAL);
         formTemplate.setName("name_3");
         formTemplate.setFullName("fullname_3");
-        formTemplate.setCode("code_3");
+        formTemplate.setHeader("header_3");
         formTemplate.setScript("test_script");
 
         DataRow<HeaderCell> headers1 = new DataRow<HeaderCell>(FormDataUtils.createHeaderCells(formTemplate.getColumns()));
@@ -229,7 +229,7 @@ public class FormTemplateDaoTest {
         formTemplate.setStatus(VersionedObjectStatus.NORMAL);
         formTemplate.setName("name_4");
         formTemplate.setFullName("fullname_4");
-        formTemplate.setCode("code_4");
+        formTemplate.setHeader("header_4");
         formTemplate.setScript("test_script");
         formTemplate.setStatus(VersionedObjectStatus.FAKE);
         FormType type = new FormType();
@@ -240,7 +240,7 @@ public class FormTemplateDaoTest {
         formTemplate = formTemplateDao.get(id);
         Assert.assertEquals("name_4", formTemplate.getName());
         Assert.assertEquals("fullname_4", formTemplate.getFullName());
-        Assert.assertEquals("code_4", formTemplate.getCode());
+        Assert.assertEquals("header_4", formTemplate.getHeader());
     }
 
     @Test

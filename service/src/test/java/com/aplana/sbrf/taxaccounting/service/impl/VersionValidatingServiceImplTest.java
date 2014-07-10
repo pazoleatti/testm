@@ -54,7 +54,7 @@ public class VersionValidatingServiceImplTest {
         calendar.set(2012, Calendar.JANUARY, 1);
         FormTemplate formTemplate1 = new FormTemplate();
         formTemplate1.setId(FORM_TEMPLATE_ID_F);
-        formTemplate1.setCode("code");
+        formTemplate1.setHeader("header");
         formTemplate1.setVersion(calendar.getTime());
         calendar.clear();
         formTemplate1.setStatus(VersionedObjectStatus.NORMAL);
@@ -66,7 +66,7 @@ public class VersionValidatingServiceImplTest {
         calendar.set(2013, Calendar.JANUARY, 1);
         FormTemplate formTemplate4 = new FormTemplate();
         formTemplate4.setId(FORM_TEMPLATE_ID_FORTH);
-        formTemplate4.setCode("code");
+        formTemplate4.setHeader("header");
         formTemplate4.setVersion(calendar.getTime());
         calendar.clear();
         formTemplate4.setStatus(VersionedObjectStatus.NORMAL);
@@ -76,7 +76,7 @@ public class VersionValidatingServiceImplTest {
         calendar.set(2013, Calendar.DECEMBER, 31);
         FormTemplate formTemplate2 = new FormTemplate();
         formTemplate2.setId(FORM_TEMPLATE_ID_S);
-        formTemplate2.setCode("code");
+        formTemplate2.setHeader("header");
         formTemplate2.setVersion(calendar.getTime());
         calendar.clear();
         formTemplate2.setStatus(VersionedObjectStatus.FAKE);
@@ -85,7 +85,7 @@ public class VersionValidatingServiceImplTest {
         calendar.set(2014, Calendar.JANUARY, 1);
         FormTemplate formTemplate3 = new FormTemplate();
         formTemplate3.setId(FORM_TEMPLATE_ID_TH);
-        formTemplate3.setCode("code");
+        formTemplate3.setHeader("header");
         formTemplate3.setVersion(calendar.getTime());
         calendar.clear();
         formTemplate3.setStatus(VersionedObjectStatus.DRAFT);

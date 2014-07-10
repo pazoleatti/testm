@@ -14,6 +14,7 @@ public class FormType implements Serializable {
 	private String name;
 	private TaxType taxType;
     private VersionedObjectStatus status;
+    private String code;
 
     /**
      * Статус
@@ -70,4 +71,15 @@ public class FormType implements Serializable {
 	public void setTaxType(TaxType taxType) {
 		this.taxType = taxType;
 	}
+
+    /**
+     * @return идентификатор формы и номер формы
+     */
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
 }

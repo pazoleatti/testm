@@ -21,7 +21,7 @@ public class FormTemplate extends IdentityObject<Integer> {
     
     private String name;
     private String fullName;
-    private String code;
+    private String header;
     private boolean monthly;
 
     private VersionedObjectStatus status;
@@ -71,14 +71,14 @@ public class FormTemplate extends IdentityObject<Integer> {
 	/**
 	 * @return идентификатор формы и номер формы
 	 */
-	public String getCode() {
-		return code;
+	public String getHeader() {
+		return header;
 	}
 
-	public void setCode(String code) {
-		this.code = code;
+	public void setHeader(String header) {
+		this.header = header;
 	}
-	
+
 	public String getScript() {
 		return script;
 	}
