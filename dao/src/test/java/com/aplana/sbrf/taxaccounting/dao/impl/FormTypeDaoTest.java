@@ -59,6 +59,7 @@ public class FormTypeDaoTest {
     public void testSave(){
         FormType type = formTypeDao.get(1);
         type.setStatus(VersionedObjectStatus.DRAFT);
+		type.setCode("code_5");
         Assert.assertEquals(10000, formTypeDao.save(type));
     }
 
