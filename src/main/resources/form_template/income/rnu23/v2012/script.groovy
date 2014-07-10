@@ -704,8 +704,62 @@ void addTransportData(def xml) {
     totalSumColumns.each { alias ->
         totalRow.getCell(alias).setValue(null, null)
     }
-    rows.add(totalRow)
     calcTotalSum(rows, totalRow, totalSumColumns)
+    rows.add(totalRow)
+
+    // сравнение итогов
+    if (xml.rowTotal.size() == 1) {
+        rnuIndexRow = rnuIndexRow + 2
+        def row = xml.rowTotal[0]
+        def total = formData.createDataRow()
+
+        // графа 13
+        def rnuIndexCol = 13
+        total.incomeCurrency = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
+        // графа 14
+        rnuIndexCol = 14
+        total.incomeRuble = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
+        // графа 15
+        rnuIndexCol = 15
+        total.accountingCurrency = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
+        // графа 16
+        rnuIndexCol = 16
+        total.accountingRuble = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
+        // графа 17
+        rnuIndexCol = 17
+        total.preChargeCurrency = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
+        // графа 18
+        rnuIndexCol = 18
+        total.preChargeRuble = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
+        // графа 19
+        rnuIndexCol = 19
+        total.taxPeriodCurrency = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
+        // графа 20
+        rnuIndexCol = 20
+        total.taxPeriodRuble = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
+        def colIndexMap = ['incomeCurrency' : 13, 'incomeRuble' : 14, 'accountingCurrency' : 15,
+                'accountingRuble' : 16, 'preChargeCurrency' : 17, 'preChargeRuble' : 18,
+                'taxPeriodCurrency' : 19, 'taxPeriodRuble' : 20]
+        for (def alias : totalSumColumns) {
+            def v1 = total.getCell(alias).value
+            def v2 = totalRow.getCell(alias).value
+            if (v1 == null && v2 == null) {
+                continue
+            }
+            if (v1 == null || v1 != null && v1 != v2) {
+                logger.error(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
+                break
+            }
+        }
+    }
 
     dataRowHelper.save(rows)
 }
