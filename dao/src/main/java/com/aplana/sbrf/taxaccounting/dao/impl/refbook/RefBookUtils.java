@@ -515,6 +515,9 @@ public class RefBookUtils extends AbstractDao {
 
                 if (a.getAttributeType().equals(RefBookAttributeType.NUMBER)) {
                     BigDecimal number = (BigDecimal)(values.get(a.getAlias()).getNumberValue());
+                    if (number == null) {
+                        continue;
+                    }
                     String valStr = number.toPlainString();
                     if (valStr.contains(".")) {
                         number = new BigDecimal(valStr.replaceAll("()(0+)(e|$)", "$1$3"));

@@ -54,6 +54,9 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
+        break
 }
 
 //// Кэши и константы
@@ -80,10 +83,6 @@ def totalColumns = ['income', 'outcome']
 @Field
 def autoFillColumns = ['number', 'code', 'name']
 
-// Текущая дата
-@Field
-def currentDate = new Date()
-
 // Дата окончания отчетного периода
 @Field
 def endDate = null
@@ -97,26 +96,9 @@ def getRecordIdImport(def Long refBookId, def String alias, def String value, de
             getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
 }
 
-// Поиск записи в справочнике по значению (для расчетов)
-def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
-                def Date date, boolean required = true) {
-    return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value, date, rowIndex,
-            cellName, logger, required)
-}
-
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
-}
-
-// Поиск записи в справочнике по значению (для импорта)
-def getRecordImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                    def boolean required) {
-    if (value == null || value == '') {
-        return null
-    }
-    return formDataService.getRefBookRecordImport(refBookId, recordCache, providerCache, refBookCache, alias, value,
-            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
 }
 
 //// Кастомные методы
@@ -132,45 +114,53 @@ void calc() {
         deleteAllAliased(dataRows)
 
         // сортируем по кодам
-        dataRowHelper.save(dataRows.sort { getKnu(it.balance) })
+        dataRows.sort { getKnu(it.balance) }
 
-        // посчитать "итого по коду"
-        def totalRows = [:]
-        def tmp = null
-        def sum = 0, sum2 = 0
-        dataRows.eachWithIndex { row, i ->
-            if (tmp == null) {
-                tmp = row.balance
-            }
-            // если код расходы поменялся то создать новую строку "итого по коду"
-            if (tmp != row.balance) {
-                totalRows.put(i, getNewRow(getKnu(tmp), sum, sum2))
-                sum = 0
-                sum2 = 0
-            }
-            // если строка последняя то сделать для ее кода расхода новую строку "итого по коду"
-            if (i == dataRows.size() - 1) {
-                sum += (row.income ?: 0)
-                sum2 += (row.outcome ?: 0)
-                def totalRowCode = getNewRow(getKnu(row.balance), sum, sum2)
-                totalRows.put(i + 1, totalRowCode)
-                sum = 0
-                sum2 = 0
-            }
-            sum += (row.income ?: 0)
-            sum2 += (row.outcome ?: 0)
-            tmp = row.balance
+        dataRows.eachWithIndex { row, index ->
+            row.setIndex(index + 1)
         }
 
-        // добавить "итого по коду" в таблицу
-        def i = 1
-        totalRows.each { index, row ->
-            dataRowHelper.insert(row, index + i++)
-        }
+        calcSubTotal(dataRows)
     }
 
-    dataRowHelper.insert(calcTotalRow(dataRows), dataRows.size() + 1)
+    dataRows.add(calcTotalRow(dataRows))
     dataRowHelper.save(dataRows)
+}
+
+void calcSubTotal(def dataRows) {
+    // посчитать "итого по коду"
+    def totalRows = [:]
+    def code = null
+    def sum = 0, sum2 = 0
+    dataRows.eachWithIndex { row, i ->
+        if (code == null) {
+            code = getKnu(row.balance)
+        }
+        // если код расходы поменялся то создать новую строку "итого по коду"
+        if (code != getKnu(row.balance)) {
+            totalRows.put(i, getNewRow(code, sum, sum2))
+            sum = 0
+            sum2 = 0
+            code = getKnu(row.balance)
+        }
+        // если строка последняя то сделать для ее кода расхода новую строку "итого по коду"
+        if (i == dataRows.size() - 1) {
+            sum += (row.income ?: 0)
+            sum2 += (row.outcome ?: 0)
+            def totalRowCode = getNewRow(code, sum, sum2)
+            totalRows.put(i + 1, totalRowCode)
+            sum = 0
+            sum2 = 0
+        }
+        sum += (row.income ?: 0)
+        sum2 += (row.outcome ?: 0)
+    }
+
+    // добавить "итого по коду" в таблицу
+    def i = 0
+    totalRows.each { index, row ->
+        dataRows.add(index + i++, row)
+    }
 }
 
 def calcTotalRow(def dataRows) {
@@ -376,6 +366,96 @@ void addData(def xml, int headRowCount) {
         // графа 6
         newRow.outcome = parseNumber(row.cell[6].text(), xlsIndexRow, 6 + colOffset, logger, true)
         rows.add(newRow)
+    }
+    dataRowHelper.save(rows)
+}
+
+void importTransportData() {
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    addTransportData(xml)
+}
+
+void addTransportData(def xml) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def int rnuIndexRow = 2
+    def int colOffset = 1
+    def rows = []
+    def int rowIndex = 1  // Строки НФ, от 1
+
+    for (def row : xml.row) {
+        rnuIndexRow++
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+        def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
+        editableColumns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
+        autoFillColumns.each {
+            newRow.getCell(it).setStyleAlias('Автозаполняемая')
+        }
+
+        // графа 3 - поиск записи идет по графе 2
+        newRow.balance = getRecordIdImport(28, 'CODE', row.cell[2].text(), rnuIndexRow, 2 + colOffset)
+        def map = getRefBookValue(28, newRow.code)
+
+        // графа 3 проверка
+        if (map != null) {
+            def text = row.cell[3].text()
+            if ((text != null && !text.isEmpty() && !text.equals(map.NUMBER?.stringValue)) || ((text == null || text.isEmpty()) && map.NUMBER?.stringValue != null)) {
+                logger.error("Проверка файла: Строка ${rnuIndexRow}, столбец ${3 + colOffset} содержит значение, " +
+                        "отсутствующее в справочнике «" + refBookFactory.get(28).getName() + "»!")
+            }
+        }
+
+        // графа 4 проверка
+        if (map != null) {
+            def text = row.cell[4].text()
+            if ((text != null && !text.isEmpty() && !text.equals(map.TYPE_INCOME?.stringValue)) || ((text == null || text.isEmpty()) && map.NUMBER?.stringValue != null)) {
+                logger.error("Проверка файла: Строка ${rnuIndexRow}, столбец ${3 + colOffset} содержит значение, " +
+                        "отсутствующее в справочнике «" + refBookFactory.get(28).getName() + "»!")
+            }
+        }
+
+        // графа 5
+        newRow.income = parseNumber(row.cell[5].text(), rnuIndexRow, 5 + colOffset, logger, true)
+
+        // графа 6
+        newRow.outcome = parseNumber(row.cell[6].text(), rnuIndexRow, 6 + colOffset, logger, true)
+        rows.add(newRow)
+    }
+    calcSubTotal(rows)
+    def totalRow = calcTotalRow(rows)
+    rows.add(totalRow)
+
+    if (xml.rowTotal.size() == 1) {
+        rnuIndexRow += 2
+
+        def row = xml.rowTotal[0]
+
+        def total = formData.createDataRow()
+
+        // графа 5
+        total.income = parseNumber(row.cell[5].text(), rnuIndexRow, 5 + colOffset, logger, true)
+
+        // графа 6
+        total.outcome = parseNumber(row.cell[6].text(), rnuIndexRow, 6 + colOffset, logger, true)
+
+        def colIndexMap = ['income' : 5, 'outcome' : 6]
+        for (def alias : totalColumns) {
+            def v1 = total[alias]
+            def v2 = totalRow[alias]
+            if (v1 == null && v2 == null) {
+                continue
+            }
+            if (v1 == null || v1 != null && v1 != v2) {
+                logger.error(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
+                break
+            }
+        }
     }
     dataRowHelper.save(rows)
 }

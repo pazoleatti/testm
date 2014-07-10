@@ -115,7 +115,7 @@ public class TransportDataServiceImpl implements TransportDataService {
         // Конфигурационные параметры
         ConfigurationParamModel model = configurationDao.getAll();
 
-        List<String> uploadPathList = model.get(ConfigurationParam.UPLOAD_DIRECTORY, departmentId);
+        List<String> uploadPathList = model.get(ConfigurationParam.FORM_UPLOAD_DIRECTORY, departmentId);
 
         if (uploadPathList == null || uploadPathList.isEmpty()) {
             logger.error(NO_CATALOG_UPLOAD_ERROR);
@@ -339,7 +339,7 @@ public class TransportDataServiceImpl implements TransportDataService {
             ConfigurationParamModel model = configurationDao.getAll();
             List<String> errorPathList = null;
             if (model != null) {
-                errorPathList = model.get(ConfigurationParam.ERROR_DIRECTORY, DepartmentType.ROOT_BANK.getCode());
+                errorPathList = model.get(ConfigurationParam.FORM_ERROR_DIRECTORY, DepartmentType.ROOT_BANK.getCode());
             }
 
             // Проверка наличия каталога в параметрах

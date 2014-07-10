@@ -214,9 +214,13 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
     public List<ReportPeriod> getClosedPeriodsForFormTemplate(Integer formTemplateId) {
         try {
             return getJdbcTemplate().query(
-                    "SELECT * FROM form_data fd " +
-                            "LEFT JOIN report_period rp ON fd.report_period_id = rp.id " +
-                            "LEFT JOIN department_report_period drp on fd.department_id = drp.department_id and rp.id = drp.report_period_id " +
+                    "SELECT DISTINCT " +
+                            "rp.id, rp.name, rp.tax_period_id, rp.dict_tax_period_id, rp.start_date, rp.end_date, " +
+                            "rp.calendar_start_date " +
+                            "FROM report_period rp " +
+                            "LEFT JOIN form_data fd ON fd.report_period_id = rp.id " +
+                            "LEFT JOIN department_report_period drp ON fd.department_id = drp.department_id " +
+                            "AND rp.id = drp.report_period_id " +
                             "WHERE drp.is_active = 0 AND fd.form_template_id = ?",
                     new Object[]{formTemplateId},
                     new ReportPeriodMapper()
