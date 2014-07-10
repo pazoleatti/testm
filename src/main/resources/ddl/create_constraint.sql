@@ -53,6 +53,7 @@ alter table ref_book_attribute add constraint ref_book_attr_chk_is_unique check 
 alter table ref_book_attribute add constraint ref_book_attribute_chk_format check (format in (0,1,2,3,4,5,6));
 alter table ref_book_attribute add constraint ref_book_attr_chk_read_only check (read_only in (0, 1));
 alter table ref_book_attribute add constraint ref_book_attr_chk_max_length check ((type=1 and max_length between 1 and 2000) or (type=2 and max_length between 1 and 27) or (type in (3,4) and max_length is null));
+alter table REF_BOOK_ATTRIBUTE disable constraint REF_BOOK_ATTR_CHK_MAX_LENGTH;
 
 alter table ref_book add constraint ref_book_fk_region foreign key (region_attribute_id) references ref_book_attribute(id);
 
