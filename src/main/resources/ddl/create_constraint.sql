@@ -8,6 +8,7 @@ create unique index i_ref_book_oktmo_record_id on ref_book_oktmo(record_id, vers
 alter table form_type add constraint form_type_pk primary key (id);
 alter table form_type add constraint form_type_chk_taxtype check (tax_type in ('I', 'P', 'T', 'V', 'D'));
 alter table form_type add constraint form_type_check_status check (status in (-1, 0, 1, 2));
+alter table form_type add constraint form_type_uniq_code unique(code);
 
 alter table tax_period add constraint tax_period_pk primary key (id);
 alter table tax_period add constraint tax_period_chk_taxtype check (tax_type in ('I', 'P', 'T', 'V', 'D'));
