@@ -76,6 +76,9 @@
                                           addStyleNames="{style.mgnr}"/>
                     </g:cell>
                     <g:cell>
+                        <g:Button ui:field="checkButton" text="Проверить"/>
+                    </g:cell>
+                    <g:cell>
                         <g:Button ui:field="saveButton" text="Сохранить"/>
                     </g:cell>
                     <g:cell>

@@ -45,6 +45,7 @@ public class RefBookDepartment implements RefBookDataProvider {
     private static final String DEPARTMENT_TYPE_ATTRIBUTE = "TYPE";
     private static final String DEPARTMENT_NAME_ATTRIBUTE = "NAME";
     private static final String DEPARTMENT_PARENT_ATTRIBUTE = "PARENT_ID";
+    private static final String DEPARTMENT_ACTIVE_NAME = "IS_ACTIVE";
     private static final String WARN_MESSAGE_TARGET =
             "Внимание! Форма %s подразделения %s при сохранении будет являться приемником для формы %s подразделения %s, относящимся к разным территориальным банкам";
     private static final String WARN_MESSAGE_SOURCE =
@@ -392,7 +393,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         }*/
 
         //Сохранение
-        refBookDepartmentDao.update(uniqueRecordId, records, refBook.getAttributes());
+        refBookDepartmentDao.update(uniqueRecordId.intValue(), records, refBook.getAttributes());
 
         auditService.add(FormDataEvent.UPDATE_DEPARTMENT, logger.getTaUserInfo(), uniqueRecordId.intValue(),
                 null, null, null, null,
@@ -500,12 +501,19 @@ public class RefBookDepartment implements RefBookDataProvider {
         return refBookDepartmentDao.getAttributesValues(attributePairs);
     }
 
+    /**
+     * Проверка корректности
+     * @param recordId уникальный идентификатор записи
+     * @param attributes атрибуты справочника
+     * @param records значения справочника
+     */
     private void checkCorrectness(Logger logger, Long recordId, List<RefBookAttribute> attributes, List<RefBookRecord> records) {
         Department rootBank = departmentService.getBankDepartment();
-        DepartmentType type = records.get(0).getValues().get(DEPARTMENT_TYPE_ATTRIBUTE) != null ?
-                DepartmentType.fromCode(records.get(0).getValues().get(DEPARTMENT_TYPE_ATTRIBUTE).getReferenceValue().intValue()) :
+        Map<String, RefBookValue> values = records.get(0).getValues();
+        DepartmentType type = values.get(DEPARTMENT_TYPE_ATTRIBUTE) != null ?
+                DepartmentType.fromCode(values.get(DEPARTMENT_TYPE_ATTRIBUTE).getReferenceValue().intValue()) :
                 null;
-        Long parentDepartmentId = records.get(0).getValues().get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue();
+        Long parentDepartmentId = values.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue();
         if (parentDepartmentId != null &&
                 type == DepartmentType.ROOT_BANK){
             logger.error("Подразделение с типом \"Банк\" не может иметь родительское подразделение!");
@@ -544,6 +552,42 @@ public class RefBookDepartment implements RefBookDataProvider {
             }
             throw new ServiceLoggerException(ERROR_MESSAGE, logEntryService.save(logger.getEntries()));
         }
+
+
+        //Новое подразделение не имеет смысла проверять
+        if (recordId == null) {
+            //Если нет родительского то это подразделение Банк
+            if (parentDepartmentId == null)
+                return;
+            //Проверяем аттрибут "действующее подразделение" у родительского подразделения
+            Department parentDep = departmentService.getDepartment(parentDepartmentId.intValue());
+            if (!parentDep.isActive()){
+                logger.error("Подразделение не может быть действующим, если оно находится в составе недействующего подразделения!");
+            }
+        }else {
+            Department currDepartment = departmentService.getDepartment(recordId.intValue());
+            boolean isChangeActive = values.get(DEPARTMENT_ACTIVE_NAME).getNumberValue().intValue() != (currDepartment.isActive() ? 1 :0);
+            if (!isChangeActive)
+                return;
+            if(values.get(DEPARTMENT_ACTIVE_NAME).getNumberValue().intValue() == 0){
+                List<Department> childIds = departmentService.getAllChildren(recordId.intValue());
+                for (Department child : childIds){
+                    if (recordId != child.getId() && child.isActive()){
+                        logger.error("Подразделение не может быть недействующим и иметь в составе действующие подразделения!");
+                        return;
+                    }
+                }
+            }
+            //Если нет родительского то это подразделение Банк
+            if (parentDepartmentId == null)
+                return;
+            //Проверяем аттрибут "действующее подразделение" у родительского подразделения
+            Department parentDep = departmentService.getDepartment(parentDepartmentId.intValue());
+            if (!parentDep.isActive() && values.get(DEPARTMENT_ACTIVE_NAME).getNumberValue().intValue() == 1){
+                logger.error("Подразделение не может быть действующим, если оно находится в составе недействующего подразделения!");
+            }
+        }
+
     }
 
     //http://conf.aplana.com/pages/viewpage.action?pageId=11402881

@@ -109,7 +109,7 @@ public class RefBookDepartmentDaoTest {
     @Test
     public void testUpdate() {
         Map<String, RefBookValue> record = refBookDepartmentDao.getRecordData(2L);
-        refBookDepartmentDao.update(30l, record, refBookDao.getAttributes(30l));
+        refBookDepartmentDao.update(30, record, refBookDao.getAttributes(30l));
     }
 
     @Test
