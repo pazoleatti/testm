@@ -46,7 +46,14 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     private ScriptComponentContext scriptComponentContext;
 
     private static final String FIND_ERROR = "FormData не сохранена, id = null.";
-    private static final String REF_BOOK_NOT_FOUND_IMPORT_ERROR = "Проверка файла: Строка %d, столбец %d содержит значение, отсутствующее в справочнике «%s»!";
+
+    // Ссылочный, независимая графа: Не найдена версия справочника, соответствующая значению в файле
+    private static final String REF_BOOK_NOT_FOUND_IMPORT_ERROR = "Проверка файла: Строка %d, столбец %d: В справочнике «%s» в атрибуте «%s» не найдено значение «%s», актуальное на дату %s!";
+    // Ссылочный, зависимая графа: Значение в файле отличается от того, которое должно быть в зависимой графе
+    private static final String REF_BOOK_REFERENCE_NOT_FOUND_IMPORT_ERROR = "Проверка файла: Строка %d, столбец %d содержит значение «%s», отсутствующее в справочнике «%s»!";
+    // Ссылочный: Найдено несколько записей справочника, соответствующих значению в файле
+    private static final String REF_BOOK_TOO_MANY_FOUND_IMPORT_ERROR = "Проверка файла: Строка %d, столбец %d: В справочнике «%s» в атрибуте «%s» найдено более одного значения «%s», актуального на дату %s!";
+
     private static final String REF_BOOK_ROW_NOT_FOUND_ERROR = "Строка %d, графа «%s» содержит значение, отсутствующее в справочнике «%s»!";
     private static final String REF_BOOK_NOT_FOUND_ERROR = "В справочнике «%s» не найдено значение «%s», соответствующее атрибуту «%s»!";
     private static final String REF_BOOK_DEREFERENCE_ERROR = "Строка %d, графа «%s»: В справочнике «%s» не найден элемент с id = %d»!";
@@ -56,7 +63,6 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
             "Расчеты не могут быть выполнены.";
     private static final String REF_BOOK_TOO_MANY_FOUND_ERROR = "В справочнике «%s» содержится более одного раза значение «%s», соответствующее атрибуту «%s»!";
     private static final String REF_BOOK_ROW_TOO_MANY_FOUND_ERROR = "Строка %d, графа «%s» содержит значение, встречающееся более одного раза в справочнике «%s»!";
-    private static final String REF_BOOK_TOO_MANY_FOUND_IMPORT_ERROR = "Проверка файла: Строка %d, столбец %d содержит значение, встречающееся более одного раза в справочнике «%s»!";
 
     private static final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
@@ -400,7 +406,8 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
         }
 
         RefBook rb = refBookFactory.get(refBookId);
-        String msg = String.format(tooManyValue ? REF_BOOK_TOO_MANY_FOUND_IMPORT_ERROR : REF_BOOK_NOT_FOUND_IMPORT_ERROR, rowIndex, colIndex, rb.getName());
+        String msg = String.format(tooManyValue ? REF_BOOK_TOO_MANY_FOUND_IMPORT_ERROR : REF_BOOK_NOT_FOUND_IMPORT_ERROR,
+                rowIndex, colIndex, rb.getName(), rb.getAttribute(alias).getName(), value, (new SimpleDateFormat("dd.MM.yyyy")).format(date));
         if (required) {
             throw new ServiceException("%s", msg);
         } else {
@@ -427,7 +434,8 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
         }
 
         RefBook rb = refBookFactory.get(refBookId);
-        String msg = String.format(tooManyValue ? REF_BOOK_TOO_MANY_FOUND_IMPORT_ERROR : REF_BOOK_NOT_FOUND_IMPORT_ERROR, rowIndex, colIndex, rb.getName());
+        String msg = String.format(tooManyValue ? REF_BOOK_TOO_MANY_FOUND_IMPORT_ERROR : REF_BOOK_NOT_FOUND_IMPORT_ERROR,
+                rowIndex, colIndex, rb.getName(), rb.getAttribute(alias).getName(), value, (new SimpleDateFormat("dd.MM.yyyy")).format(date));
         if (required) {
             throw new ServiceException("%s", msg);
         } else {
@@ -625,7 +633,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
             return;
         }
         RefBook rb = refBookFactory.get(refBookId);
-        String msg = String.format(REF_BOOK_NOT_FOUND_IMPORT_ERROR, rowIndex, colIndex, rb.getName());
+        String msg = String.format(REF_BOOK_REFERENCE_NOT_FOUND_IMPORT_ERROR, rowIndex, colIndex, referenceValue, rb.getName());
         if (required) {
             throw new ServiceException("%s", msg);
         } else {
