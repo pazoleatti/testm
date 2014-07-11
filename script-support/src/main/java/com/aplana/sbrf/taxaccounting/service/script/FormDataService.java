@@ -255,8 +255,8 @@ public interface FormDataService {
     /**
      * Сравнить зависимое поле с ожидаемым.
      *
-     * @param referenceValue значение зависомого поля
-     * @param expectedValue ожидаемое значение
+     * @param referenceValue значение зависомого поля (ва загружаемом файле)
+     * @param expectedValue ожидаемое значение (в БД)
      * @param rowIndex номер строки в транспортном файле
      * @param colIndex номер колонки в транспортном файле
      * @param logger для вывода сообщений

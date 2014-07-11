@@ -246,6 +246,22 @@ public class FormDataServiceTest {
         assertTrue(logger.getEntries().isEmpty());
     }
 
+    public void checkReferenceValueTest() {
+        Logger logger = new Logger();
+        formDataService.checkReferenceValue(REF_BOOK_ID, "test", "test", ROW_INDEX, COL_INDEX, logger, true);
+        assertTrue(logger.getEntries().isEmpty());
+        formDataService.checkReferenceValue(REF_BOOK_ID, "test", "test", ROW_INDEX, COL_INDEX, logger, false);
+        assertTrue(logger.getEntries().isEmpty());
+        formDataService.checkReferenceValue(REF_BOOK_ID, "test_1", "test_2", ROW_INDEX, COL_INDEX, logger, false);
+        assertFalse(logger.getEntries().isEmpty());
+    }
+
+    @Test(expected = ServiceException.class)
+    public void checkReferenceValue2Test() {
+        Logger logger = new Logger();
+        formDataService.checkReferenceValue(REF_BOOK_ID, "test_1", "test_2", ROW_INDEX, COL_INDEX, logger, true);
+    }
+
     @Test
     public void test() {
         FormData formData1 = new FormData();
