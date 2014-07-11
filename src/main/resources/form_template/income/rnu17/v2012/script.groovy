@@ -55,6 +55,9 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
+        break
 }
 
 //// Кэши и константы
@@ -77,39 +80,15 @@ def nonEmptyColumns = ['incomeType', 'sum']
 @Field
 def totalColumns = ['sum']
 
-// Текущая дата
+// Дата окончания отчетного периода
 @Field
-def currentDate = new Date()
+def endDate = null
 
 //// Обертки методов
-
-// Поиск записи в справочнике по значению (для расчетов)
-def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
-                def Date date, boolean required = true) {
-    return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value, date, rowIndex,
-            cellName, logger, required)
-}
 
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
-}
-
-// Поиск записи в справочнике по значению (для импорта)
-def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required = false) {
-    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
-            reportPeriodEndDate, rowIndex, colIndex, logger, required)
-}
-
-// Поиск записи в справочнике по значению (для импорта)
-def getRecordImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                    def boolean required = true) {
-    if (value == null || value == '') {
-        return null
-    }
-    return formDataService.getRefBookRecordImport(refBookId, recordCache, providerCache, refBookCache, alias, value,
-            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
 }
 
 //// Кастомные методы
@@ -125,10 +104,10 @@ void calc() {
         deleteAllAliased(dataRows)
 
         // сортируем по кодам
-        dataRowHelper.save(dataRows.sort { getKnu(it.incomeType) })
+        dataRows.sort { getKnu(it.incomeType) }
     }
 
-    dataRowHelper.insert(calcTotalRow(dataRows), dataRows.size() + 1)
+    dataRows.add(calcTotalRow(dataRows))
     dataRowHelper.save(dataRows)
 }
 
@@ -244,4 +223,83 @@ void addData(def xml, int headRowCount) {
         rows.add(newRow)
     }
     dataRowHelper.save(rows)
+}
+
+void importTransportData() {
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    addTransportData(xml)
+}
+
+void addTransportData(def xml) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    def int rnuIndexRow = 2
+    def int colOffset = 1
+    def rows = []
+    def int rowIndex = 1  // Строки НФ, от 1
+
+    for (def row : xml.row) {
+        rnuIndexRow++
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
+        editableColumns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
+
+        // графа 3
+        String filter = "LOWER(CODE) = LOWER('" + row.cell[2].text() + "') and LOWER(TYPE_EXP) = LOWER('" + row.cell[3].text() + "')"
+        def records = refBookFactory.getDataProvider(27).getRecords(reportPeriodEndDate, null, filter, null)
+        if (records.size() == 1) {
+            newRow.incomeType = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+        } else {
+            logger.error("Проверка файла: Строка ${rnuIndexRow} содержит значение, отсутствующее в справочнике " +
+                    "«" + refBookFactory.get(27).getName() + "»!")
+        }
+
+        // графа 4
+        newRow.sum = parseNumber(row.cell[4].text(), rnuIndexRow, 4 + colOffset, logger, true)
+
+        rows.add(newRow)
+    }
+    def totalRow = getDataRow(dataRows, 'total')
+    calcTotalSum(rows, totalRow, totalColumns)
+    rows.add(totalRow)
+
+    if (xml.rowTotal.size() == 1) {
+        rnuIndexRow += 2
+
+        def row = xml.rowTotal[0]
+
+        def total = formData.createDataRow()
+
+        // графа 4
+        total.sum = parseNumber(row.cell[4].text(), rnuIndexRow, 4 + colOffset, logger, true)
+
+        def colIndexMap = ['sum' : 4]
+        for (def alias : totalColumns) {
+            def v1 = total[alias]
+            def v2 = totalRow[alias]
+            if (v1 == null && v2 == null) {
+                continue
+            }
+            if (v1 == null || v1 != null && v1 != v2) {
+                logger.error(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
+                break
+            }
+        }
+    }
+    dataRowHelper.save(rows)
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
 }
