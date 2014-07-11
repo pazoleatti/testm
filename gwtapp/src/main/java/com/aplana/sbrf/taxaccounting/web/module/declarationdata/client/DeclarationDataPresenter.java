@@ -62,6 +62,8 @@ public class DeclarationDataPresenter
 
 		void showRecalculateButton(boolean show);
 
+        void showDownloadButtons(boolean show);
+
 		void showDelete(boolean show);
 
 		void setType(String type);
@@ -147,6 +149,7 @@ public class DeclarationDataPresenter
 								getView().showReject(result.isCanReject());
 								getView().showDelete(result.isCanDelete());
 								getView().showRecalculateButton(result.isCanDelete());
+								getView().showDownloadButtons(result.isCanDownload());
 								getView().setPdf(result.getPdf());
 							}
 						}, DeclarationDataPresenter.this).addCallback(

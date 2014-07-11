@@ -85,6 +85,8 @@ public class GetDeclarationDataHandler
 
 		result.setPdf(generatePdfViewerModel(action, userInfo, taxType));
 
+        result.setCanDownload(declaration.getXmlDataUuid() != null);
+
 		return result;
 	}
 

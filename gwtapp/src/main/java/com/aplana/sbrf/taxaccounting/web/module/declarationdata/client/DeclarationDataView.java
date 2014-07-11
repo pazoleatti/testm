@@ -96,6 +96,12 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 		dateBox.setEnabled(show);
 	}
 
+    @Override
+    public void showDownloadButtons(boolean show) {
+        downloadExcelButton.setVisible(show);
+        downloadXmlButton.setVisible(show);
+    }
+
 	@Override
 	public void showDelete(boolean show) {
 		deleteButton.setVisible(show);
