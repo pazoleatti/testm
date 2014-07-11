@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import groovy.transform.Field
 
 import java.math.RoundingMode
@@ -760,12 +761,18 @@ void addData(def xml, int headRowCount) {
         indexCell++
 
         // графа 5 - атрибут 809 - ISSUER - «Эмитент», справочник 84 «Ценные бумаги»
-        indexCell = 5
-        def record100 = getRecordImport(100, 'FULL_NAME', row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset)
-        // TODO (Ramil Timerbaev) могут быть проблемы с нахождением записи,
-        // если в справочнике 84 есть несколько записей с одинаковыми значениями в поле ISSUER
-        def record84 = getRecordImport(84, 'ISSUER', record100?.record_id?.value?.toString(), xlsIndexRow, indexCell + colOffset)
-        newRow.securityName = record84?.record_id?.value
+        def record100 = getRecordImport(100, 'NAME', row.cell[5].text(), xlsIndexRow, 5 + colOffset)
+        // поиск записи по эмитенту и серии (графам 5 и 6)
+        String filter = "ISSUER = " + record100?.record_id?.value?.toString() + " and LOWER(SHORTNAME) = LOWER('" + row.cell[6].text() + "')"
+        def records = refBookFactory.getDataProvider(84).getRecords(reportPeriodEndDate, null, filter, null)
+        def record84 = null
+        if (records.size() == 1) {
+            record84 = records[0]
+            newRow.securityName = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+        } else {
+            logger.error("Проверка файла: Строка ${xlsIndexRow} содержит значение, отсутствующее в справочнике " +
+                    "«" + refBookFactory.get(84).getName() + "»!")
+        }
 
         if (record84 != null) {
             // графа 6 - зависит от графы 5 - атрибут 812 - SHORTNAME - «Краткое название ценной бумаги / Выпуск», справочник 84 «Ценные бумаги»
@@ -792,7 +799,7 @@ void addData(def xml, int headRowCount) {
                 formDataService.checkReferenceValue(84, value1, value2, xlsIndexRow, indexCell + colOffset, logger, true)
             }
 
-            // графа 9 - зависит от графы 5 - атрибут 810 - CODE_CUR - «Цифровой код валюты выпуска», справочник 84 «Ценные бумаги»
+            // графа 9 - зависит от графы 5 - атрибут 810 - CODE - «Цифровой код валюты выпуска», справочник 84 «Ценные бумаги»
             indexCell = 9
             def record15 = getRecordImport(15, 'CODE', row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset)
             if (record15 != null) {
@@ -801,14 +808,11 @@ void addData(def xml, int headRowCount) {
                 formDataService.checkReferenceValue(84, value1, value2, xlsIndexRow, indexCell + colOffset, logger, true)
             }
 
-            // графа 10 - зависит от графы 5 - атрибут 810 - CODE_CUR - «Цифровой код валюты выпуска», справочник 84 «Ценные бумаги»
+            // графа 10 - зависит от графы 5 - атрибут 810 - NAME - «Наименование валюты», справочник 84 «Ценные бумаги»
             indexCell = 10
-            // TODO (Ramil Timerbaev) могут быть проблемы с нахождением записи,
-            // если в справочнике 15 есть несколько записей с одинаковыми значениями в поле NAME
-            record15 = getRecordImport(15, 'NAME', row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset)
             if (record15 != null) {
-                value1 = record15?.record_id?.value?.toString()
-                value2 = record84?.CODE_CUR?.value?.toString()
+                value1 = record15?.NAME?.value
+                value2 = row.cell[indexCell].text()
                 formDataService.checkReferenceValue(84, value1, value2, xlsIndexRow, indexCell + colOffset, logger, true)
             }
         }
@@ -979,12 +983,18 @@ void addTransportData(def xml) {
         newRow.contractorName = row.cell[indexCell].text()
 
         // графа 5 - атрибут 809 - ISSUER - «Эмитент», справочник 84 «Ценные бумаги»
-        indexCell = 5
-        def record100 = getRecordImport(100, 'FULL_NAME', row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset)
-        // TODO (Ramil Timerbaev) могут быть проблемы с нахождением записи,
-        // если в справочнике 84 есть несколько записей с одинаковыми значениями в поле ISSUER
-        def record84 = getRecordImport(84, 'ISSUER', record100?.record_id?.value?.toString(), rnuIndexRow, indexCell + colOffset)
-        newRow.securityName = record84?.record_id?.value
+        def record100 = getRecordImport(100, 'NAME', row.cell[5].text(), rnuIndexRow, 5 + colOffset)
+        // поиск записи по эмитенту и серии (графам 5 и 6)
+        String filter = "ISSUER = " + record100?.record_id?.value?.toString() + " and LOWER(SHORTNAME) = LOWER('" + row.cell[6].text() + "')"
+        def records = refBookFactory.getDataProvider(84).getRecords(reportPeriodEndDate, null, filter, null)
+        def record84 = null
+        if (records.size() == 1) {
+            record84 = records[0]
+            newRow.securityName = record84.get(RefBook.RECORD_ID_ALIAS).numberValue
+        } else {
+            logger.error("Проверка файла: Строка ${rnuIndexRow} содержит значение, отсутствующее в справочнике " +
+                    "«" + refBookFactory.get(84).getName() + "»!")
+        }
 
         if (record84 != null) {
             // графа 6 - зависит от графы 5 - атрибут 812 - SHORTNAME - «Краткое название ценной бумаги / Выпуск», справочник 84 «Ценные бумаги»
@@ -1011,7 +1021,7 @@ void addTransportData(def xml) {
                 formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, indexCell + colOffset, logger, true)
             }
 
-            // графа 9 - зависит от графы 5 - атрибут 810 - CODE_CUR - «Цифровой код валюты выпуска», справочник 84 «Ценные бумаги»
+            // графа 9 - зависит от графы 5 - атрибут 810 - CODE - «Цифровой код валюты выпуска», справочник 84 «Ценные бумаги»
             indexCell = 9
             def record15 = getRecordImport(15, 'CODE', row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset)
             if (record15 != null) {
@@ -1020,14 +1030,11 @@ void addTransportData(def xml) {
                 formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, indexCell + colOffset, logger, true)
             }
 
-            // графа 10 - зависит от графы 5 - атрибут 810 - CODE_CUR - «Цифровой код валюты выпуска», справочник 84 «Ценные бумаги»
+            // графа 10 - зависит от графы 5 - атрибут 810 - NAME - «Наименование валюты», справочник 84 «Ценные бумаги»
             indexCell = 10
-            // TODO (Ramil Timerbaev) могут быть проблемы с нахождением записи,
-            // если в справочнике 15 есть несколько записей с одинаковыми значениями в поле NAME
-            record15 = getRecordImport(15, 'NAME', row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset)
             if (record15 != null) {
-                value1 = record15?.record_id?.value?.toString()
-                value2 = record84?.CODE_CUR?.value?.toString()
+                value1 = record15?.NAME?.value
+                value2 = row.cell[indexCell].text()
                 formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, indexCell + colOffset, logger, true)
             }
         }
