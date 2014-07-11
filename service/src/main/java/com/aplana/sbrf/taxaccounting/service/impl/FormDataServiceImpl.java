@@ -638,7 +638,7 @@ public class FormDataServiceImpl implements FormDataService {
             // Экземпляр формы-приемника
             FormData destinationForm = findFormData(destinationDFT.getFormTypeId(), destinationDFT.getKind(), destinationDFT.getDepartmentId(), formData.getReportPeriodId(), formData.getPeriodOrder());
             // Если форма распринимается при отсутствии экземпляра формы-приемника, то такую форму не обрабатываем.
-            if (destinationForm == null && workflowMove.getFromState() == WorkflowState.ACCEPTED) {
+            if (destinationForm == null) {
                 continue;
             }
             ObjectLock lock = lockCoreService.getLock(FormData.class, destinationForm.getId(), userInfo);
@@ -668,8 +668,6 @@ public class FormDataServiceImpl implements FormDataService {
                     if (destinationForm == null && workflowMove.getFromState() == WorkflowState.ACCEPTED) {
                         continue;
                     }
-                    //Блокируем форму-приемник
-                    lockCoreService.lock(FormData.class, destinationForm.getId(), userInfo);
                     // Список типов источников для текущего типа приемников
                     List<DepartmentFormType> sourceFormTypes = departmentFormTypeDao.getFormSources(destinationDFT.getDepartmentId(), destinationDFT.getFormTypeId(), destinationDFT.getKind());
                     // Признак наличия принятых экземпляров источников
@@ -701,9 +699,8 @@ public class FormDataServiceImpl implements FormDataService {
                     }
             }
         } finally {
-            for (DepartmentFormType destinationDFT : departmentFormTypes) {
-                FormData destinationForm = findFormData(destinationDFT.getFormTypeId(), destinationDFT.getKind(), destinationDFT.getDepartmentId(), formData.getReportPeriodId(), formData.getPeriodOrder());
-                lockCoreService.unlock(FormData.class, destinationForm.getId(), userInfo);
+            for (FormData lockedForm : lockedForms) {
+                lockCoreService.unlock(FormData.class, lockedForm.getId(), userInfo);
             }
         }
     }
