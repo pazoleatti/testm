@@ -243,7 +243,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         }
         countColumnsCode += nullColumnCount;
 
-        String code = formTemplate.getHeader().replace(XlsxReportMetadata.REPORT_DELIMITER, '\n');
+        String code = (formTemplate.getHeader() != null) ? formTemplate.getHeader().replace(XlsxReportMetadata.REPORT_DELIMITER, '\n') : "";
         createCellByRange(XlsxReportMetadata.RANGE_REPORT_CODE, code, 0, shiftCode);
         for(int i = shiftCode; i <= shiftCode + countColumnsCode; i++) {
             createNotHiddenCell(ar2.getFirstCell().getCol() + i, r2).setCellStyle(cellStyle);
