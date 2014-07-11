@@ -87,12 +87,12 @@ def refBookCache = [:]
 // Все атрибуты
 @Field
 def allColumns = ['rowNumber', 'fix', 'name', 'inn', 'number', 'date', 'cost', 'repaymentDate', 'concessionsDate', 'income',
-        'financialResult1', 'currencyDebtObligation', 'rateBR', 'interestRate', 'perc', 'loss']
+                  'financialResult1', 'currencyDebtObligation', 'rateBR', 'interestRate', 'perc', 'loss']
 
 // Редактируемые атрибуты
 @Field
 def editableColumns = ['name', 'inn', 'number', 'date', 'cost', 'repaymentDate', 'concessionsDate', 'income',
-        'currencyDebtObligation', 'interestRate']
+                       'currencyDebtObligation', 'interestRate']
 
 // Автозаполняемые атрибуты
 @Field
@@ -101,7 +101,7 @@ def autoFillColumns = allColumns - editableColumns
 // Проверяемые на пустые значения атрибуты
 @Field
 def nonEmptyColumns = ['name', 'inn', 'number', 'date', 'cost', 'repaymentDate', 'concessionsDate', 'income',
-        'financialResult1', 'currencyDebtObligation', 'perc', 'loss']
+                       'financialResult1', 'currencyDebtObligation', 'perc', 'loss']
 
 // алиасы графов для арифметической проверки
 @Field
@@ -421,7 +421,7 @@ def getCalcTotalName(def dataRows) {
 def getCalcTotalNameRow(def row, def dataRows) {
     def tRow = getPrevRowWithoutAlias(row, dataRows)
     def newRow = formData.createDataRow()
-    newRow.setAlias('total' + getRowNumber(tRow.name, dataRows))
+    newRow.setAlias('total' + tRow.name)
     newRow.fix = 'Итого по ' + tRow.name
     newRow.getCell('fix').colSpan = 2
     allColumns.each {
@@ -449,20 +449,6 @@ def getCalcTotalNameRow(def row, def dataRows) {
         }
     }
     return newRow
-}
-
-/**
- * Получение первого rowNumber по name
- * @param alias
- * @param data
- * @return
- */
-def getRowNumber(def alias, def dataRows) {
-    for (def row : dataRows) {
-        if (row.name == alias) {
-            return row.rowNumber?.toString()
-        }
-    }
 }
 
 /**
