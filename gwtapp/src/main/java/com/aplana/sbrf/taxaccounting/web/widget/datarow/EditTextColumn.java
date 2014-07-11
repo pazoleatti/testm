@@ -38,6 +38,8 @@ public class EditTextColumn extends DataRowColumn<String> {
     		value = ((BigDecimal) dataRow.get(alias)).toPlainString();
     	} else if (dataRow.get(alias) instanceof String){
     		value = (String) dataRow.get(alias);
+            value = value.replaceAll("»", "\"");
+            value = value.replaceAll("«", "\"");
     	}
     	return value == null ? "" : value;
     }
