@@ -9,7 +9,6 @@ public class FormTemplateVersion implements Serializable {
 
     private String formTemplateId;
     private String typeName;
-    private String versionNumber;
     private String actualBeginVersionDate;
     private String actualEndVersionDate;
 
@@ -20,15 +19,6 @@ public class FormTemplateVersion implements Serializable {
     public void setTypeName(String typeName) {
         this.typeName = typeName;
     }
-
-    public String getVersionNumber() {
-        return versionNumber;
-    }
-
-    public void setVersionNumber(String versionNumber) {
-        this.versionNumber = versionNumber;
-    }
-
     public String getActualBeginVersionDate() {
         return actualBeginVersionDate;
     }

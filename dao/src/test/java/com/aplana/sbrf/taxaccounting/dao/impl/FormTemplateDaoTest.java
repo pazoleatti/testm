@@ -223,7 +223,6 @@ public class FormTemplateDaoTest {
     @Test
     public void testSaveNew(){
         FormTemplate formTemplate = new FormTemplate();
-        formTemplate.setEdition(1);
         formTemplate.setFixedRows(false);
         formTemplate.setVersion(new Date());
         formTemplate.setStatus(VersionedObjectStatus.NORMAL);
@@ -262,7 +261,6 @@ public class FormTemplateDaoTest {
     public void testUpdate(){
         FormTemplate formTemplate1 = new FormTemplate();
         formTemplate1.setId(1);
-        formTemplate1.setEdition(1000);
         formTemplate1.setName("");
         formTemplate1.setStatus(VersionedObjectStatus.DELETED);
         formTemplate1.setVersion(new Date());
@@ -272,7 +270,6 @@ public class FormTemplateDaoTest {
         formTemplate1.setType(type);
         FormTemplate formTemplate2 = new FormTemplate();
         formTemplate2.setId(2);
-        formTemplate2.setEdition(1001);
         formTemplate2.setName("sfcxvxc");
         formTemplate2.setStatus(VersionedObjectStatus.DELETED);
         formTemplate2.setVersion(new Date());
@@ -284,10 +281,10 @@ public class FormTemplateDaoTest {
         Assert.assertEquals(VersionedObjectStatus.DELETED, formTemplateDao.get(1).getStatus());
     }
 
-    @Test
+    /*@Test
     public void testLastVersionEdition(){
         Assert.assertEquals(2, formTemplateDao.getLastVersionEdition(2));
-    }
+    }*/
 
     @Test
     public void testFindFTVersionIntersections() throws ParseException {

@@ -40,7 +40,6 @@ public class GetFTVersionHistoryHandler extends AbstractActionHandler<GetFTVersi
         for (TemplateChanges changes : changeses) {
             TemplateChangesExt templateChangesExt = new TemplateChangesExt();
             templateChangesExt.setTemplateChanges(changes);
-            templateChangesExt.setEdition(formTemplateService.get(changes.getFormTemplateId()).getEdition());
             changesList.add(templateChangesExt);
         }
         GetFTVersionHistoryResult result = new GetFTVersionHistoryResult();

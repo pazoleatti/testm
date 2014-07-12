@@ -69,7 +69,6 @@ create table form_template (
   type_id number(9) not null,
   data_rows clob,
   version date not null,
-  edition number(9) not null,
   fixed_rows number(1) not null,
   name varchar2(1000) not null,
   fullname varchar2(1000) not null,
@@ -84,7 +83,6 @@ comment on column form_template.data_rows is 'Предопределённые �
 comment on column form_template.id is 'Первичный ключ';
 comment on column form_template.type_id is 'Идентификатор вида налоговой формы';
 comment on column form_template.version is 'Версия формы (уникально в рамках типа)';
-comment on column form_template.edition is 'Номер редакции записи';
 comment on column form_template.fixed_rows is 'Признак использования фиксированных строк: 0 - используется фиксированный набор строк, 1 - есть возможность добавлять и удалять строки из формы.';
 comment on column form_template.name is 'Наименование формы';
 comment on column form_template.fullname is 'Полное наименование формы';
@@ -378,7 +376,6 @@ create sequence seq_dept_declaration_type start with 10000;
 -----------------------------------------------------------------------------------------------------------------------------------
 create table declaration_template (
   id       number(9) not null,
-  edition    number(9) not null,
   status number(1) default 0 not null,
   version date not null,
   name varchar2(600) not null,
@@ -389,7 +386,6 @@ create table declaration_template (
 );
 comment on table declaration_template is 'Шаблоны налоговых деклараций';
 comment on column declaration_template.id is 'Идентификатор (первичный ключ)';
-comment on column declaration_template.edition is 'Номер редакции';
 comment on column declaration_template.version is 'Версия';
 comment on column declaration_template.name is 'Наименование версии макета';
 comment on column declaration_template.create_script is 'Скрипт формирования декларации';

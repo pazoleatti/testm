@@ -48,7 +48,6 @@ public class DeclarationServiceTest {
         declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);
         declarationTemplate.setCreateScript("script");
         declarationTemplate.setType(new DeclarationType());
-        declarationTemplate.setEdition(1);
         declarationTemplate.setVersion(new Date());
         declarationTemplate.setId(1);
 

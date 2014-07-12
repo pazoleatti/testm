@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.server;
 
 import com.aplana.sbrf.taxaccounting.model.TemplateChanges;
-import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.TemplateChangesService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.shared.GetDTHistoryAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.shared.GetDTHistoryResult;
@@ -26,9 +25,6 @@ public class GetDTHistoryHandler extends AbstractActionHandler<GetDTHistoryActio
     @Autowired
     private TemplateChangesService templateChangesService;
 
-    @Autowired
-    private DeclarationTemplateService declarationTemplateService;
-
     public GetDTHistoryHandler() {
         super(GetDTHistoryAction.class);
     }
@@ -40,7 +36,6 @@ public class GetDTHistoryHandler extends AbstractActionHandler<GetDTHistoryActio
         for (TemplateChanges changes : changeses){
             TemplateChangesExt templateChangesExt = new TemplateChangesExt();
             templateChangesExt.setTemplateChanges(changes);
-            templateChangesExt.setEdition(declarationTemplateService.get(changes.getDeclarationTemplateId()).getEdition());
             changesList.add(templateChangesExt);
         }
         GetDTHistoryResult result = new GetDTHistoryResult();

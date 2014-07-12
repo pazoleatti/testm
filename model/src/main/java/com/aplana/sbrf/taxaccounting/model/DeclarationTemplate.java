@@ -11,7 +11,6 @@ public class DeclarationTemplate extends IdentityObject<Integer> {
 
 	private DeclarationType type;
 	private Date version;
-	private Integer edition;
     private String xsdId;
     private String jrxmlBlobId;
     private String name;
@@ -83,19 +82,6 @@ public class DeclarationTemplate extends IdentityObject<Integer> {
 	 */
 	public void setCreateScript(String createScript) {
 		this.createScript = createScript;
-	}
-
-	public Integer getEdition() {
-		return edition;
-	}
-
-	public void setEdition(Integer edition) {
-		if (this.edition != null) {
-			throw new IllegalStateException(
-					"Edition property already initialized");
-		} else {
-			this.edition = edition;
-		}
 	}
 
     /**

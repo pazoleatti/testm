@@ -149,12 +149,5 @@ public interface DeclarationTemplateDao {
      */
     List<Map<String,Object>> versionTemplateCountByType(Collection<Integer> typeIds);
 
-    /**
-     * Получает номер последней редакции макета.
-     * @param typeId  вид шаблона
-     * @return номер последней редакции шаблона
-     */
-    int getLastVersionEdition(int typeId);
-
     int updateVersionStatus(VersionedObjectStatus versionStatus, int decTemplateId);
 }

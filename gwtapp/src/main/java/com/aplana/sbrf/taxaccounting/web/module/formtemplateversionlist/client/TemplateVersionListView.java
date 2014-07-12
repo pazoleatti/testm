@@ -94,13 +94,6 @@ public class TemplateVersionListView extends ViewWithUiHandlers<FTVersionListUiH
             }
         };
 
-        TextColumn<FormTemplateVersion> versionColumn = new TextColumn<FormTemplateVersion>() {
-            @Override
-            public String getValue(FormTemplateVersion object) {
-                return String.valueOf(object.getVersionNumber());
-            }
-        };
-
         TextColumn<FormTemplateVersion> startColumn = new TextColumn<FormTemplateVersion>() {
             @Override
             public String getValue(FormTemplateVersion object) {
@@ -115,7 +108,6 @@ public class TemplateVersionListView extends ViewWithUiHandlers<FTVersionListUiH
             }
         };
         linkColumn.setSortable(true);
-        versionColumn.setSortable(true);
         startColumn.setSortable(true);
         endColumn.setSortable(true);
 
@@ -123,12 +115,6 @@ public class TemplateVersionListView extends ViewWithUiHandlers<FTVersionListUiH
             @Override
             public int compare(FormTemplateVersion o1, FormTemplateVersion o2) {
                 return compareWithNull(o1.getTypeName(), o2.getTypeName());
-            }
-        });
-        sortHandler.setComparator(versionColumn, new ComparatorWithNull<FormTemplateVersion, String>() {
-            @Override
-            public int compare(FormTemplateVersion o1, FormTemplateVersion o2) {
-                return compareWithNull(o1.getVersionNumber(), o2.getVersionNumber());
             }
         });
         sortHandler.setComparator(startColumn, new ComparatorWithNull<FormTemplateVersion, String>() {
@@ -145,7 +131,6 @@ public class TemplateVersionListView extends ViewWithUiHandlers<FTVersionListUiH
         });
 
         ftVersionCellTable.addResizableColumn(linkColumn, "Наименование");
-        ftVersionCellTable.addResizableColumn(versionColumn, "Версия");
         ftVersionCellTable.addResizableColumn(startColumn, "Начало актуального периода");
         ftVersionCellTable.addResizableColumn(endColumn, "Окончание актуальности периода");
 

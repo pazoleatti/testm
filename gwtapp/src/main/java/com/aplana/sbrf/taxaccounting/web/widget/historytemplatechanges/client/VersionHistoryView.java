@@ -55,10 +55,10 @@ public class VersionHistoryView extends PopupViewImpl implements VersionHistoryP
                         }
                         String url = templateChanges.getTemplateChanges().getFormTemplateId() != null ?
                                 AdminConstants.NameTokens.formTemplateInfoPage + ";" + AdminConstants.NameTokens.formTemplateId + "="
-                                + templateChanges.getTemplateChanges().getFormTemplateId() + "\">" :
+                                + templateChanges.getTemplateChanges().getFormTemplateId() + "\">"  + templateChanges.getTemplateChanges().getFormTemplateId() + "</a>":
                                 DeclarationTemplateTokens.declarationTemplate + ";" + DeclarationTemplateTokens.declarationTemplateId + "="
-                                + templateChanges.getTemplateChanges().getDeclarationTemplateId() + "\">";
-                        sb.appendHtmlConstant("<a href=\"#" + url + templateChanges.getEdition() + "</a>");
+                                + templateChanges.getTemplateChanges().getDeclarationTemplateId() + "\">" + templateChanges.getTemplateChanges().getDeclarationTemplateId() + "</a>";
+                        sb.appendHtmlConstant("<a href=\"#" + url + "</a>");
                     }
                 }) {
             @Override

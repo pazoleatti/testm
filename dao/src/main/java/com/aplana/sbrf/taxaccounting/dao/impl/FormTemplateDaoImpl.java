@@ -58,7 +58,6 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 			formTemplate.setName(rs.getString("name"));
 			formTemplate.setFullName(rs.getString("fullname"));
             formTemplate.setType(formTypeDao.get(SqlUtils.getInteger(rs,"type_id")));
-            formTemplate.setEdition(SqlUtils.getInteger(rs,"edition"));
             formTemplate.setFixedRows(rs.getBoolean("fixed_rows"));
             formTemplate.setHeader(rs.getString("header"));
             formTemplate.setStatus(VersionedObjectStatus.getStatusById(SqlUtils.getInteger(rs,"status")));
@@ -91,7 +90,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 		JdbcTemplate jt = getJdbcTemplate();
 		try {
 			return jt.queryForObject(
-					"select id, version, name, fullname, type_id, edition, fixed_rows, header, script, status, monthly " +
+					"select id, version, name, fullname, type_id, fixed_rows, header, script, status, monthly " +
                             "from form_template where id = ?",
 					new Object[]{formId},
 					new int[]{Types.NUMERIC},
@@ -189,7 +188,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 
 	@Override
 	public List<FormTemplate> listAll() {
-		return getJdbcTemplate().query("select id, version, name, fullname, type_id, edition, fixed_rows, header, status, monthly" +
+		return getJdbcTemplate().query("select id, version, name, fullname, type_id, fixed_rows, header, status, monthly" +
                 " from form_template where status in (0,1)", new FormTemplateMapper(true));
 	}
 
@@ -304,7 +303,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
         if (!statusList.isEmpty())
             builder.append(" and status in (:statusList)");
 
-        builder.append(" order by version, edition");
+        builder.append(" order by version");
         try {
             return getNamedParameterJdbcTemplate().queryForList(builder.toString(), valueMap, Integer.class);
         } catch (DataAccessException e){
@@ -383,7 +382,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
                 throw new DataRetrievalFailureException("Дата начала актуализации версии не должна быть null");
 
             return getNamedParameterJdbcTemplate().queryForInt("select * from (select id from form_template where type_id = :typeId" +
-                    " and TRUNC(version, 'DD') > :actualBeginVersion and status in (:statusList) order by version, edition) where rownum = 1", valueMap);
+                    " and TRUNC(version, 'DD') > :actualBeginVersion and status in (:statusList) order by version) where rownum = 1", valueMap);
         } catch(EmptyResultDataAccessException e){
             return 0;
         } catch (DataAccessException e){
@@ -423,12 +422,11 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
         try {
             formTemplate.setId(formTemplateId);
             getJdbcTemplate().
-                    update("insert into form_template (id, data_rows, data_headers, edition, version, fixed_rows, name, fullname, header, script, status, type_id) " +
-                    "values (?,?,?,?,?,?,?,?,?,?,?,?)",
+                    update("insert into form_template (id, data_rows, data_headers, version, fixed_rows, name, fullname, header, script, status, type_id) " +
+                    "values (?,?,?,?,?,?,?,?,?,?,?)",
                             formTemplateId,
                             dataRowsXml,
                             dataHeadersXml,
-                            getLastVersionEdition(formTemplate.getType().getId()) + 1,
                             formTemplate.getVersion(),
                             formTemplate.isFixedRows(),
                             formTemplate.getName() != null ? formTemplate.getName() : " ",
@@ -480,7 +478,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
         }
     }
 
-    @Override
+    /*@Override
     public int getLastVersionEdition(int formTypeId) {
         String sql = "SELECT MAX(edition) FROM form_template WHERE type_id = ? AND status IN (0, 1)";
         try {
@@ -495,7 +493,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
             throw new DaoException("Ошибка при получении номера редакции макета", e);
         }
 
-    }
+    }*/
 
     @Override
     @CacheEvict(value = CacheConstants.FORM_TEMPLATE, beforeInvocation = true, key = "#formTemplateId")

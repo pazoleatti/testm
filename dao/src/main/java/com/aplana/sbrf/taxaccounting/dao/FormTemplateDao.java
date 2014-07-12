@@ -155,7 +155,7 @@ public interface FormTemplateDao {
      * @param formTypeId  вид шаблона
      * @return номер последней редакции шаблона
      */
-    int getLastVersionEdition(int formTypeId);
+    /*int getLastVersionEdition(int formTypeId);*/
 
     int updateVersionStatus(VersionedObjectStatus versionStatus, int formTemplateId);
 }

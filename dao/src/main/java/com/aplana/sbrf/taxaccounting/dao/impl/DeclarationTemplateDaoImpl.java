@@ -46,7 +46,6 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 			d.setId(SqlUtils.getInteger(rs,"id"));
             d.setName(rs.getString("name"));
 			d.setVersion(rs.getDate("version"));
-			d.setEdition(SqlUtils.getInteger(rs,"edition"));
 			d.setType(declarationTypeDao.get(SqlUtils.getInteger(rs,"declaration_type_id")));
             d.setXsdId(rs.getString("XSD"));
             d.setJrxmlBlobId(rs.getString("JRXML"));
@@ -72,7 +71,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 	public DeclarationTemplate get(int declarationTemplateId) {
 		try {
 			return getJdbcTemplate().queryForObject(
-					"select id, name, version, edition, declaration_type_id, xsd, jrxml, status from declaration_template where id = ?",
+					"select id, name, version, declaration_type_id, xsd, jrxml, status from declaration_template where id = ?",
 					new Object[] { declarationTemplateId },
 					new DeclarationTemplateRowMapper()
 			);
@@ -116,9 +115,8 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 			}*/
         try {
             int count = getJdbcTemplate().update(
-                    "UPDATE declaration_template SET edition = ?, name = ?, version = ?, create_script = ?, declaration_type_id = ?, xsd = ?, status = ? WHERE id = ?",
+                    "UPDATE declaration_template SET name = ?, version = ?, create_script = ?, declaration_type_id = ?, xsd = ?, status = ? WHERE id = ?",
                     new Object[]{
-                            declarationTemplate.getEdition(),
                             declarationTemplate.getName(),
                             declarationTemplate.getVersion(),
                             declarationTemplate.getCreateScript(),
@@ -128,7 +126,6 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
                             declarationTemplate.getId()
                     },
                     new int[]{
-                            Types.NUMERIC,
                             Types.VARCHAR,
                             Types.DATE,
                             Types.VARCHAR,
@@ -155,10 +152,9 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
         try {
             int declarationTemplateId = generateId("seq_declaration_template", Integer.class);
             getJdbcTemplate().update(
-                    "INSERT INTO declaration_template (id, edition, name, version, create_script, declaration_type_id, xsd, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                    "INSERT INTO declaration_template (id, name, version, create_script, declaration_type_id, xsd, status) VALUES (?, ?, ?, ?, ?, ?, ?)",
                     new Object[]{
                             declarationTemplateId,
-                            getLastVersionEdition(declarationTemplate.getType().getId()) + 1,
                             declarationTemplate.getName(),
                             declarationTemplate.getVersion(),
                             declarationTemplate.getCreateScript(),
@@ -167,7 +163,6 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
                             declarationTemplate.getStatus().getId()
                     },
                     new int[]{
-                            Types.NUMERIC,
                             Types.NUMERIC,
                             Types.VARCHAR,
                             Types.DATE,
@@ -294,7 +289,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 
         if (decTemplateId != 0)
             builder.append(" and id <> :decTemplateId");
-        builder.append(" order by version, edition");
+        builder.append(" order by version");
 
         try {
             return getNamedParameterJdbcTemplate().queryForList(builder.toString(), valueMap, Integer.class);
@@ -382,7 +377,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
             valueMap.put("actualBeginVersion", actualBeginVersion);
 
             return getNamedParameterJdbcTemplate().queryForInt("select * from (select id from declaration_template where declaration_type_id = :typeId " +
-                    " and TRUNC(version, 'DD') > :actualBeginVersion and status in (:statusList) order by version, edition) where rownum = 1",
+                    " and TRUNC(version, 'DD') > :actualBeginVersion and status in (:statusList) order by version) where rownum = 1",
                     valueMap);
         } catch(EmptyResultDataAccessException e){
             return 0;
@@ -436,22 +431,6 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
         } catch (DataAccessException e){
             logger.error("Ошибка при получении числа версий.", e);
             throw new DaoException("Ошибка при получении числа версий.", e.getMessage());
-        }
-    }
-
-    @Override
-    public int getLastVersionEdition(int typeId) {
-        String sql = "SELECT MAX(edition) FROM declaration_template WHERE declaration_type_id = ? AND status IN (0, 1)";
-        try {
-            Integer edition = getJdbcTemplate().queryForObject(sql,
-                    new Object[]{typeId},
-                    Integer.class);
-            return edition != null ? edition : 0;
-        } catch (EmptyResultDataAccessException e){
-            return 0;
-        } catch (DataAccessException e){
-            logger.error("Ошибка при получении номера редакции макета", e);
-            throw new DaoException("Ошибка при получении номера редакции макета", e);
         }
     }
 

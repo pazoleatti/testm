@@ -10,7 +10,6 @@ import java.io.Serializable;
  */
 public class TemplateChangesExt implements Serializable {
     private TemplateChanges templateChanges;
-    private int edition;
 
     public TemplateChanges getTemplateChanges() {
         return templateChanges;
@@ -18,13 +17,5 @@ public class TemplateChangesExt implements Serializable {
 
     public void setTemplateChanges(TemplateChanges templateChanges) {
         this.templateChanges = templateChanges;
-    }
-
-    public int getEdition() {
-        return edition;
-    }
-
-    public void setEdition(int edition) {
-        this.edition = edition;
     }
 }

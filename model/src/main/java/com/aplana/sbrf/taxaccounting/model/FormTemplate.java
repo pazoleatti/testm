@@ -16,7 +16,6 @@ public class FormTemplate extends IdentityObject<Integer> {
 	
 	private FormType type;
 	private Date version;
-	private int edition;
     private boolean fixedRows;
     
     private String name;
@@ -194,38 +193,6 @@ public class FormTemplate extends IdentityObject<Integer> {
 	 */
 	public Date getVersion() {
 		return version;
-	}
-
-	/**
-	 * Возвращает номер редакции данной записи (используется для предотвращения
-	 * одновременного редактирования записи несколькими пользователями)
-	 * 
-	 * @return номер редакции
-	 */
-	public int getEdition() {
-		return edition;
-	}
-
-	/**
-	 * Задать номер редакции Этот номер используется для предотвращения
-	 * одновременного редактирования записи несколькими пользователями. Если при
-	 * попытке сохранения FormTemplate обнаружится, что значение поля edition в
-	 * БД отличается от того, которое записано в модельном классе, то будет
-	 * сгенерировано исключение. Задать значение поля можно только один раз для
-	 * каждого экземпляра FormTemplate, поэтому после каждого сохранения объекта
-	 * в БД, использовать этот объект далее нельзя, нужно перечитать объект из
-	 * БД и создать новый экзепляр.
-	 * 
-	 * @param edition - номер редакции
-	 */
-	public void setEdition(int edition) {
-		if (this.edition != 0) {
-			throw new IllegalStateException(
-					"Edition property already initialized");
-		} else {
-			this.edition = edition;
-		}
-
 	}
 
 	/**

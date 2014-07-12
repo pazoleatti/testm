@@ -42,7 +42,6 @@ public class GetVersionHistoryHandler extends AbstractActionHandler<GetVersionHi
         for (TemplateChanges changes : changeses){
             TemplateChangesExt templateChangesExt = new TemplateChangesExt();
             templateChangesExt.setTemplateChanges(changes);
-            templateChangesExt.setEdition(formTemplate.getEdition());
             changesList.add(templateChangesExt);
         }
 

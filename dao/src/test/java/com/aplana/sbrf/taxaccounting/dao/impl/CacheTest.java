@@ -161,7 +161,6 @@ public class CacheTest {
         DeclarationTemplate declarationTemplate = new DeclarationTemplate();
         declarationTemplate.setId(1);
         declarationTemplate.setName("Декларация");
-        declarationTemplate.setEdition(1);
         /*declarationTemplate.setActive(true);*/
         declarationTemplate.setVersion(new Date());
         declarationTemplate.setCreateScript("MyScript");

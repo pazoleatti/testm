@@ -58,7 +58,6 @@ public class VersionValidatingServiceImplTest {
         formTemplate1.setVersion(calendar.getTime());
         calendar.clear();
         formTemplate1.setStatus(VersionedObjectStatus.NORMAL);
-        formTemplate1.setEdition(1);
         FormType type1 = new FormType();
         type1.setId(FORM_TYPE_ID_F);
         formTemplate1.setType(type1);
@@ -70,7 +69,6 @@ public class VersionValidatingServiceImplTest {
         formTemplate4.setVersion(calendar.getTime());
         calendar.clear();
         formTemplate4.setStatus(VersionedObjectStatus.NORMAL);
-        formTemplate4.setEdition(1);
         formTemplate4.setType(type1);
 
         calendar.set(2013, Calendar.DECEMBER, 31);
@@ -80,7 +78,6 @@ public class VersionValidatingServiceImplTest {
         formTemplate2.setVersion(calendar.getTime());
         calendar.clear();
         formTemplate2.setStatus(VersionedObjectStatus.FAKE);
-        formTemplate2.setEdition(1);
 
         calendar.set(2014, Calendar.JANUARY, 1);
         FormTemplate formTemplate3 = new FormTemplate();
@@ -89,7 +86,6 @@ public class VersionValidatingServiceImplTest {
         formTemplate3.setVersion(calendar.getTime());
         calendar.clear();
         formTemplate3.setStatus(VersionedObjectStatus.DRAFT);
-        formTemplate3.setEdition(1);
 
         //Настройка пересечений
         VersionSegment segmentIntersection1 = new VersionSegment();

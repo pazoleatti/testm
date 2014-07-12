@@ -97,7 +97,6 @@ public class DeclarationTemplateDaoTest {
 		assertEquals(declarationType.getId(), savedDeclarationTemplate.getType().getId());
 		/*assertTrue(savedDeclarationTemplate.isActive());*/
         assertEquals(null, savedDeclarationTemplate.getXsdId());
-        assertEquals(3, savedDeclarationTemplate.getEdition().intValue());
 	}
 
 	@Test
@@ -107,7 +106,6 @@ public class DeclarationTemplateDaoTest {
 		declarationTemplate.setId(1);
         declarationTemplate.setStatus(VersionedObjectStatus.FAKE);
         declarationTemplate.setName("Декларация");
-		declarationTemplate.setEdition(1);
 		declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);
 		declarationTemplate.setVersion(new Date());
 		declarationTemplate.setCreateScript("MyScript");
@@ -129,7 +127,6 @@ public class DeclarationTemplateDaoTest {
     public void testSetJrxml() {
         DeclarationTemplate declarationTemplate = new DeclarationTemplate();
         declarationTemplate.setId(1);
-        declarationTemplate.setEdition(1);
         declarationTemplate.setName("Декларация");
         declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);
         declarationTemplate.setStatus(VersionedObjectStatus.FAKE);
@@ -152,7 +149,6 @@ public class DeclarationTemplateDaoTest {
 	public void testUpdate() {
 		DeclarationTemplate declarationTemplate1 = new DeclarationTemplate();
 		declarationTemplate1.setId(1);
-		declarationTemplate1.setEdition(1000);
         declarationTemplate1.setName("");
         declarationTemplate1.setStatus(VersionedObjectStatus.FAKE);
 		declarationTemplate1.setVersion(new Date());
@@ -160,7 +156,6 @@ public class DeclarationTemplateDaoTest {
 		declarationTemplate1.setType(declarationTypeDao.get(1));
         DeclarationTemplate declarationTemplate2 = new DeclarationTemplate();
         declarationTemplate2.setId(2);
-        declarationTemplate2.setEdition(1001);
         declarationTemplate2.setName("sfcxvxc");
         declarationTemplate2.setStatus(VersionedObjectStatus.FAKE);
         declarationTemplate2.setVersion(new Date());
@@ -190,7 +185,6 @@ public class DeclarationTemplateDaoTest {
     public void getDeclarationTemplateScriptTest(){
         DeclarationTemplate declarationTemplate = new DeclarationTemplate();
         declarationTemplate.setId(1);
-        declarationTemplate.setEdition(1);
         declarationTemplate.setName("Декларация");
         declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);
         declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);
@@ -269,10 +263,10 @@ public class DeclarationTemplateDaoTest {
         Assert.assertEquals((long) 2, list.get(0).get("version_count"));
     }
 
-    @Test
+    /*@Test
     public void testGetLastVersionEdition(){
         Assert.assertEquals(3, declarationTemplateDao.getLastVersionEdition(2));
-    }
+    }*/
 
     @Test
     public void testGeAll(){

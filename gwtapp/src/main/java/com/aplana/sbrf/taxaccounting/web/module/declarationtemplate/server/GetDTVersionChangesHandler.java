@@ -1,8 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.server;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.TemplateChanges;
-import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.TemplateChangesService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.GetDTVersionChangesAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.GetDTVersionChangesResult;
@@ -25,8 +23,6 @@ import java.util.List;
 public class GetDTVersionChangesHandler extends AbstractActionHandler<GetDTVersionChangesAction, GetDTVersionChangesResult> {
     @Autowired
     private TemplateChangesService templateChangesService;
-    @Autowired
-    private DeclarationTemplateService declarationTemplateService;
 
     public GetDTVersionChangesHandler() {
         super(GetDTVersionChangesAction.class);
@@ -37,11 +33,9 @@ public class GetDTVersionChangesHandler extends AbstractActionHandler<GetDTVersi
         GetDTVersionChangesResult result = new GetDTVersionChangesResult();
         List<TemplateChanges> changeses = templateChangesService.getByDeclarationTemplateId(action.getDeclarationTemplateId());
         List<TemplateChangesExt> changesList = new ArrayList<TemplateChangesExt>(changeses.size());
-        DeclarationTemplate declarationTemplate = declarationTemplateService.get(action.getDeclarationTemplateId());
         for (TemplateChanges changes : changeses){
             TemplateChangesExt templateChangesExt = new TemplateChangesExt();
             templateChangesExt.setTemplateChanges(changes);
-            templateChangesExt.setEdition(declarationTemplate.getEdition());
             changesList.add(templateChangesExt);
         }
 

@@ -189,7 +189,6 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
         FormTemplate formTemplate =  new FormTemplate();
         formTemplate.setVersion(date);
         formTemplate.setStatus(VersionedObjectStatus.FAKE);
-        formTemplate.setEdition(0);
         formTemplate.setType(formTypeService.get(formTypeId));
         formTemplate.setName("fake");
         formTemplate.setFullName("fake");

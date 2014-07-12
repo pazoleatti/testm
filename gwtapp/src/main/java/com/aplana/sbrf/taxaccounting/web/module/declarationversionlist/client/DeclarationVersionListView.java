@@ -10,7 +10,6 @@ import com.aplana.sbrf.taxaccounting.web.widget.style.table.ComparatorWithNull;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -34,7 +33,6 @@ import java.util.List;
  */
 public class DeclarationVersionListView extends ViewWithUiHandlers<DTVersionListUIHandlers> implements DeclarationVersionListPresenter.MyView{
 
-    private static final DateTimeFormat SDF = DateTimeFormat.getFormat("dd.MM.yyyy");
 
     interface Binder extends UiBinder<Widget, DeclarationVersionListView> {
     }
@@ -87,12 +85,6 @@ public class DeclarationVersionListView extends ViewWithUiHandlers<DTVersionList
                 return object;
             }
         };
-        TextColumn<DeclarationTemplateVersion> versionColumn = new TextColumn<DeclarationTemplateVersion>() {
-            @Override
-            public String getValue(DeclarationTemplateVersion object) {
-                return String.valueOf(object.getVersionNumber());
-            }
-        };
         TextColumn<DeclarationTemplateVersion> startColumn = new TextColumn<DeclarationTemplateVersion>() {
             @Override
             public String getValue(DeclarationTemplateVersion object) {
@@ -106,17 +98,14 @@ public class DeclarationVersionListView extends ViewWithUiHandlers<DTVersionList
             }
         };
         linkColumn.setSortable(true);
-        versionColumn.setSortable(true);
         startColumn.setSortable(true);
         endColumn.setSortable(true);
 
         dtVersionCellTable.addResizableColumn(linkColumn, "Наименование");
-        dtVersionCellTable.addResizableColumn(versionColumn, "Версия");
         dtVersionCellTable.addResizableColumn(startColumn, "Начало актуального периода");
         dtVersionCellTable.addResizableColumn(endColumn, "Окончание актуальности периода");
 
         dtVersionCellTable.setColumnWidth(linkColumn, 50, Style.Unit.PCT);
-        dtVersionCellTable.setColumnWidth(versionColumn, 10, Style.Unit.PCT);
         dtVersionCellTable.setColumnWidth(startColumn, 20, Style.Unit.PCT);
         dtVersionCellTable.setColumnWidth(endColumn, 20, Style.Unit.PCT);
 
@@ -125,12 +114,6 @@ public class DeclarationVersionListView extends ViewWithUiHandlers<DTVersionList
             @Override
             public int compare(DeclarationTemplateVersion o1, DeclarationTemplateVersion o2) {
                 return compareWithNull(o1.getTypeName(), o2.getTypeName());
-            }
-        });
-        dataSortHandler.setComparator(versionColumn, new ComparatorWithNull<DeclarationTemplateVersion, String>() {
-            @Override
-            public int compare(DeclarationTemplateVersion o1, DeclarationTemplateVersion o2) {
-                return compareWithNull(o1.getVersionNumber(), o2.getVersionNumber());
             }
         });
         dataSortHandler.setComparator(startColumn, new ComparatorWithNull<DeclarationTemplateVersion, String>() {

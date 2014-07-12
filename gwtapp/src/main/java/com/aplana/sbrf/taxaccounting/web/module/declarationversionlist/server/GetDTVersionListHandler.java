@@ -51,7 +51,6 @@ public class GetDTVersionListHandler extends AbstractActionHandler<GetDTVersionL
             DeclarationTemplate declarationTemplate = declarationTemplateList.get(i);
             decTemplateVersion.setDtId(String.valueOf(declarationTemplate.getId()));
             decTemplateVersion.setTypeName(declarationTemplate.getName());
-            decTemplateVersion.setVersionNumber(String.valueOf(declarationTemplate.getEdition()));
             decTemplateVersion.setActualBeginVersionDate(SDF.format(declarationTemplate.getVersion()));
             decTemplateVersion.setActualEndVersionDate(declarationTemplateList.get(i + 1).getVersion() != null ?
                     SDF.format(new Date(declarationTemplateList.get(i + 1).getVersion().getTime() - 86400000)) : "");
@@ -66,7 +65,6 @@ public class GetDTVersionListHandler extends AbstractActionHandler<GetDTVersionL
             DeclarationTemplateVersion decTemplateVersion = new DeclarationTemplateVersion();
             decTemplateVersion.setDtId(String.valueOf(declarationTemplateList.get(declarationTemplateList.size() - 1).getId()));
             decTemplateVersion.setTypeName(declarationTemplateList.get(declarationTemplateList.size() - 1).getName());
-            decTemplateVersion.setVersionNumber(String.valueOf(declarationTemplateList.get(declarationTemplateList.size() - 1).getEdition()));
             decTemplateVersion.setActualBeginVersionDate(SDF.format(declarationTemplateList.get(declarationTemplateList.size() - 1).getVersion()));
             declarationTemplateVersions.add(decTemplateVersion);
         }

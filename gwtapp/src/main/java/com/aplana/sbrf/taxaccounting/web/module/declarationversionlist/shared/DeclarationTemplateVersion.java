@@ -8,7 +8,6 @@ import java.io.Serializable;
 public class DeclarationTemplateVersion implements Serializable {
     private String dtId;
     private String typeName;
-    private String versionNumber;
     private String actualBeginVersionDate;
     private String actualEndVersionDate;
 
@@ -26,14 +25,6 @@ public class DeclarationTemplateVersion implements Serializable {
 
     public void setTypeName(String typeName) {
         this.typeName = typeName;
-    }
-
-    public String getVersionNumber() {
-        return versionNumber;
-    }
-
-    public void setVersionNumber(String versionNumber) {
-        this.versionNumber = versionNumber;
     }
 
     public String getActualBeginVersionDate() {
