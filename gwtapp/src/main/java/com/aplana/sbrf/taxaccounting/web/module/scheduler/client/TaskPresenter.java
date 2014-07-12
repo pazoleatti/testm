@@ -166,11 +166,7 @@ public class TaskPresenter extends Presenter<TaskPresenter.MyView,
 
                 //Значение параметра
                 Widget paramValueWidget = ((Widget) ((HorizontalPanel) param.getWidget(PARAM_VALUE_POSITION)).getWidget(1));
-                if (paramValueWidget instanceof TextBox) {
-                    paramModel.setTaskParamValue(((TextBox) paramValueWidget).getValue());
-                } else {
-                    paramModel.setTaskParamDateValue(((DateMaskBoxPicker) paramValueWidget).getValue());
-                }
+                paramModel.setTaskParamValue(((TextBox) paramValueWidget).getValue());
                 params.add(paramModel);
             }
             action.setParams(params);

@@ -50,8 +50,7 @@ public class CreateTaskHandler extends AbstractActionHandler<CreateTaskAction, C
                 Map<String, TaskParam> taskParams = new HashMap<String, TaskParam>();
                 for (int i = 0; i < action.getParams().size(); i++) {
                     TaskParamModel param = action.getParams().get(i);
-                    String paramValue = (param.getTaskParamValue() != null) ? param.getTaskParamValue() :
-                            df.format(param.getTaskParamDateValue());
+                    String paramValue = param.getTaskParamValue();
                     taskParams.put(param.getTaskParamName(),
                             new TaskParam(i, param.getTaskParamName(),
                                     TaskParamType.getTypeById(param.getTaskParamType()), paramValue));

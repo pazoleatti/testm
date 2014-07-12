@@ -25,11 +25,6 @@ public class TaskParamModel implements Serializable {
      */
     private String taskParamValue = null;
 
-    /**
-     * Используется, если значение параметра - дата
-     */
-    private Date taskParamDateValue = null;
-
     public String getTaskParamName() {
         return taskParamName;
     }
@@ -54,14 +49,6 @@ public class TaskParamModel implements Serializable {
         this.taskParamValue = taskParamValue;
     }
 
-    public Date getTaskParamDateValue() {
-        return taskParamDateValue;
-    }
-
-    public void setTaskParamDateValue(Date taskParamDateValue) {
-        this.taskParamDateValue = taskParamDateValue;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -69,8 +56,6 @@ public class TaskParamModel implements Serializable {
 
         TaskParamModel model = (TaskParamModel) o;
 
-        if (taskParamDateValue != null ? !taskParamDateValue.equals(model.taskParamDateValue) : model.taskParamDateValue != null)
-            return false;
         if (taskParamName != null ? !taskParamName.equals(model.taskParamName) : model.taskParamName != null)
             return false;
         if (taskParamType != null ? !taskParamType.equals(model.taskParamType) : model.taskParamType != null)
@@ -86,7 +71,6 @@ public class TaskParamModel implements Serializable {
         int result = taskParamName != null ? taskParamName.hashCode() : 0;
         result = 31 * result + (taskParamType != null ? taskParamType.hashCode() : 0);
         result = 31 * result + (taskParamValue != null ? taskParamValue.hashCode() : 0);
-        result = 31 * result + (taskParamDateValue != null ? taskParamDateValue.hashCode() : 0);
         return result;
     }
 
@@ -96,7 +80,6 @@ public class TaskParamModel implements Serializable {
                 "taskParamName='" + taskParamName + '\'' +
                 ", taskParamType=" + taskParamType +
                 ", taskParamValue='" + taskParamValue + '\'' +
-                ", taskParamDateValue=" + taskParamDateValue +
                 '}';
     }
 }
