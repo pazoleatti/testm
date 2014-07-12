@@ -576,7 +576,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                 List<Department> childIds = departmentService.getAllChildren(recordId.intValue());
                 for (Department child : childIds){
                     if (recordId != child.getId() && child.isActive()){
-                        logger.error("Подразделение не может быть недействующим и иметь в составе действующие подразделения!");
+                        logger.error("Подразделение не может быть недействующим, если в его составе есть действующие подразделения!");
                         return;
                     }
                 }
