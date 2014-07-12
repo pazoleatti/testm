@@ -63,7 +63,7 @@ def refBookCache = [:]
 // Редактируемые атрибуты
 @Field
 def editableColumns = ['fullName', 'docNumber', 'docDate', 'dealNumber', 'dealDate', 'dealType',
-        'currencyCode', 'countryDealCode', 'incomeSum', 'outcomeSum', 'dealDoneDate']
+                       'currencyCode', 'countryDealCode', 'incomeSum', 'outcomeSum', 'dealDoneDate']
 
 // Автозаполняемые атрибуты
 @Field
@@ -76,7 +76,7 @@ def groupColumns = ['fullName', 'docNumber', 'docDate', 'dealType']
 // Проверяемые на пустые значения атрибуты
 @Field
 def nonEmptyColumns = ['fullName', 'docNumber', 'docDate', 'dealType', 'currencyCode', 'countryDealCode',
-        'price', 'total', 'dealDoneDate']
+                       'price', 'total', 'dealDoneDate']
 
 // Дата окончания отчетного периода
 @Field
@@ -422,32 +422,22 @@ void addData(def xml, int headRowCount) {
 
         // графа 3
         if (map != null) {
-            def text = row.cell[xmlIndexCol].text()
-            if ((text != null && !text.isEmpty() && !text.equals(map.INN_KIO?.stringValue)) || ((text == null || text.isEmpty()) && map.INN_KIO?.stringValue != null)) {
-                logger.warn("Проверка файла: Строка ${xlsIndexRow}, столбец ${xmlIndexCol + colOffset} " +
-                        "содержит значение, отсутствующее в справочнике «" + refBookFactory.get(9).getName()+"»!")
-            }
+            formDataService.checkReferenceValue(9, row.cell[xmlIndexCol].text(), map.INN_KIO?.stringValue, xlsIndexRow, xmlIndexCol + colOffset, logger, false)
         }
         xmlIndexCol++
 
         // графа 4.1
         if (map != null) {
-            def text = row.cell[xmlIndexCol].text()
             map = getRefBookValue(10, map.COUNTRY?.referenceValue)
-            if ((text != null && !text.isEmpty() && !text.equals(map?.NAME?.stringValue)) || ((text == null || text.isEmpty()) && map?.NAME?.stringValue != null)) {
-                logger.warn("Проверка файла: Строка ${xlsIndexRow}, столбец ${xmlIndexCol + colOffset} " +
-                        "содержит значение, отсутствующее в справочнике «" + refBookFactory.get(10).getName()+"»!")
+            if (map != null) {
+                formDataService.checkReferenceValue(10, row.cell[xmlIndexCol].text(), map.NAME?.stringValue, xlsIndexRow, xmlIndexCol + colOffset, logger, false)
             }
         }
         xmlIndexCol++
 
         // графа 4.2
         if (map != null) {
-            def text = row.cell[xmlIndexCol].text()
-            if ((text != null && !text.isEmpty() && !text.equals(map.CODE?.stringValue)) || ((text == null || text.isEmpty()) && map.CODE?.stringValue != null)) {
-                logger.warn("Проверка файла: Строка ${xlsIndexRow}, столбец ${xmlIndexCol + colOffset} " +
-                        "содержит значение, отсутствующее в справочнике «" + refBookFactory.get(10).getName()+"»!")
-            }
+            formDataService.checkReferenceValue(10, row.cell[xmlIndexCol].text(), map.CODE?.stringValue, xlsIndexRow, xmlIndexCol + colOffset, logger, false)
         }
         xmlIndexCol++
 
