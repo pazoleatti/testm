@@ -303,15 +303,6 @@ void checkItog(def dataRows) {
     // Имеющиеся строки итогов
     def itogRows = dataRows.findAll { it -> it.getAlias() != null }
 
-    // TODO в 0.3.7 перенести в ScriptUtils
-    // Последняя строка должна быть подитоговой
-    if (testItogRows.size() > itogRows.size() && dataRows.size() != 0 && dataRows.get(dataRows.size() - 1).getAlias() == null) {
-        String groupCols = getValuesByGroupColumn(dataRows.get(dataRows.size() - 1));
-        if (groupCols != null) {
-            logger.error(GROUP_WRONG_ITOG, groupCols);
-        }
-    }
-
     checkItogRows(dataRows, testItogRows, itogRows, groupColumns, logger, new GroupString() {
         @Override
         String getString(DataRow<Cell> row) {

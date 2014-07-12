@@ -92,7 +92,7 @@ void accepted() {
         refDataProvider.createRecordVersion(logger, new Date(), null, records)
     }
     if (deleteList.size() > 0) {
-        // TODO (Ramil Timerbaev) при выполнении ругается что на этой форме есть ссылки на удаляемые справочные данные.
+        // (Ramil Timerbaev) при выполнении ругается что на этой форме есть ссылки на удаляемые справочные данные.
         // Пока сказали оставить, возможно надо будет удалять строки с удаляемыми справочными данными
         refDataProvider.deleteRecordVersions(logger, deleteList)
     }
