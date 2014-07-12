@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.scheduler.api.entity;
 
+import com.aplana.sbrf.taxaccounting.scheduler.api.form.FormElement;
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Информация по jndi-именам задач
@@ -14,6 +16,14 @@ public class TaskJndiInfo implements Serializable {
 
     /** JNDI-имя задачи */
     private String jndi;
+
+    private List<FormElement> params;
+
+    public TaskJndiInfo(String name, String jndi, List<FormElement> params) {
+        this.name = name;
+        this.jndi = jndi;
+        this.params = params;
+    }
 
     public TaskJndiInfo(String name, String jndi) {
         this.name = name;
@@ -45,5 +55,13 @@ public class TaskJndiInfo implements Serializable {
                 "name='" + name + '\'' +
                 ", jndi='" + jndi + '\'' +
                 '}';
+    }
+
+    public List<FormElement> getParams() {
+        return params;
+    }
+
+    public void setParams(List<FormElement> params) {
+        this.params = params;
     }
 }

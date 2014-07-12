@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.scheduler.core.manager;
 
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.*;
+import com.aplana.sbrf.taxaccounting.scheduler.api.form.*;
 import com.aplana.sbrf.taxaccounting.scheduler.api.exception.TaskSchedulingException;
 import com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManager;
 import org.apache.commons.logging.Log;
@@ -154,7 +155,30 @@ public class TaskManagerMock implements TaskManager {
     @Override
     public List<TaskJndiInfo> getTasksJndi() throws TaskSchedulingException {
         List<TaskJndiInfo> taskInfo = new ArrayList<TaskJndiInfo>();
-        taskInfo.add(new TaskJndiInfo("test", "testJndi"));
+        List<FormElement> params = new ArrayList<FormElement>();
+        FormElement element1 = new TextBox();
+        element1.setName("Цена");
+        element1.setType(TaskParamType.LONG);
+        element1.setRequired(true);
+        params.add(element1);
+
+        // значение дата
+        FormElement element2 = new DateBox();
+        element2.setName("Дата");
+        element2.setType(TaskParamType.DATE);
+        params.add(element2);
+
+        // значение класс
+        SelectBox element3 = new SelectBox();
+        element3.setName("Какое то число");
+        element3.setType(TaskParamType.INT);
+        List<SelectBoxItem> selectBoxValues = new ArrayList<SelectBoxItem>();
+        selectBoxValues.add(new SelectBoxItem("ОДин", 1));
+        selectBoxValues.add(new SelectBoxItem("Два", 2));
+        element3.setValues(selectBoxValues);
+        params.add(element3);
+
+        taskInfo.add(new TaskJndiInfo( "test123", "testJndi", params));
         return taskInfo;
     }
 }
