@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.scheduler.shared;
 
+import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskJndiInfo;
 import com.gwtplatform.dispatch.shared.Result;
 
 import java.util.List;
@@ -11,13 +12,13 @@ import java.util.List;
 public class GetAvailableTasksResult implements Result {
     private static final long serialVersionUID = 1215417224661845534L;
 
-    private List<TaskInfoItem> jndiList;
+    private List<TaskJndiInfo> jndiList;
 
-    public List<TaskInfoItem> getJndiList() {
+    public List<TaskJndiInfo> getJndiList() {
         return jndiList;
     }
 
-    public void setJndiList(List<TaskInfoItem> jndiList) {
+    public void setJndiList(List<TaskJndiInfo> jndiList) {
         this.jndiList = jndiList;
     }
 }

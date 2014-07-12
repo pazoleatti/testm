@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.scheduler.api.exception.TaskSchedulingExcep
 import com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManager;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.GetAvailableTasksAction;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.GetAvailableTasksResult;
-import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.TaskInfoItem;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
@@ -36,9 +35,9 @@ public class GetAvailableTasksHandler extends AbstractActionHandler<GetAvailable
         GetAvailableTasksResult result = new GetAvailableTasksResult();
         try {
             List<TaskJndiInfo> taskInfo = taskManager.getTasksJndi();
-            List<TaskInfoItem> jndiList = new ArrayList<TaskInfoItem>();
+            List<TaskJndiInfo> jndiList = new ArrayList<TaskJndiInfo>();
             for (TaskJndiInfo info : taskInfo) {
-                jndiList.add(new TaskInfoItem(info.getName(), info.getJndi()));
+                jndiList.add(new TaskJndiInfo(info.getName(), info.getJndi()));
             }
             result.setJndiList(jndiList);
             return result;

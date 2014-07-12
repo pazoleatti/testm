@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.scheduler.client;
 
 import com.aplana.sbrf.taxaccounting.model.TaskParamModel;
 import com.aplana.sbrf.taxaccounting.model.TaskParamTypeValues;
+import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskJndiInfo;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.ParamUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
@@ -81,7 +82,7 @@ public class TaskPresenter extends Presenter<TaskPresenter.MyView,
 
         String getJndi();
 
-        void setJndiList(List<TaskInfoItem> jndiList);
+        void setJndiList(List<TaskJndiInfo> jndiList);
 
         void clearForm();
 

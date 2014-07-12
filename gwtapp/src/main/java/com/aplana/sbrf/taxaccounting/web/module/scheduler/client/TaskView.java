@@ -1,8 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.scheduler.client;
 
 import com.aplana.sbrf.taxaccounting.model.TaskParamModel;
+import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskJndiInfo;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.GetTaskInfoResult;
-import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.TaskInfoItem;
 import com.aplana.gwt.client.ListBoxWithTooltip;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.resources.client.CssResource;
@@ -41,7 +41,7 @@ public class TaskView extends ViewWithUiHandlers<TaskUiHandlers>
     TextBox numberOfRepeats;
 
     @UiField(provided = true)
-    ListBoxWithTooltip<TaskInfoItem> jndi;
+    ListBoxWithTooltip<TaskJndiInfo> jndi;
 
     @UiField
     Button addParamButton;
@@ -54,7 +54,7 @@ public class TaskView extends ViewWithUiHandlers<TaskUiHandlers>
     @UiField
     Label titleDesc;
 
-    private List<TaskInfoItem> jndiList;
+    private List<TaskJndiInfo> jndiList;
 
     interface LinkStyle extends CssResource {
         String separator();
@@ -66,9 +66,9 @@ public class TaskView extends ViewWithUiHandlers<TaskUiHandlers>
     @Inject
     @UiConstructor
     public TaskView(final Binder uiBinder) {
-        jndi = new ListBoxWithTooltip<TaskInfoItem>(new AbstractRenderer<TaskInfoItem>() {
+        jndi = new ListBoxWithTooltip<TaskJndiInfo>(new AbstractRenderer<TaskJndiInfo>() {
             @Override
-            public String render(TaskInfoItem info) {
+            public String render(TaskJndiInfo info) {
                 if (info != null) {
                     return info.getName();
                 }
@@ -130,7 +130,7 @@ public class TaskView extends ViewWithUiHandlers<TaskUiHandlers>
     }
 
     @Override
-    public void setJndiList(List<TaskInfoItem> jndiList) {
+    public void setJndiList(List<TaskJndiInfo> jndiList) {
         jndiList.add(null);
         this.jndiList = jndiList;
         jndi.setAcceptableValues(jndiList);
@@ -177,8 +177,8 @@ public class TaskView extends ViewWithUiHandlers<TaskUiHandlers>
         titleDesc.setText(title);
     }
 
-    private TaskInfoItem findJndiInfo(String jndi) {
-        for (TaskInfoItem info : jndiList) {
+    private TaskJndiInfo findJndiInfo(String jndi) {
+        for (TaskJndiInfo info : jndiList) {
             if (info != null && info.getJndi()!= null && info.getJndi().equals(jndi)) {
                 return info;
             }
