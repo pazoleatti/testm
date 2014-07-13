@@ -46,4 +46,9 @@ public class WDateBox extends ParamWidget {
     public void setValue(String value) {
         datePicker.setValue(DateTimeFormat.getFormat("yyyy-MM-dd").parse(value));
     }
+
+    @Override
+    public void setEnable(boolean enable) {
+        datePicker.setEnabled(enable);
+    }
 }

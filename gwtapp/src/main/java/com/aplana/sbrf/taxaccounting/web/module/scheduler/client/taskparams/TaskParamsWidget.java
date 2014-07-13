@@ -197,4 +197,16 @@ public class TaskParamsWidget extends HTMLPanel {
             }
         }
     }
+
+    /**
+     * Установить редактируемость полей ввода
+     *
+     * @param enable
+     */
+    public void setEnable(boolean enable){
+        for (ParamWidget widget : widgets) {
+            widget.setEnable(enable);
+        }
+
+    }
 }

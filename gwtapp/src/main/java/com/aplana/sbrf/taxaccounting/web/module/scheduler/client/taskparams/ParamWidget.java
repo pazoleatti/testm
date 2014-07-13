@@ -85,4 +85,11 @@ abstract class ParamWidget{
     public void setType(TaskParamType type) {
         this.type = type;
     }
+
+    /**
+     * Установить редактируемость поля воода
+     *
+     * @param enable
+     */
+    public abstract void setEnable(boolean enable);
 }

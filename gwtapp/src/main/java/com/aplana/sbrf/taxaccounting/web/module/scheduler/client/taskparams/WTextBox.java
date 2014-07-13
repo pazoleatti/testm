@@ -96,4 +96,9 @@ public class WTextBox extends ParamWidget {
     public void setValue(String value) {
         textBox.setValue(value);
     }
+
+    @Override
+    public void setEnable(boolean enable) {
+        textBox.setEnabled(enable);
+    }
 }

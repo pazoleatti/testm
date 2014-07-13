@@ -76,4 +76,9 @@ public class WSelectBox extends ParamWidget {
             }
         }
     }
+
+    @Override
+    public void setEnable(boolean enable) {
+        listBox.setEnabled(enable);
+    }
 }

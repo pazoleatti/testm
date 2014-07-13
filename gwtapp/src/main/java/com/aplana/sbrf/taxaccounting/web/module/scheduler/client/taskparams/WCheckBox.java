@@ -44,4 +44,9 @@ public class WCheckBox extends ParamWidget{
     public void setValue(String value) {
         checkBox.setValue(Boolean.valueOf(value));
     }
+
+    @Override
+    public void setEnable(boolean enable) {
+        checkBox.setEnabled(enable);
+    }
 }
