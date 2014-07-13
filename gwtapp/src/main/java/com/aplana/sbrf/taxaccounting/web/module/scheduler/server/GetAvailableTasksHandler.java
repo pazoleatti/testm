@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.scheduler.server;
 
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskJndiInfo;
 import com.aplana.sbrf.taxaccounting.scheduler.api.exception.TaskSchedulingException;
+import com.aplana.sbrf.taxaccounting.scheduler.api.form.FormElement;
 import com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManager;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.GetAvailableTasksAction;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.GetAvailableTasksResult;
@@ -35,11 +36,7 @@ public class GetAvailableTasksHandler extends AbstractActionHandler<GetAvailable
         GetAvailableTasksResult result = new GetAvailableTasksResult();
         try {
             List<TaskJndiInfo> taskInfo = taskManager.getTasksJndi();
-            List<TaskJndiInfo> jndiList = new ArrayList<TaskJndiInfo>();
-            for (TaskJndiInfo info : taskInfo) {
-                jndiList.add(new TaskJndiInfo(info.getName(), info.getJndi()));
-            }
-            result.setJndiList(jndiList);
+            result.setJndiList(taskInfo);
             return result;
         } catch (TaskSchedulingException e) {
             throw new ActionException("Ошибка получения списка задач, доступых для планирования", e);
