@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
@@ -125,10 +126,12 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                    logger.error(NOT_SET_ERROR, param.getCaption());
                    return;
                }
-           }
+            }
         }
-        configurationDao.save(model);
-	}
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            configurationDao.save(model);
+        }
+    }
 
     @Override
     public void checkReadWriteAccess(TAUserInfo userInfo, ConfigurationParamModel model, Logger logger) {

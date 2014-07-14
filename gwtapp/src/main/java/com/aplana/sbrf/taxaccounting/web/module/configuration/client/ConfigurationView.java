@@ -157,9 +157,9 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
         }
         rowsData.remove(selRow);
         if (rowsData == commonRowsData) {
-            setCommonConfigData(rowsData);
+            setCommonConfigData(rowsData, false);
         } else {
-            setFormConfigData(rowsData);
+            setFormConfigData(rowsData, false);
         }
         ((SingleSelectionModel<DataRow<Cell>>) table.getSelectionModel()).setSelected(selRow, false);
     }
@@ -190,7 +190,6 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
 		getUiHandlers().onCancel();
     }
 
-
     private static final Comparator<DataRow<Cell>> commonComparator = new Comparator<DataRow<Cell>>() {
         @Override
         public int compare(DataRow<Cell> o1, DataRow<Cell> o2) {
@@ -209,9 +208,33 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
         }
     };
 
+    private static final Comparator<DataRow<Cell>> formComparator = new Comparator<DataRow<Cell>>() {
+        @Override
+        public int compare(DataRow<Cell> o1, DataRow<Cell> o2) {
+            String name1 = o1.getCell("departmentColumn").getRefBookDereference();
+            String name2 = o2.getCell("departmentColumn").getRefBookDereference();
+            if (name1 == null && name2 == null) {
+                return 0;
+            }
+            if (name1 == null) {
+                return 1;
+            }
+            if (name2 == null) {
+                return -1;
+            }
+            return name1.compareTo(name2);
+        }
+    };
+
     @Override
     public void setCommonConfigData(List<DataRow<Cell>> rowsData) {
-        Collections.sort(rowsData, commonComparator);
+        setCommonConfigData(rowsData, true);
+    }
+
+    private void setCommonConfigData(List<DataRow<Cell>> rowsData, boolean needSort) {
+        if (needSort) {
+            Collections.sort(rowsData, commonComparator);
+        }
         commonRowsData = rowsData;
         commonTable.setVisibleRange(new Range(0, rowsData.size()));
         commonTable.setRowCount(rowsData.size());
@@ -220,11 +243,18 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
 
 	@Override
 	public void setFormConfigData(List<DataRow<Cell>> rowsData) {
+        setFormConfigData(rowsData, true);
+	}
+
+    private void setFormConfigData(List<DataRow<Cell>> rowsData, boolean needSort) {
+        if (needSort) {
+            Collections.sort(rowsData, formComparator);
+        }
         formRowsData = rowsData;
         formTable.setVisibleRange(new Range(0, rowsData.size()));
         formTable.setRowCount(rowsData.size());
         formTable.setRowData(0, rowsData);
-	}
+    }
 
     @Override
     public RefBookColumn getParamColumn() {
@@ -264,5 +294,11 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
     @Override
     public List<DataRow<Cell>> getCommonRowsData() {
         return commonRowsData;
+    }
+
+    @Override
+    public void clearSelection() {
+        ((SingleSelectionModel)commonTable.getSelectionModel()).clear();
+        ((SingleSelectionModel)formTable.getSelectionModel()).clear();
     }
 }

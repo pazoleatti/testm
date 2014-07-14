@@ -48,6 +48,7 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
         StringColumn getValueColumn();
         List<DataRow<Cell>> getFormRowsData();
         List<DataRow<Cell>> getCommonRowsData();
+        void clearSelection();
 	}
 
 	private final DispatchAsync dispatcher;
@@ -337,7 +338,7 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
     public void onCheckReadWriteAccess(DataRow<Cell> selRow, boolean common) {
         LogCleanEvent.fire(this);
         ConfigurationParamModel model = new ConfigurationParamModel();
-        CheckReadWriteAccessAction action = new CheckReadWriteAccessAction();
+        final CheckReadWriteAccessAction action = new CheckReadWriteAccessAction();
         action.setModel(model);
         // Преобразование данных таблиц в ConfigurationParamModel
         List<DataRow<Cell>> commonRowsData = new ArrayList<DataRow<Cell>>();
@@ -354,7 +355,7 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
             @Override
             public void onSuccess(CheckReadWriteAccessResult result) {
                 LogAddEvent.fire(ConfigurationPresenter.this, result.getUuid());
-                placeManager.revealCurrentPlace();
+                getView().clearSelection();
             }
         }, this));
     }
