@@ -207,12 +207,11 @@ void calc() {
             row.reserveCreation = calc16(row)
             // графа 17
             row.reserveRecovery = calc17(row)
-        }
-
-        // для подитоговых значений
-        def issuerId = getRefBookValue(84, row.currency)?.ISSUER?.value
-        if (issuerId != null && !totalGroups.contains(issuerId)) {
-            totalGroups.add(issuerId)
+            // для подитоговых значений
+            def issuerId = getRefBookValue(84, row.currency)?.ISSUER?.value
+            if (issuerId != null && !totalGroups.contains(issuerId)) {
+                totalGroups.add(issuerId)
+            }
         }
     }
 
@@ -359,7 +358,7 @@ void logicCheck() {
         }
 
         if (getRate(row, getReportPeriodEndDate()) != row.rubCourse) {
-            loggerError(errorMsg + "Значение графы «${getColumnName(row, 'rubCourse')}» отсутствует в справочнике «Курсы валют»!")
+            loggerError(row, errorMsg + "Значение графы «${getColumnName(row, 'rubCourse')}» отсутствует в справочнике «Курсы валют»!")
         }
 
         // 18. Проверка итоговых значений по эмитентам
