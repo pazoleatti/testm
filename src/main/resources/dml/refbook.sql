@@ -521,3 +521,9 @@ INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, VISIBLE
 INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, VISIBLE, WIDTH) VALUES (1041, 105, 'Наименование', 'NAME', 1, 1, 1, 40);
 
 
+insert into ref_book (id, name, visible, type, read_only) values (106, 'Коды, определяющие период бухгалтерской отчетности', 1, 0, 1);
+
+insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, visible, width, required, is_unique, max_length) values (1061, 106, 'Код', 'CODE', 1, 1, 1, 10, 1, 1, 2);
+insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, visible, width, required, is_unique, max_length) values (1062, 106, 'Наименование', 'NAME', 1, 2, 1, 50, 1, 0, 255);
+
+
