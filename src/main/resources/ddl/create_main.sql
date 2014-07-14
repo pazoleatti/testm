@@ -313,7 +313,8 @@ create table income_101 (
   outcome_debet_remains  number(22,4),
   outcome_credit_remains number(22,4),
   account_name           varchar2(255 char),
-  department_id          number(9) not null
+  department_id          number(9) not null,
+  account_period_id 	 number(9)
 );
 comment on table income_101 is 'Оборотная ведомость (Форма 0409101-СБ)';
 comment on column income_101.id is 'Код записи';
@@ -327,6 +328,7 @@ comment on column income_101.outcome_debet_remains is 'Исходящие ост
 comment on column income_101.outcome_credit_remains is 'Исходящие остатки по кредиту';
 comment on column income_101.account_name is 'Название счёта';
 comment on column income_101.department_id is 'Код подразделения';
+comment on column income_101.account_period_id is 'Идентификатор периода и подразделения БО';
 
 create sequence seq_income_101 start with 100;
 -------------------------------------------------------------------------------------------------------------------------------------------
@@ -336,7 +338,8 @@ create table income_102 (
   opu_code         varchar2(25 char) not null,
   total_sum        number(22,4),
   item_name        varchar2(255 char),
-  department_id    number(9) not null
+  department_id    number(9) not null,
+  account_period_id number(9)
   );
 comment on table income_102 is 'Отчет о прибылях и убытках (Форма 0409102-СБ)';
 comment on column income_102.id is 'Код записи';
@@ -345,6 +348,7 @@ comment on column income_102.opu_code is 'Код ОПУ';
 comment on column income_102.total_sum is 'Сумма';
 comment on column income_102.item_name is 'Наименование статьи';
 comment on column income_102.department_id is 'Код подразделения';
+comment on column income_102.account_period_id is 'Идентификатор периода и подразделения БО';
 
 create sequence seq_income_102 start with 100;
 ---------------------------------------------------------------------------------------------------
@@ -787,4 +791,20 @@ COMMENT ON COLUMN event.id IS 'Идентификатор события';
 COMMENT ON COLUMN event.name IS 'Наименование события';
 
  create sequence seq_template_changes start with 10000;
+--------------------------------------------------------------------------------------------------------
+create table account_period
+(
+id number(9) not null,
+year number(4) not null,
+code_id number(18) not null,
+department_id number(9) not null
+);
+
+comment on table account_period is 'Периоды и подразделения бухг. отчетности (БО)';
+comment on column account_period.id is 'Идентификатор периода БО'; 
+comment on column account_period.year is 'Год';
+comment on column account_period.code_id is 'Идентификатор кода периода БО';
+comment on column account_period.department_id is 'Идентификатор департамента';
+
+create sequence seq_account_period start with 1 increment by 1;
 --------------------------------------------------------------------------------------------------------
