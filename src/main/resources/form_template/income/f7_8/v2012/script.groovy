@@ -173,9 +173,6 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
                     def boolean required = true) {
-    if (value == null || value == '') {
-        return null
-    }
     return formDataService.getRefBookRecordImport(refBookId, recordCache, providerCache, refBookCache, alias, value,
             getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
 }
@@ -762,59 +759,65 @@ void addData(def xml, int headRowCount) {
 
         // графа 5 - атрибут 809 - ISSUER - «Эмитент», справочник 84 «Ценные бумаги»
         def record100 = getRecordImport(100, 'NAME', row.cell[5].text(), xlsIndexRow, 5 + colOffset)
-        // поиск записи по эмитенту и серии (графам 5 и 6)
-        String filter = "ISSUER = " + record100?.record_id?.value?.toString() + " and LOWER(SHORTNAME) = LOWER('" + row.cell[6].text() + "')"
-        def records = refBookFactory.getDataProvider(84).getRecords(reportPeriodEndDate, null, filter, null)
-        def record84 = null
-        if (records.size() == 1) {
-            record84 = records[0]
-            newRow.securityName = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+
+        if (record100 != null) {
+            // поиск записи по эмитенту и серии (графам 5 и 6)
+            String filter = "ISSUER = " + (record100?.record_id?.value?.toString() ?: 0) + " and LOWER(SHORTNAME) = LOWER('" + (row.cell[6].text() ?: '') + "')"
+            def records = refBookFactory.getDataProvider(84).getRecords(reportPeriodEndDate, null, filter, null)
+            def record84 = null
+            if (records.size() == 1) {
+                record84 = records[0]
+                newRow.securityName = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+            } else {
+                logger.error("Проверка файла: Строка ${xlsIndexRow} содержит значение, отсутствующее в справочнике " +
+                        "«" + refBookFactory.get(84).getName() + "»!")
+            }
+
+            if (record84 != null) {
+                // графа 6 - зависит от графы 5 - атрибут 812 - SHORTNAME - «Краткое название ценной бумаги / Выпуск», справочник 84 «Ценные бумаги»
+                indexCell = 6
+                def value1 = record84?.SHORTNAME?.value
+                def value2 = row.cell[indexCell].text()
+                formDataService.checkReferenceValue(84, value1, value2, xlsIndexRow, indexCell + colOffset, logger, true)
+
+                // графа 7 - зависит от графы 5 - атрибут 815 - TYPE - «Тип (вид) ценной бумаги», справочник 84 «Ценные бумаги»
+                indexCell = 7
+                def record89 = getRecordImport(89, 'CODE', row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset)
+                if (record89 != null) {
+                    value1 = record89?.record_id?.value?.toString()
+                    value2 = record84?.TYPE?.value?.toString()
+                    formDataService.checkReferenceValue(84, value1, value2, xlsIndexRow, indexCell + colOffset, logger, true)
+                }
+
+                // графа 8 - зависит от графы 5 - атрибут 869 - SIGN - «Признак ценной бумаги», справочник 84 «Ценные бумаги»
+                indexCell = 8
+                def record62 = getRecordImport(62, 'CODE', row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset)
+                if (record62 != null) {
+                    value1 = record62?.record_id?.value?.toString()
+                    value2 = record84?.SIGN?.value?.toString()
+                    formDataService.checkReferenceValue(84, value1, value2, xlsIndexRow, indexCell + colOffset, logger, true)
+                }
+
+                // графа 9 - зависит от графы 5 - атрибут 810 - CODE - «Цифровой код валюты выпуска», справочник 84 «Ценные бумаги»
+                indexCell = 9
+                def record15 = getRecordImport(15, 'CODE', row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset)
+                if (record15 != null) {
+                    value1 = record15?.record_id?.value?.toString()
+                    value2 = record84?.CODE_CUR?.value?.toString()
+                    formDataService.checkReferenceValue(84, value1, value2, xlsIndexRow, indexCell + colOffset, logger, true)
+                }
+
+                // графа 10 - зависит от графы 5 - атрибут 810 - NAME - «Наименование валюты», справочник 84 «Ценные бумаги»
+                indexCell = 10
+                if (record15 != null) {
+                    value1 = record15?.NAME?.value
+                    value2 = row.cell[indexCell].text()
+                    formDataService.checkReferenceValue(84, value1, value2, xlsIndexRow, indexCell + colOffset, logger, true)
+                }
+            }
         } else {
             logger.error("Проверка файла: Строка ${xlsIndexRow} содержит значение, отсутствующее в справочнике " +
-                    "«" + refBookFactory.get(84).getName() + "»!")
-        }
-
-        if (record84 != null) {
-            // графа 6 - зависит от графы 5 - атрибут 812 - SHORTNAME - «Краткое название ценной бумаги / Выпуск», справочник 84 «Ценные бумаги»
-            indexCell = 6
-            def value1 = record84?.SHORTNAME?.value
-            def value2 = row.cell[indexCell].text()
-            formDataService.checkReferenceValue(84, value1, value2, xlsIndexRow, indexCell + colOffset, logger, true)
-
-            // графа 7 - зависит от графы 5 - атрибут 815 - TYPE - «Тип (вид) ценной бумаги», справочник 84 «Ценные бумаги»
-            indexCell = 7
-            def record89 = getRecordImport(89, 'CODE', row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset)
-            if (record89 != null) {
-                value1 = record89?.record_id?.value?.toString()
-                value2 = record84?.TYPE?.value?.toString()
-                formDataService.checkReferenceValue(84, value1, value2, xlsIndexRow, indexCell + colOffset, logger, true)
-            }
-
-            // графа 8 - зависит от графы 5 - атрибут 869 - SIGN - «Признак ценной бумаги», справочник 84 «Ценные бумаги»
-            indexCell = 8
-            def record62 = getRecordImport(62, 'CODE', row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset)
-            if (record62 != null) {
-                value1 = record62?.record_id?.value?.toString()
-                value2 = record84?.SIGN?.value?.toString()
-                formDataService.checkReferenceValue(84, value1, value2, xlsIndexRow, indexCell + colOffset, logger, true)
-            }
-
-            // графа 9 - зависит от графы 5 - атрибут 810 - CODE - «Цифровой код валюты выпуска», справочник 84 «Ценные бумаги»
-            indexCell = 9
-            def record15 = getRecordImport(15, 'CODE', row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset)
-            if (record15 != null) {
-                value1 = record15?.record_id?.value?.toString()
-                value2 = record84?.CODE_CUR?.value?.toString()
-                formDataService.checkReferenceValue(84, value1, value2, xlsIndexRow, indexCell + colOffset, logger, true)
-            }
-
-            // графа 10 - зависит от графы 5 - атрибут 810 - NAME - «Наименование валюты», справочник 84 «Ценные бумаги»
-            indexCell = 10
-            if (record15 != null) {
-                value1 = record15?.NAME?.value
-                value2 = row.cell[indexCell].text()
-                formDataService.checkReferenceValue(84, value1, value2, xlsIndexRow, indexCell + colOffset, logger, true)
-            }
+                    "«" + refBookFactory.get(100).getName() + "»!")
         }
 
         // графа 11
@@ -984,59 +987,64 @@ void addTransportData(def xml) {
 
         // графа 5 - атрибут 809 - ISSUER - «Эмитент», справочник 84 «Ценные бумаги»
         def record100 = getRecordImport(100, 'NAME', row.cell[5].text(), rnuIndexRow, 5 + colOffset)
-        // поиск записи по эмитенту и серии (графам 5 и 6)
-        String filter = "ISSUER = " + record100?.record_id?.value?.toString() + " and LOWER(SHORTNAME) = LOWER('" + row.cell[6].text() + "')"
-        def records = refBookFactory.getDataProvider(84).getRecords(reportPeriodEndDate, null, filter, null)
-        def record84 = null
-        if (records.size() == 1) {
-            record84 = records[0]
-            newRow.securityName = record84.get(RefBook.RECORD_ID_ALIAS).numberValue
+        if (record100 != null) {
+            // поиск записи по эмитенту и серии (графам 5 и 6)
+            String filter = "ISSUER = " + record100?.record_id?.value?.toString() + " and LOWER(SHORTNAME) = LOWER('" + (row.cell[6].text() ?: '') + "')"
+            def records = refBookFactory.getDataProvider(84).getRecords(reportPeriodEndDate, null, filter, null)
+            def record84 = null
+            if (records.size() == 1) {
+                record84 = records[0]
+                newRow.securityName = record84.get(RefBook.RECORD_ID_ALIAS).numberValue
+            } else {
+                logger.error("Проверка файла: Строка ${rnuIndexRow} содержит значение, отсутствующее в справочнике " +
+                        "«" + refBookFactory.get(84).getName() + "»!")
+            }
+
+            if (record84 != null) {
+                // графа 6 - зависит от графы 5 - атрибут 812 - SHORTNAME - «Краткое название ценной бумаги / Выпуск», справочник 84 «Ценные бумаги»
+                indexCell = 6
+                def value1 = record84?.SHORTNAME?.value
+                def value2 = row.cell[indexCell].text()
+                formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, indexCell + colOffset, logger, true)
+
+                // графа 7 - зависит от графы 5 - атрибут 815 - TYPE - «Тип (вид) ценной бумаги», справочник 84 «Ценные бумаги»
+                indexCell = 7
+                def record89 = getRecordImport(89, 'CODE', row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset)
+                if (record89 != null) {
+                    value1 = record89?.record_id?.value?.toString()
+                    value2 = record84?.TYPE?.value?.toString()
+                    formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, indexCell + colOffset, logger, true)
+                }
+
+                // графа 8 - зависит от графы 5 - атрибут 869 - SIGN - «Признак ценной бумаги», справочник 84 «Ценные бумаги»
+                indexCell = 8
+                def record62 = getRecordImport(62, 'CODE', row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset)
+                if (record62 != null) {
+                    value1 = record62?.record_id?.value?.toString()
+                    value2 = record84?.SIGN?.value?.toString()
+                    formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, indexCell + colOffset, logger, true)
+                }
+
+                // графа 9 - зависит от графы 5 - атрибут 810 - CODE - «Цифровой код валюты выпуска», справочник 84 «Ценные бумаги»
+                indexCell = 9
+                def record15 = getRecordImport(15, 'CODE', row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset)
+                if (record15 != null) {
+                    value1 = record15?.record_id?.value?.toString()
+                    value2 = record84?.CODE_CUR?.value?.toString()
+                    formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, indexCell + colOffset, logger, true)
+                }
+
+                // графа 10 - зависит от графы 5 - атрибут 810 - NAME - «Наименование валюты», справочник 84 «Ценные бумаги»
+                indexCell = 10
+                if (record15 != null) {
+                    value1 = record15?.NAME?.value
+                    value2 = row.cell[indexCell].text()
+                    formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, indexCell + colOffset, logger, true)
+                }
+            }
         } else {
-            logger.error("Проверка файла: Строка ${rnuIndexRow} содержит значение, отсутствующее в справочнике " +
-                    "«" + refBookFactory.get(84).getName() + "»!")
-        }
-
-        if (record84 != null) {
-            // графа 6 - зависит от графы 5 - атрибут 812 - SHORTNAME - «Краткое название ценной бумаги / Выпуск», справочник 84 «Ценные бумаги»
-            indexCell = 6
-            def value1 = record84?.SHORTNAME?.value
-            def value2 = row.cell[indexCell].text()
-            formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, indexCell + colOffset, logger, true)
-
-            // графа 7 - зависит от графы 5 - атрибут 815 - TYPE - «Тип (вид) ценной бумаги», справочник 84 «Ценные бумаги»
-            indexCell = 7
-            def record89 = getRecordImport(89, 'CODE', row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset)
-            if (record89 != null) {
-                value1 = record89?.record_id?.value?.toString()
-                value2 = record84?.TYPE?.value?.toString()
-                formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, indexCell + colOffset, logger, true)
-            }
-
-            // графа 8 - зависит от графы 5 - атрибут 869 - SIGN - «Признак ценной бумаги», справочник 84 «Ценные бумаги»
-            indexCell = 8
-            def record62 = getRecordImport(62, 'CODE', row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset)
-            if (record62 != null) {
-                value1 = record62?.record_id?.value?.toString()
-                value2 = record84?.SIGN?.value?.toString()
-                formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, indexCell + colOffset, logger, true)
-            }
-
-            // графа 9 - зависит от графы 5 - атрибут 810 - CODE - «Цифровой код валюты выпуска», справочник 84 «Ценные бумаги»
-            indexCell = 9
-            def record15 = getRecordImport(15, 'CODE', row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset)
-            if (record15 != null) {
-                value1 = record15?.record_id?.value?.toString()
-                value2 = record84?.CODE_CUR?.value?.toString()
-                formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, indexCell + colOffset, logger, true)
-            }
-
-            // графа 10 - зависит от графы 5 - атрибут 810 - NAME - «Наименование валюты», справочник 84 «Ценные бумаги»
-            indexCell = 10
-            if (record15 != null) {
-                value1 = record15?.NAME?.value
-                value2 = row.cell[indexCell].text()
-                formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, indexCell + colOffset, logger, true)
-            }
+            logger.error("Проверка файла: Строка ${xlsIndexRow} содержит значение, отсутствующее в справочнике " +
+                    "«" + refBookFactory.get(100).getName() + "»!")
         }
 
         // графа 11
