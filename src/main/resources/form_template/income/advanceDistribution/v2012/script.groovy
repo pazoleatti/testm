@@ -489,6 +489,15 @@ void consolidation() {
                         }
                         def isNew = (newRow == null)
                         newRow = newRow ?: formData.createDataRow()
+                        if (isNew) {
+                            editableColumns.each {
+                                newRow.getCell(it).editable = true
+                                newRow.getCell(it).setStyleAlias('Редактируемая')
+                            }
+                            autoFillColumns.each {
+                                newRow.getCell(it).setStyleAlias('Автозаполняемая')
+                            }
+                        }
 
                         newRow.regionBank = row.regionBank
                         newRow.regionBankDivision = row.regionBankDivision
