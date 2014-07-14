@@ -189,8 +189,8 @@ void calc() {
     // список групп кодов классификации для которых надо будет посчитать суммы
     def totalGroups = []
 
-    if (!getBalancePeriod() && !isConsolidated) {
-        for (row in dataRows) {
+    for (row in dataRows) {
+        if (!getBalancePeriod() && !isConsolidated) {
             // строка из предыдущего периода
             def prevRow = getPrevRowByColumn4(prevDataRows, row.tradeNumber)
             // графа 6
@@ -207,11 +207,11 @@ void calc() {
             row.reserveCreation = calc16(row)
             // графа 17
             row.reserveRecovery = calc17(row)
-            // для подитоговых значений
-            def issuerId = getRefBookValue(84, row.currency)?.ISSUER?.value
-            if (issuerId != null && !totalGroups.contains(issuerId)) {
-                totalGroups.add(issuerId)
-            }
+        }
+        // для подитоговых значений
+        def issuerId = getRefBookValue(84, row.currency)?.ISSUER?.value
+        if (issuerId != null && !totalGroups.contains(issuerId)) {
+            totalGroups.add(issuerId)
         }
     }
 
