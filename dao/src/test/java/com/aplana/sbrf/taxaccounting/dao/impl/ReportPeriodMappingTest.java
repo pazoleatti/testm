@@ -28,19 +28,16 @@ public class ReportPeriodMappingTest {
 
     @Test
     public void getByTaxPeriodAndDictTest() {
-
-        int taxPeriodId = 31;
-        int dictTaxPeriodId = 21;
+        int taxPeriodId = 21;
+        int dictTaxPeriodId = 99; // TODO Левыкин: Тут какая-то ошибка в ДАО, имеется в виду не dictTaxPeriodId, а код периода «99»!
 
         Integer reportPeriodId = mappingDao.getByTaxPeriodAndDict(taxPeriodId, dictTaxPeriodId);
 
         ReportPeriod reportPeriod = periodDao.get(reportPeriodId);
 
-        assertEquals(Integer.valueOf(4), reportPeriod.getId());
-        assertEquals("Income report period 1", reportPeriod.getName());
-        assertEquals(Integer.valueOf(31), reportPeriod.getTaxPeriod().getId());
+        assertEquals(Integer.valueOf(3), reportPeriod.getId());
+        assertEquals("VAT report period 1", reportPeriod.getName());
+        assertEquals(taxPeriodId, reportPeriod.getTaxPeriod().getId().intValue());
         assertEquals(21, reportPeriod.getDictTaxPeriodId());
-
     }
-
 }

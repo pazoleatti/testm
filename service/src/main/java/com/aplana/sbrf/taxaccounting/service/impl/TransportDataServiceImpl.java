@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
-import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
@@ -22,9 +22,15 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * @author Dmitriy Levykin
@@ -49,7 +55,7 @@ public class TransportDataServiceImpl implements TransportDataService {
     private FormTemplateService formTemplateService;
 
     @Autowired
-    private ReportPeriodDao reportPeriodDao;
+    private PeriodService periodService;
 
     @Autowired
     private FormDataScriptingService formDataScriptingService;
@@ -60,11 +66,11 @@ public class TransportDataServiceImpl implements TransportDataService {
     @Autowired
     private DepartmentService departmentService;
 
-//    @Autowired
-//    private FormDataAccessService formDataAccessService;
-//
-//    @Autowired
-//    private FormTypeService formTypeService;
+    @Autowired
+    private DepartmentFormTypeDao departmentFormTypeDao;
+
+    @Autowired
+    private FormTypeService formTypeService;
 
     final static String USER_NOT_FOUND_ERROR = "Не определен пользователь!";
     final static String ACCESS_DENIED_ERROR = "У пользователя нет прав для загрузки транспортных файлов!";
@@ -72,26 +78,30 @@ public class TransportDataServiceImpl implements TransportDataService {
     final static String EMPTY_INPUT_STREAM_ERROR = "Поток данных пуст!";
     final static String NO_CATALOG_UPLOAD_ERROR = "Не указан каталог загрузки в конфигурационных параметрах АС «Учет налогов»!";
     final static String NO_CATALOG_ERROR_ERROR = "Не указан каталог ошибок в конфигурационных параметрах АС «Учет налогов»!";
-    final static String UPLOAD_SUCCESS = "Файл «%s» помещен в каталог загрузки «%s».";
+    final static String UPLOAD_FILE_SUCCESS = "Файл «%s» помещен в каталог загрузки «%s».";
+    final static String UPLOAD_FILE_REPLACE = "В каталоге загрузки ранее загруженный файл «%s» был заменен!";
+    final static String UPLOAD_ALL = "Загрузка транспортных файлов в каталог загрузки завершена.";
     final static String NO_IMPORT_FILES_ERROR = "В каталоге загрузки не найдены файлы!";
     final static String EXIST_FORM_DATA_ERROR = "Налоговая форма существует и имеет статус «Создана».";
     final static String IMPORT_FORM_DATA_REPORT = "Завершена процедура загрузки транспортных файлов, содержащих данные налоговых форм. Файлов загружено: %d. Файлов отклонено: %d.";
-    final static String IMPORT_REF_BOOK_DATA_REPORT = "Завершена процедура загрузки транспортных файлов, содержащих данные справочников. Файлов загружено: %d. Файлов отклонено: %d.";
     final static String IMPORT_FORM_DATA_SCRIPT_ERROR = "При загрузке данных налоговой формы из транспортного файла произошли ошибки!";
     final static String MOVE_ARCHIVE_ERROR = "Ошибка при архивировании транспортного файла!";
     final static String MOVE_ARCHIVE_SUCCESS = "Перенос «%s» в каталог архива успешно выполнен!";
     final static String WRONG_NAME = "Файл «%s» не загружен, т.к. имеет некорректный формат имени!";
-
+    final static String WRONG_NAME_DEPARTMENT = "Код подразделения «%s» не существует в АС «Учет налогов»!";
+    final static String WRONG_NAME_FORM_TYPE = "Код налоговой формы «%s» не существует в АС «Учет налогов»!";
+    final static String ASSIGNATION_ERROR = "Файл «%s» не загружен, т.к. текущий пользователь не имеет доступа к содержащейся в нем налоговой форме «%s» подразделения «%s»!";
+    final static String COPY_ERROR = "Файл «%s не загружен: %s!";
     final static String ZIP_ENCODING = "cp866";
     final static String LOG_FILE_NAME = "Ошибки.txt";
 
     @Override
-    public void uploadFile(TAUserInfo userInfo, int departmentId, String fileName, InputStream inputStream, Logger logger)
-            throws IOException {
+    public boolean uploadFile(TAUserInfo userInfo, int departmentId, String fileName, InputStream inputStream, Logger logger) {
         // Проверка прав
         if (userInfo == null) {
             logger.error(USER_NOT_FOUND_ERROR);
-            return;
+            logger.error(UPLOAD_ALL);
+            return false;
         }
 
         if (!userInfo.getUser().hasRole(TARole.ROLE_OPER)
@@ -99,27 +109,20 @@ public class TransportDataServiceImpl implements TransportDataService {
                 && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
                 && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
             logger.error(ACCESS_DENIED_ERROR);
-            return;
+            logger.error(UPLOAD_ALL);
+            return false;
         }
 
         if (fileName == null) {
             logger.error(NO_FILE_NAME_ERROR);
-            return;
+            logger.error(UPLOAD_ALL);
+            return false;
         }
 
         if (inputStream == null) {
             logger.error(EMPTY_INPUT_STREAM_ERROR);
-            return;
-        }
-
-        // Конфигурационные параметры
-        ConfigurationParamModel model = configurationDao.getAll();
-
-        List<String> uploadPathList = model.get(ConfigurationParam.FORM_UPLOAD_DIRECTORY, departmentId);
-
-        if (uploadPathList == null || uploadPathList.isEmpty()) {
-            logger.error(NO_CATALOG_UPLOAD_ERROR);
-            return;
+            logger.error(UPLOAD_ALL);
+            return false;
         }
 
         // Список загруженных ТФ для ЖА
@@ -129,86 +132,161 @@ public class TransportDataServiceImpl implements TransportDataService {
             // Архив — извлекаем все содержимое
             ZipArchiveInputStream zais = new ZipArchiveInputStream(inputStream, ZIP_ENCODING);
             ArchiveEntry entry;
-            while ((entry = zais.getNextEntry()) != null) {
-                if (checkFormDataAccess(userInfo.getUser(), entry.getName(), logger)) {
-                    copyFileFromStream(zais, uploadPathList.get(0), entry.getName(), logger);
-                    fileNames.add(entry.getName());
+            try {
+                while ((entry = zais.getNextEntry()) != null) {
+                    ConfigurationParam configurationParam = checkFormDataAccess(entry.getName(), logger);
+                    if (configurationParam != null) {
+                        int departmentConfId = departmentId;
+                        if (configurationParam.isCommon()) {
+                            departmentConfId = DepartmentType.ROOT_BANK.getCode();
+                        }
+                        try {
+                            if (configurationParam != null
+                                    && copyFileFromStream(zais, getUploadPath(configurationParam, departmentConfId, logger),
+                                    entry.getName(), logger)) {
+                                fileNames.add(entry.getName());
+                            }
+                        } catch (IOException e) {
+                            logger.error(COPY_ERROR, e.getMessage());
+                        }
+                    }
                 }
+            } catch (IOException e) {
+                logger.error(COPY_ERROR, e.getMessage());
             }
             IOUtils.closeQuietly(zais);
         } else {
             // Не архив
-            if (checkFormDataAccess(userInfo.getUser(), fileName, logger)) {
-                copyFileFromStream(inputStream, uploadPathList.get(0), fileName, logger);
-                fileNames.add(fileName);
+            ConfigurationParam configurationParam = checkFormDataAccess(fileName, logger);
+            if (configurationParam != null) {
+                int departmentConfId = departmentId;
+                if (configurationParam.isCommon()) {
+                    departmentConfId = DepartmentType.ROOT_BANK.getCode();
+                }
+                try {
+                    if (configurationParam != null
+                            && copyFileFromStream(inputStream, getUploadPath(configurationParam, departmentConfId, logger),
+                            fileName, logger)) {
+                        fileNames.add(fileName);
+                    }
+                } catch (IOException e) {
+                    logger.error(COPY_ERROR, e.getMessage());
+                }
             }
         }
+
         IOUtils.closeQuietly(inputStream);
+
+        if (fileNames.isEmpty()) {
+            logger.error(UPLOAD_ALL);
+            return false;
+        }
+
+        logger.info(UPLOAD_ALL);
 
         // ЖА
         String msg = StringUtils.collectionToDelimitedString(fileNames, "; ");
         auditService.add(FormDataEvent.UPLOAD_TRANSPORT_FILE, userInfo, userInfo.getUser().getDepartmentId(), null,
                 null, null, null, msg);
+
+        return true;
+    }
+
+    /**
+     * Получение пути из конф. параметров
+     */
+    private String getUploadPath(ConfigurationParam configurationParam, int departmentId, Logger logger) {
+        ConfigurationParamModel model = configurationDao.getAll();
+        List<String> uploadPathList = model.get(configurationParam, departmentId);
+        if (uploadPathList == null || uploadPathList.isEmpty()) {
+            logger.error(NO_CATALOG_UPLOAD_ERROR);
+            return null;
+        }
+        return uploadPathList.get(0);
     }
 
     /**
      * Проверка имени файла и проверка доступа к соответствующим НФ
      * http://conf.aplana.com/pages/viewpage.action?pageId=13111363
      */
-    private boolean checkFormDataAccess(TAUser tAUser, String fileName, Logger logger) {
-        boolean isRefBook = refBookExternalService.isDiasoftFile(fileName);
+    private ConfigurationParam checkFormDataAccess(String fileName, Logger logger) {
+        boolean isDiasoftRefBook = refBookExternalService.isDiasoftFile(fileName);
         boolean isFormData = TransportDataParam.isValidName(fileName);
 
-        if (isRefBook) {
+        if (isDiasoftRefBook) {
             // Справочники не проверяем
-            return true;
+            return ConfigurationParam.DIASOFT_UPLOAD_DIRECTORY;
         }
 
-        if (!isRefBook && !isFormData) {
-            logger.info(WRONG_NAME, fileName);
-            return false;
+        // Не справочники Diasoft и не ТФ НФ
+        if (!isDiasoftRefBook && !isFormData) {
+            logger.warn(WRONG_NAME, fileName);
+            return null;
         }
 
-        try {
-            TransportDataParam transportDataParam = TransportDataParam.valueOf(fileName);
-            int departmentCode = Integer.valueOf(transportDataParam.getDepartmentCode());
-            Department formDepartment = departmentService.getDepartmentByCode(departmentCode);
-            String formCode = transportDataParam.getFormCode();
-            String reportPeriodCode = transportDataParam.getReportPeriodCode();
+        //// НФ
 
-            // Не задан код подразделения или код формы
-            if (formDepartment == null || formCode == null || reportPeriodCode == null) {
-                logger.info(WRONG_NAME, fileName);
-                return false;
-            }
+        // Параметры из имени файла
+        TransportDataParam transportDataParam = TransportDataParam.valueOf(fileName);
+        String formCode = transportDataParam.getFormCode();
+        String reportPeriodCode = transportDataParam.getReportPeriodCode();
+        Integer year = transportDataParam.getYear();
+        Integer departmentCode = transportDataParam.getDepartmentCode();
 
-            // Доступность пользователю подразделения
-            List<Integer> departmentList = departmentService.getTaxFormDepartments(tAUser, Arrays.asList(TaxType.INCOME));
-            if (departmentList == null || departmentList.contains(formDepartment.getId())) {
-                logger.info(WRONG_NAME, fileName);
-                return false;
-            }
-
-            // Назначение подразделению типа и вида НФ
-            // TODO Определить вид формы и проверить назначение http://conf.aplana.com/pages/viewpage.action?pageId=13111363
-
-        } catch (NumberFormatException e) {
-            // Ignore
+        // Не задан код подразделения или код формы
+        if (departmentCode == null || formCode == null || reportPeriodCode == null || year == null) {
+            logger.warn(WRONG_NAME, fileName);
+            return null;
         }
 
-        return true;
+        // Указан несуществующий код подразделения
+        Department formDepartment = departmentService.getDepartmentByCode(departmentCode);
+        if (formDepartment == null) {
+            logger.warn(WRONG_NAME + ' ' + WRONG_NAME_DEPARTMENT, fileName, transportDataParam.getDepartmentCode());
+            return null;
+        }
+
+        // Указан несуществующий код налоговой формы
+        FormType formType = formTypeService.getByCode(formCode);
+        if (formType == null) {
+            logger.warn(WRONG_NAME + ' ' + WRONG_NAME_FORM_TYPE, fileName, transportDataParam.getDepartmentCode());
+            return null;
+        }
+
+        // Указан недопустимый код периода
+        ReportPeriod reportPeriod = periodService.getByTaxTypedCodeYear(formType.getTaxType(), reportPeriodCode, year);
+        if (reportPeriod == null) {
+            logger.warn(WRONG_NAME + ' ' + WRONG_NAME_FORM_TYPE, fileName, transportDataParam.getDepartmentCode());
+            return null;
+        }
+
+        // Назначение подразделению типа и вида НФ
+        if (!departmentFormTypeDao.existAssignedForm(formDepartment.getId(), formType.getId(), FormDataKind.PRIMARY)) {
+            logger.warn(ASSIGNATION_ERROR, fileName, formType.getName(), formDepartment.getName());
+            return null;
+        }
+
+        return ConfigurationParam.FORM_UPLOAD_DIRECTORY;
     }
 
     /**
      * Копирование файла из потока в каталог загрузки
      */
-    private void copyFileFromStream(InputStream inputStream, String folderPath, String fileName, Logger logger)
+    private boolean copyFileFromStream(InputStream inputStream, String folderPath, String fileName, Logger logger)
             throws IOException {
-        FileWrapper file = ResourceUtils.getSharedResource(folderPath + fileName, false);
-        OutputStream outputStream = file.getOutputStream();
-        IOUtils.copy(inputStream, outputStream);
-        IOUtils.closeQuietly(outputStream);
-        logger.info(UPLOAD_SUCCESS, fileName, folderPath);
+        if (folderPath != null) {
+            FileWrapper file = ResourceUtils.getSharedResource(folderPath + fileName, false);
+            boolean exist = file.exists();
+            OutputStream outputStream = file.getOutputStream();
+            IOUtils.copy(inputStream, outputStream);
+            IOUtils.closeQuietly(outputStream);
+            logger.info(UPLOAD_FILE_SUCCESS, fileName, folderPath);
+            if (exist) {
+                logger.info(UPLOAD_FILE_REPLACE, fileName);
+            }
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -310,7 +388,7 @@ public class TransportDataServiceImpl implements TransportDataService {
         // Если формы нет, то создаем
         if (formData == null) {
             int formTeplateId = formTemplateService.getActiveFormTemplateId(formTypeId, reportPeriodId);
-            ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
+            ReportPeriod reportPeriod = periodService.getReportPeriod(reportPeriodId);
             long formDataId = formDataService.createFormData(logger, userInfo, formTeplateId, departmentId,
                     formDataKind, reportPeriod, transportDataParam.getMonth());
             formData = formDataDao.get(formDataId, false);
@@ -358,8 +436,8 @@ public class TransportDataServiceImpl implements TransportDataService {
             // Создание архива
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("(yyyy.MM.dd HH.mm.ss)");
 
-            FileWrapper errorFileDst = ResourceUtils.getSharedResource(errorFolderDst.getPath() + "/"
-                    + errorFileSrc.getName() + simpleDateFormat.format(calendar.getTime()) + ".zip", false);
+            String path = errorFolderDst.getPath() + "/" + errorFileSrc.getName() + simpleDateFormat.format(calendar.getTime()) + ".zip";
+            FileWrapper errorFileDst = ResourceUtils.getSharedResource(path, false);
             ZipArchiveOutputStream zaos = new ZipArchiveOutputStream(errorFileDst.getOutputStream());
             zaos.setEncoding(ZIP_ENCODING);
             zaos.putArchiveEntry(new ZipArchiveEntry(errorFileSrc.getName()));

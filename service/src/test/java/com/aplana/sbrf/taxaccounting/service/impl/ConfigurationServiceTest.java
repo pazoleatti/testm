@@ -256,7 +256,7 @@ public class ConfigurationServiceTest {
         archiveFolder.delete();
         errorFolder.delete();
 
-        Assert.assertEquals(11, logger.getEntries().size());
+        Assert.assertEquals(10, logger.getEntries().size());
         Assert.assertTrue(logger.containsLevel(LogLevel.ERROR));
         Assert.assertTrue(logger.containsLevel(LogLevel.INFO));
     }
@@ -308,7 +308,7 @@ public class ConfigurationServiceTest {
         archiveFolder.delete();
         errorFolder.delete();
 
-        Assert.assertEquals(11, logger.getEntries().size());
+        Assert.assertEquals(10, logger.getEntries().size());
         Assert.assertTrue(logger.containsLevel(LogLevel.ERROR));
         Assert.assertTrue(logger.containsLevel(LogLevel.INFO));
     }

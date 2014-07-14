@@ -59,4 +59,9 @@ public interface FormTypeDao {
      * @return активные макеты в данном периоде
      */
 	List<FormType> getFormTypes(int departmentId, ReportPeriod reportPeriod, TaxType taxType, List<FormDataKind> kind);
+
+    /**
+     * Вид НФ по его уникальному коду
+     */
+    FormType getByCode(String code);
 }

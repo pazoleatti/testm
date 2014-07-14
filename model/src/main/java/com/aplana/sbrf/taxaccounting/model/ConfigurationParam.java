@@ -12,8 +12,7 @@ public enum ConfigurationParam {
     ACCOUNT_PLAN_UPLOAD_DIRECTORY("Путь к каталогу загрузки транспортных файлов, содержащих данные справочника «План счетов»", true, true, true, 1),
     OKATO_UPLOAD_DIRECTORY("Путь к каталогу загрузки транспортных файлов, содержащих данные справочника «ОКАТО»", true, true, true, 1),
     REGION_UPLOAD_DIRECTORY("Путь к каталогу загрузки транспортных файлов, содержащих данные справочника «Субъекты РФ»", true, true, true, 1),
-    EMITENT_UPLOAD_DIRECTORY("Путь к каталогу загрузки транспортных файлов, содержащих данные справочника «Эмитенты»", true, true, true, 2),
-    BOND_UPLOAD_DIRECTORY("Путь к каталогу загрузки транспортных файлов, содержащих данные справочника «Ценные бумаги»", true, true, true, 2),
+    DIASOFT_UPLOAD_DIRECTORY("Путь к каталогу справочников Diasoft", true, true, true, 2),
     REF_BOOK_ARCHIVE_DIRECTORY("Путь к каталогу архива справочников", true, true, true, 2),
     REF_BOOK_ERROR_DIRECTORY("Путь к каталогу ошибок справочников", true, true, true, 2),
     // Загрузка НФ

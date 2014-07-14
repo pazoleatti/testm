@@ -18,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class ReportPeriodMappingDaoImpl extends AbstractDao implements ReportPeriodMappingDao {
 
+    // TODO Левыкин: А почему берем только первую попавшуюся запись? Должен учитываться год.
+    // TODO Левыкин: На входе dictTaxPeriodId (ссылка на значение справочника), а в запросе сравнивается с ref_book_value.string_value!
     @Override
     public Integer getByTaxPeriodAndDict(int taxPeriodId, int dictTaxPeriodId) {
         StringBuilder sql = new StringBuilder("select * from ( ");

@@ -114,4 +114,9 @@ public interface ReportPeriodDao {
      * @return список закрытых периодов, где существует экземпляр НФ данной версии
      */
     List<ReportPeriod> getClosedPeriodsForFormTemplate(Integer formTemplateId);
+
+    /**
+     * Отчетный период по коду и году
+     */
+    ReportPeriod getByTaxTypedCodeYear(TaxType taxType, String code, int year);
 }

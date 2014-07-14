@@ -8,7 +8,6 @@
     <import resource="classpath:testDaoContext.xml"/>
     <jdbc:initialize-database>
         <jdbc:script location="classpath:data/ReportPeriodDao.sql" encoding="UTF-8"/>
-        <jdbc:script location="classpath:data/ReportPeriodMapping.sql" encoding="UTF-8"/>
     </jdbc:initialize-database>
 
 </beans>

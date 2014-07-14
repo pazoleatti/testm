@@ -32,7 +32,7 @@ public class ReportPeriodDaoTest {
 
 	@Autowired
 	private TaxPeriodDao taxPeriodDao;
-	
+
 	private TaxPeriod taxPeriod;
 
 	@Test(expected = DaoException.class)
@@ -184,5 +184,14 @@ public class ReportPeriodDaoTest {
         ReportPeriod reportPeriod = reportPeriodDao.get(newReportPeriodId);
         assertEquals(date, reportPeriod.getCalendarStartDate());
         assertEquals(2, reportPeriod.getOrder());
+    }
+
+    @Test
+    public void getByTaxTypedCodeYearTest() {
+        ReportPeriod reportPeriod1 = reportPeriodDao.getByTaxTypedCodeYear(TaxType.INCOME, "21", 2013);
+        ReportPeriod reportPeriod2 = reportPeriodDao.getByTaxTypedCodeYear(TaxType.VAT, "99", 2013);
+        Assert.assertNull(reportPeriod1);
+        Assert.assertNotNull(reportPeriod2);
+        Assert.assertEquals(3, reportPeriod2.getId().intValue());
     }
 }

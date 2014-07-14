@@ -35,9 +35,9 @@
         <fm:body>
             <fm:BodyContainer>
                 <g:HorizontalPanel spacing="5">
-                    <g:Label text="Подразделение:"/>
+                    <g:Label text="Подразделение:" title="Используется только при загрузке ТФ налоговых форм"/>
                     <picker:DepartmentPickerPopupWidget ui:field="departmentPicker" multiselection="false"
-                                                        width="250px" enabled="false" />
+                                                        width="250px" enabled="false" title="Используется только при загрузке ТФ налоговых форм"/>
                 </g:HorizontalPanel>
             </fm:BodyContainer>
         </fm:body>

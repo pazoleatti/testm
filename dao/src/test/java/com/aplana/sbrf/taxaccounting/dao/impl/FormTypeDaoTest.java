@@ -88,4 +88,13 @@ public class FormTypeDaoTest {
     public void testGetAll() {
         Assert.assertEquals(4, formTypeDao.getAll().size());
     }
+
+    @Test
+    public void getByCodeTest() {
+        Assert.assertNull(formTypeDao.getByCode(null));
+        Assert.assertEquals(1, formTypeDao.getByCode("code_1").getId());
+        Assert.assertEquals(2, formTypeDao.getByCode("code_2").getId());
+        Assert.assertEquals(3, formTypeDao.getByCode("code_3").getId());
+        Assert.assertEquals(4, formTypeDao.getByCode("code_4").getId());
+    }
 }

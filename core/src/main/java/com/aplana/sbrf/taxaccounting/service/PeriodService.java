@@ -346,4 +346,9 @@ public interface PeriodService {
                                      Date correctionDate, Date newCorrectionDate, TAUserInfo user, List<LogEntry> logs);
 
     public List<DepartmentReportPeriod> getDRPByDepartmentIds(List<TaxType> taxTypes, List<Long> departmentIds);
+
+    /**
+     * Отчетный период по коду и году
+     */
+    ReportPeriod getByTaxTypedCodeYear(TaxType taxType, String code, int year);
 }

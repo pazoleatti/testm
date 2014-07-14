@@ -30,7 +30,7 @@ public class TransportDataParamTest {
     public void valueOf3Test() {
         TransportDataParam transportDataParam = TransportDataParam.valueOf(VALID_NAME_1);
         Assert.assertEquals("852-4", transportDataParam.getFormCode());
-        Assert.assertEquals("147", transportDataParam.getDepartmentCode());
+        Assert.assertEquals(147, transportDataParam.getDepartmentCode().intValue());
         Assert.assertEquals("21", transportDataParam.getReportPeriodCode());
         Assert.assertEquals(Integer.valueOf(2014), transportDataParam.getYear());
         Assert.assertNull(transportDataParam.getMonth());
@@ -40,7 +40,7 @@ public class TransportDataParamTest {
     public void valueOf4Test() {
         TransportDataParam transportDataParam = TransportDataParam.valueOf(VALID_NAME_2);
         Assert.assertEquals("1290-40.1", transportDataParam.getFormCode());
-        Assert.assertEquals("151", transportDataParam.getDepartmentCode());
+        Assert.assertEquals(151, transportDataParam.getDepartmentCode().intValue());
         Assert.assertEquals("22", transportDataParam.getReportPeriodCode());
         Assert.assertEquals(Integer.valueOf(2015), transportDataParam.getYear());
         Assert.assertEquals(Integer.valueOf(6), transportDataParam.getMonth());

@@ -839,4 +839,9 @@ public class PeriodServiceImpl implements PeriodService{
             return departmentReportPeriodDao.getListDRPByDepartmentIds(taxTypes, departmentIds);
 
     }
+
+    @Override
+    public ReportPeriod getByTaxTypedCodeYear(TaxType taxType, String code, int year) {
+        return reportPeriodDao.getByTaxTypedCodeYear(taxType, code, year);
+    }
 }

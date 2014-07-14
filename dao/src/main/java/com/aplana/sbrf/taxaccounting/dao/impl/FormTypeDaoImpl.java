@@ -148,4 +148,21 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
 			new FormTypeMapper()
 		);
     }
+
+    @Override
+    public FormType getByCode(String code) {
+        if (code == null) {
+            return null;
+        }
+        try {
+            return getJdbcTemplate().queryForObject(
+                    "select id, name, tax_type, status, code from form_type where code = ?",
+                    new Object[]{code},
+                    new int[]{Types.VARCHAR},
+                    new FormTypeMapper()
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
 }

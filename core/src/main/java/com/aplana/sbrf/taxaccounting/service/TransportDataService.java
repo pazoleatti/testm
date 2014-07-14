@@ -22,9 +22,9 @@ public interface TransportDataService {
      * @param fileName Имя ТФ
      * @param inputStream Поток ТФ
      * @param logger Логгер для области уведомлений
-     * @throws IOException
+     * @return true — был загружен хотя бы один файл
      */
-    void uploadFile(TAUserInfo userInfo, int departmentId, String fileName, InputStream inputStream, Logger logger) throws IOException;
+    boolean uploadFile(TAUserInfo userInfo, int departmentId, String fileName, InputStream inputStream, Logger logger) throws IOException;
 
     /**
      * Импорт ТФ из каталога загрузки (Планировщик)

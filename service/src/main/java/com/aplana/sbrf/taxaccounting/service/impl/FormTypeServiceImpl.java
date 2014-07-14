@@ -61,4 +61,9 @@ public class FormTypeServiceImpl implements FormTypeService {
 	public List<FormType> getFormTypes(int departmentId, int reportPeriod, TaxType taxType, List<FormDataKind> kind) {
 		return formTypeDao.getFormTypes(departmentId, reportPeriodDao.get(reportPeriod), taxType, kind);
     }
+
+    @Override
+    public FormType getByCode(String code) {
+        return formTypeDao.getByCode(code);
+    }
 }

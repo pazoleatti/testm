@@ -67,7 +67,6 @@ public class UploadTransportDataView extends ViewWithUiHandlers<UploadTransportD
                 } else {
                     uploadWidget.setEnabled(false);
                 }
-                System.out.println("url = " + getUiHandlers().ACTION_URL + departmentStr);
                 uploadWidget.setActionUrl(getUiHandlers().ACTION_URL + departmentStr);
             }
         });

@@ -14,4 +14,8 @@ public interface FormTypeService {
     void delete(int formTypeId);
     List<FormType> getByFilter(TemplateFilter filter);
 	List<FormType> getFormTypes(int departmentId, int reportPeriod, TaxType taxType, List<FormDataKind> kind);
+    /**
+     * Вид НФ по его уникальному коду
+     */
+    FormType getByCode(String code);
 }

@@ -12,7 +12,7 @@ public class TransportDataParam {
     public static String NAME_FORMAT_ERROR = "Имя транспортного файла «%s» не соответствует формату «<Код налоговой формы><Код подразделения><Код периода><Календарный год><Месяц>.rnu»!";
 
     private final String formCode;
-    private final String departmentCode;
+    private final Integer departmentCode;
     private final String reportPeriodCode;
     private final Integer year;
     private final Integer month;
@@ -20,12 +20,12 @@ public class TransportDataParam {
     /**
      * Параметры ТФ, получаемые из имени ТФ
      * @param formCode Код налоговой формы
-     * @param departmentCode Идентификатор подразделения
+     * @param departmentCode Код подразделения
      * @param reportPeriodCode Код периода
      * @param year Календарный год
      * @param month Месяц, может быть null
      */
-    public TransportDataParam(String formCode, String departmentCode, String reportPeriodCode, Integer year, Integer month) {
+    public TransportDataParam(String formCode, Integer departmentCode, String reportPeriodCode, Integer year, Integer month) {
         this.formCode = formCode;
         this.departmentCode = departmentCode;
         this.reportPeriodCode = reportPeriodCode;
@@ -42,19 +42,24 @@ public class TransportDataParam {
             throw new IllegalArgumentException(String.format(NAME_FORMAT_ERROR, name));
         }
         String formCode = name.substring(0, 9).replaceAll("_", "").trim();
-        String departmentCode = name.substring(9, 26).replaceAll("_", "").trim();
         String reportPeriodCode = name.substring(26, 28).replaceAll("_", "").trim();
-        Integer year;
+        Integer departmentCode = null;
+        Integer year = null;
         Integer month = null;
+        try {
+            departmentCode = Integer.parseInt(name.substring(9, 26).replaceAll("_", "").trim());
+        } catch (NumberFormatException nfe) {
+           // Ignore
+        }
         try {
             year = Integer.parseInt(name.substring(28, 32));
         } catch (NumberFormatException nfe) {
-            throw new IllegalArgumentException(String.format(NAME_FORMAT_ERROR, name));
+            // Ignore
         }
         try {
             month = Integer.parseInt(name.substring(32, 34).replaceAll("_", "").trim());
         } catch (NumberFormatException nfe) {
-            // Месяц может быть не задан
+            // Ignore
         }
         return new TransportDataParam(formCode, departmentCode, reportPeriodCode, year, month);
     }
@@ -82,7 +87,7 @@ public class TransportDataParam {
     /**
      * Код подразделения
      */
-    public String getDepartmentCode() {
+    public Integer getDepartmentCode() {
         return departmentCode;
     }
 

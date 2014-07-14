@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.server;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -48,6 +49,8 @@ public class GetDepartmentsHandler extends AbstractActionHandler<GetDepartmentsA
                 result.setDefaultDepartmentId(unpList.get(0).getId());
             }
         } else {
+            Department userDepartment = departmentService.getDepartment(userInfo.getUser().getDepartmentId());
+            result.setCanChooseDepartment(userDepartment.getType() == DepartmentType.CSKO_PCP);
             if (departmentList != null && !departmentList.isEmpty()) {
                 result.setDefaultDepartmentId(departmentList.get(0).getId());
             }

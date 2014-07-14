@@ -274,7 +274,7 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 					"select rp.id, rp.name, rp.tax_period_id, rp.start_date, rp.end_date, rp.dict_tax_period_id, " +
 							"rp.calendar_start_date from report_period rp join tax_period tp on rp.tax_period_id = tp.id " +
 							"where tp.tax_type = ? and rp.end_date>=? and rp.calendar_start_date<=?",
-					new Object[]{taxType.getCode(), startDate, endDate},
+					new Object[]{new Object[]{String.valueOf(taxType.getCode())}, startDate, endDate},
 					new int[] { Types.VARCHAR, Types.DATE, Types.DATE },
 					new ReportPeriodMapper()
 			);
@@ -283,5 +283,21 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 		}
 	}
 
+    @Override
+    public ReportPeriod getByTaxTypedCodeYear(TaxType taxType, String code, int year) {
+        try {
+            return getJdbcTemplate().queryForObject(
+                    "select id, name, tax_period_id, start_date, end_date, dict_tax_period_id, calendar_start_date  " +
+                            "from report_period where dict_tax_period_id = (select record_id from ref_book_value " +
+                            "where attribute_id = 25 and string_value = ?) and tax_period_id in (select id from " +
+                            "tax_period where year = ? and tax_type = ?)",
+                    new Object[]{code, year, String.valueOf(taxType.getCode())},
+                    new int[]{Types.VARCHAR, Types.NUMERIC, Types.CHAR},
+                    new ReportPeriodMapper()
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
 }
 

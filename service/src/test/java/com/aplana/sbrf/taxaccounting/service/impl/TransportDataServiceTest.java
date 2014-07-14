@@ -1,18 +1,16 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.AuditService;
-import com.aplana.sbrf.taxaccounting.service.RefBookExternalService;
-import com.aplana.sbrf.taxaccounting.service.TransportDataService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.apache.commons.io.FileUtils;
+import org.junit.*;
 import org.junit.rules.TemporaryFolder;
+import org.junit.runners.MethodSorters;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -26,16 +24,18 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static java.util.Arrays.asList;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TransportDataServiceTest {
     private static TransportDataService transportDataService = new TransportDataServiceImpl();
-    private static String FILE_NAME_1 = "Тестовый файл 1.ууу";
-    private static String FILE_NAME_2 = "Тестовый файл 2.zip";
-    private static String FILE_NAME_2_EXTRACT_1 = "Тестовый файл 1.txt";
-    private static String FILE_NAME_2_EXTRACT_2 = "Тестовый файл 2.txt";
+    private static String FILE_NAME_1 = "Тестовый файл 1.ууу"; // Mock как справочник
+    private static String FILE_NAME_2 = "Тестовый файл 2.zip"; // Архив
+    private static String FILE_NAME_2_EXTRACT_1 = "____852-4______________147212014__.rnu"; // ТФ НФ
+    private static String FILE_NAME_2_EXTRACT_2 = "Тестовый файл 2.txt"; // Mock как неподходящий файл
 
     private static String TEST_PATH = "com/aplana/sbrf/taxaccounting/service/impl/";
     private static File folder;
@@ -49,13 +49,13 @@ public class TransportDataServiceTest {
         temporaryFolder = new TemporaryFolder();
         temporaryFolder.create();
         folder = temporaryFolder.getRoot();
-        System.out.println("Test common folder is \"" + folder.getAbsolutePath() + "\"");
         ConfigurationDao configurationDao = mock(ConfigurationDao.class);
         ConfigurationParamModel model = new ConfigurationParamModel();
         model.put(ConfigurationParam.FORM_UPLOAD_DIRECTORY, TEST_DEPARTMENT_ID, asList("file://" + folder.getPath() + "/"));
         model.put(ConfigurationParam.FORM_ARCHIVE_DIRECTORY, null);
+        model.put(ConfigurationParam.DIASOFT_UPLOAD_DIRECTORY, TEST_DEPARTMENT_ID, asList("file://" + folder.getPath() + "/"));
         model.put(ConfigurationParam.KEY_FILE, TEST_DEPARTMENT_ID, asList("smb://", "/"));
-        model.put(ConfigurationParam.FORM_ERROR_DIRECTORY, TEST_DEPARTMENT_ID, asList("file://" + folder.getPath() + "/", "smb://"));
+        model.put(ConfigurationParam.FORM_ERROR_DIRECTORY, TEST_DEPARTMENT_ID, asList("file://" + folder.getPath() + "/error/", "smb://"));
 
         when(configurationDao.getAll()).thenReturn(model);
         ReflectionTestUtils.setField(transportDataService, "configurationDao", configurationDao);
@@ -66,20 +66,58 @@ public class TransportDataServiceTest {
         when(refBookExternalService.isDiasoftFile(anyString())).thenAnswer(new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
-                String name = (String)invocation.getArguments()[0];
+                String name = (String) invocation.getArguments()[0];
                 if (FILE_NAME_1.equals(name)) {
                     return true;
                 }
                 if (FILE_NAME_2_EXTRACT_1.equals(name)) {
-                    return true;
+                    return false;
                 }
                 if (FILE_NAME_2_EXTRACT_2.equals(name)) {
-                    return true;
+                    return false;
                 }
-                return null;
+                return false;
             }
         });
         ReflectionTestUtils.setField(transportDataService, "refBookExternalService", refBookExternalService);
+
+        final Department formDepartment = new Department();
+        formDepartment.setId(1);
+        formDepartment.setName("TestDepartment");
+
+        DepartmentService departmentService = mock(DepartmentService.class);
+        when(departmentService.getDepartment(anyInt())).thenAnswer(new Answer<Object>() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                int departmentId = (Integer) invocation.getArguments()[0];
+                if (departmentId == 1) {
+                    return formDepartment;
+                } else {
+                    return null;
+                }
+            }
+        });
+        when(departmentService.getDepartmentByCode(147)).thenReturn(formDepartment);
+        ReflectionTestUtils.setField(transportDataService, "departmentService", departmentService);
+
+        FormType formType852_4 = new FormType();
+        formType852_4.setId(1);
+        formType852_4.setTaxType(TaxType.INCOME);
+        formType852_4.setName("Test form type 852-4");
+        FormTypeService formTypeService = mock(FormTypeService.class);
+        when(formTypeService.getByCode("852-4")).thenReturn(formType852_4);
+        ReflectionTestUtils.setField(transportDataService, "formTypeService", formTypeService);
+
+        PeriodService periodService = mock(PeriodService.class);
+        ReportPeriod reportPeriod21 = new ReportPeriod();
+        reportPeriod21.setId(1);
+        reportPeriod21.setName("Test period");
+        when(periodService.getByTaxTypedCodeYear(TaxType.INCOME, "21", 2014)).thenReturn(reportPeriod21);
+        ReflectionTestUtils.setField(transportDataService, "periodService", periodService);
+
+        DepartmentFormTypeDao departmentFormTypeDao = mock(DepartmentFormTypeDao.class);
+        when(departmentFormTypeDao.existAssignedForm(1, 1, FormDataKind.PRIMARY)).thenReturn(true);
+        ReflectionTestUtils.setField(transportDataService, "departmentFormTypeDao", departmentFormTypeDao);
     }
 
     @AfterClass
@@ -92,8 +130,9 @@ public class TransportDataServiceTest {
     public void uploadFile1Test() throws IOException {
         Logger logger = new Logger();
         transportDataService.uploadFile(null, 1, FILE_NAME_1, getFileAsStream(FILE_NAME_1), logger);
-        Assert.assertEquals(1, logger.getEntries().size());
+        Assert.assertEquals(2, logger.getEntries().size());
         Assert.assertEquals(LogLevel.ERROR, logger.getEntries().get(0).getLevel());
+        Assert.assertEquals(LogLevel.ERROR, logger.getEntries().get(1).getLevel());
         Assert.assertEquals(TransportDataServiceImpl.USER_NOT_FOUND_ERROR, logger.getEntries().get(0).getMessage());
     }
 
@@ -108,8 +147,9 @@ public class TransportDataServiceTest {
         user.setRoles(asList(role));
         Logger logger = new Logger();
         transportDataService.uploadFile(userInfo, 1, FILE_NAME_1, getFileAsStream(FILE_NAME_1), logger);
-        Assert.assertEquals(1, logger.getEntries().size());
+        Assert.assertEquals(2, logger.getEntries().size());
         Assert.assertEquals(LogLevel.ERROR, logger.getEntries().get(0).getLevel());
+        Assert.assertEquals(LogLevel.ERROR, logger.getEntries().get(1).getLevel());
         Assert.assertEquals(TransportDataServiceImpl.ACCESS_DENIED_ERROR, logger.getEntries().get(0).getMessage());
     }
 
@@ -124,8 +164,9 @@ public class TransportDataServiceTest {
         user.setRoles(asList(role));
         Logger logger = new Logger();
         transportDataService.uploadFile(userInfo, 1, null, getFileAsStream(FILE_NAME_1), logger);
-        Assert.assertEquals(1, logger.getEntries().size());
+        Assert.assertEquals(2, logger.getEntries().size());
         Assert.assertEquals(LogLevel.ERROR, logger.getEntries().get(0).getLevel());
+        Assert.assertEquals(LogLevel.ERROR, logger.getEntries().get(1).getLevel());
         Assert.assertEquals(TransportDataServiceImpl.NO_FILE_NAME_ERROR, logger.getEntries().get(0).getMessage());
     }
 
@@ -140,30 +181,15 @@ public class TransportDataServiceTest {
         user.setRoles(asList(role));
         Logger logger = new Logger();
         transportDataService.uploadFile(userInfo, 1, FILE_NAME_1, null, logger);
-        Assert.assertEquals(1, logger.getEntries().size());
+        Assert.assertEquals(2, logger.getEntries().size());
         Assert.assertEquals(LogLevel.ERROR, logger.getEntries().get(0).getLevel());
+        Assert.assertEquals(LogLevel.ERROR, logger.getEntries().get(1).getLevel());
         Assert.assertEquals(TransportDataServiceImpl.EMPTY_INPUT_STREAM_ERROR, logger.getEntries().get(0).getMessage());
     }
 
-    // Не указан каталог загрузки
+    // Успешный импорт файла справочника
     @Test
     public void uploadFile5Test() throws IOException {
-        TAUserInfo userInfo = new TAUserInfo();
-        TAUser user = new TAUser();
-        userInfo.setUser(user);
-        TARole role = new TARole();
-        role.setAlias(TARole.ROLE_CONTROL_UNP);
-        user.setRoles(asList(role));
-        Logger logger = new Logger();
-        transportDataService.uploadFile(userInfo, 2, FILE_NAME_1, getFileAsStream(FILE_NAME_1), logger);
-        Assert.assertEquals(1, logger.getEntries().size());
-        Assert.assertEquals(LogLevel.ERROR, logger.getEntries().get(0).getLevel());
-        Assert.assertEquals(TransportDataServiceImpl.NO_CATALOG_UPLOAD_ERROR, logger.getEntries().get(0).getMessage());
-    }
-
-    // Успешный импорт файла
-    @Test
-    public void uploadFile6Test() throws IOException {
         TAUserInfo userInfo = new TAUserInfo();
         TAUser user = new TAUser();
         userInfo.setUser(user);
@@ -175,11 +201,12 @@ public class TransportDataServiceTest {
         String[] files = folder.list();
         Assert.assertEquals(1, files.length);
         Assert.assertEquals(FILE_NAME_1, files[0]);
+        new File(folder.getPath() + '/' + FILE_NAME_1).delete();
     }
 
-    // Успешный импорт архива
+    // Успешный импорт архива НФ
     @Test
-    public void uploadFile7Test() throws IOException {
+    public void uploadFile6Test() throws IOException {
         TAUserInfo userInfo = new TAUserInfo();
         TAUser user = new TAUser();
         userInfo.setUser(user);
@@ -189,11 +216,9 @@ public class TransportDataServiceTest {
         Logger logger = new Logger();
         transportDataService.uploadFile(userInfo, 1, FILE_NAME_2, getFileAsStream(FILE_NAME_2), logger);
         String[] files = folder.list();
+        Assert.assertTrue(files != null && files.length != 0);
         List<String> fileList = asList(files);
-        Assert.assertEquals(3, fileList.size());
-        Assert.assertTrue(fileList.contains(FILE_NAME_1));
         Assert.assertTrue(fileList.contains(FILE_NAME_2_EXTRACT_1));
-        Assert.assertTrue(fileList.contains(FILE_NAME_2_EXTRACT_2));
     }
 
     @Test
@@ -201,7 +226,6 @@ public class TransportDataServiceTest {
         // Подготовка тестового каталога
         TemporaryFolder temporaryFolder = new TemporaryFolder();
         temporaryFolder.create();
-        System.out.println("Test src folder getWorkFilesFromFolderTest is \"" + temporaryFolder.getRoot().getAbsoluteFile() + "\"");
         // Создание тестовых файлов
         String[] fileNames = {"file1.txt", "file2.doc", "file3.zip", "file4.zip",
                 "____852-4______________147212014__.rnu", "1290-40.1______________151222015_6.rnu"};
@@ -227,7 +251,6 @@ public class TransportDataServiceTest {
     public void moveToErrorDirectoryTest() throws IOException {
         TemporaryFolder temporaryFolder = new TemporaryFolder();
         temporaryFolder.create();
-        System.out.println("Test src folder moveToErrorDirectoryTest is \"" + temporaryFolder.getRoot().getAbsolutePath() + "\"");
         FileWrapper errorFile = new FileWrapper(temporaryFolder.newFile("Тестовый файл.rnu"));
         Logger logger = new Logger();
         logger.error("Тестовая ошибка!");
@@ -246,9 +269,9 @@ public class TransportDataServiceTest {
 
         ((TransportDataServiceImpl) transportDataService).moveToErrorDirectory(errorFile, userInfo, logger);
 
-        File dstFolder = new File(folder.getPath() + "/" + calendar.get(Calendar.YEAR) + "/"
-                + Months.fromId(calendar.get(Calendar.MONTH)).getName() + "/"
-                + String.format("%02d", calendar.get(Calendar.DAY_OF_MONTH)) + "/");
+        File dstFolder = new File(folder.getPath() + "/error/" + calendar.get(Calendar.YEAR) + '/'
+                + Months.fromId(calendar.get(Calendar.MONTH)).getName() + '/'
+                + String.format("%02d", calendar.get(Calendar.DAY_OF_MONTH)) + '/');
 
         Assert.assertTrue(dstFolder.exists());
         List<String> fileNameList = asList(dstFolder.list());
@@ -256,6 +279,7 @@ public class TransportDataServiceTest {
         Assert.assertTrue(fileNameList.get(0).endsWith(".zip"));
         File srcFolder = new File(temporaryFolder.getRoot().getPath());
         Assert.assertEquals(0, srcFolder.list().length);
+        FileUtils.deleteDirectory(new File(folder.getPath() + "/error/"));
         temporaryFolder.delete();
     }
 

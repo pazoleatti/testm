@@ -229,10 +229,8 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
 
     @Override
     public void importRefBookDiasoft(TAUserInfo userInfo, Logger logger) {
-        // Эмитенты
-        importRefBook(userInfo, logger, ConfigurationParam.EMITENT_UPLOAD_DIRECTORY, diasoftMappingMap);
-        // Ценные бумаги
-        importRefBook(userInfo, logger, ConfigurationParam.BOND_UPLOAD_DIRECTORY, diasoftMappingMap);
+        // Эмитенты и Ценные бумаги
+        importRefBook(userInfo, logger, ConfigurationParam.DIASOFT_UPLOAD_DIRECTORY, diasoftMappingMap);
     }
 
     @Override
