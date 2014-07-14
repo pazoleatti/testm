@@ -319,8 +319,7 @@ def calc11(def row, def taxBase) {
 def calc12(def row) {
     def temp = 0
     def minimizeTaxSum = row.minimizeTaxSum ?: 0
-    def amountTax = row.amountTax ?: 0
-    if (amountTax == 0) {
+    if (row.amountTax == null) {
         if (row.baseTaxOfRub > 0) {
             if (minimizeTaxSum > 0) {
                 temp = roundValue((row.baseTaxOfRub * 0.18 - minimizeTaxSum) * 100 / row.baseTaxOfRub, 2)
@@ -334,7 +333,7 @@ def calc12(def row) {
             temp = 0
         }
     } else {
-        temp = amountTax
+        temp = row.amountTax
     }
     return temp
 }
@@ -343,9 +342,6 @@ def calc13(def row) {
     def temp = 0
     def minimizeTaxSum = row.minimizeTaxSum ?: 0
     if (row.baseTaxOfRub > 0) {
-        if(minimizeTaxSum == null){
-            return null
-        }
         if (minimizeTaxSum == 0) {
             temp = roundValue(row.baseTaxOfRub * row.subjectTaxStavka / 100, 0)
         } else {
@@ -500,10 +496,14 @@ void consolidation() {
                         newRow.propertyPrice = newRow.propertyPrice ? (newRow.propertyPrice + row.avepropertyPricerageCost) : row.avepropertyPricerageCost
                         newRow.workersCount = newRow.workersCount ? (newRow.workersCount + row.workersCount) : row.workersCount
                         newRow.subjectTaxCredit = newRow.subjectTaxCredit ? (newRow.subjectTaxCredit + row.subjectTaxCredit) : row.subjectTaxCredit
-                        decreaseTaxSum = row.decreaseTaxSum ?: 0
-                        newRow.minimizeTaxSum = newRow.minimizeTaxSum ? (newRow.minimizeTaxSum + decreaseTaxSum) : decreaseTaxSum
-                        taxRate = row.taxRate ?: 0
-                        newRow.amountTax = newRow.amountTax ? (newRow.amountTax + taxRate) : taxRate
+                        // если поле в Приложении 5 не заполнено, то и в приемнике оно должно быть незаполнено(похоже подразумевается что источник один)
+                        // условие срабатывает только для источника со значением в поле или если оно уже заполнено
+                        if (newRow.minimizeTaxSum != null || row.decreaseTaxSum != null) {
+                            newRow.minimizeTaxSum = (newRow.minimizeTaxSum ?: 0) + (row.decreaseTaxSum ?: 0)
+                        }
+                        if (newRow.amountTax != null || row.taxRate != null) {
+                            newRow.amountTax = (newRow.amountTax ?: 0) + (row.taxRate ?: 0)
+                        }
                         if (isNew) {
                             dataRows.add(newRow)
                         }
