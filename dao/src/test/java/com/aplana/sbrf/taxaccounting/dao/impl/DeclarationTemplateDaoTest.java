@@ -263,11 +263,6 @@ public class DeclarationTemplateDaoTest {
         Assert.assertEquals((long) 2, list.get(0).get("version_count"));
     }
 
-    /*@Test
-    public void testGetLastVersionEdition(){
-        Assert.assertEquals(3, declarationTemplateDao.getLastVersionEdition(2));
-    }*/
-
     @Test
     public void testGeAll(){
         Assert.assertEquals(6, declarationTemplateDao.getByFilter(null).size());

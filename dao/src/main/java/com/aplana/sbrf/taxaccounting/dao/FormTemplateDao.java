@@ -97,7 +97,6 @@ public interface FormTemplateDao {
      * Метод для поиска пересечений версий макетов в указанных датах
      * @param formTypeId вид шаблона
      * @param formTemplateId дентификатор шаблона, который исключить из поиска, если нет такого то 0
-     * @param statusList статус формы
      * @param actualStartVersion дата начала
      * @param actualEndVersion дата окончания
      * @return список пеересечений
@@ -149,13 +148,6 @@ public interface FormTemplateDao {
      * @return количество
      */
     List<Map<String,Object>> versionTemplateCountByType(Collection<Integer> formTypeId);
-
-    /**
-     * Получает номер последней редакции макета.
-     * @param formTypeId  вид шаблона
-     * @return номер последней редакции шаблона
-     */
-    /*int getLastVersionEdition(int formTypeId);*/
 
     int updateVersionStatus(VersionedObjectStatus versionStatus, int formTemplateId);
 }

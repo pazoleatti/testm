@@ -113,18 +113,6 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
         try {
             final Integer formTemplateId = formTemplate.getId();
 
-		/*if (formTemplateId == null) {
-            throw new UnsupportedOperationException("Saving of new FormTemplate is not implemented");
-		}*/
-
-		/*JdbcTemplate jt = getJdbcTemplate();
-        int storedEdition = jt.queryForInt("select edition from form_template where id = ? for update", formTemplateId);
-
-		if (storedEdition != formTemplate.getEdition()) {
-			throw new DaoException("Сохранение описания налоговой формы невозможно, так как её состояние в БД" +
-				" было изменено после того, как данные по ней были считаны");
-		}*/
-
             String dataRowsXml = null;
             List<DataRow<Cell>> rows = formTemplate.getRows();
             if (rows != null && !rows.isEmpty()) {
@@ -477,23 +465,6 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
             throw new DaoException("Ошибка при получении числа версий.", e.getMessage());
         }
     }
-
-    /*@Override
-    public int getLastVersionEdition(int formTypeId) {
-        String sql = "SELECT MAX(edition) FROM form_template WHERE type_id = ? AND status IN (0, 1)";
-        try {
-            Integer edition = getJdbcTemplate().queryForObject(sql,
-                    new Object[]{formTypeId},
-                    Integer.class);
-            return edition != null ? edition : 0;
-        } catch (EmptyResultDataAccessException e){
-            return 0;
-        } catch (DataAccessException e){
-            logger.error("Ошибка при получении номера редакции макета", e);
-            throw new DaoException("Ошибка при получении номера редакции макета", e);
-        }
-
-    }*/
 
     @Override
     @CacheEvict(value = CacheConstants.FORM_TEMPLATE, beforeInvocation = true, key = "#formTemplateId")

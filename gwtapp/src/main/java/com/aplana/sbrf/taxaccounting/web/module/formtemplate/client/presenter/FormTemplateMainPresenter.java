@@ -75,7 +75,6 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
                         FormTemplateExt formTemplateExt = new FormTemplateExt();
                         formTemplateExt.setFormTemplate(formTemplate);
                         FormTemplateSetEvent.fire(FormTemplateMainPresenter.this, formTemplateExt, null);
-                        /*Window.alert(String.valueOf(formTemplate.getEdition()));*/
                         super.onFailure(caught);
                     }
                 }, this));

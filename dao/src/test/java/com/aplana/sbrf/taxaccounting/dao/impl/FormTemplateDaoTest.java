@@ -281,11 +281,6 @@ public class FormTemplateDaoTest {
         Assert.assertEquals(VersionedObjectStatus.DELETED, formTemplateDao.get(1).getStatus());
     }
 
-    /*@Test
-    public void testLastVersionEdition(){
-        Assert.assertEquals(2, formTemplateDao.getLastVersionEdition(2));
-    }*/
-
     @Test
     public void testFindFTVersionIntersections() throws ParseException {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd");

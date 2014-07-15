@@ -107,12 +107,6 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
     @Caching(evict = {@CacheEvict(value = CacheConstants.DECLARATION_TEMPLATE, key = "#declarationTemplate.id", beforeInvocation = true),
             @CacheEvict(value = CacheConstants.DECLARATION_TEMPLATE, key = "#declarationTemplate.id + new String(\"_script\")", beforeInvocation = true)})
 	public int save(DeclarationTemplate declarationTemplate) {
-			/*int storedEdition = getJdbcTemplate()
-					.queryForInt("select edition from declaration_template where id = ? for update", declarationTemplateId);
-            if (storedEdition != declarationTemplate.getEdition()) {
-				throw new DaoException("Сохранение описания декларации невозможно, так как её состояние в БД" +
-						" было изменено после того, как данные по ней были считаны");
-			}*/
         try {
             int count = getJdbcTemplate().update(
                     "UPDATE declaration_template SET name = ?, version = ?, create_script = ?, declaration_type_id = ?, xsd = ?, status = ? WHERE id = ?",
