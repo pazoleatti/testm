@@ -67,12 +67,14 @@ public class WSelectBox extends ParamWidget {
     }
 
     @Override
-    public void setValue(String value) {
-        Integer id = Integer.valueOf(value);
-        for (SelectBoxItem selectBoxItem : values) {
-            if (selectBoxItem.getId().equals(id)){
-                listBox.setValue(selectBoxItem);
-                return;
+    public void setValue(String selectedValueId) {
+        if (selectedValueId != null){
+            Integer id = Integer.valueOf(selectedValueId);
+            for (SelectBoxItem selectBoxItem : values) {
+                if (selectBoxItem.getId().equals(id)){
+                    listBox.setValue(selectBoxItem);
+                    return;
+                }
             }
         }
     }
