@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.scheduler.server;
 
+import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskData;
+import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskState;
 import com.aplana.sbrf.taxaccounting.scheduler.api.exception.TaskSchedulingException;
 import com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManager;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.ResumeTaskAction;
@@ -31,7 +33,10 @@ public class ResumeTaskHandler extends AbstractActionHandler<ResumeTaskAction, R
         ResumeTaskResult result = new ResumeTaskResult();
         try {
             for (Long taskId : action.getTasksIds()) {
-                taskManager.resumeTask(taskId);
+                TaskData taskData = taskManager.getTaskData(taskId);
+                if (taskData.getTaskState() == TaskState.CANCELLED){
+                    taskManager.resumeTask(taskId);
+                }
             }
         } catch (TaskSchedulingException e) {
             throw new ActionException("Ошибка возобновления задачи планировщика", e);
