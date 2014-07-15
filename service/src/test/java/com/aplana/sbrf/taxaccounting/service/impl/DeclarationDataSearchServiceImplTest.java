@@ -63,7 +63,7 @@ public class DeclarationDataSearchServiceImplTest {
 		ReflectionTestUtils.setField(service, "declarationTypeDao", declarationTypeDao);
 
         DepartmentService departmentService = mock(DepartmentService.class);
-        when(departmentService.getTaxFormDepartments(any(TAUser.class), anyListOf(TaxType.class))).thenReturn(Arrays.asList(1));
+        when(departmentService.getTaxFormDepartments(any(TAUser.class), anyListOf(TaxType.class), null, null)).thenReturn(Arrays.asList(1));
         Department dep1 = new Department();
         dep1.setId(1);
         Department dep2 = new Department();

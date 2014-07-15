@@ -147,8 +147,8 @@ public class DepartmentServiceImplTest {
         when(departmentReportPeriodDao.existForDepartment(departmentOSB311.getId(), 1)).thenReturn(true);
 
         // Доступность по связям
-        when(departmentDao.getDepartmentsBySourceControl(anyInt(), anyListOf(TaxType.class))).thenReturn(asList(departmentTB2.getId(), departmentTB3.getId()));
-        when(departmentDao.getDepartmentsBySourceControlNs(anyInt(), anyListOf(TaxType.class))).thenReturn(asList(departmentTB2.getId(), departmentTB3.getId()));
+        when(departmentDao.getDepartmentsBySourceControl(anyInt(), anyListOf(TaxType.class), null, null)).thenReturn(asList(departmentTB2.getId(), departmentTB3.getId()));
+        when(departmentDao.getDepartmentsBySourceControlNs(anyInt(), anyListOf(TaxType.class), null, null)).thenReturn(asList(departmentTB2.getId(), departmentTB3.getId()));
         // Для дерева
         when(departmentDao.getRequiredForTreeDepartments(anyListOf(Integer.class))).thenAnswer(new Answer<List<Department>>() {
             @Override
@@ -324,7 +324,7 @@ public class DepartmentServiceImplTest {
         TAUser taUser = new TAUser();
         taUser.setRoles(taRoles);
 
-        List<Integer> result = departmentService.getTaxFormDepartments(taUser, asList(TaxType.INCOME));
+        List<Integer> result = departmentService.getTaxFormDepartments(taUser, asList(TaxType.INCOME), null, null);
         Assert.assertEquals(5, result.size());
         Assert.assertEquals(true, result.contains(root.getId()) && result.contains(departmentTB2.getId())
                 && result.contains(departmentTB3.getId()) && result.contains(departmentGOSB31.getId())

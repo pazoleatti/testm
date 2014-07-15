@@ -78,7 +78,8 @@ public class GetBSOpenDataHandler extends AbstractActionHandler<GetBSOpenDataAct
                 avSet.add(dep.getId());
             }
         } else {
-            avSet.addAll(departmentService.getTaxFormDepartments(currUser, asList(TaxType.INCOME)));
+            //TODO в 039 этого уже нет. Убрать после мержа
+            avSet.addAll(departmentService.getTaxFormDepartments(currUser, asList(TaxType.INCOME), null, null));
 
             // Необходимые для дерева подразделения
             result.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(avSet).values()));

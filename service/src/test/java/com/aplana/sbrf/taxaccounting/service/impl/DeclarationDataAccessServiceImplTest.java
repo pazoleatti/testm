@@ -125,7 +125,7 @@ public class DeclarationDataAccessServiceImplTest {
 		when(departmentService.getDepartment(DEPARTMENT_TB1_ID)).thenReturn(departmentTB1);
 		when(departmentService.getDepartment(DEPARTMENT_TB2_ID)).thenReturn(departmentTB2);
         // Привязанные подразделения
-        when(departmentService.getTaxFormDepartments(any(TAUser.class), anyListOf(TaxType.class))).thenAnswer(new Answer<List<Integer>>() {
+        when(departmentService.getTaxFormDepartments(any(TAUser.class), anyListOf(TaxType.class), null, null)).thenAnswer(new Answer<List<Integer>>() {
             @Override
             public List<Integer> answer(InvocationOnMock invocation) throws Throwable {
 

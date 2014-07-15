@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -108,9 +109,11 @@ public interface DepartmentDao {
      * http://conf.aplana.com/pages/viewpage.action?pageId=11380670
      * @param userDepartmentId Подразделение пользователя
      * @param taxTypes Типы налога
+     * @param periodStart  начало периода, в котором действуют назначения
+     * @param periodEnd    окончание периода, в котором действуют назначения
      * @return Список id доступных подразделений
      */
-    List<Integer> getDepartmentsBySourceControl(int userDepartmentId, List<TaxType> taxTypes);
+    List<Integer> getDepartmentsBySourceControl(int userDepartmentId, List<TaxType> taxTypes, Date periodStart, Date periodEnd);
 
     /**
      * Список подразделений, в которых доступны декларации/НФ (по иерархии подразделений и по связям источник-приемник)
@@ -118,9 +121,11 @@ public interface DepartmentDao {
      * http://conf.aplana.com/pages/viewpage.action?pageId=11380670
      * @param userDepartmentId Подразделение пользователя
      * @param taxTypes Типы налога
+     * @param periodStart  начало периода, в котором действуют назначения
+     * @param periodEnd    окончание периода, в котором действуют назначения
      * @return Список id доступных подразделений
      */
-    List<Integer> getDepartmentsBySourceControlNs(int userDepartmentId, List<TaxType> taxTypes);
+    List<Integer> getDepartmentsBySourceControlNs(int userDepartmentId, List<TaxType> taxTypes, Date periodStart, Date periodEnd);
 
     /**
      * Получение списка исполнителей по списку идентификаторов подразделений

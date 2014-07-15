@@ -75,6 +75,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
     private FormTemplateService formTemplateService;
     @Autowired
     private LogEntryService logEntryService;
+    @Autowired
+    private PeriodService periodService;
 
     @Override
     public void canRead(TAUserInfo userInfo, long formDataId) {
@@ -84,10 +86,11 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
         }
         // НФ
         FormData formData = formDataDao.getWithoutRows(formDataId);
+        ReportPeriod reportPeriod = periodService.getReportPeriod(formData.getReportPeriodId());
 
         // Подразделения, доступные пользователю
         List<Integer> avaibleDepartmentList = departmentService.getTaxFormDepartments(userInfo.getUser(),
-                asList(formData.getFormType().getTaxType()));
+                asList(formData.getFormType().getTaxType()), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
 
         // Создаваемые вручную формы (читают все, имеющие доступ к подразделению в любом статусе)
         if (asList(FormDataKind.ADDITIONAL, FormDataKind.PRIMARY, FormDataKind.UNP).contains(formData.getKind())

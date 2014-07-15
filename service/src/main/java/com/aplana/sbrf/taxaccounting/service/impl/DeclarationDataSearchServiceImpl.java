@@ -48,7 +48,7 @@ public class DeclarationDataSearchServiceImpl implements DeclarationDataSearchSe
             }
             // http://conf.aplana.com/pages/viewpage.action?pageId=11380670
             result.setDepartmentIds(new HashSet<Integer>(departmentService.getTaxFormDepartments(userInfo.getUser(),
-                    asList(taxType))));
+                    asList(taxType), null, null)));
         } else {
 			throw new AccessDeniedException("Недостаточно прав для поиска деклараций");
 		}

@@ -70,26 +70,6 @@ public class AuditServiceImpl implements AuditService {
 		auditDao.add(log);
 	}
 
-	@Override
-	public LogSystemFilterAvailableValues getFilterAvailableValues(TAUser user) {
-		LogSystemFilterAvailableValues values = new LogSystemFilterAvailableValues();
-        if (user.hasRole(TARole.ROLE_ADMIN) || user.hasRole(TARole.ROLE_CONTROL_UNP))
-            values.setDepartments(departmentService.listAll());
-        else if (user.hasRole(TARole.ROLE_CONTROL_NS)){
-            List<Integer> departments = departmentService.getTaxFormDepartments(user, Arrays.asList(TaxType.values()));
-            if (departments.isEmpty()){
-                values.setDepartments(new ArrayList<Department>());
-            } else{
-                Set<Integer> departmentIds = new HashSet<Integer>(departments);
-                values.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(departmentIds).values()));
-            }
-        }
-
-		/*values.setFormTypeIds(formTypeDao.getAll());*/
-		values.setDeclarationTypes(declarationTypeDao.listAll());
-		return values;
-	}
-
     @Override
     @Transactional(readOnly = false)
     public void removeRecords(List<LogSearchResultItem> items, TAUserInfo userInfo) {
@@ -135,7 +115,7 @@ public class AuditServiceImpl implements AuditService {
                 break;
             case 2:
                 declarationDataFilter.setDepartmentIds(departmentService.getTaxFormDepartments(userInfo.getUser(),
-                        filter.getTaxType() != null ? Arrays.asList(filter.getTaxType()) : Arrays.asList(TaxType.values())));
+                        filter.getTaxType() != null ? Arrays.asList(filter.getTaxType()) : Arrays.asList(TaxType.values()), null, null));
                 declarationDataFilter.setTaxType(filter.getTaxType());
                 /*declarationDataFilter.setReportPeriodIds(filter.getReportPeriodIds());*/
                 declarationDataFilter.setDeclarationTypeId(filter.getDeclarationTypeId());
@@ -158,7 +138,7 @@ public class AuditServiceImpl implements AuditService {
                 //Т.к. перешли на хранение полного имени подразделения, то поиск по имени конкретного подразделению
                 //уже в ЖА.
                 declarationDataFilter.setDepartmentIds(departmentService.getTaxFormDepartments(userInfo.getUser(),
-                        filter.getTaxType() != null ? Arrays.asList(filter.getTaxType()) : Arrays.asList(TaxType.values())));
+                        filter.getTaxType() != null ? Arrays.asList(filter.getTaxType()) : Arrays.asList(TaxType.values()), null, null));
                 declarationDataFilter.setTaxType(filter.getTaxType());
                 declarationDataFilter.setDeclarationTypeId(filter.getDeclarationTypeId());
                 declarationDataIds =

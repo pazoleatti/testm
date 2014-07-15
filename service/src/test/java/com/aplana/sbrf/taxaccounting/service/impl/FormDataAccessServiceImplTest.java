@@ -127,7 +127,7 @@ public class FormDataAccessServiceImplTest {
 		when(departmentService.getDepartment(Department.ROOT_BANK_ID)).thenReturn(d);
 
         // Доступные подразделения (для чтения)
-        when(departmentService.getTaxFormDepartments(any(TAUser.class), anyListOf(TaxType.class))).thenAnswer(
+        when(departmentService.getTaxFormDepartments(any(TAUser.class), anyListOf(TaxType.class), null, null)).thenAnswer(
                 new Answer<List<Integer>>() {
                     @Override
                     public List<Integer> answer(InvocationOnMock invocation) throws Throwable {
@@ -168,7 +168,7 @@ public class FormDataAccessServiceImplTest {
                 List<TaxType> taxTypeList = (List<TaxType>) invocation.getArguments()[1];
                 Integer reportPeriodId = (Integer) invocation.getArguments()[2];
                 if (reportPeriodId.equals(REPORT_PERIOD_ACTIVE_ID) || reportPeriodId.equals(REPORT_PERIOD_BALANCED_ID)) {
-                    return departmentService.getTaxFormDepartments(user, taxTypeList);
+                    return departmentService.getTaxFormDepartments(user, taxTypeList, null, null);
                 } else {
                     return new ArrayList<Integer>(0);
                 }

@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -114,10 +115,12 @@ public interface DepartmentService {
     /**
      * Выборка id подразделений для доступа к экземплярам НФ/деклараций
      * @param tAUser пользователь
-     * @param taxTypes Типы налога
+     * @param taxTypes Типы
+     * @param periodStart  начало периода, в котором действуют назначения
+     * @param periodEnd    окончание периода, в котором действуют назначения
      * @return
      */
-    List<Integer> getTaxFormDepartments(TAUser tAUser, List<TaxType> taxTypes);
+    List<Integer> getTaxFormDepartments(TAUser tAUser, List<TaxType> taxTypes, Date periodStart, Date periodEnd);
 
     /**
      * Выборка id подразделений для назначения подразделений-исполнителей

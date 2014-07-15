@@ -82,7 +82,7 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
         // Подразделения
         // http://conf.aplana.com/pages/viewpage.action?pageId=11380670
         result.setDepartmentIds(new HashSet<Integer>(departmentService.getTaxFormDepartments(userInfo.getUser(),
-                asList(taxType))));
+                asList(taxType), null, null)));
 
         // Подразделение по-умолчанию
         result.setDefaultDepartmentId(userInfo.getUser().getDepartmentId());
@@ -113,7 +113,7 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
         List<Integer> departments = formDataFilter.getDepartmentIds();
         if (departments == null || departments.isEmpty()) {
             departments = departmentService.getTaxFormDepartments(userInfo.getUser(),
-                    formDataFilter.getTaxType() != null ? asList(formDataFilter.getTaxType()) : asList(TaxType.values()));
+                    formDataFilter.getTaxType() != null ? asList(formDataFilter.getTaxType()) : asList(TaxType.values()), null, null);
         }
         formDataDaoFilter.setDepartmentIds(departments);
         // Отчетные периоды
@@ -185,7 +185,7 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
             formDataDaoFilter.setAccessFilterType(AccessFilterType.AVAILABLE_DEPARTMENTS_WITH_KIND);
             // http://conf.aplana.com/pages/viewpage.action?pageId=11380670
             formDataDaoFilter.setAvailableDepartmentIds(departmentService.getTaxFormDepartments(userInfo.getUser(),
-                    asList(formDataFilter.getTaxType())));
+                    asList(formDataFilter.getTaxType()), null, null));
             // Доступные типы
             List<FormDataKind> formDataKindList = new LinkedList<FormDataKind>();
             formDataKindList.add(FormDataKind.PRIMARY);
@@ -200,7 +200,7 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
             formDataDaoFilter.setAccessFilterType(AccessFilterType.AVAILABLE_DEPARTMENTS);
             // http://conf.aplana.com/pages/viewpage.action?pageId=11380670
             formDataDaoFilter.setAvailableDepartmentIds(departmentService.getTaxFormDepartments(userInfo.getUser(),
-                    formDataFilter.getTaxType() != null ? asList(formDataFilter.getTaxType()) : asList(TaxType.values())));
+                    formDataFilter.getTaxType() != null ? asList(formDataFilter.getTaxType()) : asList(TaxType.values()), null, null));
         } else {
             throw new AccessDeniedException("У пользователя нет прав на поиск по налоговым формам");
         }
