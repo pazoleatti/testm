@@ -46,10 +46,7 @@ public class TaskJndiInfo implements Serializable {
 
     @Override
     public String toString() {
-        return "TaskJndiInfo{" +
-                "name='" + name + '\'' +
-                ", jndi='" + jndi + '\'' +
-                '}';
+        return name;
     }
 
     public List<FormElement> getParams() {
