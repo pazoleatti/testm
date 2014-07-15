@@ -520,11 +520,7 @@ void addData(def xml, int headRowCount) {
 
         // графа 4 проверка
         if (map != null) {
-            def text = row.cell[4].text()
-            if ((text != null && !text.isEmpty() && !text.equals(map.NUMBER?.stringValue)) || ((text == null || text.isEmpty()) && map.NUMBER?.stringValue != null)) {
-                logger.error("Проверка файла: Строка ${xlsIndexRow}, столбец ${4 + colOffset} содержит значение, " +
-                        "отсутствующее в справочнике «" + refBookFactory.get(28).getName() + "»!")
-            }
+            formDataService.checkReferenceValue(28, row.cell[4].text(), map.NUMBER?.stringValue, xlsIndexRow, 4 + colOffset, logger, true)
         }
 
         // графа 3
@@ -594,11 +590,7 @@ void addTransportData(def xml) {
 
         // графа 4 проверка
         if (map != null) {
-            def text = row.cell[4].text()
-            if ((text != null && !text.isEmpty() && !text.equals(map.NUMBER?.stringValue)) || ((text == null || text.isEmpty()) && map.NUMBER?.stringValue != null)) {
-                logger.error("Проверка файла: Строка ${rnuIndexRow}, столбец ${4 + colOffset} содержит значение, " +
-                        "отсутствующее в справочнике «" + refBookFactory.get(28).getName() + "»!")
-            }
+            formDataService.checkReferenceValue(28, row.cell[4].text(), map.NUMBER?.stringValue, rnuIndexRow, 4 + colOffset, logger, true)
         }
 
         // графа 3
