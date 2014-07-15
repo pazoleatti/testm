@@ -64,6 +64,7 @@ public class TaskManagerMock implements TaskManager {
         task.setNextFireTime(new Date());
         task.setUserTaskJndi(taskContext.getUserTaskJndi());
         task.setParams(taskContext.getParams());
+        task.setModificationDate(new Date());
 
         LOG.info("new task: "+task);
         tasks.add(task);

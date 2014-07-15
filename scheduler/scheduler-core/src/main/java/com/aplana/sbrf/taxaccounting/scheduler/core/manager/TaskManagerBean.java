@@ -25,6 +25,7 @@ import javax.naming.NamingException;
 import javax.rmi.PortableRemoteObject;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -79,6 +80,7 @@ public class TaskManagerBean implements TaskManager {
             taskContextEntity.setTaskId(Long.parseLong(taskStatus.getTaskId()));
             taskContextEntity.setTaskName(taskContext.getTaskName());
             taskContextEntity.setUserTaskJndi(taskContext.getUserTaskJndi());
+            taskContextEntity.setModificationDate(new Date());
             persistenceService.saveContext(taskContextEntity);
 
             LOG.info(String.format("New task has been created. Task id: %s; Next call: %s",
