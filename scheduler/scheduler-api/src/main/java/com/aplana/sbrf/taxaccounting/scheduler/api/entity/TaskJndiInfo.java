@@ -25,11 +25,6 @@ public class TaskJndiInfo implements Serializable {
         this.params = params;
     }
 
-    public TaskJndiInfo(String name, String jndi) {
-        this.name = name;
-        this.jndi = jndi;
-    }
-
     public TaskJndiInfo() {
     }
 
@@ -63,5 +58,27 @@ public class TaskJndiInfo implements Serializable {
 
     public void setParams(List<FormElement> params) {
         this.params = params;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        TaskJndiInfo that = (TaskJndiInfo) o;
+
+        if (jndi != null ? !jndi.equals(that.jndi) : that.jndi != null) return false;
+        if (name != null ? !name.equals(that.name) : that.name != null) return false;
+        if (params != null ? !params.equals(that.params) : that.params != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = name != null ? name.hashCode() : 0;
+        result = 31 * result + (jndi != null ? jndi.hashCode() : 0);
+        result = 31 * result + (params != null ? params.hashCode() : 0);
+        return result;
     }
 }

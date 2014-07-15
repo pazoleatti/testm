@@ -231,7 +231,7 @@ public class TaskManagerBean implements TaskManager {
                     .append(userTask.getTaskClassName())
                     .append("#")
                     .append(UserTaskRemote.class.getName());
-            jndiInfo.add(new TaskJndiInfo(userTask.getTaskName(), jndi.toString()));
+            jndiInfo.add(new TaskJndiInfo(userTask.getTaskName(), jndi.toString(), userTask.getParams()));
         }
 
         String newJndiName = jndiName + "/" + item.getName();
