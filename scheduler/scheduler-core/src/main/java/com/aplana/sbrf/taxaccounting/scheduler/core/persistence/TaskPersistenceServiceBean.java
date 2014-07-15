@@ -50,7 +50,7 @@ public class TaskPersistenceServiceBean implements TaskPersistenceService {
 
     @Override
     public List<TaskContextEntity> getAllContexts() throws TaskPersistenceException {
-        Query query = em.createNamedQuery("TaskContextEntity.findAll");
+        Query query = em.createNamedQuery("TaskContextEntity.getFullListOrderedByModificationDate");
         List<TaskContextEntity> result = query.getResultList();
         for (TaskContextEntity item : result) {
             if (item.isCustomParamsExist()) {

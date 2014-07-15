@@ -22,6 +22,10 @@ import java.util.Date;
         @NamedQuery(
                 name = "TaskContextEntity.findAll",
                 query = "select c from TaskContextEntity c"
+        ),
+        @NamedQuery(
+                name = "TaskContextEntity.getFullListOrderedByModificationDate",
+                query = "select c from TaskContextEntity c order by c.modification_date"
         )
 })
 @Entity
