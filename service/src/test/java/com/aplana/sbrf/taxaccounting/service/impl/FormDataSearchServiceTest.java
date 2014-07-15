@@ -12,6 +12,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import static com.aplana.sbrf.taxaccounting.test.DepartmentFormTypeMockUtils.mockDepartmentFormType;
@@ -106,7 +107,7 @@ public class FormDataSearchServiceTest {
         reportPeriod.setEndDate(calendar.getTime());
         when(periodService.getReportPeriod(1)).thenReturn(reportPeriod);
 
-        when(departmentService.getTaxFormDepartments(any(TAUser.class), anyListOf(TaxType.class), null, null)).thenReturn(asList(1, 2, 3));
+        when(departmentService.getTaxFormDepartments(any(TAUser.class), anyListOf(TaxType.class), any(Date.class), any(Date.class))).thenReturn(asList(1, 2, 3));
         when(formDataAccessService.getAvailableFormDataKind(any(TAUserInfo.class), anyListOf(TaxType.class))).thenReturn(asList(FormDataKind.values()));
 		
 		List<DepartmentFormType> dfts = new ArrayList<DepartmentFormType>();

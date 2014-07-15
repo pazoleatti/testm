@@ -77,15 +77,15 @@ insert into department_form_type(id, department_id, form_type_id, kind) values (
 insert into department_form_type(id, department_id, form_type_id, kind) values (38, 3, 4, 3);
 
 -- Для форм подразделения 1 источниками будут являться форма 3 из подразделения 2 и форма 4 из подразделения 3
-insert into form_data_source(department_form_type_id, src_department_form_type_id) values (11, 25);
-insert into form_data_source(department_form_type_id, src_department_form_type_id) values (11, 26);
-insert into form_data_source(department_form_type_id, src_department_form_type_id) values (14, 37);
-insert into form_data_source(department_form_type_id, src_department_form_type_id) values (14, 38);
+insert into form_data_source(department_form_type_id, src_department_form_type_id, period_start, period_end) values (11, 25, date '1900-01-01', null);
+insert into form_data_source(department_form_type_id, src_department_form_type_id, period_start, period_end) values (11, 26, date '1900-01-01', null);
+insert into form_data_source(department_form_type_id, src_department_form_type_id, period_start, period_end) values (14, 37, date '1900-01-01', null);
+insert into form_data_source(department_form_type_id, src_department_form_type_id, period_start, period_end) values (14, 38, date '1900-01-01', null);
 
 -- Для деклараций подразделения 1  источником будет являться форма 1 из подразделений 2 и 3
 insert into declaration_type(id, name, tax_type) values (1, 'Декларация', 'T');
 insert into department_declaration_type(id, department_id, declaration_type_id) values (1, 1, 1);
-insert into declaration_source (department_declaration_type_id, src_department_form_type_id) values (1, 21);
-insert into declaration_source (department_declaration_type_id, src_department_form_type_id) values (1, 22);
-insert into declaration_source (department_declaration_type_id, src_department_form_type_id) values (1, 31);
-insert into declaration_source (department_declaration_type_id, src_department_form_type_id) values (1, 32);
+insert into declaration_source (department_declaration_type_id, src_department_form_type_id, period_start, period_end) values (1, 21, date '1900-01-01', null);
+insert into declaration_source (department_declaration_type_id, src_department_form_type_id, period_start, period_end) values (1, 22, date '1900-01-01', null);
+insert into declaration_source (department_declaration_type_id, src_department_form_type_id, period_start, period_end) values (1, 31, date '1900-01-01', null);
+insert into declaration_source (department_declaration_type_id, src_department_form_type_id, period_start, period_end) values (1, 32, date '1900-01-01', null);

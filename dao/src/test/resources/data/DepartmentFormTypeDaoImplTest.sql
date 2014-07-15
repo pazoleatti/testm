@@ -51,24 +51,24 @@ insert into department_form_type (id, department_id, form_type_id, kind) values 
 insert into department_form_type (id, department_id, form_type_id, kind) values (24, 6, 2, 2);
 
 -- Для Формы 1 в подразделении 2 источниками являются формы 1, 2, 3, 4 из подразделения 1  и форма 2 из подразделения 3
-insert into form_data_source (department_form_type_id, src_department_form_type_id) values (11, 1);
-insert into form_data_source (department_form_type_id, src_department_form_type_id) values (11, 2);
-insert into form_data_source (department_form_type_id, src_department_form_type_id) values (11, 3);
-insert into form_data_source (department_form_type_id, src_department_form_type_id) values (11, 4);
-insert into form_data_source (department_form_type_id, src_department_form_type_id) values (11, 22);
+insert into form_data_source (department_form_type_id, src_department_form_type_id, period_start, period_end) values (11, 1, date '1900-01-01', null);
+insert into form_data_source (department_form_type_id, src_department_form_type_id, period_start, period_end) values (11, 2, date '1900-01-01', null);
+insert into form_data_source (department_form_type_id, src_department_form_type_id, period_start, period_end) values (11, 3, date '1900-01-01', null);
+insert into form_data_source (department_form_type_id, src_department_form_type_id, period_start, period_end) values (11, 4, date '1900-01-01', null);
+insert into form_data_source (department_form_type_id, src_department_form_type_id, period_start, period_end) values (11, 22, date '1900-01-01', null);
 
 -- Для формы 2 в подразделении 2 источниками являются форма 1 из подразлделения 1 и форма 1 из подразделения 2
-insert into form_data_source (department_form_type_id, src_department_form_type_id) values (12, 1);
-insert into form_data_source (department_form_type_id, src_department_form_type_id) values (12, 11);
+insert into form_data_source (department_form_type_id, src_department_form_type_id, period_start, period_end) values (12, 1, date '1900-01-01', null);
+insert into form_data_source (department_form_type_id, src_department_form_type_id, period_start, period_end) values (12, 11, date '1900-01-01', null);
 
 -- Для формы 2 в подразделении 4 источниками являются форма 2 из подразделения 6
-insert into form_data_source (department_form_type_id, src_department_form_type_id) values (23, 24);
+insert into form_data_source (department_form_type_id, src_department_form_type_id, period_start, period_end) values (23, 24, date '1900-01-01', null);
 
 -- В подразделении 2 есть декларация 1 
 insert into department_declaration_type (id, department_id, declaration_type_id) values (1, 2, 1);
 
 -- Для декларации 1 в подразделении 2 источником является формы 1,2 из подразделения 3 и формы 11, 12 из подразделения 1
-insert into declaration_source (department_declaration_type_id, src_department_form_type_id) values (1, 21);
-insert into declaration_source (department_declaration_type_id, src_department_form_type_id) values (1, 22);
-insert into declaration_source (department_declaration_type_id, src_department_form_type_id) values (1, 5);
-insert into declaration_source (department_declaration_type_id, src_department_form_type_id) values (1, 6);
+insert into declaration_source (department_declaration_type_id, src_department_form_type_id, period_start, period_end) values (1, 21, date '1900-01-01', null);
+insert into declaration_source (department_declaration_type_id, src_department_form_type_id, period_start, period_end) values (1, 22, date '1900-01-01', null);
+insert into declaration_source (department_declaration_type_id, src_department_form_type_id, period_start, period_end) values (1, 5, date '1900-01-01', null);
+insert into declaration_source (department_declaration_type_id, src_department_form_type_id, period_start, period_end) values (1, 6, date '1900-01-01', null);

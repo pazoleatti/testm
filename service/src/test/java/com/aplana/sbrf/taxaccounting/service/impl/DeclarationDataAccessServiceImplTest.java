@@ -125,7 +125,7 @@ public class DeclarationDataAccessServiceImplTest {
 		when(departmentService.getDepartment(DEPARTMENT_TB1_ID)).thenReturn(departmentTB1);
 		when(departmentService.getDepartment(DEPARTMENT_TB2_ID)).thenReturn(departmentTB2);
         // Привязанные подразделения
-        when(departmentService.getTaxFormDepartments(any(TAUser.class), anyListOf(TaxType.class), null, null)).thenAnswer(new Answer<List<Integer>>() {
+        when(departmentService.getTaxFormDepartments(any(TAUser.class), anyListOf(TaxType.class), any(Date.class), any(Date.class))).thenAnswer(new Answer<List<Integer>>() {
             @Override
             public List<Integer> answer(InvocationOnMock invocation) throws Throwable {
 
@@ -195,13 +195,13 @@ public class DeclarationDataAccessServiceImplTest {
 		
 		SourceService sourceService = mock(SourceService.class);
 		List<DepartmentDeclarationType> bankDeclarationTypes = Collections.singletonList(mockDepartmentDeclarationType(Department.ROOT_BANK_ID, DECLARATION_TYPE_1_ID));
-		when(sourceService.getDDTByDepartment(Matchers.eq(Department.ROOT_BANK_ID), Matchers.any(TaxType.class), new Date(), new Date())).thenReturn(bankDeclarationTypes);
+		when(sourceService.getDDTByDepartment(Matchers.eq(Department.ROOT_BANK_ID), Matchers.any(TaxType.class), any(Date.class), any(Date.class))).thenReturn(bankDeclarationTypes);
 		
 		List<DepartmentDeclarationType> departmentTB1DeclarationTypes = Collections.singletonList(mockDepartmentDeclarationType(DEPARTMENT_TB1_ID, DECLARATION_TYPE_1_ID));
-		when(sourceService.getDDTByDepartment(Matchers.eq(DEPARTMENT_TB1_ID), Matchers.any(TaxType.class), new Date(), new Date())).thenReturn(departmentTB1DeclarationTypes);
+		when(sourceService.getDDTByDepartment(Matchers.eq(DEPARTMENT_TB1_ID), Matchers.any(TaxType.class), any(Date.class), any(Date.class))).thenReturn(departmentTB1DeclarationTypes);
 		
 		List<DepartmentDeclarationType> departmentTB2DeclarationTypes = Collections.singletonList(mockDepartmentDeclarationType(DEPARTMENT_TB2_ID, DECLARATION_TYPE_2_ID));
-		when(sourceService.getDDTByDepartment(Matchers.eq(DEPARTMENT_TB2_ID), Matchers.any(TaxType.class), new Date(), new Date())).thenReturn(departmentTB2DeclarationTypes);
+		when(sourceService.getDDTByDepartment(Matchers.eq(DEPARTMENT_TB2_ID), Matchers.any(TaxType.class), any(Date.class), any(Date.class))).thenReturn(departmentTB2DeclarationTypes);
 		ReflectionTestUtils.setField(service, "sourceService", sourceService);
     }
 

@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,6 +16,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.*;
 
+import static com.aplana.sbrf.taxaccounting.test.ReportPeriodMockUtils.mockReportPeriod;
 import static java.util.Arrays.asList;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.*;
@@ -45,11 +47,13 @@ public class DepartmentServiceImplTest {
         departmentDeclarationTypeDao = mock(DepartmentDeclarationTypeDao.class);
         departmentFormTypeDao = mock(DepartmentFormTypeDao.class);
         departmentReportPeriodDao = mock(DepartmentReportPeriodDao.class);
+        PeriodService periodService = mock(PeriodService.class);
 
         ReflectionTestUtils.setField(departmentService, "departmentDao", departmentDao);
         ReflectionTestUtils.setField(departmentService, "departmentReportPeriodDao", departmentReportPeriodDao);
         ReflectionTestUtils.setField(departmentService, "departmentDeclarationTypeDao", departmentDeclarationTypeDao);
         ReflectionTestUtils.setField(departmentService, "departmentFormTypeDao", departmentFormTypeDao);
+        ReflectionTestUtils.setField(departmentService, "periodService", periodService);
 
         root = new Department();
         root.setName("Bank");
@@ -112,6 +116,8 @@ public class DepartmentServiceImplTest {
         when(departmentDao.getDepartmenTBChildren(departmentGOSB31.getId())).thenReturn(asList(departmentTB3, departmentGOSB31, departmentOSB311));
         when(departmentDao.getDepartmenTBChildren(departmentOSB311.getId())).thenReturn(asList(departmentTB3, departmentGOSB31, departmentOSB311));
 
+        when(periodService.getReportPeriod(any(Integer.class))).thenReturn(mock(ReportPeriod.class));
+
         // Роли
         taRoles = new ArrayList<TARole>();
         for (String alias : asList(TARole.ROLE_CONTROL_UNP, TARole.ROLE_CONTROL_NS, TARole.ROLE_CONTROL, TARole.ROLE_OPER)) {
@@ -147,8 +153,8 @@ public class DepartmentServiceImplTest {
         when(departmentReportPeriodDao.existForDepartment(departmentOSB311.getId(), 1)).thenReturn(true);
 
         // Доступность по связям
-        when(departmentDao.getDepartmentsBySourceControl(anyInt(), anyListOf(TaxType.class), null, null)).thenReturn(asList(departmentTB2.getId(), departmentTB3.getId()));
-        when(departmentDao.getDepartmentsBySourceControlNs(anyInt(), anyListOf(TaxType.class), null, null)).thenReturn(asList(departmentTB2.getId(), departmentTB3.getId()));
+        when(departmentDao.getDepartmentsBySourceControl(anyInt(), anyListOf(TaxType.class), any(Date.class), any(Date.class))).thenReturn(asList(departmentTB2.getId(), departmentTB3.getId()));
+        when(departmentDao.getDepartmentsBySourceControlNs(anyInt(), anyListOf(TaxType.class), any(Date.class), any(Date.class))).thenReturn(asList(departmentTB2.getId(), departmentTB3.getId()));
         // Для дерева
         when(departmentDao.getRequiredForTreeDepartments(anyListOf(Integer.class))).thenAnswer(new Answer<List<Department>>() {
             @Override

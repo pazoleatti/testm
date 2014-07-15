@@ -381,23 +381,25 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
             cnt++;
         }*/
 
+        String allSql = "select id from " +
+                "(select distinct " +
+                "case when t3.c = 0 then av_dep.id else link_dep.id end as id " +
+                "from (" + availableDepartmentsSql +
+                ") av_dep left join ( " +
+                "select distinct ddt.department_id parent_id, dft.department_id id " +
+                "from declaration_source ds, department_form_type dft, department_declaration_type ddt, declaration_type dt " +
+                "where ds.department_declaration_type_id = ddt.id and ds.src_department_form_type_id = dft.id " +
+                "and dt.id = ddt.declaration_type_id and dt.tax_type in " + SqlUtils.transformTaxTypeToSqlInStatement(taxTypes) + " " +
+                "union " +
+                "select distinct dft.department_id parent_id, dfts.department_id id " +
+                "from form_data_source fds, department_form_type dft, department_form_type dfts, form_type ft " +
+                "where fds.department_form_type_id = dft.id and fds.src_department_form_type_id = dfts.id " +
+                "and ft.id = dft.form_type_id and ft.tax_type in " + SqlUtils.transformTaxTypeToSqlInStatement(taxTypes) + ") link_dep " +
+                "on av_dep.id = link_dep.parent_id, (select 0 as c from dual union all select 1 as c from dual) t3) " +
+                "where id is not null";
+
         try {
-            return getNamedParameterJdbcTemplate().queryForList("select id from " +
-                    "(select distinct " +
-                    "case when t3.c = 0 then av_dep.id else link_dep.id end as id " +
-                    "from (" + availableDepartmentsSql +
-                    ") av_dep left join ( " +
-                    "select distinct ddt.department_id parent_id, dft.department_id id " +
-                    "from declaration_source ds, department_form_type dft, department_declaration_type ddt, declaration_type dt " +
-                    "where ds.department_declaration_type_id = ddt.id and ds.src_department_form_type_id = dft.id " +
-                    "and dt.id = ddt.declaration_type_id and dt.tax_type in (" + SqlUtils.preparePlaceHolders(taxTypes.size()) + ") " +
-                    "union " +
-                    "select distinct dft.department_id parent_id, dfts.department_id id " +
-                    "from form_data_source fds, department_form_type dft, department_form_type dfts, form_type ft " +
-                    "where fds.department_form_type_id = dft.id and fds.src_department_form_type_id = dfts.id " +
-                    "and ft.id = dft.form_type_id and ft.tax_type in (" + SqlUtils.preparePlaceHolders(taxTypes.size()) + ")) link_dep " +
-                    "on av_dep.id = link_dep.parent_id, (select 0 as c from dual union all select 1 as c from dual) t3) " +
-                    "where id is not null",
+            return getNamedParameterJdbcTemplate().queryForList(allSql,
                     params, Integer.class);
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<Integer>(0);
