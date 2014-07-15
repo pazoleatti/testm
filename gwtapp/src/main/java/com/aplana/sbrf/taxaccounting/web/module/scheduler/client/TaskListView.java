@@ -41,7 +41,7 @@ public class TaskListView extends ViewWithUiHandlers<TaskListUiHandlers>
     public static final String STATE_TITLE = "Статус";
     public static final String REPEATS_LEFT_TITLE = "Повторений выполнено";
     public static final String NUMBER_OF_REPEATS_TITLE = "Повторений всего";
-    public static final String TIME_CREATED_TITLE = "Дата создания";
+    public static final String TIME_CHANGED_TITLE = "Дата редактирования";
     public static final String NEXT_FIRE_TIME_TITLE = "Дата следующего запуска";
 
     @UiField
@@ -155,7 +155,7 @@ public class TaskListView extends ViewWithUiHandlers<TaskListUiHandlers>
         taskDataTable.addResizableColumn(stateColumn, STATE_TITLE);
         taskDataTable.addResizableColumn(repeatsLeftColumn, REPEATS_LEFT_TITLE);
         taskDataTable.addResizableColumn(numberOfRepeatsColumn, NUMBER_OF_REPEATS_TITLE);
-        taskDataTable.addResizableColumn(timeCreatedColumn, TIME_CREATED_TITLE);
+        taskDataTable.addResizableColumn(timeCreatedColumn, TIME_CHANGED_TITLE);
         taskDataTable.addResizableColumn(nextFireTimeColumn, NEXT_FIRE_TIME_TITLE);
 
         taskDataTable.setSelectionModel(selectionModel, DefaultSelectionEventManager
