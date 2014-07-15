@@ -390,6 +390,18 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
     }
 
     @Override
+    @CacheEvict(value = CacheConstants.FORM_TEMPLATE, beforeInvocation = true, allEntries = true)
+    public void delete(final Collection<Integer> formTemplateIds) {
+        try {
+            getNamedParameterJdbcTemplate().update("delete from form_template where id in (:ids)",
+                    new HashMap<String, Object>(){{put("ids", formTemplateIds);}});
+        } catch (DataAccessException e){
+            logger.error("", e);
+            throw new DaoException("", e);
+        }
+    }
+
+    @Override
     public int saveNew(FormTemplate formTemplate) {
 
         String dataRowsXml = null;

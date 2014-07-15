@@ -393,6 +393,18 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
     }
 
     @Override
+    @CacheEvict(value = CacheConstants.DECLARATION_TEMPLATE, beforeInvocation = true, allEntries = true)
+    public void delete(final Collection<Integer> templateIds) {
+        try {
+            getNamedParameterJdbcTemplate().update("delete from declaration_template where id in (:ids)",
+                    new HashMap<String, Object>(){{put("ids", templateIds);}});
+        } catch (DataAccessException e){
+            logger.error("", e);
+            throw new DaoException("", e);
+        }
+    }
+
+    @Override
     public int versionTemplateCount(int decTypeId, List<Integer> statusList) {
         Map<String, Object> valueMap =  new HashMap<String, Object>();
         valueMap.put("typeId", decTypeId);
