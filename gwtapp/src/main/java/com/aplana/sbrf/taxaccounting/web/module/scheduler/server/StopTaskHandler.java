@@ -30,7 +30,9 @@ public class StopTaskHandler extends AbstractActionHandler<StopTaskAction, StopT
     public StopTaskResult execute(StopTaskAction action, ExecutionContext executionContext) throws ActionException {
         StopTaskResult result = new StopTaskResult();
         try {
-            taskManager.stopTask(action.getTaskId());
+            for (Long taskId : action.getTasksIds()) {
+                taskManager.stopTask(taskId);
+            }
         } catch (TaskSchedulingException e) {
             throw new ActionException("Ошибка остановки задачи планировщика", e);
         }

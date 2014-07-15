@@ -30,7 +30,9 @@ public class ResumeTaskHandler extends AbstractActionHandler<ResumeTaskAction, R
     public ResumeTaskResult execute(ResumeTaskAction action, ExecutionContext executionContext) throws ActionException {
         ResumeTaskResult result = new ResumeTaskResult();
         try {
-            taskManager.resumeTask(action.getTaskId());
+            for (Long taskId : action.getTasksIds()) {
+                taskManager.resumeTask(taskId);
+            }
         } catch (TaskSchedulingException e) {
             throw new ActionException("Ошибка возобновления задачи планировщика", e);
         }

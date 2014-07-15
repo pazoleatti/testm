@@ -17,14 +17,13 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.DefaultSelectionEventManager;
-import com.google.gwt.view.client.ProvidesKey;
-import com.google.gwt.view.client.SelectionModel;
-import com.google.gwt.view.client.SingleSelectionModel;
+import com.google.gwt.view.client.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * View для формы "Планировщик задач"       *
@@ -62,19 +61,19 @@ public class TaskListView extends ViewWithUiHandlers<TaskListUiHandlers>
     @UiField
     GenericDataGrid<TaskSearchResultItem> taskDataTable;
 
+    final MultiSelectionModel<TaskSearchResultItem> selectionModel = new MultiSelectionModel<TaskSearchResultItem>(
+            new ProvidesKey<TaskSearchResultItem>() {
+                @Override
+                public Object getKey(TaskSearchResultItem item) {
+                    return item == null ? null : item.getId();
+                }
+            }
+    );
+
     @Inject
     @UiConstructor
     public TaskListView(final Binder uiBinder) {
         initWidget(uiBinder.createAndBindUi(this));
-
-        final SelectionModel<TaskSearchResultItem> selectionModel = new SingleSelectionModel<TaskSearchResultItem>(
-                new ProvidesKey<TaskSearchResultItem>() {
-                    @Override
-                    public Object getKey(TaskSearchResultItem item) {
-                        return item == null ? null : item.getId();
-                    }
-                }
-        );
 
         TextColumn<TaskSearchResultItem> numberColumn = new TextColumn<TaskSearchResultItem>() {
             @Override
@@ -208,7 +207,13 @@ public class TaskListView extends ViewWithUiHandlers<TaskListUiHandlers>
     }
 
     @Override
-    public TaskSearchResultItem getSelectedItem() {
-        return ((SingleSelectionModel<TaskSearchResultItem>) taskDataTable.getSelectionModel()).getSelectedObject();
+    public List<Long> getSelectedItem() {
+        Set<TaskSearchResultItem> selectedSet = selectionModel.getSelectedSet();
+        List<Long> tasksIds = new ArrayList<Long>();
+        for (TaskSearchResultItem item : selectedSet) {
+            tasksIds.add(item.getId());
+        }
+
+        return tasksIds;
     }
 }

@@ -8,4 +8,13 @@ import com.gwtplatform.dispatch.shared.Result;
  */
 public class DeleteTaskResult implements Result {
     private static final long serialVersionUID = 1457691267349523170L;
+    private String uuid;
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
 }

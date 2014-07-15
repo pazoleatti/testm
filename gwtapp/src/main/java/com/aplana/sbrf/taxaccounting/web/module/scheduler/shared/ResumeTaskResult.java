@@ -8,4 +8,5 @@ import com.gwtplatform.dispatch.shared.Result;
  */
 public class ResumeTaskResult implements Result {
     private static final long serialVersionUID = -1412225671426535850L;
+    private String uuid;
 }
