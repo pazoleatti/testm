@@ -12,6 +12,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.util.Arrays;
 import java.util.Date;
 
 /**
@@ -48,5 +49,11 @@ public class TemplateChangesDaoTest {
     public void testGetByTypeId(){
         Assert.assertEquals(1, templateChangesDao.getByFormTypeIds(1).size());
         Assert.assertEquals(2, templateChangesDao.getByDeclarationTypeId(1).size());
+    }
+
+    @Test
+    public void testDelete(){
+        templateChangesDao.delete(Arrays.asList(1));
+        Assert.assertEquals(0, templateChangesDao.getByFormTemplateId(1).size());
     }
 }

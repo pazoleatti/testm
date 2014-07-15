@@ -118,7 +118,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
 	        getJdbcTemplate().update(
 	                "insert into department_declaration_type (id, department_id, declaration_type_id) " +
 	                        " values (SEQ_DEPT_DECLARATION_TYPE.nextval, ?, ?)",
-	                new Object[]{ departmentId, declarationTypeId});
+                    departmentId, declarationTypeId);
 		} catch (DataIntegrityViolationException e) {
     		throw new DaoException("Декларация указанного типа уже назначена подразделению", e);
     	}
@@ -130,8 +130,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
 		try{
 	        getJdbcTemplate().update(
 	                "delete from department_declaration_type where id = ?",
-	                new Object[]{id}
-	        );
+                    id);
 		} catch (DataIntegrityViolationException e){
 			throw new DaoException("Назначение является приемником данных для форм", e);
 		}
@@ -154,7 +153,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
                     "   AND (ds.PERIOD_START BETWEEN :dateFrom AND :dateTo " +
                     "   OR ds.PERIOD_END BETWEEN :dateFrom AND :dateTo \n" +
                     "   OR (ds.PERIOD_START BETWEEN :dateFrom AND :dateTo \n" +
-                    "   AND ds.PERIOD_END IS null));",
+                    "   AND ds.PERIOD_END IS null))",
                     values,
                     DDT_SOURCES_MAPPER);
         } catch (DataAccessException e){
@@ -180,7 +179,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
                     "   AND (ds.PERIOD_START BETWEEN :dateFrom AND :dateTo " +
                     "   OR ds.PERIOD_END BETWEEN :dateFrom AND :dateTo \n" +
                     "   OR (ds.PERIOD_START BETWEEN :dateFrom AND :dateTo \n" +
-                    "   AND ds.PERIOD_END IS null));",
+                    "   AND ds.PERIOD_END IS null))",
                     values,
                     DFT_SOURCES_MAPPER);
         } catch (DataAccessException e){

@@ -7,6 +7,15 @@ import com.gwtplatform.dispatch.shared.Result;
  */
 public class DeleteVersionResult implements Result {
     private String uuid;
+    private boolean isLastVersion;
+
+    public boolean isLastVersion() {
+        return isLastVersion;
+    }
+
+    public void setLastVersion(boolean lastVersion) {
+        isLastVersion = lastVersion;
+    }
 
     public String getUuid() {
         return uuid;

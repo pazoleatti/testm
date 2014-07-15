@@ -12,6 +12,15 @@ public class UpdateTableEvent extends GwtEvent<UpdateTableEvent.MyHandler> {
         void onUpdateTable(UpdateTableEvent event);
     }
 
+    private String uuid;
+
+    public UpdateTableEvent() {
+    }
+
+    public UpdateTableEvent(String uuid) {
+        this.uuid = uuid;
+    }
+
     private static final Type<MyHandler> TYPE = new Type<MyHandler>();
 
     public static Type<MyHandler> getType() {
@@ -20,6 +29,11 @@ public class UpdateTableEvent extends GwtEvent<UpdateTableEvent.MyHandler> {
 
     public static void fire(HasHandlers source) {
         UpdateTableEvent event = new UpdateTableEvent();
+        source.fireEvent(event);
+    }
+
+    public static void fire(HasHandlers source, String uuid) {
+        UpdateTableEvent event = new UpdateTableEvent(uuid);
         source.fireEvent(event);
     }
 
@@ -34,4 +48,7 @@ public class UpdateTableEvent extends GwtEvent<UpdateTableEvent.MyHandler> {
         return getType();
     }
 
+    public String getUuid() {
+        return uuid;
+    }
 }

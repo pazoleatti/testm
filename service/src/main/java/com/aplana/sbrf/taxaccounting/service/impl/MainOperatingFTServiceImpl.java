@@ -123,9 +123,10 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
             for (FormTemplate formTemplate : formTemplates){
                 versionOperatingService.isUsedVersion(formTemplate.getId(), typeId, formTemplate.getStatus(), formTemplate.getVersion(), null, logger);
                 checkError(logger, DELETE_TEMPLATE_MESSAGE);
-                formTemplate.setStatus(VersionedObjectStatus.DELETED);
+                //formTemplate.setStatus(VersionedObjectStatus.DELETED);
             }
-            formTemplateService.update(formTemplates);
+            //Все версии теперь каскадом удаляю, т.к. есть все необходимые проверки
+            //formTemplateService.delete(formTemplates);
         }
         versionOperatingService.checkDestinationsSources(typeId, null, null, logger);
         checkError(logger, DELETE_TEMPLATE_MESSAGE);
@@ -139,7 +140,8 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
     }
 
     @Override
-    public void deleteVersionTemplate(int templateId, Date templateActualEndDate, Logger logger, TAUser user) {
+    public boolean deleteVersionTemplate(int templateId, Date templateActualEndDate, Logger logger, TAUser user) {
+        boolean isDeleteAll = false;//переменная определяющая, удалена ли все версии макета
         FormTemplate template = formTemplateService.get(templateId);
         Date dateEndActualize = formTemplateService.getFTEndDate(templateId);
         versionOperatingService.isUsedVersion(templateId, template.getType().getId(), template.getStatus(), template.getVersion(), dateEndActualize, logger);
@@ -147,8 +149,8 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
         versionOperatingService.checkDestinationsSources(template.getType().getId(), template.getVersion(), templateActualEndDate, logger);
         checkError(logger, DELETE_TEMPLATE_VERSION_MESSAGE);
 
-        template.setStatus(VersionedObjectStatus.DELETED);
-        formTemplateService.save(template);
+        versionOperatingService.cleanVersions(templateId, template.getType().getId(), template.getStatus(), template.getVersion(), dateEndActualize, logger);
+        formTemplateService.delete(template.getId());
         List<FormTemplate> formTemplates = formTemplateService.getFormTemplateVersionsByStatus(template.getType().getId(),
                 VersionedObjectStatus.DRAFT, VersionedObjectStatus.NORMAL);
         //Проверка существуют ли еще версии со статусом 0 или 1
@@ -156,18 +158,19 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
             for (DepartmentFormType departmentFormType : sourceService.getDFTByFormType(template.getType().getId())){
                 logger.error(
                         String.format(HAVE_DFT_MESSAGE,
-                                departmentService.getDepartment(departmentFormType.getDepartmentId())));
-                checkError(logger, DELETE_TEMPLATE_VERSION_MESSAGE);
+                                departmentService.getDepartment(departmentFormType.getDepartmentId()).getName()));
             }
+            checkError(logger, DELETE_TEMPLATE_VERSION_MESSAGE);
         }
 
-        versionOperatingService.cleanVersions(templateId, template.getType().getId(), template.getStatus(), template.getVersion(), dateEndActualize, logger);
         //Если нет версий макетов, то можно удалить весь макет
         if (formTemplates.isEmpty()){
             formTypeService.delete(template.getType().getId());
             logger.info("Макет удален в связи с удалением его последней версии");
+            isDeleteAll = true;
         }
         logging(templateId, TemplateChangesEvent.DELETED, user);
+        return isDeleteAll;
     }
 
     @Override

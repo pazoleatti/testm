@@ -126,9 +126,10 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
                 versionOperatingService.isUsedVersion(declarationTemplate.getId(), declarationTemplate.getType().getId(),
                         declarationTemplate.getStatus(), declarationTemplate.getVersion(), null, logger);
                 checkError(logger, DELETE_TEMPLATE_MESSAGE);
-                declarationTemplate.setStatus(VersionedObjectStatus.DELETED);
+                //declarationTemplate.setStatus(VersionedObjectStatus.DELETED);
             }
-            declarationTemplateService.update(templates);
+            //Все версии теперь каскадом удаляю, т.к. есть все необходимые проверки
+            //declarationTemplateService.delete(templates);
         }
         versionOperatingService.checkDestinationsSources(typeId, null, null, logger);
         checkError(logger, DELETE_TEMPLATE_MESSAGE);
@@ -143,7 +144,8 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
     }
 
     @Override
-    public void deleteVersionTemplate(int templateId, Date templateActualEndDate, Logger logger, TAUser user) {
+    public boolean deleteVersionTemplate(int templateId, Date templateActualEndDate, Logger logger, TAUser user) {
+        boolean isDeleteAll = false;//переменная определяющая, удалена ли все версии макета
         DeclarationTemplate template = declarationTemplateService.get(templateId);
         Date dateEndActualize = declarationTemplateService.getDTEndDate(templateId);
         versionOperatingService.isUsedVersion(template.getId(), template.getType().getId(),
@@ -152,8 +154,9 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
         versionOperatingService.checkDestinationsSources(template.getType().getId(), template.getVersion(), templateActualEndDate, logger);
         checkError(logger, DELETE_TEMPLATE_VERSION_MESSAGE);
 
-        template.setStatus(VersionedObjectStatus.DELETED);
-        declarationTemplateService.save(template);
+        versionOperatingService.cleanVersions(template.getId(), template.getType().getId(),
+                template.getStatus(), template.getVersion(), dateEndActualize, logger);
+        declarationTemplateService.delete(template.getId());
         List<DeclarationTemplate> declarationTemplates = declarationTemplateService.getDecTemplateVersionsByStatus(template.getType().getId(),
                 VersionedObjectStatus.DRAFT, VersionedObjectStatus.NORMAL);
         if (declarationTemplates.isEmpty()){
@@ -165,14 +168,14 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
             }
         }
 
-        versionOperatingService.cleanVersions(template.getId(), template.getType().getId(),
-                template.getStatus(), template.getVersion(), dateEndActualize, logger);
         //Если нет версий макетов, то можно удалить весь макет
         if (declarationTemplates.isEmpty()){
             declarationTypeService.delete(template.getType().getId());
             logger.info("Макет удален в связи с удалением его последней версии");
+            isDeleteAll = true;
         }
         logging(templateId, TemplateChangesEvent.DELETED, user);
+        return isDeleteAll;
     }
 
     @Override

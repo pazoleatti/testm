@@ -190,6 +190,7 @@ public class AdminPresenter
     @Override
     public void onUpdateTable(UpdateTableEvent event) {
         updateFormData();
+        if (event.getUuid() != null)
+            LogAddEvent.fire(this, event.getUuid());
     }
-
 }

@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.TemplateChanges;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -14,4 +15,5 @@ public interface TemplateChangesService {
     List<TemplateChanges> getByDeclarationTemplateId(int declarationTemplateId);
     List<TemplateChanges> getByFormTypeIds(int ftTypeId);
     List<TemplateChanges> getByDeclarationTypeIds(int dtTypeId);
+    void delete(Collection<Integer> ids);
 }

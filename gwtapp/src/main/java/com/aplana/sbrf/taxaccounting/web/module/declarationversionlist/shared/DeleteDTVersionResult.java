@@ -7,6 +7,15 @@ import com.gwtplatform.dispatch.shared.Result;
  */
 public class DeleteDTVersionResult implements Result {
     private String logEntryUuid;
+    private boolean isLastVersion;
+
+    public boolean isLastVersion() {
+        return isLastVersion;
+    }
+
+    public void setLastVersion(boolean lastVersion) {
+        isLastVersion = lastVersion;
+    }
 
     public String getLogEntryUuid() {
         return logEntryUuid;

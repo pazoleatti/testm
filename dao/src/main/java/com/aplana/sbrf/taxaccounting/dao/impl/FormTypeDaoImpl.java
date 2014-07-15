@@ -109,19 +109,16 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
     public void updateFormType(int formTypeId, String newName, String code) {
         getJdbcTemplate().update(
                 "update form_type set name = ?, code = ? where id = ?",
-                new Object[]{
-                        newName,
-                        code,
-                        formTypeId
-                }
-        );
+                newName,
+                code,
+                formTypeId);
     }
 
     @CacheEvict("FormType")
     @Override
     public void delete(int formTypeId) {
         try {
-            getJdbcTemplate().update("update form_type set status = -1 where id = ?",
+            getJdbcTemplate().update("delete from form_type where id = ?",
                     new Object[]{formTypeId},
                     new int[]{Types.INTEGER});
         } catch (DataAccessException e){

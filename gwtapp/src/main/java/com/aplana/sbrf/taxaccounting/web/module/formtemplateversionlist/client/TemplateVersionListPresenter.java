@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.UpdateTableEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.client.event.CreateNewVersionEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.shared.*;
 import com.aplana.sbrf.taxaccounting.web.widget.historytemplatechanges.client.VersionHistoryPresenter;
@@ -63,6 +64,11 @@ public class TemplateVersionListPresenter extends Presenter<TemplateVersionListP
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<DeleteVersionResult>() {
             @Override
             public void onSuccess(DeleteVersionResult result) {
+                if (result.isLastVersion()){
+                    placeManager.revealPlace(new PlaceRequest.Builder().nameToken(AdminConstants.NameTokens.adminPage).build());
+                    UpdateTableEvent.fire(TemplateVersionListPresenter.this, result.getUuid());
+                    return;
+                }
                 LogAddEvent.fire(TemplateVersionListPresenter.this, result.getUuid());
                 placeManager.revealPlace(new PlaceRequest.Builder().nameToken(AdminConstants.NameTokens.formTemplateVersionList)
                         .with(AdminConstants.NameTokens.formTypeId, placeManager.getCurrentPlaceRequest().getParameter(AdminConstants.NameTokens.formTypeId, "")).build());

@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.DeclarationTemplateTokens;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.event.UpdateTableEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.client.event.CreateNewDTVersionEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.shared.*;
 import com.aplana.sbrf.taxaccounting.web.widget.historytemplatechanges.client.VersionHistoryPresenter;
@@ -66,6 +67,11 @@ public class DeclarationVersionListPresenter extends Presenter<DeclarationVersio
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<DeleteDTVersionResult>() {
             @Override
             public void onSuccess(DeleteDTVersionResult result) {
+                if (result.isLastVersion()){
+                    placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplateList).build());
+                    UpdateTableEvent.fire(DeclarationVersionListPresenter.this, result.getLogEntryUuid());
+                    return;
+                }
                 String typeId = placeManager.getCurrentPlaceRequest().getParameter(DeclarationTemplateTokens.declarationType, "");
                 LogAddEvent.fire(DeclarationVersionListPresenter.this, result.getLogEntryUuid());
                 placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationVersionList)

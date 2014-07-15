@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.dao;
 
 import com.aplana.sbrf.taxaccounting.model.TemplateChanges;
 
+import javax.validation.constraints.NotNull;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -42,4 +44,10 @@ public interface TemplateChangesDao {
      * @return список изменений
      */
     List<TemplateChanges> getByDeclarationTypeId(int dtTypeId);
+
+    /**
+     * Удаляет все записи журнала изменений макета. Только в случае удаления всего макета.
+     * @param ids идентификаторы
+     */
+    void delete(@NotNull Collection<Integer> ids);
 }

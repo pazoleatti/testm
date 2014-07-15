@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.FormType;
@@ -22,6 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class FormTypeDaoTest {
 	@Autowired
 	private FormTypeDao formTypeDao;
+    @Autowired
+    private FormTemplateDao formTemplateDao;
 	
 	@Test
 	public void testGet() {
@@ -63,12 +66,19 @@ public class FormTypeDaoTest {
         Assert.assertEquals(10000, formTypeDao.save(type));
     }
 
-    @Test
+    @Test(expected = DaoException.class)
     public void testSDelete(){
         FormType type = formTypeDao.get(1);
         formTypeDao.delete(type.getId());
-        type = formTypeDao.get(1);
-        Assert.assertEquals(-1, type.getStatus().getId());
+        formTypeDao.get(1);
+    }
+
+    //Должен удалить версию шаблона по каскаду
+    @Test(expected = DaoException.class)
+    public void testDeleteCascade(){
+        FormType type = formTypeDao.get(1);
+        formTypeDao.delete(type.getId());
+        formTemplateDao.get(1);
     }
 
     @Test

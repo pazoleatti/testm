@@ -262,7 +262,7 @@ public class FormTemplateDaoTest {
         FormTemplate formTemplate1 = new FormTemplate();
         formTemplate1.setId(1);
         formTemplate1.setName("");
-        formTemplate1.setStatus(VersionedObjectStatus.DELETED);
+        formTemplate1.setStatus(VersionedObjectStatus.DRAFT);
         formTemplate1.setVersion(new Date());
         formTemplate1.setScript("MyScript");
         FormType type = new FormType();
@@ -271,14 +271,14 @@ public class FormTemplateDaoTest {
         FormTemplate formTemplate2 = new FormTemplate();
         formTemplate2.setId(2);
         formTemplate2.setName("sfcxvxc");
-        formTemplate2.setStatus(VersionedObjectStatus.DELETED);
+        formTemplate2.setStatus(VersionedObjectStatus.DRAFT);
         formTemplate2.setVersion(new Date());
         formTemplate2.setScript("MyScript");
         formTemplate2.setType(type);
 
         int[] updateIds = formTemplateDao.update(Arrays.asList(formTemplate1, formTemplate2));
         Assert.assertArrayEquals(new int[]{1,1}, updateIds);
-        Assert.assertEquals(VersionedObjectStatus.DELETED, formTemplateDao.get(1).getStatus());
+        Assert.assertEquals(VersionedObjectStatus.DRAFT, formTemplateDao.get(1).getStatus());
     }
 
     @Test

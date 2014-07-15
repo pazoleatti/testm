@@ -16,7 +16,9 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -113,6 +115,17 @@ public class TemplateChangesDaoImpl extends AbstractDao implements TemplateChang
         } catch (DataAccessException e){
             logger.error("Ошибка при получении истории изменнений.", e);
             throw new DaoException("Ошибка при получении истории изменнений.", e.getMessage());
+        }
+    }
+
+    @Override
+    public void delete(final Collection<Integer> ids) {
+        try {
+            getNamedParameterJdbcTemplate().update("delete from template_changes where id in (:ids)",
+                    new HashMap<String, Object>(){{put("ids", ids);}});
+        } catch (DataAccessException e){
+            logger.error("Удаление записей журнала изменений", e);
+            throw new DaoException("Удаление записей журнала изменений", e);
         }
     }
 }

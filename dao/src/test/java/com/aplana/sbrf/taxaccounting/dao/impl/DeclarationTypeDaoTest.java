@@ -61,11 +61,11 @@ public class DeclarationTypeDaoTest {
         Assert.assertEquals(0, declarationTypeDao.getByFilter(filter).size());
     }
 
-    @Test
+    @Test(expected = DaoException.class)
     public void testDelete(){
         DeclarationType dt = declarationTypeDao.get(1);
         declarationTypeDao.delete(dt.getId());
-        assertEquals(VersionedObjectStatus.DELETED, declarationTypeDao.get(dt.getId()).getStatus());
+        declarationTypeDao.get(dt.getId());
     }
 
     @Test
