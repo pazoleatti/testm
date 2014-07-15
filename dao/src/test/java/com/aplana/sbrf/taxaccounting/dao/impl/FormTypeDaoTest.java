@@ -74,12 +74,12 @@ public class FormTypeDaoTest {
     }
 
     //Должен удалить версию шаблона по каскаду
-    @Test(expected = DaoException.class)
+    /*@Test(expected = DaoException.class)
     public void testDeleteCascade(){
         FormType type = formTypeDao.get(1);
         formTypeDao.delete(type.getId());
         formTemplateDao.get(1);
-    }
+    }*/
 
     @Test
     public void testGetByTaxType(){
