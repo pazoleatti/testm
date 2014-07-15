@@ -1,19 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<artifactId>taxaccounting</artifactId>
-		<groupId>com.aplana.taxaccounting</groupId>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>taxaccounting</artifactId>
+        <groupId>com.aplana.taxaccounting</groupId>
         <version>0.3.9</version>
-	</parent>
+    </parent>
 
-	<artifactId>taxaccounting-ear</artifactId>
-	<description>АС "Учёт налогов" - Дистрибутив</description>
-	<packaging>ear</packaging>
+    <artifactId>taxaccounting-ear</artifactId>
+    <description>АС "Учёт налогов" - Дистрибутив</description>
+    <packaging>ear</packaging>
 
     <profiles>
         <profile>
-        <id>development</id>
+            <id>development</id>
             <dependencies>
                 <dependency>
                     <groupId>${project.groupId}</groupId>
@@ -57,9 +58,14 @@
                                     <bundleFileName>mdb.jar</bundleFileName>
                                 </ejbModule>
                                 <ejbModule>
-                                    <groupId>com.aplana.taxaccounting</groupId>
+                                    <groupId>${project.groupId}</groupId>
                                     <artifactId>scheduler-task</artifactId>
                                     <bundleFileName>scheduler-task.jar</bundleFileName>
+                                </ejbModule>
+                                <ejbModule>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>scheduler-core</artifactId>
+                                    <bundleFileName>scheduler-core.jar</bundleFileName>
                                 </ejbModule>
                             </modules>
                         </configuration>
@@ -77,14 +83,14 @@
                     <type>ejb</type>
                     <classifier>jar-with-dependencies</classifier>
                     <exclusions>
-                    <exclusion>
-                    <groupId>${project.groupId}</groupId>
-                    <artifactId>core</artifactId>
-                    </exclusion>
-                    <exclusion>
-                    <groupId>${project.groupId}</groupId>
-                    <artifactId>dao</artifactId>
-                    </exclusion>
+                        <exclusion>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>core</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>dao</artifactId>
+                        </exclusion>
                     </exclusions>
                 </dependency>
                 <dependency>
@@ -94,18 +100,18 @@
                     <type>ejb</type>
                     <classifier>jar-with-dependencies</classifier>
                     <exclusions>
-                    <exclusion>
-                    <groupId>${project.groupId}</groupId>
-                    <artifactId>service</artifactId>
-                    </exclusion>
-                    <exclusion>
-                    <groupId>${project.groupId}</groupId>
-                    <artifactId>dao</artifactId>
-                    </exclusion>
-                    <exclusion>
-                    <groupId>${project.groupId}</groupId>
-                    <artifactId>core</artifactId>
-                    </exclusion>
+                        <exclusion>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>service</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>dao</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>core</artifactId>
+                        </exclusion>
                     </exclusions>
                 </dependency>
             </dependencies>
@@ -139,9 +145,14 @@
                                     <classifier>jar-with-dependencies</classifier>
                                 </ejbModule>
                                 <ejbModule>
-                                    <groupId>com.aplana.taxaccounting</groupId>
+                                    <groupId>${project.groupId}</groupId>
                                     <artifactId>scheduler-task</artifactId>
                                     <bundleFileName>scheduler-task.jar</bundleFileName>
+                                </ejbModule>
+                                <ejbModule>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>scheduler-core</artifactId>
+                                    <bundleFileName>scheduler-core.jar</bundleFileName>
                                 </ejbModule>
                             </modules>
                         </configuration>
@@ -151,18 +162,18 @@
         </profile>
 
     </profiles>
-	<dependencies>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>gwtapp</artifactId>
-			<version>${project.version}</version>
-			<type>war</type>
-		</dependency>
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>gwtapp</artifactId>
+            <version>${project.version}</version>
+            <type>war</type>
+        </dependency>
         <!-- TODO: вернуть когда будет внедрен планировщик -->
-        <!--<dependency>
+        <dependency>
             <groupId>com.aplana.taxaccounting</groupId>
             <artifactId>scheduler-core</artifactId>
-             <version>${project.version}</version>
+            <version>${project.version}</version>
             <type>ejb</type>
             <exclusions>
                 <exclusion>
@@ -170,37 +181,37 @@
                     <artifactId>ws-runtime</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>-->
+        </dependency>
         <dependency>
             <groupId>com.aplana.taxaccounting</groupId>
             <artifactId>scheduler-task</artifactId>
             <version>${project.version}</version>
             <type>ejb</type>
         </dependency>
-	</dependencies>
+    </dependencies>
 
-	<build>
-		<plugins>
-<!--
-			<plugin>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<version>1.7</version>
-				<executions>
-					<execution>
-						<phase>pre-integration-test</phase>
-						<configuration>
-							<target>
-								<ant dir="src/test/resources" antfile="deploy.xml" />
-							</target>
-						</configuration>
-						<goals>
-							<goal>run</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
--->
-		</plugins>
-	</build>
+    <build>
+        <plugins>
+            <!--
+                        <plugin>
+                            <artifactId>maven-antrun-plugin</artifactId>
+                            <version>1.7</version>
+                            <executions>
+                                <execution>
+                                    <phase>pre-integration-test</phase>
+                                    <configuration>
+                                        <target>
+                                            <ant dir="src/test/resources" antfile="deploy.xml" />
+                                        </target>
+                                    </configuration>
+                                    <goals>
+                                        <goal>run</goal>
+                                    </goals>
+                                </execution>
+                            </executions>
+                        </plugin>
+            -->
+        </plugins>
+    </build>
 </project>
 
