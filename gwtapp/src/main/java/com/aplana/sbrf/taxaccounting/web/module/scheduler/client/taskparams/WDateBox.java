@@ -12,6 +12,7 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class WDateBox extends ParamWidget {
     private DateMaskBoxPicker datePicker;
+    public static final String FORMAT = "dd-MM-yyyy, HH:mm";
 
     public WDateBox() {
         datePicker = new DateMaskBoxPicker();
@@ -39,12 +40,14 @@ public class WDateBox extends ParamWidget {
 
     @Override
     public String getValue() {
-        return datePicker.getValue() != null ? datePicker.getValue().toString():null;
+        return datePicker.getValue() != null ? DateTimeFormat.getFormat(FORMAT).format(datePicker.getValue()):null;
     }
 
     @Override
-    public void setValue(String value) {
-        datePicker.setValue(DateTimeFormat.getFormat("yyyy-MM-dd").parse(value));
+    public void setValue(String date) {
+        if (date != null){
+            datePicker.setValue(DateTimeFormat.getFormat(FORMAT).parse(date));
+        }
     }
 
     @Override
