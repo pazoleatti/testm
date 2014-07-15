@@ -45,8 +45,9 @@ public interface FormTypeDao {
      * Обновить имя типа налоговой формы
      * @param formTypeId идентификатор типа налоговой формы
      * @param newName новое имя типа налоговой формы
+     * @param code новый номер типа налоговой формы
      */
-    void updateFormTypeName(int formTypeId, String newName);
+    void updateFormType(int formTypeId, String newName, String code);
 
     void delete(int formTypeId);
 

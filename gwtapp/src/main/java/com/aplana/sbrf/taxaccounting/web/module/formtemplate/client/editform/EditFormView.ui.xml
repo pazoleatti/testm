@@ -28,15 +28,45 @@
             border-top: 1px solid #aeaeac;
         }
 
+        .editFieldsPanel {
+            vertical-align: middle;
+            padding-bottom: 5px;
+            width: 100%;
+        }
+
+        .leftLabel {
+            width: 150px;
+        }
+
+        .editFields {
+            width: 280px;
+            margin-left: 5px;
+        }
+
     </ui:style>
 
     <g:HTMLPanel>
         <g:ScrollPanel addStyleNames="{style.scrPanel}">
             <g:VerticalPanel styleName="{style.editPadding}">
                 <g:cell>
-                    <g:HorizontalPanel>
-                        <g:Label width="100px" text="Наименование макета"/>
-                        <g:TextBox width="300px" ui:field="formType"/>
+                    <g:HorizontalPanel addStyleNames="{style.editFieldsPanel}">
+                        <g:cell horizontalAlignment="right" verticalAlignment="middle">
+                            <g:Label text="Наименование макета:" addStyleNames="{style.leftLabel}"/>
+                        </g:cell>
+                        <g:cell>
+                            <g:TextBox ui:field="formType" addStyleNames="{style.editFields}"/>
+                        </g:cell>
+                    </g:HorizontalPanel>
+                </g:cell>
+
+                <g:cell>
+                    <g:HorizontalPanel addStyleNames="{style.editFieldsPanel}">
+                        <g:cell horizontalAlignment="right" verticalAlignment="middle">
+                            <g:Label text="Номер макета:" addStyleNames="{style.leftLabel}"/>
+                        </g:cell>
+                        <g:cell>
+                            <g:TextBox ui:field="formTypeCode" addStyleNames="{style.editFields}"/>
+                        </g:cell>
                     </g:HorizontalPanel>
                 </g:cell>
             </g:VerticalPanel>

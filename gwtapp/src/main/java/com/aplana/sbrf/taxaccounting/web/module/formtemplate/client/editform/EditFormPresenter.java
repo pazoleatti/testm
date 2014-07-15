@@ -5,8 +5,8 @@ import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.UpdateTableEvent;
-import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.EditFormTypeNameAction;
-import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.EditFormTypeNameResult;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.EditFormTypeAction;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.EditFormTypeResult;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -22,13 +22,16 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 
     public interface MyView extends View, HasUiHandlers<EditFormUiHandlers> {
         void setFormTypeName(String formTypeName);
+        void setFormTypeCode(String formTypeCode);
         String getFormTypeName();
+        String getFormTypeCode();
     }
 
     DispatchAsync dispatchAsync;
 
     int formTypeId;
     String initFormTypeName;
+    String initFormTypeCode;
 
     @Inject
     public EditFormPresenter(final EventBus eventBus, final MyView view, final DispatchAsync dispatchAsync) {
@@ -46,16 +49,23 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
         getView().setFormTypeName(formTypeName);
     }
 
+    public void setFormTypeCode(String formTypeCode) {
+        this.initFormTypeCode = formTypeCode;
+        getView().setFormTypeCode(formTypeCode);
+    }
+
     @Override
     public void onSave() {
-        EditFormTypeNameAction action = new EditFormTypeNameAction();
+        EditFormTypeAction action = new EditFormTypeAction();
         action.setFormTypeId(formTypeId);
         action.setNewFormTypeName(getView().getFormTypeName());
+        action.setNewFormTypeCode(getView().getFormTypeCode());
         dispatchAsync.execute(action, CallbackUtils
-                .defaultCallback(new AbstractCallback<EditFormTypeNameResult>() {
+                .defaultCallback(new AbstractCallback<EditFormTypeResult>() {
                     @Override
-                    public void onSuccess(EditFormTypeNameResult result) {
+                    public void onSuccess(EditFormTypeResult result) {
                         initFormTypeName = getView().getFormTypeName();
+                        initFormTypeCode = getView().getFormTypeCode();
                         UpdateTableEvent.fire(EditFormPresenter.this);
                     }
                 }, this));
@@ -72,6 +82,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
             @Override
             public void no() {
                 getView().setFormTypeName(initFormTypeName);
+                getView().setFormTypeCode(initFormTypeCode);
             }
         });
 

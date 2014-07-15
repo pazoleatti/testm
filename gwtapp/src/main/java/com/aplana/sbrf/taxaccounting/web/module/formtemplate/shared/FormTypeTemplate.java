@@ -11,6 +11,7 @@ import java.io.Serializable;
 public class FormTypeTemplate implements Serializable {
     private int formTypeId;
     private String formTypeName;
+    private String formTypeCode;
     private TaxType taxType;
     private int versionCount;
 
@@ -44,5 +45,13 @@ public class FormTypeTemplate implements Serializable {
 
     public void setVersionCount(int versionCount) {
         this.versionCount = versionCount;
+    }
+
+    public String getFormTypeCode() {
+        return formTypeCode;
+    }
+
+    public void setFormTypeCode(String formTypeCode) {
+        this.formTypeCode = formTypeCode;
     }
 }

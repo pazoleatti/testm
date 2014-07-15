@@ -56,6 +56,7 @@ public class GetFormTemplateListHandler extends AbstractActionHandler<GetFormTem
             typeTemplate.setTaxType(type.getTaxType());
             typeTemplate.setFormTypeId(type.getId());
             typeTemplate.setFormTypeName(type.getName());
+            typeTemplate.setFormTypeCode(type.getCode());
             typeTemplate.setVersionCount(idsVsCount.containsKey((long) type.getId()) ? idsVsCount.get((long)type.getId()) : 0);
 
             formTypeTemplates.add(typeTemplate);

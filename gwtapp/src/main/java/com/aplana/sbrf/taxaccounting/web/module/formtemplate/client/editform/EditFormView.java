@@ -19,6 +19,9 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers>
     @UiField
     TextBox formType;
 
+    @UiField
+    TextBox formTypeCode;
+
     @Inject
     public EditFormView(Binder uiBinder) {
         initWidget(uiBinder.createAndBindUi(this));
@@ -44,7 +47,17 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers>
     }
 
     @Override
+    public void setFormTypeCode(String formTypeCode) {
+        this.formTypeCode.setValue(formTypeCode);
+    }
+
+    @Override
     public String getFormTypeName() {
         return formType.getValue();
+    }
+
+    @Override
+    public String getFormTypeCode() {
+        return formTypeCode.getValue();
     }
 }

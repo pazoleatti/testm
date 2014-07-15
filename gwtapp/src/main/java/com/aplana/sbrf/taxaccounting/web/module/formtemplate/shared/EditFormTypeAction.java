@@ -2,9 +2,10 @@ package com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared;
 
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
-public class EditFormTypeNameAction extends UnsecuredActionImpl<EditFormTypeNameResult> {
+public class EditFormTypeAction extends UnsecuredActionImpl<EditFormTypeResult> {
     int formTypeId;
     String newFormTypeName;
+    String newFormTypeCode;
 
     public int getFormTypeId() {
         return formTypeId;
@@ -20,5 +21,13 @@ public class EditFormTypeNameAction extends UnsecuredActionImpl<EditFormTypeName
 
     public void setNewFormTypeName(String newFormTypeName) {
         this.newFormTypeName = newFormTypeName;
+    }
+
+    public String getNewFormTypeCode() {
+        return newFormTypeCode;
+    }
+
+    public void setNewFormTypeCode(String newFormTypeCode) {
+        this.newFormTypeCode = newFormTypeCode;
     }
 }
