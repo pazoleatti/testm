@@ -26,7 +26,7 @@ public class TaskSearchResultItem implements Serializable {
     private Integer repeatsLeft;
 
     /** Дата создания задачи */
-    private String timeCreated;
+    private String modificationDate;
 
     /** Дата следующего запуска задачи */
     private String nextFireTime;
@@ -71,12 +71,12 @@ public class TaskSearchResultItem implements Serializable {
         this.repeatsLeft = repeatsLeft;
     }
 
-    public String getTimeCreated() {
-        return timeCreated;
+    public String getModificationDate() {
+        return modificationDate;
     }
 
-    public void setTimeCreated(String timeCreated) {
-        this.timeCreated = timeCreated;
+    public void setModificationDate(String modificationDate) {
+        this.modificationDate = modificationDate;
     }
 
     public String getNextFireTime() {

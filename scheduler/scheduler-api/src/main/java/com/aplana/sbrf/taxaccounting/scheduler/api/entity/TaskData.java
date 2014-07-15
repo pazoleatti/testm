@@ -35,6 +35,9 @@ public class TaskData implements Serializable {
     /** Количество выполненных повторений задачи */
     private Integer repeatsLeft;
 
+    /** Дата последей операции по редактированию параметров задачи */
+    private Date modificationDate;
+
     /** Дата создания задачи */
     private Date timeCreated;
 
@@ -134,9 +137,18 @@ public class TaskData implements Serializable {
                 ", userTaskJndi='" + userTaskJndi + '\'' +
                 ", numberOfRepeats=" + numberOfRepeats +
                 ", repeatsLeft=" + repeatsLeft +
+                ", modificationDate=" + modificationDate +
                 ", timeCreated=" + timeCreated +
                 ", nextFireTime=" + nextFireTime +
                 ", params=" + params +
                 '}';
+    }
+
+    public Date getModificationDate() {
+        return modificationDate;
+    }
+
+    public void setModificationDate(Date modificationDate) {
+        this.modificationDate = modificationDate;
     }
 }

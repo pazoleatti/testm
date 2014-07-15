@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.scheduler.core.entity;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * Сущность контекста задачи для сохранения в бд
@@ -60,6 +61,12 @@ public class TaskContextEntity implements Serializable {
     private Boolean isCustomParamsExist;
 
     /**
+     * Дата последней операции по изменению параметров задачи
+     */
+    @Column(name = "modification_date", nullable = false)
+    private Date modificationDate;
+
+    /**
      * Сериализованный контекст задачи
      */
     @Lob
@@ -113,5 +120,13 @@ public class TaskContextEntity implements Serializable {
 
     public void setSerializedParams(byte[] serializedParams) {
         this.serializedParams = serializedParams;
+    }
+
+    public Date getModificationDate() {
+        return modificationDate;
+    }
+
+    public void setModificationDate(Date modificationDate) {
+        this.modificationDate = modificationDate;
     }
 }

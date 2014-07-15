@@ -29,6 +29,7 @@ public class TaskManagerMock implements TaskManager {
         task.setRepeatsLeft(1);
         task.setTimeCreated(new Date());
         task.setNextFireTime(new Date());
+        task.setModificationDate(new Date());
         task.setUserTaskJndi("ejb/taxaccounting/scheduler-task.jar/SimpleUserTask#com.aplana.sbrf.taxaccounting.scheduler.api.task.UserTaskRemote");
         task.setParams(new HashMap<String, TaskParam>(0));
 
@@ -40,6 +41,7 @@ public class TaskManagerMock implements TaskManager {
         task2.setNumberOfRepeats(-1);
         task2.setRepeatsLeft(1);
         task2.setTimeCreated(new Date());
+        task2.setModificationDate(new Date());
         task2.setNextFireTime(new Date());
         task2.setUserTaskJndi("ejb/scheduler-ear/scheduler-task.jar/SimpleUserTask#ru.aplana.scheduler.api.task.UserTaskRemote");
         task2.setParams(new HashMap<String, TaskParam>(0));

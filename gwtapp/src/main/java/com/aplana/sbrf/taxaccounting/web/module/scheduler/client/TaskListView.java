@@ -133,10 +133,10 @@ public class TaskListView extends ViewWithUiHandlers<TaskListUiHandlers>
             }
         };
 
-        TextColumn<TaskSearchResultItem> timeCreatedColumn = new TextColumn<TaskSearchResultItem>() {
+        TextColumn<TaskSearchResultItem> modificationDateColumn = new TextColumn<TaskSearchResultItem>() {
             @Override
             public String getValue(TaskSearchResultItem taskItem) {
-                return taskItem.getTimeCreated();
+                return taskItem.getModificationDate();
             }
         };
 
@@ -155,7 +155,7 @@ public class TaskListView extends ViewWithUiHandlers<TaskListUiHandlers>
         taskDataTable.addResizableColumn(stateColumn, STATE_TITLE);
         taskDataTable.addResizableColumn(repeatsLeftColumn, REPEATS_LEFT_TITLE);
         taskDataTable.addResizableColumn(numberOfRepeatsColumn, NUMBER_OF_REPEATS_TITLE);
-        taskDataTable.addResizableColumn(timeCreatedColumn, TIME_CHANGED_TITLE);
+        taskDataTable.addResizableColumn(modificationDateColumn, TIME_CHANGED_TITLE);
         taskDataTable.addResizableColumn(nextFireTimeColumn, NEXT_FIRE_TIME_TITLE);
 
         taskDataTable.setSelectionModel(selectionModel, DefaultSelectionEventManager

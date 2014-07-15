@@ -270,6 +270,7 @@ public class TaskManagerBean implements TaskManager {
         taskData.setTimeCreated(taskInfo.getTimeCreated());
         taskData.setNextFireTime(taskInfo.getNextFireTime());
         taskData.setParams(params);
+        taskData.setModificationDate(taskContextEntity.getModificationDate());
         return taskData;
     }
 }
