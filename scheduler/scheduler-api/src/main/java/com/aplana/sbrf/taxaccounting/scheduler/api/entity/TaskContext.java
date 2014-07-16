@@ -11,6 +11,14 @@ import java.util.Map;
 public class TaskContext implements Serializable {
     private static final long serialVersionUID = -1981721618349446095L;
 
+    /**
+     * id контекста, исползуется как id задачи,
+     * так как у нас нет возможности обновлять саму задачу
+     * поэтому мы задачу пересоздаем а контекст обновляем
+     * т.е. при обновлении задачи id контекста уникальна
+     */
+    private Long id;
+
     /** Название задачи */
     private String taskName;
 
@@ -69,10 +77,19 @@ public class TaskContext implements Serializable {
         this.params = params;
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     @Override
     public String toString() {
         return "TaskContext{" +
-                "taskName='" + taskName + '\'' +
+                "id=" + id +
+                ", taskName='" + taskName + '\'' +
                 ", numberOfRepeats=" + numberOfRepeats +
                 ", schedule='" + schedule + '\'' +
                 ", userTaskJndi='" + userTaskJndi + '\'' +
