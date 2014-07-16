@@ -34,7 +34,7 @@ public class ResumeTaskHandler extends AbstractActionHandler<ResumeTaskAction, R
         try {
             for (Long taskId : action.getTasksIds()) {
                 TaskData taskData = taskManager.getTaskData(taskId);
-                if (taskData.getTaskState() == TaskState.CANCELLED){
+                if (taskData.getTaskState() == TaskState.SUSPENDED){
                     taskManager.resumeTask(taskId);
                 }
             }
