@@ -24,7 +24,7 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
 
     private static String SAVE_MESSAGE = "Версия макета не сохранена, обнаружены фатальные ошибки!";
     private static String DELETE_TEMPLATE_MESSAGE = "Версия макета не сохранена, обнаружены фатальные ошибки!";
-    private static String DELETE_TEMPLATE_VERSION_MESSAGE = "Удаление невозможно, обнаружены ссылки на удаляемую версию макета!";
+    private static String DELETE_TEMPLATE_VERSION_MESSAGE = "Удаление невозможно, обнаружено использование макета!";
     private static String HAVE_DFT_MESSAGE = "Существует назначение налоговой формы подразделению %s!";
 
     @Autowired
