@@ -14,7 +14,7 @@ alter table tax_period add constraint tax_period_pk primary key (id);
 alter table tax_period add constraint tax_period_chk_taxtype check (tax_type in ('I', 'P', 'T', 'V', 'D'));
 
 alter table form_template add constraint form_template_pk primary key (id);
-alter table form_template add constraint form_template_fk_type_id foreign key (type_id) references form_type(id) on delete cascade;
+alter table form_template add constraint form_template_fk_type_id foreign key (type_id) references form_type(id);
 --ограничение не работает, в таком виде оно бесполезно
 --alter table form_template add constraint form_template_uniq_version unique(type_id, version);
 alter table form_template add constraint form_template_chk_fixed_rows check(fixed_rows in (0, 1));
@@ -96,20 +96,15 @@ alter table report_period add constraint report_period_fk_dtp_id foreign key (di
 alter table report_period add constraint report_period_uniq_tax_dict unique (tax_period_id, dict_tax_period_id);
 alter table report_period add constraint report_period_chk_date check (end_date >= start_date);
 
-alter table account_period add constraint account_period_pk primary key(id);
-alter table account_period add constraint account_period_unq_group unique (year, code_id, department_id);
-alter table account_period add constraint account_period_fk_code_id foreign key (code_id) references ref_book_record (id);
-alter table account_period add constraint account_period_fk_depart_id foreign key (department_id) references department(id);
-
 alter table income_101 add constraint income_101_pk primary key (id);
 alter table income_101 add constraint income_101_fk_report_period_id foreign key (report_period_id) references report_period(id);
 alter table income_101 add constraint income_101_fk_department foreign key (department_id) references department(id);
-alter table income_101 add constraint income_101_fk_accperiod_id foreign key (account_period_id) references account_period(id);
+alter table income_101 add constraint income_101_fk_accperiod_id foreign key (account_period_id) references ref_book_record(id);
 
 alter table income_102 add constraint income_102_pk primary key (id);
 alter table income_102 add constraint income_102_fk_report_period_id foreign key (report_period_id) references report_period(id);
 alter table income_102 add constraint income_102_fk_department foreign key (department_id) references department(id);
-alter table income_102 add constraint income_102_fk_accperiod_id foreign key (account_period_id) references account_period(id);
+alter table income_102 add constraint income_102_fk_accperiod_id foreign key (account_period_id) references ref_book_record(id);
 
 alter table declaration_type add constraint declaration_type_pk primary key (id);
 alter table declaration_type add constraint declaration_type_chk_tax_type check (tax_type in ('I', 'P', 'T', 'V', 'D'));
@@ -121,7 +116,7 @@ alter table department_declaration_type add constraint dept_decl_type_fk_decl_ty
 alter table department_declaration_type add constraint dept_decl_type_uniq_decl unique (department_id, declaration_type_id);
 
 alter table declaration_template add constraint declaration_template_pk primary key (id);
-alter table declaration_template add constraint declaration_template_fk_dtype foreign key (declaration_type_id) references declaration_type (id) on delete cascade;
+alter table declaration_template add constraint declaration_template_fk_dtype foreign key (declaration_type_id) references declaration_type (id);
 alter table declaration_template add constraint declaration_tem_fk_blob_data foreign key (XSD) references blob_data (id);
 alter table declaration_template add constraint dec_tem_fk_blob_data_jrxml foreign key (jrxml) references blob_data(id);
 alter table declaration_template add constraint dec_template_check_status check (status in (-1, 0, 1, 2));

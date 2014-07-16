@@ -121,11 +121,17 @@ public interface FormTemplateDao {
     int getNearestFTVersionIdRight(int formTypeId, List<Integer> statusList, Date actualBeginVersion);
 
     /**
-     * Удаляет версию шаблона. По идее удалять полностью только фейковые версии шаблонов.
+     * Удаляет версию шаблона.
      * @param formTemplateId идентификатор макета
      * @return удаленный идентификатор макета
      */
     int delete(int formTemplateId);
+
+    /**
+     * Удаляет версии шаблонов.
+     * @param formTemplateIds идентификатор макета
+     */
+    void delete(Collection<Integer> formTemplateIds);
 
     /**
      * Сохраняем новый шаблон

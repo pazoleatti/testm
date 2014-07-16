@@ -4,6 +4,8 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.script.range.Range;
 import com.aplana.sbrf.taxaccounting.model.script.range.Rect;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
@@ -81,6 +83,15 @@ public final class ScriptUtils {
 
     private static final String IMPORT_ROW_PREFIX = "Строка файла %d: %s";
     private static final String TRANSPORT_FILE_SUM_ERROR = "Итоговая сумма в графе %s строки %s в транспортном файле некорректна. Загрузка файла не выполнена.";
+
+
+    // Ссылочный, независимая графа: Не найдена версия справочника, соответствующая значению в файле
+    public static final String REF_BOOK_NOT_FOUND_IMPORT_ERROR = "Проверка файла: Строка %d, столбец %d: В справочнике «%s» в атрибуте «%s» не найдено значение «%s», актуальное на дату %s!";
+    // Ссылочный, зависимая графа: Значение в файле отличается от того, которое должно быть в зависимой графе
+    public static final String REF_BOOK_REFERENCE_NOT_FOUND_IMPORT_ERROR = "Проверка файла: Строка %d, столбец %d содержит значение «%s», отсутствующее в справочнике «%s»!";
+    // Ссылочный: Найдено несколько записей справочника, соответствующих значению в файле
+    public static final String REF_BOOK_TOO_MANY_FOUND_IMPORT_ERROR = "Проверка файла: Строка %d, столбец %d: В справочнике «%s» в атрибуте «%s» найдено более одного значения «%s», актуального на дату %s!";
+
 
     /**
      * Интерфейс для переопределения алгоритма расчета
@@ -999,5 +1010,27 @@ public final class ScriptUtils {
             value = value.replaceAll("«", "\"").replaceAll("»", "\"");
         }
         return value;
+    }
+
+    /**
+     * Проверка количества найденных в скрипте по составному ключу записей справочника во время импорта.
+     */
+    public static boolean checkImportRecordsCount(PagingResult<Map<String, RefBookValue>> records, RefBook refBook,
+                                                  String alias, String value, Date date, int rowIndex, int colIndex,
+                                                  Logger logger, boolean required) {
+        if (records.size() == 1) {
+            return true;
+        } else {
+            String dateFormat = (new SimpleDateFormat("dd.MM.yyyy")).format(date);
+            String msg = String.format(
+                    (records.size() > 1 ? REF_BOOK_TOO_MANY_FOUND_IMPORT_ERROR : REF_BOOK_NOT_FOUND_IMPORT_ERROR),
+                    rowIndex, colIndex, refBook.getName(), refBook.getAttribute(alias).getName(), value, dateFormat);
+            if (required) {
+                logger.error("%s", msg);
+            } else {
+                logger.warn("%s", msg);
+            }
+        }
+        return false;
     }
 }

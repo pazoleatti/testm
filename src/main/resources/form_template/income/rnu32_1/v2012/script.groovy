@@ -254,7 +254,7 @@ void logicCheck() {
             def sum = roundValue(getSum(dataRows, alias, firstRow, lastRow), 6)
             if (sum != value) {
                 def name = getColumnName(lastRow, alias)
-                rowError(logger, row, "Неверно рассчитаны итоговые значения для раздела $section в графе \"$name\"!")
+                rowError(logger, lastRow, "Неверно рассчитаны итоговые значения для раздела $section в графе \"$name\"!")
             }
         }
     }
@@ -280,6 +280,7 @@ void consolidation() {
             }
         }
     }
+    calcTotal(dataRows)
     dataRowHelper.save(dataRows)
 }
 

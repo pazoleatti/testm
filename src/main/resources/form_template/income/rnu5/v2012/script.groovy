@@ -328,11 +328,9 @@ void addData(def xml, int headRowCount) {
         // графа 3
         String filter = "LOWER(CODE) = LOWER('" + row.cell[2].text() + "') and LOWER(NUMBER) = LOWER('" + row.cell[3].text() + "')"
         def records = refBookFactory.getDataProvider(27).getRecords(reportPeriodEndDate, null, filter, null)
-        if (records.size() == 1) {
-            newRow.number = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
-        } else {
-            logger.error("Проверка файла: Строка ${xlsIndexRow} содержит значение, отсутствующее в справочнике " +
-                    "«" + refBookFactory.get(27).getName() + "»!")
+        if (checkImportRecordsCount(records, refBookFactory.get(27), 'CODE', row.cell[2].text(), reportPeriodEndDate, xlsIndexRow, 2, logger, true)) {
+            // графа 2
+            newRow.code = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
         }
 
         // графа 5
@@ -374,13 +372,11 @@ void addTransportData(def xml) {
 
         String filter = "LOWER(CODE) = LOWER('" + row.cell[2].text() + "') and LOWER(NUMBER) = LOWER('" + row.cell[3].text() + "')"
         def records = refBookFactory.getDataProvider(27).getRecords(reportPeriodEndDate, null, filter, null)
-        if (records.size() == 1) {
+        if (checkImportRecordsCount(records, refBookFactory.get(27), 'CODE', row.cell[2].text(), reportPeriodEndDate, rnuIndexRow, 2, logger, true)) {
             // графа 2
             newRow.code = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
-        } else {
-            logger.error("Проверка файла: Строка ${rnuIndexRow} содержит значение, отсутствующее в справочнике " +
-                    "«" + refBookFactory.get(27).getName() + "»!")
         }
+
         // графа 5
         newRow.sum = parseNumber(row.cell[5].text(), rnuIndexRow, 5 + colOffset, logger, true)
 

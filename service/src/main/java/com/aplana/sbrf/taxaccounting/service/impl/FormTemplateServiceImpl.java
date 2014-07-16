@@ -255,6 +255,11 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     }
 
     @Override
+    public void delete(Collection<Integer> templateIds) {
+        formTemplateDao.delete(templateIds);
+    }
+
+    @Override
     public FormTemplate getNearestFTRight(int formTemplateId, VersionedObjectStatus... status) {
         FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
 

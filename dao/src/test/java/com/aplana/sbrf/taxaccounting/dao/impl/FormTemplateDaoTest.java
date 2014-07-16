@@ -221,6 +221,11 @@ public class FormTemplateDaoTest {
     }
 
     @Test
+    public void testDeleteList(){
+        formTemplateDao.delete(Arrays.asList(1,2));
+    }
+
+    @Test
     public void testSaveNew(){
         FormTemplate formTemplate = new FormTemplate();
         formTemplate.setFixedRows(false);

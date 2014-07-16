@@ -135,6 +135,12 @@ public interface DeclarationTemplateDao {
     int delete(int declarationTemplateId);
 
     /**
+     * Удаляет версии шаблонов.
+     * @param templateIds идентификатор макета
+     */
+    void delete(Collection<Integer> templateIds);
+
+    /**
      * Количество весий для вида шаблона
      * @param decTypeId вид шаблона
      * @param statusList статусы

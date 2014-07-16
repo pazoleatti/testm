@@ -353,11 +353,7 @@ void addData(def xml, int headRowCount) {
 
         // графа 4
         if (map != null) {
-            def text = row.cell[3].text()
-            if ((text != null && !text.isEmpty() && !text.equals(map.NUMBER?.stringValue)) || ((text == null || text.isEmpty()) && map.NUMBER?.stringValue != null)) {
-                logger.error("Проверка файла: Строка ${xlsIndexRow}, столбец ${3 + colOffset} содержит значение, " +
-                        "отсутствующее в справочнике «" + refBookFactory.get(28).getName() + "»!")
-            }
+            formDataService.checkReferenceValue(28, row.cell[3].text(), map.NUMBER?.stringValue, rnuIndexRow, 3 + colOffset, logger, true)
         }
 
         // графа 5
@@ -404,20 +400,12 @@ void addTransportData(def xml) {
 
         // графа 3 проверка
         if (map != null) {
-            def text = row.cell[3].text()
-            if ((text != null && !text.isEmpty() && !text.equals(map.NUMBER?.stringValue)) || ((text == null || text.isEmpty()) && map.NUMBER?.stringValue != null)) {
-                logger.error("Проверка файла: Строка ${rnuIndexRow}, столбец ${3 + colOffset} содержит значение, " +
-                        "отсутствующее в справочнике «" + refBookFactory.get(28).getName() + "»!")
-            }
+            formDataService.checkReferenceValue(28, row.cell[3].text(), map.NUMBER?.stringValue, rnuIndexRow, 3 + colOffset, logger, true)
         }
 
         // графа 4 проверка
         if (map != null) {
-            def text = row.cell[4].text()
-            if ((text != null && !text.isEmpty() && !text.equals(map.TYPE_INCOME?.stringValue)) || ((text == null || text.isEmpty()) && map.NUMBER?.stringValue != null)) {
-                logger.error("Проверка файла: Строка ${rnuIndexRow}, столбец ${3 + colOffset} содержит значение, " +
-                        "отсутствующее в справочнике «" + refBookFactory.get(28).getName() + "»!")
-            }
+            formDataService.checkReferenceValue(28, row.cell[4].text(), map.TYPE_INCOME?.stringValue, rnuIndexRow, 4 + colOffset, logger, true)
         }
 
         // графа 5

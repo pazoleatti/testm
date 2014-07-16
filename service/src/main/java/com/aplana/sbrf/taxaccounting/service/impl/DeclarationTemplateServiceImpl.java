@@ -209,6 +209,11 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     }
 
     @Override
+    public void delete(Collection<Integer> templateIds) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
     public DeclarationTemplate getNearestDTRight(int declarationTemplateId, VersionedObjectStatus... status) {
         DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationTemplateId);
 

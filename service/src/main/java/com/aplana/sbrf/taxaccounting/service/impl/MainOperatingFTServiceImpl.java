@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -22,8 +23,8 @@ import java.util.List;
 public class MainOperatingFTServiceImpl implements MainOperatingService {
 
     private static String SAVE_MESSAGE = "Версия макета не сохранена, обнаружены фатальные ошибки!";
-    private static String DELETE_TEMPLATE_MESSAGE = "Версия макета не сохранена, обнаружены фатальные ошибки!";
-    private static String DELETE_TEMPLATE_VERSION_MESSAGE = "Удаление невозможно, обнаружены ссылки на удаляемую версию макета!";
+    private static String DELETE_TEMPLATE_MESSAGE = "Удаление невозможно, обнаружены фатальные ошибки!";
+    private static String DELETE_TEMPLATE_VERSION_MESSAGE = "Удаление невозможно, обнаружено использование макета!";
     private static String HAVE_DFT_MESSAGE = "Существует назначение налоговой формы подразделению %s!";
 
     @Autowired
@@ -120,13 +121,15 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
                 VersionedObjectStatus.NORMAL, VersionedObjectStatus.DRAFT);
         //Проверка использования
         if (formTemplates != null && !formTemplates.isEmpty()){
+            ArrayList<Integer> formIds = new ArrayList<Integer>(formTemplates.size());
             for (FormTemplate formTemplate : formTemplates){
                 versionOperatingService.isUsedVersion(formTemplate.getId(), typeId, formTemplate.getStatus(), formTemplate.getVersion(), null, logger);
                 checkError(logger, DELETE_TEMPLATE_MESSAGE);
                 //formTemplate.setStatus(VersionedObjectStatus.DELETED);
+                formIds.add(formTemplate.getId());
             }
             //Все версии теперь каскадом удаляю, т.к. есть все необходимые проверки
-            //formTemplateService.delete(formTemplates);
+            formTemplateService.delete(formIds);
         }
         versionOperatingService.checkDestinationsSources(typeId, null, null, logger);
         checkError(logger, DELETE_TEMPLATE_MESSAGE);

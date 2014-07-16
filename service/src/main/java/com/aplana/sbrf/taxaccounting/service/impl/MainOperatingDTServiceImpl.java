@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -22,7 +23,7 @@ import java.util.List;
 public class MainOperatingDTServiceImpl implements MainOperatingService {
 
     private static String SAVE_MESSAGE = "Версия макета не сохранена, обнаружены фатальные ошибки!";
-    private static String DELETE_TEMPLATE_MESSAGE = "Версия макета не сохранена, обнаружены фатальные ошибки!";
+    private static String DELETE_TEMPLATE_MESSAGE = "Удаление невозможно, обнаружены фатальные ошибки!";
     private static String DELETE_TEMPLATE_VERSION_MESSAGE = "Удаление невозможно, обнаружены ссылки на удаляемую версию макета!";
     private static String HAVE_DDT_MESSAGE = "Существует назначение налоговой формы подразделению %s!";
 
@@ -122,14 +123,16 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
         List<DeclarationTemplate> templates = declarationTemplateService.getDecTemplateVersionsByStatus(typeId,
                 VersionedObjectStatus.NORMAL, VersionedObjectStatus.DRAFT);
         if (templates != null && !templates.isEmpty()){
+            ArrayList<Integer> ids = new ArrayList<Integer>(templates.size());
             for (DeclarationTemplate declarationTemplate : templates){
                 versionOperatingService.isUsedVersion(declarationTemplate.getId(), declarationTemplate.getType().getId(),
                         declarationTemplate.getStatus(), declarationTemplate.getVersion(), null, logger);
                 checkError(logger, DELETE_TEMPLATE_MESSAGE);
                 //declarationTemplate.setStatus(VersionedObjectStatus.DELETED);
+                ids.add(declarationTemplate.getId());
             }
             //Все версии теперь каскадом удаляю, т.к. есть все необходимые проверки
-            //declarationTemplateService.delete(templates);
+            declarationTemplateService.delete(ids);
         }
         versionOperatingService.checkDestinationsSources(typeId, null, null, logger);
         checkError(logger, DELETE_TEMPLATE_MESSAGE);
