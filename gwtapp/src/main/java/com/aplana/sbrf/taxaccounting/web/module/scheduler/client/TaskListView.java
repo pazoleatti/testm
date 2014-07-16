@@ -159,11 +159,34 @@ public class TaskListView extends ViewWithUiHandlers<TaskListUiHandlers>
 
         taskDataTable.setSelectionModel(selectionModel, DefaultSelectionEventManager
                 .<TaskSearchResultItem>createCheckboxManager());
+
+        selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                updateButtonsStatuses();
+            }
+        });
+
+        updateButtonsStatuses();
+    }
+
+    /**
+     * Устанавливаем не доступность кнопок которые работают с выделенными
+     * задачами из списка задач
+     */
+    private void updateButtonsStatuses(){
+        boolean status = !selectionModel.getSelectedSet().isEmpty();
+        deleteButton.setEnabled(status);
+        startButton.setEnabled(status);
+        stopButton.setEnabled(status);
+        resumeButton.setEnabled(status);
     }
 
     @Override
     public void setTableData(List<TaskSearchResultItem> tasks) {
         taskDataTable.setRowData(tasks);
+        selectionModel.clear();
+        updateButtonsStatuses();
     }
 
     @UiHandler("createButton")
