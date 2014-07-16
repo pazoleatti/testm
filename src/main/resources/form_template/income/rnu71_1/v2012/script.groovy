@@ -480,6 +480,7 @@ void addData(def xml, int headRowCount) {
 
         // графа 10
         newRow.income = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
 
         // графы рассчитываемые, однако не при импорте в консолидированную - должны загружаться
         // графа 11
