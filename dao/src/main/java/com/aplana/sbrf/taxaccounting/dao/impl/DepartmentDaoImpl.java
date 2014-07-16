@@ -20,10 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Repository
 @Transactional(readOnly = true)
@@ -386,13 +383,13 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     }
 
     @Override
-    public List<Integer> getDepartmentsBySourceControl(int userDepartmentId, List<TaxType> taxTypes) {
-        return getDepartmentsBySource(userDepartmentId, taxTypes, false);
+    public List<Integer> getDepartmentsBySourceControl(int userDepartmentId, List<TaxType> taxTypes, Date periodStart, Date periodEnd) {
+        return getDepartmentsBySource(userDepartmentId, taxTypes, periodStart, periodEnd, false);
     }
 
     @Override
-    public List<Integer> getDepartmentsBySourceControlNs(int userDepartmentId, List<TaxType> taxTypes) {
-        return getDepartmentsBySource(userDepartmentId, taxTypes, true);
+    public List<Integer> getDepartmentsBySourceControlNs(int userDepartmentId, List<TaxType> taxTypes, Date periodStart, Date periodEnd) {
+        return getDepartmentsBySource(userDepartmentId, taxTypes, periodStart, periodEnd, true);
     }
 
     @Override
@@ -428,59 +425,68 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 
     /**
      * Поиск подразделений, доступных по иерархии и подразделений доступных по связи приемник-источник для этих подразделений
+     *
      * @param userDepartmentId Подразделение пользователя
      * @param taxTypes Типы налога
-     * @param isNs true - для роли "Контролер НС", false для роли "Контролер"
-     * @return Список id подразделений
+     * @param periodStart  начало периода, в котором действуют назначения
+     * @param periodEnd    окончание периода, в котором действуют назначения
+     * @param isNs true - для роли "Контролер НС", false для роли "Контролер"  @return Список id подразделений
      */
-    private List<Integer> getDepartmentsBySource(int userDepartmentId, List<TaxType> taxTypes, boolean isNs) {
+    private List<Integer> getDepartmentsBySource(int userDepartmentId, List<TaxType> taxTypes, Date periodStart, Date periodEnd, boolean isNs) {
         String recursive = isWithRecursive() ? "recursive" : "";
 
-        String availableDepartmentsSql = isNs ?
-                "with " + recursive + " tree1 (id, parent_id, type) as " +
-                        "(select id, parent_id, type from department where id = ? " +
-                        "union all " +
-                        "select d.id, d.parent_id, d.type from department d inner join tree1 t1 on d.id = t1.parent_id " +
-                        "where d.type >= 2), tree2 (id, root_id, type) as " +
-                        "(select id, id root_id, type from department where type = 2 " +
-                        "union all " +
-                        "select d.id, t2.root_id, d.type from department d inner join tree2 t2 on d.parent_id = t2.id) " +
-                        "select tree2.id from tree1, tree2 where tree1.type = 2 and tree2.root_id = tree1.id"
-                :
-                "with " + recursive + " tree (id) as " +
-                        "(select id from department where id = ? " +
-                        "union all " +
-                        "select d.id from department d inner join tree t on d.parent_id = t.id) " +
-                        "select id from tree";
+        Map<String, Object> params = new HashMap<String, Object>();
+        String availableDepartmentsSql;
+        if (isNs) {
+            availableDepartmentsSql = "with " + recursive + " tree1 (id, parent_id, type) as " +
+                    "(select id, parent_id, type from department where id = :userDepartmentId " +
+                    "union all " +
+                    "select d.id, d.parent_id, d.type from department d inner join tree1 t1 on d.id = t1.parent_id " +
+                    "where d.type >= 2), tree2 (id, root_id, type) as " +
+                    "(select id, id root_id, type from department where type = 2 " +
+                    "union all " +
+                    "select d.id, t2.root_id, d.type from department d inner join tree2 t2 on d.parent_id = t2.id) " +
+                    "select tree2.id from tree1, tree2 where tree1.type = 2 and tree2.root_id = tree1.id";
+        } else {
+            availableDepartmentsSql = "with " + recursive + " tree (id) as " +
+                    "(select id from department where id = :userDepartmentId " +
+                    "union all " +
+                    "select d.id from department d inner join tree t on d.parent_id = t.id) " +
+                    "select id from tree";
+        }
+        params.put("userDepartmentId", userDepartmentId);
+
 
         // Параметры запроса: id подразделения и типы налога (дважды)
-        Object[] sqlParams = new Object[taxTypes.size() * 2 + 1];
+        /*Object[] sqlParams = new Object[taxTypes.size() * 2 + 1];
         int cnt = 1;
         sqlParams[0] = userDepartmentId;
         for (TaxType taxType : taxTypes) {
             sqlParams[cnt] = String.valueOf(taxType.getCode());
             sqlParams[taxTypes.size() + cnt] = String.valueOf(taxType.getCode());
             cnt++;
-        }
+        }*/
+
+        String allSql = "select id from " +
+                "(select distinct " +
+                "case when t3.c = 0 then av_dep.id else link_dep.id end as id " +
+                "from (" + availableDepartmentsSql +
+                ") av_dep left join ( " +
+                "select distinct ddt.department_id parent_id, dft.department_id id " +
+                "from declaration_source ds, department_form_type dft, department_declaration_type ddt, declaration_type dt " +
+                "where ds.department_declaration_type_id = ddt.id and ds.src_department_form_type_id = dft.id " +
+                "and dt.id = ddt.declaration_type_id and dt.tax_type in " + SqlUtils.transformTaxTypeToSqlInStatement(taxTypes) + " " +
+                "union " +
+                "select distinct dft.department_id parent_id, dfts.department_id id " +
+                "from form_data_source fds, department_form_type dft, department_form_type dfts, form_type ft " +
+                "where fds.department_form_type_id = dft.id and fds.src_department_form_type_id = dfts.id " +
+                "and ft.id = dft.form_type_id and ft.tax_type in " + SqlUtils.transformTaxTypeToSqlInStatement(taxTypes) + ") link_dep " +
+                "on av_dep.id = link_dep.parent_id, (select 0 as c from dual union all select 1 as c from dual) t3) " +
+                "where id is not null";
 
         try {
-            return getJdbcTemplate().queryForList("select id from " +
-                    "(select distinct " +
-                    "case when t3.c = 0 then av_dep.id else link_dep.id end as id " +
-                    "from (" + availableDepartmentsSql +
-                    ") av_dep left join ( " +
-                    "select distinct ddt.department_id parent_id, dft.department_id id " +
-                    "from declaration_source ds, department_form_type dft, department_declaration_type ddt, declaration_type dt " +
-                    "where ds.department_declaration_type_id = ddt.id and ds.src_department_form_type_id = dft.id " +
-                    "and dt.id = ddt.declaration_type_id and dt.tax_type in (" + SqlUtils.preparePlaceHolders(taxTypes.size()) + ") " +
-                    "union " +
-                    "select distinct dft.department_id parent_id, dfts.department_id id " +
-                    "from form_data_source fds, department_form_type dft, department_form_type dfts, form_type ft " +
-                    "where fds.department_form_type_id = dft.id and fds.src_department_form_type_id = dfts.id " +
-                    "and ft.id = dft.form_type_id and ft.tax_type in (" + SqlUtils.preparePlaceHolders(taxTypes.size()) + ")) link_dep " +
-                    "on av_dep.id = link_dep.parent_id, (select 0 as c from dual union all select 1 as c from dual) t3) " +
-                    "where id is not null",
-                    Integer.class, sqlParams);
+            return getNamedParameterJdbcTemplate().queryForList(allSql,
+                    params, Integer.class);
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<Integer>(0);
         }

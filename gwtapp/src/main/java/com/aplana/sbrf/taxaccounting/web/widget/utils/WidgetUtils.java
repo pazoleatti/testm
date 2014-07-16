@@ -1,13 +1,17 @@
 package com.aplana.sbrf.taxaccounting.web.widget.utils;
 
+import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.ValueListBox;
 
 import java.util.Date;
 
@@ -185,6 +189,31 @@ public class WidgetUtils {
         }
     }
 
+    public static void setupOptionTitle(ValueListBox valueListBox) {
+        for (int i = 0; i < DOM.getChildCount(valueListBox.getElement()); i++) {
+            com.google.gwt.user.client.Element child = DOM.getChild(valueListBox.getElement(), i);
+            child.setAttribute("title", child.getAttribute("value"));
+        }
+    }
 
+    /**
+     * Создание элемента затемнения, который потом можно вставлять в дом-элементы для их затемнения
+     * @return
+     */
+    public static DivElement createGlassElement(){
+        DivElement glass = Document.get().createDivElement();
+
+        Style style = glass.getStyle();
+        style.setProperty("filter", "alpha(opacity=0.15)");
+        style.setOpacity(0.15);
+        style.setBackgroundColor("#000000");
+        style.setPosition(Style.Position.ABSOLUTE);
+        style.setLeft(0, Style.Unit.PX);
+        style.setTop(0, Style.Unit.PX);
+        style.setRight(0, Style.Unit.PX);
+        style.setBottom(0, Style.Unit.PX);
+        //style.setZIndex(2147483647); // Maximum z-index
+        return glass;
+    }
 
 }

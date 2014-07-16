@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +40,9 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Autowired
     FormDataDao formDataDao;
+
+    @Autowired
+    PeriodService periodService;
 
     @Override
     public Department getUNPDepartment() {
@@ -241,7 +245,13 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     // http://conf.aplana.com/pages/viewpage.action?pageId=11380670
     @Override
-    public List<Integer> getTaxFormDepartments(TAUser tAUser, List<TaxType> taxTypes) {
+    public List<Integer> getTaxFormDepartments(TAUser tAUser, List<TaxType> taxTypes, Date periodStart, Date periodEnd) {
+        if (periodStart == null && periodEnd == null) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(1900, Calendar.JANUARY, 1);
+            periodStart = calendar.getTime();
+            periodEnd = null;
+        }
         List<Integer> retList = new ArrayList<Integer>();
         if (tAUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
             // Все подразделения из справочника подразделений
@@ -250,12 +260,12 @@ public class DepartmentServiceImpl implements DepartmentService {
             }
         } else if (tAUser.hasRole(TARole.ROLE_CONTROL_NS)) {
             // 1, 2
-            retList.addAll(departmentDao.getDepartmentsBySourceControlNs(tAUser.getDepartmentId(), taxTypes));
+            retList.addAll(departmentDao.getDepartmentsBySourceControlNs(tAUser.getDepartmentId(), taxTypes, periodStart, periodEnd));
             // 3
             retList.addAll(getDepartmentIdsByExcutors(retList, taxTypes));
         } else if (tAUser.hasRole(TARole.ROLE_CONTROL)) {
             // 1, 2
-            retList.addAll(departmentDao.getDepartmentsBySourceControl(tAUser.getDepartmentId(), taxTypes));
+            retList.addAll(departmentDao.getDepartmentsBySourceControl(tAUser.getDepartmentId(), taxTypes, periodStart, periodEnd));
             // 3
             retList.addAll(getDepartmentIdsByExcutors(retList, taxTypes));
         } else if (tAUser.hasRole(TARole.ROLE_OPER)) {
@@ -313,9 +323,10 @@ public class DepartmentServiceImpl implements DepartmentService {
     // http://conf.aplana.com/pages/viewpage.action?pageId=11383234
     @Override
     public List<Integer> getOpenPeriodDepartments(TAUser tAUser, List<TaxType> taxTypes, int reportPeriodId) {
+        ReportPeriod reportPeriod = periodService.getReportPeriod(reportPeriodId);
         List<Integer> retList = new ArrayList<Integer>();
         // Подразделения согласно выборке 40 - Выборка для доступа к экземплярам НФ/деклараций
-        List<Integer> list = getTaxFormDepartments(tAUser, taxTypes);
+        List<Integer> list = getTaxFormDepartments(tAUser, taxTypes, reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
         for (Integer departmentId : list) {
             DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(reportPeriodId,
                     departmentId.longValue());

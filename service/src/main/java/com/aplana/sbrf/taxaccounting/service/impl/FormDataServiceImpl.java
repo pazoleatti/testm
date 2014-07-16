@@ -767,6 +767,7 @@ public class FormDataServiceImpl implements FormDataService {
     @Transactional(readOnly = true)
     public void checkDestinations(long formDataId) {
         FormData formData = formDataDao.get(formDataId, null);
+        ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
         // Проверка вышестоящих налоговых форм
         List<DepartmentFormType> departmentFormTypes =
                 departmentFormTypeDao.getFormDestinations(formData.getDepartmentId(),
@@ -786,8 +787,8 @@ public class FormDataServiceImpl implements FormDataService {
         }
 
         // Проверка вышестоящих деклараций
-        List<DepartmentDeclarationType> departmentDeclarationTypes = departmentDeclarationTypeDao.getDestinations(
-                formData.getDepartmentId(), formData.getFormType().getId(), formData.getKind());
+        List<DepartmentDeclarationType> departmentDeclarationTypes = sourceService.getDeclarationDestinations(
+                formData.getDepartmentId(), formData.getFormType().getId(), formData.getKind(), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
         if (departmentDeclarationTypes != null) {
             for (DepartmentDeclarationType departmentDeclarationType : departmentDeclarationTypes) {
                 DeclarationData declaration = declarationDataDao.find(departmentDeclarationType.getDeclarationTypeId(),

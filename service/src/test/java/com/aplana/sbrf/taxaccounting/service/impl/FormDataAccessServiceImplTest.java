@@ -127,7 +127,7 @@ public class FormDataAccessServiceImplTest {
 		when(departmentService.getDepartment(Department.ROOT_BANK_ID)).thenReturn(d);
 
         // Доступные подразделения (для чтения)
-        when(departmentService.getTaxFormDepartments(any(TAUser.class), anyListOf(TaxType.class))).thenAnswer(
+        when(departmentService.getTaxFormDepartments(any(TAUser.class), anyListOf(TaxType.class), any(Date.class), any(Date.class))).thenAnswer(
                 new Answer<List<Integer>>() {
                     @Override
                     public List<Integer> answer(InvocationOnMock invocation) throws Throwable {
@@ -168,7 +168,7 @@ public class FormDataAccessServiceImplTest {
                 List<TaxType> taxTypeList = (List<TaxType>) invocation.getArguments()[1];
                 Integer reportPeriodId = (Integer) invocation.getArguments()[2];
                 if (reportPeriodId.equals(REPORT_PERIOD_ACTIVE_ID) || reportPeriodId.equals(REPORT_PERIOD_BALANCED_ID)) {
-                    return departmentService.getTaxFormDepartments(user, taxTypeList);
+                    return departmentService.getTaxFormDepartments(user, taxTypeList, null, null);
                 } else {
                     return new ArrayList<Integer>(0);
                 }
@@ -176,6 +176,10 @@ public class FormDataAccessServiceImplTest {
         });
 
         ReflectionTestUtils.setField(service, "departmentService", departmentService);
+
+        PeriodService periodService = mock(PeriodService.class);
+        when(periodService.getReportPeriod(any(Integer.class))).thenReturn(mock(ReportPeriod.class));
+        ReflectionTestUtils.setField(service, "periodService", periodService);
 
         // Сводная форма 1 из тербанка 1 является источником для сводной 1 банка
 		DepartmentFormTypeDao departmentFormTypeDao = mock(DepartmentFormTypeDao.class);
@@ -279,19 +283,19 @@ public class FormDataAccessServiceImplTest {
 		dfts.add(mockDepartmentFormType(TB1_ID, summaryFormType1.getId(), FormDataKind.SUMMARY));
 		dfts.add(mockDepartmentFormType(TB1_ID, summaryFormType1.getId(), FormDataKind.CONSOLIDATED));
 		dfts.add(mockDepartmentFormType(TB1_ID, additionalFormType.getId(), FormDataKind.ADDITIONAL));
-		when(sourceService.getDFTByDepartment(Matchers.eq(TB1_ID), Matchers.any(TaxType.class))).thenReturn(dfts);
+		when(sourceService.getDFTByDepartment(Matchers.eq(TB1_ID), Matchers.any(TaxType.class), any(Date.class), any(Date.class))).thenReturn(dfts);
 		
 		dfts = new ArrayList<DepartmentFormType>();
 		dfts.add(mockDepartmentFormType(TB2_ID, summaryFormType1.getId(), FormDataKind.SUMMARY));
 		dfts.add(mockDepartmentFormType(TB2_ID, summaryFormType1.getId(), FormDataKind.CONSOLIDATED));
 		dfts.add(mockDepartmentFormType(TB2_ID, additionalFormType.getId(), FormDataKind.ADDITIONAL));
-		when(sourceService.getDFTByDepartment(Matchers.eq(TB2_ID), Matchers.any(TaxType.class))).thenReturn(dfts);
+		when(sourceService.getDFTByDepartment(Matchers.eq(TB2_ID), Matchers.any(TaxType.class), any(Date.class), any(Date.class))).thenReturn(dfts);
 		
 		dfts = new ArrayList<DepartmentFormType>();
 		dfts.add(mockDepartmentFormType(Department.ROOT_BANK_ID, summaryFormType1.getId(), FormDataKind.SUMMARY));
 		dfts.add(mockDepartmentFormType(Department.ROOT_BANK_ID, summaryFormType2.getId(), FormDataKind.SUMMARY));
 		dfts.add(mockDepartmentFormType(Department.ROOT_BANK_ID, additionalFormType.getId(), FormDataKind.ADDITIONAL));
-		when(sourceService.getDFTByDepartment(Matchers.eq(Department.ROOT_BANK_ID), Matchers.any(TaxType.class))).thenReturn(dfts);
+		when(sourceService.getDFTByDepartment(Matchers.eq(Department.ROOT_BANK_ID), Matchers.any(TaxType.class), any(Date.class), any(Date.class))).thenReturn(dfts);
 		ReflectionTestUtils.setField(service, "sourceService", sourceService);
 		
 		FormTypeDao formTypeDao = mock(FormTypeDao.class);

@@ -47,17 +47,17 @@ insert into department_form_type (id, department_id, form_type_id, kind) values 
 insert into department_form_type (id, department_id, form_type_id, kind) values (9, 13, 2, 2);
 
 -- DECLARATION_SOURCE
-insert into declaration_source (department_declaration_type_id, src_department_form_type_id) values (1, 1);
-insert into declaration_source (department_declaration_type_id, src_department_form_type_id) values (2, 2);
-insert into declaration_source (department_declaration_type_id, src_department_form_type_id) values (3, 1);
-insert into declaration_source (department_declaration_type_id, src_department_form_type_id) values (1, 4);
-insert into declaration_source (department_declaration_type_id, src_department_form_type_id) values (2, 4);
-insert into declaration_source (department_declaration_type_id, src_department_form_type_id) values (4, 5);
-insert into declaration_source (department_declaration_type_id, src_department_form_type_id) values (4, 6);
-insert into declaration_source (department_declaration_type_id, src_department_form_type_id) values (5, 7);
+insert into declaration_source (department_declaration_type_id, src_department_form_type_id, period_start, period_end) values (1, 1, date '1900-01-01', null);
+insert into declaration_source (department_declaration_type_id, src_department_form_type_id, period_start, period_end) values (2, 2, date '1900-01-01', null);
+insert into declaration_source (department_declaration_type_id, src_department_form_type_id, period_start, period_end) values (3, 1, date '1900-01-01', null);
+insert into declaration_source (department_declaration_type_id, src_department_form_type_id, period_start, period_end) values (1, 4, date '1900-01-01', null);
+insert into declaration_source (department_declaration_type_id, src_department_form_type_id, period_start, period_end) values (2, 4, date '1900-01-01', null);
+insert into declaration_source (department_declaration_type_id, src_department_form_type_id, period_start, period_end) values (4, 5, date '1900-01-01', null);
+insert into declaration_source (department_declaration_type_id, src_department_form_type_id, period_start, period_end) values (4, 6, date '1900-01-01', null);
+insert into declaration_source (department_declaration_type_id, src_department_form_type_id, period_start, period_end) values (5, 7, date '1900-01-01', null);
 
 
 -- FORM_DATA_SOURCE
-insert into form_data_source (department_form_type_id, src_department_form_type_id) values (6, 7);
-insert into form_data_source (department_form_type_id, src_department_form_type_id) values (6, 8);
-insert into form_data_source (department_form_type_id, src_department_form_type_id) values (8, 9);
+insert into form_data_source (department_form_type_id, src_department_form_type_id, period_start, period_end) values (6, 7, date '1900-01-01', null);
+insert into form_data_source (department_form_type_id, src_department_form_type_id, period_start, period_end) values (6, 8, date '1900-01-01', null);
+insert into form_data_source (department_form_type_id, src_department_form_type_id, period_start, period_end) values (8, 9, date '1900-01-01', null);

@@ -21,6 +21,8 @@ public interface DepartmentPicker extends HasValue<List<Integer>>, LeafValueEdit
      */
 	void setAvalibleValues(List<Department> departments, Set<Integer> availableDepartments);
 
+    Integer getSingleValue();
+
     /**
      * Список подразделений доступных для выбора
      */

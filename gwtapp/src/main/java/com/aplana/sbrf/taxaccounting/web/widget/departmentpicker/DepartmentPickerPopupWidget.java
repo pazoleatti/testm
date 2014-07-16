@@ -211,6 +211,17 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
     }
 
     @Override
+    public Integer getSingleValue() {
+        if (getValue() != null) {
+            Iterator<Integer> depPickIterator = getValue().iterator();
+            if (depPickIterator.hasNext()) {
+                return depPickIterator.next();
+            }
+        }
+        return null;
+    }
+
+    @Override
     public List<Integer> getValue() {
         Collections.sort(value);
         return new ArrayList<Integer>(value);

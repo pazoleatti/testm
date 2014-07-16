@@ -171,8 +171,7 @@ public class AdminPresenter
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<DeleteFormTypeResult>() {
             @Override
             public void onSuccess(DeleteFormTypeResult result) {
-                if (result.getUuid() != null)
-                    LogAddEvent.fire(AdminPresenter.this, result.getUuid());
+                LogAddEvent.fire(AdminPresenter.this, result.getUuid());
                 updateFormData();
             }
         }, this));

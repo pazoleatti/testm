@@ -22,4 +22,20 @@ public class SimpleDateUtils {
     public static java.sql.Date getSqlDate(Date date) {
         return new java.sql.Date(date.getTime());
     }
+
+    public static Date getMinDate(Date first, Date second) {
+        if (first.before(second)) {
+            return first;
+        } else {
+            return second;
+        }
+    }
+
+    public static Date getMaxDate(Date first, Date second) {
+        if (first.after(second)) {
+            return first;
+        } else {
+            return second;
+        }
+    }
 }

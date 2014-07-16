@@ -130,8 +130,7 @@ public class GetMainMenuActionHandler extends
                     menu.getSubMenu().add(
                             new MenuItem("Назначение источников-приёмников",
                                     NUMBER_SIGN + SourcesTokens.SOURCES + ";"
-                                            + TYPE + "=" + menu.getMeta() + ";"
-                                            + SourcesTokens.FORM_FLAG + "=" + true));
+                                            + TYPE + "=" + menu.getMeta()));
                 }
             }
             taxMenu.getSubMenu().add(new MenuItem("Загрузить ТФ", NUMBER_SIGN + UploadTransportDataTokens.uploadTransportData));
