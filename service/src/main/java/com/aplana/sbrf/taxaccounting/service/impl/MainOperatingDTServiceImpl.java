@@ -131,7 +131,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
                 //declarationTemplate.setStatus(VersionedObjectStatus.DELETED);
                 ids.add(declarationTemplate.getId());
             }
-            //Все версии теперь каскадом удаляю, т.к. есть все необходимые проверки
+            ids.addAll(declarationTemplateService.getDTVersionIdsByStatus(typeId, VersionedObjectStatus.FAKE));
             declarationTemplateService.delete(ids);
         }
         versionOperatingService.checkDestinationsSources(typeId, null, null, logger);
@@ -140,7 +140,8 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
         for (DepartmentDeclarationType departmentFormType : sourceService.getDDTByDeclarationType(typeId))
             logger.error(
                     String.format(HAVE_DDT_MESSAGE,
-                            departmentService.getDepartment(departmentFormType.getDepartmentId())));
+                            departmentService.getDepartment(departmentFormType.getDepartmentId()).getName()));
+        checkError(logger, DELETE_TEMPLATE_MESSAGE);
         declarationTypeService.delete(typeId);
 
         /*logging(typeId, TemplateChangesEvent.DELETED, user);*/
