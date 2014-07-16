@@ -526,4 +526,9 @@ insert into ref_book (id, name, visible, type, read_only) values (106, 'Коды
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, visible, width, required, is_unique, max_length) values (1061, 106, 'Код', 'CODE', 1, 1, 1, 10, 1, 1, 2);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, visible, width, required, is_unique, max_length) values (1062, 106, 'Наименование', 'NAME', 1, 2, 1, 50, 1, 0, 255);
 
+insert into ref_book (id, name, visible, type, read_only) values (107, 'Периоды и подразделения БО', 0, 0, 1);
+
+insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, visible, precision, width, required, is_unique, read_only, max_length) values (1071, 107, 'Год', 'YEAR', 2, 1, 1, 0, 10, 1, 0, 0, 4);
+insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, visible, precision, width, required, is_unique, read_only, max_length, reference_id, attribute_id) values (1072, 107, 'Код периода бухгалтерской отчетности', 'ACCOUNT_PERIOD_ID', 4, 2, 1, null, 20, 1, 0, 0, null, 106, 1062);
+insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, visible, precision, width, required, is_unique, read_only, max_length, reference_id, attribute_id) values (1073, 107, 'Код подразделения', 'DEPARTMENT_ID', 4, 3, 1, null, 20, 1, 0, 0, null, 30, 161);
 

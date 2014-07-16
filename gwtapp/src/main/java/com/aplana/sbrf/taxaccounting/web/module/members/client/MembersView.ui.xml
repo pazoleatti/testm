@@ -45,7 +45,7 @@
                 <fm:left>
                     <fm:Left>
                         <style:LeftBar childValign="middle" height="100%">
-                            <g:Label text="Настройки" addStyleNames="{style.header}"/>
+                            <g:Label text="Администрирование" addStyleNames="{style.header}"/>
                             <g:Label text="—" addStyleNames="{style.header}"/>
                         </style:LeftBar>
                     </fm:Left>
