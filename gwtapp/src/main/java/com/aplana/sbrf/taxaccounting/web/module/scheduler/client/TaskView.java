@@ -173,6 +173,7 @@ public class TaskView extends ViewWithUiHandlers<TaskUiHandlers>
 
     @Override
     public void clearForm() {
+        createButton.setText("Создать");
         createButton.setVisible(true);
         taskName.setValue("");
         taskSchedule.setValue("");
@@ -188,23 +189,17 @@ public class TaskView extends ViewWithUiHandlers<TaskUiHandlers>
 
     @Override
     public void setTaskData(GetTaskInfoResult taskData) {
-        createButton.setVisible(false);
+        createButton.setText("Сохранить");
         taskName.setValue(taskData.getTaskName());
-        taskName.setEnabled(false);
         taskSchedule.setValue(taskData.getSchedule());
-        taskSchedule.setEnabled(false);
         numberOfRepeats.setValue(String.valueOf(taskData.getNumberOfRepeats()));
-        numberOfRepeats.setEnabled(false);
         jndi.setValue(findJndiInfo(taskData.getUserTaskJndi()), true);
-        jndi.setEnabled(false);
-        paramsWidget.setEnable(false);
-
         paramsWidget.setParamsValues(taskData.getParams());
     }
 
     @Override
-    public void setTitle(String title) {
-        titleDesc.setText(title);
+    public void setMode(boolean editMode) {
+        titleDesc.setText(editMode ? "Изменить задачу":"Создать задачу");
     }
 
     @Override

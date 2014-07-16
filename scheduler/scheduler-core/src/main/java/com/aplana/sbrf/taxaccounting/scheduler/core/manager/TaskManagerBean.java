@@ -53,6 +53,10 @@ public class TaskManagerBean implements TaskManager {
 
     @Override
     public Long createTask(TaskContext taskContext) throws TaskSchedulingException {
+        return createTask(taskContext, true);
+    }
+
+    private Long createTask(TaskContext taskContext, boolean newContext) throws TaskSchedulingException {
         LOG.info("New task creation has been started");
         try {
             //Планирование задачи в IBM Scheduler
@@ -80,8 +84,13 @@ public class TaskManagerBean implements TaskManager {
             taskContextEntity.setTaskId(Long.parseLong(taskStatus.getTaskId()));
             taskContextEntity.setTaskName(taskContext.getTaskName());
             taskContextEntity.setUserTaskJndi(taskContext.getUserTaskJndi());
+            taskContextEntity.setId(taskContext.getId());
             taskContextEntity.setModificationDate(new Date());
-            persistenceService.saveContext(taskContextEntity);
+            if (newContext){
+                persistenceService.saveContext(taskContextEntity);
+            } else {
+                persistenceService.updateContext(taskContextEntity);
+            }
 
             LOG.info(String.format("New task has been created. Task id: %s; Next call: %s",
                     taskStatus.getTaskId(),
@@ -168,14 +177,14 @@ public class TaskManagerBean implements TaskManager {
     public void updateTask(Long taskId, TaskContext taskContext) throws TaskSchedulingException {
         LOG.info(String.format("Task updating has been started. Task id: %s", taskId));
         //TODO api ibm не позволяет обновлять данные задачи. Надо удалять и создавать новую
-        /*try {
+        try {
             scheduler.cancel(taskId.toString(), true);
             persistenceService.deleteContextByTaskId(taskId);
-            createTask(taskContext);
+            createTask(taskContext, false);
         } catch (Exception e) {
             LOG.error(e.getLocalizedMessage(), e);
             throw new TaskSchedulingException(e);
-        }*/
+        }
     }
 
     @Override
@@ -273,6 +282,8 @@ public class TaskManagerBean implements TaskManager {
         taskData.setNextFireTime(taskInfo.getNextFireTime());
         taskData.setParams(params);
         taskData.setModificationDate(taskContextEntity.getModificationDate());
+        taskData.setContextId(taskContextEntity.getId());
+
         return taskData;
     }
 }

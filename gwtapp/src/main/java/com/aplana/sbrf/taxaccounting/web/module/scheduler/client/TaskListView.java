@@ -78,7 +78,7 @@ public class TaskListView extends ViewWithUiHandlers<TaskListUiHandlers>
         TextColumn<TaskSearchResultItem> numberColumn = new TextColumn<TaskSearchResultItem>() {
             @Override
             public String getValue(TaskSearchResultItem taskItem) {
-                return String.valueOf(taskItem.getId());
+                return String.valueOf(taskItem.getContextId());
             }
         };
 

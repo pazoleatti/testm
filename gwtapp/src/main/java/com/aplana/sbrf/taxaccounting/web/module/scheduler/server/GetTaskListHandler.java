@@ -64,6 +64,7 @@ public class GetTaskListHandler extends AbstractActionHandler<GetTaskListAction,
                 item.setRepeatsLeft(task.getRepeatsLeft());
                 item.setModificationDate(df.format(task.getModificationDate()));
                 item.setNextFireTime(df.format(task.getNextFireTime()));
+                item.setContextId(task.getContextId());
 
                 records.add(item);
             }
