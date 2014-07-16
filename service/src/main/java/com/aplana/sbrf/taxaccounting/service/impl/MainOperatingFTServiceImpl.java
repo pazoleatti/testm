@@ -66,14 +66,15 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
                 versionOperatingService.isUsedVersion(formTemplate.getId(), formTemplate.getType().getId(),
                         formTemplate.getStatus(), formTemplate.getVersion(), templateActualEndDate, logger);
                 checkError(logger, SAVE_MESSAGE);
-                //Что то с нумерацией строк
-                checkError(logger, SAVE_MESSAGE);
                 break;
             case DRAFT:
-                //Что то с нумерацией строк
                 checkError(logger, SAVE_MESSAGE);
                 break;
         }
+
+        formTemplateService.validateFormAutoNumerationColumn(formTemplate, logger);
+
+        checkError(logger, SAVE_MESSAGE);
 
         int id = formTemplateService.save(formTemplate);
 

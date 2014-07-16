@@ -186,19 +186,28 @@ public interface FormTemplateService {
     boolean isMonthly(int formId);
 
     /**
-     * Обновленее статуса деклааации
-     * @param versionStatus статус
-     * @param formTemplateId ижентификатор
-     * @return идентифиактор
+     * Обновление статуса декларации
+     *
+     * @param versionStatus  статус
+     * @param formTemplateId идентификатор
+     * @return идентификатор
      */
     int updateVersionStatus(VersionedObjectStatus versionStatus, int formTemplateId);
+
+    /**
+     * Валидация сквозной нумерации
+     *
+     * @param formTemplate макета НФ
+     * @param logger       логгер
+     */
+    void validateFormAutoNumerationColumn(FormTemplate formTemplate, Logger logger);
 
     /**
      * Есть ли хоть одна автонумеруемая графа указанного типа в макете
      *
      * @param formTemplate макета НФ
-     * @param type      тип нумерации
+     * @param type         тип нумерации
      * @return true - есть, false - нет
      */
-    public boolean isAnyAutoNumerationColumn(FormTemplate formTemplate, AutoNumerationColumnType type);
+    boolean isAnyAutoNumerationColumn(FormTemplate formTemplate, AutoNumerationColumnType type);
 }
