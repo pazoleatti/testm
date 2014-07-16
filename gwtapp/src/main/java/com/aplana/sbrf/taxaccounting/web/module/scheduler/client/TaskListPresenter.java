@@ -68,6 +68,11 @@ public class TaskListPresenter extends Presenter<TaskListPresenter.MyView,
                     .defaultCallback(new AbstractCallback<StopTaskResult>() {
                         @Override
                         public void onSuccess(StopTaskResult result) {
+                            // проверка ошибок
+                            LogAddEvent.fire(TaskListPresenter.this, result.getUuid());
+                            if (result.getUuid() != null){
+                                Dialog.errorMessage("Остановка задачи", "Остановка не выполнена");
+                            }
                             updateTableData();
                         }
                     }, TaskListPresenter.this));
