@@ -37,4 +37,9 @@ public interface TaskPersistenceService {
      * @throws com.aplana.sbrf.taxaccounting.scheduler.api.exception.TaskPersistenceException
      */
     void deleteContextByTaskId(Long taskId) throws TaskPersistenceException;
+
+    /**
+     * Обновить контекст задачи
+     */
+    void updateContext(TaskContextEntity context) throws TaskPersistenceException;
 }

@@ -69,4 +69,9 @@ public class TaskPersistenceServiceBean implements TaskPersistenceService {
             throw new TaskPersistenceException("Не удалось удалить контекст задачи", e);
         }
     }
+
+    @Override
+    public void updateContext(TaskContextEntity context){
+        em.refresh(context);
+    }
 }
