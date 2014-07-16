@@ -245,6 +245,12 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     }
 
     @Override
+    public List<Integer> getFTVersionIdsByStatus(int formTypeId, VersionedObjectStatus... status) {
+        List<Integer> statusList = createStatusList(status);
+        return formTemplateDao.getFormTemplateVersions(formTypeId, statusList);
+    }
+
+    @Override
     public List<VersionSegment> findFTVersionIntersections(int templateId, int typeId, Date actualBeginVersion, Date actualEndVersion) {
         return formTemplateDao.findFTVersionIntersections(typeId, templateId, actualBeginVersion, actualEndVersion);
     }

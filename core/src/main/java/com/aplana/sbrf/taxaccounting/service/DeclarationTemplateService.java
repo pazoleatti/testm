@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 
+import javax.validation.constraints.NotNull;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.Date;
@@ -125,6 +126,14 @@ public interface DeclarationTemplateService {
      */
     List<DeclarationTemplate> getDecTemplateVersionsByStatus(int formTypeId, VersionedObjectStatus... status);
 
+    /**
+     * Получить идентификаторы версии макетов деклараций с определеннным статусом
+     * @param formTypeId тип налоговой формы
+     * @param status статус версии макета НФ
+     * @return список версий налоговых форм
+     */
+    List<Integer> getDTVersionIdsByStatus(int formTypeId, VersionedObjectStatus... status);
+
     List<VersionSegment> findFTVersionIntersections(int templateId, int typeId, Date actualBeginVersion, Date actualEndVersion);
 
     /**
@@ -139,9 +148,8 @@ public interface DeclarationTemplateService {
      * Удаление макетов.
      * Макеты со статусом фиктивной версии удаляются, с остальными статусами помечаются как удаленные
      * @param templateIds макет для удаления
-     * @return обновленные записи
      */
-    void delete(Collection<Integer> templateIds);
+    void delete(@NotNull Collection<Integer> templateIds);
 
     /**
      * Возвращает версию макета ближайшую к данной спрвва.

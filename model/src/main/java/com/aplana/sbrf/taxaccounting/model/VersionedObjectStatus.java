@@ -7,6 +7,8 @@ package com.aplana.sbrf.taxaccounting.model;
 public enum VersionedObjectStatus {
     /** Обычная версия */
     NORMAL(0),
+    /** Версия помеченная на удаление */
+    DELETED(-1),
     /** Черновик версии */
     DRAFT(1),
     /** Фиктивная версия */
