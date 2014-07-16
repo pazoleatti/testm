@@ -44,6 +44,11 @@ public interface FormDataService {
     void createManualFormData(Logger logger, TAUserInfo userInfo, Long formDataId);
 
     /**
+     * Импорт ТФ НФ
+     */
+    void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, InputStream is, String fileName, FormDataEvent formDataEvent);
+
+    /**
      * Метод для импорта данных из xls-файлов
      * 
      * @param logger
