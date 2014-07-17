@@ -115,4 +115,9 @@ public abstract class DoubleStateComposite extends Composite implements HasEnabl
 	public boolean getLabelWordWrap() {
 		return label.getWordWrap();
 	}
+
+    @Override
+    public void setVisible(boolean visible) {
+        deckPanel.setVisible(visible);
+    }
 }

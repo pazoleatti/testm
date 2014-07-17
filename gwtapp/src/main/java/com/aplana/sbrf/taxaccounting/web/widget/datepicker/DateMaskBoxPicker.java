@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.datepicker;
 
+import com.aplana.gwt.client.DoubleStateComposite;
 import com.aplana.gwt.client.mask.ui.DateMaskBox;
 import com.aplana.gwt.client.mask.ui.DayMonthMaskBox;
 import com.aplana.sbrf.taxaccounting.model.Formats;
@@ -29,7 +30,7 @@ import static com.aplana.sbrf.taxaccounting.web.widget.utils.WidgetUtils.*;
  *
  * @author aivanov
  */
-public class DateMaskBoxPicker extends Composite implements HasEnabled, HasVisibility, HasValue<Date>, LeafValueEditor<Date> {
+public class DateMaskBoxPicker extends DoubleStateComposite implements HasEnabled, HasVisibility, HasValue<Date>, LeafValueEditor<Date> {
 
     public static String calendarIconUrl = "resources/img/picker-icons/calendar-icon.png";
     public static String calendarIconDisableUrl = "resources/img/picker-icons/calendar-icon-disable.png";
@@ -130,8 +131,8 @@ public class DateMaskBoxPicker extends Composite implements HasEnabled, HasVisib
     public void onDateImage(ClickEvent event) {
         if (widgetEnabled) {
             // Проверяем помещаеться ли календарь в окно, если нет корректируем координаты
-            int leftPosition = 0;
-            int topPosition = 0;
+            int leftPosition;
+            int topPosition;
             if (Window.getClientWidth() - (event.getClientX() + POPUP_PANEL_WIDTH_CHECK) < 0) {
                 leftPosition = Window.getClientWidth() - POPUP_PANEL_WIDTH_CHECK - 10;
             } else {
@@ -293,6 +294,8 @@ public class DateMaskBoxPicker extends Composite implements HasEnabled, HasVisib
 
     @Override
     public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        setLabelValue(dateBox.getText());
         this.widgetEnabled = enabled;
         dateBox.setEnabled(enabled);
         calendarImage.setUrl(enabled ? calendarIconUrl : calendarIconDisableUrl);
@@ -307,6 +310,7 @@ public class DateMaskBoxPicker extends Composite implements HasEnabled, HasVisib
 
     @Override
     public void setVisible(boolean visible) {
+        super.setVisible(visible);
         mainPanel.setVisible(visible);
     }
 }
