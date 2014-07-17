@@ -75,7 +75,7 @@ public class RefBookDaoTest {
     }
 
 	@Test
-	public void testGetData1() throws Exception {
+	public void testGetData1() {
 		RefBook refBook = refBookDao.get(1L);
 		PagingResult<Map<String, RefBookValue>> data = refBookDao.getRecords(1L, getDate(1, 1, 2013), null, null, refBook.getAttribute(ATTRIBUTE_NAME));
 		// проверяем кол-во строк
@@ -103,7 +103,7 @@ public class RefBookDaoTest {
 	}
 
 	@Test
-	public void testGetData2() throws Exception {
+	public void testGetData2() {
 		PagingResult<Map<String, RefBookValue>> data = refBookDao.getRecords(1L, getDate(1, 2, 2013), null, null, null);
 		// проверяем кол-во строк
 		assertEquals(2, data.size());
@@ -116,7 +116,7 @@ public class RefBookDaoTest {
 	}
 
 	@Test
-	public void testGetData3() throws Exception {
+	public void testGetData3() {
 		PagingResult<Map<String, RefBookValue>> data = refBookDao.getRecords(1L, getDate(1, 3, 2013), null, null, null);
         // проверяем кол-во строк
         assertEquals(1, data.size());
@@ -128,14 +128,14 @@ public class RefBookDaoTest {
 	}
 
 	@Test
-	public void testGetData4() throws Exception {
+	public void testGetData4() {
 		PagingResult<Map<String, RefBookValue>> data = refBookDao.getRecords(1L, getDate(1, 1, 2012), null, null, null);
 		// проверяем кол-во строк
 		assertEquals(0, data.size());
 	}
 
 	@Test
-	public void testGetData5() throws Exception {
+	public void testGetData5() {
 		PagingResult<Map<String, RefBookValue>> data = refBookDao.getRecords(1L, getDate(1, 1, 2014), null, null, null);
 		// проверяем кол-во строк
 		assertEquals(1, data.size());
@@ -592,4 +592,15 @@ public class RefBookDaoTest {
         RefBook refBook2 = refBookDao.get(3L);
         assertTrue(refBook2.getScriptId().equals("24af57ef-ec1c-455f-a4fa-f0fb29483066"));
     }
+
+	@Test (expected = Exception.class)
+	public void testGetNull() {
+		refBookDao.get(null);
+	}
+
+	@Test (expected = Exception.class)
+	public void testGetByAttribute4() {
+		Long t = null;
+		refBookDao.getByAttribute(t);
+	}
 }
