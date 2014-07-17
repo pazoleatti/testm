@@ -48,7 +48,7 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
 
     @Editor.Ignore
     @UiField
-    Button search;
+    SubmitButton search;
 
     @Editor.Ignore
     @UiField
