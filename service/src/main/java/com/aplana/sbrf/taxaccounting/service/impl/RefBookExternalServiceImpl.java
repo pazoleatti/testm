@@ -96,7 +96,7 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
     private void importRefBook(TAUserInfo userInfo, Logger logger, ConfigurationParam refBookDirectoryParam, Map<String, List<Pair<Boolean, Long>>> mappingMap) {
         // TODO добавить проверку ЭЦП (Marat Fayzullin 2013-10-19)
         ConfigurationParamModel model = configurationService.getAllConfig(userInfo);
-        List<String> refBookDirectoryList = model.get(refBookDirectoryParam, DepartmentType.ROOT_BANK.getCode());
+        List<String> refBookDirectoryList = model.get(refBookDirectoryParam, 0);
 
         BufferedReader reader = null;
 

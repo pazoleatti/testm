@@ -792,27 +792,11 @@ COMMENT ON COLUMN event.name IS 'Наименование события';
 
  create sequence seq_template_changes start with 10000;
 --------------------------------------------------------------------------------------------------------
-create table account_period
-(
-id number(9) not null,
-year number(4) not null,
-code_id number(18) not null,
-department_id number(9) not null
-);
-
-comment on table account_period is 'Периоды и подразделения бухг. отчетности (БО)';
-comment on column account_period.id is 'Идентификатор периода БО'; 
-comment on column account_period.year is 'Год';
-comment on column account_period.code_id is 'Идентификатор кода периода БО';
-comment on column account_period.department_id is 'Идентификатор департамента';
-
-create sequence seq_account_period start with 1 increment by 1;
---------------------------------------------------------------------------------------------------------
 create table lock_data
 (
-key varchar2(1000) not null,
-user_id number(9) not null,
-date_before date not null
+  key varchar2(1000) not null,
+  user_id number(9) not null,
+  date_before date not null
 );
 
 comment on table lock_data is 'Информация о блокировках';

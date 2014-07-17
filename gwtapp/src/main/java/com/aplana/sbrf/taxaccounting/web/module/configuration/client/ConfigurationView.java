@@ -169,7 +169,6 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
         showTab(commonPanel.isVisible() ? 1 : 0);
     }
 
-
     @UiHandler("checkButton")
     void onCheckButtonClick(ClickEvent event) {
         DataGrid<DataRow<Cell>> table = commonPanel.isVisible() ? commonTable : formTable;

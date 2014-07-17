@@ -98,7 +98,7 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
                 continue;
             }
 
-            List<String> list = model.get(key, DepartmentType.ROOT_BANK.getCode());
+            List<String> list = model.get(key, 0);
             if (list == null) {
                 continue;
             }
@@ -212,7 +212,7 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
         }
         for (Map.Entry<ConfigurationParam, List<String>> entry : commonMap.entrySet()) {
             Map<Integer, List<String>> departmentMap = new HashMap<Integer, List<String>>();
-            departmentMap.put(DepartmentType.ROOT_BANK.getCode(), entry.getValue());
+            departmentMap.put(0, entry.getValue());
             model.put(entry.getKey(), departmentMap);
         }
 

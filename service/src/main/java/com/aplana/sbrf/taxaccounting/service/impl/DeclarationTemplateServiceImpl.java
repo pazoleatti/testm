@@ -199,6 +199,12 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     }
 
     @Override
+    public List<Integer> getDTVersionIdsByStatus(int formTypeId, VersionedObjectStatus... status) {
+        List<Integer> statusList = createStatusList(status);
+        return declarationTemplateDao.getDeclarationTemplateVersions(formTypeId, 0, statusList, null, null);
+    }
+
+    @Override
     public List<VersionSegment> findFTVersionIntersections(int templateId, int typeId, Date actualBeginVersion, Date actualEndVersion) {
         return declarationTemplateDao.findFTVersionIntersections(typeId, templateId, actualBeginVersion, actualEndVersion);
     }
@@ -210,7 +216,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 
     @Override
     public void delete(Collection<Integer> templateIds) {
-        //To change body of implemented methods use File | Settings | File Templates.
+        declarationTemplateDao.delete(templateIds);
     }
 
     @Override

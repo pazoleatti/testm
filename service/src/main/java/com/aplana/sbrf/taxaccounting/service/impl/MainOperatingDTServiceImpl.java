@@ -23,7 +23,7 @@ import java.util.List;
 public class MainOperatingDTServiceImpl implements MainOperatingService {
 
     private static String SAVE_MESSAGE = "Версия макета не сохранена, обнаружены фатальные ошибки!";
-    private static String DELETE_TEMPLATE_MESSAGE = "Версия макета не сохранена, обнаружены фатальные ошибки!";
+    private static String DELETE_TEMPLATE_MESSAGE = "Удаление невозможно, обнаружены фатальные ошибки!";
     private static String DELETE_TEMPLATE_VERSION_MESSAGE = "Удаление невозможно, обнаружены ссылки на удаляемую версию макета!";
     private static String HAVE_DDT_MESSAGE = "Существует назначение налоговой формы подразделению %s!";
 
@@ -131,7 +131,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
                 //declarationTemplate.setStatus(VersionedObjectStatus.DELETED);
                 ids.add(declarationTemplate.getId());
             }
-            //Все версии теперь каскадом удаляю, т.к. есть все необходимые проверки
+            ids.addAll(declarationTemplateService.getDTVersionIdsByStatus(typeId, VersionedObjectStatus.FAKE));
             declarationTemplateService.delete(ids);
         }
         versionOperatingService.checkDestinationsSources(typeId, null, null, logger);
@@ -140,7 +140,8 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
         for (DepartmentDeclarationType departmentFormType : sourceService.getDDTByDeclarationType(typeId))
             logger.error(
                     String.format(HAVE_DDT_MESSAGE,
-                            departmentService.getDepartment(departmentFormType.getDepartmentId())));
+                            departmentService.getDepartment(departmentFormType.getDepartmentId()).getName()));
+        checkError(logger, DELETE_TEMPLATE_MESSAGE);
         declarationTypeService.delete(typeId);
 
         /*logging(typeId, TemplateChangesEvent.DELETED, user);*/

@@ -149,6 +149,11 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
+    public void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, InputStream inputStream, String fileName, FormDataEvent formDataEvent) {
+        loadFormData(logger, userInfo, formDataId, inputStream, fileName, formDataEvent);
+    }
+
+    @Override
     public void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, InputStream inputStream, String fileName) {
         loadFormData(logger, userInfo, formDataId, inputStream, fileName, FormDataEvent.IMPORT);
     }
@@ -183,7 +188,7 @@ public class FormDataServiceImpl implements FormDataService {
             if(!ext.equals(XLS_EXT) && !ext.equals(XLSX_EXT)){
 
                 String pKeyFileUrl = null;
-                List<String> paramList = configurationDao.getAll().get(ConfigurationParam.KEY_FILE, DepartmentType.ROOT_BANK.getCode());
+                List<String> paramList = configurationDao.getAll().get(ConfigurationParam.KEY_FILE, 0);
                 if (paramList != null && !paramList.isEmpty()) {
                     pKeyFileUrl =  paramList.get(0); // TODO Ключи нужно искать в нескольких каталогах
                 }
