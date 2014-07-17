@@ -218,7 +218,9 @@ public interface FormDataDao {
      * @param reportPeriodId отчетный период
      * @param taxType тип налога
      * @param kind тип налоговой формы
+     * @param periodStart  начало периода, в котором действуют назначения
+     * @param periodEnd    окончание периода, в котором действуют назначения
      * @return список налоговых форм
      */
-    List<FormData> getManualInputForms(List<Integer> departments, int reportPeriodId, TaxType taxType, FormDataKind kind);
+    List<FormData> getManualInputForms(List<Integer> departments, int reportPeriodId, TaxType taxType, FormDataKind kind, Date periodStart, Date periodEnd);
 }

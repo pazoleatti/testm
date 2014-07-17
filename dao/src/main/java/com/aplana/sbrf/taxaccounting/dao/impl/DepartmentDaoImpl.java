@@ -456,17 +456,6 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
         }
         params.put("userDepartmentId", userDepartmentId);
 
-
-        // Параметры запроса: id подразделения и типы налога (дважды)
-        /*Object[] sqlParams = new Object[taxTypes.size() * 2 + 1];
-        int cnt = 1;
-        sqlParams[0] = userDepartmentId;
-        for (TaxType taxType : taxTypes) {
-            sqlParams[cnt] = String.valueOf(taxType.getCode());
-            sqlParams[taxTypes.size() + cnt] = String.valueOf(taxType.getCode());
-            cnt++;
-        }*/
-
         String allSql = "select id from " +
                 "(select distinct " +
                 "case when t3.c = 0 then av_dep.id else link_dep.id end as id " +
@@ -474,15 +463,19 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
                 ") av_dep left join ( " +
                 "select distinct ddt.department_id parent_id, dft.department_id id " +
                 "from declaration_source ds, department_form_type dft, department_declaration_type ddt, declaration_type dt " +
-                "where ds.department_declaration_type_id = ddt.id and ds.src_department_form_type_id = dft.id " +
+                "where ds.department_declaration_type_id = ddt.id and ds.src_department_form_type_id = dft.id \n" +
+                "and (:periodStart is null or ((ds.period_end >= :periodStart or ds.period_end is null) and (:periodEnd is null or ds.period_start <= :periodEnd))) " +
                 "and dt.id = ddt.declaration_type_id and dt.tax_type in " + SqlUtils.transformTaxTypeToSqlInStatement(taxTypes) + " " +
                 "union " +
                 "select distinct dft.department_id parent_id, dfts.department_id id " +
                 "from form_data_source fds, department_form_type dft, department_form_type dfts, form_type ft " +
                 "where fds.department_form_type_id = dft.id and fds.src_department_form_type_id = dfts.id " +
+                "and (:periodStart is null or ((fds.period_end >= :periodStart or fds.period_end is null) and (:periodEnd is null or fds.period_start <= :periodEnd)))" +
                 "and ft.id = dft.form_type_id and ft.tax_type in " + SqlUtils.transformTaxTypeToSqlInStatement(taxTypes) + ") link_dep " +
                 "on av_dep.id = link_dep.parent_id, (select 0 as c from dual union all select 1 as c from dual) t3) " +
                 "where id is not null";
+        params.put("periodStart", periodStart);
+        params.put("periodEnd", periodEnd);
 
         try {
             return getNamedParameterJdbcTemplate().queryForList(allSql,

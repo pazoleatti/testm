@@ -121,6 +121,7 @@ public class DepartmentFormType implements Serializable {
 
         if (departmentId != that.departmentId) return false;
         if (formTypeId != that.formTypeId) return false;
+        if (performerId != that.performerId) return false;
         if (id != null ? !id.equals(that.id) : that.id != null) return false;
         if (kind != that.kind) return false;
         if (periodEnd != null ? !periodEnd.equals(that.periodEnd) : that.periodEnd != null) return false;
@@ -137,6 +138,7 @@ public class DepartmentFormType implements Serializable {
         result = 31 * result + (kind != null ? kind.hashCode() : 0);
         result = 31 * result + (periodStart != null ? periodStart.hashCode() : 0);
         result = 31 * result + (periodEnd != null ? periodEnd.hashCode() : 0);
+        result = 31 * result + performerId;
         return result;
     }
 
@@ -149,6 +151,7 @@ public class DepartmentFormType implements Serializable {
                 ", kind=" + kind +
                 ", periodStart=" + periodStart +
                 ", periodEnd=" + periodEnd +
+                ", performerId=" + performerId +
                 '}';
     }
 }

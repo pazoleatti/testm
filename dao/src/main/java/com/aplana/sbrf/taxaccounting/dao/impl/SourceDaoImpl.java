@@ -37,20 +37,20 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
         ps.appendQuery(String.format(query, in));
     }
 
-    private final static String GET_FORM_INTERSECTIONS = "select src_department_form_type_id as source, department_form_type_id as destination, period_start, period_end \n" +
+    private final static String GET_FORM_INTERSECTIONS = "select distinct src_department_form_type_id as source, department_form_type_id as destination, period_start, period_end \n" +
             "from form_data_source a \n" +
             "where\n" +
             "(src_department_form_type_id, department_form_type_id) in %s --список пар \n" +
             "and (period_end >= ? or period_end is null) --дата открытия периода \n" +
-            "and period_start <= nvl(?, '31.12.9999') --дата окончания периода (может быть передана null)\n" +
+            "and (? is null or period_start <= ?) --дата окончания периода (может быть передана null)\n" +
             "and (? is null or (period_start, period_end) not in ((?, ?))) --исключить этот период";
 
-    private final static String GET_DECLARATION_INTERSECTIONS = "select src_department_form_type_id as source, department_declaration_type_id as destination, period_start, period_end\n" +
+    private final static String GET_DECLARATION_INTERSECTIONS = "select distinct src_department_form_type_id as source, department_declaration_type_id as destination, period_start, period_end\n" +
             "from declaration_source a\n" +
             "where\n" +
             "(src_department_form_type_id, department_declaration_type_id) in %s --список пар\n" +
             "and (period_end >= ? or period_end is null) --дата открытия периода\n" +
-            "and period_start <= nvl(?, '31.12.9999') --дата окончания периода (может быть передана null)\n" +
+            "and (? is null or period_start <= ?) --дата окончания периода (может быть передана null)\n" +
             "and (? is null or (period_start, period_end) not in ((?, ?))) --исключить этот период";
 
     @Override
@@ -65,6 +65,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             buildParametrizedInQuery(GET_FORM_INTERSECTIONS, sourcePairs, ps);
         }
         ps.addParam(periodStart);
+        ps.addParam(periodEnd);
         ps.addParam(periodEnd);
         ps.addParam(excludedPeriodStart);
         ps.addParam(excludedPeriodStart);
@@ -100,7 +101,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "       tgt as department_form_type_id\n" +
             "from subset \n" +
             "where connect_by_iscycle = 1 -- есть зацикливание\n" +
-            "connect by nocycle prior src = tgt and (period_end >= ? or period_end is null) and period_start <= nvl(?, '31.12.9999') -- предыдущий источник = текущему приемнику, т.е. поднимаемся наверх\n" +
+            "connect by nocycle prior src = tgt and (period_end >= ? or period_end is null) and (? is null or period_start <= ?) -- предыдущий источник = текущему приемнику, т.е. поднимаемся наверх\n" +
             "start with base  = 0 -- начать с тех записей, которые были добавлены в граф фиктивно";
 
     @Override
@@ -112,6 +113,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
         //формируем in-часть вида ((1, 2), (1, 3))
         buildParametrizedInQuery(GET_LOOPS, sourcePairs, ps);
         ps.addParam(periodStart);
+        ps.addParam(periodEnd);
         ps.addParam(periodEnd);
 
         getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RowCallbackHandler() {

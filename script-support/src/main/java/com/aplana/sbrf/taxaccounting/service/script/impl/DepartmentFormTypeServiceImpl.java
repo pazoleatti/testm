@@ -39,8 +39,7 @@ public class DepartmentFormTypeServiceImpl extends AbstractDao implements Depart
 
     @Override
     public List<DepartmentFormType> getFormSources(int departmentId, int formTypeId, FormDataKind kind, Date periodStart, Date periodEnd) {
-        // TODO (Ramil Timerbaev) При periodStart, periodEnd == null метод должен работать по-старому
-        return departmentFormTypeDao.getFormSources(departmentId, formTypeId, kind);
+        return departmentFormTypeDao.getFormSources(departmentId, formTypeId, kind, periodStart, periodEnd);
     }
 
     @Override
@@ -50,8 +49,7 @@ public class DepartmentFormTypeServiceImpl extends AbstractDao implements Depart
 
     @Override
     public List<DepartmentFormType> getFormDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind, Date periodStart, Date periodEnd) {
-        // TODO (Ramil Timerbaev) При periodStart, periodEnd == null метод должен работать по-старому
-        return departmentFormTypeDao.getFormDestinations(sourceDepartmentId, sourceFormTypeId, sourceKind);
+        return departmentFormTypeDao.getFormDestinations(sourceDepartmentId, sourceFormTypeId, sourceKind, periodStart, periodEnd);
     }
 
     @Override
@@ -61,8 +59,7 @@ public class DepartmentFormTypeServiceImpl extends AbstractDao implements Depart
 
     @Override
     public List<DepartmentFormType> getDepartmentSources(int departmentId, TaxType taxType, Date periodStart, Date periodEnd) {
-        // TODO (Ramil Timerbaev) При periodStart, periodEnd == null метод должен работать по-старому
-        return departmentFormTypeDao.getDepartmentSources(departmentId, taxType);
+        return departmentFormTypeDao.getDepartmentSources(departmentId, taxType, periodStart, periodEnd);
     }
 
     @Override
@@ -72,8 +69,7 @@ public class DepartmentFormTypeServiceImpl extends AbstractDao implements Depart
 
     @Override
     public List<DepartmentDeclarationType> getDeclarationDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind, Date periodStart, Date periodEnd) {
-        // TODO (Ramil Timerbaev) При periodStart, periodEnd == null метод должен работать по-старому
-        return departmentFormTypeDao.getDeclarationDestinations(sourceDepartmentId, sourceFormTypeId, sourceKind);
+        return departmentFormTypeDao.getDeclarationDestinations(sourceDepartmentId, sourceFormTypeId, sourceKind, periodStart, periodEnd);
     }
 
     @Override
@@ -83,7 +79,6 @@ public class DepartmentFormTypeServiceImpl extends AbstractDao implements Depart
 
     @Override
     public List<DepartmentFormType> getDeclarationSources(int departmentId, int declarationTypeId, Date periodStart, Date periodEnd) {
-        // TODO (Ramil Timerbaev) При periodStart, periodEnd == null метод должен работать по-старому
-        return departmentFormTypeDao.getDeclarationSources(departmentId, declarationTypeId);
+        return departmentFormTypeDao.getDeclarationSources(departmentId, declarationTypeId, periodStart, periodEnd);
     }
 }

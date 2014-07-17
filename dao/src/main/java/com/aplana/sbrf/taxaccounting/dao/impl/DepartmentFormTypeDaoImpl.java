@@ -165,36 +165,36 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         );
     }
 
-    private static final String GET_FORM_SOURCES_SQL = "select src_dft.*, fds.period_start, fds.period_end \n" +
+    private static final String GET_FORM_SOURCES_SQL = "select distinct src_dft.*, fds.period_start, fds.period_end \n" +
             "from department_form_type src_dft \n" +
             "join form_data_source fds on fds.src_department_form_type_id=src_dft.id \n" +
             "join department_form_type dft on fds.department_form_type_id=dft.id \n" +
-            "where dft.department_id=:departmentId and dft.form_type_id=:formTypeId and dft.kind=:formKind \n" +
-            "and (:periodStart is null or ((fds.period_end >= :periodStart or fds.period_end is null) and fds.period_start <= nvl(:periodEnd, '31.12.9999')))";
+            "where dft.department_id=:departmentId and (:formTypeId is null or dft.form_type_id=:formTypeId) and (:formKind is null or dft.kind=:formKind) \n" +
+            "and (:periodStart is null or ((fds.period_end >= :periodStart or fds.period_end is null) and (:periodEnd is null or fds.period_start <= :periodEnd)))";
 
     @Override
     public List<DepartmentFormType> getFormSources(int departmentId, int formTypeId, FormDataKind kind, Date periodStart, Date periodEnd) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("departmentId", departmentId);
-        params.put("formTypeId", formTypeId);
-        params.put("formKind", kind.getId());
+        params.put("formTypeId", formTypeId != 0 ? formTypeId : null);
+        params.put("formKind", kind != null ? kind.getId() : null);
         params.put("periodStart", periodStart);
         params.put("periodEnd", periodEnd);
         return getNamedParameterJdbcTemplate().query(GET_FORM_SOURCES_SQL, params, DFT_MAPPER_WITH_PERIOD);
     }
 
-    private static final String GET_FORM_DESTINATIONS_SQL = "select dest_dft.*, fds.period_start, fds.period_end from department_form_type dest_dft \n" +
+    private static final String GET_FORM_DESTINATIONS_SQL = "select distinct dest_dft.*, fds.period_start, fds.period_end from department_form_type dest_dft \n" +
             "join form_data_source fds on fds.department_form_type_id=dest_dft.id\n" +
             "join department_form_type dft on fds.src_department_form_type_id=dft.id\n" +
-            "where dft.department_id=:sourceDepartmentId and dft.form_type_id=:sourceFormTypeId and dft.kind=:sourceKind \n" +
-            "and (:periodStart is null or ((fds.period_end >= :periodStart or fds.period_end is null) and fds.period_start <= nvl(:periodEnd, '31.12.9999')))";
+            "where dft.department_id=:sourceDepartmentId and (:sourceFormTypeId is null or dft.form_type_id=:sourceFormTypeId) and (:sourceKind is null or dft.kind=:sourceKind) \n" +
+            "and (:periodStart is null or ((fds.period_end >= :periodStart or fds.period_end is null) and (:periodEnd is null or fds.period_start <= :periodEnd)))";
 
     @Override
     public List<DepartmentFormType> getFormDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind, Date periodStart, Date periodEnd) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("sourceDepartmentId", sourceDepartmentId);
-        params.put("sourceFormTypeId", sourceFormTypeId);
-        params.put("sourceKind", sourceKind.getId());
+        params.put("sourceFormTypeId", sourceFormTypeId != 0 ? sourceFormTypeId : null);
+        params.put("sourceKind", sourceKind != null ? sourceKind.getId() : null);
         params.put("periodStart", periodStart);
         params.put("periodEnd", periodEnd);
         return getNamedParameterJdbcTemplate().query(GET_FORM_DESTINATIONS_SQL, params, DFT_MAPPER_WITH_PERIOD);
@@ -341,19 +341,19 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         }
     }
 
-    private static final String GET_DECLARATION_DESTINATIONS_SQL = "select dest_ddt.*, ds.period_start, ds.period_end from department_declaration_type dest_ddt \n" +
+    private static final String GET_DECLARATION_DESTINATIONS_SQL = "select distinct dest_ddt.*, ds.period_start, ds.period_end from department_declaration_type dest_ddt \n" +
             "join declaration_source ds on ds.department_declaration_type_id=dest_ddt.id\n" +
             "join department_form_type dft on ds.src_department_form_type_id=dft.id  \n" +
-            "where dft.department_id=:sourceDepartmentId and dft.form_type_id=:sourceFormTypeId and dft.kind=:sourceKind\n" +
-            "and (:periodStart is null or ((ds.period_end >= :periodStart or ds.period_end is null) and ds.period_start <= nvl(:periodEnd, '31.12.9999')))";
+            "where dft.department_id=:sourceDepartmentId and (:sourceFormTypeId is null or dft.form_type_id=:sourceFormTypeId) and (:sourceKind is null or dft.kind=:sourceKind) \n" +
+            "and (:periodStart is null or ((ds.period_end >= :periodStart or ds.period_end is null) and (:periodEnd is null or ds.period_start <= :periodEnd)))";
 
     @Override
     public List<DepartmentDeclarationType> getDeclarationDestinations(int sourceDepartmentId,
                                                                       int sourceFormTypeId, FormDataKind sourceKind, Date periodStart, Date periodEnd) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("sourceDepartmentId", sourceDepartmentId);
-        params.put("sourceFormTypeId", sourceFormTypeId);
-        params.put("sourceKind", sourceKind.getId());
+        params.put("sourceFormTypeId", sourceFormTypeId != 0 ? sourceFormTypeId : null);
+        params.put("sourceKind", sourceKind != null ? sourceKind.getId() : null);
         params.put("periodStart", periodStart);
         params.put("periodEnd", periodEnd);
         return getNamedParameterJdbcTemplate().query(GET_DECLARATION_DESTINATIONS_SQL, params, DDT_MAPPER_WITH_PERIOD);
@@ -385,6 +385,23 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                params, DDT_MAPPER);
     }
 
+    private static final String GET_DECLARATION_SOURCES_SQL = "select distinct src_dft.*, dds.period_start, dds.period_end \n" +
+            "from department_form_type src_dft \n" +
+            "join declaration_source dds on dds.src_department_form_type_id=src_dft.id \n" +
+            "join department_declaration_type ddt on dds.department_declaration_type_id = ddt.id \n" +
+            "where ddt.department_id=:departmentId and (:declarationTypeId is null or ddt.declaration_type_id = :declarationTypeId) " +
+            "and (:periodStart is null or ((dds.period_end >= :periodStart or dds.period_end is null) and (:periodEnd is null or dds.period_start <= :periodEnd)))";
+
+    @Override
+    public List<DepartmentFormType> getDeclarationSources(int departmentId, int declarationTypeId, Date periodStart, Date periodEnd) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("departmentId", departmentId);
+        params.put("declarationTypeId", declarationTypeId != 0 ? declarationTypeId : null);
+        params.put("periodStart", periodStart);
+        params.put("periodEnd", periodEnd);
+        return getNamedParameterJdbcTemplate().query(GET_DECLARATION_SOURCES_SQL, params, DFT_MAPPER_WITH_PERIOD);
+    }
+
     private static final String GET_DECLARATION_SOURCES_SQL_OLD = "select * from department_form_type src_dft where exists "
             + "(select 1 from department_declaration_type ddt, declaration_source dds where "
             + "dds.department_declaration_type_id=ddt.id and dds.src_department_form_type_id=src_dft.id "
@@ -404,23 +421,6 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                 params,
                 DFT_MAPPER
         );
-    }
-
-    private static final String GET_DECLARATION_SOURCES_SQL = "select src_dft.*, dds.period_start, dds.period_end \n" +
-            "from department_form_type src_dft \n" +
-            "join declaration_source dds on dds.src_department_form_type_id=src_dft.id \n" +
-            "join department_declaration_type ddt on dds.department_declaration_type_id = ddt.id \n" +
-            "where ddt.department_id=:departmentId and ddt.declaration_type_id=:declarationTypeId " +
-            "and (:periodStart is null or ((dds.period_end >= :periodStart or dds.period_end is null) and dds.period_start <= nvl(:periodEnd, '31.12.9999')))";
-
-    @Override
-    public List<DepartmentFormType> getDeclarationSources(int departmentId, int declarationTypeId, Date periodStart, Date periodEnd) {
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put("departmentId", departmentId);
-        params.put("declarationTypeId", declarationTypeId);
-        params.put("periodStart", periodStart);
-        params.put("periodEnd", periodEnd);
-        return getNamedParameterJdbcTemplate().query(GET_DECLARATION_SOURCES_SQL, params, DFT_MAPPER_WITH_PERIOD);
     }
 
     private final RowMapper<FormTypeKind> FORM_ASSIGN_MAPPER = new RowMapper<FormTypeKind>() {
@@ -489,12 +489,12 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
     private static final String GET_ALL_DEPARTMENT_SOURCES_SQL = "select * from department_form_type src_dft where "
             + "exists (select 1 from department_form_type dft, form_data_source fds, form_type src_ft where "
             + "fds.department_form_type_id=dft.id and fds.src_department_form_type_id=src_dft.id and src_ft.id = src_dft.form_type_id "
-            + "and (:periodStart is null or ((fds.period_end >= :periodStart or fds.period_end is null) and fds.period_start <= nvl(:periodEnd, '31.12.9999'))) "
-            + "and dft.department_id=:departmentId and src_ft.tax_type = :taxType) "
+            + "and (:periodStart is null or ((fds.period_end >= :periodStart or fds.period_end is null) and (:periodEnd is null or fds.period_start <= :periodEnd))) "
+            + "and dft.department_id=:departmentId and (:taxType = '!' or src_ft.tax_type = :taxType)) "
             + "or exists (select 1 from department_declaration_type ddt, declaration_source dds, form_type src_ft where "
             + "dds.department_declaration_type_id=ddt.id and dds.src_department_form_type_id=src_dft.id and src_ft.id = src_dft.form_type_id "
-            + "and ddt.department_id=:departmentId and src_ft.tax_type = :taxType"
-            + "and (:periodStart is null or ((dds.period_end >= :periodStart or dds.period_end is null) and dds.period_start <= nvl(:periodEnd, '31.12.9999'))) ) ";
+            + "and ddt.department_id=:departmentId and (:taxType = '!' or src_ft.tax_type = :taxType)"
+            + "and (:periodStart is null or ((dds.period_end >= :periodStart or dds.period_end is null) and (:periodEnd is null or dds.period_start <= :periodEnd))) ) ";
 
     @Override
     public List<DepartmentFormType> getDepartmentSources(int departmentId, TaxType taxType, Date periodStart, Date periodEnd) {
@@ -502,7 +502,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         params.put("periodStart", periodStart);
         params.put("periodEnd", periodEnd);
         params.put("departmentId", departmentId);
-        params.put("taxType", String.valueOf(taxType.getCode()));
+        params.put("taxType", taxType != null ? String.valueOf(taxType.getCode()) : '!');
         return getNamedParameterJdbcTemplate().query(
                 GET_ALL_DEPARTMENT_SOURCES_SQL,
                 params,
@@ -557,20 +557,19 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
 
     private final static String GET_SQL_BY_TAX_TYPE_SQL = "select * from department_form_type dft where department_id = :departmentId and exists (\n" +
             "  select 1 from form_type ft \n" +
-            "  join form_template ftemp on ftemp.type_id = ft.id \n" +
-            "  where ft.id = dft.form_type_id and ft.tax_type in %s \n" +
-            "  and ftemp.version >= :periodStart and (:periodEnd is null or ftemp.version <= :periodEnd)\n" +
+            "  left join form_template ftemp on ftemp.type_id = ft.id \n" +
+            "  where ft.id = dft.form_type_id and (:taxType = '!' or ft.tax_type = :taxType) \n" +
+            "  and (:periodStart is null or (ftemp.version >= :periodStart and (:periodEnd is null or ftemp.version <= :periodEnd)))\n" +
             ")";
 
     @Override
     public List<DepartmentFormType> getByTaxType(int departmentId, TaxType taxType, Date periodStart, Date periodEnd) {
-        String sql = String.format(GET_SQL_BY_TAX_TYPE_SQL,
-                (taxType != null ? SqlUtils.transformTaxTypeToSqlInStatement(Arrays.asList(taxType)) : SqlUtils.transformTaxTypeToSqlInStatement(Arrays.asList(TaxType.values()))));
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("departmentId", departmentId);
         params.put("periodStart", periodStart);
         params.put("periodEnd", periodEnd);
-        return getNamedParameterJdbcTemplate().query(sql, params, DFT_MAPPER);
+        params.put("taxType", taxType != null ? taxType.getCode() : '!');   //hsqldb тупит и не сравнивает строки с null
+        return getNamedParameterJdbcTemplate().query(GET_SQL_BY_TAX_TYPE_SQL, params, DFT_MAPPER);
     }
 
     private final static String GET_SQL_BY_TAX_TYPE_SQL_OLD = "select * from department_form_type dft where department_id = ?" +
@@ -718,7 +717,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
             "join declaration_source ds on ds.department_declaration_type_id = ddt.id\n" +
             "join department_form_type dft on dft.id = ds.src_department_form_type_id\n" +
             "where dft.department_id = ? and dft.kind = ? and dft.form_type_id = ? and dd.report_period_id = ? and dd.is_accepted = 1\n" +
-            "and (:periodStart is null or ((ds.period_end >= :periodStart or ds.period_end is null) and ds.period_start <= nvl(:periodEnd, '31.12.9999')))";
+            "and (:periodStart is null or ((ds.period_end >= :periodStart or ds.period_end is null) and (:periodEnd is null or ds.period_start <= :periodEnd)))";
 
     @Override
     public List<Pair<String, String>> existAcceptedDestinations(int sourceDepartmentId, int sourceFormTypeId,

@@ -432,6 +432,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
     private List<WorkflowMove> getAvailableMovesWithoutCanRead(TAUserInfo userInfo, long formDataId) {
         List<WorkflowMove> result = new LinkedList<WorkflowMove>();
         FormData formData = formDataDao.getWithoutRows(formDataId);
+        ReportPeriod reportPeriod = periodService.getReportPeriod(formData.getReportPeriodId());
 
         // Проверка открытости периода
         if (!reportPeriodService.isActivePeriod(formData.getReportPeriodId(), formData.getDepartmentId())) {
@@ -455,7 +456,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
         } else {
             // Связи НФ -> НФ
             List<DepartmentFormType> formDestinations = departmentFormTypeDao.getFormDestinations(
-                    formData.getDepartmentId(), formData.getFormType().getId(), formData.getKind());
+                    formData.getDepartmentId(), formData.getFormType().getId(), formData.getKind(),
+                    reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
             // Призрак передачи НФ на вышестоящий уровень
             boolean sendToNextLevel = false;
             for (DepartmentFormType destination : formDestinations) {
@@ -468,7 +470,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                 // Связи НФ -> Декларация
                 List<DepartmentDeclarationType> declarationDestinations =
                         departmentFormTypeDao.getDeclarationDestinations(formData.getDepartmentId(),
-                                formData.getFormType().getId(), formData.getKind());
+                                formData.getFormType().getId(), formData.getKind(),
+                                reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
                 for (DepartmentDeclarationType destination : declarationDestinations) {
                     if (formData.getDepartmentId() != destination.getDepartmentId()) {
                         sendToNextLevel = true;

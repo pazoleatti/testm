@@ -170,7 +170,7 @@
                                         <g:Label text="Подразделение:" width="120px" addStyleNames="{style.searchLabel}"/>
                                         <g:cell width="100%">
                                             <d:DepartmentPickerPopupWidget ui:field="leftDepPicker" width="100%"
-                                                                           header="Выберите приёмник" multiselection="false"/>
+                                                                           title="Выберите приёмник" multiselection="false"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
                                     <g:ResizeLayoutPanel addStyleNames="{style.tableBG}, {style.upTables}">
@@ -192,7 +192,7 @@
                                         <g:Label text="Подразделение:" width="120px" addStyleNames="{style.searchLabel}"/>
                                         <g:cell width="100%">
                                             <d:DepartmentPickerPopupWidget ui:field="rightDepPicker"
-                                                                           width="100%" header="Выберите источник"
+                                                                           width="100%" title="Выберите источник"
                                                                            multiselection="false"/>
                                         </g:cell>
                                     </g:HorizontalPanel>

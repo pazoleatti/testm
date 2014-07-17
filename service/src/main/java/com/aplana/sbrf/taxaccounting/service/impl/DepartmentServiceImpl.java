@@ -246,12 +246,6 @@ public class DepartmentServiceImpl implements DepartmentService {
     // http://conf.aplana.com/pages/viewpage.action?pageId=11380670
     @Override
     public List<Integer> getTaxFormDepartments(TAUser tAUser, List<TaxType> taxTypes, Date periodStart, Date periodEnd) {
-        if (periodStart == null && periodEnd == null) {
-            Calendar calendar = Calendar.getInstance();
-            calendar.set(1900, Calendar.JANUARY, 1);
-            periodStart = calendar.getTime();
-            periodEnd = null;
-        }
         List<Integer> retList = new ArrayList<Integer>();
         if (tAUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
             // Все подразделения из справочника подразделений

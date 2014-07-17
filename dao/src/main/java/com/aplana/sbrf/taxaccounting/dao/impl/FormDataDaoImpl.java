@@ -517,16 +517,25 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         getJdbcTemplate().update("UPDATE form_data SET number_previous_row =? WHERE id=?", previousRowNumber, formDataId);
     }
 
+    private static final String GET_MANUAL_UNPUTS_FORMS = "select fd.*, ft.type_id from form_data fd " +
+            "join department_form_type dft on dft.department_id = fd.department_id and dft.kind = fd.kind " +
+            "join form_template ft on ft.id = fd.form_template_id and ft.type_id = dft.form_type_id " +
+            "join form_type t on t.id = ft.type_id " +
+            "join declaration_source ds on ds.src_department_form_type_id = dft.id " +
+            "where %s and fd.report_period_id = :reportPeriodId and t.tax_type = :taxType and dft.kind = :kind and exists (select 1 from data_row where form_data_id = fd.id and manual = 1) " +
+            "and (:periodStart is null or ((ds.period_end >= :periodStart or ds.period_end is null) and (:periodEnd is null or ds.period_start <= :periodEnd)))";
+
     @Override
-    public List<FormData> getManualInputForms(List<Integer> departments, int reportPeriodId, TaxType taxType, FormDataKind kind) {
-        return getJdbcTemplate().query(
-                "select fd.*, ft.type_id from form_data fd " +
-                "join department_form_type dft on dft.department_id = fd.department_id and dft.kind = fd.kind " +
-                "join form_template ft on ft.id = fd.form_template_id and ft.type_id = dft.form_type_id " +
-                "join form_type t on t.id = ft.type_id " +
-                "join declaration_source ds on ds.src_department_form_type_id = dft.id " +
-                "where " + SqlUtils.transformToSqlInStatement("dft.department_id", departments) + " and fd.report_period_id = ? and t.tax_type = ? and dft.kind = ? and exists (select 1 from data_row where form_data_id = fd.id and manual = 1)",
-                new Object[]{reportPeriodId, String.valueOf(taxType.getCode()), kind.getId()},
+    public List<FormData> getManualInputForms(List<Integer> departments, int reportPeriodId, TaxType taxType, FormDataKind kind, Date periodStart, Date periodEnd) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("reportPeriodId", reportPeriodId);
+        params.put("taxType", taxType.getCode());
+        params.put("kind", kind.getId());
+        params.put("periodStart", periodStart);
+        params.put("periodEnd", periodEnd);
+        return getNamedParameterJdbcTemplate().query(
+                String.format(GET_MANUAL_UNPUTS_FORMS, SqlUtils.transformToSqlInStatement("dft.department_id", departments)),
+                params,
                 new FormDataWithoutRowMapperWithTypeId()) ;
     }
 

@@ -624,8 +624,9 @@ public class FormDataServiceImpl implements FormDataService {
                 reportPeriodService.isBalancePeriod(formData.getReportPeriodId(), formData.getDepartmentId())) {
             return;
         }
+        ReportPeriod reportPeriod = reportPeriodDao.get(formData.getReportPeriodId());
         // Список типов приемников для текущей формы
-        List<DepartmentFormType> departmentFormTypes = departmentFormTypeDao.getFormDestinations(formData.getDepartmentId(), formData.getFormType().getId(), formData.getKind());
+        List<DepartmentFormType> departmentFormTypes = departmentFormTypeDao.getFormDestinations(formData.getDepartmentId(), formData.getFormType().getId(), formData.getKind(), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
         // Если нет приемников, то обработка не требуется.
         if (departmentFormTypes == null || departmentFormTypes.isEmpty()) {
             return;
@@ -669,7 +670,7 @@ public class FormDataServiceImpl implements FormDataService {
                         continue;
                     }
                     // Список типов источников для текущего типа приемников
-                    List<DepartmentFormType> sourceFormTypes = departmentFormTypeDao.getFormSources(destinationDFT.getDepartmentId(), destinationDFT.getFormTypeId(), destinationDFT.getKind());
+                    List<DepartmentFormType> sourceFormTypes = departmentFormTypeDao.getFormSources(destinationDFT.getDepartmentId(), destinationDFT.getFormTypeId(), destinationDFT.getKind(), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
                     // Признак наличия принятых экземпляров источников
                     boolean existAcceptedSources = false;
                     for (DepartmentFormType sourceDFT : sourceFormTypes) {
@@ -771,7 +772,8 @@ public class FormDataServiceImpl implements FormDataService {
         // Проверка вышестоящих налоговых форм
         List<DepartmentFormType> departmentFormTypes =
                 departmentFormTypeDao.getFormDestinations(formData.getDepartmentId(),
-                        formData.getFormType().getId(), formData.getKind());
+                        formData.getFormType().getId(), formData.getKind(),
+                        reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
         if (departmentFormTypes != null) {
             for (DepartmentFormType departmentFormType : departmentFormTypes) {
                 FormData form = findFormData(departmentFormType.getFormTypeId(), departmentFormType.getKind(),
@@ -943,6 +945,7 @@ public class FormDataServiceImpl implements FormDataService {
 
     @Override
     public List<FormData> getManualInputForms(List<Integer> departments, int reportPeriodId, TaxType taxType, FormDataKind kind) {
-        return formDataDao.getManualInputForms(departments, reportPeriodId, taxType, kind);
+        ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
+        return formDataDao.getManualInputForms(departments, reportPeriodId, taxType, kind, reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
     }
 }
