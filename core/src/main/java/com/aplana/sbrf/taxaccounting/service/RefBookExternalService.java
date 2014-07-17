@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.ImportResult;
 
 import java.util.Date;
 import java.util.List;
@@ -15,12 +16,12 @@ public interface RefBookExternalService {
 	/**
 	 * Загрузка справочников из ЦАС НСИ
 	 */
-	public void importRefBookNsi(TAUserInfo userInfo, Logger logger);
+	public ImportResult importRefBookNsi(TAUserInfo userInfo, Logger logger);
 
     /**
      * Загрузка справочников из Diasoft Custody
      */
-    public void importRefBookDiasoft(TAUserInfo userInfo, Logger logger);
+    public ImportResult importRefBookDiasoft(TAUserInfo userInfo, Logger logger);
 
     /**
      * Вызов события FormDataEvent.SAVE для скрипта справочника
