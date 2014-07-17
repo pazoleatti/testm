@@ -61,19 +61,12 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
             checkError(logger, SAVE_MESSAGE);
         }
 
-        switch (formTemplate.getStatus()){
-            case NORMAL:
-                versionOperatingService.isUsedVersion(formTemplate.getId(), formTemplate.getType().getId(),
-                        formTemplate.getStatus(), formTemplate.getVersion(), templateActualEndDate, logger);
-                checkError(logger, SAVE_MESSAGE);
-                break;
-            case DRAFT:
-                checkError(logger, SAVE_MESSAGE);
-                break;
+        if (formTemplate.getStatus().equals(VersionedObjectStatus.NORMAL)){
+            versionOperatingService.isUsedVersion(formTemplate.getId(), formTemplate.getType().getId(),
+                    formTemplate.getStatus(), formTemplate.getVersion(), templateActualEndDate, logger);
         }
 
         formTemplateService.validateFormAutoNumerationColumn(formTemplate, logger);
-
         checkError(logger, SAVE_MESSAGE);
 
         int id = formTemplateService.save(formTemplate);
