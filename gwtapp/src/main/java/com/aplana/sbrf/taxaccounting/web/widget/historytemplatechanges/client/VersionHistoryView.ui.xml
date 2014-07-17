@@ -20,7 +20,7 @@
         }
     </ui:style>
 
-    <dw:ModalWindow title="Информация по форме/декларации">
+    <dw:ModalWindow title="Журнал изменений макета">
         <g:VerticalPanel addStyleNames="aplana-ModalWindow-contentBackWhite">
             <g:cell>
                 <style:GenericDataGrid ui:field="versionHistoryCellTable" height="500px" width="450px"/>

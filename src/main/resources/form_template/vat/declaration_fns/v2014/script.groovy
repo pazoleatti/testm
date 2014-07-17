@@ -583,13 +583,17 @@ def round(def value) {
  */
 def getNalNeVich(def row) {
     def order = reportPeriodService.get(declarationData.reportPeriodId)?.order
-    if (order != 1 && row.code == specialCode){
+    if (row.code == specialCode){
         // сумма кодов ОПУ из отчета 102
         def sumOpu = getSumByOpuCodes(opuCodes)
-        // сумма из расходов простых
-        def sumOutcome = getSumOutcomeSimple(knuCodes)
-        // разность сумм
-        return sumOpu - sumOutcome
+        if (order == 1) {
+            return sumOpu
+        } else {
+            // сумма из расходов простых
+            def sumOutcome = getSumOutcomeSimple(knuCodes)
+            // разность сумм
+            return sumOpu - sumOutcome
+        }
     } else {
         return empty
     }

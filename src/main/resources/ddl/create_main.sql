@@ -792,3 +792,15 @@ COMMENT ON COLUMN event.name IS 'Наименование события';
 
  create sequence seq_template_changes start with 10000;
 --------------------------------------------------------------------------------------------------------
+create table lock_data
+(
+  key varchar2(1000) not null,
+  user_id number(9) not null,
+  date_before date not null
+);
+
+comment on table lock_data is 'Информация о блокировках';
+comment on column lock_data.key is 'Код блокировки';
+comment on column lock_data.user_id is 'Идентификатор пользователя, установившего блокировку';
+comment on column lock_data.date_before is 'Срок истечения блокировки';
+--------------------------------------------------------------------------------------------------------

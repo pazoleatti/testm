@@ -2,12 +2,14 @@ package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
 import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.ImportCounter;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Сервис загрузки транспортных файлов
@@ -16,7 +18,8 @@ import java.util.List;
  */
 public interface TransportDataService {
     /**
-     * Загрузка ТФ в каталог загрузки
+     * Загрузка ТФ в каталог загрузки. Загружаются ТФ НФ и ТФС.
+     *
      * @param userInfo Пользователь
      * @param departmentId Подразделение, в каталог которого пойдет загрузка
      * @param fileName Имя ТФ
@@ -27,24 +30,12 @@ public interface TransportDataService {
     boolean uploadFile(TAUserInfo userInfo, int departmentId, String fileName, InputStream inputStream, Logger logger) throws IOException;
 
     /**
-     * Импорт ТФ из каталога загрузки (Планировщик)
-     * @param userInfo Пользователь
-     * @param departmentList Список подразделений, для которых нужно выполнить импорт
-     * @param folderParam Ключ конф. параметра, по которому ищется каталог
-     * @param logger Логгер для области уведомлений
+     * Затрузка всех ТФНФ и ТФС
      */
-    void importDataFromFolder(TAUserInfo userInfo, List<Department> departmentList, ConfigurationParam folderParam, Logger logger);
+    void importAllData(TAUserInfo userInfo, Logger logger);
 
     /**
-     * Импорт ТФ из каталога загрузки (Ручная загрузка)
-     * @param userInfo Пользователь
-     * @param folderParam Ключ конф. параметра, по которому ищется каталог
-     * @param logger Логгер для области уведомлений
+     * Получение спика ТФ НФ из каталога загрузки. Файлы, которые не соответствуют маппингу пропускаются.
      */
-    void importDataFromFolder(TAUserInfo userInfo, ConfigurationParam folderParam, Logger logger);
-
-    /**
-     * Получение спика файлов из каталога загрузки. Некоторые файлы могут быть пропущены.
-     */
-    List<String> getWorkFilesFromFolder(String folderPath);
+    List<String> getWorkFilesFromFolder(String folderPath, Set<String> ignoreFileSet);
 }

@@ -1,7 +1,9 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -16,6 +18,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -53,6 +56,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
     private static final String FORM_DATA_DEPARTMENT_ACCESS_DENIED_LOG = "Selected department (%d) not available in report period (%d)!";
     private static final String FORM_DATA_DEPARTMENT_ACCESS_DENIED = "Выбранное подразделение недоступно для пользователя!";
     private static final String FORM_DATA_EDIT_ERROR = "Нельзя редактировать форму \"%s\" в состоянии \"%s\"";
+    private static final String ERROR_PERIOD = "Переход невозможен, т.к. у одного из приемников период не открыт.";
 
     // id типа формы "Согласование организаций"
     private static final int ORGANIZATION_FORM_TYPE = 410;
@@ -60,11 +64,15 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
     @Autowired
     private FormDataDao formDataDao;
     @Autowired
+    private DeclarationDataDao declarationDataDao;
+    @Autowired
     private DepartmentService departmentService;
     @Autowired
     private FormTemplateDao formTemplateDao;
     @Autowired
     private DepartmentFormTypeDao departmentFormTypeDao;
+    @Autowired
+    private DepartmentDeclarationTypeDao departmentDeclarationTypeDao;
     @Autowired
     private PeriodService reportPeriodService;
     @Autowired
@@ -77,6 +85,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
     private LogEntryService logEntryService;
     @Autowired
     private PeriodService periodService;
+    @Autowired
+    private FormDataService formDataService;
 
     @Override
     public void canRead(TAUserInfo userInfo, long formDataId) {
@@ -454,6 +464,11 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                             formData.getKind().getName(), formData.getState()));
             }
         } else {
+            try {
+                checkDestinations(formDataId);
+            } catch (ServiceException e) {
+                return result;
+            }
             // Связи НФ -> НФ
             List<DepartmentFormType> formDestinations = departmentFormTypeDao.getFormDestinations(
                     formData.getDepartmentId(), formData.getFormType().getId(), formData.getKind(),
@@ -700,5 +715,47 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
         else
             return formTemplate.getVersion().compareTo(reportPeriod.getStartDate()) <= 0
                     || formTemplate.getVersion().compareTo(reportPeriod.getEndDate()) <= 0;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public void checkDestinations(long formDataId) {
+        FormData formData = formDataDao.getWithoutRows(formDataId);
+        // Проверка вышестоящих налоговых форм
+        List<DepartmentFormType> departmentFormTypes =
+                departmentFormTypeDao.getFormDestinations(formData.getDepartmentId(),
+                        formData.getFormType().getId(), formData.getKind());
+        if (departmentFormTypes != null) {
+            for (DepartmentFormType departmentFormType : departmentFormTypes) {
+                FormData form = formDataService.findFormData(departmentFormType.getFormTypeId(), departmentFormType.getKind(),
+                        departmentFormType.getDepartmentId(), formData.getReportPeriodId(), formData.getPeriodOrder());
+                // Если форма существует и статус отличен от "Создана"
+                if (form != null && form.getState() != WorkflowState.CREATED) {
+                    throw new ServiceException("Переход невозможен, т.к. уже подготовлена/утверждена/принята вышестоящая налоговая форма.");
+                }
+                if (!reportPeriodService.isActivePeriod(formData.getReportPeriodId(), departmentFormType.getDepartmentId())) {
+                    throw new ServiceException(ERROR_PERIOD);
+                }
+            }
+        }
+
+        // Проверка вышестоящих деклараций
+        List<DepartmentDeclarationType> departmentDeclarationTypes = sourceService.getDeclarationDestinations(
+                formData.getDepartmentId(), formData.getFormType().getId(), formData.getKind(), formData.getReportPeriodId());
+        if (departmentDeclarationTypes != null) {
+            for (DepartmentDeclarationType departmentDeclarationType : departmentDeclarationTypes) {
+                DeclarationData declaration = declarationDataDao.find(departmentDeclarationType.getDeclarationTypeId(),
+                        departmentDeclarationType.getDepartmentId(), formData.getReportPeriodId());
+                // Если декларация существует и статус "Принята"
+                if (declaration != null && declaration.isAccepted()) {
+                    String str = formData.getFormType().getTaxType() == TaxType.DEAL ? "принято уведомление" :
+                            "принята декларация";
+                    throw new ServiceException("Переход невозможен, т.к. уже " + str + ".");
+                }
+                if (declaration != null && !reportPeriodService.isActivePeriod(formData.getReportPeriodId(), declaration.getDepartmentId())) {
+                    throw new ServiceException(ERROR_PERIOD);
+                }
+            }
+        }
     }
 }

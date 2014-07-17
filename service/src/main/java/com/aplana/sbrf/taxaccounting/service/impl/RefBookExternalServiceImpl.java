@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
+import com.aplana.sbrf.taxaccounting.model.ImportResult;
 import com.aplana.sbrf.taxaccounting.service.RefBookExternalService;
 import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
 import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
@@ -66,7 +67,7 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
     private final static  Map<String, List<Pair<Boolean, Long>>> diasoftMappingMap = new HashMap<String, List<Pair<Boolean, Long>>>();
 
     static {
-        // TODO Каждый конкретный справочник будет загружаться только архивом или только простым файлом, не обоими способами
+        // TODO Левыкин: Каждый конкретный справочник будет загружаться только архивом или только простым файлом, не обоими способами
 
         // Ценные бумаги + Эмитенты
         diasoftMappingMap.put("ds\\d{6}\\.nsi", asList(new Pair<Boolean, Long>(true, REF_BOOK_EMITENT),
@@ -93,10 +94,11 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
      * @param refBookDirectoryParam Путь к директории
      * @param mappingMap Маппинг имен: Регулярка → Пара(Признак архива, Id справочника)
      */
-    private void importRefBook(TAUserInfo userInfo, Logger logger, ConfigurationParam refBookDirectoryParam, Map<String, List<Pair<Boolean, Long>>> mappingMap) {
+    private ImportResult<FileWrapper> importRefBook(TAUserInfo userInfo, Logger logger, ConfigurationParam refBookDirectoryParam, Map<String, List<Pair<Boolean, Long>>> mappingMap) {
+        // http://jira.aplana.com/browse/SBRFACCTAX-8059 0.3.9 Реализовать проверку ЭЦП ТФ
         // TODO добавить проверку ЭЦП (Marat Fayzullin 2013-10-19)
         ConfigurationParamModel model = configurationService.getAllConfig(userInfo);
-        List<String> refBookDirectoryList = model.get(refBookDirectoryParam, DepartmentType.ROOT_BANK.getCode());
+        List<String> refBookDirectoryList = model.get(refBookDirectoryParam, 0);
 
         BufferedReader reader = null;
 
@@ -104,13 +106,15 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
             throw new ServiceException("Не указан путь к директории для импорта справочников.");
         }
 
+        ImportResult<FileWrapper> importResult = new ImportResult<FileWrapper>();
+
         for (String refBookDirectory : refBookDirectoryList) {
             logger.info("Импорт данных справочников из директории «" + refBookDirectory + "».");
 
             refBookDirectory = refBookDirectory.trim();
 
             // Число успешно импортированных файлов
-            int refBookImportCount = 0;
+            int successFolder = 0;
 
             // Признак наличия ошибок при импорте
             boolean withError = false;
@@ -121,6 +125,7 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
                         FileWrapper file = ResourceUtils.getSharedResource(refBookDirectory + fileName);
                         // Из директории считываем только файлы
                         if (!file.isFile()) {
+                            importResult.getSkipFileList().add(file);
                             continue;
                         }
                         for (String key : mappingMap.keySet()) {
@@ -154,13 +159,16 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
                                         switch (scriptStatusHolder.getScriptStatus()) {
                                             case SUCCESS:
                                                 logger.info("Импорт успешно выполнен.");
-                                                refBookImportCount++;
+                                                successFolder++;
+                                                importResult.getSuccessFileList().add(file);
                                                 break;
                                             case SKIP:
+                                                importResult.getSkipFileList().add(file);
                                                 logger.info("Файл пропущен. " + scriptStatusHolder.getStatusMessage());
                                                 break;
                                         }
                                     } catch (Exception e) {
+                                        importResult.getFailFileList().add(file);
                                         //// Ошибка импорта отдельного справочника — откатываются изменения только по нему, импорт продолжается
                                         withError = true;
                                         String errorMsg;
@@ -174,7 +182,7 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
                                                 + "» из файла «" + fileName + "». " + errorMsg;
 
                                         // Журнал аудита
-                                        auditService.add(FormDataEvent.IMPORT, userInfo, userInfo.getUser().getDepartmentId(),
+                                        auditService.add(FormDataEvent.IMPORT_TRANSPORT_FILE, userInfo, userInfo.getUser().getDepartmentId(),
                                                 null, null, null, null, errorMsg);
 
                                         logger.error(errorMsg);
@@ -187,50 +195,47 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
                     }
                 }
                 String msg = "Произведен импорт данных справочников из «" + refBookDirectory + "»" +
-                        (withError ? " с ошибками." : " без ошибок.") + " Импортировано файлов: " + refBookImportCount + ".";
+                        (withError ? " с ошибками." : " без ошибок.") + " Импортировано файлов: " + successFolder + ".";
 
-                if (refBookImportCount == 0) {
+                if (successFolder == 0) {
                     msg = "Импорт не выполнен, корректных файлов с данными справочников в папке «" + refBookDirectory + "» не найдено.";
                 }
 
                 // Журнал аудита
-                auditService.add(FormDataEvent.IMPORT, userInfo, userInfo.getUser().getDepartmentId(), null, null, null,
+                auditService.add(FormDataEvent.IMPORT_TRANSPORT_FILE, userInfo, userInfo.getUser().getDepartmentId(), null, null, null,
                         null, msg);
                 logger.info(msg);
             } catch (Exception e) {
                 //// Глобальная ошибка импорта — все изменения откатываются
                 // Журнал аудита
-                String errorMsg;
-                if (e != null && e.getLocalizedMessage() != null) {
-                    errorMsg = e.getLocalizedMessage() + ".";
-                } else {
-                    errorMsg = "";
-                }
-                errorMsg = "Импорт не выполнен, ошибка доступа к папке «" + refBookDirectory + "». " + errorMsg;
-
-                auditService.add(FormDataEvent.IMPORT, userInfo, userInfo.getUser().getDepartmentId(), null, null, null,
+                String errorMsg = "Импорт не выполнен, ошибка доступа к папке «" + refBookDirectory + "». " + e.getMessage() + ".";
+                auditService.add(FormDataEvent.IMPORT_TRANSPORT_FILE, userInfo, userInfo.getUser().getDepartmentId(), null, null, null,
                         null, errorMsg);
                 throw new ServiceException(errorMsg, e);
             } finally {
                 IOUtils.closeQuietly(reader);
             }
         }
+        return importResult;
     }
 
     @Override
-    public void importRefBookNsi(TAUserInfo userInfo, Logger logger) {
+    public ImportResult<FileWrapper> importRefBookNsi(TAUserInfo userInfo, Logger logger) {
+        ImportResult<FileWrapper> importResult = new ImportResult<FileWrapper>();
         // ОКАТО
-        importRefBook(userInfo, logger, ConfigurationParam.OKATO_UPLOAD_DIRECTORY, nsiOkatoMappingMap);
+        importResult.add(importRefBook(userInfo, logger, ConfigurationParam.OKATO_UPLOAD_DIRECTORY, nsiOkatoMappingMap));
         // Субъекты РФ
-        importRefBook(userInfo, logger, ConfigurationParam.REGION_UPLOAD_DIRECTORY, nsiRegionMappingMap);
+        importResult.add(importRefBook(userInfo, logger, ConfigurationParam.REGION_UPLOAD_DIRECTORY, nsiRegionMappingMap));
         // План счетов
-        importRefBook(userInfo, logger, ConfigurationParam.ACCOUNT_PLAN_UPLOAD_DIRECTORY, nsiAccountPlanMappingMap);
+        importResult.add(importRefBook(userInfo, logger, ConfigurationParam.ACCOUNT_PLAN_UPLOAD_DIRECTORY, nsiAccountPlanMappingMap));
+
+        return importResult;
     }
 
     @Override
-    public void importRefBookDiasoft(TAUserInfo userInfo, Logger logger) {
+    public ImportResult<FileWrapper> importRefBookDiasoft(TAUserInfo userInfo, Logger logger) {
         // Эмитенты и Ценные бумаги
-        importRefBook(userInfo, logger, ConfigurationParam.DIASOFT_UPLOAD_DIRECTORY, diasoftMappingMap);
+        return importRefBook(userInfo, logger, ConfigurationParam.DIASOFT_UPLOAD_DIRECTORY, diasoftMappingMap);
     }
 
     @Override

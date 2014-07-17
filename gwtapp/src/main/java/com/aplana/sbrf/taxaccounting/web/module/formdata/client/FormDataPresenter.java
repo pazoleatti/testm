@@ -200,8 +200,8 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 	}
 
 	private void manageButtonsForFormInClosedPeriod(boolean isPeriodClosed) {
+        getView().showSignersAnchor(!isPeriodClosed);
 		if (isPeriodClosed) {
-			getView().showSignersAnchor(false);
 			getView().showRecalculateButton(false);
 			getView().showOriginalVersionButton(false);
 

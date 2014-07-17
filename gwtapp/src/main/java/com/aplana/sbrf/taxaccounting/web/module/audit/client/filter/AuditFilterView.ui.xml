@@ -58,8 +58,8 @@
 
         <g:cell>
             <g:VerticalPanel spacing="0" width="300px" horizontalAlignment="left">
-                <g:HorizontalPanel verticalAlignment="middle" width="100%">
-                    <g:TextBox ui:field="filter" width="100%"/>
+                <g:HorizontalPanel spacing="2" verticalAlignment="middle" width="100%">
+                    <g:TextBox ui:field="filter" width="300px"/>
                 </g:HorizontalPanel>
                 <g:HorizontalPanel spacing="2" verticalAlignment="middle" width="100%">
                     <g:cell horizontalAlignment="right" width="115px">
@@ -78,7 +78,7 @@
 
         <g:cell>
             <g:VerticalPanel spacing="0" width="150px">
-                <g:Button ui:field="search" text="Найти" addStyleNames="{style.btnFind}"/>
+                <g:SubmitButton ui:field="search" text="Найти" addStyleNames="{style.btnFind}"/>
                 <g:CheckBox ui:field="searchResults" text="Искать в найденном"/>
             </g:VerticalPanel>
         </g:cell>

@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
+import javax.validation.constraints.NotNull;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -124,6 +125,14 @@ public interface FormTemplateService {
     List<FormTemplate> getFormTemplateVersionsByStatus(int formTypeId, VersionedObjectStatus... status);
 
     /**
+     * Получить идентификаторы версии макетов налоговых форм с определеннным статусом
+     * @param formTypeId тип налоговой формы
+     * @param status статус версии макета НФ
+     * @return список версий налоговых форм
+     */
+    List<Integer> getFTVersionIdsByStatus(int formTypeId, VersionedObjectStatus... status);
+
+    /**
      * Метод для поиска пересечений версий макетов в указанных датах
      * @param formTemplate версия макета
      * @param actualEndVersion дата окончания версии макета
@@ -145,7 +154,7 @@ public interface FormTemplateService {
      * @param templateIds макет для удаления
      * @return обновленные записи
      */
-    void delete(Collection<Integer> templateIds);
+    void delete(@NotNull Collection<Integer> templateIds);
 
     /**
      * Возвращает версию макета ближайшую к данной спрвва.
@@ -186,19 +195,28 @@ public interface FormTemplateService {
     boolean isMonthly(int formId);
 
     /**
-     * Обновленее статуса деклааации
-     * @param versionStatus статус
-     * @param formTemplateId ижентификатор
-     * @return идентифиактор
+     * Обновление статуса декларации
+     *
+     * @param versionStatus  статус
+     * @param formTemplateId идентификатор
+     * @return идентификатор
      */
     int updateVersionStatus(VersionedObjectStatus versionStatus, int formTemplateId);
+
+    /**
+     * Валидация сквозной нумерации
+     *
+     * @param formTemplate макета НФ
+     * @param logger       логгер
+     */
+    void validateFormAutoNumerationColumn(FormTemplate formTemplate, Logger logger);
 
     /**
      * Есть ли хоть одна автонумеруемая графа указанного типа в макете
      *
      * @param formTemplate макета НФ
-     * @param type      тип нумерации
+     * @param type         тип нумерации
      * @return true - есть, false - нет
      */
-    public boolean isAnyAutoNumerationColumn(FormTemplate formTemplate, AutoNumerationColumnType type);
+    boolean isAnyAutoNumerationColumn(FormTemplate formTemplate, AutoNumerationColumnType type);
 }

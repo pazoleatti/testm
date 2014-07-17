@@ -41,13 +41,10 @@ public class FormDataServiceImpl implements FormDataService {
 
     private static final String XLSX_EXT = "xlsx";
     private static final String XLS_EXT = "xls";
-    private static final String ERROR_PERIOD = "Переход невозможен, т.к. у одного из приемников период не открыт.";
     public static final String MSG_IS_EXIST_FORM = "Существует экземпляр налоговой формы %s типа %s в подразделении %s периоде %s";
 
     @Autowired
 	private FormDataDao formDataDao;
-    @Autowired
-    private DeclarationDataDao declarationDataDao;
 	@Autowired
 	private FormTemplateDao formTemplateDao;
     @Autowired
@@ -70,8 +67,6 @@ public class FormDataServiceImpl implements FormDataService {
 	private DepartmentDao departmentDao;
     @Autowired
     private DepartmentFormTypeDao departmentFormTypeDao;
-    @Autowired
-    private DepartmentDeclarationTypeDao departmentDeclarationTypeDao;
     @Autowired
     private PeriodService reportPeriodService;
     @Autowired
@@ -149,6 +144,11 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
+    public void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, InputStream inputStream, String fileName, FormDataEvent formDataEvent) {
+        loadFormData(logger, userInfo, formDataId, inputStream, fileName, formDataEvent);
+    }
+
+    @Override
     public void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, InputStream inputStream, String fileName) {
         loadFormData(logger, userInfo, formDataId, inputStream, fileName, FormDataEvent.IMPORT);
     }
@@ -183,7 +183,7 @@ public class FormDataServiceImpl implements FormDataService {
             if(!ext.equals(XLS_EXT) && !ext.equals(XLSX_EXT)){
 
                 String pKeyFileUrl = null;
-                List<String> paramList = configurationDao.getAll().get(ConfigurationParam.KEY_FILE, DepartmentType.ROOT_BANK.getCode());
+                List<String> paramList = configurationDao.getAll().get(ConfigurationParam.KEY_FILE, 0);
                 if (paramList != null && !paramList.isEmpty()) {
                     pKeyFileUrl =  paramList.get(0); // TODO Ключи нужно искать в нескольких каталогах
                 }
@@ -221,7 +221,7 @@ public class FormDataServiceImpl implements FormDataService {
                 throw new ServiceLoggerException(
                         "Есть критические ошибки при выполнения скрипта.", logEntryService.save(logger.getEntries()));
             } else {
-                logger.info("Данные загружены");
+                logger.info("Данные загружены.");
             }
 
             logBusinessService.add(formDataId, null, userInfo, formDataEvent, null);
@@ -706,7 +706,8 @@ public class FormDataServiceImpl implements FormDataService {
         }
     }
 
-    private FormData findFormData(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder) {
+    @Override
+    public FormData findFormData(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder) {
         if (periodOrder == null || kind != FormDataKind.PRIMARY && kind != FormDataKind.CONSOLIDATED) {
             // Если форма-источник квартальная или форма-приемник не является первичной или консолидированной, то ищем квартальный экземпляр
             return formDataDao.find(formTypeId, kind, departmentId, reportPeriodId);
@@ -764,51 +765,6 @@ public class FormDataServiceImpl implements FormDataService {
         });
 	}
 
-    @Override
-    @Transactional(readOnly = true)
-    public void checkDestinations(long formDataId) {
-        FormData formData = formDataDao.get(formDataId, null);
-        ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
-        // Проверка вышестоящих налоговых форм
-        List<DepartmentFormType> departmentFormTypes =
-                departmentFormTypeDao.getFormDestinations(formData.getDepartmentId(),
-                        formData.getFormType().getId(), formData.getKind(),
-                        reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
-        if (departmentFormTypes != null) {
-            for (DepartmentFormType departmentFormType : departmentFormTypes) {
-                FormData form = findFormData(departmentFormType.getFormTypeId(), departmentFormType.getKind(),
-                        departmentFormType.getDepartmentId(), formData.getReportPeriodId(), formData.getPeriodOrder());
-                // Если форма существует и статус отличен от "Создана"
-                if (form != null && form.getState() != WorkflowState.CREATED) {
-                    throw new ServiceException("Переход невозможен, т.к. уже подготовлена/утверждена/принята вышестоящая налоговая форма.");
-                }
-                if (!reportPeriodService.isActivePeriod(formData.getReportPeriodId(), departmentFormType.getDepartmentId())) {
-                    throw new ServiceException(ERROR_PERIOD);
-                }
-            }
-        }
-
-        // Проверка вышестоящих деклараций
-        List<DepartmentDeclarationType> departmentDeclarationTypes = sourceService.getDeclarationDestinations(
-                formData.getDepartmentId(), formData.getFormType().getId(), formData.getKind(), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
-        if (departmentDeclarationTypes != null) {
-            for (DepartmentDeclarationType departmentDeclarationType : departmentDeclarationTypes) {
-                DeclarationData declaration = declarationDataDao.find(departmentDeclarationType.getDeclarationTypeId(),
-                        departmentDeclarationType.getDepartmentId(), formData.getReportPeriodId());
-                // Если декларация существует и статус "Принята"
-                if (declaration != null && declaration.isAccepted()) {
-                    String str = formData.getFormType().getTaxType() == TaxType.DEAL ? "принято уведомление" :
-                            "принята декларация";
-                    throw new ServiceException("Переход невозможен, т.к. уже " + str + ".");
-                }
-                if (declaration != null && !reportPeriodService.isActivePeriod(formData.getReportPeriodId(), declaration.getDepartmentId())) {
-                    throw new ServiceException(ERROR_PERIOD);
-                }
-            }
-        }
-    }
-
-    @Override
     public List<Long> getFormDataListInActualPeriodByTemplate(int templateId, Date startDate) {
         return formDataDao.getFormDataListInActualPeriodByTemplate(templateId, startDate);
     }

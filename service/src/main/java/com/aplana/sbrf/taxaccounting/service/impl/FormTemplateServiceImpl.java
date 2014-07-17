@@ -245,6 +245,12 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     }
 
     @Override
+    public List<Integer> getFTVersionIdsByStatus(int formTypeId, VersionedObjectStatus... status) {
+        List<Integer> statusList = createStatusList(status);
+        return formTemplateDao.getFormTemplateVersions(formTypeId, statusList);
+    }
+
+    @Override
     public List<VersionSegment> findFTVersionIntersections(int templateId, int typeId, Date actualBeginVersion, Date actualEndVersion) {
         return formTemplateDao.findFTVersionIntersections(typeId, templateId, actualBeginVersion, actualEndVersion);
     }
@@ -344,7 +350,6 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 		validateFormColumns(formTemplate, logger);
 		validateFormStyles(formTemplate.getStyles(), logger);
 		validateFormRows(formTemplate.getRows(), logger);
-        validateFormAutoNumerationColumn(formTemplate, logger);
     }
 
 	private void validateFormColumns(FormTemplate formTemplate, Logger logger) {
@@ -429,11 +434,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
         return formTemplate.isMonthly();
     }
 
-    /**
-     * Валидация сквозной нумерации
-     * @param formTemplate макета НФ
-     */
-    protected void validateFormAutoNumerationColumn(FormTemplate formTemplate, Logger logger) {
+    public void validateFormAutoNumerationColumn(FormTemplate formTemplate, Logger logger) {
 
         Integer formTemplateId = formTemplate.getId();
 

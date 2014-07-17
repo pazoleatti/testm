@@ -23,7 +23,7 @@ import java.util.List;
 public class MainOperatingFTServiceImpl implements MainOperatingService {
 
     private static String SAVE_MESSAGE = "Версия макета не сохранена, обнаружены фатальные ошибки!";
-    private static String DELETE_TEMPLATE_MESSAGE = "Удаление невозможно, обнаружены фатальные ошибки!";
+    private static String DELETE_TEMPLATE_MESSAGE = "Удаление невозможно, обнаружено использование макета!";
     private static String DELETE_TEMPLATE_VERSION_MESSAGE = "Удаление невозможно, обнаружено использование макета!";
     private static String HAVE_DFT_MESSAGE = "Существует назначение налоговой формы подразделению %s!";
 
@@ -61,19 +61,13 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
             checkError(logger, SAVE_MESSAGE);
         }
 
-        switch (formTemplate.getStatus()){
-            case NORMAL:
-                versionOperatingService.isUsedVersion(formTemplate.getId(), formTemplate.getType().getId(),
-                        formTemplate.getStatus(), formTemplate.getVersion(), templateActualEndDate, logger);
-                checkError(logger, SAVE_MESSAGE);
-                //Что то с нумерацией строк
-                checkError(logger, SAVE_MESSAGE);
-                break;
-            case DRAFT:
-                //Что то с нумерацией строк
-                checkError(logger, SAVE_MESSAGE);
-                break;
+        if (formTemplate.getStatus().equals(VersionedObjectStatus.NORMAL)){
+            versionOperatingService.isUsedVersion(formTemplate.getId(), formTemplate.getType().getId(),
+                    formTemplate.getStatus(), formTemplate.getVersion(), templateActualEndDate, logger);
         }
+
+        formTemplateService.validateFormAutoNumerationColumn(formTemplate, logger);
+        checkError(logger, SAVE_MESSAGE);
 
         int id = formTemplateService.save(formTemplate);
 
@@ -121,15 +115,16 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
                 VersionedObjectStatus.NORMAL, VersionedObjectStatus.DRAFT);
         //Проверка использования
         if (formTemplates != null && !formTemplates.isEmpty()){
-            ArrayList<Integer> formIds = new ArrayList<Integer>(formTemplates.size());
+            ArrayList<Integer> ids = new ArrayList<Integer>(formTemplates.size());
             for (FormTemplate formTemplate : formTemplates){
                 versionOperatingService.isUsedVersion(formTemplate.getId(), typeId, formTemplate.getStatus(), formTemplate.getVersion(), null, logger);
                 checkError(logger, DELETE_TEMPLATE_MESSAGE);
                 //formTemplate.setStatus(VersionedObjectStatus.DELETED);
-                formIds.add(formTemplate.getId());
+                ids.add(formTemplate.getId());
             }
-            //Все версии теперь каскадом удаляю, т.к. есть все необходимые проверки
-            formTemplateService.delete(formIds);
+            //Получение фейковых значений
+            ids.addAll(formTemplateService.getFTVersionIdsByStatus(typeId, VersionedObjectStatus.FAKE));
+            formTemplateService.delete(ids);
         }
         versionOperatingService.checkDestinationsSources(typeId, null, null, logger);
         checkError(logger, DELETE_TEMPLATE_MESSAGE);
@@ -137,7 +132,8 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
         for (DepartmentFormType departmentFormType : sourceService.getDFTByFormType(typeId))
             logger.error(
                     String.format(HAVE_DFT_MESSAGE,
-                            departmentService.getDepartment(departmentFormType.getDepartmentId())));
+                            departmentService.getDepartment(departmentFormType.getDepartmentId()).getName()));
+        checkError(logger, DELETE_TEMPLATE_MESSAGE);
         formTypeService.delete(typeId);
         /*logging(typeId, TemplateChangesEvent.DELETED, user);*/
     }

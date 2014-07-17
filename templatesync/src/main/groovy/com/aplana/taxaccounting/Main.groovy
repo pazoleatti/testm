@@ -16,11 +16,11 @@ package com.aplana.taxaccounting
 class Main {
     // Параметры подключения к БД
     def static DB_URL = 'jdbc:oracle:thin:@//172.16.127.16:1521/ORCL.APLANA.LOCAL'
-    def static DB_USER = 'TAX_0_3_8'
+    def static DB_USER = 'TAX_0_3_9'
     def static DB_PASSWORD = 'TAX'
 
     // Схема для сравнения макетов, null если сравнение не требуется
-    def static DB_USER_COMPARE = 'TAX_NEXT'
+    def static DB_USER_COMPARE = 'TAX_0_3_8'
 
     // Путь к папке с шаблонами
     def static SRC_FOLDER_PATH = '../src/main/resources/form_template'

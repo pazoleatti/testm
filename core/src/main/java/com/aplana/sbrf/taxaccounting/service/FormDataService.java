@@ -44,6 +44,11 @@ public interface FormDataService {
     void createManualFormData(Logger logger, TAUserInfo userInfo, Long formDataId);
 
     /**
+     * Импорт ТФ НФ
+     */
+    void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, InputStream is, String fileName, FormDataEvent formDataEvent);
+
+    /**
      * Метод для импорта данных из xls-файлов
      * 
      * @param logger
@@ -162,8 +167,19 @@ public interface FormDataService {
 	 */
 	void deleteRow(Logger logger, TAUserInfo userInfo, FormData formData, DataRow<Cell> currentDataRow);
 
-	
-	/**
+    /**
+     * Поиск формы по основным параметрам
+     *
+     * @param formTypeId
+     * @param kind
+     * @param departmentId
+     * @param reportPeriodId
+     * @param periodOrder
+     * @return
+     */
+    FormData findFormData(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder);
+
+    /**
 	 * Заблокировать FormData.
 	 * @param formDataId - идентификатор налоговой формы
 	 * @param userInfo информация о пользователе
@@ -193,13 +209,6 @@ public interface FormDataService {
 	 * @return информацию о блокировке объекта
 	 */
 	ObjectLock<Long> getObjectLock(long formDataId, TAUserInfo userInfo);
-
-    /**
-     * Проверка наличия и статуса приемника при осуществлении перевода формы
-     * в статус "Подготовлена"/"Утверждена"/"Принята".
-     * @param formDataId
-     */
-    void checkDestinations(long formDataId);
 
     /**
      * Ищет налоговые формы, которые использует данную версию макета, у которых период от #startDate

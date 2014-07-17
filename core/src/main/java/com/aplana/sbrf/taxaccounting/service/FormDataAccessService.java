@@ -87,4 +87,11 @@ public interface FormDataAccessService {
      * @param taxTypes Виды нлога
      */
     List<FormDataKind> getAvailableFormDataKind(TAUserInfo userInfo, List<TaxType> taxTypes);
+
+    /**
+     * Проверка наличия и статуса приемника при осуществлении перевода формы
+     * в статус "Подготовлена"/"Утверждена"/"Принята".
+     * @param formDataId
+     */
+    void checkDestinations(long formDataId);
 }

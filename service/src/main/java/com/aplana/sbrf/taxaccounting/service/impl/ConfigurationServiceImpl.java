@@ -69,7 +69,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         // Проверки общих параметров
         for (ConfigurationParam configurationParam : ConfigurationParam.values()) {
             if (configurationParam.isCommon()) {
-                List<String> valuesList = model.get(configurationParam, DepartmentType.ROOT_BANK.getCode());
+                List<String> valuesList = model.get(configurationParam, 0);
                 if (valuesList == null || valuesList.isEmpty()) {
                     // Обязательность
                     logger.error(NOT_SET_ERROR, configurationParam.getCaption());
@@ -147,7 +147,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         // Проверки общих параметров
         for (ConfigurationParam configurationParam : ConfigurationParam.values()) {
             if (configurationParam.isCommon()) {
-                List<String> valuesList = model.get(configurationParam, DepartmentType.ROOT_BANK.getCode());
+                List<String> valuesList = model.get(configurationParam, 0);
                 if (valuesList != null)
                     for (String value : valuesList) {
                         if (configurationParam.hasReadCheck() && (configurationParam.isFolder()

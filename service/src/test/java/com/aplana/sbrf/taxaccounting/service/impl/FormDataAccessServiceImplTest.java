@@ -1,16 +1,15 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
-import com.aplana.sbrf.taxaccounting.service.PeriodService;
-import com.aplana.sbrf.taxaccounting.service.SourceService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.test.FormTypeMockUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -24,6 +23,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+import static com.aplana.sbrf.taxaccounting.test.DepartmentDeclarationTypeMockUtils.mockDepartmentDeclarationType;
 import static com.aplana.sbrf.taxaccounting.test.DepartmentFormTypeMockUtils.mockDepartmentFormType;
 import static com.aplana.sbrf.taxaccounting.test.DepartmentMockUtils.mockDepartment;
 import static com.aplana.sbrf.taxaccounting.test.FormDataMockUtils.mockFormData;
@@ -81,6 +81,8 @@ public class FormDataAccessServiceImplTest {
 	private static final boolean REPORT_PERIOD_ACTIVE = true;
 	private static final boolean REPORT_PERIOD_INACTIVE = false;
 	private static final boolean REPORT_PERIOD_BALANCED = true;
+
+    private static final int DECLARATION_TYPE_1_ID = 101;
 
 	private final static String LOCAL_IP = "127.0.0.1";
 
@@ -296,6 +298,9 @@ public class FormDataAccessServiceImplTest {
 		dfts.add(mockDepartmentFormType(Department.ROOT_BANK_ID, summaryFormType2.getId(), FormDataKind.SUMMARY));
 		dfts.add(mockDepartmentFormType(Department.ROOT_BANK_ID, additionalFormType.getId(), FormDataKind.ADDITIONAL));
 		when(sourceService.getDFTByDepartment(Matchers.eq(Department.ROOT_BANK_ID), Matchers.any(TaxType.class), any(Date.class), any(Date.class))).thenReturn(dfts);
+        List<DepartmentDeclarationType> ddtList = new ArrayList<DepartmentDeclarationType>();
+        when(sourceService.getDeclarationDestinations(Department.ROOT_BANK_ID, summaryFormType1.getId(), FormDataKind.SUMMARY, 1)).thenReturn(ddtList);
+        when(sourceService.getDeclarationDestinations(Department.ROOT_BANK_ID, summaryFormType2.getId(), FormDataKind.SUMMARY, 1)).thenReturn(null);
 		ReflectionTestUtils.setField(service, "sourceService", sourceService);
 		
 		FormTypeDao formTypeDao = mock(FormTypeDao.class);
@@ -303,9 +308,23 @@ public class FormDataAccessServiceImplTest {
 		ft.setTaxType(TaxType.INCOME);
 		when(formTypeDao.get(Matchers.anyInt())).thenReturn(ft);
 		ReflectionTestUtils.setField(service, "formTypeDao", formTypeDao);
+
+        ddtList.add(mockDepartmentDeclarationType(Department.ROOT_BANK_ID, DECLARATION_TYPE_1_ID));
+
+        DeclarationDataDao declarationDataDao = mock(DeclarationDataDao.class);
+        DeclarationData declarationData = new DeclarationData();
+        declarationData.setAccepted(false);
+        declarationData.setDepartmentId(TB1_ID);
+        when(declarationDataDao.find(DECLARATION_TYPE_1_ID, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID)).thenReturn(declarationData);
+        ReflectionTestUtils.setField(service, "declarationDataDao", declarationDataDao);
+
+        FormDataService formDataService = mock(FormDataService.class);
+        fd = mockFormData(TB1_CREATED_FORMDATA_ID, TB1_ID, WorkflowState.CREATED, FormDataKind.SUMMARY, REPORT_PERIOD_ACTIVE_ID, summaryFormType1);
+        when(formDataService.findFormData(summaryFormType1.getId(), FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID, null)).thenReturn(fd);
+		ReflectionTestUtils.setField(service, "formDataService", formDataService);
 	}
 
-	@Test
+    @Test
 	public void testCanReadForFirstLifeCycle(){
 		/* Жизненный цикл налоговых форм, формируемых пользователем с ролью «Оператор»
 			 и не передаваемых на вышестоящий уровень (Выходные формы уровня БАНК)*/

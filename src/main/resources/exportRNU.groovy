@@ -245,7 +245,7 @@ def getFileName(FormTemplate template) {
     String value
 
     // <Код налоговой формы>
-    value = addUnderline(template.getCode(), 9)
+    value = addUnderline(template.getType().getCode(), 9)
     value = value.replace("\\", "_").replace("/", "_") // TODO (Ramil Timerbaev) в некоторых шаблонах есть значение '/', при сохранении ругается, потом убрать
     sb.append(value)
 
@@ -358,7 +358,7 @@ void loadFormTemplates(Statement statement) {
     // TODO (Ramil Timerbaev) возможно надо будет изменить запрос, имзенив получение макетов по id типа формы и версии, а не по id макета
     // получить данные шаблонов: id, name, monthly из form_template и id из form_type. Остальные данные не нужны
     ResultSet resultSet = statement.executeQuery(
-            "select ft.id as id, ft.name as name, ft.monthly as monthly, ft.code as code, f.id as form_type_id " +
+            "select ft.id as id, ft.name as name, ft.monthly as monthly, f.code as code, f.id as form_type_id " +
                     "from form_template ft, form_type f " +
                     "where ft.id in (${formTemplateIds.join(', ')}) and ft.type_id = f.id")
 
@@ -368,10 +368,10 @@ void loadFormTemplates(Statement statement) {
         formTemplate.setId(resultSet.getInt("id"))
         formTemplate.setName(resultSet.getString("name"))
         formTemplate.setMonthly(resultSet.getBoolean("monthly"))
-        formTemplate.setCode(resultSet.getString("code"))
 
         FormType formType = new FormType()
         formType.setId(resultSet.getInt("form_type_id"))
+        formType.setCode(resultSet.getString("code"))
         formTemplate.setType(formType)
 
         // заполнение глобальной мапы с шаблонами
@@ -744,7 +744,7 @@ void log(LogLevel level, def s, def ...args) {
 
 /** Подготавливает данные. */
 void calcData() {
-    formTemplatesExcludeRowMap.each { id, fix ->
+    formTemplatesExcludeRowMap.each { def id, fix ->
         formTemplateIds.add(id)
     }
 }
