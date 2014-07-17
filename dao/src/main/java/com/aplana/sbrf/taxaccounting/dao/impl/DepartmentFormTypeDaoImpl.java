@@ -490,10 +490,10 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
             + "exists (select 1 from department_form_type dft, form_data_source fds, form_type src_ft where "
             + "fds.department_form_type_id=dft.id and fds.src_department_form_type_id=src_dft.id and src_ft.id = src_dft.form_type_id "
             + "and (:periodStart is null or ((fds.period_end >= :periodStart or fds.period_end is null) and (:periodEnd is null or fds.period_start <= :periodEnd))) "
-            + "and dft.department_id=:departmentId and (:taxType = '!' or src_ft.tax_type = :taxType)) "
+            + "and dft.department_id=:departmentId and (:taxType is null or src_ft.tax_type = :taxType)) "
             + "or exists (select 1 from department_declaration_type ddt, declaration_source dds, form_type src_ft where "
             + "dds.department_declaration_type_id=ddt.id and dds.src_department_form_type_id=src_dft.id and src_ft.id = src_dft.form_type_id "
-            + "and ddt.department_id=:departmentId and (:taxType = '!' or src_ft.tax_type = :taxType)"
+            + "and ddt.department_id=:departmentId and (:taxType is null or src_ft.tax_type = :taxType)"
             + "and (:periodStart is null or ((dds.period_end >= :periodStart or dds.period_end is null) and (:periodEnd is null or dds.period_start <= :periodEnd))) ) ";
 
     @Override
@@ -502,7 +502,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         params.put("periodStart", periodStart);
         params.put("periodEnd", periodEnd);
         params.put("departmentId", departmentId);
-        params.put("taxType", taxType != null ? String.valueOf(taxType.getCode()) : '!');
+        params.put("taxType", taxType != null ? String.valueOf(taxType.getCode()) : null);
         return getNamedParameterJdbcTemplate().query(
                 GET_ALL_DEPARTMENT_SOURCES_SQL,
                 params,
@@ -558,7 +558,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
     private final static String GET_SQL_BY_TAX_TYPE_SQL = "select * from department_form_type dft where department_id = :departmentId and exists (\n" +
             "  select 1 from form_type ft \n" +
             "  left join form_template ftemp on ftemp.type_id = ft.id \n" +
-            "  where ft.id = dft.form_type_id and (:taxType = '!' or ft.tax_type = :taxType) \n" +
+            "  where ft.id = dft.form_type_id and (:taxType is null or ft.tax_type = :taxType) \n" +
             "  and (:periodStart is null or (ftemp.version >= :periodStart and (:periodEnd is null or ftemp.version <= :periodEnd)))\n" +
             ")";
 
@@ -568,7 +568,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         params.put("departmentId", departmentId);
         params.put("periodStart", periodStart);
         params.put("periodEnd", periodEnd);
-        params.put("taxType", taxType != null ? taxType.getCode() : '!');   //hsqldb тупит и не сравнивает строки с null
+        params.put("taxType", taxType != null ? String.valueOf(taxType.getCode()) : null);
         return getNamedParameterJdbcTemplate().query(GET_SQL_BY_TAX_TYPE_SQL, params, DFT_MAPPER);
     }
 
