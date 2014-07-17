@@ -245,6 +245,8 @@ ALTER TABLE event ADD CONSTRAINT event_pk PRIMARY KEY (id);
 ALTER TABLE log_system ADD CONSTRAINT log_system_fk_event_id FOREIGN KEY (event_id) REFERENCES event(id);
 ALTER TABLE log_system DROP CONSTRAINT log_system_chk_event_id;
 
+alter table lock_data add constraint lock_data_pk primary key (key);
+alter table lock_data add constraint lock_data_fk_user_id foreign key (user_id) references sec_user(id) on delete cascade;
 ------------------------------------------------------------------------------------------------------
 create index i_department_parent_id on department(parent_id);
 create index i_data_row_form_data_id on data_row(form_data_id);

@@ -90,10 +90,10 @@ public class ConfigurationServiceTest {
         for (ConfigurationParam param : ConfigurationParam.values()) {
             if (param.isCommon()) {
                 if (param.isFolder()) {
-                    model.put(param, DepartmentType.ROOT_BANK.getCode(),
+                    model.put(param, 0,
                             asList("file://" + path + "/"));
                 } else {
-                    model.put(param, DepartmentType.ROOT_BANK.getCode(),
+                    model.put(param, 0,
                             asList("file://" + path + "/" + file.getName()));
                 }
             }
@@ -138,10 +138,10 @@ public class ConfigurationServiceTest {
         for (ConfigurationParam param : ConfigurationParam.values()) {
             if (param.isCommon()) {
                 if (param.isFolder()) {
-                    model.put(param, DepartmentType.ROOT_BANK.getCode(),
+                    model.put(param, 0,
                             asList("file://" + path + "/"));
                 } else {
-                    model.put(param, DepartmentType.ROOT_BANK.getCode(),
+                    model.put(param, 0,
                             asList("file://" + path + "/" + file.getName()));
                 }
             }
@@ -185,11 +185,9 @@ public class ConfigurationServiceTest {
         for (ConfigurationParam param : ConfigurationParam.values()) {
             if (param.isCommon()) {
                 if (param.isFolder()) {
-                    model.put(param, DepartmentType.ROOT_BANK.getCode(),
-                            asList("file://" + path + "/"));
+                    model.put(param, 0, asList("file://" + path + "/"));
                 } else {
-                    model.put(param, DepartmentType.ROOT_BANK.getCode(),
-                            asList("file://" + path + "/" + file.getName()));
+                    model.put(param, 0, asList("file://" + path + "/" + file.getName()));
                 }
             }
         }
@@ -232,10 +230,10 @@ public class ConfigurationServiceTest {
         for (ConfigurationParam param : ConfigurationParam.values()) {
             if (param.isCommon()) {
                 if (param.isFolder()) {
-                    model.put(param, DepartmentType.ROOT_BANK.getCode(),
+                    model.put(param, 0,
                             asList("file://" + path + "/"));
                 } else {
-                    model.put(param, DepartmentType.ROOT_BANK.getCode(),
+                    model.put(param, 0,
                             asList("file://" + path + "/" + file.getName()));
                 }
             }
@@ -284,10 +282,10 @@ public class ConfigurationServiceTest {
         for (ConfigurationParam param : ConfigurationParam.values()) {
             if (param.isCommon()) {
                 if (param.isFolder()) {
-                    model.put(param, DepartmentType.ROOT_BANK.getCode(),
+                    model.put(param, 0,
                             asList("file://" + path + "/"));
                 } else {
-                    model.put(param, DepartmentType.ROOT_BANK.getCode(),
+                    model.put(param, 0,
                             asList("file://" + path + "/" + file.getName()));
                 }
             }
