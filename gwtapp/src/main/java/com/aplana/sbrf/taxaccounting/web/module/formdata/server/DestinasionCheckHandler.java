@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
-import com.aplana.sbrf.taxaccounting.service.FormDataService;
+import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DestinationCheckAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DestinationCheckResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 public class DestinasionCheckHandler extends AbstractActionHandler<DestinationCheckAction, DestinationCheckResult> {
 
     @Autowired
-    private FormDataService formDataService;
+    private FormDataAccessService formDataAccessService;
 
     public DestinasionCheckHandler() {
         super(DestinationCheckAction.class);
@@ -26,7 +26,7 @@ public class DestinasionCheckHandler extends AbstractActionHandler<DestinationCh
 
     @Override
     public DestinationCheckResult execute(DestinationCheckAction action, ExecutionContext context) throws ActionException {
-        formDataService.checkDestinations(action.getFormDataId());
+        formDataAccessService.checkDestinations(action.getFormDataId());
         return new DestinationCheckResult();
     }
 
