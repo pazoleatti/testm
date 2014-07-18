@@ -24,8 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
-import static com.aplana.sbrf.taxaccounting.model.DepartmentType.TERR_BANK;
-import static com.aplana.sbrf.taxaccounting.model.DepartmentType.fromCode;
+import static com.aplana.sbrf.taxaccounting.model.DepartmentType.*;
 
 /**
  * Провайдер для работы со справочником подразделений
@@ -294,7 +293,9 @@ public class RefBookDepartment implements RefBookDataProvider {
                     break;
                 //5 шаг
                 case CSKO_PCP:
-                case INTERNAL:
+                case MANAGEMENT:
+                    if (newType.equals(CSKO_PCP) || newType.equals(MANAGEMENT))
+                        break;
                     List<TAUserFull> users = taUserService.getByFilter(new MembersFilterData(){{
                         setDepartmentIds(new HashSet<Integer>(Arrays.asList(uniqueRecordId.intValue())));
                     }});
