@@ -564,7 +564,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                 return;
             //Проверяем аттрибут "действующее подразделение" у родительского подразделения
             Department parentDep = departmentService.getDepartment(parentDepartmentId.intValue());
-            if (!parentDep.isActive()){
+            if (!parentDep.isActive() && values.get(DEPARTMENT_ACTIVE_NAME).getNumberValue().intValue() == 1){
                 logger.error("Подразделению не может быть установлен признак \"Действующее\", если оно находится в составе недействующего подразделения!");
             }
         }else {
