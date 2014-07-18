@@ -28,15 +28,6 @@ public class SimpleUserTask implements UserTask {
     @Override
     public void execute(Map<String, TaskParam> params) throws TaskExecutionException {
         LOG.info("SimpleUserTask started");
-        for (Map.Entry<String, TaskParam> entry : params.entrySet()) {
-            try {
-                LOG.info(entry.getKey() + " : " + params.get(entry.getKey()).getTypifiedValue());
-            } catch (InvalidTaskParamException e) {
-                LOG.error(e.getLocalizedMessage(), e);
-                throw new TaskExecutionException("Ошибка получения параметров", e);
-            }
-
-        }
     }
 
     @Override
