@@ -1,8 +1,10 @@
 package com.aplana.sbrf.taxaccounting.scheduler.api.task;
 
+import com.aplana.sbrf.taxaccounting.scheduler.api.form.FormElement;
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskParam;
 import com.aplana.sbrf.taxaccounting.scheduler.api.exception.TaskExecutionException;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -28,4 +30,10 @@ public interface UserTask {
      * @return название класса задачи
      */
     String getTaskClassName();
+
+    /**
+     * Возвращает список параметров необходимых для задачи
+     * @return
+     */
+    List<FormElement> getParams();
 }

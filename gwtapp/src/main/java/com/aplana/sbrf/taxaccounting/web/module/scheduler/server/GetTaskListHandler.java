@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.scheduler.server;
 
 import com.aplana.sbrf.taxaccounting.model.TaskSearchResultItem;
+import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskData;
+import com.aplana.sbrf.taxaccounting.scheduler.api.exception.TaskSchedulingException;
 import com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManager;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.GetTaskListAction;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.GetTaskListResult;
@@ -11,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +25,8 @@ import java.util.List;
 @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 public class GetTaskListHandler extends AbstractActionHandler<GetTaskListAction, GetTaskListResult> {
 
+    private static final String DATE_FORMAT = "dd-MM-yyyy, HH:mm";
+
     @Autowired
     TaskManager taskManager;
 
@@ -31,7 +36,7 @@ public class GetTaskListHandler extends AbstractActionHandler<GetTaskListAction,
 
     @Override
     public GetTaskListResult execute(GetTaskListAction getTaskListAction, ExecutionContext executionContext) throws ActionException {
-        GetTaskListResult result = new GetTaskListResult();
+/*        GetTaskListResult result = new GetTaskListResult();
         List<TaskSearchResultItem> records = new ArrayList<TaskSearchResultItem>();
         TaskSearchResultItem item = new TaskSearchResultItem();
         item.setId((long) 1);
@@ -39,12 +44,12 @@ public class GetTaskListHandler extends AbstractActionHandler<GetTaskListAction,
         item.setState("State");
         item.setNumberOfRepeats(1);
         item.setRepeatsLeft(2);
-        item.setTimeCreated("11.11.2014");
+        item.setTimeChanged("11.11.2014");
         item.setNextFireTime("11.11.2015");
         records.add(item);
         result.setTasks(records);
-        return result;
-        /*try {
+        return result;*/
+        try {
             SimpleDateFormat df = new SimpleDateFormat(DATE_FORMAT);
             GetTaskListResult result = new GetTaskListResult();
             List<TaskSearchResultItem> records = new ArrayList<TaskSearchResultItem>();
@@ -55,10 +60,9 @@ public class GetTaskListHandler extends AbstractActionHandler<GetTaskListAction,
                 item.setId(task.getTaskId());
                 item.setName(task.getTaskName());
                 item.setState(task.getTaskState().getName());
-                item.setNumberOfRepeats(task.getNumberOfRepeats());
-                item.setRepeatsLeft(task.getRepeatsLeft());
-                item.setTimeCreated(df.format(task.getTimeCreated()));
+                item.setModificationDate(df.format(task.getModificationDate()));
                 item.setNextFireTime(df.format(task.getNextFireTime()));
+                item.setContextId(task.getContextId());
 
                 records.add(item);
             }
@@ -66,7 +70,7 @@ public class GetTaskListHandler extends AbstractActionHandler<GetTaskListAction,
             return result;
         } catch (TaskSchedulingException e) {
             throw new ActionException("Ошибка получения списка задач планировщика", e);
-        }*/
+        }
     }
 
     @Override

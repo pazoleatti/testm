@@ -12,7 +12,7 @@
         }
     </ui:style>
 
-    <ui:style>
+    <ui:style field="styles" type="com.aplana.sbrf.taxaccounting.web.module.scheduler.client.TaskView.AllStyles">
 
         .header {
             font-size: 14px;
@@ -63,8 +63,8 @@
                 <fm:left>
                     <fm:Left>
                         <style:LeftBar childValign="middle" height="100%">
-                            <g:Label ui:field="formHeader" text="Планировщик задач" addStyleNames="{style.header}"/>
-                            <g:Label text="—" addStyleNames="{style.header}"/>
+                            <g:Label ui:field="formHeader" text="Планировщик задач" addStyleNames="{styles.header}"/>
+                            <g:Label text="—" addStyleNames="{styles.header}"/>
                         </style:LeftBar>
                     </fm:Left>
                 </fm:left>
@@ -84,49 +84,33 @@
         </fm:header>
         <fm:body>
             <fm:BodyContainer>
-                <g:HorizontalPanel spacing="5" addStyleNames="{style.btnPanel}" verticalAlignment="middle">
+                <g:HorizontalPanel spacing="5" addStyleNames="{styles.btnPanel}" verticalAlignment="middle">
                     <g:Button text="Создать" ui:field="createButton"/>
                     <g:Button text="Отменить" ui:field="cancelButton"/>
                 </g:HorizontalPanel>
 
-                <g:Label addStyleNames="{style.horSep}"/>
+                <g:Label addStyleNames="{styles.horSep}"/>
 
-                <g:ScrollPanel addStyleNames="{style.scroll}">
+                <g:ScrollPanel addStyleNames="{styles.scroll}">
                     <g:VerticalPanel>
                         <!-- Базовые параметры -->
                         <g:cell width="750px">
-                            <g:VerticalPanel styleName="{style.paramsBlock}">
-                                <g:Label styleName="{style.paramsTitle}" text="Базовые параметры"/>
+                            <g:VerticalPanel styleName="{styles.paramsBlock}">
+                                <g:Label styleName="{styles.paramsTitle}" text="Параметры"/>
                                 <g:HorizontalPanel spacing="5" verticalAlignment="middle">
-                                    <g:Label text="Название:" addStyleNames="{style.label}"/>
-                                    <g:TextBox width="475px" ui:field="taskName"/>
+                                    <g:Label text="Название:" addStyleNames="{styles.label}"/>
+                                    <dw:TextBox width="475px" ui:field="taskName"/>
                                 </g:HorizontalPanel>
                                 <g:HorizontalPanel spacing="5" verticalAlignment="middle">
-                                    <g:Label text="Расписание:" addStyleNames="{style.label}"/>
-                                    <g:TextBox width="475px" ui:field="taskSchedule"/>
+                                    <g:Label text="Расписание:" addStyleNames="{styles.label}"/>
+                                    <dw:TextBox width="475px" ui:field="taskSchedule"/>
                                 </g:HorizontalPanel>
                                 <g:HorizontalPanel spacing="5" verticalAlignment="middle">
-                                    <g:Label text="Количество повторений:" addStyleNames="{style.label}"/>
-                                    <g:TextBox width="475px" ui:field="numberOfRepeats"/>
+                                    <g:Label text="Тип задачи:" addStyleNames="{styles.label}"/>
+                                    <dw:ValueListBox width="475px" ui:field="jndi"/>
                                 </g:HorizontalPanel>
-                                <g:HorizontalPanel spacing="5" verticalAlignment="middle">
-                                    <g:Label text="Тип задачи:" addStyleNames="{style.label}"/>
-                                    <dw:ListBoxWithTooltip width="475px" ui:field="jndi"/>
-                                </g:HorizontalPanel>
+                                <g:HTMLPanel ui:field="formPanel"></g:HTMLPanel>
                             </g:VerticalPanel>
-                        </g:cell>
-                        <!-- Пользовательские параметры -->
-                        <g:cell width="750px">
-                            <g:VerticalPanel styleName="{style.paramsBlock}">
-                                <g:Label styleName="{style.paramsTitle}" text="Пользовательские параметры"/>
-                                <g:VerticalPanel ui:field="paramsPanel"/>
-                                <g:HorizontalPanel width="100%" horizontalAlignment="ALIGN_RIGHT">
-                                    <g:Button text="Добавить" ui:field="addParamButton"/>
-                                </g:HorizontalPanel>
-                            </g:VerticalPanel>
-                        </g:cell>
-                        <g:cell height="15px">
-                            <g:Label/>
                         </g:cell>
                     </g:VerticalPanel>
                 </g:ScrollPanel>

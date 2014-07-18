@@ -1,7 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.scheduler.client;
 
 import com.aplana.sbrf.taxaccounting.model.TaskParamModel;
-import com.aplana.sbrf.taxaccounting.model.TaskParamTypeValues;
+
+
+import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskJndiInfo;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.ParamUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
@@ -10,17 +12,10 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.*;
-import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
-import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.text.shared.AbstractRenderer;
-import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
+import com.gwtplatform.dispatch.shared.Result;
 import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.Presenter;
 import com.gwtplatform.mvp.client.View;
@@ -44,24 +39,9 @@ public class TaskPresenter extends Presenter<TaskPresenter.MyView,
 
     private final DispatchAsync dispatcher;
     private PlaceManager placeManager;
-
-    /**
-     * Позиция имени параметра в блоках виджетов
-     */
-    private static final int PARAM_NAME_POSITION = 0;
-    /**
-     * Позиция типа параметра в блоках виджетов
-     */
-    private static final int PARAM_TYPE_POSITION = 1;
-    /**
-     * Позиция значения параметра в блоках виджетов
-     */
-    private static final int PARAM_VALUE_POSITION = 2;
-
-    /**
-     * Счетчик параметров задачи
-     */
-    private int paramsCounter = 0;
+    private boolean editMode;
+    private Long currentTaskId;
+    private Long contextId;
 
     @ProxyCodeSplit
     @NameToken(SchedulerTokens.task)
@@ -69,25 +49,29 @@ public class TaskPresenter extends Presenter<TaskPresenter.MyView,
     }
 
     public interface MyView extends View, HasUiHandlers<TaskUiHandlers> {
-        VerticalPanel getParamsPanel();
-
         LinkStyle getCss();
 
         String getTaskName();
 
         String getTaskSchedule();
 
-        String getNumberOfRepeats();
-
         String getJndi();
 
-        void setJndiList(List<TaskInfoItem> jndiList);
+        void setJndiList(List<TaskJndiInfo> jndiList);
 
         void clearForm();
 
         void setTaskData(GetTaskInfoResult taskData);
 
-        void setTitle(String title);
+        void setMode(boolean editMode);
+
+        boolean validateTaskParams();
+
+        String getErrorsOnValidateTaskParams();
+
+        boolean isTaskTypeSelected();
+
+        List<TaskParamModel> getTaskParams();
     }
 
     @Inject
@@ -104,11 +88,9 @@ public class TaskPresenter extends Presenter<TaskPresenter.MyView,
         super.prepareFromRequest(request);
         LogCleanEvent.fire(this);
         LogShowEvent.fire(this, false);
-        if (request.getParameterNames().size() != 0) {
-            getView().setTitle("Изменить задачу");
-        } else {
-            getView().setTitle("Создать задачу");
-        }
+        editMode = request.getParameterNames().size() != 0;
+        getView().setMode(editMode);
+
         GetAvailableTasksAction initAction = new GetAvailableTasksAction();
         dispatcher.execute(initAction, CallbackUtils
                 .defaultCallback(new AbstractCallback<GetAvailableTasksResult>() {
@@ -120,8 +102,7 @@ public class TaskPresenter extends Presenter<TaskPresenter.MyView,
 
                         //Загрузка информации по задаче, если она была выбрана
                         if (request.getParameter(SchedulerTokens.taskId, null) != null) {
-                            Long currentTaskId = ParamUtils.getLong(request,
-                                    SchedulerTokens.taskId);
+                            currentTaskId = ParamUtils.getLong(request, SchedulerTokens.taskId);
 
                             //Получаем данные задачи
                             GetTaskInfoAction action = new GetTaskInfoAction();
@@ -131,6 +112,7 @@ public class TaskPresenter extends Presenter<TaskPresenter.MyView,
                                         @Override
                                         public void onSuccess(GetTaskInfoResult result) {
                                             getView().setTaskData(result);
+                                            contextId = result.getContextId();
                                         }
                                     }, TaskPresenter.this));
                         }
@@ -141,210 +123,52 @@ public class TaskPresenter extends Presenter<TaskPresenter.MyView,
     @Override
     public void onCreateTask() {
         if (validateForm()) {
-            CreateTaskAction action = new CreateTaskAction();
-            action.setTaskName(getView().getTaskName());
-            action.setSchedule(getView().getTaskSchedule());
-            action.setNumberOfRepeats(Integer.parseInt(getView().getNumberOfRepeats()));
-            action.setUserTaskJndi(getView().getJndi());
+            if (editMode) {
+                UpdateTaskAction action = new UpdateTaskAction();
+                action.setTaskId(currentTaskId);
+                action.setContextId(contextId);
+                fillTaskData(action);
 
-            List<TaskParamModel> params = new ArrayList<TaskParamModel>();
+                dispatcher.execute(action, CallbackUtils
+                        .defaultCallback(new AbstractCallback<UpdateTaskResult>() {
+                            @Override
+                            public void onSuccess(UpdateTaskResult result) {
+                                placeManager.revealPlace(new PlaceRequest.Builder().nameToken(SchedulerTokens.taskList).build());
+                            }
+                        }, TaskPresenter.this));
+            } else {
+                CreateTaskAction action = new CreateTaskAction();
+                fillTaskData(action);
 
-            for (int i = 0; i < getView().getParamsPanel().getWidgetCount(); i++) {
-                TaskParamModel paramModel = new TaskParamModel();
-                VerticalPanel param = (VerticalPanel) getView().getParamsPanel().getWidget(i);
-
-                //Имя параметра
-                paramModel.setTaskParamName(((TextBox) (
-                        (HorizontalPanel) param.getWidget(PARAM_NAME_POSITION)).getWidget(1)
-                ).getValue());
-
-                //Тип параметра
-                paramModel.setTaskParamType(((ValueListBox<TaskParamTypeValues>)
-                        ((HorizontalPanel) param.getWidget(PARAM_TYPE_POSITION)).getWidget(1)
-                ).getValue().getId());
-
-                //Значение параметра
-                Widget paramValueWidget = ((Widget) ((HorizontalPanel) param.getWidget(PARAM_VALUE_POSITION)).getWidget(1));
-                if (paramValueWidget instanceof TextBox) {
-                    paramModel.setTaskParamValue(((TextBox) paramValueWidget).getValue());
-                } else {
-                    paramModel.setTaskParamDateValue(((DateMaskBoxPicker) paramValueWidget).getValue());
-                }
-                params.add(paramModel);
+                dispatcher.execute(action, CallbackUtils
+                        .defaultCallback(new AbstractCallback<CreateTaskResult>() {
+                            @Override
+                            public void onSuccess(CreateTaskResult result) {
+                                placeManager.revealPlace(new PlaceRequest.Builder().nameToken(SchedulerTokens.taskList).build());
+                            }
+                        }, TaskPresenter.this));
             }
-            action.setParams(params);
-
-            dispatcher.execute(action, CallbackUtils
-                    .defaultCallback(new AbstractCallback<CreateTaskResult>() {
-                        @Override
-                        public void onSuccess(CreateTaskResult result) {
-                            placeManager.revealPlace(new PlaceRequest.Builder().nameToken(SchedulerTokens.taskList).build());
-                        }
-                    }, TaskPresenter.this));
         }
+    }
+
+    /**
+     * Заполение данных задачи
+     *
+     * @param action
+     * @param <T>
+     */
+    private <T extends Result> void fillTaskData(TaskData<T> action) {
+        action.setTaskName(getView().getTaskName());
+        action.setSchedule(getView().getTaskSchedule());
+        action.setUserTaskJndi(getView().getJndi());
+
+        List<TaskParamModel> params = getView().getTaskParams();
+        action.setParams(params);
     }
 
     @Override
     public void onCancel() {
         placeManager.revealPlace(new PlaceRequest.Builder().nameToken(SchedulerTokens.taskList).build());
-    }
-
-    @Override
-    public void onAddParam() {
-        addParam(null);
-    }
-
-    @Override
-    public void onAddParam(TaskParamModel param) {
-        addParam(param);
-    }
-
-    private void addParam(TaskParamModel param) {
-        paramsCounter++;
-        VerticalPanel paramPanel = new VerticalPanel();
-        paramPanel.getElement().setId("paramPanel" + paramsCounter);
-
-        //Название параметра
-        HorizontalPanel namePanel = new HorizontalPanel();
-        namePanel.setSpacing(5);
-        Label nameLabel = new Label("Название:");
-        nameLabel.getElement().getStyle().setTextAlign(Style.TextAlign.RIGHT);
-        nameLabel.setWidth("150px");
-        TextBox nameTextBox = new TextBox();
-        nameTextBox.getElement().setId("paramName_" + paramsCounter);
-        nameTextBox.setWidth("370px");
-        nameTextBox.setValue((param == null) ? "" : param.getTaskParamName());
-        nameTextBox.setReadOnly(param != null);
-
-        namePanel.add(nameLabel);
-        namePanel.add(nameTextBox);
-
-        //Тип параметра
-        HorizontalPanel typePanel = new HorizontalPanel();
-        typePanel.setSpacing(5);
-        Label typeLabel = new Label("Тип:");
-        typeLabel.getElement().getStyle().setTextAlign(Style.TextAlign.RIGHT);
-        typeLabel.setWidth("150px");
-        ValueListBox<TaskParamTypeValues> typeListBox = new ValueListBox<TaskParamTypeValues>(
-                new AbstractRenderer<TaskParamTypeValues>() {
-                    @Override
-                    public String render(TaskParamTypeValues object) {
-                        if (object == null) {
-                            return "";
-                        }
-                        return object.getName();
-                    }
-                });
-        if (param == null) {
-            typeListBox.setValue(TaskParamTypeValues.INT);
-            typeListBox.setAcceptableValues(Arrays.asList(TaskParamTypeValues.values()));
-        } else {
-            typeListBox.setValue(TaskParamTypeValues.fromId(param.getTaskParamType()));
-            typeListBox.setAcceptableValues(Arrays.asList(TaskParamTypeValues.fromId(param.getTaskParamType())));
-        }
-        typeListBox.getElement().setId("paramType_" + paramsCounter);
-        typeListBox.setWidth("370px");
-        typeListBox.addValueChangeHandler(new ValueChangeHandler<TaskParamTypeValues>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<TaskParamTypeValues> event) {
-                //Если будет выбран тип 'Дата', то надо поменять контрол для ввода значения параметра
-                String paramNumber = getParamNumber(((ValueListBox<TaskParamTypeValues>) event.getSource())
-                        .getElement().getId());
-
-                //Находим виджет для ввода значения параметра
-                Widget targetParamValue = null;
-                HorizontalPanel targetParamValuePanel = null;
-                for (int i = 0; i < getView().getParamsPanel().getWidgetCount(); i++) {
-                    VerticalPanel param = (VerticalPanel) getView().getParamsPanel().getWidget(i);
-                    if (param.getElement().getId().endsWith(paramNumber)) {
-                        targetParamValuePanel = (HorizontalPanel) param.getWidget(PARAM_VALUE_POSITION);
-                        targetParamValue = targetParamValuePanel.getWidget(1);
-                        break;
-                    }
-                }
-
-                //Заменяем контрол, если это необходимо
-                if (event.getValue() == TaskParamTypeValues.DATE) {
-                    if (targetParamValue instanceof TextBox) {
-                        targetParamValue.removeFromParent();
-                        DateMaskBoxPicker valueBox = new DateMaskBoxPicker();
-                        valueBox.getElement().setId("paramValue" + paramNumber);
-                        valueBox.setWidth("130px");
-                        targetParamValuePanel.add(valueBox);
-                    }
-                } else {
-                    if (targetParamValue instanceof DateMaskBoxPicker) {
-                        targetParamValue.removeFromParent();
-                        TextBox valueBox = new TextBox();
-                        valueBox.getElement().setId("paramValue_" + paramNumber);
-                        valueBox.setWidth("370px");
-                        targetParamValuePanel.add(valueBox);
-                    }
-                }
-            }
-        });
-
-        typePanel.add(typeLabel);
-        typePanel.add(typeListBox);
-
-        //Кнопка удаления параметра
-        if (param == null) {
-            Button paramDeleteButton = new Button("Удалить");
-            paramDeleteButton.getElement().setId("deleteParamBtn_" + paramsCounter);
-            paramDeleteButton.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    String paramNumber = getParamNumber(((Button) event.getSource())
-                            .getElement().getId());
-
-                    for (int i = 0; i < getView().getParamsPanel().getWidgetCount(); i++) {
-                        VerticalPanel param = (VerticalPanel) getView().getParamsPanel().getWidget(PARAM_TYPE_POSITION);
-                        if (param.getElement().getId().endsWith(paramNumber)) {
-                            param.removeFromParent();
-                            break;
-                        }
-                    }
-                }
-            });
-
-            HorizontalPanel deleteButtonPanel = new HorizontalPanel();
-            deleteButtonPanel.setWidth("100px");
-            deleteButtonPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-            deleteButtonPanel.add(paramDeleteButton);
-            typePanel.add(deleteButtonPanel);
-        }
-
-        //Значение параметра
-        HorizontalPanel valuePanel = new HorizontalPanel();
-        valuePanel.setSpacing(5);
-        Label valueLabel = new Label("Значение:");
-        valueLabel.getElement().getStyle().setTextAlign(Style.TextAlign.RIGHT);
-        valueLabel.setWidth("150px");
-        TextBox valueBox = new TextBox();
-        valueBox.getElement().setId("paramValue_" + paramsCounter);
-        valueBox.setWidth("370px");
-        valueBox.setValue((param == null) ? "" : param.getTaskParamValue());
-        valueBox.setReadOnly(param != null);
-
-        valuePanel.add(valueLabel);
-        valuePanel.add(valueBox);
-
-        //Разделитель
-        HorizontalPanel separatorPanel = new HorizontalPanel();
-        separatorPanel.setWidth("100%");
-        separatorPanel.setStyleName(getView().getCss().separator());
-
-        //Важно соблюдать порядок добавления виджетов
-        paramPanel.add(namePanel);
-        paramPanel.add(typePanel);
-        paramPanel.add(valuePanel);
-        paramPanel.add(separatorPanel);
-
-        getView().getParamsPanel().add(paramPanel);
-    }
-
-    private String getParamNumber(String paramId) {
-        return paramId.substring(paramId.lastIndexOf('_') + 1);
     }
 
     /**
@@ -358,66 +182,23 @@ public class TaskPresenter extends Presenter<TaskPresenter.MyView,
         if (getView().getTaskSchedule().isEmpty()) {
             validateMsg.append("Не заполнено поле 'Расписание'").append("; ");
         }
-        if (getView().getNumberOfRepeats().isEmpty()) {
-            validateMsg.append("Не заполнено поле 'Количество повторений задачи'").append("; ");
-        } else if (!checkStringAsInt(getView().getNumberOfRepeats(), false)) {
-            validateMsg.append("Поле 'Количество повторений задачи' должно быть числом").append("; ");
-        }
         if (getView().getJndi().isEmpty()) {
             validateMsg.append("Не заполнено поле 'JNDI класса-обработчика'").append("; ");
         }
 
-        Set<String> paramNames = new HashSet<String>();
-        for (int i = 0; i < getView().getParamsPanel().getWidgetCount(); i++) {
-            VerticalPanel param = (VerticalPanel) getView().getParamsPanel().getWidget(i);
-            //Имя параметра
-            String paramName = ((TextBox) (
-                    (HorizontalPanel) param.getWidget(PARAM_NAME_POSITION)).getWidget(1)
-            ).getValue();
-            if (paramName.isEmpty()) {
-                validateMsg.append("Не заполнено поле 'Название' у пользовательского параметра задачи").append("; ");
-            } else {
-                if (paramNames.contains(paramName)) {
-                    validateMsg.append("Названия пользовательских параметров не должны повторяться").append("; ");
-                } else {
-                    paramNames.add(paramName);
-                }
-            }
-
-            //Значение параметра
-            Widget paramValueWidget = ((Widget) ((HorizontalPanel) param.getWidget(PARAM_VALUE_POSITION)).getWidget(1));
-            if (paramValueWidget instanceof TextBox) {
-                String paramValue = ((TextBox) paramValueWidget).getValue();
-                if (paramValue.isEmpty()) {
-                    validateMsg.append("Не заполнено поле 'Значение' у пользовательского параметра задачи").append("; ");
-                } else {
-                    TaskParamTypeValues paramType = ((ValueListBox<TaskParamTypeValues>)
-                            ((HorizontalPanel) param.getWidget(PARAM_TYPE_POSITION)).getWidget(1)
-                    ).getValue();
-                    if ((paramType == TaskParamTypeValues.INT || paramType == TaskParamTypeValues.LONG )
-                            && !checkStringAsInt(paramValue, false)) {
-                        validateMsg.append("Пользовательский параметр должен быть целым числом").append("; ");
-                    }
-                    if ((paramType == TaskParamTypeValues.FLOAT || paramType == TaskParamTypeValues.DOUBLE)
-                            && !checkStringAsInt(paramValue, true)) {
-                        validateMsg.append("Пользовательский параметр должен быть дробным числом").append("; ");
-                    }
-                    if (paramType == TaskParamTypeValues.BOOLEAN
-                            && !(paramValue.equalsIgnoreCase("true") || paramValue.equalsIgnoreCase("false"))) {
-                        validateMsg.append("Пользовательский параметр должен быть равен 'true' либо 'false'").append("; ");
-                    }
-                }
-            } else {
-                if (((DateMaskBoxPicker) paramValueWidget).getValue() == null) {
-                    validateMsg.append("Не заполнено поле 'Значение' у пользовательского параметра задачи").append("; ");
-                }
-            }
+        /**
+         * если часть формы с полями воода значений для задачи
+         * видима, и на ней есть ошибки то добавим их в основной список ошибок
+         */
+        if (getView().isTaskTypeSelected() && !getView().validateTaskParams()){
+            validateMsg.append(getView().getErrorsOnValidateTaskParams());
         }
 
         if (!validateMsg.toString().isEmpty()) {
             MessageEvent.fire(this, "Ошибки в заполнении параметров задачи: " + validateMsg);
             return false;
         }
+
         return true;
     }
 

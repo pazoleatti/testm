@@ -18,14 +18,4 @@ public interface TaskUiHandlers extends UiHandlers {
      * Вью пытается отменить создание задачи
      */
     void onCancel();
-
-    /**
-     * Вью пытается создать добавить новый параметр в задачу
-     */
-    void onAddParam();
-
-    /**
-     * Вью пытается создать добавить новый параметр с заданными данными
-     */
-    void onAddParam(TaskParamModel param);
 }

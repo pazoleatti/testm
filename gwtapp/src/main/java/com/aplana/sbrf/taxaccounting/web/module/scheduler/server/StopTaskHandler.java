@@ -1,7 +1,11 @@
 package com.aplana.sbrf.taxaccounting.web.module.scheduler.server;
 
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskData;
+import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskState;
 import com.aplana.sbrf.taxaccounting.scheduler.api.exception.TaskSchedulingException;
 import com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManager;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.StopTaskAction;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.StopTaskResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -22,6 +26,9 @@ public class StopTaskHandler extends AbstractActionHandler<StopTaskAction, StopT
     @Autowired
     TaskManager taskManager;
 
+    @Autowired
+    private LogEntryService logEntryService;
+
     public StopTaskHandler() {
         super(StopTaskAction.class);
     }
@@ -29,11 +36,21 @@ public class StopTaskHandler extends AbstractActionHandler<StopTaskAction, StopT
     @Override
     public StopTaskResult execute(StopTaskAction action, ExecutionContext executionContext) throws ActionException {
         StopTaskResult result = new StopTaskResult();
+        Logger logger = new Logger();
         try {
-            taskManager.stopTask(action.getTaskId());
+            for (Long taskId : action.getTasksIds()) {
+                TaskData taskData = taskManager.getTaskData(taskId);
+                if (taskData.getTaskState() != TaskState.RUNNING){
+                    taskManager.stopTask(taskId);
+                } else{
+                    logger.error("Задача "+taskData.getTaskName()+" выполняется в данный момент и не может быть остановлена.");
+                }
+            }
         } catch (TaskSchedulingException e) {
             throw new ActionException("Ошибка остановки задачи планировщика", e);
         }
+        result.setUuid(logEntryService.save(logger.getEntries()));
+
         return result;
     }
 

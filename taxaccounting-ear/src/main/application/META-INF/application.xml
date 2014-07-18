@@ -1,24 +1,29 @@
-<?xml version="1.0" encoding="UTF-8"?><application version="5" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/application_5.xsd">
-  <description>АС "Учёт налогов" - Дистрибутив</description>
-  <display-name>taxaccounting</display-name>
-  <module>
-    <web>
-      <web-uri>gwtapp.war</web-uri>
-      <context-root>/taxaccounting${releasePostfix}/gwtapp</context-root>
-    </web>
-  </module>
-  <module>
-    <ejb>migration-ejb.jar</ejb>
-  </module>
-  <module>
-    <ejb>mdb.jar</ejb>
-  </module>
-  <module>
-    <ejb>scheduler-task.jar</ejb>
-  </module>
+<?xml version="1.0" encoding="UTF-8"?>
+<application version="5" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/application_5.xsd">
+    <description>АС "Учёт налогов" - Дистрибутив</description>
+    <display-name>taxaccounting</display-name>
+    <module>
+        <web>
+            <web-uri>gwtapp.war</web-uri>
+            <context-root>/taxaccounting${releasePostfix}/gwtapp</context-root>
+        </web>
+    </module>
+    <module>
+        <ejb>migration-ejb.jar</ejb>
+    </module>
+    <module>
+        <ejb>mdb.jar</ejb>
+    </module>
+    <module>
+        <ejb>scheduler-task.jar</ejb>
+    </module>
+    <module>
+        <ejb>scheduler-core.jar</ejb>
+    </module>
     <security-role>
         <description>Все аутентифицированные пользователи</description>
         <role-name>taxaccountingUsers</role-name>
     </security-role>
-  <library-directory>lib</library-directory>
+    <library-directory>lib</library-directory>
 </application>

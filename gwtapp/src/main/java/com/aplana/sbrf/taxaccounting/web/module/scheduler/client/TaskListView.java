@@ -17,14 +17,13 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.DefaultSelectionEventManager;
-import com.google.gwt.view.client.ProvidesKey;
-import com.google.gwt.view.client.SelectionModel;
-import com.google.gwt.view.client.SingleSelectionModel;
+import com.google.gwt.view.client.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * View для формы "Планировщик задач"       *
@@ -39,9 +38,7 @@ public class TaskListView extends ViewWithUiHandlers<TaskListUiHandlers>
     public static final String NUMBER = "№";
     public static final String NAME_TITLE = "Название";
     public static final String STATE_TITLE = "Статус";
-    public static final String REPEATS_LEFT_TITLE = "Повторений выполнено";
-    public static final String NUMBER_OF_REPEATS_TITLE = "Повторений всего";
-    public static final String TIME_CREATED_TITLE = "Дата создания";
+    public static final String TIME_CHANGED_TITLE = "Дата редактирования";
     public static final String NEXT_FIRE_TIME_TITLE = "Дата следующего запуска";
 
     @UiField
@@ -62,24 +59,24 @@ public class TaskListView extends ViewWithUiHandlers<TaskListUiHandlers>
     @UiField
     GenericDataGrid<TaskSearchResultItem> taskDataTable;
 
+    final MultiSelectionModel<TaskSearchResultItem> selectionModel = new MultiSelectionModel<TaskSearchResultItem>(
+            new ProvidesKey<TaskSearchResultItem>() {
+                @Override
+                public Object getKey(TaskSearchResultItem item) {
+                    return item == null ? null : item.getId();
+                }
+            }
+    );
+
     @Inject
     @UiConstructor
     public TaskListView(final Binder uiBinder) {
         initWidget(uiBinder.createAndBindUi(this));
 
-        final SelectionModel<TaskSearchResultItem> selectionModel = new SingleSelectionModel<TaskSearchResultItem>(
-                new ProvidesKey<TaskSearchResultItem>() {
-                    @Override
-                    public Object getKey(TaskSearchResultItem item) {
-                        return item == null ? null : item.getId();
-                    }
-                }
-        );
-
         TextColumn<TaskSearchResultItem> numberColumn = new TextColumn<TaskSearchResultItem>() {
             @Override
             public String getValue(TaskSearchResultItem taskItem) {
-                return String.valueOf(taskItem.getId());
+                return String.valueOf(taskItem.getContextId());
             }
         };
 
@@ -119,24 +116,10 @@ public class TaskListView extends ViewWithUiHandlers<TaskListUiHandlers>
             }
         };
 
-        TextColumn<TaskSearchResultItem> repeatsLeftColumn = new TextColumn<TaskSearchResultItem>() {
+        TextColumn<TaskSearchResultItem> modificationDateColumn = new TextColumn<TaskSearchResultItem>() {
             @Override
             public String getValue(TaskSearchResultItem taskItem) {
-                return taskItem.getRepeatsLeft().toString();
-            }
-        };
-
-        TextColumn<TaskSearchResultItem> numberOfRepeatsColumn = new TextColumn<TaskSearchResultItem>() {
-            @Override
-            public String getValue(TaskSearchResultItem taskItem) {
-                return String.valueOf(taskItem.getNumberOfRepeats());
-            }
-        };
-
-        TextColumn<TaskSearchResultItem> timeCreatedColumn = new TextColumn<TaskSearchResultItem>() {
-            @Override
-            public String getValue(TaskSearchResultItem taskItem) {
-                return taskItem.getTimeCreated();
+                return taskItem.getModificationDate();
             }
         };
 
@@ -153,18 +136,39 @@ public class TaskListView extends ViewWithUiHandlers<TaskListUiHandlers>
         taskDataTable.setColumnWidth(numberColumn, 30, Style.Unit.PX);
         taskDataTable.addResizableColumn(nameColumn, NAME_TITLE);
         taskDataTable.addResizableColumn(stateColumn, STATE_TITLE);
-        taskDataTable.addResizableColumn(repeatsLeftColumn, REPEATS_LEFT_TITLE);
-        taskDataTable.addResizableColumn(numberOfRepeatsColumn, NUMBER_OF_REPEATS_TITLE);
-        taskDataTable.addResizableColumn(timeCreatedColumn, TIME_CREATED_TITLE);
+        taskDataTable.addResizableColumn(modificationDateColumn, TIME_CHANGED_TITLE);
         taskDataTable.addResizableColumn(nextFireTimeColumn, NEXT_FIRE_TIME_TITLE);
 
         taskDataTable.setSelectionModel(selectionModel, DefaultSelectionEventManager
                 .<TaskSearchResultItem>createCheckboxManager());
+
+        selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                updateButtonsStatuses();
+            }
+        });
+
+        updateButtonsStatuses();
+    }
+
+    /**
+     * Устанавливаем не доступность кнопок которые работают с выделенными
+     * задачами из списка задач
+     */
+    private void updateButtonsStatuses(){
+        boolean status = !selectionModel.getSelectedSet().isEmpty();
+        deleteButton.setEnabled(status);
+        startButton.setEnabled(status);
+        stopButton.setEnabled(status);
+        resumeButton.setEnabled(status);
     }
 
     @Override
     public void setTableData(List<TaskSearchResultItem> tasks) {
         taskDataTable.setRowData(tasks);
+        selectionModel.clear();
+        updateButtonsStatuses();
     }
 
     @UiHandler("createButton")
@@ -208,7 +212,13 @@ public class TaskListView extends ViewWithUiHandlers<TaskListUiHandlers>
     }
 
     @Override
-    public TaskSearchResultItem getSelectedItem() {
-        return ((SingleSelectionModel<TaskSearchResultItem>) taskDataTable.getSelectionModel()).getSelectedObject();
+    public List<Long> getSelectedItem() {
+        Set<TaskSearchResultItem> selectedSet = selectionModel.getSelectedSet();
+        List<Long> tasksIds = new ArrayList<Long>();
+        for (TaskSearchResultItem item : selectedSet) {
+            tasksIds.add(item.getId());
+        }
+
+        return tasksIds;
     }
 }

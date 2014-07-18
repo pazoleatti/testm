@@ -16,6 +16,9 @@ public class GetTaskInfoResult implements Result {
     /** Идентификатор задачи */
     private Long taskId;
 
+    /** Идентификатор контекста задачи */
+    private Long contextId;
+
     /** Название задачи */
     private String taskName;
 
@@ -30,9 +33,6 @@ public class GetTaskInfoResult implements Result {
 
     /** JNDI класса-обработчика задачи */
     private String userTaskJndi;
-
-    /** Количество повторений задачи планировщиком */
-    private int numberOfRepeats;
 
     /** Количество выполненных повторений задачи */
     private Integer repeatsLeft;
@@ -86,14 +86,6 @@ public class GetTaskInfoResult implements Result {
         this.userTaskJndi = userTaskJndi;
     }
 
-    public int getNumberOfRepeats() {
-        return numberOfRepeats;
-    }
-
-    public void setNumberOfRepeats(int numberOfRepeats) {
-        this.numberOfRepeats = numberOfRepeats;
-    }
-
     public Integer getRepeatsLeft() {
         return repeatsLeft;
     }
@@ -125,4 +117,13 @@ public class GetTaskInfoResult implements Result {
     public void setParams(List<TaskParamModel> params) {
         this.params = params;
     }
+
+    public Long getContextId() {
+        return contextId;
+    }
+
+    public void setContextId(Long contextId) {
+        this.contextId = contextId;
+    }
+
 }

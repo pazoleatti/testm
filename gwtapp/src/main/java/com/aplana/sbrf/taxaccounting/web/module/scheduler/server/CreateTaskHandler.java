@@ -6,7 +6,6 @@ import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskParam;
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskParamType;
 import com.aplana.sbrf.taxaccounting.scheduler.api.exception.TaskSchedulingException;
 import com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManager;
-import com.aplana.sbrf.taxaccounting.scheduler.api.utils.CronUtils;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.CreateTaskAction;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.CreateTaskResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -43,15 +42,14 @@ public class CreateTaskHandler extends AbstractActionHandler<CreateTaskAction, C
             if (!taskManager.isTaskExist(action.getTaskName())) {
                 TaskContext taskContext = new TaskContext();
                 taskContext.setTaskName(action.getTaskName());
-                taskContext.setSchedule(CronUtils.assembleIbmCronExpression(action.getSchedule()));
+                taskContext.setSchedule(action.getSchedule());
                 taskContext.setUserTaskJndi(action.getUserTaskJndi());
-                taskContext.setNumberOfRepeats(action.getNumberOfRepeats());
+                taskContext.setNumberOfRepeats(-1);
 
                 Map<String, TaskParam> taskParams = new HashMap<String, TaskParam>();
                 for (int i = 0; i < action.getParams().size(); i++) {
                     TaskParamModel param = action.getParams().get(i);
-                    String paramValue = (param.getTaskParamValue() != null) ? param.getTaskParamValue() :
-                            df.format(param.getTaskParamDateValue());
+                    String paramValue = param.getTaskParamValue();
                     taskParams.put(param.getTaskParamName(),
                             new TaskParam(i, param.getTaskParamName(),
                                     TaskParamType.getTypeById(param.getTaskParamType()), paramValue));

@@ -40,11 +40,11 @@ public class GetTaskInfoHandler extends AbstractActionHandler<GetTaskInfoAction,
             result.setTaskName(taskData.getTaskName());
             result.setTaskState(taskData.getTaskState().getId());
             result.setSchedule(taskData.getSchedule());
-            result.setNumberOfRepeats(taskData.getNumberOfRepeats());
             result.setUserTaskJndi(taskData.getUserTaskJndi());
             result.setTimeCreated(taskData.getTimeCreated());
             result.setNextFireTime(taskData.getNextFireTime());
             result.setRepeatsLeft(taskData.getRepeatsLeft());
+            result.setContextId(taskData.getContextId());
 
             List<TaskParamModel> params = new ArrayList<TaskParamModel>();
             for (TaskParam param : taskData.getParams().values()) {

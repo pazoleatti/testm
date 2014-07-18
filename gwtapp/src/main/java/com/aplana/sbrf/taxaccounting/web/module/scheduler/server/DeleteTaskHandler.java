@@ -1,7 +1,11 @@
 package com.aplana.sbrf.taxaccounting.web.module.scheduler.server;
 
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskData;
+import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskState;
 import com.aplana.sbrf.taxaccounting.scheduler.api.exception.TaskSchedulingException;
 import com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManager;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.DeleteTaskAction;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.DeleteTaskResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -22,6 +26,9 @@ public class DeleteTaskHandler extends AbstractActionHandler<DeleteTaskAction, D
     @Autowired
     TaskManager taskManager;
 
+    @Autowired
+    private LogEntryService logEntryService;
+
     public DeleteTaskHandler() {
         super(DeleteTaskAction.class);
     }
@@ -29,11 +36,21 @@ public class DeleteTaskHandler extends AbstractActionHandler<DeleteTaskAction, D
     @Override
     public DeleteTaskResult execute(DeleteTaskAction action, ExecutionContext executionContext) throws ActionException {
         DeleteTaskResult result = new DeleteTaskResult();
+        Logger logger = new Logger();
         try {
-            taskManager.deleteTask(action.getTaskId());
+            for (Long taskId : action.getTasksIds()) {
+                TaskData taskData = taskManager.getTaskData(taskId);
+                if (taskData.getTaskState() != TaskState.RUNNING){
+                    taskManager.deleteTask(taskId);
+                } else{
+                    logger.error("Задача "+taskData.getTaskName()+" выполняется в данный момент и не может быть удалена.");
+                }
+            }
         } catch (TaskSchedulingException e) {
             throw new ActionException("Ошибка удаления задачи планировщика", e);
         }
+        result.setUuid(logEntryService.save(logger.getEntries()));
+
         return result;
     }
 

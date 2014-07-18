@@ -2,10 +2,10 @@ package com.aplana.sbrf.taxaccounting.web.module.scheduler.server;
 
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskJndiInfo;
 import com.aplana.sbrf.taxaccounting.scheduler.api.exception.TaskSchedulingException;
+import com.aplana.sbrf.taxaccounting.scheduler.api.form.FormElement;
 import com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManager;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.GetAvailableTasksAction;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.GetAvailableTasksResult;
-import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.TaskInfoItem;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
@@ -36,11 +36,7 @@ public class GetAvailableTasksHandler extends AbstractActionHandler<GetAvailable
         GetAvailableTasksResult result = new GetAvailableTasksResult();
         try {
             List<TaskJndiInfo> taskInfo = taskManager.getTasksJndi();
-            List<TaskInfoItem> jndiList = new ArrayList<TaskInfoItem>();
-            for (TaskJndiInfo info : taskInfo) {
-                jndiList.add(new TaskInfoItem(info.getName(), info.getJndi()));
-            }
-            result.setJndiList(jndiList);
+            result.setJndiList(taskInfo);
             return result;
         } catch (TaskSchedulingException e) {
             throw new ActionException("Ошибка получения списка задач, доступых для планирования", e);

@@ -35,6 +35,9 @@ public class TaskData implements Serializable {
     /** Количество выполненных повторений задачи */
     private Integer repeatsLeft;
 
+    /** Дата последей операции по редактированию параметров задачи */
+    private Date modificationDate;
+
     /** Дата создания задачи */
     private Date timeCreated;
 
@@ -43,6 +46,9 @@ public class TaskData implements Serializable {
 
     /** Пользовательские параметры задачи */
     private Map<String, TaskParam> params;
+
+    /** Идентификатор контекста задачи */
+    private Long contextId;
 
     public Long getTaskId() {
         return taskId;
@@ -134,9 +140,72 @@ public class TaskData implements Serializable {
                 ", userTaskJndi='" + userTaskJndi + '\'' +
                 ", numberOfRepeats=" + numberOfRepeats +
                 ", repeatsLeft=" + repeatsLeft +
+                ", modificationDate=" + modificationDate +
                 ", timeCreated=" + timeCreated +
                 ", nextFireTime=" + nextFireTime +
                 ", params=" + params +
+                ", contextId=" + contextId +
                 '}';
+    }
+
+    public Date getModificationDate() {
+        return modificationDate;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        TaskData taskData = (TaskData) o;
+
+        if (numberOfRepeats != taskData.numberOfRepeats) return false;
+        if (contextId != null ? !contextId.equals(taskData.contextId) : taskData.contextId != null) return false;
+        if (modificationDate != null ? !modificationDate.equals(taskData.modificationDate) : taskData.modificationDate != null)
+            return false;
+        if (nextFireTime != null ? !nextFireTime.equals(taskData.nextFireTime) : taskData.nextFireTime != null)
+            return false;
+        if (params != null ? !params.equals(taskData.params) : taskData.params != null) return false;
+        if (repeatsLeft != null ? !repeatsLeft.equals(taskData.repeatsLeft) : taskData.repeatsLeft != null)
+            return false;
+        if (schedule != null ? !schedule.equals(taskData.schedule) : taskData.schedule != null) return false;
+        if (taskId != null ? !taskId.equals(taskData.taskId) : taskData.taskId != null) return false;
+        if (taskName != null ? !taskName.equals(taskData.taskName) : taskData.taskName != null) return false;
+        if (taskState != taskData.taskState) return false;
+        if (timeCreated != null ? !timeCreated.equals(taskData.timeCreated) : taskData.timeCreated != null)
+            return false;
+        if (userTaskJndi != null ? !userTaskJndi.equals(taskData.userTaskJndi) : taskData.userTaskJndi != null)
+            return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = taskId != null ? taskId.hashCode() : 0;
+        result = 31 * result + (taskName != null ? taskName.hashCode() : 0);
+        result = 31 * result + (taskState != null ? taskState.hashCode() : 0);
+        result = 31 * result + (schedule != null ? schedule.hashCode() : 0);
+        result = 31 * result + (userTaskJndi != null ? userTaskJndi.hashCode() : 0);
+        result = 31 * result + numberOfRepeats;
+        result = 31 * result + (repeatsLeft != null ? repeatsLeft.hashCode() : 0);
+        result = 31 * result + (modificationDate != null ? modificationDate.hashCode() : 0);
+        result = 31 * result + (timeCreated != null ? timeCreated.hashCode() : 0);
+        result = 31 * result + (nextFireTime != null ? nextFireTime.hashCode() : 0);
+        result = 31 * result + (params != null ? params.hashCode() : 0);
+        result = 31 * result + (contextId != null ? contextId.hashCode() : 0);
+        return result;
+    }
+
+    public void setModificationDate(Date modificationDate) {
+        this.modificationDate = modificationDate;
+    }
+
+    public void setContextId(Long contextId) {
+        this.contextId = contextId;
+    }
+
+    public Long getContextId() {
+        return contextId;
     }
 }

@@ -727,6 +727,7 @@ create table task_context(
 id  number(18,0) primary key,
 task_id number(18,0) not null,
 task_name varchar2(100) not null,
+modification_date date not null,
 user_task_jndi varchar2(500) not null,
 custom_params_exist number(9,0) not null,
 serialized_params blob null

@@ -50,7 +50,7 @@ public class TaskPersistenceServiceBean implements TaskPersistenceService {
 
     @Override
     public List<TaskContextEntity> getAllContexts() throws TaskPersistenceException {
-        Query query = em.createNamedQuery("TaskContextEntity.findAll");
+        Query query = em.createNamedQuery("TaskContextEntity.getFullListOrderedByModificationDate");
         List<TaskContextEntity> result = query.getResultList();
         for (TaskContextEntity item : result) {
             if (item.isCustomParamsExist()) {
@@ -68,5 +68,10 @@ public class TaskPersistenceServiceBean implements TaskPersistenceService {
         } catch (Exception e) {
             throw new TaskPersistenceException("Не удалось удалить контекст задачи", e);
         }
+    }
+
+    @Override
+    public void updateContext(TaskContextEntity context){
+        em.merge(context);
     }
 }

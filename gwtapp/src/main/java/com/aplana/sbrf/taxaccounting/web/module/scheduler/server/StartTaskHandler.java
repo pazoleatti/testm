@@ -30,7 +30,9 @@ public class StartTaskHandler extends AbstractActionHandler<StartTaskAction, Sta
     public StartTaskResult execute(StartTaskAction action, ExecutionContext executionContext) throws ActionException {
         StartTaskResult result = new StartTaskResult();
         try {
-            taskManager.startTask(action.getTaskId());
+            for (Long taskId : action.getTasksIds()) {
+                taskManager.startTask(taskId);
+            }
         } catch (TaskSchedulingException e) {
             throw new ActionException("Ошибка запуска задачи планировщика", e);
         }

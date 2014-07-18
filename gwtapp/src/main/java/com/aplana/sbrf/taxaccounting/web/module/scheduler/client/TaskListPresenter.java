@@ -1,10 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.module.scheduler.client;
 
+import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.TaskSearchResultItem;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.*;
@@ -40,7 +42,7 @@ public class TaskListPresenter extends Presenter<TaskListPresenter.MyView,
 
     public interface MyView extends View, HasUiHandlers<TaskListUiHandlers> {
         void setTableData(List<TaskSearchResultItem> records);
-        TaskSearchResultItem getSelectedItem();
+        List<Long> getSelectedItem();
     }
 
     @Inject
@@ -61,11 +63,16 @@ public class TaskListPresenter extends Presenter<TaskListPresenter.MyView,
     public void onStopTask() {
         if (isSelectedTaskExist()) {
             StopTaskAction action = new StopTaskAction();
-            action.setTaskId(getView().getSelectedItem().getId());
+            action.setTasksIds(getView().getSelectedItem());
             dispatcher.execute(action, CallbackUtils
                     .defaultCallback(new AbstractCallback<StopTaskResult>() {
                         @Override
                         public void onSuccess(StopTaskResult result) {
+                            // проверка ошибок
+                            LogAddEvent.fire(TaskListPresenter.this, result.getUuid());
+                            if (result.getUuid() != null){
+                                Dialog.errorMessage("Остановка задачи", "Остановка не выполнена");
+                            }
                             updateTableData();
                         }
                     }, TaskListPresenter.this));
@@ -76,7 +83,7 @@ public class TaskListPresenter extends Presenter<TaskListPresenter.MyView,
     public void onResumeTask() {
         if (isSelectedTaskExist()) {
             ResumeTaskAction action = new ResumeTaskAction();
-            action.setTaskId(getView().getSelectedItem().getId());
+            action.setTasksIds(getView().getSelectedItem());
             dispatcher.execute(action, CallbackUtils
                     .defaultCallback(new AbstractCallback<ResumeTaskResult>() {
                         @Override
@@ -91,7 +98,7 @@ public class TaskListPresenter extends Presenter<TaskListPresenter.MyView,
     public void onStartTask() {
         if (isSelectedTaskExist()) {
             StartTaskAction action = new StartTaskAction();
-            action.setTaskId(getView().getSelectedItem().getId());
+            action.setTasksIds(getView().getSelectedItem());
             dispatcher.execute(action, CallbackUtils
                     .defaultCallback(new AbstractCallback<StartTaskResult>() {
                         @Override
@@ -107,11 +114,16 @@ public class TaskListPresenter extends Presenter<TaskListPresenter.MyView,
     public void onDeleteTask() {
         if (isSelectedTaskExist()) {
             DeleteTaskAction action = new DeleteTaskAction();
-            action.setTaskId(getView().getSelectedItem().getId());
+            action.setTasksIds(getView().getSelectedItem());
             dispatcher.execute(action, CallbackUtils
                     .defaultCallback(new AbstractCallback<DeleteTaskResult>() {
                         @Override
                         public void onSuccess(DeleteTaskResult result) {
+                            // проверка ошибок
+                            LogAddEvent.fire(TaskListPresenter.this, result.getUuid());
+                            if (result.getUuid() != null){
+                                Dialog.errorMessage("Удаление задачи", "Удаление не выполнено");
+                            }
                             updateTableData();
                         }
                     }, TaskListPresenter.this));

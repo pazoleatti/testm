@@ -8,4 +8,13 @@ import com.gwtplatform.dispatch.shared.Result;
  */
 public class StopTaskResult implements Result {
     private static final long serialVersionUID = -1851857689812954767L;
+    private String uuid;
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
 }

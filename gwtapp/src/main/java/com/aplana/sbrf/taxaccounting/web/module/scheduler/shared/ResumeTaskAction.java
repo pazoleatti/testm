@@ -3,20 +3,22 @@ package com.aplana.sbrf.taxaccounting.web.module.scheduler.shared;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
+import java.util.List;
+
 /**
  * Возобновление задачи планировщика
  * @author dloshkarev
  */
 public class ResumeTaskAction  extends UnsecuredActionImpl<ResumeTaskResult> implements ActionName {
 
-    private Long taskId;
+    private List<Long> tasksIds;
 
-    public Long getTaskId() {
-        return taskId;
+    public List<Long> getTasksIds() {
+        return tasksIds;
     }
 
-    public void setTaskId(Long taskId) {
-        this.taskId = taskId;
+    public void setTasksIds(List<Long> tasksIds) {
+        this.tasksIds = tasksIds;
     }
 
     @Override

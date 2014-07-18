@@ -13,20 +13,16 @@ public class TaskSearchResultItem implements Serializable {
     /** Идентификатор задачи */
     private Long id;
 
+    private Long contextId;
+
     /** Название задачи */
     private String name;
 
     /** Состояние задачи */
     private String state;
 
-    /** Количество повторений задачи планировщиком */
-    private int numberOfRepeats;
-
-    /** Количество выполненных повторений задачи */
-    private Integer repeatsLeft;
-
     /** Дата создания задачи */
-    private String timeCreated;
+    private String modificationDate;
 
     /** Дата следующего запуска задачи */
     private String nextFireTime;
@@ -55,28 +51,12 @@ public class TaskSearchResultItem implements Serializable {
         this.state = state;
     }
 
-    public int getNumberOfRepeats() {
-        return numberOfRepeats;
+    public String getModificationDate() {
+        return modificationDate;
     }
 
-    public void setNumberOfRepeats(int numberOfRepeats) {
-        this.numberOfRepeats = numberOfRepeats;
-    }
-
-    public Integer getRepeatsLeft() {
-        return repeatsLeft;
-    }
-
-    public void setRepeatsLeft(Integer repeatsLeft) {
-        this.repeatsLeft = repeatsLeft;
-    }
-
-    public String getTimeCreated() {
-        return timeCreated;
-    }
-
-    public void setTimeCreated(String timeCreated) {
-        this.timeCreated = timeCreated;
+    public void setModificationDate(String modificationDate) {
+        this.modificationDate = modificationDate;
     }
 
     public String getNextFireTime() {
@@ -85,5 +65,42 @@ public class TaskSearchResultItem implements Serializable {
 
     public void setNextFireTime(String nextFireTime) {
         this.nextFireTime = nextFireTime;
+    }
+
+    public Long getContextId() {
+        return contextId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        TaskSearchResultItem that = (TaskSearchResultItem) o;
+
+        if (contextId != null ? !contextId.equals(that.contextId) : that.contextId != null) return false;
+        if (id != null ? !id.equals(that.id) : that.id != null) return false;
+        if (modificationDate != null ? !modificationDate.equals(that.modificationDate) : that.modificationDate != null)
+            return false;
+        if (name != null ? !name.equals(that.name) : that.name != null) return false;
+        if (nextFireTime != null ? !nextFireTime.equals(that.nextFireTime) : that.nextFireTime != null) return false;
+        if (state != null ? !state.equals(that.state) : that.state != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (contextId != null ? contextId.hashCode() : 0);
+        result = 31 * result + (name != null ? name.hashCode() : 0);
+        result = 31 * result + (state != null ? state.hashCode() : 0);
+        result = 31 * result + (modificationDate != null ? modificationDate.hashCode() : 0);
+        result = 31 * result + (nextFireTime != null ? nextFireTime.hashCode() : 0);
+        return result;
+    }
+
+    public void setContextId(Long contextId) {
+        this.contextId = contextId;
     }
 }
