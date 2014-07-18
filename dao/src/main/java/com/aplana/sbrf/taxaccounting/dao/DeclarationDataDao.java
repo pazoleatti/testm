@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.source.DeclarationDataInfo;
 
 import java.util.Date;
 import java.util.List;
@@ -15,7 +14,7 @@ public interface DeclarationDataDao {
 	 * Получить декларацию
 	 * @param declarationDataId идентификатор декларации
 	 * @return объект декларации
-	 * @throws com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException если такой декларации не существует
+	 * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если такой декларации не существует
 	 */
 	DeclarationData get(long declarationDataId);
 
@@ -33,7 +32,7 @@ public interface DeclarationDataDao {
 	 * При попытке сохранить уже существующий объект (с непустым id) будет выброшен DaoException
 	 * @param declarationData объект декларации
 	 * @return идентификатор сохранённой записи
-	 * @throws com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException если передана декларация с непустым id
+	 * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если передана декларация с непустым id
 	 */
 	long saveNew(DeclarationData declarationData);
 	
@@ -41,14 +40,14 @@ public interface DeclarationDataDao {
 	 * Установить флаг принятия декларации
 	 * @param declarationDataId идентификатор декларации
 	 * @param accepted признак принятия
-	 * @throws com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException если такой декларации не существует
+	 * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если такой декларации не существует
 	 */
 	void setAccepted(long declarationDataId, boolean accepted);
 	
 	/**
 	 * Удалить декларацию
 	 * @param declarationDataId идентификатор декларации
-	 * @throws com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException если такой декларации не существует
+	 * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если такой декларации не существует
 	 */
 	void delete(long declarationDataId);
 
@@ -74,7 +73,7 @@ public interface DeclarationDataDao {
 	 * @param departmentId идентификатор {@link com.aplana.sbrf.taxaccounting.model.Department подразделения}
 	 * @param reportPeriodId идентификатор {@link com.aplana.sbrf.taxaccounting.model.ReportPeriod отчетного периода}
 	 * @return декларацию или null, если такой декларации не найдено
-	 * @throws com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException если будет найдено несколько записей, удовлетворяющих условию поиска
+	 * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если будет найдено несколько записей, удовлетворяющих условию поиска
 	 */
 	DeclarationData find(int declarationTypeId, int departmentId, int reportPeriodId);
 
