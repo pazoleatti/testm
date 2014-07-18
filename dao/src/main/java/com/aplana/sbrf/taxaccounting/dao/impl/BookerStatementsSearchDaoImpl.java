@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.Types;
 import java.util.List;
 
-import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.*;
+import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSqlInStatement;
 
 /**
  * @author lhaziev
@@ -17,27 +17,31 @@ import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.*;
 public class BookerStatementsSearchDaoImpl extends AbstractDao implements BookerStatementsSearchDao {
 
     private void appendFromAndWhereClause(StringBuilder sql, BookerStatementsFilter filter) {
-        sql.append(" select distinct REPORT_PERIOD_ID, DEPARTMENT_ID, 0 as TYPE")
+        sql.append(" select distinct account_period_id, 0 as type")
                 .append(" from income_101 ");
 
         StringBuilder b = new StringBuilder();
         if (filter.getBookerStatementsType() != null) {
             b.append(" and 0 = ").append(filter.getBookerStatementsType().getId());
         }
-
-        if (filter.getReportPeriodIds() != null && !filter.getReportPeriodIds().isEmpty()) {
-            b.append(" and ").append(transformToSqlInStatement("REPORT_PERIOD_ID", filter.getReportPeriodIds()));
-        }
-
         if (filter.getDepartmentIds() != null && !filter.getDepartmentIds().isEmpty()) {
-            b.append(" and ").append(transformToSqlInStatement("DEPARTMENT_ID", filter.getDepartmentIds()));
+            sql.append(", department dep");
+            b.append(" and dep.id = (select reference_value from ref_book_value rbv where record_id = account_period_id and attribute_id = 1073)");
+            b.append(" and ").append(transformToSqlInStatement("dep.id", filter.getDepartmentIds()));
         }
+        if (filter.getAccountPeriodIds() != null && !filter.getAccountPeriodIds().isEmpty()) {
+            b.append(" and ").append(transformToSqlInStatement("account_period_id", filter.getAccountPeriodIds()));
+        }
+
         if (b.length() != 0) {
             b.delete(0, 4);
             sql.append(" where").append(b);
         }
-        sql.append("union select distinct REPORT_PERIOD_ID, DEPARTMENT_ID, 1 as TYPE")
+        sql.append("union select distinct account_period_id, 1 as type")
                 .append(" from income_102 ");
+        if (filter.getDepartmentIds() != null && !filter.getDepartmentIds().isEmpty()) {
+            sql.append(", department dep");
+        }
         if (b.length() != 0) {
             sql.append(" where").append(b.toString().replace("0 = ", "1 = "));
         }
@@ -52,10 +56,10 @@ public class BookerStatementsSearchDaoImpl extends AbstractDao implements Booker
                 column = "dp.name";
                 break;
             case YEAR:
-                column = "tp.year";
+                column = "ap.number_value";
                 break;
-            case REPORT_PERIOD_NAME:
-                column = "rp.NAME";
+            case ACCOUNT_PERIOD_NAME:
+                column = "period.string_value";
                 break;
             case BOOKER_STATEMENTS_TYPE_NAME:
                 column = "bs.type";
@@ -74,21 +78,23 @@ public class BookerStatementsSearchDaoImpl extends AbstractDao implements Booker
     @Override
     public PagingResult<BookerStatementsSearchResultItem> findPage(BookerStatementsFilter filter, BookerStatementsSearchOrdering ordering, boolean ascSorting, PagingParams pageParams) {
         StringBuilder sql = new StringBuilder("select ordDat.* from (select dat.*, rownum as rn from (");
-        sql.append("select bs.REPORT_PERIOD_ID, bs.DEPARTMENT_ID, bs.type, tp.year, rp.NAME as report_period_name, dp.NAME as department_name from (");
+        sql.append(" select bs.account_period_id, bs.type, ap.number_value as year, period.string_value as account_period_name, dep.name as department_name, dep.id as department_id from (");
         appendFromAndWhereClause(sql, filter);
-        sql.append(") bs, department dp, report_period rp, tax_period tp")
-                .append(" where dp.id = bs.department_id AND rp.id = bs.report_period_id AND tp.id=rp.tax_period_id");
+        sql.append(" ) bs, department dep, ref_book_value ap, ref_book_value period")
+                .append(" where dep.id = (select reference_value from ref_book_value rbv where record_id = account_period_id and attribute_id = 1073)")
+                .append(" and ap.record_id = account_period_id and ap.attribute_id = 1071")
+                .append(" and period.record_id = (select reference_value from ref_book_value rbv where record_id = account_period_id and attribute_id = 1072) and period.attribute_id = 1062");
 
         appendOrderByClause(sql, ordering, ascSorting);
-        sql.append(") dat) ordDat where ordDat.rn between ? and ?")
+        sql.append(" ) dat) ordDat where ordDat.rn between ? and ?")
                 .append(" order by ordDat.rn");
         List<BookerStatementsSearchResultItem> records = getJdbcTemplate().query(
                 sql.toString(),
-                new Object[] {
-                        pageParams.getStartIndex() + 1,	// В java нумерация с 0, в БД row_number() нумерует с 1
+                new Object[]{
+                        pageParams.getStartIndex() + 1,    // В java нумерация с 0, в БД row_number() нумерует с 1
                         pageParams.getStartIndex() + pageParams.getCount()
                 },
-                new int[] {
+                new int[]{
                         Types.NUMERIC,
                         Types.NUMERIC
                 },

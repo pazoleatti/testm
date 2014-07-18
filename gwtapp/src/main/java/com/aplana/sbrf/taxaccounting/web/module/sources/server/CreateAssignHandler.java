@@ -75,7 +75,7 @@ public class CreateAssignHandler extends AbstractActionHandler<CreateAssignActio
         sourceClientData.setPeriodStart(PeriodConvertor.getDateFrom(period));
         sourceClientData.setPeriodStartName(period.getPeriodStartName());
         sourceClientData.setPeriodEnd(PeriodConvertor.getDateTo(period));
-        sourceClientData.setPeriodEndName(period.getPeriodEndName());
+        sourceClientData.setPeriodEndName(period.getPeriodTo() != null ? period.getPeriodEndName() : null);
         if (action.getMode() == SourceMode.SOURCES) {
             sourceClientData.setSourceDepartmentId(action.getRightDepartmentId());
             sourceClientData.setDestinationDepartmentId(action.getLeftDepartmentId());

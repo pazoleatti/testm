@@ -21,57 +21,69 @@ import java.util.*;
 @Repository
 public class SourceDaoImpl extends AbstractDao implements SourceDao {
 
-    private void buildParametrizedInQuery(String query, List<SourcePair> sourcePairs, PreparedStatementData ps) {
+    private Map<String, Long> buildParametrizedInQuery(String query, List<SourcePair> sourcePairs, PreparedStatementData ps) {
         StringBuilder in = new StringBuilder();
+        Map<String, Long> params = new HashMap<String, Long>();
+        int paramNum = 0;
         in.append("(");
         for (Iterator<SourcePair> it = sourcePairs.iterator(); it.hasNext();) {
             SourcePair pair = it.next();
             ps.addParam(pair.getSource());
             ps.addParam(pair.getDestination());
-            in.append("(?,?)");
+            String leftPart = "leftPart" +  paramNum;
+            String rightPart = "rightPart" + paramNum;
+            in.append("(:").append(leftPart).append(",:").append(rightPart).append(")");
+            params.put(leftPart, pair.getSource());
+            params.put(rightPart, pair.getDestination());
             if (it.hasNext()) {
                 in.append(",");
             }
+            paramNum += 1;
         }
         in.append(")");
         ps.appendQuery(String.format(query, in));
+        return params;
     }
 
     private final static String GET_FORM_INTERSECTIONS = "select distinct src_department_form_type_id as source, department_form_type_id as destination, period_start, period_end \n" +
             "from form_data_source a \n" +
             "where\n" +
             "(src_department_form_type_id, department_form_type_id) in %s --список пар \n" +
-            "and (period_end >= ? or period_end is null) --дата открытия периода \n" +
-            "and (? is null or period_start <= ?) --дата окончания периода (может быть передана null)\n" +
-            "and (? is null or (period_start, period_end) not in ((?, ?))) --исключить этот период";
+            "and (period_end >= :periodStart or period_end is null) --дата открытия периода \n" +
+            "and (:periodEnd is null or period_start <= :periodEnd) --дата окончания периода (может быть передана null)\n" +
+            "and (:excludedPeriodStart is null or (period_start, period_end) not in ((:excludedPeriodStart, :excludedPeriodEnd))) --исключить этот период";
 
     private final static String GET_DECLARATION_INTERSECTIONS = "select distinct src_department_form_type_id as source, department_declaration_type_id as destination, period_start, period_end\n" +
             "from declaration_source a\n" +
             "where\n" +
             "(src_department_form_type_id, department_declaration_type_id) in %s --список пар\n" +
-            "and (period_end >= ? or period_end is null) --дата открытия периода\n" +
-            "and (? is null or period_start <= ?) --дата окончания периода (может быть передана null)\n" +
-            "and (? is null or (period_start, period_end) not in ((?, ?))) --исключить этот период";
+            "and (period_end >= :periodStart or period_end is null) --дата открытия периода\n" +
+            "and (:periodEnd is null or period_start <= :periodEnd) --дата окончания периода (может быть передана null)\n" +
+            "and (:excludedPeriodStart is null or (period_start, period_end) not in ((:excludedPeriodStart, :excludedPeriodEnd))) --исключить этот период";
 
     @Override
     public Map<SourcePair, List<SourceObject>> getIntersections(List<SourcePair> sourcePairs, Date periodStart, Date periodEnd,
                                                                 Date excludedPeriodStart, Date excludedPeriodEnd, boolean declaration) {
         final Map<SourcePair, List<SourceObject>> result = new HashMap<SourcePair, List<SourceObject>>();
         PreparedStatementData ps = new PreparedStatementData();
+        Map<String, Long> pairParams;
         //формируем in-часть вида ((1, 2), (1, 3))
         if (declaration) {
-            buildParametrizedInQuery(GET_DECLARATION_INTERSECTIONS, sourcePairs, ps);
+            pairParams = buildParametrizedInQuery(GET_DECLARATION_INTERSECTIONS, sourcePairs, ps);
         } else {
-            buildParametrizedInQuery(GET_FORM_INTERSECTIONS, sourcePairs, ps);
+            pairParams = buildParametrizedInQuery(GET_FORM_INTERSECTIONS, sourcePairs, ps);
         }
-        ps.addParam(periodStart);
-        ps.addParam(periodEnd);
-        ps.addParam(periodEnd);
-        ps.addParam(excludedPeriodStart);
-        ps.addParam(excludedPeriodStart);
-        ps.addParam(excludedPeriodEnd);
+        //составляем все параметры вместе. PreparedStatementData использовать не получается, т.к несколько параметров могут быть равны null
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("periodStart", periodStart);
+        params.put("periodEnd", periodEnd);
+        params.put("excludedPeriodStart", excludedPeriodStart);
+        params.put("excludedPeriodEnd", excludedPeriodEnd);
+        for (Map.Entry<String, Long> param : pairParams.entrySet()) {
+            params.put(param.getKey(), param.getValue());
+        }
 
-        getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RowCallbackHandler() {
+        getNamedParameterJdbcTemplate().query(ps.getQuery().toString(), params, new RowCallbackHandler() {
             @Override
             public void processRow(ResultSet rs) throws SQLException {
                 SourcePair pair = new SourcePair(rs.getLong("source"), rs.getLong("destination"));
@@ -92,7 +104,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "--существующие записи из таблицы соответствия\n" +
             "select tds.src_department_form_type_id, tds.department_form_type_id, period_start, period_end, 1 as base from form_data_source tds\n" +
             "union all --записи через cross join для возможности фильтрации попарно (можно заменить за запрос из временной таблицы), фиктивные даты = даты для фильтрации \n" +
-            "select a.id, b.id, ?, ?, 0 as base from department_form_type a, department_form_type b where (a.id, b.id) in %s\n" +
+            "select a.id, b.id, :periodStart, cast(:periodEnd as date), 0 as base from department_form_type a, department_form_type b where (a.id, b.id) in %s\n" +
             ")\n" +
             "select \n" +
             "       CONNECT_BY_ROOT src as IN_src_department_form_type_id, --исходный источник\n" +
@@ -101,22 +113,24 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "       tgt as department_form_type_id\n" +
             "from subset \n" +
             "where connect_by_iscycle = 1 -- есть зацикливание\n" +
-            "connect by nocycle prior src = tgt and (period_end >= ? or period_end is null) and (? is null or period_start <= ?) -- предыдущий источник = текущему приемнику, т.е. поднимаемся наверх\n" +
+            "connect by nocycle prior src = tgt and (period_end >= :periodStart or period_end is null) and (:periodEnd is null or period_start <= :periodEnd) -- предыдущий источник = текущему приемнику, т.е. поднимаемся наверх\n" +
             "start with base  = 0 -- начать с тех записей, которые были добавлены в граф фиктивно";
 
     @Override
     public Map<SourcePair, SourcePair> getLoops(List<SourcePair> sourcePairs, Date periodStart, Date periodEnd) {
         final Map<SourcePair, SourcePair> result = new HashMap<SourcePair, SourcePair>();
         PreparedStatementData ps = new PreparedStatementData();
-        ps.addParam(periodStart);
-        ps.addParam(periodEnd);
         //формируем in-часть вида ((1, 2), (1, 3))
-        buildParametrizedInQuery(GET_LOOPS, sourcePairs, ps);
-        ps.addParam(periodStart);
-        ps.addParam(periodEnd);
-        ps.addParam(periodEnd);
+        Map<String, Long> pairParams = buildParametrizedInQuery(GET_LOOPS, sourcePairs, ps);
+        //составляем все параметры вместе. PreparedStatementData использовать не получается, т.к несколько параметров могут быть равны null
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("periodStart", periodStart);
+        params.put("periodEnd", periodEnd);
+        for (Map.Entry<String, Long> param : pairParams.entrySet()) {
+            params.put(param.getKey(), param.getValue());
+        }
 
-        getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RowCallbackHandler() {
+        getNamedParameterJdbcTemplate().query(ps.getQuery().toString(), params, new RowCallbackHandler() {
             @Override
             public void processRow(ResultSet rs) throws SQLException {
                 result.put(

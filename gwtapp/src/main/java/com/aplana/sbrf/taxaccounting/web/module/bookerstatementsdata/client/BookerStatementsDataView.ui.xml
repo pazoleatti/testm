@@ -2,9 +2,7 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
              xmlns:pager="urn:import:com.aplana.sbrf.taxaccounting.web.widget.pager"
-             xmlns:rep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client"
              xmlns:fileuplod="urn:import:com.aplana.sbrf.taxaccounting.web.widget.fileupload"
-             xmlns:picker="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
              xmlns:fm="urn:import:com.aplana.gwt.client.form">
     <ui:style>
         .titleText {
@@ -52,18 +50,13 @@
             min-width: 100px;
         }
 
-        .reportPeriodLabel {
+        .accountPeriodLabel {
             font-size: 12px;
             font-weight: bold;
             overflow: hidden;
             white-space: nowrap;
             text-overflow: ellipsis;
             -ms-text-overflow: ellipsis;
-        }
-
-
-        .btnPanel {
-
         }
 
         .fileUploader {
@@ -146,7 +139,7 @@
                             </g:cell>
                             <g:cell>
                                 <g:VerticalPanel spacing="2" addStyleNames="{style.infoValuesBlock}">
-                                    <g:Label ui:field="reportPeriodLabel" addStyleNames="{style.reportPeriodLabel}, {style.depAttr}"/>
+                                    <g:Label ui:field="accountPeriodLabel" addStyleNames="{style.accountPeriodLabel}, {style.depAttr}"/>
                                 </g:VerticalPanel>
                             </g:cell>
                         </g:HorizontalPanel>

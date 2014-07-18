@@ -9,7 +9,6 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.client.create.CreateBookerStatementsPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.bookerstatementsdata.client.BookerStatementsDataTokens;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.History;
@@ -46,8 +45,6 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
 
     private final TableDataProvider dataProvider = new TableDataProvider();
 
-    private boolean isFilter = false;
-
     private final CreateBookerStatementsPresenter dialogPresenter;
 
     private BookerStatementsFilter filter;
@@ -77,15 +74,6 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
         void setDepartment(List<Integer> departments);
 
         /**
-         * Установка доступных налоговых периодов
-         *
-         * @param reportPeriods
-         */
-        void setReportPeriods(List<ReportPeriod> reportPeriods);
-
-        void setReportPeriod(List<Integer> reportPeriods);
-
-        /**
          * Установка списка достуных видов бухгалтерской отчётности
          *
          * @param bookerReportTypes
@@ -101,7 +89,7 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
         /**
          * Получает выбранные отчетные периоды
          */
-        List<Integer> getReportPeriods();
+        List<Long> getAccountPeriods();
 
         /**
          * Получает тип
@@ -145,7 +133,7 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
         BookerStatementsFilter filter = new BookerStatementsFilter();
         filter.setBookerStatementsType(getView().getType());
         filter.setDepartmentIds(getView().getDepartments());
-        filter.setReportPeriodIds(getView().getReportPeriods());
+        filter.setAccountPeriodIds(getView().getAccountPeriods());
 
         getView().updateTable();
     }
@@ -181,7 +169,6 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
                                 getView().setDepartments(result.getDepartments(), result.getAvailableDepartments());
                                 // Список достуных видов бухгалтерской отчётности
                                 getView().setBookerReportTypes(result.getBookerReportTypes());
-                                getView().setReportPeriods(result.getReportPeriods());
 
                                 if (filter == null) {
                                     filter = new BookerStatementsFilter();
@@ -190,7 +177,6 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
                                     getView().setBookerReportType(BookerStatementsType.INCOME101);
                                 } else {
                                     getView().setDepartment(filter.getDepartmentIds());
-                                    getView().setReportPeriod(filter.getReportPeriodIds());
                                     getView().setBookerReportType(filter.getBookerStatementsType());
                                 }
                                 onSearch();
@@ -207,7 +193,7 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
                 return;
             }
             filter.setDepartmentIds(getView().getDepartments());
-            filter.setReportPeriodIds(getView().getReportPeriods());
+            filter.setAccountPeriodIds(getView().getAccountPeriods());
             filter.setBookerStatementsType(getView().getType());
             filter.setStartIndex(range.getStart());
             filter.setCountOfRecords(range.getLength());

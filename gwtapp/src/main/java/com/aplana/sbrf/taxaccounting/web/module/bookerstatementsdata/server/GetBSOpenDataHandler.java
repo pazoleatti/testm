@@ -1,8 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.bookerstatementsdata.server;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.bookerstatementsdata.shared.GetBSOpenDataAction;
@@ -14,11 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-
-import static java.util.Arrays.asList;
+import java.util.Map;
 
 /**
  * @author Dmitriy Levykin
@@ -37,7 +35,7 @@ public class GetBSOpenDataHandler extends AbstractActionHandler<GetBSOpenDataAct
     SourceService departmentFormTypService;
 
     @Autowired
-    private PeriodService periodService;
+    RefBookFactory refBookFactory;
 
     public GetBSOpenDataHandler() {
         super(GetBSOpenDataAction.class);
@@ -47,7 +45,7 @@ public class GetBSOpenDataHandler extends AbstractActionHandler<GetBSOpenDataAct
     public GetBSOpenDataResult execute(GetBSOpenDataAction action, ExecutionContext executionContext) throws ActionException {
         GetBSOpenDataResult result = new GetBSOpenDataResult();
 
-        if (action.getReportPeriodId() == null) {
+        if (action.getAccountPeriodId() == null) {
             throw new ActionException();
         }
         if (action.getDepartmentId() == null) {
@@ -76,11 +74,16 @@ public class GetBSOpenDataHandler extends AbstractActionHandler<GetBSOpenDataAct
             result.setDepartmentName(departmentService.getParentsHierarchy(action.getDepartmentId()));
         }
 
-        if (action.getReportPeriodId() != null) {
-            ReportPeriod reportPeriod = periodService.getReportPeriod(action.getReportPeriodId());
-            if (reportPeriod != null) {
-                result.setReportPeriodName(reportPeriod.getTaxPeriod().getYear() + " - " + reportPeriod.getName());
-            }
+        if (action.getAccountPeriodId() != null) {
+            RefBookDataProvider dataProvider = refBookFactory.getDataProvider(107L);
+            Map<String, RefBookValue> refBookValueMap = dataProvider.getRecordData((long) action.getAccountPeriodId());
+            String date = String.valueOf(refBookValueMap.get("YEAR").getNumberValue());
+
+            dataProvider = refBookFactory.getDataProvider(106L);
+            refBookValueMap = dataProvider.getRecordData(refBookValueMap.get("ACCOUNT_PERIOD_ID").getReferenceValue());
+            String name = refBookValueMap.get("NAME").getStringValue();
+
+            result.setAccountPeriodName(date + " - " + name);
         }
 
         if (action.getStatementsKind() != null) {

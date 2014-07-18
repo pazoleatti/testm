@@ -29,11 +29,12 @@ public class CreateBookerStatementsPresenter extends PresenterWidget<CreateBooke
     public interface MyView extends PopupView, HasUiHandlers<CreateBookerStatementsUiHandlers> {
         void init();
         void setAcceptableDepartments(List<Department> list, Set<Integer> availableValues);
-        void setAcceptableReportPeriods(List<ReportPeriod> reportPeriods);
         void setBookerReportTypes(List<BookerStatementsType> bookerReportTypes);
         BookerStatementsType getType();
-        Integer getReportPeriod();
+        Long getAccountPeriod();
         Integer getDepartment();
+        void setYear(int year);
+        Integer getYear();
     }
 
     @Inject
@@ -49,9 +50,10 @@ public class CreateBookerStatementsPresenter extends PresenterWidget<CreateBooke
         LogCleanEvent.fire(this);
         LogShowEvent.fire(this, false);
         final CreateBookerStatementsAction action = new CreateBookerStatementsAction();
+        action.setYear(getView().getYear());
+        action.setAccountPeriodId(getView().getAccountPeriod());
         action.setDepartmentId(getView().getDepartment());
         action.setBookerStatementsTypeId(getView().getType().getId());
-        action.setReportPeriodId(getView().getReportPeriod());
 
         dispatchAsync.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<CreateBookerStatementsResult>() {
@@ -62,7 +64,7 @@ public class CreateBookerStatementsPresenter extends PresenterWidget<CreateBooke
                             getView().hide();
                             placeManager.revealPlace(new Builder().nameToken(BookerStatementsDataTokens.bookerStatements)
                                     .with(BookerStatementsDataTokens.DEPARTMENT_ID, action.getDepartmentId().toString())
-                                    .with(BookerStatementsDataTokens.REPORT_PERIOD_ID, action.getReportPeriodId().toString())
+                                    .with(BookerStatementsDataTokens.ACCOUNT_PERIOD_ID, result.getAccountPeriodId().toString())
                                     .with(BookerStatementsDataTokens.TYPE_ID, action.getBookerStatementsTypeId().toString())
                                     .build());
                         } else {
@@ -73,38 +75,18 @@ public class CreateBookerStatementsPresenter extends PresenterWidget<CreateBooke
         );
     }
 
-    @Override
-    public void onReportPeriodChange() {
-        Integer reportId = getView().getReportPeriod();
-        if (reportId == null)
-            return;
-
-        BookerStatementsFieldsAction action = new BookerStatementsFieldsAction();
-        action.setFieldId(reportId);
-        action.setFieldsNum(BookerStatementsFieldsAction.FieldsNum.SECOND);
-        dispatchAsync.execute(action, CallbackUtils
-                .wrongStateCallback(new AbstractCallback<BookerStatementsFieldsResult>() {
-                    @Override
-                    public void onSuccess(BookerStatementsFieldsResult result) {
-                        getView().setAcceptableDepartments(result.getDepartments(), result.getDepartmentIds());
-                    }
-                }, this));
-    }
-
     public void initAndShowDialog(final HasPopupSlot slotForMe){
         getView().init();
         slotForMe.addToPopupSlot(CreateBookerStatementsPresenter.this);
 
         BookerStatementsFieldsAction action = new BookerStatementsFieldsAction();
-        action.setFieldsNum(BookerStatementsFieldsAction.FieldsNum.FIRST);
 
         dispatchAsync.execute(action, CallbackUtils
                 .wrongStateCallback(new AbstractCallback<BookerStatementsFieldsResult>() {
                     @Override
                     public void onSuccess(BookerStatementsFieldsResult result) {
-                        getView().setAcceptableReportPeriods(result.getReportPeriods());
                         getView().setBookerReportTypes(Arrays.asList(BookerStatementsType.values()));
-
+                        getView().setAcceptableDepartments(result.getDepartments(), result.getDepartmentIds());
                         slotForMe.addToPopupSlot(CreateBookerStatementsPresenter.this);
                     }
                 }, this));
