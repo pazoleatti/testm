@@ -72,6 +72,6 @@ public class TaskPersistenceServiceBean implements TaskPersistenceService {
 
     @Override
     public void updateContext(TaskContextEntity context){
-        em.refresh(context);
+        em.merge(context);
     }
 }
