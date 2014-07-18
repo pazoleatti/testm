@@ -78,7 +78,12 @@ public class AssignDialogView extends ViewWithUiHandlers<AssignDialogUiHandlers>
                 return item != null ? item.getCode() : null;
             }
         });
-        periodTo = new ValueListBox<PeriodInfo>(abstractRenderer);
+        periodTo = new ValueListBox<PeriodInfo>(abstractRenderer, new ProvidesKey<PeriodInfo>() {
+            @Override
+            public Object getKey(PeriodInfo item) {
+                return item != null ? item.getCode() : null;
+            }
+        });
         initWidget(uiBinder.createAndBindUi(this));
 
         periodFrom.addValueChangeHandler(new ValueChangeHandler<PeriodInfo>() {
