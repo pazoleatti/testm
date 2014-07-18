@@ -304,7 +304,7 @@ create sequence seq_report_period start with 100;
 ----------------------------------------------------------------------------------------------------
 create table income_101 (
   id                     number(18) not null,
-  report_period_id       number(9) not null,
+  report_period_id       number(9),
   account                varchar2(255 char) not null,
   income_debet_remains   number(22,4),
   income_credit_remains  number(22,4),
@@ -313,7 +313,7 @@ create table income_101 (
   outcome_debet_remains  number(22,4),
   outcome_credit_remains number(22,4),
   account_name           varchar2(255 char),
-  department_id          number(9) not null,
+  department_id          number(9),
   account_period_id 	 number(9)
 );
 comment on table income_101 is 'Оборотная ведомость (Форма 0409101-СБ)';
@@ -334,11 +334,11 @@ create sequence seq_income_101 start with 100;
 -------------------------------------------------------------------------------------------------------------------------------------------
 create table income_102 (
   id               number(18) not null,
-  report_period_id number(9) not null,
+  report_period_id number(9),
   opu_code         varchar2(25 char) not null,
   total_sum        number(22,4),
   item_name        varchar2(255 char),
-  department_id    number(9) not null,
+  department_id    number(9),
   account_period_id number(9)
   );
 comment on table income_102 is 'Отчет о прибылях и убытках (Форма 0409102-СБ)';
@@ -564,26 +564,26 @@ create sequence seq_department_form_type start with 10000;
 create table declaration_source (
   department_declaration_type_id number(9) not null,
   src_department_form_type_id   number(9) not null,
-  period_start date,
-  period_end date
+  period_start date not null,
+  period_end date null
 );
 comment on table declaration_source is 'Информация о формах-источниках данных для деклараций разных видов';
 comment on column declaration_source.department_declaration_type_id is 'Иденфтикиатор сочетания вида декларации и подразделения, для которого задаётся источник';
 comment on column declaration_source.src_department_form_type_id is 'Идентификатор сочетания типа и вида формы, а также подразделения, которые являются источников данных для деклараций';
-comment on column declaration_source.period_start is 'Дата начала назначения';
-comment on column declaration_source.period_end is 'Дата окончания назначения';
+comment on column declaration_source.period_start is 'Дата начала действия назначения';
+comment on column declaration_source.period_end is 'Дата окончания действия назначения';
 ----------------------------------------------------------------------------------------------------
 create table form_data_source (
   department_form_type_id number(9) not null,
   src_department_form_type_id number(9) not null,
-  period_start date,
-  period_end date
+  period_start date not null,
+  period_end date null
 );
 comment on table form_data_source is 'Информация об источниках данных для формирования консолидированных и сводных налоговоых форм';
 comment on column form_data_source.department_form_type_id is 'Идентификатор сочетания вида, типа формы и подразделения, для которого задётся источник данных';
 comment on column form_data_source.src_department_form_type_id is 'Идентификатор сочетания вида, типа формы и подразделения, которое является источником данных';
-comment on column form_data_source.period_start is 'Дата начала назначения';
-comment on column form_data_source.period_end is 'Дата окончания назначения';
+comment on column form_data_source.period_start is 'Дата начала действия назначения';
+comment on column form_data_source.period_end is 'Дата окончания действия назначения';
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------
 create table sec_user (
   id number(9) not null,

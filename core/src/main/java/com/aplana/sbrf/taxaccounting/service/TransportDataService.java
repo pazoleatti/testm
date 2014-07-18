@@ -18,7 +18,8 @@ import java.util.Set;
  */
 public interface TransportDataService {
     /**
-     * Загрузка ТФ в каталог загрузки
+     * Загрузка ТФ в каталог загрузки. Загружаются ТФ НФ и ТФС.
+     *
      * @param userInfo Пользователь
      * @param departmentId Подразделение, в каталог которого пойдет загрузка
      * @param fileName Имя ТФ
@@ -29,13 +30,9 @@ public interface TransportDataService {
     boolean uploadFile(TAUserInfo userInfo, int departmentId, String fileName, InputStream inputStream, Logger logger) throws IOException;
 
     /**
-     * Импорт ТФ из одного каталога загрузки
-     * @param userInfo Пользователь
-     * @param folderParam Ключ конф. параметра, по которому ищется каталог
-     * @param departmentId Подразделение. Для общих параметров не используется
-     * @param logger Логгер для области уведомлений
+     * Затрузка всех ТФНФ и ТФС
      */
-    ImportCounter importDataFromFolder(TAUserInfo userInfo, ConfigurationParam folderParam, Integer departmentId, Logger logger);
+    void importAllData(TAUserInfo userInfo, Logger logger);
 
     /**
      * Получение спика ТФ НФ из каталога загрузки. Файлы, которые не соответствуют маппингу пропускаются.

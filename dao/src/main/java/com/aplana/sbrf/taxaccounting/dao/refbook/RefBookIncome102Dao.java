@@ -22,24 +22,22 @@ public interface RefBookIncome102Dao {
     /**
      * Получение записей справочника
      *
-     * @param reportPeriodId
      * @param pagingParams
      * @param filter
      * @param sortAttribute
      * @return
      */
-    PagingResult<Map<String, RefBookValue>> getRecords(Integer reportPeriodId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending);
+    PagingResult<Map<String, RefBookValue>> getRecords(PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending);
 
     /**
      * Перегруженный метод с восходящей сортировкой по умолчанию
      *
-     * @param reportPeriodId
      * @param pagingParams
      * @param filter
      * @param sortAttribute
      * @return
      */
-    PagingResult<Map<String, RefBookValue>> getRecords(Integer reportPeriodId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute);
+    PagingResult<Map<String, RefBookValue>> getRecords(PagingParams pagingParams, String filter, RefBookAttribute sortAttribute);
 
     /**
      * Получает уникальные идентификаторы записей, удовлетворяющих условиям фильтра

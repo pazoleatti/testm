@@ -163,8 +163,7 @@ public class DeclarationTemplateListPresenter
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<DTDeleteResult>() {
             @Override
             public void onSuccess(DTDeleteResult result) {
-                if (result.getLogEntriesUuid() != null)
-                    LogAddEvent.fire(DeclarationTemplateListPresenter.this, result.getLogEntriesUuid());
+                LogAddEvent.fire(DeclarationTemplateListPresenter.this, result.getLogEntriesUuid());
                 placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplateList).build());
             }
         }, this).addCallback(new ManualRevealCallback<DTDeleteResult>(DeclarationTemplateListPresenter.this)));

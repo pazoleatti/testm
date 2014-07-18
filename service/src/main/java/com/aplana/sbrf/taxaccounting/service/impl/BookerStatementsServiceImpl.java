@@ -8,9 +8,11 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookIncome101;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.BookerStatementsService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
@@ -24,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -37,7 +40,6 @@ import java.util.regex.Pattern;
 @Transactional
 public class BookerStatementsServiceImpl implements BookerStatementsService {
 
-    private static final String I_101_REPORT_PERIOD_ID = "REPORT_PERIOD_ID";
     private static final String I_101_ACCOUNT = "ACCOUNT";
     private static final String I_101_ACCOUNT_NAME = "ACCOUNT_NAME";
     private static final String I_101_INCOME_DEBET_REMAINS = "INCOME_DEBET_REMAINS";
@@ -46,13 +48,12 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
     private static final String I_101_CREDIT_RATE = "CREDIT_RATE";
     private static final String I_101_OUTCOME_DEBET_REMAINS = "OUTCOME_DEBET_REMAINS";
     private static final String I_101_OUTCOME_CREDIT_REMAINS = "OUTCOME_CREDIT_REMAINS";
-    private static final String I_101_DEPARTMENT_ID = "DEPARTMENT_ID";
+    private static final String I_101_ACCOUNT_PERIOD_ID = "ACCOUNT_PERIOD_ID";
 
-    private static final String I_102_REPORT_PERIOD_ID = "REPORT_PERIOD_ID";
     private static final String I_102_OPU_CODE = "OPU_CODE";
     private static final String I_102_TOTAL_SUM = "TOTAL_SUM";
     private static final String I_102_ITEM_NAME = "ITEM_NAME";
-    private static final String I_102_DEPARTMENT_ID = "DEPARTMENT_ID";
+    private static final String I_102_ACCOUNT_PERIOD_ID = "ACCOUNT_PERIOD_ID";
 
     // Ограничение по строкам для xls-файла
     private static final long MAX_FILE_ROW = 10000L;
@@ -62,27 +63,27 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
     private static final String NO_DATA_FILE_MSG = "Файл не содержит данных. Файл не может быть загружен.";
     private static final String IO_WORKBOOK_EXCEPTION = "Не могу прочитать загруженный Excel фаил.";
     private static final String REPORT_PERIOD_CLOSED = "Указан закрытый период. Файл не может быть загружен.";
-    private static final String REPORT_PERIOD_INVALID = "Отчетный период не указан.";
+    private static final String ACCOUNT_PERIOD_INVALID = "Период не указан.";
     private static final String DEPARTMENTID_INVALID = "Подразделение не указано.";
     private static final String FILE_NULL = "Не указан фаил.";
-	private static final String ATTRIBUTE_ACCOUNT_NO = "Номер счета";
-	private static final String ATTRIBUTE_NAME = "Название";
-	private static final String ATTRIBUTE_INCOME_REMAINS = "Входящие остатки";
-	private static final String ATTRIBUTE_REPORT_PERIOD_TURN = "Обороты за отчетный период";
-	private static final String ATTRIBUTE_OUTCOME_REMAINS = "Исходящие остатки";
-	private static final String ON_DEBET = "по дебету";
-	private static final String ON_CREDIT = "по кредиту";
-	private static final String ATTRIBUTE_INCOME_REMAINS_ON_DEBET = "Входящие остатки по дебету";
-	private static final String ATTRIBUTE_INCOME_REMAINS_ON_CREDIT = "Входящие остатки по кредиту";
-	private static final String ATTRIBUTE_REPORT_PERIOD_TURN_ON_DEBET = "Обороты за отчетный период по дебету";
-	private static final String ATTRIBUTE_REPORT_PERIOD_TURN_ON_CREDIT = "Обороты за отчетный период по кредиту";
-	private static final String ATTRIBUTE_OUTCOME_REMAINS_ON_DEBET = "Исходящие остатки по дебету";
-	private static final String ATTRIBUTE_OUTCOME_REMAINS_ON_CREDIT = "Исходящие остатки по кредиту";
-	private static final String ATTRIBUTE_ARTICLE_NAME = "Наименование статей";
-	private static final String ATTRIBUTE_SYMBOLS = "Символы";
-	private static final String ATTRIBUTE_TOTAL = "Всего";
+    private static final String ATTRIBUTE_ACCOUNT_NO = "Номер счета";
+    private static final String ATTRIBUTE_NAME = "Название";
+    private static final String ATTRIBUTE_INCOME_REMAINS = "Входящие остатки";
+    private static final String ATTRIBUTE_REPORT_PERIOD_TURN = "Обороты за отчетный период";
+    private static final String ATTRIBUTE_OUTCOME_REMAINS = "Исходящие остатки";
+    private static final String ON_DEBET = "по дебету";
+    private static final String ON_CREDIT = "по кредиту";
+    private static final String ATTRIBUTE_INCOME_REMAINS_ON_DEBET = "Входящие остатки по дебету";
+    private static final String ATTRIBUTE_INCOME_REMAINS_ON_CREDIT = "Входящие остатки по кредиту";
+    private static final String ATTRIBUTE_REPORT_PERIOD_TURN_ON_DEBET = "Обороты за отчетный период по дебету";
+    private static final String ATTRIBUTE_REPORT_PERIOD_TURN_ON_CREDIT = "Обороты за отчетный период по кредиту";
+    private static final String ATTRIBUTE_OUTCOME_REMAINS_ON_DEBET = "Исходящие остатки по дебету";
+    private static final String ATTRIBUTE_OUTCOME_REMAINS_ON_CREDIT = "Исходящие остатки по кредиту";
+    private static final String ATTRIBUTE_ARTICLE_NAME = "Наименование статей";
+    private static final String ATTRIBUTE_SYMBOLS = "Символы";
+    private static final String ATTRIBUTE_TOTAL = "Всего";
 
-	@Autowired
+    @Autowired
     PeriodService reportPeriodService;
 
     @Autowired
@@ -100,14 +101,14 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
         if (stream == null) {
             throw new ServiceException(FILE_NULL);
         }
-        if (departmentId == null){
+        if (departmentId == null) {
             throw new ServiceException(DEPARTMENTID_INVALID);
         }
         if (periodId == null) {
-            throw new ServiceException(REPORT_PERIOD_INVALID);
+            throw new ServiceException(ACCOUNT_PERIOD_INVALID);
         }
         if (realFileName == null || !getFileExtention(realFileName).equals("xls")) {
-            throw  new ServiceException(NO_DATA_FILE_MSG);
+            throw new ServiceException(NO_DATA_FILE_MSG);
         }
         // Проверка того, что пользователем указан открытый отчетный период
         if (!reportPeriodService.isActivePeriod(periodId, departmentId)) {
@@ -123,7 +124,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
 
                 for (Income101 item : list) {
                     Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
-                    map.put(I_101_REPORT_PERIOD_ID, new RefBookValue(RefBookAttributeType.NUMBER, periodId));
+                    //map.put(I_101_REPORT_PERIOD_ID, new RefBookValue(RefBookAttributeType.NUMBER, periodId));
                     map.put(I_101_ACCOUNT, new RefBookValue(RefBookAttributeType.STRING, item.getAccount()));
                     map.put(I_101_ACCOUNT_NAME, new RefBookValue(RefBookAttributeType.STRING, item.getAccountName()));
                     map.put(I_101_INCOME_DEBET_REMAINS, new RefBookValue(RefBookAttributeType.NUMBER, item.getIncomeDebetRemains()));
@@ -132,13 +133,13 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
                     map.put(I_101_CREDIT_RATE, new RefBookValue(RefBookAttributeType.NUMBER, item.getCreditRate()));
                     map.put(I_101_OUTCOME_DEBET_REMAINS, new RefBookValue(RefBookAttributeType.NUMBER, item.getOutcomeDebetRemains()));
                     map.put(I_101_OUTCOME_CREDIT_REMAINS, new RefBookValue(RefBookAttributeType.NUMBER, item.getOutcomeCreditRemains()));
-                    map.put(I_101_DEPARTMENT_ID, new RefBookValue(RefBookAttributeType.REFERENCE, (long) departmentId));
+                    //map.put(I_101_DEPARTMENT_ID, new RefBookValue(RefBookAttributeType.REFERENCE, (long) departmentId));
                     records.add(map);
                 }
 
                 provider.updateRecords(new Date(), records);
             } else {
-                throw  new ServiceException(NO_DATA_FILE_MSG);
+                throw new ServiceException(NO_DATA_FILE_MSG);
             }
         } else {
             RefBookDataProvider provider = rbFactory.getDataProvider(RefBookIncome102Dao.REF_BOOK_ID);
@@ -149,18 +150,18 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
 
                 for (Income102 item : list) {
                     Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
-                    map.put(I_102_REPORT_PERIOD_ID, new RefBookValue(RefBookAttributeType.NUMBER, periodId));
+                    //map.put(I_102_REPORT_PERIOD_ID, new RefBookValue(RefBookAttributeType.NUMBER, periodId));
                     map.put(I_102_OPU_CODE, new RefBookValue(RefBookAttributeType.STRING, item.getOpuCode()));
                     map.put(I_102_TOTAL_SUM, new RefBookValue(RefBookAttributeType.NUMBER, item.getTotalSum()));
                     map.put(I_102_ITEM_NAME, new RefBookValue(RefBookAttributeType.STRING, item.getItemName()));
-                    map.put(I_102_DEPARTMENT_ID, new RefBookValue(RefBookAttributeType.REFERENCE, (long) departmentId));
+                    //map.put(I_102_DEPARTMENT_ID, new RefBookValue(RefBookAttributeType.REFERENCE, (long) departmentId));
                     records.add(map);
                 }
 
                 provider.updateRecords(new Date(), records);
 
             } else {
-                throw  new ServiceException(NO_DATA_FILE_MSG);
+                throw new ServiceException(NO_DATA_FILE_MSG);
             }
         }
 
@@ -200,10 +201,10 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
             if (row.getRowNum() == 9) {
                 while (cells.hasNext()) {
                     Cell cell = cells.next();
-	                if ((cell.getCellType() != Cell.CELL_TYPE_STRING)
-			         && (cell.getCellType() != Cell.CELL_TYPE_BLANK)) {
-		                throw new ServiceException(BAD_FILE_MSG);
-	                }
+                    if ((cell.getCellType() != Cell.CELL_TYPE_STRING)
+                            && (cell.getCellType() != Cell.CELL_TYPE_BLANK)) {
+                        throw new ServiceException(BAD_FILE_MSG);
+                    }
                     int colNum = cell.getColumnIndex();
                     String colName = cell.getStringCellValue().trim();
                     if ((colNum == 1 && !colName.equals(ATTRIBUTE_ACCOUNT_NO))
@@ -298,7 +299,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
                 }
             }
         }
-        if(!hasHeader){
+        if (!hasHeader) {
             throw new ServiceException(BAD_FILE_MSG);
         }
         return list;
@@ -485,18 +486,8 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
     }
 
     @Override
-    public void create(Logger logger, Integer periodId, int typeId, Integer departmentId, TAUserInfo userInfo) {
+    public void create(Logger logger, Integer year, Long periodId, int typeId, Integer departmentId, TAUserInfo userInfo) {
 
-        if (departmentId == null){
-            throw new ServiceException(DEPARTMENTID_INVALID);
-        }
-        if (periodId == null) {
-            throw new ServiceException(REPORT_PERIOD_INVALID);
-        }
-        // Проверка того, что пользователем указан открытый отчетный период
-        if (!reportPeriodService.isActivePeriod(periodId, departmentId)) {
-            logger.error("Выбранный период закрыт");
-        }
         RefBookDataProvider provider;
         if (typeId == BookerStatementsType.INCOME101.getId()) {
             provider = rbFactory.getDataProvider(RefBookIncome101Dao.REF_BOOK_ID);
@@ -504,21 +495,32 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
             provider = rbFactory.getDataProvider(RefBookIncome102Dao.REF_BOOK_ID);
         }
 
-        Date version = reportPeriodService.getEndDate(periodId).getTime();
+        List<Long> ids = rbFactory.getDataProvider(107L).getUniqueRecordIds(null,
+                " account_period_id = " + periodId + " and year = " + year + " and department_id = " + departmentId);
+        if (ids.size() > 0) {
+            List<Long> ids101 = provider.getUniqueRecordIds(null, " account_period_id = " + ids.get(0));
+            if (ids101.size() > 0) {
+                logger.error("Бухгалтерская отчётность с заданными параметрами уже существует");
+            }
+        } else {
+            Map<String, RefBookValue> values = new HashMap<String, RefBookValue>();
+            values.put("YEAR", new RefBookValue(RefBookAttributeType.NUMBER, BigDecimal.valueOf(year)));
+            values.put("ACCOUNT_PERIOD_ID", new RefBookValue(RefBookAttributeType.REFERENCE, periodId));
+            values.put("DEPARTMENT_ID", new RefBookValue(RefBookAttributeType.REFERENCE, Long.valueOf(departmentId)));
 
-        List<Long> ids = provider.getUniqueRecordIds(version, " department_id = " + departmentId);
-        if (ids.size()>0) {
-            logger.error("Бухгалтерская отчётность с заданными параметрами уже существует");
+            RefBookRecord record = new RefBookRecord();
+            record.setValues(values);
+
+            ids = rbFactory.getDataProvider(107L).createRecordVersion(logger, new Date(), null, Arrays.asList(record));
         }
 
         if (logger.containsLevel(LogLevel.ERROR)) {
-            return ;
+            return;
         }
-        if (typeId == 0) {
-            List<Map<String, RefBookValue>> records = new LinkedList<Map<String, RefBookValue>>();
 
-            Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
-            map.put(I_101_REPORT_PERIOD_ID, new RefBookValue(RefBookAttributeType.NUMBER, periodId));
+        List<Map<String, RefBookValue>> records = new LinkedList<Map<String, RefBookValue>>();
+        Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
+        if (typeId == 0) {
             map.put(I_101_ACCOUNT, new RefBookValue(RefBookAttributeType.STRING, "-1"));
             map.put(I_101_ACCOUNT_NAME, new RefBookValue(RefBookAttributeType.STRING, null));
             map.put(I_101_INCOME_DEBET_REMAINS, new RefBookValue(RefBookAttributeType.NUMBER, null));
@@ -527,18 +529,15 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
             map.put(I_101_CREDIT_RATE, new RefBookValue(RefBookAttributeType.NUMBER, null));
             map.put(I_101_OUTCOME_DEBET_REMAINS, new RefBookValue(RefBookAttributeType.NUMBER, null));
             map.put(I_101_OUTCOME_CREDIT_REMAINS, new RefBookValue(RefBookAttributeType.NUMBER, null));
-            map.put(I_101_DEPARTMENT_ID, new RefBookValue(RefBookAttributeType.REFERENCE, (long) departmentId));
+            map.put(I_101_ACCOUNT_PERIOD_ID, new RefBookValue(RefBookAttributeType.REFERENCE, ids.get(0)));
             records.add(map);
             provider.updateRecords(new Date(), records);
-        } else {
 
-            List<Map<String, RefBookValue>> records = new LinkedList<Map<String, RefBookValue>>();
-            Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
-            map.put(I_102_REPORT_PERIOD_ID, new RefBookValue(RefBookAttributeType.NUMBER, periodId));
+        } else {
             map.put(I_102_OPU_CODE, new RefBookValue(RefBookAttributeType.STRING, "-1"));
             map.put(I_102_TOTAL_SUM, new RefBookValue(RefBookAttributeType.NUMBER, null));
             map.put(I_102_ITEM_NAME, new RefBookValue(RefBookAttributeType.STRING, null));
-            map.put(I_102_DEPARTMENT_ID, new RefBookValue(RefBookAttributeType.REFERENCE, (long) departmentId));
+            map.put(I_102_ACCOUNT_PERIOD_ID, new RefBookValue(RefBookAttributeType.REFERENCE, ids.get(0)));
             records.add(map);
             provider.updateRecords(new Date(), records);
         }
@@ -548,6 +547,6 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
     public PagingResult<BookerStatementsSearchResultItem> findDataByFilter(BookerStatementsFilter bookerStatementsFilter) {
         return bookerStatementsSearchDao.findPage(bookerStatementsFilter, bookerStatementsFilter.getSearchOrdering(),
                 bookerStatementsFilter.isAscSorting(), new PagingParams(bookerStatementsFilter.getStartIndex(),
-                bookerStatementsFilter.getCountOfRecords()));
+                        bookerStatementsFilter.getCountOfRecords()));
     }
 }

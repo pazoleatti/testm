@@ -12,14 +12,14 @@ public class GetBSOpenDataAction extends UnsecuredActionImpl<GetBSOpenDataResult
     private Integer departmentId;
     /** Тип бухотчетности (0, 1) */
     private Integer statementsKind;
-    private Integer reportPeriodId;
+    private Integer accountPeriodId;
 
-    public Integer getReportPeriodId() {
-        return reportPeriodId;
+    public Integer getAccountPeriodId() {
+        return accountPeriodId;
     }
 
-    public void setReportPeriodId(Integer reportPeriodId) {
-        this.reportPeriodId = reportPeriodId;
+    public void setAccountPeriodId(Integer accountPeriodId) {
+        this.accountPeriodId = accountPeriodId;
     }
 
     public Integer getStatementsKind() {

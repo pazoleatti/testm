@@ -18,6 +18,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -123,9 +124,12 @@ public class FormDataServiceTest {
         final List<DepartmentFormType> list = new CopyOnWriteArrayList<DepartmentFormType>();
         list.add(departmentFormType);
 
-        when(departmentFormTypeDao.getFormDestinations(2, 1, FormDataKind.PRIMARY)).thenReturn(new ArrayList<DepartmentFormType>());
-        when(departmentFormTypeDao.getFormDestinations(1, 1, FormDataKind.PRIMARY)).thenReturn(list);
+        when(departmentFormTypeDao.getFormDestinations(2, 1, FormDataKind.PRIMARY, null, null)).thenReturn(new ArrayList<DepartmentFormType>());
+        when(departmentFormTypeDao.getFormDestinations(1, 1, FormDataKind.PRIMARY, null, null)).thenReturn(list);
         ReflectionTestUtils.setField(formDataService, "departmentFormTypeDao", departmentFormTypeDao);
+        ReportPeriodDao reportPeriodDao = mock(ReportPeriodDao.class);
+        when(reportPeriodDao.get(any(Integer.class))).thenReturn(mock(ReportPeriod.class));
+        ReflectionTestUtils.setField(formDataService, "reportPeriodDao", reportPeriodDao);
 
         Department department = new Department();
         department.setName("Тестовое подразделение");

@@ -129,7 +129,7 @@ public class FormDataAccessServiceImplTest {
 		when(departmentService.getDepartment(Department.ROOT_BANK_ID)).thenReturn(d);
 
         // Доступные подразделения (для чтения)
-        when(departmentService.getTaxFormDepartments(any(TAUser.class), anyListOf(TaxType.class))).thenAnswer(
+        when(departmentService.getTaxFormDepartments(any(TAUser.class), anyListOf(TaxType.class), any(Date.class), any(Date.class))).thenAnswer(
                 new Answer<List<Integer>>() {
                     @Override
                     public List<Integer> answer(InvocationOnMock invocation) throws Throwable {
@@ -170,7 +170,7 @@ public class FormDataAccessServiceImplTest {
                 List<TaxType> taxTypeList = (List<TaxType>) invocation.getArguments()[1];
                 Integer reportPeriodId = (Integer) invocation.getArguments()[2];
                 if (reportPeriodId.equals(REPORT_PERIOD_ACTIVE_ID) || reportPeriodId.equals(REPORT_PERIOD_BALANCED_ID)) {
-                    return departmentService.getTaxFormDepartments(user, taxTypeList);
+                    return departmentService.getTaxFormDepartments(user, taxTypeList, null, null);
                 } else {
                     return new ArrayList<Integer>(0);
                 }
@@ -179,12 +179,16 @@ public class FormDataAccessServiceImplTest {
 
         ReflectionTestUtils.setField(service, "departmentService", departmentService);
 
+        PeriodService periodService = mock(PeriodService.class);
+        when(periodService.getReportPeriod(any(Integer.class))).thenReturn(mock(ReportPeriod.class));
+        ReflectionTestUtils.setField(service, "periodService", periodService);
+
         // Сводная форма 1 из тербанка 1 является источником для сводной 1 банка
 		DepartmentFormTypeDao departmentFormTypeDao = mock(DepartmentFormTypeDao.class);
 		List<DepartmentFormType> dfts = new ArrayList<DepartmentFormType>();
 		dfts.add(mockDepartmentFormType(Department.ROOT_BANK_ID, summaryFormType1.getId(), FormDataKind.SUMMARY));
 		dfts.add(mockDepartmentFormType(Department.ROOT_BANK_ID, summaryFormType2.getId(), FormDataKind.SUMMARY));
-		when(departmentFormTypeDao.getFormDestinations(TB1_ID, summaryFormType1.getId(), FormDataKind.SUMMARY)).thenReturn(dfts);
+		when(departmentFormTypeDao.getFormDestinations(any(Integer.class), any(Integer.class), any(FormDataKind.class), any(Date.class), any(Date.class))).thenReturn(dfts);
 
 		ReflectionTestUtils.setField(service, "departmentFormTypeDao", departmentFormTypeDao);
 		
@@ -281,19 +285,22 @@ public class FormDataAccessServiceImplTest {
 		dfts.add(mockDepartmentFormType(TB1_ID, summaryFormType1.getId(), FormDataKind.SUMMARY));
 		dfts.add(mockDepartmentFormType(TB1_ID, summaryFormType1.getId(), FormDataKind.CONSOLIDATED));
 		dfts.add(mockDepartmentFormType(TB1_ID, additionalFormType.getId(), FormDataKind.ADDITIONAL));
-		when(sourceService.getDFTByDepartment(Matchers.eq(TB1_ID), Matchers.any(TaxType.class))).thenReturn(dfts);
+		when(sourceService.getDFTByDepartment(Matchers.eq(TB1_ID), Matchers.any(TaxType.class), any(Date.class), any(Date.class))).thenReturn(dfts);
 		
 		dfts = new ArrayList<DepartmentFormType>();
 		dfts.add(mockDepartmentFormType(TB2_ID, summaryFormType1.getId(), FormDataKind.SUMMARY));
 		dfts.add(mockDepartmentFormType(TB2_ID, summaryFormType1.getId(), FormDataKind.CONSOLIDATED));
 		dfts.add(mockDepartmentFormType(TB2_ID, additionalFormType.getId(), FormDataKind.ADDITIONAL));
-		when(sourceService.getDFTByDepartment(Matchers.eq(TB2_ID), Matchers.any(TaxType.class))).thenReturn(dfts);
+		when(sourceService.getDFTByDepartment(Matchers.eq(TB2_ID), Matchers.any(TaxType.class), any(Date.class), any(Date.class))).thenReturn(dfts);
 		
 		dfts = new ArrayList<DepartmentFormType>();
 		dfts.add(mockDepartmentFormType(Department.ROOT_BANK_ID, summaryFormType1.getId(), FormDataKind.SUMMARY));
 		dfts.add(mockDepartmentFormType(Department.ROOT_BANK_ID, summaryFormType2.getId(), FormDataKind.SUMMARY));
 		dfts.add(mockDepartmentFormType(Department.ROOT_BANK_ID, additionalFormType.getId(), FormDataKind.ADDITIONAL));
-		when(sourceService.getDFTByDepartment(Matchers.eq(Department.ROOT_BANK_ID), Matchers.any(TaxType.class))).thenReturn(dfts);
+		when(sourceService.getDFTByDepartment(Matchers.eq(Department.ROOT_BANK_ID), Matchers.any(TaxType.class), any(Date.class), any(Date.class))).thenReturn(dfts);
+        List<DepartmentDeclarationType> ddtList = new ArrayList<DepartmentDeclarationType>();
+        when(sourceService.getDeclarationDestinations(Department.ROOT_BANK_ID, summaryFormType1.getId(), FormDataKind.SUMMARY, 1)).thenReturn(ddtList);
+        when(sourceService.getDeclarationDestinations(Department.ROOT_BANK_ID, summaryFormType2.getId(), FormDataKind.SUMMARY, 1)).thenReturn(null);
 		ReflectionTestUtils.setField(service, "sourceService", sourceService);
 		
 		FormTypeDao formTypeDao = mock(FormTypeDao.class);
@@ -302,12 +309,7 @@ public class FormDataAccessServiceImplTest {
 		when(formTypeDao.get(Matchers.anyInt())).thenReturn(ft);
 		ReflectionTestUtils.setField(service, "formTypeDao", formTypeDao);
 
-        DepartmentDeclarationTypeDao departmentDeclarationTypeDao = mock(DepartmentDeclarationTypeDao.class);
-        List<DepartmentDeclarationType> ddtList = new ArrayList<DepartmentDeclarationType>();
         ddtList.add(mockDepartmentDeclarationType(Department.ROOT_BANK_ID, DECLARATION_TYPE_1_ID));
-        when(departmentDeclarationTypeDao.getDestinations(Department.ROOT_BANK_ID, summaryFormType1.getId(), FormDataKind.SUMMARY)).thenReturn(ddtList);
-        when(departmentDeclarationTypeDao.getDestinations(Department.ROOT_BANK_ID, summaryFormType2.getId(), FormDataKind.SUMMARY)).thenReturn(null);
-        ReflectionTestUtils.setField(service, "departmentDeclarationTypeDao", departmentDeclarationTypeDao);
 
         DeclarationDataDao declarationDataDao = mock(DeclarationDataDao.class);
         DeclarationData declarationData = new DeclarationData();
@@ -568,17 +570,17 @@ public class FormDataAccessServiceImplTest {
         //Перевести из состояния "Подготовлена" в "Создана" и из "Подготовлена" в "Принята" может контролер текущего уровня,
         // контролер вышестоящего уровня или контролер УНП.
         userInfo.setUser(mockUser(BANK_CONTROL_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
-        assertArrayEquals(new Object[]{WorkflowMove.PREPARED_TO_CREATED, WorkflowMove.PREPARED_TO_ACCEPTED},
+        assertArrayEquals(new Object[]{WorkflowMove.PREPARED_TO_CREATED, WorkflowMove.PREPARED_TO_APPROVED},
                 service.getAvailableMoves(userInfo, BANK_PREPARED_FORMDATA_ID).toArray());
         userInfo.setUser(mockUser(BANK_CONTROL_UNP_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL_UNP));
-        assertArrayEquals(new Object[]{WorkflowMove.PREPARED_TO_CREATED, WorkflowMove.PREPARED_TO_ACCEPTED},
+        assertArrayEquals(new Object[]{WorkflowMove.PREPARED_TO_CREATED, WorkflowMove.PREPARED_TO_APPROVED},
                 service.getAvailableMoves(userInfo, BANK_PREPARED_FORMDATA_ID).toArray());
         userInfo.setUser(mockUser(BANK_OPERATOR_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_OPER));
         assertArrayEquals(new Object[]{}, service.getAvailableMoves(userInfo, BANK_PREPARED_FORMDATA_ID).toArray());
 
         //Перевести из состояния "Принята" в "Подготовлена" может контролер вышестоящего уровня и контролер УНП.
         userInfo.setUser(mockUser(BANK_CONTROL_UNP_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL_UNP));
-        assertArrayEquals(new Object[]{WorkflowMove.ACCEPTED_TO_PREPARED},
+        assertArrayEquals(new Object[]{WorkflowMove.ACCEPTED_TO_APPROVED},
                 service.getAvailableMoves(userInfo, BANK_ACCEPTED_FORMDATA_ID).toArray());
         userInfo.setUser(mockUser(BANK_OPERATOR_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_OPER));
         assertArrayEquals(new Object[]{}, service.getAvailableMoves(userInfo, BANK_ACCEPTED_FORMDATA_ID).toArray());
@@ -593,25 +595,25 @@ public class FormDataAccessServiceImplTest {
 
 		//Перевести из состояния "Создана" в "Принята" может контролер текущего уровня, контролер УНП
 		userInfo.setUser(mockUser(BANK_CONTROL_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
-		assertArrayEquals(new Object[] { WorkflowMove.CREATED_TO_ACCEPTED },
+		assertArrayEquals(new Object[] { WorkflowMove.CREATED_TO_APPROVED },
 				service.getAvailableMoves(userInfo, BANK_CREATED_SUMMARY_FORMDATA_ID).toArray());
 		userInfo.setUser(mockUser(BANK_CONTROL_UNP_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL_UNP));
-		assertArrayEquals(new Object[] { WorkflowMove.CREATED_TO_ACCEPTED },
+		assertArrayEquals(new Object[] { WorkflowMove.CREATED_TO_APPROVED },
 				service.getAvailableMoves(userInfo, BANK_CREATED_SUMMARY_FORMDATA_ID).toArray());
 		userInfo.setUser(mockUser(BANK_OPERATOR_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_OPER));
 		/*assertArrayEquals(new Object[] { }, service.getAvailableMoves(userInfo, BANK_CREATED_SUMMARY_FORMDATA_ID).toArray());*/
 
 		//Перевести из состояния "Принята" в "Создана" может текущий контролер или контролер УНП
 		userInfo.setUser(mockUser(BANK_CONTROL_UNP_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL_UNP));
-		assertArrayEquals(new Object[] { WorkflowMove.ACCEPTED_TO_CREATED },
+		assertArrayEquals(new Object[] { WorkflowMove.ACCEPTED_TO_APPROVED },
 				service.getAvailableMoves(userInfo, BANK_ACCEPTED_SUMMARY_FORMDATA_ID).toArray());
 		assertArrayEquals(new Object[] { WorkflowMove.CREATED_TO_ACCEPTED},
 				service.getAvailableMoves(userInfo, TB1_CREATED_FORMDATA_BALANCED_ID).toArray());
 		assertArrayEquals(new Object[] { WorkflowMove.ACCEPTED_TO_CREATED},
 				service.getAvailableMoves(userInfo, TB1_ACCEPTED_FORMDATA_BALANCED_ID).toArray());
 		userInfo.setUser(mockUser(BANK_CONTROL_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
-		assertArrayEquals(new Object[] { WorkflowMove.ACCEPTED_TO_CREATED},
-				service.getAvailableMoves(userInfo, BANK_ACCEPTED_SUMMARY_FORMDATA_ID).toArray());
+/*		assertArrayEquals(new Object[] { WorkflowMove.ACCEPTED_TO_CREATED},
+				service.getAvailableMoves(userInfo, BANK_ACCEPTED_SUMMARY_FORMDATA_ID).toArray());*/
 		userInfo.setUser(mockUser(BANK_OPERATOR_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_OPER));
 		/*assertArrayEquals(new Object[] { }, service.getAvailableMoves(userInfo, BANK_ACCEPTED_SUMMARY_FORMDATA_ID).toArray());*/
 		/*assertArrayEquals(new Object[] { },
@@ -694,7 +696,7 @@ public class FormDataAccessServiceImplTest {
 		assertTrue(params.isCanEdit());
 		assertFalse(params.isCanDelete());
 		assertArrayEquals(
-			new Object[] {WorkflowMove.PREPARED_TO_CREATED, WorkflowMove.PREPARED_TO_ACCEPTED},
+			new Object[] {WorkflowMove.PREPARED_TO_CREATED, WorkflowMove.PREPARED_TO_APPROVED},
 			params.getAvailableWorkflowMoves().toArray()
 		);
 	}

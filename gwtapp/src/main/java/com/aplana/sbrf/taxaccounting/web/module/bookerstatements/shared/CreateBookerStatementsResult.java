@@ -7,6 +7,7 @@ public class CreateBookerStatementsResult implements Result {
 
     private String uuid;
     private boolean hasError = false;
+    private Long accountPeriodId;
 
     public String getUuid() {
         return uuid;
@@ -22,5 +23,13 @@ public class CreateBookerStatementsResult implements Result {
 
     public void setHasError(boolean hasError) {
         this.hasError = hasError;
+    }
+
+    public Long getAccountPeriodId() {
+        return accountPeriodId;
+    }
+
+    public void setAccountPeriodId(Long accountPeriodId) {
+        this.accountPeriodId = accountPeriodId;
     }
 }

@@ -36,9 +36,10 @@ public class GetAuditFilterDataHandler extends AbstractActionHandler<GetAuditFil
     public GetAuditFilterDataResult execute(GetAuditFilterDataAction action, ExecutionContext executionContext) throws ActionException {
         GetAuditFilterDataResult result = new GetAuditFilterDataResult();
 
-        LogSystemFilterAvailableValues avaliableValues = auditService.getFilterAvailableValues(securityService.currentUserInfo().getUser());
+        //TODO этот хэндлер больше не нужен. Удалить после мержа
+        /*LogSystemFilterAvailableValues avaliableValues = auditService.getFilterAvailableValues(securityService.currentUserInfo().getUser());
         result.setTaxTypes(Arrays.asList(TaxType.values()));
-        result.setAvailableValues(avaliableValues);
+        result.setAvailableValues(avaliableValues);*/
         return result;
     }
 

@@ -50,7 +50,12 @@ public class RefBookUniversal implements RefBookDataProvider {
 
     private static final String REF_BOOK_RECORD_TABLE_NAME = "REF_BOOK_RECORD";
 
-    private final static SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+    private static final ThreadLocal<SimpleDateFormat> formatter = new ThreadLocal<SimpleDateFormat>(){
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy");
+        }
+    };
 
     private final static String CROSS_ERROR_MSG = "Обнаружено пересечение указанного срока актуальности с существующей версией!";
 
@@ -299,7 +304,7 @@ public class RefBookUniversal implements RefBookDataProvider {
             }
             if (versionTo == null) {
                 if (nextVersion != null && logger != null) {
-                    logger.info("Установлена дата окончания актуальности версии "+sdf.format(SimpleDateUtils.addDayToDate(nextVersion.getVersionStart(), -1))+" в связи с наличием следующей версии");
+                    logger.info("Установлена дата окончания актуальности версии "+formatter.get().format(SimpleDateUtils.addDayToDate(nextVersion.getVersionStart(), -1))+" в связи с наличием следующей версии");
                 }
             } else {
                 if (!excludedVersionEndRecords.contains(record.getRecordId())) {
@@ -337,7 +342,7 @@ public class RefBookUniversal implements RefBookDataProvider {
                     throw new ServiceException(CROSS_ERROR_MSG);
                 } else {
                     if (logger != null) {
-                        logger.info("Установлена дата окончания актуальности версии "+sdf.format(SimpleDateUtils.addDayToDate(versionFrom, -1))+" для предыдущей версии");
+                        logger.info("Установлена дата окончания актуальности версии "+formatter.get().format(SimpleDateUtils.addDayToDate(versionFrom, -1))+" для предыдущей версии");
                     }
                 }
             }
@@ -537,7 +542,7 @@ public class RefBookUniversal implements RefBookDataProvider {
         if (parentVersions != null && !parentVersions.isEmpty()) {
             StringBuilder versions = new StringBuilder();
             for (int i=0; i<parentVersions.size(); i++) {
-                versions.append(sdf.format(parentVersions));
+                versions.append(formatter.get().format(parentVersions));
                 if (i < parentVersions.size() - 1) {
                     versions.append(", ");
                 }

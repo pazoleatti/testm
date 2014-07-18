@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -9,7 +11,7 @@ import java.util.List;
 public class BookerStatementsFilter implements Serializable {
     private static final long serialVersionUID = -756162324197L;
 
-    private List<Integer> reportPeriodIds;
+    private List<Long> accountPeriodIds;
     private List<Integer> departmentIds;
     private BookerStatementsType bookerStatementsType;
 
@@ -24,13 +26,12 @@ public class BookerStatementsFilter implements Serializable {
     /*true, если сортируем по возрастанию, false - по убыванию*/
     private boolean ascSorting;
 
-
-    public List<Integer> getReportPeriodIds() {
-        return reportPeriodIds;
+    public List<Long> getAccountPeriodIds() {
+        return accountPeriodIds;
     }
 
-    public void setReportPeriodIds(List<Integer> reportPeriodIds) {
-        this.reportPeriodIds = reportPeriodIds;
+    public void setAccountPeriodIds(List<Long> accountPeriodIds) {
+        this.accountPeriodIds = accountPeriodIds;
     }
 
     public List<Integer> getDepartmentIds() {
@@ -79,5 +80,16 @@ public class BookerStatementsFilter implements Serializable {
 
     public void setAscSorting(boolean ascSorting) {
         this.ascSorting = ascSorting;
+    }
+
+    @Override
+    public String toString() {
+        return "[accountPeriodIds = "+ (accountPeriodIds != null ? "[" + (accountPeriodIds.size()> 0 ? StringUtils.join(accountPeriodIds.toArray(), ',') : "") + "]" : "null") +
+                "; departmentIds = "+ (departmentIds != null ? "[" + (departmentIds.size()> 0 ? StringUtils.join(departmentIds.toArray(), ',') : "") + "]" : "null") +
+                "; bookerStatementsType = " + bookerStatementsType +
+                "; startIndex = " + startIndex +
+                "; countOfRecords = " + countOfRecords +
+                "; searchOrdering = " + searchOrdering +
+                "; ascSorting = " + ascSorting + "]";
     }
 }

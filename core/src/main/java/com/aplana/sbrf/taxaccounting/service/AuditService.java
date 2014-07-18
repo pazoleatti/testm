@@ -25,10 +25,6 @@ public interface AuditService {
 	void add(FormDataEvent event, TAUserInfo userInfo, Integer departmentId, Integer reportPeriodId,
              String declarationType, String formType, Integer formKindId, String note);
 
-	/**
-	 * Получить данные используемые для фильтрации журналом аудита
-	 */
-	LogSystemFilterAvailableValues getFilterAvailableValues(TAUser user);
 
     /**
      * Удаляем набор записей из журнала и сразу создаем запись в ЖА об архивировании.

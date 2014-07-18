@@ -2,13 +2,19 @@ package com.aplana.sbrf.taxaccounting.web.module.sources.client;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.source.SourceMode;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
+import com.aplana.sbrf.taxaccounting.web.module.sources.client.assingDialog.AssignDialogPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.sources.client.assingDialog.AssignDialogView;
+import com.aplana.sbrf.taxaccounting.web.module.sources.client.assingDialog.ButtonClickHandlers;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.*;
-import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.DepartmentFormTypeShared;
+import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -32,44 +38,80 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 	public interface MyProxy extends ProxyPlace<SourcesPresenter>, Place {
 	}
 
-	public interface MyView extends View, HasUiHandlers<SourcesUiHandlers> {
+    public interface MyView extends View, HasUiHandlers<SourcesUiHandlers> {
 
-		void init(TaxType taxType, boolean isForm, Integer selectedReceiverId, Integer selectedSourceId);
-		void setDepartments(List<Department> departments, Set<Integer> availableDepartments);
+        /**
+         * Иницализация формы.
+         * Запускается один раз при открытии.
+         *
+         * @param taxType тип налога
+         * @param types доступные типы назначений
+         * @param type текущий тип назначения
+         * @param year года для периода периодов О_О
+         * @param periods список достных периодов
+         * @param isForm форма или декларация
+         */
+        void init(TaxType taxType, List<AppointmentType> types, AppointmentType type, int year, List<PeriodInfo> periods,
+                  boolean isForm);
 
-		/**
-		 * Обновляет на фрме таблицу с доступными для выбора типами НФ приемников (НФ назначениями) (левая)
-		 *
-		 * @param formTypes
-		 * @param departmentFormTypes
-		 */
-		void setAvalibleFormReceivers(Map<Integer, FormType> formTypes,
-				List<DepartmentFormType> departmentFormTypes);
+        /**
+         * Полуыить выбранный интервал периодов
+         * @return интервал периодов
+         */
+        PeriodsInterval getPeriodInterval();
 
-		/**
-		 * Обновляет на фрме таблицу с доступными для выбора типами деклараций приемников  (левая)
-		 *
-		 * @param declarationTypes
-		 * @param departmentDeclarationTypes
-		 */
-		void setAvalibleDeclarationReceivers(Map<Integer, DeclarationType> declarationTypes,
-				List<DepartmentDeclarationType> departmentDeclarationTypes);
+        /**
+         * Назначаются приемники?
+         */
+        boolean isSource();
 
-		/**
-		 * Обновляет на фрме таблицу с доступными для добавления источниками (которая справа)
-		 *
-		 * @param formTypes
-		 * @param departmentFormTypes
-		 */
-		void setAvalibleSources(Map<Integer, FormType> formTypes, List<DepartmentFormType> departmentFormTypes);
+        /**
+         * Обработка деклараций
+         */
+        boolean isDeclaration();
 
-		/**
-		 * Обновляет на фрме таблицу с источниками для выбранного приемника (которая внизу)
-		 *
-		 * @param departmentFormTypes
-		 */
-		void setCurrentSources(List<DepartmentFormTypeShared> departmentFormTypes);
-	}
+        /**
+         * Установка значений для комопонента выбора подразделения
+         * @param departments список подразделений
+         * @param availableDepartments доступные для выбора
+         */
+        void setDepartments(List<Department> departments, Set<Integer> availableDepartments);
+
+        /**
+         * Обновляет на фрме таблицу с доступными для выбора типами НФ (НФ назначениями) (левая)
+         *
+         * @param departmentFormTypes назначения НФ подразделениям
+         */
+        void setAvailableFormsLeft(List<DepartmentAssign> departmentFormTypes);
+
+        /**
+         * Обновляет на фрме таблицу с доступными для выбора типами НФ (НФ назначениями) (правая)
+         *
+         * @param departmentDeclarationTypes назначения деклараций подразделениям
+         */
+        void setAvailableDecsRight(List<DepartmentAssign> departmentDeclarationTypes);
+
+        /**
+         * Обновляет на фрме таблицу с доступными для выбора типами назначений деклараций подразделению (левая)
+         *
+         * @param departmentDeclarationTypes назначения деклараций подразделениям
+         */
+        void setAvailableDecsLeft(List<DepartmentAssign> departmentDeclarationTypes);
+
+        /**
+         * Обновляет на фрме таблицу с доступными для добавления приемнику/источнику (которая справа)
+         *
+         * @param departmentFormTypes назначения НФ подразделениям
+         */
+        void setAvailableFormRight(List<DepartmentAssign> departmentFormTypes);
+
+        /**
+         * Обновляет на фрме таблицу с источниками для выбранного приемника/источника (которая внизу)
+         *
+         * @param departmentFormTypes назначения НФ подразделениям
+         */
+        void setCurrentSources(List<CurrentAssign> departmentFormTypes);
+    }
 
 	private final DispatchAsync dispatcher;
 
@@ -77,12 +119,26 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 
     private boolean isForm = true;
 
+    protected final AssignDialogPresenter assignDialogPresenter;
+
 	@Inject
-	public SourcesPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy, DispatchAsync dispatcher) {
+	public SourcesPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy, DispatchAsync dispatcher,
+                            AssignDialogPresenter assignDialogPresenter) {
 		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
 		this.dispatcher = dispatcher;
+        this.assignDialogPresenter = assignDialogPresenter;
 		getView().setUiHandlers(this);
 	}
+
+    @Override
+    public void openAssignDialog(AssignDialogView.State state, PeriodsInterval pi, ButtonClickHandlers handlers){
+        assignDialogPresenter.open(state, pi, handlers);
+    }
+
+    @Override
+    public void closeAssignDialog(){
+        assignDialogPresenter.close();
+    }
 
 	/**
 	 * @param request запрос
@@ -93,26 +149,24 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
         LogCleanEvent.fire(this);
         LogShowEvent.fire(this, false);
 
-		// При инициализации формы получаем списки департаментов
-		GetDepartmentsAction action = new GetDepartmentsAction();
+        // При инициализации формы получаем списки департаментов
+        InitSourcesAction action = new InitSourcesAction();
 
         taxType = TaxType.valueOf(request.getParameter("nType", ""));
-        isForm = Boolean.valueOf(request.getParameter("isForm", ""));
+        isForm = Boolean.valueOf(request.getParameter("isForm", "true"));
 
-        // Выбранные подразделения
-        String selectedReceiverStr = request.getParameter("dst", null);
-        String selectedSourceStr = request.getParameter("src", null);
-        final Integer selectedReceiverId = selectedReceiverStr == null ? null : Integer.valueOf(selectedReceiverStr);
-        final Integer selectedSourceId = selectedSourceStr == null ? null : Integer.valueOf(selectedSourceStr);
+        action.setTaxType(taxType);
 
         dispatcher.execute(action, CallbackUtils
-                .defaultCallback(new AbstractCallback<GetDepartmentsResult>() {
+                .defaultCallback(new AbstractCallback<InitSourcesResult>() {
                     @Override
-                    public void onSuccess(GetDepartmentsResult result) {
+                    public void onSuccess(InitSourcesResult result) {
                         getView().setDepartments(result.getDepartments(), result.getAvailableDepartments());
-                        getView().init(taxType, isForm, selectedReceiverId, selectedSourceId);
+                        getView().init(taxType, Arrays.asList(AppointmentType.values()), AppointmentType.SOURCES, result.getYear(),
+                                result.getPeriods(), isForm);
+                        assignDialogPresenter.setAvailablePeriods(result.getPeriods());
                     }
-                }, this).addCallback(new ManualRevealCallback<GetDepartmentsResult>(SourcesPresenter.this)));
+                }, this).addCallback(new ManualRevealCallback<InitSourcesResult>(SourcesPresenter.this)));
     }
 
 	@Override
@@ -121,87 +175,108 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 	}
 
 	@Override
-	public void getFormSources(Integer departmentId) {
+	public void getFormsRight(Integer departmentId, DepartmentAssign selectedLeft) {
         if (departmentId == null) {
-            getView().setAvalibleSources(new HashMap<Integer, FormType>(0), new ArrayList<DepartmentFormType>(0));
+            getView().setAvailableFormRight(new ArrayList<DepartmentAssign>(0));
             return;
         }
 
-		GetFormDFTAction action = new GetFormDFTAction();
+		GetDepartmentAssignsAction action = new GetDepartmentAssignsAction();
+        action.setForm(true);
 		action.setDepartmentId(departmentId);
 		action.setTaxType(taxType);
+        action.setPeriodsInterval(getView().getPeriodInterval());
+        action.setSelectedLeft(selectedLeft);
+        action.setMode(getView().isSource() ? SourceMode.SOURCES : SourceMode.DESTINATIONS);
 		dispatcher.execute(action, CallbackUtils
-				.defaultCallback(new AbstractCallback<GetFormDFTResult>() {
+				.defaultCallback(new AbstractCallback<GetDepartmentAssignsResult>() {
 					@Override
-					public void onSuccess(GetFormDFTResult result) {
-						getView().setAvalibleSources(result.getFormTypes(), result.getDepartmentFormTypes());
+					public void onSuccess(GetDepartmentAssignsResult result) {
+						getView().setAvailableFormRight(result.getDepartmentAssigns());
 					}
 				}, this));
 	}
 
 	@Override
-	public void getFormReceivers(Integer departmentId) {
+	public void getFormsLeft(Integer departmentId) {
         if (departmentId == null) {
-            getView().setAvalibleFormReceivers(new HashMap<Integer, FormType>(0), new ArrayList<DepartmentFormType>(0));
+            getView().setAvailableFormsLeft(new ArrayList<DepartmentAssign>(0));
             return;
         }
 
-		GetFormDFTAction action = new GetFormDFTAction();
+		GetDepartmentAssignsAction action = new GetDepartmentAssignsAction();
+        action.setForm(true);
 		action.setDepartmentId(departmentId);
 		action.setTaxType(taxType);
+        action.setPeriodsInterval(getView().getPeriodInterval());
 		dispatcher.execute(action, CallbackUtils
-				.defaultCallback(new AbstractCallback<GetFormDFTResult>() {
+				.defaultCallback(new AbstractCallback<GetDepartmentAssignsResult>() {
 					@Override
-					public void onSuccess(GetFormDFTResult result) {
-						getView().setAvalibleFormReceivers(result.getFormTypes(), result.getDepartmentFormTypes());
+					public void onSuccess(GetDepartmentAssignsResult result) {
+						getView().setAvailableFormsLeft(result.getDepartmentAssigns());
 					}
 				}, this));
 	}
 
+    @Override
+    public void getDecsLeft(Integer departmentId) {
+        if (departmentId == null) {
+            getView().setAvailableDecsLeft(new ArrayList<DepartmentAssign>(0));
+            return;
+        }
+
+        GetDepartmentAssignsAction action = new GetDepartmentAssignsAction();
+        action.setForm(false);
+        action.setDepartmentId(departmentId);
+        action.setTaxType(taxType);
+        action.setPeriodsInterval(getView().getPeriodInterval());
+        dispatcher.execute(action, CallbackUtils
+                .defaultCallback(new AbstractCallback<GetDepartmentAssignsResult>() {
+                    @Override
+                    public void onSuccess(GetDepartmentAssignsResult result) {
+                        getView().setAvailableDecsLeft(result.getDepartmentAssigns());
+                    }
+                }, this));
+    }
+
+    @Override
+    public void getDecsRight(Integer departmentId, DepartmentAssign selectedLeft) {
+        if (departmentId == null) {
+            getView().setAvailableDecsRight(new ArrayList<DepartmentAssign>(0));
+            return;
+        }
+
+        GetDepartmentAssignsAction action = new GetDepartmentAssignsAction();
+        action.setForm(false);
+        action.setDepartmentId(departmentId);
+        action.setTaxType(taxType);
+        action.setPeriodsInterval(getView().getPeriodInterval());
+        action.setSelectedLeft(selectedLeft);
+        action.setMode(getView().isSource() ? SourceMode.SOURCES : SourceMode.DESTINATIONS);
+        dispatcher.execute(action, CallbackUtils
+                .defaultCallback(new AbstractCallback<GetDepartmentAssignsResult>() {
+                    @Override
+                    public void onSuccess(GetDepartmentAssignsResult result) {
+                        getView().setAvailableDecsRight(result.getDepartmentAssigns());
+                    }
+                }, this));
+    }
+
 	@Override
-	public void getFormReceiverSources(DepartmentFormType departmentFormType) {
-		GetCurrentSourcesForFormAction action = new GetCurrentSourcesForFormAction();
-		action.setDepartmentId(departmentFormType.getDepartmentId());
-		action.setFormTypeId(departmentFormType.getFormTypeId());
-		action.setKind(departmentFormType.getKind());
+	public void getCurrentAssigns(DepartmentAssign departmentAssign) {
+        GetCurrentAssignsAction action = new GetCurrentAssignsAction();
+        action.setDepartmentId(departmentAssign.getDepartmentId());
+        action.setTypeId(departmentAssign.getTypeId());
+        action.setDeclaration(getView().isDeclaration());
+        action.setKind(departmentAssign.getKind());
+        action.setPeriodsInterval(getView().getPeriodInterval());
+        action.setMode(getView().isSource() ? SourceMode.SOURCES : SourceMode.DESTINATIONS);
+
 		dispatcher.execute(action, CallbackUtils
-				.defaultCallback(new AbstractCallback<GetCurrentSourcesResult>() {
+				.defaultCallback(new AbstractCallback<GetCurrentAssignsResult>() {
 					@Override
-					public void onSuccess(GetCurrentSourcesResult result) {
+					public void onSuccess(GetCurrentAssignsResult result) {
 						getView().setCurrentSources(result.getCurrentSources());
-					}
-				}, this));
-	}
-
-	@Override
-	public void getDeclarationReceiverSources(DepartmentDeclarationType departmentDeclarationType) {
-		GetCurrentSourcesForDeclaratonAction action = new GetCurrentSourcesForDeclaratonAction();
-		action.setDepartmentId(departmentDeclarationType.getDepartmentId());
-		action.setDeclarationTypeId(departmentDeclarationType.getDeclarationTypeId());
-		dispatcher.execute(action, CallbackUtils
-				.defaultCallback(new AbstractCallback<GetCurrentSourcesResult>() {
-					@Override
-					public void onSuccess(GetCurrentSourcesResult result) {
-						getView().setCurrentSources(result.getCurrentSources());
-					}
-				}, this));
-	}
-
-	@Override
-	public void getDeclarationReceivers(Integer departmentId) {
-        if (departmentId == null) {
-            getView().setAvalibleDeclarationReceivers(new HashMap<Integer, DeclarationType>(0), new ArrayList<DepartmentDeclarationType>(0));
-            return;
-        }
-
-		GetDeclarationDDTAction action = new GetDeclarationDDTAction();
-		action.setDepartmentId(departmentId);
-		action.setTaxType(taxType);
-		dispatcher.execute(action, CallbackUtils
-				.defaultCallback(new AbstractCallback<GetDeclarationDDTResult>() {
-					@Override
-					public void onSuccess(GetDeclarationDDTResult result) {
-						getView().setAvalibleDeclarationReceivers(result.getDeclarationTypes(), result.getDeclarationReceivers());
 					}
 				}, this));
 	}
@@ -212,38 +287,111 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
     }
 
     @Override
-	public void showAssignErrorMessage() {
-        // TODO Заменить на http://jira.aplana.com/browse/SBRFACCTAX-5398 по готовности
-        Dialog.warningMessage("Выбранное назначение налоговой формы уже является источником " +
-                "для выбранного приемника!");
+    public void deleteCurrentAssign(final DepartmentAssign departmentAssign, Set<CurrentAssign> currentAssigns) {
+        DeleteCurrentAssignsAction action = new DeleteCurrentAssignsAction();
+        action.setDeclaration(getView().isDeclaration());
+        action.setMode(getView().isSource() ? SourceMode.SOURCES : SourceMode.DESTINATIONS);
+        action.setPeriodsInterval(getView().getPeriodInterval());
+        action.setCurrentAssigns(currentAssigns);
+        action.setDepartmentAssign(departmentAssign);
+        dispatcher.execute(action, CallbackUtils
+                .defaultCallback(new AbstractCallback<DeleteCurrentAssignsResult>() {
+                    @Override
+                    public void onSuccess(DeleteCurrentAssignsResult result) {
+                        getCurrentAssigns(departmentAssign);
+                        LogCleanEvent.fire(SourcesPresenter.this);
+                        LogAddEvent.fire(SourcesPresenter.this, result.getUuid());
+                    }
+                }, this));
     }
 
-	@Override
-	public void updateFormSources(final DepartmentFormType departmentFormType, List<Long> sourceDepartmentFormTypeIds) {
-		UpdateFormSourcesAction action = new UpdateFormSourcesAction();
-		action.setDepartmentFormTypeId(departmentFormType.getId());
-		action.setSourceDepartmentFormTypeIds(sourceDepartmentFormTypeIds);
-		dispatcher.execute(action, CallbackUtils
-				.defaultCallback(new AbstractCallback<UpdateSourcesResult>() {
-					@Override
-					public void onSuccess(UpdateSourcesResult result) {
-						getFormReceiverSources(departmentFormType);
-					}
-				}, this));
+    @Override
+    public void prepareUpdateAssign(final DepartmentAssign departmentAssign, final CurrentAssign currentAssign) {
+        GetPeriodIntervalAction action = new GetPeriodIntervalAction();
+        action.setPeriodStart(currentAssign.getStartDateAssign());
+        action.setPeriodEnd(currentAssign.getEndDateAssign());
+        action.setTaxType(taxType);
+        dispatcher.execute(action, CallbackUtils
+                .defaultCallback(new AbstractCallback<GetPeriodIntervalResult>() {
+                    @Override
+                    public void onSuccess(final GetPeriodIntervalResult result) {
+                        openAssignDialog(AssignDialogView.State.UPDATE, result.getPeriodsInterval(), new ButtonClickHandlers() {
+                            @Override
+                            public void ok(PeriodsInterval periodsInterval) {
+                                updateCurrentAssign(departmentAssign, currentAssign, periodsInterval);
+                            }
+
+                            @Override
+                            public void cancel() {
+                                closeAssignDialog();
+                            }
+                        });
+                    }
+                }, this));
+    }
+
+    @Override
+    public void createAssign(final DepartmentAssign leftObject, Set<DepartmentAssign> rightSelectedObjects, PeriodsInterval periodInterval, List<Integer> leftDepartment, List<Integer> rightDepartment) {
+        if (checkInterval(periodInterval)) {
+            if (leftDepartment == null || leftDepartment.isEmpty()
+                    || rightDepartment == null || rightDepartment.isEmpty()) {
+                Dialog.errorMessage("Создание назначения", "Подразделение не выбрано!");
+                return;
+            }
+            CreateAssignAction action = new CreateAssignAction();
+            action.setDeclaration(getView().isDeclaration());
+            action.setMode(getView().isSource() ? SourceMode.SOURCES : SourceMode.DESTINATIONS);
+            action.setPeriodsInterval(periodInterval);
+            action.setLeftObject(leftObject);
+            action.setRightSelectedObjects(rightSelectedObjects);
+            action.setLeftDepartmentId(leftDepartment.get(0));
+            action.setRightDepartmentId(rightDepartment.get(0));
+            action.setTaxType(taxType);
+            dispatcher.execute(action, CallbackUtils
+                    .defaultCallback(new AbstractCallback<CreateAssignResult>() {
+                        @Override
+                        public void onSuccess(CreateAssignResult result) {
+                            getCurrentAssigns(leftObject);
+                            LogCleanEvent.fire(SourcesPresenter.this);
+                            LogAddEvent.fire(SourcesPresenter.this, result.getUuid());
+                        }
+                    }, this));
+        }
+    }
+
+    @Override
+	public void updateCurrentAssign(final DepartmentAssign departmentAssign, CurrentAssign currentAssign, PeriodsInterval periodInterval) {
+        if (checkInterval(periodInterval)) {
+            UpdateCurrentAssignsAction action = new UpdateCurrentAssignsAction();
+            action.setDeclaration(getView().isDeclaration());
+            action.setMode(getView().isSource() ? SourceMode.SOURCES : SourceMode.DESTINATIONS);
+            action.setNewPeriodsInterval(periodInterval);
+            action.setCurrentAssign(currentAssign);
+            action.setDepartmentAssign(departmentAssign);
+            action.setOldDateFrom(currentAssign.getStartDateAssign());
+            action.setOldDateTo(currentAssign.getEndDateAssign());
+            action.setTaxType(taxType);
+            dispatcher.execute(action, CallbackUtils
+                    .defaultCallback(new AbstractCallback<UpdateCurrentAssignsResult>() {
+                        @Override
+                        public void onSuccess(UpdateCurrentAssignsResult result) {
+                            getCurrentAssigns(departmentAssign);
+                            LogCleanEvent.fire(SourcesPresenter.this);
+                            LogAddEvent.fire(SourcesPresenter.this, result.getUuid());
+                        }
+                    }, this));
+        }
 	}
 
-	@Override
-	public void updateDeclarationSources(final DepartmentDeclarationType departmentDeclarationType,
-										 List<Long> sourceDepartmentFormTypeIds) {
-		UpdateDeclarationSourcesAction action = new UpdateDeclarationSourcesAction();
-		action.setDepartmentDeclarationTypeId(departmentDeclarationType.getId());
-		action.setSourceDepartmentFormTypeIds(sourceDepartmentFormTypeIds);
-		dispatcher.execute(action, CallbackUtils
-				.defaultCallback(new AbstractCallback<UpdateSourcesResult>() {
-					@Override
-					public void onSuccess(UpdateSourcesResult result) {
-						getDeclarationReceiverSources(departmentDeclarationType);
-					}
-				}, this));
-	}
+    private boolean checkInterval(PeriodsInterval periodInterval) {
+        PeriodInfo periodFrom = periodInterval.getPeriodFrom();
+        PeriodInfo periodTo = periodInterval.getPeriodTo();
+        int yearFrom = periodInterval.getYearFrom();
+        int yearTo= periodInterval.getYearTo();
+        if (yearFrom > yearTo || (yearFrom == yearTo && periodFrom.getStartDate().after(periodTo.getStartDate()))) {
+            Dialog.errorMessage("Создание назначения", "Интервал периода указан неверно!");
+            return false;
+        }
+        return true;
+    }
 }

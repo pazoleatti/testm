@@ -84,6 +84,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
     @Autowired
     private LogEntryService logEntryService;
     @Autowired
+    private PeriodService periodService;
+    @Autowired
     private FormDataService formDataService;
 
     @Override
@@ -94,10 +96,11 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
         }
         // НФ
         FormData formData = formDataDao.getWithoutRows(formDataId);
+        ReportPeriod reportPeriod = periodService.getReportPeriod(formData.getReportPeriodId());
 
         // Подразделения, доступные пользователю
         List<Integer> avaibleDepartmentList = departmentService.getTaxFormDepartments(userInfo.getUser(),
-                asList(formData.getFormType().getTaxType()));
+                asList(formData.getFormType().getTaxType()), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
 
         // Создаваемые вручную формы (читают все, имеющие доступ к подразделению в любом статусе)
         if (asList(FormDataKind.ADDITIONAL, FormDataKind.PRIMARY, FormDataKind.UNP).contains(formData.getKind())
@@ -162,6 +165,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 
         // Вид формы
         FormType formType = formTypeDao.get(formTypeId);
+        ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(reportPeriodId);
 
         // Если выбранный "Вид формы" не назначен выбранному подразделению,
         // то система выводит сообщение в панель уведомления: "Выбранный вид налоговой формы не назначен подразделению".
@@ -169,7 +173,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
         // "Нет прав доступа к созданию формы с заданными параметрами".
         boolean foundTypeAndKind = false;
         boolean foundKind = false;
-        for (DepartmentFormType dft : sourceService.getDFTByDepartment(departmentId, formType.getTaxType())) {
+        for (DepartmentFormType dft : sourceService.getDFTByDepartment(departmentId, formType.getTaxType(),
+                reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate())) {
             if (dft.getKind() == kind) {
                 foundKind = true;
                 if (dft.getFormTypeId() == formTypeId) {
@@ -232,7 +237,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 
         //Не существует приёмника формы, имеющего статус "Принят"?
         List<Pair<String, String>> destinations = sourceService.existAcceptedDestinations(formData.getDepartmentId(), formData.getFormType().getId(),
-                formData.getKind(), formData.getReportPeriodId());
+                formData.getKind(), formData.getReportPeriodId(), null, null);
         if (!destinations.isEmpty()) {
             ReportPeriod period = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
             for (Pair<String, String> destination : destinations) {
@@ -408,7 +413,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 
         //Не существует приёмника формы, имеющего статус "Принят"?
         List<Pair<String, String>> destinations = sourceService.existAcceptedDestinations(formData.getDepartmentId(), formData.getFormType().getId(),
-                formData.getKind(), formData.getReportPeriodId());
+                formData.getKind(), formData.getReportPeriodId(), null, null);
         if (!destinations.isEmpty()) {
             ReportPeriod period = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
             for (Pair<String, String> destination : destinations) {
@@ -437,6 +442,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
     private List<WorkflowMove> getAvailableMovesWithoutCanRead(TAUserInfo userInfo, long formDataId) {
         List<WorkflowMove> result = new LinkedList<WorkflowMove>();
         FormData formData = formDataDao.getWithoutRows(formDataId);
+        ReportPeriod reportPeriod = periodService.getReportPeriod(formData.getReportPeriodId());
 
         // Проверка открытости периода
         if (!reportPeriodService.isActivePeriod(formData.getReportPeriodId(), formData.getDepartmentId())) {
@@ -465,7 +471,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
             }
             // Связи НФ -> НФ
             List<DepartmentFormType> formDestinations = departmentFormTypeDao.getFormDestinations(
-                    formData.getDepartmentId(), formData.getFormType().getId(), formData.getKind());
+                    formData.getDepartmentId(), formData.getFormType().getId(), formData.getKind(),
+                    reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
             // Призрак передачи НФ на вышестоящий уровень
             boolean sendToNextLevel = false;
             for (DepartmentFormType destination : formDestinations) {
@@ -478,7 +485,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                 // Связи НФ -> Декларация
                 List<DepartmentDeclarationType> declarationDestinations =
                         departmentFormTypeDao.getDeclarationDestinations(formData.getDepartmentId(),
-                                formData.getFormType().getId(), formData.getKind());
+                                formData.getFormType().getId(), formData.getKind(),
+                                reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
                 for (DepartmentDeclarationType destination : declarationDestinations) {
                     if (formData.getDepartmentId() != destination.getDepartmentId()) {
                         sendToNextLevel = true;
@@ -732,8 +740,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
         }
 
         // Проверка вышестоящих деклараций
-        List<DepartmentDeclarationType> departmentDeclarationTypes = departmentDeclarationTypeDao.getDestinations(
-                formData.getDepartmentId(), formData.getFormType().getId(), formData.getKind());
+        List<DepartmentDeclarationType> departmentDeclarationTypes = sourceService.getDeclarationDestinations(
+                formData.getDepartmentId(), formData.getFormType().getId(), formData.getKind(), formData.getReportPeriodId());
         if (departmentDeclarationTypes != null) {
             for (DepartmentDeclarationType departmentDeclarationType : departmentDeclarationTypes) {
                 DeclarationData declaration = declarationDataDao.find(departmentDeclarationType.getDeclarationTypeId(),

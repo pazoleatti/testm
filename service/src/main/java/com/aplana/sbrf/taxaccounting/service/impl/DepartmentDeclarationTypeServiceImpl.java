@@ -26,16 +26,6 @@ public class DepartmentDeclarationTypeServiceImpl implements DepartmentDeclarati
     DeclarationTypeDao declarationTypeDao;
 
 	@Override
-	public List<DepartmentDeclarationType> getDepartmentDeclarationTypes(int departmentId) {
-		return departmentDeclarationTypeDao.getDepartmentDeclarationTypes(departmentId);
-	}
-
-	@Override
-	public List<DepartmentDeclarationType> getDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind) {
-		return departmentDeclarationTypeDao.getDestinations(sourceDepartmentId, sourceFormTypeId, sourceKind);
-	}
-
-	@Override
 	public Set<Integer> getDepartmentIdsByTaxType(TaxType taxType) {
 		return departmentDeclarationTypeDao.getDepartmentIdsByTaxType(taxType);
 	}

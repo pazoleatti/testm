@@ -126,10 +126,12 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 		int departmentId = declarationData.getDepartmentId();
 		int declarationTemplateId = declarationData.getDeclarationTemplateId();
 		int reportPeriodId = declarationData.getReportPeriodId();
+        ReportPeriod reportPeriod = periodService.getReportPeriod(reportPeriodId);
 
 		// Формирование списка НФ-источников в статусе "Принята"
 		DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationTemplateId);
-		List<DepartmentFormType> sourcesInfo = departmentFormTypeDao.getDeclarationSources(departmentId, declarationTemplate.getType().getId());
+		List<DepartmentFormType> sourcesInfo = departmentFormTypeDao.getDeclarationSources(departmentId, declarationTemplate.getType().getId(),
+                reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
 		List<FormData> records = new ArrayList<FormData>();
 		for (DepartmentFormType dft : sourcesInfo) {
 			// В будущем возможны ситуации, когда по заданному сочетанию параметров будет несколько

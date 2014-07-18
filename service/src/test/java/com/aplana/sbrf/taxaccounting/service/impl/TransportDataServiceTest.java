@@ -249,42 +249,6 @@ public class TransportDataServiceTest {
         // Не реализуется, т.к. логика сложная и сильно завязана на другие сервисы
     }
 
-    @Test
-    public void moveToErrorDirectoryTest() throws IOException {
-        TemporaryFolder temporaryFolder = new TemporaryFolder();
-        temporaryFolder.create();
-        FileWrapper errorFile = new FileWrapper(temporaryFolder.newFile("Тестовый файл.rnu"));
-        Logger logger = new Logger();
-        logger.error("Тестовая ошибка!");
-        logger.warn("Тестовое предупреждение!");
-        logger.info("Тестовое сообщение!");
-
-        TAUserInfo userInfo = new TAUserInfo();
-        TAUser user = new TAUser();
-        userInfo.setUser(user);
-        TARole role = new TARole();
-        role.setAlias(TARole.ROLE_CONTROL_UNP);
-        user.setRoles(asList(role));
-
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date());
-
-        ((TransportDataServiceImpl) transportDataService).moveToErrorDirectory(userInfo, TEST_DEPARTMENT_ID, errorFile, logger);
-
-        File dstFolder = new File(folder.getPath() + "/error/" + calendar.get(Calendar.YEAR) + '/'
-                + Months.fromId(calendar.get(Calendar.MONTH)).getName() + '/'
-                + String.format("%02d", calendar.get(Calendar.DAY_OF_MONTH)) + '/');
-
-        Assert.assertTrue(dstFolder.exists());
-        List<String> fileNameList = asList(dstFolder.list());
-        Assert.assertEquals(1, fileNameList.size());
-        Assert.assertTrue(fileNameList.get(0).endsWith(".zip"));
-        File srcFolder = new File(temporaryFolder.getRoot().getPath());
-        Assert.assertEquals(0, srcFolder.list().length);
-        FileUtils.deleteDirectory(new File(folder.getPath() + "/error/"));
-        temporaryFolder.delete();
-    }
-
     private static InputStream getFileAsStream(String fileName) {
         return TransportDataServiceTest.class.getClassLoader().getResourceAsStream(TEST_PATH + fileName);
     }

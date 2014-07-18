@@ -4,8 +4,6 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
-import java.util.Date;
-
 /**
  * Получение бухгалтерской отчетности
  * @author dloshkarev
@@ -15,7 +13,7 @@ public class GetBookerStatementsAction extends UnsecuredActionImpl<GetBookerStat
     private int departmentId;
     /** Тип бухотчетности (0, 1) */
     private int statementsKind;
-    private Integer reportPeriodId;
+    private Integer accountPeriodId;
     private PagingParams pagingParams;
 
     /** Флаг для получения всех идентификаторов записей. Используется только при удалении */
@@ -45,12 +43,12 @@ public class GetBookerStatementsAction extends UnsecuredActionImpl<GetBookerStat
         this.departmentId = departmentId;
     }
 
-    public Integer getReportPeriodId() {
-        return reportPeriodId;
+    public Integer getAccountPeriodId() {
+        return accountPeriodId;
     }
 
-    public void setReportPeriodId(Integer reportPeriodId) {
-        this.reportPeriodId = reportPeriodId;
+    public void setAccountPeriodId(Integer accountPeriodId) {
+        this.accountPeriodId = accountPeriodId;
     }
 
     public boolean isNeedOnlyIds() {

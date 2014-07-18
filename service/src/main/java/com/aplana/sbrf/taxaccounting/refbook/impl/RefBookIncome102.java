@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookIncome102Dao;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -34,13 +33,9 @@ public class RefBookIncome102 implements RefBookDataProvider {
     @Autowired
     private RefBookIncome102Dao dao;
 
-    @Autowired
-    private ReportPeriodDao reportPeriodDao;
-
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
-		ReportPeriod period = reportPeriodDao.getReportPeriodByDate(TaxType.INCOME, version);
-        return dao.getRecords(period.getId(), pagingParams, filter, sortAttribute, isSortAscending);
+        return dao.getRecords(pagingParams, filter, sortAttribute, isSortAscending);
     }
 
     @Override
@@ -50,32 +45,12 @@ public class RefBookIncome102 implements RefBookDataProvider {
 
     @Override
     public List<Long> getUniqueRecordIds(Date version, String filter) {
-        if (version != null){
-            ReportPeriod period = reportPeriodDao.getReportPeriodByDate(TaxType.INCOME, version);
-            if (filter == null || filter.isEmpty()) {
-                filter = " REPORT_PERIOD_ID = " + period.getId();
-            } else {
-                filter += " AND REPORT_PERIOD_ID = " + period.getId();
-            }
             return dao.getUniqueRecordIds(filter);
-        } else {
-            return dao.getUniqueRecordIds(filter);
-        }
     }
 
     @Override
     public int getRecordsCount(Date version, String filter) {
-        if (version != null){
-            ReportPeriod period = reportPeriodDao.getReportPeriodByDate(TaxType.INCOME, version);
-            if (filter == null || filter.isEmpty()) {
-                filter = " REPORT_PERIOD_ID = " + period.getId();
-            } else {
-                filter += " AND REPORT_PERIOD_ID = " + period.getId();
-            }
             return dao.getRecordsCount(filter);
-        } else {
-            return dao.getRecordsCount(filter);
-        }
     }
 
     @Override

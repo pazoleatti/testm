@@ -1,8 +1,9 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
-    <ui:style>
-        .panel{
+
+    <ui:style field="style" type="com.aplana.sbrf.taxaccounting.web.widget.style.LabelSeparator.Style">
+        .panel {
             padding: 1px;
         }
         .sptext {
@@ -12,17 +13,17 @@
 
         .sp {
             border-bottom: #277E55 dashed 1px;
-            padding-right: 2px;
+            margin-left: 4px;
         }
     </ui:style>
 
-    <g:HorizontalPanel ui:field="panel" width="100%" addStyleNames="{style.panel}">
-        <g:cell width="1%">
-            <g:Label wordWrap="false" ui:field="textBox" addStyleNames="{style.sptext}"/>
-        </g:cell>
-        <g:cell width="99%" verticalAlignment="bottom">
-            <g:HTMLPanel addStyleNames="{style.sp}"/>
-        </g:cell>
+    <g:HorizontalPanel ui:field="panel" width="100%">
+        <!--<g:cell width="1%">-->
+            <!--<g:Label wordWrap="false" addStyleNames="{style.sptext}"/>-->
+        <!--</g:cell>-->
+        <!--<g:cell width="99%" verticalAlignment="bottom">-->
+            <!--<g:HTMLPanel addStyleNames="{style.sp}"/>-->
+        <!--</g:cell>-->
     </g:HorizontalPanel>
 
 </ui:UiBinder>

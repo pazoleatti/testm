@@ -392,7 +392,7 @@ public class PeriodServiceImpl implements PeriodService{
 
 	@Override
 	public Set<ReportPeriod> getOpenForUser(TAUser user, TaxType taxType) {
-		List<Integer> departments = departmentService.getTaxFormDepartments(user, Arrays.asList(taxType));
+		List<Integer> departments = departmentService.getTaxFormDepartments(user, Arrays.asList(taxType), null, null);
 		getPeriodsByTaxTypeAndDepartments(taxType, departments);
 		if (user.hasRole(TARole.ROLE_CONTROL_UNP)
 				|| user.hasRole(TARole.ROLE_CONTROL_NS)

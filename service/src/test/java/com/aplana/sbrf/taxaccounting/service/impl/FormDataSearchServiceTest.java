@@ -12,6 +12,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import static com.aplana.sbrf.taxaccounting.test.DepartmentFormTypeMockUtils.mockDepartmentFormType;
@@ -105,19 +106,19 @@ public class FormDataSearchServiceTest {
         reportPeriod.setEndDate(calendar.getTime());
         when(periodService.getReportPeriod(1)).thenReturn(reportPeriod);
 
-        when(departmentService.getTaxFormDepartments(any(TAUser.class), anyListOf(TaxType.class))).thenReturn(asList(1, 2, 3));
+        when(departmentService.getTaxFormDepartments(any(TAUser.class), anyListOf(TaxType.class), any(Date.class), any(Date.class))).thenReturn(asList(1, 2, 3));
         when(formDataAccessService.getAvailableFormDataKind(any(TAUserInfo.class), anyListOf(TaxType.class))).thenReturn(asList(FormDataKind.values()));
 		
 		List<DepartmentFormType> dfts = new ArrayList<DepartmentFormType>();
 		dfts.add(mockDepartmentFormType(1, 1, FormDataKind.SUMMARY));
 		dfts.add(mockDepartmentFormType(1, 2, FormDataKind.SUMMARY));
-		when(departmentFormTypeDao.getByTaxType(1, TaxType.TRANSPORT)).thenReturn(dfts);
+		when(departmentFormTypeDao.getByTaxType(1, TaxType.TRANSPORT, null, null)).thenReturn(dfts);
 		
 		dfts = new ArrayList<DepartmentFormType>();
 		dfts.add(mockDepartmentFormType(2, 3, FormDataKind.SUMMARY));
 		dfts.add(mockDepartmentFormType(3, 2, FormDataKind.SUMMARY));
         dfts.add(mockDepartmentFormType(1, 2, FormDataKind.PRIMARY));
-		when(departmentFormTypeDao.getDepartmentSources(1, TaxType.TRANSPORT)).thenReturn(dfts);
+		when(departmentFormTypeDao.getDepartmentSources(1, TaxType.TRANSPORT, null, null)).thenReturn(dfts);
 	}
 
 	@Test
