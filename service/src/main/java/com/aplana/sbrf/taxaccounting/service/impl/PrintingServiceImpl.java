@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.LogBusinessDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
@@ -68,74 +69,80 @@ public class PrintingServiceImpl implements PrintingService {
 
 	@Override
 	public String generateExcel(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked) {
-        formDataAccessService.canRead(userInfo, formDataId);
-        FormDataReport data = new FormDataReport();
-        FormData formData = formDataDao.get(formDataId, manual);
-        FormTemplate formTemplate = formTemplateDao.get(formData.getFormTemplateId());
-        Department department =  departmentDao.getDepartment(formData.getPerformer() != null ?
-                formData.getPerformer().getPrintDepartmentId() : formData.getDepartmentId());
-        ReportPeriod reportPeriod = reportPeriodDao.get(formData.getReportPeriodId());
-        // http://jira.aplana.com/browse/SBRFACCTAX-6399
-        if ((formData.getKind() == FormDataKind.PRIMARY || formData.getKind() == FormDataKind.CONSOLIDATED)
-                && reportPeriod.getTaxPeriod().getTaxType() == TaxType.INCOME) {
-            RefBookDataProvider dataProvider = refBookFactory.getDataProvider(REF_BOOK_ID);
-            Map<String, RefBookValue> refBookValueMap = dataProvider.getRecordData((long) reportPeriod.getDictTaxPeriodId());
-            Integer code = Integer.parseInt(refBookValueMap.get(REF_BOOK_VALUE_NAME).getStringValue());
-            reportPeriod.setName(ReportPeriodSpecificName.fromId(code).getName());
-        }
-        data.setData(formData);
-        data.setFormTemplate(formTemplate);
-        data.setReportPeriod(reportPeriod);
-        data.setAcceptanceDate(logBusinessDao.getFormAcceptanceDate(formDataId));
-        data.setCreationDate(logBusinessDao.getFormCreationDate(formDataId));
-        List<DataRow<Cell>> dataRows = dataRowDao.getSavedRows(formData, null, null);
-        Logger log = new Logger();
-        refBookHelper.dataRowsDereference(log, dataRows, formTemplate.getColumns());
-
-        RefBookValue refBookValue = refBookFactory.getDataProvider(REF_BOOK_ID).
-                getRecordData((long) reportPeriod.getDictTaxPeriodId()).get(REF_BOOK_VALUE_NAME);
         try {
+            formDataAccessService.canRead(userInfo, formDataId);
+            FormDataReport data = new FormDataReport();
+            FormData formData = formDataDao.get(formDataId, manual);
+            FormTemplate formTemplate = formTemplateDao.get(formData.getFormTemplateId());
+            Department department =  departmentDao.getDepartment(formData.getPerformer() != null ?
+                    formData.getPerformer().getPrintDepartmentId() : formData.getDepartmentId());
+            ReportPeriod reportPeriod = reportPeriodDao.get(formData.getReportPeriodId());
+            // http://jira.aplana.com/browse/SBRFACCTAX-6399
+            if ((formData.getKind() == FormDataKind.PRIMARY || formData.getKind() == FormDataKind.CONSOLIDATED)
+                    && reportPeriod.getTaxPeriod().getTaxType() == TaxType.INCOME) {
+                RefBookDataProvider dataProvider = refBookFactory.getDataProvider(REF_BOOK_ID);
+                Map<String, RefBookValue> refBookValueMap = dataProvider.getRecordData((long) reportPeriod.getDictTaxPeriodId());
+                Integer code = Integer.parseInt(refBookValueMap.get(REF_BOOK_VALUE_NAME).getStringValue());
+                reportPeriod.setName(ReportPeriodSpecificName.fromId(code).getName());
+            }
+            data.setData(formData);
+            data.setFormTemplate(formTemplate);
+            data.setReportPeriod(reportPeriod);
+            data.setAcceptanceDate(logBusinessDao.getFormAcceptanceDate(formDataId));
+            data.setCreationDate(logBusinessDao.getFormCreationDate(formDataId));
+            List<DataRow<Cell>> dataRows = dataRowDao.getSavedRows(formData, null, null);
+            Logger log = new Logger();
+            refBookHelper.dataRowsDereference(log, dataRows, formTemplate.getColumns());
+
+            RefBookValue refBookValue = refBookFactory.getDataProvider(REF_BOOK_ID).
+                getRecordData((long) reportPeriod.getDictTaxPeriodId()).get(REF_BOOK_VALUE_NAME);
+
             FormDataXlsmReportBuilder builder = new FormDataXlsmReportBuilder(data, isShowChecked, dataRows, refBookValue);
             return builder.createReport();
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
             throw new ServiceException("Ошибка при создании печатной формы.");
+        } catch (DaoException ex) {
+            throw new ServiceException(ex.getMessage());
         }
 
 	}
 
     @Override
     public String generateCSV(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked) {
-        formDataAccessService.canRead(userInfo, formDataId);
-        FormDataReport data = new FormDataReport();
-        FormData formData = formDataDao.get(formDataId, manual);
-        FormTemplate formTemplate = formTemplateDao.get(formData.getFormTemplateId());
-        ReportPeriod reportPeriod = reportPeriodDao.get(formData.getReportPeriodId());
-        // http://jira.aplana.com/browse/SBRFACCTAX-6399
-        if ((formData.getKind() == FormDataKind.PRIMARY || formData.getKind() == FormDataKind.CONSOLIDATED)
-                && reportPeriod.getTaxPeriod().getTaxType() == TaxType.INCOME) {
-            RefBookDataProvider dataProvider = refBookFactory.getDataProvider(REF_BOOK_ID);
-            Map<String, RefBookValue> refBookValueMap = dataProvider.getRecordData((long) reportPeriod.getDictTaxPeriodId());
-            Integer code = Integer.parseInt(refBookValueMap.get(REF_BOOK_VALUE_NAME).getStringValue());
-            reportPeriod.setName(ReportPeriodSpecificName.fromId(code).getName());
-        }
-        data.setData(formData);
-        data.setFormTemplate(formTemplate);
-        data.setReportPeriod(reportPeriod);
-        data.setAcceptanceDate(logBusinessDao.getFormAcceptanceDate(formDataId));
-        data.setCreationDate(logBusinessDao.getFormCreationDate(formDataId));
-        List<DataRow<Cell>> dataRows = dataRowDao.getSavedRows(formData, null, null);
-        Logger log = new Logger();
-        refBookHelper.dataRowsDereference(log, dataRows, formTemplate.getColumns());
-
-        RefBookValue refBookValue = refBookFactory.getDataProvider(REF_BOOK_ID).
-                getRecordData((long) reportPeriod.getDictTaxPeriodId()).get(REF_BOOK_VALUE_NAME);
         try {
+            formDataAccessService.canRead(userInfo, formDataId);
+            FormDataReport data = new FormDataReport();
+            FormData formData = formDataDao.get(formDataId, manual);
+            FormTemplate formTemplate = formTemplateDao.get(formData.getFormTemplateId());
+            ReportPeriod reportPeriod = reportPeriodDao.get(formData.getReportPeriodId());
+            // http://jira.aplana.com/browse/SBRFACCTAX-6399
+            if ((formData.getKind() == FormDataKind.PRIMARY || formData.getKind() == FormDataKind.CONSOLIDATED)
+                    && reportPeriod.getTaxPeriod().getTaxType() == TaxType.INCOME) {
+                RefBookDataProvider dataProvider = refBookFactory.getDataProvider(REF_BOOK_ID);
+                Map<String, RefBookValue> refBookValueMap = dataProvider.getRecordData((long) reportPeriod.getDictTaxPeriodId());
+                Integer code = Integer.parseInt(refBookValueMap.get(REF_BOOK_VALUE_NAME).getStringValue());
+                reportPeriod.setName(ReportPeriodSpecificName.fromId(code).getName());
+            }
+            data.setData(formData);
+            data.setFormTemplate(formTemplate);
+            data.setReportPeriod(reportPeriod);
+            data.setAcceptanceDate(logBusinessDao.getFormAcceptanceDate(formDataId));
+            data.setCreationDate(logBusinessDao.getFormCreationDate(formDataId));
+            List<DataRow<Cell>> dataRows = dataRowDao.getSavedRows(formData, null, null);
+            Logger log = new Logger();
+            refBookHelper.dataRowsDereference(log, dataRows, formTemplate.getColumns());
+
+
+            RefBookValue refBookValue = refBookFactory.getDataProvider(REF_BOOK_ID).
+                    getRecordData((long) reportPeriod.getDictTaxPeriodId()).get(REF_BOOK_VALUE_NAME);
             FormDataCSVReportBuilder builder = new FormDataCSVReportBuilder(data, isShowChecked, dataRows, refBookValue);
             return builder.createReport();
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
             throw new ServiceException("Ошибка при создании печатной формы.");
+        } catch (DaoException ex) {
+            throw new ServiceException(ex.getMessage());
         }
     }
 

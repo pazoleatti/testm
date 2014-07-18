@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.ObjectLockDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
@@ -110,7 +111,12 @@ public class PeriodServiceImpl implements PeriodService{
 		if (reportPeriods.isEmpty()) {
 			RefBook refBook = rbFactory.get(PERIOD_CODE_REFBOOK);
 			RefBookDataProvider provider = rbFactory.getDataProvider(refBook.getId());
-			Map<String, RefBookValue> record = provider.getRecordData((long) dictionaryTaxPeriodId);
+            Map<String, RefBookValue> record;
+            try {
+                record = provider.getRecordData((long) dictionaryTaxPeriodId);
+            } catch (DaoException ex) {
+                throw new ServiceException(ex.getMessage());
+            }
 			newReportPeriod = new ReportPeriod();
 			newReportPeriod.setTaxPeriod(taxPeriod);
 			newReportPeriod.setDictTaxPeriodId(dictionaryTaxPeriodId);
@@ -762,7 +768,12 @@ public class PeriodServiceImpl implements PeriodService{
         ReportPeriod rp = getReportPeriod(reportPeriodId);
         RefBook refBook = rbFactory.get(PERIOD_CODE_REFBOOK);
         RefBookDataProvider provider = rbFactory.getDataProvider(refBook.getId());
-        Map<String, RefBookValue> dictTaxPeriod = provider.getRecordData((long) newDictTaxPeriodId);
+        Map<String, RefBookValue> dictTaxPeriod;
+        try {
+            dictTaxPeriod = provider.getRecordData((long) newDictTaxPeriodId);
+        } catch (DaoException ex) {
+            throw new ServiceException(ex.getMessage());
+        }
 
         String strBalance = isBalance ? " ввод остатков" : "";
         List<Department> deps = getAvailableDepartments(taxType, user.getUser(), Operation.EDIT, (int) departmentId);
