@@ -12,21 +12,16 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
 import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
-import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
-import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -64,7 +59,7 @@ public class LoadTransportDataServiceImpl implements LoadTransportDataService {
     private static enum LogData {
         L1("Запущена процедура загрузки транспортных файлов, содержащих данные налоговых форм.", LogLevel.INFO, true),
         L2("Завершена процедура загрузки транспортных файлов, содержащих данные налоговых форм. Файлов загружено: %d. Файлов отклонено: %d.", LogLevel.INFO, true),
-        // L3("В каталоге загрузки не найдены файлы! Загрузка файла не выполнена.", LogLevel.ERROR, true),
+        L3("В каталоге загрузки не найдены файлы! Загрузка не выполнена.", LogLevel.ERROR, true),
         L4("Имя или формат файла «%s» не соответствует требованиям к транспортному файлу! Загрузка файла не выполнена.", LogLevel.ERROR, true),
         L5("Указанный в имени файла «%s» код подразделения не существует в Системе! Загрузка файла не выполнена.", LogLevel.ERROR, true),
         L6("Указанный в имени файла «%s» код налоговой формы не существует в Системе! Загрузка файла не выполнена.", LogLevel.ERROR, true),
@@ -82,13 +77,16 @@ public class LoadTransportDataServiceImpl implements LoadTransportDataService {
         L18("Создана новая налоговая форма «%s» для подразделения «%s» в периоде «%s».", LogLevel.INFO, true),
         L19("Первичная налоговая форма «%s» для подразделения «%s» в периоде «%s» сохранена.", LogLevel.INFO, true),
         L20("Закончена загрузка данных файла «%s».", LogLevel.INFO, true),
-        L21("Ошибка при обработке данных транспортного файла Загрузка файла не выполнена.", LogLevel.ERROR, true),
+        L21("Ошибка при обработке данных транспортного файла. Загрузка файла не выполнена.", LogLevel.ERROR, true),
         // L22("Итоговая сумма в графе «%s» строки %d в транспортном файле некорректна. Загрузка файла не выполнена.", LogLevel.ERROR, true),
         L23("Запущена процедура загрузки транспортных файлов, содержащих данные справочников.", LogLevel.INFO, true),
         L24("Завершена процедура загрузки транспортных файлов, содержащих данные справочников. Файлов загружено: %d. Файлов отклонено: %d.", LogLevel.INFO, true),
         // L25("Не указан путь к корректному файлу ключей ЭЦП! Загрузка файла не выполнена.", LogLevel.ERROR, true),
         L26("Транспортный файл размещен в каталоге ошибок в составе архива «%s».", LogLevel.INFO, true),
         L27("Транспортный файл не записан в каталог ошибок! Загрузка файла не выполнена.", LogLevel.ERROR, true),
+        L28("Ошибка при удалении файла «%s» из каталога «%s» при перемещении в каталог ошибок!", LogLevel.INFO, true),
+        L29("Ошибка при удалении файла «%s» из каталога «%s» при перемещении в каталог архива!", LogLevel.ERROR, true),
+        L30("К каталогу загрузки для подразделения «%s» не указан корректный путь!", LogLevel.ERROR, true),
         // Сообщения которых нет в постановке
         L_1("Не указан каталог ошибок в конфигурационных параметрах АС «Учет налогов»!", LogLevel.ERROR, true),
         L_2("Не указан каталог архива в конфигурационных параметрах АС «Учет налогов»!", LogLevel.ERROR, true);
@@ -118,7 +116,6 @@ public class LoadTransportDataServiceImpl implements LoadTransportDataService {
 
     // Сообщения, которые не учтены в постановка
     final static String IMPORT_REF_BOOK_ERROR = "Ошибка при загрузке транспортных файлов справочников %s.";
-    final static String PATH_NOT_SET_ERROR = "Не указан каталог загрузки для «%s» в конфигурационных параметрах АС «Учет налогов»!";
 
     // Константы
     final static String LOG_FILE_NAME = "Ошибки.txt";
@@ -158,6 +155,7 @@ public class LoadTransportDataServiceImpl implements LoadTransportDataService {
         try {
             importResult = refBookExternalService.importRefBookNsi(userInfo, logger);
         } catch (Exception e) {
+            // Сюда должны попадать только при общих ошибках при импорте справочников, ошибки конкретного справочника перехватываются в сервисе
             logger.error(IMPORT_REF_BOOK_ERROR, e.getMessage());
             return new ImportCounter();
         }
@@ -172,6 +170,7 @@ public class LoadTransportDataServiceImpl implements LoadTransportDataService {
         try {
             importResult = refBookExternalService.importRefBookDiasoft(userInfo, logger);
         } catch (Exception e) {
+            // Сюда должны попадать только при общих ошибках при импорте справочников, ошибки конкретного справочника перехватываются в сервисе
             logger.error(IMPORT_REF_BOOK_ERROR, e.getMessage());
             return new ImportCounter();
         }
@@ -197,7 +196,8 @@ public class LoadTransportDataServiceImpl implements LoadTransportDataService {
                     break;
                 }
             }
-            moveToErrorDirectory(userInfo, archivePath, file, logger);
+            // TODO Логи по отдельным файлам тоже можно передать в каталог ошибок, нужно передавать через ImportResult
+            moveToErrorDirectory(userInfo, errorPath, file, null, logger);
         }
 
         return new ImportCounter(importResult.getSuccessFileList().size(), importResult.getSkipFileList().size(), importResult.getFailFileList().size());
@@ -209,7 +209,7 @@ public class LoadTransportDataServiceImpl implements LoadTransportDataService {
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     private ImportCounter importDataFromFolder(TAUserInfo userInfo, ConfigurationParam param, Integer departmentId, Logger logger) {
         // TODO Здесь выводится ошибка поиска пути для подразделения, которая дублируется.
-        String path = getUploadPath(param, departmentId, logger);
+        String path = getUploadPath(userInfo, param, departmentId, logger);
         if (path == null) {
             // Ошибка получения пути
             return new ImportCounter();
@@ -252,6 +252,12 @@ public class LoadTransportDataServiceImpl implements LoadTransportDataService {
         int fail = 0;
         // Набор файлов, которые не удалось переместить с удалением. Их нужно пропускать.
         Set<String> ignoreFileSet = new HashSet<String>();
+        // Если изначально нет подходящих файлов то выдаем отдельную ошибку
+        if (getWorkFilesFromFolder(path, ignoreFileSet).isEmpty()) {
+            logImport(userInfo, LogData.L3, logger);
+            return new ImportCounter();
+        }
+
         // Обработка всех подходящих файлов, с получением списка на каждой итерации
         while (!(workFilesList = getWorkFilesFromFolder(path, ignoreFileSet)).isEmpty()) {
             String fileName = workFilesList.get(0);
@@ -312,7 +318,7 @@ public class LoadTransportDataServiceImpl implements LoadTransportDataService {
                 continue;
             }
 
-            // TODO Корерктирующий период? Вопрос что с ним делать.
+            // TODO Логика загрузки в корерктирующий период реализуется в версии 0.4
 
             FormDataKind formDataKind = FormDataKind.PRIMARY; // ТФ только для первичных НФ
 
@@ -321,19 +327,32 @@ public class LoadTransportDataServiceImpl implements LoadTransportDataService {
             // Поиск экземпляра НФ
             FormData formData;
 
-            if (transportDataParam.getMonth() == null) {
+            // Признак ежемесячной формы по файлу
+            boolean monthly = transportDataParam.getMonth() != null;
+
+            Integer formTemplateId = formTemplateService.getActiveFormTemplateId(formType.getId(), reportPeriod.getId());
+
+            FormTemplate formTemplate = null;
+            if (formTemplateId != null) {
+                formTemplate = formTemplateService.get(formTemplateId);
+                // Уточнение из шаблона
+                monthly = formTemplate.isMonthly();
+            }
+
+            if (!monthly) {
                 formData = formDataDao.find(formType.getId(), formDataKind, formDepartment.getId(), reportPeriod.getId());
             } else {
-                formData = formDataDao.findMonth(formType.getId(), formDataKind, formDepartment.getId(), reportPeriod.getTaxPeriod().getId(),
-                        transportDataParam.getMonth());
+                formData = formDataDao.findMonth(formType.getId(), formDataKind, formDepartment.getId(),
+                        reportPeriod.getTaxPeriod().getId(), transportDataParam.getMonth());
             }
 
             // Экземпляр уже есть и не в статусе «Создана»
             if (formData != null && formData.getState() != WorkflowState.CREATED) {
-                Logger fileLogger = new Logger();
-                logImport(userInfo, LogData.L17, fileLogger);
-                logger.getEntries().addAll(fileLogger.getEntries());
-                moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentCode, fileLogger), currentFile, fileLogger);
+                // Сообщение об ошибке в общий лог и в файл со списком ошибок
+                Logger localLogger = new Logger();
+                localLogger.error(LogData.L17.getText());
+                logImport(userInfo, LogData.L17, logger, formType.getName(), formDepartment.getName());
+                moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentCode, logger), currentFile, localLogger.getEntries(), logger);
                 skip++;
                 continue;
             }
@@ -343,24 +362,22 @@ public class LoadTransportDataServiceImpl implements LoadTransportDataService {
             }
 
             // Загрузка данных в НФ (скрипт)
-            Logger fileLogger = new Logger();
+            Logger localLogger = new Logger();
             try {
-                // Блокировка
-                lockCoreService.lock(FormData.class, formData.getId(), userInfo);
                 // Загрузка
-                importFormData(userInfo, currentFile, formData, formType, formDepartment, reportPeriod, formDataKind,
-                        transportDataParam, fileLogger);
-                // Забираем вывод скрипта
-                logger.getEntries().addAll(fileLogger.getEntries());
+                importFormData(userInfo, currentFile, formData, formType, formTemplate, formDepartment, reportPeriod, formDataKind,
+                        transportDataParam, localLogger);
+                // Вывод скрипта в область уведомлений
+                logger.getEntries().addAll(localLogger.getEntries());
             } catch (Exception ex) {
+                // Вывод скрипта в область уведомлений
+                logger.getEntries().addAll(localLogger.getEntries());
+                // Вывод в область уведомленеий и ЖА
                 logImport(userInfo, LogData.L21, logger, formType.getName(), formDepartment.getName());
                 // Перемещение в каталог ошибок
-                moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentCode, fileLogger), currentFile, fileLogger);
+                moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentCode, logger), currentFile, localLogger.getEntries(), logger);
                 fail++;
                 continue;
-            } finally {
-                // Снимаем блокировку
-                lockCoreService.unlock(FormData.class, formData.getId(), userInfo);
             }
 
             // Файл загружен
@@ -373,50 +390,65 @@ public class LoadTransportDataServiceImpl implements LoadTransportDataService {
     /**
      * Загрузка ТФ конкретной НФ
      */
-    private void importFormData(TAUserInfo userInfo, FileWrapper currentFile, FormData formData, FormType formType, Department formDepartment,
-                                ReportPeriod reportPeriod, FormDataKind formDataKind, TransportDataParam transportDataParam,
-                                Logger logger) {
-
-        // Наличие фатальных ошибок в общем логе не должно откатывать изменения по импорту отдельной формы, если в ней фатальных ошибок нет
-        Logger localLogger = new Logger();
-
+    @Transactional
+    private void importFormData(TAUserInfo userInfo, FileWrapper currentFile, FormData formData, FormType formType,
+                                FormTemplate formTemplate, Department formDepartment, ReportPeriod reportPeriod,
+                                FormDataKind formDataKind, TransportDataParam transportDataParam,
+                                Logger localLogger) {
         String reportPeriodName = reportPeriod.getTaxPeriod().getYear() + " - " + reportPeriod.getName();
 
+        boolean formCreated = false;
         // Если формы нет, то создаем
         if (formData == null) {
+            // Если форма не ежемесячная, то месяц при созданнии не указывается
+            Integer month = transportDataParam.getMonth();
+            if (formTemplate != null && !formTemplate.isMonthly()) {
+                month = null;
+            }
             int formTeplateId = formTemplateService.getActiveFormTemplateId(formType.getId(), reportPeriod.getId());
-            long formDataId = formDataService.createFormData(logger, userInfo, formTeplateId, formDepartment.getId(),
-                    formDataKind, reportPeriod, transportDataParam.getMonth());
+            long formDataId = formDataService.createFormData(localLogger, userInfo, formTeplateId, formDepartment.getId(),
+                    formDataKind, reportPeriod, month);
             formData = formDataDao.get(formDataId, false);
-            logImport(userInfo, LogData.L18, logger, formType.getName(), formDepartment.getName(), reportPeriodName);
+            formCreated = true;
         }
 
-        // Скрипт
-        InputStream inputStream = currentFile.getInputStream();
+        // Блокировка
+        lockCoreService.lock(FormData.class, formData.getId(), userInfo);
+
         try {
-            formDataService.importFormData(localLogger, userInfo, formData.getId(), inputStream, currentFile.getName(),
-                    FormDataEvent.IMPORT_TRANSPORT_FILE);
+            // Скрипт
+            InputStream inputStream = currentFile.getInputStream();
+            try {
+                formDataService.importFormData(localLogger, userInfo, formData.getId(), inputStream, currentFile.getName(),
+                        FormDataEvent.IMPORT_TRANSPORT_FILE);
+            } finally {
+                IOUtils.closeQuietly(inputStream);
+            }
+
+            // Если при выполнении скрипта возникли фатальные ошибки, то
+            if (localLogger.containsLevel(LogLevel.ERROR)) {
+                // Исключение для отката транзакции сознания и заполнения НФ
+                throw new ServiceException();
+            }
+
+            // Перенос в архив
+            moveToArchiveDirectory(userInfo, getFormDataArchivePath(userInfo, formDepartment.getId(), localLogger), currentFile, localLogger);
+
+            if (formCreated) {
+                logImport(userInfo, LogData.L18, localLogger, formType.getName(), formDepartment.getName(), reportPeriodName);
+            }
+
+            // Сохранение
+            formDataService.saveFormData(localLogger, userInfo, formData);
+
+            logImport(userInfo, LogData.L19, localLogger, formType.getName(), formDepartment.getName(), reportPeriodName);
         } finally {
-            IOUtils.closeQuietly(inputStream);
+            // Снимаем блокировку
+            lockCoreService.unlock(FormData.class, formData.getId(), userInfo);
         }
 
-        // Локальный лог → общий лог
-        logger.getEntries().addAll(localLogger.getEntries());
-
-        // Если при выполнении скрипта возникли фатальные ошибки, то
-        if (localLogger.containsLevel(LogLevel.ERROR)) {
-            // Исключение для отката транзакции сознания и заполнения НФ
-            throw new ServiceException();
-        }
-
-        // Перенос в архив
-        moveToArchiveDirectory(userInfo, getFormDataArchivePath(userInfo, formDepartment.getId(), logger), currentFile, logger);
-
-        // Сохранение
-        formDataService.saveFormData(logger, userInfo, formData);
-        logImport(userInfo, LogData.L19, logger, formType.getName(), formDepartment.getName(), reportPeriodName);
-
-        logImport(userInfo, LogData.L20, logger, currentFile.getName());
+        // Загрузка формы завершена
+        logImport(userInfo, LogData.L20, localLogger, currentFile.getName());
     }
 
     /**
@@ -443,11 +475,12 @@ public class LoadTransportDataServiceImpl implements LoadTransportDataService {
      * @param errorPath Путь к каталогу ошибок
      * @param errorFileSrc Файл с ошибкой, который должен быть перенесен
      */
-    void moveToErrorDirectory(TAUserInfo userInfo, String errorPath, FileWrapper errorFileSrc, Logger logger) {
+    void moveToErrorDirectory(TAUserInfo userInfo, String errorPath, FileWrapper errorFileSrc, List<LogEntry> errorList, Logger logger) {
         try {
             // Создание дерева каталогов
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(new Date());
+            // Каталог_ошибок/Текущий_год/Текущий_месяц/Текущий_день_месяца/
             FileWrapper errorFolderDst = ResourceUtils.getSharedResource(errorPath + calendar.get(Calendar.YEAR)
                     + "/" + Months.fromId(calendar.get(Calendar.MONTH)).getName()
                     + "/" + String.format("%02d", calendar.get(Calendar.DAY_OF_MONTH)) + "/", false);
@@ -456,7 +489,8 @@ public class LoadTransportDataServiceImpl implements LoadTransportDataService {
             // Создание архива
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("(yyyy.MM.dd HH.mm.ss)");
 
-            String path = errorFolderDst.getPath() + "/" + errorFileSrc.getName() + simpleDateFormat.format(calendar.getTime()) + ".zip";
+            String path = errorFolderDst.getPath() + "/" + errorFileSrc.getName()
+                    + simpleDateFormat.format(calendar.getTime()) + ".zip";
             FileWrapper errorFileDst = ResourceUtils.getSharedResource(path, false);
             ZipArchiveOutputStream zaos = new ZipArchiveOutputStream(errorFileDst.getOutputStream());
             zaos.setEncoding(ZIP_ENCODING);
@@ -466,18 +500,25 @@ public class LoadTransportDataServiceImpl implements LoadTransportDataService {
             zaos.closeArchiveEntry();
             IOUtils.closeQuietly(errorFileSrcInputStream);
 
-            // Файл с логами
-            zaos.putArchiveEntry(new ZipArchiveEntry(LOG_FILE_NAME));
-            StringBuilder sb = new StringBuilder();
-            for (LogEntry logEntry : logger.getEntries()) {
-                sb.append(logEntry.getLevel().name() + "\t" + logEntry.getMessage() + "\r\n");
+            // Файл с логами, если логи есть
+            if (errorList != null && !errorList.isEmpty()) {
+                zaos.putArchiveEntry(new ZipArchiveEntry(LOG_FILE_NAME));
+                StringBuilder sb = new StringBuilder();
+                for (LogEntry logEntry : errorList) {
+                    sb.append(logEntry.getLevel().name() + "\t" + logEntry.getMessage() + "\r\n");
+                }
+                IOUtils.copy(new ByteArrayInputStream(sb.toString().getBytes()), zaos);
+                zaos.closeArchiveEntry();
             }
-            IOUtils.copy(new ByteArrayInputStream(sb.toString().getBytes()), zaos);
-            zaos.closeArchiveEntry();
+
             IOUtils.closeQuietly(zaos);
 
-            // Удаление
-            errorFileSrc.delete();
+            try {
+                // Удаление
+                errorFileSrc.delete();
+            } catch (Exception e) {
+                logImport(userInfo, LogData.L28, logger);
+            }
 
             logImport(userInfo, LogData.L26, logger, errorFileDst.getName());
         } catch (Exception e) {
@@ -514,6 +555,7 @@ public class LoadTransportDataServiceImpl implements LoadTransportDataService {
             // Создание дерева каталогов
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(new Date());
+            // Каталог_архива/Текущий_год/Текущий_месяц/Текущий_день_месяца/
             FileWrapper archiveFolderDst = ResourceUtils.getSharedResource(archivePath + calendar.get(Calendar.YEAR)
                     + "/" + Months.fromId(calendar.get(Calendar.MONTH)).getName()
                     + "/" + String.format("%02d", calendar.get(Calendar.DAY_OF_MONTH)) + "/", false);
@@ -522,7 +564,8 @@ public class LoadTransportDataServiceImpl implements LoadTransportDataService {
             // Создание архива
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("(yyyy.MM.dd HH.mm.ss)");
 
-            String path = archiveFolderDst.getPath() + "/" + archiveFileSrc.getName() + simpleDateFormat.format(calendar.getTime()) + ".zip";
+            String path = archiveFolderDst.getPath() + "/" + archiveFileSrc.getName()
+                    + simpleDateFormat.format(calendar.getTime()) + ".zip";
             FileWrapper archiveFileDst = ResourceUtils.getSharedResource(path, false);
             ZipArchiveOutputStream zaos = new ZipArchiveOutputStream(archiveFileDst.getOutputStream());
             zaos.setEncoding(ZIP_ENCODING);
@@ -534,7 +577,11 @@ public class LoadTransportDataServiceImpl implements LoadTransportDataService {
             IOUtils.closeQuietly(zaos);
 
             // Удаление
-            archiveFileSrc.delete();
+            try {
+                archiveFileSrc.delete();
+            } catch (Exception e) {
+                logImport(userInfo, LogData.L29, logger);
+            }
 
             logImport(userInfo, LogData.L11, logger, archiveFileDst.getName());
         } catch (Exception e) {
@@ -573,6 +620,7 @@ public class LoadTransportDataServiceImpl implements LoadTransportDataService {
                 break;
         }
         // ЖА
+        // TODO Указать признак ошибки в ЖА. См. logData.getLevel()
         if (logData.isLogSystem()) {
             auditService.add(FormDataEvent.IMPORT_TRANSPORT_FILE, userInfo, userInfo.getUser().getDepartmentId(), null,
                     null, null, null, String.format(logData.getText(), args));
@@ -582,11 +630,11 @@ public class LoadTransportDataServiceImpl implements LoadTransportDataService {
     /**
      * Получение пути из конф. параметров
      */
-    private String getUploadPath(ConfigurationParam configurationParam, int departmentId, Logger logger) {
+    private String getUploadPath(TAUserInfo userInfo, ConfigurationParam configurationParam, int departmentId, Logger logger) {
         ConfigurationParamModel model = configurationDao.getByDepartment(departmentId);
         List<String> uploadPathList = model.get(configurationParam, departmentId);
         if (uploadPathList == null || uploadPathList.isEmpty()) {
-            logger.error(PATH_NOT_SET_ERROR, departmentService.getDepartment(departmentId).getName());
+            logImport(userInfo, LogData.L30, logger, departmentService.getDepartment(departmentId).getName());
             return null;
         }
         return uploadPathList.get(0);
