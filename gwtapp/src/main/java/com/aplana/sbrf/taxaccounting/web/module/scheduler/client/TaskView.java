@@ -3,6 +3,8 @@ package com.aplana.sbrf.taxaccounting.web.module.scheduler.client;
 import com.aplana.gwt.client.*;
 import com.aplana.gwt.client.LongBox;
 import com.aplana.gwt.client.ValueListBox;
+import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.TaskParamModel;
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskJndiInfo;
 import com.aplana.sbrf.taxaccounting.model.TaskParamTypeValues;
@@ -132,9 +134,14 @@ public class TaskView extends ViewWithUiHandlers<TaskUiHandlers>
 
     @UiHandler("cancelButton")
     public void onCancel(ClickEvent event){
-        if(getUiHandlers() != null){
-            getUiHandlers().onCancel();
-        }
+        Dialog.confirmMessage("Отмена", "Отменить изменения?", new DialogHandler() {
+            @Override
+            public void yes() {
+                if (getUiHandlers() != null) {
+                    getUiHandlers().onCancel();
+                }
+            }
+        });
     }
 
     @Override
@@ -160,6 +167,7 @@ public class TaskView extends ViewWithUiHandlers<TaskUiHandlers>
     @Override
     public void setJndiList(List<TaskJndiInfo> jndiList) {
         this.jndiList = jndiList;
+        jndi.setValue(null);
         jndi.setAcceptableValues(jndiList);
     }
 
@@ -169,7 +177,6 @@ public class TaskView extends ViewWithUiHandlers<TaskUiHandlers>
         createButton.setVisible(true);
         taskName.setValue("");
         taskSchedule.setValue("");
-        jndi.setValue(null);
         paramsWidget.clear();
 
         taskName.setEnabled(true);
