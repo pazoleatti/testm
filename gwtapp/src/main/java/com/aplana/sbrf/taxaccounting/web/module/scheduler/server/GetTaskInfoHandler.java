@@ -40,7 +40,6 @@ public class GetTaskInfoHandler extends AbstractActionHandler<GetTaskInfoAction,
             result.setTaskName(taskData.getTaskName());
             result.setTaskState(taskData.getTaskState().getId());
             result.setSchedule(taskData.getSchedule());
-            result.setNumberOfRepeats(taskData.getNumberOfRepeats());
             result.setUserTaskJndi(taskData.getUserTaskJndi());
             result.setTimeCreated(taskData.getTimeCreated());
             result.setNextFireTime(taskData.getNextFireTime());

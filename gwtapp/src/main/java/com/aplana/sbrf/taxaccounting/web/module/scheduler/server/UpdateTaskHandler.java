@@ -51,7 +51,7 @@ public class UpdateTaskHandler extends AbstractActionHandler<UpdateTaskAction, U
                 taskContext.setTaskName(action.getTaskName());
                 taskContext.setSchedule(action.getSchedule());
                 taskContext.setUserTaskJndi(action.getUserTaskJndi());
-                taskContext.setNumberOfRepeats(action.getNumberOfRepeats());
+                taskContext.setNumberOfRepeats(-1);
                 taskContext.setId(action.getContextId());
 
                 Map<String, TaskParam> taskParams = new HashMap<String, TaskParam>();

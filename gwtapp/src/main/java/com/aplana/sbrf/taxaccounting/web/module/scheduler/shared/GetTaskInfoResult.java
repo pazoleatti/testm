@@ -34,9 +34,6 @@ public class GetTaskInfoResult implements Result {
     /** JNDI класса-обработчика задачи */
     private String userTaskJndi;
 
-    /** Количество повторений задачи планировщиком */
-    private int numberOfRepeats;
-
     /** Количество выполненных повторений задачи */
     private Integer repeatsLeft;
 
@@ -87,14 +84,6 @@ public class GetTaskInfoResult implements Result {
 
     public void setUserTaskJndi(String userTaskJndi) {
         this.userTaskJndi = userTaskJndi;
-    }
-
-    public int getNumberOfRepeats() {
-        return numberOfRepeats;
-    }
-
-    public void setNumberOfRepeats(int numberOfRepeats) {
-        this.numberOfRepeats = numberOfRepeats;
     }
 
     public Integer getRepeatsLeft() {

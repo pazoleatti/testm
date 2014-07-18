@@ -21,12 +21,6 @@ public class TaskSearchResultItem implements Serializable {
     /** Состояние задачи */
     private String state;
 
-    /** Количество повторений задачи планировщиком */
-    private int numberOfRepeats;
-
-    /** Количество выполненных повторений задачи */
-    private Integer repeatsLeft;
-
     /** Дата создания задачи */
     private String modificationDate;
 
@@ -57,22 +51,6 @@ public class TaskSearchResultItem implements Serializable {
         this.state = state;
     }
 
-    public int getNumberOfRepeats() {
-        return numberOfRepeats;
-    }
-
-    public void setNumberOfRepeats(int numberOfRepeats) {
-        this.numberOfRepeats = numberOfRepeats;
-    }
-
-    public Integer getRepeatsLeft() {
-        return repeatsLeft;
-    }
-
-    public void setRepeatsLeft(Integer repeatsLeft) {
-        this.repeatsLeft = repeatsLeft;
-    }
-
     public String getModificationDate() {
         return modificationDate;
     }
@@ -100,14 +78,12 @@ public class TaskSearchResultItem implements Serializable {
 
         TaskSearchResultItem that = (TaskSearchResultItem) o;
 
-        if (numberOfRepeats != that.numberOfRepeats) return false;
         if (contextId != null ? !contextId.equals(that.contextId) : that.contextId != null) return false;
         if (id != null ? !id.equals(that.id) : that.id != null) return false;
         if (modificationDate != null ? !modificationDate.equals(that.modificationDate) : that.modificationDate != null)
             return false;
         if (name != null ? !name.equals(that.name) : that.name != null) return false;
         if (nextFireTime != null ? !nextFireTime.equals(that.nextFireTime) : that.nextFireTime != null) return false;
-        if (repeatsLeft != null ? !repeatsLeft.equals(that.repeatsLeft) : that.repeatsLeft != null) return false;
         if (state != null ? !state.equals(that.state) : that.state != null) return false;
 
         return true;
@@ -119,8 +95,6 @@ public class TaskSearchResultItem implements Serializable {
         result = 31 * result + (contextId != null ? contextId.hashCode() : 0);
         result = 31 * result + (name != null ? name.hashCode() : 0);
         result = 31 * result + (state != null ? state.hashCode() : 0);
-        result = 31 * result + numberOfRepeats;
-        result = 31 * result + (repeatsLeft != null ? repeatsLeft.hashCode() : 0);
         result = 31 * result + (modificationDate != null ? modificationDate.hashCode() : 0);
         result = 31 * result + (nextFireTime != null ? nextFireTime.hashCode() : 0);
         return result;

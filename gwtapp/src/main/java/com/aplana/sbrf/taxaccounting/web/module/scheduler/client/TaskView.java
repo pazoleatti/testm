@@ -52,9 +52,6 @@ public class TaskView extends ViewWithUiHandlers<TaskUiHandlers>
     @UiField
     com.aplana.gwt.client.TextBox taskSchedule;
 
-    @UiField
-    com.aplana.gwt.client.TextBox numberOfRepeats;
-
     @UiField(provided = true)
     ValueListBox<TaskJndiInfo> jndi;
 
@@ -156,11 +153,6 @@ public class TaskView extends ViewWithUiHandlers<TaskUiHandlers>
     }
 
     @Override
-    public String getNumberOfRepeats() {
-        return numberOfRepeats.getValue();
-    }
-
-    @Override
     public String getJndi() {
         return jndi.getValue() != null ? jndi.getValue().getJndi() : "";
     }
@@ -177,13 +169,11 @@ public class TaskView extends ViewWithUiHandlers<TaskUiHandlers>
         createButton.setVisible(true);
         taskName.setValue("");
         taskSchedule.setValue("");
-        numberOfRepeats.setValue("");
         jndi.setValue(null);
         paramsWidget.clear();
 
         taskName.setEnabled(true);
         taskSchedule.setEnabled(true);
-        numberOfRepeats.setEnabled(true);
         jndi.setEnabled(true);
     }
 
@@ -192,7 +182,6 @@ public class TaskView extends ViewWithUiHandlers<TaskUiHandlers>
         createButton.setText("Сохранить");
         taskName.setValue(taskData.getTaskName());
         taskSchedule.setValue(taskData.getSchedule());
-        numberOfRepeats.setValue(String.valueOf(taskData.getNumberOfRepeats()));
         jndi.setValue(findJndiInfo(taskData.getUserTaskJndi()), true);
         paramsWidget.setParamsValues(taskData.getParams());
     }

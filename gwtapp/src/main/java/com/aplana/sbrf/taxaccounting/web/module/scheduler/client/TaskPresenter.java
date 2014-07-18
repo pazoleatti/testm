@@ -55,8 +55,6 @@ public class TaskPresenter extends Presenter<TaskPresenter.MyView,
 
         String getTaskSchedule();
 
-        String getNumberOfRepeats();
-
         String getJndi();
 
         void setJndiList(List<TaskJndiInfo> jndiList);
@@ -162,7 +160,6 @@ public class TaskPresenter extends Presenter<TaskPresenter.MyView,
     private <T extends Result> void fillTaskData(TaskData<T> action) {
         action.setTaskName(getView().getTaskName());
         action.setSchedule(getView().getTaskSchedule());
-        action.setNumberOfRepeats(Integer.parseInt(getView().getNumberOfRepeats()));
         action.setUserTaskJndi(getView().getJndi());
 
         List<TaskParamModel> params = getView().getTaskParams();
@@ -184,11 +181,6 @@ public class TaskPresenter extends Presenter<TaskPresenter.MyView,
         }
         if (getView().getTaskSchedule().isEmpty()) {
             validateMsg.append("Не заполнено поле 'Расписание'").append("; ");
-        }
-        if (getView().getNumberOfRepeats().isEmpty()) {
-            validateMsg.append("Не заполнено поле 'Количество повторений задачи'").append("; ");
-        } else if (!checkStringAsInt(getView().getNumberOfRepeats(), false)) {
-            validateMsg.append("Поле 'Количество повторений задачи' должно быть числом").append("; ");
         }
         if (getView().getJndi().isEmpty()) {
             validateMsg.append("Не заполнено поле 'JNDI класса-обработчика'").append("; ");

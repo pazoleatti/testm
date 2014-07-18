@@ -106,10 +106,6 @@
                                     <dw:TextBox width="475px" ui:field="taskSchedule"/>
                                 </g:HorizontalPanel>
                                 <g:HorizontalPanel spacing="5" verticalAlignment="middle">
-                                    <g:Label text="Количество повторений:" addStyleNames="{styles.label}"/>
-                                    <dw:TextBox width="475px" ui:field="numberOfRepeats"/>
-                                </g:HorizontalPanel>
-                                <g:HorizontalPanel spacing="5" verticalAlignment="middle">
                                     <g:Label text="Тип задачи:" addStyleNames="{styles.label}"/>
                                     <dw:ValueListBox width="475px" ui:field="jndi"/>
                                 </g:HorizontalPanel>

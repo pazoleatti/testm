@@ -18,9 +18,6 @@ public abstract class TaskData<T extends Result> extends UnsecuredActionImpl<T> 
     /** Название задачи */
     private String taskName;
 
-    /** Количество повторений задачи планировщиком */
-    private int numberOfRepeats = -1;
-
     /** Расписание задачи в формате CRON
      * second minute hourOfDay DayOfMonth Month DayOfWeek
      * Например 0 10 * * * ? выполняется каждый час в 10 минут, т.е 0:10, 1:10
@@ -44,14 +41,6 @@ public abstract class TaskData<T extends Result> extends UnsecuredActionImpl<T> 
 
     public void setTaskName(String taskName) {
         this.taskName = taskName;
-    }
-
-    public int getNumberOfRepeats() {
-        return numberOfRepeats;
-    }
-
-    public void setNumberOfRepeats(int numberOfRepeats) {
-        this.numberOfRepeats = numberOfRepeats;
     }
 
     public String getSchedule() {

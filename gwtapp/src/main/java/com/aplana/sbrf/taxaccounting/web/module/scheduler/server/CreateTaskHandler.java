@@ -44,7 +44,7 @@ public class CreateTaskHandler extends AbstractActionHandler<CreateTaskAction, C
                 taskContext.setTaskName(action.getTaskName());
                 taskContext.setSchedule(action.getSchedule());
                 taskContext.setUserTaskJndi(action.getUserTaskJndi());
-                taskContext.setNumberOfRepeats(action.getNumberOfRepeats());
+                taskContext.setNumberOfRepeats(-1);
 
                 Map<String, TaskParam> taskParams = new HashMap<String, TaskParam>();
                 for (int i = 0; i < action.getParams().size(); i++) {
