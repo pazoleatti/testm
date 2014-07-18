@@ -16,19 +16,7 @@ import java.util.Set;
  *
  * @author Dmitriy Levykin
  */
-public interface TransportDataService {
-    /**
-     * Загрузка ТФ в каталог загрузки. Загружаются ТФ НФ и ТФС.
-     *
-     * @param userInfo Пользователь
-     * @param departmentId Подразделение, в каталог которого пойдет загрузка
-     * @param fileName Имя ТФ
-     * @param inputStream Поток ТФ
-     * @param logger Логгер для области уведомлений
-     * @return true — был загружен хотя бы один файл
-     */
-    boolean uploadFile(TAUserInfo userInfo, int departmentId, String fileName, InputStream inputStream, Logger logger) throws IOException;
-
+public interface LoadTransportDataService {
     /**
      * Затрузка всех ТФНФ и ТФС
      */
