@@ -1,11 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.bookerstatementsdata.shared;
 
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.gwtplatform.dispatch.shared.Result;
-
-import java.util.List;
-import java.util.Set;
 
 /**
  * @author Dmitriy Levykin
@@ -17,7 +12,7 @@ public class GetBSOpenDataResult implements Result {
     private Boolean isControlUNP;
 
     private String departmentName;
-    private String reportPeriodName;
+    private String accountPeriodName;
     private String statementsKindName;
 
     public Boolean getControlUNP() {
@@ -36,12 +31,12 @@ public class GetBSOpenDataResult implements Result {
         this.departmentName = departmentName;
     }
 
-    public String getReportPeriodName() {
-        return reportPeriodName;
+    public String getAccountPeriodName() {
+        return accountPeriodName;
     }
 
-    public void setReportPeriodName(String reportPeriodName) {
-        this.reportPeriodName = reportPeriodName;
+    public void setAccountPeriodName(String accountPeriodName) {
+        this.accountPeriodName = accountPeriodName;
     }
 
     public String getStatementsKindName() {

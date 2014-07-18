@@ -7,7 +7,6 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder
 import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.client.BookerStatementsTokens;
@@ -53,12 +52,12 @@ public class BookerStatementsDataPresenter extends Presenter<BookerStatementsDat
     private final TableDataProvider dataProvider = new TableDataProvider();
 
     private Integer departmentId;
-    private Integer reportPeriodId;
+    private Integer accountPeriodId;
     private Integer typeId;
 
     public interface MyView extends View, HasUiHandlers<BookerStatementsDataUiHandlers> {
 
-        void setAdditionalFormInfo(String department, String reportPeriod, String type);
+        void setAdditionalFormInfo(String department, String accountPeriodId, String type);
 
         void addAccImportValueChangeHandler(ValueChangeHandler<String> valueChangeHandler);
 
@@ -74,7 +73,7 @@ public class BookerStatementsDataPresenter extends Presenter<BookerStatementsDat
 
         String getDepartmentName();
 
-        String getReportPeriodName();
+        String getAccountPeriodName();
 
         String getBookerReportType();
 
@@ -100,7 +99,7 @@ public class BookerStatementsDataPresenter extends Presenter<BookerStatementsDat
         GetBookerStatementsAction action = new GetBookerStatementsAction();
         action.setDepartmentId(departmentId);
         action.setStatementsKind(typeId);
-        action.setReportPeriodId(reportPeriodId);
+        action.setAccountPeriodId(accountPeriodId);
         action.setNeedOnlyIds(true);
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetBookerStatementsResult>() {
             @Override
@@ -117,7 +116,7 @@ public class BookerStatementsDataPresenter extends Presenter<BookerStatementsDat
                                             .defaultCallback(new AbstractCallback<DeleteBookerStatementsResult>() {
                                                 @Override
                                                 public void onSuccess(DeleteBookerStatementsResult result) {
-                                                    Dialog.infoMessage("Данные бухгалтерской отчётности (форма " + getView().getBookerReportType() + " для подразделения " + getView().getDepartmentName() + " в периоде " + getView().getReportPeriodName() + ") удалены!");
+                                                    Dialog.infoMessage("Данные бухгалтерской отчётности (форма " + getView().getBookerReportType() + " для подразделения " + getView().getDepartmentName() + " в периоде " + getView().getAccountPeriodName() + ") удалены!");
                                                     onReturnClicked();
                                                 }
                                             }, BookerStatementsDataPresenter.this)
@@ -137,7 +136,7 @@ public class BookerStatementsDataPresenter extends Presenter<BookerStatementsDat
                 } else {
                     Dialog.errorMessage("Данные бухгалтерской отчётности (форма " + getView().getBookerReportType() +
                             " для подразделения " + getView().getDepartmentName() +
-                            " в периоде " + getView().getReportPeriodName() + ") не существуют!");
+                            " в периоде " + getView().getAccountPeriodName() + ") не существуют!");
                 }
             }
         }, BookerStatementsDataPresenter.this));
@@ -156,8 +155,8 @@ public class BookerStatementsDataPresenter extends Presenter<BookerStatementsDat
         if (request.getParameterNames().contains(BookerStatementsDataTokens.DEPARTMENT_ID)) {
             departmentId = Integer.parseInt(request.getParameter(BookerStatementsDataTokens.DEPARTMENT_ID, null));
         }
-        if (request.getParameterNames().contains(BookerStatementsDataTokens.REPORT_PERIOD_ID)) {
-            reportPeriodId = Integer.parseInt(request.getParameter(BookerStatementsDataTokens.REPORT_PERIOD_ID, null));
+        if (request.getParameterNames().contains(BookerStatementsDataTokens.ACCOUNT_PERIOD_ID)) {
+            accountPeriodId = Integer.parseInt(request.getParameter(BookerStatementsDataTokens.ACCOUNT_PERIOD_ID, null));
         }
         if (request.getParameterNames().contains(BookerStatementsDataTokens.TYPE_ID)) {
             typeId = Integer.parseInt(request.getParameter(BookerStatementsDataTokens.TYPE_ID, null));
@@ -166,7 +165,7 @@ public class BookerStatementsDataPresenter extends Presenter<BookerStatementsDat
 
         GetBSOpenDataAction action = new GetBSOpenDataAction();
         action.setDepartmentId(departmentId);
-        action.setReportPeriodId(reportPeriodId);
+        action.setAccountPeriodId(accountPeriodId);
         action.setStatementsKind(typeId);
 
         dispatcher.execute(action,
@@ -179,7 +178,7 @@ public class BookerStatementsDataPresenter extends Presenter<BookerStatementsDat
                                     return;
                                 }
 
-                                getView().setAdditionalFormInfo(result.getDepartmentName(), result.getReportPeriodName(), result.getStatementsKindName());
+                                getView().setAdditionalFormInfo(result.getDepartmentName(), result.getAccountPeriodName(), result.getStatementsKindName());
                                 onSearch();
 
                             }
@@ -195,7 +194,7 @@ public class BookerStatementsDataPresenter extends Presenter<BookerStatementsDat
                 ImportAction importAction = new ImportAction();
                 importAction.setUuid(event.getValue());
                 importAction.setDepartmentId(departmentId);
-                importAction.setReportPeriodId(reportPeriodId);
+                importAction.setReportPeriodId(accountPeriodId);
                 importAction.setTypeId(typeId);
                 dispatcher.execute(importAction, CallbackUtils.defaultCallback(
                         new AbstractCallback<ImportResult>() {
@@ -224,7 +223,7 @@ public class BookerStatementsDataPresenter extends Presenter<BookerStatementsDat
                 GetBookerStatementsAction action = new GetBookerStatementsAction();
                 action.setDepartmentId(departmentId);
                 action.setStatementsKind(typeId);
-                action.setReportPeriodId(reportPeriodId);
+                action.setAccountPeriodId(accountPeriodId);
                 action.setPagingParams(new PagingParams(range.getStart() + 1, range.getLength()));
                 action.setNeedOnlyIds(false);
                 dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetBookerStatementsResult>() {

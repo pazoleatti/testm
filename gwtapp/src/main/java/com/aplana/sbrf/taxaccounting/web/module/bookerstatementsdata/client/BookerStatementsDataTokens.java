@@ -16,5 +16,5 @@ public final class BookerStatementsDataTokens {
 	public static final String bookerStatements = "!bookerstatementsdata";
     public static final String DEPARTMENT_ID = "department";
     public static final String TYPE_ID = "type";
-    public static final String REPORT_PERIOD_ID = "reportPeriod";
+    public static final String ACCOUNT_PERIOD_ID = "accountPeriod";
 }

@@ -9,39 +9,39 @@ public class BookerStatementsSearchResultItem implements Serializable {
     private static final long serialVersionUID = -48100343545156L;
 
     // Идентификатор отчётного периода
-    private Integer reportPeriodId;
+    private Integer accountPeriodId;
     // Название отчётного периода
-    private String reportPeriodName;
+    private String accountPeriodName;
     // Год отчётного периода
-    private Integer reportPeriodYear;
+    private Integer accountPeriodYear;
     // Идентификатор подразделения
     private Integer departmentId;
     // Идентификатор вида налоговой формы
-    private Integer BookerStatementsTypeId;
+    private Integer bookerStatementsTypeId;
 
 
-    public Integer getReportPeriodId() {
-        return reportPeriodId;
+    public Integer getAccountPeriodId() {
+        return accountPeriodId;
     }
 
-    public void setReportPeriodId(Integer reportPeriodId) {
-        this.reportPeriodId = reportPeriodId;
+    public void setAccountPeriodId(Integer accountPeriodId) {
+        this.accountPeriodId = accountPeriodId;
     }
 
-    public String getReportPeriodName() {
-        return reportPeriodName;
+    public String getAccountPeriodName() {
+        return accountPeriodName;
     }
 
-    public void setReportPeriodName(String reportPeriodName) {
-        this.reportPeriodName = reportPeriodName;
+    public void setAccountPeriodName(String accountPeriodName) {
+        this.accountPeriodName = accountPeriodName;
     }
 
-    public Integer getReportPeriodYear() {
-        return reportPeriodYear;
+    public Integer getAccountPeriodYear() {
+        return accountPeriodYear;
     }
 
-    public void setReportPeriodYear(Integer reportPeriodYear) {
-        this.reportPeriodYear = reportPeriodYear;
+    public void setAccountPeriodYear(Integer accountPeriodYear) {
+        this.accountPeriodYear = accountPeriodYear;
     }
 
     public Integer getDepartmentId() {
@@ -53,11 +53,11 @@ public class BookerStatementsSearchResultItem implements Serializable {
     }
 
     public Integer getBookerStatementsTypeId() {
-        return BookerStatementsTypeId;
+        return bookerStatementsTypeId;
     }
 
     public void setBookerStatementsTypeId(Integer bookerStatementsTypeId) {
-        BookerStatementsTypeId = bookerStatementsTypeId;
+        this.bookerStatementsTypeId = bookerStatementsTypeId;
     }
 
 }

@@ -13,10 +13,10 @@ public class BookerStatementsSearchResultItemMapper implements RowMapper<BookerS
         BookerStatementsSearchResultItem result = new BookerStatementsSearchResultItem();
 
 		result.setDepartmentId(SqlUtils.getInteger(rs,"department_id"));
-		result.setBookerStatementsTypeId(SqlUtils.getInteger(rs,"type"));
-		result.setReportPeriodId(SqlUtils.getInteger(rs,"report_period_id"));
-		result.setReportPeriodName(rs.getString("report_period_name"));
-        result.setReportPeriodYear(SqlUtils.getInteger(rs,"year"));
+		result.setBookerStatementsTypeId(SqlUtils.getInteger(rs, "type"));
+		result.setAccountPeriodId(SqlUtils.getInteger(rs, "account_period_id"));
+		result.setAccountPeriodName(rs.getString("account_period_name"));
+        result.setAccountPeriodYear(SqlUtils.getInteger(rs, "year"));
 
 		return result;
 	}

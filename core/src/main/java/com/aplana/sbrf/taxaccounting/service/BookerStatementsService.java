@@ -35,11 +35,6 @@ public interface BookerStatementsService {
 
     /**
      * Создание бух отчетности
-     * @param logger
-     * @param periodId
-     * @param typeId
-     * @param departmentId
-     * @param userInfo
      */
-    void create(Logger logger, Integer periodId, int typeId, Integer departmentId, TAUserInfo userInfo);
+    void create(Logger logger, Integer year, Long periodId, int typeId, Integer departmentId, TAUserInfo userInfo);
 }
