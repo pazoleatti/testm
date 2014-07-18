@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.ObjectLockDao;
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
-import com.aplana.sbrf.taxaccounting.dao.api.exception.LockException;
+import com.aplana.sbrf.taxaccounting.model.exception.LockException;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 import com.aplana.sbrf.taxaccounting.model.ObjectLock;

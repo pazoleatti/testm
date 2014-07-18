@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.script.refbook.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.script.refbook.RefBookService;
@@ -8,7 +8,6 @@ import com.aplana.sbrf.taxaccounting.service.script.refbook.RefBookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
