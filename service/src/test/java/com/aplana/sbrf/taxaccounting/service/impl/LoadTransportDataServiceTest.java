@@ -120,7 +120,7 @@ public class LoadTransportDataServiceTest {
 
 
     @Test
-    public void getWorkFilesFromFolderTest() throws IOException {
+    public void getWorkTransportFilesTest() throws IOException {
         // Подготовка тестового каталога
         TemporaryFolder temporaryFolder = new TemporaryFolder();
         temporaryFolder.create();
@@ -133,7 +133,7 @@ public class LoadTransportDataServiceTest {
         }
         temporaryFolder.newFolder("folder");
         // Получение «рабочих» (подходящих файлов)
-        List<String> result = uploadTransportDataService.getWorkFilesFromFolder(temporaryFolder.getRoot().getPath() + "/", null);
+        List<String> result = uploadTransportDataService.getWorkTransportFiles(temporaryFolder.getRoot().getPath() + "/", null);
         temporaryFolder.delete();
         Assert.assertEquals(2, result.size());
         Assert.assertTrue(result.contains(fileNames[4]));
