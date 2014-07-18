@@ -38,6 +38,7 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
     public static final String DECLARATION_TITLE = "Создание декларации";
     public static final String DECLARATION_TITLE_D = "Создание уведомления";
     public static final String DECLARATION_TYPE_TITLE = "Вид декларации:";
+    public static final String DECLARATION_TYPE_TITLE_D = "Вид";
 
     @UiField
     ModalWindow modalWindowTitle;
@@ -99,8 +100,7 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
         TaxType taxType = getUiHandlers().getTaxType();
         departmentPicker.setEnabled(periodPicker.getValue() != null && !periodPicker.getValue().isEmpty() );
         declarationTypeBox.setEnabled(departmentPicker.getValue() != null && !departmentPicker.getValue().isEmpty());
-        continueButton.setEnabled(declarationTypeBox.getValue() != null ||
-                (taxType != null && departmentPicker.getValue() != null && !departmentPicker.getValue().isEmpty() && taxType.equals(TaxType.DEAL)));
+        continueButton.setEnabled(declarationTypeBox.getValue() != null);
     }
 
 
@@ -199,11 +199,11 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
         if (!taxType.equals(TaxType.DEAL)) {
             modalWindowTitle.setText(DECLARATION_TITLE);
             declarationTypeLabel.setText(DECLARATION_TYPE_TITLE);
-            declarationTypeBox.setVisible(true);
         } else {
             modalWindowTitle.setText(DECLARATION_TITLE_D);
-            declarationTypeLabel.setText("");
-            declarationTypeBox.setVisible(false);
+            declarationTypeLabel.setText(DECLARATION_TYPE_TITLE_D);
         }
+
+        declarationTypeBox.setVisible(true);
     }
 }
