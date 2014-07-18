@@ -1,14 +1,14 @@
 package com.aplana.sbrf.taxaccounting.web.module.bookerstatements.shared;
 
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.CreateFormDataResult;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
 public class CreateBookerStatementsAction extends UnsecuredActionImpl<CreateBookerStatementsResult> implements ActionName {
 
-	private Integer bookerStatementsTypeId;
-	private Integer reportPeriodId;
+    private Integer year;
+	private Long accountPeriodId;
 	private Integer departmentId;
+    private Integer bookerStatementsTypeId;
 
 	public Integer getBookerStatementsTypeId() {
 		return bookerStatementsTypeId;
@@ -20,13 +20,13 @@ public class CreateBookerStatementsAction extends UnsecuredActionImpl<CreateBook
 	}
 
 
-	public Integer getReportPeriodId() {
-		return reportPeriodId;
+	public Long getAccountPeriodId() {
+		return accountPeriodId;
 	}
 
 
-	public void setReportPeriodId(Integer reportPeriodId) {
-		this.reportPeriodId = reportPeriodId;
+	public void setAccountPeriodId(Long accountPeriodId) {
+		this.accountPeriodId = accountPeriodId;
 	}
 
 
@@ -42,4 +42,12 @@ public class CreateBookerStatementsAction extends UnsecuredActionImpl<CreateBook
 	public String getName() {
 		return "Создание бух. отчетности";
 	}
+
+    public Integer getYear() {
+        return year;
+    }
+
+    public void setYear(Integer year) {
+        this.year = year;
+    }
 }

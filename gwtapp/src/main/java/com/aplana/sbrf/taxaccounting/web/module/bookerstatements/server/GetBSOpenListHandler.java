@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.web.module.bookerstatements.server;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.shared.GetBSOpenListAction;
@@ -37,9 +36,6 @@ public class GetBSOpenListHandler extends AbstractActionHandler<GetBSOpenListAct
     @Autowired
     SourceService departmentFormTypService;
 
-    @Autowired
-    private PeriodService periodService;
-
     public GetBSOpenListHandler() {
         super(GetBSOpenListAction.class);
     }
@@ -50,9 +46,6 @@ public class GetBSOpenListHandler extends AbstractActionHandler<GetBSOpenListAct
 
         // Текущий пользователь
         TAUser currUser = securityService.currentUserInfo().getUser();
-
-        // Все отчетные периоды
-        result.setReportPeriods(periodService.getAllPeriodsByTaxType(TaxType.INCOME, true));
 
         // Признак контролера
         if (currUser.hasRole(TARole.ROLE_CONTROL_UNP)) {

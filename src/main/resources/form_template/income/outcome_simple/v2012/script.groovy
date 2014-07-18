@@ -596,7 +596,7 @@ void addData(def xml, int headRowCount) {
     def xmlIndexRow = -1
     def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
     def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
-    def int maxRow = 213
+    def int maxRow = 218
 
     def rows = dataRowHelper.allCached
     def int rowIndex = 1

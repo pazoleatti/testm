@@ -2,10 +2,9 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
              xmlns:pager="urn:import:com.aplana.sbrf.taxaccounting.web.widget.pager"
-             xmlns:rep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client"
-             xmlns:fileuplod="urn:import:com.aplana.sbrf.taxaccounting.web.widget.fileupload"
              xmlns:picker="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
-             xmlns:fm="urn:import:com.aplana.gwt.client.form">
+             xmlns:fm="urn:import:com.aplana.gwt.client.form"
+             xmlns:r='urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client'>
     <ui:style>
         .header {
             font-size: 14px;
@@ -15,15 +14,6 @@
         .btnFindPanel {
             padding-left: 10px;
             padding-right: 10px;
-        }
-
-        .btnPanel {
-
-        }
-
-        .fileUploader {
-            margin-right: 5px;
-            margin-left: 5px;
         }
 
         .pager {
@@ -103,8 +93,8 @@
                                 <g:Label text="Период:" addStyleNames="{style.marginRight3}"/>
                             </g:cell>
                             <g:cell width="100%">
-                                <rep:PeriodPickerPopupWidget ui:field="reportPeriodIds" multiselect="true"
-                                                             width="100%"/>
+                                <r:RefBookPickerWidget ui:field="accountPeriodIds" width="100%" versionEnabled="false"
+                                                       attributeIdInt="1071" isHierarchical="false" multiSelect="true" title="Выбор периодов и подразделений БО"/>
                             </g:cell>
                         </g:HorizontalPanel>
                     </g:cell>

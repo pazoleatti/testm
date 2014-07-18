@@ -11,7 +11,6 @@ import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
-import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -34,22 +33,17 @@ public class RefBookIncome101DaoImpl extends AbstractDao implements RefBookIncom
     @Autowired
     private RefBookDao refBookDao;
 
-	@Autowired
-	private RefBookUtils refBookUtils;
+    @Autowired
+    private RefBookUtils refBookUtils;
 
     @Override
-    public PagingResult<Map<String, RefBookValue>> getRecords(Integer reportPeriodId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
-        if (filter == null || filter.isEmpty()) {
-            filter = " REPORT_PERIOD_ID = " + reportPeriodId;
-        } else {
-            filter += " AND REPORT_PERIOD_ID = " + reportPeriodId;
-        }
+    public PagingResult<Map<String, RefBookValue>> getRecords(PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
         return refBookUtils.getRecords(REF_BOOK_ID, TABLE_NAME, pagingParams, filter, sortAttribute, isSortAscending, null);
     }
 
     @Override
-    public PagingResult<Map<String, RefBookValue>> getRecords(Integer reportPeriodId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
-        return getRecords(reportPeriodId, pagingParams, filter, sortAttribute, true);
+    public PagingResult<Map<String, RefBookValue>> getRecords(PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
+        return getRecords(pagingParams, filter, sortAttribute, true);
     }
 
     @Override
@@ -65,13 +59,15 @@ public class RefBookIncome101DaoImpl extends AbstractDao implements RefBookIncom
     @Override
     public Map<String, RefBookValue> getRecordData(Long recordId) {
         try {
-            return getJdbcTemplate().queryForObject("select ID as "+RefBook.RECORD_ID_ALIAS+", REPORT_PERIOD_ID, ACCOUNT, INCOME_DEBET_REMAINS, INCOME_CREDIT_REMAINS, DEBET_RATE, CREDIT_RATE, OUTCOME_DEBET_REMAINS, OUTCOME_CREDIT_REMAINS, ACCOUNT_NAME, DEPARTMENT_ID " +
-                    "from " + TABLE_NAME + " where id = ?",
+            return getJdbcTemplate().queryForObject("select ID as " + RefBook.RECORD_ID_ALIAS + ", ACCOUNT, " +
+                            "INCOME_DEBET_REMAINS, INCOME_CREDIT_REMAINS, DEBET_RATE, CREDIT_RATE, OUTCOME_DEBET_REMAINS, " +
+                            "OUTCOME_CREDIT_REMAINS, ACCOUNT_NAME, ACCOUNT_PERIOD_ID " +
+                            "from " + TABLE_NAME + " where id = ?",
                     new RefBookValueMapper(refBookDao.get(REF_BOOK_ID)),
                     recordId);
-        } catch (EmptyResultDataAccessException e){
+        } catch (EmptyResultDataAccessException e) {
             return new HashMap<String, RefBookValue>(0);
-        } catch (DataAccessException e){
+        } catch (DataAccessException e) {
             logger.error("", e);
             throw new DaoException("", e);
         }
@@ -84,21 +80,20 @@ public class RefBookIncome101DaoImpl extends AbstractDao implements RefBookIncom
 
     @Override
     public List<Date> getVersions(String tableName, Date startDate, Date endDate) {
-		String sql = String.format("SELECT distinct rp.end_date FROM %s i JOIN report_period rp on rp.id = i.report_period_id " +
-				"where rp.end_date >= ? and rp.end_date <= ?", tableName);
-		return getJdbcTemplate().queryForList(sql, new Object[]{startDate, endDate}, new int[]{Types.DATE, Types.DATE}, Date.class);
+        return null;
     }
 
     @Override
     public void updateRecords(final List<Map<String, RefBookValue>> records) {
-        final RefBook refBook = refBookDao.get(REF_BOOK_ID);
 
         if (records == null || records.isEmpty()) {
             return;
         }
 
-        // Удаление записей с совпадающими REPORT_PERIOD_ID и DEPARTMENT_ID
-        Set<Pair<Long, Long>> delList = new HashSet<Pair<Long, Long>>();
+        final RefBook refBook = refBookDao.get(REF_BOOK_ID);
+
+        // Удаление записей с совпадающим ACCOUNT_PERIOD_ID
+        Set<Long> delList = new HashSet<Long>();
 
         for (Map<String, RefBookValue> record : records) {
             // проверка обязательности заполнения записей справочника
@@ -107,24 +102,22 @@ public class RefBookIncome101DaoImpl extends AbstractDao implements RefBookIncom
                 throw new DaoException("Поля " + errors.toString() + "являются обязательными для заполнения");
             }
 
-            long repId = record.get("REPORT_PERIOD_ID").getNumberValue().longValue();
-            long depId = record.get("DEPARTMENT_ID").getReferenceValue().longValue();
-            delList.add(new Pair<Long, Long>(repId, depId));
+            long accountPeriodId = record.get("ACCOUNT_PERIOD_ID").getReferenceValue().longValue();
+            delList.add(accountPeriodId);
         }
 
         List<Object[]> delObjs = new LinkedList<Object[]>();
-        for (Pair<Long, Long> pair : delList) {
-            delObjs.add(new Object[]{pair.getFirst(), pair.getSecond()});
+        for (Long id : delList) {
+            delObjs.add(new Object[]{id});
         }
 
-        getJdbcTemplate().batchUpdate(String.format("delete from %s where report_period_id = ? and department_id = ?", TABLE_NAME), delObjs,
+        getJdbcTemplate().batchUpdate(String.format("delete from %s where ACCOUNT_PERIOD_ID = ?", TABLE_NAME), delObjs,
                 new int[]{Types.NUMERIC, Types.NUMERIC});
 
         // Добавление записей
         getJdbcTemplate().batchUpdate(
                 String.format("insert into %s (" +
                         " ID," +
-                        " REPORT_PERIOD_ID," +
                         " ACCOUNT," +
                         " INCOME_DEBET_REMAINS," +
                         " INCOME_CREDIT_REMAINS," +
@@ -133,8 +126,8 @@ public class RefBookIncome101DaoImpl extends AbstractDao implements RefBookIncom
                         " OUTCOME_DEBET_REMAINS," +
                         " OUTCOME_CREDIT_REMAINS," +
                         " ACCOUNT_NAME," +
-                        " DEPARTMENT_ID)" +
-                        " values (seq_income_101.nextval,?,?,?,?,?,?,?,?,?,?)", TABLE_NAME),
+                        " ACCOUNT_PERIOD_ID)" +
+                        " values (seq_income_101.nextval,?,?,?,?,?,?,?,?,?)", TABLE_NAME),
                 new BatchPreparedStatementSetter() {
 
                     private Iterator<Map<String, RefBookValue>> iterator = records.iterator();
@@ -143,73 +136,71 @@ public class RefBookIncome101DaoImpl extends AbstractDao implements RefBookIncom
                     public void setValues(PreparedStatement ps, int index) throws SQLException {
                         Map<String, RefBookValue> map = iterator.next();
 
-                        ps.setLong(1, map.get("REPORT_PERIOD_ID").getNumberValue().longValue());
-
                         RefBookValue val = map.get("ACCOUNT");
-                        ps.setString(2, val.getStringValue());
+                        ps.setString(1, val.getStringValue());
 
                         val = map.get("INCOME_DEBET_REMAINS");
                         if (val != null && val.getNumberValue() != null) {
-                            ps.setDouble(3, BigDecimal.valueOf(val.getNumberValue().doubleValue())
+                            ps.setDouble(2, BigDecimal.valueOf(val.getNumberValue().doubleValue())
                                     .setScale(refBook.getAttribute("INCOME_DEBET_REMAINS").getPrecision(),
+                                            RoundingMode.HALF_UP).doubleValue());
+                        } else {
+                            ps.setNull(2, Types.NUMERIC);
+                        }
+
+                        val = map.get("INCOME_CREDIT_REMAINS");
+                        if (val != null && val.getNumberValue() != null) {
+                            ps.setDouble(3, BigDecimal.valueOf(val.getNumberValue().doubleValue())
+                                    .setScale(refBook.getAttribute("INCOME_CREDIT_REMAINS").getPrecision(),
                                             RoundingMode.HALF_UP).doubleValue());
                         } else {
                             ps.setNull(3, Types.NUMERIC);
                         }
 
-                        val = map.get("INCOME_CREDIT_REMAINS");
+                        val = map.get("DEBET_RATE");
                         if (val != null && val.getNumberValue() != null) {
                             ps.setDouble(4, BigDecimal.valueOf(val.getNumberValue().doubleValue())
-                                    .setScale(refBook.getAttribute("INCOME_CREDIT_REMAINS").getPrecision(),
+                                    .setScale(refBook.getAttribute("DEBET_RATE").getPrecision(),
                                             RoundingMode.HALF_UP).doubleValue());
                         } else {
                             ps.setNull(4, Types.NUMERIC);
                         }
 
-                        val = map.get("DEBET_RATE");
+                        val = map.get("CREDIT_RATE");
                         if (val != null && val.getNumberValue() != null) {
                             ps.setDouble(5, BigDecimal.valueOf(val.getNumberValue().doubleValue())
-                                    .setScale(refBook.getAttribute("DEBET_RATE").getPrecision(),
+                                    .setScale(refBook.getAttribute("CREDIT_RATE").getPrecision(),
                                             RoundingMode.HALF_UP).doubleValue());
                         } else {
                             ps.setNull(5, Types.NUMERIC);
                         }
 
-                        val = map.get("CREDIT_RATE");
+                        val = map.get("OUTCOME_DEBET_REMAINS");
                         if (val != null && val.getNumberValue() != null) {
                             ps.setDouble(6, BigDecimal.valueOf(val.getNumberValue().doubleValue())
-                                    .setScale(refBook.getAttribute("CREDIT_RATE").getPrecision(),
+                                    .setScale(refBook.getAttribute("OUTCOME_DEBET_REMAINS").getPrecision(),
                                             RoundingMode.HALF_UP).doubleValue());
                         } else {
                             ps.setNull(6, Types.NUMERIC);
                         }
 
-                        val = map.get("OUTCOME_DEBET_REMAINS");
+                        val = map.get("OUTCOME_CREDIT_REMAINS");
                         if (val != null && val.getNumberValue() != null) {
                             ps.setDouble(7, BigDecimal.valueOf(val.getNumberValue().doubleValue())
-                                    .setScale(refBook.getAttribute("OUTCOME_DEBET_REMAINS").getPrecision(),
+                                    .setScale(refBook.getAttribute("OUTCOME_CREDIT_REMAINS").getPrecision(),
                                             RoundingMode.HALF_UP).doubleValue());
                         } else {
                             ps.setNull(7, Types.NUMERIC);
                         }
 
-                        val = map.get("OUTCOME_CREDIT_REMAINS");
-                        if (val != null && val.getNumberValue() != null) {
-                            ps.setDouble(8, BigDecimal.valueOf(val.getNumberValue().doubleValue())
-                                    .setScale(refBook.getAttribute("OUTCOME_CREDIT_REMAINS").getPrecision(),
-                                            RoundingMode.HALF_UP).doubleValue());
-                        } else {
-                            ps.setNull(8, Types.NUMERIC);
-                        }
-
                         val = map.get("ACCOUNT_NAME");
                         if (val != null && val.getStringValue() != null) {
-                            ps.setString(9, val.getStringValue());
+                            ps.setString(8, val.getStringValue());
                         } else {
-                            ps.setNull(9, Types.VARCHAR);
+                            ps.setNull(8, Types.VARCHAR);
                         }
 
-                        ps.setLong(10, map.get("DEPARTMENT_ID").getReferenceValue().longValue());
+                        ps.setLong(9, map.get("ACCOUNT_PERIOD_ID").getReferenceValue().longValue());
                     }
 
                     @Override

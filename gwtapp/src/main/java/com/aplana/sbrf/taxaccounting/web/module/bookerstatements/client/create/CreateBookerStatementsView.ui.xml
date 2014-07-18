@@ -2,7 +2,6 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
              xmlns:g="urn:import:com.google.gwt.user.client.ui"
              xmlns:dep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
-             xmlns:rep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client"
              xmlns:r='urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client'
              xmlns:dw="urn:import:com.aplana.gwt.client">
     <ui:style>
@@ -24,15 +23,25 @@
         }
     </ui:style>
 
-    <dw:ModalWindow iconUrl="resources/img/add.png" title="Создание налоговой формы" ui:field="title">
+    <dw:ModalWindow iconUrl="resources/img/add.png" title="Создание бухгалтерской отчётности" ui:field="title">
         <g:VerticalPanel height="100%" width="400px" addStyleNames="aplana-ModalWindow-contentBackWhite">
+
+            <g:HorizontalPanel spacing="6" verticalAlignment="middle" addStyleNames="{style.content}">
+                <g:cell horizontalAlignment="right">
+                    <g:Label width="140px" wordWrap="false" text="Год:"/>
+                </g:cell>
+                <g:cell width="100%">
+                    <dw:Spinner minValue="1920" maxValue="2100" width="100%" ui:field="yearBox"/>
+                </g:cell>
+            </g:HorizontalPanel>
 
             <g:HorizontalPanel spacing="6" verticalAlignment="middle" addStyleNames="{style.content}">
                 <g:cell horizontalAlignment="right">
                     <g:Label width="140px" wordWrap="false" text="Период:"/>
                 </g:cell>
                 <g:cell width="100%">
-                    <rep:PeriodPickerPopupWidget width="100%" ui:field="reportPeriodIds" multiselect="false"/>
+                    <r:RefBookPickerWidget ui:field="accountPeriodIds" width="100%" versionEnabled="false"
+                                           attributeIdInt="1062" isHierarchical="false" multiSelect="false"/>
                 </g:cell>
             </g:HorizontalPanel>
 

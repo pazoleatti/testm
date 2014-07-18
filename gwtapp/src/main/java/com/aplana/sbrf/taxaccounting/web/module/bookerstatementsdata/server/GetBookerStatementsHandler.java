@@ -8,7 +8,6 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.web.module.bookerstatementsdata.shared.GetBookerStatementsAction;
 import com.aplana.sbrf.taxaccounting.web.module.bookerstatementsdata.shared.GetBookerStatementsResult;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.HorizontalAlignment;
@@ -30,11 +29,31 @@ public class GetBookerStatementsHandler extends AbstractActionHandler<GetBookerS
     @Autowired
     RefBookFactory rbFactory;
 
-    @Autowired
-    private PeriodService reportService;
-
     public static final long REF_BOOK_101 = 50L;
     public static final long REF_BOOK_102 = 52L;
+
+    private static final Map<String, String> columns101;
+
+    static {
+        columns101 = new HashMap<String, String>();
+        columns101.put("ACCOUNT", "Номер счёта");
+        columns101.put("ACCOUNT_NAME", "Название счёта");
+        columns101.put("INCOME_DEBET_REMAINS", "Входящие остатки по дебету");
+        columns101.put("INCOME_CREDIT_REMAINS", "Входящие остатки по кредиту");
+        columns101.put("DEBET_RATE", "Обороты по дебету");
+        columns101.put("CREDIT_RATE", "Обороты по кредиту");
+        columns101.put("OUTCOME_DEBET_REMAINS", "Исходящие остатки по дебету");
+        columns101.put("OUTCOME_CREDIT_REMAINS", "Исходящие остатки по кредиту");
+    }
+
+    private static final Map<String, String> columns102;
+
+    static {
+        columns102 = new HashMap<String, String>();
+        columns102.put("ITEM_NAME", "Наименование статьи");
+        columns102.put("OPU_CODE", "Код ОПУ");
+        columns102.put("TOTAL_SUM", "Сумма");
+    }
 
     public GetBookerStatementsHandler() {
         super(GetBookerStatementsAction.class);
@@ -43,31 +62,23 @@ public class GetBookerStatementsHandler extends AbstractActionHandler<GetBookerS
     @Override
     public GetBookerStatementsResult execute(GetBookerStatementsAction action, ExecutionContext context) throws ActionException {
         GetBookerStatementsResult result = new GetBookerStatementsResult();
-        RefBookDataProvider provider = null;
-        RefBook refBook = null;
+        RefBookDataProvider provider;
+        RefBook refBook;
         List<RefBookDataRow> rows = new ArrayList<RefBookDataRow>();
         List<RefBookColumn> columns = new ArrayList<RefBookColumn>();
 
-        Date version;
+        Date version = new Date();
         String notRecord;
-        if (action.getReportPeriodId() != null) {
-            version = reportService.getEndDate(action.getReportPeriodId()).getTime();
-        } else {
-            return null;
-        }
         if (action.getStatementsKind() == BookerStatementsType.INCOME101.getId()) {
             notRecord = " AND ACCOUNT != '-1'";
-        } else {
-            notRecord = " AND OPU_CODE != '-1'";
-        }
-        if (action.getStatementsKind() == 0) {
             provider = rbFactory.getDataProvider(REF_BOOK_101);
             refBook = rbFactory.get(REF_BOOK_101);
         } else {
+            notRecord = " AND OPU_CODE != '-1'";
             provider = rbFactory.getDataProvider(REF_BOOK_102);
             refBook = rbFactory.get(REF_BOOK_102);
         }
-        String filter = "DEPARTMENT_ID = " + action.getDepartmentId();
+        String filter = "ACCOUNT_PERIOD_ID = " + action.getAccountPeriodId();
 
         if (action.isNeedOnlyIds()) {
             //Получаем только идентификаторы
@@ -76,8 +87,13 @@ public class GetBookerStatementsHandler extends AbstractActionHandler<GetBookerS
             PagingResult<Map<String, RefBookValue>> refBookPage = provider.getRecords(version, action.getPagingParams(), filter + notRecord, null);
             Map<String, RefBookDataProvider> refProviders = new HashMap<String, RefBookDataProvider>();
             Map<String, String> refAliases = new HashMap<String, String>();
+            Map<String, String> columnsMap = (action.getStatementsKind() == 0) ? columns101 : columns102;
 
             for (RefBookAttribute attribute : refBook.getAttributes()) {
+                if (!columnsMap.containsKey(attribute.getAlias())) {
+                    continue;
+                }
+
                 if (attribute.getAttributeType() == RefBookAttributeType.REFERENCE) {
                     refProviders.put(attribute.getAlias(), rbFactory.getDataProvider(attribute.getRefBookId()));
                     RefBook refRefBook = rbFactory.get(attribute.getRefBookId());
@@ -89,8 +105,8 @@ public class GetBookerStatementsHandler extends AbstractActionHandler<GetBookerS
                 col.setId(attribute.getId());
                 col.setAlias(attribute.getAlias());
                 col.setAttributeType(attribute.getAttributeType());
-                col.setName(attribute.getName());
-                col.setRefBookName(attribute.getRefBookId()==null?"":rbFactory.get(attribute.getRefBookId()).getName());
+                col.setName(columnsMap.get(attribute.getAlias()));
+                col.setRefBookName(attribute.getRefBookId() == null ? "" : rbFactory.get(attribute.getRefBookId()).getName());
                 col.setRefBookAttributeId(attribute.getRefBookAttributeId());
                 col.setWidth(attribute.getWidth());
                 col.setAlignment(getHorizontalAlignment(attribute));
@@ -101,6 +117,10 @@ public class GetBookerStatementsHandler extends AbstractActionHandler<GetBookerS
             for (Map<String, RefBookValue> record : refBookPage) {
                 Map<String, String> tableRowData = new HashMap<String, String>();
                 for (RefBookAttribute attribute : refBook.getAttributes()) {
+                    if (!columnsMap.containsKey(attribute.getAlias())) {
+                        continue;
+                    }
+
                     RefBookValue value = record.get(attribute.getAlias());
                     String tableCell;
                     if (value == null) {
@@ -121,7 +141,7 @@ public class GetBookerStatementsHandler extends AbstractActionHandler<GetBookerS
                                 break;
                             case REFERENCE:
                                 if (value.getReferenceValue() == null) tableCell = "";
-                                else  {
+                                else {
                                     Map<String, RefBookValue> refValue = refProviders.get(attribute.getAlias()).getRecordData(value.getReferenceValue());
                                     tableCell = refValue.get(refAliases.get(attribute.getAlias())).toString();
                                 }
@@ -143,8 +163,8 @@ public class GetBookerStatementsHandler extends AbstractActionHandler<GetBookerS
             result.setColumns(columns);
             result.setTotalCount(refBookPage.getTotalCount());
 
-            List<Long> ids = provider.getUniqueRecordIds(version, " department_id = " + action.getDepartmentId());
-            if (ids.size() == 0) {
+            List<Long> ids = provider.getUniqueRecordIds(version, filter);
+                if (ids.size() == 0) {
                 result.setNotBlank(false);
             }
 

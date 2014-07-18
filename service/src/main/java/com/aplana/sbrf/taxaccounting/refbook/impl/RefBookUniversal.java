@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.util.BDUtils;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
@@ -123,6 +124,7 @@ public class RefBookUniversal implements RefBookDataProvider {
     }
 
     @Override
+    @Transactional(noRollbackFor = DaoException.class)
 	public Map<String, RefBookValue> getRecordData(Long recordId) {
 		return refBookDao.getRecordData(refBookId, recordId);
 	}

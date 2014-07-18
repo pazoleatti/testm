@@ -1,22 +1,15 @@
 package com.aplana.sbrf.taxaccounting.web.module.bookerstatementsdata.client;
 
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.HorizontalAlignment;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookColumn;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookDataRow;
-import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget;
-import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.CheckHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
-import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopup;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
@@ -43,7 +36,7 @@ public class BookerStatementsDataView extends ViewWithUiHandlers<BookerStatement
     interface Binder extends UiBinder<Widget, BookerStatementsDataView> {
     }
 
-    private final static int DEFAULT_REPORT_PERIOD_LABEL_WIDTH = 150;
+    private final static int DEFAULT_ACCOUNT_PERIOD_LABEL_WIDTH = 150;
 
     @UiField
     Label title;
@@ -55,7 +48,7 @@ public class BookerStatementsDataView extends ViewWithUiHandlers<BookerStatement
     Label departmentIdLabel;
 
     @UiField
-    Label reportPeriodLabel;
+    Label accountPeriodLabel;
 
     @UiField
     Anchor returnAnchor;
@@ -81,7 +74,7 @@ public class BookerStatementsDataView extends ViewWithUiHandlers<BookerStatement
         pager.setDisplay(dataTable);
         dataTable.setVisible(false);
         pager.setVisible(false);
-        recalcReportPeriodLabelWidth();
+        recalcAccountPeriodLabelWidth();
     }
 
     @Override
@@ -120,9 +113,7 @@ public class BookerStatementsDataView extends ViewWithUiHandlers<BookerStatement
         }
 
         for (final RefBookColumn header : columns) {
-            if (header.getAlias().equals("DEPARTMENT_ID") || header.getAlias().equals("REPORT_PERIOD_ID")) {
-                continue;
-            } else {
+            if (!header.getAlias().equals("DEPARTMENT_ID") && !header.getAlias().equals("ACCOUNT_PERIOD_ID")) {
                 TextColumn<RefBookDataRow> column = new TextColumn<RefBookDataRow>() {
                     @Override
                     public String getValue(RefBookDataRow object) {
@@ -166,9 +157,9 @@ public class BookerStatementsDataView extends ViewWithUiHandlers<BookerStatement
     }
 
     @Override
-    public void setAdditionalFormInfo(String department, String reportPeriod, String type) {
+    public void setAdditionalFormInfo(String department, String accountPeriod, String type) {
         departmentIdLabel.setText(department);
-        reportPeriodLabel.setText(reportPeriod);
+        accountPeriodLabel.setText(accountPeriod);
         title.setText(type);
     }
 
@@ -189,10 +180,10 @@ public class BookerStatementsDataView extends ViewWithUiHandlers<BookerStatement
      * делается в ручную потому что контернер находится в табличной ячейке
      * и заворачивание во многоточние происходит если только явно задать ширину в пикселях
      */
-    private void recalcReportPeriodLabelWidth(){
+    private void recalcAccountPeriodLabelWidth(){
 
         // сбрасывает прошлое значение лейбла что бы он не мешал замеру его родительского контейнра
-        reportPeriodLabel.getElement().getStyle().setPropertyPx("width", DEFAULT_REPORT_PERIOD_LABEL_WIDTH);
+        accountPeriodLabel.getElement().getStyle().setPropertyPx("width", DEFAULT_ACCOUNT_PERIOD_LABEL_WIDTH);
 
         // берется ширина ячейки в которой находится контейнер с информационном блоком формы
         Element centerBlockParentElement = centerBlock.getElement().getParentElement();
@@ -201,7 +192,7 @@ public class BookerStatementsDataView extends ViewWithUiHandlers<BookerStatement
             if (parentWidth != null) {
                 int width = parentWidth - 135;
                 if (width > 0) {
-                    reportPeriodLabel.getElement().getStyle().setPropertyPx("width", width);
+                    accountPeriodLabel.getElement().getStyle().setPropertyPx("width", width);
                 }
             }
         }
@@ -213,8 +204,8 @@ public class BookerStatementsDataView extends ViewWithUiHandlers<BookerStatement
     }
 
     @Override
-    public String getReportPeriodName() {
-        return reportPeriodLabel.getText();
+    public String getAccountPeriodName() {
+        return accountPeriodLabel.getText();
     }
 
     @Override

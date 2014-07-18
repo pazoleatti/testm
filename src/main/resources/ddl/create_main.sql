@@ -304,7 +304,7 @@ create sequence seq_report_period start with 100;
 ----------------------------------------------------------------------------------------------------
 create table income_101 (
   id                     number(18) not null,
-  report_period_id       number(9) not null,
+  report_period_id       number(9),
   account                varchar2(255 char) not null,
   income_debet_remains   number(22,4),
   income_credit_remains  number(22,4),
@@ -313,7 +313,7 @@ create table income_101 (
   outcome_debet_remains  number(22,4),
   outcome_credit_remains number(22,4),
   account_name           varchar2(255 char),
-  department_id          number(9) not null,
+  department_id          number(9),
   account_period_id 	 number(9)
 );
 comment on table income_101 is 'Оборотная ведомость (Форма 0409101-СБ)';
@@ -334,11 +334,11 @@ create sequence seq_income_101 start with 100;
 -------------------------------------------------------------------------------------------------------------------------------------------
 create table income_102 (
   id               number(18) not null,
-  report_period_id number(9) not null,
+  report_period_id number(9),
   opu_code         varchar2(25 char) not null,
   total_sum        number(22,4),
   item_name        varchar2(255 char),
-  department_id    number(9) not null,
+  department_id    number(9),
   account_period_id number(9)
   );
 comment on table income_102 is 'Отчет о прибылях и убытках (Форма 0409102-СБ)';
