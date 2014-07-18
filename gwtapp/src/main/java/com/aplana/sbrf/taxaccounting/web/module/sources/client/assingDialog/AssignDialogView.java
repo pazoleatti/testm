@@ -81,15 +81,21 @@ public class AssignDialogView extends ViewWithUiHandlers<AssignDialogUiHandlers>
         periodTo = new ValueListBox<PeriodInfo>(abstractRenderer);
         initWidget(uiBinder.createAndBindUi(this));
 
-        ValueChangeHandler<PeriodInfo> periodTitleChanger = new ValueChangeHandler<PeriodInfo>() {
+        periodFrom.addValueChangeHandler(new ValueChangeHandler<PeriodInfo>() {
             @Override
             public void onValueChange(ValueChangeEvent<PeriodInfo> event) {
                 SourcesUtils.setupPeriodTitle((ValueListBox<PeriodInfo>) event.getSource());
             }
-        };
-
-        periodFrom.addValueChangeHandler(periodTitleChanger);
-        periodTo.addValueChangeHandler(periodTitleChanger);
+        });
+        periodTo.addValueChangeHandler(new ValueChangeHandler<PeriodInfo>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<PeriodInfo> event) {
+                if (event.getValue() == null) {
+                    yearTo.setValue(null);
+                }
+                SourcesUtils.setupPeriodTitle((ValueListBox<PeriodInfo>) event.getSource());
+            }
+        });
 
         yearFrom.addValueChangeHandler(new ValueChangeHandler<Integer>() {
             @Override
@@ -107,12 +113,12 @@ public class AssignDialogView extends ViewWithUiHandlers<AssignDialogUiHandlers>
 
     @Override
     public void setAcceptablePeriods(List<PeriodInfo> periods) {
+        periodFrom.setValue(periods.get(0));
         periodFrom.setAcceptableValues(periods);
         periodTo.setAcceptableValues(periods);
 
         WidgetUtils.setupOptionTitle(periodFrom);
         WidgetUtils.setupOptionTitle(periodTo);
-        periodFrom.setValue(periods.get(0));
         periodTo.setValue(periods.get(periods.size() - 1));
     }
 
