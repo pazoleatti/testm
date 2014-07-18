@@ -4,7 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.service.TransportDataService;
+import com.aplana.sbrf.taxaccounting.service.UploadTransportDataService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
@@ -35,7 +35,7 @@ public class TransportDataController {
     SecurityService securityService;
 
     @Autowired
-    TransportDataService transportDataService;
+    UploadTransportDataService uploadTransportDataService;
 
     @RequestMapping(value = "transportData/upload/{departmentId}", method = RequestMethod.POST)
     public void upload(@PathVariable int departmentId, HttpServletRequest request, HttpServletResponse response)
@@ -55,7 +55,7 @@ public class TransportDataController {
                 fileName = fileName.substring(fileName.lastIndexOf("\\") + 1);
             }
 
-            transportDataService.uploadFile(securityService.currentUserInfo(), departmentId, fileName,
+            uploadTransportDataService.uploadFile(securityService.currentUserInfo(), departmentId, fileName,
                     items.get(0).getInputStream(), logger);
         }
 

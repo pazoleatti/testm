@@ -79,7 +79,7 @@
         <g:cell>
             <g:VerticalPanel spacing="0" width="150px">
                 <g:SubmitButton ui:field="search" text="Найти" addStyleNames="{style.btnFind}"/>
-                <g:CheckBox ui:field="searchResults" text="Искать в найденном"/>
+                <g:CheckBox ui:field="searchResults" text="Искать в найденном" name="searchResult"/>
             </g:VerticalPanel>
         </g:cell>
         <g:cell spacing="0" width="18px" horizontalAlignment="right">
