@@ -78,7 +78,7 @@ switch (formDataEvent){
         break
 
     case FormDataEvent.CALCULATE:
-        fillForm()
+        calc()
         !hasError() && logicalCheck()
         break
 // после принятия из подготовлена
@@ -88,13 +88,13 @@ switch (formDataEvent){
 // обобщить
     case FormDataEvent.COMPOSE :
         consolidation()
-        fillForm()
+        calc()
         !hasError() && logicalCheck()
         break
     case FormDataEvent.IMPORT :
         importData()
         if (!hasError()) {
-            fillForm()
+            calc()
         }
         break
     case FormDataEvent.MIGRATION :
@@ -169,17 +169,9 @@ def deleteRow(){
  * Заполнение полей формы
  * 6.40.2.3 Алгоритмы заполнения полей формы
  */
-def fillForm(){
+def calc(){
 
     def data = getData(formData)
-
-    // Проверка обязательных полей. Cписок проверяемых столбцов (графа 1..8)
-    def requiredColumns = ['tradeNumber', 'securityName', 'currencyCode', 'nominalPrice', 'part1REPODate', 'part2REPODate', 'acquisitionPrice', 'salePrice']
-    for (def row : getRows(data)) {
-        if (!isTotalRow(row) && !checkRequiredColumns(row, requiredColumns)) {
-            return
-        }
-    }
 
     // удаляем строку итого
     for(def i=0;i<data.getAllCached().size();i++){
