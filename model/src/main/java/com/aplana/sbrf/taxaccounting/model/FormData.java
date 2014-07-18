@@ -286,4 +286,52 @@ public class FormData extends IdentityObject<Long> {
 		builder.append("]");
 		return builder.toString();
 	}
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        FormData formData = (FormData) o;
+
+        if (formTemplateId != formData.formTemplateId) return false;
+        if (returnSign != formData.returnSign) return false;
+        if (departmentId != null ? !departmentId.equals(formData.departmentId) : formData.departmentId != null)
+            return false;
+        if (formColumns != null ? !formColumns.equals(formData.formColumns) : formData.formColumns != null)
+            return false;
+        if (formStyles != null ? !formStyles.equals(formData.formStyles) : formData.formStyles != null) return false;
+        if (formType != null ? !formType.equals(formData.formType) : formData.formType != null) return false;
+        if (headers != null ? !headers.equals(formData.headers) : formData.headers != null) return false;
+        if (kind != formData.kind) return false;
+        if (manual != null ? !manual.equals(formData.manual) : formData.manual != null) return false;
+        if (performer != null ? !performer.equals(formData.performer) : formData.performer != null) return false;
+        if (periodOrder != null ? !periodOrder.equals(formData.periodOrder) : formData.periodOrder != null)
+            return false;
+        if (reportPeriodId != null ? !reportPeriodId.equals(formData.reportPeriodId) : formData.reportPeriodId != null)
+            return false;
+        if (signers != null ? !signers.equals(formData.signers) : formData.signers != null) return false;
+        if (state != formData.state) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = state != null ? state.hashCode() : 0;
+        result = 31 * result + (kind != null ? kind.hashCode() : 0);
+        result = 31 * result + (departmentId != null ? departmentId.hashCode() : 0);
+        result = 31 * result + (reportPeriodId != null ? reportPeriodId.hashCode() : 0);
+        result = 31 * result + (periodOrder != null ? periodOrder.hashCode() : 0);
+        result = 31 * result + (manual != null ? manual.hashCode() : 0);
+        result = 31 * result + (returnSign ? 1 : 0);
+        result = 31 * result + formTemplateId;
+        result = 31 * result + (formColumns != null ? formColumns.hashCode() : 0);
+        result = 31 * result + (formStyles != null ? formStyles.hashCode() : 0);
+        result = 31 * result + (headers != null ? headers.hashCode() : 0);
+        result = 31 * result + (formType != null ? formType.hashCode() : 0);
+        result = 31 * result + (performer != null ? performer.hashCode() : 0);
+        result = 31 * result + (signers != null ? signers.hashCode() : 0);
+        return result;
+    }
 }

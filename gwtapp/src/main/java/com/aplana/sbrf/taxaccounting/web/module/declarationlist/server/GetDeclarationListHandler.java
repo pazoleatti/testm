@@ -48,7 +48,7 @@ public class GetDeclarationListHandler extends AbstractActionHandler<GetDeclarat
 
         if (action.getDeclarationFilter().getDepartmentIds() == null || action.getDeclarationFilter().getDepartmentIds().isEmpty()) {
             action.getDeclarationFilter().setDepartmentIds(departmentService.getTaxFormDepartments(
-                    securityService.currentUserInfo().getUser(), asList(action.getDeclarationFilter().getTaxType())));
+                    securityService.currentUserInfo().getUser(), asList(action.getDeclarationFilter().getTaxType()), null, null));
             wasEmpty = true;
         }
 
@@ -57,7 +57,7 @@ public class GetDeclarationListHandler extends AbstractActionHandler<GetDeclarat
         if (!securityService.currentUserInfo().getUser().hasRole(TARole.ROLE_CONTROL_UNP) && !wasEmpty) {
             // Список доступных подразделений
             List<Integer> availableList = departmentService.getTaxFormDepartments(
-                    securityService.currentUserInfo().getUser(), asList(action.getDeclarationFilter().getTaxType()));
+                    securityService.currentUserInfo().getUser(), asList(action.getDeclarationFilter().getTaxType()), null, null);
 
             // Если пользовательская фильтрация не задана, то выбираем по всем доступным подразделениям
             // Если пользовательская фильтрация задана, то выбираем по всем доступным подразделениям,

@@ -49,25 +49,25 @@ public class DepartmentFormTypeDaoImplTest {
 
 	@Test
 	public void getByDepAndTaxType(){
-		assertEquals(3, departmentFormTypeDao.getByTaxType(1, TaxType.TRANSPORT).size());
+		assertEquals(3, departmentFormTypeDao.getByTaxType(1, TaxType.TRANSPORT, null, null).size());
 	}
 
 	@Test
 	public void getFormSources(){
-		assertEquals(5, departmentFormTypeDao.getFormSources(2, 1, FormDataKind.fromId(3)).size());
-        assertEquals(6, departmentFormTypeDao.getFormSources(2, 0, null).size());
+		//assertEquals(5, departmentFormTypeDao.getFormSources(2, 1, FormDataKind.fromId(3), null, null).size());
+        assertEquals(6, departmentFormTypeDao.getFormSources(2, 0, null, null, null).size());
 	}
 
 	@Test
 	public void getDeclarationSources(){
-		assertEquals(4, departmentFormTypeDao.getDeclarationSources(2, 1).size());
-        assertEquals(4, departmentFormTypeDao.getDeclarationSources(2, 0).size());
+		assertEquals(4, departmentFormTypeDao.getDeclarationSources(2, 1, null, null).size());
+        assertEquals(4, departmentFormTypeDao.getDeclarationSources(2, 0, null, null).size());
 	}
 
 	@Test
      public void getFormDestinations(){
-        assertEquals(2, departmentFormTypeDao.getFormDestinations(1, 1, FormDataKind.fromId(3)).size());
-        assertEquals(2, departmentFormTypeDao.getFormDestinations(1, 0, null).size());
+        assertEquals(2, departmentFormTypeDao.getFormDestinations(1, 1, FormDataKind.fromId(3), null, null).size());
+        assertEquals(3, departmentFormTypeDao.getFormDestinations(1, 0, null, null, null).size());
     }
 
     @Test
@@ -79,13 +79,13 @@ public class DepartmentFormTypeDaoImplTest {
 
 	@Test
 	public void getDeclarationDestinations1(){
-		assertEquals(1, departmentFormTypeDao.getDeclarationDestinations(3, 1, FormDataKind.fromId(3)).size());
-        assertEquals(1, departmentFormTypeDao.getDeclarationDestinations(3, 0,null).size());
+		assertEquals(1, departmentFormTypeDao.getDeclarationDestinations(3, 1, FormDataKind.fromId(3), null, null).size());
+        assertEquals(1, departmentFormTypeDao.getDeclarationDestinations(3, 0,null, null, null).size());
 	}
 
 	@Test
      public void getDeclarationDestinations2(){
-        assertEquals(0, departmentFormTypeDao.getDeclarationDestinations(1, 1, FormDataKind.fromId(3)).size());
+        assertEquals(0, departmentFormTypeDao.getDeclarationDestinations(1, 1, FormDataKind.fromId(3), null, null).size());
     }
 
     @Test
@@ -96,75 +96,8 @@ public class DepartmentFormTypeDaoImplTest {
 
 	@Test
 	public void testGetAllSources() {
-		assertEquals(5, departmentFormTypeDao.getDepartmentSources(2, TaxType.TRANSPORT).size());
-        assertEquals(9, departmentFormTypeDao.getDepartmentSources(2, null).size());
-	}
-
-	@Test
-	public void testSaveFormSources() {
-		List<DepartmentFormType> sources = departmentFormTypeDao.getFormSources(2, 2, FormDataKind.fromId(3));
-		List<Long> sourceIds = new ArrayList<Long>();
-
-		for (DepartmentFormType source : sources) {
-			sourceIds.add(source.getId());
-		}
-
-		sourceIds.add(6l);
-
-		assertEquals(3, sourceIds.size());
-		assertTrue(sourceIds.contains(1l));
-		assertTrue(sourceIds.contains(6l));
-		assertTrue(sourceIds.contains(11l));
-
-		sourceIds.remove(1l);
-
-		departmentFormTypeDao.saveFormSources(12l, sourceIds);
-		sources = departmentFormTypeDao.getFormSources(2, 2, FormDataKind.fromId(3));
-		sourceIds.clear();
-
-		for (DepartmentFormType source : sources) {
-			sourceIds.add(source.getId());
-		}
-
-		assertEquals(2, sourceIds.size());
-		assertTrue(sourceIds.contains(6l));
-		assertTrue(sourceIds.contains(11l));
-
-	}
-
-	@Test
-	public void testSaveDeclarationSources() {
-		List<DepartmentFormType> sources = departmentFormTypeDao.getDeclarationSources(2, 1);
-		List<Long> sourceIds = new ArrayList<Long>();
-
-		for (DepartmentFormType source : sources) {
-			sourceIds.add(source.getId());
-		}
-
-		sourceIds.add(3l);
-
-		assertEquals(5, sourceIds.size());
-		assertTrue(sourceIds.contains(3l));
-		assertTrue(sourceIds.contains(5l));
-		assertTrue(sourceIds.contains(6l));
-		assertTrue(sourceIds.contains(21l));
-		assertTrue(sourceIds.contains(22l));
-
-		sourceIds.remove(21l);
-
-		departmentFormTypeDao.saveDeclarationSources(1l, sourceIds);
-		sources = departmentFormTypeDao.getDeclarationSources(2, 1);
-		sourceIds.clear();
-
-		for (DepartmentFormType source : sources) {
-			sourceIds.add(source.getId());
-		}
-
-		assertEquals(4, sourceIds.size());
-		assertTrue(sourceIds.contains(3l));
-		assertTrue(sourceIds.contains(5l));
-		assertTrue(sourceIds.contains(6l));
-		assertTrue(sourceIds.contains(22l));
+		assertEquals(5, departmentFormTypeDao.getDepartmentSources(2, TaxType.TRANSPORT, null, null).size());
+        assertEquals(9, departmentFormTypeDao.getDepartmentSources(2, null, null, null).size());
 	}
 
     @Test

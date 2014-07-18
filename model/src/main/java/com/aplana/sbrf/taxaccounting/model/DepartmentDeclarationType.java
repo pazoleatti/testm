@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * Модельный класс, представляющий информацию о назначениий декларации какому-то подразделению
@@ -13,6 +14,10 @@ public class DepartmentDeclarationType implements Serializable {
 	private int id;
 	private int departmentId;
 	private int declarationTypeId;
+
+    /** Период действия назначения. Может быть null */
+    private Date periodStart;
+    private Date periodEnd;
 
 	/**
 	 * Получить идентификатор записи
@@ -61,4 +66,20 @@ public class DepartmentDeclarationType implements Serializable {
 	public void setDeclarationTypeId(int declarationTypeId) {
 		this.declarationTypeId = declarationTypeId;
 	}
+
+    public Date getPeriodStart() {
+        return periodStart;
+    }
+
+    public void setPeriodStart(Date periodStart) {
+        this.periodStart = periodStart;
+    }
+
+    public Date getPeriodEnd() {
+        return periodEnd;
+    }
+
+    public void setPeriodEnd(Date periodEnd) {
+        this.periodEnd = periodEnd;
+    }
 }

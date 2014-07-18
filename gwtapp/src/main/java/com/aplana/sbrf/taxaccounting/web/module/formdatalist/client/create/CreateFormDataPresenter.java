@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.create;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
@@ -72,10 +73,12 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
                     @Override
                     public void onSuccess(final CreateFormDataResult createResult) {
                         getView().hide();
+                        String uuid = createResult.getUuid();
                         placeManager.revealPlace(new Builder().nameToken(FormDataPresenter.NAME_TOKEN)
                                 .with(FormDataPresenter.READ_ONLY, "false")
                                 .with(FormDataPresenter.FORM_DATA_ID, String.valueOf(createResult.getFormDataId()))
                                 .build());
+                        LogAddEvent.fire(CreateFormDataPresenter.this, uuid);
                     }
                 }, CreateFormDataPresenter.this)
         );

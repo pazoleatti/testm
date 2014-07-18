@@ -18,6 +18,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.util.*;
 
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -64,12 +66,16 @@ public class DeclarationServiceTest {
         when(declarationDataDao.find(2, 1, 101)).thenReturn(new DeclarationData());
         when(declarationTypeDao.get(2)).thenReturn(declarationType);
         when(declarationTemplateDao.get(1)).thenReturn(declarationTemplate);
-        when(departmentFormTypeDao.getDeclarationSources(1, 1)).thenReturn(sourcesInfo);
+        when(departmentFormTypeDao.getDeclarationSources(eq(1), eq(1), any(Date.class), any(Date.class))).thenReturn(sourcesInfo);
 
         ReflectionTestUtils.setField(service, "declarationDataDao", declarationDataDao);
         ReflectionTestUtils.setField(service, "declarationTypeDao", declarationTypeDao);
         ReflectionTestUtils.setField(service, "departmentFormTypeDao", departmentFormTypeDao);
         ReflectionTestUtils.setField(service, "declarationTemplateDao", declarationTemplateDao);
+
+        PeriodService periodService = mock(PeriodService.class);
+        when(periodService.getReportPeriod(any(Integer.class))).thenReturn(mock(ReportPeriod.class));
+        ReflectionTestUtils.setField(service, "periodService", periodService);
     }
 
     @Test

@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -61,11 +62,14 @@ public class DeleteFormSoursesHandler extends AbstractActionHandler<DeleteFormsS
                 continue;
             }
             // возьмем его источников - налоговые формы
-            List<DepartmentFormType> formsSources = departmentFormTypeService.getDFTSourcesByDFT(data.getDepartment().getId(), data.getFormTypeId().intValue(), data.getKind());
+            //TODO передавать данные с клиента
+            Date periodStart = new Date();
+            Date periodEnd = new Date();
+            List<DepartmentFormType> formsSources = departmentFormTypeService.getDFTSourcesByDFT(data.getDepartment().getId(), data.getFormTypeId().intValue(), data.getKind(), periodStart, periodEnd);
             // возьмем его назначений - налоговые формы
-            List<DepartmentFormType> formsDestinations = departmentFormTypeService.getFormDestinations(data.getDepartment().getId(), data.getFormTypeId().intValue(), data.getKind());
+            List<DepartmentFormType> formsDestinations = departmentFormTypeService.getFormDestinations(data.getDepartment().getId(), data.getFormTypeId().intValue(), data.getKind(), null, null);
             // приемники - декларации, источников деклараций у нас не существует
-            List<DepartmentDeclarationType> declarationDestinations = departmentFormTypeService.getDeclarationDestinations(data.getDepartment().getId(), data.getFormTypeId().intValue(), data.getKind());
+            List<DepartmentDeclarationType> declarationDestinations = departmentFormTypeService.getDeclarationDestinations(data.getDepartment().getId(), data.getFormTypeId().intValue(), data.getKind(), null, null);
             // шаблонг начала сообщения
             final String headErrMsg = "Не может быть отменено назначение " +
                     data.getDepartment().getName() +

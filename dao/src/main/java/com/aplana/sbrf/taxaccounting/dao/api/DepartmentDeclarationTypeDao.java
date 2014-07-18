@@ -17,22 +17,6 @@ import javax.validation.constraints.NotNull;
  * @author dsultanbekov
  */
 public interface DepartmentDeclarationTypeDao {
-	/**
-	 * Возвращает информацию о декларациях, формируемых в указанном подразделении
-	 * @param departmentId идентификатор подразделения
-	 * @return список {@link DepartmentDeclarationType}, представляющий перечень деклараций, формируемых в подразделении,
-	 * 	задаваемом departmentId 
-	 */
-	List<DepartmentDeclarationType> getDepartmentDeclarationTypes(int departmentId);
-
-	/**
-	 * Возвращает информацию о декларациях-потребителях, которые должны использовать информацию из данной налоговой формы в качестве источника
-	 * @param sourceDepartmentId идентификатор подразделения формы-источника
-	 * @param sourceFormTypeId вид налоговой формы-источника
-	 * @param sourceKind тип налоговой формы-источника
-	 * @return информация о декларациях-потребителях в виде списка {@link DepartmentDeclarationType}
-	 */
-	List<DepartmentDeclarationType> getDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind);
 
 	/**
 	 * Возвращает идентификаторы всех подразделений, в которых есть декларации по данному виду налога.
@@ -41,12 +25,23 @@ public interface DepartmentDeclarationTypeDao {
 	 */
 	Set<Integer> getDepartmentIdsByTaxType(TaxType taxType);
 
+    /**
+     * Возвращает информацию о назначенных подразделению декларациях по заданному виду налога
+     * @param departmentId идентификатор подразделения
+     * @param taxType вид налога
+     * @param periodStart  начало периода, в котором действуют назначения
+     * @param periodEnd    окончание периода, в котором действуют назначения
+     * @return список назначенных подразделению деклараций (с учётом вида и типа) по заданному виду налога
+     */
+    List<DepartmentDeclarationType> getByTaxType(int departmentId, TaxType taxType, Date periodStart, Date periodEnd);
+
 	/**
 	 * Возвращает информацию о назначенных подразделению декларациях по заданному виду налога
 	 * @param departmentId идентификатор подразделения
 	 * @param taxType вид налога
 	 * @return список назначенных подразделению деклараций (с учётом вида и типа) по заданному виду налога
 	 */
+    @Deprecated
 	List<DepartmentDeclarationType> getByTaxType(int departmentId, TaxType taxType);
 	
     /**

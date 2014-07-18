@@ -25,7 +25,7 @@ import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 public class LinkButton extends FocusWidget implements HasHorizontalAlignment,
 		HasHTML, HasSafeHtml {
 
-	interface LocalHtmlTemplates extends SafeHtmlTemplates {
+    interface LocalHtmlTemplates extends SafeHtmlTemplates {
 		@Template("<div>" +
                     "<img style=\"display: inline; border: none; margin-right: -16px; vertical-align: top;\" src=\"{0}\"/>" +
                     "<div style=\"" +

@@ -1,10 +1,8 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.source.FormDataInfo;
 
 import java.util.Collection;
 import java.util.Date;
@@ -220,7 +218,9 @@ public interface FormDataDao {
      * @param reportPeriodId отчетный период
      * @param taxType тип налога
      * @param kind тип налоговой формы
+     * @param periodStart  начало периода, в котором действуют назначения
+     * @param periodEnd    окончание периода, в котором действуют назначения
      * @return список налоговых форм
      */
-    List<FormData> getManualInputForms(List<Integer> departments, int reportPeriodId, TaxType taxType, FormDataKind kind);
+    List<FormData> getManualInputForms(List<Integer> departments, int reportPeriodId, TaxType taxType, FormDataKind kind, Date periodStart, Date periodEnd);
 }

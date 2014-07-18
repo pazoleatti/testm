@@ -18,6 +18,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -44,7 +45,8 @@ public class AddDeclarationSourceHandler extends AbstractActionHandler<AddDeclar
 		for (Integer depId : action.getDepartmentId()) {
 			for (Integer dt : action.getDeclarationTypeId()) {
 				boolean canAssign = true;
-				for (DepartmentDeclarationType ddt : departmentFormTypeService.getDDTByDepartment(depId.intValue(), action.getTaxType())) {
+                //TODO тоже надо откуда то брать период
+				for (DepartmentDeclarationType ddt : departmentFormTypeService.getDDTByDepartment(depId.intValue(), action.getTaxType(), new Date(), new Date())) {
 					if (ddt.getDeclarationTypeId() == dt) {
 						canAssign = false;
 						logs.add(new LogEntry(LogLevel.WARNING, "Для " + departmentService.getDepartment(depId).getName() +

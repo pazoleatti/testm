@@ -66,27 +66,6 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
     };
 
 	@Override
-	public List<DepartmentDeclarationType> getDepartmentDeclarationTypes(int departmentId) {
-		return getJdbcTemplate().query(
-				"select * from department_declaration_type where department_id = ?",
-				new Object[] { departmentId},
-				new int[] {Types.NUMERIC},
-				DEPARTMENT_DECLARATION_TYPE_ROW_MAPPER);
-	}
-
-	@Override
-	public List<DepartmentDeclarationType> getDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind) {
-		return getJdbcTemplate().query(
-				"select * from department_declaration_type src_ddt where exists (" +
-						"select 1 from department_form_type dft, declaration_source ds " +
-						"where ds.src_department_form_type_id=dft.id and dft.department_id=? and dft.form_type_id=? and dft.kind=? and ds.department_declaration_type_id = src_ddt.id" +
-						")",
-				new Object[] { sourceDepartmentId, sourceFormTypeId, sourceKind.getId()},
-				new int[]{Types.NUMERIC, Types.NUMERIC, Types.NUMERIC},
-				DEPARTMENT_DECLARATION_TYPE_ROW_MAPPER);
-	}
-
-	@Override
 	public Set<Integer> getDepartmentIdsByTaxType(TaxType taxType) {
 		Set<Integer> departmentIds = new HashSet<Integer>();
 		departmentIds.addAll(getJdbcTemplate().queryForList(
@@ -99,18 +78,35 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
 		return departmentIds;
 	}
 
+    private final static String GET_SQL_BY_TAX_TYPE_SQL = "select * from department_declaration_type ddt where department_id = :departmentId and exists (\n" +
+            "  select 1 from declaration_type dt \n" +
+            "  left join declaration_template dtemp on dtemp.declaration_type_id = dt.id\n" +
+            "  where dt.id = ddt.declaration_type_id and (:taxType is null or dt.tax_type = :taxType) \n" +
+            "  and (:periodStart is null or (dtemp.version >= :periodStart and (:periodEnd is null or dtemp.version <= :periodEnd)))\n" +
+            ")";
+
 	@Override
-	public List<DepartmentDeclarationType> getByTaxType(int departmentId, TaxType taxType) {
-		return getJdbcTemplate().query(
-                "select * from department_declaration_type ddt where department_id = ?" +
-                " and exists (select 1 from declaration_type dt where dt.id = ddt.declaration_type_id " +
-                        (taxType != null ? "and dt.tax_type in " +SqlUtils.transformTaxTypeToSqlInStatement(Arrays.asList(taxType)) : "") + ")",
-				new Object[] {
-						departmentId
-				},
-				DEPARTMENT_DECLARATION_TYPE_ROW_MAPPER
-		);
+	public List<DepartmentDeclarationType> getByTaxType(int departmentId, TaxType taxType, Date periodStart, Date periodEnd) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("departmentId", departmentId);
+        params.put("periodEnd", periodEnd);
+        params.put("periodStart", periodStart);
+        params.put("taxType", taxType != null ? String.valueOf(taxType.getCode()) : null);
+		return getNamedParameterJdbcTemplate().query(GET_SQL_BY_TAX_TYPE_SQL, params, DEPARTMENT_DECLARATION_TYPE_ROW_MAPPER);
 	}
+
+    @Override
+    public List<DepartmentDeclarationType> getByTaxType(int departmentId, TaxType taxType) {
+        return getJdbcTemplate().query(
+                "select * from department_declaration_type ddt where department_id = ?" +
+                        " and exists (select 1 from declaration_type dt where dt.id = ddt.declaration_type_id " +
+                        (taxType != null ? "and dt.tax_type in " +SqlUtils.transformTaxTypeToSqlInStatement(Arrays.asList(taxType)) : "") + ")",
+                new Object[] {
+                        departmentId
+                },
+                DEPARTMENT_DECLARATION_TYPE_ROW_MAPPER
+        );
+    }
 
 	@Override
 	public void save(int departmentId, int declarationTypeId) {

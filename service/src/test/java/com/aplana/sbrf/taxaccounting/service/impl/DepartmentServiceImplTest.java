@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,6 +16,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.*;
 
+import static com.aplana.sbrf.taxaccounting.test.ReportPeriodMockUtils.mockReportPeriod;
 import static java.util.Arrays.asList;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.*;
@@ -45,11 +47,13 @@ public class DepartmentServiceImplTest {
         departmentDeclarationTypeDao = mock(DepartmentDeclarationTypeDao.class);
         departmentFormTypeDao = mock(DepartmentFormTypeDao.class);
         departmentReportPeriodDao = mock(DepartmentReportPeriodDao.class);
+        PeriodService periodService = mock(PeriodService.class);
 
         ReflectionTestUtils.setField(departmentService, "departmentDao", departmentDao);
         ReflectionTestUtils.setField(departmentService, "departmentReportPeriodDao", departmentReportPeriodDao);
         ReflectionTestUtils.setField(departmentService, "departmentDeclarationTypeDao", departmentDeclarationTypeDao);
         ReflectionTestUtils.setField(departmentService, "departmentFormTypeDao", departmentFormTypeDao);
+        ReflectionTestUtils.setField(departmentService, "periodService", periodService);
 
         root = new Department();
         root.setName("Bank");
@@ -117,6 +121,8 @@ public class DepartmentServiceImplTest {
         when(departmentDao.getDepartmenTBChildren(departmentGOSB31.getId())).thenReturn(asList(departmentTB3, departmentGOSB31, departmentOSB311));
         when(departmentDao.getDepartmenTBChildren(departmentOSB311.getId())).thenReturn(asList(departmentTB3, departmentGOSB31, departmentOSB311));
 
+        when(periodService.getReportPeriod(any(Integer.class))).thenReturn(mock(ReportPeriod.class));
+
         when(departmentDao.getDepartmenTBChildrenId(root.getId())).thenReturn(new ArrayList<Integer>(0));
         when(departmentDao.getDepartmenTBChildrenId(departmentTB2.getId())).thenReturn(asList(departmentTB2.getId()));
         when(departmentDao.getDepartmenTBChildrenId(departmentTB3.getId())).thenReturn(asList(departmentTB3.getId(), departmentGOSB31.getId(), departmentOSB311.getId()));
@@ -158,8 +164,8 @@ public class DepartmentServiceImplTest {
         when(departmentReportPeriodDao.existForDepartment(departmentOSB311.getId(), 1)).thenReturn(true);
 
         // Доступность по связям
-        when(departmentDao.getDepartmentsBySourceControl(anyInt(), anyListOf(TaxType.class))).thenReturn(asList(departmentTB2.getId(), departmentTB3.getId()));
-        when(departmentDao.getDepartmentsBySourceControlNs(anyInt(), anyListOf(TaxType.class))).thenReturn(asList(departmentTB2.getId(), departmentTB3.getId()));
+        when(departmentDao.getDepartmentsBySourceControl(anyInt(), anyListOf(TaxType.class), any(Date.class), any(Date.class))).thenReturn(asList(departmentTB2.getId(), departmentTB3.getId()));
+        when(departmentDao.getDepartmentsBySourceControlNs(anyInt(), anyListOf(TaxType.class), any(Date.class), any(Date.class))).thenReturn(asList(departmentTB2.getId(), departmentTB3.getId()));
 
         when(departmentDao.getDepartmentIdsByExecutors(Arrays.asList(311))).thenReturn(Arrays.asList(3));
         when(departmentDao.getDepartmentIdsByExecutors(Arrays.asList(31))).thenReturn(Arrays.asList(3));
@@ -427,7 +433,7 @@ public class DepartmentServiceImplTest {
         TAUser taUser = new TAUser();
         taUser.setRoles(taRoles);
 
-        List<Integer> result = departmentService.getTaxFormDepartments(taUser, asList(TaxType.INCOME));
+        List<Integer> result = departmentService.getTaxFormDepartments(taUser, asList(TaxType.INCOME), null, null);
         Assert.assertEquals(5, result.size());
         Assert.assertEquals(true, result.contains(root.getId()) && result.contains(departmentTB2.getId())
                 && result.contains(departmentTB3.getId()) && result.contains(departmentGOSB31.getId())

@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -44,6 +45,9 @@ public class DeleteDeclarationSourcesHandler extends AbstractActionHandler<Delet
 		DeleteDeclarationSourcesResult result = new DeleteDeclarationSourcesResult();
 		List<LogEntry> logs = new ArrayList<LogEntry>();
         boolean existDeclaration = false;
+        //TODO передавать данные с клиента
+        Date periodStart = new Date();
+        Date periodEnd = new Date();
 		for (FormTypeKind ddt : action.getKind()) {
             // проверим наличие деклараций
             existDeclaration |= declarationDataService.existDeclaration(ddt.getFormTypeId().intValue(), ddt.getDepartment().getId(), logs);
@@ -51,8 +55,8 @@ public class DeleteDeclarationSourcesHandler extends AbstractActionHandler<Delet
             if (existDeclaration) {
                 continue;
             }
-            List<DepartmentFormType> departmentFormTypes = departmentFormTypeService
-					.getDFTSourceByDDT(ddt.getDepartment().getId(), ddt.getFormTypeId().intValue());
+			List<DepartmentFormType> departmentFormTypes = departmentFormTypeService
+					.getDFTSourceByDDT(ddt.getDepartment().getId(), ddt.getFormTypeId().intValue(), periodStart, periodEnd);
 			if (departmentFormTypes.isEmpty()) { // Нет назначений
 				departmentFormTypeService.deleteDDT(Arrays.asList(ddt.getId()));
 			} else {

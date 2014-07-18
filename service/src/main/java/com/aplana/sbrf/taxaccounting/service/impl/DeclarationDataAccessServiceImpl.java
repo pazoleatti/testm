@@ -84,7 +84,7 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
         if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS) || userInfo.getUser().hasRole(TARole.ROLE_CONTROL)) {
             ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(reportPeriodId);
 			if (reportPeriod != null && departmentService.getTaxFormDepartments(userInfo.getUser(),
-					asList(reportPeriod.getTaxPeriod().getTaxType())).contains(declarationDepartment.getId())) {
+					asList(reportPeriod.getTaxPeriod().getTaxType()), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate()).contains(declarationDepartment.getId())) {
 				return;
 			}
         }
@@ -113,7 +113,9 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 		int declarationTypeId = declarationTemplate.getType()
 				.getId();
 
-		List<DepartmentDeclarationType> ddts = sourceService.getDDTByDepartment(departmentId, declarationTemplate.getType().getTaxType());
+        ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(reportPeriodId);
+		List<DepartmentDeclarationType> ddts = sourceService.getDDTByDepartment(departmentId, declarationTemplate.getType().getTaxType(),
+                reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
 		boolean found = false;
 		for (DepartmentDeclarationType ddt : ddts) {
 			if (ddt.getDeclarationTypeId() == declarationTypeId) {

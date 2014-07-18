@@ -89,26 +89,6 @@ public class AuditServiceImpl implements AuditService {
         });            
 	}
 
-	@Override
-	public LogSystemFilterAvailableValues getFilterAvailableValues(TAUser user) {
-		LogSystemFilterAvailableValues values = new LogSystemFilterAvailableValues();
-        if (user.hasRole(TARole.ROLE_ADMIN) || user.hasRole(TARole.ROLE_CONTROL_UNP))
-            values.setDepartments(departmentService.listAll());
-        else if (user.hasRole(TARole.ROLE_CONTROL_NS)){
-            List<Integer> departments = departmentService.getTaxFormDepartments(user, Arrays.asList(TaxType.values()));
-            if (departments.isEmpty()){
-                values.setDepartments(new ArrayList<Department>());
-            } else{
-                Set<Integer> departmentIds = new HashSet<Integer>(departments);
-                values.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(departmentIds).values()));
-            }
-        }
-
-		/*values.setFormTypeIds(formTypeDao.getAll());*/
-		values.setDeclarationTypes(declarationTypeDao.listAll());
-		return values;
-	}
-
     @Override
     @Transactional(readOnly = false)
     public void removeRecords(List<LogSearchResultItem> items, TAUserInfo userInfo) {
@@ -132,7 +112,7 @@ public class AuditServiceImpl implements AuditService {
 
     @Override
     public PagingResult<LogSearchResultItem> getLogsBusiness(LogSystemFilter filter, TAUserInfo userInfo) {
-        List<Integer> departments = departmentService.getTaxFormDepartments(userInfo.getUser(), asList(TaxType.values()));
+        List<Integer> departments = departmentService.getTaxFormDepartments(userInfo.getUser(), asList(TaxType.values()), null, null);
         try {
             return auditDao.getLogsBusiness(filter, departments);
         } catch (DaoException e){
