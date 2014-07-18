@@ -7,7 +7,6 @@ import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskParam;
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskParamType;
 import com.aplana.sbrf.taxaccounting.scheduler.api.exception.TaskSchedulingException;
 import com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManager;
-import com.aplana.sbrf.taxaccounting.scheduler.api.utils.CronUtils;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.CreateTaskAction;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.CreateTaskResult;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.UpdateTaskAction;
@@ -50,7 +49,7 @@ public class UpdateTaskHandler extends AbstractActionHandler<UpdateTaskAction, U
             } else {
                 TaskContext taskContext = new TaskContext();
                 taskContext.setTaskName(action.getTaskName());
-                taskContext.setSchedule(CronUtils.assembleIbmCronExpression(action.getSchedule()));
+                taskContext.setSchedule(action.getSchedule());
                 taskContext.setUserTaskJndi(action.getUserTaskJndi());
                 taskContext.setNumberOfRepeats(action.getNumberOfRepeats());
                 taskContext.setId(action.getContextId());
