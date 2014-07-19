@@ -24,8 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
-import static com.aplana.sbrf.taxaccounting.model.DepartmentType.TERR_BANK;
-import static com.aplana.sbrf.taxaccounting.model.DepartmentType.fromCode;
+import static com.aplana.sbrf.taxaccounting.model.DepartmentType.*;
 
 /**
  * Провайдер для работы со справочником подразделений
@@ -294,7 +293,9 @@ public class RefBookDepartment implements RefBookDataProvider {
                     break;
                 //5 шаг
                 case CSKO_PCP:
-                case INTERNAL:
+                case MANAGEMENT:
+                    if (newType.equals(CSKO_PCP) || newType.equals(MANAGEMENT))
+                        break;
                     List<TAUserFull> users = taUserService.getByFilter(new MembersFilterData(){{
                         setDepartmentIds(new HashSet<Integer>(Arrays.asList(uniqueRecordId.intValue())));
                     }});
@@ -564,7 +565,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                 return;
             //Проверяем аттрибут "действующее подразделение" у родительского подразделения
             Department parentDep = departmentService.getDepartment(parentDepartmentId.intValue());
-            if (!parentDep.isActive()){
+            if (!parentDep.isActive() && values.get(DEPARTMENT_ACTIVE_NAME).getNumberValue().intValue() == 1){
                 logger.error("Подразделению не может быть установлен признак \"Действующее\", если оно находится в составе недействующего подразделения!");
             }
         }else {
