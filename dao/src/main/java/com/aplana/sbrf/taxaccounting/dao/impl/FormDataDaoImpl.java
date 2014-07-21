@@ -473,7 +473,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
             "JOIN form_column fc ON fc.form_template_id = fd.form_template_id\n" +
             "LEFT JOIN report_period rp ON fd.report_period_id = rp.id\n" +
             "LEFT JOIN tax_period tp ON tp.id = rp.tax_period_id\n" +
-            "WHERE fc.type = 'A' AND tp.year = ? AND tp.tax_type = ? AND fd.department_id = ? AND fd.kind = ? AND fd.form_template_id = ?)\n" +
+            "WHERE fc.type = 'A' AND fc.numeration_row = 1 AND tp.year = ? AND tp.tax_type = ? AND fd.department_id = ? AND fd.kind = ? AND fd.form_template_id = ?)\n" +
             "SELECT * FROM list\n";
 
     @Override
