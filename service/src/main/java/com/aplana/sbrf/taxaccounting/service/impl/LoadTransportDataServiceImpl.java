@@ -203,8 +203,8 @@ public class LoadTransportDataServiceImpl implements LoadTransportDataService {
                     break;
                 }
             }
-            // TODO Логи по отдельным файлам тоже можно передать в каталог ошибок, нужно передавать через ImportResult
-            moveToErrorDirectory(userInfo, errorPath, file, null, logger);
+            List<LogEntry> errorList = importResult.getFailLogMap().get(file);
+            moveToErrorDirectory(userInfo, errorPath, file, errorList, logger);
         }
         ImportCounter importCounter = new ImportCounter(importResult.getSuccessFileList().size(),
                 importResult.getSkipFileList().size(), importResult.getFailFileList().size());
