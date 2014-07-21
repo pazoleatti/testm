@@ -2,7 +2,6 @@ package form_template.vat.vat_724_1.v2014
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
@@ -442,8 +441,8 @@ void addData(def xml, int headRowCount) {
 
         // Графа 2 - зависит от графы 3 - атрибут 901 - ACCOUNT_NAME - «Наименование балансового счета», справочник 101 «План счетов бухгалтерского учета»
         if (record != null) {
-            def value1 = record?.ACCOUNT_NAME?.value?.toString()
-            def value2 = row.cell[2].text()
+            def value1 = row.cell[2].text()
+            def value2 = record?.ACCOUNT_NAME?.value?.toString()
             formDataService.checkReferenceValue(101, value1, value2, xlsIndexRow, 2 + colOffset, logger, true)
         }
 
