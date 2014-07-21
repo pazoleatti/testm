@@ -82,7 +82,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
             "  select 1 from declaration_type dt \n" +
             "  left join declaration_template dtemp on dtemp.declaration_type_id = dt.id\n" +
             "  where dt.id = ddt.declaration_type_id and (:taxType is null or dt.tax_type = :taxType) \n" +
-            "  and (:periodStart is null or (dtemp.version >= :periodStart and (:periodEnd is null or dtemp.version <= :periodEnd)))\n" +
+            "  and (:periodStart is null or (dtemp.version >= :periodStart or (:periodEnd is null or dtemp.version <= :periodEnd)))\n" +
             ")";
 
 	@Override
