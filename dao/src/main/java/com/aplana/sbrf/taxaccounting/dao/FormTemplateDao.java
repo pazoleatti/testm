@@ -156,4 +156,15 @@ public interface FormTemplateDao {
     List<Map<String,Object>> versionTemplateCountByType(Collection<Integer> formTypeId);
 
     int updateVersionStatus(VersionedObjectStatus versionStatus, int formTemplateId);
+
+    /**
+     * Проверка существования активного шаблона нф
+     * с типом formTypeId и датой актуальности которой является период включающий
+     * reportPeriodId
+     *
+     * @param formTypeId вид шаблона
+     * @param reportPeriodId отчетный период
+     * @return
+     */
+    boolean existFormTemplate(int formTypeId, int reportPeriodId);
 }

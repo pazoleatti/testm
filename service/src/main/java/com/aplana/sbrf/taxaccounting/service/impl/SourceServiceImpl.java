@@ -1,12 +1,9 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.*;
 import com.aplana.sbrf.taxaccounting.dao.api.*;
-import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.dao.SourceDao;
 import com.aplana.sbrf.taxaccounting.dao.api.*;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -14,10 +11,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.source.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.FormDataService;
-import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.service.SourceService;
+import com.aplana.sbrf.taxaccounting.service.*;
 
 import com.aplana.sbrf.taxaccounting.utils.SimpleDateUtils;
 import org.apache.commons.collections.CollectionUtils;
@@ -102,6 +96,9 @@ public class SourceServiceImpl implements SourceService {
 
     @Autowired
     LogEntryService logEntryService;
+
+    @Autowired
+    FormTemplateDao formTemplateDao;
 
     @Override
     public List<DepartmentFormType> getDFTSourcesByDFT(int departmentId, int formTypeId, FormDataKind kind, Date periodStart, Date periodEnd) {
@@ -1103,11 +1100,14 @@ public class SourceServiceImpl implements SourceService {
             /** исполнитель */
             formToFormRelation.setPerformer(departmentDao.getDepartment(departmentFormType.getPerformerId()));
             /** Полное название подразделения */
-            formToFormRelation.setFullDepartmentName(departmentService.getParentsHierarchy(departmentFormType.getDepartmentId()));
+            int departmentId = departmentFormType.getDepartmentId();
+            formToFormRelation.setFullDepartmentName(departmentService.getParentsHierarchy(departmentId));
             ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
+            int formTypeId = departmentFormType.getFormTypeId();
+            FormDataKind kind = departmentFormType.getKind();
             FormData formData = (periodOrder == null) ?
-                    formDataDao.find(departmentFormType.getFormTypeId(), departmentFormType.getKind(), departmentFormType.getDepartmentId(), reportPeriod.getId()) :
-                    formDataDao.findMonth(departmentFormType.getFormTypeId(), departmentFormType.getKind(), departmentFormType.getDepartmentId(), reportPeriod.getTaxPeriod().getId(), periodOrder);
+                    formDataDao.find(formTypeId, kind, departmentId, reportPeriod.getId()) :
+                    formDataDao.findMonth(formTypeId, kind, departmentId, reportPeriod.getTaxPeriod().getId(), periodOrder);
             if (formData != null){
                 /** Форма существует */
                 formToFormRelation.setCreated(true);
@@ -1116,18 +1116,24 @@ public class SourceServiceImpl implements SourceService {
                 /** вид формы */
                 formToFormRelation.setFormType(formData.getFormType());
                 /** тип нф */
-                formToFormRelation.setFormDataKind(departmentFormType.getKind());
+                formToFormRelation.setFormDataKind(kind);
                 /** установить id */
                 formToFormRelation.setFormDataId(formData.getId());
 
                 formToFormRelations.add(formToFormRelation);
-            } else if (includeUncreatedForms){
+
+            /**
+             * 0.3.9: Назначение источников-приёмников пересекается с отчетным периодом текущего экземпляра
+             * Уточнения Насти: Период текущей формы пересекается с периодом действия макета,
+             * для которой нет созданной нф
+             */
+            } else if (includeUncreatedForms && formTemplateDao.existFormTemplate(formTypeId, reportPeriodId)){
                 /** Формы не существует */
                 formToFormRelation.setCreated(false);
                 /** вид формы */
-                formToFormRelation.setFormType(formTypeDao.get(departmentFormType.getFormTypeId()));
+                formToFormRelation.setFormType(formTypeDao.get(formTypeId));
                 /** тип нф */
-                formToFormRelation.setFormDataKind(departmentFormType.getKind());
+                formToFormRelation.setFormDataKind(kind);
 
                 formToFormRelations.add(formToFormRelation);
             }
