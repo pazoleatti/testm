@@ -84,6 +84,26 @@ def dateFormat = 'dd.MM.yyyy'
 @Field
 def isBalancePeriod = null
 
+@Field
+def startDate = null
+
+@Field
+def endDate = null
+
+def getReportPeriodStartDate() {
+    if (startDate == null) {
+        startDate = reportPeriodService.getMonthStartDate(formData.reportPeriodId, formData.periodOrder).time
+    }
+    return startDate
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder).time
+    }
+    return endDate
+}
+
 // Получение числа из строки при импорте
 def getNumber(def value, def indexRow, def indexCol) {
     return parseNumber(value, indexRow, indexCol, logger, true)
@@ -382,7 +402,8 @@ void consolidation() {
         }
     }
     def taxPeriodId = reportPeriodService.get(formData.reportPeriodId)?.taxPeriod?.id
-    for (formDataSource in departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind())) {
+    for (formDataSource in departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind(),
+            getReportPeriodStartDate(), getReportPeriodEndDate())) {
         if (formDataSource.formTypeId == formData.getFormType().getId()) {
             def source = formDataService.findMonth(formDataSource.formTypeId, formDataSource.kind, formDataSource.departmentId, taxPeriodId, formData.periodOrder)
             if (source != null && source.state == WorkflowState.ACCEPTED) {

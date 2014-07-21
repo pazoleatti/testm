@@ -110,14 +110,28 @@ def totalSumColumns = ['countsBonds', 'incomePrev', 'incomeShortPosition', 'perc
 @Field
 sections = ['1', '2', '3', '4', '5', '6', '7', '8']
 
-// Дата окончания отчетного периода
-@Field
-def endDate = null
-
 @Field
 def taxPeriod = null
 
-//// Обертки методов
+@Field
+def startDate = null
+
+@Field
+def endDate = null
+
+def getReportPeriodStartDate() {
+    if (startDate == null) {
+        startDate = reportPeriodService.getMonthStartDate(formData.reportPeriodId, formData.periodOrder).time
+    }
+    return startDate
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder).time
+    }
+    return endDate
+}
 
 // Поиск записи в справочнике по значению (для расчетов) + по дате
 def getRefBookRecord(def Long refBookId, def String alias, def String value, def Date day, def int rowIndex, def String cellName,
@@ -268,7 +282,8 @@ void consolidation() {
     deleteNotFixedRows(dataRows)
 
     // собрать из источников строки и разместить соответствующим разделам
-    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
+            getReportPeriodStartDate(), getReportPeriodEndDate()).each {
         if (it.formTypeId == formData.formType.id) {
             def source = formDataService.findMonth(it.formTypeId, it.kind, it.departmentId, getTaxPeriod()?.id, formData.periodOrder)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
@@ -495,13 +510,6 @@ void updateIndexes(def dataRows) {
     dataRows.eachWithIndex { row, i ->
         row.setIndex(i + 1)
     }
-}
-
-def getReportPeriodEndDate() {
-    if (endDate == null) {
-        endDate = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder)?.time
-    }
-    return endDate
 }
 
 def getTaxPeriod() {

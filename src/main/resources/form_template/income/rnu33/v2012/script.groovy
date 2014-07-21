@@ -134,15 +134,29 @@ def totalSumColumns = ['bondsCount', 'purchaseCost', 'costs', 'redemptionVal', '
 @Field
 def isBalancePeriod
 
-// Дата окончания отчетного периода
-@Field
-def endDate = null
-
 // Налоговый период
 @Field
 def taxPeriod = null
 
-//// Обертки методов
+@Field
+def startDate = null
+
+@Field
+def endDate = null
+
+def getReportPeriodStartDate() {
+    if (startDate == null) {
+        startDate = reportPeriodService.getMonthStartDate(formData.reportPeriodId, formData.periodOrder).time
+    }
+    return startDate
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder).time
+    }
+    return endDate
+}
 
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
@@ -935,13 +949,6 @@ void updateIndexes(def dataRows) {
     dataRows.eachWithIndex { row, i ->
         row.setIndex(i + 1)
     }
-}
-
-def getReportPeriodEndDate() {
-    if (endDate == null) {
-        endDate = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder).time
-    }
-    return endDate
 }
 
 def getTaxPeriod() {

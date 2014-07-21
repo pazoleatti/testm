@@ -74,6 +74,9 @@ def totalColumns = ['realizeCost', 'obtainCost']
 @Field
 def startDate = null
 
+@Field
+def calendarStartDate = null
+
 // Дата окончания отчетного периода
 @Field
 def endDate = null
@@ -157,6 +160,13 @@ def getReportPeriodStartDate() {
     return startDate
 }
 
+def getCalendarStartDate() {
+    if (!calendarStartDate) {
+        calendarStartDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
+    }
+    return calendarStartDate
+}
+
 def getReportPeriodEndDate() {
     if (endDate == null) {
         endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
@@ -168,7 +178,7 @@ def getPrevReportPeriodStartDate() {
     if (prevStartDate == null) {
         def prevReportPeriodId = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)?.id
         if (prevReportPeriodId != null) {
-            prevStartDate = reportPeriodService.getCalendarStartDate(prevReportPeriodId).time
+            prevStartDate = reportPeriodService.getStartDate(prevReportPeriodId).time
         }
     }
     return prevStartDate
@@ -239,7 +249,8 @@ void consolidation() {
         it.realizeCost = null
         it.obtainCost = null
     }
-    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
+            getCalendarStartDate(), getReportPeriodEndDate()).each {
         def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
         if (source != null && source.state == WorkflowState.ACCEPTED && source.formType.taxType == TaxType.VAT) {
             formDataService.getDataRowHelper(source).allCached.each { srcRow ->

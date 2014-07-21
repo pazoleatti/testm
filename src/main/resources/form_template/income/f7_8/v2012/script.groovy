@@ -154,9 +154,24 @@ def arithmeticCheckAlias = ['marketPriceInPerc', 'marketPriceInRub', 'costAcquis
 def fixedDate = new SimpleDateFormat('dd.MM.yyyy').parse('01.01.2010')
 
 @Field
-def reportPeriodEndDate = null
+def startDate = null
 
-//// Обертки методов
+@Field
+def endDate = null
+
+def getReportPeriodStartDate() {
+    if (startDate == null) {
+        startDate = reportPeriodService.getMonthStartDate(formData.reportPeriodId, formData.periodOrder).time
+    }
+    return startDate
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder).time
+    }
+    return endDate
+}
 
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
@@ -298,7 +313,8 @@ void consolidation() {
     def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
 
     // собрать из источников строки и разместить соответствующим разделам
-    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind(),
+            getReportPeriodStartDate(), getReportPeriodEndDate()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
             def source = formDataService.findMonth(it.formTypeId, it.kind, it.departmentId, taxPeriod.id, formData.periodOrder)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
@@ -763,7 +779,7 @@ void addData(def xml, int headRowCount) {
         if (record100 != null) {
             // поиск записи по эмитенту и серии (графам 5 и 6)
             String filter = "ISSUER = " + (record100?.record_id?.value?.toString() ?: 0) + " and LOWER(SHORTNAME) = LOWER('" + (row.cell[6].text() ?: '') + "')"
-            def records = refBookFactory.getDataProvider(84).getRecords(reportPeriodEndDate, null, filter, null)
+            def records = refBookFactory.getDataProvider(84).getRecords(getReportPeriodEndDate(), null, filter, null)
             def record84 = null
             if (records.size() == 1) {
                 record84 = records[0]
@@ -990,7 +1006,7 @@ void addTransportData(def xml) {
         if (record100 != null) {
             // поиск записи по эмитенту и серии (графам 5 и 6)
             String filter = "ISSUER = " + record100?.record_id?.value?.toString() + " and LOWER(SHORTNAME) = LOWER('" + (row.cell[6].text() ?: '') + "')"
-            def records = refBookFactory.getDataProvider(84).getRecords(reportPeriodEndDate, null, filter, null)
+            def records = refBookFactory.getDataProvider(84).getRecords(getReportPeriodEndDate(), null, filter, null)
             def record84 = null
             if (records.size() == 1) {
                 record84 = records[0]
@@ -1303,11 +1319,4 @@ def getRate(def row, def Date date) {
     def record22 = formDataService.getRefBookRecord(22, recordCache, providerCache, refBookCache,
             'CODE_NUMBER', code?.toString(), date, row.getIndex(), getColumnName(row, 'currencyCode'), logger, true)
     return record22?.RATE?.value
-}
-
-def getReportPeriodEndDate() {
-    if (reportPeriodEndDate == null) {
-        reportPeriodEndDate = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder).time
-    }
-    return reportPeriodEndDate
 }

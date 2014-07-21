@@ -52,9 +52,25 @@ switch (formDataEvent) {
 @Field
 def nonEmptyColumns = ['base']
 
+@Field
+def startDate = null
 
+@Field
+def endDate = null
 
-//// Кастомные методы
+def getReportPeriodStartDate() {
+    if (startDate == null) {
+        startDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
+    }
+    return startDate
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
+}
 
 // Алгоритмы заполнения полей формы
 void calc() {
@@ -98,7 +114,8 @@ void consolidation() {
     dataRows.each {
         it.base = null
     }
-    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
+            getReportPeriodStartDate(), getReportPeriodEndDate()).each {
         def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
         if (source != null && source.state == WorkflowState.ACCEPTED && source.getFormType().getTaxType() == TaxType.VAT) {
             formDataService.getDataRowHelper(source).getAllCached().each { srcRow ->

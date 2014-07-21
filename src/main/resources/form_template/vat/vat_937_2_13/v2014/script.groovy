@@ -178,7 +178,8 @@ void consolidation() {
         }
     }
     dataRows = tmp
-    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind(),
+            getCalendarStartDate(), getReportPeriodEndDate()).each {
         def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
         if (source != null && source.state == WorkflowState.ACCEPTED && source.getFormType().getTaxType() == TaxType.VAT) {
             formDataService.getDataRowHelper(source).getAllCached().each { srcRow ->
@@ -207,6 +208,13 @@ def getReportPeriodStartDate() {
         startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
     }
     return startDate
+}
+
+def getCalendarStartDate() {
+    if (!calendarStartDate) {
+        calendarStartDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
+    }
+    return calendarStartDate
 }
 
 def getReportPeriodEndDate() {

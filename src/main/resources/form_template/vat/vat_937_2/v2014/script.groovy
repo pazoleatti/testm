@@ -80,6 +80,9 @@ def sizeDiff = 15
 @Field
 def startDate = null
 
+@Field
+def calendarStartDate = null
+
 // Дата окончания отчетного периода
 @Field
 def endDate = null
@@ -234,7 +237,8 @@ void consolidation() {
         totalB[it] = 0
     }
 
-    for (formDataSource in departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind())) {
+    for (formDataSource in departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind(),
+            getCalendarStartDate(), getReportPeriodEndDate())) {
         if (formDataSource.formTypeId == formData.getFormType().getId()) {
             def source = formDataService.find(formDataSource.formTypeId, formDataSource.kind, formDataSource.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
@@ -275,6 +279,13 @@ def getReportPeriodStartDate() {
         startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
     }
     return startDate
+}
+
+def getCalendarStartDate() {
+    if (!calendarStartDate) {
+        calendarStartDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
+    }
+    return calendarStartDate
 }
 
 def getReportPeriodEndDate() {
