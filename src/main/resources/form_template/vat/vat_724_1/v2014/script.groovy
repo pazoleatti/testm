@@ -76,15 +76,15 @@ def editableColumns = ['baseAccNum', 'baseSum', 'ndsNum', 'ndsSum', 'ndsBookSum'
 
 // Проверяемые на пустые значения атрибуты для разделов 1, 2, 3, 4 (1-4, 6-8)
 @Field
-def nonEmptyColumns1 = allColumns - 'baseAccName' - 'ndsNum'
+def nonEmptyColumns1 = ['baseAccNum', 'baseSum', 'ndsSum', 'ndsRate', 'ndsBookSum']
 
 // Проверяемые на пустые значения атрибуты для разделов 1*, 5, 6 (1-8)
 @Field
-def nonEmptyColumns2 = allColumns - 'baseAccName'
+def nonEmptyColumns2 = ['baseAccNum', 'baseSum', 'ndsNum', 'ndsSum', 'ndsRate', 'ndsBookSum']
 
 // Проверяемые на пустые значения атрибуты для разделов 7 (1-4, 6, 8)
 @Field
-def nonEmptyColumns3 = allColumns - 'baseAccName' - 'ndsNum' - 'ndsRate'
+def nonEmptyColumns3 = ['baseAccNum', 'baseSum', 'ndsSum', 'ndsBookSum']
 
 // Сортируемые атрибуты (графа 3, 5)
 @Field
