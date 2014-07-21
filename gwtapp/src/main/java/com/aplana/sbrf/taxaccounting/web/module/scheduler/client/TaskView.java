@@ -173,7 +173,6 @@ public class TaskView extends ViewWithUiHandlers<TaskUiHandlers>
 
     @Override
     public void clearForm() {
-        createButton.setText("Создать");
         createButton.setVisible(true);
         taskName.setValue("");
         taskSchedule.setValue("");
@@ -186,7 +185,6 @@ public class TaskView extends ViewWithUiHandlers<TaskUiHandlers>
 
     @Override
     public void setTaskData(GetTaskInfoResult taskData) {
-        createButton.setText("Сохранить");
         taskName.setValue(taskData.getTaskName());
         taskSchedule.setValue(taskData.getSchedule());
         jndi.setValue(findJndiInfo(taskData.getUserTaskJndi()), true);
