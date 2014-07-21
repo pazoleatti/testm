@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import org.springframework.cache.annotation.CacheEvict;
@@ -28,7 +28,7 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
 			result.setName(rs.getString("name"));
 			String taxCode = rs.getString("tax_type");
 			result.setTaxType(TaxType.fromCode(taxCode.charAt(0)));
-            result.setStatus(VersionedObjectStatus.getStatusById(SqlUtils.getInteger(rs,"status")));
+            result.setStatus(VersionedObjectStatus.getStatusById(SqlUtils.getInteger(rs, "status")));
             result.setCode(rs.getString("code"));
 			return result;
 		}

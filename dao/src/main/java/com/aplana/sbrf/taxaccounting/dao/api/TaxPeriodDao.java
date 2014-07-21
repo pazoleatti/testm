@@ -14,7 +14,7 @@ public interface TaxPeriodDao {
 	 * Получить объект налогового периода по идентификатору периода
 	 * @param taxPeriodId идентификатор налогового периода
 	 * @return объект, задаваемый идентификатором
-	 * @throws com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException если периода с заданным идентификатором не существует
+	 * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если периода с заданным идентификатором не существует
 	 */
 	TaxPeriod get(int taxPeriodId);
 	

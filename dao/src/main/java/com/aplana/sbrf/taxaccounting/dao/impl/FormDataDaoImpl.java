@@ -4,10 +4,9 @@ import com.aplana.sbrf.taxaccounting.dao.*;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
-import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.source.FormDataInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -474,7 +473,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
             "JOIN form_column fc ON fc.form_template_id = fd.form_template_id\n" +
             "LEFT JOIN report_period rp ON fd.report_period_id = rp.id\n" +
             "LEFT JOIN tax_period tp ON tp.id = rp.tax_period_id\n" +
-            "WHERE fc.type = 'A' AND tp.year = ? AND tp.tax_type = ? AND fd.department_id = ? AND fd.kind = ? AND fd.form_template_id = ?)\n" +
+            "WHERE fc.type = 'A' AND fc.numeration_row = 1 AND tp.year = ? AND tp.tax_type = ? AND fd.department_id = ? AND fd.kind = ? AND fd.form_template_id = ?)\n" +
             "SELECT * FROM list\n";
 
     @Override

@@ -38,7 +38,7 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
     public static final String DECLARATION_TITLE = "Создание декларации";
     public static final String DECLARATION_TITLE_D = "Создание уведомления";
     public static final String DECLARATION_TYPE_TITLE = "Вид декларации:";
-    public static final String DECLARATION_TYPE_TITLE_D = "Вид";
+    public static final String DECLARATION_TYPE_TITLE_D = "Вид:";
 
     @UiField
     ModalWindow modalWindowTitle;

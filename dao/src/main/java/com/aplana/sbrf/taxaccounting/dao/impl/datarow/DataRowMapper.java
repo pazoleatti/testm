@@ -143,9 +143,11 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
         Integer previousRowNumber = fd.getPreviousRowNumber() != null ? fd.getPreviousRowNumber() : 0;
         for (Cell cell : cells) {
             // Values
-            if (cell.getColumn() instanceof AutoNumerationColumn) {
-                if (rs.getString("A") == null) {
+            if (cell.getColumn() instanceof AutoNumerationColumn && rs.getString("A") == null) {
+                if (((AutoNumerationColumn) cell.getColumn()).getType() == 1) {
                     cell.setValue(SqlUtils.getInteger(rs, "IDX2") + previousRowNumber, rowNum);
+                } else {
+                    cell.setValue(SqlUtils.getInteger(rs, "IDX2"), rowNum);
                 }
             } else {
                 DataRowDaoImplUtils.CellValueExtractor extr = getCellValueExtractor(cell.getColumn());

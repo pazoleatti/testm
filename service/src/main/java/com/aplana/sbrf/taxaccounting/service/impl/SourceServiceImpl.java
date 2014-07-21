@@ -496,7 +496,7 @@ public class SourceServiceImpl implements SourceService {
 
         /** Получаем назначения с пересекающимися периодами */
         Map<SourcePair, List<SourceObject>> intersections = sourceDao.getIntersections(sourcePairs,
-                SimpleDateUtils.addDayToDate(periodStart, -1), SimpleDateUtils.addDayToDate(periodEnd, 1), excludedPeriodStart, excludedPeriodEnd, isDeclaration);
+                SimpleDateUtils.addDayToDate(periodStart, -1), periodEnd != null ? SimpleDateUtils.addDayToDate(periodEnd, 1) : null, excludedPeriodStart, excludedPeriodEnd, isDeclaration);
 
         if (!intersections.isEmpty()) {
             /**
@@ -543,7 +543,7 @@ public class SourceServiceImpl implements SourceService {
                                     sourcePair.getDestinationFormType() == null ? sourcePair.getDestinationDeclarationType().getName() :
                                             sourcePair.getDestinationKind().getName() + ": " + sourcePair.getDestinationFormType().getName(),
                                     formatter.get().format(union.getPeriodStart()),
-                                    formatter.get().format(union.getPeriodEnd())
+                                    union.getPeriodEnd() != null ? formatter.get().format(union.getPeriodEnd()) : ""
                             );
                         }
 
@@ -556,7 +556,7 @@ public class SourceServiceImpl implements SourceService {
                                     "приемником",
                                     sourcePair.getSourceKind().getName() + ": " + sourcePair.getSourceType().getName(),
                                     formatter.get().format(union.getPeriodStart()),
-                                    formatter.get().format(union.getPeriodEnd())
+                                    union.getPeriodEnd() != null ? formatter.get().format(union.getPeriodEnd()) : ""
                             );
                         }
                     });
@@ -655,7 +655,7 @@ public class SourceServiceImpl implements SourceService {
                             "приемником",
                             sourceObject.getSourcePair().getSourceKind().getName() + ": " + sourceObject.getSourcePair().getSourceType().getName(),
                             formatter.get().format(sourceObject.getPeriodStart()),
-                            formatter.get().format(sourceObject.getPeriodEnd())
+                            sourceObject.getPeriodEnd() != null ? formatter.get().format(sourceObject.getPeriodEnd()) : ""
                     );
                 } else {
                     logger.info(SAVE_SUCCESS_MSG,
@@ -664,7 +664,7 @@ public class SourceServiceImpl implements SourceService {
                             sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationDeclarationType().getName() :
                                     sourceObject.getSourcePair().getDestinationKind().getName() + ": " + sourceObject.getSourcePair().getDestinationFormType().getName(),
                             formatter.get().format(sourceObject.getPeriodStart()),
-                            formatter.get().format(sourceObject.getPeriodEnd())
+                            sourceObject.getPeriodEnd() != null ? formatter.get().format(sourceObject.getPeriodEnd()) : ""
                     );
                 }
             }

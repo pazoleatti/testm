@@ -14,7 +14,7 @@ public interface DepartmentDao {
 	 * Получить подразделение по коду
 	 * @param id идентфикатор подразделения
 	 * @return объект подразделения пользователя
-	 * @throws com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException если подразделение с таким идентификатором не существует
+	 * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если подразделение с таким идентификатором не существует
 	 */
 	Department getDepartment(int id);
 

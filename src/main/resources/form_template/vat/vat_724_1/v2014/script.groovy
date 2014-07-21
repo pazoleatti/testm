@@ -2,7 +2,6 @@ package form_template.vat.vat_724_1.v2014
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
@@ -77,15 +76,15 @@ def editableColumns = ['baseAccNum', 'baseSum', 'ndsNum', 'ndsSum', 'ndsBookSum'
 
 // Проверяемые на пустые значения атрибуты для разделов 1, 2, 3, 4 (1-4, 6-8)
 @Field
-def nonEmptyColumns1 = allColumns - 'baseAccName' - 'ndsNum'
+def nonEmptyColumns1 = ['baseAccNum', 'baseSum', 'ndsSum', 'ndsRate', 'ndsBookSum']
 
 // Проверяемые на пустые значения атрибуты для разделов 1*, 5, 6 (1-8)
 @Field
-def nonEmptyColumns2 = allColumns - 'baseAccName'
+def nonEmptyColumns2 = ['baseAccNum', 'baseSum', 'ndsNum', 'ndsSum', 'ndsRate', 'ndsBookSum']
 
 // Проверяемые на пустые значения атрибуты для разделов 7 (1-4, 6, 8)
 @Field
-def nonEmptyColumns3 = allColumns - 'baseAccName' - 'ndsNum' - 'ndsRate'
+def nonEmptyColumns3 = ['baseAccNum', 'baseSum', 'ndsSum', 'ndsBookSum']
 
 // Сортируемые атрибуты (графа 3, 5)
 @Field
@@ -442,8 +441,8 @@ void addData(def xml, int headRowCount) {
 
         // Графа 2 - зависит от графы 3 - атрибут 901 - ACCOUNT_NAME - «Наименование балансового счета», справочник 101 «План счетов бухгалтерского учета»
         if (record != null) {
-            def value1 = record?.ACCOUNT_NAME?.value?.toString()
-            def value2 = row.cell[2].text()
+            def value1 = row.cell[2].text()
+            def value2 = record?.ACCOUNT_NAME?.value?.toString()
             formDataService.checkReferenceValue(101, value1, value2, xlsIndexRow, 2 + colOffset, logger, true)
         }
 
