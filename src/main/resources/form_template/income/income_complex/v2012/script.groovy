@@ -139,10 +139,6 @@ def rowsAliasesForSecondControlSum = ['R32', 'R33', 'R34', 'R35', 'R36', 'R37', 
         'R58', 'R59', 'R60', 'R61', 'R62', 'R63', 'R64', 'R65', 'R66', 'R67', 'R68', 'R69', 'R70', 'R71', 'R72',
         'R73', 'R74', 'R75', 'R76', 'R77', 'R78', 'R79', 'R80', 'R81', 'R82', 'R83', 'R84', 'R85', 'R86', 'R87']
 
-// Дата окончания отчетного периода
-@Field
-def endDate = null
-
 @Field
 def rbIncome101 = null
 
@@ -151,6 +147,26 @@ def rbIncome102 = null
 
 @Field
 def editableStyle = 'Числовое значение'
+
+@Field
+def startDate = null
+
+@Field
+def endDate = null
+
+def getReportPeriodStartDate() {
+    if (startDate == null) {
+        startDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
+    }
+    return startDate
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
+}
 
 // Получение Id записи с использованием кэширования
 def getRecordId(def ref_id, String alias, String value, Date date) {
@@ -255,7 +271,8 @@ void consolidationBank(def dataRows) {
     }
 
     // получить консолидированные формы в дочерних подразделениях в текущем налоговом периоде
-    departmentFormTypeService.getFormSources(formData.departmentId, formData.formType.id, formData.kind).each {
+    departmentFormTypeService.getFormSources(formData.departmentId, formData.formType.id, formData.kind,
+            getReportPeriodStartDate(), getReportPeriodEndDate()).each {
         def child = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
         if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == formData.formType.id) {
             for (def row : formDataService.getDataRowHelper(child).allCached) {
@@ -296,8 +313,8 @@ void consolidationSummary(def dataRows) {
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
 
     // получить формы-источники в текущем налоговом периоде
-    // TODO (Ramil Timerbaev) используется устаревший метод departmentFormTypeService.getSources, возможно надо заменить на departmentFormTypeService.getFormSources
-    departmentFormTypeService.getSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
+            getReportPeriodStartDate(), getReportPeriodEndDate()).each {
         def prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
         def isMonth = it.formTypeId in [332, 328] //ежемесячная
         if (!isMonth && prevReportPeriod != null) {
@@ -659,7 +676,7 @@ def getSum(def dataRows, def colName, def rowsAliases) {
 def isBank() {
     boolean isBank = true
     // получаем список приемников
-    def list = departmentFormTypeService.getFormDestinations(formData.departmentId, formData.formType.id, FormDataKind.SUMMARY)
+    def list = departmentFormTypeService.getFormDestinations(formData.departmentId, formData.formType.id, FormDataKind.SUMMARY, getReportPeriodStartDate(), getReportPeriodEndDate())
     // если есть приемники в других подразделениях, то это не банк, а ОП
     list.each {
         if (it.departmentId != formData.departmentId) {
@@ -828,13 +845,6 @@ void addData(def xml, int headRowCount) {
         logger.error("Структура файла не соответствует макету налоговой формы в строке с КНУ = $knu. ")
     }
     dataRowHelper.update(rows)
-}
-
-def getReportPeriodEndDate() {
-    if (endDate == null) {
-        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
-    }
-    return endDate
 }
 
 void checkTotalSum(totalRow, sum){

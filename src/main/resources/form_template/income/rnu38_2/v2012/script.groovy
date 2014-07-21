@@ -59,15 +59,31 @@ switch (formDataEvent) {
 @Field
 def allColumns = ['amount', 'incomePrev', 'incomeShortPosition', 'totalPercIncome']
 
-// Дата окончания отчетного периода
-@Field
-def endDate = null
-
 @Field
 def taxPeriod = null
 
 @Field
 def sourceFormData = null
+
+@Field
+def startDate = null
+
+@Field
+def endDate = null
+
+def getReportPeriodStartDate() {
+    if (startDate == null) {
+        startDate = reportPeriodService.getMonthStartDate(formData.reportPeriodId, formData.periodOrder).time
+    }
+    return startDate
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder).time
+    }
+    return endDate
+}
 
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
@@ -126,7 +142,8 @@ void consolidation() {
         totalRow[it] = 0
     }
 
-    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
+            getReportPeriodStartDate(), getReportPeriodEndDate()).each {
         def source = formDataService.findMonth(it.formTypeId, it.kind, it.departmentId, getTaxPeriod()?.id, formData.periodOrder)
         if (source != null && source.state == WorkflowState.ACCEPTED) {
             def sourceRows = formDataService.getDataRowHelper(source).allCached
@@ -137,13 +154,6 @@ void consolidation() {
         }
     }
     dataRowHelper.save(dataRows)
-}
-
-def getReportPeriodEndDate() {
-    if (endDate == null) {
-        endDate = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder)?.time
-    }
-    return endDate
 }
 
 def getTaxPeriod() {

@@ -61,8 +61,8 @@ public class UploadTransportDataServiceTest {
         AuditService auditService = mock(AuditService.class);
         ReflectionTestUtils.setField(uploadTransportDataService, "auditService", auditService);
 
-        RefBookExternalService refBookExternalService = mock(RefBookExternalService.class);
-        when(refBookExternalService.isDiasoftFile(anyString())).thenAnswer(new Answer<Object>() {
+        LoadRefBookDataService loadRefBookDataService = mock(LoadRefBookDataService.class);
+        when(loadRefBookDataService.isDiasoftFile(anyString())).thenAnswer(new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 String name = (String) invocation.getArguments()[0];
@@ -78,7 +78,7 @@ public class UploadTransportDataServiceTest {
                 return false;
             }
         });
-        ReflectionTestUtils.setField(uploadTransportDataService, "refBookExternalService", refBookExternalService);
+        ReflectionTestUtils.setField(uploadTransportDataService, "loadRefBookDataService", loadRefBookDataService);
 
         final Department formDepartment = new Department();
         formDepartment.setId(TEST_DEPARTMENT_ID);

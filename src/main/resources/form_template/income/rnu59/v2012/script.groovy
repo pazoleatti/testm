@@ -108,10 +108,27 @@ switch (formDataEvent){
 }
 
 @Field
-def endDate = null
+def totalColumns = ['nominalPrice', 'acquisitionPrice', 'salePrice', 'income', 'outcome', 'outcome269st', 'outcomeTax']
 
 @Field
-def totalColumns = ['nominalPrice', 'acquisitionPrice', 'salePrice', 'income', 'outcome', 'outcome269st', 'outcomeTax']
+def startDate = null
+
+@Field
+def endDate = null
+
+def getReportPeriodStartDate() {
+    if (startDate == null) {
+        startDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
+    }
+    return startDate
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
+}
 
 /**
  * Добавление новой строки
@@ -270,7 +287,7 @@ def logicalCheck(){
         totalValues[it] = 0
     }
 
-    def dFrom = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).getTime()
+    def dFrom = getReportPeriodStartDate()
     def dTo = getReportPeriodEndDate()
     def reportDay = reportPeriodService.getReportDate(formData.reportPeriodId)?.time
 
@@ -503,8 +520,8 @@ void consolidation() {
     data.clear()
     def newRows = []
 
-    // TODO (Ramil Timerbaev) в метод departmentFormTypeService.getFormSources добавить периоды
-    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind(),
+            getReportPeriodStartDate(), getReportPeriodEndDate()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
             def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
@@ -1052,11 +1069,4 @@ void loggerError(def msg, Object... args) {
     //TODO вернуть error
     //logger.error(msg)
     logger.warn(msg, args)
-}
-
-def getReportPeriodEndDate() {
-    if (endDate == null) {
-        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
-    }
-    return endDate
 }

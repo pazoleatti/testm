@@ -107,10 +107,6 @@ def formatY = new SimpleDateFormat('yyyy')
 @Field
 def format = new SimpleDateFormat('dd.MM.yyyy')
 
-// Дата окончания отчетного периода
-@Field
-def endDate = null
-
 @Field
 def rbIncome101 = null
 
@@ -119,6 +115,26 @@ def rbIncome102 = null
 
 @Field
 def editableStyle = 'Редактируемая'
+
+@Field
+def startDate = null
+
+@Field
+def endDate = null
+
+def getReportPeriodStartDate() {
+    if (startDate == null) {
+        startDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
+    }
+    return startDate
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
+}
 
 // Получение Id записи с использованием кэширования
 def getRecordId(def ref_id, String alias, String value, Date date) {
@@ -329,7 +345,8 @@ def consolidationBank(def dataRows) {
         }
     }
     // получить данные из источников
-    for (departmentFormType in departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind())) {
+    for (departmentFormType in departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind(),
+            getReportPeriodStartDate(), getReportPeriodEndDate())) {
         def child = formDataService.find(departmentFormType.formTypeId, departmentFormType.kind, departmentFormType.departmentId, formData.reportPeriodId)
         if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == departmentFormType.formTypeId) {
             def childData = formDataService.getDataRowHelper(child)
@@ -396,8 +413,8 @@ def consolidationSummary(def dataRows) {
     fillRecordsMap(28, 'CODE', knuList, getReportPeriodEndDate())
 
     // получить формы-источники в текущем налоговом периоде
-    // TODO (Ramil Timerbaev) используется устаревший метод departmentFormTypeService.getSources, возможно надо заменить на departmentFormTypeService.getFormSources
-    departmentFormTypeService.getSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind(),
+            getReportPeriodStartDate(), getReportPeriodEndDate()).each {
         def child = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
         if (child != null && child.state == WorkflowState.ACCEPTED) {
             def dataChild = formDataService.getDataRowHelper(child)
@@ -482,7 +499,7 @@ void checkCreation() {
 def isBank() {
     boolean isBank = true
     // получаем список приемников
-    def list = departmentFormTypeService.getFormDestinations(formData.departmentId, formData.formType.id, FormDataKind.SUMMARY)
+    def list = departmentFormTypeService.getFormDestinations(formData.departmentId, formData.formType.id, FormDataKind.SUMMARY, getReportPeriodStartDate(), getReportPeriodEndDate())
     // если есть приемники в других подразделениях, то это не банк, а ОП
     list.each {
         if (it.departmentId != formData.departmentId) {
@@ -650,11 +667,4 @@ void checkTotalSum(totalRow, needRow) {
     if (!errorColumns.isEmpty()) {
         logger.error("Итоговое значение в строке ${totalRow.getIndex()} рассчитано неверно в графах ${errorColumns.join(", ")}!")
     }
-}
-
-def getReportPeriodEndDate() {
-    if (endDate == null) {
-        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
-    }
-    return endDate
 }

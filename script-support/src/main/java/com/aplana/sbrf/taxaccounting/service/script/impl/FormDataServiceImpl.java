@@ -146,9 +146,12 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
         DataRowHelper dataRowHelper = getDataRowHelper(formData);
         // Новый список строк
         List<DataRow<Cell>> rows = new LinkedList<DataRow<Cell>>();
+        // даты начала и конца отчетного периода
+        Date startDate = reportPeriodService.getCalendarStartDate(formData.getReportPeriodId()).getTime();
+        Date endDate = reportPeriodService.getEndDate(formData.getReportPeriodId()).getTime();
         // НФ назначения
         List<DepartmentFormType> typeList = departmentFormTypeService.getFormSources(departmentId,
-                formData.getFormType().getId(), formData.getKind());
+                formData.getFormType().getId(), formData.getKind(), startDate, endDate);
         // периодичность приёмника "ежемесячно"
         boolean isFormDataMonthly = formData.getPeriodOrder() != null;
 

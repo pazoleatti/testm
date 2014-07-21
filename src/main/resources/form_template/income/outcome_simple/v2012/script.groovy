@@ -3,6 +3,7 @@ package form_template.income.outcome_simple.v2012
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormData
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
@@ -91,10 +92,6 @@ def formatY = new SimpleDateFormat('yyyy')
 @Field
 def format = new SimpleDateFormat('dd.MM.yyyy')
 
-// Дата окончания отчетного периода
-@Field
-def endDate = null
-
 // справочник "Отчет о прибылях и убытках (Форма 0409102-СБ)"
 @Field
 def rbIncome102 = null
@@ -106,6 +103,26 @@ def row50002alias = 'R213'
 
 @Field
 def editableStyle = 'Редактирование (светло-голубой)'
+
+@Field
+def startDate = null
+
+@Field
+def endDate = null
+
+def getReportPeriodStartDate() {
+    if (startDate == null) {
+        startDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
+    }
+    return startDate
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
+}
 
 // Получение Id записи с использованием кэширования
 def getRecordId(def ref_id, String alias, String value, Date date) {
@@ -281,7 +298,8 @@ def consolidationBank(def dataRows) {
     }
 
     // получить консолидированные формы в дочерних подразделениях в текущем налоговом периоде
-    for (departmentFormType in departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind())) {
+    for (departmentFormType in departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind(),
+            getReportPeriodStartDate(), getReportPeriodEndDate())) {
         def child = formDataService.find(departmentFormType.formTypeId, departmentFormType.kind, departmentFormType.departmentId, formData.reportPeriodId)
         if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == formData.formType.id) {
             def childData = formDataService.getDataRowHelper(child)
@@ -358,8 +376,8 @@ void consolidationSummary(def dataRows) {
     fillRecordsMap(27, 'CODE', knuList, getReportPeriodEndDate())
 
     // получить консолидированные формы в дочерних подразделениях в текущем налоговом периоде
-    // TODO (Ramil Timerbaev) используется устаревший метод departmentFormTypeService.getSources, возможно надо заменить на departmentFormTypeService.getFormSources
-    departmentFormTypeService.getSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind(),
+            getReportPeriodStartDate(), getReportPeriodEndDate()).each {
         def child = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
         if (child != null && child.state == WorkflowState.ACCEPTED) {
             def dataRowsChild = formDataService.getDataRowHelper(child)?.allCached
@@ -419,7 +437,7 @@ void consolidationSummary(def dataRows) {
 def isBank() {
     boolean isBank = true
     // получаем список приемников
-    def list = departmentFormTypeService.getFormDestinations(formData.departmentId, formData.formType.id, FormDataKind.SUMMARY)
+    def list = departmentFormTypeService.getFormDestinations(formData.departmentId, formData.formType.id, FormDataKind.SUMMARY, getReportPeriodStartDate(), getReportPeriodEndDate())
     // если есть приемники в других подразделениях, то это не банк, а ОП
     list.each {
         if (it.departmentId != formData.departmentId) {
@@ -689,13 +707,6 @@ void checkRnu14Accepted() {
     if (formData14 == null || formData14.state != WorkflowState.ACCEPTED) {
         logger.error("Принятие сводной налоговой формы невозможно, т.к. форма РНУ-14 не сформирована или имеет статус, отличный от «Принята»")
     }
-}
-
-def getReportPeriodEndDate() {
-    if (endDate == null) {
-        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
-    }
-    return endDate
 }
 
 // Возвращает данные из Отчета о прибылях и убытках за период, для которого сформирована текущая форма

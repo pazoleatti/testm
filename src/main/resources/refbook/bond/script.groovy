@@ -17,7 +17,7 @@ import java.text.SimpleDateFormat
  * blob_data.id = b43514e5-55dd-4b74-9ce5-60007c32d6a6
  */
 switch (formDataEvent) {
-    case FormDataEvent.IMPORT:
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importFromNSI()
         break
 }

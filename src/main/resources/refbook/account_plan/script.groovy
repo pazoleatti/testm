@@ -20,7 +20,7 @@ import java.text.SimpleDateFormat
  * ref_book_id = 101
  */
 switch (formDataEvent) {
-    case FormDataEvent.IMPORT:
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importFromXML()
         break
 }

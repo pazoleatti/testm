@@ -6,7 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.service.RefBookExternalService;
+import com.aplana.sbrf.taxaccounting.service.LoadRefBookDataService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookValueSerializable;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.SaveRefBookRowVersionAction;
@@ -38,7 +38,7 @@ public class SaveRefBookRowVersionHandler extends AbstractActionHandler<SaveRefB
     private LogEntryService logEntryService;
 
     @Autowired
-    private RefBookExternalService refBookExternalService;
+    private LoadRefBookDataService loadRefBookDataService;
 
     @Autowired
     private SecurityService securityService;
@@ -56,7 +56,7 @@ public class SaveRefBookRowVersionHandler extends AbstractActionHandler<SaveRefB
         // проверка новых значений по БЛ
         List<Map<String, RefBookValue>> saveRecords = new ArrayList<Map<String, RefBookValue>>();
         saveRecords.add(valueToSave);
-        refBookExternalService.saveRefBookRecords(action.getRefBookId(), saveRecords, action.getVersionFrom(),
+        loadRefBookDataService.saveRefBookRecords(action.getRefBookId(), saveRecords, action.getVersionFrom(),
                 action.getVersionTo(), false, securityService.currentUserInfo(), logger);
 
         RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(action.getRefBookId());

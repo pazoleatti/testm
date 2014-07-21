@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.RefBookExternalService;
+import com.aplana.sbrf.taxaccounting.service.LoadRefBookDataService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.LoadRefBookAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.LoadRefBookResult;
@@ -22,7 +22,7 @@ import com.gwtplatform.dispatch.shared.ActionException;
 public class LoadRefBookHandler extends AbstractActionHandler<LoadRefBookAction, LoadRefBookResult> {
 
     @Autowired
-    private RefBookExternalService refBookExternalService;
+    private LoadRefBookDataService loadRefBookDataService;
     
     @Autowired
     private SecurityService securityService;
@@ -40,9 +40,9 @@ public class LoadRefBookHandler extends AbstractActionHandler<LoadRefBookAction,
 		LoadRefBookResult result = new LoadRefBookResult();
 		Logger logger = new Logger();
         // Импорт справочников из ЦАС НСИ
-		refBookExternalService.importRefBookNsi(securityService.currentUserInfo(), logger);
+		loadRefBookDataService.importRefBookNsi(securityService.currentUserInfo(), logger);
         // Импорт справочников из Diasoft Custody
-        refBookExternalService.importRefBookDiasoft(securityService.currentUserInfo(), logger);
+        loadRefBookDataService.importRefBookDiasoft(securityService.currentUserInfo(), logger);
         result.setUuid(logEntryService.save(logger.getEntries()));
 		return result;
 	}
