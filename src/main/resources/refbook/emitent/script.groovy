@@ -15,7 +15,7 @@ import groovy.transform.Field
  * blob_data.id = 4e1a8f16-3dfa-41b5-a71b-ba37efa2fadb
  */
 switch (formDataEvent) {
-    case FormDataEvent.IMPORT:
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importFromNSI()
         break
 }
