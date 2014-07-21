@@ -59,6 +59,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
         @Override
         public Pair<DepartmentDeclarationType, Date> mapRow(ResultSet rs, int i) throws SQLException {
             DepartmentDeclarationType departmentDeclarationType = new DepartmentDeclarationType();
+            departmentDeclarationType.setId(rs.getInt("id"));
             departmentDeclarationType.setDeclarationTypeId(SqlUtils.getInteger(rs,"declaration_type_id"));
             departmentDeclarationType.setDepartmentId(SqlUtils.getInteger(rs,"department_id"));
             return new Pair<DepartmentDeclarationType, Date>(departmentDeclarationType, rs.getDate("start_date"));
@@ -140,7 +141,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
             values.put("dateFrom", dateFrom);
             values.put("dateTo", dateTo);
 
-            return getNamedParameterJdbcTemplate().query("select tgt.DEPARTMENT_ID department_id, tgt.DECLARATION_TYPE_ID declaration_type_id, ds.PERIOD_START start_date\n" +
+            return getNamedParameterJdbcTemplate().query("select tgt.id id, tgt.DEPARTMENT_ID department_id, tgt.DECLARATION_TYPE_ID declaration_type_id, ds.PERIOD_START start_date\n" +
                     "from department_form_type src \n" +
                     "join declaration_source ds on src.id = ds.src_department_form_type_id\n" +
                     "join department_declaration_type tgt on ds.department_declaration_type_id = tgt.id \n" +
