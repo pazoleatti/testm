@@ -1,13 +1,9 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
-import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.ImportCounter;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 import java.util.Set;
 
@@ -17,13 +13,24 @@ import java.util.Set;
  * @author Dmitriy Levykin
  */
 public interface LoadTransportDataService {
+
     /**
-     * Затрузка всех ТФНФ и ТФС
+     * Загрузка ТФ справочников из ЦАС НСИ (ACCOUNT_PLAN_UPLOAD_DIRECTORY, OKATO_UPLOAD_DIRECTORY, REGION_UPLOAD_DIRECTORY)
      */
-    void importAllData(TAUserInfo userInfo, Logger logger);
+    ImportCounter importRefBookNsi(TAUserInfo userInfo, Logger logger);
+
+    /**
+     * Загрузка ТФ справочников из Diasoft (DIASOFT_UPLOAD_DIRECTORY)
+     */
+    ImportCounter importRefBookDiasoft(TAUserInfo userInfo, Logger logger);
+
+    /**
+     * Загрузка ТФ НФ ТБ (FORM_UPLOAD_DIRECTORY)
+     */
+    ImportCounter importFormData(TAUserInfo userInfo, Logger logger);
 
     /**
      * Получение спика ТФ НФ из каталога загрузки. Файлы, которые не соответствуют маппингу пропускаются.
      */
-    List<String> getWorkFilesFromFolder(String folderPath, Set<String> ignoreFileSet);
+    List<String> getWorkTransportFiles(String folderPath, Set<String> ignoreFileSet);
 }

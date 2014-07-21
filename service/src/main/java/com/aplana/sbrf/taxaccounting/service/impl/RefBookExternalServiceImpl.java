@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
@@ -136,6 +137,9 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
                                     Long refBookId = refBookMapPair.getSecond();
                                     RefBook refBook = refBookFactory.get(refBookId);
 
+                                    // Локальный логгер
+                                    Logger localLogger = new Logger();
+
                                     ScriptStatusHolder scriptStatusHolder = new ScriptStatusHolder();
                                     try {
                                         is = new BufferedInputStream(file.getInputStream());
@@ -147,28 +151,31 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
                                                 is = zis;
                                             }
                                         }
-                                        logger.info("Импорт данных справочника «" + refBook.getName() + "» из файла «" + fileName + "».");
+                                        localLogger.info("Импорт данных справочника «" + refBook.getName() + "» из файла «" + fileName + "».");
 
                                         // Обращение к скрипту
                                         Map<String, Object> additionalParameters = new HashMap<String, Object>();
                                         additionalParameters.put("inputStream", is);
                                         additionalParameters.put("fileName", fileName);
                                         additionalParameters.put("scriptStatusHolder", scriptStatusHolder);
-                                        refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.IMPORT, logger, additionalParameters);
+                                        refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.IMPORT, localLogger, additionalParameters);
                                         // Обработка результата выполнения скрипта
                                         switch (scriptStatusHolder.getScriptStatus()) {
                                             case SUCCESS:
-                                                logger.info("Импорт успешно выполнен.");
+                                                localLogger.info("Импорт успешно выполнен.");
                                                 successFolder++;
                                                 importResult.getSuccessFileList().add(file);
                                                 break;
                                             case SKIP:
                                                 importResult.getSkipFileList().add(file);
-                                                logger.info("Файл пропущен. " + scriptStatusHolder.getStatusMessage());
+                                                localLogger.info("Файл пропущен. " + scriptStatusHolder.getStatusMessage());
                                                 break;
                                         }
                                     } catch (Exception e) {
+                                        // В список файлов с ошибками
                                         importResult.getFailFileList().add(file);
+                                        // Список ошибок в результат
+                                        importResult.getFailLogMap().put(file, new ArrayList<LogEntry>(localLogger.getEntries()));
                                         //// Ошибка импорта отдельного справочника — откатываются изменения только по нему, импорт продолжается
                                         withError = true;
                                         String errorMsg;
@@ -185,8 +192,9 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
                                         auditService.add(FormDataEvent.IMPORT_TRANSPORT_FILE, userInfo, userInfo.getUser().getDepartmentId(),
                                                 null, null, null, null, errorMsg);
 
-                                        logger.error(errorMsg);
+                                        localLogger.error(errorMsg);
                                     } finally {
+                                        logger.getEntries().addAll(localLogger.getEntries());
                                         IOUtils.closeQuietly(is);
                                     }
                                 }

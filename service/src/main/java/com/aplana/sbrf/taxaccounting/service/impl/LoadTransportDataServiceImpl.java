@@ -150,7 +150,9 @@ public class LoadTransportDataServiceImpl implements LoadTransportDataService {
     /**
      * Загрузка всех справочников НСИ
      */
-    private ImportCounter importNsiRefBook(TAUserInfo userInfo, Logger logger) {
+    @Override
+    public ImportCounter importRefBookNsi(TAUserInfo userInfo, Logger logger) {
+        logImport(userInfo, LogData.L23, logger);
         ImportResult<FileWrapper> importResult;
         try {
             importResult = refBookExternalService.importRefBookNsi(userInfo, logger);
@@ -159,13 +161,18 @@ public class LoadTransportDataServiceImpl implements LoadTransportDataService {
             logger.error(IMPORT_REF_BOOK_ERROR, e.getMessage());
             return new ImportCounter();
         }
-        return new ImportCounter(importResult.getSuccessFileList().size(), importResult.getSkipFileList().size(), importResult.getFailFileList().size());
+        ImportCounter importCounter = new ImportCounter(importResult.getSuccessFileList().size(),
+                importResult.getSkipFileList().size(), importResult.getFailFileList().size());
+        logImport(userInfo, LogData.L24, logger, importCounter.getSuccessCounter(), importCounter.getFailCounter());
+        return importCounter;
     }
 
     /**
      * Загрузка всех справочников Diasoft
      */
-    private ImportCounter importDiasoftRefBook(TAUserInfo userInfo, Logger logger) {
+    @Override
+    public ImportCounter importRefBookDiasoft(TAUserInfo userInfo, Logger logger) {
+        logImport(userInfo, LogData.L23, logger);
         ImportResult<FileWrapper> importResult;
         try {
             importResult = refBookExternalService.importRefBookDiasoft(userInfo, logger);
@@ -196,11 +203,13 @@ public class LoadTransportDataServiceImpl implements LoadTransportDataService {
                     break;
                 }
             }
-            // TODO Логи по отдельным файлам тоже можно передать в каталог ошибок, нужно передавать через ImportResult
-            moveToErrorDirectory(userInfo, errorPath, file, null, logger);
+            List<LogEntry> errorList = importResult.getFailLogMap().get(file);
+            moveToErrorDirectory(userInfo, errorPath, file, errorList, logger);
         }
-
-        return new ImportCounter(importResult.getSuccessFileList().size(), importResult.getSkipFileList().size(), importResult.getFailFileList().size());
+        ImportCounter importCounter = new ImportCounter(importResult.getSuccessFileList().size(),
+                importResult.getSkipFileList().size(), importResult.getFailFileList().size());
+        logImport(userInfo, LogData.L24, logger, importCounter.getSuccessCounter(), importCounter.getFailCounter());
+        return importCounter;
     }
 
     /**
@@ -208,7 +217,6 @@ public class LoadTransportDataServiceImpl implements LoadTransportDataService {
      */
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     private ImportCounter importDataFromFolder(TAUserInfo userInfo, ConfigurationParam param, Integer departmentId, Logger logger) {
-        // TODO Здесь выводится ошибка поиска пути для подразделения, которая дублируется.
         String path = getUploadPath(userInfo, param, departmentId, logger);
         if (path == null) {
             // Ошибка получения пути
@@ -218,27 +226,14 @@ public class LoadTransportDataServiceImpl implements LoadTransportDataService {
     }
 
     @Override
-    public void importAllData(TAUserInfo userInfo, Logger logger) {
-        // ТФНФ
+    public ImportCounter importFormData(TAUserInfo userInfo, Logger logger) {
         logImport(userInfo, LogData.L1, logger);
-        ImportCounter importCounter = importAllFormData(userInfo, logger);
-        logImport(userInfo, LogData.L2, logger, importCounter.getSuccessCounter(), importCounter.getFailCounter());
-        // ТФС
-        logImport(userInfo, LogData.L23, logger);
-        importCounter = importDiasoftRefBook(userInfo, logger);
-        importCounter.add(importNsiRefBook(userInfo, logger));
-        logImport(userInfo, LogData.L24, logger, importCounter.getSuccessCounter(), importCounter.getFailCounter());
-    }
-
-    /**
-     * Загрузка ТФНФ со всех ТБ
-     */
-    private ImportCounter importAllFormData(TAUserInfo userInfo, Logger logger) {
         List<Integer> departmenIdList = departmentService.getTBDepartmentIds(userInfo.getUser());
         ImportCounter importCounter = new ImportCounter();
         for (Integer departmentId : departmenIdList) {
             importCounter.add(importDataFromFolder(userInfo, ConfigurationParam.FORM_UPLOAD_DIRECTORY, departmentId, logger));
         }
+        logImport(userInfo, LogData.L2, logger, importCounter.getSuccessCounter(), importCounter.getFailCounter());
         return importCounter;
     }
 
@@ -253,13 +248,13 @@ public class LoadTransportDataServiceImpl implements LoadTransportDataService {
         // Набор файлов, которые не удалось переместить с удалением. Их нужно пропускать.
         Set<String> ignoreFileSet = new HashSet<String>();
         // Если изначально нет подходящих файлов то выдаем отдельную ошибку
-        if (getWorkFilesFromFolder(path, ignoreFileSet).isEmpty()) {
+        if (getWorkTransportFiles(path, ignoreFileSet).isEmpty()) {
             logImport(userInfo, LogData.L3, logger);
             return new ImportCounter();
         }
 
         // Обработка всех подходящих файлов, с получением списка на каждой итерации
-        while (!(workFilesList = getWorkFilesFromFolder(path, ignoreFileSet)).isEmpty()) {
+        while (!(workFilesList = getWorkTransportFiles(path, ignoreFileSet)).isEmpty()) {
             String fileName = workFilesList.get(0);
             ignoreFileSet.add(fileName);
             FileWrapper currentFile = ResourceUtils.getSharedResource(path + fileName);
@@ -590,7 +585,7 @@ public class LoadTransportDataServiceImpl implements LoadTransportDataService {
     }
 
     @Override
-    public List<String> getWorkFilesFromFolder(String folderPath, Set<String> ignoreFileSet) {
+    public List<String> getWorkTransportFiles(String folderPath, Set<String> ignoreFileSet) {
         List<String> retVal = new LinkedList<String>();
         FileWrapper catalogFile = ResourceUtils.getSharedResource(folderPath);
         for (String candidateStr : catalogFile.list()) {
