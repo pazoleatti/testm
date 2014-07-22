@@ -588,7 +588,7 @@ def getFormDataSimple(def reportPeriodId) {
 // Получение данных из справочника «Отчет о прибылях и убытках» для текужего подразделения и отчетного периода
 def getIncome102Data(def date) {
     if (!income102DataCache.containsKey(date)) {
-        def records = bookerStatementService.getRecords(52L, declarationData.reportPeriodId, date, null)
+        def records = bookerStatementService.getRecords(52L, declarationData.departmentId, date, null)
         income102DataCache.put(date, records)
     }
     return income102DataCache.get(date)
