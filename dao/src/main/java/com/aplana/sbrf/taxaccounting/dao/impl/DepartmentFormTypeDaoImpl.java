@@ -64,6 +64,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         @Override
         public Pair<DepartmentFormType, Date> mapRow(ResultSet rs, int i) throws SQLException {
             DepartmentFormType departmentFormType = new DepartmentFormType();
+            departmentFormType.setId(rs.getInt("id"));
             departmentFormType.setFormTypeId(SqlUtils.getInteger(rs,"form_type_id"));
             departmentFormType.setDepartmentId(SqlUtils.getInteger(rs,"department_id"));
             departmentFormType.setKind(FormDataKind.fromId(SqlUtils.getInteger(rs,"kind")));
@@ -753,7 +754,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         }, sourceDepartmentId, sourceKind.getId(), sourceFormTypeId, reportPeriodId);
     }
 
-    private static final String FIND_DESTINATIONS_SQL = "SELECT tgt.DEPARTMENT_ID department_id, tgt.FORM_TYPE_ID form_type_id, tgt.KIND kind, fds.PERIOD_START start_date \n" +
+    private static final String FIND_DESTINATIONS_SQL = "SELECT tgt.id id, tgt.DEPARTMENT_ID department_id, tgt.FORM_TYPE_ID form_type_id, tgt.KIND kind, fds.PERIOD_START start_date \n" +
             "from department_form_type src \n" +
             "join form_data_source fds on src.id = fds.src_department_form_type_id\n" +
             "join department_form_type tgt on fds.department_form_type_id = tgt.id \n" +
@@ -780,7 +781,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         }
     }
 
-    private static final String FIND_SOURCES_SQL = "SELECT src.DEPARTMENT_ID department_id, src.FORM_TYPE_ID form_type_id, src.KIND kind, fds.PERIOD_START start_date \n" +
+    private static final String FIND_SOURCES_SQL = "SELECT src.id id, src.DEPARTMENT_ID department_id, src.FORM_TYPE_ID form_type_id, src.KIND kind, fds.PERIOD_START start_date \n" +
             "from department_form_type src \n" +
             "join form_data_source fds on src.id = fds.src_department_form_type_id\n" +
             "join department_form_type tgt on fds.department_form_type_id = tgt.id \n" +

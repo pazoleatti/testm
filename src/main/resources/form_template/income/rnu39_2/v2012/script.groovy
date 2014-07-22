@@ -110,13 +110,25 @@ def totalColumns = ["amount", "cost", "pkdSumOpen", "pkdSumClose", "couponIncome
 @Field
 def sections = ['A1', 'A2', 'A3', 'A4', 'A5', 'B1', 'B2', 'B3', 'B4', 'B5']
 
-// Дата начала отчетного периода
 @Field
 def startDate = null
 
-// Дата окончания отчетного периода
 @Field
 def endDate = null
+
+def getReportPeriodStartDate() {
+    if (startDate == null) {
+        startDate = reportPeriodService.getMonthStartDate(formData.reportPeriodId, formData.periodOrder).time
+    }
+    return startDate
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder).time
+    }
+    return endDate
+}
 
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
@@ -266,7 +278,8 @@ void consolidation() {
     def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
 
     // собрать из источников строки и разместить соответствующим разделам
-    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
+            getReportPeriodStartDate(), getReportPeriodEndDate()).each {
         if (it.formTypeId == formData.formType.id) {
             def source = formDataService.findMonth(it.formTypeId, it.kind, it.departmentId, taxPeriod.id, formData.periodOrder)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
@@ -420,20 +433,6 @@ void updateIndexes(def dataRows) {
     dataRows.eachWithIndex { row, i ->
         row.setIndex(i + 1)
     }
-}
-
-def getReportPeriodStartDate() {
-    if (startDate == null) {
-        startDate = reportPeriodService.getMonthStartDate(formData.reportPeriodId, formData.periodOrder).time
-    }
-    return startDate
-}
-
-def getReportPeriodEndDate() {
-    if (endDate == null) {
-        endDate = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder).time
-    }
-    return endDate
 }
 
 void importData() {

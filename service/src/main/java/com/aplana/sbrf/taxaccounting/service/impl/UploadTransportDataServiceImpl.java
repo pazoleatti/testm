@@ -35,7 +35,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
     @Autowired
     private PeriodService periodService;
     @Autowired
-    private RefBookExternalService refBookExternalService;
+    private LoadRefBookDataService loadRefBookDataService;
     @Autowired
     private DepartmentService departmentService;
     @Autowired
@@ -193,7 +193,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
      * http://conf.aplana.com/pages/viewpage.action?pageId=13111363
      */
     private ConfigurationParam checkFormDataAccess(String fileName, Logger logger) {
-        boolean isDiasoftRefBook = refBookExternalService.isDiasoftFile(fileName);
+        boolean isDiasoftRefBook = loadRefBookDataService.isDiasoftFile(fileName);
         boolean isFormData = TransportDataParam.isValidName(fileName);
 
         if (isDiasoftRefBook) {

@@ -126,6 +126,7 @@
                             <skinnyWars>true</skinnyWars>
                             <displayName>${parent.artifactId}</displayName>
                             <applicationName>${parent.description}</applicationName>
+                            <filtering>true</filtering>
                             <modules>
                                 <webModule>
                                     <groupId>${project.groupId}</groupId>

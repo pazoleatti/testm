@@ -84,15 +84,31 @@ def nonEmptyColumns = ['series', 'amount', 'nominal', 'shortPositionDate', 'bala
 @Field
 def totalColumns = ['amount', 'percIncome']
 
-// Дата окончания отчетного периода
-@Field
-def endDate = null
-
 @Field
 def providerCache = [:]
 
 @Field
 def recordCache = [:]
+
+@Field
+def startDate = null
+
+@Field
+def endDate = null
+
+def getReportPeriodStartDate() {
+    if (startDate == null) {
+        startDate = reportPeriodService.getMonthStartDate(formData.reportPeriodId, formData.periodOrder).time
+    }
+    return startDate
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder).time
+    }
+    return endDate
+}
 
 def addRow() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
@@ -217,7 +233,8 @@ void consolidation() {
     }
 
     // собрать из источников строки и разместить соответствующим разделам
-    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
+            getReportPeriodStartDate(), getReportPeriodEndDate()).each {
         if (it.formTypeId == formData.formType.id) {
             def taxPeriodId = reportPeriodService.get(formData.reportPeriodId)?.taxPeriod?.id
             def source = formDataService.findMonth(it.formTypeId, it.kind, it.departmentId, taxPeriodId, formData.periodOrder)
@@ -315,13 +332,6 @@ void updateIndexes(def dataRows) {
     dataRows.eachWithIndex { row, i ->
         row.setIndex(i + 1)
     }
-}
-
-def getReportPeriodEndDate() {
-    if (endDate == null) {
-        endDate = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder).time
-    }
-    return endDate
 }
 
 // Получение xml с общими проверками

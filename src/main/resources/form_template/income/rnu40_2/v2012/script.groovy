@@ -73,17 +73,31 @@ def totalColumns = ['bondsCount', 'percent']
 @Field
 def sections = ['1', '2', '3', '4', '5', '6', '7', '8']
 
-// Дата окончания отчетного периода
-@Field
-def endDate = null
-
 @Field
 def taxPeriod = null
 
 @Field
 def sourceFormData = null
 
-//// Обертки методов
+@Field
+def startDate = null
+
+@Field
+def endDate = null
+
+def getReportPeriodStartDate() {
+    if (startDate == null) {
+        startDate = reportPeriodService.getMonthStartDate(formData.reportPeriodId, formData.periodOrder).time
+    }
+    return startDate
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder).time
+    }
+    return endDate
+}
 
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
@@ -213,7 +227,8 @@ void consolidation() {
     deleteRows(dataRows)
 
     // собрать из источников строки и разместить соответствующим разделам
-    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
+            getReportPeriodStartDate(), getReportPeriodEndDate()).each {
         def source = formDataService.findMonth(it.formTypeId, it.kind, it.departmentId, getTaxPeriod()?.id, formData.periodOrder)
         if (source != null && source.state == WorkflowState.ACCEPTED) {
             def sourceDataRows = formDataService.getDataRowHelper(source).allCached
@@ -384,13 +399,6 @@ def roundValue(def value, int precision) {
     } else {
         return null
     }
-}
-
-def getReportPeriodEndDate() {
-    if (endDate == null) {
-        endDate = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder).time
-    }
-    return endDate
 }
 
 def getTaxPeriod() {

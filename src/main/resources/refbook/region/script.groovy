@@ -24,7 +24,7 @@ import java.text.SimpleDateFormat
  * @author Levykin
  */
 switch (formDataEvent) {
-    case FormDataEvent.IMPORT:
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importFromXML()
         break
 }

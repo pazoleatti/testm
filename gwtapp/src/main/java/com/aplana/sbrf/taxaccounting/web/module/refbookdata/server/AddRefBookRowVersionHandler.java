@@ -6,7 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.service.RefBookExternalService;
+import com.aplana.sbrf.taxaccounting.service.LoadRefBookDataService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.AddRefBookRowVersionAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.AddRefBookRowVersionResult;
@@ -38,7 +38,7 @@ public class AddRefBookRowVersionHandler extends AbstractActionHandler<AddRefBoo
     private LogEntryService logEntryService;
 
     @Autowired
-    private RefBookExternalService refBookExternalService;
+    private LoadRefBookDataService loadRefBookDataService;
 
     @Autowired
     private SecurityService securityService;
@@ -67,7 +67,7 @@ public class AddRefBookRowVersionHandler extends AbstractActionHandler<AddRefBoo
         Logger logger = new Logger();
 
         // проверка новых значений по БЛ
-        refBookExternalService.saveRefBookRecords(action.getRefBookId(), saveRecords, action.getVersionFrom(),
+        loadRefBookDataService.saveRefBookRecords(action.getRefBookId(), saveRecords, action.getVersionFrom(),
                 action.getVersionTo(), true, securityService.currentUserInfo(), logger);
 
         AddRefBookRowVersionResult result = new AddRefBookRowVersionResult();

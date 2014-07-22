@@ -86,16 +86,28 @@ def rowsCalc = ['R3', 'R4', 'R5', 'R6', 'R7', 'R8', 'R9', 'R10', 'R11', 'R12', '
 def notImportSum = ['R1', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8', 'R9', 'R12', 'R13', 'R15', 'R16', 'R17', 'R27', 'R29',
         'R67', 'R68', 'R71']
 
-// Дата окончания отчетного периода
+@Field
+def editableStyle = 'Редактирование (светло-голубой)'
+
+@Field
+def startDate = null
+
 @Field
 def endDate = null
 
-// справочник "Отчет о прибылях и убытках (Форма 0409102-СБ)"
-@Field
-def rbIncome102 = null
+def getReportPeriodStartDate() {
+    if (startDate == null) {
+        startDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
+    }
+    return startDate
+}
 
-@Field
-def editableStyle = 'Редактирование (светло-голубой)'
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
+}
 
 //// Кастомные методы
 
@@ -251,8 +263,8 @@ void consolidationBank(def dataRows) {
     }
 
     // получить консолидированные формы из источников
-    // TODO (Ramil Timerbaev) используется устаревший метод departmentFormTypeService.getSources, возможно надо заменить на departmentFormTypeService.getFormSources
-    departmentFormTypeService.getSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind(),
+            getReportPeriodStartDate(), getReportPeriodEndDate()).each {
         def child = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
         if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == formData.formType.id) {
             for (def row : formDataService.getDataRowHelper(child).getAllCached()) {
@@ -308,8 +320,8 @@ void consolidationSummary(def dataRows) {
         addPrevValue(prevList, dataRows, 'consumptionBuhSumPrevTaxPeriod', dataRowsOld, 'consumptionBuhSumAccepted')
     }
     // получить формы-источники в текущем налоговом периоде
-    // TODO (Ramil Timerbaev) используется устаревший метод departmentFormTypeService.getSources, возможно надо заменить на departmentFormTypeService.getFormSources
-    departmentFormTypeService.getSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
+            getReportPeriodStartDate(), getReportPeriodEndDate()).each {
         def isMonth = it.formTypeId in [332] //ежемесячная
         def children = []
         if (isMonth) {
@@ -555,7 +567,7 @@ void consolidationSummary(def dataRows) {
 def isBank() {
     boolean isBank = true
     // получаем список приемников
-    def list = departmentFormTypeService.getFormDestinations(formData.departmentId, formData.formType.id, FormDataKind.SUMMARY)
+    def list = departmentFormTypeService.getFormDestinations(formData.departmentId, formData.formType.id, FormDataKind.SUMMARY, getReportPeriodStartDate(), getReportPeriodEndDate())
     // если есть приемники в других подразделениях, то это не банк, а ОП
     list.each {
         if (it.departmentId != formData.departmentId) {
@@ -604,7 +616,7 @@ def isEmpty(def value) {
 def calcColumn6(def dataRows, def aliasRows) {
     def sum = 0
     aliasRows.each { alias ->
-        sum += getDataRow(dataRows, alias).consumptionBuhSumAccepted
+        sum += (getDataRow(dataRows, alias).consumptionBuhSumAccepted ?: 0)
     }
     return sum
 }
@@ -865,20 +877,10 @@ void addData(def xml, int headRowCount) {
     dataRowHelper.update(rows)
 }
 
-def getReportPeriodEndDate() {
-    if (endDate == null) {
-        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
-    }
-    return endDate
-}
-
 // Возвращает данные из Отчета о прибылях и убытках за период, для которого сформирована текущая форма
 def getIncome102Data(def row) {
     // справочник "Отчет о прибылях и убытках (Форма 0409102-СБ)"
-    if (rbIncome102 == null) {
-        rbIncome102 = refBookFactory.getDataProvider(52L)
-    }
-    return rbIncome102?.getRecords(getReportPeriodEndDate(), null, "OPU_CODE = '${row.accountingRecords}' AND DEPARTMENT_ID = ${formData.departmentId}", null)
+    return bookerStatementService.getRecords(52L, formData.departmentId, getReportPeriodEndDate(), "OPU_CODE = '${row.accountingRecords}'")
 }
 
 void checkTotalSum(totalRow, sum){

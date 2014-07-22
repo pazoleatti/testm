@@ -124,21 +124,36 @@ def groups = ['A', 'B', 'V', 'G', 'D', 'E']
 @Field
 def groupsRus = ['А', 'Б', 'В', 'Г', 'Д', 'Е']
 
-// Дата начала отчетного периода
-@Field
-def reportPeriodStartDate = null
-
-// Дата окончания отчетного периода
-@Field
-def reportPeriodEndDate = null
-
 // Отчетный период
 @Field
 def currentReportPeriod = null
 
+@Field
+def startDate = null
+
+@Field
+def endDate = null
+
+def getReportPeriodStartDate() {
+    if (startDate == null) {
+        startDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
+    }
+    return startDate
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
+}
+
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
                       def boolean required = true) {
+    if (value == null || value.trim().isEmpty()) {
+        return null
+    }
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
             getEndDate(), rowIndex, colIndex, logger, required)
 }
@@ -197,8 +212,8 @@ void calc() {
 }
 
 void calc(def dataRows) {
-    def start = getStartDate()
-    def end = getEndDate()
+    def start = getReportPeriodStartDate()
+    def end = getReportPeriodEndDate()
     def reportPeriod = getReportPeriod()
     def dataRows46 = getDataRowsByFormTemplateId(342, reportPeriod, start, end)
     def dataRows45 = getDataRowsByFormTemplateId(341, reportPeriod, start, end)
@@ -252,8 +267,8 @@ void sort(def dataRows) {
 void logicCheck() {
     def dataRows = formDataService.getDataRowHelper(formData)?.allCached
 
-    def start = getStartDate()
-    def end = getEndDate()
+    def start = getReportPeriodStartDate()
+    def end = getReportPeriodEndDate()
     def reportPeriod = getReportPeriod()
     def dataRows46 = getDataRowsByFormTemplateId(342, reportPeriod, start, end)
     def dataRows45 = getDataRowsByFormTemplateId(341, reportPeriod, start, end)
@@ -401,7 +416,8 @@ void consolidation() {
     deleteNotFixedRows(dataRows)
 
     // собрать из источников строки и разместить соответствующим разделам
-    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
+            getReportPeriodStartDate(), getReportPeriodEndDate()).each {
         if (it.formTypeId == formData.formType.id) {
             def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
@@ -570,20 +586,6 @@ def DataRow getRow45(DataRow row49, def dataRows45) {
         }
     }
     return null
-}
-
-def getStartDate() {
-    if (reportPeriodStartDate == null) {
-        reportPeriodStartDate = reportPeriodService.getStartDate(formData.reportPeriodId)?.time
-    }
-    return reportPeriodStartDate
-}
-
-def getEndDate() {
-    if (reportPeriodEndDate == null) {
-        reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId)?.time
-    }
-    return reportPeriodEndDate
 }
 
 def getReportPeriod() {
