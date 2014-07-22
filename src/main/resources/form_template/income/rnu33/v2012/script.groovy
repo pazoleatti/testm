@@ -253,7 +253,7 @@ void logicCheck() {
         def errorMsg = "Строка $index: "
 
         // 2. Обязательность заполнения полей
-        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
+        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !isMonthBalance())
 
         // 3. Проверка рыночной цены в процентах к номиналу (графа 10, 14)
         if (row.marketPriceOnDateAcquisitionInPerc > 0 && row.redemptionVal != 100) {
@@ -306,7 +306,7 @@ void logicCheck() {
         }
         def record = dataProvider.getRecords(reportPeriodEndDate, null, "SHORTNAME = '${row.issue}'", null)
         if (record.size() == 0) {
-            rowError(logger, row, errorMsg + "Значение графы «Выпуск» отсутствует в справочнике «Ценные бумаги»")
+            loggerError(row, errorMsg + "Значение графы «Выпуск» отсутствует в справочнике «Ценные бумаги»")
         }
     }
 
