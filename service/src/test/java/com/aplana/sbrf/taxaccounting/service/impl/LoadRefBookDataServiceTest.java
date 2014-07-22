@@ -36,4 +36,6 @@ public class LoadRefBookDataServiceTest {
             Assert.assertFalse("File \"" + name + "\" is not Diasoft Custody file!", loadRefBookDataService.isDiasoftFile(name));
         }
     }
+
+    // TODO Добавить тесты загрузки
 }
