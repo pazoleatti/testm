@@ -140,12 +140,6 @@ def rowsAliasesForSecondControlSum = ['R32', 'R33', 'R34', 'R35', 'R36', 'R37', 
         'R73', 'R74', 'R75', 'R76', 'R77', 'R78', 'R79', 'R80', 'R81', 'R82', 'R83', 'R84', 'R85', 'R86', 'R87']
 
 @Field
-def rbIncome101 = null
-
-@Field
-def rbIncome102 = null
-
-@Field
 def editableStyle = 'Числовое значение'
 
 @Field
@@ -568,19 +562,13 @@ def getOpuSumByTableDFor35to40(def row, def income101Data){
 // Возвращает данные из Оборотной Ведомости за период, для которого сформирована текущая форма
 def getIncome101Data(def row) {
     // Справочник 50 - "Оборотная ведомость (Форма 0409101-СБ)"
-    if (rbIncome101 == null) {
-        rbIncome101 = refBookFactory.getDataProvider(50L)
-    }
-    return rbIncome101?.getRecords(getReportPeriodEndDate(), null, "ACCOUNT = '${row.accountingRecords}' AND DEPARTMENT_ID = ${formData.departmentId}", null)
+    return bookerStatementService.getRecords(50L, formData.departmentId, getReportPeriodEndDate(), "ACCOUNT = '${row.accountingRecords}'")
 }
 
 // Возвращает данные из Отчета о прибылях и убытках за период, для которого сформирована текущая форма
 def getIncome102Data(def row) {
     // справочник "Отчет о прибылях и убытках (Форма 0409102-СБ)"
-    if (rbIncome102 == null) {
-        rbIncome102 = refBookFactory.getDataProvider(52L)
-    }
-    return rbIncome102?.getRecords(getReportPeriodEndDate(), null, "OPU_CODE = '${row.accountingRecords}' AND DEPARTMENT_ID = ${formData.departmentId}", null)
+    return bookerStatementService.getRecords(52L, formData.departmentId, getReportPeriodEndDate(), "OPU_CODE = '${row.accountingRecords}'")
 }
 
 // Расчет контрольных граф Сводной формы начисленных доходов (№ строки 4-5)

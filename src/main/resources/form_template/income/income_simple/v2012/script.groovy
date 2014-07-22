@@ -108,12 +108,6 @@ def formatY = new SimpleDateFormat('yyyy')
 def format = new SimpleDateFormat('dd.MM.yyyy')
 
 @Field
-def rbIncome101 = null
-
-@Field
-def rbIncome102 = null
-
-@Field
 def editableStyle = 'Редактируемая'
 
 @Field
@@ -259,19 +253,13 @@ void calc() {
 // Возвращает данные из Оборотной Ведомости за период, для которого сформирована текущая форма
 def getIncome101Data(def row) {
     // Справочник 50 - "Оборотная ведомость (Форма 0409101-СБ)"
-    if (rbIncome101 == null) {
-        rbIncome101 = refBookFactory.getDataProvider(50L)
-    }
-    return rbIncome101?.getRecords(getReportPeriodEndDate(), null, "ACCOUNT = '${row.accountingRecords}' AND DEPARTMENT_ID = ${formData.departmentId}", null)
+    return bookerStatementService.getRecords(50L, formData.departmentId, getReportPeriodEndDate(), "ACCOUNT = '${row.accountingRecords}'")
 }
 
 // Возвращает данные из Отчета о прибылях и убытках за период, для которого сформирована текущая форма
 def getIncome102Data(def row) {
     // справочник "Отчет о прибылях и убытках (Форма 0409102-СБ)"
-    if (rbIncome102 == null) {
-        rbIncome102 = refBookFactory.getDataProvider(52L)
-    }
-    return rbIncome102?.getRecords(getReportPeriodEndDate(), null, "OPU_CODE = '${row.accountingRecords}' AND DEPARTMENT_ID = ${formData.departmentId}", null)
+    return bookerStatementService.getRecords(52L, formData.departmentId, getReportPeriodEndDate(), "OPU_CODE = '${row.accountingRecords}'")
 }
 
 void logicCheck() {
