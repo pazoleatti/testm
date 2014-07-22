@@ -28,7 +28,7 @@ public class EditFormTypeHandler extends AbstractActionHandler<EditFormTypeActio
         if (code != null || !"".equals(code)) {
             FormType formType = formTypeService.getByCode(code);
             if (formType != null && formType.getId() != action.getFormTypeId()) {
-                throw new ActionException("Нарушено требование к уникальности, уже существует макет с такими значениями атрибута CODE!");
+                throw new ActionException("Нарушено требование к уникальности, уже существует макет с такими значениями атрибута «Код формы»!");
             }
         }
         formTypeService.updateFormType(action.getFormTypeId(), action.getNewFormTypeName(), action.getNewFormTypeCode());
