@@ -231,7 +231,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 		Column<FormTypeKind, Boolean> checkBoxColumn = new Column<FormTypeKind, Boolean>(new CheckboxCell(true, false)) {
 			@Override
 			public Boolean getValue(FormTypeKind object) {
-				return (object == null || object.getId() == null) ? null : formSM.isSelected(object);
+				return (object == null || object.getId() == null) ? null : decSM.isSelected(object);
 			}
 		};
 

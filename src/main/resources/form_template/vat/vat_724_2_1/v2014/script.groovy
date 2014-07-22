@@ -82,9 +82,6 @@ def calendarStartDate = null
 def endDate = null
 
 @Field
-def prevStartDate = null
-
-@Field
 def prevEndDate = null
 
 @Field
@@ -98,6 +95,9 @@ def calcRowAlias5 = ['R8', 'R9', 'R13']
 
 @Field
 def repordPeriod = null
+
+@Field
+def prevReportPeriod = null
 
 // Cправочник «Отчет о прибылях и убытках (Форма 0409102-СБ)»
 @Field
@@ -174,19 +174,9 @@ def getReportPeriodEndDate() {
     return endDate
 }
 
-def getPrevReportPeriodStartDate() {
-    if (prevStartDate == null) {
-        def prevReportPeriodId = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)?.id
-        if (prevReportPeriodId != null) {
-            prevStartDate = reportPeriodService.getStartDate(prevReportPeriodId).time
-        }
-    }
-    return prevStartDate
-}
-
 def getPrevReportPeriodEndDate() {
     if (prevEndDate == null) {
-        def prevReportPeriodId = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)?.id
+        def prevReportPeriodId = getPrevReportPeriod()?.id
         if (prevReportPeriodId != null) {
             prevEndDate = reportPeriodService.getEndDate(prevReportPeriodId).time
         }
@@ -201,30 +191,45 @@ def getRepordPeriod() {
     return repordPeriod
 }
 
+def getPrevReportPeriod() {
+    if (prevReportPeriod == null) {
+        prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
+    }
+    return prevReportPeriod
+}
+
 // Получение данных из справочника «Отчет о прибылях и убытках» для текужего подразделения и отчетного периода
 def getIncome102Data(def date) {
     if(date==null){
         return []
     }
     if (!income102DataCache.containsKey(date)) {
-        def filter = "DEPARTMENT_ID = ${formData.departmentId}"
-        income102DataCache.put(date, refBookFactory.getDataProvider(52L)?.getRecords(date, null, filter, null))
+        def records = bookerStatementService.getRecords(52L, formData.departmentId, date, null)
+        if (records == null) {
+            return []
+        }
+        income102DataCache.put(date, records)
     }
     return income102DataCache.get(date)
 }
 
 // Проверка наличия необходимых записей в справочнике «Отчет о прибылях и убытках»
 void checkIncome102() {
+    // формирование названия периода
+    def period = getBookerStatementPeriod(getReportPeriodEndDate())
+    def prevPeriod = ""
+    if (getRepordPeriod().order > 1) {
+        prevPeriod = getBookerStatementPeriod(getPrevReportPeriodEndDate())
+        period = prevPeriod + " и " + period
+    }
     // Наличие экземпляра Отчета о прибылях и убытках подразделения и периода, для которых сформирована текущая форма
     if (getIncome102Data(getReportPeriodEndDate()) == []) {
-        throw new ServiceException("Экземпляр Отчета о прибылях и убытках за период " +
-                "${getReportPeriodStartDate().format(dateFormat)} - ${getReportPeriodEndDate().format(dateFormat)} " +
+        throw new ServiceException("Экземпляр Отчета о прибылях и убытках за $period " +
                 "не существует (отсутствуют данные для расчета)! Расчеты не могут быть выполнены.")
     }
     // Наличие экземпляра Отчета о прибылях и убытках подразделения и предыдущего периода
     if (getRepordPeriod().order > 1 && getIncome102Data(getPrevReportPeriodEndDate()) == []) {
-        throw new ServiceException("Экземпляр Отчета о прибылях и убытках за период " +
-                "${getPrevReportPeriodStartDate().format(dateFormat)} - ${getPrevReportPeriodEndDate().format(dateFormat)} " +
+        throw new ServiceException("Экземпляр Отчета о прибылях и убытках за $prevPeriod " +
                 "не существует (отсутствуют данные для расчета)! Расчеты не могут быть выполнены.")
     }
 }
@@ -284,7 +289,7 @@ def calc4or5(def row, def columnFlag) {
     // список кодов ОПУ из справочника
     def opuCodes = getOpuCodes(row.code, row, columnFlag)
     // сумма кодов ОПУ из отчета 102
-    def sum = getSumByOpuCodes(opuCodes, row.getIndex(), columnFlag)
+    def sum = getSumByOpuCodes(opuCodes, row, columnFlag)
     return roundValue(sum, 2)
 }
 
@@ -459,4 +464,14 @@ void addData(def xml, int headRowCount) {
         dataRow.obtainCost = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
     }
     dataRowHelper.save(dataRows)
+}
+
+/**
+ * Получить название периода Бухалтерской отчетности по дате.
+ *
+ * @param date дата.
+ */
+def getBookerStatementPeriod(def date) {
+    def name = bookerStatementService.getPeriodValue(date)?.NAME?.value
+    return name + " " + getRepordPeriod()?.taxPeriod?.year
 }

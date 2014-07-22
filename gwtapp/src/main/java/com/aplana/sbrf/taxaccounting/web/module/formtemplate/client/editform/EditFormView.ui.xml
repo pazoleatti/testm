@@ -62,7 +62,7 @@
                 <g:cell>
                     <g:HorizontalPanel addStyleNames="{style.editFieldsPanel}">
                         <g:cell horizontalAlignment="right" verticalAlignment="middle">
-                            <g:Label text="Номер макета:" addStyleNames="{style.leftLabel}"/>
+                            <g:Label text="Код формы:" addStyleNames="{style.leftLabel}"/>
                         </g:cell>
                         <g:cell>
                             <g:TextBox ui:field="formTypeCode" addStyleNames="{style.editFields}"/>

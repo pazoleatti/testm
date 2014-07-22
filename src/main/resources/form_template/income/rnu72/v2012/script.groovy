@@ -314,12 +314,11 @@ void addTransportData(def xml) {
 
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
-        def columns = (isBalancePeriod() ? allColumns - 'rowNumber' : editableColumns)
-        columns.each {
+        editableColumns.each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
         }
-        (allColumns - columns).each {
+        autoFillColumns.each {
             newRow.getCell(it).setStyleAlias('Автозаполняемая')
         }
 

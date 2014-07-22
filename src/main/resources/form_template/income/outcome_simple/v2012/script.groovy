@@ -92,10 +92,6 @@ def formatY = new SimpleDateFormat('yyyy')
 @Field
 def format = new SimpleDateFormat('dd.MM.yyyy')
 
-// справочник "Отчет о прибылях и убытках (Форма 0409102-СБ)"
-@Field
-def rbIncome102 = null
-
 @Field
 def row50001alias = 'R108'
 @Field
@@ -712,10 +708,7 @@ void checkRnu14Accepted() {
 // Возвращает данные из Отчета о прибылях и убытках за период, для которого сформирована текущая форма
 def getIncome102Data(def row) {
     // справочник "Отчет о прибылях и убытках (Форма 0409102-СБ)"
-    if (rbIncome102 == null) {
-        rbIncome102 = refBookFactory.getDataProvider(52L)
-    }
-    return rbIncome102?.getRecords(getReportPeriodEndDate(), null, "OPU_CODE = '${row.accountingRecords}' AND DEPARTMENT_ID = ${formData.departmentId}", null)
+    return bookerStatementService.getRecords(52L, formData.departmentId, getReportPeriodEndDate(), "OPU_CODE = '${row.accountingRecords}'")
 }
 
 void checkTotalSum(totalRow, needRow){
