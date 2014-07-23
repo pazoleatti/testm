@@ -45,6 +45,11 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
     private static long REF_BOOK_EMITENT = 100L; // Эмитенты
     private static long REF_BOOK_BOND = 84L; // Ценные бумаги
 
+    private final String OKATO_NAME = "справочника ОКАТО";
+    private final String REGION_NAME = "справочника «Субъекты РФ»";
+    private final String ACCOUNT_PLAN_NAME = "справочника «План счетов»";
+    private final String DIASOFT_NAME = "справочников Diasoft";
+
     //// Справочники ЦАС НСИ
     // ОКАТО
     private final static Map<String, List<Pair<Boolean, Long>>> nsiOkatoMappingMap = new HashMap<String, List<Pair<Boolean, Long>>>();
@@ -88,15 +93,16 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
      * @param logger                Логгер
      * @param refBookDirectoryParam Путь к директории
      * @param mappingMap            Маппинг имен: Регулярка → Пара(Признак архива, Id справочника)
+     * @param refBookName           Имя справочника для сообщения об ошибке
      * @param move                  Признак необходимости перемещения файла после импорта
      */
     private ImportCounter importRefBook(TAUserInfo userInfo, Logger logger, ConfigurationParam refBookDirectoryParam,
-                                        Map<String, List<Pair<Boolean, Long>>> mappingMap, boolean move) {
+                                        Map<String, List<Pair<Boolean, Long>>> mappingMap, String refBookName, boolean move) {
         // Получение пути к каталогу загрузки ТФ
         ConfigurationParamModel model = configurationDao.getByDepartment(0);
         List<String> refBookDirectoryList = model.get(refBookDirectoryParam, 0);
         if (refBookDirectoryList == null || refBookDirectoryList.isEmpty()) {
-            log(userInfo, LogData.L31, logger);
+            log(userInfo, LogData.L31, logger, refBookName);
             return new ImportCounter();
         }
 
@@ -111,7 +117,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
             Set<String> ignoreFileSet = new HashSet<String>();
             // Если изначально нет подходящих файлов то выдаем отдельную ошибку
             if (getWorkTransportFiles(path, ignoreFileSet, mappingMap.keySet()).isEmpty()) {
-                log(userInfo, LogData.L31, logger);
+                log(userInfo, LogData.L31, logger, refBookName);
                 return new ImportCounter();
             }
 
@@ -227,13 +233,13 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
         try {
             // ОКАТО
             importCounter.add(importRefBook(userInfo, logger, ConfigurationParam.OKATO_UPLOAD_DIRECTORY,
-                    nsiOkatoMappingMap, false));
+                    nsiOkatoMappingMap, OKATO_NAME, false));
             // Субъекты РФ
             importCounter.add(importRefBook(userInfo, logger, ConfigurationParam.REGION_UPLOAD_DIRECTORY,
-                    nsiRegionMappingMap, false));
+                    nsiRegionMappingMap, REGION_NAME, false));
             // План счетов
             importCounter.add(importRefBook(userInfo, logger, ConfigurationParam.ACCOUNT_PLAN_UPLOAD_DIRECTORY,
-                    nsiAccountPlanMappingMap, false));
+                    nsiAccountPlanMappingMap, ACCOUNT_PLAN_NAME, false));
         } catch (Exception e) {
             // Сюда должны попадать только при общих ошибках при импорте справочников, ошибки конкретного справочника перехватываются в сервисе
             logger.error(IMPORT_REF_BOOK_ERROR, e.getMessage());
@@ -249,7 +255,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
         ImportCounter importCounter = new ImportCounter();
         try {
             importCounter = importRefBook(userInfo, logger, ConfigurationParam.DIASOFT_UPLOAD_DIRECTORY,
-                    diasoftMappingMap, true);
+                    diasoftMappingMap, DIASOFT_NAME, true);
         } catch (Exception e) {
             // Сюда должны попадать только при общих ошибках при импорте справочников, ошибки конкретного справочника перехватываются в сервисе
             logger.error(IMPORT_REF_BOOK_ERROR, e.getMessage());
