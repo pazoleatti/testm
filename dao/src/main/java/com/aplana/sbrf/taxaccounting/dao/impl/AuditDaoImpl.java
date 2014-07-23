@@ -46,9 +46,10 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         ps.appendQuery("ls.form_kind_id, ");
         ps.appendQuery("fk.name form_kind_name, ");
         ps.appendQuery("ls.note, ");
-
+        if (filter.getSearchOrdering() == HistoryBusinessSearchOrdering.FORM_TYPE)
+            ps.appendQuery("case when ls.declaration_type_name is not null then ls.declaration_type_name else ls.form_type_name end as type_name, ");
         ps.appendQuery("ls.user_department_name ");
-        ps.appendQuery(" from log_system ls ");
+        ps.appendQuery("from log_system ls ");
 
         ps.appendQuery("left join event ev on ls.event_id=ev.\"ID\" ");
         ps.appendQuery("left join form_kind fk on ls.form_kind_id=fk.\"ID\" ");
@@ -282,7 +283,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                 column = "ls.log_date";
                 break;
             case EVENT:
-                column = "em.event_title";
+                column = "ev.name";
                 break;
             case NOTE:
                 column = "ls.note";
@@ -300,10 +301,10 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                 column = "ls.form_kind_id";
                 break;
             case FORM_TYPE:
-                column = "ft.form_type_name";
+                column = "type_name";
                 break;
             case USER:
-                column = "su.name";
+                column = "ls.user_login";
                 break;
             case USER_ROLE:
                 column = "ls.roles";
