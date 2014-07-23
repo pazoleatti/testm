@@ -96,7 +96,7 @@ public class UploadTransportDataServiceTest {
                 }
             }
         });
-        when(departmentService.getDepartmentByCode(147)).thenReturn(formDepartment);
+        when(departmentService.getDepartmentBySbrfCode("147")).thenReturn(formDepartment);
         ReflectionTestUtils.setField(uploadTransportDataService, "departmentService", departmentService);
 
         FormType formType852_4 = new FormType();

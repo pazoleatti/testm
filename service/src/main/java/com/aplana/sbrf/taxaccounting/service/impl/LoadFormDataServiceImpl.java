@@ -98,7 +98,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             String formCode = transportDataParam.getFormCode();
             String reportPeriodCode = transportDataParam.getReportPeriodCode();
             Integer year = transportDataParam.getYear();
-            Integer departmentCode = transportDataParam.getDepartmentCode();
+            String departmentCode = transportDataParam.getDepartmentCode();
 
             // Не задан код подразделения или код формы
             if (departmentCode == null || formCode == null || reportPeriodCode == null || year == null) {
@@ -110,7 +110,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             }
 
             // Указан несуществующий код подразделения
-            Department formDepartment = departmentService.getDepartmentByCode(departmentCode);
+            Department formDepartment = departmentService.getDepartmentBySbrfCode(departmentCode);
             if (formDepartment == null) {
                 log(userInfo, LogData.L5, logger, fileName);
                 moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,

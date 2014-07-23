@@ -214,7 +214,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
         String formCode = transportDataParam.getFormCode();
         String reportPeriodCode = transportDataParam.getReportPeriodCode();
         Integer year = transportDataParam.getYear();
-        Integer departmentCode = transportDataParam.getDepartmentCode();
+        String departmentCode = transportDataParam.getDepartmentCode();
 
         // Не задан код подразделения или код формы
         if (departmentCode == null || formCode == null || reportPeriodCode == null || year == null) {
@@ -230,7 +230,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
         }
 
         // Указан несуществующий код подразделения
-        Department formDepartment = departmentService.getDepartmentByCode(departmentCode);
+        Department formDepartment = departmentService.getDepartmentBySbrfCode(departmentCode);
         if (formDepartment == null) {
             logger.warn(U5 + U5_1, fileName, transportDataParam.getDepartmentCode());
             return null;
