@@ -22,7 +22,7 @@ public class FileWrapper {
     private static String ERROR_RESOURCE_INIT = "Ошибка получения ресурса. Ресурс не проинициализирован!";
     private static String ERROR_LIST_SMB = "Ошибка получения списка файлов через протокол smb!";
     private static String ERROR_LIST_INIT = "Ошибка получения списка файлов. Ресурс не проинициализирован!";
-    private static String ERROR_DELETE = "Ошибка удаления файла!";
+    private static String ERROR_DELETE = "Не удалось удалить файл!";
 
     public FileWrapper(File file) {
         this.file = file;

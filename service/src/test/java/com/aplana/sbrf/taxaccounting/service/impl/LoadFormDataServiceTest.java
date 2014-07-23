@@ -84,6 +84,7 @@ public class LoadFormDataServiceTest {
         uploadFolder.delete();
         archiveFolder.delete();
         errorFolder.delete();
+        temporaryFolder.delete();
     }
 
     private void mockDepartmentService() {
