@@ -100,12 +100,14 @@ public class GetDepartmentAssignsHandler extends AbstractActionHandler<GetDepart
                 }
             }
 
-            for (Iterator<DepartmentAssign> it = departmentAssigns.iterator(); it.hasNext();) {
+            Iterator<DepartmentAssign> it = departmentAssigns.iterator();
+            while(it.hasNext()) {
                 DepartmentAssign assign = it.next();
                 if (!assign.isDeclaration()) {
                     for (ComparableSourceObject currentAssign : currentAssigns) {
                         if (assign.getKind() == currentAssign.formKind && assign.getTypeId() == currentAssign.formTypeId) {
                             it.remove();
+                            break;
                         }
                     }
                 } else {
@@ -113,12 +115,14 @@ public class GetDepartmentAssignsHandler extends AbstractActionHandler<GetDepart
                         for (ComparableSourceObject currentAssign : currentAssigns) {
                             if (assign.getKind() == currentAssign.formKind && assign.getTypeId() == currentAssign.formTypeId) {
                                 it.remove();
+                                break;
                             }
                         }
                     } else {
                         for (ComparableSourceObject currentAssign : currentAssigns) {
                             if (assign.getTypeId() == currentAssign.declarationTypeId) {
                                 it.remove();
+                                break;
                             }
                         }
                     }
