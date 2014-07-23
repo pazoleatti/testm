@@ -25,6 +25,7 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Dmitriy Levykin
@@ -92,6 +93,7 @@ public class LoadFormDataServiceTest {
         department147.setName("147");
         when(departmentService.getTBDepartmentIds(any(TAUser.class))).thenReturn(DEPARTMENT_LIST);
         when(departmentService.getDepartmentByCode(147)).thenReturn(department147);
+        when(departmentService.getDepartment(anyInt())).thenReturn(department147);
         ReflectionTestUtils.setField(service, "departmentService", departmentService);
     }
 
