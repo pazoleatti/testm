@@ -588,7 +588,9 @@ public class FormDataServiceImpl implements FormDataService {
                 null, formData.getFormType().getName(), formData.getKind().getId(), note);
 
         if (workflowMove.getFromState() == WorkflowState.CREATED || workflowMove.getToState() == WorkflowState.CREATED) {
-            logger.info(updatePreviousRowNumber(formData));
+            String msg = updatePreviousRowNumber(formData);
+            if (msg != null)
+                logger.info(msg);
         }
     }
 
