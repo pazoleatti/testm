@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
@@ -95,7 +96,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
         ConfigurationParamModel model = configurationDao.getByDepartment(0);
         List<String> refBookDirectoryList = model.get(refBookDirectoryParam, 0);
         if (refBookDirectoryList == null || refBookDirectoryList.isEmpty()) {
-            log(userInfo, LogData.L3, logger);
+            log(userInfo, LogData.L31, logger);
             return new ImportCounter();
         }
 
@@ -110,7 +111,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
             Set<String> ignoreFileSet = new HashSet<String>();
             // Если изначально нет подходящих файлов то выдаем отдельную ошибку
             if (getWorkTransportFiles(path, ignoreFileSet, mappingMap.keySet()).isEmpty()) {
-                log(userInfo, LogData.L3, logger);
+                log(userInfo, LogData.L31, logger);
                 return new ImportCounter();
             }
 
@@ -158,13 +159,25 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                         // Обработка результата выполнения скрипта
                         switch (scriptStatusHolder.getScriptStatus()) {
                             case SUCCESS:
-                                success++;
-                                // В случае успешного импорта в общий лог попадает только вывод одного скрипта
-                                logger.getEntries().addAll(localLoggerList.get(i).getEntries());
-                                log(userInfo, LogData.L20, logger, currentFile.getName());
-                                // Перемещение в каталог архива
-                                moveToArchiveDirectory(userInfo, getRefBookArchivePath(userInfo, logger), currentFile,
-                                        logger);
+                                if (move) {
+                                    // Перемещение в каталог архива
+                                    boolean result = moveToArchiveDirectory(userInfo, getRefBookArchivePath(userInfo,
+                                            logger), currentFile, logger);
+                                    if (result) {
+                                        success++;
+                                        logger.getEntries().addAll(localLoggerList.get(i).getEntries());
+                                        log(userInfo, LogData.L20, logger, currentFile.getName());
+                                    } else {
+                                        fail++;
+                                        // Если в архив не удалось перенести, то пытаемся перенести в каталог ошибок
+                                        moveToErrorDirectory(userInfo, getRefBookErrorPath(userInfo, logger), currentFile,
+                                                Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L12.getText(), ""))), logger);
+                                    }
+                                } else {
+                                    success++;
+                                    logger.getEntries().addAll(localLoggerList.get(i).getEntries());
+                                    log(userInfo, LogData.L20, logger, currentFile.getName());
+                                }
                                 break;
                             case SKIP:
                                 skip++;
@@ -180,11 +193,13 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                         fail++;
                         localLoggerList.get(i).error(e.getMessage());
                         // Ошибка импорта отдельного справочника — откатываются изменения только по нему, импорт продолжается
-                        log(userInfo, LogData.L21, logger);
+                        log(userInfo, LogData.L21, logger, e.getMessage());
                         // Перемещение в каталог ошибок
                         logger.getEntries().addAll(getEntries(localLoggerList));
-                        moveToErrorDirectory(userInfo, getRefBookErrorPath(userInfo, logger), currentFile,
-                                getEntries(localLoggerList), logger);
+                        if (move) {
+                            moveToErrorDirectory(userInfo, getRefBookErrorPath(userInfo, logger), currentFile,
+                                    getEntries(localLoggerList), logger);
+                        }
                     } finally {
                         IOUtils.closeQuietly(is);
                     }

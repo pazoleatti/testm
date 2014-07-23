@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.Months;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -33,7 +30,6 @@ public abstract class AbstractLoadTransportDataService {
     private AuditService auditService;
 
     // Константы
-    final static String LOG_FILE_NAME = "Ошибки.txt";
     final static String ZIP_ENCODING = "cp866";
     final static SimpleDateFormat dateFormat = new SimpleDateFormat("(yyyy.MM.dd HH.mm.ss)");
 
@@ -41,7 +37,7 @@ public abstract class AbstractLoadTransportDataService {
     protected static enum LogData {
         L1("Запущена процедура загрузки транспортных файлов, содержащих данные налоговых форм.", LogLevel.INFO, true),
         L2("Завершена процедура загрузки транспортных файлов, содержащих данные налоговых форм. Файлов загружено: %d. Файлов отклонено: %d.", LogLevel.INFO, true),
-        L3("В каталоге загрузки не найдены файлы! Загрузка не выполнена.", LogLevel.ERROR, true),
+        L3("В каталоге загрузки для подразделения «%s» не найдены файлы!", LogLevel.ERROR, true),
         L4("Имя или формат файла «%s» не соответствует требованиям к транспортному файлу! Загрузка файла не выполнена.", LogLevel.ERROR, true),
         L5("Указанный в имени файла «%s» код подразделения не существует в Системе! Загрузка файла не выполнена.", LogLevel.ERROR, true),
         L6("Указанный в имени файла «%s» код налоговой формы не существует в Системе! Загрузка файла не выполнена.", LogLevel.ERROR, true),
@@ -50,7 +46,7 @@ public abstract class AbstractLoadTransportDataService {
         L9("Для налоговой формы «%s» закрыт (либо еще не открыт) отчетный период «%s»! Загрузка файла не выполнена.", LogLevel.ERROR, true),
         // L10("ТФ с таким именем уже есть в архиве, текущий ТФ переименован в «%s».", LogLevel.INFO, false),
         L11("Перенос «%s» в каталог архива успешно выполнен.", LogLevel.INFO, false),
-        L12("Ошибка при архивировании транспортного файла! Загрузка файла не выполнена.", LogLevel.ERROR, true),
+        L12("Ошибка при архивировании транспортного файла! Загрузка файла не выполнена. %s.", LogLevel.ERROR, true),
         L13("Налоговая форма существует и имеет статус «" + WorkflowState.CREATED.getName() + "».", LogLevel.INFO, false),
         L14("Назначение налоговой формы «%s» подразделению «%s» не выполнено! Загрузка файла не выполнена.", LogLevel.ERROR, true),
         L15("ЭЦП файла «%s» принята, начата загрузка данных файла.", LogLevel.INFO, true),
@@ -59,16 +55,17 @@ public abstract class AbstractLoadTransportDataService {
         L18("Создана новая налоговая форма «%s» для подразделения «%s» в периоде «%s».", LogLevel.INFO, true),
         L19("Первичная налоговая форма «%s» для подразделения «%s» в периоде «%s» сохранена.", LogLevel.INFO, true),
         L20("Закончена загрузка данных файла «%s».", LogLevel.INFO, true),
-        L21("Ошибка при обработке данных транспортного файла. Загрузка файла не выполнена.", LogLevel.ERROR, true),
+        L21("Ошибка при обработке данных транспортного файла. Загрузка файла не выполнена. %s.", LogLevel.ERROR, true),
         // L22("Итоговая сумма в графе «%s» строки %d в транспортном файле некорректна. Загрузка файла не выполнена.", LogLevel.ERROR, true),
         L23("Запущена процедура загрузки транспортных файлов, содержащих данные справочников.", LogLevel.INFO, true),
         L24("Завершена процедура загрузки транспортных файлов, содержащих данные справочников. Файлов загружено: %d. Файлов отклонено: %d.", LogLevel.INFO, true),
         // L25("Не указан путь к корректному файлу ключей ЭЦП! Загрузка файла не выполнена.", LogLevel.ERROR, true),
         L26("Транспортный файл размещен в каталоге ошибок в составе архива «%s».", LogLevel.INFO, true),
-        L27("Транспортный файл не записан в каталог ошибок! Загрузка файла не выполнена.", LogLevel.ERROR, true),
-        L28("Ошибка при удалении файла «%s» из каталога «%s» при перемещении в каталог ошибок!", LogLevel.INFO, true),
-        L29("Ошибка при удалении файла «%s» из каталога «%s» при перемещении в каталог архива!", LogLevel.ERROR, true),
+        L27("Транспортный файл не записан в каталог ошибок! Загрузка файла не выполнена. %s.", LogLevel.ERROR, true),
+        L28("Ошибка при удалении файла «%s» из каталога «%s» при перемещении в каталог ошибок! %s.", LogLevel.ERROR, true),
+        L29("Ошибка при удалении файла «%s» из каталога «%s» при перемещении в каталог архива! %s.", LogLevel.ERROR, true),
         L30("К каталогу загрузки для подразделения «%s» не указан корректный путь!", LogLevel.ERROR, true),
+        L31("В каталоге загрузки не найдены файлы!", LogLevel.ERROR, true), // TODO Обновить http://conf.aplana.com/pages/viewpage.action?pageId=12324125
         // Сообщения которых нет в постановке
         L_1("Не указан каталог ошибок в конфигурационных параметрах АС «Учет налогов»!", LogLevel.ERROR, true),
         L_2("Не указан каталог архива в конфигурационных параметрах АС «Учет налогов»!", LogLevel.ERROR, true);
@@ -112,8 +109,16 @@ public abstract class AbstractLoadTransportDataService {
         // ЖА
         // TODO Указать признак ошибки в ЖА. См. logData.getLevel()
         if (logData.isLogSystem()) {
-            auditService.add(FormDataEvent.IMPORT_TRANSPORT_FILE, userInfo, userInfo.getUser().getDepartmentId(), null,
-                    null, null, null, String.format(logData.getText(), args));
+            Integer departmentId = null;
+            if (userInfo != null) {
+                departmentId = userInfo.getUser().getDepartmentId();
+            }
+            String prefix = "";
+            if (userInfo.getUser().getId() == TAUser.SYSTEM_USER_ID) {
+                prefix = "Событие инициировано Системой. ";
+            }
+            auditService.add(FormDataEvent.IMPORT_TRANSPORT_FILE, userInfo, departmentId, null,
+                    null, null, null, prefix + String.format(logData.getText(), args));
         }
     }
 
@@ -135,9 +140,9 @@ public abstract class AbstractLoadTransportDataService {
      * @param errorPath    Путь к каталогу ошибок
      * @param errorFileSrc Файл с ошибкой, который должен быть перенесен
      */
-    protected final void moveToErrorDirectory(TAUserInfo userInfo, String errorPath, FileWrapper errorFileSrc,
-                                              List<LogEntry> errorList, Logger logger) {
-        moveToDirectory(userInfo, errorPath, errorFileSrc, errorList, logger, LogData.L28, LogData.L26, LogData.L27);
+    protected final boolean moveToErrorDirectory(TAUserInfo userInfo, String errorPath, FileWrapper errorFileSrc,
+                                                 List<LogEntry> errorList, Logger logger) {
+        return moveToDirectory(userInfo, errorPath, errorFileSrc, errorList, logger, LogData.L28, LogData.L26, LogData.L27);
     }
 
     /**
@@ -146,16 +151,17 @@ public abstract class AbstractLoadTransportDataService {
      * @param archivePath    Путь к каталогу архива
      * @param archiveFileSrc Файл, который должен быть перенесен
      */
-    protected final void moveToArchiveDirectory(TAUserInfo userInfo, String archivePath, FileWrapper archiveFileSrc,
-                                                Logger logger) {
-        moveToDirectory(userInfo, archivePath, archiveFileSrc, null, logger, LogData.L29, LogData.L11, LogData.L12);
+    protected final boolean moveToArchiveDirectory(TAUserInfo userInfo, String archivePath, FileWrapper archiveFileSrc,
+                                                   Logger logger) {
+        return moveToDirectory(userInfo, archivePath, archiveFileSrc, null, logger, LogData.L29, LogData.L11, LogData.L12);
     }
 
     /**
      * Перенос ТФ в каталог ошибок или архива
      */
-    private void moveToDirectory(TAUserInfo userInfo, String rootPath, FileWrapper file, List<LogEntry> errorList,
-                                 Logger logger, LogData deleteErrorLogData, LogData successLogData, LogData moveErrorLogData) {
+    private boolean moveToDirectory(TAUserInfo userInfo, String rootPath, FileWrapper file, List<LogEntry> errorList,
+                                    Logger logger, LogData deleteErrorLogData, LogData successLogData, LogData moveErrorLogData) {
+        boolean success = true;
         try {
             // Создание дерева каталогов
             Calendar calendar = Calendar.getInstance();
@@ -177,8 +183,9 @@ public abstract class AbstractLoadTransportDataService {
 
             // Файл с логами, если логи есть
             if (errorList != null && !errorList.isEmpty()) {
-                zaos.putArchiveEntry(new ZipArchiveEntry(LOG_FILE_NAME));
+                zaos.putArchiveEntry(new ZipArchiveEntry(file.getName() + ".txt"));
                 StringBuilder sb = new StringBuilder();
+                sb.append(userInfo.getUser().getName() + " \r\n");
                 for (LogEntry logEntry : errorList) {
                     sb.append(logEntry.getLevel().name() + "\t" + logEntry.getMessage() + "\r\n");
                 }
@@ -192,12 +199,15 @@ public abstract class AbstractLoadTransportDataService {
             try {
                 file.delete();
             } catch (Exception e) {
-                log(userInfo, deleteErrorLogData, logger);
+                success = false;
+                log(userInfo, deleteErrorLogData, logger, e.getMessage());
             }
 
             log(userInfo, successLogData, logger, fileDst.getName());
         } catch (Exception e) {
-            log(userInfo, moveErrorLogData, logger);
+            success = false;
+            log(userInfo, moveErrorLogData, logger, e.getMessage());
         }
+        return success;
     }
 }
