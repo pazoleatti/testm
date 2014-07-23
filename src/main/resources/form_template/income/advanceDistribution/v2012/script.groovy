@@ -174,13 +174,16 @@ void calc() {
     def propertyPriceSumm = getSumAll(dataRows, "propertyPrice")
     def workersCountSumm = getSumAll(dataRows, "workersCount")
 
-    /** Распределяемая налоговая база за отчетный период. */
-    def taxBase = roundValue(getTaxBase(), 0)
-    /** Отчётный период. */
+    // Распределяемая налоговая база за отчетный период.
+    def taxBase
+    if (formDataEvent != FormDataEvent.COMPOSE) {
+        taxBase = roundValue(getTaxBase(), 0)
+    }
+    // Отчётный период.
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
     def departmentParamsDate = getReportPeriodEndDate() - 1
 
-    /** Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде. */
+    // Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде.
     def sumNal = 0
     def sumTaxRecords = getRefBookRecord(33, "DEPARTMENT_ID", "1", departmentParamsDate, -1, null, false)
     if (sumTaxRecords != null && !sumTaxRecords.isEmpty()) {
@@ -473,7 +476,7 @@ void consolidation() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = []
 
-    /** Идентификатор шаблона источников (Приложение 5). */
+    // Идентификатор шаблона источников (Приложение 5).
     def id = 372
     def newRow
 
