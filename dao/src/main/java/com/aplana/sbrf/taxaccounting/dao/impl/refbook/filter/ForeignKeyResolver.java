@@ -134,7 +134,6 @@ public class ForeignKeyResolver {
             // алиас лдя таблицы frb - foreign ref book
             int index = ftCounter - foreignTables.size() + i;
             String currentAlias = "frb"+index;
-            // TODO завязка на r.id, r алиас главной таблицы
             String prevLinkCell = i == 0 ? "a"+foreignTables.get(i).alias+".reference_value" : "frb"+index+"."+foreignTables.get(i).alias;
             // составления join запроса
             buffer.append("left join ref_book_value ").append(currentAlias).append(" on ");
@@ -184,7 +183,7 @@ public class ForeignKeyResolver {
 
     /**
      * Функция добавления внешней таблицы в карту.
-     * Отсутствие повторов гарантирует LinkedHashMap
+     * Отсутствие повторов гарантирует
      */
     private void addForeignTable(Long id, String alias){
         foreignTables.add(new LinkModel(id, alias));
