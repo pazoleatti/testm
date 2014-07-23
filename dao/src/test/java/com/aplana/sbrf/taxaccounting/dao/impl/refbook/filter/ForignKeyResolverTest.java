@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter;
 
+import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.components.AbstractTreeListenerComponent;
+import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.components.ForeignKeyResolverComponent;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
@@ -22,9 +24,7 @@ import static org.mockito.Mockito.when;
  */
 public class ForignKeyResolverTest {
 
-    ForeignKeyResolver foreignKeyResolver;
-
-    PreparedStatementData preparedStatementData = new PreparedStatementData();
+    AbstractTreeListenerComponent foreignKeyResolverComponent;
 
     @Before
     public void init(){
@@ -75,33 +75,29 @@ public class ForignKeyResolverTest {
         when(refBookDao.get(3L)).thenReturn(refBook3);
 
 
-        foreignKeyResolver = new ForeignKeyResolver();
-        foreignKeyResolver.setPs(preparedStatementData);
-        foreignKeyResolver.setRefBook(refBook);
-        ReflectionTestUtils.setField(foreignKeyResolver, "refBookDao", refBookDao);
+        foreignKeyResolverComponent = new ForeignKeyResolverComponent();
+        foreignKeyResolverComponent.setRefBook(refBook);
+        ReflectionTestUtils.setField(foreignKeyResolverComponent, "refBookDao", refBookDao);
     }
 
     @Test
     public void test(){
-        foreignKeyResolver.enterEAliasNode("user");
-        foreignKeyResolver.enterExternalAliasNode("name");
-        foreignKeyResolver.exitEAliasNode();
-        foreignKeyResolver.setSqlPartsOfJoin();
+        PreparedStatementData result = new PreparedStatementData();
+        foreignKeyResolverComponent.setPreparedStatementData(result);
+        Filter.getFilterQuery("user.name = '123'", foreignKeyResolverComponent);
 
-        assertTrue(preparedStatementData.getJoinPartsOfQuery().equals("left join ref_book_value frb0 on frb0.record_id = auser.reference_value and frb0.attribute_id = 2\n"));
-        assertTrue(preparedStatementData.getQuery().toString().equals("frb0.STRING_value"));
+        assertTrue(result.getQuery().toString().equals("frb0.STRING_value"));
+        assertTrue(result.getJoinPartsOfQuery().equals("left join ref_book_value frb0 on frb0.record_id = auser.reference_value and frb0.attribute_id = 2\n"));
     }
 
     @Test
     public void test2(){
-        foreignKeyResolver.enterEAliasNode("user");
-        foreignKeyResolver.enterExternalAliasNode("city");
-        foreignKeyResolver.enterExternalAliasNode("name");
-        foreignKeyResolver.exitEAliasNode();
-        foreignKeyResolver.setSqlPartsOfJoin();
+        PreparedStatementData result = new PreparedStatementData();
+        foreignKeyResolverComponent.setPreparedStatementData(result);
+        Filter.getFilterQuery("user.city.name = '123'", foreignKeyResolverComponent);
 
-        assertTrue(preparedStatementData.getJoinPartsOfQuery().equals("left join ref_book_value frb0 on frb0.record_id = auser.reference_value and frb0.attribute_id = 3\nleft join ref_book_value frb1 on frb1.record_id = frb1.city and frb1.attribute_id = 4\n"));
-        assertTrue(preparedStatementData.getQuery().toString().equals("frb1.STRING_value"));
+        assertTrue(result.getJoinPartsOfQuery().equals("left join ref_book_value frb0 on frb0.record_id = auser.reference_value and frb0.attribute_id = 3\nleft join ref_book_value frb1 on frb1.record_id = frb1.city and frb1.attribute_id = 4\n"));
+        assertTrue(result.getQuery().toString().equals("frb1.STRING_value"));
     }
 
     /**
@@ -109,25 +105,14 @@ public class ForignKeyResolverTest {
      */
     @Test
     public void test3(){
-        foreignKeyResolver.enterEAliasNode("user");
-        foreignKeyResolver.enterExternalAliasNode("name");
-        foreignKeyResolver.exitEAliasNode();
+        PreparedStatementData result1 = new PreparedStatementData();
+        foreignKeyResolverComponent.setPreparedStatementData(result1);
+        Filter.getFilterQuery("user.name = '123' and user.city.name = '123'", foreignKeyResolverComponent);
 
-        assertTrue(preparedStatementData.getQuery().toString().equals("frb0.STRING_value"));
-        preparedStatementData.setQuery(new StringBuilder());
-
-        foreignKeyResolver.enterEAliasNode("user");
-        foreignKeyResolver.enterExternalAliasNode("city");
-        foreignKeyResolver.enterExternalAliasNode("name");
-        foreignKeyResolver.exitEAliasNode();
-
-        foreignKeyResolver.setSqlPartsOfJoin();
-
-        assertTrue(preparedStatementData.getJoinPartsOfQuery().equals("left join ref_book_value frb0 on frb0.record_id = auser.reference_value and frb0.attribute_id = 2\n" +
+        assertTrue(result1.getJoinPartsOfQuery().equals("left join ref_book_value frb0 on frb0.record_id = auser.reference_value and frb0.attribute_id = 2\n" +
                 "\n" +
                 "left join ref_book_value frb1 on frb1.record_id = auser.reference_value and frb1.attribute_id = 3\n" +
                 "left join ref_book_value frb2 on frb2.record_id = frb2.city and frb2.attribute_id = 4\n"));
 
-        assertTrue(preparedStatementData.getQuery().toString().equals("frb2.STRING_value"));
     }
 }
