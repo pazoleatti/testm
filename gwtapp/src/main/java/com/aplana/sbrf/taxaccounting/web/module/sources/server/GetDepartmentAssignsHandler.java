@@ -82,48 +82,39 @@ public class GetDepartmentAssignsHandler extends AbstractActionHandler<GetDepart
                     }
                 }
                 for (DepartmentFormType dft : departmentFormTypes) {
-                    currentAssigns.add(new ComparableSourceObject(dft.getKind(), dft.getFormTypeId(), null));
+                    currentAssigns.add(new ComparableSourceObject(dft.getKind(), dft.getFormTypeId(), null, dft.getDepartmentId()));
                 }
             } else {
                 if (action.getMode() == SourceMode.SOURCES) {
                     List<DepartmentFormType> departmentFormTypes = sourceService
                             .getDFTSourceByDDT(selectedLeftObject.getDepartmentId(), selectedLeftObject.getTypeId(), periodFrom, periodTo);
                     for (DepartmentFormType dft : departmentFormTypes) {
-                        currentAssigns.add(new ComparableSourceObject(dft.getKind(), dft.getFormTypeId(), null));
+                        currentAssigns.add(new ComparableSourceObject(dft.getKind(), dft.getFormTypeId(), null, dft.getDepartmentId()));
                     }
                 } else {
                     List<DepartmentDeclarationType> departmentFormTypes = sourceService.
                             getDeclarationDestinations(selectedLeftObject.getDepartmentId(), selectedLeftObject.getTypeId(), selectedLeftObject.getKind(), periodFrom, periodTo);
                     for (DepartmentDeclarationType ddt : departmentFormTypes) {
-                        currentAssigns.add(new ComparableSourceObject(null, null, ddt.getDeclarationTypeId()));
+                        currentAssigns.add(new ComparableSourceObject(null, null, ddt.getDeclarationTypeId(), ddt.getDepartmentId()));
                     }
                 }
             }
 
             Iterator<DepartmentAssign> it = departmentAssigns.iterator();
-            while(it.hasNext()) {
+            while (it.hasNext()) {
                 DepartmentAssign assign = it.next();
-                if (!assign.isDeclaration()) {
+                if (!assign.isDeclaration() || action.getMode() == SourceMode.SOURCES) {
                     for (ComparableSourceObject currentAssign : currentAssigns) {
-                        if (assign.getKind() == currentAssign.formKind && assign.getTypeId() == currentAssign.formTypeId) {
+                        if (assign.getKind() == currentAssign.formKind && assign.getTypeId() == currentAssign.formTypeId && action.getDepartmentId() == currentAssign.departmentId) {
                             it.remove();
                             break;
                         }
                     }
                 } else {
-                    if (action.getMode() == SourceMode.SOURCES) {
-                        for (ComparableSourceObject currentAssign : currentAssigns) {
-                            if (assign.getKind() == currentAssign.formKind && assign.getTypeId() == currentAssign.formTypeId) {
-                                it.remove();
-                                break;
-                            }
-                        }
-                    } else {
-                        for (ComparableSourceObject currentAssign : currentAssigns) {
-                            if (assign.getTypeId() == currentAssign.declarationTypeId) {
-                                it.remove();
-                                break;
-                            }
+                    for (ComparableSourceObject currentAssign : currentAssigns) {
+                        if (assign.getTypeId() == currentAssign.declarationTypeId && action.getDepartmentId() == currentAssign.departmentId) {
+                            it.remove();
+                            break;
                         }
                     }
                 }
@@ -145,11 +136,13 @@ public class GetDepartmentAssignsHandler extends AbstractActionHandler<GetDepart
         private FormDataKind formKind;
         private Integer formTypeId;
         private Integer declarationTypeId;
+        private int departmentId;
 
-        private ComparableSourceObject(FormDataKind formKind, Integer formTypeId, Integer declarationTypeId) {
+        private ComparableSourceObject(FormDataKind formKind, Integer formTypeId, Integer declarationTypeId, int departmentId) {
             this.formKind = formKind;
             this.formTypeId = formTypeId;
             this.declarationTypeId = declarationTypeId;
+            this.departmentId = departmentId;
         }
     }
 }
