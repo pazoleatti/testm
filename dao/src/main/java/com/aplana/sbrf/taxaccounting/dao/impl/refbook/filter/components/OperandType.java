@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter;
+package com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.components;
 
 /**
  * Типы данных

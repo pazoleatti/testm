@@ -1,10 +1,13 @@
 // Generated from SqlCondition.g4 by ANTLR 4.1
 package com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter;
 
+import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.components.AbstractTreeListenerComponent;
+import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.components.ForeignKeyResolverComponent;
+import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.components.TypeVerifierComponent;
+import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.components.UniversalQueryBuilderComponent;
 import com.aplana.sbrf.taxaccounting.dao.refbook.filter.FilterTreeListener;
 import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ErrorNode;
@@ -17,253 +20,346 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Универсальная реализация лиснера для обхода дерева запроса
  * Для работы с внешними таблицами используется объект ForeignKeyResolver
  * Для проверки типов используется объект TypeVerifier
- *
  */
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Qualifier("universalFilterTreeListener")
 public class UniversalFilterTreeListener implements FilterTreeListener {
-    // модель для preparedStatement
-    PreparedStatementData ps;
 
-    // справочник
-    private RefBook refBook;
+    /** Список компонентов */
+    List<AbstractTreeListenerComponent> components;
 
     @Autowired
     private ApplicationContext applicationContext;
 
-    /**
-     * объект-компаньен, реализует функционал
-     * работы с внешними справочниками
-     */
-    private ForeignKeyResolver foreignKeyResolver;
-
-    private TypeVerifier typeVerifier;
-
     @PostConstruct
-    public void init(){
-        foreignKeyResolver = applicationContext.getBean("foreignKeyResolver", ForeignKeyResolver.class);
-        typeVerifier = applicationContext.getBean(TypeVerifier.class);
-        typeVerifier.setForeignKeyResolver(foreignKeyResolver);
-    }
+    public void init() {
+        components = new ArrayList<AbstractTreeListenerComponent>();
 
-    public PreparedStatementData getPs() {
-        return ps;
+        // компонент отражающий простые лексемы в sql выражение
+        components.add(applicationContext.getBean(UniversalQueryBuilderComponent.class));
+
+        // компонент реализующий логику обработки параметров справочника которые являются ссылками
+        ForeignKeyResolverComponent foreignKeyResolverComponent = applicationContext.getBean(ForeignKeyResolverComponent.class);
+        components.add(foreignKeyResolverComponent);
+
+        // компонент реализующий логику проверти типов
+        TypeVerifierComponent verifierComponent = applicationContext.getBean(TypeVerifierComponent.class);
+        verifierComponent.setHasLastExternalRefBookAttribute(foreignKeyResolverComponent);
+        components.add(verifierComponent);
     }
 
     public void setPs(PreparedStatementData ps) {
-        this.ps = ps;
-        foreignKeyResolver.setPs(ps);
-    }
-
-    public RefBook getRefBook() {
-        return refBook;
-    }
-
-    public void setRefBook(RefBook refBook) {
-        this.refBook = refBook;
-        typeVerifier.setRefBook(refBook);
-        foreignKeyResolver.setRefBook(refBook);
-    }
-
-
-	@Override public void enterNobrakets(@NotNull FilterTreeParser.NobraketsContext ctx) {
-        if (ctx.link_type() != null){
-            ps.appendQuery(" ");
-            ps.appendQuery(ctx.link_type().getText());
-            ps.appendQuery(" ");
+        for (AbstractTreeListenerComponent c: components){
+            c.setPreparedStatementData(ps);
         }
     }
 
-	@Override public void exitNobrakets(@NotNull FilterTreeParser.NobraketsContext ctx) { }
+    public void setRefBook(RefBook refBook) {
+        for (AbstractTreeListenerComponent c: components){
+            c.setRefBook(refBook);
+        }
+    }
+
 
     @Override
-    public void enterAlias(@NotNull FilterTreeParser.AliasContext ctx) {
+    public void enterNobrakets(@NotNull FilterTreeParser.NobraketsContext ctx) {
+        for (AbstractTreeListenerComponent c: components){
+            c.enterNobrakets(ctx);
+        }
     }
 
     @Override
-    public void exitAlias(@NotNull FilterTreeParser.AliasContext ctx) {}
+    public void exitNobrakets(@NotNull FilterTreeParser.NobraketsContext ctx) {
+        for (AbstractTreeListenerComponent c: components){
+            c.exitNobrakets(ctx);
+        }
+    }
+
+    @Override
+    public void enterAlias(@NotNull FilterTreeParser.AliasContext ctx) {
+        for (AbstractTreeListenerComponent c: components){
+            c.enterAlias(ctx);
+        }
+    }
+
+    @Override
+    public void exitAlias(@NotNull FilterTreeParser.AliasContext ctx) {
+        for (AbstractTreeListenerComponent c: components){
+            c.exitAlias(ctx);
+        }
+    }
 
     @Override
     public void enterFuncwrap(@NotNull FilterTreeParser.FuncwrapContext ctx) {
-        ps.appendQuery(ctx.functype().getText());
-        ps.appendQuery("(");
+        for (AbstractTreeListenerComponent c: components){
+            c.enterFuncwrap(ctx);
+        }
     }
 
     @Override
     public void exitFuncwrap(@NotNull FilterTreeParser.FuncwrapContext ctx) {
-        ps.appendQuery(")");
-        typeVerifier.exitFuncwrap(ctx);
+        for (AbstractTreeListenerComponent c: components){
+            c.exitFuncwrap(ctx);
+        }
     }
 
-	@Override public void enterOperand_type(@NotNull FilterTreeParser.Operand_typeContext ctx) {
-        ps.appendQuery(" ");
-        ps.appendQuery(ctx.getText());
-        ps.appendQuery(" ");
+    @Override
+    public void enterOperand_type(@NotNull FilterTreeParser.Operand_typeContext ctx) {
+        for (AbstractTreeListenerComponent c: components){
+            c.enterOperand_type(ctx);
+        }
     }
 
-	@Override public void exitOperand_type(@NotNull FilterTreeParser.Operand_typeContext ctx) { }
+    @Override
+    public void exitOperand_type(@NotNull FilterTreeParser.Operand_typeContext ctx) {
+        for (AbstractTreeListenerComponent c: components){
+            c.exitOperand_type(ctx);
+        }
+    }
 
     @Override
     public void enterString(@NotNull FilterTreeParser.StringContext ctx) {
-        ps.appendQuery("?");
-        // Строка по умолчанию содерижт символы кавычек. Пример " 'Текст' "
-        ps.addParam(ctx.getText().substring(1, ctx.getText().length() - 1));
+        for (AbstractTreeListenerComponent c: components){
+            c.enterString(ctx);
+        }
     }
 
     @Override
     public void exitString(@NotNull FilterTreeParser.StringContext ctx) {
-        typeVerifier.exitString(ctx);
+        for (AbstractTreeListenerComponent c: components){
+            c.exitString(ctx);
+        }
     }
 
-    @Override public void enterQuery(@NotNull FilterTreeParser.QueryContext ctx) {
-
+    @Override
+    public void enterQuery(@NotNull FilterTreeParser.QueryContext ctx) {
+        for (AbstractTreeListenerComponent c: components){
+            c.enterQuery(ctx);
+        }
     }
 
-	@Override
+    @Override
     public void exitQuery(@NotNull FilterTreeParser.QueryContext ctx) {
-        foreignKeyResolver.setSqlPartsOfJoin();
+        for (AbstractTreeListenerComponent c: components){
+            c.exitQuery(ctx);
+        }
     }
 
     @Override
     public void enterInternlAlias(@NotNull FilterTreeParser.InternlAliasContext ctx) {
-        ps.appendQuery(buildAliasStr(ctx.getText()));
+        for (AbstractTreeListenerComponent c: components){
+            c.enterInternlAlias(ctx);
+        }
     }
 
     @Override
     public void exitInternlAlias(@NotNull FilterTreeParser.InternlAliasContext ctx) {
-        typeVerifier.exitInternlAlias(ctx);
+        for (AbstractTreeListenerComponent c: components){
+            c.exitInternlAlias(ctx);
+        }
     }
 
     @Override
     public void enterNumber(@NotNull FilterTreeParser.NumberContext ctx) {
-        ps.appendQuery(ctx.getText());
+        for (AbstractTreeListenerComponent c: components){
+            c.enterNumber(ctx);
+        }
     }
 
     @Override
     public void exitNumber(@NotNull FilterTreeParser.NumberContext ctx) {
-        typeVerifier.exitNumber(ctx);
+        for (AbstractTreeListenerComponent c: components){
+            c.exitNumber(ctx);
+        }
     }
 
     @Override
     public void enterRoperand(@NotNull FilterTreeParser.RoperandContext ctx) {
-        typeVerifier.enterRoperand(ctx);
+        for (AbstractTreeListenerComponent c: components){
+            c.enterRoperand(ctx);
+        }
     }
 
     @Override
-    public void exitRoperand(@NotNull FilterTreeParser.RoperandContext ctx) {}
+    public void exitRoperand(@NotNull FilterTreeParser.RoperandContext ctx) {
+        for (AbstractTreeListenerComponent c: components){
+            c.exitRoperand(ctx);
+        }
+    }
 
     @Override
     public void enterStandartExpr(@NotNull FilterTreeParser.StandartExprContext ctx) {
-        typeVerifier.enterStandartExpr(ctx);
+        for (AbstractTreeListenerComponent c: components){
+            c.enterStandartExpr(ctx);
+        }
     }
 
     @Override
     public void exitStandartExpr(@NotNull FilterTreeParser.StandartExprContext ctx) {
-        typeVerifier.exitStandartExpr(ctx);
-    }
-
-	@Override public void enterWithbrakets(@NotNull FilterTreeParser.WithbraketsContext ctx) {
-        if (ctx.link_type() != null){
-            ps.appendQuery(" ");
-            ps.appendQuery(ctx.link_type().getText());
+        for (AbstractTreeListenerComponent c: components){
+            c.exitStandartExpr(ctx);
         }
-        ps.appendQuery("(");
     }
 
-	@Override public void exitWithbrakets(@NotNull FilterTreeParser.WithbraketsContext ctx) {
-        ps.appendQuery(")");
+    @Override
+    public void enterWithbrakets(@NotNull FilterTreeParser.WithbraketsContext ctx) {
+        for (AbstractTreeListenerComponent c: components){
+            c.enterWithbrakets(ctx);
+        }
+    }
+
+    @Override
+    public void exitWithbrakets(@NotNull FilterTreeParser.WithbraketsContext ctx) {
+        for (AbstractTreeListenerComponent c: components){
+            c.exitWithbrakets(ctx);
+        }
     }
 
     @Override
     public void enterEAlias(@NotNull FilterTreeParser.EAliasContext ctx) {
-        foreignKeyResolver.enterEAliasNode(ctx.ALIAS().getText());
+        for (AbstractTreeListenerComponent c: components){
+            c.enterEAlias(ctx);
+        }
     }
 
     @Override
     public void exitEAlias(@NotNull FilterTreeParser.EAliasContext ctx) {
-        foreignKeyResolver.exitEAliasNode();
+        for (AbstractTreeListenerComponent c: components){
+            c.exitEAlias(ctx);
+        }
     }
 
     @Override
-    public void enterOperand(@NotNull FilterTreeParser.OperandContext ctx) { }
+    public void enterOperand(@NotNull FilterTreeParser.OperandContext ctx) {
+        for (AbstractTreeListenerComponent c: components){
+            c.enterOperand(ctx);
+        }
+    }
 
     @Override
-    public void exitOperand(@NotNull FilterTreeParser.OperandContext ctx) { }
+    public void exitOperand(@NotNull FilterTreeParser.OperandContext ctx) {
+        for (AbstractTreeListenerComponent c: components){
+            c.exitOperand(ctx);
+        }
+    }
 
     @Override
     public void enterLoperand(@NotNull FilterTreeParser.LoperandContext ctx) {
-        typeVerifier.enterLoperand(ctx);
+        for (AbstractTreeListenerComponent c: components){
+            c.enterLoperand(ctx);
+        }
     }
 
     @Override
-    public void exitLoperand(@NotNull FilterTreeParser.LoperandContext ctx) {}
+    public void exitLoperand(@NotNull FilterTreeParser.LoperandContext ctx) {
+        for (AbstractTreeListenerComponent c: components){
+            c.exitLoperand(ctx);
+        }
+    }
 
     @Override
     public void enterExternalAlias(@NotNull FilterTreeParser.ExternalAliasContext ctx) {
-        foreignKeyResolver.enterExternalAliasNode(ctx.ALIAS().getText());
+        for (AbstractTreeListenerComponent c: components){
+            c.enterExternalAlias(ctx);
+        }
     }
 
     @Override
     public void exitExternalAlias(@NotNull FilterTreeParser.ExternalAliasContext ctx) {
-        typeVerifier.exitExternalAlias(ctx);
+        for (AbstractTreeListenerComponent c: components){
+            c.exitExternalAlias(ctx);
+        }
     }
 
     @Override
-    public void enterFunctype(@NotNull FilterTreeParser.FunctypeContext ctx) { }
+    public void enterFunctype(@NotNull FilterTreeParser.FunctypeContext ctx) {
+        for (AbstractTreeListenerComponent c: components){
+            c.enterFunctype(ctx);
+        }
+    }
 
     @Override
-    public void exitFunctype(@NotNull FilterTreeParser.FunctypeContext ctx) { }
+    public void exitFunctype(@NotNull FilterTreeParser.FunctypeContext ctx) {
+        for (AbstractTreeListenerComponent c: components){
+            c.exitFunctype(ctx);
+        }
+    }
 
     @Override
     public void enterIsNullExpr(@NotNull FilterTreeParser.IsNullExprContext ctx) {
-        typeVerifier.enterIsNullExpr(ctx);
+        for (AbstractTreeListenerComponent c: components){
+            c.enterIsNullExpr(ctx);
+        }
     }
 
     @Override
     public void exitIsNullExpr(@NotNull FilterTreeParser.IsNullExprContext ctx) {
-        ps.appendQuery(" is null");
+        for (AbstractTreeListenerComponent c: components){
+            c.exitIsNullExpr(ctx);
+        }
     }
 
-	@Override public void enterLink_type(@NotNull FilterTreeParser.Link_typeContext ctx) { }
-
-	@Override public void exitLink_type(@NotNull FilterTreeParser.Link_typeContext ctx) { }
+    @Override
+    public void enterLink_type(@NotNull FilterTreeParser.Link_typeContext ctx) {
+        for (AbstractTreeListenerComponent c: components){
+            c.enterLink_type(ctx);
+        }
+    }
 
     @Override
-    public void enterSimpleoperand(@NotNull FilterTreeParser.SimpleoperandContext ctx) {}
+    public void exitLink_type(@NotNull FilterTreeParser.Link_typeContext ctx) {
+        for (AbstractTreeListenerComponent c: components){
+            c.exitLink_type(ctx);
+        }
+    }
 
     @Override
-    public void exitSimpleoperand(@NotNull FilterTreeParser.SimpleoperandContext ctx) {}
+    public void enterSimpleoperand(@NotNull FilterTreeParser.SimpleoperandContext ctx) {
+        for (AbstractTreeListenerComponent c: components){
+            c.enterSimpleoperand(ctx);
+        }
+    }
 
-	@Override public void enterEveryRule(@NotNull ParserRuleContext ctx) {}
+    @Override
+    public void exitSimpleoperand(@NotNull FilterTreeParser.SimpleoperandContext ctx) {
+        for (AbstractTreeListenerComponent c: components){
+            c.exitSimpleoperand(ctx);
+        }
+    }
 
-	@Override public void exitEveryRule(@NotNull ParserRuleContext ctx) {}
+    @Override
+    public void enterEveryRule(@NotNull ParserRuleContext ctx) {
+        for (AbstractTreeListenerComponent c: components){
+            c.enterEveryRule(ctx);
+        }
+    }
 
-	@Override public void visitTerminal(@NotNull TerminalNode node) {}
+    @Override
+    public void exitEveryRule(@NotNull ParserRuleContext ctx) {
+        for (AbstractTreeListenerComponent c: components){
+            c.exitEveryRule(ctx);
+        }
+    }
 
-	@Override public void visitErrorNode(@NotNull ErrorNode node) { }
+    @Override
+    public void visitTerminal(@NotNull TerminalNode node) {
+        for (AbstractTreeListenerComponent c: components){
+            c.visitTerminal(node);
+        }
+    }
 
-    private String buildAliasStr(String alias){
-        if (alias.equalsIgnoreCase(RefBook.RECORD_ID_ALIAS)){
-            return "id";
-        } else {
-            StringBuffer sb = new StringBuffer();
-            RefBookAttribute attribute = refBook.getAttribute(alias);
-            if (attribute == null){
-                throw new IllegalArgumentException("Не найден атрибут с алиасом = "+alias);
-            }
-            sb.append("a");
-            sb.append(alias);
-            sb.append(".");
-            sb.append(attribute.getAttributeType().toString());
-            sb.append("_value");
-
-            return sb.toString();
+    @Override
+    public void visitErrorNode(@NotNull ErrorNode node) {
+        for (AbstractTreeListenerComponent c: components){
+            c.visitErrorNode(node);
         }
     }
 }

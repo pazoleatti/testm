@@ -1,5 +1,6 @@
-package com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter;
+package com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.components;
 
+import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.FilterTreeParser;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import org.antlr.v4.runtime.misc.NotNull;
@@ -8,7 +9,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 /**
- * Класс - компаньен фильтра, отвечает за проверку типов
+ * Компонент для проверку типов
  * пример при вызове фильтра с "length(name) > city.name"
  * фильтр выкинет исключение RuntimeException "Not match types. (left: NUMBER, right: STRING) on expression <length(name) > city.name>"
  *
@@ -22,13 +23,18 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class TypeVerifier {
+public class TypeVerifierComponent extends AbstractTreeListenerComponent {
+
+    public interface HasLastExternalRefBookAttribute{
+        RefBookAttribute getLastExternalRefBookAttribute();
+    }
+
     private boolean left;
     private boolean right;
     private OperandType letfType, rightType;
-    private ForeignKeyResolver foreignKeyResolver;
-    private RefBook refBook;
+    private HasLastExternalRefBookAttribute hasLastExternalRefBookAttribute;
 
+    @Override
     public void exitFuncwrap(@NotNull FilterTreeParser.FuncwrapContext ctx) {
         // проверка типа данных для функции
         checkFunctionType(ctx);
@@ -43,14 +49,17 @@ public class TypeVerifier {
         }
     }
 
+    @Override
     public void exitString(@NotNull FilterTreeParser.StringContext ctx) {
         setType(OperandType.STRING);
     }
 
+    @Override
     public void exitNumber(@NotNull FilterTreeParser.NumberContext ctx) {
         setType(OperandType.NUMBER);
     }
 
+    @Override
     public void enterRoperand(@NotNull FilterTreeParser.RoperandContext ctx) {
         /**
          * Метод устанавливает работу с правым операндом
@@ -59,6 +68,7 @@ public class TypeVerifier {
         right = true;
     }
 
+    @Override
     public void enterStandartExpr(@NotNull FilterTreeParser.StandartExprContext ctx) {
         /**
          * Сброс параметров, для повторного использования объекта
@@ -69,6 +79,7 @@ public class TypeVerifier {
         right = false;
     }
 
+    @Override
     public void exitStandartExpr(@NotNull FilterTreeParser.StandartExprContext ctx) {
         /**
          * Проверка типов левого и правого операнда
@@ -82,19 +93,23 @@ public class TypeVerifier {
         }
     }
 
+    @Override
     public void enterLoperand(@NotNull FilterTreeParser.LoperandContext ctx) {
         startCatchLeftType();
     }
 
+    @Override
     public void enterIsNullExpr(@NotNull FilterTreeParser.IsNullExprContext ctx) {
         // хотя это совсем не играет роли, чтоб исключить исплючение
         startCatchLeftType();
     }
 
+    @Override
     public void exitExternalAlias(@NotNull FilterTreeParser.ExternalAliasContext ctx) {
-        setAliasType(foreignKeyResolver.getLastRefBookAttribute());
+        setAliasType(hasLastExternalRefBookAttribute.getLastExternalRefBookAttribute());
     }
 
+    @Override
     public void exitInternlAlias(@NotNull FilterTreeParser.InternlAliasContext ctx) {
         setAliasType(ctx.getText());
     }
@@ -117,9 +132,6 @@ public class TypeVerifier {
             default: throw new RuntimeException("Unexpected internal alias type");
         }
     }
-
-
-
 
     /**
      * Переключения типа захвата типа
@@ -169,12 +181,8 @@ public class TypeVerifier {
         }
     }
 
-    public void setRefBook(RefBook refBook) {
-        this.refBook = refBook;
-    }
-
-    public void setForeignKeyResolver(ForeignKeyResolver foreignKeyResolver) {
-        this.foreignKeyResolver = foreignKeyResolver;
+    public void setHasLastExternalRefBookAttribute(HasLastExternalRefBookAttribute hasLastExternalRefBookAttribute) {
+        this.hasLastExternalRefBookAttribute = hasLastExternalRefBookAttribute;
     }
 }
 

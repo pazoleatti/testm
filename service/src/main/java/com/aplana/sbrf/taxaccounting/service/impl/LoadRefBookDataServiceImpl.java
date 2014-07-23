@@ -137,13 +137,16 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                 List<Logger> localLoggerList = new ArrayList<Logger>(matchList.size());
 
                 int skip = 0;
-
+                boolean load = false;
+                // Попытка загрузить один файл в несколько справочников
                 for (int i = 0; i < matchList.size(); i++) {
+                    if (load) {
+                        break;
+                    }
                     Pair<Boolean, Long> refBookMapPair = matchList.get(i);
                     InputStream is = null;
                     Long refBookId = refBookMapPair.getSecond();
                     localLoggerList.add(new Logger());
-
                     ScriptStatusHolder scriptStatusHolder = new ScriptStatusHolder();
                     try {
                         is = new BufferedInputStream(currentFile.getInputStream());
@@ -162,9 +165,12 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                         additionalParameters.put("scriptStatusHolder", scriptStatusHolder);
                         refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.IMPORT_TRANSPORT_FILE,
                                 localLoggerList.get(i), additionalParameters);
+                        IOUtils.closeQuietly(is);
                         // Обработка результата выполнения скрипта
                         switch (scriptStatusHolder.getScriptStatus()) {
                             case SUCCESS:
+                                // Уже загрузили, больше не пытаемся
+                                load = true;
                                 if (move) {
                                     // Перемещение в каталог архива
                                     boolean result = moveToArchiveDirectory(userInfo, getRefBookArchivePath(userInfo,
@@ -196,8 +202,10 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                                 break;
                         }
                     } catch (Exception e) {
+                        // При ошибке второй раз не пытаемся загрузить
+                        load = true;
+                        IOUtils.closeQuietly(is);
                         fail++;
-                        localLoggerList.get(i).error(e.getMessage());
                         // Ошибка импорта отдельного справочника — откатываются изменения только по нему, импорт продолжается
                         log(userInfo, LogData.L21, logger, e.getMessage());
                         // Перемещение в каталог ошибок
@@ -206,8 +214,6 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                             moveToErrorDirectory(userInfo, getRefBookErrorPath(userInfo, logger), currentFile,
                                     getEntries(localLoggerList), logger);
                         }
-                    } finally {
-                        IOUtils.closeQuietly(is);
                     }
                 }
             }

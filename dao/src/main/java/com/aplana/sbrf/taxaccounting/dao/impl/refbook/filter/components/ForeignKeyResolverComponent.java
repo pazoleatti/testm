@@ -1,10 +1,11 @@
-package com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter;
+package com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.components;
 
+import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.FilterTreeParser;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
-import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
+import org.antlr.v4.runtime.misc.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -15,33 +16,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Класс помошник фильтра, берет на себя обязанности
- * разименовывания справочников если в фильтре присутствуют внешние ключи
- * к примеру user.city.name, в этом случае он добавляет цепочку join'ов
- * и условие.
+ * Компонент ответственный за разименовывание параметров-ссылок
+ * справочников.
+ *
+ * К примеру если в фильтре присутствуют внешний ключ user.city.name,
+ * в этом случае он добавляет цепочку join'ов и условие.
  *
  * @author auldanov
  */
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Qualifier("foreignKeyResolver")
-public class ForeignKeyResolver {
-
-    public PreparedStatementData getPs() {
-        return ps;
-    }
-
-    public void setPs(PreparedStatementData ps) {
-        this.ps = ps;
-    }
-
-    public RefBook getRefBook() {
-        return refBook;
-    }
-
-    public void setRefBook(RefBook refBook) {
-        this.refBook = refBook;
-    }
+public class ForeignKeyResolverComponent extends AbstractTreeListenerComponent implements TypeVerifierComponent.HasLastExternalRefBookAttribute{
 
     class LinkModel{
         public Long recordId;
@@ -90,16 +76,6 @@ public class ForeignKeyResolver {
      */
     private RefBookAttribute lastRefBookAttribute;
 
-    /**
-     * Корневой справочник
-     */
-    private RefBook refBook;
-
-    /*
-    * Модель содержащая данные для PreparedStatement
-    */
-    PreparedStatementData ps;
-
     @Autowired
     private RefBookDao refBookDao;
 
@@ -108,9 +84,10 @@ public class ForeignKeyResolver {
     /**
      * Вход в узел содержащий поля внешних справочников eAlias
      */
-    public void enterEAliasNode(String alias){
+    @Override
+    public void enterEAlias(@NotNull FilterTreeParser.EAliasContext ctx) {
         // Устанавливаем текущий атрибут как последний
-        lastRefBookAttribute = refBook.getAttribute(alias);
+        lastRefBookAttribute = refBook.getAttribute(ctx.ALIAS().getText());
     }
 
     /**
@@ -122,7 +99,8 @@ public class ForeignKeyResolver {
      * Пример: для условия фильтра - user.city.name = 'Уфа'
      * в sql выражение пропишется последний алиас name = 'Уфа'
      */
-    public void exitEAliasNode(){
+    @Override
+    public void exitEAlias(@NotNull FilterTreeParser.EAliasContext ctx) {
         ps.appendQuery("frb"+(ftCounter - 1));
         ps.appendQuery(".");
         ps.appendQuery(lastRefBookAttribute.getAttributeType().toString());
@@ -134,7 +112,6 @@ public class ForeignKeyResolver {
             // алиас лдя таблицы frb - foreign ref book
             int index = ftCounter - foreignTables.size() + i;
             String currentAlias = "frb"+index;
-            // TODO завязка на r.id, r алиас главной таблицы
             String prevLinkCell = i == 0 ? "a"+foreignTables.get(i).alias+".reference_value" : "frb"+index+"."+foreignTables.get(i).alias;
             // составления join запроса
             buffer.append("left join ref_book_value ").append(currentAlias).append(" on ");
@@ -147,21 +124,17 @@ public class ForeignKeyResolver {
         joinStatement.add(buffer.toString());
     }
 
-
-    public RefBookAttribute getLastRefBookAttribute(){
-        return lastRefBookAttribute;
-    }
-
     /**
      * Вход в узел содержащий алиас поля внешней таблицы
      */
-    public void enterExternalAliasNode(String alias){
+    @Override
+    public void enterExternalAlias(@NotNull FilterTreeParser.ExternalAliasContext ctx) {
         // increment counter of join tables
         ftCounter++;
 
         // Получение текущего атрибута
         RefBook currentRefBook = refBookDao.get(lastRefBookAttribute.getRefBookId());
-        RefBookAttribute currentAttribute = currentRefBook.getAttribute(alias); // getId
+        RefBookAttribute currentAttribute = currentRefBook.getAttribute(ctx.ALIAS().getText()); // getId
 
         // добавляем связанный справочник
         addForeignTable(currentAttribute.getId(), lastRefBookAttribute.getAlias());
@@ -174,7 +147,8 @@ public class ForeignKeyResolver {
      * Метод устанавливает в ps части sql запроса join для всех встретившихся
      * внешних справочников
      */
-    public void setSqlPartsOfJoin(){
+    @Override
+    public void exitQuery(@NotNull FilterTreeParser.QueryContext ctx) {
         if (joinStatement.size() > 0) {
             ps.setJoinPartsOfQuery(StringUtils.join(joinStatement.toArray(), '\n'));
         } else {
@@ -182,9 +156,14 @@ public class ForeignKeyResolver {
         }
     }
 
+    @Override
+    public RefBookAttribute getLastExternalRefBookAttribute() {
+        return lastRefBookAttribute;
+    }
+
     /**
      * Функция добавления внешней таблицы в карту.
-     * Отсутствие повторов гарантирует LinkedHashMap
+     * Отсутствие повторов гарантирует
      */
     private void addForeignTable(Long id, String alias){
         foreignTables.add(new LinkModel(id, alias));

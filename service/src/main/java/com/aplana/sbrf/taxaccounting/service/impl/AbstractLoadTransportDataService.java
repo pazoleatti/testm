@@ -62,8 +62,8 @@ public abstract class AbstractLoadTransportDataService {
         // L25("Не указан путь к корректному файлу ключей ЭЦП! Загрузка файла не выполнена.", LogLevel.ERROR, true),
         L26("Транспортный файл размещен в каталоге ошибок в составе архива «%s».", LogLevel.INFO, true),
         L27("Транспортный файл не записан в каталог ошибок! Загрузка файла не выполнена. %s.", LogLevel.ERROR, true),
-        L28("Ошибка при удалении файла «%s» из каталога «%s» при перемещении в каталог ошибок! %s.", LogLevel.ERROR, true),
-        L29("Ошибка при удалении файла «%s» из каталога «%s» при перемещении в каталог архива! %s.", LogLevel.ERROR, true),
+        L28("Ошибка при удалении файла «%s» при перемещении в каталог ошибок! %s.", LogLevel.ERROR, true),
+        L29("Ошибка при удалении файла «%s» при перемещении в каталог архива! %s.", LogLevel.ERROR, true),
         L30("К каталогу загрузки для подразделения «%s» не указан корректный путь!", LogLevel.ERROR, true),
         L31("В каталоге загрузки для %s не найдены файлы!", LogLevel.ERROR, true),
         // Сообщения которых нет в постановке
@@ -200,7 +200,7 @@ public abstract class AbstractLoadTransportDataService {
                 file.delete();
             } catch (Exception e) {
                 success = false;
-                log(userInfo, deleteErrorLogData, logger, e.getMessage());
+                log(userInfo, deleteErrorLogData, logger, file.getPath(), e.getMessage());
             }
 
             log(userInfo, successLogData, logger, fileDst.getName());
