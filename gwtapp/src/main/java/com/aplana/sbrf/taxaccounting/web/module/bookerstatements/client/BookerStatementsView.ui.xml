@@ -114,7 +114,7 @@
                         <g:HorizontalPanel verticalAlignment="middle" width="100%">
 
                             <g:cell horizontalAlignment="right">
-                                <g:Label wordWrap="false" text="Вид бух.отчётности:" addStyleNames="{style.marginRight3}"/>
+                                <g:Label wordWrap="false" text="Вид бух. отчётности:" addStyleNames="{style.marginRight3}"/>
                             </g:cell>
                             <g:cell width="100%">
                                 <g:ValueListBox ui:field="bookerReportType" width="100%" addStyleNames="{style.listBox}"/>
