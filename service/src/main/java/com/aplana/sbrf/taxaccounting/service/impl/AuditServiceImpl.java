@@ -66,6 +66,8 @@ public class AuditServiceImpl implements AuditService {
                 String departmentName = departmentId == null ? "" : departmentService.getParentsHierarchy(departmentId);
                 log.setFormDepartmentName(departmentName.substring(0, Math.min(departmentName.length(), 2000)));
                 log.setFormDepartmentId(departmentId);
+                if (departmentId != null) log.setDepartmentTBId(departmentService.getParentTB(departmentId).getId());
+
                 if (reportPeriodId == null)
                     log.setReportPeriodName(null);
                 else {
@@ -113,8 +115,13 @@ public class AuditServiceImpl implements AuditService {
     @Override
     public PagingResult<LogSearchResultItem> getLogsBusiness(LogSystemFilter filter, TAUserInfo userInfo) {
         List<Integer> departments = departmentService.getTaxFormDepartments(userInfo.getUser(), asList(TaxType.values()), null, null);
+        List<Department> BADepartments = departmentService.getBADepartments(userInfo.getUser());
+        List<Integer> BADepartmentIds = new ArrayList<Integer>();
+        for(Department department: BADepartments) {
+            BADepartmentIds.add(department.getId());
+        }
         try {
-            return auditDao.getLogsBusiness(filter, departments);
+            return auditDao.getLogsBusiness(filter, departments, BADepartmentIds);
         } catch (DaoException e){
             throw new ServiceException("Поиск по НФ/декларациям.", e);
         }

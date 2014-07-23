@@ -25,6 +25,7 @@ public class LogSystem implements Serializable {
 	private String note;
     private String userDepartmentName;
     private Integer formDepartmentId;
+    private Integer departmentTBId;
 
     public String getUserLogin() {
         return userLogin;
@@ -136,5 +137,13 @@ public class LogSystem implements Serializable {
 
     public void setFormDepartmentId(Integer formDepartmentId) {
         this.formDepartmentId = formDepartmentId;
+    }
+
+    public Integer getDepartmentTBId() {
+        return departmentTBId;
+    }
+
+    public void setDepartmentTBId(Integer departmentTBId) {
+        this.departmentTBId = departmentTBId;
     }
 }
