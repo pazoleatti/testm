@@ -178,7 +178,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 formTemplateId = formTemplateService.getActiveFormTemplateId(formType.getId(), reportPeriod.getId());
             } catch (Exception e) {
                 // Если шаблона нет, то не загружаем ТФ
-                log(userInfo, LogData.L21, logger, formType.getName(), e.getMessage());
+                log(userInfo, LogData.L21, logger, e.getMessage());
                 moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
                         Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L21.getText(), e.getMessage()))), logger);
                 fail++;
