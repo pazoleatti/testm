@@ -35,6 +35,12 @@ public interface TAUserService {
 	TAUser getUser(int userId);
 
 	/**
+	 * Возвращает информацию о системном пользователе
+	 * @return
+	 */
+	TAUserInfo getSystemUserInfo();
+
+	/**
 	 * Активирует\блокирует учетную запись пользователя
 	 *
 	 * @param login
