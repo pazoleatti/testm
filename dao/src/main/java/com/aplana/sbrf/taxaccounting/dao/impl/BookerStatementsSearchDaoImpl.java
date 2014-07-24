@@ -53,7 +53,7 @@ public class BookerStatementsSearchDaoImpl extends AbstractDao implements Booker
             case ID:
                 break;
             case DEPARTMENT_NAME:
-                column = "dp.name";
+                column = "dep.name";
                 break;
             case YEAR:
                 column = "ap.number_value";
