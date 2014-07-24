@@ -15,7 +15,7 @@ public enum DepartmentType implements Serializable {
 	/** 4 Управление - MANAGEMENT*/
     MANAGEMENT("Управление", 4),
 	/** 5 INTERNAL - не передается в СУДИР */
-    INTERNAL("Не передается в СУДИР", 5);
+    INTERNAL("", 5);
 
 	private static final long serialVersionUID = 1L;	
 
