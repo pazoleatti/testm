@@ -172,7 +172,18 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             // Признак ежемесячной формы по файлу
             boolean monthly = transportDataParam.getMonth() != null;
 
-            Integer formTemplateId = formTemplateService.getActiveFormTemplateId(formType.getId(), reportPeriod.getId());
+            // Актуальный шаблон НФ, введенный в действие
+            Integer formTemplateId;
+            try {
+                formTemplateId = formTemplateService.getActiveFormTemplateId(formType.getId(), reportPeriod.getId());
+            } catch (Exception e) {
+                // Если шаблона нет, то не загружаем ТФ
+                log(userInfo, LogData.L21, logger, formType.getName(), e.getMessage());
+                moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
+                        Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L21.getText(), e.getMessage()))), logger);
+                fail++;
+                continue;
+            }
 
             FormTemplate formTemplate = null;
             if (formTemplateId != null) {
@@ -217,7 +228,6 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 // Вывод скрипта в область уведомлений
                 logger.getEntries().addAll(localLogger.getEntries());
                 // Вывод в область уведомленеий и ЖА
-                e.printStackTrace();
                 log(userInfo, LogData.L21, logger, e.getMessage());
                 // Перемещение в каталог ошибок
                 moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile, localLogger.getEntries(), logger);
