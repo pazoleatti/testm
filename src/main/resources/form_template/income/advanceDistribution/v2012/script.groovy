@@ -214,9 +214,10 @@ void calc() {
         // графа 10
         row.baseTaxOf = calc10(row, propertyPriceSumm, workersCountSumm)
 
-        // графа 11
-        row.baseTaxOfRub = calc11(row, taxBase)
-
+        if (formDataEvent != FormDataEvent.COMPOSE) {
+            // графа 11
+            row.baseTaxOfRub = calc11(row, taxBase)
+        }
         // графа 12
         row.subjectTaxStavka = calc12(row)
 
@@ -276,8 +277,10 @@ void calc() {
             caTotalRow.getCell(alias).setValue(caRow.getCell(alias).getValue(), caTotalRow.getIndex())
         }
 
-        // графа 11
-        caTotalRow.baseTaxOfRub = taxBase - totalRow.baseTaxOfRub + caRow.baseTaxOfRub
+        if (formDataEvent != FormDataEvent.COMPOSE) {
+            // графа 11
+            caTotalRow.baseTaxOfRub = taxBase - totalRow.baseTaxOfRub + caRow.baseTaxOfRub
+        }
 
         // графа 14
         caTotalRow.taxSumOutside = sumNal - totalRow.taxSumOutside + caRow.taxSumOutside
