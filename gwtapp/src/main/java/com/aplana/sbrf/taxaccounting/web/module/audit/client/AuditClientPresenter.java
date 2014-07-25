@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.sortable.ViewWithSortableTable;
 import com.aplana.sbrf.taxaccounting.web.module.audit.client.archive.AuditArchiveDialogEvent;
 import com.aplana.sbrf.taxaccounting.web.module.audit.client.archive.AuditArchiveDialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.audit.client.event.AuditClientSearchEvent;
@@ -19,7 +20,6 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.Presenter;
-import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
 import com.gwtplatform.mvp.client.annotations.ProxyEvent;
@@ -38,7 +38,42 @@ import java.util.List;
 public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView, AuditClientPresenter.MyProxy>
         implements AuditClientUIHandler, AuditArchiveDialogEvent.AuditArchiveHandler, AuditClientSearchEvent.MyHandler {
 
+    interface MyView extends ViewWithSortableTable, HasUiHandlers<AuditClientUIHandler> {
+        void setAuditTableData(int startIndex, long count, List<LogSearchResultItem> itemList);
+
+        void getBlobFromServer(String uuid);
+
+        void updateData();
+
+        void updateData(int pageNumber);
+
+        void updateArchiveDateLbl(String archiveDate);
+
+        HistoryBusinessSearchOrdering getSearchOrdering();
+
+        void setVisibleArchiveButton(boolean isVisible);
+
+    }
+
+    @ProxyCodeSplit
+    @NameToken(AuditToken.AUDIT)
+    interface MyProxy extends ProxyPlace<AuditClientPresenter> {
+    }
+
+    public static final Object TYPE_AUDIT_FILTER_PRESENTER = new Object();
+    protected final DispatchAsync dispatcher;
     private AuditArchiveDialogPresenter auditArchiveDialogPresenter;
+    private AuditFilterPresenter auditFilterPresenter;
+
+
+    @Inject
+    public AuditClientPresenter(EventBus eventBus, MyView view, MyProxy proxy, AuditArchiveDialogPresenter auditArchiveDialogPresenter, AuditFilterPresenter auditFilterPresenter, DispatchAsync dispatcher) {
+        super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
+        this.auditArchiveDialogPresenter = auditArchiveDialogPresenter;
+        this.auditFilterPresenter = auditFilterPresenter;
+        this.dispatcher = dispatcher;
+        getView().setUiHandlers(this);
+    }
 
     @ProxyEvent
     @Override
@@ -69,7 +104,7 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
 
     @Override
     public void onPrintButtonClicked() {
-        try{
+        try {
             PrintAuditDataAction dataAction = new PrintAuditDataAction();
             dataAction.setLogSystemFilter(new LogSystemAuditFilter(auditFilterPresenter.getLogSystemFilter()));
             dataAction.getLogSystemFilter().setStartIndex(0);
@@ -86,12 +121,11 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
                             "Не удалось напечатать журнал аудита", caught);
                 }
             }, this));
-        }catch (Exception e){
+        } catch (Exception e) {
             MessageEvent.fire(this,
                     "Не удалось напечатать журнал аудита", e);
         }
     }
-
 
     @Override
     public void onArchiveButtonClicked() {
@@ -128,38 +162,6 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
         getProxy().manualReveal(AuditClientPresenter.this);
     }
 
-    interface MyView extends View,HasUiHandlers<AuditClientUIHandler> {
-        void setAuditTableData(int startIndex, long count,  List<LogSearchResultItem> itemList);
-        void getBlobFromServer(String uuid);
-        void updateData();
-        void updateData(int pageNumber);
-        void updateArchiveDateLbl(String archiveDate);
-        boolean isAscSorting();
-        HistoryBusinessSearchOrdering getSearchOrdering();
-        void setVisibleArchiveButton(boolean isVisible);
-
-    }
-
-    @ProxyCodeSplit
-    @NameToken(AuditToken.AUDIT)
-    interface MyProxy extends ProxyPlace<AuditClientPresenter> {}
-
-    static final Object TYPE_auditFilterPresenter = new Object();
-
-    private AuditFilterPresenter auditFilterPresenter;
-
-    protected final DispatchAsync dispatcher;
-
-
-    @Inject
-    public AuditClientPresenter(EventBus eventBus, MyView view, MyProxy proxy, AuditArchiveDialogPresenter auditArchiveDialogPresenter, AuditFilterPresenter auditFilterPresenter, DispatchAsync dispatcher) {
-        super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
-        this.auditArchiveDialogPresenter = auditArchiveDialogPresenter;
-        this.auditFilterPresenter = auditFilterPresenter;
-        this.dispatcher = dispatcher;
-        getView().setUiHandlers(this);
-    }
-
     @Override
     protected void revealInParent() {
         RevealContentEvent.fire(this, RevealContentTypeHolder.getMainContent(),
@@ -192,12 +194,12 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
     @Override
     protected void onHide() {
         super.onHide();
-        clearSlot(TYPE_auditFilterPresenter);
+        clearSlot(TYPE_AUDIT_FILTER_PRESENTER);
     }
 
     @Override
     protected void onReveal() {
         super.onReveal();
-        setInSlot(TYPE_auditFilterPresenter, auditFilterPresenter);
+        setInSlot(TYPE_AUDIT_FILTER_PRESENTER, auditFilterPresenter);
     }
 }

@@ -6,22 +6,21 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallba
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.sortable.ViewWithSortableTable;
 import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.client.create.CreateBookerStatementsPresenter;
-import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.shared.*;
+import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.shared.GetBSOpenListAction;
+import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.shared.GetBSOpenListResult;
+import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.shared.GetBookerStatementsListAction;
+import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.shared.GetBookerStatementsListResult;
 import com.aplana.sbrf.taxaccounting.web.module.bookerstatementsdata.client.BookerStatementsDataTokens;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.History;
-import com.google.gwt.view.client.AbstractDataProvider;
-import com.google.gwt.view.client.AsyncDataProvider;
-import com.google.gwt.view.client.HasData;
-import com.google.gwt.view.client.Range;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.Presenter;
-import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
 import com.gwtplatform.mvp.client.proxy.*;
@@ -36,22 +35,7 @@ import java.util.*;
 public class BookerStatementsPresenter extends Presenter<BookerStatementsPresenter.MyView,
         BookerStatementsPresenter.MyProxy> implements BookerStatementsUiHandlers {
 
-    @ProxyCodeSplit
-    @NameToken(BookerStatementsTokens.bookerStatements)
-    public interface MyProxy extends ProxyPlace<BookerStatementsPresenter>, Place {
-    }
-
-    private final DispatchAsync dispatcher;
-
-    private final TableDataProvider dataProvider = new TableDataProvider();
-
-    private final CreateBookerStatementsPresenter dialogPresenter;
-
-    private BookerStatementsFilter filter;
-
-    private Map<Integer, String> lstHistory = new HashMap<Integer, String>();
-
-    public interface MyView extends View, HasUiHandlers<BookerStatementsUiHandlers> {
+    interface MyView extends HasUiHandlers<BookerStatementsUiHandlers>, ViewWithSortableTable {
 
         /**
          * Инициализация значений элементов фильтра.
@@ -81,6 +65,7 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
         void setBookerReportTypes(List<BookerStatementsType> bookerReportTypes);
 
         void setBookerReportType(BookerStatementsType bookerReportType);
+
         /**
          * Получает выбранные подразделения
          */
@@ -102,14 +87,20 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
 
         int getPageSize();
 
-        void assignDataProvider(int pageSize, AbstractDataProvider<BookerStatementsSearchResultItem> dataProvider);
-
         void updateTable();
 
         BookerStatementsSearchOrdering getSearchOrdering();
-
-        boolean isAscSorting();
     }
+
+    @ProxyCodeSplit
+    @NameToken(BookerStatementsTokens.bookerStatements)
+    interface MyProxy extends ProxyPlace<BookerStatementsPresenter>, Place {
+    }
+
+    private final DispatchAsync dispatcher;
+    private final CreateBookerStatementsPresenter dialogPresenter;
+    private BookerStatementsFilter filter;
+    private Map<Integer, String> lstHistory = new HashMap<Integer, String>();
 
     @Inject
     public BookerStatementsPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy,
@@ -118,7 +109,6 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
         this.dispatcher = dispatcher;
         this.dialogPresenter = dialogPresenter;
         getView().setUiHandlers(this);
-        getView().assignDataProvider(getView().getPageSize(), dataProvider);
         History.addValueChangeHandler(new ValueChangeHandler<String>() {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
@@ -184,42 +174,38 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
                         }, this).addCallback(new ManualRevealCallback<GetBSOpenListAction>(this)));
     }
 
-    private class TableDataProvider extends AsyncDataProvider<BookerStatementsSearchResultItem> {
-        @Override
-        protected void onRangeChanged(HasData<BookerStatementsSearchResultItem> display) {
-            final Range range = display.getVisibleRange();
-
-            if (filter == null) {
-                return;
-            }
-            filter.setDepartmentIds(getView().getDepartments());
-            filter.setAccountPeriodIds(getView().getAccountPeriods());
-            filter.setBookerStatementsType(getView().getType());
-            filter.setStartIndex(range.getStart());
-            filter.setCountOfRecords(range.getLength());
-            filter.setAscSorting(getView().isAscSorting());
-            filter.setSearchOrdering(getView().getSearchOrdering());
-
-            GetBookerStatementsListAction action = new GetBookerStatementsListAction();
-            action.setFilter(filter);
-            dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetBookerStatementsListResult>() {
-                @Override
-                public void onSuccess(GetBookerStatementsListResult result) {
-                    getView().setTableData(range.getStart(),
-                            result.getTotalCount(), result.getDataRows(), result.getDepartmentFullNames());
-                }
-            }, BookerStatementsPresenter.this));
-        }
-    }
-
     @Override
-    public void onSortingChanged(){
+    public void onSortingChanged() {
         getView().updateTable();
     }
-
 
     @Override
     public void onCreateClicked() {
         dialogPresenter.initAndShowDialog(this);
+    }
+
+    @Override
+    public void onRangeChange(final int start, int length) {
+
+        if (filter == null) {
+            return;
+        }
+        filter.setDepartmentIds(getView().getDepartments());
+        filter.setAccountPeriodIds(getView().getAccountPeriods());
+        filter.setBookerStatementsType(getView().getType());
+        filter.setStartIndex(start);
+        filter.setCountOfRecords(length);
+        filter.setAscSorting(getView().isAscSorting());
+        filter.setSearchOrdering(getView().getSearchOrdering());
+
+        GetBookerStatementsListAction action = new GetBookerStatementsListAction();
+        action.setFilter(filter);
+        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetBookerStatementsListResult>() {
+            @Override
+            public void onSuccess(GetBookerStatementsListResult result) {
+                getView().setTableData(start,
+                        result.getTotalCount(), result.getDataRows(), result.getDepartmentFullNames());
+            }
+        }, BookerStatementsPresenter.this));
     }
 }
