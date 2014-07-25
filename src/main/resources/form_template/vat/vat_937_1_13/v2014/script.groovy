@@ -65,6 +65,9 @@ def startDate = null
 def endDate = null
 
 @Field
+def calendarStartDate = null
+
+@Field
 def dateFormat = 'dd.MM.yyyy'
 
 @Field
@@ -211,7 +214,7 @@ def getReportPeriodStartDate() {
 }
 
 def getCalendarStartDate() {
-    if (!calendarStartDate) {
+    if (calendarStartDate == null) {
         calendarStartDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
     }
     return calendarStartDate
