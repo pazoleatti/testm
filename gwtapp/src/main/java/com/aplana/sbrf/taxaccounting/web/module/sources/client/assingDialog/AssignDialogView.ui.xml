@@ -20,6 +20,10 @@
             margin: 10px;
         }
 
+        .marginBottom2 {
+            margin-bottom: 2px;
+        }
+
     </ui:style>
 
 
@@ -31,10 +35,10 @@
                     <g:HorizontalPanel spacing="5" verticalAlignment="middle">
                         <g:Label text="с"/>
                         <g:ValueListBox ui:field="periodFrom" width="200px"/>
-                        <w:Spinner ui:field="yearFrom" minValue="1970" maxValue="2100" width="60px" height="19px"/>
+                        <w:Spinner ui:field="yearFrom" minValue="1970" maxValue="2100" width="60px" height="18px" addStyleNames="{style.marginBottom2}"/>
                         <g:Label text="по"/>
                         <g:ValueListBox ui:field="periodTo" width="200px"/>
-                        <w:Spinner ui:field="yearTo" minValue="1970" maxValue="2100" width="60px" height="19px"/>
+                        <w:Spinner ui:field="yearTo" minValue="1970" maxValue="2100" width="60px" height="18px" addStyleNames="{style.marginBottom2}"/>
                     </g:HorizontalPanel>
                 </g:VerticalPanel>
             </g:cell>
