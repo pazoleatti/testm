@@ -12,6 +12,7 @@ import java.util.Set;
 public class BookerStatementsFieldsResult implements Result {
     List<Department> departments;
     Set<Integer> departmentIds;
+    Integer year;
 
     public Set<Integer> getDepartmentIds() {
         return departmentIds;
@@ -27,5 +28,13 @@ public class BookerStatementsFieldsResult implements Result {
 
     public void setDepartments(List<Department> departments) {
         this.departments = departments;
+    }
+
+    public Integer getYear() {
+        return year;
+    }
+
+    public void setYear(Integer year) {
+        this.year = year;
     }
 }
