@@ -957,9 +957,9 @@ public final class ScriptUtils {
                 msg = String.format(EMPTY_VALUE, indexRow, getColumnName(row, alias), valueExpected);
             }
             if (required) {
-                logger.error("%s", msg);
+                rowError(logger, row, msg);
             } else {
-                logger.warn("%s", msg);
+                rowWarning(logger, row, msg);
             }
         }
     }

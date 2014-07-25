@@ -196,13 +196,13 @@ public class FormDataServiceImpl implements FormDataService {
                         pKeyFileInputStream = new BufferedInputStream(ResourceUtils.getSharedResourceAsStream(pKeyFileUrl));
                         IOUtils.copy(pKeyFileInputStream, pKeyFileOutputStream);
                     } catch (Exception e) {
-                        throw new ServiceException("Ошибка доступа к файлу базы открытых ключей.", e);
+                        throw new ServiceException("Ошибка доступа к файлу базы открытых ключей", e);
                     } finally {
                         IOUtils.closeQuietly(pKeyFileOutputStream);
                         IOUtils.closeQuietly(pKeyFileInputStream);
                     }
                     if (!signService.checkSign(dataFile.getAbsolutePath(), pKeyFile.getAbsolutePath(), 0)) {
-                        throw new ServiceException("Ошибка проверки цифровой подписи.");
+                        throw new ServiceException("Ошибка проверки цифровой подписи");
                     }
                 }
             }
@@ -217,10 +217,10 @@ public class FormDataServiceImpl implements FormDataService {
             IOUtils.closeQuietly(dataFileInputStream);
 
             if (logger.containsLevel(LogLevel.ERROR)) {
-                throw new ServiceLoggerException(
-                        "Есть критические ошибки при выполнения скрипта.", logEntryService.save(logger.getEntries()));
+                throw new ServiceLoggerException("Есть критические ошибки при выполнения скрипта",
+                        logEntryService.save(logger.getEntries()));
             } else {
-                logger.info("Данные загружены.");
+                logger.info("Данные загружены");
             }
 
             logBusinessService.add(formDataId, null, userInfo, formDataEvent, null);
@@ -545,6 +545,7 @@ public class FormDataServiceImpl implements FormDataService {
         // Временный срез формы должен быть в актуальном состоянии
         dataRowDao.rollback(formDataId);
 
+        formDataAccessService.checkDestinations(formDataId);
         List<WorkflowMove> availableMoves = formDataAccessService.getAvailableMoves(userInfo, formDataId);
         if (!availableMoves.contains(workflowMove)) {
             throw new ServiceException(

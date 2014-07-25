@@ -514,23 +514,32 @@ public class RefBookUtils extends AbstractDao {
                 }
 
                 if (a.getAttributeType().equals(RefBookAttributeType.NUMBER)) {
-                    BigDecimal number = (BigDecimal)(values.get(a.getAlias()).getNumberValue());
+                    Number number = values.get(a.getAlias()).getNumberValue();
                     if (number == null) {
                         continue;
                     }
-                    String valStr = number.toPlainString();
-                    if (valStr.contains(".")) {
-                        number = new BigDecimal(valStr.replaceAll("()(0+)(e|$)", "$1$3"));
+
+                    BigDecimal bigDecimal;
+                    if (number instanceof BigDecimal) {
+                        bigDecimal = (BigDecimal)(values.get(a.getAlias()).getNumberValue());
+                        String valStr = bigDecimal.toPlainString();
+                        if (valStr.contains(".")) {
+                            bigDecimal = new BigDecimal(valStr.replaceAll("()(0+)(e|$)", "$1$3"));
+                        }
+                    } else {
+                        bigDecimal = new BigDecimal(number.toString());
                     }
-                    int fractionalPart = number.scale();
-                    int integerPart = fractionalPart < 0 ? (number.precision() - fractionalPart) : number.precision() ;
+
+                    int fractionalPart = bigDecimal.scale();
+                    int integerPart = bigDecimal.precision();
+                    integerPart = fractionalPart < integerPart ? (integerPart - fractionalPart) : 0;
                     fractionalPart = fractionalPart < 0 ? 0 : fractionalPart;
 
                     Integer maxLength = a.getMaxLength();
                     Integer precision = a.getPrecision();
 
                     // пердпологается, что (maxLength - precision) <= 17
-                    if (fractionalPart > precision || (integerPart + fractionalPart) > maxLength) {
+                    if (fractionalPart > precision || integerPart > (maxLength - precision)) {
                         errors.add("Значение атрибута «" + a.getName() + "» не соответствует формату (" + maxLength + ", " + precision + ")");
                     }
                 }

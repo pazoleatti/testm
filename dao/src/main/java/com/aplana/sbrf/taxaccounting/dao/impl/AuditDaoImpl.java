@@ -25,11 +25,11 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 
 	@Override
 	public PagingResult<LogSearchResultItem> getLogs(LogSystemFilter filter) {
-        return getLogsBusiness(filter, null);
+        return getLogsBusiness(filter, null, null);
     }
 
     @Override
-    public PagingResult<LogSearchResultItem> getLogsBusiness(LogSystemFilter filter, List<Integer> departments) {
+    public PagingResult<LogSearchResultItem> getLogsBusiness(LogSystemFilter filter, List<Integer> departments, List<Integer> BADepartmentIds) {
         PreparedStatementData ps = new PreparedStatementData();
         ps.appendQuery("select ordDat.* from (select dat.*, rownum as rn from ( select ");
         ps.appendQuery("ls.id, ");
@@ -46,16 +46,20 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         ps.appendQuery("ls.form_kind_id, ");
         ps.appendQuery("fk.name form_kind_name, ");
         ps.appendQuery("ls.note, ");
-
+        if (filter.getSearchOrdering() == HistoryBusinessSearchOrdering.FORM_TYPE)
+            ps.appendQuery("case when ls.declaration_type_name is not null then ls.declaration_type_name else ls.form_type_name end as type_name, ");
         ps.appendQuery("ls.user_department_name ");
-        ps.appendQuery(" from log_system ls ");
+        ps.appendQuery("from log_system ls ");
 
         ps.appendQuery("left join event ev on ls.event_id=ev.\"ID\" ");
         ps.appendQuery("left join form_kind fk on ls.form_kind_id=fk.\"ID\" ");
 
         if (departments != null) {
-            ps.appendQuery(" WHERE (ls.form_type_name is not null OR ls.declaration_type_name is not null ) AND ");
+            ps.appendQuery(" WHERE (ls.form_type_name is not null OR ls.declaration_type_name is not null) AND (");
             ps.appendQuery(transformToSqlInStatement("form_department_id", departments));
+            ps.appendQuery(" OR (not form_department_id in (select id from department) AND ");
+            ps.appendQuery(transformToSqlInStatement("tb_department_id", BADepartmentIds));
+            ps.appendQuery("))");
             appendSelectWhereClause(ps, filter, " AND");
         } else {
             appendSelectWhereClause(ps, filter, " WHERE");
@@ -75,7 +79,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                 ps.getQuery().toString(),
                 ps.getParams().toArray(),
                 new AuditRowMapper());
-		return new PagingResult<LogSearchResultItem>(records, getCount(filter, departments));
+		return new PagingResult<LogSearchResultItem>(records, getCount(filter, departments, BADepartmentIds));
 	}
 
 	@Override
@@ -90,8 +94,8 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 
             jt.update(
                     "insert into log_system (id, log_date, ip, event_id, user_login, roles, department_name, report_period_name, " +
-                            "declaration_type_name, form_type_name, form_kind_id, note, user_department_name, form_department_id)" +
-                            " values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                            "declaration_type_name, form_type_name, form_kind_id, note, user_department_name, form_department_id, tb_department_id)" +
+                            " values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     id,
                     logSystem.getLogDate(),
                     logSystem.getIp(),
@@ -105,7 +109,8 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                     logSystem.getFormKindId(),
                     logSystem.getNote(),
                     logSystem.getUserDepartmentName(),
-                    logSystem.getFormDepartmentId()
+                    logSystem.getFormDepartmentId(),
+                    logSystem.getDepartmentTBId()
             );
         } catch (DataAccessException e){
             logger.error("Ошибки при логировании.", e);
@@ -278,7 +283,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                 column = "ls.log_date";
                 break;
             case EVENT:
-                column = "em.event_title";
+                column = "ev.name";
                 break;
             case NOTE:
                 column = "ls.note";
@@ -296,10 +301,10 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                 column = "ls.form_kind_id";
                 break;
             case FORM_TYPE:
-                column = "ft.form_type_name";
+                column = "type_name";
                 break;
             case USER:
-                column = "su.name";
+                column = "ls.user_login";
                 break;
             case USER_ROLE:
                 column = "ls.roles";
@@ -327,15 +332,18 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
     }
 
 
-    private int getCount(LogSystemFilter filter, List<Integer> departments) {
+    private int getCount(LogSystemFilter filter, List<Integer> departments, List<Integer> BADepartmentIds) {
         PreparedStatementData ps = new PreparedStatementData();
         ps.appendQuery("select count(*) from log_system ls ");
         ps.appendQuery("left join event ev on ls.event_id=ev.\"ID\" ");
         /*ps.appendQuery("left join sec_user su on ls.user_id=su.\"ID\" ");*/
         ps.appendQuery("left join form_kind fk on ls.form_kind_id=fk.\"ID\" ");
         if (departments != null) {
-            ps.appendQuery(" WHERE (ls.form_type_name is not null OR ls.declaration_type_name is not null ) AND ");
+            ps.appendQuery(" WHERE (ls.form_type_name is not null OR ls.declaration_type_name is not null ) AND (");
             ps.appendQuery(transformToSqlInStatement("form_department_id", departments));
+            ps.appendQuery(" OR (not form_department_id in (select id from department) AND ");
+            ps.appendQuery(transformToSqlInStatement("tb_department_id", BADepartmentIds));
+            ps.appendQuery("))");
             appendSelectWhereClause(ps, filter, " AND");
         } else {
             appendSelectWhereClause(ps, filter, " WHERE");

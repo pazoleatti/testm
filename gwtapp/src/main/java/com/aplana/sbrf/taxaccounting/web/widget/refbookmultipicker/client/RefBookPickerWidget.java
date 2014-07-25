@@ -72,7 +72,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     @UiField
     HorizontalPanel versionPanel;
     @UiField
-    LinkButton pickAll;
+    CheckBox pickAll;
 
     @UiField
     FlowPanel modalBodyWrapper;
@@ -107,7 +107,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
 
         widgetWrapper.add(refBookView);
 
-        pickAll.setVisible(multiSelect);
+        pickAll.setVisible(multiSelect && isHierarchical);
 
         versionDateBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
             @Override
@@ -121,9 +121,6 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
             @Override
             public void onValueChange(ValueChangeEvent<Set<Long>> event) {
                 selectionCountLabel.setText("Выделено: " + event.getValue().size());
-                if (getMultiSelect()) {
-                    pickAll.setText(refBookView.getSelectedIds().size() == refBookView.getLoadedItemsCount() ? WidgetUtils.UNPICK_ALL: WidgetUtils.PICK_ALL);
-                }
                 if (isEnabledFireChangeEvent) {
                     isEnabledFireChangeEvent = false;
                     clearAndSetValues(event.getValue());
@@ -240,6 +237,13 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
             state.getSetIds().clear();
         }
         //clearSearchPattern();
+        if (isHierarchical() && getMultiSelect()) {
+            // для иерархического мультивыбора галочка "Выбрать все" находится на окне выбора
+            pickAll.setValue(false);
+        } else {
+            // для НЕиерархического мультивыбора галочка "Выбрать все" находится в шапке таблицы
+            refBookView.unselectAll(null);
+        }
         updateUIState();
         prevState.setValues(state);
 
@@ -270,17 +274,13 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     }
 
     @UiHandler("pickAll")
-    void onPickAllButtonClicked(ClickEvent event) {
-        pickAll.setDisableImage(false);
-
+    void onPickAllValueChange(ValueChangeEvent<Boolean> event) {
         modalBodyWrapper.getElement().appendChild(glass);
 
-        if(pickAll.getText().equals(WidgetUtils.UNPICK_ALL)){
+        if (!event.getValue()) {
             refBookView.unselectAll(new DeferredInvokeHandler() {
                 @Override
                 public void onInvoke() {
-                    pickAll.setDisableImage(true);
-                    pickAll.setText(WidgetUtils.PICK_ALL);
                     modalBodyWrapper.getElement().removeChild(glass);
                 }
             });
@@ -288,8 +288,6 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
             refBookView.selectAll(new DeferredInvokeHandler() {
                 @Override
                 public void onInvoke() {
-                    pickAll.setDisableImage(true);
-                    pickAll.setText(WidgetUtils.UNPICK_ALL);
                     modalBodyWrapper.getElement().removeChild(glass);
                 }
             });

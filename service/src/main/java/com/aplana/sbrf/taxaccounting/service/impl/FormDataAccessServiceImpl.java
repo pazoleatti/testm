@@ -721,10 +721,11 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
     @Transactional(readOnly = true)
     public void checkDestinations(long formDataId) {
         FormData formData = formDataDao.getWithoutRows(formDataId);
+        ReportPeriod reportPeriod = periodService.getReportPeriod(formData.getReportPeriodId());
         // Проверка вышестоящих налоговых форм
         List<DepartmentFormType> departmentFormTypes =
                 departmentFormTypeDao.getFormDestinations(formData.getDepartmentId(),
-                        formData.getFormType().getId(), formData.getKind());
+                        formData.getFormType().getId(), formData.getKind(), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
         if (departmentFormTypes != null) {
             for (DepartmentFormType departmentFormType : departmentFormTypes) {
                 FormData form = formDataService.findFormData(departmentFormType.getFormTypeId(), departmentFormType.getKind(),

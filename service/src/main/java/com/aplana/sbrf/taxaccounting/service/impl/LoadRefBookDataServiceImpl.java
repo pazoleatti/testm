@@ -346,12 +346,13 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                 continue;
             }
             FileWrapper candidateFile = ResourceUtils.getSharedResource(folderPath + candidateStr);
-            // Файл, это файл, а не директория и соответствует формату имени ТФ
+            // Это файл, а не директория и соответствует формату имени ТФ
             if (candidateFile.isFile() && mappingMatch(candidateFile.getName(), mappingSet) != null) {
                 retVal.add(candidateStr);
             }
         }
-        // TODO Система сортирует файлы по возрастанию по значению блоков VVV.RR в имени файла.
+        // Система сортирует файлы по возрастанию по значению блоков VVV.RR в имени файла.
+        Collections.sort(retVal);
         return retVal;
     }
 }

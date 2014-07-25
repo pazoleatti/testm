@@ -5,7 +5,6 @@ import com.aplana.gwt.client.ModalWindow;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
-import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.TextUtils;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.WidgetUtils;
 import com.google.gwt.core.client.GWT;
@@ -67,7 +66,7 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
     Label countItems;
 
     @UiField
-    LinkButton pickAll;
+    CheckBox pickAll;
 
     @UiField
     CheckBox showDisabled;
@@ -99,7 +98,6 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
                 int size = tree.getValue().size();
                 ok.setEnabled(size > 0);
                 if (isMultiSelect()) {
-                    updateSelectAllLabel();
                     countItems.setText(String.valueOf(size));
                 }
             }
@@ -126,7 +124,6 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
                 tree.setShowDisabledDepartment(event.getValue());
-                updateSelectAllLabel();
             }
         });
     }
@@ -139,16 +136,12 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
     private void open(){
         tree.setValueById(value, false);
         countItems.setText(String.valueOf(tree.getValue().size()));
-        updateSelectAllLabel();
         popupPanel.center();
-    }
-
-    private void updateSelectAllLabel(){
-        pickAll.setText(tree.getValue().size() == tree.getItemsWithFilter().size() ? WidgetUtils.UNPICK_ALL: WidgetUtils.PICK_ALL);
     }
 
     @UiHandler("clearButton")
     void onClearButtonClicked(ClickEvent event) {
+        pickAll.setValue(false);
         valueDereference.clear();
         this.setValue(null, true);
     }
@@ -188,12 +181,10 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
     }
 
     @UiHandler("pickAll")
-    void onPickAllClick(ClickEvent clickEvent) {
-        if(tree.getValue().size() == tree.getItemsWithFilter().size()){
-            pickAll.setText(WidgetUtils.PICK_ALL);
+    void onPickAllValueChange(ValueChangeEvent<Boolean> event) {
+        if(!event.getValue()){
             tree.unselectAll();
         } else {
-            pickAll.setText(WidgetUtils.UNPICK_ALL);
             tree.selectAll();
         }
     }
@@ -206,7 +197,6 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
         } else {
             tree.filter(filter.getText().trim(), items);
             tree.setShowDisabledDepartment(showDisabled.getValue());
-            updateSelectAllLabel();
         }
     }
 

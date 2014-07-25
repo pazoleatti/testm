@@ -887,7 +887,7 @@ public class SourceServiceImpl implements SourceService {
 
     @Override
     public List<DepartmentFormType> getDFTByDepartment(int departmentId, TaxType taxType, Date periodStart, Date periodEnd) {
-        return departmentFormTypeDao.getByTaxType(departmentId, taxType);
+        return departmentFormTypeDao.getByTaxType(departmentId, taxType, periodStart, periodEnd);
     }
 
     @Override

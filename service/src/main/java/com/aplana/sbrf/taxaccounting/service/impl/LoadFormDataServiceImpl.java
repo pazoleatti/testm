@@ -98,7 +98,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             String formCode = transportDataParam.getFormCode();
             String reportPeriodCode = transportDataParam.getReportPeriodCode();
             Integer year = transportDataParam.getYear();
-            Integer departmentCode = transportDataParam.getDepartmentCode();
+            String departmentCode = transportDataParam.getDepartmentCode();
 
             // Не задан код подразделения или код формы
             if (departmentCode == null || formCode == null || reportPeriodCode == null || year == null) {
@@ -110,7 +110,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             }
 
             // Указан несуществующий код подразделения
-            Department formDepartment = departmentService.getDepartmentByCode(departmentCode);
+            Department formDepartment = departmentService.getDepartmentBySbrfCode(departmentCode);
             if (formDepartment == null) {
                 log(userInfo, LogData.L5, logger, fileName);
                 moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
@@ -172,7 +172,18 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             // Признак ежемесячной формы по файлу
             boolean monthly = transportDataParam.getMonth() != null;
 
-            Integer formTemplateId = formTemplateService.getActiveFormTemplateId(formType.getId(), reportPeriod.getId());
+            // Актуальный шаблон НФ, введенный в действие
+            Integer formTemplateId;
+            try {
+                formTemplateId = formTemplateService.getActiveFormTemplateId(formType.getId(), reportPeriod.getId());
+            } catch (Exception e) {
+                // Если шаблона нет, то не загружаем ТФ
+                log(userInfo, LogData.L21, logger, e.getMessage());
+                moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
+                        Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L21.getText(), e.getMessage()))), logger);
+                fail++;
+                continue;
+            }
 
             FormTemplate formTemplate = null;
             if (formTemplateId != null) {
@@ -217,7 +228,6 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 // Вывод скрипта в область уведомлений
                 logger.getEntries().addAll(localLogger.getEntries());
                 // Вывод в область уведомленеий и ЖА
-                e.printStackTrace();
                 log(userInfo, LogData.L21, logger, e.getMessage());
                 // Перемещение в каталог ошибок
                 moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile, localLogger.getEntries(), logger);

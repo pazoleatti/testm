@@ -216,20 +216,27 @@ def getIncome102Data(def date) {
 // Проверка наличия необходимых записей в справочнике «Отчет о прибылях и убытках»
 void checkIncome102() {
     // формирование названия периода
-    def period = getBookerStatementPeriod(getReportPeriodEndDate())
-    def prevPeriod = ""
-    if (getRepordPeriod().order > 1) {
-        prevPeriod = getBookerStatementPeriod(getPrevReportPeriodEndDate())
-        period = prevPeriod + " и " + period
-    }
+    def periodName = null
+    def period = null
+    def prevPeriod = null
+
     // Наличие экземпляра Отчета о прибылях и убытках подразделения и периода, для которых сформирована текущая форма
     if (getIncome102Data(getReportPeriodEndDate()) == []) {
-        throw new ServiceException("Экземпляр Отчета о прибылях и убытках за $period " +
-                "не существует (отсутствуют данные для расчета)! Расчеты не могут быть выполнены.")
+        period = getBookerStatementPeriod(getReportPeriodEndDate())
     }
     // Наличие экземпляра Отчета о прибылях и убытках подразделения и предыдущего периода
     if (getRepordPeriod().order > 1 && getIncome102Data(getPrevReportPeriodEndDate()) == []) {
-        throw new ServiceException("Экземпляр Отчета о прибылях и убытках за $prevPeriod " +
+        prevPeriod = getBookerStatementPeriod(getPrevReportPeriodEndDate())
+    }
+
+    if (prevPeriod && period) {
+        periodName = prevPeriod + " и " + period
+    } else if (prevPeriod || period) {
+        periodName = (prevPeriod ?: period)
+    }
+
+    if (periodName) {
+        throw new ServiceException("Экземпляр Отчета о прибылях и убытках за $periodName " +
                 "не существует (отсутствуют данные для расчета)! Расчеты не могут быть выполнены.")
     }
 }

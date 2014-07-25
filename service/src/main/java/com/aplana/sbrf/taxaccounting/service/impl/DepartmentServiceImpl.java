@@ -156,15 +156,11 @@ public class DepartmentServiceImpl implements DepartmentService {
     public List<Department> getTBDepartments(TAUser tAUser) {
         List<Department> retList = new ArrayList<Department>();
 
-        if (tAUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+        if (tAUser.hasRole(TARole.ROLE_ADMIN)
+         || tAUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
             // подразделение с типом 1
             retList.addAll(departmentDao.getDepartmentsByType(DepartmentType.ROOT_BANK.getCode()));
             // подразделение с типом 2
-            retList.addAll(departmentDao.getDepartmentsByType(DepartmentType.TERR_BANK.getCode()));
-        } else if (tAUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
-            // подразделение с типом 1
-            retList.addAll(departmentDao.getDepartmentsByType(DepartmentType.ROOT_BANK.getCode()));
-            // подразделения с типом 2
             retList.addAll(departmentDao.getDepartmentsByType(DepartmentType.TERR_BANK.getCode()));
         } else if (tAUser.hasRole(TARole.ROLE_CONTROL_NS)
                 || tAUser.hasRole(TARole.ROLE_CONTROL)
