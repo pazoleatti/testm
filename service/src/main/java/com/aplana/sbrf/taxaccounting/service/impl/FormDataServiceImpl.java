@@ -545,6 +545,7 @@ public class FormDataServiceImpl implements FormDataService {
         // Временный срез формы должен быть в актуальном состоянии
         dataRowDao.rollback(formDataId);
 
+        formDataAccessService.checkDestinations(formDataId);
         List<WorkflowMove> availableMoves = formDataAccessService.getAvailableMoves(userInfo, formDataId);
         if (!availableMoves.contains(workflowMove)) {
             throw new ServiceException(
