@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.scheduler.api.task;
 
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.scheduler.api.form.FormElement;
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskParam;
 import com.aplana.sbrf.taxaccounting.scheduler.api.exception.TaskExecutionException;
@@ -35,5 +36,5 @@ public interface UserTask {
      * Возвращает список параметров необходимых для задачи
      * @return
      */
-    List<FormElement> getParams();
+    List<FormElement> getParams(TAUserInfo userInfo);
 }

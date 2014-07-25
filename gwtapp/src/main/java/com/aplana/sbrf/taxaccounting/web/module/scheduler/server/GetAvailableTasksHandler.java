@@ -1,9 +1,11 @@
 package com.aplana.sbrf.taxaccounting.web.module.scheduler.server;
 
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskJndiInfo;
 import com.aplana.sbrf.taxaccounting.scheduler.api.exception.TaskSchedulingException;
 import com.aplana.sbrf.taxaccounting.scheduler.api.form.FormElement;
 import com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManager;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.GetAvailableTasksAction;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.GetAvailableTasksResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -27,6 +29,9 @@ public class GetAvailableTasksHandler extends AbstractActionHandler<GetAvailable
     @Autowired
     TaskManager taskManager;
 
+    @Autowired
+    SecurityService securityService;
+
     public GetAvailableTasksHandler() {
         super(GetAvailableTasksAction.class);
     }
@@ -35,7 +40,8 @@ public class GetAvailableTasksHandler extends AbstractActionHandler<GetAvailable
     public GetAvailableTasksResult execute(GetAvailableTasksAction getAvailableTasksAction, ExecutionContext executionContext) throws ActionException {
         GetAvailableTasksResult result = new GetAvailableTasksResult();
         try {
-            List<TaskJndiInfo> taskInfo = taskManager.getTasksJndi();
+            TAUserInfo userInfo = securityService.currentUserInfo();
+            List<TaskJndiInfo> taskInfo = taskManager.getTasksJndi(userInfo);
             result.setJndiList(taskInfo);
             return result;
         } catch (TaskSchedulingException e) {

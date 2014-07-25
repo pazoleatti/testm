@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.scheduler.core.manager;
 
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.*;
 import com.aplana.sbrf.taxaccounting.scheduler.api.form.*;
 import com.aplana.sbrf.taxaccounting.scheduler.api.exception.TaskSchedulingException;
@@ -156,7 +157,7 @@ public class TaskManagerMock implements TaskManager {
     }
 
     @Override
-    public List<TaskJndiInfo> getTasksJndi() throws TaskSchedulingException {
+    public List<TaskJndiInfo> getTasksJndi(TAUserInfo userInfo) throws TaskSchedulingException {
         List<TaskJndiInfo> taskInfo = new ArrayList<TaskJndiInfo>();
         List<FormElement> params = new ArrayList<FormElement>();
         FormElement element1 = new TextBox();
