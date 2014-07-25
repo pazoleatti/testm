@@ -89,12 +89,16 @@ INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (97, 'Типы 
 INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (98, 'Параметры подразделения по НДС', 0, 0, 0);
 INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (99, 'Параметры подразделения по налогу на имущество', 0, 0, 0);
 INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (100, 'Эмитенты', 0, 1, 0);
-INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (105, 'Конфигурационные параметры', 0, 0, 1);
+
 
 INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (101, 'План счетов бухгалтерского учета', 0, 1, 0);
 INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (102, 'Классификатор соответствия кодов операций налоговой формы 724.2.1 по НДС символам ОПУ', 0, 1, 0);
 INSERT INTO REF_BOOK (ID, NAME, READ_ONLY) VALUES (103, 'Тип подразделения', 1);
 INSERT INTO ref_book (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (104, 'Список полей для Журнала аудита', 1, 0, 1);
+
+INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (105, 'Конфигурационные параметры', 0, 0, 1);
+INSERT INTO REF_BOOK (ID, NAME, VISIBLE, TYPE, READ_ONLY) VALUES (106, 'Коды, определяющие период бухгалтерской отчетности', 1, 0, 1);
+INSERT INTO REF_BOOK (ID, NAME, VISIBLE, TYPE, READ_ONLY) VALUES (107, 'Периоды и подразделения БО', 0, 0, 1);
 
 INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH, REQUIRED, IS_UNIQUE) VALUES (0, 0, 'Тестовое наименование', 'NAME', 1, 1, null, null, 1, null, 10, 0, 0);
 
@@ -520,6 +524,13 @@ INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, WIDTH) 
 INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, VISIBLE, WIDTH) VALUES (1040, 105, 'Код', 'CODE', 1, 0, 0, 20);
 INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, VISIBLE, WIDTH) VALUES (1041, 105, 'Наименование', 'NAME', 1, 1, 1, 40);
 
+INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, VISIBLE, WIDTH, REQUIRED, IS_UNIQUE, MAX_LENGTH) VALUES (1061, 106, 'Код', 'CODE', 1, 1, 1, 10, 1, 1, 2);
+INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, VISIBLE, WIDTH, REQUIRED, IS_UNIQUE, MAX_LENGTH) VALUES (1062, 106, 'Наименование', 'NAME', 1, 2, 1, 50, 1, 0, 255);
+
+INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, VISIBLE, PRECISION, WIDTH, REQUIRED, IS_UNIQUE, READ_ONLY, MAX_LENGTH, SORT_ORDER) VALUES (1071, 107, 'Год', 'YEAR', 2, 1, 1, 0, 10, 1, 0, 0, 4, -1);
+INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, VISIBLE, PRECISION, WIDTH, REQUIRED, IS_UNIQUE, READ_ONLY, MAX_LENGTH, REFERENCE_ID, ATTRIBUTE_ID) VALUES (1072, 107, 'Код периода бухгалтерской отчетности', 'ACCOUNT_PERIOD_ID', 4, 2, 1, null, 20, 1, 0, 0, null, 106, 1062);
+INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, VISIBLE, PRECISION, WIDTH, REQUIRED, IS_UNIQUE, READ_ONLY, MAX_LENGTH, REFERENCE_ID, ATTRIBUTE_ID) VALUES (1073, 107, 'Код подразделения', 'DEPARTMENT_ID', 4, 3, 1, null, 20, 1, 0, 0, null, 30, 161);
+
 -- Max_length
 UPDATE REF_BOOK_ATTRIBUTE SET MAX_LENGTH=1 WHERE ID = 643;
 UPDATE REF_BOOK_ATTRIBUTE SET MAX_LENGTH=255 WHERE ID = 644;
@@ -791,16 +802,3 @@ UPDATE REF_BOOK_ATTRIBUTE SET MAX_LENGTH=9 WHERE ID = 184;
 UPDATE REF_BOOK_ATTRIBUTE SET MAX_LENGTH=4 WHERE ID = 185;
 UPDATE REF_BOOK_ATTRIBUTE SET MAX_LENGTH=10 WHERE ID = 189;
 UPDATE REF_BOOK_ATTRIBUTE SET MAX_LENGTH=9 WHERE ID = 190;
--------------
-
-insert into ref_book (id, name, visible, type, read_only) values (106, 'Коды, определяющие период бухгалтерской отчетности', 1, 0, 1);
-
-insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, visible, width, required, is_unique, max_length) values (1061, 106, 'Код', 'CODE', 1, 1, 1, 10, 1, 1, 2);
-insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, visible, width, required, is_unique, max_length) values (1062, 106, 'Наименование', 'NAME', 1, 2, 1, 50, 1, 0, 255);
-
-insert into ref_book (id, name, visible, type, read_only) values (107, 'Периоды и подразделения БО', 0, 0, 1);
-
-insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, visible, precision, width, required, is_unique, read_only, max_length, sort_order) values (1071, 107, 'Год', 'YEAR', 2, 1, 1, 0, 10, 1, 0, 0, 4, -1);
-insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, visible, precision, width, required, is_unique, read_only, max_length, reference_id, attribute_id) values (1072, 107, 'Код периода бухгалтерской отчетности', 'ACCOUNT_PERIOD_ID', 4, 2, 1, null, 20, 1, 0, 0, null, 106, 1062);
-insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, visible, precision, width, required, is_unique, read_only, max_length, reference_id, attribute_id) values (1073, 107, 'Код подразделения', 'DEPARTMENT_ID', 4, 3, 1, null, 20, 1, 0, 0, null, 30, 161);
-
