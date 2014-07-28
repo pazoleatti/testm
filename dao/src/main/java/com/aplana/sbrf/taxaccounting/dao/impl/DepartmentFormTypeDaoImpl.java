@@ -556,15 +556,15 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
             "  select 1 from form_type ft \n" +
             "  left join form_template ftemp on ftemp.type_id = ft.id \n" +
             "  where ft.id = dft.form_type_id and (:taxType is null or ft.tax_type = :taxType) \n" +
-            "  and (:periodStart is null or (ftemp.version >= :periodStart and (:periodEnd is null or ftemp.version <= :periodEnd)))\n" +
+            //"  and (:periodStart is null or (ftemp.version >= :periodStart and (:periodEnd is null or ftemp.version <= :periodEnd)))\n" +
             ")";
 
     @Override
     public List<DepartmentFormType> getByTaxType(int departmentId, TaxType taxType, Date periodStart, Date periodEnd) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("departmentId", departmentId);
-        params.put("periodStart", periodStart);
-        params.put("periodEnd", periodEnd);
+        //params.put("periodStart", periodStart);
+        //params.put("periodEnd", periodEnd);
         params.put("taxType", taxType != null ? String.valueOf(taxType.getCode()) : null);
         return getNamedParameterJdbcTemplate().query(GET_SQL_BY_TAX_TYPE_SQL, params, DFT_MAPPER);
     }
