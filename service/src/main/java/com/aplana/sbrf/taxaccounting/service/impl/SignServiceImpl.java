@@ -34,23 +34,20 @@ public class SignServiceImpl implements SignService {
         long init;
         long pkBase;
         StringBuffer userIdBuf = new StringBuffer("1");
+        System.out.println(System.getProperty("java.library.path"));
         //-------------- грузим DLL --------------------------------
         //try-catch на случай если библиотека подгружена другим ClassLoader-ом
-        try {
-            if (System.getProperty("os.arch", "?").equals("amd64"))
-            {   //64 бит
-                System.loadLibrary("grn64");
-                System.loadLibrary("bicr4_64");
-                System.loadLibrary("bicr_adm64");
-            }
-            else //32 бит
-            {
-                System.loadLibrary("grn");
-                System.loadLibrary("bicr4");
-                System.loadLibrary("bicr_adm");
-            }
-        } catch (UnsatisfiedLinkError linkError){
-            logger.info("Библиотека уже загружена." + linkError);
+        if (System.getProperty("os.arch", "?").equals("amd64"))
+        {   //64 бит
+            System.loadLibrary("grn64");
+            System.loadLibrary("bicr4_64");
+            System.loadLibrary("bicr_adm64");
+        }
+        else //32 бит
+        {
+            System.loadLibrary("grn");
+            System.loadLibrary("bicr4");
+            System.loadLibrary("bicr_adm");
         }
 
         //-------------- инициализация --------------------------------
