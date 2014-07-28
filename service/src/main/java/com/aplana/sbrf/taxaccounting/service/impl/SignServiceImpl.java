@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.SignService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -21,8 +22,28 @@ public class SignServiceImpl implements SignService {
     private static final int COM_LEN = 0;
     private static final byte TM_NUMBER[] = new byte[32];
     private static final int TMN_BLEN[] = new int[1];
-    {
+
+    static {
         TMN_BLEN[0] = 32;
+        //-------------- грузим DLL --------------------------------
+        //Возможен вариант ошибки, когда библиотека подгружена другим ClassLoader-ом
+        try {
+            if (System.getProperty("os.arch", "?").equals("amd64"))
+            {   //64 бит
+                System.loadLibrary("grn64");
+                System.loadLibrary("bicr4_64");
+                System.loadLibrary("bicr_adm64");
+            }
+            else //32 бит
+            {
+                System.loadLibrary("grn");
+                System.loadLibrary("bicr4");
+                System.loadLibrary("bicr_adm");
+            }
+        } catch (UnsatisfiedLinkError linkError){
+            if (!linkError.getMessage().contains("Library is already loaded"))
+                throw new ServiceException("Ошибка при загрузке библиотек подписи", linkError);
+        }
     }
 
     @Override
@@ -34,21 +55,6 @@ public class SignServiceImpl implements SignService {
         long init;
         long pkBase;
         StringBuffer userIdBuf = new StringBuffer("1");
-        System.out.println(System.getProperty("java.library.path"));
-        //-------------- грузим DLL --------------------------------
-        //try-catch на случай если библиотека подгружена другим ClassLoader-ом
-        if (System.getProperty("os.arch", "?").equals("amd64"))
-        {   //64 бит
-            System.loadLibrary("grn64");
-            System.loadLibrary("bicr4_64");
-            System.loadLibrary("bicr_adm64");
-        }
-        else //32 бит
-        {
-            System.loadLibrary("grn");
-            System.loadLibrary("bicr4");
-            System.loadLibrary("bicr_adm");
-        }
 
         //-------------- инициализация --------------------------------
         Bicr4.cr_init(FLAG_TM, FILE_GK, FILE_UZ, "", TM_NUMBER, TMN_BLEN, intParam, param);
