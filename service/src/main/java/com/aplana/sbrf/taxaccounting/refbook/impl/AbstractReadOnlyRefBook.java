@@ -56,6 +56,11 @@ public abstract class AbstractReadOnlyRefBook implements RefBookDataProvider {
 	}
 
     @Override
+    public List<Pair<Long, Long>> getRecordIdPairs(Long refBookId, Date version, Boolean needAccurateVersion, String filter) {
+        return refBookDao.getRecordIdPairs(refBookId, version, needAccurateVersion, filter);
+    }
+
+    @Override
     public PagingResult<Map<String, RefBookValue>> getRecordVersions(final Long recordId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
         return new PagingResult(new ArrayList<Map<String, RefBookValue>>(){{add(getRecordData(recordId));}}, 1);
     }
