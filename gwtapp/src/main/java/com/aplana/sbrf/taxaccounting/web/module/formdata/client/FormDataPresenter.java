@@ -416,6 +416,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                             @Override
                                             public void onSuccess(
                                                     DeleteFormDataResult result) {
+                                                setReadUnlockedMode();
                                                 revealFormData(true, false, null);
                                             }
 
