@@ -417,10 +417,10 @@ comment on column declaration_data.id is 'Идентификатор (перви
 comment on column declaration_data.declaration_template_id is 'Ссылка на шаблон декларации';
 comment on column declaration_data.report_period_id is 'Отчётный период';
 comment on column declaration_data.department_id is 'Подразделение';
-comment on column declaration_data.data is 'Данные декларации в формате законодателя (XML) ';
+comment on column declaration_data.data is 'Данные декларации в формате законодателя (XML)';
 comment on column declaration_data.is_accepted is 'Признак того, что декларация принята';
-comment on column declaration_data.data_pdf is 'pdf';
-comment on column declaration_data.data_xlsx is 'xlsx';
+comment on column declaration_data.data_pdf is 'Данные декларации в формате PDF';
+comment on column declaration_data.data_xlsx is 'Данные декларации в формате XLSX';
 comment on column declaration_data.jasper_print is 'Сформированный отчет во внутреннем формате Jasper Reports';
 
 create sequence seq_declaration_data start with 10000;
@@ -733,6 +733,7 @@ custom_params_exist number(9,0) not null,
 serialized_params blob null
 );
 comment on table task_context is 'Контекст пользовательских задач планировщика';
+comment on column task_context.id is 'Уникальный идентификатор записи';
 comment on column task_context.task_id is 'Идентификатор задачи планировщика websphere';
 comment on column task_context.task_name is 'Название задачи';
 comment on column task_context.user_task_jndi is 'JNDI-имя класса-обработчика задачи';
@@ -753,6 +754,7 @@ deadline date not null
 );
 
 comment on table notification is 'Оповещения';
+comment on column notification.id is 'Уникальный идентификатор оповещения';
 comment on column notification.report_period_id is 'идентификатор отчетного периода'; 
 comment on column notification.sender_department_id is 'идентификатор подразделения-отправителя'; 
 comment on column notification.receiver_department_id is 'идентификатор подразделения-получателя'; 
@@ -775,6 +777,7 @@ create table template_changes (
 );
 
 comment on table template_changes is 'Изменение версий налоговых шаблонов';
+comment on column template_changes.id is 'Уникальный идентификатор записи';
 comment on column template_changes.form_template_id is 'Идентификатор налогового шаблона';
 comment on column template_changes.declaration_template_id is 'Идентификатор шаблона декларации';
 comment on column template_changes.event is 'Событие версии';

@@ -7,8 +7,6 @@ public class Income102 {
 
 	// Код записи
 	private Long id;
-	// Идентификатор отчетного периода
-	private Integer reportPeriodId;
 	// Код ОПУ
 	private String opuCode;
 	// Сумма
@@ -22,14 +20,6 @@ public class Income102 {
 
 	public void setId(Long id) {
 		this.id = id;
-	}
-
-	public Integer getReportPeriodId() {
-		return reportPeriodId;
-	}
-
-	public void setReportPeriodId(Integer reportPeriodId) {
-		this.reportPeriodId = reportPeriodId;
 	}
 
 	public String getOpuCode() {

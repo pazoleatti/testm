@@ -31,9 +31,9 @@ public class BookerStatementsServiceImplTest {
     private static final Integer TYPE_INVALID = 2;
     private static final Integer REPORT_PERIOD_ID_OPEN = 1;
     private static final Integer REPORT_PERIOD_ID_CLOSED = 2;
-    private static final Integer REPORT_PERIOD_ID_INVALID = 3;
+    private static final Integer REPORT_PERIOD_ID_INVALID = null;
     private static final Integer DEPARTMENT_ID = 1;
-    private static final Integer DEPARTMENT_INVALID = 2;
+    private static final Integer DEPARTMENT_INVALID = null;
 
     private static BookerStatementsService service;
 
@@ -88,11 +88,6 @@ public class BookerStatementsServiceImplTest {
     @Test(expected = ServiceException.class)
     public void invalidPeriod() {
         service.importXML("test.xls", get101Stream(), REPORT_PERIOD_ID_INVALID, TYPE_INCOME_101, DEPARTMENT_ID, new TAUserInfo());
-    }
-
-    @Test(expected = ServiceException.class)
-    public void closedPeriod() {
-        service.importXML("test.xls", get101Stream(), REPORT_PERIOD_ID_CLOSED, TYPE_INCOME_101, DEPARTMENT_ID, new TAUserInfo());
     }
 
     @Test(expected = ServiceException.class)

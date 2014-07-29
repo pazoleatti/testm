@@ -20,11 +20,12 @@ public interface BookerStatementsService {
      *
      * @param realFileName Имя файла что импортируем (валидируем расширение должно быть xml)
      * @param stream       Steam на загруженный фаил
-     * @param periodID     id периода
-     * @param typeID       0 - Оборотная ведомость по счетам бухгалтерского учёта кредитной организации (Ф-101);
-     * @param departmentId Подразделение    @throws IOException, ServiceException
+     * @param accountPeriodId     идентификатор периода и подразделения БО
+     * @param typeId       0 - Оборотная ведомость по счетам бухгалтерского учёта кредитной организации (Ф-101);
+     * @param departmentId Подразделение // TODO (Ramil Timerbaev)
+     * @throws IOException, ServiceException
      */
-    void importXML(String realFileName, InputStream stream, Integer periodID, int typeID, Integer departmentId, TAUserInfo userInfo);
+    void importXML(String realFileName, InputStream stream, Integer accountPeriodId, int typeId, Integer departmentId, TAUserInfo userInfo);
 
     /**
      * Получение списка бух отчетностей соответсвующих заданному фильтру
@@ -34,7 +35,14 @@ public interface BookerStatementsService {
     PagingResult<BookerStatementsSearchResultItem> findDataByFilter(BookerStatementsFilter bookerStatementsFilter);
 
     /**
-     * Создание бух отчетности
+     * Создание бух отчетности.
+     *
+     * @param logger логгер
+     * @param year год
+     * @param periodId идентификатор периода БО из справочника 106 "Коды, определяющие период бухгалтерской отчетности"
+     * @param typeId 0 - Оборотная ведомость по счетам бухгалтерского учёта кредитной организации (Ф-101); иначе формы 102
+     * @param departmentId идентификатор подразделения
+     * @param userInfo информация о пользователе
      */
     void create(Logger logger, Integer year, Long periodId, int typeId, Integer departmentId, TAUserInfo userInfo);
 }

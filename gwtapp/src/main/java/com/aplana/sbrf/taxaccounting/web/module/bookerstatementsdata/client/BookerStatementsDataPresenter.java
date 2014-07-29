@@ -196,7 +196,7 @@ public class BookerStatementsDataPresenter extends Presenter<BookerStatementsDat
                 ImportAction importAction = new ImportAction();
                 importAction.setUuid(event.getValue());
                 importAction.setDepartmentId(departmentId);
-                importAction.setReportPeriodId(accountPeriodId);
+                importAction.setAccountPeriodId(accountPeriodId);
                 importAction.setTypeId(typeId);
                 dispatcher.execute(importAction, CallbackUtils.defaultCallback(
                         new AbstractCallback<ImportResult>() {
