@@ -2,13 +2,14 @@ package com.aplana.sbrf.taxaccounting.scheduler.task;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskParamType;
 import com.aplana.sbrf.taxaccounting.scheduler.api.form.SelectBox;
 import com.aplana.sbrf.taxaccounting.scheduler.api.form.SelectBoxItem;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.SchedulerInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
+import javax.ejb.Singleton;
 import javax.interceptor.Interceptors;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,18 +18,12 @@ import java.util.List;
  * Утилитный клас для задач
  */
 @Interceptors(SchedulerInterceptor.class)
-@Service
-public class TaskUtils {
+public class FormElementHelperImpl implements FormElementHelper {
 
     @Autowired
     DepartmentService departmentService;
 
-    /**
-     * Создание SelectBox'а со значениями из выборки "20 - Получение ТБ универсальное"
-     *
-     * @param userInfo
-     * @return
-     */
+    @Override
     public SelectBox getTBSelectBox(TAUserInfo userInfo){
         // элементы выпадающего списка
         List<SelectBoxItem> selectBoxItems = new ArrayList<SelectBoxItem>();
@@ -42,6 +37,7 @@ public class TaskUtils {
         selectBox.setValues(selectBoxItems);
         selectBox.setRequired(true);
         selectBox.setName("ТБ");
+        selectBox.setType(TaskParamType.INT);
 
         return selectBox;
     }
