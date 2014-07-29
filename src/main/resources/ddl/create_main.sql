@@ -88,7 +88,7 @@ comment on column form_template.name is 'Наименование формы';
 comment on column form_template.fullname is 'Полное наименование формы';
 comment on column form_template.script is 'Скрипт, реализующий бизнес-логику налоговой формы';
 comment on column form_template.data_headers is 'Описание заголовка таблицы';
-comment on column form_template.status is 'Статус версии (0 - действующая версия; 1 - удаленная версия, 2 - черновик версии, 3 - фиктивная версия)';
+comment on column form_template.status is 'Статус версии (0 - действующая версия; -1 - удаленная версия, 1 - черновик версии, 2 - фиктивная версия)';
 comment on column form_template.monthly is 'Признак ежемесячной формы (0 - не ежемесячная, 1 - ежемесячная)';
 comment on column form_template.header is 'Верхний колонтитул печатной формы';
 
@@ -495,7 +495,7 @@ comment on column data_row.ord is 'Номер строки в форме';
 comment on column data_row.type is 'Тип строки (0 - подтвержденные данные, 1 - строка добавлена, -1 - строка удалена)';
 comment on column data_row.manual is 'Режим ввода данных (0 - обычная запись; 1 - версия ручного ввода)';
 
-create sequence seq_data_row start with 10000;
+create sequence seq_data_row start with 10000 increment by 100000;
 ---------------------------------------------------------------------------------------------------
 create table cell_style (
   row_id  number(18) not null,
@@ -649,7 +649,7 @@ create table log_business (
   id                  number(18,0) primary key,
   log_date            date not null,
   event_id            number(3,0) not null,
-  user_login          varchar2(100) not null,
+  user_login          varchar2(255) not null,
   roles               varchar2(200) not null,
   declaration_data_id number(9,0),
   form_data_id        number(9,0),
@@ -674,7 +674,7 @@ create table log_system (
   log_date            date not null,
   ip                  varchar2(39),
   event_id            number(3,0) not null,
-  user_login          varchar2(100) not null,
+  user_login          varchar2(255) not null,
   roles               varchar2(200),
   department_name     varchar2(4000 byte) not null,
   report_period_name  varchar2(100),
@@ -694,7 +694,7 @@ comment on column log_system.event_id is 'Код события (1 - Созда�
 comment on column log_system.user_login is 'Логин пользователя';
 comment on column log_system.roles is 'Список ролей пользователя';
 comment on column log_system.department_name is 'Наименование подразделения НФ\декларации';
-comment on column log_system.report_period_name is 'Имя отчетного периода';
+comment on column log_system.report_period_name is 'Наименование отчетного периода';
 comment on column log_system.form_kind_id is 'Код типа налоговой формы (1,2,3,4,5)';
 comment on column log_system.note is 'Текст сообщения';
 comment on column log_system.user_department_name is 'Наименование подразделения пользователя';
@@ -706,7 +706,7 @@ comment on column log_system.tb_department_id is 'Идентификатор Т�
 create sequence seq_log_system start with 10000;
 ------------------------------------------------------------------------------------------------------
 create table department_report_period (
-  id                  number(18, 0)  primary key,
+  id                  number(18, 0)  not null,
   department_id       number(9) not null,
   report_period_id    number(9) not null,
   is_active           number(1) not null,
@@ -739,6 +739,7 @@ comment on column task_context.task_name is 'Название задачи';
 comment on column task_context.user_task_jndi is 'JNDI-имя класса-обработчика задачи';
 comment on column task_context.custom_params_exist is 'Признак наличия пользовательских параметров';
 comment on column task_context.serialized_params is 'Сериализованные пользователькие параметры';
+comment on column task_context.modification_date is 'Дата последнего редактирования задачи';
 
 create sequence seq_task_context start with 100;
 ------------------------------------------------------------------------------------------------------

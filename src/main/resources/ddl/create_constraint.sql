@@ -12,6 +12,7 @@ alter table form_type add constraint form_type_uniq_code unique(code);
 
 alter table tax_period add constraint tax_period_pk primary key (id);
 alter table tax_period add constraint tax_period_chk_taxtype check (tax_type in ('I', 'P', 'T', 'V', 'D'));
+alter table tax_period add constraint tax_period_uniq_taxtype_year unique (tax_type, year);
 
 alter table form_template add constraint form_template_pk primary key (id);
 alter table form_template add constraint form_template_fk_type_id foreign key (type_id) references form_type(id);
@@ -223,6 +224,7 @@ alter table log_system add constraint log_system_chk_rp check (event_id in (7, 1
 alter table log_system add constraint log_system_fk_kind foreign key (form_kind_id) references form_kind(id);
 alter table log_system add constraint log_system_fk_user_login foreign key (user_login) references sec_user(login);
 
+alter table department_report_period add constraint department_report_period_pk primary key(id);
 alter table department_report_period add constraint dep_rep_per_chk_is_active check (is_active in (0, 1));
 alter table department_report_period add constraint dep_rep_per_chk_is_balance_per check (is_balance_period in (0, 1));
 alter table department_report_period add constraint dep_rep_per_fk_department_id foreign key (department_id) references department(id) on delete cascade;

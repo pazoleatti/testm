@@ -25,6 +25,7 @@ drop table object_lock;
 drop sequence seq_sec_user;
 drop sequence seq_notification;
 drop table notification;
+drop table lock_data;
 drop table sec_user;
 drop table form_data_source;
 drop table declaration_source;
