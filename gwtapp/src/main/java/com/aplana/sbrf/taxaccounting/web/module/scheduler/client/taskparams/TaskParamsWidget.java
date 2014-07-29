@@ -97,30 +97,32 @@ public class TaskParamsWidget extends HTMLPanel {
     private void buildWidgets(List<FormElement> params) {
         widgets.clear();
 
-        for (FormElement param : params) {
-            ParamWidget widget;
-            if (param instanceof SelectBox){
-                List<SelectBoxItem> values = ((SelectBox) param).getValues();
-                WSelectBox wSelectBox = new WSelectBox(values);
-                wSelectBox.setWidth("475px");
-                widget = wSelectBox;
-                setParamWidgetConfig(widget, param);
-            } else if (param instanceof CheckBox){
-                WCheckBox wCheckBox = new WCheckBox();
-                widget = wCheckBox;
-                setParamWidgetConfig(widget, param);
-            } else if (param instanceof DateBox){
-                WDateBox wDateBox = new WDateBox();
-                widget = wDateBox;
-                setParamWidgetConfig(widget, param);
-            } else{
-                WTextBox wTextBox = new WTextBox();
-                wTextBox.setWidth("475px");
-                widget = wTextBox;
-                setParamWidgetConfig(widget, param);
-            }
+        if (params != null){
+            for (FormElement param : params) {
+                ParamWidget widget;
+                if (param instanceof SelectBox){
+                    List<SelectBoxItem> values = ((SelectBox) param).getValues();
+                    WSelectBox wSelectBox = new WSelectBox(values);
+                    wSelectBox.setWidth("475px");
+                    widget = wSelectBox;
+                    setParamWidgetConfig(widget, param);
+                } else if (param instanceof CheckBox){
+                    WCheckBox wCheckBox = new WCheckBox();
+                    widget = wCheckBox;
+                    setParamWidgetConfig(widget, param);
+                } else if (param instanceof DateBox){
+                    WDateBox wDateBox = new WDateBox();
+                    widget = wDateBox;
+                    setParamWidgetConfig(widget, param);
+                } else{
+                    WTextBox wTextBox = new WTextBox();
+                    wTextBox.setWidth("475px");
+                    widget = wTextBox;
+                    setParamWidgetConfig(widget, param);
+                }
 
-            widgets.add(widget);
+                widgets.add(widget);
+            }
         }
     }
 

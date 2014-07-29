@@ -47,12 +47,14 @@ public class GetTaskInfoHandler extends AbstractActionHandler<GetTaskInfoAction,
             result.setContextId(taskData.getContextId());
 
             List<TaskParamModel> params = new ArrayList<TaskParamModel>();
-            for (TaskParam param : taskData.getParams().values()) {
-                TaskParamModel model = new TaskParamModel();
-                model.setTaskParamName(param.getName());
-                model.setTaskParamType(param.getType().getId());
-                model.setTaskParamValue(param.getValue());
-                params.add(model);
+            if (taskData.getParams() != null){
+                for (TaskParam param : taskData.getParams().values()) {
+                    TaskParamModel model = new TaskParamModel();
+                    model.setTaskParamName(param.getName());
+                    model.setTaskParamType(param.getType().getId());
+                    model.setTaskParamValue(param.getValue());
+                    params.add(model);
+                }
             }
             result.setParams(params);
         } catch (TaskSchedulingException e) {
