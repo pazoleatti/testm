@@ -26,7 +26,7 @@ public class FormElementHelperImpl implements FormElementHelper {
     DepartmentService departmentService;
 
     @Override
-    public SelectBox getTBSelectBox(TAUserInfo userInfo){
+    public SelectBox getTBSelectBox(TAUserInfo userInfo, String name){
         // элементы выпадающего списка
         List<SelectBoxItem> selectBoxItems = new ArrayList<SelectBoxItem>();
         List<Department> departments = departmentService.getTBDepartments(userInfo.getUser());
@@ -38,7 +38,7 @@ public class FormElementHelperImpl implements FormElementHelper {
         SelectBox selectBox = new SelectBox();
         selectBox.setValues(selectBoxItems);
         selectBox.setRequired(true);
-        selectBox.setName("ТБ");
+        selectBox.setName(name);
         selectBox.setType(TaskParamType.INT);
 
         return selectBox;

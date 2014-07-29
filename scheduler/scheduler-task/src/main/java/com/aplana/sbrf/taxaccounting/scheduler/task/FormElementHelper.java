@@ -4,7 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.scheduler.api.form.SelectBox;
 
 /**
- * Created by auldanov on 25.07.2014.
+ * @author auldanov
  */
 public interface FormElementHelper {
     /**
@@ -13,5 +13,5 @@ public interface FormElementHelper {
      * @param userInfo
      * @return
      */
-    SelectBox getTBSelectBox(TAUserInfo userInfo);
+    SelectBox getTBSelectBox(TAUserInfo userInfo, String name);
 }

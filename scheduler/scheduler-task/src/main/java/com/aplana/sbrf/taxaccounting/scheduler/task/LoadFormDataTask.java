@@ -42,13 +42,15 @@ public class LoadFormDataTask implements UserTask{
     @Autowired
     FormElementHelper formElementHelper;
 
+    private static final String TB_NAME = "ТБ";
+
     @Override
     public void execute(Map<String, TaskParam> params) throws TaskExecutionException {
-        if (!params.containsKey("ТБ")){
+        if (!params.containsKey(TB_NAME)){
             throw new TaskExecutionException("Не достасточно параметров для запуска задачи");
         }
 
-        TaskParam param = params.get("TБ");
+        TaskParam param = params.get(TB_NAME);
         Integer departmentId;
         try {
             departmentId = (Integer) param.getTypifiedValue();
@@ -76,7 +78,7 @@ public class LoadFormDataTask implements UserTask{
     public List<FormElement> getParams(TAUserInfo userInfo) {
         // список параметров задачи
         List<FormElement> params = new ArrayList<FormElement>();
-        params.add(formElementHelper.getTBSelectBox(userInfo));
+        params.add(formElementHelper.getTBSelectBox(userInfo, TB_NAME));
 
         return params;
     }
