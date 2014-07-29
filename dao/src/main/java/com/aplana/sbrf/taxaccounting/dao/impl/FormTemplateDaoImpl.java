@@ -202,7 +202,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 		} catch (EmptyResultDataAccessException e) {
 			throw new DaoException("Для данного вида налоговой формы %d - %s не найдено активного шаблона налоговой формы.",formTypeId, formTypeDao.get(formTypeId).getName());
 		}catch(IncorrectResultSizeDataAccessException e){
-			throw new DaoException("Для даного вида налоговой формы %d - %s найдено несколько активных шаблонов налоговой формы в одном отчетном периоде %s.",
+			throw new DaoException("Для данного вида налоговой формы %d - %s найдено несколько активных шаблонов налоговой формы в одном отчетном периоде %s.",
                     formTypeId, formTypeDao.get(formTypeId).getName(), reportPeriod.getName());
 		}
 	}

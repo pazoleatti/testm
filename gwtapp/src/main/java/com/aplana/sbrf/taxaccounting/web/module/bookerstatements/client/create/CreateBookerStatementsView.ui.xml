@@ -56,7 +56,7 @@
 
             <g:HorizontalPanel spacing="6"  verticalAlignment="middle" addStyleNames="{style.content}">
                 <g:cell horizontalAlignment="right">
-                    <g:Label width="140px" wordWrap="false" text="Вид бух.отчётности:"/>
+                    <g:Label width="140px" wordWrap="false" text="Вид бух. отчётности:"/>
                 </g:cell>
                 <g:cell width="100%">
                     <dw:ListBoxWithTooltip ui:field="bookerReportType" width="100%"/>
