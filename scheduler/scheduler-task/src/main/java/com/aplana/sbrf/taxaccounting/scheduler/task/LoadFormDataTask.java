@@ -1,14 +1,19 @@
 package com.aplana.sbrf.taxaccounting.scheduler.task;
 
+import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskParam;
+import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskParamType;
 import com.aplana.sbrf.taxaccounting.scheduler.api.exception.InvalidTaskParamException;
 import com.aplana.sbrf.taxaccounting.scheduler.api.exception.TaskExecutionException;
 import com.aplana.sbrf.taxaccounting.scheduler.api.form.FormElement;
+import com.aplana.sbrf.taxaccounting.scheduler.api.form.SelectBox;
+import com.aplana.sbrf.taxaccounting.scheduler.api.form.SelectBoxItem;
 import com.aplana.sbrf.taxaccounting.scheduler.api.task.UserTask;
 import com.aplana.sbrf.taxaccounting.scheduler.api.task.UserTaskLocal;
 import com.aplana.sbrf.taxaccounting.scheduler.api.task.UserTaskRemote;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.LoadFormDataService;
 import com.aplana.sbrf.taxaccounting.service.SchedulerInterceptor;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
@@ -40,7 +45,7 @@ public class LoadFormDataTask implements UserTask{
     TAUserService userService;
 
     @Autowired
-    FormElementHelper formElementHelper;
+    DepartmentService departmentService;
 
     private static final String TB_NAME = "ТБ";
 
@@ -76,9 +81,24 @@ public class LoadFormDataTask implements UserTask{
 
     @Override
     public List<FormElement> getParams(TAUserInfo userInfo) {
+
+        // элементы выпадающего списка
+        List<SelectBoxItem> selectBoxItems = new ArrayList<SelectBoxItem>();
+        List<Department> departments = departmentService.getTBDepartments(userInfo.getUser());
+        for (Department department : departments) {
+            selectBoxItems.add(new SelectBoxItem(department.getName(), department.getId()));
+        }
+
+        // элемент ТБ
+        SelectBox selectBox = new SelectBox();
+        selectBox.setValues(selectBoxItems);
+        selectBox.setRequired(true);
+        selectBox.setName(TB_NAME);
+        selectBox.setType(TaskParamType.INT);
+
         // список параметров задачи
         List<FormElement> params = new ArrayList<FormElement>();
-        params.add(formElementHelper.getTBSelectBox(userInfo, TB_NAME));
+        params.add(selectBox);
 
         return params;
     }
