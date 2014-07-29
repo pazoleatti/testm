@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.scheduler.api.form.SelectBoxItem;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.SchedulerInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import javax.ejb.Singleton;
 import javax.interceptor.Interceptors;
@@ -17,6 +18,7 @@ import java.util.List;
 /**
  * Утилитный клас для задач
  */
+@Service
 @Interceptors(SchedulerInterceptor.class)
 public class FormElementHelperImpl implements FormElementHelper {
 

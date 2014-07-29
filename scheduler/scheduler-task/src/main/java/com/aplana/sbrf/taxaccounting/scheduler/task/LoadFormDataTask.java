@@ -9,7 +9,6 @@ import com.aplana.sbrf.taxaccounting.scheduler.api.form.FormElement;
 import com.aplana.sbrf.taxaccounting.scheduler.api.task.UserTask;
 import com.aplana.sbrf.taxaccounting.scheduler.api.task.UserTaskLocal;
 import com.aplana.sbrf.taxaccounting.scheduler.api.task.UserTaskRemote;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.LoadFormDataService;
 import com.aplana.sbrf.taxaccounting.service.SchedulerInterceptor;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
@@ -41,10 +40,7 @@ public class LoadFormDataTask implements UserTask{
     TAUserService userService;
 
     @Autowired
-    DepartmentService departmentService;
-
-    @Autowired
-    TaskUtils taskUtils;
+    FormElementHelper formElementHelper;
 
     @Override
     public void execute(Map<String, TaskParam> params) throws TaskExecutionException {
@@ -80,7 +76,7 @@ public class LoadFormDataTask implements UserTask{
     public List<FormElement> getParams(TAUserInfo userInfo) {
         // список параметров задачи
         List<FormElement> params = new ArrayList<FormElement>();
-        params.add(taskUtils.getTBSelectBox(userInfo));
+        params.add(formElementHelper.getTBSelectBox(userInfo));
 
         return params;
     }
