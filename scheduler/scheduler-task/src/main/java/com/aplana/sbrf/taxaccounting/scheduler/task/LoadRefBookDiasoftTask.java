@@ -50,7 +50,7 @@ public class LoadRefBookDiasoftTask implements UserTask {
 
     @Override
     public String getTaskClassName() {
-        return LoadFormDataTask.class.getSimpleName();
+        return LoadRefBookDiasoftTask.class.getSimpleName();
     }
 
     @Override

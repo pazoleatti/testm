@@ -50,7 +50,7 @@ public class LoadRefBookNsiTask implements UserTask {
 
     @Override
     public String getTaskClassName() {
-        return LoadFormDataTask.class.getSimpleName();
+        return LoadRefBookNsiTask.class.getSimpleName();
     }
 
     @Override
