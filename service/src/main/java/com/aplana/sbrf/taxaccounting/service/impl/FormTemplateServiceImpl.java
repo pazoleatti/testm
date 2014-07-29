@@ -103,7 +103,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
             return formTemplateDao.getActiveFormTemplateId(formTypeId, reportPeriodId);
         } catch (DaoException e){
 			logger.error(e.getMessage(), e);
-            throw new ServiceException("Ошибка при получении активного шаблона НФ.", e);
+            throw new ServiceException(e.getMessage(), e);
         }
 
 	}
