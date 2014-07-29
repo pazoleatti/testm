@@ -33,6 +33,10 @@ public class WDateBox extends ParamWidget {
         }
     }
 
+    public void setWidth(String width){
+        datePicker.setWidth(width);
+    }
+
     @Override
     public String getErrorMsg() {
         return null;

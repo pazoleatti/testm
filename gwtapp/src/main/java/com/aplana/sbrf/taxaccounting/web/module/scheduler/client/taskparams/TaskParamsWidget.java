@@ -112,6 +112,7 @@ public class TaskParamsWidget extends HTMLPanel {
                     setParamWidgetConfig(widget, param);
                 } else if (param instanceof DateBox){
                     WDateBox wDateBox = new WDateBox();
+                    wDateBox.setWidth("475px");
                     widget = wDateBox;
                     setParamWidgetConfig(widget, param);
                 } else{
