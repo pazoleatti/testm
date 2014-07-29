@@ -495,7 +495,7 @@ comment on column data_row.ord is 'Номер строки в форме';
 comment on column data_row.type is 'Тип строки (0 - подтвержденные данные, 1 - строка добавлена, -1 - строка удалена)';
 comment on column data_row.manual is 'Режим ввода данных (0 - обычная запись; 1 - версия ручного ввода)';
 
-create sequence seq_data_row start with 10000 increment by 100000;
+create sequence seq_data_row start with 10000;
 ---------------------------------------------------------------------------------------------------
 create table cell_style (
   row_id  number(18) not null,
