@@ -35,7 +35,7 @@ public class ImportHandler extends AbstractActionHandler<ImportAction, ImportRes
     public ImportResult execute(ImportAction importAction, ExecutionContext executionContext) throws ActionException {
         BlobData blobData = blobDataService.get(importAction.getUuid());
         ImportResult importResult = new ImportResult();
-        service.importXML(blobData.getName(), blobData.getInputStream(), importAction.getReportPeriodId(), importAction.getTypeId(), importAction.getDepartmentId(), securityService.currentUserInfo());
+        service.importXML(blobData.getName(), blobData.getInputStream(), importAction.getAccountPeriodId(), importAction.getTypeId(), importAction.getDepartmentId(), securityService.currentUserInfo());
         return importResult;
     }
 
