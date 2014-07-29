@@ -76,10 +76,4 @@ public abstract class AbstractPermanentRefBook extends AbstractReadOnlyRefBook {
     public Map<RefBookAttributePair, String> getAttributesValues(List<RefBookAttributePair> attributePairs) {
         throw new UnsupportedOperationException();
     }
-
-    @Override
-    public Long getRowNum(Date version, Long recordId, String filter, RefBookAttribute sortAttribute,
-			boolean isSortAscending) {
-        throw new UnsupportedOperationException();
-    }
 }

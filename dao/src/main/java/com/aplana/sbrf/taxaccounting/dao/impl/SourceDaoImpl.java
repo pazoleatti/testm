@@ -13,10 +13,9 @@ import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.*;
+import java.util.Date;
 
 @Repository
 public class SourceDaoImpl extends AbstractDao implements SourceDao {
@@ -166,9 +165,10 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
         public void setValues(PreparedStatement ps, int i) throws SQLException {
             SourceObject sourceObject = sources.get(i);
             java.sql.Date periodEndSql = sourceObject.getPeriodEnd() != null ? new java.sql.Date(sourceObject.getPeriodEnd().getTime()) : null;
+            java.sql.Date newPeriodEndSql = periodEnd != null ? new java.sql.Date(periodEnd.getTime()) : null;
             if (updateMode) {
                 ps.setDate(1, new java.sql.Date(periodStart.getTime()));
-                ps.setDate(2, new java.sql.Date(periodEnd.getTime()));
+                ps.setDate(2, newPeriodEndSql);
                 ps.setLong(3, sourceObject.getSourcePair().getSource());
                 ps.setLong(4, sourceObject.getSourcePair().getDestination());
                 ps.setDate(5, new java.sql.Date(sourceObject.getPeriodStart().getTime()));

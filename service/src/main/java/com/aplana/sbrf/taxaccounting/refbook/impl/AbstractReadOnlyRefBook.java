@@ -180,4 +180,10 @@ public abstract class AbstractReadOnlyRefBook implements RefBookDataProvider {
     public List<Pair<Long, Long>> checkRecordExistence(Date version, String filter) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public Long getRowNum(Date version, Long recordId, String filter, RefBookAttribute sortAttribute,
+                          boolean isSortAscending) {
+        return refBookDao.getRowNum(refBookId, version, recordId, filter, sortAttribute, isSortAscending);
+    }
 }

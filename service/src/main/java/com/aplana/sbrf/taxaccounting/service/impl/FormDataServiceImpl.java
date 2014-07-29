@@ -466,7 +466,10 @@ public class FormDataServiceImpl implements FormDataService {
 		auditService.add(FormDataEvent.SAVE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
 				null, formData.getFormType().getName(), formData.getKind().getId(), null);
 
-        updatePreviousRowNumber(formData);
+        String msg = updatePreviousRowNumber(formData);
+        if (msg != null) {
+            logger.info(msg);
+        }
 
 		return formData.getId();
 	}

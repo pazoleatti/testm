@@ -89,7 +89,7 @@ public class UpdateCurrentAssignsHandler extends AbstractActionHandler<UpdateCur
         sourceClientData.setPeriodStart(PeriodConvertor.getDateFrom(period));
         sourceClientData.setPeriodStartName(period.getPeriodStartName());
         sourceClientData.setPeriodEnd(PeriodConvertor.getDateTo(period));
-        sourceClientData.setPeriodEndName(period.getPeriodEndName());
+        sourceClientData.setPeriodEndName(period.getPeriodTo() != null ? period.getPeriodEndName() : null);
 
         /** Получение информации по периодам из справочника Коды, определяющие налоговый (отчётный) период*/
         RefBook refBook = rbFactory.get(PERIOD_CODE_REFBOOK);
