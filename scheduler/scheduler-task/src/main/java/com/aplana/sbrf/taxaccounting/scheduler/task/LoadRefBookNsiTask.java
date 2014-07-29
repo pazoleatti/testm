@@ -55,6 +55,6 @@ public class LoadRefBookNsiTask implements UserTask {
 
     @Override
     public List<FormElement> getParams(TAUserInfo userInfo) {
-        return new ArrayList<FormElement>();
+        return null;
     }
 }

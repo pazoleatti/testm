@@ -55,6 +55,6 @@ public class LoadRefBookDiasoftTask implements UserTask {
 
     @Override
     public List<FormElement> getParams(TAUserInfo userInfo) {
-        return new ArrayList<FormElement>();
+        return null;
     }
 }
