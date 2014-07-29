@@ -8,7 +8,7 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
  * User: ekuvshinov
  */
 public class ImportAction extends UnsecuredActionImpl<ImportResult> implements ActionName {
-    private Integer reportPeriodId;
+    private Integer accountPeriodId;
     private Integer departmentId;
     private int typeId; //0 - Оборотная ведомость по счетам бухгалтерского учёта кредитной организации (Ф-101); 1 - Ф-102.
     private String uuid;
@@ -18,12 +18,12 @@ public class ImportAction extends UnsecuredActionImpl<ImportResult> implements A
         return "Загрузка бух отчетности";
     }
 
-    public Integer getReportPeriodId() {
-        return reportPeriodId;
+    public Integer getAccountPeriodId() {
+        return accountPeriodId;
     }
 
-    public void setReportPeriodId(Integer reportPeriodId) {
-        this.reportPeriodId = reportPeriodId;
+    public void setAccountPeriodId(Integer reportPeriodId) {
+        this.accountPeriodId = reportPeriodId;
     }
 
     public Integer getDepartmentId() {

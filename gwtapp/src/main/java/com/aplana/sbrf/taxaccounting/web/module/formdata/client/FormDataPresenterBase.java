@@ -241,6 +241,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         getView().showModeAnchor(existManual, formData.isManual());
         getView().showManualAnchor(canCreatedManual && !existManual);
         getView().showDeleteManualAnchor(false);
+        placeManager.setOnLeaveConfirmation(null);
 	}
 
 	protected void setEditMode() {

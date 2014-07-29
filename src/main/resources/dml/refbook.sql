@@ -94,7 +94,7 @@ INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (100, 'Эмит
 INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (101, 'План счетов бухгалтерского учета', 0, 1, 0);
 INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (102, 'Классификатор соответствия кодов операций налоговой формы 724.2.1 по НДС символам ОПУ', 0, 1, 0);
 INSERT INTO REF_BOOK (ID, NAME, READ_ONLY) VALUES (103, 'Тип подразделения', 1);
-INSERT INTO ref_book (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (104, 'Список полей для Журнала аудита', 1, 0, 1);
+INSERT INTO ref_book (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (104, 'Список полей для Журнала аудита', 0, 0, 1);
 
 INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (105, 'Конфигурационные параметры', 0, 0, 1);
 INSERT INTO REF_BOOK (ID, NAME, VISIBLE, TYPE, READ_ONLY) VALUES (106, 'Коды, определяющие период бухгалтерской отчетности', 1, 0, 1);

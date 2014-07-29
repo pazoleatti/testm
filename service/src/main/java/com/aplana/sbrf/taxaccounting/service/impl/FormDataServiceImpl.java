@@ -466,7 +466,10 @@ public class FormDataServiceImpl implements FormDataService {
 		auditService.add(FormDataEvent.SAVE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
 				null, formData.getFormType().getName(), formData.getKind().getId(), null);
 
-        updatePreviousRowNumber(formData);
+        String msg = updatePreviousRowNumber(formData);
+        if (msg != null) {
+            logger.info(msg);
+        }
 
 		return formData.getId();
 	}
@@ -637,6 +640,8 @@ public class FormDataServiceImpl implements FormDataService {
         SimpleDateFormat dateTimeFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm");
 
         for (DepartmentFormType destinationDFT : departmentFormTypes) {
+            // Проверяем наличие активного шаблона приемника (встроенный в дао Exception)
+            formTemplateService.getActiveFormTemplateId(destinationDFT.getFormTypeId(), formData.getReportPeriodId());
             // Экземпляр формы-приемника
             FormData destinationForm = findFormData(destinationDFT.getFormTypeId(), destinationDFT.getKind(), destinationDFT.getDepartmentId(), formData.getReportPeriodId(), formData.getPeriodOrder());
             // Если форма распринимается при отсутствии экземпляра формы-приемника, то такую форму не обрабатываем.

@@ -96,9 +96,9 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
                     new int[]{Types.NUMERIC, Types.DATE, Types.DATE, Types.DATE}
             );
         } catch (EmptyResultDataAccessException e) {
-            throw new DaoException("Выбранный вид декларации %d не существует в выбранном периоде.", declarationTypeId);
+            throw new DaoException("Выбранный вид декларации %d - %s не существует в выбранном периоде.", declarationTypeId, declarationTypeDao.get(declarationTypeId).getName());
         }catch(IncorrectResultSizeDataAccessException e){
-            throw new DaoException("Для даного вида декларации %d найдено несколько активных шаблонов деклараций.", declarationTypeId);
+            throw new DaoException("Для даного вида декларации %d - %s найдено несколько активных шаблонов деклараций.", declarationTypeId, declarationTypeDao.get(declarationTypeId).getName());
         }
 	}
 
