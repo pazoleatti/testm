@@ -37,7 +37,8 @@ public class GetFormLogsBusinessHandler extends
 	public GetLogsBusinessResult execute(GetFormLogsBusinessAction action,
 			ExecutionContext context) throws ActionException {
 
-		List<LogBusiness> logs = logBusinessService.getFormLogsBusiness(action.getId());
+		List<LogBusiness> logs = logBusinessService.getFormLogsBusiness(action.getId(),
+                action.getFilter().getSearchOrdering(), action.getFilter().isAscSorting());
 
 		GetLogsBusinessResult result = new GetLogsBusinessResult();
         ArrayList<LogBusinessClient> logBusinessClients = new ArrayList<LogBusinessClient>(logs.size());

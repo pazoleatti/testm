@@ -1,10 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.LogBusinessDao;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.LogBusiness;
-import com.aplana.sbrf.taxaccounting.model.TARole;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,8 +18,8 @@ public class LogBusinessServiceImpl implements LogBusinessService {
 	private LogBusinessDao logBusinessDao;
 
     @Override
-	public List<LogBusiness> getFormLogsBusiness(long formId) {
-		return logBusinessDao.getFormLogsBusiness(formId);
+	public List<LogBusiness> getFormLogsBusiness(long formId, HistoryBusinessSearchOrdering ordering, boolean isAscSorting) {
+		return logBusinessDao.getFormLogsBusiness(formId, ordering, isAscSorting);
 	}
 
     @Override
@@ -51,7 +48,7 @@ public class LogBusinessServiceImpl implements LogBusinessService {
 	}
 
     @Override
-	public List<LogBusiness> getDeclarationLogsBusiness(long declarationId) {
-		return logBusinessDao.getDeclarationLogsBusiness(declarationId);
+	public List<LogBusiness> getDeclarationLogsBusiness(long declarationId, HistoryBusinessSearchOrdering ordering, boolean isAscSorting) {
+		return logBusinessDao.getDeclarationLogsBusiness(declarationId, ordering, isAscSorting);
 	}
 }

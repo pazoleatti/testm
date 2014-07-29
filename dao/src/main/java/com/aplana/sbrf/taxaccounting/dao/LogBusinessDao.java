@@ -10,19 +10,25 @@ import java.util.List;
  */
 public interface LogBusinessDao {
 
-	/**
-	 * Получить информацию об историей событий деклараций
-	 * @param declarationId идентификатор пользователя
-	 * @return объект, представляющий историю событий для декларации
-	 */
-	List<LogBusiness> getDeclarationLogsBusiness(long declarationId);
+    /**
+     * Получить информацию об истории событий деклараций
+     *
+     * @param declarationId идентификатор пользователя
+     * @param ordering      столбец, по которому сортировать
+     * @param isAscSorting  сорировать по возрастанию или убыванию
+     * @return объект, представляющий историю событий для декларации
+     */
+    List<LogBusiness> getDeclarationLogsBusiness(long declarationId, HistoryBusinessSearchOrdering ordering, boolean isAscSorting);
 
-	/**
-	 * Получить информацию об историей событий налоговой формы
-	 * @param formId идентификатор пользователя
-	 * @return объект, представляющий историю событий для декларации
-	 */
-	List<LogBusiness> getFormLogsBusiness(long formId);
+    /**
+     * Получить информацию об истории событий налоговой формы
+     *
+     * @param formId       идентификатор пользователя
+     * @param ordering     столбец, по которому сортировать
+     * @param isAscSorting сорировать по возрастанию или убыванию
+     * @return объект, представляющий историю событий для декларации
+     */
+    List<LogBusiness> getFormLogsBusiness(long formId, HistoryBusinessSearchOrdering ordering, boolean isAscSorting);
 
 	/**
 	 * Получить дату последнего принятия налоговой формы
