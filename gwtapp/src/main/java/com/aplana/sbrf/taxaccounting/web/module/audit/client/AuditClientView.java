@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.TableCellElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -257,16 +258,23 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler>
         };
 
         table.addColumn(dateColumn, DATE_COLUMN_HEADER);
+        table.setColumnWidth(dateColumn, 8.5, Style.Unit.EM);
         table.addColumn(eventColumn, EVENT_COLUMN_HEADER);
         table.addColumn(noteColumn, NOTE_COLUMN_HEADER);
         table.addColumn(reportPeriodColumn, REPORT_PERIOD_COLUMN_HEADER);
+        table.setColumnWidth(reportPeriodColumn, 9, Style.Unit.EM);
         table.addColumn(departmentColumn, DEPARTMENT_COLUMN_HEADER);
         table.addColumn(typeColumn, TYPE_COLUMN_HEADER);
+        table.setColumnWidth(typeColumn, 8, Style.Unit.EM);
         table.addColumn(formDataKindColumn, FORM_DATA_KIND_COLUMN_HEADER);
+        table.setColumnWidth(formDataKindColumn, 9, Style.Unit.EM);
         table.addColumn(formDeclTypeColumn, FORM_TYPE_COLUMN_HEADER);
         table.addColumn(userLoginColumn, USER_LOGIN_COLUMN_HEADER);
+        table.setColumnWidth(userLoginColumn, 9, Style.Unit.EM);
         table.addColumn(userRolesColumn, USER_ROLES_COLUMN_HEADER);
+        table.setColumnWidth(userRolesColumn, 7, Style.Unit.EM);
         table.addColumn(userIpColumn, USER_IP_COLUMN_HEADER);
+        table.setColumnWidth(userIpColumn, 8, Style.Unit.EM);
         table.addCellPreviewHandler(new CellPreviewEvent.Handler<LogSearchResultItem>() {
             @Override
             public void onCellPreview(CellPreviewEvent<LogSearchResultItem> event) {
