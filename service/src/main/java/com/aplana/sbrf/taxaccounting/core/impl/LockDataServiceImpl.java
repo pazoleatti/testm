@@ -15,7 +15,7 @@ import java.util.Date;
 
 public class LockDataServiceImpl implements LockDataService {
 
-	private static final long WAIT_STEP = 500; //шаг времени между проверками освобождения блокировки, миллисекунды
+	private static final long SLEEP_TIME = 500; //шаг времени между проверками освобождения блокировки, миллисекунды
 
 	@Autowired
 	private LockDataDao dao;
@@ -41,7 +41,7 @@ public class LockDataServiceImpl implements LockDataService {
 		long startTime = new Date().getTime();
 		while (lock(key, userId, age) != null) {
 			try {
-				Thread.currentThread().wait(WAIT_STEP);
+				Thread.sleep(SLEEP_TIME);
 			} catch (InterruptedException e) {
 			}
 			if (Math.abs(new Date().getTime() - startTime) > timeout) {
