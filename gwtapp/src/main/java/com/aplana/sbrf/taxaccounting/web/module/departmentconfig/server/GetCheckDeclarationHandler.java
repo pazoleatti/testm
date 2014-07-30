@@ -93,9 +93,7 @@ public class GetCheckDeclarationHandler extends AbstractActionHandler<GetCheckDe
         formDataFilter.setFormTypeId(formTypeIds);
         formDataFilter.setFormState(WorkflowState.ACCEPTED);
         formDataFilter.setTaxType(action.getTaxType());
-        TAUserInfo userInfo = new TAUserInfo();
-        userInfo.setIp("127.0.0.1");
-        userInfo.setUser(userService.getUser(TAUser.SYSTEM_USER_ID));
+        TAUserInfo userInfo = userService.getSystemUserInfo();
         boolean manual = true;
         List<Long> formDataIds = formDataSearchService.findDataIdsByUserAndFilter(userInfo, formDataFilter);
         for(Long formDataId : formDataIds) {

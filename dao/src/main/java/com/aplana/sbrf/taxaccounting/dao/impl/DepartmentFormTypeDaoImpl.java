@@ -598,7 +598,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         sqlParams[cnt] = String.valueOf(taxType.getCode());
         return getJdbcTemplate().queryForList(
                 "select dft.form_type_id from department_form_type dft where performer_dep_id = ? " +
-                        " and dft.kind in (" + SqlUtils.preparePlaceHolders(kinds.size()) + ")" +
+                        (kinds.isEmpty() ? "" : " and dft.kind in (" + SqlUtils.preparePlaceHolders(kinds.size()) + ")" )+
                         " and exists (select 1 from form_type ft where ft.id = dft.form_type_id and ft.tax_type = ?)",
                 Long.class,
                 sqlParams
