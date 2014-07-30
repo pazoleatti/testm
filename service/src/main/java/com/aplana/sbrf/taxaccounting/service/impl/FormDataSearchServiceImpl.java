@@ -166,7 +166,7 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
         // Отчетные периоды
         formDataDaoFilter.setReportPeriodIds(formDataFilter.getReportPeriodIds());
         // Типы форм
-        if (formDataFilter.getFormDataKind() != null) {
+        if (formDataFilter.getFormDataKind() != null && !formDataFilter.getFormDataKind().isEmpty()) {
             List<FormDataKind> list = new ArrayList<FormDataKind>(FormDataKind.values().length);
             for(Long id: formDataFilter.getFormDataKind()){
                 list.add(FormDataKind.fromId(id.intValue()));
@@ -193,10 +193,14 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
                 }
                 Set<DepartmentFormType> departmentFormTypeList = new HashSet<DepartmentFormType>();
                 for (Department department : departments10) {
-                    for (Integer reportPeriodId : formDataFilter.getReportPeriodIds()) {
-                        ReportPeriod reportPeriod = periodService.getReportPeriod(reportPeriodId);
-                        departmentFormTypeList.addAll(sourceService.getDFTByDepartment(department.getId(), formDataFilter.getTaxType(),
-                                reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate()));
+                    if (formDataFilter.getReportPeriodIds().isEmpty()) {
+                        departmentFormTypeList.addAll(sourceService.getDFTByDepartment(department.getId(), formDataFilter.getTaxType(), null, null));
+                    } else {
+                        for (Integer reportPeriodId : formDataFilter.getReportPeriodIds()) {
+                            ReportPeriod reportPeriod = periodService.getReportPeriod(reportPeriodId);
+                            departmentFormTypeList.addAll(sourceService.getDFTByDepartment(department.getId(), formDataFilter.getTaxType(),
+                                    reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate()));
+                        }
                     }
                 }
                 for(DepartmentFormType departmentFormType : departmentFormTypeList) {
