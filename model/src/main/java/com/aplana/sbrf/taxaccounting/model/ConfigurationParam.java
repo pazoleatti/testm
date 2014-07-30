@@ -18,7 +18,8 @@ public enum ConfigurationParam {
     // Загрузка НФ
     FORM_UPLOAD_DIRECTORY("Путь к каталогу загрузки", false, true, true, 2),
     FORM_ARCHIVE_DIRECTORY("Путь к каталогу архива", false, true, true, 2),
-    FORM_ERROR_DIRECTORY("Путь к каталогу ошибок", false, true, true, 2);
+    FORM_ERROR_DIRECTORY("Путь к каталогу ошибок", false, true, true, 2),
+    ENCRYPT_DLL("Путь к библиотеке подписи", true, true, true, 1);
 
     private String caption;
     private boolean common;
