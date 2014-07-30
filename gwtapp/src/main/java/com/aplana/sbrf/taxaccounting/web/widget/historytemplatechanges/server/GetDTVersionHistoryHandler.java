@@ -1,10 +1,8 @@
-package com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.server;
+package com.aplana.sbrf.taxaccounting.web.widget.historytemplatechanges.server;
 
 import com.aplana.sbrf.taxaccounting.model.TemplateChanges;
 import com.aplana.sbrf.taxaccounting.service.TemplateChangesService;
-import com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.shared.GetDTHistoryAction;
-import com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.shared.GetDTHistoryResult;
-import com.aplana.sbrf.taxaccounting.web.widget.historytemplatechanges.shared.TemplateChangesExt;
+import com.aplana.sbrf.taxaccounting.web.widget.historytemplatechanges.shared.*;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
@@ -20,31 +18,31 @@ import java.util.List;
  */
 @Service
 @PreAuthorize("hasRole('ROLE_CONF')")
-public class GetDTHistoryHandler extends AbstractActionHandler<GetDTHistoryAction, GetDTHistoryResult> {
-
+public class GetDTVersionHistoryHandler extends AbstractActionHandler<GetDTVersionHistoryAction, GetDTVersionHistoryResult> {
     @Autowired
     private TemplateChangesService templateChangesService;
 
-    public GetDTHistoryHandler() {
-        super(GetDTHistoryAction.class);
+    public GetDTVersionHistoryHandler() {
+        super(GetDTVersionHistoryAction.class);
     }
 
     @Override
-    public GetDTHistoryResult execute(GetDTHistoryAction action, ExecutionContext executionContext) throws ActionException {
-        List<TemplateChanges> changeses = templateChangesService.getByDeclarationTypeIds(action.getTypeId());
+    public GetDTVersionHistoryResult execute(GetDTVersionHistoryAction action, ExecutionContext executionContext) throws ActionException {
+        GetDTVersionHistoryResult result = new GetDTVersionHistoryResult();
+        List<TemplateChanges> changeses = templateChangesService.getByDeclarationTemplateId(action.getTemplateId(),
+                action.getSortFilter().getSearchOrdering(), action.getSortFilter().isAscSorting());
         List<TemplateChangesExt> changesList = new ArrayList<TemplateChangesExt>(changeses.size());
         for (TemplateChanges changes : changeses){
             TemplateChangesExt templateChangesExt = new TemplateChangesExt();
             templateChangesExt.setTemplateChanges(changes);
             changesList.add(templateChangesExt);
         }
-        GetDTHistoryResult result = new GetDTHistoryResult();
-        result.setTemplateChangesExts(changesList);
+
+        result.setChangesExtList(changesList);
         return result;
     }
 
     @Override
-    public void undo(GetDTHistoryAction getDTHistoryAction, GetDTHistoryResult getDTHistoryResult, ExecutionContext executionContext) throws ActionException {
-
+    public void undo(GetDTVersionHistoryAction getDTVersionChangesAction, GetDTVersionHistoryResult getDTVersionChangesResult, ExecutionContext executionContext) throws ActionException {
     }
 }
