@@ -173,7 +173,6 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetDeclarationFilterDataResult>() {
             @Override
             public void onSuccess(GetDeclarationFilterDataResult result) {
-                getView().setAcceptableDepartments(result.getDepartments(), result.getFilterValues().getDepartmentIds());
                 getView().setAcceptableReportPeriods(result.getPeriodsForCreation());
                 popupSlot.addToPopupSlot(DeclarationCreationPresenter.this);
             }
@@ -183,5 +182,21 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
     @Override
     public TaxType getTaxType() {
         return taxType;
+    }
+
+    @Override
+    public void onReportPeriodChange() {
+        if (getView().getSelectedReportPeriod().isEmpty()) {
+            return;
+        }
+        GetDeclarationDepartmentsAction action = new GetDeclarationDepartmentsAction();
+        action.setTaxType(taxType);
+        action.setReportPeriodId(getView().getSelectedReportPeriod().get(0));
+        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetDeclarationDepartmentsResult>() {
+            @Override
+            public void onSuccess(GetDeclarationDepartmentsResult result) {
+                getView().setAcceptableDepartments(result.getDepartments(), result.getDepartmentIds());
+            }
+        }, this) );
     }
 }
