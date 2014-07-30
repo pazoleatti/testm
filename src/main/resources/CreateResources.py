@@ -427,7 +427,7 @@ if MQQueuesId[0] != '':
 			break
 if MQQueueNotFound:
 	print 'Initiated the creation of an MQ queue'
-	print 'id='+ AdminTask.createWMQQueue(resourceRootLocationId, ['-name', MQQueueName, '-jndiName', MQQueueJndi, '-queueName', MQServerQueueName, '-busName', SIBusName, '-qmgr', MQServerQueueManager])
+	print 'id='+ AdminTask.createWMQQueue(resourceRootLocationId, ['-name', MQQueueName, '-jndiName', MQQueueJndi, '-queueName', MQServerQueueName, '-qmgr', MQServerQueueManager])
 	AdminConfig.save()
 	print 'Configuration is saved.'
 
