@@ -65,6 +65,9 @@ def startDate = null
 def endDate = null
 
 @Field
+def calendarStartDate = null
+
+@Field
 def dateFormat = 'dd.MM.yyyy'
 
 @Field

@@ -44,6 +44,11 @@ public class RefBookIncome101 implements RefBookDataProvider {
     }
 
     @Override
+    public List<Pair<Long, Long>> getRecordIdPairs(Long refBookId, Date version, Boolean needAccurateVersion, String filter) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public List<Long> getUniqueRecordIds(Date version, String filter) {
          return dao.getUniqueRecordIds(filter);
     }

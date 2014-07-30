@@ -78,7 +78,7 @@
             <fm:BodyContainer>
                 <g:HTMLPanel ui:field="filterContentPanel" addStyleNames="{style.btnPanel}"/>
                 <g:ResizeLayoutPanel addStyleNames="{style.table}">
-                    <style:GenericDataGrid ui:field="auditTable" height="100%" width="100%"/>
+                    <style:GenericDataGrid ui:field="table" height="100%" width="100%"/>
                 </g:ResizeLayoutPanel>
                 <pager:FlexiblePager ui:field="pager" location="CENTER"
                                      showFastForwardButton="false" fastForwardRows="0"

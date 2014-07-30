@@ -8,10 +8,10 @@ import org.junit.Test;
  */
 public class TransportDataParamTest {
 
-    private static String INVALID_NAME_1 = "__1111-25______99_11702_03212014.rnu";
-    private static String INVALID_NAME_2 = "____852-4______________147212014__";
+    private static String INVALID_NAME_1 = "__1111-25______99_11702_03212014_.rnu";
+    private static String INVALID_NAME_2 = "____852-4______________147212014";
 
-    private static String VALID_NAME_1 = "____852-4___99_11702_02_02212014__.rnu";
+    private static String VALID_NAME_1 = "____852-4___99_11702_02_02212014.rnu";
     private static String VALID_NAME_2 = "1290-40.1_______49_0000_00222015_6.rnu";
 
     // Несоответствие формата

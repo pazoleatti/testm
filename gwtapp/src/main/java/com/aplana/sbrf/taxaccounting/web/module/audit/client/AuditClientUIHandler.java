@@ -1,12 +1,11 @@
 package com.aplana.sbrf.taxaccounting.web.module.audit.client;
 
-import com.gwtplatform.mvp.client.UiHandlers;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.AplanaUiHandlers;
 
 /**
  * User: avanteev
  */
-public interface AuditClientUIHandler extends UiHandlers {
-    void onRangeChange(final int start, int length);
+public interface AuditClientUIHandler extends AplanaUiHandlers {
     void onPrintButtonClicked();
     void onArchiveButtonClicked();
     void onSortingChanged();

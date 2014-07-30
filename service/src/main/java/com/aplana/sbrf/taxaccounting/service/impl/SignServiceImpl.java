@@ -34,24 +34,20 @@ public class SignServiceImpl implements SignService {
         long init;
         long pkBase;
         StringBuffer userIdBuf = new StringBuffer("1");
-
+        System.out.println(System.getProperty("java.library.path"));
         //-------------- грузим DLL --------------------------------
         //try-catch на случай если библиотека подгружена другим ClassLoader-ом
-        try {
-            if (System.getProperty("os.arch", "?").equals("amd64"))
-            {   //64 бит
-                System.loadLibrary("grn64");
-                System.loadLibrary("bicr4_64");
-                System.loadLibrary("bicr_adm64");
-            }
-            else //32 бит
-            {
-                System.loadLibrary("grn");
-                System.loadLibrary("bicr4");
-                System.loadLibrary("bicr_adm");
-            }
-        } catch (UnsatisfiedLinkError linkError){
-            logger.info("Библиотека уже загружена." + linkError.getMessage());
+        if (System.getProperty("os.arch", "?").equals("amd64"))
+        {   //64 бит
+            System.loadLibrary("grn64");
+            System.loadLibrary("bicr4_64");
+            System.loadLibrary("bicr_adm64");
+        }
+        else //32 бит
+        {
+            System.loadLibrary("grn");
+            System.loadLibrary("bicr4");
+            System.loadLibrary("bicr_adm");
         }
 
         //-------------- инициализация --------------------------------
@@ -60,14 +56,17 @@ public class SignServiceImpl implements SignService {
 
         //-------------- загрузка базы БОК --------------------------------
         total +=  Bicr4.cr_pkbase_load(init, pathToSignDat, COM_LEN, 0, param);
+        logger.info("cr_pkbase_load, result = " + total);
         pkBase = param[0];
 
         //-------------- проверка ЭЦП в файле --------------------------------
         int n = 1; //проверим первую ЭЦП
         total += Bicr4.cr_check_file(init, pkBase, pathToSignFile, n, delFlag, userIdBuf);
+        logger.info("cr_check_file, result = " + total);
 
         //-------------- деинициализация --------------------------------
         total += Bicr4.cr_pkbase_close(pkBase);
+        logger.info("cr_pkbase_close, result = " + total);
         total += Bicr4.cr_uninit(init);
 		return total == 0;
     }

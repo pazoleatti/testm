@@ -145,10 +145,10 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
 
             // Налог на прибыль
             if (action.getTaxType() == TaxType.INCOME) {
-                paramsMap.put(DepartmentParamAliases.SUM_TAX.name(), new RefBookValue(RefBookAttributeType.NUMBER, BigDecimal.valueOf(depCombined.getSumTax())));
-                paramsMap.put(DepartmentParamAliases.SUM_DIVIDENDS.name(), new RefBookValue(RefBookAttributeType.NUMBER, BigDecimal.valueOf(depCombined.getSumDividends())));
+                paramsMap.put(DepartmentParamAliases.SUM_TAX.name(), new RefBookValue(RefBookAttributeType.NUMBER, depCombined.getSumTax()));
+                paramsMap.put(DepartmentParamAliases.SUM_DIVIDENDS.name(), new RefBookValue(RefBookAttributeType.NUMBER, depCombined.getSumDividends()));
                 paramsMap.put(DepartmentParamAliases.OBLIGATION.name(), new RefBookValue(RefBookAttributeType.REFERENCE, getFirstLong(depCombined.getObligation())));
-                paramsMap.put(DepartmentParamAliases.TAX_RATE.name(), new RefBookValue(RefBookAttributeType.NUMBER, BigDecimal.valueOf(depCombined.getTaxRate())));
+                paramsMap.put(DepartmentParamAliases.TAX_RATE.name(), new RefBookValue(RefBookAttributeType.NUMBER, depCombined.getTaxRate()));
                 paramsMap.put(DepartmentParamAliases.TYPE.name(), new RefBookValue(RefBookAttributeType.REFERENCE, getFirstLong(depCombined.getType())));
             }
 
@@ -229,9 +229,7 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
             formDataFilter.setFormTypeId(formTypeIds);
             formDataFilter.setFormState(WorkflowState.ACCEPTED);
             formDataFilter.setTaxType(action.getTaxType());
-            TAUserInfo userInfo = new TAUserInfo();
-            userInfo.setIp("127.0.0.1");
-            userInfo.setUser(userService.getUser(TAUser.SYSTEM_USER_ID));
+            TAUserInfo userInfo = userService.getSystemUserInfo();
             boolean manual = true;
             List<Long> formDataIds = formDataSearchService.findDataIdsByUserAndFilter(userInfo, formDataFilter);
             for(Long formDataId : formDataIds) {

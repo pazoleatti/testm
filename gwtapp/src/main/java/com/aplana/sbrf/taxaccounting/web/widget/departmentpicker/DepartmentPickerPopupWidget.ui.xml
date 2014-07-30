@@ -2,7 +2,6 @@
              xmlns:t="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
              xmlns:g="urn:import:com.google.gwt.user.client.ui"
              xmlns:m="urn:import:com.aplana.gwt.client"
-             xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
         >
 
     <ui:style>
@@ -129,6 +128,9 @@
                     <g:HorizontalPanel spacing="0" width="100%" addStyleNames="{modal.datePanel}"
                                        verticalAlignment="middle" horizontalAlignment="right">
                         <g:cell horizontalAlignment="left" width="50%">
+                            <g:CheckBox ui:field="pickAll" wordWrap="false" text="Выделить все"/>
+                        </g:cell>
+                        <g:cell horizontalAlignment="left" width="50%">
                             <g:CheckBox ui:field="selectChild" wordWrap="false" text="Включая подчиненные"/>
                         </g:cell>
                         <g:cell horizontalAlignment="right" width="50%">
@@ -147,7 +149,6 @@
                             <g:HorizontalPanel ui:field="itemsInfoPanel">
                                 <g:Label ui:field="countItemsLabel" text="Выделено:"/>
                                 <g:Label ui:field="countItems" width="3em" addStyleNames="{modal.forCountSelected}" />
-                                <style:LinkButton ui:field="pickAll" text="Выделить все" disableImage="true"/>
                             </g:HorizontalPanel>
                         </g:cell>
                         <g:Button ui:field="ok" text="Выбрать" width="70px" addStyleNames="{modal.marginRight10}"/>

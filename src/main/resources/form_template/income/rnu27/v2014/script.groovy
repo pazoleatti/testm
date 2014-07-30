@@ -163,7 +163,6 @@ def getRecordImport(def Long refBookId, def String alias, def String value, def 
     if (value == null || value == '') {
         return null
     }
-    logger.info("id = "+ refBookId + "; v = "+ value)
     return formDataService.getRefBookRecordImport(refBookId, recordCache, providerCache, refBookCache, alias, value,
             getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
 }

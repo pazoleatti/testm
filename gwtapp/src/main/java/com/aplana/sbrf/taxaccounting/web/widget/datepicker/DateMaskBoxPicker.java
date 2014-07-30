@@ -313,4 +313,8 @@ public class DateMaskBoxPicker extends DoubleStateComposite implements HasEnable
         super.setVisible(visible);
         mainPanel.setVisible(visible);
     }
+
+    public void addKeyPressHandler(KeyPressHandler handler) {
+        dateBox.addKeyPressHandler(handler);
+    }
 }

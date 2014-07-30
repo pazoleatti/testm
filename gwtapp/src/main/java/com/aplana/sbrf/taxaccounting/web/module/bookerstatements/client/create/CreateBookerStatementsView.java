@@ -141,7 +141,7 @@ public class CreateBookerStatementsView extends PopupViewWithUiHandlers<CreateBo
         if (yearBox.getValue() == null) {
             names.append("«Год», ");
         }
-        if (accountPeriodIds.getValue() == null) {
+        if (accountPeriodIds.getValue() == null || accountPeriodIds.getValue().isEmpty()) {
             names.append("«Период», ");
         }
         if (departmentPicker.getValue() == null || departmentPicker.getValue().size() == 0) {

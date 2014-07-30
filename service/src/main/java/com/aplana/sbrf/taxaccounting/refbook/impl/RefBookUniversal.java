@@ -103,6 +103,11 @@ public class RefBookUniversal implements RefBookDataProvider {
     }
 
     @Override
+    public List<Pair<Long, Long>> getRecordIdPairs(Long refBookId, Date version, Boolean needAccurateVersion, String filter) {
+        return refBookDao.getRecordIdPairs(refBookId, version, needAccurateVersion, filter);
+    }
+
+    @Override
     public List<Long>  getUniqueRecordIds(Date version, String filter) {
         //TODO: возможно нужно точное совпадение версии
         List<Pair<Long, Long>> pairs = refBookDao.getRecordIdPairs(refBookId, version, false, filter);

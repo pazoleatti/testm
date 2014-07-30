@@ -526,7 +526,7 @@ void generateXML() {
                                     КодОпер: row.code,
                                     СтРеалТов: round(row.realizeCost),
                                     СтПриобТов: round(row.obtainCost ?: empty),
-                                    НалНеВыч: getNalNeVich(row)
+                                    НалНеВыч: round(getNalNeVich(row))
                             )
                         }
                     }

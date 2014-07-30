@@ -89,9 +89,13 @@ public class RefBookFactoryImpl implements RefBookFactory {
             dataProvider.setRefBookId(refBookId);
             return dataProvider;
         } else if (RefBookConfigurationParam.REF_BOOK_ID.equals(refBookId)) {
-			return (RefBookConfigurationParam) applicationContext.getBean("refBookConfigurationParam", RefBookConfigurationParam.class);
+            RefBookConfigurationParam dataProvider = applicationContext.getBean("refBookConfigurationParam", RefBookConfigurationParam.class);
+            dataProvider.setRefBookId(refBookId);
+            return dataProvider;
 		}  else if (RefBookAuditFieldList.REF_BOOK_ID.equals(refBookId)) {
-			return (RefBookAuditFieldList) applicationContext.getBean("refBookAuditFieldList", RefBookAuditFieldList.class);
+            RefBookAuditFieldList dataProvider = applicationContext.getBean("refBookAuditFieldList", RefBookAuditFieldList.class);
+            dataProvider.setRefBookId(refBookId);
+            return dataProvider;
 		}else{
 			RefBookUniversal refBookUniversal = (RefBookUniversal) applicationContext.getBean("refBookUniversal", RefBookDataProvider.class);
 			refBookUniversal.setRefBookId(refBookId);

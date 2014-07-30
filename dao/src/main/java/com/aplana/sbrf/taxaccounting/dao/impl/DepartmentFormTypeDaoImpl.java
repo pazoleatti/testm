@@ -556,15 +556,15 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
             "  select 1 from form_type ft \n" +
             "  left join form_template ftemp on ftemp.type_id = ft.id \n" +
             "  where ft.id = dft.form_type_id and (:taxType is null or ft.tax_type = :taxType) \n" +
-            "  and (:periodStart is null or (ftemp.version >= :periodStart and (:periodEnd is null or ftemp.version <= :periodEnd)))\n" +
+            //"  and (:periodStart is null or (ftemp.version >= :periodStart and (:periodEnd is null or ftemp.version <= :periodEnd)))\n" +
             ")";
 
     @Override
     public List<DepartmentFormType> getByTaxType(int departmentId, TaxType taxType, Date periodStart, Date periodEnd) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("departmentId", departmentId);
-        params.put("periodStart", periodStart);
-        params.put("periodEnd", periodEnd);
+        //params.put("periodStart", periodStart);
+        //params.put("periodEnd", periodEnd);
         params.put("taxType", taxType != null ? String.valueOf(taxType.getCode()) : null);
         return getNamedParameterJdbcTemplate().query(GET_SQL_BY_TAX_TYPE_SQL, params, DFT_MAPPER);
     }
@@ -598,7 +598,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         sqlParams[cnt] = String.valueOf(taxType.getCode());
         return getJdbcTemplate().queryForList(
                 "select dft.form_type_id from department_form_type dft where performer_dep_id = ? " +
-                        " and dft.kind in (" + SqlUtils.preparePlaceHolders(kinds.size()) + ")" +
+                        (kinds.isEmpty() ? "" : " and dft.kind in (" + SqlUtils.preparePlaceHolders(kinds.size()) + ")" )+
                         " and exists (select 1 from form_type ft where ft.id = dft.form_type_id and ft.tax_type = ?)",
                 Long.class,
                 sqlParams
@@ -713,7 +713,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
             "join department_declaration_type ddt on (ddt.department_id = d.id and ddt.declaration_type_id = dtype.id)\n" +
             "join declaration_source ds on ds.department_declaration_type_id = ddt.id\n" +
             "join department_form_type dft on dft.id = ds.src_department_form_type_id\n" +
-            "where dft.department_id = ? and dft.kind = ? and dft.form_type_id = ? and dd.report_period_id = ? and dd.is_accepted = 1\n" +
+            "where dft.department_id = :sourceDepartmentId and dft.kind = :sourceKind and dft.form_type_id = :sourceFormTypeId and dd.report_period_id = :reportPeriodId and dd.is_accepted = 1\n" +
             "and (:periodStart is null or ((ds.period_end >= :periodStart or ds.period_end is null) and (:periodEnd is null or ds.period_start <= :periodEnd)))";
 
     @Override

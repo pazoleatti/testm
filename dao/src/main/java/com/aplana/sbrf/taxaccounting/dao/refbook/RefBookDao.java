@@ -99,7 +99,7 @@ public interface RefBookDao {
      * @param version дата актуальности. Может быть null - тогда не учитывается
      * @param needAccurateVersion признак того, что нужно точное совпадение по дате начала действия записи
      * @param filter фильтр для отбора записей
-     * @return пары идентификатор версии элемента - идентификаторидентификатор элемента справочника
+     * @return пары идентификатор версии элемента - идентификатор элемента справочника
      */
     List<Pair<Long, Long>> getRecordIdPairs(Long refBookId, Date version, Boolean needAccurateVersion, String filter);
 
