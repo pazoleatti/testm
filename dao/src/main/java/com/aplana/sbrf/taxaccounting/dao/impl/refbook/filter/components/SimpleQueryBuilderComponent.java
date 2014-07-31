@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class SimpleQueryBuilderComponent extends AbstractQueryBuilderComponent {
     @Override
-    public void enterInternlAlias(@NotNull FilterTreeParser.InternlAliasContext ctx) {
+    public void enterInternlAlias(FilterTreeParser.InternlAliasContext ctx) {
         if (ctx.getText().equalsIgnoreCase(RefBook.RECORD_ID_ALIAS)){
             ps.appendQuery("id");
         } else{

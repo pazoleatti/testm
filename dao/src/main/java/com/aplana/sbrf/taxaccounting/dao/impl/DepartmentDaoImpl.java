@@ -1,15 +1,12 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -25,16 +22,6 @@ import java.util.*;
 @Repository
 @Transactional(readOnly = true)
 public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
-
-	@Autowired
-	DepartmentFormTypeDao departmentFormTypeDao;
-
-	@Autowired
-	DepartmentDeclarationTypeDao departmentDeclarationTypeDao;
-
-    @Autowired
-    DBInfo dbInfo;
-
 	@Override
 	@Cacheable(CacheConstants.DEPARTMENT)
 	public Department getDepartment(int id) {
@@ -340,7 +327,6 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
                 (idOnly ? "select d.id " : "select d.* ") +                         // определяем
                 "from tree1 t1, tree2 t2, department d where t1.type = ? " +
                 "and t2.root_id = t1.id and t2.id = d.id";
-        System.out.println("" + rez+"");
         return rez;
     }
 

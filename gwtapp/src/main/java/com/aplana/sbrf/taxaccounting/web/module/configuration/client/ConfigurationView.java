@@ -2,7 +2,10 @@ package com.aplana.sbrf.taxaccounting.web.module.configuration.client;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.module.configuration.client.ConfigurationPresenter.MyView;
+import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumn;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumnFactory;
+import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellModifiedEvent;
+import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellModifiedEventHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -19,10 +22,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandlers> implements MyView {
     @UiField
@@ -91,6 +91,16 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
         commonTable.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.ENABLED);
         SingleSelectionModel<DataRow<Cell>> singleSelectionModel = new SingleSelectionModel<DataRow<Cell>>();
         commonTable.setSelectionModel(singleSelectionModel);
+
+        // Обновляем таблицу после обновления модели
+        ((DataRowColumn<?>)paramColumnUI).addCellModifiedEventHandler(new CellModifiedEventHandler() {
+            @Override
+            public void onCellModified(CellModifiedEvent event, boolean withReference) {
+                if (getUiHandlers() != null) {
+                    commonTable.redraw();
+                }
+            }
+        });
     }
 
     /**
@@ -126,6 +136,16 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
         formTable.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.ENABLED);
         SingleSelectionModel<DataRow<Cell>> singleSelectionModel = new SingleSelectionModel<DataRow<Cell>>();
         formTable.setSelectionModel(singleSelectionModel);
+
+        // Обновляем таблицу после обновления модели
+        ((DataRowColumn<?>)departmentColumnUI).addCellModifiedEventHandler(new CellModifiedEventHandler() {
+            @Override
+            public void onCellModified(CellModifiedEvent event, boolean withReference) {
+                if (getUiHandlers() != null) {
+                    formTable.redraw();
+                }
+            }
+        });
     }
 
     // Переключение между вкладками

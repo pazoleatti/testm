@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.components;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.FilterTreeParser;
-import org.antlr.v4.runtime.misc.NotNull;
 
 /**
  * Собирает sql выражение но при этом не учитывает
@@ -9,7 +8,7 @@ import org.antlr.v4.runtime.misc.NotNull;
  */
 abstract class AbstractQueryBuilderComponent extends AbstractTreeListenerComponent {
 
-    @Override public void enterNobrakets(@NotNull FilterTreeParser.NobraketsContext ctx) {
+    @Override public void enterNobrakets(FilterTreeParser.NobraketsContext ctx) {
         if (ctx.link_type() != null){
             ps.appendQuery(" ");
             ps.appendQuery(ctx.link_type().getText());
@@ -18,24 +17,24 @@ abstract class AbstractQueryBuilderComponent extends AbstractTreeListenerCompone
     }
 
     @Override
-    public void enterFuncwrap(@NotNull FilterTreeParser.FuncwrapContext ctx) {
+    public void enterFuncwrap(FilterTreeParser.FuncwrapContext ctx) {
         ps.appendQuery(ctx.functype().getText());
         ps.appendQuery("(");
     }
 
     @Override
-    public void exitFuncwrap(@NotNull FilterTreeParser.FuncwrapContext ctx) {
+    public void exitFuncwrap(FilterTreeParser.FuncwrapContext ctx) {
         ps.appendQuery(")");
     }
 
-    @Override public void enterOperand_type(@NotNull FilterTreeParser.Operand_typeContext ctx) {
+    @Override public void enterOperand_type(FilterTreeParser.Operand_typeContext ctx) {
         ps.appendQuery(" ");
         ps.appendQuery(ctx.getText());
         ps.appendQuery(" ");
     }
 
     @Override
-    public void enterString(@NotNull FilterTreeParser.StringContext ctx) {
+    public void enterString(FilterTreeParser.StringContext ctx) {
         ps.appendQuery("?");
         // Строка по умолчанию содерижт символы кавычек. Пример " 'Текст' "
         ps.addParam(ctx.getText().substring(1, ctx.getText().length() - 1));
@@ -43,14 +42,14 @@ abstract class AbstractQueryBuilderComponent extends AbstractTreeListenerCompone
 
 
     @Override
-    public abstract void enterInternlAlias(@NotNull FilterTreeParser.InternlAliasContext ctx);
+    public abstract void enterInternlAlias(FilterTreeParser.InternlAliasContext ctx);
 
     @Override
-    public void enterNumber(@NotNull FilterTreeParser.NumberContext ctx) {
+    public void enterNumber(FilterTreeParser.NumberContext ctx) {
         ps.appendQuery(ctx.getText());
     }
 
-    @Override public void enterWithbrakets(@NotNull FilterTreeParser.WithbraketsContext ctx) {
+    @Override public void enterWithbrakets(FilterTreeParser.WithbraketsContext ctx) {
         if (ctx.link_type() != null){
             ps.appendQuery(" ");
             ps.appendQuery(ctx.link_type().getText());
@@ -58,12 +57,12 @@ abstract class AbstractQueryBuilderComponent extends AbstractTreeListenerCompone
         ps.appendQuery("(");
     }
 
-    @Override public void exitWithbrakets(@NotNull FilterTreeParser.WithbraketsContext ctx) {
+    @Override public void exitWithbrakets(FilterTreeParser.WithbraketsContext ctx) {
         ps.appendQuery(")");
     }
 
     @Override
-    public void exitIsNullExpr(@NotNull FilterTreeParser.IsNullExprContext ctx) {
+    public void exitIsNullExpr(FilterTreeParser.IsNullExprContext ctx) {
         ps.appendQuery(" is null");
     }
 }

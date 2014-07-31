@@ -33,14 +33,11 @@ public class RefBookIncome102DaoImpl extends AbstractDao implements RefBookIncom
     private RefBookDao refBookDao;
 
 	@Autowired
-	private RefBookUtils refBookUtils;
-
-	@Autowired
 	private RefBookIncome101Dao income101Dao;
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
-		return refBookUtils.getRecords(REF_BOOK_ID, TABLE_NAME, pagingParams, filter, sortAttribute, isSortAscending, null);
+		return refBookDao.getRecords(REF_BOOK_ID, TABLE_NAME, pagingParams, filter, sortAttribute, isSortAscending, null);
     }
 
     @Override
@@ -50,12 +47,12 @@ public class RefBookIncome102DaoImpl extends AbstractDao implements RefBookIncom
 
     @Override
     public List<Long> getUniqueRecordIds(String filter) {
-        return refBookUtils.getUniqueRecordIds(REF_BOOK_ID, TABLE_NAME, filter);
+        return refBookDao.getUniqueRecordIds(REF_BOOK_ID, TABLE_NAME, filter);
     }
 
     @Override
     public int getRecordsCount(String filter) {
-        return refBookUtils.getRecordsCount(REF_BOOK_ID, TABLE_NAME, filter);
+        return refBookDao.getRecordsCount(REF_BOOK_ID, TABLE_NAME, filter);
     }
 
     @Override
@@ -86,7 +83,7 @@ public class RefBookIncome102DaoImpl extends AbstractDao implements RefBookIncom
 
         for (Map<String, RefBookValue> record : records) {
             // проверка обязательности заполнения записей справочника
-            List<String> errors= refBookUtils.checkFillRequiredRefBookAtributes(refBook.getAttributes(), record);
+            List<String> errors= RefBookUtils.checkFillRequiredRefBookAtributes(refBook.getAttributes(), record);
             if (errors.size() > 0){
                 throw new DaoException("Поля " + errors.toString() + "являются обязательными для заполнения");
             }

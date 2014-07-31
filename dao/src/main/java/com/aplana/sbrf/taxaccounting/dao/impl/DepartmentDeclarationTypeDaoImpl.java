@@ -14,7 +14,6 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.validation.constraints.NotNull;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -186,7 +185,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
     }
 
     @Override
-    public List<DepartmentDeclarationType> getDDTByDeclarationType(@NotNull Integer declarationTypeId) {
+    public List<DepartmentDeclarationType> getDDTByDeclarationType(Integer declarationTypeId) {
         try {
             return getJdbcTemplate().query("select id, department_id, DECLARATION_TYPE_ID from DEPARTMENT_DECLARATION_TYPE where DECLARATION_TYPE_ID = ?",
                     new Object[]{declarationTypeId},

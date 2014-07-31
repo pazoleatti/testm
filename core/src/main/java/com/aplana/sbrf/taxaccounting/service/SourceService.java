@@ -6,20 +6,16 @@ import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import javax.validation.constraints.NotNull;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.source.SourceClientData;
-import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
 /**
  * Интерфейс сервиса для работы с привязкой департаментов к подразделениям
  */
 public interface SourceService {
-
 
     /**
      * Возвращает НФ назначения, которые являются источниками

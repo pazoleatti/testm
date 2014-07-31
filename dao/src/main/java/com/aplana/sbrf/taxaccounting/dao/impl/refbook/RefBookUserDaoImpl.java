@@ -28,12 +28,9 @@ class RefBookUserDaoImpl extends AbstractDao implements RefBookUserDao {
 
     private static final String TABLE_NAME = "SEC_USER";
 
-    @Autowired
-    private RefBookUtils refBookUtils;
-
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
-        return refBookUtils.getRecords(REF_BOOK_ID, TABLE_NAME, pagingParams, filter, sortAttribute, isSortAscending, null);
+        return refBookDao.getRecords(REF_BOOK_ID, TABLE_NAME, pagingParams, filter, sortAttribute, isSortAscending, null);
     }
 
     @Override
@@ -43,12 +40,12 @@ class RefBookUserDaoImpl extends AbstractDao implements RefBookUserDao {
 
     @Override
     public List<Long> getUniqueRecordIds(Date version, String filter) {
-        return refBookUtils.getUniqueRecordIds(REF_BOOK_ID, TABLE_NAME, filter);
+        return refBookDao.getUniqueRecordIds(REF_BOOK_ID, TABLE_NAME, filter);
     }
 
     @Override
     public int getRecordsCount(Date version, String filter) {
-        return refBookUtils.getRecordsCount(REF_BOOK_ID, TABLE_NAME, filter);
+        return refBookDao.getRecordsCount(REF_BOOK_ID, TABLE_NAME, filter);
     }
 
     @Override
@@ -73,6 +70,6 @@ class RefBookUserDaoImpl extends AbstractDao implements RefBookUserDao {
 
     @Override
     public Long getRowNum(Long recordId, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
-        return refBookUtils.getRowNum(REF_BOOK_ID, TABLE_NAME, recordId, filter, sortAttribute, isSortAscending, null);
+        return refBookDao.getRowNum(REF_BOOK_ID, TABLE_NAME, recordId, filter, sortAttribute, isSortAscending, null);
     }
 }

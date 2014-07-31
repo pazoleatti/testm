@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.core.api.LockCoreService;
+import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.AuditDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
@@ -33,7 +35,8 @@ public class AuditServiceImpl implements AuditService {
     private PeriodService periodService;
     @Autowired
     private TransactionHelper tx;
-
+    @Autowired
+    private LockDataService lockDataService;
 
     @Override
 	public PagingResult<LogSearchResultItem> getLogsByFilter(LogSystemFilter filter) {
@@ -125,5 +128,15 @@ public class AuditServiceImpl implements AuditService {
         } catch (DaoException e){
             throw new ServiceException("Поиск по НФ/декларациям.", e);
         }
+    }
+
+    @Override
+    public LockData lock(TAUserInfo userInfo) {
+        return lockDataService.lock("LOG_SYSTEM_BACKUP", userInfo.getUser().getId(), 3600000);
+    }
+
+    @Override
+    public void unlock(TAUserInfo userInfo) {
+        lockDataService.unlock("LOG_SYSTEM_BACKUP", userInfo.getUser().getId());
     }
 }

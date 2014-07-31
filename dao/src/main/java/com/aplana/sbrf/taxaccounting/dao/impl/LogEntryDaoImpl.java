@@ -11,7 +11,6 @@ import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
-import javax.validation.constraints.NotNull;
 import java.io.*;
 import java.sql.*;
 import java.util.List;
@@ -77,7 +76,7 @@ public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
 
     @Override
     @Cacheable(value = "DataBlobsCache", key = "#uuid")
-    public List<LogEntry> get(@NotNull String uuid) {
+    public List<LogEntry> get(String uuid) {
         if (uuid.isEmpty()) {
             return null;
         }

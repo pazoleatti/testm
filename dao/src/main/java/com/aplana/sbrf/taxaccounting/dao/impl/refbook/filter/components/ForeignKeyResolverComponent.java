@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
-import org.antlr.v4.runtime.misc.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -85,7 +84,7 @@ public class ForeignKeyResolverComponent extends AbstractTreeListenerComponent i
      * Вход в узел содержащий поля внешних справочников eAlias
      */
     @Override
-    public void enterEAlias(@NotNull FilterTreeParser.EAliasContext ctx) {
+    public void enterEAlias(FilterTreeParser.EAliasContext ctx) {
         // Устанавливаем текущий атрибут как последний
         lastRefBookAttribute = refBook.getAttribute(ctx.ALIAS().getText());
     }
@@ -100,7 +99,7 @@ public class ForeignKeyResolverComponent extends AbstractTreeListenerComponent i
      * в sql выражение пропишется последний алиас name = 'Уфа'
      */
     @Override
-    public void exitEAlias(@NotNull FilterTreeParser.EAliasContext ctx) {
+    public void exitEAlias(FilterTreeParser.EAliasContext ctx) {
         ps.appendQuery("frb"+(ftCounter - 1));
         ps.appendQuery(".");
         ps.appendQuery(lastRefBookAttribute.getAttributeType().toString());
@@ -128,7 +127,7 @@ public class ForeignKeyResolverComponent extends AbstractTreeListenerComponent i
      * Вход в узел содержащий алиас поля внешней таблицы
      */
     @Override
-    public void enterExternalAlias(@NotNull FilterTreeParser.ExternalAliasContext ctx) {
+    public void enterExternalAlias(FilterTreeParser.ExternalAliasContext ctx) {
         // increment counter of join tables
         ftCounter++;
 
@@ -148,7 +147,7 @@ public class ForeignKeyResolverComponent extends AbstractTreeListenerComponent i
      * внешних справочников
      */
     @Override
-    public void exitQuery(@NotNull FilterTreeParser.QueryContext ctx) {
+    public void exitQuery(FilterTreeParser.QueryContext ctx) {
         if (joinStatement.size() > 0) {
             ps.setJoinPartsOfQuery(StringUtils.join(joinStatement.toArray(), '\n'));
         } else {

@@ -24,8 +24,6 @@ import static org.junit.Assert.assertTrue;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class RefBookUtilsTest {
 
-    private RefBookUtils refBookUtils = new RefBookUtils();
-
     @Test
     public void checkFillRequiredRefBookAtributesTest(){
         // Атрибуты справочника герои Великой Отечественной войны
@@ -52,11 +50,11 @@ public class RefBookUtilsTest {
         records1.put("NAME", new RefBookValue(RefBookAttributeType.STRING, "Виктор Васильевич Талалихин"));
         records1.put("BIRTHYEAR", new RefBookValue(RefBookAttributeType.STRING, "1918"));
         // все заполнено, все ок
-        assertTrue(refBookUtils.checkFillRequiredRefBookAtributes(attributes, records1).size() == 0);
+        assertTrue(RefBookUtils.checkFillRequiredRefBookAtributes(attributes, records1).size() == 0);
 
         Map<String, RefBookValue> records2 = new HashMap<String, RefBookValue>();
         records2.put("BIRTHYEAR", new RefBookValue(RefBookAttributeType.STRING, "1918"));
         // не заполнено имя, метод должен вернуть мапу с NAME
-        assertTrue(refBookUtils.checkFillRequiredRefBookAtributes(attributes, records2).size() == 1);
+        assertTrue(RefBookUtils.checkFillRequiredRefBookAtributes(attributes, records2).size() == 1);
     }
 }

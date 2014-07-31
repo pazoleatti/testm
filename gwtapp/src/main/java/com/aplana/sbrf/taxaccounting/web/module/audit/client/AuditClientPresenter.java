@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.audit.client;
 
+import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.HistoryBusinessSearchOrdering;
 import com.aplana.sbrf.taxaccounting.model.LogSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.LogSystemFilter;
@@ -7,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.sortable.ViewWithSortableTable;
@@ -148,15 +150,23 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<AuditArchiveResult>() {
             @Override
             public void onSuccess(AuditArchiveResult result) {
-                MessageEvent.fire(AuditClientPresenter.this, "Архивация выполнена успешно. Архивировано " + result.getCountOfRemoveRecords() + " записей");
-                getView().getBlobFromServer(result.getUuid());
-                GetLastArchiveDateAction action = new GetLastArchiveDateAction();
-                dispatcher.execute(action, CallbackUtils.defaultCallbackNoLock(new AbstractCallback<GetLastArchiveDateResult>() {
-                    @Override
-                    public void onSuccess(GetLastArchiveDateResult result) {
-                        getView().updateArchiveDateLbl(result.getLastArchiveDate());
-                    }
-                }, AuditClientPresenter.this));
+                LogCleanEvent.fire(AuditClientPresenter.this);
+                LogAddEvent.fire(AuditClientPresenter.this, result.getUuid());
+                if (!result.isException()) {
+                    MessageEvent.fire(AuditClientPresenter.this, "Архивация выполнена успешно. Архивировано " + result.getCountOfRemoveRecords() + " записей");
+                    getView().getBlobFromServer(result.getFileUuid());
+                    GetLastArchiveDateAction action = new GetLastArchiveDateAction();
+                    dispatcher.execute(action, CallbackUtils.defaultCallbackNoLock(new AbstractCallback<GetLastArchiveDateResult>() {
+                        @Override
+                        public void onSuccess(GetLastArchiveDateResult result) {
+                            getView().updateArchiveDateLbl(result.getLastArchiveDate());
+                        }
+                    }, AuditClientPresenter.this));
+                    auditFilterPresenter.initFilterData();
+                    auditFilterPresenter.onSearchButtonClicked();
+                } else {
+                    Dialog.errorMessage("Архивация не выполнена");
+                }
             }
         }, this));
         getProxy().manualReveal(AuditClientPresenter.this);

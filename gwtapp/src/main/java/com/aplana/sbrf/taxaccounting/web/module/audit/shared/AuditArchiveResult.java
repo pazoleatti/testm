@@ -7,7 +7,9 @@ import com.gwtplatform.dispatch.shared.Result;
  */
 public class AuditArchiveResult implements Result {
     String uuid;
+    String fileUuid;
     private int countOfRemoveRecords;
+    private boolean exception = false;
 
     public int getCountOfRemoveRecords() {
         return countOfRemoveRecords;
@@ -23,5 +25,21 @@ public class AuditArchiveResult implements Result {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
+    }
+
+    public String getFileUuid() {
+        return fileUuid;
+    }
+
+    public void setFileUuid(String fileUuid) {
+        this.fileUuid = fileUuid;
+    }
+
+    public boolean isException() {
+        return exception;
+    }
+
+    public void setException(boolean exception) {
+        this.exception = exception;
     }
 }

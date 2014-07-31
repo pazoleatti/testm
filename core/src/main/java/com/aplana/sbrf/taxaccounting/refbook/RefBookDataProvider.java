@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +36,7 @@ public interface RefBookDataProvider {
 	 * @param sortAttribute сортируемый столбец. Может быть не задан
 	 * @return
 	 */
-	PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams,
+	PagingResult<Map<String, RefBookValue>> getRecords(@NotNull Date version, PagingParams pagingParams,
 		String filter, RefBookAttribute sortAttribute, boolean isSortAscending);
 
     /**
@@ -122,7 +123,7 @@ public interface RefBookDataProvider {
 	 * @param recordId код строки справочника
 	 * @return
 	 */
-	Map<String, RefBookValue> getRecordData(Long recordId);
+	Map<String, RefBookValue> getRecordData(@NotNull Long recordId);
 
     /**
      * Получение структуры Код строки → Строка справочника по списку кодов строк

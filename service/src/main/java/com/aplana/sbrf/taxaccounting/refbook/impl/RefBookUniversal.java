@@ -39,9 +39,6 @@ public class RefBookUniversal implements RefBookDataProvider {
 	private RefBookDao refBookDao;
 
     @Autowired
-    private RefBookUtils refBookUtils;
-
-    @Autowired
     private LogEntryService logEntryService;
 
     @Autowired
@@ -220,13 +217,13 @@ public class RefBookUniversal implements RefBookDataProvider {
      */
     private void checkCorrectness(Logger logger, RefBook refBook, Long uniqueRecordId, Date versionFrom, Date versionTo, List<RefBookAttribute> attributes, List<RefBookRecord> records) {
         //Проверка обязательности заполнения записей справочника
-        List<String> errors = refBookUtils.checkFillRequiredRefBookAtributes(attributes, records);
+        List<String> errors = RefBookUtils.checkFillRequiredRefBookAtributes(attributes, records);
         if (errors.size() > 0){
             throw new ServiceException("Поля " + errors.toString() + " являются обязательными для заполнения");
         }
 
         //Проверка корректности значений атрибутов
-        errors = refBookUtils.checkRefBookAtributeValues(attributes, records);
+        errors = RefBookUtils.checkRefBookAtributeValues(attributes, records);
         if (!errors.isEmpty()){
             for (String error : errors) {
                 logger.error(error);
@@ -259,7 +256,7 @@ public class RefBookUniversal implements RefBookDataProvider {
         }
 
         //Проверка ссылочных значений
-        refBookUtils.isReferenceValuesCorrect(logger, REF_BOOK_RECORD_TABLE_NAME, versionFrom, versionTo, attributes, records);
+        refBookDao.isReferenceValuesCorrect(logger, REF_BOOK_RECORD_TABLE_NAME, versionFrom, versionTo, attributes, records);
     }
 
     /**
@@ -356,12 +353,12 @@ public class RefBookUniversal implements RefBookDataProvider {
                 }
             }
             if (result.getResult() == CrossResult.NEED_CHANGE) {
-                refBookUtils.updateVersionRelevancePeriod(REF_BOOK_RECORD_TABLE_NAME, result.getRecordId(), SimpleDateUtils.addDayToDate(versionTo, 1));
+                refBookDao.updateVersionRelevancePeriod(REF_BOOK_RECORD_TABLE_NAME, result.getRecordId(), SimpleDateUtils.addDayToDate(versionTo, 1));
                 //updateResults(results, result);
                 return false;
             }
             if (result.getResult() == CrossResult.NEED_DELETE) {
-                refBookUtils.deleteVersion(REF_BOOK_RECORD_TABLE_NAME, result.getRecordId());
+                refBookDao.deleteVersion(REF_BOOK_RECORD_TABLE_NAME, result.getRecordId());
                 //updateResults(results, result);
             }
         }
@@ -417,9 +414,9 @@ public class RefBookUniversal implements RefBookDataProvider {
                 if (!newParent.equals(oldParent) &&
                         refBookDao.hasLoops(uniqueRecordId, newParent.getReferenceValue())) {
                     //Цикл найден, формируем сообщение
-                    String parentRecordName = refBookUtils.buildUniqueRecordName(refBook,
+                    String parentRecordName = refBookDao.buildUniqueRecordName(refBook,
                             refBookDao.getUniqueAttributeValues(refBookId, newParent.getReferenceValue()));
-                    String recordName = refBookUtils.buildUniqueRecordName(refBook,
+                    String recordName = refBookDao.buildUniqueRecordName(refBook,
                             refBookDao.getUniqueAttributeValues(refBookId, uniqueRecordId));
                     throw new ServiceException("Версия " + parentRecordName + " не может быть указана как родительская, т.к. входит в структуру дочерних элементов версии " + recordName);
                 }
@@ -469,7 +466,7 @@ public class RefBookUniversal implements RefBookDataProvider {
             if (isRelevancePeriodChanged) {
                 List<Long> uniqueIdAsList = Arrays.asList(uniqueRecordId);
                 //Обновляем дату начала актуальности
-                refBookUtils.updateVersionRelevancePeriod(REF_BOOK_RECORD_TABLE_NAME, uniqueRecordId, versionFrom);
+                refBookDao.updateVersionRelevancePeriod(REF_BOOK_RECORD_TABLE_NAME, uniqueRecordId, versionFrom);
                 //Получаем запись - окончание версии. Если = null, то версия не имеет конца
                 List<Long> relatedVersions = refBookDao.getRelatedVersions(uniqueIdAsList);
                 if (!relatedVersions.isEmpty() && relatedVersions.size() > 1) {
@@ -485,18 +482,18 @@ public class RefBookUniversal implements RefBookDataProvider {
                     if (!relatedVersions.isEmpty() && !oldVersionPeriod.getVersionEnd().equals(versionTo)) {
                         if (!isVersionEndAlreadyExists) {
                             //Изменяем существующую фиктивную версию
-                            refBookUtils.updateVersionRelevancePeriod(REF_BOOK_RECORD_TABLE_NAME, relatedVersions.get(0), SimpleDateUtils.addDayToDate(versionTo, 1));
+                            refBookDao.updateVersionRelevancePeriod(REF_BOOK_RECORD_TABLE_NAME, relatedVersions.get(0), SimpleDateUtils.addDayToDate(versionTo, 1));
                         } else {
                             //Удаляем существующую фиктивную версию, теперь дата окончания задается началом следующей версии
                             Long currentVersionEnd = refBookDao.findRecord(refBookId, recordId, SimpleDateUtils.addDayToDate(oldVersionPeriod.getVersionEnd(), 1));
-                            refBookUtils.deleteRecordVersions(REF_BOOK_RECORD_TABLE_NAME, Arrays.asList(currentVersionEnd));
+                            refBookDao.deleteRecordVersions(REF_BOOK_RECORD_TABLE_NAME, Arrays.asList(currentVersionEnd));
                         }
                     }
                 }
 
                 if (!relatedVersions.isEmpty() && versionTo == null) {
                     //Удаляем фиктивную запись - теперь у версии нет конца
-                    refBookUtils.deleteRecordVersions(REF_BOOK_RECORD_TABLE_NAME, relatedVersions);
+                    refBookDao.deleteRecordVersions(REF_BOOK_RECORD_TABLE_NAME, relatedVersions);
                 }
             }
 
@@ -530,7 +527,7 @@ public class RefBookUniversal implements RefBookDataProvider {
         for (Long uniqueRecordId : uniqueRecordIds) {
             List<Long> relatedVersions = refBookDao.getRelatedVersions(uniqueRecordIds);
             if (!relatedVersions.isEmpty() && relatedVersions.size() > 1) {
-                refBookUtils.deleteRecordVersions(REF_BOOK_RECORD_TABLE_NAME, relatedVersions);
+                refBookDao.deleteRecordVersions(REF_BOOK_RECORD_TABLE_NAME, relatedVersions);
             }
             Long recordId = refBookDao.getRecordId(uniqueRecordId);
             //Проверяем следующую версию после даты окочания
@@ -609,7 +606,7 @@ public class RefBookUniversal implements RefBookDataProvider {
             }
             List<Long> fakeVersionIds = refBookDao.getRelatedVersions(uniqueRecordIds);
             uniqueRecordIds.addAll(fakeVersionIds);
-            refBookUtils.deleteRecordVersions(REF_BOOK_RECORD_TABLE_NAME, uniqueRecordIds);
+            refBookDao.deleteRecordVersions(REF_BOOK_RECORD_TABLE_NAME, uniqueRecordIds);
         } catch (Exception e) {
             if (logger != null) {
                 logger.error(e);
