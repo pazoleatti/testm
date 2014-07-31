@@ -722,7 +722,8 @@ task_name varchar2(100) not null,
 modification_date date not null,
 user_task_jndi varchar2(500) not null,
 custom_params_exist number(9,0) not null,
-serialized_params blob null
+serialized_params blob null,
+user_id number(9) not null
 );
 comment on table task_context is 'Контекст пользовательских задач планировщика';
 comment on column task_context.id is 'Уникальный идентификатор записи';
@@ -732,6 +733,7 @@ comment on column task_context.user_task_jndi is 'JNDI-имя класса-об�
 comment on column task_context.custom_params_exist is 'Признак наличия пользовательских параметров';
 comment on column task_context.serialized_params is 'Сериализованные пользователькие параметры';
 comment on column task_context.modification_date is 'Дата последнего редактирования задачи';
+comment on column task_context.user_id is 'Идентификатор пользователя';
 
 create sequence seq_task_context start with 100;
 ------------------------------------------------------------------------------------------------------
