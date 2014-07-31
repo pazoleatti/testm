@@ -9,11 +9,10 @@ public interface SignService {
 	/**
 	 * Проверить подписанный файл
 	 * @param pathToSignFile путь к файлу для проверки
-	 * @param pathToSignDat путь к файлу БОК(база открытых ключей)
      * @param delFlag если равен 1, то в случае, если подпись есть (контрольная сумма совпала), она будет удалена из файла
      * если равен 0, подпись не удаляется. При N равным 2 и более будут удалены все подписи от 1 до N.
      * После удаления подписи и последующих вызовах функции для проверки одного и того же файла N необходимо снова устанавливать равным 1
      * @return успешность выполненной проверки
 	 * */
-	boolean checkSign(String pathToSignFile, String pathToSignDat, int delFlag);
+	boolean checkSign(String pathToSignFile, int delFlag);
 }

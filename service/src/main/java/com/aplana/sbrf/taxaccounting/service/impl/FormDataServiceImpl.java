@@ -181,27 +181,10 @@ public class FormDataServiceImpl implements FormDataService {
             String ext = getFileExtention(fileName);
             if(!ext.equals(XLS_EXT) && !ext.equals(XLSX_EXT)){
 
-                String pKeyFileUrl = null;
                 List<String> paramList = configurationDao.getAll().get(ConfigurationParam.KEY_FILE, 0);
-                if (paramList != null && !paramList.isEmpty()) {
-                    pKeyFileUrl =  paramList.get(0); // TODO Ключи нужно искать в нескольких каталогах
-                }
 
-                if (pKeyFileUrl != null) { // Необходимо проверить подпись
-                    InputStream pKeyFileInputStream = null;
-
-                    pKeyFile = File.createTempFile("signature", ".sign");
-                    OutputStream pKeyFileOutputStream = new BufferedOutputStream(new FileOutputStream(pKeyFile));
-                    try {
-                        pKeyFileInputStream = new BufferedInputStream(ResourceUtils.getSharedResourceAsStream(pKeyFileUrl));
-                        IOUtils.copy(pKeyFileInputStream, pKeyFileOutputStream);
-                    } catch (Exception e) {
-                        throw new ServiceException("Ошибка доступа к файлу базы открытых ключей", e);
-                    } finally {
-                        IOUtils.closeQuietly(pKeyFileOutputStream);
-                        IOUtils.closeQuietly(pKeyFileInputStream);
-                    }
-                    if (!signService.checkSign(dataFile.getAbsolutePath(), pKeyFile.getAbsolutePath(), 0)) {
+                if (paramList != null) { // Необходимо проверить подпись
+                    if (!signService.checkSign(dataFile.getAbsolutePath(), 0)) {
                         throw new ServiceException("Ошибка проверки цифровой подписи");
                     }
                 }

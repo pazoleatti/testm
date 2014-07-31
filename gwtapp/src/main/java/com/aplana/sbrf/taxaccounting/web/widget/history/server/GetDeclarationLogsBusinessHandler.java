@@ -37,7 +37,8 @@ public class GetDeclarationLogsBusinessHandler extends
 	public GetLogsBusinessResult execute(GetDeclarationLogsBusinessAction action,
 			ExecutionContext context) throws ActionException {
 
-		List<LogBusiness> logs = logBusinessService.getDeclarationLogsBusiness(action.getId());
+		List<LogBusiness> logs = logBusinessService.getDeclarationLogsBusiness(action.getId(),
+                action.getFilter().getSearchOrdering(), action.getFilter().isAscSorting());
         ArrayList<LogBusinessClient> logBusinessClients = new ArrayList<LogBusinessClient>(logs.size());
 
 		GetLogsBusinessResult result = new GetLogsBusinessResult();

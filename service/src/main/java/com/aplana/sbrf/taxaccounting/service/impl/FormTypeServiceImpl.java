@@ -46,7 +46,7 @@ public class FormTypeServiceImpl implements FormTypeService {
     @SuppressWarnings("unchecked")
     @Override
     public void delete(int formTypeId) {
-        List<TemplateChanges> changeses = templateChangesService.getByFormTypeIds(formTypeId);
+        List<TemplateChanges> changeses = templateChangesService.getByFormTypeIds(formTypeId, VersionHistorySearchOrdering.DATE, false);
         if (!changeses.isEmpty())
             templateChangesService.delete(CollectionUtils.collect(changeses, new Transformer() {
                 @Override

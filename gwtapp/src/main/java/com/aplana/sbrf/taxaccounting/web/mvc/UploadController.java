@@ -73,7 +73,7 @@ public class UploadController {
 
         // означает что подпись удалять не будем
         int delFlag = 0;
-        boolean result = signService.checkSign(file.getAbsolutePath(), "C:\\Users\\Илья\\Desktop\\sign.dat", delFlag);
+        boolean result = signService.checkSign(file.getAbsolutePath(), delFlag);
         file.delete();
         return result;
     }
