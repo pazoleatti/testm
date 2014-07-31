@@ -151,7 +151,6 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
     private TextColumn<CurrentAssign> downAssignKindColumn;
     private TextColumn<CurrentAssign> downDepartmentColumn;
     private TextColumn<CurrentAssign> downNameTypeColumn;
-    private TextColumn<CurrentAssign> downCountColumn;
     private Column<CurrentAssign, Date> downStartColumn;
     private Column<CurrentAssign, Date> downEndColumn;
 
@@ -354,14 +353,6 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
                 return object.getName();
             }
         };
-
-        downCountColumn = new TextColumn<CurrentAssign>() {
-            @Override
-            public String getValue(CurrentAssign object) {
-                return object.getCount() != null ? String.valueOf(object.getCount()) : "0";
-            }
-        };
-        downCountColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
         AbstractCell<Date> dateCell = new AbstractCell<Date>() {
             @Override
@@ -587,7 +578,6 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         }
 
         downTable.addColumn(downNameTypeColumn, downNameTypeHeader, 100, Style.Unit.PCT);
-        downTable.addColumn(downCountColumn, "Количество созданных " + (isNotFourState ? "форм" : "деклараций"), 90, Style.Unit.PX);
         downTable.addColumn(downStartColumn, "Начало назначения", 80, Style.Unit.PX);
         downTable.addColumn(downEndColumn, "Окончание назначения", 80, Style.Unit.PX);
 

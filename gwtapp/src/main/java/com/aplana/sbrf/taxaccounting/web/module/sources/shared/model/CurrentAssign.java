@@ -25,8 +25,6 @@ public class CurrentAssign implements Serializable{
 
     /* Название типа НФ */
     private FormDataKind formKind;
-    /* Количество назначеных форм/деклараций */
-    private Integer count;
     /* Дата начала назначения */
     private Date startDateAssign;
     /* Дата окончания */
@@ -67,14 +65,6 @@ public class CurrentAssign implements Serializable{
 
     public void setDepartmentName(String departmentName) {
         this.departmentName = departmentName;
-    }
-
-    public Integer getCount() {
-        return count;
-    }
-
-    public void setCount(Integer count) {
-        this.count = count;
     }
 
     public String getName() {
