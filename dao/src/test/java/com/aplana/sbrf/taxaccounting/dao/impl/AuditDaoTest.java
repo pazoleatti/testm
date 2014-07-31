@@ -175,7 +175,7 @@ public class AuditDaoTest {
         LogSystemFilter filter3 = new LogSystemFilter();
         filter3.setFilter("2013 первый квартал");
         filter3.setAuditFieldList(Arrays.asList(AuditFieldList.PERIOD.getId()));
-        filter2.setOldLogSystemFilter(filter2);
+        filter2.setOldLogSystemFilter(filter3);
 
         PagingResult<LogSearchResultItem> records = auditDao.getLogsBusiness(filter, null, null);
         assertEquals(2, records.size());
