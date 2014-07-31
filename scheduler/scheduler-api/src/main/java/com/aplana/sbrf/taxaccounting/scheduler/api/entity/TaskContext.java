@@ -37,6 +37,11 @@ public class TaskContext implements Serializable {
     /** Пользовательские параметры задачи */
     private Map<String, TaskParam> params = new HashMap<String, TaskParam>(0);
 
+    /**
+     * Идентификатор пользователя создавший, либо обновивший задачу
+     */
+    private int userId;
+
     public String getTaskName() {
         return taskName;
     }
@@ -85,6 +90,14 @@ public class TaskContext implements Serializable {
         this.id = id;
     }
 
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
+
     @Override
     public String toString() {
         return "TaskContext{" +
@@ -94,6 +107,7 @@ public class TaskContext implements Serializable {
                 ", schedule='" + schedule + '\'' +
                 ", userTaskJndi='" + userTaskJndi + '\'' +
                 ", params=" + params +
+                ", userId=" + userId +
                 '}';
     }
 }

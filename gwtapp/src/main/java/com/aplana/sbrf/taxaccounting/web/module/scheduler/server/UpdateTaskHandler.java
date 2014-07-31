@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.scheduler.server;
 
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.TaskParamModel;
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskContext;
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskData;
@@ -7,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskParam;
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskParamType;
 import com.aplana.sbrf.taxaccounting.scheduler.api.exception.TaskSchedulingException;
 import com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManager;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.CreateTaskAction;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.CreateTaskResult;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.UpdateTaskAction;
@@ -33,6 +35,9 @@ public class UpdateTaskHandler extends AbstractActionHandler<UpdateTaskAction, U
     @Autowired
     TaskManager taskManager;
 
+    @Autowired
+    SecurityService securityService;
+
     public UpdateTaskHandler() {
         super(UpdateTaskAction.class);
     }
@@ -53,6 +58,7 @@ public class UpdateTaskHandler extends AbstractActionHandler<UpdateTaskAction, U
                 taskContext.setUserTaskJndi(action.getUserTaskJndi());
                 taskContext.setNumberOfRepeats(-1);
                 taskContext.setId(action.getContextId());
+                taskContext.setUserId(securityService.currentUserInfo().getUser().getId());
 
                 Map<String, TaskParam> taskParams = new HashMap<String, TaskParam>();
                 for (int i = 0; i < action.getParams().size(); i++) {

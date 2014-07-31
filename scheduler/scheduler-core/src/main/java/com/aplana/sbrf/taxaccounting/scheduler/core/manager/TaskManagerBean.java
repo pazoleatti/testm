@@ -87,6 +87,7 @@ public class TaskManagerBean implements TaskManager {
             taskContextEntity.setUserTaskJndi(taskContext.getUserTaskJndi());
             taskContextEntity.setId(taskContext.getId());
             taskContextEntity.setModificationDate(new Date());
+            taskContextEntity.setUserId(taskContext.getUserId());
             if (newContext){
                 persistenceService.saveContext(taskContextEntity);
             } else {
