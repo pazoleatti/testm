@@ -24,7 +24,7 @@ public interface LockDataDao {
 	 * @param userId код пользователя, установившего блокировку
 	 * @param dateBefore срок жизни блокировки
 	 */
-	void createLock(String key, long userId, Date dateBefore);
+	void createLock(String key, int userId, Date dateBefore);
 
 	/**
 	 * Обновляет блокировку
