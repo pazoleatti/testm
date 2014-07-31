@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.dao.LockDataDao;
 import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 
@@ -13,6 +15,8 @@ import java.util.Date;
  * @since 17.07.14 17:32
  */
 
+@Service
+@Transactional
 public class LockDataServiceImpl implements LockDataService {
 
 	private static final long SLEEP_TIME = 500; //шаг времени между проверками освобождения блокировки, миллисекунды

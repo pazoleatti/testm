@@ -44,4 +44,16 @@ public interface AuditService {
      * @return записи из ЖА
      */
     public PagingResult<LogSearchResultItem> getLogsBusiness(LogSystemFilter filter, TAUserInfo userInfo);
+
+    /**
+     * Блокировка операции "Архивирование журнала событий"
+     * @param userInfo
+     */
+    LockData lock(TAUserInfo userInfo);
+
+    /**
+     * Снимает блокировку операции "Архивирование журнала событий"
+     * @param userInfo
+     */
+    void unlock(TAUserInfo userInfo);
 }
