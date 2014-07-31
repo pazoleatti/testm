@@ -39,7 +39,7 @@ public class DepartmentFormTypeServiceImpl extends AbstractDao implements Depart
 
     @Override
     public List<DepartmentFormType> getFormSources(int departmentId, int formTypeId, FormDataKind kind, Date periodStart, Date periodEnd) {
-        return departmentFormTypeDao.getFormSources(departmentId, formTypeId, kind, periodStart, periodEnd);
+        return departmentFormTypeDao.getFormSources(departmentId, formTypeId, kind, periodStart, periodEnd, null, false);
     }
 
     @Override
@@ -79,6 +79,6 @@ public class DepartmentFormTypeServiceImpl extends AbstractDao implements Depart
 
     @Override
     public List<DepartmentFormType> getDeclarationSources(int departmentId, int declarationTypeId, Date periodStart, Date periodEnd) {
-        return departmentFormTypeDao.getDeclarationSources(departmentId, declarationTypeId, periodStart, periodEnd);
+        return departmentFormTypeDao.getDeclarationSources(departmentId, declarationTypeId, periodStart, periodEnd, null, false);
     }
 }

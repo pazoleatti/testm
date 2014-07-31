@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
+import com.aplana.sbrf.taxaccounting.model.SourcesSearchOrdering;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
@@ -49,19 +50,19 @@ public class DepartmentFormTypeDaoImplTest {
 
 	@Test
 	public void getByDepAndTaxType(){
-		assertEquals(3, departmentFormTypeDao.getByTaxType(1, TaxType.TRANSPORT, null, null).size());
+		assertEquals(3, departmentFormTypeDao.getByTaxType(1, TaxType.TRANSPORT, null, null, SourcesSearchOrdering.KIND, false).size());
 	}
 
 	@Test
 	public void getFormSources(){
 		//assertEquals(5, departmentFormTypeDao.getFormSources(2, 1, FormDataKind.fromId(3), null, null).size());
-        assertEquals(6, departmentFormTypeDao.getFormSources(2, 0, null, null, null).size());
+        assertEquals(6, departmentFormTypeDao.getFormSources(2, 0, null, null, null, SourcesSearchOrdering.KIND, false).size());
 	}
 
 	@Test
 	public void getDeclarationSources(){
-		assertEquals(4, departmentFormTypeDao.getDeclarationSources(2, 1, null, null).size());
-        assertEquals(4, departmentFormTypeDao.getDeclarationSources(2, 0, null, null).size());
+		assertEquals(4, departmentFormTypeDao.getDeclarationSources(2, 1, null, null, null, false).size());
+        assertEquals(4, departmentFormTypeDao.getDeclarationSources(2, 0, null, null, null, false).size());
 	}
 
 	@Test
