@@ -89,12 +89,10 @@ public class RateMDB implements MessageListener {
     }
 
     private TAUserInfo getUser() {
-        TAUserInfo userInfo = new TAUserInfo();
         if (taUserService != null) {
-            userInfo.setUser(taUserService.getUser(TAUser.SYSTEM_USER_ID));
-            userInfo.setIp("127.0.0.1");
+            return taUserService.getSystemUserInfo();
         }
-        return userInfo;
+        return new TAUserInfo();
     }
 
     /**

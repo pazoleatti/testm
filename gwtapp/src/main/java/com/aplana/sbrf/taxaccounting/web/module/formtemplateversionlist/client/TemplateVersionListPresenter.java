@@ -10,7 +10,7 @@ import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstan
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.UpdateTableEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.client.event.CreateNewVersionEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.shared.*;
-import com.aplana.sbrf.taxaccounting.web.widget.historytemplatechanges.client.VersionHistoryPresenter;
+import com.aplana.sbrf.taxaccounting.web.widget.historytemplatechanges.client.FormHistoryPresenter;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -34,12 +34,12 @@ public class TemplateVersionListPresenter extends Presenter<TemplateVersionListP
 
     private final DispatchAsync dispatcher;
     private final PlaceManager placeManager;
-    protected VersionHistoryPresenter versionHistoryPresenter;
+    protected FormHistoryPresenter versionHistoryPresenter;
 
     @Inject
     public TemplateVersionListPresenter(EventBus eventBus, MyView view, MyProxy proxy,
                                         DispatchAsync dispatcher, PlaceManager placeManager,
-                                        VersionHistoryPresenter versionHistoryPresenter) {
+                                        FormHistoryPresenter versionHistoryPresenter) {
         super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
         this.dispatcher = dispatcher;
         this.placeManager = placeManager;
@@ -80,15 +80,9 @@ public class TemplateVersionListPresenter extends Presenter<TemplateVersionListP
 
     @Override
     public void onHistoryClick() {
-        GetFTVersionHistoryAction action = new GetFTVersionHistoryAction();
-        action.setFormTypeId(Integer.valueOf(placeManager.getCurrentPlaceRequest().getParameter(AdminConstants.NameTokens.formTypeId, "")));
-        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetFTVersionHistoryResult>() {
-            @Override
-            public void onSuccess(GetFTVersionHistoryResult result) {
-                versionHistoryPresenter.initHistory(result.getChangeses());
-                addToPopupSlot(versionHistoryPresenter);
-            }
-        }, this));
+        Integer id = Integer.valueOf(placeManager.getCurrentPlaceRequest().getParameter(AdminConstants.NameTokens.formTypeId, ""));
+        versionHistoryPresenter.init(id);
+        addToPopupSlot(versionHistoryPresenter);
     }
 
     @Override

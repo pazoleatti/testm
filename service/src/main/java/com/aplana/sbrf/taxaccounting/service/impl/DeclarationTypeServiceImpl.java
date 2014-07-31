@@ -2,10 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.DeclarationType;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.model.TemplateChanges;
-import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTypeService;
 import com.aplana.sbrf.taxaccounting.service.TemplateChangesService;
 import org.apache.commons.collections.CollectionUtils;
@@ -50,7 +47,7 @@ public class DeclarationTypeServiceImpl implements DeclarationTypeService {
     @SuppressWarnings("unchecked")
     @Override
     public void delete(int typeId) {
-        List<TemplateChanges> changeses = templateChangesService.getByFormTypeIds(typeId);
+        List<TemplateChanges> changeses = templateChangesService.getByFormTypeIds(typeId, VersionHistorySearchOrdering.DATE, false);
         if (!changeses.isEmpty())
             templateChangesService.delete(CollectionUtils.collect(changeses, new Transformer() {
                 @Override

@@ -305,11 +305,12 @@ print '--------------------------------'
 print '- Service integration bus'
 SIBusesId = AdminTask.listSIBuses().split(lineSeparator)
 SIBusNotFound = 1
-for SIBusId in SIBusesId:
-	if AdminConfig.showAttribute(SIBusId, 'name') == SIBusName:
-		SIBusNotFound = 0
-		print 'Found existing service integration bus name='+ SIBusId
-		break
+if SIBusesId[0] != '':
+	for SIBusId in SIBusesId:
+		if AdminConfig.showAttribute(SIBusId, 'name') == SIBusName:
+			SIBusNotFound = 0
+			print 'Found existing service integration bus name='+ SIBusId
+			break
 if SIBusNotFound:
 	print 'Initiated the creation of an service integration bus'
 	print 'id='+ AdminTask.createSIBus('[-bus "'+ SIBusName +'" -busSecurity false]')
@@ -330,14 +331,15 @@ else:
 print '________________________________'
 SIBDestinationsId = AdminTask.listSIBDestinations('-bus "'+ SIBusName +'" -type Queue').split(lineSeparator)
 SIBDestinationNotFound = 1
-for SIBDestinationId in SIBDestinationsId:
-	SIBDestinationIdentifier = AdminConfig.showAttribute(SIBDestinationId, 'identifier')
-	if SIBDestinationIdentifier[-len(SIBDestinationName):] == SIBDestinationName:
-		SIBDestinationNotFound = 0
-		print 'Found existing service integration bus destinations:'
-		print 'SIBDestinationIdentifier='+ SIBDestinationIdentifier
-		print 'SIBDestinationId='+ SIBDestinationId
-		break
+if SIBDestinationsId[0] != '':
+	for SIBDestinationId in SIBDestinationsId:
+		SIBDestinationIdentifier = AdminConfig.showAttribute(SIBDestinationId, 'identifier')
+		if SIBDestinationIdentifier[-len(SIBDestinationName):] == SIBDestinationName:
+			SIBDestinationNotFound = 0
+			print 'Found existing service integration bus destinations:'
+			print 'SIBDestinationIdentifier='+ SIBDestinationIdentifier
+			print 'SIBDestinationId='+ SIBDestinationId
+			break
 if SIBDestinationNotFound:
 	print 'Initiated the creation of an service integration bus destinations'
 	print 'id='+ AdminTask.createSIBDestination('[-bus "'+ SIBusName +'" -name "'+ SIBDestinationName +'" -type Queue -node "'+ nodeName +'" -server "'+ serverName +'"]')
@@ -347,11 +349,12 @@ if SIBDestinationNotFound:
 print '________________________________'
 SIBJMSConnectionFactoriesId = AdminTask.listSIBJMSConnectionFactories(resourceRootLocationId).split(lineSeparator)
 SIBJMSConnectionFactoryNotFound = 1
-for SIBJMSConnectionFactoryId in SIBJMSConnectionFactoriesId:
-	if AdminConfig.showAttribute(SIBJMSConnectionFactoryId, 'jndiName') == SIBJMSConnectionFactoryJndi:
-		SIBJMSConnectionFactoryNotFound = 0
-		print 'Found existing service integration bus connection factory id='+ SIBJMSConnectionFactoryId
-		break
+if SIBJMSConnectionFactoriesId[0] != '':
+	for SIBJMSConnectionFactoryId in SIBJMSConnectionFactoriesId:
+		if AdminConfig.showAttribute(SIBJMSConnectionFactoryId, 'jndiName') == SIBJMSConnectionFactoryJndi:
+			SIBJMSConnectionFactoryNotFound = 0
+			print 'Found existing service integration bus connection factory id='+ SIBJMSConnectionFactoryId
+			break
 if SIBJMSConnectionFactoryNotFound:
 	print 'Initiated the creation of an service integration bus connection factory'
 	print 'id='+ AdminTask.createSIBJMSConnectionFactory(resourceRootLocationId, ['-name', SIBJMSConnectionFactoryName, '-jndiName', SIBJMSConnectionFactoryJndi, '-busName', SIBusName])
@@ -361,11 +364,12 @@ if SIBJMSConnectionFactoryNotFound:
 print '________________________________'
 SIBJMSQueuesId = AdminTask.listSIBJMSQueues(resourceRootLocationId).split(lineSeparator)
 SIBJMSQueueNotFound = 1
-for SIBJMSQueueId in SIBJMSQueuesId:
-	if AdminConfig.showAttribute(SIBJMSQueueId, 'jndiName') == SIBJMSQueueJndi:
-		SIBJMSQueueNotFound = 0
-		print 'Found existing service integration bus queue id='+ SIBJMSQueueId
-		break
+if SIBJMSQueuesId[0] != '':
+	for SIBJMSQueueId in SIBJMSQueuesId:
+		if AdminConfig.showAttribute(SIBJMSQueueId, 'jndiName') == SIBJMSQueueJndi:
+			SIBJMSQueueNotFound = 0
+			print 'Found existing service integration bus queue id='+ SIBJMSQueueId
+			break
 if SIBJMSQueueNotFound:
 	print 'Initiated the creation of an service integration bus queue'
 	print 'id='+ AdminTask.createSIBJMSQueue(resourceRootLocationId, ['-name', SIBJMSQueueName, '-jndiName', SIBJMSQueueJndi, '-queueName', SIBDestinationName, '-busName', SIBusName])
@@ -375,11 +379,12 @@ if SIBJMSQueueNotFound:
 print '________________________________'
 SIBJMSActivationSpecsId = AdminTask.listSIBJMSActivationSpecs(resourceRootLocationId).split(lineSeparator)
 SIBJMSActivationSpecNotFound = 1
-for SIBJMSActivationSpecId in SIBJMSActivationSpecsId:
-	if AdminConfig.showAttribute(SIBJMSActivationSpecId, 'jndiName') == SIBJMSActivationSpecJndi:
-		SIBJMSActivationSpecNotFound = 0
-		print 'Found existing service integration bus activation specifications id='+ SIBJMSActivationSpecId
-		break
+if SIBJMSActivationSpecsId[0] != '':
+	for SIBJMSActivationSpecId in SIBJMSActivationSpecsId:
+		if AdminConfig.showAttribute(SIBJMSActivationSpecId, 'jndiName') == SIBJMSActivationSpecJndi:
+			SIBJMSActivationSpecNotFound = 0
+			print 'Found existing service integration bus activation specifications id='+ SIBJMSActivationSpecId
+			break
 if SIBJMSActivationSpecNotFound:
 	print 'Initiated the creation of an service integration bus activation specifications'
 	print 'id='+ AdminTask.createSIBJMSActivationSpec(resourceRootLocationId, ['-name', SIBJMSActivationSpecName, '-jndiName', SIBJMSActivationSpecJndi, '-destinationJndiName', SIBJMSQueueJndi, '-busName', SIBusName, '-maxBatchSize', 1, '-maxConcurrency', 1]) 
@@ -399,11 +404,12 @@ print '--------------------------------'
 print '- MQ messaging provider'
 MQConnectionFactoriesId = AdminTask.listWMQConnectionFactories(resourceRootLocationId).split(lineSeparator)
 MQConnectionFactoryNotFound = 1
-for MQConnectionFactoryId in MQConnectionFactoriesId:
-	if AdminConfig.showAttribute(MQConnectionFactoryId, 'jndiName') == MQConnectionFactoryJndi:
-		MQConnectionFactoryNotFound = 0
-		print 'Found existing MQ connection factory id='+ MQConnectionFactoryId
-		break
+if MQConnectionFactoriesId[0] != '':
+	for MQConnectionFactoryId in MQConnectionFactoriesId:
+		if AdminConfig.showAttribute(MQConnectionFactoryId, 'jndiName') == MQConnectionFactoryJndi:
+			MQConnectionFactoryNotFound = 0
+			print 'Found existing MQ connection factory id='+ MQConnectionFactoryId
+			break
 if MQConnectionFactoryNotFound:
 	print 'Initiated the creation of an MQ connection factory'
 	print 'id='+ AdminTask.createWMQConnectionFactory(resourceRootLocationId, ['-name', MQConnectionFactoryName, '-jndiName', MQConnectionFactoryJndi, '-type', 'CF', '-qmgrName', MQServerQueueManager, '-wmqTransportType', 'BINDINGS_THEN_CLIENT', '-qmgrHostname', MQServerHost, '-qmgrPortNumber', MQServerPort, '-qmgrSvrconnChannel', MQServerChanel, '-xaRecoveryAuthAlias', mqJaasAlias, '-containerAuthAlias', mqJaasAlias])
@@ -413,25 +419,27 @@ if MQConnectionFactoryNotFound:
 print '________________________________'
 MQQueuesId = AdminTask.listWMQQueues(resourceRootLocationId).split(lineSeparator)
 MQQueueNotFound = 1
-for MQQueueId in MQQueuesId:
-	if AdminConfig.showAttribute(MQQueueId, 'jndiName') == MQQueueJndi:
-		MQQueueNotFound = 0
-		print 'Found existing MQ queue id='+ MQQueueId
-		break
+if MQQueuesId[0] != '':
+	for MQQueueId in MQQueuesId:
+		if AdminConfig.showAttribute(MQQueueId, 'jndiName') == MQQueueJndi:
+			MQQueueNotFound = 0
+			print 'Found existing MQ queue id='+ MQQueueId
+			break
 if MQQueueNotFound:
 	print 'Initiated the creation of an MQ queue'
-	print 'id='+ AdminTask.createWMQQueue(resourceRootLocationId, ['-name', MQQueueName, '-jndiName', MQQueueJndi, '-queueName', MQServerQueueName, '-busName', SIBusName, '-qmgr', MQServerQueueManager])
+	print 'id='+ AdminTask.createWMQQueue(resourceRootLocationId, ['-name', MQQueueName, '-jndiName', MQQueueJndi, '-queueName', MQServerQueueName, '-qmgr', MQServerQueueManager])
 	AdminConfig.save()
 	print 'Configuration is saved.'
 
 print '________________________________'
 MQActivationSpecsId = AdminTask.listWMQActivationSpecs(resourceRootLocationId).split(lineSeparator)
 MQActivationSpecNotFound = 1
-for MQActivationSpecId in MQActivationSpecsId:
-	if AdminConfig.showAttribute(MQActivationSpecId, 'jndiName') == MQActivationSpecJndi:
-		MQActivationSpecNotFound = 0
-		print 'Found existing MQ activation specifications id='+ MQActivationSpecId
-		break
+if MQActivationSpecsId[0] != '':
+	for MQActivationSpecId in MQActivationSpecsId:
+		if AdminConfig.showAttribute(MQActivationSpecId, 'jndiName') == MQActivationSpecJndi:
+			MQActivationSpecNotFound = 0
+			print 'Found existing MQ activation specifications id='+ MQActivationSpecId
+			break
 if MQActivationSpecNotFound:
 	print 'Initiated the creation of an MQ activation specifications'
 	print 'id='+ AdminTask.createWMQActivationSpec(resourceRootLocationId, ['-name', MQActivationSpecName, '-jndiName', MQActivationSpecJndi, '-qmgrName', MQServerQueueManager, '-wmqTransportType', 'BINDINGS_THEN_CLIENT', '-qmgrHostname', MQServerHost, '-qmgrPortNumber', MQServerPort, '-qmgrSvrconnChannel', MQServerChanel, '-destinationJndiName', MQQueueJndi, '-destinationType', 'javax.jms.Queue', '-authAlias', mqJaasAlias]) 

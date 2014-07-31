@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.scheduler.task;
 
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskParamType;
 import com.aplana.sbrf.taxaccounting.scheduler.api.form.*;
 import org.apache.commons.logging.Log;
@@ -26,7 +27,7 @@ public class SimpleUserTask implements UserTask {
     private static final Log LOG = LogFactory.getLog(SimpleUserTask.class);
 
     @Override
-    public void execute(Map<String, TaskParam> params) throws TaskExecutionException {
+    public void execute(Map<String, TaskParam> params, int userId) throws TaskExecutionException {
         LOG.info("SimpleUserTask started");
     }
 
@@ -41,7 +42,7 @@ public class SimpleUserTask implements UserTask {
     }
 
     @Override
-    public List<FormElement> getParams() {
+    public List<FormElement> getParams(TAUserInfo userInfo) {
         List<FormElement> params = new ArrayList<FormElement>();
         FormElement element1 = new TextBox();
         element1.setName("Имя");

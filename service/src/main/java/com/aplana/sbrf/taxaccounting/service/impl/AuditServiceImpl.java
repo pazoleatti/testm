@@ -63,7 +63,7 @@ public class AuditServiceImpl implements AuditService {
                 }
                 log.setRoles(roles.toString());
 
-                String departmentName = departmentId == null ? "" : departmentService.getParentsHierarchy(departmentId);
+                String departmentName = departmentId == null ? "" : (departmentId == 0 ? departmentService.getDepartment(departmentId).getShortName() : departmentService.getParentsHierarchy(departmentId));
                 log.setFormDepartmentName(departmentName.substring(0, Math.min(departmentName.length(), 2000)));
                 log.setFormDepartmentId(departmentId);
                 if (departmentId != null) log.setDepartmentTBId(departmentService.getParentTB(departmentId).getId());
@@ -78,7 +78,7 @@ public class AuditServiceImpl implements AuditService {
                 log.setFormTypeName(formTypeName);
                 log.setFormKindId(formKindId);
                 log.setNote(note != null ? note.substring(0, Math.min(note.length(), 2000)) : null);
-                String userDepartmentName = departmentService.getParentsHierarchy(userInfo.getUser().getDepartmentId());
+                String userDepartmentName = departmentId == 0 ? departmentService.getDepartment(departmentId).getShortName() : departmentService.getParentsHierarchy(userInfo.getUser().getDepartmentId());
                 log.setUserDepartmentName(userDepartmentName.substring(0, Math.min(userDepartmentName.length(), 2000)));
 
                 auditDao.add(log);
