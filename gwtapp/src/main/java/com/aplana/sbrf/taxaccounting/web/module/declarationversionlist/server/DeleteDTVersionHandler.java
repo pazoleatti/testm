@@ -44,7 +44,7 @@ public class DeleteDTVersionHandler extends AbstractActionHandler<DeleteDTVersio
     public DeleteDTVersionResult execute(DeleteDTVersionAction action, ExecutionContext context) throws ActionException {
         DeleteDTVersionResult result = new DeleteDTVersionResult();
         Logger logger = new Logger();
-        result.setLastVersion(mainOperatingService.deleteVersionTemplate(action.getDeclarationTemplateId(), null, logger, securityService.currentUserInfo().getUser()));
+        result.setLastVersion(mainOperatingService.deleteVersionTemplate(action.getDeclarationTemplateId(), logger, securityService.currentUserInfo().getUser()));
         result.setLogEntryUuid(logEntryService.save(logger.getEntries()));
 
         TemplateChanges changes = new TemplateChanges();

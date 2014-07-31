@@ -26,8 +26,8 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
     private static final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
     private static final String MSG_IS_USED_VERSION = "Существует экземпляр налоговой формы типа \"%s\" в подразделении \"%s\" периоде %s для макета!";
-    private static final String MSG_HAVE_DESTINATION = "Существует назначение налоговой формы в качестве приёмника данных для налоговой формы типа %s вида %s в подразделении %s начиная с периода %s!";
-    private static final String MSG_HAVE_SOURCE = "Существует назначение налоговой формы в качестве источника данных для налоговой формы типа %s вида %s в подразделении %s начиная с периода %s!";
+    private static final String MSG_HAVE_DESTINATION = "Существует назначение налоговой формы в качестве источника данных для налоговой формы типа %s вида %s в подразделении %s начиная с периода %s!";
+    private static final String MSG_HAVE_SOURCE = "Существует назначение налоговой формы в качестве приёмника данных для налоговой формы типа %s вида %s в подразделении %s начиная с периода %s!";
 
     @Autowired
     private FormDataDao formDataDao;

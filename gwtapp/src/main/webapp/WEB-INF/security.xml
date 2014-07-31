@@ -15,6 +15,7 @@
 	<http pattern="/GenericAccountManagementService/**" security="none"/>
 	<http pattern="/TaxAccountingSupportingData" security="none"/>
 	<http pattern="/TaxAccountingSupportingData/**" security="none"/>
+    <http pattern="/download/timer/ping/" security="none"/>
 
 	<!--
 		А вот здесь мы уже определяем фильтры аутентификации.

@@ -41,7 +41,7 @@ public class DeleteVersionHandler extends AbstractActionHandler<DeleteVersionAct
     public DeleteVersionResult execute(DeleteVersionAction action, ExecutionContext context) throws ActionException {
         Logger logger = new Logger();
         DeleteVersionResult result = new DeleteVersionResult();
-        result.setLastVersion(mainOperatingService.deleteVersionTemplate(action.getFormTemplateId(), null, logger, securityService.currentUserInfo().getUser()));
+        result.setLastVersion(mainOperatingService.deleteVersionTemplate(action.getFormTemplateId(), logger, securityService.currentUserInfo().getUser()));
         result.setUuid(logEntryService.save(logger.getEntries()));
 
         return result;

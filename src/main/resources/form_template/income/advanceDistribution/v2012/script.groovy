@@ -889,7 +889,7 @@ void calcColumnFrom14To21(def row, def sumNal, def reportPeriod) {
     if (sumNal == null || row.baseTaxOf == null) {
         row.taxSumOutside = 0
     } else {
-        row.taxSumOutside = roundValue(sumNal * row.baseTaxOf / 100, 0)
+        row.taxSumOutside = roundValue(sumNal * 0.9 * row.baseTaxOf / 100, 0)
     }
 
     // графа 15

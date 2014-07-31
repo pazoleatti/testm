@@ -38,18 +38,18 @@ public class AuditDaoTest {
         filter.setAuditFieldList(Arrays.asList(AuditFieldList.ALL.getId()));
 
         PagingResult<LogSearchResultItem> records = auditDao.getLogs(filter);
-/*        LogSearchResultItem logSystem = records.get(0);
+        LogSearchResultItem logSystem = records.get(0);
         assertEquals(Long.valueOf(3), logSystem.getId());
         assertEquals("192.168.72.16", logSystem.getIp());
         assertEquals(FormDataEvent.getByCode(601), logSystem.getEvent());
-        assertEquals("controlBank"testAdd, logSystem.getUser());
+        assertEquals("controlBank", logSystem.getUser());
         assertEquals("operator", logSystem.getRoles());
         assertEquals("2013 первый квартал", logSystem.getReportPeriodName());
-        assertEquals("FormType - Transport", logSystem.getFormTypeName());
+        assertEquals("test form_type_name", logSystem.getFormTypeName());
         assertEquals(3, logSystem.getFormKind().getId());
         assertEquals("the best note", logSystem.getNote());
         assertEquals("Подразделение", logSystem.getUserDepartmentName());
-        assertEquals(1, records.getTotalCount());*/
+        assertEquals(3, records.getTotalCount());
     }
 
     @Test
@@ -102,9 +102,8 @@ public class AuditDaoTest {
 	@Test
 	public void getLogsNull() {
 		LogSystemFilter filter = new LogSystemFilter();
-//		filter.setCountOfRecords(10);
-//		filter.setStartIndex(0);
-//		filter.setFormTypeId(1);
+		filter.setCountOfRecords(10);
+		filter.setStartIndex(0);
 		filter.setFromSearchDate(null);
 		filter.setToSearchDate(null);
         filter.setFilter("Transport");
@@ -157,22 +156,31 @@ public class AuditDaoTest {
         assertNotNull(auditDao.lastArchiveDate());
     }
 
-    //@Test
+    @Test
     public void testGetLogBusiness(){
         Calendar calendar = Calendar.getInstance();
-        LogSystemFilterDao filterDao = new LogSystemFilterDao();
-        filterDao.setDepartmentName("ТБ");        
+        LogSystemFilter filter = new LogSystemFilter();
         calendar.set(2012, Calendar.JANUARY, 1);
-        filterDao.setFromSearchDate(calendar.getTime());
+        filter.setFromSearchDate(calendar.getTime());
         calendar.set(2014, Calendar.DECEMBER, 31);
-        filterDao.setToSearchDate(calendar.getTime());
-        filterDao.setCountOfRecords(5);
-        filterDao.setSearchOrdering(HistoryBusinessSearchOrdering.DATE);
-        filterDao.setReportPeriodName("2014 первый квартал");
-        filterDao.setUserIds(Arrays.asList(1l));
-        //PagingResult<LogSearchResultItem> records = auditDao.getLogsBusiness(filterDao, null);
-        //assertEquals(0, records.size());
+        filter.setToSearchDate(calendar.getTime());
+        filter.setCountOfRecords(5);
+        filter.setSearchOrdering(HistoryBusinessSearchOrdering.DATE);
+
+        LogSystemFilter filter2 = new LogSystemFilter();
+        filter2.setFilter("controlBank");
+        filter2.setAuditFieldList(Arrays.asList(AuditFieldList.USER.getId()));
+        filter.setOldLogSystemFilter(filter2);
+
+        LogSystemFilter filter3 = new LogSystemFilter();
+        filter3.setFilter("2013 первый квартал");
+        filter3.setAuditFieldList(Arrays.asList(AuditFieldList.PERIOD.getId()));
+        filter2.setOldLogSystemFilter(filter2);
+
+        PagingResult<LogSearchResultItem> records = auditDao.getLogsBusiness(filter, null, null);
+        assertEquals(2, records.size());
     }
+
     @Test
     @Transactional(readOnly = false)
     public void testAddNull() {
@@ -184,7 +192,7 @@ public class AuditDaoTest {
         logSystem.setEventId(FormDataEvent.MIGRATION.getCode());
         logSystem.setUserLogin("controlBank");
         logSystem.setRoles("operator");
-        logSystem.setFormDepartmentName("");
+        logSystem.setFormDepartmentName("ТБ");
         logSystem.setReportPeriodName(null);
         logSystem.setDeclarationTypeName(null);
         logSystem.setFormTypeName(null);
