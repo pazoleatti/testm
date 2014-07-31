@@ -18,7 +18,7 @@ public interface UserTask {
      * @param params параметрвы выполнения задачи
      * @throws TaskExecutionException
      */
-    void execute(Map<String, TaskParam> params) throws TaskExecutionException;
+    void execute(Map<String, TaskParam> params, int userId) throws TaskExecutionException;
 
     /**
      * Возвращает название задачи. Необходимо для отображения списка задач

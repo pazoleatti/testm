@@ -27,7 +27,7 @@ public class SimpleUserTask implements UserTask {
     private static final Log LOG = LogFactory.getLog(SimpleUserTask.class);
 
     @Override
-    public void execute(Map<String, TaskParam> params) throws TaskExecutionException {
+    public void execute(Map<String, TaskParam> params, int userId) throws TaskExecutionException {
         LOG.info("SimpleUserTask started");
     }
 

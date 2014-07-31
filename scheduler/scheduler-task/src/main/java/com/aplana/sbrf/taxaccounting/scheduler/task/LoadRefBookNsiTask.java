@@ -39,7 +39,7 @@ public class LoadRefBookNsiTask implements UserTask {
     TAUserService userService;
 
     @Override
-    public void execute(Map<String, TaskParam> params) throws TaskExecutionException {
+    public void execute(Map<String, TaskParam> params, int userId) throws TaskExecutionException {
         loadRefBookDataService.importRefBookDiasoft(userService.getSystemUserInfo(), new Logger());
     }
 
