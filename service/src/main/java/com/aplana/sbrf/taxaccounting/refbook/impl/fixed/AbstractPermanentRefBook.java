@@ -8,7 +8,6 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributePair;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.impl.AbstractReadOnlyRefBook;
 
-import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -52,7 +51,7 @@ public abstract class AbstractPermanentRefBook extends AbstractReadOnlyRefBook {
     }
 
     @Override
-    public Map<String, RefBookValue> getRecordData(@NotNull Long recordId) {
+    public Map<String, RefBookValue> getRecordData(Long recordId) {
 		PagingResult<Map<String, RefBookValue>> records = getRecords(null);
 		for (Map<String, RefBookValue> record: records) {
 			if (recordId.equals(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue())) {

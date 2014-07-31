@@ -50,18 +50,18 @@ public class RefBookSimpleReadOnly extends AbstractReadOnlyRefBook {
 	@Override
     public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams, String filter,
 			RefBookAttribute sortAttribute, boolean isSortAscending) {
-		return refBookUtils.getRecords(getRefBookId(), getTableName(), pagingParams, filter, sortAttribute, isSortAscending, getWhereClause());
+		return refBookDao.getRecords(getRefBookId(), getTableName(), pagingParams, filter, sortAttribute, isSortAscending, getWhereClause());
     }
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getChildrenRecords(Long parentRecordId, Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
-        return refBookUtils.getChildrenRecords(getRefBookId(), getTableName(), parentRecordId, pagingParams, filter, sortAttribute, true);
+        return refBookDao.getChildrenRecords(getRefBookId(), getTableName(), parentRecordId, pagingParams, filter, sortAttribute, true);
     }
 
     @Override
     public Long getRowNum(Date version, Long recordId,
                           String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
-        return refBookUtils.getRowNum(getRefBookId(), getTableName(), recordId, filter, sortAttribute, isSortAscending, getWhereClause());
+        return refBookDao.getRowNum(getRefBookId(), getTableName(), recordId, filter, sortAttribute, isSortAscending, getWhereClause());
     }
 
     @Override
@@ -75,7 +75,7 @@ public class RefBookSimpleReadOnly extends AbstractReadOnlyRefBook {
 
     @Override
     public Map<String, RefBookValue> getRecordData(Long recordId) {
-		return refBookUtils.getRecordData(getRefBookId(), getTableName(), recordId);
+		return refBookDao.getRecordData(getRefBookId(), getTableName(), recordId);
     }
 
     @Override
@@ -90,12 +90,12 @@ public class RefBookSimpleReadOnly extends AbstractReadOnlyRefBook {
 
     @Override
     public List<Long> getUniqueRecordIds(Date version, String filter) {
-        return refBookUtils.getUniqueRecordIds(getRefBookId(), getTableName(), filter);
+        return refBookDao.getUniqueRecordIds(getRefBookId(), getTableName(), filter);
     }
 
     @Override
     public int getRecordsCount(Date version, String filter) {
-        return refBookUtils.getRecordsCount(getRefBookId(), getTableName(), filter);
+        return refBookDao.getRecordsCount(getRefBookId(), getTableName(), filter);
     }
 
     public String getTableName() {

@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.components;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.FilterTreeParser;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import org.antlr.v4.runtime.misc.NotNull;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -16,7 +15,7 @@ import org.springframework.stereotype.Component;
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class UniversalQueryBuilderComponent extends AbstractQueryBuilderComponent {
     @Override
-    public void enterInternlAlias(@NotNull FilterTreeParser.InternlAliasContext ctx) {
+    public void enterInternlAlias(FilterTreeParser.InternlAliasContext ctx) {
         ps.appendQuery(buildAliasStr(ctx.getText()));
     }
 

@@ -52,7 +52,7 @@ public class RefBookOktmoProvider implements RefBookDataProvider {
     RefBookOktmoDao dao;
 
     @Autowired
-    RefBookDao rbDao;
+    RefBookDao refBookDao;
 
     @Autowired
     RefBookUtils refBookUtils;
@@ -123,7 +123,7 @@ public class RefBookOktmoProvider implements RefBookDataProvider {
 
     @Override
     public RefBookValue getValue(Long recordId, Long attributeId) {
-        RefBook refBook = rbDao.get(refBookId);
+        RefBook refBook = refBookDao.get(refBookId);
         RefBookAttribute attribute = refBook.getAttribute(attributeId);
         Map<String, RefBookValue> value = dao.getRecordData(getTableName(), refBookId, recordId);
         return value != null ? value.get(attribute.getAlias()) : null;
@@ -245,11 +245,11 @@ public class RefBookOktmoProvider implements RefBookDataProvider {
                 }
             }
             if (result.getResult() == CrossResult.NEED_CHANGE) {
-                refBookUtils.updateVersionRelevancePeriod(getTableName(), result.getRecordId(), SimpleDateUtils.addDayToDate(versionTo, 1));
+                refBookDao.updateVersionRelevancePeriod(getTableName(), result.getRecordId(), SimpleDateUtils.addDayToDate(versionTo, 1));
                 updateResults(results, result);
             }
             if (result.getResult() == CrossResult.NEED_DELETE) {
-                refBookUtils.deleteVersion(getTableName(), result.getRecordId());
+                refBookDao.deleteVersion(getTableName(), result.getRecordId());
                 updateResults(results, result);
             }
         }
@@ -319,7 +319,7 @@ public class RefBookOktmoProvider implements RefBookDataProvider {
     @Override
     public List<Pair<RefBookAttribute, RefBookValue>> getUniqueAttributeValues(Long uniqueRecordId) {
         List<Pair<RefBookAttribute, RefBookValue>> values = new ArrayList<Pair<RefBookAttribute, RefBookValue>>();
-        List<RefBookAttribute> attributes =  rbDao.getAttributes(refBookId);
+        List<RefBookAttribute> attributes = refBookDao.getAttributes(refBookId);
         for (RefBookAttribute attribute : attributes) {
             if (attribute.isUnique()) {
                 values.add(new Pair<RefBookAttribute, RefBookValue>(attribute, getValue(uniqueRecordId, attribute.getId())));
@@ -410,7 +410,7 @@ public class RefBookOktmoProvider implements RefBookDataProvider {
         for (Long uniqueRecordId : uniqueRecordIds) {
             List<Long> relatedVersions = dao.getRelatedVersions(getTableName(), uniqueRecordIds);
             if (!relatedVersions.isEmpty() && relatedVersions.size() > 1) {
-                refBookUtils.deleteRecordVersions(getTableName(), relatedVersions);
+                refBookDao.deleteRecordVersions(getTableName(), relatedVersions);
             }
             Long recordId = dao.getRecordId(getTableName(), uniqueRecordId);
             crossVersionsProcessing(dao.checkCrossVersions(getTableName(), recordId, versionEnd, null, null),

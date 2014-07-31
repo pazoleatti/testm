@@ -89,32 +89,31 @@ public class RefBookFormDataKindTest {
 
 	@Test
 	public void test6() {
-		assertEquals(5, refBookFormDataKind.getRecordsCount(null, null));
+		assertEquals(5, refBookFormDataKind.getRecordsCount(new Date(), null));
 	}
 
 	@Test
 	public void test7() {
-		assertEquals(2, refBookFormDataKind.getRecordsCount(null, "2,4"));
+		assertEquals(2, refBookFormDataKind.getRecordsCount(new Date(), "2,4"));
 	}
 
 	@Test
 	public void test8() {
-		assertEquals(1, refBookFormDataKind.getRecordsCount(null, "LOWER(NAME) like '%ичн%'"));
+		assertEquals(1, refBookFormDataKind.getRecordsCount(new Date(), "LOWER(NAME) like '%ичн%'"));
 	}
 
 	@Test
 	public void test9() {
-		assertEquals(4, refBookFormDataKind.getRecordsCount(null, "LOWER(NAME) like '%ная%'"));
+		assertEquals(4, refBookFormDataKind.getRecordsCount(new Date(), "LOWER(NAME) like '%ная%'"));
 	}
 
 	@Test
 	public void test10() {
-		assertEquals(0, refBookFormDataKind.getRecordsCount(null, "LOWER(NAME) like '%qw1%'"));
+		assertEquals(0, refBookFormDataKind.getRecordsCount(new Date(), "LOWER(NAME) like '%qw1%'"));
 	}
 
 	@Test
 	public void test11() {
-		assertEquals(1, refBookFormDataKind.getRecordsCount(null, "LOWER(NAME) like '%Форма%'"));
+		assertEquals(1, refBookFormDataKind.getRecordsCount(new Date(), "LOWER(NAME) like '%Форма%'"));
 	}
-
 }

@@ -16,7 +16,6 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.validation.constraints.NotNull;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
@@ -809,7 +808,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
     }
 
     @Override
-    public List<DepartmentFormType> getDFTByFormType(@NotNull Integer formTypeId) {
+    public List<DepartmentFormType> getDFTByFormType(Integer formTypeId) {
         try {
             return getJdbcTemplate().query("select id, department_id, form_type_id, kind, performer_dep_id from DEPARTMENT_FORM_TYPE where FORM_TYPE_ID = ?",
                     new Object[]{formTypeId},

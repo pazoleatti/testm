@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.dao.*;
 import com.aplana.sbrf.taxaccounting.dao.api.*;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.dao.api.*;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
@@ -19,16 +18,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.validation.constraints.NotNull;
 import java.util.*;
 import java.text.SimpleDateFormat;
-import java.util.*;
 
 @Service
 @Transactional
 public class SourceServiceImpl implements SourceService {
 
-    private static final String FATAL_SAVE_MSG = "Назначение источников-приемников не сохранено. Обнаружены фатальные ошибки";
+    // private static final String FATAL_SAVE_MSG = "Назначение источников-приемников не сохранено. Обнаружены фатальные ошибки";
     private static final String CHECK_EXISTENCE_MSG = "Невозможно назначить источники / приемники: Форма \"%s\" не назначена подразделению %s";
     private static final String MAIN_SOURCE_NOT_EXIST_MSG = "Назначение, указанное в качестве %s не найдено. Операция не может быть продолжена";
     private static final String SOURCES_LIST_IS_EMPTY_MSG = "Все назначения были исключены в результате проверок. Продолжение операции невозможно.";
@@ -1073,12 +1070,12 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public List<DepartmentFormType> getDFTByFormType(@NotNull Integer formTypeId) {
+    public List<DepartmentFormType> getDFTByFormType(Integer formTypeId) {
         return departmentFormTypeDao.getDFTByFormType(formTypeId);
     }
 
     @Override
-    public List<DepartmentDeclarationType> getDDTByDeclarationType(@NotNull Integer declarationTypeId) {
+    public List<DepartmentDeclarationType> getDDTByDeclarationType(Integer declarationTypeId) {
         return departmentDeclarationTypeDao.getDDTByDeclarationType(declarationTypeId);
     }
 

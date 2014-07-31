@@ -2,10 +2,14 @@ package com.aplana.sbrf.taxaccounting.dao.refbook;
 
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -20,7 +24,6 @@ import java.util.Map;
  * @author <a href="mailto:Marat.Fayzullin@aplana.com">Файзуллин Марат</a>
  * @since 04.07.13 12:25
  */
-
 public interface RefBookDao {
 
 	/**
@@ -28,7 +31,7 @@ public interface RefBookDao {
 	 * @param id код справочника
 	 * @return
 	 */
-	RefBook get(Long id);
+	RefBook get(@NotNull Long id);
 
 	/**
 	 * Загружает список всех справочников
@@ -56,7 +59,7 @@ public interface RefBookDao {
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если справочник не найден
 	 * @return
 	 */
-	RefBook getByAttribute(Long attributeId);
+	RefBook getByAttribute(@NotNull Long attributeId);
 
 	/**
 	 * Загружает данные справочника на определенную дату актуальности
@@ -67,8 +70,9 @@ public interface RefBookDao {
 	 * @param sortAttribute сортируемый столбец. Может быть не задан
 	 * @return
 	 */
-	PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, Date version, PagingParams pagingParams,
-		String filter, RefBookAttribute sortAttribute);
+	PagingResult<Map<String, RefBookValue>> getRecords(@NotNull Long refBookId, @NotNull Date version,
+                                                       PagingParams pagingParams, String filter,
+                                                       RefBookAttribute sortAttribute);
 
     /**
      * Получение row_num записи по заданным параметрам
@@ -79,7 +83,7 @@ public interface RefBookDao {
      * @param sortAttribute сортируемый столбец. Может быть не задан
      * @return
      */
-    Long getRowNum(Long refBookId, Date version, Long recordId,
+    Long getRowNum(@NotNull Long refBookId, Date version, Long recordId,
                    String filter, RefBookAttribute sortAttribute, boolean isSortAscending);
 
     /**
@@ -91,7 +95,7 @@ public interface RefBookDao {
 	 * @param sortAttribute сортируемый столбец. Может быть не задан
 	 * @return
 	 */
-	PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, Date version, PagingParams pagingParams,
+	PagingResult<Map<String, RefBookValue>> getRecords(@NotNull Long refBookId, Date version, PagingParams pagingParams,
 		String filter, RefBookAttribute sortAttribute, boolean isSortAscending);
 
     /**
@@ -122,8 +126,9 @@ public interface RefBookDao {
 	 * @param sortAttribute сортируемый столбец. Может быть не задан
 	 * @return
 	 */
-	PagingResult<Map<String, RefBookValue>> getChildrenRecords(Long refBookId, Long parentRecordId, Date version,
-		PagingParams pagingParams, String filter, RefBookAttribute sortAttribute);
+	PagingResult<Map<String, RefBookValue>> getChildrenRecords(@NotNull Long refBookId, Long parentRecordId,
+                                                               @NotNull Date version, PagingParams pagingParams,
+                                                               String filter, RefBookAttribute sortAttribute);
 
 	/**
 	 * По коду возвращает строку справочника
@@ -132,7 +137,7 @@ public interface RefBookDao {
 	 * @return
 	 * @throws org.springframework.dao.EmptyResultDataAccessException если строка не найдена
 	 */
-	Map<String, RefBookValue> getRecordData(Long refBookId, Long recordId);
+	Map<String, RefBookValue> getRecordData(@NotNull Long refBookId, @NotNull Long recordId);
 
     /**
      * Получение структуры Код строки → Строка справочника по списку кодов строк
@@ -140,7 +145,7 @@ public interface RefBookDao {
      * @param refBookId код справочника
      * @param recordIds список кодов строк справочника
      */
-    Map<Long, Map<String, RefBookValue>> getRecordData(Long refBookId, List<Long> recordIds);
+    Map<Long, Map<String, RefBookValue>> getRecordData(@NotNull Long refBookId, @NotNull List<Long> recordIds);
 
     /**
 	 * Создает новые версии записи в справочнике.
@@ -151,7 +156,8 @@ public interface RefBookDao {
 	 * @param records список новых записей
      * @return идентификатор записи справочника (без учета версий)
 	 */
-	List<Long> createRecordVersion(Long refBookId, Date version, VersionedObjectStatus status, List<RefBookRecord> records);
+	List<Long> createRecordVersion(@NotNull Long refBookId, @NotNull Date version, @NotNull VersionedObjectStatus status,
+                                   List<RefBookRecord> records);
 
     /**
      * Создает фиктивную запись, являющуюся датой окончания периода актуальности какой то версии
@@ -159,7 +165,7 @@ public interface RefBookDao {
      * @param recordId идентификатор записи справочника без учета версий
      * @param version версия записи справочника
      */
-    void createFakeRecordVersion(Long refBookId, Long recordId, Date version);
+    void createFakeRecordVersion(@NotNull Long refBookId, @NotNull Long recordId, @NotNull Date version);
 
     /**
      * Обновляет значения атрибутов у указанной версии
@@ -167,7 +173,7 @@ public interface RefBookDao {
      * @param uniqueRecordId уникальный идентификатор версии записи справочника
      * @param records список значений атрибутов
      */
-    void updateRecordVersion(Long refBookId, Long uniqueRecordId, Map<String, RefBookValue> records);
+    void updateRecordVersion(@NotNull Long refBookId, @NotNull Long uniqueRecordId, @NotNull Map<String, RefBookValue> records);
 
     /**
      * Проверяет существование версий записи справочника
@@ -176,7 +182,7 @@ public interface RefBookDao {
      * @param version версия записи справочника
      * @return
      */
-    boolean isVersionsExist(Long refBookId, List<Long> recordIds, Date version);
+    boolean isVersionsExist(@NotNull Long refBookId, @NotNull List<Long> recordIds, @NotNull Date version);
 
     /**
      * Проверка и поиск Id записи по:
@@ -185,7 +191,7 @@ public interface RefBookDao {
      * @param rowId Id строки справочника
      * @return Id первой найденной записи
      */
-    Long checkRecordUnique(Long refBookId, Date version, Long rowId);
+    Long checkRecordUnique(@NotNull Long refBookId, @NotNull Date version, @NotNull Long rowId);
 
     /**
      * Значение справочника по Id записи и Id атрибута
@@ -193,7 +199,7 @@ public interface RefBookDao {
      * @param attributeId
      * @return
      */
-    RefBookValue getValue(Long recordId, Long attributeId);
+    RefBookValue getValue(@NotNull Long recordId, @NotNull Long attributeId);
 
     /**
      * Возвращает информацию по версии записи справочника
@@ -201,7 +207,7 @@ public interface RefBookDao {
      * @param uniqueRecordId уникальный идентификатор версии записи справочника
      * @return
      */
-    RefBookRecordVersion getRecordVersionInfo(Long uniqueRecordId);
+    RefBookRecordVersion getRecordVersionInfo(@NotNull Long uniqueRecordId);
 
     /**
      * Возвращает количество существующих версий для элемента справочника
@@ -209,7 +215,7 @@ public interface RefBookDao {
      * @param uniqueRecordId уникальный идентификатор версии записи справочника
      * @return
      */
-    int getRecordVersionsCount(Long refBookId, Long uniqueRecordId);
+    int getRecordVersionsCount(@NotNull Long refBookId, @NotNull Long uniqueRecordId);
 
     /**
      * Возвращает все версии указанной записи справочника
@@ -220,7 +226,9 @@ public interface RefBookDao {
      * @param sortAttribute сортируемый столбец. Может быть не задан
      * @return
      */
-    PagingResult<Map<String,RefBookValue>> getRecordVersions(Long refBookId, Long uniqueRecordId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute);
+    PagingResult<Map<String,RefBookValue>> getRecordVersions(@NotNull Long refBookId, @NotNull Long uniqueRecordId,
+                                                             PagingParams pagingParams, String filter,
+                                                             RefBookAttribute sortAttribute);
 
     /**
      * Возвращает значения уникальных атрибутов справочника
@@ -228,7 +236,7 @@ public interface RefBookDao {
      * @param recordId идентификатор записи
      * @return
      */
-    List<Pair<RefBookAttribute, RefBookValue>> getUniqueAttributeValues(Long refBookId, Long recordId);
+    List<Pair<RefBookAttribute, RefBookValue>> getUniqueAttributeValues(@NotNull Long refBookId, @NotNull Long recordId);
 
     /**
      * По коду справочника возвращает набор его атрибутов
@@ -236,7 +244,7 @@ public interface RefBookDao {
      * @param refBookId код справочника
      * @return набор атрибутов
      */
-    List<RefBookAttribute> getAttributes(Long refBookId);
+    List<RefBookAttribute> getAttributes(@NotNull Long refBookId);
 
     /**
      *
@@ -249,7 +257,9 @@ public interface RefBookDao {
      * @param records новые значения полей элемента справочника
      * @return список пар идентификатор записи-имя атрибута, у которых совпали значения уникальных атрибутов
      */
-    List<Pair<Long,String>> getMatchedRecordsByUniqueAttributes(Long refBookId, Long uniqueRecordId, List<RefBookAttribute> attributes, List<RefBookRecord> records);
+    List<Pair<Long,String>> getMatchedRecordsByUniqueAttributes(@NotNull Long refBookId, @NotNull Long uniqueRecordId,
+                                                                @NotNull List<RefBookAttribute> attributes,
+                                                                @NotNull List<RefBookRecord> records);
 
     /**
      * Поиск существующих версий, которые могут пересекаться с новой версией
@@ -260,7 +270,9 @@ public interface RefBookDao {
      * @param excludedRecordId идентификатор версии записи справочника, которая исключается из проверки пересечения. Используется только при редактировании
      * @return результат проверки по каждой версии, с которой есть пересечение
      */
-    List<CheckCrossVersionsResult> checkCrossVersions(Long refBookId, Long recordId, Date versionFrom, Date versionTo, Long excludedRecordId);
+    List<CheckCrossVersionsResult> checkCrossVersions(@NotNull Long refBookId, @NotNull Long recordId,
+                                                      @NotNull Date versionFrom, @NotNull Date versionTo,
+                                                      Long excludedRecordId);
 
     /**
      * Проверка на пересечение версий у записей справочника, в которых совпали уникальные атрибуты
@@ -278,7 +290,7 @@ public interface RefBookDao {
      * @param versionFrom дата начала актуальности новой версии
      * @return есть ссылки на версию?
      */
-    boolean isVersionUsed(Long refBookId, Long uniqueRecordId, Date versionFrom);
+    boolean isVersionUsed(@NotNull Long refBookId, @NotNull Long uniqueRecordId, @NotNull Date versionFrom);
 
     /**
      * Проверяет есть ли ссылки на версию в каких либо точках запроса
@@ -289,7 +301,7 @@ public interface RefBookDao {
      *@param versionTo
      * @param isValuesChanged признак того, что были изменены атрибуты  @return результаты проверки. Сообщения об ошибках
      */
-    List<String> isVersionUsed(Long refBookId, List<Long> uniqueRecordIds, Date versionFrom, Date versionTo, boolean isValuesChanged);
+    List<String> isVersionUsed(@NotNull Long refBookId, @NotNull List<Long> uniqueRecordIds, Date versionFrom, Date versionTo, boolean isValuesChanged);
 
     Collection<String> isVersionUsedInRefBooks(Long refBookId, List<Long> uniqueRecordIds);
 
@@ -300,7 +312,7 @@ public interface RefBookDao {
      * @param versionFrom дата начала актуальности версии текущей версии, после которой будет выполняться поиск следующей версии
      * @return данные версии
      */
-    RefBookRecordVersion getNextVersion(Long refBookId, Long recordId, Date versionFrom);
+    RefBookRecordVersion getNextVersion(@NotNull Long refBookId, @NotNull Long recordId, @NotNull Date versionFrom);
 
     /**
      * Возвращает данные о версии следующей до указанной
@@ -316,7 +328,7 @@ public interface RefBookDao {
      * @param uniqueRecordId уникальный идентификатор версии записи
      * @return
      */
-    Long getRecordId(Long uniqueRecordId);
+    Long getRecordId(@NotNull Long uniqueRecordId);
 
     /**
      * Возвращает уникальный идентификатор записи, удовлетворяющей указанным условиям
@@ -332,14 +344,14 @@ public interface RefBookDao {
      * @param uniqueRecordIds идентификаторы версии записи справочника
      * @return идентификаторы фиктивных версии
      */
-    List<Long> getRelatedVersions(List<Long> uniqueRecordIds);
+    List<Long> getRelatedVersions(@NotNull List<Long> uniqueRecordIds);
 
     /**
      * Удаляет все версии записи из справочника
      * @param refBookId идентификатор справочника
      * @param uniqueRecordIds список идентификаторов записей, все версии которых будут удалены
      */
-    void deleteAllRecordVersions(Long refBookId, List<Long> uniqueRecordIds);
+    void deleteAllRecordVersions(@NotNull Long refBookId, @NotNull List<Long> uniqueRecordIds);
 
     /**
      * Возвращает список версий элементов справочника за указанный период времени
@@ -348,7 +360,7 @@ public interface RefBookDao {
      * @param endDate конечная дата
      * @return
      */
-    List<Date> getVersions(Long refBookId, Date startDate, Date endDate);
+    List<Date> getVersions(@NotNull Long refBookId, @NotNull Date startDate, @NotNull Date endDate);
 
     /**
      * Получает идентификатор записи, который имеет наименьшую дату начала актуальности для указанной версии
@@ -356,14 +368,14 @@ public interface RefBookDao {
      * @param uniqueRecordId идентификатор версии записи справочника
      * @return
      */
-    Long getFirstRecordId(Long refBookId, Long uniqueRecordId);
+    Long getFirstRecordId(@NotNull Long refBookId, @NotNull Long uniqueRecordId);
 
     /**
      * Возвращает дату начала периода актуальности для указанных версий записей справочника
      * @param uniqueRecordIds уникальные идентификаторы версий записей справочника
      * @return идентификатор версии - дата начала периода актуальности
      */
-    Map<Long,Date> getRecordsVersionStart(List<Long> uniqueRecordIds);
+    Map<Long,Date> getRecordsVersionStart(@NotNull @Size(min = 1) List<Long> uniqueRecordIds);
 
     /**
      * Проверяет есть ли дочерние элементы для указанных версий записей
@@ -371,7 +383,7 @@ public interface RefBookDao {
      * @param uniqueRecordIds уникальные идентификаторы версий записей справочника
      * @return возвращает список дат начала периода актуальности, для версий у которых были найдены дочерние элементы. Либо null, если их нет
      */
-    List<Date> hasChildren(Long refBookId, List<Long> uniqueRecordIds);
+    List<Date> hasChildren(@NotNull Long refBookId, @NotNull List<Long> uniqueRecordIds);
 
     /**
      * Возвращает список идентификаторов элементов справочника, являющихся родительскими  по иерархии вверх для указанного элемента
@@ -421,7 +433,7 @@ public interface RefBookDao {
      * @param records список новых записей
      */
     @Deprecated
-    void createRecords(Long refBookId, Date version, List<Map<String, RefBookValue>> records);
+    void createRecords(@NotNull Long refBookId, @NotNull Date version, @NotNull List<Map<String, RefBookValue>> records);
     
     /**
      * Обновляет значения в справочнике
@@ -432,7 +444,7 @@ public interface RefBookDao {
      * Вместо этого метода, надо использовать {@link com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao#updateRecordVersion}
      */
     @Deprecated
-    void updateRecords(Long refBookId, Date version, List<Map<String, RefBookValue>> records);
+    void updateRecords(@NotNull Long refBookId, @NotNull Date version, @NotNull List<Map<String, RefBookValue>> records);
 
     /**
      * Удаляет записи из справочника
@@ -443,7 +455,7 @@ public interface RefBookDao {
      * Вместо этого метода, надо использовать {@link com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao#deleteRecordVersions}
      */
     @Deprecated    
-    void deleteRecords(Long refBookId, Date version, List<Long> recordIds);
+    void deleteRecords(@NotNull Long refBookId, @NotNull Date version, @NotNull List<Long> recordIds);
 
     /**
      * Удаление всех записей справочника.<br>
@@ -455,5 +467,91 @@ public interface RefBookDao {
      * Вместо этого метода, надо использовать {@link com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao#deleteAllRecordVersions}
      */
     @Deprecated
-    void deleteAllRecords(Long refBookId, Date version);
+    void deleteAllRecords(@NotNull Long refBookId, @NotNull Date version);
+
+    PagingResult<Map<String, RefBookValue>> getChildrenRecords(Long refBookId, String tableName, Long parentId, PagingParams pagingParams,
+                                                               String filter, RefBookAttribute sortAttribute, boolean isSortAscending);
+
+    PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, String tableName, PagingParams pagingParams,
+                                                       String filter, RefBookAttribute sortAttribute, String whereClause);
+
+    List<Map<String, RefBookValue>> getRecordsData(PreparedStatementData ps, RefBook refBook);
+
+    /**
+     * row_num
+     */
+    Long getRowNum(Long refBookId, String tableName, Long recordId, String filter, RefBookAttribute sortAttribute,
+                   boolean isSortAscending, String whereClause);
+
+    /**
+     * row_num
+     */
+    Long getRowNum(PreparedStatementData ps, Long recordId);
+
+    PreparedStatementData getSimpleQuery(RefBook refBook, String tableName, RefBookAttribute sortAttribute,
+                                         String filter, PagingParams pagingParams, boolean isSortAscending, String whereClause);
+
+    PreparedStatementData getSimpleQuery(RefBook refBook, String tableName, RefBookAttribute sortAttribute, String filter, PagingParams pagingParams, String whereClause);
+
+    PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, String tableName, PagingParams pagingParams,
+                                                       String filter, RefBookAttribute sortAttribute, boolean isSortAscending, String whereClause);
+
+    List<Long> getUniqueRecordIds(Long refBookId, String tableName, String filter);
+
+    /**
+     * Получает количество уникальных записей, удовлетворяющих условиям фильтра
+     * @param refBookId ид справочника
+     * @param tableName название таблицы
+     * @param filter условие фильтрации строк. Может быть не задано
+     * @return количество
+     */
+    int getRecordsCount(Long refBookId, String tableName, String filter);
+
+    /**
+     * Количество записей в выборке
+     */
+    Integer getRecordsCount(PreparedStatementData ps);
+
+    /**
+     * Изменение периода актуальности для указанной версии
+     *
+     * @param tableName      название таблицы
+     * @param uniqueRecordId уникальный идентификатор версии записи
+     * @param version        новая дата начала актуальности
+     */
+    void updateVersionRelevancePeriod(String tableName, Long uniqueRecordId, Date version);
+
+    /**
+     * Проверка ссылочных атрибутов. Их дата начала актуальности должна быть больше либо равна дате актуальности новой версии
+     *
+     * @param versionFrom дата актуальности новой версии
+     * @param attributes  атрибуты справочника
+     * @param records     новые значения полей элемента справочника
+     */
+    void isReferenceValuesCorrect(Logger logger, String tableName, @NotNull Date versionFrom, Date versionTo, @NotNull List<RefBookAttribute> attributes, List<RefBookRecord> records);
+
+    Map<String, RefBookValue> getRecordData(Long refBookId, String tableName, Long recordId);
+
+    /**
+     * Формирует имя для записи справочника, основанное на уникальных атрибутах
+     *
+     * @param refBook справочник
+     * @param values  список значений уникальных атрибутов
+     * @return
+     */
+    String buildUniqueRecordName(RefBook refBook, List<Pair<RefBookAttribute, RefBookValue>> values);
+
+    /**
+     * Удаляет указанные версии записи из справочника
+     *
+     * @param uniqueRecordIds список идентификаторов версий записей, которые будут удалены
+     */
+    void deleteRecordVersions(String tableName, @NotNull List<Long> uniqueRecordIds);
+
+    /**
+     * Удаление версии
+     *
+     * @param uniqueRecordId уникальный идентификатор версии записи
+     */
+    void deleteVersion(String tableName, @NotNull Long uniqueRecordId);
 }

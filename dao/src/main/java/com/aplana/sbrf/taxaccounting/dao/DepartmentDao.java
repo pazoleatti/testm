@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
 
@@ -58,7 +59,7 @@ public interface DepartmentDao {
      * @param departmentId подразделение до которого строится иерархия
      * @return строка вида "подразделение/другое подразделение/еще одно подразделение"
      */
-    String getParentsHierarchy(Integer departmentId);
+    String getParentsHierarchy(@NotNull Integer departmentId);
 
 	/**
 	 * Возвращает путь в иерархии до указанного подразделения используя сокращеные наименования

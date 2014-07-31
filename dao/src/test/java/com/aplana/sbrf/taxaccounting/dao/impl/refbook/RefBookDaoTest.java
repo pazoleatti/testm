@@ -44,13 +44,8 @@ public class RefBookDaoTest {
 	@Autowired
     RefBookDao refBookDao;
 
-    @Autowired
-    private RefBookUtils refBookUtils;
-
-    static Long cnt = 8L;
-
     @Before
-    public void init(){
+    public void init() {
         ReflectionTestUtils.setField(refBookDao, "dbUtils", BDUtilsMock.getBDUtils());
     }
 
@@ -320,7 +315,7 @@ public class RefBookDaoTest {
 		record.get(ATTRIBUTE_AUTHOR).setValue(null);
 		// сохраняем изменения
         refBookDao.updateRecordVersion(refBook.getId(), record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue(), record);
-        refBookUtils.updateVersionRelevancePeriod(REF_BOOK_RECORD_TABLE_NAME, record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue(), version2);
+        refBookDao.updateVersionRelevancePeriod(REF_BOOK_RECORD_TABLE_NAME, record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue(), version2);
 		// проверяем изменения
 		data = refBookDao.getRecords(refBook.getId(), version2, new PagingParams(), null, refBook.getAttribute(ATTRIBUTE_NAME));
         assertEquals(data.size(), 2);
@@ -488,7 +483,7 @@ public class RefBookDaoTest {
     public void deleteRecordVersions() {
         PagingResult<Map<String, RefBookValue>> records = refBookDao.getRecords(1L, getDate(1, 1, 2013), null, null, null);
         assertEquals(2, records.size());
-        refBookUtils.deleteRecordVersions(REF_BOOK_RECORD_TABLE_NAME, asList(1L));
+        refBookDao.deleteRecordVersions(REF_BOOK_RECORD_TABLE_NAME, asList(1L));
         records = refBookDao.getRecords(1L, getDate(1, 1, 2013), null, null, null);
         assertEquals(1, records.size());
     }
@@ -558,18 +553,18 @@ public class RefBookDaoTest {
 
 	@Test
 	public void getChildrenRecordsTest() {
-		checkChildrenCount(null, 4);
-		checkChildrenCount(8L, 2);
-		checkChildrenCount(9L, 0);
-		checkChildrenCount(10L, 1);
-		checkChildrenCount(11L, 0);
-		checkChildrenCount(12L, 3);
-		checkChildrenCount(13L, 0);
-		checkChildrenCount(14L, 0);
-		checkChildrenCount(15L, 0);
-		checkChildrenCount(16L, 0);
-		checkChildrenCount(17L, 0);
-	}
+        checkChildrenCount(null, 4);
+        checkChildrenCount(8L, 2);
+        checkChildrenCount(9L, 0);
+        checkChildrenCount(10L, 1);
+        checkChildrenCount(11L, 0);
+        checkChildrenCount(12L, 3);
+        checkChildrenCount(13L, 0);
+        checkChildrenCount(14L, 0);
+        checkChildrenCount(15L, 0);
+        checkChildrenCount(16L, 0);
+        checkChildrenCount(17L, 0);
+    }
 
     @Test
     public void hasChildren() {

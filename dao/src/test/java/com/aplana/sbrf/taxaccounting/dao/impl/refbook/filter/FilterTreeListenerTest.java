@@ -31,8 +31,6 @@ public class FilterTreeListenerTest {
 
     private RefBook refBook;
 
-    UniversalFilterTreeListener universalFilterTreeListener;
-
     @Before
     public void init(){
         refBook =  mock(RefBook.class);
