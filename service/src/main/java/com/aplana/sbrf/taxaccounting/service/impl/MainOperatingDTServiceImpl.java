@@ -148,14 +148,14 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
     }
 
     @Override
-    public boolean deleteVersionTemplate(int templateId, Date templateActualEndDate, Logger logger, TAUser user) {
+    public boolean deleteVersionTemplate(int templateId, Logger logger, TAUser user) {
         boolean isDeleteAll = false;//переменная определяющая, удалена ли все версии макета
         DeclarationTemplate template = declarationTemplateService.get(templateId);
         Date dateEndActualize = declarationTemplateService.getDTEndDate(templateId);
         versionOperatingService.isUsedVersion(template.getId(), template.getType().getId(),
                 template.getStatus(), template.getVersion(), dateEndActualize, logger);
         checkError(logger, DELETE_TEMPLATE_VERSION_MESSAGE);
-        versionOperatingService.checkDestinationsSources(template.getType().getId(), template.getVersion(), templateActualEndDate, logger);
+        versionOperatingService.checkDestinationsSources(template.getType().getId(), template.getVersion(), dateEndActualize, logger);
         checkError(logger, DELETE_TEMPLATE_VERSION_MESSAGE);
 
         versionOperatingService.cleanVersions(template.getId(), template.getType().getId(),
