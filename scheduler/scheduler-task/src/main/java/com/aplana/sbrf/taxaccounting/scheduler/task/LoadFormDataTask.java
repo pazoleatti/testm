@@ -84,7 +84,6 @@ public class LoadFormDataTask implements UserTask{
         }
 
         loadFormDataService.importFormData(userService.getSystemUserInfo(), departmentsIds, new Logger());
-        throw new RuntimeException("Тест транзакции, форма с id = 12767 не должна была удалится с бд");
     }
 
     @Override
