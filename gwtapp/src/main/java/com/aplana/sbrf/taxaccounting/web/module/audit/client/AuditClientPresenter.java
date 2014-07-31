@@ -162,6 +162,8 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
                             getView().updateArchiveDateLbl(result.getLastArchiveDate());
                         }
                     }, AuditClientPresenter.this));
+                    auditFilterPresenter.initFilterData();
+                    auditFilterPresenter.onSearchButtonClicked();
                 } else {
                     Dialog.errorMessage("Архивация не выполнена");
                 }
