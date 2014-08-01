@@ -373,7 +373,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 						if (string!= null && string.length() > maxLength) {
 							BadValueException badValueException = new BadValueException();
 							badValueException.setFieldName(field.getKey().getName());
-							badValueException.setDescription("Значение более " + maxLength + " символов");
+							badValueException.setDescription("значение атрибута превышает максимально допустимое " + maxLength + "!");
 							throw badValueException;
 						}
 						value.setAttributeType(RefBookAttributeType.STRING);
