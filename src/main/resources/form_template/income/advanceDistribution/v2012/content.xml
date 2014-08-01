@@ -104,7 +104,7 @@
         <checking>false</checking>
         <name>Доля налоговой базы (%)</name>
         <order>11</order>
-        <width>5</width>
+        <width>7</width>
         <maxLength>11</maxLength>
         <precision>8</precision>
     </columns>
@@ -113,7 +113,7 @@
         <checking>false</checking>
         <name>Налоговая база, исходя из доли</name>
         <order>12</order>
-        <width>5</width>
+        <width>8</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -131,7 +131,7 @@
         <checking>false</checking>
         <name>Сумма налога</name>
         <order>14</order>
-        <width>5</width>
+        <width>8</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -149,7 +149,7 @@
         <checking>false</checking>
         <name>Сумма налога к доплате</name>
         <order>16</order>
-        <width>5</width>
+        <width>8</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
