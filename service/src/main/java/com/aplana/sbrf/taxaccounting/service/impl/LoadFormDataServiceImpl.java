@@ -377,6 +377,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             if (ignoreFileSet != null && ignoreFileSet.contains(candidateStr)) {
                 continue;
             }
+            // TODO Можно оптимизировать
             FileWrapper candidateFile = ResourceUtils.getSharedResource(folderPath + candidateStr);
             // Это файл, а не директория и соответствует формату имени ТФ
             if (candidateFile.isFile() && TransportDataParam.isValidName(candidateStr)) {
