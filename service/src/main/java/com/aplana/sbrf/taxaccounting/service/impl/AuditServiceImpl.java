@@ -1,9 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.core.api.LockCoreService;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.AuditDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -29,8 +27,6 @@ public class AuditServiceImpl implements AuditService {
 	private AuditDao auditDao;
 	@Autowired
 	private DepartmentService departmentService;
-    @Autowired
-	private DeclarationTypeDao declarationTypeDao;
     @Autowired
     private PeriodService periodService;
     @Autowired
@@ -66,10 +62,10 @@ public class AuditServiceImpl implements AuditService {
                 }
                 log.setRoles(roles.toString());
 
-                String departmentName = departmentId == null ? "" : (departmentId == 0 ? departmentService.getDepartment(departmentId).getShortName() : departmentService.getParentsHierarchy(departmentId));
+                String departmentName = departmentId == null ? "" : (departmentId == 0 ? departmentService.getDepartment(departmentId).getName() : departmentService.getParentsHierarchy(departmentId));
                 log.setFormDepartmentName(departmentName.substring(0, Math.min(departmentName.length(), 2000)));
                 log.setFormDepartmentId(departmentId);
-                if (departmentId != null) log.setDepartmentTBId(departmentService.getParentTB(departmentId).getId());
+                if (departmentId != null && departmentId != 0) log.setDepartmentTBId(departmentService.getParentTB(departmentId).getId());
 
                 if (reportPeriodId == null)
                     log.setReportPeriodName(null);
@@ -81,7 +77,8 @@ public class AuditServiceImpl implements AuditService {
                 log.setFormTypeName(formTypeName);
                 log.setFormKindId(formKindId);
                 log.setNote(note != null ? note.substring(0, Math.min(note.length(), 2000)) : null);
-                String userDepartmentName = departmentId == 0 ? departmentService.getDepartment(departmentId).getShortName() : departmentService.getParentsHierarchy(userInfo.getUser().getDepartmentId());
+                int userDepId = userInfo.getUser().getDepartmentId();
+                String userDepartmentName = userDepId == 0 ? departmentService.getDepartment(userDepId).getName() : departmentService.getParentsHierarchy(userDepId);
                 log.setUserDepartmentName(userDepartmentName.substring(0, Math.min(userDepartmentName.length(), 2000)));
 
                 auditDao.add(log);

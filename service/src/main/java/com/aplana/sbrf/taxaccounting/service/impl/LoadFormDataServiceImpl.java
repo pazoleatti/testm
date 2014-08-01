@@ -80,18 +80,17 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
         }
         int success = 0;
         int fail = 0;
-        List<String> workFilesList;
         // Набор файлов, которые уже обработали
         Set<String> ignoreFileSet = new HashSet<String>();
         // Если изначально нет подходящих файлов то выдаем отдельную ошибку
-        if (getWorkTransportFiles(path, ignoreFileSet).isEmpty()) {
+        List<String> workFilesList = getWorkTransportFiles(path, ignoreFileSet);
+        if (workFilesList.isEmpty()) {
             log(userInfo, LogData.L3, logger, departmentService.getDepartment(departmentId).getName());
             return new ImportCounter();
         }
 
         // Обработка всех подходящих файлов, с получением списка на каждой итерации
-        while (!(workFilesList = getWorkTransportFiles(path, ignoreFileSet)).isEmpty()) {
-            String fileName = workFilesList.get(0);
+        for (String fileName : workFilesList) {
             ignoreFileSet.add(fileName);
             FileWrapper currentFile = ResourceUtils.getSharedResource(path + fileName);
 
@@ -166,8 +165,11 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             FormDataKind formDataKind = FormDataKind.PRIMARY; // ТФ только для первичных НФ
 
             if (!signService.checkSign(currentFile.getPath(), 0)) {
-                throw new ServiceException("Ошибка проверки цифровой подписи, файл " + currentFile.getPath());
+                log(userInfo, LogData.L16, logger, fileName);
+                fail++;
+                continue;
             }
+
             log(userInfo, LogData.L15, logger, fileName);
 
             // Поиск экземпляра НФ
@@ -377,10 +379,13 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             if (ignoreFileSet != null && ignoreFileSet.contains(candidateStr)) {
                 continue;
             }
-            FileWrapper candidateFile = ResourceUtils.getSharedResource(folderPath + candidateStr);
+
             // Это файл, а не директория и соответствует формату имени ТФ
-            if (candidateFile.isFile() && TransportDataParam.isValidName(candidateStr)) {
-                retVal.add(candidateStr);
+            if (TransportDataParam.isValidName(candidateStr)) {
+                FileWrapper candidateFile = ResourceUtils.getSharedResource(folderPath + candidateStr);
+                if (candidateFile.isFile()) {
+                    retVal.add(candidateStr);
+                }
             }
         }
         return retVal;
