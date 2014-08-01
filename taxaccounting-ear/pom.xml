@@ -5,7 +5,7 @@
     <parent>
         <artifactId>taxaccounting</artifactId>
         <groupId>com.aplana.taxaccounting</groupId>
-        <version>0.3.9</version>
+        <version>0.4</version>
     </parent>
 
     <artifactId>taxaccounting-ear</artifactId>
