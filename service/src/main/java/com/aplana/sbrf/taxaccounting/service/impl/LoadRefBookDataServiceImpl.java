@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.LoadRefBookDataService;
 import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
+import com.aplana.sbrf.taxaccounting.service.SignService;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
 import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
 import org.apache.commons.io.IOUtils;
@@ -36,6 +37,8 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
     private RefBookScriptingService refBookScriptingService;
     @Autowired
     private ConfigurationDao configurationDao;
+    @Autowired
+    private SignService signService;
 
     // ЦАС НСИ
     private static long REF_BOOK_OKATO = 3L; // Коды ОКАТО
@@ -112,22 +115,26 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
 
         // Каталогов может быть несколько, хоть сейчас в ConfigurationParam и ограничено одним значением для всех справочников
         for (String path : refBookDirectoryList) {
-            List<String> workFilesList;
             // Набор файлов, которые уже обработали
             Set<String> ignoreFileSet = new HashSet<String>();
             // Если изначально нет подходящих файлов то выдаем отдельную ошибку
-            if (getWorkTransportFiles(path, ignoreFileSet, mappingMap.keySet()).isEmpty()) {
+            List<String> workFilesList = getWorkTransportFiles(path, ignoreFileSet, mappingMap.keySet());
+
+            if (workFilesList.isEmpty()) {
                 log(userInfo, LogData.L31, logger, refBookName);
                 return new ImportCounter();
             }
 
             // Обработка всех подходящих файлов, с получением списка на каждой итерации
-            while (!(workFilesList = getWorkTransportFiles(path, ignoreFileSet, mappingMap.keySet())).isEmpty()) {
-                String fileName = workFilesList.get(0);
+            for (String fileName : workFilesList) {
                 ignoreFileSet.add(fileName);
                 FileWrapper currentFile = ResourceUtils.getSharedResource(path + fileName);
 
-                // TODO Проверка ЭЦП (L15, L16, L25) // http://jira.aplana.com/browse/SBRFACCTAX-8059 0.3.9 Реализовать проверку ЭЦП ТФ
+                if (!signService.checkSign(currentFile.getPath(), 0)) {
+                    log(userInfo, LogData.L16, logger, fileName);
+                    return new ImportCounter();
+                }
+
                 log(userInfo, LogData.L15, logger, fileName);
 
                 // Один файл может соответствоваь нескольким справочникам
@@ -345,11 +352,12 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
             if (ignoreFileSet != null && ignoreFileSet.contains(candidateStr)) {
                 continue;
             }
-            FileWrapper candidateFile = ResourceUtils.getSharedResource(folderPath + candidateStr);
             // Это файл, а не директория и соответствует формату имени ТФ
-            // TODO Можно оптимизировать
-            if (candidateFile.isFile() && mappingMatch(candidateFile.getName(), mappingSet) != null) {
-                retVal.add(candidateStr);
+            if (mappingMatch(candidateStr, mappingSet) != null) {
+                FileWrapper candidateFile = ResourceUtils.getSharedResource(folderPath + candidateStr);
+                if (candidateFile.isFile()) {
+                    retVal.add(candidateStr);
+                }
             }
         }
         // Система сортирует файлы по возрастанию по значению блоков VVV.RR в имени файла.
