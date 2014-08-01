@@ -2,7 +2,9 @@ package com.aplana.sbrf.taxaccounting.core.impl;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.LockDataDao;
+import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.model.LockData;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,8 +27,11 @@ public class LockDataServiceImpl implements LockDataService {
 	@Autowired
 	private LockDataDao dao;
 
+	@Autowired
+	private TAUserDao userDao;
+
 	@Override
-	public LockData lock(String key, long userId, long age) {
+	public LockData lock(String key, int userId, long age) {
 		try {
 			synchronized(this) {
 				LockData lock = validateLock(dao.get(key));
@@ -42,7 +47,7 @@ public class LockDataServiceImpl implements LockDataService {
 	}
 
 	@Override
-	public void lockWait(String key, long userId, long age, long timeout) {
+	public void lockWait(String key, int userId, long age, long timeout) {
 		long startTime = new Date().getTime();
 		while (lock(key, userId, age) != null) {
 			try {
@@ -56,14 +61,15 @@ public class LockDataServiceImpl implements LockDataService {
 	}
 
 	@Override
-	public void unlock(String key, long userId) {
+	public void unlock(String key, int userId) {
 		try {
 			synchronized(this) {
 				LockData lock = validateLock(dao.get(key));
 				if (lock != null) {
 					if (lock.getUserId() != userId) {
-						throw new ServiceException(String.format("Невозможно удалить блокировку, так как она установлена другим " +
-								"пользователем (id = %s). Текущий пользователь id = %s", lock.getUserId(), userId));
+						TAUser blocker = userDao.getUser(lock.getUserId());
+						throw new ServiceException(String.format("Невозможно удалить блокировку, так как она установлена " +
+								"пользователем \"$s\"(%s).", blocker.getLogin(), blocker.getId()));
 					}
 					dao.deleteLock(key);
 				} else {
@@ -78,14 +84,15 @@ public class LockDataServiceImpl implements LockDataService {
 	}
 
 	@Override
-	public void extend(String key, long userId, long age) {
+	public void extend(String key, int userId, long age) {
 		try {
 			synchronized(this) {
 				LockData lock = validateLock(dao.get(key));
 				if (lock != null) {
 					if (lock.getUserId() != userId) {
-						throw new ServiceException(String.format("Невозможно продлить блокировку, так как она установлена другим " +
-							"пользователем (id = %s). Текущий пользователь id = %s", lock.getUserId(), userId));
+						TAUser blocker = userDao.getUser(lock.getUserId());
+						throw new ServiceException(String.format("Невозможно продлить блокировку, так как она установлена " +
+							"пользователем \"$s\"(id = %s). Текущий пользователь id = %s", blocker.getLogin(), blocker.getId()));
 					}
 					Date dateBefore = new Date();
 					dao.updateLock(key, new Date(dateBefore.getTime() + age));
@@ -117,7 +124,7 @@ public class LockDataServiceImpl implements LockDataService {
 	/**
 	 * Блокировка без всяких проверок - позволяет сократить количество обращений к бд для вложенных вызовов методов
 	 */
-	private void internalLock(String key, long userId, long age) {
+	private void internalLock(String key, int userId, long age) {
 		Date dateBefore = new Date();
 		dao.createLock(key, userId, new Date(dateBefore.getTime() + age));
 	}

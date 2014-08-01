@@ -47,7 +47,7 @@ public interface LockDataService {
 	 * @param age относительное время жизни блокировки в миллисекундах
 	 * @return информация о блокировке
 	 */
-	LockData lock(String key, long userId, long age);
+	LockData lock(String key, int userId, long age);
 
 	/**
 	 * Установка блокировки с ожиданием
@@ -60,7 +60,7 @@ public interface LockDataService {
 	 * @param timeout максимальное относительное время ожидания для установки новой блокировки
 	 * @throws ServiceException если время ожидания timeout истекло
 	 */
-	void lockWait(String key, long userId, long age, long timeout);
+	void lockWait(String key, int userId, long age, long timeout);
 
 	/**
 	 * Снимает блокировку по ее идентификатору. Если блокировки не было, либо была установлена другим пользователем, то exception.
@@ -69,7 +69,7 @@ public interface LockDataService {
 	 * @param userId код установившего блокировку пользователя
 	 * @throws ServiceException если блокировка была установлена другим пользователем, либо блокировки не было в бд
 	 */
-	void unlock(String key, long userId);
+	void unlock(String key, int userId);
 
 	/**
 	 * Аналогично методу lock с той разницей, что если блокировка объекта от имени указанного пользователя существует,
@@ -80,6 +80,6 @@ public interface LockDataService {
 	 * @param age относительное время жизни блокировки в миллисекундах
 	 * @throws ServiceException если блокировка была установлена другим пользователем
 	 */
-	void extend(String key, long userId, long age);
+	void extend(String key, int userId, long age);
 
 }
