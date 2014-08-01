@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockCoreService;
+import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
@@ -17,7 +18,6 @@ import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
-import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -26,7 +26,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -84,6 +83,10 @@ public class FormDataServiceImpl implements FormDataService {
     TransactionHelper tx;
     @Autowired
     TAUserService userService;
+    @Autowired
+    private LockDataService lockDataService;
+    // Время блокировки при консолидации (3 часа)
+    private static final int BLOCK_TIME =  3 * 60 * 60 * 1000;
 
 	/**
 	 * Создать налоговую форму заданного типа При создании формы выполняются
@@ -601,7 +604,7 @@ public class FormDataServiceImpl implements FormDataService {
      *
      *  http://conf.aplana.com/pages/viewpage.action?pageId=8788114
      */
-    void compose(WorkflowMove workflowMove, FormData formData, TAUserInfo userInfo, Logger logger){
+    void compose(WorkflowMove workflowMove, FormData formData, TAUserInfo userInfo, Logger logger) {
         // Проверка перехода ЖЦ. Принятие либо отмена принятия. Прочие переходы не обрабатываются.
         if (workflowMove.getToState() != WorkflowState.ACCEPTED && workflowMove.getFromState() != WorkflowState.ACCEPTED) {
             return;
@@ -618,79 +621,69 @@ public class FormDataServiceImpl implements FormDataService {
         if (departmentFormTypes == null || departmentFormTypes.isEmpty()) {
             return;
         }
-        // Проверяем блокировку приемников
-        List<FormData> lockedForms = new ArrayList<FormData>();
-        SimpleDateFormat dateTimeFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm");
 
-        for (DepartmentFormType destinationDFT : departmentFormTypes) {
-            // Проверяем наличие активного шаблона приемника (встроенный в дао Exception)
-            formTemplateService.getActiveFormTemplateId(destinationDFT.getFormTypeId(), formData.getReportPeriodId());
-            // Экземпляр формы-приемника
-            FormData destinationForm = findFormData(destinationDFT.getFormTypeId(), destinationDFT.getKind(), destinationDFT.getDepartmentId(), formData.getReportPeriodId(), formData.getPeriodOrder());
-            // Если форма распринимается при отсутствии экземпляра формы-приемника, то такую форму не обрабатываем.
-            if (destinationForm == null) {
-                continue;
-            }
-            ObjectLock lock = lockCoreService.getLock(FormData.class, destinationForm.getId(), userInfo);
-            if (lock != null) {
-                lockedForms.add(destinationForm);
-                logger.error("Невозможно принять налоговую форму и осуществить консолидацию " +
-                        "из-за блокировки другими пользователями форм-приемников " +
-                        "Форма " + destinationForm.getFormType().getName() + " " + destinationForm.getKind().getName() + ", " +
-                        reportPeriodService.getReportPeriod(destinationForm.getReportPeriodId()).getName() + ", " +
-                        departmentDao.getDepartment(destinationForm.getDepartmentId()).getName() + " заблокирована пользователем " +
-                        userService.getUser(lock.getUserId()).getName() + " " + dateTimeFormat.format(lock.getLockTime())
-                );
+       List<String> lockedForms = new ArrayList<String>();
 
-                continue;
-            }
-        }
-        if (!lockedForms.isEmpty()) {
-            throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
-        }
         try {
+            // Проверяем блокировку приемников
+            for (DepartmentFormType destinationDFT : departmentFormTypes) {
+                String periodOrder = ((destinationDFT.getKind() == FormDataKind.PRIMARY || destinationDFT.getKind() == FormDataKind.CONSOLIDATED) && formData.getPeriodOrder() != null) ?
+                        String.valueOf(formData.getPeriodOrder()) : "";
+                String lockKey = formData.getReportPeriodId() + "." + periodOrder + "." + destinationDFT.getDepartmentId()
+                        + "." + destinationDFT.getFormTypeId() + "." + destinationDFT.getKind();
+                if (lockDataService.lock(lockKey, userInfo.getUser().getId(), BLOCK_TIME) != null) {
+                    FormTemplate formTemplate = formTemplateService.get(formTemplateService.getActiveFormTemplateId(destinationDFT.getFormTypeId(), formData.getReportPeriodId()));
+                    logger.error(String.format("Заблокирована форма-приемник «%s» в подразделении «%s»",
+                            formTemplate.getName(), departmentDao.getDepartment(destinationDFT.getDepartmentId()).getName()));
+                } else {
+                    lockedForms.add(lockKey);
+                }
+            }
+            if (logger.containsLevel(LogLevel.ERROR)) {
+                throw new ServiceLoggerException("Ошибка при консолидации", logEntryService.save(logger.getEntries()));
+            }
+
             // Проход по типам приемников
             for (DepartmentFormType destinationDFT : departmentFormTypes) {
-
-                    // Экземпляр формы-приемника
-                    FormData destinationForm = findFormData(destinationDFT.getFormTypeId(), destinationDFT.getKind(), destinationDFT.getDepartmentId(), formData.getReportPeriodId(), formData.getPeriodOrder());
-                    // Если форма распринимается при отсутствии экземпляра формы-приемника, то такую форму не обрабатываем.
-                    if (destinationForm == null && workflowMove.getFromState() == WorkflowState.ACCEPTED) {
-                        continue;
+                // Экземпляр формы-приемника
+                FormData destinationForm = findFormData(destinationDFT.getFormTypeId(), destinationDFT.getKind(), destinationDFT.getDepartmentId(), formData.getReportPeriodId(), formData.getPeriodOrder());
+                // Если форма распринимается при отсутствии экземпляра формы-приемника, то такую форму не обрабатываем.
+                if (destinationForm == null && workflowMove.getFromState() == WorkflowState.ACCEPTED) {
+                    continue;
+                }
+                // Список типов источников для текущего типа приемников
+                List<DepartmentFormType> sourceFormTypes = departmentFormTypeDao.getFormSources(destinationDFT.getDepartmentId(), destinationDFT.getFormTypeId(), destinationDFT.getKind(), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
+                // Признак наличия принятых экземпляров источников
+                boolean existAcceptedSources = false;
+                for (DepartmentFormType sourceDFT : sourceFormTypes) {
+                    FormData sourceForm = findFormData(sourceDFT.getFormTypeId(), sourceDFT.getKind(), sourceDFT.getDepartmentId(), formData.getReportPeriodId(), formData.getPeriodOrder());
+                    if (sourceForm != null && sourceForm.getState().equals(WorkflowState.ACCEPTED)) {
+                        existAcceptedSources = true;
+                        break;
                     }
-                    // Список типов источников для текущего типа приемников
-                    List<DepartmentFormType> sourceFormTypes = departmentFormTypeDao.getFormSources(destinationDFT.getDepartmentId(), destinationDFT.getFormTypeId(), destinationDFT.getKind(), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
-                    // Признак наличия принятых экземпляров источников
-                    boolean existAcceptedSources = false;
-                    for (DepartmentFormType sourceDFT : sourceFormTypes) {
-                        FormData sourceForm = findFormData(sourceDFT.getFormTypeId(), sourceDFT.getKind(), sourceDFT.getDepartmentId(), formData.getReportPeriodId(), formData.getPeriodOrder());
-                        if (sourceForm != null && sourceForm.getState().equals(WorkflowState.ACCEPTED)) {
-                            existAcceptedSources = true;
-                            break;
-                        }
-                    }
-                    // Если текущая форма-приемник имеет один или более источников в статусе «Принята» то консолидируем ее, иначе удаляем
-                    if (existAcceptedSources) {
-                        ScriptComponentContextImpl scriptComponentContext = new ScriptComponentContextImpl();
-                        scriptComponentContext.setUserInfo(userInfo);
-                        scriptComponentContext.setLogger(logger);
-                        FormDataCompositionService formDataCompositionService = applicationContext.getBean(FormDataCompositionService.class);
-                        ((ScriptComponentContextHolder) formDataCompositionService).setScriptComponentContext(scriptComponentContext);
-                        Integer periodOrder = (destinationDFT.getKind() == FormDataKind.PRIMARY || destinationDFT.getKind() == FormDataKind.CONSOLIDATED) ? formData.getPeriodOrder() : null;
-                        formDataCompositionService.compose(destinationForm, formData.getReportPeriodId(), periodOrder,
-                                destinationDFT.getDepartmentId(), destinationDFT.getFormTypeId(), destinationDFT.getKind());
-                    } else if (destinationForm != null) {
-                        String formName = destinationForm.getFormType().getName();
-                        String kindName = destinationForm.getKind().getName();
-                        String departmentName = departmentDao.getDepartment(destinationForm.getDepartmentId()).getName();
-                        deleteFormData(logger, userInfo, destinationForm.getId(), formData.isManual());
-                        logger.info("%s: Расформирована налоговая форма-приемник: Подразделение: «%s», Тип: «%s», Вид: «%s».",
-                                FormDataEvent.COMPOSE.getTitle(), departmentName, kindName, formName);
-                    }
+                }
+                // Если текущая форма-приемник имеет один или более источников в статусе «Принята» то консолидируем ее, иначе удаляем
+                if (existAcceptedSources) {
+                    ScriptComponentContextImpl scriptComponentContext = new ScriptComponentContextImpl();
+                    scriptComponentContext.setUserInfo(userInfo);
+                    scriptComponentContext.setLogger(logger);
+                    FormDataCompositionService formDataCompositionService = applicationContext.getBean(FormDataCompositionService.class);
+                    ((ScriptComponentContextHolder) formDataCompositionService).setScriptComponentContext(scriptComponentContext);
+                    Integer periodOrder = (destinationDFT.getKind() == FormDataKind.PRIMARY || destinationDFT.getKind() == FormDataKind.CONSOLIDATED) ? formData.getPeriodOrder() : null;
+                    formDataCompositionService.compose(destinationForm, formData.getReportPeriodId(), periodOrder,
+                            destinationDFT.getDepartmentId(), destinationDFT.getFormTypeId(), destinationDFT.getKind());
+                } else if (destinationForm != null) {
+                    String formName = destinationForm.getFormType().getName();
+                    String kindName = destinationForm.getKind().getName();
+                    String departmentName = departmentDao.getDepartment(destinationForm.getDepartmentId()).getName();
+                    deleteFormData(logger, userInfo, destinationForm.getId(), formData.isManual());
+                    logger.info("%s: Расформирована налоговая форма-приемник: Подразделение: «%s», Тип: «%s», Вид: «%s».",
+                            FormDataEvent.COMPOSE.getTitle(), departmentName, kindName, formName);
+                }
             }
         } finally {
-            for (FormData lockedForm : lockedForms) {
-                lockCoreService.unlock(FormData.class, lockedForm.getId(), userInfo);
+            for (String lockKey : lockedForms) {
+                lockDataService.unlock(lockKey, userInfo.getUser().getId());
             }
         }
     }

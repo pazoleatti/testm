@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
@@ -16,7 +17,7 @@ import java.util.Date;
  */
 
 @Service
-@Transactional
+@Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class LockDataServiceImpl implements LockDataService {
 
 	private static final long SLEEP_TIME = 500; //шаг времени между проверками освобождения блокировки, миллисекунды
