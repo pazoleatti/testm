@@ -25,12 +25,6 @@ public class LockCoreServiceImpl implements LockCoreService{
 	@Autowired
 	private TAUserDao userDao;
 
-    @PostConstruct
-    private void clearOldLocks() {
-        int timeToDie = 60*60*24; // One day
-        lockDao.unlockIfOlderThan(timeToDie);
-    }
-
 	@Override
 	public <T extends Number> void lock(
 			Class<? extends IdentityObject<T>> clazz, T id,
