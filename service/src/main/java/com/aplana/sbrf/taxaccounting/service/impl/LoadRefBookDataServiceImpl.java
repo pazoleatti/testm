@@ -347,6 +347,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
             }
             FileWrapper candidateFile = ResourceUtils.getSharedResource(folderPath + candidateStr);
             // Это файл, а не директория и соответствует формату имени ТФ
+            // TODO Можно оптимизировать
             if (candidateFile.isFile() && mappingMatch(candidateFile.getName(), mappingSet) != null) {
                 retVal.add(candidateStr);
             }
