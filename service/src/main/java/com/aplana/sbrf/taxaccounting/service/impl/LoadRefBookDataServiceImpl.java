@@ -130,9 +130,19 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                 ignoreFileSet.add(fileName);
                 FileWrapper currentFile = ResourceUtils.getSharedResource(path + fileName);
 
-                if (!signService.checkSign(currentFile.getPath(), 0)) {
-                    log(userInfo, LogData.L16, logger, fileName);
-                    return new ImportCounter();
+                // ЭЦП
+                List<String> signList = configurationDao.getByDepartment(0).get(ConfigurationParam.SIGN_CHECK, 0);
+                if (signList != null && !signList.isEmpty() && signList.get(0).equals("1")) {
+                    boolean check = false;
+                    try {
+                        check = signService.checkSign(currentFile.getPath(), 0);
+                    } catch (Exception e) {
+                        logger.error("Ошибка при проверке ЭЦП: " + e.getMessage());
+                    }
+                    if (!check) {
+                        log(userInfo, LogData.L16, logger, fileName);
+                        return new ImportCounter();
+                    }
                 }
 
                 log(userInfo, LogData.L15, logger, fileName);
