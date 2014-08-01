@@ -47,6 +47,8 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
     private FormTypeService formTypeService;
     @Autowired
     private LockCoreService lockCoreService;
+    @Autowired
+    private SignService signService;
 
     @Override
     public ImportCounter importFormData(TAUserInfo userInfo, List<Integer> departmentIdList, Logger logger) {
@@ -163,7 +165,9 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
 
             FormDataKind formDataKind = FormDataKind.PRIMARY; // ТФ только для первичных НФ
 
-            // TODO Проверка ЭЦП (L15, L16, L25) // http://jira.aplana.com/browse/SBRFACCTAX-8059 0.3.9 Реализовать проверку ЭЦП ТФ
+            if (!signService.checkSign(currentFile.getPath(), 0)) {
+                throw new ServiceException("Ошибка проверки цифровой подписи, файл " + currentFile.getPath());
+            }
             log(userInfo, LogData.L15, logger, fileName);
 
             // Поиск экземпляра НФ
