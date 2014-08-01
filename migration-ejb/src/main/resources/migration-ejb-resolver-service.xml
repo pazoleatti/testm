@@ -25,6 +25,7 @@
     <tx:jta-transaction-manager/>
     <tx:annotation-driven/>
 
+    <bean id="DBInfo" class="com.aplana.sbrf.taxaccounting.dao.impl.DBInfo"/>
     <bean id="MigrationDao" class="com.aplana.sbrf.taxaccounting.dao.impl.MigrationDaoImpl"/>
 
 </beans>
