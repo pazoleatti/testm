@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockCoreService;
+import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
@@ -17,9 +18,7 @@ import org.mockito.stubbing.Answer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.junit.Assert.assertEquals;
@@ -101,6 +100,9 @@ public class FormDataServiceTest {
         formData.setManual(false);
 
         TAUserInfo userInfo = new TAUserInfo();
+        TAUser user = new TAUser();
+        user.setId(1);
+        userInfo.setUser(user);
         userInfo.setIp("127.0.0.1");
         Logger logger = new Logger();
 
@@ -150,7 +152,7 @@ public class FormDataServiceTest {
 
         doAnswer(new Answer<Object>() {
             public Object answer(InvocationOnMock invocation) {
-                for (DepartmentFormType departmentFormType1 : list){
+                for (DepartmentFormType departmentFormType1 : list) {
                     if (departmentFormType1.getDepartmentId() == formData.getDepartmentId() &&
                             departmentFormType1.getKind().equals(formData.getKind()) &&
                             departmentFormType1.getFormTypeId() == formData.getFormType().getId())
@@ -161,11 +163,11 @@ public class FormDataServiceTest {
         }).when(formDataDao).delete(formData1.getId());
         ReflectionTestUtils.setField(formDataService, "formDataDao", formDataDao);
 
-		FormDataCompositionService formDataCompositionService = mock(FormDataCompositionService.class);
+        FormDataCompositionService formDataCompositionService = mock(FormDataCompositionService.class);
 
-		ApplicationContext applicationContext = mock(ApplicationContext.class);
-		when(applicationContext.getBean(FormDataCompositionService.class)).thenReturn(formDataCompositionService);
-		ReflectionTestUtils.setField(formDataService, "applicationContext", applicationContext);
+        ApplicationContext applicationContext = mock(ApplicationContext.class);
+        when(applicationContext.getBean(FormDataCompositionService.class)).thenReturn(formDataCompositionService);
+        ReflectionTestUtils.setField(formDataService, "applicationContext", applicationContext);
 
         LockCoreService lockCoreService = mock(LockCoreService.class);
         ReflectionTestUtils.setField(formDataService, "lockCoreService", lockCoreService);
@@ -175,6 +177,27 @@ public class FormDataServiceTest {
 
         AuditService auditService = mock(AuditService.class);
         ReflectionTestUtils.setField(formDataService, "auditService", auditService);
+
+        LockDataService lockDataService = mock(LockDataService.class);
+        final Map<String, LockData> map = new HashMap<String, LockData>();
+        doAnswer(new Answer<Object>() {
+            public Object answer(InvocationOnMock invocation) {
+                Object[] arguments = invocation.getArguments();
+                Object key = invocation.getArguments()[0];
+                if (map.containsKey(key)) {
+                    return map.get(key);
+                }
+                map.put((String) arguments[0], new LockData((String) arguments[0], (Long) arguments[1], new Date()));
+                return null;
+            }
+        }).when(lockDataService).lock(anyString(), anyInt(), anyInt());
+        doAnswer(new Answer<Object>() {
+            public Object answer(InvocationOnMock invocation) {
+                map.remove(invocation.getArguments()[0]);
+                return null;
+            }
+        }).when(lockDataService).unlock(anyString(),anyInt());
+        ReflectionTestUtils.setField(formDataService, "lockDataService", lockDataService);
 
         formDataService.compose(WorkflowMove.APPROVED_TO_ACCEPTED, formData, userInfo, logger);
         // проверяем что источник удален
