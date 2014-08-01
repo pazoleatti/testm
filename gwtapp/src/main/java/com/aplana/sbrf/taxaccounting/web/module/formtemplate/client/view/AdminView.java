@@ -4,9 +4,10 @@ import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstan
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter.AdminPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter.AdminUIHandlers;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.FormTypeTemplate;
-import com.aplana.sbrf.taxaccounting.web.widget.style.GenericCellTable;
+import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.aplana.sbrf.taxaccounting.web.widget.style.table.ComparatorWithNull;
 import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -42,7 +43,7 @@ public class AdminView extends ViewWithUiHandlers<AdminUIHandlers> implements Ad
     Panel editFormContentPanel;
 
 	@UiField
-    GenericCellTable<FormTypeTemplate> formTemplateTable;
+    GenericDataGrid<FormTypeTemplate> formTemplateTable;
 
     private SingleSelectionModel<FormTypeTemplate> selectionModel;
     private ListDataProvider<FormTypeTemplate> dataProvider;
@@ -130,9 +131,9 @@ public class AdminView extends ViewWithUiHandlers<AdminUIHandlers> implements Ad
             }
         });
 
-        formTemplateTable.addResizableColumn(linkColumn, "Наименование");
-        formTemplateTable.addResizableColumn(typeTaxColumn, "Вид налога");
-		formTemplateTable.addResizableColumn(versionColumn, "Количество версий");
+        formTemplateTable.addResizableColumn(linkColumn, "Наименование", 80, Style.Unit.PCT);
+        formTemplateTable.addResizableColumn(typeTaxColumn, "Вид налога", 15, Style.Unit.PCT);
+		formTemplateTable.addResizableColumn(versionColumn, "Количество версий", 5, Style.Unit.PCT);
 
         dataProvider.addDataDisplay(formTemplateTable);
         formTemplateTable.addColumnSortHandler(sortHandler);
