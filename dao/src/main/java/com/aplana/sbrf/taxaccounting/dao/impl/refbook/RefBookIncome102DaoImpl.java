@@ -14,11 +14,13 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.*;
@@ -45,9 +47,23 @@ public class RefBookIncome102DaoImpl extends AbstractDao implements RefBookIncom
 		return getRecords(pagingParams, filter, sortAttribute, true);
     }
 
+    private final static String INCOME_102_FILTER_BY_DEPARTMENT = "select res.id record_id from INCOME_102 res\n" +
+            "join REF_BOOK_RECORD rbr on res.ACCOUNT_PERIOD_ID = rbr.ID\n" +
+            "join REF_BOOK_VALUE rbv on rbr.id = rbv.RECORD_ID\n" +
+            "  where attribute_id = 1073 and %s";
     @Override
     public List<Long> getUniqueRecordIds(String filter) {
-        return refBookDao.getUniqueRecordIds(REF_BOOK_ID, TABLE_NAME, filter);
+        if (filter.toUpperCase().contains("DEPARTMENT_ID")){
+            String filterDep = filter.toUpperCase().replace("DEPARTMENT_ID", "REFERENCE_VALUE");
+            return getJdbcTemplate().query(String.format(INCOME_102_FILTER_BY_DEPARTMENT, filterDep),
+                    new RowMapper<Long>() {
+                        @Override
+                        public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+                            return SqlUtils.getLong(rs, RefBook.RECORD_ID_ALIAS);
+                        }
+                    });
+        } else
+            return refBookDao.getUniqueRecordIds(REF_BOOK_ID, TABLE_NAME, filter);
     }
 
     @Override
@@ -88,7 +104,7 @@ public class RefBookIncome102DaoImpl extends AbstractDao implements RefBookIncom
                 throw new DaoException("Поля " + errors.toString() + "являются обязательными для заполнения");
             }
 
-            long accountPeriodId = record.get("ACCOUNT_PERIOD_ID").getReferenceValue().longValue();
+            long accountPeriodId = record.get("ACCOUNT_PERIOD_ID").getReferenceValue();
             delList.add(accountPeriodId);
         }
 
@@ -138,7 +154,7 @@ public class RefBookIncome102DaoImpl extends AbstractDao implements RefBookIncom
                             ps.setNull(3, Types.VARCHAR);
                         }
 
-                        ps.setLong(4, map.get("ACCOUNT_PERIOD_ID").getReferenceValue().longValue());
+                        ps.setLong(4, map.get("ACCOUNT_PERIOD_ID").getReferenceValue());
                     }
 
                     @Override
