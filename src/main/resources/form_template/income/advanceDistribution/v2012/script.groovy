@@ -782,6 +782,10 @@ def getTaxBase() {
             if (khy in ['22492', '22500', '22505', '22585', '22590', '22595', '22660', '22664', '22668', '22670', '22690', '22695', '22700', '23120', '23130', '23140', '23240']) {
                 group5 += consumptionTaxSumS
             }
+            //k34
+            if (khy in ['23150']) {
+                group5 -= consumptionTaxSumS
+            }
             //k35
             if (khy in ['23160']) {
                 group5 -= consumptionTaxSumS
