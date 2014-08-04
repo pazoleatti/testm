@@ -396,7 +396,7 @@ List<String> getErrorDepartment(record) {
     }
     def reorgFormCode = getRefBookValue(5, record?.REORG_FORM_CODE?.value)?.CODE?.value
     if (reorgFormCode != null && reorgFormCode != 0) {
-        if (record.NAME == null || record.NAME.value == null || record.NAME.value.isEmpty()) {
+        if (record.REORG_INN == null || record.REORG_INN.value == null || record.REORG_INN.value.isEmpty()) {
             errorList.add("«ИНН реорганизованного обособленного подразделения»")
         }
         if (record.REORG_KPP == null || record.REORG_KPP.value == null || record.REORG_KPP.value.isEmpty()) {
