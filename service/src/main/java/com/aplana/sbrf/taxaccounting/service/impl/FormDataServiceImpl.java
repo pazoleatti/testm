@@ -182,25 +182,41 @@ public class FormDataServiceImpl implements FormDataService {
             IOUtils.closeQuietly(dataFileOutputStream);
 
             String ext = getFileExtention(fileName);
-            if(!ext.equals(XLS_EXT) && !ext.equals(XLSX_EXT)){
 
-                List<String> paramList = configurationDao.getAll().get(ConfigurationParam.KEY_FILE, 0);
-
-                if (paramList != null) { // Необходимо проверить подпись
-                    if (!signService.checkSign(dataFile.getAbsolutePath(), 0)) {
-                        throw new ServiceException("Ошибка проверки цифровой подписи");
+            // Проверка ЭЦП
+            // Если флаг проверки отсутствует или не равен «1», то файл считается проверенным
+            boolean check = false;
+            if (!ext.equals(XLS_EXT) && !ext.equals(XLSX_EXT)) {
+                List<String> signList = configurationDao.getByDepartment(0).get(ConfigurationParam.SIGN_CHECK, 0);
+                if (signList != null && !signList.isEmpty() && signList.get(0).equals("1")) {
+                    List<String> paramList = configurationDao.getAll().get(ConfigurationParam.KEY_FILE, 0);
+                    if (paramList != null) { // Необходимо проверить подпись
+                        try {
+                            check = signService.checkSign(dataFile.getAbsolutePath(), 0);
+                        } catch (Exception e) {
+                            logger.error("Ошибка при проверке ЭЦП: " + e.getMessage());
+                        }
+                        if (check) {
+                            logger.error("Ошибка проверки цифровой подписи");
+                        }
                     }
+                } else {
+                    check = true;
                 }
+            } else {
+                check = true;
             }
 
             FormData fd = formDataDao.get(formDataId, false);
 
-            dataFileInputStream = new BufferedInputStream(new FileInputStream(dataFile));
-            Map<String, Object> additionalParameters = new HashMap<String, Object>();
-            additionalParameters.put("ImportInputStream", dataFileInputStream);
-            additionalParameters.put("UploadFileName", fileName);
-            formDataScriptingService.executeScript(userInfo, fd, formDataEvent, logger, additionalParameters);
-            IOUtils.closeQuietly(dataFileInputStream);
+            if (check) {
+                dataFileInputStream = new BufferedInputStream(new FileInputStream(dataFile));
+                Map<String, Object> additionalParameters = new HashMap<String, Object>();
+                additionalParameters.put("ImportInputStream", dataFileInputStream);
+                additionalParameters.put("UploadFileName", fileName);
+                formDataScriptingService.executeScript(userInfo, fd, formDataEvent, logger, additionalParameters);
+                IOUtils.closeQuietly(dataFileInputStream);
+            }
 
             if (logger.containsLevel(LogLevel.ERROR)) {
                 throw new ServiceLoggerException("Есть критические ошибки при выполнения скрипта",

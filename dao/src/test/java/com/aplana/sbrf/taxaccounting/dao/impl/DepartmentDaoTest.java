@@ -235,7 +235,6 @@ public class DepartmentDaoTest {
         Assert.assertNull(departmentDao.getDepartmentByCode(-1));
     }
 
-// TODO Вернуть после подключения валидации
 //    @Test(expected = ValidationException.class)
 //    public void violationTest() throws Exception {
 //        departmentDao.getParentsHierarchy(null);

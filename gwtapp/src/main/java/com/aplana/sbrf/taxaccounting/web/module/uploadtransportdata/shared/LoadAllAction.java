@@ -3,12 +3,9 @@ package com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.shared;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
-/**
- * @author Dmitriy Levykin
- */
-public class GetDepartmentsAction extends UnsecuredActionImpl<GetDepartmentsResult> implements ActionName {
+public class LoadAllAction extends UnsecuredActionImpl<LoadAllResult> implements ActionName {
     @Override
     public String getName() {
-        return "Получение списка подразделений";
+        return "Загрука ТФ из каталога";
     }
 }

@@ -65,7 +65,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
     final static String ZIP_ENCODING = "cp866";
 
     @Override
-    public boolean uploadFile(TAUserInfo userInfo, int departmentId, String fileName, InputStream inputStream, Logger logger) {
+    public boolean uploadFile(TAUserInfo userInfo, String fileName, InputStream inputStream, Logger logger) {
         // Проверка прав
         if (userInfo == null) {
             logger.error(USER_NOT_FOUND_ERROR);
@@ -104,16 +104,10 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                 ArchiveEntry entry;
                 try {
                     while ((entry = zais.getNextEntry()) != null) {
-                        ConfigurationParam configurationParam = checkFormDataAccess(entry.getName(), logger);
-                        if (configurationParam != null) {
-                            int departmentConfId = departmentId;
-                            if (configurationParam.isCommon()) {
-                                departmentConfId = 0;
-                            }
+                        String path = checkFormDataAccess(entry.getName(), logger);
+                        if (path != null) {
                             try {
-                                if (configurationParam != null
-                                        && copyFileFromStream(zais, getUploadPath(configurationParam, departmentConfId, logger),
-                                        entry.getName(), logger)) {
+                                if (copyFileFromStream(zais, path, entry.getName(), logger)) {
                                     fileNames.add(entry.getName());
                                 }
                             } catch (IOException e) {
@@ -130,15 +124,10 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                 }
             } else {
                 // Не архив
-                ConfigurationParam configurationParam = checkFormDataAccess(fileName, logger);
-                if (configurationParam != null) {
-                    int departmentConfId = departmentId;
-                    if (configurationParam.isCommon()) {
-                        departmentConfId = 0;
-                    }
+                String path = checkFormDataAccess(fileName, logger);
+                if (path != null) {
                     try {
-                        if (configurationParam != null
-                                && copyFileFromStream(inputStream, getUploadPath(configurationParam, departmentConfId, logger),
+                        if (copyFileFromStream(inputStream, path,
                                 fileName, logger)) {
                             fileNames.add(fileName);
                         }
@@ -191,14 +180,15 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
     /**
      * Проверка имени файла и проверка доступа к соответствующим НФ
      * http://conf.aplana.com/pages/viewpage.action?pageId=13111363
+     * Возвращает путь к каталогу, если проверка прошла.
      */
-    private ConfigurationParam checkFormDataAccess(String fileName, Logger logger) {
+    private String checkFormDataAccess(String fileName, Logger logger) {
         boolean isDiasoftRefBook = loadRefBookDataService.isDiasoftFile(fileName);
         boolean isFormData = TransportDataParam.isValidName(fileName);
 
         if (isDiasoftRefBook) {
             // Справочники не проверяем
-            return ConfigurationParam.DIASOFT_UPLOAD_DIRECTORY;
+            return getUploadPath(ConfigurationParam.DIASOFT_UPLOAD_DIRECTORY, 0, logger);
         }
 
         // Не справочники Diasoft и не ТФ НФ
@@ -249,7 +239,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
             return null;
         }
 
-        return ConfigurationParam.FORM_UPLOAD_DIRECTORY;
+        return getUploadPath(ConfigurationParam.FORM_UPLOAD_DIRECTORY, formDepartment.getId(), logger);
     }
 
     /**
