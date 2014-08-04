@@ -13,9 +13,12 @@ import org.springframework.stereotype.Service;
 import ru.infocrypt.bicrypt.Bicr4;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 @Service
 public class SignServiceImpl implements SignService {
+
+    private static Pattern DLL_PATTERN = Pattern.compile(".+\\.dll");
 
     @Autowired
     ConfigurationDao configurationDao;
@@ -123,11 +126,13 @@ public class SignServiceImpl implements SignService {
         String[] listFiles = resourceDir.list();
         assert listFiles != null;
         for (String fileName : listFiles) {
+            if (!DLL_PATTERN.matcher(fileName).matches())
+                continue;
             FileWrapper resourceFile = ResourceUtils.getSharedResource(dir + fileName);
             try {
                 System.load(resourceFile.getPath());
             } catch (UnsatisfiedLinkError linkError){
-                logger.warn("Ошибка при загрузке библиотек подписи", linkError);
+                logger.error("Ошибка при загрузке библиотек подписи", linkError);
             }
         }
     }

@@ -115,7 +115,7 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 
         ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(reportPeriodId);
 		List<DepartmentDeclarationType> ddts = sourceService.getDDTByDepartment(departmentId, declarationTemplate.getType().getTaxType(),
-                reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
+                reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate(), false);
 		boolean found = false;
 		for (DepartmentDeclarationType ddt : ddts) {
 			if (ddt.getDeclarationTypeId() == declarationTypeId) {

@@ -97,6 +97,7 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
 
         Date current = new Date();
         accountPeriodIds.setPeriodDates(current, current);
+        accountPeriodIds.setSearchEnabled(false);
     }
 
     @Override
