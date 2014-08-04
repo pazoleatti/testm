@@ -219,7 +219,7 @@ public class ConfigurationServiceTest {
         model.put(ConfigurationParam.KEY_FILE, 0, Arrays.asList(sb.toString(), sb.toString(), ""));
         service.saveAllConfig(getUser(), model, logger);
 
-        Assert.assertEquals(9, logger.getEntries().size());
+        Assert.assertEquals(10, logger.getEntries().size());
         Assert.assertTrue(logger.getEntries().get(0).getMessage().contains("(" + length + ")"));
         Assert.assertTrue(logger.getEntries().get(1).getMessage().contains("(" + length + ")"));
     }
