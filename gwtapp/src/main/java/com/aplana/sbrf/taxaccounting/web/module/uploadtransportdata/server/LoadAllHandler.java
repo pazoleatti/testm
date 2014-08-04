@@ -37,7 +37,7 @@ public class LoadAllHandler extends AbstractActionHandler<LoadAllAction, LoadAll
 
         TAUserInfo userInfo = securityService.currentUserInfo();
 
-        // TODO Выборка подразделений
+        // TODO Выборка подразделений http://conf.aplana.com/pages/viewpage.action?pageId=13111363
 
         loadFormDataService.importFormData(userInfo, logger);
 

@@ -163,8 +163,8 @@ public class FormTemplateServiceTest {
         assertTrue(logger.getEntries().size() == 0);
     }
 
-    @Test(expected = ValidationException.class)
-    public void validationTest() {
-        formTemplateService.delete(null);
-    }
+//    @Test(expected = ValidationException.class)
+//    public void validationTest() {
+//        formTemplateService.delete(null);
+//    }
 }

@@ -235,8 +235,8 @@ public class DepartmentDaoTest {
         Assert.assertNull(departmentDao.getDepartmentByCode(-1));
     }
 
-    @Test(expected = ValidationException.class)
-    public void violationTest() throws Exception {
-        departmentDao.getParentsHierarchy(null);
-    }
+//    @Test(expected = ValidationException.class)
+//    public void violationTest() throws Exception {
+//        departmentDao.getParentsHierarchy(null);
+//    }
 }
