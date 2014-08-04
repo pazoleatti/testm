@@ -270,8 +270,8 @@ def calc() {
                         logger.error(errorMsg + "Ошибка при получении параметров налоговых льгот.")
                         return;
                     } else {
-                        reducingPerc = record.percent
-                        loweringRates = record.rate
+                        reducingPerc = record.PERCENT.numberValue
+                        loweringRates = record.RATE.numberValue
                     }
                 }
             }

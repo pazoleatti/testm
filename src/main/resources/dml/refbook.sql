@@ -60,7 +60,7 @@ INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (69, 'Приз�
 INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (70, 'Сведения об организации', 0, 1, 0);
 INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (71, 'Амортизационные группы', 0, 1, 0);
 INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (72, 'Процентные ставки', 0, 1, 0);
-INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (73, 'Товарная номенклатура внешнеэкономической деятельности таможенного союза', 0, 1, 0);
+INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (73, 'Товарная номенклатура внешнеэкономической деятельности таможенного союза', 1, 1, 0);
 INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (74, 'Пользователи', 0, 0, 1);
 
 INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (80, 'Виды изменений', 0, 1, 0);
@@ -421,7 +421,7 @@ INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFEREN
 
 INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH, REQUIRED, IS_UNIQUE) VALUES ( 648, 73, 'Код', 'CODE', 2, 1, null, null, 1, 0, 10, 1, 1);
 INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH, REQUIRED, IS_UNIQUE) VALUES ( 649, 73, 'Наименование позиции', 'NAME', 1, 2, null, null, 1, null, 50, 0, 0);
-INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH, REQUIRED, IS_UNIQUE) VALUES ( 650, 73, 'Код родительского элемента', 'PARENT_ID', 2, 3, null, null, 1, 0, 10, 0, 0);
+INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH, REQUIRED, IS_UNIQUE) VALUES ( 650, 73, 'Код родительского элемента', 'PARENT_ID', 4, 3, 73, 648, 1, null, 10, 0, 0);
 
 INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH, REQUIRED, IS_UNIQUE) VALUES ( 651, 74, 'Код пользователя', 'CODE', 2, 1, null, null, 1, 0, 9, 0, 1);
 INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH, REQUIRED, IS_UNIQUE) VALUES ( 652, 74, 'ФИО', 'NAME', 1, 2, null, null, 1, null, 50, 0, 0);

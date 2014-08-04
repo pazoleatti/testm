@@ -388,7 +388,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 }
                 break;
                 case NUMBER: {
-                    value = rs.getBigDecimal(columnName).setScale(attribute.getPrecision());
+                    value = rs.getBigDecimal(columnName).setScale(attribute.getPrecision(), BigDecimal.ROUND_HALF_UP);
                 }
                 break;
                 case DATE: {
@@ -872,8 +872,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                     break;
                     case NUMBER: {
                         if (entry.getValue().getNumberValue() != null) {
-                            values[3] = BigDecimal.valueOf(entry.getValue().getNumberValue().doubleValue())
-                                    .setScale(attribute.getPrecision(), RoundingMode.HALF_UP).doubleValue();
+                            BigDecimal v = new BigDecimal(entry.getValue().getNumberValue().toString());
+                            values[3] = v.setScale(attribute.getPrecision(), RoundingMode.HALF_UP);
                         }
                     }
                     break;
@@ -929,8 +929,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                     break;
                     case NUMBER: {
                         if (entry.getValue().getNumberValue() != null) {
-                            values[3] = BigDecimal.valueOf(entry.getValue().getNumberValue().doubleValue())
-                                    .setScale(attribute.getPrecision(), RoundingMode.HALF_UP).doubleValue();
+                            BigDecimal v = new BigDecimal(entry.getValue().getNumberValue().toString());
+                            values[3] = v.setScale(attribute.getPrecision(), RoundingMode.HALF_UP);
                         }
                     }
                     break;
@@ -1020,7 +1020,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                                 }
                                 break;
                                 case NUMBER: {
-                                    value = rs.getBigDecimal(columnName).setScale(attribute.getPrecision());
+                                    value = rs.getBigDecimal(columnName).setScale(attribute.getPrecision(), RoundingMode.HALF_UP);
                                 }
                                 break;
                                 case DATE: {
@@ -1284,18 +1284,19 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "case\n" +
             "  when (status=0 and (\n" +
             "  \t(:versionTo is null and (\n" +
-            "  \t\t(nextversion is not null and nextversion > :versionFrom) or \n" +
-            "\t\t(nextversion is null and version > :versionFrom)\n" +
+            "  \t\t(nextversion is not null and nextversion >= :versionFrom) or \t\t-- 1, 6\n" +
+            "\t\t(nextversion is null and version >= :versionFrom)\t\t\t\t\t-- 9, 10, 11, 12\n" +
             "  \t)) or (:versionTo is not null and (\n" +
-            "  \t\t(version < :versionFrom and nextversion > :versionFrom) or \n" +
-            "  \t\t(version > :versionFrom and version < :versionTo)\n" +
+            "  \t\t(version <= :versionFrom and nextversion >= :versionFrom) or \t\t-- 2, 3\n" +
+            "  \t\t(version >= :versionFrom and version <= :versionTo)\t\t\t\t\t-- 4, 5\n" +
             "  \t))\n" +
             "  )) then 1\n" +
-            "  when (status=0 and nextversion is null and version < :versionFrom) then 2\n" +
-            "  when (status=2 and (:versionTo is not null and version >= :versionFrom and version < :versionTo and nextversion > :versionTo)) then 3\n" +
+            "  when (status=0 and nextversion is null and version < :versionFrom) then 2\t\t\t\t\t\t\t--7, 8\n" +
+            "  when (status=2 and (:versionTo is not null and version >= :versionFrom and version < :versionTo and nextversion is not null and nextversion > :versionTo)) then 3 \t\t-- 17\n" +
             "  when (status=2 and (\n" +
-            "  \t(nextversion is not null and :versionTo is null and version > :versionFrom) or \n" +
-            "  \t(nextversion is null and version >= :versionFrom)\n" +
+            "  \t(nextversion is not null and :versionTo is null and version > :versionFrom) or  \t-- 18\n" +
+            "  \t(version = :versionFrom) or \n" +
+            "  \t(nextversion is null and version >= :versionFrom)\t\t\t\t\t\t\t\t\t-- 21, 22\n" +
             "  )) then 4\n" +
             "  else 0\n" +
             "end as result\n" +
@@ -1757,6 +1758,11 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         } catch (EmptyResultDataAccessException e) {
             throw new DaoException(String.format("Не найдена запись справочника с id = %d", uniqueRecordId));
         }
+    }
+
+    @Override
+    public Long findRecord(Long refBookId, Long recordId, Date version) {
+        return getJdbcTemplate().queryForLong("select id from ref_book_record where ref_book_id = ? and record_id = ? and version = ?", refBookId, recordId, version);
     }
 
     private static final String DELETE_ALL_VERSIONS = "delete from ref_book_record where ref_book_id=? and record_id in (select record_id from ref_book_record where %s)";
