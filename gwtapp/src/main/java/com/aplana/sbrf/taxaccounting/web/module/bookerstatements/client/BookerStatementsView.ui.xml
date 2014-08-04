@@ -94,7 +94,7 @@
                             </g:cell>
                             <g:cell width="100%">
                                 <r:RefBookPickerWidget ui:field="accountPeriodIds" width="100%" versionEnabled="false"
-                                                       attributeIdInt="1071" isHierarchical="false" multiSelect="true" title="Выбор периодов и подразделений БО"/>
+                                                       attributeIdInt="1083" isHierarchical="false" multiSelect="true" title="Выбор периода"/>
                             </g:cell>
                         </g:HorizontalPanel>
                     </g:cell>

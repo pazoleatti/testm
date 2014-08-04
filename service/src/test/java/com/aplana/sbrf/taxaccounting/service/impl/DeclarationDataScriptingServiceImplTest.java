@@ -27,7 +27,6 @@ import static com.aplana.sbrf.taxaccounting.test.DeclarationDataMockUtils.mockDe
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -83,7 +82,7 @@ public class DeclarationDataScriptingServiceImplTest {
 		dft.setKind(FormDataKind.SUMMARY);
 		dft.setDepartmentId(DEPARTMENT_ID);
 		sourcesInfo.add(dft);
-		when(departmentFormTypeDao.getDeclarationSources(any(Integer.class), any(Integer.class), any(Date.class), any(Date.class))).thenReturn(sourcesInfo);
+		when(departmentFormTypeDao.getDeclarationSources(any(Integer.class), any(Integer.class), any(Date.class), any(Date.class), any(SourcesSearchOrdering.class), any(Boolean.class))).thenReturn(sourcesInfo);
 		//ReflectionTestUtils.setField(service, "departmentFormTypeDao", departmentFormTypeDao, DepartmentFormTypeDao.class);
 
 		FormDataDao formDataDao = mock(FormDataDao.class);

@@ -112,7 +112,7 @@ public class FormDataSearchServiceTest {
 		List<DepartmentFormType> dfts = new ArrayList<DepartmentFormType>();
 		dfts.add(mockDepartmentFormType(1, 1, FormDataKind.SUMMARY));
 		dfts.add(mockDepartmentFormType(1, 2, FormDataKind.SUMMARY));
-		when(departmentFormTypeDao.getByTaxType(1, TaxType.TRANSPORT, null, null)).thenReturn(dfts);
+		when(departmentFormTypeDao.getByTaxType(1, TaxType.TRANSPORT, null, null, null, null)).thenReturn(dfts);
 		
 		dfts = new ArrayList<DepartmentFormType>();
 		dfts.add(mockDepartmentFormType(2, 3, FormDataKind.SUMMARY));
