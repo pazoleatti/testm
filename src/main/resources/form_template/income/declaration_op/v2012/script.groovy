@@ -398,7 +398,7 @@ List<String> getErrorDepartment(record) {
         errorList.add("«Код вида экономической деятельности и по классификатору ОКВЭД»")
     }
     def reorgFormCode = getRefBookValue(5, record?.REORG_FORM_CODE?.value)?.CODE?.value
-    if (reorgFormCode != null && reorgFormCode != 0) {
+    if (reorgFormCode != null && reorgFormCode != '0') {
         if (record.REORG_INN == null || record.REORG_INN.value == null || record.REORG_INN.value.isEmpty()) {
             errorList.add("«ИНН реорганизованного обособленного подразделения»")
         }

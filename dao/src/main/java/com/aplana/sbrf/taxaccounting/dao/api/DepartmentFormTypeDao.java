@@ -30,7 +30,8 @@ public interface DepartmentFormTypeDao {
      * @param periodEnd    окончание периода, в котором действуют назначения
      * @return список назначенных подразделению форм (с учётом вида и типа) по заданному виду налога
      */
-    List<DepartmentFormType> getByTaxType(int departmentId, TaxType taxType, Date periodStart, Date periodEnd);
+    List<DepartmentFormType> getByTaxType(int departmentId, TaxType taxType, Date periodStart, Date periodEnd,
+                                          SourcesSearchOrdering ordering, Boolean isAscSorting);
 
     /**
      * Возвращает информацию он назначенных подразделению формах по заданному виду налога
@@ -91,7 +92,8 @@ public interface DepartmentFormTypeDao {
      * @return информация о формах-источниках в виде списка
      *         {@link DepartmentFormType}
      */
-    List<DepartmentFormType> getFormSources(int departmentId, int formTypeId, FormDataKind kind, Date periodStart, Date periodEnd);
+    List<DepartmentFormType> getFormSources(int departmentId, int formTypeId, FormDataKind kind, Date periodStart,
+                                            Date periodEnd, SourcesSearchOrdering ordering, boolean isAscSorting);
 
     /**
      * Возвращает информацию о всех налоговых формах, которые являются источниками
@@ -240,12 +242,15 @@ public interface DepartmentFormTypeDao {
      *
      * @param departmentId      идентификатор декларации
      * @param declarationTypeId идентификатор вида декларации
-     * @param periodStart  начало периода, в котором действуют назначения
-     * @param periodEnd    окончание периода, в котором действуют назначения
+     * @param periodStart       начало периода, в котором действуют назначения
+     * @param periodEnd         окончание периода, в котором действуют назначения
+     * @param ordering          столбец, по которому сортировать
+     * @param isAscSorting      сортировать по возрастанию\убыванию
      * @return информация о формах-источниках в виде списка
-     *         {@link DepartmentFormType}
+     * {@link DepartmentFormType}
      */
-    List<DepartmentFormType> getDeclarationSources(int departmentId, int declarationTypeId, Date periodStart, Date periodEnd);
+    List<DepartmentFormType> getDeclarationSources(int departmentId, int declarationTypeId, Date periodStart, Date periodEnd,
+                                                   SourcesSearchOrdering ordering, boolean isAscSorting);
 
     /**
      * Возвращает список назначенных налоговых форм для выбранного налога и подразделения

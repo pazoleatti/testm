@@ -13,6 +13,7 @@ public class GetDepartmentAssignsAction extends UnsecuredActionImpl<GetDepartmen
     private boolean isForm = true;
     private PeriodsInterval periodsInterval;
     private DepartmentAssign selectedLeft;
+    private SortFilter filter;
     /** Назначение источников или приемников? */
     private SourceMode mode;
 
@@ -62,6 +63,14 @@ public class GetDepartmentAssignsAction extends UnsecuredActionImpl<GetDepartmen
 
     public void setForm(boolean isForm) {
         this.isForm = isForm;
+    }
+
+    public SortFilter getFilter() {
+        return filter;
+    }
+
+    public void setFilter(SortFilter filter) {
+        this.filter = filter;
     }
 
     @Override

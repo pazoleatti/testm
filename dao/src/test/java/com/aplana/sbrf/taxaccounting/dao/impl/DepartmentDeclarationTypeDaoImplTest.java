@@ -44,7 +44,7 @@ public class DepartmentDeclarationTypeDaoImplTest {
 
     @Test
     public void testGetByTaxType() {
-        assertEquals(2, departmentDeclarationTypeDao.getByTaxType(1, null, null, null).size());
+        assertEquals(2, departmentDeclarationTypeDao.getByTaxType(1, null, null, null, false).size());
     }
 
 	@Test
