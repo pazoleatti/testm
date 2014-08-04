@@ -88,7 +88,7 @@ public class LockDataServiceImpl implements LockDataService {
         tx.executeInNewTransaction(new TransactionLogic() {
             @Override
             public void execute() {
-                long startTime = new Date().getTime();try {
+                try {
                     synchronized(this) {
                         LockData lock = validateLock(dao.get(key));
                         if (lock != null) {
