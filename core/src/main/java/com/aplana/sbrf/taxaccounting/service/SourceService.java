@@ -11,9 +11,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.source.SourceClientData;
-
 /**
  * Интерфейс сервиса для работы с привязкой департаментов к подразделениям
  */
@@ -82,7 +79,7 @@ public interface SourceService {
      * @return список назначенных подразделению деклараций (с учётом вида и типа) по заданному виду налога
      */
     List<DepartmentDeclarationType> getDDTByDepartment(int departmentId, TaxType taxType, Date periodStart, Date periodEnd,
-                                                       Boolean isAscSorting);
+                                                       boolean isAscSorting);
 
     /**
      * Возвращает информацию об источниках, которые должны использоваться при

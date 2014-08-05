@@ -86,7 +86,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
 
 	@Override
 	public List<DepartmentDeclarationType> getByTaxType(int departmentId, TaxType taxType, Date periodStart,
-                                                        Date periodEnd, Boolean isAscSorting) {
+                                                        Date periodEnd, boolean isAscSorting) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("departmentId", departmentId);
         params.put("periodEnd", periodEnd);
