@@ -1292,7 +1292,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         });
     }
 
-    private final static String CHECK_UNIQUE_MATCHES = "select v.RECORD_ID as ID, a.NAME as NAME from REF_BOOK_VALUE v, REF_BOOK_RECORD r, REF_BOOK_ATTRIBUTE a \n" +
+    private final static String CHECK_UNIQUE_MATCHES = "select distinct v.RECORD_ID as ID, a.NAME as NAME from REF_BOOK_VALUE v, REF_BOOK_RECORD r, REF_BOOK_ATTRIBUTE a \n" +
             "where r.ID = v.RECORD_ID and r.STATUS=0 and a.ID=v.ATTRIBUTE_ID and r.REF_BOOK_ID = ?";
 
     private final static String CHECK_COMBINED_UNIQUE_MATCHES = "select ID from (\n" +
@@ -1317,10 +1317,10 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             ps.addParam(refBookId);
             for (RefBookAttribute attribute : attributes) {
                 if (attribute.isUnique()) {
-                    hasUniqueAttributes = true;
-                    ps.appendQuery(" and ");
-                    if (records.size() > 1) {
-                        ps.appendQuery(" (");
+                    if (!hasUniqueAttributes) {
+                        ps.appendQuery(" and (");
+                    } else {
+                        ps.appendQuery(" or ");
                     }
                     for (int i = 0; i < records.size(); i++) {
                         RefBookRecord record = records.get(i);
@@ -1358,7 +1358,11 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                         ps.appendQuery(" and v.record_id != ?");
                         ps.addParam(uniqueRecordId);
                     }
+                    hasUniqueAttributes = true;
                 }
+            }
+            if (hasUniqueAttributes) {
+                ps.appendQuery(") ");
             }
 
             if (hasUniqueAttributes) {
