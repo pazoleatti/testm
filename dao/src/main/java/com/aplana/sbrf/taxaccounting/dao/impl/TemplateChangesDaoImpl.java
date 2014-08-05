@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.dao.TemplateChangesDao;
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.VersionHistorySearchOrdering;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
@@ -41,7 +42,7 @@ public class TemplateChangesDaoImpl extends AbstractDao implements TemplateChang
             changes.setId(SqlUtils.getInteger(rs, "id"));
             changes.setEventDate(new Date(rs.getTimestamp("date_event").getTime()));
             changes.setAuthor(taUserDao.getUser(SqlUtils.getInteger(rs,"author")));
-            changes.setEvent(TemplateChangesEvent.fromId(SqlUtils.getInteger(rs,"event")));
+            changes.setEvent(FormDataEvent.getByCode(SqlUtils.getInteger(rs, "event")));
             changes.setFormTemplateId(SqlUtils.getInteger(rs,"form_template_id"));
             changes.setDeclarationTemplateId(SqlUtils.getInteger(rs,"declaration_template_id"));
             return changes;
@@ -54,7 +55,7 @@ public class TemplateChangesDaoImpl extends AbstractDao implements TemplateChang
             int templateEventId = generateId("seq_template_changes", Integer.class);
             getJdbcTemplate().update("INSERT INTO template_changes(id, event, date_event, author, form_template_id, declaration_template_id)" +
                     " VALUES(?, ?, ?, ?, ?, ?)",
-                    new Object[]{templateEventId, templateChanges.getEvent().getId(), templateChanges.getEventDate(), templateChanges.getAuthor().getId(),
+                    new Object[]{templateEventId, templateChanges.getEvent().getCode(), templateChanges.getEventDate(), templateChanges.getAuthor().getId(),
                             templateChanges.getFormTemplateId(), templateChanges.getDeclarationTemplateId()},
                     new int[]{Types.NUMERIC, Types.NUMERIC, Types.TIMESTAMP, Types.NUMERIC, Types.NUMERIC, Types.NUMERIC});
             return templateEventId;
