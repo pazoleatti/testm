@@ -30,7 +30,6 @@ import static java.util.Arrays.asList;
  * @author Dmitriy Levykin
  */
 @Service
-@Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService implements LoadRefBookDataService {
 
     @Autowired
@@ -99,6 +98,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
      * @param refBookName           Имя справочника для сообщения об ошибке
      * @param move                  Признак необходимости перемещения файла после импорта
      */
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     private ImportCounter importRefBook(TAUserInfo userInfo, Logger logger, ConfigurationParam refBookDirectoryParam,
                                         Map<String, List<Pair<Boolean, Long>>> mappingMap, String refBookName, boolean move) {
         // Получение пути к каталогу загрузки ТФ

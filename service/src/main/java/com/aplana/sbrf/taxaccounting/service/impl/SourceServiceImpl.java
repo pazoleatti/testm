@@ -2,8 +2,6 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.*;
 import com.aplana.sbrf.taxaccounting.dao.api.*;
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
@@ -20,9 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
-import javax.validation.constraints.NotNull;
 import java.text.SimpleDateFormat;
+import java.util.*;
 
 @Service
 @Transactional
@@ -969,7 +966,7 @@ public class SourceServiceImpl implements SourceService {
 
     @Override
     public List<DepartmentDeclarationType> getDDTByDepartment(int departmentId, TaxType taxType, Date periodStart,
-                                                              Date periodEnd, Boolean isAscSorting) {
+                                                              Date periodEnd, boolean isAscSorting) {
         return departmentDeclarationTypeDao.getByTaxType(departmentId, taxType, periodStart, periodEnd, isAscSorting);
     }
 
