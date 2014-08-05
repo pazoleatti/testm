@@ -340,7 +340,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             // Скрипт
             InputStream inputStream = currentFile.getInputStream();
             try {
-                formDataService.importFormData(localLogger, userInfo, formData.getId(), inputStream, currentFile.getName(),
+                formDataService.importFormData(localLogger, userInfo, formData.getId(), formData.isManual(), inputStream, currentFile.getName(),
                         FormDataEvent.IMPORT_TRANSPORT_FILE);
             } finally {
                 IOUtils.closeQuietly(inputStream);
