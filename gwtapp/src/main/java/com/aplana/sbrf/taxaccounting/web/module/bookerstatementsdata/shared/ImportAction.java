@@ -15,7 +15,7 @@ public class ImportAction extends UnsecuredActionImpl<ImportResult> implements A
 
     @Override
     public String getName() {
-        return "Загрузка бух отчетности";
+        return "Загрузка бухгалтерской отчетности";
     }
 
     public Integer getAccountPeriodId() {
