@@ -2,8 +2,6 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.*;
 import com.aplana.sbrf.taxaccounting.dao.api.*;
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
@@ -20,9 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
-import javax.validation.constraints.NotNull;
 import java.text.SimpleDateFormat;
+import java.util.*;
 
 @Service
 @Transactional
@@ -922,8 +919,18 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
+    public List<FormTypeKind> getAllFormAssigned(List<Long> departmentIds, char taxType, TaxNominationFilter filter) {
+        return departmentFormTypeDao.getAllFormAssigned(departmentIds, taxType, filter);
+    }
+
+    @Override
     public List<FormTypeKind> getDeclarationAssigned(Long departmentId, char taxType) {
         return departmentFormTypeDao.getDeclarationAssigned(departmentId, taxType);
+    }
+
+    @Override
+    public List<FormTypeKind> getAllDeclarationAssigned(List<Long> departmentIds, char taxType, TaxNominationFilter filter) {
+        return departmentDeclarationTypeDao.getAllDeclarationAssigned(departmentIds, taxType, filter);
     }
 
     @Override

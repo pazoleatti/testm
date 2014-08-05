@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.model;
+package com.aplana.sbrf.taxaccounting.model;
 
 /**
  * Перечисление колонок для сортировки
