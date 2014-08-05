@@ -20,7 +20,13 @@ public interface LoadFormDataService {
 
     /**
      * Загрузка ТФ НФ ТБ (FORM_UPLOAD_DIRECTORY)
-     * Указанные ТБ
+     * Указанные ТБ и список имен файлов
      */
-    ImportCounter importFormData(TAUserInfo userInfo, List<Integer> departmentIdList,  Logger logger);
+    ImportCounter importFormData(TAUserInfo userInfo, List<Integer> departmentIdList, List<String> loadedFileNameList,
+                                 Logger logger);
+
+    /**
+     * Список доступных ТБ
+     */
+    List<Integer> getTB(TAUserInfo userInfo, Logger logger);
 }

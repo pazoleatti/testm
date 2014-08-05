@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.client;
 
-import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
@@ -77,11 +76,9 @@ public class UploadTransportDataPresenter extends Presenter<UploadTransportDataP
 
     @Override
     public void onSuccess() {
-        Dialog.infoMessage("Загрузка транспортных файлов в каталог загрузки", "Загрузка транспортных файлов в каталог загрузки завершена");
     }
 
     @Override
     public void onFailure() {
-        Dialog.errorMessage("Загрузка транспортных файлов в каталог загрузки", "Транспортные файлы не загружены в каталог загрузки. Обратитесь к администратору!");
     }
 }
