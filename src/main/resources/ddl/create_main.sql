@@ -766,7 +766,7 @@ create table template_changes (
  id number(9) not null,
  form_template_id number(9),
  declaration_template_id number(9),
- event number(1),
+ event number(9),
  author number(9) not null,
  date_event date
 );
