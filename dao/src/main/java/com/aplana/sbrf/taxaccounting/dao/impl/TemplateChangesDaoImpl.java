@@ -69,8 +69,11 @@ public class TemplateChangesDaoImpl extends AbstractDao implements TemplateChang
     @Override
     public List<TemplateChanges> getByFormTemplateId(int ftId, VersionHistorySearchOrdering ordering, boolean isAscSorting) {
         StringBuilder sql = new StringBuilder(
-                "SELECT id, event, author, date_event, form_template_id, declaration_template_id\n" +
-                        "FROM template_changes WHERE form_template_id = ?\n");
+                "SELECT tch.id, event, author, date_event, form_template_id, declaration_template_id\n" +
+                        "FROM template_changes tch\n");
+        if (ordering == VersionHistorySearchOrdering.EVENT)
+            sql.append("LEFT JOIN event ev on tch.event=ev.\"ID\"\n");
+        sql.append("WHERE form_template_id = ?\n");
         sql.append(sortingClause(ordering, isAscSorting));
 
         try {
@@ -80,15 +83,18 @@ public class TemplateChangesDaoImpl extends AbstractDao implements TemplateChang
                     new TemplateChangesMapper());
         } catch (DataAccessException e) {
             logger.error("Ошибка при получении истории изменнений.", e);
-            throw new DaoException("Ошибка при получении истории изменнений.", e.getMessage());
+            throw new DaoException("Ошибка при получении истории изменнений.", e);
         }
     }
 
     @Override
     public List<TemplateChanges> getByDeclarationTemplateId(int dtId, VersionHistorySearchOrdering ordering, boolean isAscSorting) {
         StringBuilder sql = new StringBuilder(
-                "SELECT id, event, author, date_event, form_template_id, declaration_template_id\n" +
-                        "FROM template_changes WHERE declaration_template_id = ?\n");
+                "SELECT tch.id, event, author, date_event, form_template_id, declaration_template_id\n" +
+                        "FROM template_changes tch\n");
+        if (ordering == VersionHistorySearchOrdering.EVENT)
+            sql.append("LEFT JOIN event ev on tch.event=ev.\"ID\"\n");
+        sql.append("WHERE declaration_template_id = ?\n");
         sql.append(sortingClause(ordering, isAscSorting));
         try {
             return getJdbcTemplate().query(sql.toString(),
@@ -97,15 +103,18 @@ public class TemplateChangesDaoImpl extends AbstractDao implements TemplateChang
                     new TemplateChangesMapper());
         } catch (DataAccessException e){
             logger.error("Ошибка при получении истории изменнений.", e);
-            throw new DaoException("Ошибка при получении истории изменнений.", e.getMessage());
+            throw new DaoException("Ошибка при получении истории изменнений.", e);
         }
     }
 
     @Override
     public List<TemplateChanges> getByFormTypeIds(int ftTypeId, VersionHistorySearchOrdering ordering, boolean isAscSorting) {
         StringBuilder sql = new StringBuilder(
-                "SELECT id, event, author, date_event, form_template_id, declaration_template_id\n" +
-                        "FROM template_changes WHERE form_template_id IN\n" +
+                "SELECT tch.id, event, author, date_event, form_template_id, declaration_template_id\n" +
+                        "FROM template_changes tch\n");
+        if (ordering == VersionHistorySearchOrdering.EVENT)
+            sql.append("LEFT JOIN event ev on tch.event=ev.\"ID\"\n");
+        sql.append("WHERE form_template_id IN\n" +
                         "(SELECT id FROM form_template WHERE type_id = ? AND status != 2)\n");
         sql.append(sortingClause(ordering, isAscSorting));
         try {
@@ -115,15 +124,18 @@ public class TemplateChangesDaoImpl extends AbstractDao implements TemplateChang
                     new TemplateChangesMapper());
         } catch (DataAccessException e){
             logger.error("Ошибка при получении истории изменнений.", e);
-            throw new DaoException("Ошибка при получении истории изменнений.", e.getMessage());
+            throw new DaoException("Ошибка при получении истории изменнений.", e);
         }
     }
 
     @Override
     public List<TemplateChanges> getByDeclarationTypeId(int dtTypeId, VersionHistorySearchOrdering ordering, boolean isAscSorting) {
         StringBuilder sql = new StringBuilder(
-                "SELECT id, event, author, date_event, form_template_id, declaration_template_id\n" +
-                        "FROM template_changes WHERE declaration_template_id IN\n" +
+                "SELECT tch.id, event, author, date_event, form_template_id, declaration_template_id\n" +
+                        "FROM template_changes tch\n");
+        if (ordering == VersionHistorySearchOrdering.EVENT)
+            sql.append("LEFT JOIN event ev on tch.event=ev.\"ID\"\n");
+        sql.append(" WHERE declaration_template_id IN\n" +
                         "(SELECT id FROM declaration_template WHERE declaration_type_id = ? AND status != 2)\n");
         sql.append(sortingClause(ordering, isAscSorting));
         try {
@@ -133,7 +145,7 @@ public class TemplateChangesDaoImpl extends AbstractDao implements TemplateChang
                     new TemplateChangesMapper());
         } catch (DataAccessException e){
             logger.error("Ошибка при получении истории изменнений.", e);
-            throw new DaoException("Ошибка при получении истории изменнений.", e.getMessage());
+            throw new DaoException("Ошибка при получении истории изменнений.", e);
         }
     }
 
@@ -157,7 +169,7 @@ public class TemplateChangesDaoImpl extends AbstractDao implements TemplateChang
                 clause.append("ORDER BY form_template_id");
                 break;
             case EVENT:
-                clause.append("ORDER BY event");
+                clause.append("ORDER BY ev.name");
                 break;
             case DATE:
                 clause.append("ORDER BY date_event");
