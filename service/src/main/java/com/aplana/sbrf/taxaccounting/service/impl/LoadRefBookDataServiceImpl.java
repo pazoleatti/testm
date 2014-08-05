@@ -143,9 +143,10 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                         log(userInfo, LogData.L16, logger, fileName);
                         return new ImportCounter();
                     }
+                    log(userInfo, LogData.L15, logger, fileName);
+                } else {
+                    log(userInfo, LogData.L15_1, logger, fileName);
                 }
-
-                log(userInfo, LogData.L15, logger, fileName);
 
                 // Один файл может соответствоваь нескольким справочникам
                 List<Pair<Boolean, Long>> matchList = mappingMap.get(mappingMatch(currentFile.getName(), mappingMap.keySet()));

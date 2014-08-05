@@ -223,9 +223,10 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                     fail++;
                     continue;
                 }
+                log(userInfo, LogData.L15, logger, fileName);
+            } else {
+                log(userInfo, LogData.L15_1, logger, fileName);
             }
-
-            log(userInfo, LogData.L15, logger, fileName);
 
             // Поиск экземпляра НФ
             FormData formData;
