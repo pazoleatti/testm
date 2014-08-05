@@ -1351,18 +1351,15 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                             ps.appendQuery(" or ");
                         }
                     }
-                    if (records.size() > 1) {
-                        ps.appendQuery(")");
-                    }
-                    if (uniqueRecordId != null) {
-                        ps.appendQuery(" and v.record_id != ?");
-                        ps.addParam(uniqueRecordId);
-                    }
                     hasUniqueAttributes = true;
                 }
             }
             if (hasUniqueAttributes) {
-                ps.appendQuery(") ");
+                ps.appendQuery(")");
+            }
+            if (uniqueRecordId != null) {
+                ps.appendQuery(" and v.record_id != ?");
+                ps.addParam(uniqueRecordId);
             }
 
             if (hasUniqueAttributes) {
