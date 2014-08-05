@@ -60,7 +60,7 @@ public class UploadDataRowsHandler extends
         logger.info("Загрузка данных из файла: \"" + blobData.getName() + "\"");
         //Парсит загруженный в фаловое хранилище xls-файл
         formDataService.importFormData(logger, userInfo,
-                formData.getId(), blobData.getInputStream(), blobData.getName());
+                formData.getId(), formData.isManual(), blobData.getInputStream(), blobData.getName());
 
 
         DataRowResult result = new DataRowResult();

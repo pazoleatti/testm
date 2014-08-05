@@ -541,4 +541,14 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
     public void updateVisibleEditButton() {
         editButton.setVisible(!isEditMode);
     }
+
+    @Override
+    public Integer getCurrentReportPeriodId() {
+        return currentReportPeriodId;
+    }
+
+    @Override
+    public Integer getCurrentDepartmentId() {
+        return currentDepartmentId;
+    }
 }

@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.server;
 import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
-import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTypeService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
@@ -46,7 +45,7 @@ public class AddDeclarationSourceHandler extends AbstractActionHandler<AddDeclar
 			for (Integer dt : action.getDeclarationTypeId()) {
 				boolean canAssign = true;
                 //TODO тоже надо откуда то брать период
-				for (DepartmentDeclarationType ddt : departmentFormTypeService.getDDTByDepartment(depId.intValue(), action.getTaxType(), new Date(), new Date())) {
+				for (DepartmentDeclarationType ddt : departmentFormTypeService.getDDTByDepartment(depId.intValue(), action.getTaxType(), new Date(), new Date(), false)) {
 					if (ddt.getDeclarationTypeId() == dt) {
 						canAssign = false;
 						logs.add(new LogEntry(LogLevel.WARNING, "Для " + departmentService.getDepartment(depId).getName() +

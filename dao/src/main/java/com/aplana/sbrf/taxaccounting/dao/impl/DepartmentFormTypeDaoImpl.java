@@ -2,9 +2,9 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -161,22 +161,27 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         );
     }
 
-    private static final String GET_FORM_SOURCES_SQL = "select distinct src_dft.*, fds.period_start, fds.period_end \n" +
+    private static final String GET_FORM_SOURCES_SQL = "select distinct src_dft.*, ds.period_start, ds.period_end, d.NAME, ft.NAME, fk.NAME\n" +
             "from department_form_type src_dft \n" +
-            "join form_data_source fds on fds.src_department_form_type_id=src_dft.id \n" +
-            "join department_form_type dft on fds.department_form_type_id=dft.id \n" +
+            "join form_data_source ds on ds.src_department_form_type_id=src_dft.id \n" +
+            "join department_form_type dft on ds.department_form_type_id=dft.id \n" +
+            "JOIN form_kind fk ON fk.id = src_dft.kind\n" +
+            "JOIN department d ON d.id = src_dft.department_id\n" +
+            "JOIN form_type ft ON ft.ID = src_dft.form_type_id\n" +
             "where dft.department_id=:departmentId and (:formTypeId is null or dft.form_type_id=:formTypeId) and (:formKind is null or dft.kind=:formKind) \n" +
-            "and (:periodStart is null or ((fds.period_end >= :periodStart or fds.period_end is null) and (:periodEnd is null or fds.period_start <= :periodEnd)))";
+            "and (:periodStart is null or ((ds.period_end >= :periodStart or ds.period_end is null) and (:periodEnd is null or ds.period_start <= :periodEnd)))\n";
 
     @Override
-    public List<DepartmentFormType> getFormSources(int departmentId, int formTypeId, FormDataKind kind, Date periodStart, Date periodEnd) {
+    public List<DepartmentFormType> getFormSources(int departmentId, int formTypeId, FormDataKind kind, Date periodStart,
+                                                   Date periodEnd, SourcesSearchOrdering ordering, boolean isAscSorting) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("departmentId", departmentId);
         params.put("formTypeId", formTypeId != 0 ? formTypeId : null);
         params.put("formKind", kind != null ? kind.getId() : null);
         params.put("periodStart", periodStart);
         params.put("periodEnd", periodEnd);
-        return getNamedParameterJdbcTemplate().query(GET_FORM_SOURCES_SQL, params, DFT_MAPPER_WITH_PERIOD);
+        return getNamedParameterJdbcTemplate().query(GET_FORM_SOURCES_SQL + getSortingClause(ordering, isAscSorting),
+                params, DFT_MAPPER_WITH_PERIOD);
     }
 
     private static final String GET_FORM_DESTINATIONS_SQL = "select distinct dest_dft.*, fds.period_start, fds.period_end from department_form_type dest_dft \n" +
@@ -381,21 +386,26 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                params, DDT_MAPPER);
     }
 
-    private static final String GET_DECLARATION_SOURCES_SQL = "select distinct src_dft.*, dds.period_start, dds.period_end \n" +
+    private static final String GET_DECLARATION_SOURCES_SQL = "select distinct src_dft.*, ds.period_start, ds.period_end, d.NAME, ft.NAME, fk.NAME\n \n" +
             "from department_form_type src_dft \n" +
-            "join declaration_source dds on dds.src_department_form_type_id=src_dft.id \n" +
-            "join department_declaration_type ddt on dds.department_declaration_type_id = ddt.id \n" +
+            "join declaration_source ds on ds.src_department_form_type_id=src_dft.id \n" +
+            "join department_declaration_type ddt on ds.department_declaration_type_id = ddt.id \n" +
+            "JOIN form_kind fk ON fk.id = src_dft.kind\n" +
+            "JOIN department d ON d.id = src_dft.department_id\n" +
+            "JOIN form_type ft ON ft.ID = src_dft.form_type_id\n" +
             "where ddt.department_id=:departmentId and (:declarationTypeId is null or ddt.declaration_type_id = :declarationTypeId) " +
-            "and (:periodStart is null or ((dds.period_end >= :periodStart or dds.period_end is null) and (:periodEnd is null or dds.period_start <= :periodEnd)))";
+            "and (:periodStart is null or ((ds.period_end >= :periodStart or ds.period_end is null) and (:periodEnd is null or ds.period_start <= :periodEnd)))";
 
     @Override
-    public List<DepartmentFormType> getDeclarationSources(int departmentId, int declarationTypeId, Date periodStart, Date periodEnd) {
+    public List<DepartmentFormType> getDeclarationSources(int departmentId, int declarationTypeId, Date periodStart, Date periodEnd,
+                                                          SourcesSearchOrdering ordering, boolean isAscSorting) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("departmentId", departmentId);
         params.put("declarationTypeId", declarationTypeId != 0 ? declarationTypeId : null);
         params.put("periodStart", periodStart);
         params.put("periodEnd", periodEnd);
-        return getNamedParameterJdbcTemplate().query(GET_DECLARATION_SOURCES_SQL, params, DFT_MAPPER_WITH_PERIOD);
+        return getNamedParameterJdbcTemplate().query(GET_DECLARATION_SOURCES_SQL + getSortingClause(ordering, isAscSorting),
+                params, DFT_MAPPER_WITH_PERIOD);
     }
 
     private static final String GET_DECLARATION_SOURCES_SQL_OLD = "select * from department_form_type src_dft where exists "
@@ -551,21 +561,25 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         );
     }
 
-    private final static String GET_SQL_BY_TAX_TYPE_SQL = "select * from department_form_type dft where department_id = :departmentId and exists (\n" +
-            "  select 1 from form_type ft \n" +
-            "  left join form_template ftemp on ftemp.type_id = ft.id \n" +
-            "  where ft.id = dft.form_type_id and (:taxType is null or ft.tax_type = :taxType) \n" +
+    private final static String GET_SQL_BY_TAX_TYPE_SQL = "select dft.*, ft.name from department_form_type dft\n" +
+            "LEFT JOIN form_kind fk ON fk.id = dft.KIND\n" +
+            "LEFT JOIN form_type ft ON dft.FORM_TYPE_ID = ft.ID\n" +
+            "where department_id = :departmentId and exists (\n" +
+            "select 1 from form_type ft \n" +
+            "left join form_template ftemp on ftemp.type_id = ft.id \n" +
+            "where ft.id = dft.form_type_id and (:taxType is null or ft.tax_type = :taxType) \n" +
             //"  and (:periodStart is null or (ftemp.version >= :periodStart and (:periodEnd is null or ftemp.version <= :periodEnd)))\n" +
             ")";
 
     @Override
-    public List<DepartmentFormType> getByTaxType(int departmentId, TaxType taxType, Date periodStart, Date periodEnd) {
+    public List<DepartmentFormType> getByTaxType(int departmentId, TaxType taxType, Date periodStart, Date periodEnd,
+                                                 SourcesSearchOrdering ordering, Boolean isAscSorting) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("departmentId", departmentId);
         //params.put("periodStart", periodStart);
         //params.put("periodEnd", periodEnd);
         params.put("taxType", taxType != null ? String.valueOf(taxType.getCode()) : null);
-        return getNamedParameterJdbcTemplate().query(GET_SQL_BY_TAX_TYPE_SQL, params, DFT_MAPPER);
+        return getNamedParameterJdbcTemplate().query(GET_SQL_BY_TAX_TYPE_SQL + getSortingClause(ordering, isAscSorting), params, DFT_MAPPER);
     }
 
     private final static String GET_SQL_BY_TAX_TYPE_SQL_OLD = "select * from department_form_type dft where department_id = ?" +
@@ -824,5 +838,33 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         getJdbcTemplate().update(
             "update department_form_type set performer_dep_id = ? where id = ?",
                 performerId, id);
+    }
+
+    private String getSortingClause(SourcesSearchOrdering ordering, Boolean isAscSorting) {
+        if (ordering == null) ordering = SourcesSearchOrdering.TYPE;
+        if (isAscSorting == null) isAscSorting = true;
+        StringBuilder sorting = new StringBuilder();
+
+        switch (ordering) {
+            case TYPE:
+                sorting.append("ORDER BY ft.name\n");
+                break;
+            case KIND:
+                sorting.append("ORDER BY fk.name\n");
+                break;
+            case DEPARTMENT:
+                sorting.append("ORDER BY d.name\n");
+                break;
+            case START:
+                sorting.append("ORDER BY ds.period_start\n");
+                break;
+            case END:
+                sorting.append("ORDER BY ds.period_end\n");
+                break;
+        }
+
+        if (!isAscSorting) sorting.append("DESC\n");
+
+        return sorting.toString();
     }
 }

@@ -15,6 +15,7 @@ public class GetCurrentAssignsAction extends UnsecuredActionImpl<GetCurrentAssig
     private PeriodsInterval periodsInterval;
     /** Назначение источников или приемников? */
     private SourceMode mode;
+    private SortFilter filter;
 
     public int getDepartmentId() {
         return departmentId;
@@ -62,6 +63,14 @@ public class GetCurrentAssignsAction extends UnsecuredActionImpl<GetCurrentAssig
 
     public void setMode(SourceMode mode) {
         this.mode = mode;
+    }
+
+    public SortFilter getFilter() {
+        return filter;
+    }
+
+    public void setFilter(SortFilter filter) {
+        this.filter = filter;
     }
 
     @Override

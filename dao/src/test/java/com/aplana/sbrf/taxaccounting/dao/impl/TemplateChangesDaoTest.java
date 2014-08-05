@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.dao.TemplateChangesDao;
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.TemplateChanges;
 import com.aplana.sbrf.taxaccounting.model.TemplateChangesEvent;
 import com.aplana.sbrf.taxaccounting.model.VersionHistorySearchOrdering;
@@ -36,7 +37,7 @@ public class TemplateChangesDaoTest {
         templateChanges.setAuthor(taUserDao.getUser(1));
         templateChanges.setFormTemplateId(2);
         templateChanges.setEventDate(new Date());
-        templateChanges.setEvent(TemplateChangesEvent.ACTIVATED);
+        templateChanges.setEvent(FormDataEvent.TEMPLATE_ACTIVATED);
         int newEventId = templateChangesDao.add(templateChanges);
         Assert.assertEquals(newEventId, templateChangesDao.getByFormTemplateId(2, VersionHistorySearchOrdering.DATE, false).get(0).getId());
     }

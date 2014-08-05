@@ -13,6 +13,8 @@ import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
+import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
@@ -95,6 +97,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Autowired
     private LockCoreService lockCoreService;
+
+    @Autowired
+    private TransactionHelper tx;
 
     @Autowired
     private TAUserDao userDao;
@@ -545,9 +550,19 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void unlock(long declarationDataId, TAUserInfo userInfo) {
-        lockCoreService.unlock(DeclarationData.class, declarationDataId, userInfo);
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void unlock(final long declarationDataId, final TAUserInfo userInfo) {
+        tx.executeInNewTransaction(new TransactionLogic() {
+            @Override
+            public void execute() {
+                lockCoreService.unlock(DeclarationData.class, declarationDataId, userInfo);
+            }
+
+            @Override
+            public Object executeWithReturn() {
+                return null;
+            }
+        });
     }
 
     @Override

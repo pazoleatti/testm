@@ -1,12 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.server;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.service.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.TaActionException;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.CreateFormData;
@@ -14,6 +10,9 @@ import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.CreateFormDa
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -67,7 +66,8 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
         FormDataKind kind = FormDataKind.fromId(formDataKindId);
         Integer departmentId = action.getDepartmentId();
         Integer formDataTypeId = action.getFormDataTypeId();
-        List<DepartmentFormType> sources = sourceService.getDFTSourcesByDFT(departmentId, formDataTypeId, kind, reportPeriodId);
+        List<DepartmentFormType> sources = sourceService.getDFTSourcesByDFT(departmentId, formDataTypeId, kind, reportPeriodId,
+                null, false);
         if (!sources.isEmpty()){
             logger.warn("Форма является приемником данных.");
         }

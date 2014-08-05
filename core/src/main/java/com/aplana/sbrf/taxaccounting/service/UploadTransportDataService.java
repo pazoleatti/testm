@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 /**
  * Сервис загрузки ТФ в каталог загрузки
@@ -21,5 +22,5 @@ public interface UploadTransportDataService {
      * @param logger Логгер для области уведомлений
      * @return true — был загружен хотя бы один файл
      */
-    boolean uploadFile(TAUserInfo userInfo, String fileName, InputStream inputStream, Logger logger) throws IOException;
+    List<String> uploadFile(TAUserInfo userInfo, String fileName, InputStream inputStream, Logger logger) throws IOException;
 }

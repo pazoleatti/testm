@@ -117,7 +117,7 @@ public class RefBookUtils extends AbstractDao {
 
                     // пердпологается, что (maxLength - precision) <= 17
                     if (fractionalPart > precision || integerPart > (maxLength - precision)) {
-                        errors.add("Значение атрибута «" + a.getName() + "» не соответствует формату (" + maxLength + ", " + precision + ")");
+                        errors.add("\"" + a.getName() + "\": значение атрибута не соответствует формату: максимальное количество цифр " + maxLength + ", максимальная точность " + precision);
                     }
                 }
             }
