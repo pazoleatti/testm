@@ -35,7 +35,7 @@ import static com.google.gwt.dom.client.BrowserEvents.*;
  * An editable text cell. Click to edit, escape to cancel, return to commit.
  */
 public class KeyPressableTextInputCell extends
-		AbstractEditableCell<String, KeyPressableTextInputCell.ViewData> {
+        AbstractEditableCell<String, KeyPressableTextInputCell.ViewData> {
 
     private boolean textRight = false;
 
@@ -162,7 +162,7 @@ public class KeyPressableTextInputCell extends
 	public KeyPressableTextInputCell(SafeHtmlRenderer<String> renderer, boolean textRight) {
         // переделал на MOUSEUP потому что при клике там не правильный порядок идет
         // проброса событий, так как строка перерисовывется еще
-		super(MOUSEUP, KEYUP, KEYDOWN, BLUR);
+		super(CLICK, KEYDOWN, KEYUP,  BLUR);
         this.textRight = textRight;
         if (this.textRight) {
             if (templateRight == null) {
@@ -188,6 +188,7 @@ public class KeyPressableTextInputCell extends
 	@Override
 	public void onBrowserEvent(Context context, Element parent, String value,
 	                           NativeEvent event, ValueUpdater<String> valueUpdater) {
+        super.onBrowserEvent(context, parent, value, event, valueUpdater);
 		Object key = context.getKey();
 		ViewData viewData = getViewData(key);
 		if (viewData != null && viewData.isEditing()) {
@@ -197,7 +198,7 @@ public class KeyPressableTextInputCell extends
 			String type = event.getType();
 			int keyCode = event.getKeyCode();
 			boolean enterPressed = KEYUP.equals(type) && keyCode == KeyCodes.KEY_ENTER;
-			if (MOUSEUP.equals(type) || enterPressed) {
+			if (CLICK.equals(type) || enterPressed) {
                 // Go into edit mode.
 				if (viewData == null) {
 					viewData = new ViewData(value);
