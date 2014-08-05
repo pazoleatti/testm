@@ -37,10 +37,7 @@ public class LoadAllHandler extends AbstractActionHandler<LoadAllAction, LoadAll
 
         TAUserInfo userInfo = securityService.currentUserInfo();
 
-        // TODO Выборка подразделений http://conf.aplana.com/pages/viewpage.action?pageId=13111363
-
-        loadFormDataService.importFormData(userInfo, logger);
-
+        loadFormDataService.importFormData(userInfo, loadFormDataService.getTB(userInfo, logger), null, logger);
         LoadAllResult result = new LoadAllResult();
         result.setUuid(logEntryService.save(logger.getEntries()));
 
@@ -48,5 +45,6 @@ public class LoadAllHandler extends AbstractActionHandler<LoadAllAction, LoadAll
     }
 
     @Override
-    public void undo(LoadAllAction action, LoadAllResult result, ExecutionContext context) throws ActionException {}
+    public void undo(LoadAllAction action, LoadAllResult result, ExecutionContext context) throws ActionException {
+    }
 }

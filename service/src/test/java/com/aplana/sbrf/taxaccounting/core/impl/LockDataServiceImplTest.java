@@ -4,6 +4,8 @@ import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.LockDataDao;
 import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
+import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -37,6 +39,19 @@ public class LockDataServiceImplTest {
 		when(dao.get("b")).thenReturn(new LockData("b", 0, PAST));
 		when(dao.get("c")).thenReturn(new LockData("c", 1, FUTURE));
 		ReflectionTestUtils.setField(service, "dao", dao);
+
+        TransactionHelper tx = new TransactionHelper() {
+            @Override
+            public void executeInNewTransaction(TransactionLogic logic) {
+                logic.execute();
+            }
+
+            @Override
+            public <T> T returnInNewTransaction(TransactionLogic<T> logic) {
+                return logic.executeWithReturn();
+            }
+        };
+        ReflectionTestUtils.setField(service, "tx", tx);
 	}
 
 	@Test

@@ -133,6 +133,18 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
          * Обновление видимости дял кнопки "Редактировать"
          */
         void updateVisibleEditButton();
+
+        /**
+         * Получить идентификатор текущего периода
+         * @return
+         */
+        Integer getCurrentReportPeriodId();
+
+        /**
+         * Получить идентификатор текущего подразделения
+         * @return
+         */
+        Integer getCurrentDepartmentId();
     }
 
     @Inject
@@ -302,6 +314,8 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                                 if (result.getReportPeriods() != null && !result.getReportPeriods().isEmpty()) {
                                     getView().setReportPeriod(result.getReportPeriods().get(0).getId());
                                 }
+
+                                reloadDepartmentParams(getView().getCurrentDepartmentId(), getView().getTaxType(), getView().getCurrentReportPeriodId());
                             }
                         }, this).addCallback(new ManualRevealCallback<GetDepartmentTreeDataAction>(this)));
     }
