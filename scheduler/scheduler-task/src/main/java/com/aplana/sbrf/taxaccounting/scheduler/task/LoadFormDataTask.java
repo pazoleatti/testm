@@ -83,7 +83,7 @@ public class LoadFormDataTask implements UserTask{
             departmentsIds.add(departmentId);
         }
 
-        loadFormDataService.importFormData(userService.getSystemUserInfo(), departmentsIds, new Logger());
+        loadFormDataService.importFormData(userService.getSystemUserInfo(), departmentsIds, null, new Logger());
     }
 
     @Override

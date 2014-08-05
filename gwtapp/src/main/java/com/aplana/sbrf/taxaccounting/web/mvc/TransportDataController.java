@@ -1,9 +1,11 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.service.LoadFormDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.UploadTransportDataService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -37,6 +39,9 @@ public class TransportDataController {
     @Autowired
     UploadTransportDataService uploadTransportDataService;
 
+    @Autowired
+    LoadFormDataService loadFormDataService;
+
     @RequestMapping(value = "transportData/upload", method = RequestMethod.POST)
     public void upload(HttpServletRequest request, HttpServletResponse response)
             throws FileUploadException, IOException {
@@ -57,12 +62,20 @@ public class TransportDataController {
             fileName = fileName.substring(fileName.lastIndexOf("\\") + 1);
         }
 
-        uploadTransportDataService.uploadFile(securityService.currentUserInfo(), fileName,
+        TAUserInfo userInfo = securityService.currentUserInfo();
+
+        // Загрузка в каталог
+        List<String> loadedFileNameList = uploadTransportDataService.uploadFile(userInfo, fileName,
                 items.get(0).getInputStream(), logger);
 
+        // Загрузка из каталога
+        if (!logger.containsLevel(LogLevel.ERROR) && !loadedFileNameList.isEmpty()) {
+            loadFormDataService.importFormData(userInfo, loadFormDataService.getTB(userInfo, logger),
+                    loadedFileNameList, logger);
+        }
+
         if (!logger.getEntries().isEmpty()) {
-            response.getWriter().printf((logger.containsLevel(LogLevel.ERROR) ? "error " : "") + "uuid %s",
-                    logEntryService.save(logger.getEntries()));
+            response.getWriter().printf("uuid %s", logEntryService.save(logger.getEntries()));
         }
     }
 
