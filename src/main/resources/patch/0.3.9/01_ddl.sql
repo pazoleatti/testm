@@ -269,12 +269,25 @@ INSERT ALL
   INTO event VALUES (901, 'Создание подразделения')
   INTO event VALUES (902, 'Модификация подразделения')
   INTO event VALUES (903, 'Удаление подразделения')
+  INTO event VALUES (701, 'Версия создана')
+  INTO event VALUES (702, 'Версия изменена')
+  INTO event VALUES (703, 'Версия введена в действие')
+  INTO event VALUES (704, 'Версия выведена из действия')
+  INTO event VALUES (705, 'Версия удалена')
 SELECT * FROM dual;  
 
 ALTER TABLE event ADD CONSTRAINT event_pk PRIMARY KEY (id);
 ALTER TABLE log_system ADD CONSTRAINT log_system_fk_event_id FOREIGN KEY (event_id) REFERENCES event(id);
 ALTER TABLE log_system DROP CONSTRAINT log_system_chk_event_id;
 
+-- http://jira.aplana.com/browse/SBRFACCTAX-8319 Изменения для template_changes, связаннные с введением таблицы EVENT
+ALTER TABLE template_changes DROP CONSTRAINT changes_check_event;
+ALTER TABLE template_changes MODIFY event NUMBER(9);
+
+UPDATE template_changes SET event=700+event WHERE event IN (1,2,3,4,5);
+
+ALTER TABLE template_changes ADD CONSTRAINT template_changes_chk_event CHECK (event in (701, 702, 703, 704, 705));
+ALTER TABLE template_changes ADD CONSTRAINT template_changes_fk_event FOREIGN KEY (event) references event(id);
 ---------------------------------------------------------------------------------------------------------
 -- http://jira.aplana.com/browse/SBRFACCTAX-8032 - Добавить поле "Идентификатор ТБ подразделения налоговой формы / декларации" в таблицу LOG_SYSTEM
 ALTER TABLE log_system ADD tb_department_id NUMBER(9);
