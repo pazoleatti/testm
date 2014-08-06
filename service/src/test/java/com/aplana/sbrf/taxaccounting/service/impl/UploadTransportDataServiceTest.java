@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
@@ -19,8 +20,7 @@ import java.io.InputStream;
 import java.util.*;
 
 import static java.util.Arrays.asList;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -96,6 +96,8 @@ public class UploadTransportDataServiceTest {
                 }
             }
         });
+        when(departmentService.getTaxFormDepartments(any(TAUser.class), anyListOf(TaxType.class), any(Date.class), any(Date.class)))
+                .thenReturn(Arrays.asList(TEST_DEPARTMENT_ID));
         when(departmentService.getDepartmentBySbrfCode("147")).thenReturn(formDepartment);
         ReflectionTestUtils.setField(uploadTransportDataService, "departmentService", departmentService);
 
@@ -128,10 +130,9 @@ public class UploadTransportDataServiceTest {
     @Test
     public void uploadFile1Test() throws IOException {
         Logger logger = new Logger();
-        uploadTransportDataService.uploadFile(null, FILE_NAME_1, getFileAsStream(FILE_NAME_1), logger);
+        List<String> loadedFileNameList = uploadTransportDataService.uploadFile(null, FILE_NAME_1, getFileAsStream(FILE_NAME_1), logger);
+        Assert.assertEquals(0, loadedFileNameList.size());
         Assert.assertEquals(2, logger.getEntries().size());
-        Assert.assertEquals(LogLevel.ERROR, logger.getEntries().get(0).getLevel());
-        Assert.assertEquals(LogLevel.ERROR, logger.getEntries().get(1).getLevel());
         Assert.assertEquals(UploadTransportDataServiceImpl.USER_NOT_FOUND_ERROR, logger.getEntries().get(0).getMessage());
     }
 
@@ -145,10 +146,10 @@ public class UploadTransportDataServiceTest {
         role.setAlias(TARole.ROLE_CONF);
         user.setRoles(asList(role));
         Logger logger = new Logger();
-        uploadTransportDataService.uploadFile(userInfo, FILE_NAME_1, getFileAsStream(FILE_NAME_1), logger);
+        List<String> loadedFileNameList = uploadTransportDataService.uploadFile(userInfo, FILE_NAME_1, getFileAsStream(FILE_NAME_1), logger);
+        Assert.assertEquals(0, loadedFileNameList.size());
         Assert.assertEquals(2, logger.getEntries().size());
         Assert.assertEquals(LogLevel.ERROR, logger.getEntries().get(0).getLevel());
-        Assert.assertEquals(LogLevel.ERROR, logger.getEntries().get(1).getLevel());
         Assert.assertEquals(UploadTransportDataServiceImpl.ACCESS_DENIED_ERROR, logger.getEntries().get(0).getMessage());
     }
 
@@ -162,10 +163,10 @@ public class UploadTransportDataServiceTest {
         role.setAlias(TARole.ROLE_CONTROL_UNP);
         user.setRoles(asList(role));
         Logger logger = new Logger();
-        uploadTransportDataService.uploadFile(userInfo, null, getFileAsStream(FILE_NAME_1), logger);
+        List<String> loadedFileNameList = uploadTransportDataService.uploadFile(userInfo, null, getFileAsStream(FILE_NAME_1), logger);
+        Assert.assertEquals(0, loadedFileNameList.size());
         Assert.assertEquals(2, logger.getEntries().size());
         Assert.assertEquals(LogLevel.ERROR, logger.getEntries().get(0).getLevel());
-        Assert.assertEquals(LogLevel.ERROR, logger.getEntries().get(1).getLevel());
         Assert.assertEquals(UploadTransportDataServiceImpl.NO_FILE_NAME_ERROR, logger.getEntries().get(0).getMessage());
     }
 
@@ -179,10 +180,10 @@ public class UploadTransportDataServiceTest {
         role.setAlias(TARole.ROLE_CONTROL_UNP);
         user.setRoles(asList(role));
         Logger logger = new Logger();
-        uploadTransportDataService.uploadFile(userInfo, FILE_NAME_1, null, logger);
+        List<String> loadedFileNameList = uploadTransportDataService.uploadFile(userInfo, FILE_NAME_1, null,  logger);
+        Assert.assertEquals(0, loadedFileNameList.size());
         Assert.assertEquals(2, logger.getEntries().size());
         Assert.assertEquals(LogLevel.ERROR, logger.getEntries().get(0).getLevel());
-        Assert.assertEquals(LogLevel.ERROR, logger.getEntries().get(1).getLevel());
         Assert.assertEquals(UploadTransportDataServiceImpl.EMPTY_INPUT_STREAM_ERROR, logger.getEntries().get(0).getMessage());
     }
 
@@ -197,9 +198,10 @@ public class UploadTransportDataServiceTest {
             role.setAlias(TARole.ROLE_CONTROL_UNP);
             user.setRoles(asList(role));
             Logger logger = new Logger();
-            uploadTransportDataService.uploadFile(userInfo, FILE_NAME_1, getFileAsStream(FILE_NAME_1), logger);
+            List<String> loadedFileNameList = uploadTransportDataService.uploadFile(userInfo, FILE_NAME_1, getFileAsStream(FILE_NAME_1), logger);
             String[] files = folder.list();
             Assert.assertEquals(1, files.length);
+            Assert.assertEquals(loadedFileNameList.get(0), FILE_NAME_1);
             Assert.assertEquals(FILE_NAME_1, files[0]);
             new File(folder.getPath() + '/' + FILE_NAME_1).delete();
         } catch (Exception e) {

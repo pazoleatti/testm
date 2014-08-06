@@ -44,7 +44,10 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 
 	@Override
 	public List<LogBusiness> getDeclarationLogsBusiness(long declarationId, HistoryBusinessSearchOrdering ordering, boolean isAscSorting) {
-        StringBuilder sql = new StringBuilder("select * from log_business where declaration_data_id = ?\n");
+        StringBuilder sql = new StringBuilder("select log_business.* from log_business\n");
+        if (ordering == HistoryBusinessSearchOrdering.EVENT)
+            sql.append("left join event ev on log_business.event_id=ev.\"ID\"\n");
+        sql.append("where declaration_data_id = ?\n");
         sql.append(sortingClause(ordering, isAscSorting));
         try {
 			return getJdbcTemplate().query(
@@ -59,7 +62,10 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 
 	@Override
 	public List<LogBusiness> getFormLogsBusiness(long formId, HistoryBusinessSearchOrdering ordering, boolean isAscSorting) {
-        StringBuilder sql = new StringBuilder("select * from log_business where form_data_id = ?\n");
+        StringBuilder sql = new StringBuilder("select log_business.* from log_business\n");
+        if (ordering == HistoryBusinessSearchOrdering.EVENT)
+            sql.append("left join event ev on log_business.event_id=ev.\"ID\"\n");
+        sql.append("where form_data_id = ?\n");
         sql.append(sortingClause(ordering, isAscSorting));
         try {
 			return getJdbcTemplate().query(
@@ -130,7 +136,7 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 
         switch (ordering) {
             case EVENT:
-                clause.append("ORDER BY event_id");
+                clause.append("ORDER BY ev.name");
                 break;
             case DATE:
                 clause.append("ORDER BY log_date");

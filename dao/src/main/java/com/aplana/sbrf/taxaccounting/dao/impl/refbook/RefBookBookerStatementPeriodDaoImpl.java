@@ -58,16 +58,13 @@ public class RefBookBookerStatementPeriodDaoImpl extends AbstractDao implements 
             "     YEAR, \n" +
             "     ACCOUNT_PERIOD_ID, \n" +
             "     --год + название периода БО \n" +
-            "     periods.YEAR || ': ' || t106.NAME as PERIOD_NAME, \n" +
-            "     list_ids \n" +
+            "     periods.YEAR || ': ' || t106.NAME as PERIOD_NAME \n" +
             " from ( \n" +
             "     --данные из 107 справочник сгруппированные по году и периоду без подразделения \n" +
             "     select \n" +
             "         max(t107.record_id) as record_id, \n" +
             "         t107.YEAR, \n" +
-            "         t107.ACCOUNT_PERIOD_ID, \n" +
-            "         --список идентификаторов из справочника 107 входящие в группировку \n" +
-            "         LISTAGG(t107.record_id, ', ') WITHIN GROUP (ORDER BY t107.record_id) as list_ids \n" +
+            "         t107.ACCOUNT_PERIOD_ID \n" +
             "     from t107 \n" +
             "     group by t107.YEAR, t107.ACCOUNT_PERIOD_ID \n" +
             " ) periods \n" +

@@ -357,7 +357,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
                             if (fractionalPart > precision || integerPart > (maxLength - precision)) {
 								BadValueException badValueException = new BadValueException();
 								badValueException.setFieldName(field.getKey().getName());
-								badValueException.setDescription("Значение не соответствует формату (" + maxLength + ", " + precision + ")");
+								badValueException.setDescription("значение атрибута не соответствует формату: максимальное количество цифр " + maxLength + ", максимальная точность " + precision);
 								throw badValueException;
 							}
 						}

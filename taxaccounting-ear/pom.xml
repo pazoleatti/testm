@@ -38,7 +38,7 @@
                             <version>5</version>
                             <defaultLibBundleDir>lib</defaultLibBundleDir>
                             <skinnyWars>true</skinnyWars>
-                            <displayName>${parent.artifactId}</displayName>
+                            <displayName>${project.parent.artifactId}</displayName>
                             <applicationName>${parent.description}</applicationName>
                             <modules>
                                 <webModule>
@@ -124,7 +124,7 @@
                             <version>5</version>
                             <defaultLibBundleDir>lib</defaultLibBundleDir>
                             <skinnyWars>true</skinnyWars>
-                            <displayName>${parent.artifactId}</displayName>
+                            <displayName>${project.parent.artifactId}</displayName>
                             <applicationName>${parent.description}</applicationName>
                             <filtering>true</filtering>
                             <modules>

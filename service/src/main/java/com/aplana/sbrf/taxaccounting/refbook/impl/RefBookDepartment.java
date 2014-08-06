@@ -690,7 +690,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         }
 
         //5 точка запроса
-        List<DepartmentDeclarationType> departmentDeclarationTypes = sourceService.getDDTByDepartment(department.getId(), null, null, null, null);
+        List<DepartmentDeclarationType> departmentDeclarationTypes = sourceService.getDDTByDepartment(department.getId(), null, null, null, true);
         for (DepartmentDeclarationType ddt : departmentDeclarationTypes){
             DeclarationType declarationType = declarationTypeService.get(ddt.getDeclarationTypeId());
             logger.warn(String.format("Существует назначение декларации %s подразделению %s!",
