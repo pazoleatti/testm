@@ -1,15 +1,17 @@
 package com.aplana.sbrf.taxaccounting.web.module.sources.client;
 
 import com.aplana.gwt.client.dialog.Dialog;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.SourcesSearchOrdering;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.source.SourceMode;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.sortable.ViewWithSortableTable;
 import com.aplana.sbrf.taxaccounting.web.module.sources.client.assingDialog.AssignDialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.sources.client.assingDialog.AssignDialogView;
 import com.aplana.sbrf.taxaccounting.web.module.sources.client.assingDialog.ButtonClickHandlers;
@@ -28,17 +30,20 @@ import com.gwtplatform.mvp.client.proxy.Place;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 
 public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, SourcesPresenter.MyProxy>
 		implements SourcesUiHandlers{
 
-	@ProxyCodeSplit
+    @ProxyCodeSplit
 	@NameToken(SourcesTokens.SOURCES)
 	public interface MyProxy extends ProxyPlace<SourcesPresenter>, Place {
 	}
 
-    public interface MyView extends View, HasUiHandlers<SourcesUiHandlers> {
+    public interface MyView extends View, HasUiHandlers<SourcesUiHandlers>, ViewWithSortableTable {
 
         /**
          * Иницализация формы.
@@ -78,39 +83,65 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
         void setDepartments(List<Department> departments, Set<Integer> availableDepartments);
 
         /**
-         * Обновляет на фрме таблицу с доступными для выбора типами НФ (НФ назначениями) (левая)
+         * Обновляет на форме таблицу с доступными для выбора типами НФ (НФ назначениями) (левая)
          *
          * @param departmentFormTypes назначения НФ подразделениям
          */
         void setAvailableFormsLeft(List<DepartmentAssign> departmentFormTypes);
 
         /**
-         * Обновляет на фрме таблицу с доступными для выбора типами НФ (НФ назначениями) (правая)
+         * Обновляет на форме таблицу с доступными для выбора типами НФ (НФ назначениями) (правая)
          *
          * @param departmentDeclarationTypes назначения деклараций подразделениям
          */
         void setAvailableDecsRight(List<DepartmentAssign> departmentDeclarationTypes);
 
         /**
-         * Обновляет на фрме таблицу с доступными для выбора типами назначений деклараций подразделению (левая)
+         * Обновляет на форме таблицу с доступными для выбора типами назначений деклараций подразделению (левая)
          *
          * @param departmentDeclarationTypes назначения деклараций подразделениям
          */
         void setAvailableDecsLeft(List<DepartmentAssign> departmentDeclarationTypes);
 
         /**
-         * Обновляет на фрме таблицу с доступными для добавления приемнику/источнику (которая справа)
+         * Обновляет на форме таблицу с доступными для добавления приемнику/источнику (которая справа)
          *
          * @param departmentFormTypes назначения НФ подразделениям
          */
         void setAvailableFormRight(List<DepartmentAssign> departmentFormTypes);
 
         /**
-         * Обновляет на фрме таблицу с источниками для выбранного приемника/источника (которая внизу)
+         * Обновляет на форме таблицу с источниками для выбранного приемника/источника (которая внизу)
          *
          * @param departmentFormTypes назначения НФ подразделениям
          */
         void setCurrentSources(List<CurrentAssign> departmentFormTypes);
+
+        /**
+         * Получить столбец, по которому сортировать левую таблицу
+         * @return
+         */
+        SourcesSearchOrdering getSearchOrderingLeftTable();
+
+        /**
+         * Получить столбец, по которому сортировать правую таблицу
+         * @return
+         */
+        SourcesSearchOrdering getSearchOrderingRightTable();
+
+        /**
+         * Получить столбец, по которому сортировать нижнюю таблицу
+         * @return
+         */
+        SourcesSearchOrdering getSearchOrderingDownTable();
+
+        boolean isAscSorting(SourcesView.Table table);
+
+        SourcesView.Table getTable();
+
+        void loadLeftData();
+
+        void loadRightData();
     }
 
 	private final DispatchAsync dispatcher;
@@ -120,6 +151,8 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
     private boolean isForm = true;
 
     protected final AssignDialogPresenter assignDialogPresenter;
+
+    private DepartmentAssign departmentAssign;
 
 	@Inject
 	public SourcesPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy, DispatchAsync dispatcher,
@@ -181,6 +214,10 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
             return;
         }
 
+        SortFilter filter = new SortFilter();
+        filter.setAscSorting(getView().isAscSorting(SourcesView.Table.RIGHT));
+        filter.setSearchOrdering(getView().getSearchOrderingRightTable());
+
 		GetDepartmentAssignsAction action = new GetDepartmentAssignsAction();
         action.setForm(true);
 		action.setDepartmentId(departmentId);
@@ -188,6 +225,7 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
         action.setPeriodsInterval(getView().getPeriodInterval());
         action.setSelectedLeft(selectedLeft);
         action.setMode(getView().isSource() ? SourceMode.SOURCES : SourceMode.DESTINATIONS);
+        action.setFilter(filter);
 		dispatcher.execute(action, CallbackUtils
 				.defaultCallback(new AbstractCallback<GetDepartmentAssignsResult>() {
 					@Override
@@ -204,11 +242,16 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
             return;
         }
 
+        SortFilter filter = new SortFilter();
+        filter.setAscSorting(getView().isAscSorting(SourcesView.Table.LEFT));
+        filter.setSearchOrdering(getView().getSearchOrderingLeftTable());
+
 		GetDepartmentAssignsAction action = new GetDepartmentAssignsAction();
         action.setForm(true);
 		action.setDepartmentId(departmentId);
 		action.setTaxType(taxType);
         action.setPeriodsInterval(getView().getPeriodInterval());
+        action.setFilter(filter);
 		dispatcher.execute(action, CallbackUtils
 				.defaultCallback(new AbstractCallback<GetDepartmentAssignsResult>() {
 					@Override
@@ -225,11 +268,16 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
             return;
         }
 
+        SortFilter filter = new SortFilter();
+        filter.setAscSorting(getView().isAscSorting(SourcesView.Table.LEFT));
+        filter.setSearchOrdering(getView().getSearchOrderingLeftTable());
+
         GetDepartmentAssignsAction action = new GetDepartmentAssignsAction();
         action.setForm(false);
         action.setDepartmentId(departmentId);
         action.setTaxType(taxType);
         action.setPeriodsInterval(getView().getPeriodInterval());
+        action.setFilter(filter);
         dispatcher.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<GetDepartmentAssignsResult>() {
                     @Override
@@ -245,6 +293,9 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
             getView().setAvailableDecsRight(new ArrayList<DepartmentAssign>(0));
             return;
         }
+        SortFilter filter = new SortFilter();
+        filter.setAscSorting(getView().isAscSorting(SourcesView.Table.RIGHT));
+        filter.setSearchOrdering(getView().getSearchOrderingRightTable());
 
         GetDepartmentAssignsAction action = new GetDepartmentAssignsAction();
         action.setForm(false);
@@ -253,6 +304,7 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
         action.setPeriodsInterval(getView().getPeriodInterval());
         action.setSelectedLeft(selectedLeft);
         action.setMode(getView().isSource() ? SourceMode.SOURCES : SourceMode.DESTINATIONS);
+        action.setFilter(filter);
         dispatcher.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<GetDepartmentAssignsResult>() {
                     @Override
@@ -264,6 +316,12 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 
 	@Override
 	public void getCurrentAssigns(DepartmentAssign departmentAssign) {
+
+        SortFilter filter = new SortFilter();
+        filter.setAscSorting(getView().isAscSorting(SourcesView.Table.DOWN));
+        filter.setSearchOrdering(getView().getSearchOrderingDownTable());
+
+        this.departmentAssign = departmentAssign;
         GetCurrentAssignsAction action = new GetCurrentAssignsAction();
         action.setDepartmentId(departmentAssign.getDepartmentId());
         action.setTypeId(departmentAssign.getTypeId());
@@ -271,15 +329,16 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
         action.setKind(departmentAssign.getKind());
         action.setPeriodsInterval(getView().getPeriodInterval());
         action.setMode(getView().isSource() ? SourceMode.SOURCES : SourceMode.DESTINATIONS);
+        action.setFilter(filter);
 
-		dispatcher.execute(action, CallbackUtils
-				.defaultCallback(new AbstractCallback<GetCurrentAssignsResult>() {
-					@Override
-					public void onSuccess(GetCurrentAssignsResult result) {
-						getView().setCurrentSources(result.getCurrentSources());
-					}
-				}, this));
-	}
+        dispatcher.execute(action, CallbackUtils
+                .defaultCallback(new AbstractCallback<GetCurrentAssignsResult>() {
+                    @Override
+                    public void onSuccess(GetCurrentAssignsResult result) {
+                        getView().setCurrentSources(result.getCurrentSources());
+                    }
+                }, this));
+    }
 
     @Override
     public TaxType getTaxType() {
@@ -382,6 +441,23 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
                     }, this));
         }
 	}
+
+    @Override
+    public void onRangeChange(int start, int length) {
+        SourcesView.Table table = getView().getTable();
+
+        switch (table) {
+            case LEFT:
+                getView().loadLeftData();
+                break;
+            case RIGHT:
+                getView().loadRightData();
+                break;
+            case DOWN:
+                getCurrentAssigns(departmentAssign);
+                break;
+        }
+    }
 
     private boolean checkInterval(PeriodsInterval periodInterval) {
         PeriodInfo periodFrom = periodInterval.getPeriodFrom();

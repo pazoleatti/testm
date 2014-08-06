@@ -19,7 +19,6 @@ import org.aspectj.lang.annotation.Aspect;
  */
 @Aspect
 public class ValidationAspect {
-// TODO На сфере не взлетело
 //    private ValidatorFactory validatorFactory;
 //
 //    public ValidationAspect() {
@@ -27,7 +26,7 @@ public class ValidationAspect {
 //    }
 //
 //    // Валидация возвращаемого результата
-//    @Around("execution(@javax.validation.constraints.* * * (..))")
+//    @Around("execution(@javax.validation.constraints.* com.aplana.sbrf.taxaccounting..* * (..))")
 //    public Object afterReturning(ProceedingJoinPoint aJoinPoint) throws Throwable {
 //        Object theReturnValue = aJoinPoint.proceed();
 //        MethodSignature theSignature = (MethodSignature) aJoinPoint.getSignature();
@@ -41,7 +40,7 @@ public class ValidationAspect {
 //    }
 //
 //    // Валидация параметров
-//    @Around("execution(* * (.., @javax.validation.constraints.* (*), ..))")
+//    @Around("execution(* com.aplana.sbrf.taxaccounting..* (.., @javax.validation.constraints.* (*), ..))")
 //    public Object pointcutMethodArgument(ProceedingJoinPoint aJoinPoint) throws Throwable {
 //        return validateInvocation(aJoinPoint);
 //    }

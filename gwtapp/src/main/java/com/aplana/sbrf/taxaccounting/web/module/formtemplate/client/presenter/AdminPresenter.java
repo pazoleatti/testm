@@ -183,6 +183,11 @@ public class AdminPresenter
             editFormPresenter.setFormTypeId(selectedItem.getFormTypeId());
             editFormPresenter.setFormTypeName(selectedItem.getFormTypeName());
             editFormPresenter.setFormTypeCode(selectedItem.getFormTypeCode());
+        } else {
+            editFormPresenter.setFormTypeId(0);
+            editFormPresenter.setFormTypeCode("");
+            editFormPresenter.setFormTypeName("");
+
         }
     }
 

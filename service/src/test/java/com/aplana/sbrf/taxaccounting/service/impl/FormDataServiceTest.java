@@ -187,7 +187,7 @@ public class FormDataServiceTest {
                 if (map.containsKey(key)) {
                     return map.get(key);
                 }
-                map.put((String) arguments[0], new LockData((String) arguments[0], (Long) arguments[1], new Date()));
+                map.put((String) arguments[0], new LockData((String) arguments[0], (Integer) arguments[1], new Date()));
                 return null;
             }
         }).when(lockDataService).lock(anyString(), anyInt(), anyInt());

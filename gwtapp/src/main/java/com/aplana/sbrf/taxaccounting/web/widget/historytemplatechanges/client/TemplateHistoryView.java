@@ -114,7 +114,7 @@ public class TemplateHistoryView extends PopupViewWithUiHandlers<AplanaUiHandler
         TextColumn<TemplateChangesExt> eventColumn = new TextColumn<TemplateChangesExt>() {
             @Override
             public String getValue(TemplateChangesExt object) {
-                return String.valueOf(object.getTemplateChanges().getEvent().getName());
+                return String.valueOf(object.getTemplateChanges().getEvent().getTitle());
             }
         };
 

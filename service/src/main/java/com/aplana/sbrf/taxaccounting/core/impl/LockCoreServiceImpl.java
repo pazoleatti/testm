@@ -80,5 +80,10 @@ public class LockCoreServiceImpl implements LockCoreService{
 			Class<? extends IdentityObject<T>> clazz, T id, TAUserInfo userInfo) {
 		return lockDao.getObjectLock(id, clazz);
 	}
-	
+
+    @Override
+    public void unlockIfOlderThan(int sec) {
+        lockDao.unlockIfOlderThan(sec);
+    }
+
 }

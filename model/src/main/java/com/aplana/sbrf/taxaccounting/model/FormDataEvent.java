@@ -61,6 +61,12 @@ public enum FormDataEvent implements Serializable {
 
 	LOG_SYSTEM_BACKUP(601, "Архивирование журнала событий"),
 
+    TEMPLATE_CREATED(701, "Версия создана"),
+    TEMPLATE_MODIFIED(702, "Версия изменена"),
+    TEMPLATE_ACTIVATED(703, "Версия введена в действие"),
+    TEMPLATE_DEACTIVATED(704, "Версия выведена из действия"),
+    TEMPLATE_DELETED(705, "Версия удалена"),
+
     ADD_DEPARTMENT(901, "Создание подразделения"),
     UPDATE_DEPARTMENT(902, "Модификация подразделения"),
     DELETE_DEPARTMENT(903, "Удаление подразделения");

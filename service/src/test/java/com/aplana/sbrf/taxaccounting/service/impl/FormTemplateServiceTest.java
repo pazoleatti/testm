@@ -162,7 +162,7 @@ public class FormTemplateServiceTest {
 
         assertTrue(logger.getEntries().size() == 0);
     }
-// TODO Вернуть после подключения валидации
+
 //    @Test(expected = ValidationException.class)
 //    public void validationTest() {
 //        formTemplateService.delete(null);

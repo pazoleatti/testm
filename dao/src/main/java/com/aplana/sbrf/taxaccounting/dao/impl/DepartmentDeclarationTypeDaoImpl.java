@@ -1,12 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
-import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -78,21 +75,26 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
 		return departmentIds;
 	}
 
-    private final static String GET_SQL_BY_TAX_TYPE_SQL = "select * from department_declaration_type ddt where department_id = :departmentId and exists (\n" +
-            "  select 1 from declaration_type dt \n" +
-            "  left join declaration_template dtemp on dtemp.declaration_type_id = dt.id\n" +
-            "  where dt.id = ddt.declaration_type_id and (:taxType is null or dt.tax_type = :taxType) \n" +
-            "  and (:periodStart is null or (dtemp.version >= :periodStart or (:periodEnd is null or dtemp.version <= :periodEnd)))\n" +
-            ")";
+    private final static String GET_SQL_BY_TAX_TYPE_SQL = "select * from department_declaration_type ddt\n" +
+            "left join declaration_type dt ON ddt.declaration_type_id = dt.id\n" +
+            "where department_id = :departmentId and exists (\n" +
+            "select 1 from declaration_type dt \n" +
+            "left join declaration_template dtemp on dtemp.declaration_type_id = dt.id\n" +
+            "where dt.id = ddt.declaration_type_id and (:taxType is null or dt.tax_type = :taxType) \n" +
+            "and (:periodStart is null or (dtemp.version >= :periodStart or (:periodEnd is null or dtemp.version <= :periodEnd)))\n" +
+            ") order by dt.name\n";
 
 	@Override
-	public List<DepartmentDeclarationType> getByTaxType(int departmentId, TaxType taxType, Date periodStart, Date periodEnd) {
+	public List<DepartmentDeclarationType> getByTaxType(int departmentId, TaxType taxType, Date periodStart,
+                                                        Date periodEnd, boolean isAscSorting) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("departmentId", departmentId);
         params.put("periodEnd", periodEnd);
         params.put("periodStart", periodStart);
         params.put("taxType", taxType != null ? String.valueOf(taxType.getCode()) : null);
-		return getNamedParameterJdbcTemplate().query(GET_SQL_BY_TAX_TYPE_SQL, params, DEPARTMENT_DECLARATION_TYPE_ROW_MAPPER);
+        StringBuilder sql = new StringBuilder(GET_SQL_BY_TAX_TYPE_SQL);
+        if (!isAscSorting)  sql.append("desc");
+        return getNamedParameterJdbcTemplate().query(sql.toString(), params, DEPARTMENT_DECLARATION_TYPE_ROW_MAPPER);
 	}
 
     @Override

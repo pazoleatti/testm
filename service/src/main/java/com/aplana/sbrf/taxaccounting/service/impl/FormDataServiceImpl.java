@@ -146,28 +146,28 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
-    public void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, InputStream inputStream, String fileName, FormDataEvent formDataEvent) {
-        loadFormData(logger, userInfo, formDataId, inputStream, fileName, formDataEvent);
+    public void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, Boolean isManual, InputStream inputStream, String fileName, FormDataEvent formDataEvent) {
+        loadFormData(logger, userInfo, formDataId, isManual, inputStream, fileName, formDataEvent);
     }
 
     @Override
-    public void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, InputStream inputStream, String fileName) {
-        loadFormData(logger, userInfo, formDataId, inputStream, fileName, FormDataEvent.IMPORT);
+    public void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, Boolean isManual, InputStream inputStream, String fileName) {
+        loadFormData(logger, userInfo, formDataId, isManual, inputStream, fileName, FormDataEvent.IMPORT);
     }
 
     @Override
     @Transactional
     public void migrationFormData(Logger logger, TAUserInfo userInfo, long formDataId, InputStream inputStream, String fileName) {
-        loadFormData(logger, userInfo, formDataId, inputStream, fileName, FormDataEvent.MIGRATION);
+        loadFormData(logger, userInfo, formDataId, false, inputStream, fileName, FormDataEvent.MIGRATION);
     }
 
-    private void loadFormData(Logger logger, TAUserInfo userInfo, long formDataId, InputStream inputStream, String fileName, FormDataEvent formDataEvent) {
+    private void loadFormData(Logger logger, TAUserInfo userInfo, long formDataId, Boolean isManual, InputStream inputStream, String fileName, FormDataEvent formDataEvent) {
 		// Поскольку импорт используется как часть редактирования НФ, т.е. иморт только строк (форма уже существует) то все проверки должны 
     	// соответствовать редактированию (добавление, удаление, пересчет)
     	// Форма должна быть заблокирована текущим пользователем для редактирования
 		lockCoreService.checkLockedMe(FormData.class, formDataId, userInfo);
 
-        formDataAccessService.canEdit(userInfo, formDataId, false);
+        formDataAccessService.canEdit(userInfo, formDataId, isManual);
 
         File dataFile = null;
         File pKeyFile = null;
@@ -182,25 +182,41 @@ public class FormDataServiceImpl implements FormDataService {
             IOUtils.closeQuietly(dataFileOutputStream);
 
             String ext = getFileExtention(fileName);
-            if(!ext.equals(XLS_EXT) && !ext.equals(XLSX_EXT)){
 
-                List<String> paramList = configurationDao.getAll().get(ConfigurationParam.KEY_FILE, 0);
-
-                if (paramList != null) { // Необходимо проверить подпись
-                    if (!signService.checkSign(dataFile.getAbsolutePath(), 0)) {
-                        throw new ServiceException("Ошибка проверки цифровой подписи");
+            // Проверка ЭЦП
+            // Если флаг проверки отсутствует или не равен «1», то файл считается проверенным
+            boolean check = false;
+            if (!ext.equals(XLS_EXT) && !ext.equals(XLSX_EXT)) {
+                List<String> signList = configurationDao.getByDepartment(0).get(ConfigurationParam.SIGN_CHECK, 0);
+                if (signList != null && !signList.isEmpty() && signList.get(0).equals("1")) {
+                    List<String> paramList = configurationDao.getAll().get(ConfigurationParam.KEY_FILE, 0);
+                    if (paramList != null) { // Необходимо проверить подпись
+                        try {
+                            check = signService.checkSign(dataFile.getAbsolutePath(), 0);
+                        } catch (Exception e) {
+                            logger.error("Ошибка при проверке ЭЦП: " + e.getMessage());
+                        }
+                        if (check) {
+                            logger.error("Ошибка проверки цифровой подписи");
+                        }
                     }
+                } else {
+                    check = true;
                 }
+            } else {
+                check = true;
             }
 
             FormData fd = formDataDao.get(formDataId, false);
 
-            dataFileInputStream = new BufferedInputStream(new FileInputStream(dataFile));
-            Map<String, Object> additionalParameters = new HashMap<String, Object>();
-            additionalParameters.put("ImportInputStream", dataFileInputStream);
-            additionalParameters.put("UploadFileName", fileName);
-            formDataScriptingService.executeScript(userInfo, fd, formDataEvent, logger, additionalParameters);
-            IOUtils.closeQuietly(dataFileInputStream);
+            if (check) {
+                dataFileInputStream = new BufferedInputStream(new FileInputStream(dataFile));
+                Map<String, Object> additionalParameters = new HashMap<String, Object>();
+                additionalParameters.put("ImportInputStream", dataFileInputStream);
+                additionalParameters.put("UploadFileName", fileName);
+                formDataScriptingService.executeScript(userInfo, fd, formDataEvent, logger, additionalParameters);
+                IOUtils.closeQuietly(dataFileInputStream);
+            }
 
             if (logger.containsLevel(LogLevel.ERROR)) {
                 throw new ServiceLoggerException("Есть критические ошибки при выполнения скрипта",
@@ -652,7 +668,9 @@ public class FormDataServiceImpl implements FormDataService {
                     continue;
                 }
                 // Список типов источников для текущего типа приемников
-                List<DepartmentFormType> sourceFormTypes = departmentFormTypeDao.getFormSources(destinationDFT.getDepartmentId(), destinationDFT.getFormTypeId(), destinationDFT.getKind(), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
+                List<DepartmentFormType> sourceFormTypes = departmentFormTypeDao.getFormSources(
+                        destinationDFT.getDepartmentId(), destinationDFT.getFormTypeId(), destinationDFT.getKind(),
+                        reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate(), null, false);
                 // Признак наличия принятых экземпляров источников
                 boolean existAcceptedSources = false;
                 for (DepartmentFormType sourceDFT : sourceFormTypes) {
