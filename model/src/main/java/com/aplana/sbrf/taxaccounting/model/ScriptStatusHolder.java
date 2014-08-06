@@ -10,6 +10,8 @@ public class ScriptStatusHolder {
 
     private String statusMessage;
 
+    private int successCount = 0;
+
     /**
      * Статус скрипта
      */
@@ -36,5 +38,19 @@ public class ScriptStatusHolder {
      */
     public void setStatusMessage(String statusMessage) {
         this.statusMessage = statusMessage;
+    }
+
+    /**
+     * Количество записей
+     */
+    public int getSuccessCount() {
+        return successCount;
+    }
+
+    /**
+     * Количество записей
+     */
+    public void setSuccessCount(int successCount) {
+        this.successCount = successCount;
     }
 }

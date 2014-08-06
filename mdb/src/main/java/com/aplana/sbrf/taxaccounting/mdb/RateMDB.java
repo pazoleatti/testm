@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.mdb;
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.ScriptStatusHolder;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
@@ -47,7 +47,7 @@ public class RateMDB implements MessageListener {
     private static final String ERROR_VALUE = "Сообщение не содержит значений";
     private static final String ERROR_CODE = "Значения сообщения установлены не по отношению к российскому рублю";
     private static final String ERROR_IMPORT = "Произошли ошибки в скрипте импорта справочника id = %d";
-    private static final String SUCCESS_IMPORT = "Импорт файла из КСШ успешно произведен";
+    private static final String SUCCESS_IMPORT = "Успешный обмен данными с КСШ. Загружено %s курсов %s";
     private static final String ERROR_AUDIT = "Ошибка записи в журнал аудита";
 
     @Autowired
@@ -66,6 +66,11 @@ public class RateMDB implements MessageListener {
     private static Map<String, Long> rateMapping = new HashMap() {{
         put("Currency", 22L);
         put("Metal", 90L);
+    }};
+
+    private static final Map<Long, String> nameMap = new HashMap() {{
+        put(22L, "валют");
+        put(90L, "драгоценных металлов");
     }};
 
     @Override
@@ -211,8 +216,10 @@ public class RateMDB implements MessageListener {
     private void runScript(Long refBookId, String fileText, TAUserInfo userInfo) {
         Logger logger = new Logger();
         Map<String, Object> additionalParameters = new HashMap<String, Object>();
+        ScriptStatusHolder scriptStatusHolder = new ScriptStatusHolder();
         try {
             additionalParameters.put("inputStream", new ByteArrayInputStream(fileText.getBytes(RATE_ENCODING)));
+            additionalParameters.put("scriptStatusHolder", scriptStatusHolder);
             refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.IMPORT, logger, additionalParameters);
         }
         catch (ServiceException e) {
@@ -227,7 +234,7 @@ public class RateMDB implements MessageListener {
             addLog(userInfo, msg);
             throw new ServiceLoggerException(msg, logEntryService.save(logger.getEntries()));
         }
-        addLog(userInfo, SUCCESS_IMPORT);
+        addLog(userInfo, String.format(SUCCESS_IMPORT, scriptStatusHolder.getSuccessCount(), nameMap.get(refBookId)));
     }
 
     /**
