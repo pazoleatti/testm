@@ -137,7 +137,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                     try {
                         check = signService.checkSign(currentFile.getPath(), 0);
                     } catch (Exception e) {
-                        logger.error("Ошибка при проверке ЭЦП: " + e.getMessage());
+                        log(userInfo, LogData.L36, logger, e.getMessage());
                     }
                     if (!check) {
                         log(userInfo, LogData.L16, logger, fileName);

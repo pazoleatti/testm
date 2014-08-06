@@ -12,11 +12,13 @@ import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.LoadRefBookRe
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
+import java.util.LinkedList;
 import java.util.List;
 
 @Service
@@ -56,7 +58,21 @@ public class LoadRefBookHandler extends AbstractActionHandler<LoadRefBookAction,
         boolean hasDiasoft = diasoftList != null && !diasoftList.isEmpty();
         boolean hasAccountPlan = accountPlanList != null && !accountPlanList.isEmpty();
         if (hasOkato || hasRegion || hasDiasoft || hasAccountPlan) {
-            logger.info("Получены каталоги загрузки для справочников.");
+            List<String> catalogStrList = new LinkedList<String>();
+            if (hasOkato) {
+                catalogStrList.add(ConfigurationParam.OKATO_UPLOAD_DIRECTORY.getCaption());
+            }
+            if (hasRegion) {
+                catalogStrList.add(ConfigurationParam.REGION_UPLOAD_DIRECTORY.getCaption());
+            }
+            if (hasDiasoft) {
+                catalogStrList.add(ConfigurationParam.DIASOFT_UPLOAD_DIRECTORY.getCaption());
+            }
+            if (hasAccountPlan) {
+                catalogStrList.add(ConfigurationParam.ACCOUNT_PLAN_UPLOAD_DIRECTORY.getCaption());
+            }
+
+            logger.info("Получены: %s.", StringUtils.join(catalogStrList, ", "));
             // Импорт справочников из ЦАС НСИ
             loadRefBookDataService.importRefBookNsi(securityService.currentUserInfo(), logger);
             // Импорт справочников из Diasoft Custody
