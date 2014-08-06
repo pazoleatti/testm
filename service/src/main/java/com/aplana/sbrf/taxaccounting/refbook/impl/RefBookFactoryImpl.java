@@ -101,7 +101,7 @@ public class RefBookFactoryImpl implements RefBookFactory {
             dataProvider.setRefBookId(refBookId);
             return dataProvider;
         } else {
-			RefBookUniversal refBookUniversal = (RefBookUniversal) applicationContext.getBean("refBookUniversal", RefBookDataProvider.class);
+			RefBookUniversal refBookUniversal = applicationContext.getBean("refBookUniversal", RefBookUniversal.class);
 			refBookUniversal.setRefBookId(refBookId);
 			return refBookUniversal;
         }
