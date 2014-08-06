@@ -11,6 +11,12 @@ import groovy.transform.Field
  *
  *  formTemplateId=609
  */
+
+// графа 1  - rowNum
+// графа    - fix
+// графа 2  - differences
+// графа 3  - sum
+
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
@@ -45,6 +51,9 @@ switch (formDataEvent) {
         importData()
         calc()
         logicCheck()
+        break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
         break
 }
 
@@ -83,11 +92,7 @@ void addRow() {
     if (currentDataRow != null && currentDataRow.getAlias() == null) {
         index = currentDataRow.getIndex() + 1
     }
-    def newRow = formData.createDataRow()
-    editableColumns.each {
-        newRow.getCell(it).editable = true
-        newRow.getCell(it).setStyleAlias('Редактируемая')
-    }
+    def newRow = getNewRow()
     newRow.index = index
     dataRowHelper.insert(newRow, index)
 }
@@ -288,11 +293,7 @@ void addData(def xml, int headRowCount) {
         if (isFixed) {
             newRow = getDataRow(dataRows, "R$rowIndex")
         } else {
-            newRow = formData.createDataRow()
-            editableColumns.each {
-                newRow.getCell(it).editable = true
-                newRow.getCell(it).setStyleAlias('Редактируемая')
-            }
+            newRow = getNewRow()
             newRow.setIndex(rowIndex)
         }
         newRow.setImportIndex(xlsIndexRow)
@@ -333,4 +334,100 @@ def checkOverflowAlgorithm(BigDecimal value, DataRow<Cell> row, String alias, in
         String columnName = getColumnName(row, alias);
         throw new ServiceException("Строка %d: Значение графы «%s» превышает допустимую разрядность (%d знаков). Графа «%s» рассчитывается как «%s»!", index, columnName, size, columnName, algorithm);
     }
+}
+
+
+void importTransportData() {
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    addTransportData(xml)
+}
+
+void addTransportData(def xml) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper?.allCached
+    def int rnuIndexRow = 2
+    def int colOffset = 1
+
+    def sum = BigDecimal.ZERO
+    def rowIndex = 0
+
+    dataRows.removeAll{ it.getAlias() == null }
+
+    for (def row : xml.row) {
+        rnuIndexRow++
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+        def newRow
+
+        rowIndex++
+        def isFixed = (rowIndex <= 3)
+        if (isFixed) {
+            newRow = getDataRow(dataRows, "R$rowIndex")
+            newRow.setImportIndex(rnuIndexRow)
+
+            // проверка фиксированных ячеек
+            def values = [:]
+            values.rowNum = parseNumber(row.cell[0].text(), rnuIndexRow, 0 + colOffset, logger, true)
+            values.differences = row.cell[2].text()
+            ['rowNum', 'differences'].each { alias ->
+                def value = values[alias]?.toString()
+                def valueExpected = newRow.getCell(alias).value?.toString()
+                checkFixedValue(newRow, value, valueExpected, rowIndex, alias, logger, true)
+            }
+
+            // графа 3
+            newRow.sum = parseNumber(row.cell[3].text(), rnuIndexRow, 3 + colOffset, logger, true)
+        } else {
+            newRow = getNewRow()
+            newRow.setIndex(rowIndex)
+            newRow.setImportIndex(rnuIndexRow)
+
+            // графа 1
+            newRow.rowNum = parseNumber(row.cell[1].text(), rnuIndexRow, 1 + colOffset, logger, true)
+
+            // графа 2
+            newRow.differences = row.cell[2].text()
+
+            // графа 3
+            newRow.sum = parseNumber(row.cell[3].text(), rnuIndexRow, 3 + colOffset, logger, true)
+
+            dataRows.add(newRow)
+        }
+
+        sum = sum + (newRow.sum ?: BigDecimal.ZERO)
+    }
+
+    // сравнение итогов
+    if (xml.rowTotal.size() == 1) {
+        rnuIndexRow = rnuIndexRow + 2
+        def row = xml.rowTotal[0]
+
+        // графа 3
+        def totalSum = parseNumber(row.cell[3].text(), rnuIndexRow, 3 + colOffset, logger, true)
+
+        def v1 = totalSum
+        def v2 = sum
+        if ((v1 == null && v2 != null) || v1 != null && v1 != v2) {
+            logger.error(TRANSPORT_FILE_SUM_ERROR, 3 + colOffset, rnuIndexRow)
+        }
+    }
+
+    // расчет итогов
+    def totalRow = getDataRow(dataRows, 'total')
+    dataRows.remove(totalRow)
+    totalRow.sum = calcItog(dataRows)
+    dataRows.add(totalRow)
+
+    dataRowHelper.save(dataRows)
+}
+
+def getNewRow() {
+    def newRow = formData.createDataRow()
+    editableColumns.each {
+        newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias('Редактируемая')
+    }
+    return newRow
 }
