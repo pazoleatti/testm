@@ -14,10 +14,7 @@ import com.aplana.sbrf.taxaccounting.scheduler.api.form.SelectBoxItem;
 import com.aplana.sbrf.taxaccounting.scheduler.api.task.UserTask;
 import com.aplana.sbrf.taxaccounting.scheduler.api.task.UserTaskLocal;
 import com.aplana.sbrf.taxaccounting.scheduler.api.task.UserTaskRemote;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.LoadFormDataService;
-import com.aplana.sbrf.taxaccounting.service.SchedulerInterceptor;
-import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.ejb.Local;
@@ -88,7 +85,7 @@ public class LoadFormDataTask implements UserTask{
 
     @Override
     public String getTaskName() {
-        return "Загрузка ТФ налоговых форм";
+        return "Загрузка ТФ налоговых форм" + PropertyLoader.getVersion();
     }
 
     @Override
