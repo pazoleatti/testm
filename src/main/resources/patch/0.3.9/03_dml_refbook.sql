@@ -1,35 +1,35 @@
 ---------------------------------------------------------------------------------------------------------
--- Справочник: конфигурационные параметры
-INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (105, 'Конфигурационные параметры', 0, 0, 1);
-INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, VISIBLE, WIDTH) VALUES (1040, 105, 'Код', 'CODE', 1, 0, 0, 20);
-INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, VISIBLE, WIDTH) VALUES (1041, 105, 'Наименование', 'NAME', 1, 1, 1, 40);
+-- РЎРїСЂР°РІРѕС‡РЅРёРє: РєРѕРЅС„РёРіСѓСЂР°С†РёРѕРЅРЅС‹Рµ РїР°СЂР°РјРµС‚СЂС‹
+INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (105, 'РљРѕРЅС„РёРіСѓСЂР°С†РёРѕРЅРЅС‹Рµ РїР°СЂР°РјРµС‚СЂС‹', 0, 0, 1);
+INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, VISIBLE, WIDTH) VALUES (1040, 105, 'РљРѕРґ', 'CODE', 1, 0, 0, 20);
+INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, VISIBLE, WIDTH) VALUES (1041, 105, 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ', 'NAME', 1, 1, 1, 40);
 
 ---------------------------------------------------------------------------------------------------------
--- http://jira.aplana.com/browse/SBRFACCTAX-8267: Справочники. Нет проверки на обязательность ввода значения
+-- http://jira.aplana.com/browse/SBRFACCTAX-8267: РЎРїСЂР°РІРѕС‡РЅРёРєРё. РќРµС‚ РїСЂРѕРІРµСЂРєРё РЅР° РѕР±СЏР·Р°С‚РµР»СЊРЅРѕСЃС‚СЊ РІРІРѕРґР° Р·РЅР°С‡РµРЅРёСЏ
 
---Cправочник "Виды сделок"/"Виды срочных сделок"
+--CРїСЂР°РІРѕС‡РЅРёРє "Р’РёРґС‹ СЃРґРµР»РѕРє"/"Р’РёРґС‹ СЃСЂРѕС‡РЅС‹С… СЃРґРµР»РѕРє"
 UPDATE ref_book_attribute SET required = 1 WHERE id = 818;
 UPDATE ref_book_attribute SET required = 1 WHERE id = 831;
 
 /*
-атрибуты, которым будет выставлена обязательность для заполнения:
-– Амортизационные группы.Группа
-– Виды операций.Виды операций
-– Виды ценных бумаг.Код вида ценных бумаг
-– Курсы Валют.Код валюты. Цифровой
-– Курсы драгоценных металлов.Внутренний код
-– Обеспечение.Код обеспечения
-– Общероссийский классификатор валют.Код валюты. Цифровой
-– Организации-участники контролируемых сделок.Адрес организации
-– Признак сделки, совершенной в РПС.Идентификатор
-– Признаки контрагентов.Код признака контрагента
-– Режимы переговорных сделок.Идентификатор
-– Ставки рефинансирования ЦБ РФ.Наименование
-– Типы сделок.Идентификатор
-– Ценные бумаги.Идентификатор ценной бумаги
-– Ценные бумаги.Эмитент
-– Шифры видов реализации (выбытия).Шифр вида реализации (выбытия)
-– Шифры видов реализованного (выбывшего) имущества.Шифр вида реализованного (выбывшего) имущества
+Р°С‚СЂРёР±СѓС‚С‹, РєРѕС‚РѕСЂС‹Рј Р±СѓРґРµС‚ РІС‹СЃС‚Р°РІР»РµРЅР° РѕР±СЏР·Р°С‚РµР»СЊРЅРѕСЃС‚СЊ РґР»СЏ Р·Р°РїРѕР»РЅРµРЅРёСЏ:
+вЂ“ РђРјРѕСЂС‚РёР·Р°С†РёРѕРЅРЅС‹Рµ РіСЂСѓРїРїС‹.Р“СЂСѓРїРїР°
+вЂ“ Р’РёРґС‹ РѕРїРµСЂР°С†РёР№.Р’РёРґС‹ РѕРїРµСЂР°С†РёР№
+вЂ“ Р’РёРґС‹ С†РµРЅРЅС‹С… Р±СѓРјР°Рі.РљРѕРґ РІРёРґР° С†РµРЅРЅС‹С… Р±СѓРјР°Рі
+вЂ“ РљСѓСЂСЃС‹ Р’Р°Р»СЋС‚.РљРѕРґ РІР°Р»СЋС‚С‹. Р¦РёС„СЂРѕРІРѕР№
+вЂ“ РљСѓСЂСЃС‹ РґСЂР°РіРѕС†РµРЅРЅС‹С… РјРµС‚Р°Р»Р»РѕРІ.Р’РЅСѓС‚СЂРµРЅРЅРёР№ РєРѕРґ
+вЂ“ РћР±РµСЃРїРµС‡РµРЅРёРµ.РљРѕРґ РѕР±РµСЃРїРµС‡РµРЅРёСЏ
+вЂ“ РћР±С‰РµСЂРѕСЃСЃРёР№СЃРєРёР№ РєР»Р°СЃСЃРёС„РёРєР°С‚РѕСЂ РІР°Р»СЋС‚.РљРѕРґ РІР°Р»СЋС‚С‹. Р¦РёС„СЂРѕРІРѕР№
+вЂ“ РћСЂРіР°РЅРёР·Р°С†РёРё-СѓС‡Р°СЃС‚РЅРёРєРё РєРѕРЅС‚СЂРѕР»РёСЂСѓРµРјС‹С… СЃРґРµР»РѕРє.РђРґСЂРµСЃ РѕСЂРіР°РЅРёР·Р°С†РёРё
+вЂ“ РџСЂРёР·РЅР°Рє СЃРґРµР»РєРё, СЃРѕРІРµСЂС€РµРЅРЅРѕР№ РІ Р РџРЎ.РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ
+вЂ“ РџСЂРёР·РЅР°РєРё РєРѕРЅС‚СЂР°РіРµРЅС‚РѕРІ.РљРѕРґ РїСЂРёР·РЅР°РєР° РєРѕРЅС‚СЂР°РіРµРЅС‚Р°
+вЂ“ Р РµР¶РёРјС‹ РїРµСЂРµРіРѕРІРѕСЂРЅС‹С… СЃРґРµР»РѕРє.РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ
+вЂ“ РЎС‚Р°РІРєРё СЂРµС„РёРЅР°РЅСЃРёСЂРѕРІР°РЅРёСЏ Р¦Р‘ Р Р¤.РќР°РёРјРµРЅРѕРІР°РЅРёРµ
+вЂ“ РўРёРїС‹ СЃРґРµР»РѕРє.РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ
+вЂ“ Р¦РµРЅРЅС‹Рµ Р±СѓРјР°РіРё.РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ С†РµРЅРЅРѕР№ Р±СѓРјР°РіРё
+вЂ“ Р¦РµРЅРЅС‹Рµ Р±СѓРјР°РіРё.Р­РјРёС‚РµРЅС‚
+вЂ“ РЁРёС„СЂС‹ РІРёРґРѕРІ СЂРµР°Р»РёР·Р°С†РёРё (РІС‹Р±С‹С‚РёСЏ).РЁРёС„СЂ РІРёРґР° СЂРµР°Р»РёР·Р°С†РёРё (РІС‹Р±С‹С‚РёСЏ)
+вЂ“ РЁРёС„СЂС‹ РІРёРґРѕРІ СЂРµР°Р»РёР·РѕРІР°РЅРЅРѕРіРѕ (РІС‹Р±С‹РІС€РµРіРѕ) РёРјСѓС‰РµСЃС‚РІР°.РЁРёС„СЂ РІРёРґР° СЂРµР°Р»РёР·РѕРІР°РЅРЅРѕРіРѕ (РІС‹Р±С‹РІС€РµРіРѕ) РёРјСѓС‰РµСЃС‚РІР°
 */
 
 UPDATE ref_book_attribute SET required=1 WHERE id=643;
@@ -51,11 +51,11 @@ UPDATE ref_book_attribute SET required=1 WHERE id=806;
 UPDATE ref_book_attribute SET required=1 WHERE id=804;
 
 /*
-Атрибуты, которым будет снят признак обязательности для заполнения:
-– Виды конверсионных сделок.Название конверсионной сделки
-– Виды услуг.Услуга
-– Коды субъектов Российской Федерации.Код ОКТМО
-– Услуги в части программного обеспечения.Тип услуги
+РђС‚СЂРёР±СѓС‚С‹, РєРѕС‚РѕСЂС‹Рј Р±СѓРґРµС‚ СЃРЅСЏС‚ РїСЂРёР·РЅР°Рє РѕР±СЏР·Р°С‚РµР»СЊРЅРѕСЃС‚Рё РґР»СЏ Р·Р°РїРѕР»РЅРµРЅРёСЏ:
+вЂ“ Р’РёРґС‹ РєРѕРЅРІРµСЂСЃРёРѕРЅРЅС‹С… СЃРґРµР»РѕРє.РќР°Р·РІР°РЅРёРµ РєРѕРЅРІРµСЂСЃРёРѕРЅРЅРѕР№ СЃРґРµР»РєРё
+вЂ“ Р’РёРґС‹ СѓСЃР»СѓРі.РЈСЃР»СѓРіР°
+вЂ“ РљРѕРґС‹ СЃСѓР±СЉРµРєС‚РѕРІ Р РѕСЃСЃРёР№СЃРєРѕР№ Р¤РµРґРµСЂР°С†РёРё.РљРѕРґ РћРљРўРњРћ
+вЂ“ РЈСЃР»СѓРіРё РІ С‡Р°СЃС‚Рё РїСЂРѕРіСЂР°РјРјРЅРѕРіРѕ РѕР±РµСЃРїРµС‡РµРЅРёСЏ.РўРёРї СѓСЃР»СѓРіРё
 */
 
 UPDATE ref_book_attribute SET required=0 WHERE id=834;
@@ -64,58 +64,58 @@ UPDATE ref_book_attribute SET required=0 WHERE id=17;
 UPDATE ref_book_attribute SET required=0 WHERE id=56;
 
 ---------------------------------------------------------------------------------------------------------
--- http://jira.aplana.com/browse/SBRFACCTAX-8274: Синхронизация различий c ref_book
-UPDATE ref_book SET name = 'Тест', visible = 0 WHERE id = 0;
-UPDATE ref_book SET name = 'Коды стороны сделки' WHERE id = 65;
-UPDATE ref_book SET name = 'Коды ОКП на основании общероссийского классификатора продукции (ОКП)' WHERE id = 68;
+-- http://jira.aplana.com/browse/SBRFACCTAX-8274: РЎРёРЅС…СЂРѕРЅРёР·Р°С†РёСЏ СЂР°Р·Р»РёС‡РёР№ c ref_book
+UPDATE ref_book SET name = 'РўРµСЃС‚', visible = 0 WHERE id = 0;
+UPDATE ref_book SET name = 'РљРѕРґС‹ СЃС‚РѕСЂРѕРЅС‹ СЃРґРµР»РєРё' WHERE id = 65;
+UPDATE ref_book SET name = 'РљРѕРґС‹ РћРљРџ РЅР° РѕСЃРЅРѕРІР°РЅРёРё РѕР±С‰РµСЂРѕСЃСЃРёР№СЃРєРѕРіРѕ РєР»Р°СЃСЃРёС„РёРєР°С‚РѕСЂР° РїСЂРѕРґСѓРєС†РёРё (РћРљРџ)' WHERE id = 68;
 UPDATE ref_book SET type=1, read_only=1 WHERE id=96;
 UPDATE ref_book SET type=0, read_only=1 WHERE id=9;
 UPDATE ref_book SET type=1, read_only=1 WHERE id=3;
 
---Справочник: Ставки транспортного налога
-UPDATE ref_book_attribute SET name = 'Мощность от' WHERE id = 414;
-UPDATE ref_book_attribute SET name = 'Мощность до' WHERE id = 415;
+--РЎРїСЂР°РІРѕС‡РЅРёРє: РЎС‚Р°РІРєРё С‚СЂР°РЅСЃРїРѕСЂС‚РЅРѕРіРѕ РЅР°Р»РѕРіР°
+UPDATE ref_book_attribute SET name = 'РњРѕС‰РЅРѕСЃС‚СЊ РѕС‚' WHERE id = 414;
+UPDATE ref_book_attribute SET name = 'РњРѕС‰РЅРѕСЃС‚СЊ РґРѕ' WHERE id = 415;
 
---Справочник: Коды ОКП на основании общероссийского классификатора продукции (ОКП)
-UPDATE ref_book_attribute SET name = 'Код ОКП' WHERE id = 637;
+--РЎРїСЂР°РІРѕС‡РЅРёРє: РљРѕРґС‹ РћРљРџ РЅР° РѕСЃРЅРѕРІР°РЅРёРё РѕР±С‰РµСЂРѕСЃСЃРёР№СЃРєРѕРіРѕ РєР»Р°СЃСЃРёС„РёРєР°С‚РѕСЂР° РїСЂРѕРґСѓРєС†РёРё (РћРљРџ)
+UPDATE ref_book_attribute SET name = 'РљРѕРґ РћРљРџ' WHERE id = 637;
 
---Справочник: Общероссийский классификатор валют
-UPDATE ref_book_attribute SET name = 'Наименование' WHERE id = 66;
+--РЎРїСЂР°РІРѕС‡РЅРёРє: РћР±С‰РµСЂРѕСЃСЃРёР№СЃРєРёР№ РєР»Р°СЃСЃРёС„РёРєР°С‚РѕСЂ РІР°Р»СЋС‚
+UPDATE ref_book_attribute SET name = 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ' WHERE id = 66;
 
--- Справочник: Ставки транспортного налога: обязательность для атрибута "Код субъекта РФ"
+-- РЎРїСЂР°РІРѕС‡РЅРёРє: РЎС‚Р°РІРєРё С‚СЂР°РЅСЃРїРѕСЂС‚РЅРѕРіРѕ РЅР°Р»РѕРіР°: РѕР±СЏР·Р°С‚РµР»СЊРЅРѕСЃС‚СЊ РґР»СЏ Р°С‚СЂРёР±СѓС‚Р° "РљРѕРґ СЃСѓР±СЉРµРєС‚Р° Р Р¤"
 UPDATE ref_book_attribute SET required = 1 WHERE id = 417;
 
---Удалить атрибут "Порядок следования" для справочника "Коды, определяющие налоговый (отчётный) период"
+--РЈРґР°Р»РёС‚СЊ Р°С‚СЂРёР±СѓС‚ "РџРѕСЂСЏРґРѕРє СЃР»РµРґРѕРІР°РЅРёСЏ" РґР»СЏ СЃРїСЂР°РІРѕС‡РЅРёРєР° "РљРѕРґС‹, РѕРїСЂРµРґРµР»СЏСЋС‰РёРµ РЅР°Р»РѕРіРѕРІС‹Р№ (РѕС‚С‡С‘С‚РЅС‹Р№) РїРµСЂРёРѕРґ"
 DELETE FROM ref_book_value WHERE attribute_id = 623;
 DELETE FROM ref_book_attribute WHERE id = 623;
 
---Сортировка для атрибута "Наименование вида транспортного средства" в справочнике "Коды видов транспортных средств"
+--РЎРѕСЂС‚РёСЂРѕРІРєР° РґР»СЏ Р°С‚СЂРёР±СѓС‚Р° "РќР°РёРјРµРЅРѕРІР°РЅРёРµ РІРёРґР° С‚СЂР°РЅСЃРїРѕСЂС‚РЅРѕРіРѕ СЃСЂРµРґСЃС‚РІР°" РІ СЃРїСЂР°РІРѕС‡РЅРёРєРµ "РљРѕРґС‹ РІРёРґРѕРІ С‚СЂР°РЅСЃРїРѕСЂС‚РЅС‹С… СЃСЂРµРґСЃС‚РІ"
 UPDATE ref_book_attribute SET sort_order = 1 WHERE id = 423;
 
---Обязательность заполнения для всех полей справочника "Коды драгоценных металлов"
+--РћР±СЏР·Р°С‚РµР»СЊРЅРѕСЃС‚СЊ Р·Р°РїРѕР»РЅРµРЅРёСЏ РґР»СЏ РІСЃРµС… РїРѕР»РµР№ СЃРїСЂР°РІРѕС‡РЅРёРєР° "РљРѕРґС‹ РґСЂР°РіРѕС†РµРЅРЅС‹С… РјРµС‚Р°Р»Р»РѕРІ"
 UPDATE ref_book_attribute SET required=1 WHERE id in (40, 41, 42);
 
---Обязательность заполнения для атрибута "Название сделки" в справочнике "Виды сделок"
+--РћР±СЏР·Р°С‚РµР»СЊРЅРѕСЃС‚СЊ Р·Р°РїРѕР»РЅРµРЅРёСЏ РґР»СЏ Р°С‚СЂРёР±СѓС‚Р° "РќР°Р·РІР°РЅРёРµ СЃРґРµР»РєРё" РІ СЃРїСЂР°РІРѕС‡РЅРёРєРµ "Р’РёРґС‹ СЃРґРµР»РѕРє"
 UPDATE ref_book_attribute SET required=0 WHERE id=832;
 
---http://jira.aplana.com/browse/SBRFACCTAX-6996: Скрытие вычисляемых полей "Номер" в классификаторах доходов и расходов
+--http://jira.aplana.com/browse/SBRFACCTAX-6996: РЎРєСЂС‹С‚РёРµ РІС‹С‡РёСЃР»СЏРµРјС‹С… РїРѕР»РµР№ "РќРѕРјРµСЂ" РІ РєР»Р°СЃСЃРёС„РёРєР°С‚РѕСЂР°С… РґРѕС…РѕРґРѕРІ Рё СЂР°СЃС…РѕРґРѕРІ
 UPDATE ref_book_attribute SET visible = 0 WHERE id in (350, 360);
 
 ---------------------------------------------------------------------------------------------------------
---http://jira.aplana.com/browse/SBRFACCTAX-7689 (SBRFACCTAX-7950): заполнение поля "Максимальная длина строки/целой части числа"
+--http://jira.aplana.com/browse/SBRFACCTAX-7689 (SBRFACCTAX-7950): Р·Р°РїРѕР»РЅРµРЅРёРµ РїРѕР»СЏ "РњР°РєСЃРёРјР°Р»СЊРЅР°СЏ РґР»РёРЅР° СЃС‚СЂРѕРєРё/С†РµР»РѕР№ С‡Р°СЃС‚Рё С‡РёСЃР»Р°"
 
---Атрибут "Код валюты.Буквенный", справочник "Общероссийский классификатор валют" (приведение к максимальной длине - 3)
+--РђС‚СЂРёР±СѓС‚ "РљРѕРґ РІР°Р»СЋС‚С‹.Р‘СѓРєРІРµРЅРЅС‹Р№", СЃРїСЂР°РІРѕС‡РЅРёРє "РћР±С‰РµСЂРѕСЃСЃРёР№СЃРєРёР№ РєР»Р°СЃСЃРёС„РёРєР°С‚РѕСЂ РІР°Р»СЋС‚" (РїСЂРёРІРµРґРµРЅРёРµ Рє РјР°РєСЃРёРјР°Р»СЊРЅРѕР№ РґР»РёРЅРµ - 3)
 UPDATE ref_book_value SET string_value = substr(trim(string_value), 1, 3) WHERE attribute_id = 65 and length(string_value)=4;
 
---Общероссийский классификатор территорий муниципальных образований (ОКТМО).Код (приведение к максимальной длине - 11)
+--РћР±С‰РµСЂРѕСЃСЃРёР№СЃРєРёР№ РєР»Р°СЃСЃРёС„РёРєР°С‚РѕСЂ С‚РµСЂСЂРёС‚РѕСЂРёР№ РјСѓРЅРёС†РёРїР°Р»СЊРЅС‹С… РѕР±СЂР°Р·РѕРІР°РЅРёР№ (РћРљРўРњРћ).РљРѕРґ (РїСЂРёРІРµРґРµРЅРёРµ Рє РјР°РєСЃРёРјР°Р»СЊРЅРѕР№ РґР»РёРЅРµ - 11)
 UPDATE ref_book_oktmo SET code = trim(code) WHERE length(code)>11;
 
---Для атрибута Коды драгоценных металлов.Код ОКП будет изменен тип со Строки на ссылку
+--Р”Р»СЏ Р°С‚СЂРёР±СѓС‚Р° РљРѕРґС‹ РґСЂР°РіРѕС†РµРЅРЅС‹С… РјРµС‚Р°Р»Р»РѕРІ.РљРѕРґ РћРљРџ Р±СѓРґРµС‚ РёР·РјРµРЅРµРЅ С‚РёРї СЃРѕ РЎС‚СЂРѕРєРё РЅР° СЃСЃС‹Р»РєСѓ
 UPDATE ref_book_attribute SET type=4, reference_id=68, attribute_id=637 WHERE id = 41; 
 UPDATE ref_book_value rbv1 SET rbv1.reference_value = (select rbv2.record_id from ref_book_value rbv2 WHERE rbv2.attribute_id = 637 and rbv1.string_value = rbv2.string_value) WHERE rbv1.attribute_id=41;
 UPDATE ref_book_value rbv1 SET rbv1.string_value = null WHERE rbv1.attribute_id=41;
 
---Удалить атрибут "Название географического пункта погрузки/разгрузки" (id=628) из справочника "Коды условий поставки" 
+--РЈРґР°Р»РёС‚СЊ Р°С‚СЂРёР±СѓС‚ "РќР°Р·РІР°РЅРёРµ РіРµРѕРіСЂР°С„РёС‡РµСЃРєРѕРіРѕ РїСѓРЅРєС‚Р° РїРѕРіСЂСѓР·РєРё/СЂР°Р·РіСЂСѓР·РєРё" (id=628) РёР· СЃРїСЂР°РІРѕС‡РЅРёРєР° "РљРѕРґС‹ СѓСЃР»РѕРІРёР№ РїРѕСЃС‚Р°РІРєРё" 
 DELETE FROM ref_book_value WHERE attribute_id=628;
 DELETE FROM ref_book_attribute WHERE id=628;
 
@@ -391,51 +391,51 @@ UPDATE ref_book_attribute SET max_length=10 WHERE id = 189;
 UPDATE ref_book_attribute SET max_length=9 WHERE id = 190;
 
 ---------------------------------------------------------------------------------------------------------
--- http://jira.aplana.com/browse/SBRFACCTAX-8133: уникальность атрибута "Код валюты. Цифровой" в справочнике "Курсы валют"
+-- http://jira.aplana.com/browse/SBRFACCTAX-8133: СѓРЅРёРєР°Р»СЊРЅРѕСЃС‚СЊ Р°С‚СЂРёР±СѓС‚Р° "РљРѕРґ РІР°Р»СЋС‚С‹. Р¦РёС„СЂРѕРІРѕР№" РІ СЃРїСЂР°РІРѕС‡РЅРёРєРµ "РљСѓСЂСЃС‹ РІР°Р»СЋС‚"
 UPDATE ref_book_attribute SET is_unique=1 WHERE id=80;
 
 ---------------------------------------------------------------------------------------------------------
--- http://jira.aplana.com/browse/SBRFACCTAX-7806: уникальность атрибута в справочнике "Ставки рефинансирования ЦБ РФ"
+-- http://jira.aplana.com/browse/SBRFACCTAX-7806: СѓРЅРёРєР°Р»СЊРЅРѕСЃС‚СЊ Р°С‚СЂРёР±СѓС‚Р° РІ СЃРїСЂР°РІРѕС‡РЅРёРєРµ "РЎС‚Р°РІРєРё СЂРµС„РёРЅР°РЅСЃРёСЂРѕРІР°РЅРёСЏ Р¦Р‘ Р Р¤"
 UPDATE ref_book_attribute SET is_unique=1 WHERE id=92; 
 
 ---------------------------------------------------------------------------------------------------------
--- http://jira.aplana.com/browse/SBRFACCTAX-8099: справочник "Коды, определяющие период, бухгалтерской отчетности"
-INSERT INTO ref_book (id, name, visible, type, read_only) VALUES (106, 'Коды, определяющие период бухгалтерской отчетности', 1, 0, 1);
-INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, visible, width, required, is_unique, max_length) VALUES (1061, 106, 'Код', 'CODE', 1, 1, 1, 10, 1, 1, 2);
-INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, visible, width, required, is_unique, max_length) VALUES (1062, 106, 'Наименование', 'NAME', 1, 2, 1, 50, 1, 0, 255);
+-- http://jira.aplana.com/browse/SBRFACCTAX-8099: СЃРїСЂР°РІРѕС‡РЅРёРє "РљРѕРґС‹, РѕРїСЂРµРґРµР»СЏСЋС‰РёРµ РїРµСЂРёРѕРґ, Р±СѓС…РіР°Р»С‚РµСЂСЃРєРѕР№ РѕС‚С‡РµС‚РЅРѕСЃС‚Рё"
+INSERT INTO ref_book (id, name, visible, type, read_only) VALUES (106, 'РљРѕРґС‹, РѕРїСЂРµРґРµР»СЏСЋС‰РёРµ РїРµСЂРёРѕРґ Р±СѓС…РіР°Р»С‚РµСЂСЃРєРѕР№ РѕС‚С‡РµС‚РЅРѕСЃС‚Рё', 1, 0, 1);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, visible, width, required, is_unique, max_length) VALUES (1061, 106, 'РљРѕРґ', 'CODE', 1, 1, 1, 10, 1, 1, 2);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, visible, width, required, is_unique, max_length) VALUES (1062, 106, 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ', 'NAME', 1, 2, 1, 50, 1, 0, 255);
 
 ---------------------------------------------------------------------------------------------------------
--- http://jira.aplana.com/browse/SBRFACCTAX-8100 / SBRFACCTAX-8215: справочник "Периоды и подразделения БО"
-INSERT INTO ref_book (id, name, visible, type, read_only) VALUES (107, 'Периоды и подразделения БО', 0, 0, 1);
-INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, visible, precision, width, required, is_unique, read_only, max_length, sort_order) VALUES (1071, 107, 'Год', 'YEAR', 2, 1, 1, 0, 10, 1, 0, 0, 4, -1);
-INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, visible, precision, width, required, is_unique, read_only, max_length, reference_id, attribute_id) VALUES (1072, 107, 'Код периода бухгалтерской отчетности', 'ACCOUNT_PERIOD_ID', 4, 2, 1, null, 20, 1, 0, 0, null, 106, 1062);
-INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, visible, precision, width, required, is_unique, read_only, max_length, reference_id, attribute_id) VALUES (1073, 107, 'Код подразделения', 'DEPARTMENT_ID', 4, 3, 1, null, 20, 1, 0, 0, null, 30, 161);
+-- http://jira.aplana.com/browse/SBRFACCTAX-8100 / SBRFACCTAX-8215: СЃРїСЂР°РІРѕС‡РЅРёРє "РџРµСЂРёРѕРґС‹ Рё РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ Р‘Рћ"
+INSERT INTO ref_book (id, name, visible, type, read_only) VALUES (107, 'РџРµСЂРёРѕРґС‹ Рё РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ Р‘Рћ', 0, 0, 1);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, visible, precision, width, required, is_unique, read_only, max_length, sort_order) VALUES (1071, 107, 'Р“РѕРґ', 'YEAR', 2, 1, 1, 0, 10, 1, 0, 0, 4, -1);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, visible, precision, width, required, is_unique, read_only, max_length, reference_id, attribute_id) VALUES (1072, 107, 'РљРѕРґ РїРµСЂРёРѕРґР° Р±СѓС…РіР°Р»С‚РµСЂСЃРєРѕР№ РѕС‚С‡РµС‚РЅРѕСЃС‚Рё', 'ACCOUNT_PERIOD_ID', 4, 2, 1, null, 20, 1, 0, 0, null, 106, 1062);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, visible, precision, width, required, is_unique, read_only, max_length, reference_id, attribute_id) VALUES (1073, 107, 'РљРѕРґ РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ', 'DEPARTMENT_ID', 4, 3, 1, null, 20, 1, 0, 0, null, 30, 161);
 
 ---------------------------------------------------------------------------------------------------------
--- http://jira.aplana.com/browse/SBRFACCTAX-7839: справочник "Список полей для Журнала аудита"
-INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (104, 'Список полей для Журнала аудита', 0, 0, 1);
-INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, WIDTH, MAX_LENGTH) VALUES (1050, 104, 'Наименование', 'NAME', 1, 1, 20, 2000);
+-- http://jira.aplana.com/browse/SBRFACCTAX-7839: СЃРїСЂР°РІРѕС‡РЅРёРє "РЎРїРёСЃРѕРє РїРѕР»РµР№ РґР»СЏ Р–СѓСЂРЅР°Р»Р° Р°СѓРґРёС‚Р°"
+INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (104, 'РЎРїРёСЃРѕРє РїРѕР»РµР№ РґР»СЏ Р–СѓСЂРЅР°Р»Р° Р°СѓРґРёС‚Р°', 0, 0, 1);
+INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, WIDTH, MAX_LENGTH) VALUES (1050, 104, 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ', 'NAME', 1, 1, 20, 2000);
 
 ---------------------------------------------------------------------------------------------------------
--- http://jira.aplana.com/browse/SBRFACCTAX-8099: наполнение справочника "Коды, определяющие период, бухгалтерской отчетности"
+-- http://jira.aplana.com/browse/SBRFACCTAX-8099: РЅР°РїРѕР»РЅРµРЅРёРµ СЃРїСЂР°РІРѕС‡РЅРёРєР° "РљРѕРґС‹, РѕРїСЂРµРґРµР»СЏСЋС‰РёРµ РїРµСЂРёРѕРґ, Р±СѓС…РіР°Р»С‚РµСЂСЃРєРѕР№ РѕС‚С‡РµС‚РЅРѕСЃС‚Рё"
 INSERT INTO ref_book_record (id, record_id, ref_book_id, version, status) VALUES (seq_ref_book_record.NEXTVAL, 1, 106, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
 	INSERT INTO ref_book_value (record_id, attribute_id, string_value) VALUES (seq_ref_book_record.CURRVAL, 1061, '21');
-	INSERT INTO ref_book_value (record_id, attribute_id, string_value) VALUES (seq_ref_book_record.CURRVAL, 1062, 'первый квартал');
+	INSERT INTO ref_book_value (record_id, attribute_id, string_value) VALUES (seq_ref_book_record.CURRVAL, 1062, 'РїРµСЂРІС‹Р№ РєРІР°СЂС‚Р°Р»');
 
 INSERT INTO ref_book_record (id, record_id, ref_book_id, version, status) VALUES (seq_ref_book_record.NEXTVAL, 2, 106, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
 	INSERT INTO ref_book_value (record_id, attribute_id, string_value) VALUES (seq_ref_book_record.CURRVAL, 1061, '31');
-	INSERT INTO ref_book_value (record_id, attribute_id, string_value) VALUES (seq_ref_book_record.CURRVAL, 1062, 'полугодие');
+	INSERT INTO ref_book_value (record_id, attribute_id, string_value) VALUES (seq_ref_book_record.CURRVAL, 1062, 'РїРѕР»СѓРіРѕРґРёРµ');
 
 INSERT INTO ref_book_record (id, record_id, ref_book_id, version, status) VALUES (seq_ref_book_record.NEXTVAL, 3, 106, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
 	INSERT INTO ref_book_value (record_id, attribute_id, string_value) VALUES (seq_ref_book_record.CURRVAL, 1061, '33');
-	INSERT INTO ref_book_value (record_id, attribute_id, string_value) VALUES (seq_ref_book_record.CURRVAL, 1062, 'девять месяцев');
+	INSERT INTO ref_book_value (record_id, attribute_id, string_value) VALUES (seq_ref_book_record.CURRVAL, 1062, 'РґРµРІСЏС‚СЊ РјРµСЃСЏС†РµРІ');
 
 INSERT INTO ref_book_record (id, record_id, ref_book_id, version, status) VALUES (seq_ref_book_record.NEXTVAL, 4, 106, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
 	INSERT INTO ref_book_value (record_id, attribute_id, string_value) VALUES (seq_ref_book_record.CURRVAL, 1061, '34');
-	INSERT INTO ref_book_value (record_id, attribute_id, string_value) VALUES (seq_ref_book_record.CURRVAL, 1062, 'год');
+	INSERT INTO ref_book_value (record_id, attribute_id, string_value) VALUES (seq_ref_book_record.CURRVAL, 1062, 'РіРѕРґ');
 
 ---------------------------------------------------------------------------------------------------------
--- http://jira.aplana.com/browse/SBRFACCTAX-8101: В таблицы INCOME_101, INCOME_102 необходимо добавить поле "Ид. периода и подразделения БО"
+-- http://jira.aplana.com/browse/SBRFACCTAX-8101: Р’ С‚Р°Р±Р»РёС†С‹ INCOME_101, INCOME_102 РЅРµРѕР±С…РѕРґРёРјРѕ РґРѕР±Р°РІРёС‚СЊ РїРѕР»Рµ "РРґ. РїРµСЂРёРѕРґР° Рё РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ Р‘Рћ"
 CREATE TABLE tmp_account_period
 	AS 
    SELECT Seq_Ref_Book_Record.NEXTVAL as ID, row_number() over (order by t.year, rbv.record_id, i.department_id) as RECORD_ID, rp.id as report_period_id, t.year, rbv.record_id as code_id, i.department_id, to_date('01.01.2012', 'DD.MM.YYYY') as VERSION 
@@ -457,8 +457,8 @@ INSERT INTO ref_book_value (record_id, attribute_id, reference_value) SELECT id,
 UPDATE income_101 i SET account_period_id = (SELECT id FROM tmp_account_period tap WHERE tap.report_period_id = i.report_period_id AND tap.department_id = i.department_id);
 UPDATE income_102 i SET account_period_id = (SELECT id from tmp_account_period tap WHERE tap.report_period_id = i.report_period_id AND tap.department_id = i.department_id);
 
-INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, WIDTH, REQUIRED, IS_UNIQUE, READ_ONLY) values (511, 50, 'Идентификатор периода и подразделения БО', 'ACCOUNT_PERIOD_ID', 4, 11, 107, 1072, 1, 10, 1, 0, 0);
-INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, WIDTH, REQUIRED, IS_UNIQUE, READ_ONLY) values (527, 52, 'Идентификатор периода и подразделения БО', 'ACCOUNT_PERIOD_ID', 4, 7, 107, 1072, 1, 10, 1, 0, 0);
+INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, WIDTH, REQUIRED, IS_UNIQUE, READ_ONLY) values (511, 50, 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РїРµСЂРёРѕРґР° Рё РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ Р‘Рћ', 'ACCOUNT_PERIOD_ID', 4, 11, 107, 1072, 1, 10, 1, 0, 0);
+INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, WIDTH, REQUIRED, IS_UNIQUE, READ_ONLY) values (527, 52, 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РїРµСЂРёРѕРґР° Рё РїРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ Р‘Рћ', 'ACCOUNT_PERIOD_ID', 4, 7, 107, 1072, 1, 10, 1, 0, 0);
 
 DELETE FROM ref_book_attribute WHERE id IN (509, 501, 525, 520);
 
@@ -471,4 +471,5 @@ ALTER TABLE income_102 DROP COLUMN report_period_id;
 ALTER TABLE income_102 DROP COLUMN department_id;
 
 ---------------------------------------------------------------------------------------------------------
-commit;
+COMMIT;
+EXIT;
