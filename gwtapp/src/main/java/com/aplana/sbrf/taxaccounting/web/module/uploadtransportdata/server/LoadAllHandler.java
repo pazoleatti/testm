@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.server;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.LoadFormDataService;
+import com.aplana.sbrf.taxaccounting.service.LoadRefBookDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.shared.LoadAllAction;
@@ -22,6 +23,9 @@ public class LoadAllHandler extends AbstractActionHandler<LoadAllAction, LoadAll
     private LoadFormDataService loadFormDataService;
 
     @Autowired
+    LoadRefBookDataService loadRefBookDataService;
+
+    @Autowired
     private SecurityService securityService;
 
     @Autowired
@@ -37,7 +41,12 @@ public class LoadAllHandler extends AbstractActionHandler<LoadAllAction, LoadAll
 
         TAUserInfo userInfo = securityService.currentUserInfo();
 
+        // Diasoft
+        loadRefBookDataService.importRefBookDiasoft(userInfo, logger);
+
+        // НФ
         loadFormDataService.importFormData(userInfo, loadFormDataService.getTB(userInfo, logger), null, logger);
+
         LoadAllResult result = new LoadAllResult();
         result.setUuid(logEntryService.save(logger.getEntries()));
 

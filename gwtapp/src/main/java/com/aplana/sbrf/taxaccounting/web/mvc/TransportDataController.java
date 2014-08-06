@@ -1,11 +1,13 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
+import com.aplana.sbrf.taxaccounting.model.ImportCounter;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.LoadFormDataService;
+import com.aplana.sbrf.taxaccounting.service.LoadRefBookDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.UploadTransportDataService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -42,6 +44,9 @@ public class TransportDataController {
     @Autowired
     LoadFormDataService loadFormDataService;
 
+    @Autowired
+    LoadRefBookDataService loadRefBookDataService;
+
     @RequestMapping(value = "transportData/upload", method = RequestMethod.POST)
     public void upload(HttpServletRequest request, HttpServletResponse response)
             throws FileUploadException, IOException {
@@ -70,6 +75,10 @@ public class TransportDataController {
 
         // Загрузка из каталога
         if (!logger.containsLevel(LogLevel.ERROR) && !loadedFileNameList.isEmpty()) {
+            // Diasoft
+            loadRefBookDataService.importRefBookDiasoft(userInfo, loadedFileNameList, logger);
+
+            // НФ
             loadFormDataService.importFormData(userInfo, loadFormDataService.getTB(userInfo, logger),
                     loadedFileNameList, logger);
         }

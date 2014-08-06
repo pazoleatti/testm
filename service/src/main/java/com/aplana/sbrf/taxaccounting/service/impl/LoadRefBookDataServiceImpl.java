@@ -97,10 +97,12 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
      * @param mappingMap            Маппинг имен: Регулярка → Пара(Признак архива, Id справочника)
      * @param refBookName           Имя справочника для сообщения об ошибке
      * @param move                  Признак необходимости перемещения файла после импорта
+     * @param loadedFileNameList    Список файлов, если необходимо загружать определенные файлы
      */
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     private ImportCounter importRefBook(TAUserInfo userInfo, Logger logger, ConfigurationParam refBookDirectoryParam,
-                                        Map<String, List<Pair<Boolean, Long>>> mappingMap, String refBookName, boolean move) {
+                                        Map<String, List<Pair<Boolean, Long>>> mappingMap, String refBookName, boolean move,
+                                        List<String> loadedFileNameList) {
         // Получение пути к каталогу загрузки ТФ
         ConfigurationParamModel model = configurationDao.getByDepartment(0);
         List<String> refBookDirectoryList = model.get(refBookDirectoryParam, 0);
@@ -118,7 +120,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
             // Набор файлов, которые уже обработали
             Set<String> ignoreFileSet = new HashSet<String>();
             // Если изначально нет подходящих файлов то выдаем отдельную ошибку
-            List<String> workFilesList = getWorkTransportFiles(path, ignoreFileSet, mappingMap.keySet());
+            List<String> workFilesList = getWorkTransportFiles(path, ignoreFileSet, mappingMap.keySet(), loadedFileNameList);
 
             if (workFilesList.isEmpty()) {
                 log(userInfo, LogData.L31, logger, refBookName);
@@ -252,18 +254,23 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
 
     @Override
     public ImportCounter importRefBookNsi(TAUserInfo userInfo, Logger logger) {
+        return importRefBookNsi(userInfo, null, logger);
+    }
+
+    @Override
+    public ImportCounter importRefBookNsi(TAUserInfo userInfo, List<String> loadedFileNameList, Logger logger) {
         log(userInfo, LogData.L23, logger);
         ImportCounter importCounter = new ImportCounter();
         try {
             // ОКАТО
             importCounter.add(importRefBook(userInfo, logger, ConfigurationParam.OKATO_UPLOAD_DIRECTORY,
-                    nsiOkatoMappingMap, OKATO_NAME, false));
+                    nsiOkatoMappingMap, OKATO_NAME, false, loadedFileNameList));
             // Субъекты РФ
             importCounter.add(importRefBook(userInfo, logger, ConfigurationParam.REGION_UPLOAD_DIRECTORY,
-                    nsiRegionMappingMap, REGION_NAME, false));
+                    nsiRegionMappingMap, REGION_NAME, false, loadedFileNameList));
             // План счетов
             importCounter.add(importRefBook(userInfo, logger, ConfigurationParam.ACCOUNT_PLAN_UPLOAD_DIRECTORY,
-                    nsiAccountPlanMappingMap, ACCOUNT_PLAN_NAME, false));
+                    nsiAccountPlanMappingMap, ACCOUNT_PLAN_NAME, false, loadedFileNameList));
         } catch (Exception e) {
             // Сюда должны попадать только при общих ошибках при импорте справочников, ошибки конкретного справочника перехватываются в сервисе
             logger.error(IMPORT_REF_BOOK_ERROR, e.getMessage());
@@ -275,11 +282,16 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
 
     @Override
     public ImportCounter importRefBookDiasoft(TAUserInfo userInfo, Logger logger) {
+        return importRefBookDiasoft(userInfo, null, logger);
+    }
+
+    @Override
+    public ImportCounter importRefBookDiasoft(TAUserInfo userInfo, List<String> loadedFileNameList, Logger logger) {
         log(userInfo, LogData.L23, logger);
         ImportCounter importCounter = new ImportCounter();
         try {
             importCounter = importRefBook(userInfo, logger, ConfigurationParam.DIASOFT_UPLOAD_DIRECTORY,
-                    diasoftMappingMap, DIASOFT_NAME, true);
+                    diasoftMappingMap, DIASOFT_NAME, true, loadedFileNameList);
         } catch (Exception e) {
             // Сюда должны попадать только при общих ошибках при импорте справочников, ошибки конкретного справочника перехватываются в сервисе
             logger.error(IMPORT_REF_BOOK_ERROR, e.getMessage());
@@ -356,13 +368,20 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
     /**
      * Получение спика ТФ НФ из каталога загрузки. Файлы, которые не соответствуют маппингу пропускаются.
      */
-    private List<String> getWorkTransportFiles(String folderPath, Set<String> ignoreFileSet, Set<String> mappingSet) {
+    private List<String> getWorkTransportFiles(String folderPath, Set<String> ignoreFileSet, Set<String> mappingSet,
+                                               List<String> loadedFileNameList) {
         List<String> retVal = new LinkedList<String>();
         FileWrapper catalogFile = ResourceUtils.getSharedResource(folderPath);
         for (String candidateStr : catalogFile.list()) {
             if (ignoreFileSet != null && ignoreFileSet.contains(candidateStr)) {
                 continue;
             }
+
+            if (loadedFileNameList != null && !loadedFileNameList.contains(candidateStr)) {
+                // Если задан список определенных имен, а имя не из списка, то не загружаем такой файл
+                continue;
+            }
+
             // Это файл, а не директория и соответствует формату имени ТФ
             if (mappingMatch(candidateStr, mappingSet) != null) {
                 FileWrapper candidateFile = ResourceUtils.getSharedResource(folderPath + candidateStr);
