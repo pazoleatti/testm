@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------------------------------------
--- http://jira.aplana.com/browse/SBRFACCTAX-7297: Ñêâîçíàÿ íóìåðàöèÿ ñòðîê
+-- http://jira.aplana.com/browse/SBRFACCTAX-7297: Ð¡ÐºÐ²Ð¾Ð·Ð½Ð°Ñ Ð½ÑƒÐ¼ÐµÑ€Ð°Ñ†Ð¸Ñ ÑÑ‚Ñ€Ð¾Ðº
 --alter table form_column add numeration_row number(9);
 --alter table form_data add number_previous_row number (9);
 
@@ -11,30 +11,30 @@ alter table form_column add constraint form_column_chk_numrow check (numeration_
 alter table form_column add constraint form_column_chk_type check(type in ('N', 'S', 'D', 'R', 'A'));
 alter table form_column add constraint form_column_chk_max_length check ((type = 'S' and max_length is not null and max_length > 0 and max_length <= 2000) or (type = 'N' and max_length is not null and max_length > 0 and max_length <= 27) or ((type ='D' or type ='R' or type='A') and max_length is null));
 
-comment on column form_column.type is 'Òèï ñòîëáöà (S - ñòðîêà, N – ÷èñëî, D – äàòà, R - ññûëêà, A - àâòîíóìåðóåìàÿ ãðàôà)';
-comment on column form_column.numeration_row is 'Òèï íóìåðàöèè ñòðîê äëÿ àâòîíóìåðóåìîé ãðàôû';
-comment on column form_data.number_previous_row is 'Íîìåð ïîñëåäíåé ñòðîêè ïðåäûäóùåé ÍÔ';
+comment on column form_column.type is 'Ð¢Ð¸Ð¿ ÑÑ‚Ð¾Ð»Ð±Ñ†Ð° (S - ÑÑ‚Ñ€Ð¾ÐºÐ°, N â€“ Ñ‡Ð¸ÑÐ»Ð¾, D â€“ Ð´Ð°Ñ‚Ð°, R - ÑÑÑ‹Ð»ÐºÐ°, A - Ð°Ð²Ñ‚Ð¾Ð½ÑƒÐ¼ÐµÑ€ÑƒÐµÐ¼Ð°Ñ Ð³Ñ€Ð°Ñ„Ð°)';
+comment on column form_column.numeration_row is 'Ð¢Ð¸Ð¿ Ð½ÑƒÐ¼ÐµÑ€Ð°Ñ†Ð¸Ð¸ ÑÑ‚Ñ€Ð¾Ðº Ð´Ð»Ñ Ð°Ð²Ñ‚Ð¾Ð½ÑƒÐ¼ÐµÑ€ÑƒÐµÐ¼Ð¾Ð¹ Ð³Ñ€Ð°Ñ„Ñ‹';
+comment on column form_data.number_previous_row is 'ÐÐ¾Ð¼ÐµÑ€ Ð¿Ð¾ÑÐ»ÐµÐ´Ð½ÐµÐ¹ ÑÑ‚Ñ€Ð¾ÐºÐ¸ Ð¿Ñ€ÐµÐ´Ñ‹Ð´ÑƒÑ‰ÐµÐ¹ ÐÐ¤';
 
 ---------------------------------------------------------------------------------------------------------
--- http://jira.aplana.com/browse/SBRFACCTAX-7329: Óäàëèòü ïîëå "ord" èç òàáëèöû "report_period"
+-- http://jira.aplana.com/browse/SBRFACCTAX-7329: Ð£Ð´Ð°Ð»Ð¸Ñ‚ÑŒ Ð¿Ð¾Ð»Ðµ "ord" Ð¸Ð· Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ñ‹ "report_period"
 alter table report_period drop column ord; 
 
 ---------------------------------------------------------------------------------------------------------
--- http://jira.aplana.com/browse/SBRFACCTAX-7856: Îãðàíè÷åíèå íà íàëîãîâûå ïåðèîäû
+-- http://jira.aplana.com/browse/SBRFACCTAX-7856: ÐžÐ³Ñ€Ð°Ð½Ð¸Ñ‡ÐµÐ½Ð¸Ðµ Ð½Ð° Ð½Ð°Ð»Ð¾Ð³Ð¾Ð²Ñ‹Ðµ Ð¿ÐµÑ€Ð¸Ð¾Ð´Ñ‹
 ALTER TABLE tax_period ADD CONSTRAINT tax_period_uniq_taxtype_year UNIQUE (tax_type, year);
 
---SBRFACCTAX-7406 - Âåðñèîíèðîâàíèå èñòî÷íèêîâ-ïðèåìíèêîâ
+--SBRFACCTAX-7406 - Ð’ÐµÑ€ÑÐ¸Ð¾Ð½Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð¸Ðµ Ð¸ÑÑ‚Ð¾Ñ‡Ð½Ð¸ÐºÐ¾Ð²-Ð¿Ñ€Ð¸ÐµÐ¼Ð½Ð¸ÐºÐ¾Ð²
 --alter table form_data_source add period_start date;
 --alter table form_data_source add period_end date;
 
 --alter table declaration_source add period_start date;
 --alter table declaration_source add period_end date;
 
-comment on column form_data_source.period_start is 'Äàòà íà÷àëà äåéñòâèÿ íàçíà÷åíèÿ';
-comment on column form_data_source.period_end is 'Äàòà îêîí÷àíèÿ äåéñòâèÿ íàçíà÷åíèÿ';
+comment on column form_data_source.period_start is 'Ð”Ð°Ñ‚Ð° Ð½Ð°Ñ‡Ð°Ð»Ð° Ð´ÐµÐ¹ÑÑ‚Ð²Ð¸Ñ Ð½Ð°Ð·Ð½Ð°Ñ‡ÐµÐ½Ð¸Ñ';
+comment on column form_data_source.period_end is 'Ð”Ð°Ñ‚Ð° Ð¾ÐºÐ¾Ð½Ñ‡Ð°Ð½Ð¸Ñ Ð´ÐµÐ¹ÑÑ‚Ð²Ð¸Ñ Ð½Ð°Ð·Ð½Ð°Ñ‡ÐµÐ½Ð¸Ñ';
 
-comment on column declaration_source.period_start is 'Äàòà íà÷àëà äåéñòâèÿ íàçíà÷åíèÿ';
-comment on column declaration_source.period_end is 'Äàòà îêîí÷àíèÿ äåéñòâèÿ íàçíà÷åíèÿ';
+comment on column declaration_source.period_start is 'Ð”Ð°Ñ‚Ð° Ð½Ð°Ñ‡Ð°Ð»Ð° Ð´ÐµÐ¹ÑÑ‚Ð²Ð¸Ñ Ð½Ð°Ð·Ð½Ð°Ñ‡ÐµÐ½Ð¸Ñ';
+comment on column declaration_source.period_end is 'Ð”Ð°Ñ‚Ð° Ð¾ÐºÐ¾Ð½Ñ‡Ð°Ð½Ð¸Ñ Ð´ÐµÐ¹ÑÑ‚Ð²Ð¸Ñ Ð½Ð°Ð·Ð½Ð°Ñ‡ÐµÐ½Ð¸Ñ';
 
 update form_data_source set period_start = to_date('01.01.2008', 'DD.MM.YYYY'), period_end = null;
 update declaration_source set period_start = to_date('01.01.2008', 'DD.MM.YYYY'), period_end = null;
@@ -43,41 +43,41 @@ alter table form_data_source modify period_start not null;
 alter table declaration_source modify  period_start not null;
 
 ---------------------------------------------------------------------------------------------------------
--- http://jira.aplana.com/browse/SBRFACCTAX-8037 - Óäàëèòü èç ÁÄ ïîëÿ FORM_TEMPLATE.EDITION è DECLARATION_TEMPLATE.EDITION
+-- http://jira.aplana.com/browse/SBRFACCTAX-8037 - Ð£Ð´Ð°Ð»Ð¸Ñ‚ÑŒ Ð¸Ð· Ð‘Ð” Ð¿Ð¾Ð»Ñ FORM_TEMPLATE.EDITION Ð¸ DECLARATION_TEMPLATE.EDITION
 ALTER TABLE form_template DROP COLUMN edition;
 ALTER TABLE declaration_template DROP COLUMN edition;
 
 ---------------------------------------------------------------------------------------------------------
--- http://jira.aplana.com/browse/SBRFACCTAX-8021 - Èçìåíåíèÿ â ìàêåòàõ ÍÔ è äåêëàðàöèé â ñâÿçè ñ îòêàçîì îò ñòàòóñà "Óäàëåí"
+-- http://jira.aplana.com/browse/SBRFACCTAX-8021 - Ð˜Ð·Ð¼ÐµÐ½ÐµÐ½Ð¸Ñ Ð² Ð¼Ð°ÐºÐµÑ‚Ð°Ñ… ÐÐ¤ Ð¸ Ð´ÐµÐºÐ»Ð°Ñ€Ð°Ñ†Ð¸Ð¹ Ð² ÑÐ²ÑÐ·Ð¸ Ñ Ð¾Ñ‚ÐºÐ°Ð·Ð¾Ð¼ Ð¾Ñ‚ ÑÑ‚Ð°Ñ‚ÑƒÑÐ° "Ð£Ð´Ð°Ð»ÐµÐ½"
 ALTER TABLE template_changes DROP CONSTRAINT changes_fk_form_template_id;
 ALTER TABLE template_changes DROP CONSTRAINT changes_fk_dec_template_id;
 
 ---------------------------------------------------------------------------------------------------------
--- http://jira.aplana.com/browse/SBRFACCTAX-7999 - Äîáàâèòü ñòîëáåö "header" â òàáëèöó form_template / ñòîëáåö Code â form_type
+-- http://jira.aplana.com/browse/SBRFACCTAX-7999 - Ð”Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ ÑÑ‚Ð¾Ð»Ð±ÐµÑ† "header" Ð² Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ñƒ form_template / ÑÑ‚Ð¾Ð»Ð±ÐµÑ† Code Ð² form_type
 ALTER TABLE form_template ADD header VARCHAR2(1000 byte);
-COMMENT ON COLUMN form_template.header IS 'Âåðõíèé êîëîíòèòóë ïå÷àòíîé ôîðìû';
+COMMENT ON COLUMN form_template.header IS 'Ð’ÐµÑ€Ñ…Ð½Ð¸Ð¹ ÐºÐ¾Ð»Ð¾Ð½Ñ‚Ð¸Ñ‚ÑƒÐ» Ð¿ÐµÑ‡Ð°Ñ‚Ð½Ð¾Ð¹ Ñ„Ð¾Ñ€Ð¼Ñ‹';
 
 ALTER TABLE form_type ADD code VARCHAR2(600 byte);
 ALTER TABLE form_type ADD CONSTRAINT form_type_uniq_code UNIQUE(code);
-COMMENT ON COLUMN form_type.code IS 'Íîìåð ôîðìû';
+COMMENT ON COLUMN form_type.code IS 'ÐÐ¾Ð¼ÐµÑ€ Ñ„Ð¾Ñ€Ð¼Ñ‹';
 
 UPDATE form_template SET header=trim(code);
 ALTER TABLE form_template DROP COLUMN code; 
 
 ---------------------------------------------------------------------------------------------------------
--- http://jira.aplana.com/browse/SBRFACCTAX-7650 - ïðèçíàê ðåäàêòèðóåìîñòè â àòðèáóòàõ ñïðàâî÷íèêà
+-- http://jira.aplana.com/browse/SBRFACCTAX-7650 - Ð¿Ñ€Ð¸Ð·Ð½Ð°Ðº Ñ€ÐµÐ´Ð°ÐºÑ‚Ð¸Ñ€ÑƒÐµÐ¼Ð¾ÑÑ‚Ð¸ Ð² Ð°Ñ‚Ñ€Ð¸Ð±ÑƒÑ‚Ð°Ñ… ÑÐ¿Ñ€Ð°Ð²Ð¾Ñ‡Ð½Ð¸ÐºÐ°
 ALTER TABLE ref_book_attribute ADD READ_ONLY NUMBER(1) DEFAULT 0 NOT NULL;
-COMMENT ON COLUMN ref_book_attribute.read_only IS 'Òîëüêî äëÿ ÷òåíèÿ (0 - ðåäàêòèðîâàíèå äîñòóïíî ïîëüçîâàòåëþ; 1 - ðåäàêòèðîâàíèå íåäîñòóïíî ïîëüçîâàòåëþ)';
+COMMENT ON COLUMN ref_book_attribute.read_only IS 'Ð¢Ð¾Ð»ÑŒÐºÐ¾ Ð´Ð»Ñ Ñ‡Ñ‚ÐµÐ½Ð¸Ñ (0 - Ñ€ÐµÐ´Ð°ÐºÑ‚Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð¸Ðµ Ð´Ð¾ÑÑ‚ÑƒÐ¿Ð½Ð¾ Ð¿Ð¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ñ‚ÐµÐ»ÑŽ; 1 - Ñ€ÐµÐ´Ð°ÐºÑ‚Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð¸Ðµ Ð½ÐµÐ´Ð¾ÑÑ‚ÑƒÐ¿Ð½Ð¾ Ð¿Ð¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ñ‚ÐµÐ»ÑŽ)';
 ALTER TABLE ref_book_attribute ADD CONSTRAINT ref_book_attr_chk_read_only CHECK (read_only IN (0, 1));
 
 ---------------------------------------------------------------------------------------------------------
--- http://jira.aplana.com/browse/SBRFACCTAX-7686 - ìàêñèìàëüíàÿ äëèíà ñòðîêè/öåëîé ÷àñòè ÷èñëà
+-- http://jira.aplana.com/browse/SBRFACCTAX-7686 - Ð¼Ð°ÐºÑÐ¸Ð¼Ð°Ð»ÑŒÐ½Ð°Ñ Ð´Ð»Ð¸Ð½Ð° ÑÑ‚Ñ€Ð¾ÐºÐ¸/Ñ†ÐµÐ»Ð¾Ð¹ Ñ‡Ð°ÑÑ‚Ð¸ Ñ‡Ð¸ÑÐ»Ð°
 ALTER TABLE ref_book_attribute ADD max_length number(4);
-COMMENT ON COLUMN ref_book_attribute.max_length IS 'Ìàêñèìàëüíàÿ äëèíà ñòðîêè/Ìàêñèìàëüíîå êîëè÷åñòâî öèôð áåç ó÷åòà çíàêà è äåñÿòè÷íîãî ðàçäåëèòåëÿ';
+COMMENT ON COLUMN ref_book_attribute.max_length IS 'ÐœÐ°ÐºÑÐ¸Ð¼Ð°Ð»ÑŒÐ½Ð°Ñ Ð´Ð»Ð¸Ð½Ð° ÑÑ‚Ñ€Ð¾ÐºÐ¸/ÐœÐ°ÐºÑÐ¸Ð¼Ð°Ð»ÑŒÐ½Ð¾Ðµ ÐºÐ¾Ð»Ð¸Ñ‡ÐµÑÑ‚Ð²Ð¾ Ñ†Ð¸Ñ„Ñ€ Ð±ÐµÐ· ÑƒÑ‡ÐµÑ‚Ð° Ð·Ð½Ð°ÐºÐ° Ð¸ Ð´ÐµÑÑÑ‚Ð¸Ñ‡Ð½Ð¾Ð³Ð¾ Ñ€Ð°Ð·Ð´ÐµÐ»Ð¸Ñ‚ÐµÐ»Ñ';
 ALTER TABLE ref_book_attribute ADD CONSTRAINT ref_book_attr_chk_max_length check ((type=1 and max_length between 1 and 2000) or (type=2 and max_length between 1 and 27) or (type in (3,4) and max_length IS null));
 
 ---------------------------------------------------------------------------------------------------------
--- http://jira.aplana.com/browse/SBRFACCTAX-8120 - íîâûé ìåõàíèçì áëîêèðîâîê
+-- http://jira.aplana.com/browse/SBRFACCTAX-8120 - Ð½Ð¾Ð²Ñ‹Ð¹ Ð¼ÐµÑ…Ð°Ð½Ð¸Ð·Ð¼ Ð±Ð»Ð¾ÐºÐ¸Ñ€Ð¾Ð²Ð¾Ðº
 CREATE TABLE lock_data
 (
 key VARCHAR2(1000) NOT NULL,
@@ -85,30 +85,30 @@ user_id NUMBER(9) NOT NULL,
 date_before DATE NOT NULL
 );
 
-COMMENT ON TABLE lock_data IS 'Èíôîðìàöèÿ î áëîêèðîâêàõ';
-COMMENT ON COLUMN lock_data.key IS 'Êîä áëîêèðîâêè';
-COMMENT ON COLUMN lock_data.user_id IS 'Èäåíòèôèêàòîð ïîëüçîâàòåëÿ, óñòàíîâèâøåãî áëîêèðîâêó';
-COMMENT ON COLUMN lock_data.date_before IS 'Ñðîê èñòå÷åíèÿ áëîêèðîâêè';
+COMMENT ON TABLE lock_data IS 'Ð˜Ð½Ñ„Ð¾Ñ€Ð¼Ð°Ñ†Ð¸Ñ Ð¾ Ð±Ð»Ð¾ÐºÐ¸Ñ€Ð¾Ð²ÐºÐ°Ñ…';
+COMMENT ON COLUMN lock_data.key IS 'ÐšÐ¾Ð´ Ð±Ð»Ð¾ÐºÐ¸Ñ€Ð¾Ð²ÐºÐ¸';
+COMMENT ON COLUMN lock_data.user_id IS 'Ð˜Ð´ÐµÐ½Ñ‚Ð¸Ñ„Ð¸ÐºÐ°Ñ‚Ð¾Ñ€ Ð¿Ð¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ñ‚ÐµÐ»Ñ, ÑƒÑÑ‚Ð°Ð½Ð¾Ð²Ð¸Ð²ÑˆÐµÐ³Ð¾ Ð±Ð»Ð¾ÐºÐ¸Ñ€Ð¾Ð²ÐºÑƒ';
+COMMENT ON COLUMN lock_data.date_before IS 'Ð¡Ñ€Ð¾Ðº Ð¸ÑÑ‚ÐµÑ‡ÐµÐ½Ð¸Ñ Ð±Ð»Ð¾ÐºÐ¸Ñ€Ð¾Ð²ÐºÐ¸';
 
 ALTER TABLE lock_data ADD CONSTRAINT lock_data_pk primary key (key);
 ALTER TABLE lock_data ADD CONSTRAINT lock_data_fk_user_id foreign key (user_id) references sec_user(id) on delete cascade;
 
 ---------------------------------------------------------------------------------------------------------
--- http://jira.aplana.com/browse/SBRFACCTAX-7870 - èçìåíåíèÿ òàáëèöû CONFIGURATION
+-- http://jira.aplana.com/browse/SBRFACCTAX-7870 - Ð¸Ð·Ð¼ÐµÐ½ÐµÐ½Ð¸Ñ Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ñ‹ CONFIGURATION
 ALTER TABLE configuration ADD department_id number(9) DEFAULT 0 NOT NULL;
 
 ALTER TABLE configuration ADD CONSTRAINT configuration_fk FOREIGN KEY (department_id) REFERENCES department (id) ON DELETE CASCADE;
 ALTER TABLE configuration DROP CONSTRAINT configuration_pk;
 DROP INDEX configuration_pk;
 ALTER TABLE configuration ADD CONSTRAINT configuration_pk PRIMARY KEY (code, department_id);
-COMMENT ON COLUMN configuration.department_id IS 'ÒÁ';
+COMMENT ON COLUMN configuration.department_id IS 'Ð¢Ð‘';
 
--- -- èçìåíåíèÿ ñ http://jira.aplana.com/browse/SBRFACCTAX-7698
+-- -- Ð¸Ð·Ð¼ÐµÐ½ÐµÐ½Ð¸Ñ Ñ http://jira.aplana.com/browse/SBRFACCTAX-7698
 ALTER TABLE configuration ADD(value_temp clob);
 UPDATE configuration SET value_temp = value;
 ALTER TABLE configuration drop column value;
 ALTER TABLE configuration rename column value_temp to value; 
-COMMENT ON COLUMN configuration.value IS 'Çíà÷åíèå ïàðàìåòðà'; 
+COMMENT ON COLUMN configuration.value IS 'Ð—Ð½Ð°Ñ‡ÐµÐ½Ð¸Ðµ Ð¿Ð°Ñ€Ð°Ð¼ÐµÑ‚Ñ€Ð°'; 
 
 INSERT INTO configuration (code) values ('OKATO_UPLOAD_DIRECTORY');
 INSERT INTO configuration (code) values ('REGION_UPLOAD_DIRECTORY');
@@ -127,27 +127,27 @@ DELETE FROM configuration WHERE code in ('REF_BOOK_DIRECTORY', 'REF_BOOK_DIASOFT
 ALTER TABLE configuration modify department_id default null;
 
 ---------------------------------------------------------------------------------------------------------
--- http://jira.aplana.com/browse/SBRFACCTAX-8101 - Â òàáëèöû INCOME_101, INCOME_102 íåîáõîäèìî äîáàâèòü ïîëå "Èä. ïåðèîäà è ïîäðàçäåëåíèÿ ÁÎ"
+-- http://jira.aplana.com/browse/SBRFACCTAX-8101 - Ð’ Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ñ‹ INCOME_101, INCOME_102 Ð½ÐµÐ¾Ð±Ñ…Ð¾Ð´Ð¸Ð¼Ð¾ Ð´Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ Ð¿Ð¾Ð»Ðµ "Ð˜Ð´. Ð¿ÐµÑ€Ð¸Ð¾Ð´Ð° Ð¸ Ð¿Ð¾Ð´Ñ€Ð°Ð·Ð´ÐµÐ»ÐµÐ½Ð¸Ñ Ð‘Ðž"
 ALTER TABLE income_101 ADD account_period_id NUMBER(9);
 ALTER TABLE income_101 ADD CONSTRAINT income_101_fk_accperiod_id FOREIGN KEY (account_period_id) REFERENCES ref_book_record(id);
-COMMENT ON COLUMN income_101.account_period_id IS 'Èäåíòèôèêàòîð ïåðèîäà è ïîäðàçäåëåíèÿ ÁÎ';
+COMMENT ON COLUMN income_101.account_period_id IS 'Ð˜Ð´ÐµÐ½Ñ‚Ð¸Ñ„Ð¸ÐºÐ°Ñ‚Ð¾Ñ€ Ð¿ÐµÑ€Ð¸Ð¾Ð´Ð° Ð¸ Ð¿Ð¾Ð´Ñ€Ð°Ð·Ð´ÐµÐ»ÐµÐ½Ð¸Ñ Ð‘Ðž';
 
 ALTER TABLE income_102 ADD account_period_id NUMBER(9);
 ALTER TABLE income_102 ADD CONSTRAINT income_102_fk_accperiod_id FOREIGN KEY (account_period_id) REFERENCES ref_book_record(id);
-COMMENT ON COLUMN income_102.account_period_id IS 'Èäåíòèôèêàòîð ïåðèîäà è ïîäðàçäåëåíèÿ ÁÎ';
+COMMENT ON COLUMN income_102.account_period_id IS 'Ð˜Ð´ÐµÐ½Ñ‚Ð¸Ñ„Ð¸ÐºÐ°Ñ‚Ð¾Ñ€ Ð¿ÐµÑ€Ð¸Ð¾Ð´Ð° Ð¸ Ð¿Ð¾Ð´Ñ€Ð°Ð·Ð´ÐµÐ»ÐµÐ½Ð¸Ñ Ð‘Ðž';
 
 ---------------------------------------------------------------------------------------------------------
---Ãðóïïà çàäà÷ íà LOG_SYSTEM 
+--Ð“Ñ€ÑƒÐ¿Ð¿Ð° Ð·Ð°Ð´Ð°Ñ‡ Ð½Ð° LOG_SYSTEM 
 
--- http://jira.aplana.com/browse/SBRFACCTAX-8207 - Ñìåíà ïîäðàçäåëåíèÿ ó ñèñòåìíîãî ïîëüçîâàòåëÿ
+-- http://jira.aplana.com/browse/SBRFACCTAX-8207 - Ð¡Ð¼ÐµÐ½Ð° Ð¿Ð¾Ð´Ñ€Ð°Ð·Ð´ÐµÐ»ÐµÐ½Ð¸Ñ Ñƒ ÑÐ¸ÑÑ‚ÐµÐ¼Ð½Ð¾Ð³Ð¾ Ð¿Ð¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ñ‚ÐµÐ»Ñ
 UPDATE sec_user SET department_id = 0 WHERE id = 0;
 
--- http://jira.aplana.com/browse/SBRFACCTAX-7975 - Äîðàáîòêà çàïèñè ñîáûòèé ñïðàâî÷íèêà "Ïîäðàçäåëåíèÿ" â æóðíàë àóäèòà
+-- http://jira.aplana.com/browse/SBRFACCTAX-7975 - Ð”Ð¾Ñ€Ð°Ð±Ð¾Ñ‚ÐºÐ° Ð·Ð°Ð¿Ð¸ÑÐ¸ ÑÐ¾Ð±Ñ‹Ñ‚Ð¸Ð¹ ÑÐ¿Ñ€Ð°Ð²Ð¾Ñ‡Ð½Ð¸ÐºÐ° "ÐŸÐ¾Ð´Ñ€Ð°Ð·Ð´ÐµÐ»ÐµÐ½Ð¸Ñ" Ð² Ð¶ÑƒÑ€Ð½Ð°Ð» Ð°ÑƒÐ´Ð¸Ñ‚Ð°
 ALTER TABLE log_system ADD user_login varchar2(255);
 UPDATE LOG_SYSTEM ls SET ls.user_id = 0 WHERE ls.user_id IS null;
 UPDATE LOG_SYSTEM ls SET ls.user_login = (SELECT login FROM SEC_USER su WHERE ls.USER_ID = su.ID);
 
--- http://jira.aplana.com/browse/SBRFACCTAX-8207 - Çàïîëíèòü DEPARTMENT_NAME ïî SEC_USER.DEPARTMENT
+-- http://jira.aplana.com/browse/SBRFACCTAX-8207 - Ð—Ð°Ð¿Ð¾Ð»Ð½Ð¸Ñ‚ÑŒ DEPARTMENT_NAME Ð¿Ð¾ SEC_USER.DEPARTMENT
 MERGE INTO log_system tgt
 USING
   (SELECT ls.id as log_system_id, d.name as hier_department_name
@@ -171,7 +171,7 @@ ALTER TABLE LOG_SYSTEM drop column user_id;
 ALTER TABLE log_system ADD CONSTRAINT log_system_fk_user_login foreign key (user_login) references sec_user(login);
 --ALTER TABLE LOG_SYSTEM drop CONSTRAINT LOG_SYSTEM_FK_USER_ID;
 
---òàáëèöà LOG_BUSINESS
+--Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ð° LOG_BUSINESS
 ALTER TABLE log_business ADD user_login varchar2(255);
 UPDATE log_business lb SET lb.user_login = (SELECT login FROM SEC_USER su WHERE lb.USER_ID = su.ID);
 ALTER TABLE log_business drop column user_id;
@@ -179,12 +179,12 @@ ALTER TABLE log_business drop column user_id;
 ALTER TABLE log_business ADD CONSTRAINT log_business_fk_user_login foreign key (user_login) references sec_user(login);
 
 ---------------------------------------------------------------------------------------------------------
--- http://jira.aplana.com/browse/SBRFACCTAX-6979 - Îáÿçàòåëüíîñòü çàïîëíåíèÿ ïîëåé LOG_SYSTEM c 0.3.8
+-- http://jira.aplana.com/browse/SBRFACCTAX-6979 - ÐžÐ±ÑÐ·Ð°Ñ‚ÐµÐ»ÑŒÐ½Ð¾ÑÑ‚ÑŒ Ð·Ð°Ð¿Ð¾Ð»Ð½ÐµÐ½Ð¸Ñ Ð¿Ð¾Ð»ÐµÐ¹ LOG_SYSTEM c 0.3.8
 ALTER TABLE log_system modify user_login not null;
 ALTER TABLE log_business modify user_login not null;
 
 ---------------------------------------------------------------------------------------------------------
--- http://jira.aplana.com/browse/SBRFACCTAX-7813 - Äîáàâèòü ïîääåðæêó ñîáûòèé IMPORT_TRANSPORT_FILE è UPLOAD_TRANSPORT_FILE â ÆÀ
+-- http://jira.aplana.com/browse/SBRFACCTAX-7813 - Ð”Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ Ð¿Ð¾Ð´Ð´ÐµÑ€Ð¶ÐºÑƒ ÑÐ¾Ð±Ñ‹Ñ‚Ð¸Ð¹ IMPORT_TRANSPORT_FILE Ð¸ UPLOAD_TRANSPORT_FILE Ð² Ð–Ð
 ALTER TABLE log_system drop CONSTRAINT log_system_chk_event_id;
 ALTER TABLE log_system drop CONSTRAINT log_system_chk_dcl_form;
 ALTER TABLE log_system drop CONSTRAINT log_system_chk_rp;
@@ -194,14 +194,14 @@ ALTER TABLE log_system ADD CONSTRAINT log_system_chk_dcl_form check (event_id in
 ALTER TABLE log_system ADD CONSTRAINT log_system_chk_rp check (event_id in (7, 11, 401, 402, 501, 502, 503, 601, 901, 902, 903) or report_period_name IS not null);
 
 ---------------------------------------------------------------------------------------------------------
--- http://jira.aplana.com/browse/SBRFACCTAX-7840 - çàìåíèòü íà òåêñò âñå òå àòðèáóòû, êîòîðûå ðàíüøå õðàíèëèñü êàê ññûëêè â òàáëèöàõ äëÿ Æóðíàëà àóäèòà
+-- http://jira.aplana.com/browse/SBRFACCTAX-7840 - Ð·Ð°Ð¼ÐµÐ½Ð¸Ñ‚ÑŒ Ð½Ð° Ñ‚ÐµÐºÑÑ‚ Ð²ÑÐµ Ñ‚Ðµ Ð°Ñ‚Ñ€Ð¸Ð±ÑƒÑ‚Ñ‹, ÐºÐ¾Ñ‚Ð¾Ñ€Ñ‹Ðµ Ñ€Ð°Ð½ÑŒÑˆÐµ Ñ…Ñ€Ð°Ð½Ð¸Ð»Ð¸ÑÑŒ ÐºÐ°Ðº ÑÑÑ‹Ð»ÐºÐ¸ Ð² Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ð°Ñ… Ð´Ð»Ñ Ð–ÑƒÑ€Ð½Ð°Ð»Ð° Ð°ÑƒÐ´Ð¸Ñ‚Ð°
 ALTER TABLE log_system ADD declaration_type_name varchar2(80);
 ALTER TABLE log_system ADD form_type_name varchar2(1000);
 ALTER TABLE log_system ADD form_department_id number(9);
 
-COMMENT ON COLUMN LOG_SYSTEM.DECLARATION_TYPE_NAME IS 'Âèä äåêëàðàöèè';
-COMMENT ON COLUMN LOG_SYSTEM.FORM_TYPE_NAME IS 'Âèä íàëîãîâîé ôîðìû';
-COMMENT ON COLUMN LOG_SYSTEM.FORM_DEPARTMENT_ID IS 'Èäåíòèôèêàòîð ïîäðàçäåëåíèÿ íàëîãîâîé ôîðìû/äåêëàðàöèè';
+COMMENT ON COLUMN LOG_SYSTEM.DECLARATION_TYPE_NAME IS 'Ð’Ð¸Ð´ Ð´ÐµÐºÐ»Ð°Ñ€Ð°Ñ†Ð¸Ð¸';
+COMMENT ON COLUMN LOG_SYSTEM.FORM_TYPE_NAME IS 'Ð’Ð¸Ð´ Ð½Ð°Ð»Ð¾Ð³Ð¾Ð²Ð¾Ð¹ Ñ„Ð¾Ñ€Ð¼Ñ‹';
+COMMENT ON COLUMN LOG_SYSTEM.FORM_DEPARTMENT_ID IS 'Ð˜Ð´ÐµÐ½Ñ‚Ð¸Ñ„Ð¸ÐºÐ°Ñ‚Ð¾Ñ€ Ð¿Ð¾Ð´Ñ€Ð°Ð·Ð´ÐµÐ»ÐµÐ½Ð¸Ñ Ð½Ð°Ð»Ð¾Ð³Ð¾Ð²Ð¾Ð¹ Ñ„Ð¾Ñ€Ð¼Ñ‹/Ð´ÐµÐºÐ»Ð°Ñ€Ð°Ñ†Ð¸Ð¸';
 
 UPDATE log_system ls SET declaration_type_name = (SELECT name FROM declaration_type dt WHERE dt.id = ls.declaration_type_id), form_type_name = (SELECT name FROM form_type ft WHERE ft.id = ls.form_type_id);
 
@@ -213,74 +213,74 @@ ALTER TABLE log_system drop column declaration_type_id;
 ALTER TABLE log_system drop column form_type_id;
 
 ---------------------------------------------------------------------------------------------------------
--- http://jira.aplana.com/browse/SBRFACCTAX-7906 - äîáàâèòü òàáëèöó EVENT è ññûëàòüñÿ íà íåå èç ÆÀ
+-- http://jira.aplana.com/browse/SBRFACCTAX-7906 - Ð´Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ñƒ EVENT Ð¸ ÑÑÑ‹Ð»Ð°Ñ‚ÑŒÑÑ Ð½Ð° Ð½ÐµÐµ Ð¸Ð· Ð–Ð
 CREATE TABLE event
 (
 id NUMBER(9) NOT NULL,
 name VARCHAR(510) NOT NULL
 );
 
-COMMENT ON TABLE event IS 'Ñïðàâî÷íèê ñîáûòèé â ñèñòåìå';
-COMMENT ON COLUMN event.id IS 'Èäåíòèôèêàòîð ñîáûòèÿ';
-COMMENT ON COLUMN event.name IS 'Íàèìåíîâàíèå ñîáûòèÿ';
+COMMENT ON TABLE event IS 'Ð¡Ð¿Ñ€Ð°Ð²Ð¾Ñ‡Ð½Ð¸Ðº ÑÐ¾Ð±Ñ‹Ñ‚Ð¸Ð¹ Ð² ÑÐ¸ÑÑ‚ÐµÐ¼Ðµ';
+COMMENT ON COLUMN event.id IS 'Ð˜Ð´ÐµÐ½Ñ‚Ð¸Ñ„Ð¸ÐºÐ°Ñ‚Ð¾Ñ€ ÑÐ¾Ð±Ñ‹Ñ‚Ð¸Ñ';
+COMMENT ON COLUMN event.name IS 'ÐÐ°Ð¸Ð¼ÐµÐ½Ð¾Ð²Ð°Ð½Ð¸Ðµ ÑÐ¾Ð±Ñ‹Ñ‚Ð¸Ñ';
 
 INSERT ALL
-  INTO event VALUES (1, 'Ñîçäàòü')
-  INTO event VALUES (12, 'Ïîñëå ñîçäàíèÿ')
-  INTO event VALUES (2, 'Óäàëèòü')
-  INTO event VALUES (3, 'Ðàññ÷èòàòü')
-  INTO event VALUES (4, 'Îáîáùèòü')
-  INTO event VALUES (5, 'Ïðîâåðèòü')
-  INTO event VALUES (6, 'Ñîõðàíèòü')
-  INTO event VALUES (7, 'Èìïîðò äàííûõ')
-  INTO event VALUES (8, 'Ïîëó÷åíèå äàííûõ')
-  INTO event VALUES (9, 'Ïîëó÷åíèå çàùèùåííûõ äàííûõ')
-  INTO event VALUES (10, 'Òåñòèðîâàíèå ñêðèïòîâ')
-  INTO event VALUES (11, 'Ìèãðàöèÿ èç ÀÑ "Âåäåíèå ÐÍÓ"')
-  INTO event VALUES (101, 'Óòâåðäèòü èç "Ñîçäàíà"')
-  INTO event VALUES (102, 'Âåðíóòü èç "Óòâåðæäåíà" â "Ñîçäàíà"')
-  INTO event VALUES (103, 'Ïðèíÿòü èç "Óòâåðæäåíà"')
-  INTO event VALUES (104, 'Âåðíóòü èç "Ïðèíÿòà" â "Óòâåðæäåíà"')
-  INTO event VALUES (105, 'Ïðèíÿòü èç "Ñîçäàíà"')
-  INTO event VALUES (106, 'Âåðíóòü èç "Ïðèíÿòà" â "Ñîçäàíà"')
-  INTO event VALUES (107, 'Ïîäãîòîâèòü èç "Ñîçäàíà"')
-  INTO event VALUES (108, 'Âåðíóòü èç "Ïîäãîòîâëåíà" â "Ñîçäàíà"')
-  INTO event VALUES (109, 'Ïðèíÿòü èç "Ïîäãîòîâëåíà"')
-  INTO event VALUES (110, 'Âåðíóòü èç "Ïðèíÿòà" â "Ïîäãîòîâëåíà"')
-  INTO event VALUES (111, 'Óòâåðäèòü èç "Ïîäãîòîâëåíà"')
-  INTO event VALUES (112, 'Âåðíóòü èç "Óòâåðæäåíà" â "Ïîäãîòîâëåíà"')
-  INTO event VALUES (203, 'Ïîñëå ïðèíÿòü èç "Óòâåðæäåíà"')
-  INTO event VALUES (204, 'Ïîñëå âåðíóòü èç "Ïðèíÿòà" â "Óòâåðæäåíà"')
-  INTO event VALUES (205, 'Ïîñëå ïðèíÿòü èç "Ñîçäàíà"')
-  INTO event VALUES (206, 'Ïîñëå âåðíóòü èç "Ïðèíÿòà" â "Ñîçäàíà"')
-  INTO event VALUES (207, 'Ïîñëå ïðèíÿòü èç "Ïîäãîòîâëåíà"')
-  INTO event VALUES (208, 'Ïîñëå âåðíóòü èç "Ïðèíÿòà" â "Ïîäãîòîâëåíà"')
-  INTO event VALUES (209, 'Ïîñëå óòâåðäèòü èç "Ïîäãîòîâëåíà"')
-  INTO event VALUES (210, 'Ïîñëå âåðíóòü "Ïîäãîòîâëåíà" èç "Óòâåðæäåíà"')
-  INTO event VALUES (301, 'Äîáàâèòü ñòðîêó')
-  INTO event VALUES (303, 'Óäàëèòü ñòðîêó')
-  INTO event VALUES (302, 'Çàãðóçêà')
-  INTO event VALUES (401, 'Èìïîðò èç òðàíñïîðòíûõ ôàéëîâ')
-  INTO event VALUES (402, 'Çàãðóçêà òðàíñïîðòíûõ ôàéëîâ â êàòàëîã çàãðóçêè')
-  INTO event VALUES (501, 'Âõîä ïîëüçîâàòåëÿ â Ñèñòåìó')
-  INTO event VALUES (502, 'Âûõîä ïîëüçîâàòåëÿ èç Ñèñòåìû')
-  INTO event VALUES (503, 'Âçàèìîäåéñòâèå ñ âíåøíåé ÀÑ')
-  INTO event VALUES (601, 'Àðõèâèðîâàíèå æóðíàëà ñîáûòèé')
-  INTO event VALUES (901, 'Ñîçäàíèå ïîäðàçäåëåíèÿ')
-  INTO event VALUES (902, 'Ìîäèôèêàöèÿ ïîäðàçäåëåíèÿ')
-  INTO event VALUES (903, 'Óäàëåíèå ïîäðàçäåëåíèÿ')
-  INTO event VALUES (701, 'Âåðñèÿ ñîçäàíà')
-  INTO event VALUES (702, 'Âåðñèÿ èçìåíåíà')
-  INTO event VALUES (703, 'Âåðñèÿ ââåäåíà â äåéñòâèå')
-  INTO event VALUES (704, 'Âåðñèÿ âûâåäåíà èç äåéñòâèÿ')
-  INTO event VALUES (705, 'Âåðñèÿ óäàëåíà')
+  INTO event VALUES (1, 'Ð¡Ð¾Ð·Ð´Ð°Ñ‚ÑŒ')
+  INTO event VALUES (12, 'ÐŸÐ¾ÑÐ»Ðµ ÑÐ¾Ð·Ð´Ð°Ð½Ð¸Ñ')
+  INTO event VALUES (2, 'Ð£Ð´Ð°Ð»Ð¸Ñ‚ÑŒ')
+  INTO event VALUES (3, 'Ð Ð°ÑÑÑ‡Ð¸Ñ‚Ð°Ñ‚ÑŒ')
+  INTO event VALUES (4, 'ÐžÐ±Ð¾Ð±Ñ‰Ð¸Ñ‚ÑŒ')
+  INTO event VALUES (5, 'ÐŸÑ€Ð¾Ð²ÐµÑ€Ð¸Ñ‚ÑŒ')
+  INTO event VALUES (6, 'Ð¡Ð¾Ñ…Ñ€Ð°Ð½Ð¸Ñ‚ÑŒ')
+  INTO event VALUES (7, 'Ð˜Ð¼Ð¿Ð¾Ñ€Ñ‚ Ð´Ð°Ð½Ð½Ñ‹Ñ…')
+  INTO event VALUES (8, 'ÐŸÐ¾Ð»ÑƒÑ‡ÐµÐ½Ð¸Ðµ Ð´Ð°Ð½Ð½Ñ‹Ñ…')
+  INTO event VALUES (9, 'ÐŸÐ¾Ð»ÑƒÑ‡ÐµÐ½Ð¸Ðµ Ð·Ð°Ñ‰Ð¸Ñ‰ÐµÐ½Ð½Ñ‹Ñ… Ð´Ð°Ð½Ð½Ñ‹Ñ…')
+  INTO event VALUES (10, 'Ð¢ÐµÑÑ‚Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð¸Ðµ ÑÐºÑ€Ð¸Ð¿Ñ‚Ð¾Ð²')
+  INTO event VALUES (11, 'ÐœÐ¸Ð³Ñ€Ð°Ñ†Ð¸Ñ Ð¸Ð· ÐÐ¡ "Ð’ÐµÐ´ÐµÐ½Ð¸Ðµ Ð ÐÐ£"')
+  INTO event VALUES (101, 'Ð£Ñ‚Ð²ÐµÑ€Ð´Ð¸Ñ‚ÑŒ Ð¸Ð· "Ð¡Ð¾Ð·Ð´Ð°Ð½Ð°"')
+  INTO event VALUES (102, 'Ð’ÐµÑ€Ð½ÑƒÑ‚ÑŒ Ð¸Ð· "Ð£Ñ‚Ð²ÐµÑ€Ð¶Ð´ÐµÐ½Ð°" Ð² "Ð¡Ð¾Ð·Ð´Ð°Ð½Ð°"')
+  INTO event VALUES (103, 'ÐŸÑ€Ð¸Ð½ÑÑ‚ÑŒ Ð¸Ð· "Ð£Ñ‚Ð²ÐµÑ€Ð¶Ð´ÐµÐ½Ð°"')
+  INTO event VALUES (104, 'Ð’ÐµÑ€Ð½ÑƒÑ‚ÑŒ Ð¸Ð· "ÐŸÑ€Ð¸Ð½ÑÑ‚Ð°" Ð² "Ð£Ñ‚Ð²ÐµÑ€Ð¶Ð´ÐµÐ½Ð°"')
+  INTO event VALUES (105, 'ÐŸÑ€Ð¸Ð½ÑÑ‚ÑŒ Ð¸Ð· "Ð¡Ð¾Ð·Ð´Ð°Ð½Ð°"')
+  INTO event VALUES (106, 'Ð’ÐµÑ€Ð½ÑƒÑ‚ÑŒ Ð¸Ð· "ÐŸÑ€Ð¸Ð½ÑÑ‚Ð°" Ð² "Ð¡Ð¾Ð·Ð´Ð°Ð½Ð°"')
+  INTO event VALUES (107, 'ÐŸÐ¾Ð´Ð³Ð¾Ñ‚Ð¾Ð²Ð¸Ñ‚ÑŒ Ð¸Ð· "Ð¡Ð¾Ð·Ð´Ð°Ð½Ð°"')
+  INTO event VALUES (108, 'Ð’ÐµÑ€Ð½ÑƒÑ‚ÑŒ Ð¸Ð· "ÐŸÐ¾Ð´Ð³Ð¾Ñ‚Ð¾Ð²Ð»ÐµÐ½Ð°" Ð² "Ð¡Ð¾Ð·Ð´Ð°Ð½Ð°"')
+  INTO event VALUES (109, 'ÐŸÑ€Ð¸Ð½ÑÑ‚ÑŒ Ð¸Ð· "ÐŸÐ¾Ð´Ð³Ð¾Ñ‚Ð¾Ð²Ð»ÐµÐ½Ð°"')
+  INTO event VALUES (110, 'Ð’ÐµÑ€Ð½ÑƒÑ‚ÑŒ Ð¸Ð· "ÐŸÑ€Ð¸Ð½ÑÑ‚Ð°" Ð² "ÐŸÐ¾Ð´Ð³Ð¾Ñ‚Ð¾Ð²Ð»ÐµÐ½Ð°"')
+  INTO event VALUES (111, 'Ð£Ñ‚Ð²ÐµÑ€Ð´Ð¸Ñ‚ÑŒ Ð¸Ð· "ÐŸÐ¾Ð´Ð³Ð¾Ñ‚Ð¾Ð²Ð»ÐµÐ½Ð°"')
+  INTO event VALUES (112, 'Ð’ÐµÑ€Ð½ÑƒÑ‚ÑŒ Ð¸Ð· "Ð£Ñ‚Ð²ÐµÑ€Ð¶Ð´ÐµÐ½Ð°" Ð² "ÐŸÐ¾Ð´Ð³Ð¾Ñ‚Ð¾Ð²Ð»ÐµÐ½Ð°"')
+  INTO event VALUES (203, 'ÐŸÐ¾ÑÐ»Ðµ Ð¿Ñ€Ð¸Ð½ÑÑ‚ÑŒ Ð¸Ð· "Ð£Ñ‚Ð²ÐµÑ€Ð¶Ð´ÐµÐ½Ð°"')
+  INTO event VALUES (204, 'ÐŸÐ¾ÑÐ»Ðµ Ð²ÐµÑ€Ð½ÑƒÑ‚ÑŒ Ð¸Ð· "ÐŸÑ€Ð¸Ð½ÑÑ‚Ð°" Ð² "Ð£Ñ‚Ð²ÐµÑ€Ð¶Ð´ÐµÐ½Ð°"')
+  INTO event VALUES (205, 'ÐŸÐ¾ÑÐ»Ðµ Ð¿Ñ€Ð¸Ð½ÑÑ‚ÑŒ Ð¸Ð· "Ð¡Ð¾Ð·Ð´Ð°Ð½Ð°"')
+  INTO event VALUES (206, 'ÐŸÐ¾ÑÐ»Ðµ Ð²ÐµÑ€Ð½ÑƒÑ‚ÑŒ Ð¸Ð· "ÐŸÑ€Ð¸Ð½ÑÑ‚Ð°" Ð² "Ð¡Ð¾Ð·Ð´Ð°Ð½Ð°"')
+  INTO event VALUES (207, 'ÐŸÐ¾ÑÐ»Ðµ Ð¿Ñ€Ð¸Ð½ÑÑ‚ÑŒ Ð¸Ð· "ÐŸÐ¾Ð´Ð³Ð¾Ñ‚Ð¾Ð²Ð»ÐµÐ½Ð°"')
+  INTO event VALUES (208, 'ÐŸÐ¾ÑÐ»Ðµ Ð²ÐµÑ€Ð½ÑƒÑ‚ÑŒ Ð¸Ð· "ÐŸÑ€Ð¸Ð½ÑÑ‚Ð°" Ð² "ÐŸÐ¾Ð´Ð³Ð¾Ñ‚Ð¾Ð²Ð»ÐµÐ½Ð°"')
+  INTO event VALUES (209, 'ÐŸÐ¾ÑÐ»Ðµ ÑƒÑ‚Ð²ÐµÑ€Ð´Ð¸Ñ‚ÑŒ Ð¸Ð· "ÐŸÐ¾Ð´Ð³Ð¾Ñ‚Ð¾Ð²Ð»ÐµÐ½Ð°"')
+  INTO event VALUES (210, 'ÐŸÐ¾ÑÐ»Ðµ Ð²ÐµÑ€Ð½ÑƒÑ‚ÑŒ "ÐŸÐ¾Ð´Ð³Ð¾Ñ‚Ð¾Ð²Ð»ÐµÐ½Ð°" Ð¸Ð· "Ð£Ñ‚Ð²ÐµÑ€Ð¶Ð´ÐµÐ½Ð°"')
+  INTO event VALUES (301, 'Ð”Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ ÑÑ‚Ñ€Ð¾ÐºÑƒ')
+  INTO event VALUES (303, 'Ð£Ð´Ð°Ð»Ð¸Ñ‚ÑŒ ÑÑ‚Ñ€Ð¾ÐºÑƒ')
+  INTO event VALUES (302, 'Ð—Ð°Ð³Ñ€ÑƒÐ·ÐºÐ°')
+  INTO event VALUES (401, 'Ð˜Ð¼Ð¿Ð¾Ñ€Ñ‚ Ð¸Ð· Ñ‚Ñ€Ð°Ð½ÑÐ¿Ð¾Ñ€Ñ‚Ð½Ñ‹Ñ… Ñ„Ð°Ð¹Ð»Ð¾Ð²')
+  INTO event VALUES (402, 'Ð—Ð°Ð³Ñ€ÑƒÐ·ÐºÐ° Ñ‚Ñ€Ð°Ð½ÑÐ¿Ð¾Ñ€Ñ‚Ð½Ñ‹Ñ… Ñ„Ð°Ð¹Ð»Ð¾Ð² Ð² ÐºÐ°Ñ‚Ð°Ð»Ð¾Ð³ Ð·Ð°Ð³Ñ€ÑƒÐ·ÐºÐ¸')
+  INTO event VALUES (501, 'Ð’Ñ…Ð¾Ð´ Ð¿Ð¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ñ‚ÐµÐ»Ñ Ð² Ð¡Ð¸ÑÑ‚ÐµÐ¼Ñƒ')
+  INTO event VALUES (502, 'Ð’Ñ‹Ñ…Ð¾Ð´ Ð¿Ð¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ñ‚ÐµÐ»Ñ Ð¸Ð· Ð¡Ð¸ÑÑ‚ÐµÐ¼Ñ‹')
+  INTO event VALUES (503, 'Ð’Ð·Ð°Ð¸Ð¼Ð¾Ð´ÐµÐ¹ÑÑ‚Ð²Ð¸Ðµ Ñ Ð²Ð½ÐµÑˆÐ½ÐµÐ¹ ÐÐ¡')
+  INTO event VALUES (601, 'ÐÑ€Ñ…Ð¸Ð²Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð¸Ðµ Ð¶ÑƒÑ€Ð½Ð°Ð»Ð° ÑÐ¾Ð±Ñ‹Ñ‚Ð¸Ð¹')
+  INTO event VALUES (901, 'Ð¡Ð¾Ð·Ð´Ð°Ð½Ð¸Ðµ Ð¿Ð¾Ð´Ñ€Ð°Ð·Ð´ÐµÐ»ÐµÐ½Ð¸Ñ')
+  INTO event VALUES (902, 'ÐœÐ¾Ð´Ð¸Ñ„Ð¸ÐºÐ°Ñ†Ð¸Ñ Ð¿Ð¾Ð´Ñ€Ð°Ð·Ð´ÐµÐ»ÐµÐ½Ð¸Ñ')
+  INTO event VALUES (903, 'Ð£Ð´Ð°Ð»ÐµÐ½Ð¸Ðµ Ð¿Ð¾Ð´Ñ€Ð°Ð·Ð´ÐµÐ»ÐµÐ½Ð¸Ñ')
+  INTO event VALUES (701, 'Ð’ÐµÑ€ÑÐ¸Ñ ÑÐ¾Ð·Ð´Ð°Ð½Ð°')
+  INTO event VALUES (702, 'Ð’ÐµÑ€ÑÐ¸Ñ Ð¸Ð·Ð¼ÐµÐ½ÐµÐ½Ð°')
+  INTO event VALUES (703, 'Ð’ÐµÑ€ÑÐ¸Ñ Ð²Ð²ÐµÐ´ÐµÐ½Ð° Ð² Ð´ÐµÐ¹ÑÑ‚Ð²Ð¸Ðµ')
+  INTO event VALUES (704, 'Ð’ÐµÑ€ÑÐ¸Ñ Ð²Ñ‹Ð²ÐµÐ´ÐµÐ½Ð° Ð¸Ð· Ð´ÐµÐ¹ÑÑ‚Ð²Ð¸Ñ')
+  INTO event VALUES (705, 'Ð’ÐµÑ€ÑÐ¸Ñ ÑƒÐ´Ð°Ð»ÐµÐ½Ð°')
 SELECT * FROM dual;  
 
 ALTER TABLE event ADD CONSTRAINT event_pk PRIMARY KEY (id);
 ALTER TABLE log_system ADD CONSTRAINT log_system_fk_event_id FOREIGN KEY (event_id) REFERENCES event(id);
 ALTER TABLE log_system DROP CONSTRAINT log_system_chk_event_id;
 
--- http://jira.aplana.com/browse/SBRFACCTAX-8319 Èçìåíåíèÿ äëÿ template_changes, ñâÿçàíííûå ñ ââåäåíèåì òàáëèöû EVENT
+-- http://jira.aplana.com/browse/SBRFACCTAX-8319 Ð˜Ð·Ð¼ÐµÐ½ÐµÐ½Ð¸Ñ Ð´Ð»Ñ template_changes, ÑÐ²ÑÐ·Ð°Ð½Ð½Ð½Ñ‹Ðµ Ñ Ð²Ð²ÐµÐ´ÐµÐ½Ð¸ÐµÐ¼ Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ñ‹ EVENT
 ALTER TABLE template_changes DROP CONSTRAINT changes_check_event;
 ALTER TABLE template_changes MODIFY event NUMBER(9);
 
@@ -289,51 +289,52 @@ UPDATE template_changes SET event=700+event WHERE event IN (1,2,3,4,5);
 ALTER TABLE template_changes ADD CONSTRAINT template_changes_chk_event CHECK (event in (701, 702, 703, 704, 705));
 ALTER TABLE template_changes ADD CONSTRAINT template_changes_fk_event FOREIGN KEY (event) references event(id);
 ---------------------------------------------------------------------------------------------------------
--- http://jira.aplana.com/browse/SBRFACCTAX-8032 - Äîáàâèòü ïîëå "Èäåíòèôèêàòîð ÒÁ ïîäðàçäåëåíèÿ íàëîãîâîé ôîðìû / äåêëàðàöèè" â òàáëèöó LOG_SYSTEM
+-- http://jira.aplana.com/browse/SBRFACCTAX-8032 - Ð”Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ Ð¿Ð¾Ð»Ðµ "Ð˜Ð´ÐµÐ½Ñ‚Ð¸Ñ„Ð¸ÐºÐ°Ñ‚Ð¾Ñ€ Ð¢Ð‘ Ð¿Ð¾Ð´Ñ€Ð°Ð·Ð´ÐµÐ»ÐµÐ½Ð¸Ñ Ð½Ð°Ð»Ð¾Ð³Ð¾Ð²Ð¾Ð¹ Ñ„Ð¾Ñ€Ð¼Ñ‹ / Ð´ÐµÐºÐ»Ð°Ñ€Ð°Ñ†Ð¸Ð¸" Ð² Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ñƒ LOG_SYSTEM
 ALTER TABLE log_system ADD tb_department_id NUMBER(9);
-COMMENT ON COLUMN log_system.tb_department_id IS 'Èäåíòèôèêàòîð ÒÁ ïîäðàçäåëåíèÿ íàëîãîâîé ôîðìû/äåêëàðàöèè';
+COMMENT ON COLUMN log_system.tb_department_id IS 'Ð˜Ð´ÐµÐ½Ñ‚Ð¸Ñ„Ð¸ÐºÐ°Ñ‚Ð¾Ñ€ Ð¢Ð‘ Ð¿Ð¾Ð´Ñ€Ð°Ð·Ð´ÐµÐ»ÐµÐ½Ð¸Ñ Ð½Ð°Ð»Ð¾Ð³Ð¾Ð²Ð¾Ð¹ Ñ„Ð¾Ñ€Ð¼Ñ‹/Ð´ÐµÐºÐ»Ð°Ñ€Ð°Ñ†Ð¸Ð¸';
 
 ---------------------------------------------------------------------------------------------------------
--- http://jira.aplana.com/browse/SBRFACCTAX-7971 - Äîðàáîòêà gui ïëàíèðîâùèêà
+-- http://jira.aplana.com/browse/SBRFACCTAX-7971 - Ð”Ð¾Ñ€Ð°Ð±Ð¾Ñ‚ÐºÐ° gui Ð¿Ð»Ð°Ð½Ð¸Ñ€Ð¾Ð²Ñ‰Ð¸ÐºÐ°
 ALTER TABLE task_context ADD modification_date date not null;
-COMMENT ON COLUMN task_context.modification_date IS 'Äàòà ïîñëåäíåãî ðåäàêòèðîâàíèÿ çàäà÷è';
+COMMENT ON COLUMN task_context.modification_date IS 'Ð”Ð°Ñ‚Ð° Ð¿Ð¾ÑÐ»ÐµÐ´Ð½ÐµÐ³Ð¾ Ñ€ÐµÐ´Ð°ÐºÑ‚Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð¸Ñ Ð·Ð°Ð´Ð°Ñ‡Ð¸';
 
 ---------------------------------------------------------------------------------------------------------
--- http://jira.aplana.com/browse/SBRFACCTAX-8269 - Äîï. äîðàáîòêà ïëàíèðîâùèêà
+-- http://jira.aplana.com/browse/SBRFACCTAX-8269 - Ð”Ð¾Ð¿. Ð´Ð¾Ñ€Ð°Ð±Ð¾Ñ‚ÐºÐ° Ð¿Ð»Ð°Ð½Ð¸Ñ€Ð¾Ð²Ñ‰Ð¸ÐºÐ°
 ALTER TABLE task_context ADD user_id NUMBER(9) NOT NULL;
 ALTER TABLE task_context ADD CONSTRAINT task_context_fk_user_id foreign key (user_id) references sec_user(id);
-COMMENT ON COLUMN task_context.user_id IS 'Èäåíòèôèêàòîð ïîëüçîâàòåëÿ';
+COMMENT ON COLUMN task_context.user_id IS 'Ð˜Ð´ÐµÐ½Ñ‚Ð¸Ñ„Ð¸ÐºÐ°Ñ‚Ð¾Ñ€ Ð¿Ð¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ñ‚ÐµÐ»Ñ';
 
 ---------------------------------------------------------------------------------------------------------
--- http://jira.aplana.com/browse/SBRFACCTAX-7330 - Óäàëèòü ïîëå "data_size" èç òàáëèöû "blob_data"
+-- http://jira.aplana.com/browse/SBRFACCTAX-7330 - Ð£Ð´Ð°Ð»Ð¸Ñ‚ÑŒ Ð¿Ð¾Ð»Ðµ "data_size" Ð¸Ð· Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ñ‹ "blob_data"
 ALTER TABLE blob_data DROP COLUMN data_size;
 
 ---------------------------------------------------------------------------------------------------------
--- http://jira.aplana.com/browse/SBRFACCTAX-6298 - Îãðàíè÷åíèÿ ðó÷íîãî ââîäà ñ 0.3.5
+-- http://jira.aplana.com/browse/SBRFACCTAX-6298 - ÐžÐ³Ñ€Ð°Ð½Ð¸Ñ‡ÐµÐ½Ð¸Ñ Ñ€ÑƒÑ‡Ð½Ð¾Ð³Ð¾ Ð²Ð²Ð¾Ð´Ð° Ñ 0.3.5
 ALTER TABLE data_row ADD CONSTRAINT data_row_chk_manual CHECK (manual IN (0, 1));
 
 ---------------------------------------------------------------------------------------------------------
--- http://jira.aplana.com/browse/SBRFACCTAX-7553 - Óäàëåíèå äåôîëòíîãî çíà÷åíèÿ äëÿ "Êîä ïîäðàçäåëåíèÿ"
+-- http://jira.aplana.com/browse/SBRFACCTAX-7553 - Ð£Ð´Ð°Ð»ÐµÐ½Ð¸Ðµ Ð´ÐµÑ„Ð¾Ð»Ñ‚Ð½Ð¾Ð³Ð¾ Ð·Ð½Ð°Ñ‡ÐµÐ½Ð¸Ñ Ð´Ð»Ñ "ÐšÐ¾Ð´ Ð¿Ð¾Ð´Ñ€Ð°Ð·Ð´ÐµÐ»ÐµÐ½Ð¸Ñ"
 ALTER TABLE department MODIFY CODE DEFAULT NULL;
 
 ---------------------------------------------------------------------------------------------------------
--- http://jira.aplana.com/browse/SBRFACCTAX-8183 - Äîïîëíèòåëüíûå êîììåíòàðèè ê ìåòàäàííûì
-COMMENT ON COLUMN declaration_data.data IS 'Äàííûå äåêëàðàöèè â ôîðìàòå çàêîíîäàòåëÿ (XML)';
-COMMENT ON COLUMN declaration_data.data_pdf IS 'Äàííûå äåêëàðàöèè â ôîðìàòå PDF';
-COMMENT ON COLUMN declaration_data.data_xlsx IS 'Äàííûå äåêëàðàöèè â ôîðìàòå XLSX';
-COMMENT ON COLUMN declaration_template.jrxml IS 'Ìàêåò JasperReports äëÿ ôîðìèðîâàíèÿ ïå÷àòíîãî ïðåäñòàâëåíèÿ ôîðìû';
-COMMENT ON COLUMN declaration_template.version IS 'Âåðñèÿ';
-COMMENT ON COLUMN form_template.version IS 'Âåðñèÿ ôîðìû (óíèêàëüíî â ðàìêàõ òèïà)';
-COMMENT ON COLUMN log_business.user_login IS 'Ëîãèí ïîëüçîâàòåëÿ';
-COMMENT ON COLUMN log_system.user_login IS 'Ëîãèí ïîëüçîâàòåëÿ';
-COMMENT ON COLUMN notification.id IS 'Óíèêàëüíûé èäåíòèôèêàòîð îïîâåùåíèÿ';
-COMMENT ON COLUMN ref_book.region_attribute_id IS 'Ïðè åãî íàëè÷èè ñïðàâî÷íèê ñ÷èòàåòñÿ ðåãèîíàëüíûì. Óêàçûâàåò íà àòðèáóò, ïî êîòîðîìó îïðåäåëÿåòñÿ ïðèíàäëåæíîñòü ê ðåãèîíó';
-COMMENT ON COLUMN task_context.id IS 'Óíèêàëüíûé èäåíòèôèêàòîð çàïèñè';
-COMMENT ON COLUMN template_changes.id IS 'Óíèêàëüíûé èäåíòèôèêàòîð çàïèñè';
-COMMENT ON COLUMN data_row.type IS 'Òèï ñòðîêè (0 - ïîäòâåðæäåííûå äàííûå, 1 - ñòðîêà äîáàâëåíà, -1 - ñòðîêà óäàëåíà)';
-COMMENT ON COLUMN department.region_id IS 'Êîä ðåãèîíà';
-COMMENT ON COLUMN form_column.numeration_row IS 'Òèï íóìåðàöèè ñòðîê äëÿ àâòîíóìåðóåìîé ãðàôû (0 - ïîñëåäîâàòåëüíàÿ, 1 - ñêâîçíàÿ)';
-COMMENT ON COLUMN log_system.department_name IS 'Íàèìåíîâàíèå ïîäðàçäåëåíèÿ ÍÔ\äåêëàðàöèè';
+-- http://jira.aplana.com/browse/SBRFACCTAX-8183 - Ð”Ð¾Ð¿Ð¾Ð»Ð½Ð¸Ñ‚ÐµÐ»ÑŒÐ½Ñ‹Ðµ ÐºÐ¾Ð¼Ð¼ÐµÐ½Ñ‚Ð°Ñ€Ð¸Ð¸ Ðº Ð¼ÐµÑ‚Ð°Ð´Ð°Ð½Ð½Ñ‹Ð¼
+COMMENT ON COLUMN declaration_data.data IS 'Ð”Ð°Ð½Ð½Ñ‹Ðµ Ð´ÐµÐºÐ»Ð°Ñ€Ð°Ñ†Ð¸Ð¸ Ð² Ñ„Ð¾Ñ€Ð¼Ð°Ñ‚Ðµ Ð·Ð°ÐºÐ¾Ð½Ð¾Ð´Ð°Ñ‚ÐµÐ»Ñ (XML)';
+COMMENT ON COLUMN declaration_data.data_pdf IS 'Ð”Ð°Ð½Ð½Ñ‹Ðµ Ð´ÐµÐºÐ»Ð°Ñ€Ð°Ñ†Ð¸Ð¸ Ð² Ñ„Ð¾Ñ€Ð¼Ð°Ñ‚Ðµ PDF';
+COMMENT ON COLUMN declaration_data.data_xlsx IS 'Ð”Ð°Ð½Ð½Ñ‹Ðµ Ð´ÐµÐºÐ»Ð°Ñ€Ð°Ñ†Ð¸Ð¸ Ð² Ñ„Ð¾Ñ€Ð¼Ð°Ñ‚Ðµ XLSX';
+COMMENT ON COLUMN declaration_template.jrxml IS 'ÐœÐ°ÐºÐµÑ‚ JasperReports Ð´Ð»Ñ Ñ„Ð¾Ñ€Ð¼Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð¸Ñ Ð¿ÐµÑ‡Ð°Ñ‚Ð½Ð¾Ð³Ð¾ Ð¿Ñ€ÐµÐ´ÑÑ‚Ð°Ð²Ð»ÐµÐ½Ð¸Ñ Ñ„Ð¾Ñ€Ð¼Ñ‹';
+COMMENT ON COLUMN declaration_template.version IS 'Ð’ÐµÑ€ÑÐ¸Ñ';
+COMMENT ON COLUMN form_template.version IS 'Ð’ÐµÑ€ÑÐ¸Ñ Ñ„Ð¾Ñ€Ð¼Ñ‹ (ÑƒÐ½Ð¸ÐºÐ°Ð»ÑŒÐ½Ð¾ Ð² Ñ€Ð°Ð¼ÐºÐ°Ñ… Ñ‚Ð¸Ð¿Ð°)';
+COMMENT ON COLUMN log_business.user_login IS 'Ð›Ð¾Ð³Ð¸Ð½ Ð¿Ð¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ñ‚ÐµÐ»Ñ';
+COMMENT ON COLUMN log_system.user_login IS 'Ð›Ð¾Ð³Ð¸Ð½ Ð¿Ð¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ñ‚ÐµÐ»Ñ';
+COMMENT ON COLUMN notification.id IS 'Ð£Ð½Ð¸ÐºÐ°Ð»ÑŒÐ½Ñ‹Ð¹ Ð¸Ð´ÐµÐ½Ñ‚Ð¸Ñ„Ð¸ÐºÐ°Ñ‚Ð¾Ñ€ Ð¾Ð¿Ð¾Ð²ÐµÑ‰ÐµÐ½Ð¸Ñ';
+COMMENT ON COLUMN ref_book.region_attribute_id IS 'ÐŸÑ€Ð¸ ÐµÐ³Ð¾ Ð½Ð°Ð»Ð¸Ñ‡Ð¸Ð¸ ÑÐ¿Ñ€Ð°Ð²Ð¾Ñ‡Ð½Ð¸Ðº ÑÑ‡Ð¸Ñ‚Ð°ÐµÑ‚ÑÑ Ñ€ÐµÐ³Ð¸Ð¾Ð½Ð°Ð»ÑŒÐ½Ñ‹Ð¼. Ð£ÐºÐ°Ð·Ñ‹Ð²Ð°ÐµÑ‚ Ð½Ð° Ð°Ñ‚Ñ€Ð¸Ð±ÑƒÑ‚, Ð¿Ð¾ ÐºÐ¾Ñ‚Ð¾Ñ€Ð¾Ð¼Ñƒ Ð¾Ð¿Ñ€ÐµÐ´ÐµÐ»ÑÐµÑ‚ÑÑ Ð¿Ñ€Ð¸Ð½Ð°Ð´Ð»ÐµÐ¶Ð½Ð¾ÑÑ‚ÑŒ Ðº Ñ€ÐµÐ³Ð¸Ð¾Ð½Ñƒ';
+COMMENT ON COLUMN task_context.id IS 'Ð£Ð½Ð¸ÐºÐ°Ð»ÑŒÐ½Ñ‹Ð¹ Ð¸Ð´ÐµÐ½Ñ‚Ð¸Ñ„Ð¸ÐºÐ°Ñ‚Ð¾Ñ€ Ð·Ð°Ð¿Ð¸ÑÐ¸';
+COMMENT ON COLUMN template_changes.id IS 'Ð£Ð½Ð¸ÐºÐ°Ð»ÑŒÐ½Ñ‹Ð¹ Ð¸Ð´ÐµÐ½Ñ‚Ð¸Ñ„Ð¸ÐºÐ°Ñ‚Ð¾Ñ€ Ð·Ð°Ð¿Ð¸ÑÐ¸';
+COMMENT ON COLUMN data_row.type IS 'Ð¢Ð¸Ð¿ ÑÑ‚Ñ€Ð¾ÐºÐ¸ (0 - Ð¿Ð¾Ð´Ñ‚Ð²ÐµÑ€Ð¶Ð´ÐµÐ½Ð½Ñ‹Ðµ Ð´Ð°Ð½Ð½Ñ‹Ðµ, 1 - ÑÑ‚Ñ€Ð¾ÐºÐ° Ð´Ð¾Ð±Ð°Ð²Ð»ÐµÐ½Ð°, -1 - ÑÑ‚Ñ€Ð¾ÐºÐ° ÑƒÐ´Ð°Ð»ÐµÐ½Ð°)';
+COMMENT ON COLUMN department.region_id IS 'ÐšÐ¾Ð´ Ñ€ÐµÐ³Ð¸Ð¾Ð½Ð°';
+COMMENT ON COLUMN form_column.numeration_row IS 'Ð¢Ð¸Ð¿ Ð½ÑƒÐ¼ÐµÑ€Ð°Ñ†Ð¸Ð¸ ÑÑ‚Ñ€Ð¾Ðº Ð´Ð»Ñ Ð°Ð²Ñ‚Ð¾Ð½ÑƒÐ¼ÐµÑ€ÑƒÐµÐ¼Ð¾Ð¹ Ð³Ñ€Ð°Ñ„Ñ‹ (0 - Ð¿Ð¾ÑÐ»ÐµÐ´Ð¾Ð²Ð°Ñ‚ÐµÐ»ÑŒÐ½Ð°Ñ, 1 - ÑÐºÐ²Ð¾Ð·Ð½Ð°Ñ)';
+COMMENT ON COLUMN log_system.department_name IS 'ÐÐ°Ð¸Ð¼ÐµÐ½Ð¾Ð²Ð°Ð½Ð¸Ðµ Ð¿Ð¾Ð´Ñ€Ð°Ð·Ð´ÐµÐ»ÐµÐ½Ð¸Ñ ÐÐ¤\Ð´ÐµÐºÐ»Ð°Ñ€Ð°Ñ†Ð¸Ð¸';
 
 ---------------------------------------------------------------------------------------------------------
-commit;
+COMMIT;
+EXIT;

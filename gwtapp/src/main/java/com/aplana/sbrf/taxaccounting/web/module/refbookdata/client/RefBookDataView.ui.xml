@@ -128,7 +128,7 @@
                     <g:HorizontalPanel verticalAlignment="middle" addStyleNames="{style.marginRight5}">
                         <g:Button title="Завершить редактирование" text="Завершить редактирование"
                                   ui:field="cancelEdit"/>
-                        <style:LinkButton title="Редактировать" text="Редактировать" ui:field="edit"/>
+                        <style:LinkButton title="Редактировать" text="Редактировать" ui:field="edit" img="resources/img/pencil-16.png"/>
                     </g:HorizontalPanel>
 
                 </g:HorizontalPanel>
