@@ -293,7 +293,11 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
     @Override
     public void setMode(FormMode mode) {
         this.mode = mode;
-        editFormPresenter.setMode(mode);
+        if (getView().getSelectedRow() == null) {
+            editFormPresenter.setModeWithoutUpdate(mode);
+        } else {
+            editFormPresenter.setMode(mode);
+        }
         versionPresenter.setMode(mode);
         getView().updateMode(mode);
     }
