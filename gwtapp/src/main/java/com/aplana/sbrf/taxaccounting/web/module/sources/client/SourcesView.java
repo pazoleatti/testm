@@ -769,10 +769,10 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
                 this.sortByColumnLeftTable = SourcesSearchOrdering.valueOf(sortByColumn);
                 break;
             case RIGHT:
-                this.sortByColumnLeftTable = SourcesSearchOrdering.valueOf(sortByColumn);
+                this.sortByColumnRightTable = SourcesSearchOrdering.valueOf(sortByColumn);
                 break;
             case DOWN:
-                this.sortByColumnLeftTable = SourcesSearchOrdering.valueOf(sortByColumn);
+                this.sortByColumnDownTable = SourcesSearchOrdering.valueOf(sortByColumn);
                 break;
         }
     }
