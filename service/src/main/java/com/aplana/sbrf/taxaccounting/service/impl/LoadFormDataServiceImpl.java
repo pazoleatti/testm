@@ -14,6 +14,7 @@ import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
 import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -51,28 +52,72 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
     private SignService signService;
 
     @Override
-    public ImportCounter importFormData(TAUserInfo userInfo, List<Integer> departmentIdList, Logger logger) {
+    public ImportCounter importFormData(TAUserInfo userInfo, List<Integer> departmentIdList,
+                                        List<String> loadedFileNameList, Logger logger) {
         log(userInfo, LogData.L1, logger);
         ImportCounter importCounter = new ImportCounter();
-        // По каталогам загрузки ТБ
-        List<Integer> tbList = departmentService.getTBDepartmentIds(userInfo.getUser());
-        for (Object departmentIdObj : CollectionUtils.intersection(departmentIdList, tbList)) {
-            int departmentId = (Integer) departmentIdObj;
-            importCounter.add(importDataFromFolder(userInfo, ConfigurationParam.FORM_UPLOAD_DIRECTORY, departmentId, logger));
+        if (departmentIdList != null) {
+            // По каталогам загрузки ТБ
+            List<Integer> tbList = departmentService.getTBDepartmentIds(userInfo.getUser());
+            for (Object departmentIdObj : CollectionUtils.intersection(departmentIdList, tbList)) {
+                int departmentId = (Integer) departmentIdObj;
+                importCounter.add(importDataFromFolder(userInfo, ConfigurationParam.FORM_UPLOAD_DIRECTORY, departmentId,
+                        loadedFileNameList, logger));
+            }
         }
         log(userInfo, LogData.L2, logger, importCounter.getSuccessCounter(), importCounter.getFailCounter());
         return importCounter;
     }
 
     @Override
+    public List<Integer> getTB(TAUserInfo userInfo, Logger logger) {
+        // Выборка подразделений http://conf.aplana.com/pages/viewpage.action?pageId=13111363
+        List<Integer> departmentList = departmentService.getTaxFormDepartments(userInfo.getUser(),
+                Arrays.asList(TaxType.INCOME), null, null);
+
+        List<Department> departmentTBList = new LinkedList<Department>();
+        if (departmentList != null) {
+            Collection<Department> departments = departmentService.getRequiredForTreeDepartments(
+                    new HashSet(departmentList)).values();
+            for (Department department : departments) {
+                if (department.getType() == DepartmentType.TERR_BANK) {
+                    departmentTBList.add(department);
+                }
+            }
+        }
+
+        List<Integer> departmentTBIdList = new ArrayList<Integer>(departmentTBList.size());
+
+        if (departmentTBList.isEmpty()) {
+            logger.info("Не определено доступных для пользователя ТБ.");
+        }
+
+        if (departmentTBList.size() == 1) {
+            departmentTBIdList.add( departmentTBList.get(0).getId());
+            logger.info("Определен доступный для пользователя ТБ: «%s».", departmentTBList.get(0).getName());
+        }
+
+        if (departmentTBList.size() > 1) {
+            List<String> names = new ArrayList<String>(departmentTBList.size());
+            for (Department department : departmentTBList) {
+                departmentTBIdList.add(department.getId());
+                names.add("«" + department.getName() + "»");
+            }
+            logger.info("Определены доступные для пользователя ТБ: %s.", StringUtils.join(names, ", "));
+        }
+        return departmentTBIdList;
+    }
+
+    @Override
     public ImportCounter importFormData(TAUserInfo userInfo, Logger logger) {
-        return importFormData(userInfo, departmentService.getTBDepartmentIds(userInfo.getUser()), logger);
+        return importFormData(userInfo, departmentService.getTBDepartmentIds(userInfo.getUser()), null, logger);
     }
 
     /**
      * Загрузка всех ТФ НФ из указанного каталога загрузки
      */
-    private ImportCounter importDataFromFolder(TAUserInfo userInfo, ConfigurationParam param, Integer departmentId, Logger logger) {
+    private ImportCounter importDataFromFolder(TAUserInfo userInfo, ConfigurationParam param, Integer departmentId,
+                                               List<String> loadedFileNameList, Logger logger) {
         String path = getUploadPath(userInfo, param, departmentId, logger);
         if (path == null) {
             // Ошибка получения пути
@@ -83,7 +128,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
         // Набор файлов, которые уже обработали
         Set<String> ignoreFileSet = new HashSet<String>();
         // Если изначально нет подходящих файлов то выдаем отдельную ошибку
-        List<String> workFilesList = getWorkTransportFiles(path, ignoreFileSet);
+        List<String> workFilesList = getWorkTransportFiles(path, ignoreFileSet, loadedFileNameList);
         if (workFilesList.isEmpty()) {
             log(userInfo, LogData.L3, logger, departmentService.getDepartment(departmentId).getName());
             return new ImportCounter();
@@ -171,16 +216,17 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 try {
                     check = signService.checkSign(currentFile.getPath(), 0);
                 } catch (Exception e) {
-                    logger.error("Ошибка при проверке ЭЦП: " + e.getMessage());
+                    log(userInfo, LogData.L36, logger, e.getMessage());
                 }
                 if (!check) {
                     log(userInfo, LogData.L16, logger, fileName);
                     fail++;
                     continue;
                 }
+                log(userInfo, LogData.L15, logger, fileName);
+            } else {
+                log(userInfo, LogData.L15_1, logger, fileName);
             }
-
-            log(userInfo, LogData.L15, logger, fileName);
 
             // Поиск экземпляра НФ
             FormData formData;
@@ -294,7 +340,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             // Скрипт
             InputStream inputStream = currentFile.getInputStream();
             try {
-                formDataService.importFormData(localLogger, userInfo, formData.getId(), inputStream, currentFile.getName(),
+                formDataService.importFormData(localLogger, userInfo, formData.getId(), formData.isManual(), inputStream, currentFile.getName(),
                         FormDataEvent.IMPORT_TRANSPORT_FILE);
             } finally {
                 IOUtils.closeQuietly(inputStream);
@@ -382,11 +428,17 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
     /**
      * Получение спика ТФ НФ из каталога загрузки. Файлы, которые не соответствуют маппингу пропускаются.
      */
-    private List<String> getWorkTransportFiles(String folderPath, Set<String> ignoreFileSet) {
+    private List<String> getWorkTransportFiles(String folderPath, Set<String> ignoreFileSet,
+                                               List<String> loadedFileNameList) {
         List<String> retVal = new LinkedList<String>();
         FileWrapper catalogFile = ResourceUtils.getSharedResource(folderPath);
         for (String candidateStr : catalogFile.list()) {
             if (ignoreFileSet != null && ignoreFileSet.contains(candidateStr)) {
+                continue;
+            }
+
+            if (loadedFileNameList != null && !loadedFileNameList.contains(candidateStr)) {
+                // Если задан список определенных имен, а имя не из списка, то не загружаем такой файл
                 continue;
             }
 

@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.source.SourceClientData;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
 import javax.validation.constraints.NotNull;
@@ -8,9 +10,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
-import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.source.SourceClientData;
 
 /**
  * Интерфейс сервиса для работы с привязкой департаментов к подразделениям
@@ -61,10 +60,13 @@ public interface SourceService {
      * @param taxType      вид налога
      * @param periodStart  начало периода, в котором действуют назначения
      * @param periodEnd    окончание периода, в котором действуют назначения
+     * @param ordering     столбец, по которому сортировать
+     * @param isAscSorting сортировать по возрастанию\убыванию
      * @return информация о формах-источниках в виде списка
-     *         {@link com.aplana.sbrf.taxaccounting.model.DepartmentFormType}
+     * {@link com.aplana.sbrf.taxaccounting.model.DepartmentFormType}
      */
-    List<DepartmentFormType> getDFTByDepartment(int departmentId, TaxType taxType, Date periodStart, Date periodEnd);
+    List<DepartmentFormType> getDFTByDepartment(int departmentId, TaxType taxType, Date periodStart, Date periodEnd,
+                                                SourcesSearchOrdering ordering, Boolean isAscSorting);
 
     /**
      * Возвращает информацию о назначенных подразделению декларациях по заданному виду налога
@@ -73,9 +75,11 @@ public interface SourceService {
      * @param taxType      вид налога
      * @param periodStart  начало периода, в котором действуют назначения
      * @param periodEnd    окончание периода, в котором действуют назначения
+     * @param isAscSorting сортировать по возрастанию\убыванию
      * @return список назначенных подразделению деклараций (с учётом вида и типа) по заданному виду налога
      */
-    List<DepartmentDeclarationType> getDDTByDepartment(int departmentId, TaxType taxType, Date periodStart, Date periodEnd);
+    List<DepartmentDeclarationType> getDDTByDepartment(int departmentId, TaxType taxType, Date periodStart, Date periodEnd,
+                                                       boolean isAscSorting);
 
     /**
      * Возвращает информацию об источниках, которые должны использоваться при
@@ -87,10 +91,13 @@ public interface SourceService {
      * @param kind         тип налоговой формы
      * @param periodStart  начало периода, в котором действуют назначения
      * @param periodEnd    окончание периода, в котором действуют назначения
+     * @param ordering     столбец, по которому сортировать
+     * @param isAscSorting сортировать по возрастанию\убыванию
      * @return информация о формах-источниках в виде списка
-     *         {@link com.aplana.sbrf.taxaccounting.model.DepartmentFormType}
+     * {@link com.aplana.sbrf.taxaccounting.model.DepartmentFormType}
      */
-    List<DepartmentFormType> getDFTSourcesByDFT(int departmentId, int formTypeId, FormDataKind kind, Date periodStart, Date periodEnd);
+    List<DepartmentFormType> getDFTSourcesByDFT(int departmentId, int formTypeId, FormDataKind kind, Date periodStart,
+                                                Date periodEnd, SourcesSearchOrdering ordering, boolean isAscSorting);
 
     /**
      * Возвращает информацию об источниках, которые должны использоваться при
@@ -102,7 +109,8 @@ public interface SourceService {
      * @param reportPeriodId
      * @return
      */
-    List<DepartmentFormType> getDFTSourcesByDFT(int departmentId, int formTypeId, FormDataKind kind, int reportPeriodId);
+    List<DepartmentFormType> getDFTSourcesByDFT(int departmentId, int formTypeId, FormDataKind kind, int reportPeriodId,
+                                                SourcesSearchOrdering ordering, boolean isAscSorting);
 
     /**
      * Возвращает НФ назначения (DFT), которые являются источником для ДЕ назначения (DDT)
@@ -110,12 +118,15 @@ public interface SourceService {
      *
      * @param departmentId      идентификатор декларации
      * @param declarationTypeId идентификатор вида декларации
-     * @param periodStart  начало периода, в котором действуют назначения
-     * @param periodEnd    окончание периода, в котором действуют назначения
+     * @param periodStart       начало периода, в котором действуют назначения
+     * @param periodEnd         окончание периода, в котором действуют назначения
+     * @param ordering          столбец, по которому сортировать
+     * @param isAscSorting      сортировать по возрастанию\убыванию
      * @return информация о формах-источниках в виде списка
-     *         {@link com.aplana.sbrf.taxaccounting.model.DepartmentFormType}
+     * {@link com.aplana.sbrf.taxaccounting.model.DepartmentFormType}
      */
-    List<DepartmentFormType> getDFTSourceByDDT(int departmentId, int declarationTypeId, Date periodStart, Date periodEnd);
+    List<DepartmentFormType> getDFTSourceByDDT(int departmentId, int declarationTypeId, Date periodStart, Date periodEnd,
+                                               SourcesSearchOrdering ordering, boolean isAscSorting);
 
     /**
      * Возвращает информацию о декларациях-потребителях, которые должны использовать

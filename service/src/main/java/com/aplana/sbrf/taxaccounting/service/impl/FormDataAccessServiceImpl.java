@@ -174,7 +174,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
         boolean foundTypeAndKind = false;
         boolean foundKind = false;
         for (DepartmentFormType dft : sourceService.getDFTByDepartment(departmentId, formType.getTaxType(),
-                reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate())) {
+                reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate(), null, null)) {
             if (dft.getKind() == kind) {
                 foundKind = true;
                 if (dft.getFormTypeId() == formTypeId) {
@@ -347,9 +347,11 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                         }
                         return;
                     case ACCEPTED:
-                        // Нельзя редактировать НФ в состоянии "Принята"
-                        throw new AccessDeniedException(String.format(FORM_DATA_EDIT_ERROR,
-                                formData.getFormType().getName(), formData.getState().getName()));
+                        if (!manual) {
+                            // Нельзя редактировать НФ в состоянии "Принята"
+                            throw new AccessDeniedException(String.format(FORM_DATA_EDIT_ERROR,
+                                    formData.getFormType().getName(), formData.getState().getName()));
+                        }
                 }
             }
 

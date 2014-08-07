@@ -203,7 +203,8 @@ public class BookerStatementsDataPresenter extends Presenter<BookerStatementsDat
                             @Override
                             public void onSuccess(ImportResult importResult) {
                                 getView().updateTable();
-                                Dialog.infoMessage("Загрузка бух отчетности выполнена успешно.");
+                                Dialog.infoMessage("Загрузка бухгалтерской отчётности",
+                                                   "Загрузка бухгалтерской отчётности выполнена успешно!");
                             }
                         }, BookerStatementsDataPresenter.this));
             }
