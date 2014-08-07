@@ -273,6 +273,7 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
 
 	@Override
 	public void onCancel() {
+        getView().clearSelection();
 		placeManager.revealCurrentPlace();
 	}
 
@@ -354,7 +355,10 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<CheckReadWriteAccessResult>() {
             @Override
             public void onSuccess(CheckReadWriteAccessResult result) {
-                LogAddEvent.fire(ConfigurationPresenter.this, result.getUuid());
+                if (result.getUuid() != null) {
+                    LogAddEvent.fire(ConfigurationPresenter.this, result.getUuid());
+                    LogShowEvent.fire(ConfigurationPresenter.this, true);
+                }
                 getView().clearSelection();
             }
         }, this));

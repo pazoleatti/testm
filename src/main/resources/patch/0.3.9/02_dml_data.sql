@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------------------------------------
--- http://jira.aplana.com/browse/SBRFACCTAX-7519: При развертывании 0.3.9 должны исправляться возможные ошибки в справочнике "Подразделения"
+-- http://jira.aplana.com/browse/SBRFACCTAX-7519: РџСЂРё СЂР°Р·РІРµСЂС‚С‹РІР°РЅРёРё 0.3.9 РґРѕР»Р¶РЅС‹ РёСЃРїСЂР°РІР»СЏС‚СЊСЃСЏ РІРѕР·РјРѕР¶РЅС‹Рµ РѕС€РёР±РєРё РІ СЃРїСЂР°РІРѕС‡РЅРёРєРµ "РџРѕРґСЂР°Р·РґРµР»РµРЅРёСЏ"
 MERGE INTO department a
 USING
 (
@@ -13,7 +13,7 @@ ON (a.id = b.root_id)
 WHEN MATCHED THEN UPDATE SET a.is_active = 1;
 
 ---------------------------------------------------------------------------------------------------------
--- http://jira.aplana.com/browse/SBRFACCTAX-7999: Заполнение FORM_TYPE.CODE
+-- http://jira.aplana.com/browse/SBRFACCTAX-7999: Р—Р°РїРѕР»РЅРµРЅРёРµ FORM_TYPE.CODE
 UPDATE form_type SET code='852-4' WHERE id=316;
 UPDATE form_type SET code='852-5' WHERE id=317;
 UPDATE form_type SET code='852-6' WHERE id=318;
@@ -80,23 +80,24 @@ UPDATE form_type SET code='1290-59' WHERE id=350;
 UPDATE form_type SET code='1290-60' WHERE id=351;
 
 ---------------------------------------------------------------------------------------------------------
--- http://jira.aplana.com/browse/SBRFACCTAX-8007: Преобразовать строковые значения для справочников и НФ
-UPDATE string_value SET value = translate(value, '«»', '""') WHERE instr(value, '«')<>0 or instr(value, '»')<>0;
-UPDATE department SET tb_index = translate(tb_index, '«»', '""') WHERE instr(tb_index, '«')<>0 or instr(tb_index, '»')<>0;
-UPDATE department SET sbrf_code = translate(sbrf_code, '«»', '""') WHERE instr(sbrf_code, '«')<>0 or instr(sbrf_code, '»')<>0;
-UPDATE department SET name = translate(name, '«»', '""') WHERE instr(name, '«')<>0 or instr(name, '»')<>0;
-UPDATE department SET shortname = translate(shortname, '«»', '""') WHERE instr(shortname, '«')<>0 or instr(shortname, '»')<>0;
-UPDATE form_template SET fullname = translate(fullname, '«»', '""') WHERE instr(fullname, '«')<>0 or instr(fullname, '»')<>0;
-UPDATE form_template SET header = translate(header, '«»', '""') WHERE instr(header, '«')<>0 or instr(header, '»')<>0;
-UPDATE form_template SET name = translate(name, '«»', '""') WHERE instr(name, '«')<>0 or instr(name, '»')<>0;
-UPDATE form_type SET name = translate(name, '«»', '""') WHERE instr(name, '«')<>0 or instr(name, '»')<>0;
-UPDATE form_type SET code = translate(code, '«»', '""') WHERE instr(code, '«')<>0 or instr(code, '»')<>0;
-UPDATE income_101 SET account_name = translate(account_name, '«»', '""') WHERE instr(account_name, '«')<>0 or instr(account_name, '»')<>0;
-UPDATE income_101 SET account = translate(account, '«»', '""') WHERE instr(account, '«')<>0 or instr(account, '»')<>0;
-UPDATE income_102 SET item_name = translate(item_name, '«»', '""') WHERE instr(item_name, '«')<>0 or instr(item_name, '»')<>0;
-UPDATE income_102 SET opu_code = translate(opu_code, '«»', '""') WHERE instr(opu_code, '«')<>0 or instr(opu_code, '»')<>0;
-UPDATE ref_book_oktmo SET code = translate(code, '«»', '""') WHERE instr(code, '«')<>0 or instr(code, '»')<>0;
-UPDATE ref_book_value SET string_value = translate(string_value, '«»', '""') WHERE instr(string_value, '«')<>0 or instr(string_value, '»')<>0;
+-- http://jira.aplana.com/browse/SBRFACCTAX-8007: РџСЂРµРѕР±СЂР°Р·РѕРІР°С‚СЊ СЃС‚СЂРѕРєРѕРІС‹Рµ Р·РЅР°С‡РµРЅРёСЏ РґР»СЏ СЃРїСЂР°РІРѕС‡РЅРёРєРѕРІ Рё РќР¤
+UPDATE string_value SET value = translate(value, 'В«В»', '""') WHERE instr(value, 'В«')<>0 or instr(value, 'В»')<>0;
+UPDATE department SET tb_index = translate(tb_index, 'В«В»', '""') WHERE instr(tb_index, 'В«')<>0 or instr(tb_index, 'В»')<>0;
+UPDATE department SET sbrf_code = translate(sbrf_code, 'В«В»', '""') WHERE instr(sbrf_code, 'В«')<>0 or instr(sbrf_code, 'В»')<>0;
+UPDATE department SET name = translate(name, 'В«В»', '""') WHERE instr(name, 'В«')<>0 or instr(name, 'В»')<>0;
+UPDATE department SET shortname = translate(shortname, 'В«В»', '""') WHERE instr(shortname, 'В«')<>0 or instr(shortname, 'В»')<>0;
+UPDATE form_template SET fullname = translate(fullname, 'В«В»', '""') WHERE instr(fullname, 'В«')<>0 or instr(fullname, 'В»')<>0;
+UPDATE form_template SET header = translate(header, 'В«В»', '""') WHERE instr(header, 'В«')<>0 or instr(header, 'В»')<>0;
+UPDATE form_template SET name = translate(name, 'В«В»', '""') WHERE instr(name, 'В«')<>0 or instr(name, 'В»')<>0;
+UPDATE form_type SET name = translate(name, 'В«В»', '""') WHERE instr(name, 'В«')<>0 or instr(name, 'В»')<>0;
+UPDATE form_type SET code = translate(code, 'В«В»', '""') WHERE instr(code, 'В«')<>0 or instr(code, 'В»')<>0;
+UPDATE income_101 SET account_name = translate(account_name, 'В«В»', '""') WHERE instr(account_name, 'В«')<>0 or instr(account_name, 'В»')<>0;
+UPDATE income_101 SET account = translate(account, 'В«В»', '""') WHERE instr(account, 'В«')<>0 or instr(account, 'В»')<>0;
+UPDATE income_102 SET item_name = translate(item_name, 'В«В»', '""') WHERE instr(item_name, 'В«')<>0 or instr(item_name, 'В»')<>0;
+UPDATE income_102 SET opu_code = translate(opu_code, 'В«В»', '""') WHERE instr(opu_code, 'В«')<>0 or instr(opu_code, 'В»')<>0;
+UPDATE ref_book_oktmo SET code = translate(code, 'В«В»', '""') WHERE instr(code, 'В«')<>0 or instr(code, 'В»')<>0;
+UPDATE ref_book_value SET string_value = translate(string_value, 'В«В»', '""') WHERE instr(string_value, 'В«')<>0 or instr(string_value, 'В»')<>0;
 
 ---------------------------------------------------------------------------------------------------------
-commit;
+COMMIT;
+EXIT;

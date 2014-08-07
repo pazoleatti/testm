@@ -21,7 +21,7 @@ import java.util.Date;
  */
 
 @Service
-@Transactional(propagation = Propagation.NOT_SUPPORTED)
+@Transactional(propagation = Propagation.SUPPORTS)
 public class LockDataServiceImpl implements LockDataService {
 
 	private static final long SLEEP_TIME = 500; //шаг времени между проверками освобождения блокировки, миллисекунды

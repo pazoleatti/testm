@@ -79,7 +79,7 @@ public interface SourceService {
      * @return список назначенных подразделению деклараций (с учётом вида и типа) по заданному виду налога
      */
     List<DepartmentDeclarationType> getDDTByDepartment(int departmentId, TaxType taxType, Date periodStart, Date periodEnd,
-                                                       Boolean isAscSorting);
+                                                       boolean isAscSorting);
 
     /**
      * Возвращает информацию об источниках, которые должны использоваться при

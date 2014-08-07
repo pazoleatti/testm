@@ -54,7 +54,7 @@ alter table ref_book_attribute add constraint ref_book_attr_fk_attribute_id fore
 alter table ref_book_attribute add constraint ref_book_attr_chk_is_unique check (is_unique in (0, 1));
 alter table ref_book_attribute add constraint ref_book_attribute_chk_format check (format in (0,1,2,3,4,5,6));
 alter table ref_book_attribute add constraint ref_book_attr_chk_read_only check (read_only in (0, 1));
-alter table ref_book_attribute add constraint ref_book_attr_chk_max_length check ((type=1 and max_length between 1 and 2000) or (type=2 and max_length between 1 and 27) or (type in (3,4) and max_length is null));
+alter table ref_book_attribute add constraint ref_book_attr_chk_max_length check ((type=1 and max_length is not null and max_length between 1 and 2000) or (type=2 and max_length is not null and max_length between 1 and 27) or (type in (3,4) and max_length is null));
 
 alter table ref_book add constraint ref_book_fk_region foreign key (region_attribute_id) references ref_book_attribute(id);
 
@@ -235,12 +235,14 @@ alter table notification add constraint notification_fk_sender foreign key (send
 alter table notification add constraint notification_fk_receiver foreign key (receiver_department_id) references department(id);
 alter table notification add constraint notification_fk_sec_user foreign key (first_reader_id) references sec_user(id);
 
+alter table event add constraint event_pk primary key (id);
+
 alter table template_changes add constraint template_changes_pk primary key (id);
 alter table template_changes add constraint template_changes_fk_user_id foreign key (author) references sec_user(id);
-alter table template_changes add constraint changes_check_event check (event in (1,2,3,4,5));
+alter table template_changes add constraint template_changes_chk_event check (event in (701, 702, 703, 704, 705));
+alter table template_changes add constraint template_changes_fk_event foreign key (event) references event(id);
 alter table template_changes add constraint template_changes_chk_template check ((form_template_id is not null and declaration_template_id is null) or (form_template_id is null and declaration_template_id is not null));
 
-ALTER TABLE event ADD CONSTRAINT event_pk PRIMARY KEY (id);
 ALTER TABLE log_system ADD CONSTRAINT log_system_fk_event_id FOREIGN KEY (event_id) REFERENCES event(id);
 ALTER TABLE log_system DROP CONSTRAINT log_system_chk_event_id;
 

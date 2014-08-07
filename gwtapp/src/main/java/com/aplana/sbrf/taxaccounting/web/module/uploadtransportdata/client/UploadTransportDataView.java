@@ -62,7 +62,11 @@ public class UploadTransportDataView extends ViewWithUiHandlers<UploadTransportD
                 }
                 if (event.getResults().toLowerCase().contains(UUID_STRING)) {
                     String uuid = event.getResults().replaceAll(jsonPattern, "$2");
-                    uuid = uuid.substring(uuid.indexOf(UUID_STRING) + UUID_STRING.length() + 1, uuid.length());
+                    int startIndex = uuid.indexOf(UUID_STRING) + UUID_STRING.length() + 1;
+                    int endIndex = startIndex + 36;
+                    if (endIndex <= uuid.length()) {
+                        uuid = uuid.substring(startIndex, endIndex);
+                    }
                     getUiHandlers().onEndLoad(new EndLoadFileEvent(uuid));
                 } else {
                     getUiHandlers().onEndLoad(new EndLoadFileEvent(true));

@@ -32,7 +32,7 @@ public interface DepartmentDeclarationTypeDao {
      * @return список назначенных подразделению деклараций (с учётом вида и типа) по заданному виду налога
      */
     List<DepartmentDeclarationType> getByTaxType(int departmentId, TaxType taxType, Date periodStart, Date periodEnd,
-                                                 Boolean isAscSorting);
+                                                 boolean isAscSorting);
 
 	/**
 	 * Возвращает информацию о назначенных подразделению декларациях по заданному виду налога

@@ -336,7 +336,7 @@ public class LoadFormDataServiceTest {
                 eq(FormDataKind.PRIMARY), any(ReportPeriod.class), any(Integer.class))).thenReturn(1L);
 
         doThrow(new RuntimeException("Test RuntimeException")).when(formDataService).importFormData(any(Logger.class), any(TAUserInfo.class),
-                any(Long.class), any(InputStream.class), anyString(), any(FormDataEvent.class));
+                any(Long.class), any(Boolean.class), any(InputStream.class), anyString(), any(FormDataEvent.class));
 
         ReflectionTestUtils.setField(loadFormDataService, "formDataService", formDataService);
 

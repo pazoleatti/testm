@@ -126,7 +126,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
                     map.put(I_101_CREDIT_RATE, new RefBookValue(RefBookAttributeType.NUMBER, item.getCreditRate()));
                     map.put(I_101_OUTCOME_DEBET_REMAINS, new RefBookValue(RefBookAttributeType.NUMBER, item.getOutcomeDebetRemains()));
                     map.put(I_101_OUTCOME_CREDIT_REMAINS, new RefBookValue(RefBookAttributeType.NUMBER, item.getOutcomeCreditRemains()));
-                    map.put(I_101_ACCOUNT_PERIOD_ID, new RefBookValue(RefBookAttributeType.NUMBER, accountPeriodId.longValue()));
+                    map.put(I_101_ACCOUNT_PERIOD_ID, new RefBookValue(RefBookAttributeType.REFERENCE, accountPeriodId.longValue()));
                     records.add(map);
                 }
 

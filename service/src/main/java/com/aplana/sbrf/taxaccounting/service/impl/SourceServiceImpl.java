@@ -976,7 +976,7 @@ public class SourceServiceImpl implements SourceService {
 
     @Override
     public List<DepartmentDeclarationType> getDDTByDepartment(int departmentId, TaxType taxType, Date periodStart,
-                                                              Date periodEnd, Boolean isAscSorting) {
+                                                              Date periodEnd, boolean isAscSorting) {
         return departmentDeclarationTypeDao.getByTaxType(departmentId, taxType, periodStart, periodEnd, isAscSorting);
     }
 
