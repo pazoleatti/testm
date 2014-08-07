@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.scheduler.client;
 
+import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.TaskParamModel;
 
 
@@ -177,13 +178,17 @@ public class TaskPresenter extends Presenter<TaskPresenter.MyView,
     private boolean validateForm() {
         StringBuilder validateMsg = new StringBuilder();
         if (getView().getTaskName().isEmpty()) {
-            validateMsg.append("Не заполнено поле 'Название'").append("; ");
+            validateMsg.append("«Название», ");
         }
         if (getView().getTaskSchedule().isEmpty()) {
-            validateMsg.append("Не заполнено поле 'Расписание'").append("; ");
+            validateMsg.append("«Расписание», ");
         }
         if (getView().getJndi().isEmpty()) {
-            validateMsg.append("Не заполнено поле 'JNDI класса-обработчика'").append("; ");
+            validateMsg.append("«Тип задачи», ");
+        }
+        if (validateMsg.length() > 0) {
+            validateMsg.delete(validateMsg.length() - 2, validateMsg.length());
+            validateMsg.append(". ");
         }
 
         /**
@@ -191,11 +196,11 @@ public class TaskPresenter extends Presenter<TaskPresenter.MyView,
          * видима, и на ней есть ошибки то добавим их в основной список ошибок
          */
         if (getView().isTaskTypeSelected() && !getView().validateTaskParams()){
-            validateMsg.append(getView().getErrorsOnValidateTaskParams());
+            validateMsg.append(" Дополнительные параметры задачи: "+getView().getErrorsOnValidateTaskParams());
         }
 
         if (!validateMsg.toString().isEmpty()) {
-            MessageEvent.fire(this, "Ошибки в заполнении параметров задачи: " + validateMsg);
+            Dialog.errorMessage("Указание параметров", "Не заполнены поля обязательные для заполнения: "+validateMsg);
             return false;
         }
 

@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.server;
 
 import com.aplana.sbrf.taxaccounting.model.FormTypeKind;
+import com.aplana.sbrf.taxaccounting.model.TaxNominationFilter;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetTableDataAction;
@@ -12,7 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
@@ -28,25 +32,29 @@ public class GetTableDataHandler extends AbstractActionHandler<GetTableDataActio
     @Autowired
     private SourceService departmentFormTypeService;
 
-    static final TaxNominationDataComparator comparator = new TaxNominationDataComparator();
-
     @Override
     public GetTableDataResult execute(GetTableDataAction action, ExecutionContext executionContext) throws ActionException {
         GetTableDataResult result = new GetTableDataResult();
 
         char taxType = action.getTaxType();
+        List<Long> departmentsIds = new ArrayList<Long>();
+        for (Integer id : action.getDepartmentsIds()){
+            departmentsIds.add(Long.valueOf(id));
+        }
+        // Фильтр для сортировки
+        TaxNominationFilter filter = new TaxNominationFilter();
+        filter.setSortColumn(action.getSortColumn());
+        filter.setAscSorting(action.isAsc());
+
         List<FormTypeKind> data = new ArrayList<FormTypeKind>();
         // загрузка данных
         if (action.isForm()) {
-            for (Integer depoId : action.getDepartmentsIds()) {
-                data.addAll(departmentFormTypeService.getFormAssigned(depoId.longValue(), taxType));
-            }
+            data.addAll(departmentFormTypeService.getAllFormAssigned(departmentsIds, taxType, filter));
         } else {
-            for (Integer depoId : action.getDepartmentsIds()) {
-                data.addAll(departmentFormTypeService.getDeclarationAssigned(depoId.longValue(), taxType));
-            }
+            data.addAll(departmentFormTypeService.getAllDeclarationAssigned(departmentsIds, taxType, filter));
         }
         // формирование мапы с полным названием подразделения
+        // TODO - лучше получать иерархические названия подразделений одним запросом!!!
         Map<Integer, String> departmentFullNames = new HashMap<Integer, String>();
         for (FormTypeKind item : data) {
             int departmentId = item.getDepartment().getId();
@@ -59,10 +67,6 @@ public class GetTableDataHandler extends AbstractActionHandler<GetTableDataActio
             }
         }
         result.setDepartmentFullNames(departmentFullNames);
-
-        //сортировка
-        comparator.setup(action.getSortColumn(), action.isAsc(), action.isForm(), departmentFullNames);
-        Collections.sort(data, comparator);
 
         // обрезание по пейджингу
         if (action.getCount() != 0) {
