@@ -15,6 +15,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -56,7 +57,9 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         ps.appendQuery("left join form_kind fk on ls.form_kind_id=fk.\"ID\" ");
 
         if (departments != null) {
-            ps.appendQuery(" WHERE (ls.form_type_name is not null OR ls.declaration_type_name is not null) AND (");
+            ps.appendQuery(" WHERE ");
+            ps.appendQuery(SqlUtils.transformToSqlInStatement("ls.event_id", Arrays.asList(AVAILABLE_CONTROL_EVENTS)));
+            ps.appendQuery(" AND (");
             ps.appendQuery(transformToSqlInStatement("form_department_id", departments));
             ps.appendQuery(" OR (not form_department_id in (select id from department) AND ");
             ps.appendQuery(transformToSqlInStatement("tb_department_id", BADepartmentIds));
