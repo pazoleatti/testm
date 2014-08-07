@@ -10,16 +10,16 @@ INSERT INTO ref_book(id, name) VALUES (1, 'Книга');
 INSERT INTO ref_book(id, name) VALUES (2, 'Человек');
 INSERT INTO ref_book(id, name) VALUES (3, 'Библиотека');
 
-INSERT INTO ref_book_attribute(id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width) VALUES
-  (4, 2, 1, 'ФИО', 'name', 1, NULL, NULL, 1, NULL, 10);
-INSERT INTO ref_book_attribute(id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width) VALUES
-  (1, 1, 1, 'Наименование', 'name', 1, NULL, NULL, 1, NULL, 10);
-INSERT INTO ref_book_attribute(id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width) VALUES
-  (2, 1, 2, 'Количество страниц', 'order', 2, NULL, NULL, 1, 0, 10);
+INSERT INTO ref_book_attribute(id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width, max_length) VALUES
+  (4, 2, 1, 'ФИО', 'name', 1, NULL, NULL, 1, NULL, 10, 500);
+INSERT INTO ref_book_attribute(id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width, max_length) VALUES
+  (1, 1, 1, 'Наименование', 'name', 1, NULL, NULL, 1, NULL, 10, 500);
+INSERT INTO ref_book_attribute(id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width, max_length) VALUES
+  (2, 1, 2, 'Количество страниц', 'order', 2, NULL, NULL, 1, 0, 10, 5);
 INSERT INTO ref_book_attribute(id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width) VALUES
   (3, 1, 4, 'Автор', 'author', 4, 2, 4, 1, NULL, 10);
-INSERT INTO ref_book_attribute(id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width) VALUES
-  (5, 1, 5, 'Вес', 'weight', 2, NULL, NULL, 1, 3, 10);
+INSERT INTO ref_book_attribute(id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width, max_length) VALUES
+  (5, 1, 5, 'Вес', 'weight', 2, NULL, NULL, 1, 3, 10, 10);
 
 INSERT INTO ref_book_record(id, record_id, ref_book_id, version, status) VALUES
   (1, 1, 1, to_date('01.01.2013', 'DD.MM.YYYY'), 0);
