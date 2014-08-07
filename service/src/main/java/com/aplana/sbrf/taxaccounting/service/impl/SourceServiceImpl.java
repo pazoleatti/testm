@@ -919,8 +919,18 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
+    public List<FormTypeKind> getAllFormAssigned(List<Long> departmentIds, char taxType, TaxNominationFilter filter) {
+        return departmentFormTypeDao.getAllFormAssigned(departmentIds, taxType, filter);
+    }
+
+    @Override
     public List<FormTypeKind> getDeclarationAssigned(Long departmentId, char taxType) {
         return departmentFormTypeDao.getDeclarationAssigned(departmentId, taxType);
+    }
+
+    @Override
+    public List<FormTypeKind> getAllDeclarationAssigned(List<Long> departmentIds, char taxType, TaxNominationFilter filter) {
+        return departmentDeclarationTypeDao.getAllDeclarationAssigned(departmentIds, taxType, filter);
     }
 
     @Override

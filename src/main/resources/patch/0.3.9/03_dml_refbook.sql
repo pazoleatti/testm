@@ -390,6 +390,9 @@ UPDATE ref_book_attribute SET max_length=4 WHERE id = 185;
 UPDATE ref_book_attribute SET max_length=10 WHERE id = 189;
 UPDATE ref_book_attribute SET max_length=9 WHERE id = 190;
 
+-- http://jira.aplana.com/browse/SBRFACCTAX-7686 - максимальная длина строки/целой части числа
+ALTER TABLE ref_book_attribute ADD CONSTRAINT ref_book_attr_chk_max_length check ((type=1 and max_length is not null and max_length between 1 and 2000) or (type=2 and max_length is not null and max_length between 1 and 27) or (type in (3,4) and max_length IS null));
+
 ---------------------------------------------------------------------------------------------------------
 -- http://jira.aplana.com/browse/SBRFACCTAX-8133: уникальность атрибута "Код валюты. Цифровой" в справочнике "Курсы валют"
 UPDATE ref_book_attribute SET is_unique=1 WHERE id=80;
@@ -471,5 +474,13 @@ ALTER TABLE income_102 DROP COLUMN report_period_id;
 ALTER TABLE income_102 DROP COLUMN department_id;
 
 ---------------------------------------------------------------------------------------------------------
+-- http://jira.aplana.com/browse/SBRFACCTAX-8216 - Форма фильтрации БО. В поле "Период" должно отображаться значение период + год
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (108,'Периоды БО',0,0,1,null);
+
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (1081,108,'Год','YEAR',2,1,null,null,1,0,10,1,0,-1,null,1,4);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (1082,108,'Период','ACCOUNT_PERIOD_ID',4,2,106,1062,1,null,20,1,0,null,null,1,null);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (1083,108,'Название периода бухгалтерской отчетности','PERIOD_NAME',1,3,null,null,0,null,20,1,0,null,null,1,2000);
+---------------------------------------------------------------------------------------------------------
+
 COMMIT;
 EXIT;
