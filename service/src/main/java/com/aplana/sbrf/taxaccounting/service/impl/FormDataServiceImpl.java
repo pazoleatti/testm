@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -642,20 +643,29 @@ public class FormDataServiceImpl implements FormDataService {
 
         try {
             // Проверяем блокировку приемников
+            List<String> errorsList = new ArrayList<String>();
+            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm dd.MM.yyyy");
             for (DepartmentFormType destinationDFT : departmentFormTypes) {
                 String periodOrder = ((destinationDFT.getKind() == FormDataKind.PRIMARY || destinationDFT.getKind() == FormDataKind.CONSOLIDATED) && formData.getPeriodOrder() != null) ?
                         String.valueOf(formData.getPeriodOrder()) : "";
                 String lockKey = formData.getReportPeriodId() + "." + periodOrder + "." + destinationDFT.getDepartmentId()
                         + "." + destinationDFT.getFormTypeId() + "." + destinationDFT.getKind();
-                if (lockDataService.lock(lockKey, userInfo.getUser().getId(), BLOCK_TIME) != null) {
+                LockData lockData = lockDataService.lock(lockKey, userInfo.getUser().getId(), BLOCK_TIME);
+                if (lockData != null) {
                     FormTemplate formTemplate = formTemplateService.get(formTemplateService.getActiveFormTemplateId(destinationDFT.getFormTypeId(), formData.getReportPeriodId()));
-                    logger.error(String.format("Заблокирована форма-приемник «%s» в подразделении «%s»",
-                            formTemplate.getName(), departmentDao.getDepartment(destinationDFT.getDepartmentId()).getName()));
+                    errorsList.add(String.format("«%s», %s, «%s» заблокирована пользователем %s, %s",
+                                    formTemplate.getName(), reportPeriod.getTaxPeriod().getYear()+" "+reportPeriod.getName(),
+                                    departmentDao.getDepartment(destinationDFT.getDepartmentId()).getName(),
+                                    userService.getUser(lockData.getUserId()).getName(), sdf.format(lockData.getDateBefore())));
                 } else {
                     lockedForms.add(lockKey);
                 }
             }
-            if (logger.containsLevel(LogLevel.ERROR)) {
+            if (!errorsList.isEmpty()) {
+                logger.error("Невозможно принять налоговую форму и осуществить консолидацию из-за блокировки другими пользователями форм-приемников:");
+                for(String error : errorsList){
+                    logger.error(error);
+                }
                 throw new ServiceLoggerException("Ошибка при консолидации", logEntryService.save(logger.getEntries()));
             }
 
