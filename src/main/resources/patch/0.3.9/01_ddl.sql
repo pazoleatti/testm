@@ -74,7 +74,6 @@ ALTER TABLE ref_book_attribute ADD CONSTRAINT ref_book_attr_chk_read_only CHECK 
 -- http://jira.aplana.com/browse/SBRFACCTAX-7686 - максимальная длина строки/целой части числа
 ALTER TABLE ref_book_attribute ADD max_length number(4);
 COMMENT ON COLUMN ref_book_attribute.max_length IS 'Максимальная длина строки/Максимальное количество цифр без учета знака и десятичного разделителя';
-ALTER TABLE ref_book_attribute ADD CONSTRAINT ref_book_attr_chk_max_length check ((type=1 and max_length between 1 and 2000) or (type=2 and max_length between 1 and 27) or (type in (3,4) and max_length IS null));
 
 ---------------------------------------------------------------------------------------------------------
 -- http://jira.aplana.com/browse/SBRFACCTAX-8120 - новый механизм блокировок
