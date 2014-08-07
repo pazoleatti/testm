@@ -81,7 +81,7 @@ public class DeclarationDataSearchServiceImpl implements DeclarationDataSearchSe
         Collection<DeclarationData> datas = CollectionUtils.collect(ids, new Transformer() {
             @Override
             public Object transform(Object input) {
-                return declarationDao.get((Integer) input);
+                return declarationDao.get((Long) input);
             }
         });
         return (List<DeclarationData>) datas;
