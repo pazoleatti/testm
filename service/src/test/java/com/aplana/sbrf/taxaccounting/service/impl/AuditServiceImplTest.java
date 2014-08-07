@@ -77,8 +77,8 @@ public class AuditServiceImplTest {
         userInfo.setIp("127.0.0.1");
         userInfo.setUser(user);
 
-        auditService.add(FormDataEvent.MIGRATION, userInfo, 0, null, null, null, null, "MIGRATION");
-        auditService.add(FormDataEvent.LOGIN, userInfo, 1, null, null, null, null, "LOGIN");
+        auditService.add(FormDataEvent.MIGRATION, userInfo, 0, null, null, null, null, "MIGRATION", null);
+        auditService.add(FormDataEvent.LOGIN, userInfo, 1, null, null, null, null, "LOGIN", null);
 
         ArgumentCaptor<LogSystem> argument = ArgumentCaptor.forClass(LogSystem.class);
         verify(auditDao, times(2)).add(argument.capture());

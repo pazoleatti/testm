@@ -330,7 +330,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                 prefix = "Событие инициировано Системой. ";
             }
             auditService.add(FormDataEvent.UPLOAD_TRANSPORT_FILE, userInfo, departmentId, null,
-                    null, null, null, prefix + String.format(logData.getText(), args));
+                    null, null, null, prefix + String.format(logData.getText(), args), null);
         }
     }
 }

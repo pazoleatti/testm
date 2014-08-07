@@ -48,7 +48,8 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         ps.appendQuery("ls.note, ");
         if (filter.getSearchOrdering() == HistoryBusinessSearchOrdering.FORM_TYPE)
             ps.appendQuery("case when ls.declaration_type_name is not null then ls.declaration_type_name else ls.form_type_name end as type_name, ");
-        ps.appendQuery("ls.user_department_name ");
+        ps.appendQuery("ls.user_department_name, ");
+        ps.appendQuery("ls.blob_data_id ");
         ps.appendQuery("from log_system ls ");
 
         ps.appendQuery("left join event ev on ls.event_id=ev.\"ID\" ");
@@ -94,8 +95,9 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 
             jt.update(
                     "insert into log_system (id, log_date, ip, event_id, user_login, roles, department_name, report_period_name, " +
-                            "declaration_type_name, form_type_name, form_kind_id, note, user_department_name, form_department_id, tb_department_id)" +
-                            " values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                            "declaration_type_name, form_type_name, form_kind_id, note, user_department_name, form_department_id, " +
+                            "tb_department_id, blob_data_id)" +
+                            " values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     id,
                     logSystem.getLogDate(),
                     logSystem.getIp(),
@@ -110,7 +112,8 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                     logSystem.getNote(),
                     logSystem.getUserDepartmentName(),
                     logSystem.getFormDepartmentId(),
-                    logSystem.getDepartmentTBId()
+                    logSystem.getDepartmentTBId(),
+                    logSystem.getBlobDataId()
             );
         } catch (DataAccessException e){
             logger.error("Ошибки при логировании.", e);
@@ -251,6 +254,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
             }
 			log.setNote(rs.getString("note"));
 			log.setUserDepartmentName(rs.getString("user_department_name"));
+			log.setBlobDataId(rs.getString("blob_data_id"));
 			return log;
 		}
 	}

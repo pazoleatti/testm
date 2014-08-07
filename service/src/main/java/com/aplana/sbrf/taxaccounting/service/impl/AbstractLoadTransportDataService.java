@@ -120,7 +120,7 @@ public abstract class AbstractLoadTransportDataService {
                 prefix = "Событие инициировано Системой. ";
             }
             auditService.add(FormDataEvent.IMPORT_TRANSPORT_FILE, userInfo, departmentId, null,
-                    null, null, null, prefix + String.format(logData.getText(), args));
+                    null, null, null, prefix + String.format(logData.getText(), args), null);
         }
     }
 
