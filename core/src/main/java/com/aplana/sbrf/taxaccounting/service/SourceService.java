@@ -166,6 +166,16 @@ public interface SourceService {
     List<FormTypeKind> getDeclarationAssigned(Long departmentId, char taxType);
 
     /**
+     * Возвращает список назначенных деклараций для выбранного налога и подразделений
+     *
+     * @param departmentIds идентификаторы подразделений
+     * @param taxType       идентификатор вида налога
+     * @param filter        фильтр для сортировки
+     * @return список назначенных деклараций для выбранного налога и подразделений
+     */
+    List<FormTypeKind> getAllDeclarationAssigned(List<Long> departmentIds, char taxType, TaxNominationFilter filter);
+
+    /**
      * Возвращает список назначенных налоговых форм для выбранного налога и подразделения
      *
      * @param departmentId идентификатор подразделения
@@ -174,6 +184,16 @@ public interface SourceService {
      *         {@link com.aplana.sbrf.taxaccounting.model.FormTypeKind}
      */
     List<FormTypeKind> getFormAssigned(Long departmentId, char taxType);
+
+    /**
+     * Возвращает список назначенных налоговых форм для выбранного налога и подразделений
+     *
+     * @param departmentIds идентификаторы подразделений
+     * @param taxType       идентификатор вида налога
+     * @param filter        фильтр для сортировки
+     * @return список назначенных налоговых форм для выбранного налога и подразделений
+     */
+    List<FormTypeKind> getAllFormAssigned(List<Long> departmentIds, char taxType, TaxNominationFilter filter);
 
     /**
      * Добавляет налоговые формы, назначенные подразделению

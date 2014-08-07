@@ -1,8 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.api;
 
-import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
-import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
 import javax.validation.constraints.NotNull;
@@ -59,4 +57,14 @@ public interface DepartmentDeclarationTypeDao {
     List<Pair<DepartmentFormType, Date>> findSourceFTsForDeclaration(int typeId, @NotNull Date dateFrom, @NotNull Date dateTo);
 
     List<DepartmentDeclarationType> getDDTByDeclarationType(@NotNull Integer declarationTypeId);
+
+    /**
+     * Возвращает список назначенных деклараций для выбранного налога и подразделений
+     *
+     * @param departmentIds идентификаторы подразделений
+     * @param taxType       идентификатор вида налога
+     * @param filter        фильтр для сортировки
+     * @return список назначенных налоговых форм для выбранного налога и подразделений
+     */
+    List<FormTypeKind> getAllDeclarationAssigned(List<Long> departmentIds, char taxType, TaxNominationFilter filter);
 }

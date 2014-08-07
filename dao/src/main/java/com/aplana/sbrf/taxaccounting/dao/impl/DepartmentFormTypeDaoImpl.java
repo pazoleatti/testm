@@ -13,6 +13,8 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -460,6 +462,123 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                 },
                 FORM_ASSIGN_MAPPER
         );
+    }
+
+    private final RowMapper<FormTypeKind> ALL_FORM_ASSIGN_MAPPER = new RowMapper<FormTypeKind>() {
+        @Override
+        public FormTypeKind mapRow(ResultSet rs, int rowNum) throws SQLException {
+            // Подразделение
+            Department department = new Department();
+            department.setId(SqlUtils.getInteger(rs, "department_id"));
+            department.setName(rs.getString("department_name"));
+            Integer departmentParentId = SqlUtils.getInteger(rs, "department_parent_id");
+            // В ResultSet есть особенность что если пришло значение нул то вернет значение по умолчанию - то есть для Integer'a вернет 0
+            // а так как у нас в базе 0 используется в качестве идентификатора то нужно null нужно првоерять через .wasNull()
+            department.setParentId(rs.wasNull() ? null : departmentParentId);
+            department.setType(DepartmentType.fromCode(SqlUtils.getInteger(rs, "department_type")));
+            department.setShortName(rs.getString("department_short_name"));
+            department.setTbIndex(rs.getString("department_tb_index"));
+            department.setSbrfCode(rs.getString("department_sbrf_code"));
+            department.setRegionId(SqlUtils.getLong(rs, "department_region_id"));
+            if (rs.wasNull()) {
+                department.setRegionId(null);
+            }
+            department.setActive(rs.getBoolean("department_is_active"));
+            department.setCode(rs.getInt("department_code"));
+
+            // Исполнитель
+            Integer performerId = SqlUtils.getInteger(rs, "performer_id");
+            Department performer = new Department();
+
+            if (performerId != null) {
+                performer.setId(SqlUtils.getInteger(rs, "performer_id"));
+                performer.setName(rs.getString("performer_name"));
+                Integer performerParentId = SqlUtils.getInteger(rs, "performer_parent_id");
+                // В ResultSet есть особенность что если пришло значение нул то вернет значение по умолчанию - то есть для Integer'a вернет 0
+                // а так как у нас в базе 0 используется в качестве идентификатора то нужно null нужно првоерять через .wasNull()
+                performer.setParentId(rs.wasNull() ? null : performerParentId);
+                performer.setType(DepartmentType.fromCode(SqlUtils.getInteger(rs, "performer_type")));
+                performer.setShortName(rs.getString("performer_short_name"));
+                performer.setTbIndex(rs.getString("performer_tb_index"));
+                performer.setSbrfCode(rs.getString("performer_sbrf_code"));
+                performer.setRegionId(SqlUtils.getLong(rs, "performer_region_id"));
+                if (rs.wasNull()) {
+                    performer.setRegionId(null);
+                }
+                performer.setActive(rs.getBoolean("performer_is_active"));
+                performer.setCode(rs.getInt("performer_code"));
+            }
+
+            FormTypeKind formTypeKind = new FormTypeKind();
+            formTypeKind.setId(SqlUtils.getLong(rs, "id"));
+            formTypeKind.setKind(FormDataKind.fromId(SqlUtils.getInteger(rs, "kind")));
+            formTypeKind.setName(rs.getString("name"));
+            formTypeKind.setFormTypeId(SqlUtils.getLong(rs, "type_id"));
+            formTypeKind.setDepartment(department);
+            formTypeKind.setPerformer(performerId == null ? null : performer);
+            return formTypeKind;
+        }
+    };
+
+    @Override
+    public List<FormTypeKind> getAllFormAssigned(List<Long> departmentIds, char taxType, TaxNominationFilter filter) {
+
+        SqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("params", departmentIds)
+                .addValue("taxType", String.valueOf(taxType));
+
+        String sql = "SELECT dft.ID,\n" +
+                "  dft.KIND,\n" +
+                "  ft.NAME,\n" +
+                "  ft.ID AS type_id,\n" +
+                "  -- Для подразделения\n" +
+                "  d.ID        AS department_id,\n" +
+                "  d.NAME      AS department_name,\n" +
+                "  d.PARENT_ID AS department_parent_id,\n" +
+                "  d.TYPE      AS department_type,\n" +
+                "  d.SHORTNAME AS department_short_name,\n" +
+                "  d.TB_INDEX  AS department_tb_index,\n" +
+                "  d.SBRF_CODE AS department_sbrf_code,\n" +
+                "  d.REGION_ID AS department_region_id,\n" +
+                "  d.IS_ACTIVE AS department_is_active,\n" +
+                "  d.CODE      AS department_code,\n" +
+                "  -- Для исполнителя\n" +
+                "  dp.ID        AS performer_id,\n" +
+                "  dp.NAME      AS performer_name,\n" +
+                "  dp.PARENT_ID AS performer_parent_id,\n" +
+                "  dp.TYPE      AS performer_type,\n" +
+                "  dp.SHORTNAME AS performer_short_name,\n" +
+                "  dp.TB_INDEX  AS performer_tb_index,\n" +
+                "  dp.SBRF_CODE AS performer_sbrf_code,\n" +
+                "  dp.REGION_ID AS performer_region_id,\n" +
+                "  dp.IS_ACTIVE AS performer_is_active,\n" +
+                "  dp.CODE      AS performer_code,\n" +
+                "  -- Для сортировки\n" +
+                "  ft.NAME AS form_type,\n" +
+                "  fk.NAME AS form_kind,\n" +
+                "  d.NAME  AS department,\n" +
+                "  dp.NAME AS performer\n" +
+                "FROM department_form_type dft\n" +
+                "JOIN form_type ft\n" +
+                "ON ft.ID = dft.FORM_TYPE_ID\n" +
+                "JOIN form_kind fk\n" +
+                "ON fk.ID = dft.KIND\n" +
+                "JOIN department d\n" +
+                "ON d.ID = dft.DEPARTMENT_ID\n" +
+                "LEFT OUTER JOIN department dp\n" +
+                "ON dp.ID                 = dft.PERFORMER_DEP_ID\n" +
+                "WHERE dft.department_id IN (:params)\n" +
+                "AND ft.tax_type          = :taxType\n";
+
+        String order = null;
+
+        if (filter.getSortColumn() != null) {
+            order = "ORDER BY " + filter.getSortColumn().name();
+            if (!filter.isAscSorting())
+                order = order + " DESC";
+        }
+
+        return getNamedParameterJdbcTemplate().query(sql + order, parameters, ALL_FORM_ASSIGN_MAPPER);
     }
 
     private final RowMapper<FormTypeKind> DECLARATION_ASSIGN_MAPPER = new RowMapper<FormTypeKind>() {
