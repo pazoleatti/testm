@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.refbooklist.server;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.service.LoadRefBookDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
@@ -12,7 +13,6 @@ import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.LoadRefBookRe
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
@@ -71,8 +71,7 @@ public class LoadRefBookHandler extends AbstractActionHandler<LoadRefBookAction,
             if (hasAccountPlan) {
                 catalogStrList.add(ConfigurationParam.ACCOUNT_PLAN_UPLOAD_DIRECTORY.getCaption());
             }
-
-            logger.info("Получены: %s.", StringUtils.join(catalogStrList, ", "));
+            logger.info("Получены: %s.", StringUtils.join(catalogStrList.toArray(), ", ", null));
             // Импорт справочников из ЦАС НСИ
             loadRefBookDataService.importRefBookNsi(securityService.currentUserInfo(), logger);
             // Импорт справочников из Diasoft Custody
