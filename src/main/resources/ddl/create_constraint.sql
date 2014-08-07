@@ -51,7 +51,7 @@ alter table ref_book_attribute add constraint ref_book_attribute_uniq_alias uniq
 alter table ref_book_attribute add constraint ref_book_attr_fk_ref_book_id foreign key (ref_book_id) references ref_book(id);
 alter table ref_book_attribute add constraint ref_book_attr_fk_reference_id foreign key (reference_id) references ref_book(id);
 alter table ref_book_attribute add constraint ref_book_attr_fk_attribute_id foreign key (attribute_id) references ref_book_attribute(id);
-alter table ref_book_attribute add constraint ref_book_attr_chk_is_unique check (is_unique in (0, 1));
+
 alter table ref_book_attribute add constraint ref_book_attribute_chk_format check (format in (0,1,2,3,4,5,6));
 alter table ref_book_attribute add constraint ref_book_attr_chk_read_only check (read_only in (0, 1));
 alter table ref_book_attribute add constraint ref_book_attr_chk_max_length check ((type=1 and max_length between 1 and 2000) or (type=2 and max_length between 1 and 27) or (type in (3,4) and max_length is null));
