@@ -80,7 +80,7 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler>
                 return getUiHandlers();
             }
         };
-
+        dataProvider.setAscSorting(false);
     }
 
     @Override

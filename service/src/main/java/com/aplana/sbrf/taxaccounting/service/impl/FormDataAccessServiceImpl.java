@@ -174,7 +174,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
         boolean foundTypeAndKind = false;
         boolean foundKind = false;
         for (DepartmentFormType dft : sourceService.getDFTByDepartment(departmentId, formType.getTaxType(),
-                reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate(), null, null)) {
+                reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate())) {
             if (dft.getKind() == kind) {
                 foundKind = true;
                 if (dft.getFormTypeId() == formTypeId) {

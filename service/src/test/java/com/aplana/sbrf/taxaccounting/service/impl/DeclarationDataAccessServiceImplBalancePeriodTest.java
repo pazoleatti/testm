@@ -1,21 +1,5 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
-import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.PeriodService;
-import com.aplana.sbrf.taxaccounting.service.SourceService;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.mockito.Matchers;
-import org.springframework.test.util.ReflectionTestUtils;
-
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-
 import static com.aplana.sbrf.taxaccounting.test.DeclarationDataMockUtils.mockDeclarationData;
 import static com.aplana.sbrf.taxaccounting.test.DeclarationTemplateMockUtils.mockDeclarationTemplate;
 import static com.aplana.sbrf.taxaccounting.test.DepartmentDeclarationTypeMockUtils.mockDepartmentDeclarationType;
@@ -25,6 +9,33 @@ import static org.junit.Assert.assertFalse;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.mockito.Matchers;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
+import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
+import com.aplana.sbrf.taxaccounting.model.DepartmentType;
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TARole;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
+import com.aplana.sbrf.taxaccounting.service.SourceService;
 
 /**
  * Тест для периода с флагом "Ввод остатков". Все работы с декларациями запрещены
@@ -175,13 +186,13 @@ public class DeclarationDataAccessServiceImplBalancePeriodTest {
 		
 		SourceService sourceService = mock(SourceService.class);
 		List<DepartmentDeclarationType> bankDeclarationTypes = Collections.singletonList(mockDepartmentDeclarationType(Department.ROOT_BANK_ID, DECLARATION_TYPE_1_ID));
-		when(sourceService.getDDTByDepartment(Matchers.eq(Department.ROOT_BANK_ID), Matchers.any(TaxType.class), any(Date.class), any(Date.class), any(Boolean.class))).thenReturn(bankDeclarationTypes);
+		when(sourceService.getDDTByDepartment(Matchers.eq(Department.ROOT_BANK_ID), Matchers.any(TaxType.class), any(Date.class), any(Date.class))).thenReturn(bankDeclarationTypes);
 		
 		List<DepartmentDeclarationType> departmentTB1DeclarationTypes = Collections.singletonList(mockDepartmentDeclarationType(DEPARTMENT_TB1_ID, DECLARATION_TYPE_1_ID));
-		when(sourceService.getDDTByDepartment(Matchers.eq(DEPARTMENT_TB1_ID), Matchers.any(TaxType.class), any(Date.class), any(Date.class), any(Boolean.class))).thenReturn(departmentTB1DeclarationTypes);
+		when(sourceService.getDDTByDepartment(Matchers.eq(DEPARTMENT_TB1_ID), Matchers.any(TaxType.class), any(Date.class), any(Date.class))).thenReturn(departmentTB1DeclarationTypes);
 		
 		List<DepartmentDeclarationType> departmentTB2DeclarationTypes = Collections.singletonList(mockDepartmentDeclarationType(DEPARTMENT_TB2_ID, DECLARATION_TYPE_2_ID));
-		when(sourceService.getDDTByDepartment(Matchers.eq(DEPARTMENT_TB2_ID), Matchers.any(TaxType.class), any(Date.class), any(Date.class), any(Boolean.class))).thenReturn(departmentTB2DeclarationTypes);
+		when(sourceService.getDDTByDepartment(Matchers.eq(DEPARTMENT_TB2_ID), Matchers.any(TaxType.class), any(Date.class), any(Date.class))).thenReturn(departmentTB2DeclarationTypes);
 		ReflectionTestUtils.setField(service, "sourceService", sourceService);
 	}
 	

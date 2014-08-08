@@ -66,8 +66,7 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
         FormDataKind kind = FormDataKind.fromId(formDataKindId);
         Integer departmentId = action.getDepartmentId();
         Integer formDataTypeId = action.getFormDataTypeId();
-        List<DepartmentFormType> sources = sourceService.getDFTSourcesByDFT(departmentId, formDataTypeId, kind, reportPeriodId,
-                null, false);
+        List<DepartmentFormType> sources = sourceService.getDFTSourcesByDFT(departmentId, formDataTypeId, kind, reportPeriodId);
         if (!sources.isEmpty()){
             logger.warn("Форма является приемником данных.");
         }

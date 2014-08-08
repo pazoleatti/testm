@@ -194,12 +194,12 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
                 Set<DepartmentFormType> departmentFormTypeList = new HashSet<DepartmentFormType>();
                 for (Department department : departments10) {
                     if (formDataFilter.getReportPeriodIds().isEmpty()) {
-                        departmentFormTypeList.addAll(sourceService.getDFTByDepartment(department.getId(), formDataFilter.getTaxType(), null, null, null, null));
+                        departmentFormTypeList.addAll(sourceService.getDFTByDepartment(department.getId(), formDataFilter.getTaxType(), null, null));
                     } else {
                         for (Integer reportPeriodId : formDataFilter.getReportPeriodIds()) {
                             ReportPeriod reportPeriod = periodService.getReportPeriod(reportPeriodId);
                             departmentFormTypeList.addAll(sourceService.getDFTByDepartment(department.getId(), formDataFilter.getTaxType(),
-                                    reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate(), null, null));
+                                    reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate()));
                         }
                     }
                 }

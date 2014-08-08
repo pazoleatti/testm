@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.server;
 
 import com.aplana.sbrf.taxaccounting.model.FormTypeKind;
-import com.aplana.sbrf.taxaccounting.model.TaxNominationFilter;
+import com.aplana.sbrf.taxaccounting.model.SearchOrderingFilter;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetTableDataAction;
@@ -42,8 +42,8 @@ public class GetTableDataHandler extends AbstractActionHandler<GetTableDataActio
             departmentsIds.add(Long.valueOf(id));
         }
         // Фильтр для сортировки
-        TaxNominationFilter filter = new TaxNominationFilter();
-        filter.setSortColumn(action.getSortColumn());
+        SearchOrderingFilter filter = new SearchOrderingFilter();
+        filter.setSearchOrdering(action.getSortColumn());
         filter.setAscSorting(action.isAsc());
 
         List<FormTypeKind> data = new ArrayList<FormTypeKind>();
