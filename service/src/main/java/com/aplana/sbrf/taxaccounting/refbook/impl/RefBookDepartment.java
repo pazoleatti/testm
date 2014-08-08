@@ -3,6 +3,8 @@ package com.aplana.sbrf.taxaccounting.refbook.impl;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookIncome101Dao;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookIncome102Dao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
@@ -46,6 +48,8 @@ public class RefBookDepartment implements RefBookDataProvider {
     private static final String DEPARTMENT_NAME_ATTRIBUTE = "NAME";
     private static final String DEPARTMENT_PARENT_ATTRIBUTE = "PARENT_ID";
     private static final String DEPARTMENT_ACTIVE_NAME = "IS_ACTIVE";
+    private static final String INCOME_PERIOD_ATTRIBUTE_NAME = "ACCOUNT_PERIOD_ID";
+    private static final long INCOME_PERIOD_ATTRIBUTE_ID = 1072;
     private static final String WARN_MESSAGE_TARGET =
             "Внимание! Форма %s подразделения %s при сохранении будет являться приемником для формы %s подразделения %s, относящимся к разным территориальным банкам";
     private static final String WARN_MESSAGE_SOURCE =
@@ -91,6 +95,10 @@ public class RefBookDepartment implements RefBookDataProvider {
     private RefBookIncome101 refBookIncome101;
     @Autowired
     private RefBookIncome102 refBookIncome102;
+    @Autowired
+    RefBookIncome101Dao refBookIncome101Dao;
+    @Autowired
+    RefBookIncome102Dao refBookIncome102Dao;
     @Autowired
     AuditService auditService;
     @Autowired
@@ -442,7 +450,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         if (!income102Ids.isEmpty())
             refBookIncome102.deleteRecordVersions(logger, income102Ids, false);
 
-        Collection<Long> dftIsd = CollectionUtils.collect(sourceService.getDFTByDepartment(depId, null, null, null, null, null),
+        Collection<Long> dftIsd = CollectionUtils.collect(sourceService.getDFTByDepartment(depId, null, null, null),
                 new Transformer() {
                     @Override
                     public Object transform(Object o) {
@@ -451,7 +459,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                 });
         if (!dftIsd.isEmpty())
             sourceService.deleteDFT(dftIsd);
-        Collection<Long> ddtIds = CollectionUtils.collect(sourceService.getDDTByDepartment(depId, null, null, null, false),
+        Collection<Long> ddtIds = CollectionUtils.collect(sourceService.getDDTByDepartment(depId, null, null, null),
                 new Transformer() {
                     @Override
                     public Object transform(Object o) {
@@ -681,7 +689,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         }
 
         //4 точка запроса
-        List<DepartmentFormType> departmentFormTypes = sourceService.getDFTByDepartment(department.getId(), null, null, null, null, null);
+        List<DepartmentFormType> departmentFormTypes = sourceService.getDFTByDepartment(department.getId(), null, null, null);
         for (DepartmentFormType dft : departmentFormTypes){
             FormType formType =  formTypeService.get(dft.getFormTypeId());
             logger.warn(String.format("Существует назначение формы %s типа %s подразделению %s!",
@@ -690,7 +698,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         }
 
         //5 точка запроса
-        List<DepartmentDeclarationType> departmentDeclarationTypes = sourceService.getDDTByDepartment(department.getId(), null, null, null, true);
+        List<DepartmentDeclarationType> departmentDeclarationTypes = sourceService.getDDTByDepartment(department.getId(), null, null, null);
         for (DepartmentDeclarationType ddt : departmentDeclarationTypes){
             DeclarationType declarationType = declarationTypeService.get(ddt.getDeclarationTypeId());
             logger.warn(String.format("Существует назначение декларации %s подразделению %s!",
@@ -701,14 +709,13 @@ public class RefBookDepartment implements RefBookDataProvider {
         List<Long> ref101 = refBookIncome101.getUniqueRecordIds(null, String.format(FILTER_BY_DEPARTMENT, department.getId()));
         List<Long> ref102 = refBookIncome102.getUniqueRecordIds(null, String.format(FILTER_BY_DEPARTMENT, department.getId()));
         for (Long id : ref101){
-            Map<String, RefBookValue> values = refBookIncome101.getRecordData(id);
+            String periodValue = refBookIncome101Dao.getPeriodNameFromRefBook(id);
             logger.warn(String.format("Существует загруженная для подразделения %s бух. отчетность в периоде %s!",
-                    department.getName(), periodService.getReportPeriod(values.get("REPORT_PERIOD_ID").getNumberValue().intValue())));
+                    department.getName(), refBookIncome101Dao.getPeriodNameFromRefBook(id)));
         }
         for (Long id : ref102){
-            Map<String, RefBookValue> values = refBookIncome102.getRecordData(id);
             logger.warn(String.format("Существует загруженная для подразделения %s бух. отчетность в периоде %s!",
-                    department.getName(), periodService.getReportPeriod(values.get("REPORT_PERIOD_ID").getNumberValue().intValue())));
+                    department.getName(), refBookIncome102Dao.getPeriodNameFromRefBook(id)));
         }
 
         //7 точка запроса
@@ -721,7 +728,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         //8 точка запроса
         List<DepartmentFormType> departmentFormTypesDest = sourceService.getFormDestinations(department.getId(), 0, null, null, null);
         List<DepartmentDeclarationType> departmentDeclarationTypesDest = sourceService.getDeclarationDestinations(department.getId(), 0, null, null, null);
-        List<DepartmentFormType> depFTSources = sourceService.getDFTSourcesByDFT(department.getId(), 0 , null, null, null, null, false);
+        List<DepartmentFormType> depFTSources = sourceService.getDFTSourcesByDFT(department.getId(), 0 , null, null, null);
         //List<DepartmentFormType> depDTSources = sourceService.getDFTSourceByDDT(department.getId(), 0);
         //TODO : Доделать после того как Денис сделает источники-приемники
         for (DepartmentFormType departmentFormType : departmentFormTypesDest){

@@ -28,6 +28,12 @@
                     <version>${project.version}</version>
                     <type>ejb</type>
                 </dependency>
+                <dependency>
+                    <groupId>com.aplana.taxaccounting</groupId>
+                    <artifactId>scheduler-task</artifactId>
+                    <version>${project.version}</version>
+                    <type>ejb</type>
+                </dependency>
             </dependencies>
             <build>
                 <plugins>
@@ -106,6 +112,31 @@
                         </exclusion>
                         <exclusion>
                             <groupId>${project.groupId}</groupId>
+                            <artifactId>service-support</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>dao</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>core</artifactId>
+                        </exclusion>
+                    </exclusions>
+                </dependency>
+                <dependency>
+                    <groupId>com.aplana.taxaccounting</groupId>
+                    <artifactId>scheduler-task</artifactId>
+                    <version>${project.version}</version>
+                    <type>ejb</type>
+                    <classifier>jar-with-dependencies</classifier>
+                    <exclusions>
+                        <exclusion>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>service</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>${project.groupId}</groupId>
                             <artifactId>dao</artifactId>
                         </exclusion>
                         <exclusion>
@@ -149,6 +180,7 @@
                                     <groupId>${project.groupId}</groupId>
                                     <artifactId>scheduler-task</artifactId>
                                     <bundleFileName>scheduler-task.jar</bundleFileName>
+                                    <classifier>jar-with-dependencies</classifier>
                                 </ejbModule>
                                 <ejbModule>
                                     <groupId>${project.groupId}</groupId>
@@ -182,12 +214,6 @@
                     <artifactId>ws-runtime</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.aplana.taxaccounting</groupId>
-            <artifactId>scheduler-task</artifactId>
-            <version>${project.version}</version>
-            <type>ejb</type>
         </dependency>
     </dependencies>
 
