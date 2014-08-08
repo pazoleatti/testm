@@ -954,7 +954,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                 performerId, id);
     }
 
-    private String getSortingClause(SourcesSearchOrdering ordering, boolean isAscSorting) {
+    private String getSortingClause(SourcesSearchOrdering ordering, Boolean isAscSorting) {
         if (ordering == null) ordering = SourcesSearchOrdering.TYPE;
         StringBuilder sorting = new StringBuilder();
 
@@ -976,7 +976,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                 break;
         }
 
-        if (!isAscSorting) sorting.append("DESC\n");
+        if (isAscSorting!= null && !isAscSorting) sorting.append("DESC\n");
 
         return sorting.toString();
     }
