@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookSimpleReadOnly;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -25,23 +26,14 @@ import static org.junit.Assert.assertEquals;
  */
 public class RefBookFormDataKindTest {
 
-	private RefBookFormDataKind refBookFormDataKind;
+	private RefBookSimpleReadOnly refBookFormDataKind;
+    private static final String ATTRIBUTE_NAME = "NAME";
 
 	@Before
 	public void init() {
-		RefBook refBook = new RefBook();
-		refBook.setId(RefBookFormDataKind.REF_BOOK_ID);
-
-		RefBookAttribute attribute = new RefBookAttribute();
-		attribute.setAlias(RefBookFormDataKind.ATTRIBUTE_NAME);
-		attribute.setAttributeType(RefBookAttributeType.STRING);
-
-		List<RefBookAttribute> attributes = new ArrayList<RefBookAttribute>();
-		attributes.add(attribute);
-		refBook.setAttributes(attributes);
-
-		refBookFormDataKind = new RefBookFormDataKind();
-		ReflectionTestUtils.setField(refBookFormDataKind, "refBook", refBook);
+		refBookFormDataKind = new RefBookSimpleReadOnly();
+        refBookFormDataKind.setRefBookId(RefBookSimpleReadOnly.FORM_DATA_KIND_REF_BOOK_ID);
+        refBookFormDataKind.setTableName(RefBookSimpleReadOnly.FORM_DATA_KIND_TABLE_NAME);
 	}
 
 	@Test
@@ -64,9 +56,9 @@ public class RefBookFormDataKindTest {
 		PagingResult<Map<String, RefBookValue>> records = refBookFormDataKind.getRecords(new Date(), pagingParams, null, null);
 		assertEquals(2, records.size());
 		assertEquals(FormDataKind.UNP.getId(), records.get(0).get(RefBook.RECORD_ID_ALIAS).getNumberValue().intValue());
-		assertEquals(FormDataKind.UNP.getName(), records.get(0).get(RefBookFormDataKind.ATTRIBUTE_NAME).getStringValue());
+		assertEquals(FormDataKind.UNP.getName(), records.get(0).get(ATTRIBUTE_NAME).getStringValue());
 		assertEquals(FormDataKind.ADDITIONAL.getId(), records.get(1).get(RefBook.RECORD_ID_ALIAS).getNumberValue().intValue());
-		assertEquals(FormDataKind.ADDITIONAL.getName(), records.get(1).get(RefBookFormDataKind.ATTRIBUTE_NAME).getStringValue());
+		assertEquals(FormDataKind.ADDITIONAL.getName(), records.get(1).get(ATTRIBUTE_NAME).getStringValue());
 	}
 
 	@Test
@@ -77,7 +69,7 @@ public class RefBookFormDataKindTest {
 		PagingResult<Map<String, RefBookValue>> records = refBookFormDataKind.getRecords(new Date(), pagingParams, null, null);
 		assertEquals(1, records.size());
 		assertEquals(FormDataKind.ADDITIONAL.getId(), records.get(0).get(RefBook.RECORD_ID_ALIAS).getNumberValue().intValue());
-		assertEquals(FormDataKind.ADDITIONAL.getName(), records.get(0).get(RefBookFormDataKind.ATTRIBUTE_NAME).getStringValue());
+		assertEquals(FormDataKind.ADDITIONAL.getName(), records.get(0).get(ATTRIBUTE_NAME).getStringValue());
 	}
 
 	@Test
