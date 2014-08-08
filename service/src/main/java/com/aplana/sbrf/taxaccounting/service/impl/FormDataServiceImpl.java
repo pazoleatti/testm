@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -227,7 +228,7 @@ public class FormDataServiceImpl implements FormDataService {
 
             logBusinessService.add(formDataId, null, userInfo, formDataEvent, null);
             auditService.add(formDataEvent, userInfo, fd.getDepartmentId(), fd.getReportPeriodId(),
-                    null, fd.getFormType().getName(), fd.getKind().getId(), fileName);
+                    null, fd.getFormType().getName(), fd.getKind().getId(), fileName, null);
         } catch (IOException e) {
             throw new ServiceException(e.getLocalizedMessage(), e);
         } finally {
@@ -303,7 +304,7 @@ public class FormDataServiceImpl implements FormDataService {
 		logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.CREATE, null);
 		auditService.add(FormDataEvent.CREATE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
 
-				null, formData.getFormType().getName(), formData.getKind().getId(), null);
+				null, formData.getFormType().getName(), formData.getKind().getId(), null, null);
 		// Заполняем начальные строки (но не сохраняем)
 		dataRowDao.saveRows(formData, formTemplate.getRows());
 
@@ -466,7 +467,7 @@ public class FormDataServiceImpl implements FormDataService {
 
 		logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.SAVE, null);
 		auditService.add(FormDataEvent.SAVE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-				null, formData.getFormType().getName(), formData.getKind().getId(), null);
+				null, formData.getFormType().getName(), formData.getKind().getId(), null, null);
 
         String msg = updatePreviousRowNumber(formData);
         if (msg != null) {
@@ -530,7 +531,7 @@ public class FormDataServiceImpl implements FormDataService {
 
             FormData formData = formDataDao.get(formDataId, manual);
             auditService.add(FormDataEvent.DELETE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-                    null, formData.getFormType().getName(), formData.getKind().getId(), null);
+                    null, formData.getFormType().getName(), formData.getKind().getId(), null, null);
             formDataDao.delete(formDataId);
         }
 	}
@@ -591,7 +592,7 @@ public class FormDataServiceImpl implements FormDataService {
 
         logBusinessService.add(formData.getId(), null, userInfo, workflowMove.getEvent(), note);
         auditService.add(workflowMove.getEvent(), userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-                null, formData.getFormType().getName(), formData.getKind().getId(), note);
+                null, formData.getFormType().getName(), formData.getKind().getId(), note, null);
 
         if (workflowMove.getFromState() == WorkflowState.CREATED || workflowMove.getToState() == WorkflowState.CREATED) {
             String msg = updatePreviousRowNumber(formData);
@@ -642,20 +643,29 @@ public class FormDataServiceImpl implements FormDataService {
 
         try {
             // Проверяем блокировку приемников
+            List<String> errorsList = new ArrayList<String>();
+            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm dd.MM.yyyy");
             for (DepartmentFormType destinationDFT : departmentFormTypes) {
                 String periodOrder = ((destinationDFT.getKind() == FormDataKind.PRIMARY || destinationDFT.getKind() == FormDataKind.CONSOLIDATED) && formData.getPeriodOrder() != null) ?
                         String.valueOf(formData.getPeriodOrder()) : "";
                 String lockKey = formData.getReportPeriodId() + "." + periodOrder + "." + destinationDFT.getDepartmentId()
                         + "." + destinationDFT.getFormTypeId() + "." + destinationDFT.getKind();
-                if (lockDataService.lock(lockKey, userInfo.getUser().getId(), BLOCK_TIME) != null) {
+                LockData lockData = lockDataService.lock(lockKey, userInfo.getUser().getId(), BLOCK_TIME);
+                if (lockData != null) {
                     FormTemplate formTemplate = formTemplateService.get(formTemplateService.getActiveFormTemplateId(destinationDFT.getFormTypeId(), formData.getReportPeriodId()));
-                    logger.error(String.format("Заблокирована форма-приемник «%s» в подразделении «%s»",
-                            formTemplate.getName(), departmentDao.getDepartment(destinationDFT.getDepartmentId()).getName()));
+                    errorsList.add(String.format("«%s», %s, «%s» заблокирована пользователем %s, %s",
+                                    formTemplate.getName(), reportPeriod.getTaxPeriod().getYear()+" "+reportPeriod.getName(),
+                                    departmentDao.getDepartment(destinationDFT.getDepartmentId()).getName(),
+                                    userService.getUser(lockData.getUserId()).getName(), sdf.format(lockData.getDateBefore())));
                 } else {
                     lockedForms.add(lockKey);
                 }
             }
-            if (logger.containsLevel(LogLevel.ERROR)) {
+            if (!errorsList.isEmpty()) {
+                logger.error("Невозможно принять налоговую форму и осуществить консолидацию из-за блокировки другими пользователями форм-приемников:");
+                for(String error : errorsList){
+                    logger.error(error);
+                }
                 throw new ServiceLoggerException("Ошибка при консолидации", logEntryService.save(logger.getEntries()));
             }
 

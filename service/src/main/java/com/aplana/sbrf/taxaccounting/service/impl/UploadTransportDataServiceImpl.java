@@ -61,7 +61,8 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
     protected static enum LogData {
         L32("Файл «%s» сохранен в каталоге загрузки «%s».", LogLevel.INFO, true),
         L33("Ошибка при сохранении файла «%s» в каталоге загрузки! %s.", LogLevel.ERROR, false),
-        L34("Не указан путь к каталогу загрузки справочников Diasoft! Файл «%s» не сохранен.", LogLevel.ERROR, false),
+        L34_1("Не указан путь к каталогу загрузки справочников Diasoft! Файл «%s» не сохранен.", LogLevel.ERROR, false),
+        L34_2("Не указан каталог загрузки для ТБ «%s» в конфигурационных параметрах АС «Учет налогов».", LogLevel.ERROR, false),
         L35("Завершена процедура загрузки транспортных файлов в каталог загрузки. Файлов загружено: %d. Файлов отклонено: %d.", LogLevel.INFO, false);
 
         private LogLevel level;
@@ -212,7 +213,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
 
         if (isDiasoftRefBook) {
             // Справочники не проверяем
-            return getUploadPath(userInfo, fileName, ConfigurationParam.DIASOFT_UPLOAD_DIRECTORY, 0, logger);
+            return getUploadPath(userInfo, fileName, ConfigurationParam.DIASOFT_UPLOAD_DIRECTORY, 0, LogData.L34_1, logger);
         }
 
         // Не справочники Diasoft и не ТФ НФ
@@ -272,17 +273,33 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
             return null;
         }
 
-        return getUploadPath(userInfo, fileName, ConfigurationParam.FORM_UPLOAD_DIRECTORY, formDepartment.getId(), logger);
+        String retVal = getUploadPath(userInfo, fileName, ConfigurationParam.FORM_UPLOAD_DIRECTORY, formDepartment.getId(),
+                LogData.L34_2, logger);
+
+        if (retVal == null) {
+            logger.warn(U3, fileName, formType.getName(), formDepartment.getName());
+            return null;
+        }
+
+        return retVal;
     }
 
     /**
      * Получение пути из конф. параметров
      */
-    private String getUploadPath(TAUserInfo userInfo, String fileName, ConfigurationParam configurationParam, int departmentId, Logger logger) {
+    private String getUploadPath(TAUserInfo userInfo, String fileName, ConfigurationParam configurationParam,
+                                 int departmentId, LogData logData, Logger logger) {
         ConfigurationParamModel model = configurationDao.getByDepartment(departmentId);
         List<String> uploadPathList = model.get(configurationParam, departmentId);
         if (uploadPathList == null || uploadPathList.isEmpty()) {
-            log(userInfo, LogData.L34, logger, fileName);
+            String param = "";
+            if (logData == LogData.L34_1) {
+                param = fileName;
+            } else if (logData == LogData.L34_2) {
+                param = departmentService.getDepartment(departmentId).getName();
+            }
+
+            log(userInfo, logData, logger, param);
             return null;
         }
         return uploadPathList.get(0);
@@ -313,7 +330,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                 prefix = "Событие инициировано Системой. ";
             }
             auditService.add(FormDataEvent.UPLOAD_TRANSPORT_FILE, userInfo, departmentId, null,
-                    null, null, null, prefix + String.format(logData.getText(), args));
+                    null, null, null, prefix + String.format(logData.getText(), args), null);
         }
     }
 }

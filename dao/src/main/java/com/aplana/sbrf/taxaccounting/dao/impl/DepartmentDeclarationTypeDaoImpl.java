@@ -8,6 +8,8 @@ import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -196,5 +198,80 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
             logger.error("Получение списка деклараций назначений", e);
             throw new DaoException("Получение списка деклараций назначений", e);
         }
+    }
+
+    private final RowMapper<FormTypeKind> ALL_DECLARATION_ASSIGN_MAPPER = new RowMapper<FormTypeKind>() {
+        @Override
+        public FormTypeKind mapRow(ResultSet rs, int rowNum) throws SQLException {
+            // Подразделение
+            Department department = new Department();
+            department.setId(SqlUtils.getInteger(rs, "department_id"));
+            department.setName(rs.getString("department_name"));
+            Integer departmentParentId = SqlUtils.getInteger(rs, "department_parent_id");
+            // В ResultSet есть особенность что если пришло значение нул то вернет значение по умолчанию - то есть для Integer'a вернет 0
+            // а так как у нас в базе 0 используется в качестве идентификатора то нужно null нужно првоерять через .wasNull()
+            department.setParentId(rs.wasNull() ? null : departmentParentId);
+            department.setType(DepartmentType.fromCode(SqlUtils.getInteger(rs, "department_type")));
+            department.setShortName(rs.getString("department_short_name"));
+            department.setTbIndex(rs.getString("department_tb_index"));
+            department.setSbrfCode(rs.getString("department_sbrf_code"));
+            department.setRegionId(SqlUtils.getLong(rs, "department_region_id"));
+            if (rs.wasNull()) {
+                department.setRegionId(null);
+            }
+            department.setActive(rs.getBoolean("department_is_active"));
+            department.setCode(rs.getInt("department_code"));
+
+            FormTypeKind formTypeKind = new FormTypeKind();
+            formTypeKind.setId(SqlUtils.getLong(rs, "id"));
+            formTypeKind.setName(rs.getString("name"));
+            formTypeKind.setFormTypeId(SqlUtils.getLong(rs, "type_id"));
+            formTypeKind.setDepartment(department);
+            return formTypeKind;
+        }
+    };
+
+    @Override
+    public List<FormTypeKind> getAllDeclarationAssigned(List<Long> departmentIds, char taxType, TaxNominationFilter filter) {
+
+        SqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("params", departmentIds)
+                .addValue("taxType", String.valueOf(taxType));
+
+        String sql = "SELECT ddt.ID,\n" +
+                "  dt.NAME,\n" +
+                "  dt.ID AS type_id,\n" +
+                "  ddt.department_id,\n" +
+                "  -- Для подразделения\n" +
+                "  d.ID        AS department_id,\n" +
+                "  d.NAME      AS department_name,\n" +
+                "  d.PARENT_ID AS department_parent_id,\n" +
+                "  d.TYPE      AS department_type,\n" +
+                "  d.SHORTNAME AS department_short_name,\n" +
+                "  d.TB_INDEX  AS department_tb_index,\n" +
+                "  d.SBRF_CODE AS department_sbrf_code,\n" +
+                "  d.REGION_ID AS department_region_id,\n" +
+                "  d.IS_ACTIVE AS department_is_active,\n" +
+                "  d.CODE      AS department_code,\n" +
+                "  -- Для сортировки\n" +
+                "  dt.NAME AS dec_type,\n" +
+                "  d.NAME  AS department\n" +
+                "FROM declaration_type dt\n" +
+                "JOIN department_declaration_type ddt\n" +
+                "ON ddt.DECLARATION_TYPE_ID = dt.ID\n" +
+                "JOIN department d\n" +
+                "ON d.id = ddt.DEPARTMENT_ID\n" +
+                "WHERE ddt.DEPARTMENT_ID IN (:params)\n" +
+                "AND dt.TAX_TYPE = :taxType\n";
+
+        String order = null;
+
+        if (filter.getSortColumn() != null) {
+            order = "ORDER BY " + filter.getSortColumn().name();
+            if (!filter.isAscSorting())
+                order = order + " DESC";
+        }
+
+        return getNamedParameterJdbcTemplate().query(sql + order, parameters, ALL_DECLARATION_ASSIGN_MAPPER);
     }
 }

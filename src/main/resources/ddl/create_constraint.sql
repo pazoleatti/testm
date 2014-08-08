@@ -54,7 +54,7 @@ alter table ref_book_attribute add constraint ref_book_attr_fk_attribute_id fore
 
 alter table ref_book_attribute add constraint ref_book_attribute_chk_format check (format in (0,1,2,3,4,5,6));
 alter table ref_book_attribute add constraint ref_book_attr_chk_read_only check (read_only in (0, 1));
-alter table ref_book_attribute add constraint ref_book_attr_chk_max_length check ((type=1 and max_length between 1 and 2000) or (type=2 and max_length between 1 and 27) or (type in (3,4) and max_length is null));
+alter table ref_book_attribute add constraint ref_book_attr_chk_max_length check ((type=1 and max_length is not null and max_length between 1 and 2000) or (type=2 and max_length is not null and max_length between 1 and 27) or (type in (3,4) and max_length is null));
 
 alter table ref_book add constraint ref_book_fk_region foreign key (region_attribute_id) references ref_book_attribute(id);
 
@@ -219,6 +219,7 @@ alter table log_system add constraint log_system_chk_dcl_form check (event_id in
 alter table log_system add constraint log_system_chk_rp check (event_id in (7, 11, 401, 402, 501, 502, 503, 601, 901, 902, 903) or report_period_name is not null);
 alter table log_system add constraint log_system_fk_kind foreign key (form_kind_id) references form_kind(id);
 alter table log_system add constraint log_system_fk_user_login foreign key (user_login) references sec_user(login);
+alter table log_system add constraint log_system_fk_blob_data foreign key (blob_data_id) references blob_data(id) on delete set null;
 
 alter table department_report_period add constraint department_report_period_pk primary key(id);
 alter table department_report_period add constraint dep_rep_per_chk_is_active check (is_active in (0, 1));

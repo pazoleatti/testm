@@ -74,7 +74,7 @@ public class TransportDataController {
                 items.get(0).getInputStream(), logger);
 
         // Загрузка из каталога
-        if (!logger.containsLevel(LogLevel.ERROR) && !loadedFileNameList.isEmpty()) {
+        if (!loadedFileNameList.isEmpty()) {
             // Diasoft
             loadRefBookDataService.importRefBookDiasoft(userInfo, loadedFileNameList, logger);
 

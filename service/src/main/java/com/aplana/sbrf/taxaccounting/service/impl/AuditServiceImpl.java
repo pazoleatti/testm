@@ -42,7 +42,7 @@ public class AuditServiceImpl implements AuditService {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED, readOnly = false)
 	public void add(final FormDataEvent event, final TAUserInfo userInfo, final Integer departmentId, final Integer reportPeriodId,
-                    final String declarationTypeName, final String formTypeName, final Integer formKindId, final String note) {
+                    final String declarationTypeName, final String formTypeName, final Integer formKindId, final String note, final String blobDataId) {
         tx.executeInNewTransaction(new TransactionLogic() {
             @Override
             public void execute() {
@@ -81,6 +81,8 @@ public class AuditServiceImpl implements AuditService {
                 String userDepartmentName = userDepId == 0 ? departmentService.getDepartment(userDepId).getName() : departmentService.getParentsHierarchy(userDepId);
                 log.setUserDepartmentName(userDepartmentName.substring(0, Math.min(userDepartmentName.length(), 2000)));
 
+                log.setBlobDataId(blobDataId);
+
                 auditDao.add(log);
             }
 
@@ -100,7 +102,7 @@ public class AuditServiceImpl implements AuditService {
                 listIds.add(item.getId());
             auditDao.removeRecords(listIds);
         }
-        add(FormDataEvent.LOG_SYSTEM_BACKUP, userInfo, userInfo.getUser().getDepartmentId(), null, null, null, null, "Архивация ЖА");
+        add(FormDataEvent.LOG_SYSTEM_BACKUP, userInfo, userInfo.getUser().getDepartmentId(), null, null, null, null, "Архивация ЖА", null);
     }
 
     @Override

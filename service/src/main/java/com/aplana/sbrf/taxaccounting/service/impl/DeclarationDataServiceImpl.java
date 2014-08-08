@@ -144,7 +144,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 		auditService.add(FormDataEvent.CREATE , userInfo, newDeclaration.getDepartmentId(),
 				newDeclaration.getReportPeriodId(),
 				declarationTemplateDao.get(newDeclaration.getDeclarationTemplateId()).getType().getName(),
-				null, null, null);
+				null, null, null, null);
 		return id;
 	}
 
@@ -180,7 +180,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 		auditService.add(FormDataEvent.SAVE , userInfo, declarationData.getDepartmentId(),
 				declarationData.getReportPeriodId(),
 				declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getType().getName(),
-				null, null, null);
+				null, null, null, null);
 	}
 
 	@Override
@@ -216,7 +216,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 			auditService.add(FormDataEvent.DELETE , userInfo, declarationData.getDepartmentId(),
 					declarationData.getReportPeriodId(),
 					declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getType().getName(),
-					null, null, null);
+					null, null, null, null);
 
 	}
 
@@ -239,7 +239,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             String declarationTypeName = declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getType().getName();
             logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, null);
             auditService.add(FormDataEvent.MOVE_CREATED_TO_ACCEPTED , userInfo, declarationData.getDepartmentId(),
-                    declarationData.getReportPeriodId(), declarationTypeName, null, null, null);
+                    declarationData.getReportPeriodId(), declarationTypeName, null, null, null, null);
 		} else {
 			declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_ACCEPTED_TO_CREATED);
 
@@ -252,7 +252,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             String declarationTypeName = declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getType().getName();
 			logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, null);
 			auditService.add(FormDataEvent.MOVE_ACCEPTED_TO_CREATED , userInfo, declarationData.getDepartmentId(),
-					declarationData.getReportPeriodId(), declarationTypeName, null, null, null);
+					declarationData.getReportPeriodId(), declarationTypeName, null, null, null, null);
 
 		}
 		declarationDataDao.setAccepted(id, accepted);
