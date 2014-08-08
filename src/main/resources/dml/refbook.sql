@@ -5,7 +5,7 @@ ALTER TABLE ref_book_attribute DISABLE CONSTRAINT ref_book_attr_fk_ref_book_id;
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (0,'Тест',0,0,0,null);
 
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (2,'Коды представления налоговой декларации по месту нахождения (учёта)',1,0,0,null);
-INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (3,'Коды ОКАТО',1,1,1,null);
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (3,'Коды ОКАТО',1,0,1,null);
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (4,'Коды субъектов Российской Федерации',1,0,0,null);
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (5,'Коды форм реорганизации и ликвидации организации',1,0,0,null);
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (6,'Коды налоговых льгот',1,1,0,null);

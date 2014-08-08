@@ -70,7 +70,7 @@ UPDATE ref_book SET name = 'Коды стороны сделки' WHERE id = 65;
 UPDATE ref_book SET name = 'Коды ОКП на основании общероссийского классификатора продукции (ОКП)' WHERE id = 68;
 UPDATE ref_book SET type=1, read_only=1 WHERE id=96;
 UPDATE ref_book SET type=0, read_only=1 WHERE id=9;
-UPDATE ref_book SET type=1, read_only=1 WHERE id=3;
+UPDATE ref_book SET type=0, read_only=1 WHERE id=3;
 
 --Справочник: Ставки транспортного налога
 UPDATE ref_book_attribute SET name = 'Мощность от' WHERE id = 414;
