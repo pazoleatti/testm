@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -50,7 +49,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
     final static String U2_1 = " Код подразделения «%s» не существует в АС «Учет налогов»!";
     final static String U2_2 = " Код налоговой формы «%s» не существует в АС «Учет налогов»!";
     final static String U2_3 = " Код отчетного периода «%s» не существует в налоговом периоде %d года в АС «Учет налогов»!";
-    final static String U3 = "Файл «%s» не загружен, т.к. текущий пользователь не имеет доступа к содержащейся в нем налоговой форме «%s» подразделения «%s»!";
+    final static String U3 = "Файл «%s» не загружен, т.к. пользователь не имеет доступа к содержащейся в нем налоговой форме «%s» подразделения «%s»!";
 
     // Сообщения, которые не учтены в постановка
     final static String USER_NOT_FOUND_ERROR = "Не определен пользователь!";
@@ -62,7 +61,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
         L32("Файл «%s» сохранен в каталоге загрузки «%s».", LogLevel.INFO, true),
         L33("Ошибка при сохранении файла «%s» в каталоге загрузки! %s.", LogLevel.ERROR, false),
         L34_1("Не указан путь к каталогу загрузки справочников Diasoft! Файл «%s» не сохранен.", LogLevel.ERROR, false),
-        L34_2("Не указан каталог загрузки для ТБ «%s» в конфигурационных параметрах АС «Учет налогов».", LogLevel.ERROR, false),
+        L34_2("Не указан путь к каталогу загрузки для ТБ «%s» в конфигурационных параметрах АС «Учет налогов». Файл «%s» не сохранен.", LogLevel.ERROR, false),
         L35("Завершена процедура загрузки транспортных файлов в каталог загрузки. Файлов загружено: %d. Файлов отклонено: %d.", LogLevel.INFO, false);
 
         private LogLevel level;
@@ -92,14 +91,20 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
     final static String ZIP_ENCODING = "cp866";
 
     @Override
-    public List<String> uploadFile(TAUserInfo userInfo, String fileName, InputStream inputStream, Logger logger) {
-        List<String> loadedFileNameList = new LinkedList<String>();
-        ImportCounter importCounter = uploadFileWithoutLog(userInfo, fileName, inputStream, loadedFileNameList, logger);
+    public UploadResult uploadFile(TAUserInfo userInfo, String fileName, InputStream inputStream, Logger logger) {
+        UploadResult uploadResult = new UploadResult();
+        ImportCounter importCounter = uploadFileWithoutLog(userInfo, fileName, inputStream,
+                uploadResult.getDiasoftFileNameList(), uploadResult.getFormDataFileNameList(),
+                uploadResult.getFormDataDepartmentList(), logger);
         log(userInfo, LogData.L35, logger, importCounter.getSuccessCounter(), importCounter.getFailCounter());
-        return loadedFileNameList;
+        uploadResult.setSuccessCounter(importCounter.getSuccessCounter());
+        uploadResult.setFailCounter(importCounter.getFailCounter());
+        return uploadResult;
     }
 
-    private ImportCounter uploadFileWithoutLog(TAUserInfo userInfo, String fileName, InputStream inputStream, List<String> loadedFileNameList, Logger logger) {
+    private ImportCounter uploadFileWithoutLog(TAUserInfo userInfo, String fileName, InputStream inputStream,
+                                               List<String> diasoftFileNameList, List<String> formDataFileNameList,
+                                               List<Integer> formDataDepartmentList, Logger logger) {
         // Проверка прав
         if (userInfo == null) {
             logger.error(USER_NOT_FOUND_ERROR);
@@ -134,11 +139,16 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                 ArchiveEntry entry;
                 try {
                     while ((entry = zais.getNextEntry()) != null) {
-                        String path = checkFormDataAccess(userInfo, entry.getName(), logger);
-                        if (path != null) {
+                        CheckResult checkResult = checkFileNameAccess(userInfo, entry.getName(), logger);
+                        if (checkResult != null) {
                             try {
-                                if (copyFileFromStream(userInfo, zais, path, entry.getName(), logger)) {
-                                    loadedFileNameList.add(entry.getName());
+                                if (copyFileFromStream(userInfo, zais, checkResult.getPath(), entry.getName(), logger)) {
+                                    if (checkResult.isRefBook()) {
+                                        diasoftFileNameList.add(entry.getName());
+                                    } else {
+                                        formDataFileNameList.add(entry.getName());
+                                        formDataDepartmentList.add(checkResult.getDepartmentTbId());
+                                    }
                                     success++;
                                 } else {
                                     fail++;
@@ -159,12 +169,17 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                 }
             } else {
                 // Не архив
-                String path = checkFormDataAccess(userInfo, fileName, logger);
-                if (path != null) {
+                CheckResult checkResult = checkFileNameAccess(userInfo, fileName, logger);
+                if (checkResult != null) {
                     try {
-                        if (copyFileFromStream(userInfo, inputStream, path,
+                        if (copyFileFromStream(userInfo, inputStream, checkResult.getPath(),
                                 fileName, logger)) {
-                            loadedFileNameList.add(fileName);
+                            if (checkResult.isRefBook()) {
+                                diasoftFileNameList.add(fileName);
+                            } else {
+                                formDataFileNameList.add(fileName);
+                                formDataDepartmentList.add(checkResult.getDepartmentTbId());
+                            }
                             success++;
                         } else {
                             fail++;
@@ -207,13 +222,18 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
      * http://conf.aplana.com/pages/viewpage.action?pageId=13111363
      * Возвращает путь к каталогу, если проверка прошла.
      */
-    private String checkFormDataAccess(TAUserInfo userInfo, String fileName, Logger logger) {
+    private CheckResult checkFileNameAccess(TAUserInfo userInfo, String fileName, Logger logger) {
         boolean isDiasoftRefBook = loadRefBookDataService.isDiasoftFile(fileName);
         boolean isFormData = TransportDataParam.isValidName(fileName);
 
+        CheckResult checkResult = new CheckResult();
+
         if (isDiasoftRefBook) {
             // Справочники не проверяем
-            return getUploadPath(userInfo, fileName, ConfigurationParam.DIASOFT_UPLOAD_DIRECTORY, 0, LogData.L34_1, logger);
+            checkResult.setPath(getUploadPath(userInfo, fileName, ConfigurationParam.DIASOFT_UPLOAD_DIRECTORY, 0,
+                    LogData.L34_1, logger));
+            checkResult.setRefBook(true);
+            return checkResult;
         }
 
         // Не справочники Diasoft и не ТФ НФ
@@ -273,15 +293,13 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
             return null;
         }
 
-        String retVal = getUploadPath(userInfo, fileName, ConfigurationParam.FORM_UPLOAD_DIRECTORY, formDepartment.getId(),
-                LogData.L34_2, logger);
+        checkResult.setRefBook(false);
+        Integer departmentTbId = departmentService.getParentTB(formDepartment.getId()).getId();
+        checkResult.setDepartmentTbId(departmentTbId);
+        checkResult.setPath(getUploadPath(userInfo, fileName, ConfigurationParam.FORM_UPLOAD_DIRECTORY, departmentTbId,
+                LogData.L34_2, logger));
 
-        if (retVal == null) {
-            logger.warn(U3, fileName, formType.getName(), formDepartment.getName());
-            return null;
-        }
-
-        return retVal;
+        return checkResult;
     }
 
     /**
@@ -292,14 +310,11 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
         ConfigurationParamModel model = configurationDao.getByDepartment(departmentId);
         List<String> uploadPathList = model.get(configurationParam, departmentId);
         if (uploadPathList == null || uploadPathList.isEmpty()) {
-            String param = "";
             if (logData == LogData.L34_1) {
-                param = fileName;
+                log(userInfo, logData, logger, fileName);
             } else if (logData == LogData.L34_2) {
-                param = departmentService.getDepartment(departmentId).getName();
+                log(userInfo, logData, logger, departmentService.getDepartment(departmentId).getName(), fileName);
             }
-
-            log(userInfo, logData, logger, param);
             return null;
         }
         return uploadPathList.get(0);
@@ -331,6 +346,36 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
             }
             auditService.add(FormDataEvent.UPLOAD_TRANSPORT_FILE, userInfo, departmentId, null,
                     null, null, null, prefix + String.format(logData.getText(), args));
+        }
+    }
+
+    private class CheckResult {
+        private String path;
+        private boolean refBook;
+        Integer departmentTbId;
+
+        public String getPath() {
+            return path;
+        }
+
+        public void setPath(String path) {
+            this.path = path;
+        }
+
+        public boolean isRefBook() {
+            return refBook;
+        }
+
+        public void setRefBook(boolean refBook) {
+            this.refBook = refBook;
+        }
+
+        public Integer getDepartmentTbId() {
+            return departmentTbId;
+        }
+
+        public void setDepartmentTbId(Integer departmentTbId) {
+            this.departmentTbId = departmentTbId;
         }
     }
 }
