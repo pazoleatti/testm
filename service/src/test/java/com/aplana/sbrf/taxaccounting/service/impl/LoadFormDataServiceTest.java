@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.core.api.LockCoreService;
+import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
@@ -58,6 +58,8 @@ public class LoadFormDataServiceTest {
     private FormDataService formDataService;
     @Autowired
     private SignService signService;
+    @Autowired
+    private DepartmentDao departmentDao;
 
     private static final List<Integer> DEPARTMENT_LIST = Arrays.asList(1, 2, 3, 4, 5);
     private static String FILE_NAME_1 = "____852-4______________147212014__.rnu";
@@ -88,6 +90,7 @@ public class LoadFormDataServiceTest {
     @Before
     public void init() throws IOException {
         mockDepartmentService();
+        mockDepartmentDao();
         mockAuditService();
         temporaryFolder.create();
         uploadFolder = temporaryFolder.newFolder(ConfigurationParam.FORM_UPLOAD_DIRECTORY.name());
@@ -116,9 +119,12 @@ public class LoadFormDataServiceTest {
         Department department147 = new Department();
         department147.setId(147);
         department147.setName("147");
-        when(departmentService.getTBDepartmentIds(any(TAUser.class))).thenReturn(DEPARTMENT_LIST);
         when(departmentService.getDepartmentBySbrfCode("147")).thenReturn(department147);
         when(departmentService.getDepartment(anyInt())).thenReturn(department147);
+    }
+
+    private void mockDepartmentDao() {
+        when(departmentDao.getDepartmentIdsByType(DepartmentType.TERR_BANK.getCode())).thenReturn(DEPARTMENT_LIST);
     }
 
     private void mockAuditService() {

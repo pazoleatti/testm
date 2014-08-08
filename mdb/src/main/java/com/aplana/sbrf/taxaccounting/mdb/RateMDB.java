@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.mdb;
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
@@ -47,8 +46,9 @@ public class RateMDB implements MessageListener {
     private static final String ERROR_VALUE = "Сообщение не содержит значений";
     private static final String ERROR_CODE = "Значения сообщения установлены не по отношению к российскому рублю";
     private static final String ERROR_IMPORT = "Произошли ошибки в скрипте импорта справочника id = %d";
-    private static final String SUCCESS_IMPORT = "Импорт файла из КСШ успешно произведен";
-    private static final String ERROR_AUDIT = "Ошибка записи в журнал аудита";
+    private static final String SUCCESS_IMPORT = "Успешный обмен данными с КСШ.";
+    private static final String FAIL_IMPORT = "Неуспешная попытка обмена данными с КСШ. %s.";
+    private static final String ERROR_AUDIT = "Ошибка записи в журнал аудита.";
 
     @Autowired
     RefBookScriptingService refBookScriptingService;
@@ -74,7 +74,7 @@ public class RateMDB implements MessageListener {
 
         if (message == null || !(message instanceof TextMessage)) {
             logger.error(ERROR_FORMAT);
-            addLog(userInfo, ERROR_FORMAT);
+            addLog(userInfo,  String.format(FAIL_IMPORT, ERROR_FORMAT));
             return;
         }
 
@@ -84,7 +84,7 @@ public class RateMDB implements MessageListener {
             importRate(fileText, userInfo);
         } catch (Exception ex) {
             logger.error("Ошибка при получении сообщения: " + ex.getMessage(), ex);
-            addLog(userInfo, ERROR_FORMAT);
+            addLog(userInfo, String.format(FAIL_IMPORT, ERROR_FORMAT));
         }
     }
 
@@ -195,10 +195,10 @@ public class RateMDB implements MessageListener {
             runScript(refBookId[0], fileText, userInfo);
         } catch (ServiceException ex) {
             logger.error(ex.getMessage(), ex);
-            addLog(userInfo, ex.getMessage());
+            addLog(userInfo, String.format(FAIL_IMPORT, ex.getMessage()));
         } catch (Exception ex) {
             logger.error(ERROR_FORMAT, ex);
-            addLog(userInfo, ERROR_FORMAT);
+            addLog(userInfo, String.format(FAIL_IMPORT, ERROR_FORMAT));
         }
     }
 
@@ -216,7 +216,7 @@ public class RateMDB implements MessageListener {
             refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.IMPORT, logger, additionalParameters);
         }
         catch (ServiceException e) {
-            addLog(userInfo, e.getMessage());
+            addLog(userInfo, String.format(FAIL_IMPORT, e.getMessage()));
             return;
         }
         catch (Exception e) {
@@ -224,7 +224,7 @@ public class RateMDB implements MessageListener {
         }
         if (logger.containsLevel(LogLevel.ERROR)) {
             String msg = String.format(ERROR_IMPORT, refBookId);
-            addLog(userInfo, msg);
+            addLog(userInfo, String.format(FAIL_IMPORT, msg));
             throw new ServiceLoggerException(msg, logEntryService.save(logger.getEntries()));
         }
         addLog(userInfo, SUCCESS_IMPORT);
