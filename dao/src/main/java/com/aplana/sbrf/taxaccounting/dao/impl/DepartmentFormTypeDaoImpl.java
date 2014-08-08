@@ -163,11 +163,10 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         );
     }
 
-    private static final String GET_FORM_SOURCES_SQL = "select distinct src_dft.*, ds.period_start, ds.period_end, d.NAME, ft.NAME, fk.NAME\n" +
+    private static final String GET_FORM_SOURCES_SQL = "select distinct src_dft.*, ds.period_start, ds.period_end, d.NAME, ft.NAME\n" +
             "from department_form_type src_dft \n" +
             "join form_data_source ds on ds.src_department_form_type_id=src_dft.id \n" +
             "join department_form_type dft on ds.department_form_type_id=dft.id \n" +
-            "JOIN form_kind fk ON fk.id = src_dft.kind\n" +
             "JOIN department d ON d.id = src_dft.department_id\n" +
             "JOIN form_type ft ON ft.ID = src_dft.form_type_id\n" +
             "where dft.department_id=:departmentId and (:formTypeId is null or dft.form_type_id=:formTypeId) and (:formKind is null or dft.kind=:formKind) \n" +
@@ -388,11 +387,10 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                params, DDT_MAPPER);
     }
 
-    private static final String GET_DECLARATION_SOURCES_SQL = "select distinct src_dft.*, ds.period_start, ds.period_end, d.NAME, ft.NAME, fk.NAME\n \n" +
+    private static final String GET_DECLARATION_SOURCES_SQL = "select distinct src_dft.*, ds.period_start, ds.period_end, d.NAME, ft.NAME, src_dft.kind as kind\n" +
             "from department_form_type src_dft \n" +
             "join declaration_source ds on ds.src_department_form_type_id=src_dft.id \n" +
             "join department_declaration_type ddt on ds.department_declaration_type_id = ddt.id \n" +
-            "JOIN form_kind fk ON fk.id = src_dft.kind\n" +
             "JOIN department d ON d.id = src_dft.department_id\n" +
             "JOIN form_type ft ON ft.ID = src_dft.form_type_id\n" +
             "where ddt.department_id=:departmentId and (:declarationTypeId is null or ddt.declaration_type_id = :declarationTypeId) " +
@@ -678,13 +676,12 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         );
     }
 
-    private final static String GET_SQL_BY_TAX_TYPE_SQL = "select dft.*, ft.name from department_form_type dft\n" +
-            "LEFT JOIN form_kind fk ON fk.id = dft.KIND\n" +
-            "LEFT JOIN form_type ft ON dft.FORM_TYPE_ID = ft.ID\n" +
+    private final static String GET_SQL_BY_TAX_TYPE_SQL = "select src_dft.*, ft.name from department_form_type src_dft\n" +
+            "LEFT JOIN form_type ft ON src_dft.FORM_TYPE_ID = ft.ID\n" +
             "where department_id = :departmentId and exists (\n" +
             "select 1 from form_type ft \n" +
             "left join form_template ftemp on ftemp.type_id = ft.id \n" +
-            "where ft.id = dft.form_type_id and (:taxType is null or ft.tax_type = :taxType) \n" +
+            "where ft.id = src_dft.form_type_id and (:taxType is null or ft.tax_type = :taxType) \n" +
             //"  and (:periodStart is null or (ftemp.version >= :periodStart and (:periodEnd is null or ftemp.version <= :periodEnd)))\n" +
             ")";
 
@@ -966,7 +963,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                 sorting.append("ORDER BY ft.name\n");
                 break;
             case KIND:
-                sorting.append("ORDER BY fk.name\n");
+                sorting.append("ORDER BY src_dft.kind\n");
                 break;
             case DEPARTMENT:
                 sorting.append("ORDER BY d.name\n");
