@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockCoreService;
+import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
@@ -50,6 +51,8 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
     private LockCoreService lockCoreService;
     @Autowired
     private SignService signService;
+    @Autowired
+    private DepartmentDao departmentDao;
 
     @Override
     public ImportCounter importFormData(TAUserInfo userInfo, List<Integer> departmentIdList,
@@ -58,7 +61,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
         ImportCounter importCounter = new ImportCounter();
         if (departmentIdList != null) {
             // По каталогам загрузки ТБ
-            List<Integer> tbList = departmentService.getTBDepartmentIds(userInfo.getUser());
+            List<Integer> tbList = departmentDao.getDepartmentIdsByType(DepartmentType.TERR_BANK.getCode());
             for (Object departmentIdObj : CollectionUtils.intersection(departmentIdList, tbList)) {
                 int departmentId = (Integer) departmentIdObj;
                 importCounter.add(importDataFromFolder(userInfo, ConfigurationParam.FORM_UPLOAD_DIRECTORY, departmentId,
@@ -110,7 +113,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
 
     @Override
     public ImportCounter importFormData(TAUserInfo userInfo, Logger logger) {
-        return importFormData(userInfo, departmentService.getTBDepartmentIds(userInfo.getUser()), null, logger);
+        return importFormData(userInfo, departmentDao.getDepartmentIdsByType(DepartmentType.TERR_BANK.getCode()), null, logger);
     }
 
     /**
