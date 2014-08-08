@@ -123,4 +123,9 @@ public class RefBookIncome101DaoTest {
     public void testUniqueRecordIds(){
         Assert.assertEquals(0, dao.getUniqueRecordIds("department_id = 0").size());
     }
+    
+    @Test
+    public void testGetSeparatedValue(){
+        Assert.assertTrue(dao.getPeriodNameFromRefBook(1l).isEmpty());
+    }
 }

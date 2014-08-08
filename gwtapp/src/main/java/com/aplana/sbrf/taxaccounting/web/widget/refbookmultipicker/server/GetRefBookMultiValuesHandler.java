@@ -124,7 +124,9 @@ public class GetRefBookMultiValuesHandler extends AbstractActionHandler<GetRefBo
         if (attributeId != null) {
             int i = 0;
             for (RefBookAttribute refBookAttribute : refBook.getAttributes()) {
-                return refBookAttribute;
+                if (i++ == attributeId) {
+                    return refBookAttribute;
+                }
             }
         }
         return null;

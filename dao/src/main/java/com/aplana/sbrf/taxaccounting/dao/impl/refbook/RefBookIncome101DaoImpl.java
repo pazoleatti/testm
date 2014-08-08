@@ -231,4 +231,26 @@ public class RefBookIncome101DaoImpl extends AbstractDao implements RefBookIncom
 	public void deleteRecords(List<Long> uniqueRecordIds) {
 		getJdbcTemplate().update("delete from income_101 where " + SqlUtils.transformToSqlInStatement("id", uniqueRecordIds));
 	}
+
+    private final static String INCOME_101_GET_SEPARATE_VALUE =
+            "select (select number_value nv from REF_BOOK_VALUE where attribute_id = 1071 and record_id = (select INCOME_101.ACCOUNT_PERIOD_ID from INCOME_101 where id = :incomeId)) || ' ' || v2.STRING_VALUE rp_name \n" +
+                    "from INCOME_101 res\n" +
+                    "join REF_BOOK_VALUE rbv on res.ACCOUNT_PERIOD_ID = rbv.RECORD_ID\n" +
+                    "join REF_BOOK_ATTRIBUTE rba on rbv.ATTRIBUTE_ID = rba.ID\n" +
+                    "join ref_book_value v2 on v2.record_id=rbv.reference_value\n" +
+                    "  where res.id = :incomeId and rba.REF_BOOK_ID = :refBookId and rbv.ATTRIBUTE_ID = 1072 and v2.ATTRIBUTE_ID = 1062";
+
+    @Override
+    public String getPeriodNameFromRefBook(final long recordId) {
+        try {
+            return getNamedParameterJdbcTemplate().queryForObject(INCOME_101_GET_SEPARATE_VALUE,
+                    new HashMap<String, Object>(){{put("incomeId",recordId);put("refBookId", INCOME_101_AP_REF_BOOK_ID);}},
+                    String.class);
+        } catch (EmptyResultDataAccessException e){
+            return "";
+        } catch (DataAccessException e){
+            logger.error("", e);
+            throw new DaoException("", e);
+        }
+    }
 }
