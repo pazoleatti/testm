@@ -680,7 +680,7 @@ public class FormDataServiceImpl implements FormDataService {
                 // Список типов источников для текущего типа приемников
                 List<DepartmentFormType> sourceFormTypes = departmentFormTypeDao.getFormSources(
                         destinationDFT.getDepartmentId(), destinationDFT.getFormTypeId(), destinationDFT.getKind(),
-                        reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate(), null, false);
+                        reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
                 // Признак наличия принятых экземпляров источников
                 boolean existAcceptedSources = false;
                 for (DepartmentFormType sourceDFT : sourceFormTypes) {
