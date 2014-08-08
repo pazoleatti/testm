@@ -554,21 +554,19 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                 "  dp.IS_ACTIVE AS performer_is_active,\n" +
                 "  dp.CODE      AS performer_code,\n" +
                 "  -- Для сортировки\n" +
-                "  ft.NAME AS form_type,\n" +
-                "  fk.NAME AS form_kind,\n" +
-                "  d.NAME  AS department,\n" +
-                "  dp.NAME AS performer\n" +
+                "  ft.NAME  AS form_type,\n" +
+                "  dft.KIND AS form_kind,\n" +
+                "  d.NAME   AS department,\n" +
+                "  dp.NAME  AS performer\n" +
                 "FROM department_form_type dft\n" +
                 "JOIN form_type ft\n" +
                 "ON ft.ID = dft.FORM_TYPE_ID\n" +
-                "JOIN form_kind fk\n" +
-                "ON fk.ID = dft.KIND\n" +
                 "JOIN department d\n" +
                 "ON d.ID = dft.DEPARTMENT_ID\n" +
                 "LEFT OUTER JOIN department dp\n" +
-                "ON dp.ID                 = dft.PERFORMER_DEP_ID\n" +
+                "ON dp.ID = dft.PERFORMER_DEP_ID\n" +
                 "WHERE dft.department_id IN (:params)\n" +
-                "AND ft.tax_type          = :taxType\n";
+                "AND ft.tax_type = :taxType\n";
 
         String order = null;
 
