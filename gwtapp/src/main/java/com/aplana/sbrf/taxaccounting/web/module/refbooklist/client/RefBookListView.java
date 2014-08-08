@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookType;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataTokens;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.TableModel;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
+import com.aplana.sbrf.taxaccounting.web.widget.style.table.ComparatorWithNull;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -56,13 +57,13 @@ public class RefBookListView extends AbstractRefBookListView implements RefBookL
                 return object;
             }
         };
-
-        TextColumn<TableModel> typeColumn = new TextColumn<TableModel>() {
+        nameColumn.setSortable(true);
+        sortHandler.setComparator(nameColumn, new ComparatorWithNull<TableModel, String>() {
             @Override
-            public String getValue(TableModel tableModel) {
-                return tableModel.isReadOnly() ? "Только для чтения" : "Редактируемый";
+            public int compare(TableModel o1, TableModel o2) {
+                return compareWithNull(o1.getName(), o2.getName());
             }
-        };
+        });
 
         formDataTable.addResizableColumn(nameColumn, COLUMN_NAMES[0]);
         formDataTable.addResizableColumn(editableColumn, COLUMN_NAMES[2]);
