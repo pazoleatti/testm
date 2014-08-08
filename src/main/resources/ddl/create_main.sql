@@ -791,7 +791,7 @@ COMMENT ON TABLE event IS 'Справочник событий в системе
 COMMENT ON COLUMN event.id IS 'Идентификатор события';
 COMMENT ON COLUMN event.name IS 'Наименование события';
 
- create sequence seq_template_changes start with 10000;
+create sequence seq_template_changes start with 10000;
 --------------------------------------------------------------------------------------------------------
 create table lock_data
 (
@@ -804,4 +804,14 @@ comment on table lock_data is 'Информация о блокировках';
 comment on column lock_data.key is 'Код блокировки';
 comment on column lock_data.user_id is 'Идентификатор пользователя, установившего блокировку';
 comment on column lock_data.date_before is 'Срок истечения блокировки';
+
 --------------------------------------------------------------------------------------------------------
+create table department_type
+(
+id number(9) not null,
+name varchar2(50)
+);
+
+comment on table department_type is 'Типы подразделений банка';
+comment on column department_type.id is 'Идентификатор типа';
+comment on column department_type.name is 'Наименование типа';

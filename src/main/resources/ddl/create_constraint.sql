@@ -82,9 +82,11 @@ alter table form_column add constraint form_column_fk_parent_id foreign key (par
 alter table form_column add constraint form_column_chk_filt_parent check ((type='R' and ((parent_column_id is null) and (filter is not null)) or ((parent_column_id is not null) and (filter is null)) or ((parent_column_id is null) and (filter is null))) or (type<>'R'));
 alter table form_column add constraint form_column_chk_numrow check (numeration_row in (0, 1) or type <> 'A');
 
+alter table department_type add constraint department_type_pk primary key (id);
+
 alter table department add constraint department_pk primary key (id);
 alter table department add constraint dept_fk_parent_id foreign key (parent_id) references department(id);
-alter table department add constraint dept_chk_type check(type in (1, 2, 3, 4, 5));
+alter table department add constraint department_fk_type foreign key(type) references department_type(id);
 alter table department add constraint department_chk_is_active check (is_active in (0, 1));
 alter table department add constraint department_uniq_code UNIQUE (code);
 
