@@ -72,6 +72,9 @@ UPDATE ref_book SET type=1, read_only=1 WHERE id=96;
 UPDATE ref_book SET type=0, read_only=1 WHERE id=9;
 UPDATE ref_book SET type=0, read_only=1 WHERE id=3;
 
+-- -- http://jira.aplana.com/browse/SBRFACCTAX-8401: Нередактируемость справочника "Ценные бумаги"
+UPDATE ref_book SET read_only=1 WHERE id=84;
+
 --Справочник: Ставки транспортного налога
 UPDATE ref_book_attribute SET name = 'Мощность от' WHERE id = 414;
 UPDATE ref_book_attribute SET name = 'Мощность до' WHERE id = 415;
