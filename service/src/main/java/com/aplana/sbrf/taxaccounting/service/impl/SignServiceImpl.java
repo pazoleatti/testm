@@ -74,7 +74,7 @@ public class SignServiceImpl implements SignService {
                 }
                 String[] listFileNames;
                 if (keyResourceFolder.isFile()){
-                    keyFolderPath = keyFolderPath.replaceFirst(keyResourceFolder.getName(), "");
+                    keyFolderPath = keyFolderPath.replaceFirst(keyResourceFolder.getName() + "$", "");
                     listFileNames = new String[]{keyResourceFolder.getName()};
                 }else {
                     listFileNames = keyResourceFolder.list();
