@@ -21,7 +21,6 @@ INSERT INTO ref_book_attribute (id, ref_book_id, ord, name, alias, type, referen
 INSERT INTO ref_book_attribute (id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width, max_length) VALUES
 ( 1071, 107, 3, 'Год', 'YEAR', 1, NULL, NULL, 1, NULL, 10, 100);
 
-
 INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, max_length) VALUES
 ( 502, 50,'Номер счета','ACCOUNT', 1, 1, NULL, NULL, 1,NULL, 10, 100);
 INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, max_length) VALUES
@@ -49,6 +48,9 @@ INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, referenc
 ( 524, 52,'Наименование статьи','ITEM_NAME', 1, 3, NULL, NULL, 1,NULL, 100, 100);
 INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, max_length) VALUES
 ( 527, 52,'Идентификатор периода и подразделения БО','ACCOUNT_PERIOD_ID', 4, 4, 107, 1071, 1, NULL, 10, NULL);
+
+INSERT INTO department_type (id, name) VALUES (1, 'Банк');
+INSERT INTO department_type (id, name) VALUES (2, 'Территориальный банк');
 
 -- department
 INSERT INTO department (id, NAME, parent_id, TYPE, shortname, tb_index, sbrf_code, code) VALUES (1, 'банк1', NULL, 1, NULL, NULL, NULL, 1);

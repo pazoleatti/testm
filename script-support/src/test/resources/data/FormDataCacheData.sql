@@ -68,6 +68,10 @@ INSERT INTO ref_book_value(record_id, attribute_id, string_value, number_value, 
 INSERT INTO ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) VALUES
   (7, 4, 'Петренко П.П.', NULL, NULL, NULL);
 
+
+INSERT INTO department_type (id, name) VALUES (1, 'Банк');
+INSERT INTO department_type (id, name) VALUES (2, 'Территориальный банк');
+
 -- Подразделения
 INSERT INTO DEPARTMENT (id, name, parent_id, type, shortname, tb_index, sbrf_code, code)
   VALUES (1, 'Банк', NULL, 1, NULL, NULL, '12', 1);

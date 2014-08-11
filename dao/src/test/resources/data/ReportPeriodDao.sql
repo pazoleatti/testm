@@ -1,3 +1,9 @@
+INSERT INTO department_type (id, name) VALUES (1, 'Банк');
+INSERT INTO department_type (id, name) VALUES (2, 'Территориальный банк');
+INSERT INTO department_type (id, name) VALUES (3, 'ЦСКО, ПЦП');
+INSERT INTO department_type (id, name) VALUES (4, 'Управление');
+INSERT INTO department_type (id, name) VALUES (5, '');
+
 insert into DEPARTMENT (id, name, parent_id, type, shortname, tb_index, sbrf_code, code) values (1, 'Банк', null, 1, null, null, '12', 1);
 insert into DEPARTMENT (id, name, parent_id, type, shortname, tb_index, sbrf_code, code) values (2, 'ТБ1', 1, 2, null, null, '23', 2);
 insert into DEPARTMENT (id, name, parent_id, type, shortname, tb_index, sbrf_code, code) values (3, 'ТБ2', 1, 2, null, null, null, 3);
