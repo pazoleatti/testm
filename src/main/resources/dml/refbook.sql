@@ -69,7 +69,7 @@ INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) V
 
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (82,'Шифры видов реализованного (выбывшего) имущества',1,0,0,null);
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (83,'Шифры видов реализации (выбытия)',1,0,0,null);
-INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (84,'Ценные бумаги',1,0,0,null);
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (84,'Ценные бумаги',1,0,1,null);
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (85,'Виды срочных сделок',1,0,0,null);
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (86,'Обеспечение',1,0,0,null);
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (87,'Виды операций',1,0,0,null);
