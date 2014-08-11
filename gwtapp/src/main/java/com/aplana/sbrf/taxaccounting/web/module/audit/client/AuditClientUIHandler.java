@@ -9,4 +9,5 @@ public interface AuditClientUIHandler extends AplanaUiHandlers {
     void onPrintButtonClicked();
     void onArchiveButtonClicked();
     void onSortingChanged();
+    void onEventClick(String uuid);
 }
