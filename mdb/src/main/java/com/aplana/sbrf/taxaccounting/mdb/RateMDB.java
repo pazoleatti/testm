@@ -49,6 +49,7 @@ public class RateMDB implements MessageListener {
     private static final String ERROR_IMPORT = "Произошли ошибки в скрипте импорта справочника id = %d";
     private static final String SUCCESS_IMPORT = "Успешный обмен данными с КСШ. Загружено %s курсов %s";
     private static final String ERROR_AUDIT = "Ошибка записи в журнал аудита";
+    private static final String FAIL_IMPORT = "Неуспешная попытка обмена данными с КСШ. %s.";
 
     @Autowired
     RefBookScriptingService refBookScriptingService;
@@ -79,7 +80,7 @@ public class RateMDB implements MessageListener {
 
         if (message == null || !(message instanceof TextMessage)) {
             logger.error(ERROR_FORMAT);
-            addLog(userInfo, ERROR_FORMAT, null);
+            addLog(userInfo,  String.format(FAIL_IMPORT, ERROR_FORMAT), null);
             return;
         }
 
@@ -89,7 +90,7 @@ public class RateMDB implements MessageListener {
             importRate(fileText, userInfo);
         } catch (Exception ex) {
             logger.error("Ошибка при получении сообщения: " + ex.getMessage(), ex);
-            addLog(userInfo, ERROR_FORMAT, null);
+            addLog(userInfo, String.format(FAIL_IMPORT, ERROR_FORMAT), null);
         }
     }
 
@@ -200,10 +201,10 @@ public class RateMDB implements MessageListener {
             runScript(refBookId[0], fileText, userInfo);
         } catch (ServiceException ex) {
             logger.error(ex.getMessage(), ex);
-            addLog(userInfo, ex.getMessage(), null);
+            addLog(userInfo, String.format(FAIL_IMPORT, ex.getMessage()), null);
         } catch (Exception ex) {
             logger.error(ERROR_FORMAT, ex);
-            addLog(userInfo, ERROR_FORMAT, null);
+            addLog(userInfo, String.format(FAIL_IMPORT, ERROR_FORMAT), null);
         }
     }
 
@@ -228,7 +229,7 @@ public class RateMDB implements MessageListener {
         String uuid = logEntryService.save(logger.getEntries());
         if (logger.containsLevel(LogLevel.ERROR)) {
             String msg = String.format(ERROR_IMPORT, refBookId);
-            addLog(userInfo, msg, uuid);
+            addLog(userInfo, String.format(FAIL_IMPORT, msg), uuid);
             throw new ServiceLoggerException(msg, uuid);
         }
         addLog(userInfo, String.format(SUCCESS_IMPORT, scriptStatusHolder.getSuccessCount(), nameMap.get(refBookId)), uuid);

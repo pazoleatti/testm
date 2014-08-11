@@ -174,14 +174,20 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
 
     @Override
     public List<DepartmentFormType> getFormSources(int departmentId, int formTypeId, FormDataKind kind, Date periodStart,
-                                                   Date periodEnd, SourcesSearchOrdering ordering, boolean isAscSorting) {
+                                                   Date periodEnd) {
+        SearchOrderingFilter filter = getSearchOrderingDefaultFilter();
+        return getFormSources(departmentId, formTypeId, kind, periodStart, periodEnd, filter);
+    }
+
+    @Override
+    public List<DepartmentFormType> getFormSources(int departmentId, int formTypeId, FormDataKind kind, Date periodStart, Date periodEnd, SearchOrderingFilter filter) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("departmentId", departmentId);
         params.put("formTypeId", formTypeId != 0 ? formTypeId : null);
         params.put("formKind", kind != null ? kind.getId() : null);
         params.put("periodStart", periodStart);
         params.put("periodEnd", periodEnd);
-        return getNamedParameterJdbcTemplate().query(GET_FORM_SOURCES_SQL + getSortingClause(ordering, isAscSorting),
+        return getNamedParameterJdbcTemplate().query(GET_FORM_SOURCES_SQL + getSortingClause(filter),
                 params, DFT_MAPPER_WITH_PERIOD);
     }
 
@@ -397,14 +403,19 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
             "and (:periodStart is null or ((ds.period_end >= :periodStart or ds.period_end is null) and (:periodEnd is null or ds.period_start <= :periodEnd)))";
 
     @Override
-    public List<DepartmentFormType> getDeclarationSources(int departmentId, int declarationTypeId, Date periodStart, Date periodEnd,
-                                                          SourcesSearchOrdering ordering, boolean isAscSorting) {
+    public List<DepartmentFormType> getDeclarationSources(int departmentId, int declarationTypeId, Date periodStart, Date periodEnd) {
+        SearchOrderingFilter filter = getSearchOrderingDefaultFilter();
+        return getDeclarationSources(departmentId, declarationTypeId, periodStart, periodEnd, filter);
+    }
+
+    @Override
+    public List<DepartmentFormType> getDeclarationSources(int departmentId, int declarationTypeId, Date periodStart, Date periodEnd, SearchOrderingFilter filter) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("departmentId", departmentId);
         params.put("declarationTypeId", declarationTypeId != 0 ? declarationTypeId : null);
         params.put("periodStart", periodStart);
         params.put("periodEnd", periodEnd);
-        return getNamedParameterJdbcTemplate().query(GET_DECLARATION_SOURCES_SQL + getSortingClause(ordering, isAscSorting),
+        return getNamedParameterJdbcTemplate().query(GET_DECLARATION_SOURCES_SQL + getSortingClause(filter),
                 params, DFT_MAPPER_WITH_PERIOD);
     }
 
@@ -519,7 +530,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
     };
 
     @Override
-    public List<FormTypeKind> getAllFormAssigned(List<Long> departmentIds, char taxType, TaxNominationFilter filter) {
+    public List<FormTypeKind> getAllFormAssigned(List<Long> departmentIds, char taxType, SearchOrderingFilter filter) {
 
         SqlParameterSource parameters = new MapSqlParameterSource()
                 .addValue("params", departmentIds)
@@ -568,8 +579,8 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
 
         String order = null;
 
-        if (filter.getSortColumn() != null) {
-            order = "ORDER BY " + filter.getSortColumn().name();
+        if (filter.getSearchOrdering() != null) {
+            order = "ORDER BY " + filter.getSearchOrdering().toString();
             if (!filter.isAscSorting())
                 order = order + " DESC";
         }
@@ -686,14 +697,20 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
             ")";
 
     @Override
-    public List<DepartmentFormType> getByTaxType(int departmentId, TaxType taxType, Date periodStart, Date periodEnd,
-                                                 SourcesSearchOrdering ordering, Boolean isAscSorting) {
+    public List<DepartmentFormType> getByTaxType(int departmentId, TaxType taxType, Date periodStart, Date periodEnd) {
+        SearchOrderingFilter filter = getSearchOrderingDefaultFilter();
+        return getByTaxType(departmentId, taxType, periodStart, periodEnd, filter);
+
+    }
+
+    @Override
+    public List<DepartmentFormType> getByTaxType(int departmentId, TaxType taxType, Date periodStart, Date periodEnd, SearchOrderingFilter filter) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("departmentId", departmentId);
         //params.put("periodStart", periodStart);
         //params.put("periodEnd", periodEnd);
         params.put("taxType", taxType != null ? String.valueOf(taxType.getCode()) : null);
-        return getNamedParameterJdbcTemplate().query(GET_SQL_BY_TAX_TYPE_SQL + getSortingClause(ordering, isAscSorting), params, DFT_MAPPER);
+        return getNamedParameterJdbcTemplate().query(GET_SQL_BY_TAX_TYPE_SQL + getSortingClause(filter), params, DFT_MAPPER);
     }
 
     private final static String GET_SQL_BY_TAX_TYPE_SQL_OLD = "select * from department_form_type dft where department_id = ?" +
@@ -954,8 +971,11 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                 performerId, id);
     }
 
-    private String getSortingClause(SourcesSearchOrdering ordering, Boolean isAscSorting) {
+    private String getSortingClause(SearchOrderingFilter filter) {
+        SourcesSearchOrdering ordering = (SourcesSearchOrdering) filter.getSearchOrdering();
         if (ordering == null) ordering = SourcesSearchOrdering.TYPE;
+
+        boolean isAscSorting = filter.isAscSorting();
         StringBuilder sorting = new StringBuilder();
 
         switch (ordering) {
@@ -976,8 +996,20 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                 break;
         }
 
-        if (isAscSorting!= null && !isAscSorting) sorting.append("DESC\n");
+        if (!isAscSorting) sorting.append("DESC\n");
 
         return sorting.toString();
+    }
+
+    /**
+     * Фильтр по умолчанию
+     *
+     * @return
+     */
+    private SearchOrderingFilter getSearchOrderingDefaultFilter() {
+        SearchOrderingFilter filter = new SearchOrderingFilter();
+        filter.setSearchOrdering(SourcesSearchOrdering.TYPE);
+        filter.setAscSorting(true);
+        return filter;
     }
 }

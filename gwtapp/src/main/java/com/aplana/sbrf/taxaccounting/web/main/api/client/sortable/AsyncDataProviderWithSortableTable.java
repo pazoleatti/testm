@@ -58,4 +58,8 @@ public abstract class AsyncDataProviderWithSortableTable<T, B extends AplanaUiHa
     public boolean isAscSorting() {
         return isAscSorting;
     }
+
+    public void setAscSorting(boolean isAscSorting) {
+        this.isAscSorting = isAscSorting;
+    }
 }

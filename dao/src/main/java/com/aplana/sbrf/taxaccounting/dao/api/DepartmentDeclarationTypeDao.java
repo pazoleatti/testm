@@ -28,11 +28,22 @@ public interface DepartmentDeclarationTypeDao {
      * @param taxType      вид налога
      * @param periodStart  начало периода, в котором действуют назначения
      * @param periodEnd    окончание периода, в котором действуют назначения
-     * @param isAscSorting сортировать по возрастанию\убыванию
+     * @return список назначенных подразделению деклараций (с учётом вида и типа) по заданному виду налога
+     */
+    List<DepartmentDeclarationType> getByTaxType(int departmentId, TaxType taxType, Date periodStart, Date periodEnd);
+
+    /**
+     * Возвращает информацию о назначенных подразделению декларациях по заданному виду налога
+     *
+     * @param departmentId идентификатор подразделения
+     * @param taxType      вид налога
+     * @param periodStart  начало периода, в котором действуют назначения
+     * @param periodEnd    окончание периода, в котором действуют назначения
+     * @param filter       фильтр для сортировки
      * @return список назначенных подразделению деклараций (с учётом вида и типа) по заданному виду налога
      */
     List<DepartmentDeclarationType> getByTaxType(int departmentId, TaxType taxType, Date periodStart, Date periodEnd,
-                                                 boolean isAscSorting);
+                                                 SearchOrderingFilter filter);
 
 	/**
 	 * Возвращает информацию о назначенных подразделению декларациях по заданному виду налога
@@ -66,5 +77,5 @@ public interface DepartmentDeclarationTypeDao {
      * @param filter        фильтр для сортировки
      * @return список назначенных налоговых форм для выбранного налога и подразделений
      */
-    List<FormTypeKind> getAllDeclarationAssigned(List<Long> departmentIds, char taxType, TaxNominationFilter filter);
+    List<FormTypeKind> getAllDeclarationAssigned(List<Long> departmentIds, char taxType, SearchOrderingFilter filter);
 }
