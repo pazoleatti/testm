@@ -98,6 +98,8 @@ public class TaskManagerBean implements TaskManager {
                     taskStatus.getTaskId(),
                     taskStatus.getNextFireTime()));
             return Long.parseLong(taskStatus.getTaskId());
+        } catch (UserCalendarPeriodInvalid e) {
+            throw new TaskSchedulingException("Не корректно заполнено поле «Расписание»", e);
         } catch (Exception e) {
             LOG.error(e.getLocalizedMessage(), e);
             throw new TaskSchedulingException("Не удалось выполнить создание задачи", e);
@@ -180,9 +182,8 @@ public class TaskManagerBean implements TaskManager {
         LOG.info(String.format("Task updating has been started. Task id: %s", taskId));
         //TODO api ibm не позволяет обновлять данные задачи. Надо удалять и создавать новую
         try {
-            scheduler.cancel(taskId.toString(), true);
-            persistenceService.deleteContextByTaskId(taskId);
             createTask(taskContext, false);
+            scheduler.cancel(taskId.toString(), true);
         } catch (Exception e) {
             LOG.error(e.getLocalizedMessage(), e);
             throw new TaskSchedulingException(e);

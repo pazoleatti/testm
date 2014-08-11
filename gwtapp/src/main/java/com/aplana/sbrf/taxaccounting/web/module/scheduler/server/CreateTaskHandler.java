@@ -66,7 +66,7 @@ public class CreateTaskHandler extends AbstractActionHandler<CreateTaskAction, C
                 throw new ActionException("Задача с таким именем уже существует");
             }
         } catch (TaskSchedulingException e) {
-            throw new ActionException("Ошибка создания задачи планировщика", e);
+            throw new ActionException(e.getMessage(), e);
         }
         return result;
     }
