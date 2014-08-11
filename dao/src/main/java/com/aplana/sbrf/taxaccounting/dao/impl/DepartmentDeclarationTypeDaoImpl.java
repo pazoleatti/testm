@@ -87,17 +87,23 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
             ") order by dt.name\n";
 
 	@Override
-	public List<DepartmentDeclarationType> getByTaxType(int departmentId, TaxType taxType, Date periodStart,
-                                                        Date periodEnd, boolean isAscSorting) {
+	public List<DepartmentDeclarationType> getByTaxType(int departmentId, TaxType taxType, Date periodStart, Date periodEnd) {
+        SearchOrderingFilter filter = new SearchOrderingFilter();
+        filter.setAscSorting(true);
+        return getByTaxType(departmentId, taxType, periodStart, periodEnd, filter);
+    }
+
+    @Override
+    public List<DepartmentDeclarationType> getByTaxType(int departmentId, TaxType taxType, Date periodStart, Date periodEnd, SearchOrderingFilter filter) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("departmentId", departmentId);
         params.put("periodEnd", periodEnd);
         params.put("periodStart", periodStart);
         params.put("taxType", taxType != null ? String.valueOf(taxType.getCode()) : null);
         StringBuilder sql = new StringBuilder(GET_SQL_BY_TAX_TYPE_SQL);
-        if (!isAscSorting)  sql.append("desc");
+        if (!filter.isAscSorting())  sql.append("desc");
         return getNamedParameterJdbcTemplate().query(sql.toString(), params, DEPARTMENT_DECLARATION_TYPE_ROW_MAPPER);
-	}
+    }
 
     @Override
     public List<DepartmentDeclarationType> getByTaxType(int departmentId, TaxType taxType) {
@@ -232,7 +238,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
     };
 
     @Override
-    public List<FormTypeKind> getAllDeclarationAssigned(List<Long> departmentIds, char taxType, TaxNominationFilter filter) {
+    public List<FormTypeKind> getAllDeclarationAssigned(List<Long> departmentIds, char taxType, SearchOrderingFilter filter) {
 
         SqlParameterSource parameters = new MapSqlParameterSource()
                 .addValue("params", departmentIds)
@@ -266,8 +272,8 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
 
         String order = null;
 
-        if (filter.getSortColumn() != null) {
-            order = "ORDER BY " + filter.getSortColumn().name();
+        if (filter.getSearchOrdering() != null) {
+            order = "ORDER BY " + filter.getSearchOrdering().toString();
             if (!filter.isAscSorting())
                 order = order + " DESC";
         }

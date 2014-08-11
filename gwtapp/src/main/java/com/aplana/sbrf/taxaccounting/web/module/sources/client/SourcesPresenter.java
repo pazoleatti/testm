@@ -214,10 +214,6 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
             return;
         }
 
-        SortFilter filter = new SortFilter();
-        filter.setAscSorting(getView().isAscSorting(SourcesView.Table.RIGHT));
-        filter.setSearchOrdering(getView().getSearchOrderingRightTable());
-
 		GetDepartmentAssignsAction action = new GetDepartmentAssignsAction();
         action.setForm(true);
 		action.setDepartmentId(departmentId);
@@ -225,8 +221,9 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
         action.setPeriodsInterval(getView().getPeriodInterval());
         action.setSelectedLeft(selectedLeft);
         action.setMode(getView().isSource() ? SourceMode.SOURCES : SourceMode.DESTINATIONS);
-        action.setFilter(filter);
-		dispatcher.execute(action, CallbackUtils
+        action.setOrdering(getView().getSearchOrderingRightTable());
+        action.setAscSorting(getView().isAscSorting(SourcesView.Table.RIGHT));
+        dispatcher.execute(action, CallbackUtils
 				.defaultCallback(new AbstractCallback<GetDepartmentAssignsResult>() {
 					@Override
 					public void onSuccess(GetDepartmentAssignsResult result) {
@@ -242,16 +239,13 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
             return;
         }
 
-        SortFilter filter = new SortFilter();
-        filter.setAscSorting(getView().isAscSorting(SourcesView.Table.LEFT));
-        filter.setSearchOrdering(getView().getSearchOrderingLeftTable());
-
 		GetDepartmentAssignsAction action = new GetDepartmentAssignsAction();
         action.setForm(true);
 		action.setDepartmentId(departmentId);
 		action.setTaxType(taxType);
         action.setPeriodsInterval(getView().getPeriodInterval());
-        action.setFilter(filter);
+        action.setOrdering(getView().getSearchOrderingLeftTable());
+        action.setAscSorting(getView().isAscSorting(SourcesView.Table.LEFT));
 		dispatcher.execute(action, CallbackUtils
 				.defaultCallback(new AbstractCallback<GetDepartmentAssignsResult>() {
 					@Override
@@ -268,16 +262,13 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
             return;
         }
 
-        SortFilter filter = new SortFilter();
-        filter.setAscSorting(getView().isAscSorting(SourcesView.Table.LEFT));
-        filter.setSearchOrdering(getView().getSearchOrderingLeftTable());
-
         GetDepartmentAssignsAction action = new GetDepartmentAssignsAction();
         action.setForm(false);
         action.setDepartmentId(departmentId);
         action.setTaxType(taxType);
         action.setPeriodsInterval(getView().getPeriodInterval());
-        action.setFilter(filter);
+        action.setOrdering(getView().getSearchOrderingLeftTable());
+        action.setAscSorting(getView().isAscSorting(SourcesView.Table.LEFT));
         dispatcher.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<GetDepartmentAssignsResult>() {
                     @Override
@@ -293,9 +284,6 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
             getView().setAvailableDecsRight(new ArrayList<DepartmentAssign>(0));
             return;
         }
-        SortFilter filter = new SortFilter();
-        filter.setAscSorting(getView().isAscSorting(SourcesView.Table.RIGHT));
-        filter.setSearchOrdering(getView().getSearchOrderingRightTable());
 
         GetDepartmentAssignsAction action = new GetDepartmentAssignsAction();
         action.setForm(false);
@@ -304,7 +292,8 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
         action.setPeriodsInterval(getView().getPeriodInterval());
         action.setSelectedLeft(selectedLeft);
         action.setMode(getView().isSource() ? SourceMode.SOURCES : SourceMode.DESTINATIONS);
-        action.setFilter(filter);
+        action.setOrdering(getView().getSearchOrderingRightTable());
+        action.setAscSorting(getView().isAscSorting(SourcesView.Table.RIGHT));
         dispatcher.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<GetDepartmentAssignsResult>() {
                     @Override
@@ -317,10 +306,6 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 	@Override
 	public void getCurrentAssigns(DepartmentAssign departmentAssign) {
 
-        SortFilter filter = new SortFilter();
-        filter.setAscSorting(getView().isAscSorting(SourcesView.Table.DOWN));
-        filter.setSearchOrdering(getView().getSearchOrderingDownTable());
-
         this.departmentAssign = departmentAssign;
         GetCurrentAssignsAction action = new GetCurrentAssignsAction();
         action.setDepartmentId(departmentAssign.getDepartmentId());
@@ -329,7 +314,8 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
         action.setKind(departmentAssign.getKind());
         action.setPeriodsInterval(getView().getPeriodInterval());
         action.setMode(getView().isSource() ? SourceMode.SOURCES : SourceMode.DESTINATIONS);
-        action.setFilter(filter);
+        action.setOrdering(getView().getSearchOrderingDownTable());
+        action.setAscSorting(getView().isAscSorting(SourcesView.Table.DOWN));
 
         dispatcher.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<GetCurrentAssignsResult>() {

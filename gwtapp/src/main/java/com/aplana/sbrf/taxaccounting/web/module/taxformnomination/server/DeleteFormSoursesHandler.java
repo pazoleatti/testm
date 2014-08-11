@@ -66,7 +66,7 @@ public class DeleteFormSoursesHandler extends AbstractActionHandler<DeleteFormsS
             Date periodStart = new Date();
             Date periodEnd = new Date();
             List<DepartmentFormType> formsSources = departmentFormTypeService.getDFTSourcesByDFT(data.getDepartment().getId(),
-                    data.getFormTypeId().intValue(), data.getKind(), periodStart, periodEnd, null, false);
+                    data.getFormTypeId().intValue(), data.getKind(), periodStart, periodEnd);
             // возьмем его назначений - налоговые формы
             List<DepartmentFormType> formsDestinations = departmentFormTypeService.getFormDestinations(data.getDepartment().getId(), data.getFormTypeId().intValue(), data.getKind(), null, null);
             // приемники - декларации, источников деклараций у нас не существует

@@ -56,7 +56,7 @@ public class DeleteDeclarationSourcesHandler extends AbstractActionHandler<Delet
                 continue;
             }
 			List<DepartmentFormType> departmentFormTypes = departmentFormTypeService
-					.getDFTSourceByDDT(ddt.getDepartment().getId(), ddt.getFormTypeId().intValue(), periodStart, periodEnd, null, false);
+					.getDFTSourceByDDT(ddt.getDepartment().getId(), ddt.getFormTypeId().intValue(), periodStart, periodEnd);
 			if (departmentFormTypes.isEmpty()) { // Нет назначений
 				departmentFormTypeService.deleteDDT(Arrays.asList(ddt.getId()));
 			} else {
