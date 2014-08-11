@@ -42,9 +42,7 @@ public class LogSystemLogoutHandler implements LogoutHandler {
 		lockCoreService.unlockAll(userInfo);
         AuditService auditService = (AuditService) springContext.getBean("auditServiceImpl");
         auditService.add(FormDataEvent.LOGOUT, userInfo,
-                userInfo.getUser().getDepartmentId(), null, null, null, null,
-                "Security logout system success.");
+                userInfo.getUser().getDepartmentId(), null, null, null, null, null);
         logger.info("Security logout system success.");
-
     }
 }

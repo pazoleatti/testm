@@ -35,10 +35,10 @@ public class SignServiceImplTest {
     ConfigurationDao configurationDao;
 
     private final String COMMON = ClassUtils.classPackageAsResourcePath(getClass()) + "/sign/";
-    private final String SIGN_FILE =  COMMON + "sign.dat";
     private final String DATA_FILE =  COMMON + "/dt/5101309D.rnu";
     private final String DATA_XLS_FILE = COMMON + "/dt/260220AD.xls";
     private final String NON_ENC_FILE = COMMON + "/dt/non_enc";
+    private final String ZIP_FILE = COMMON + "/dt/RNU00001.64";
     private final String BICR4_DLL = COMMON + "dll/";
 
     @Before
@@ -58,7 +58,7 @@ public class SignServiceImplTest {
     }
 
     @Test
-    public void test() throws IOException, URISyntaxException {
+    public void testRNU() throws IOException, URISyntaxException {
         if (System.getProperty("os.name").toLowerCase().contains("linux"))
             return;
         /*try {
@@ -82,8 +82,29 @@ public class SignServiceImplTest {
         }*/
 
         Assert.assertTrue(signService.checkSign(copyTmp(DATA_FILE, "dataFile", ".data").getAbsolutePath(), 0));
+
+    }
+
+    @Test
+    public void testXls() throws IOException {
+        if (System.getProperty("os.name").toLowerCase().contains("linux"))
+            return;
         Assert.assertTrue(signService.checkSign(copyTmp(DATA_XLS_FILE, "dataXlsFile", ".data").getAbsolutePath(), 0));
+    }
+
+    @Test
+    public void testNonEncrypt() throws IOException {
+        if (System.getProperty("os.name").toLowerCase().contains("linux"))
+            return;
         Assert.assertFalse(signService.checkSign(copyTmp(NON_ENC_FILE, "non_enc", ".data").getAbsolutePath(), 0));
+    }
+
+    //Тест с новым подписанным архивом. False, нормальный результат, так как нет такой подписи в нашей БОК
+    @Test
+    public void testZip() throws IOException {
+        if (System.getProperty("os.name").toLowerCase().contains("linux"))
+            return;
+        Assert.assertFalse(signService.checkSign(copyTmp(ZIP_FILE, "zip", ".data").getAbsolutePath(), 0));
     }
 
     private static File copyTmp(String dataFilePath, String prefix, String suffix) throws IOException {
