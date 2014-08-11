@@ -38,8 +38,8 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
 	}
 
 	public interface MyView extends View, HasUiHandlers<ConfigurationUiHandlers>{
-        void setCommonConfigData(List<DataRow<Cell>> rowsData);
-        void setFormConfigData(List<DataRow<Cell>> rowsData);
+        void setCommonConfigData(List<DataRow<Cell>> rowsData, boolean needSort);
+        void setFormConfigData(List<DataRow<Cell>> rowsData, boolean needSort);
         RefBookColumn getDepartmentColumn();
         StringColumn getUploadPathColumn();
         StringColumn getArchivePathColumn();
@@ -75,8 +75,8 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
 							@Override
 							public void onSuccess(GetConfigurationResult result) {
 								getView().setFormConfigData(getFormRowsData(result.getModel(),
-                                        result.getDereferenceDepartmentNameMap()));
-                                getView().setCommonConfigData(getCommonRowsData(result.getModel()));
+                                        result.getDereferenceDepartmentNameMap()), true);
+                                getView().setCommonConfigData(getCommonRowsData(result.getModel()), true);
 							}
 
                             @Override
@@ -322,17 +322,23 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
     }
 
     @Override
-    public void onFormAddRow() {
+    public void onFormAddRow(Integer index) {
         List<DataRow<Cell>> data = getView().getFormRowsData();
-        data.add(createFormDataRow());
-        getView().setFormConfigData(data);
+        if (index == null) {
+            index = data.size() - 1;
+        }
+        data.add(index + 1, createFormDataRow());
+        getView().setFormConfigData(data, false);
     }
 
     @Override
-    public void onCommonAddRow() {
+    public void onCommonAddRow(Integer index) {
         List<DataRow<Cell>> data = getView().getCommonRowsData();
-        data.add(createCommonDataRow());
-        getView().setCommonConfigData(data);
+        if (index == null) {
+            index = data.size() - 1;
+        }
+        data.add(index + 1, createCommonDataRow());
+        getView().setCommonConfigData(data, false);
     }
 
     @Override
