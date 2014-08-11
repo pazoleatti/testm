@@ -653,8 +653,9 @@ public class FormDataServiceImpl implements FormDataService {
                 LockData lockData = lockDataService.lock(lockKey, userInfo.getUser().getId(), BLOCK_TIME);
                 if (lockData != null) {
                     FormTemplate formTemplate = formTemplateService.get(formTemplateService.getActiveFormTemplateId(destinationDFT.getFormTypeId(), formData.getReportPeriodId()));
-                    errorsList.add(String.format("«%s», %s, «%s» заблокирована пользователем %s, %s",
-                                    formTemplate.getName(), reportPeriod.getTaxPeriod().getYear()+" "+reportPeriod.getName(),
+                    errorsList.add(String.format("«%s» %s, %s, «%s» заблокирована пользователем %s, %s",
+                                    formTemplate.getName(), destinationDFT.getKind().getName(),
+                                    reportPeriod.getTaxPeriod().getYear()+" "+reportPeriod.getName(),
                                     departmentDao.getDepartment(destinationDFT.getDepartmentId()).getName(),
                                     userService.getUser(lockData.getUserId()).getName(), sdf.format(lockData.getDateBefore())));
                 } else {
