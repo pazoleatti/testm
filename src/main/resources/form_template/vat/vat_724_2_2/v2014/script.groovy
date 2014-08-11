@@ -46,6 +46,9 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
+        break
 }
 
 // Проверяемые на пустые значения атрибуты
@@ -205,6 +208,75 @@ void addData(def xml, int headRowCount) {
         // графа 4
         xmlIndexCol++
         dataRow.base = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+    }
+    dataRowHelper.save(dataRows)
+}
+
+void importTransportData() {
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    addTransportData(xml)
+}
+
+void addTransportData(def xml) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    def int rnuIndexRow = 2
+    def int colOffset = 1
+
+    dataRows.each {
+        it.base = null
+    }
+
+    for (def row : xml.row) {
+        rnuIndexRow++
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        def indexRow = rnuIndexRow - 2
+        def dataRow = dataRows.get(indexRow - 1)
+
+        def values = [:]
+        values.rowNum = parseNumber(row.cell[1].text(), rnuIndexRow, 1 + colOffset, logger, true)
+        values.code = row.cell[2].text()
+        values.name = row.cell[3].text()
+
+        // Проверить фиксированные значения (графа 1..3)
+        ['rowNum', 'code', 'name'].each { alias ->
+            def value = values[alias]?.toString()
+            def valueExpected = dataRow.getCell(alias).value?.toString()
+            checkFixedValue(dataRow, value, valueExpected, indexRow, alias, logger, true)
+        }
+
+        // графа 4
+        dataRow.base = parseNumber(row.cell[4].text(), rnuIndexRow, 4 + colOffset, logger, true)
+    }
+    def totalRow = getDataRow(dataRows, 'itog')
+    totalRow.base = calcItog(dataRows)
+
+    if (xml.rowTotal.size() == 1) {
+        rnuIndexRow += 2
+
+        def row = xml.rowTotal[0]
+
+        def total = formData.createDataRow()
+
+        // графа 4
+        total.base = parseNumber(row.cell[4].text(), rnuIndexRow, 4 + colOffset, logger, true)
+
+        def colIndexMap = ['base' : 4]
+        for (def alias : ['base']) {
+            def v1 = total[alias]
+            def v2 = totalRow[alias]
+            if (v1 == null && v2 == null) {
+                continue
+            }
+            if (v1 == null || v1 != null && v1 != v2) {
+                logger.error(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
+                break
+            }
+        }
     }
     dataRowHelper.save(dataRows)
 }

@@ -56,6 +56,9 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
+        break
 }
 
 // Автозаполняемые атрибуты (графа 4, 5)
@@ -469,6 +472,84 @@ void addData(def xml, int headRowCount) {
         // графа 5
         xmlIndexCol++
         dataRow.obtainCost = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+    }
+    dataRowHelper.save(dataRows)
+}
+
+void importTransportData() {
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    addTransportData(xml)
+}
+
+void addTransportData(def xml) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    def int rnuIndexRow = 2
+    def int colOffset = 1
+
+    dataRows.each {
+        it.realizeCost = null
+        it.realizeCost = null
+    }
+
+    for (def row : xml.row) {
+        rnuIndexRow++
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        def indexRow = rnuIndexRow - 2
+        def dataRow = dataRows.get(indexRow - 1)
+
+        def values = [:]
+        values.rowNum = parseNumber(row.cell[1].text(), rnuIndexRow, 1 + colOffset, logger, true)
+        values.code = row.cell[2].text()
+        values.name = row.cell[3].text()
+
+        // Проверить фиксированные значения (графа 1..3)
+        ['rowNum', 'code', 'name'].each { alias ->
+            def value = values[alias]?.toString()
+            def valueExpected = dataRow.getCell(alias).value?.toString()
+            checkFixedValue(dataRow, value, valueExpected, indexRow, alias, logger, true)
+        }
+
+        // графа 4
+        dataRow.realizeCost = parseNumber(row.cell[4].text(), rnuIndexRow, 4 + colOffset, logger, true)
+
+        // графа 5
+        dataRow.obtainCost = parseNumber(row.cell[5].text(), rnuIndexRow, 5 + colOffset, logger, true)
+    }
+    def itogValues = calcItog(dataRows)
+    def totalRow = getDataRow(dataRows, 'itog')
+    totalColumns.each { alias ->
+        totalRow[alias] = itogValues[alias]
+    }
+
+    if (xml.rowTotal.size() == 1) {
+        rnuIndexRow += 2
+
+        def row = xml.rowTotal[0]
+
+        def total = formData.createDataRow()
+
+        // графа 4
+        total.realizeCost = parseNumber(row.cell[4].text(), rnuIndexRow, 4 + colOffset, logger, true)
+        // графа 5
+        total.obtainCost = parseNumber(row.cell[5].text(), rnuIndexRow, 5 + colOffset, logger, true)
+
+        def colIndexMap = ['realizeCost' : 4, 'obtainCost' : 5]
+        for (def alias : totalColumns) {
+            def v1 = total[alias]
+            def v2 = totalRow[alias]
+            if (v1 == null && v2 == null) {
+                continue
+            }
+            if (v1 == null || v1 != null && v1 != v2) {
+                logger.error(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
+                break
+            }
+        }
     }
     dataRowHelper.save(dataRows)
 }

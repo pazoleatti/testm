@@ -10,7 +10,12 @@ INSERT INTO ref_book_attribute (id, ref_book_id, ord, name, alias, type, referen
 INSERT INTO ref_book_attribute (id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width, max_length)
   VALUES (103, 30, 4, 'тип', 'type', 2, null, null, 1, 5, 10, 27);
 
+INSERT INTO department_type (id, name) VALUES (1, 'Банк');
+INSERT INTO department_type (id, name) VALUES (2, 'Территориальный банк');
+INSERT INTO department_type (id, name) VALUES (3, 'ЦСКО, ПЦП');
+INSERT INTO department_type (id, name) values (4, 'Управление');
+
 INSERT INTO department (id, name, parent_id, type, shortname, tb_index, sbrf_code, code)
   VALUES (1, 'Главный Банк', null, 1, 'Банк', null, '018_075_01', 1);
 INSERT INTO department (id, name, parent_id, type, shortname, tb_index, sbrf_code, code)
-  VALUES (2, 'Териториальный Банк №1', 1, 2, 'ТБ1', NULL, '018_003_01', 2);
+  VALUES (2, 'Территориальный Банк №1', 1, 2, 'ТБ1', NULL, '018_003_01', 2);

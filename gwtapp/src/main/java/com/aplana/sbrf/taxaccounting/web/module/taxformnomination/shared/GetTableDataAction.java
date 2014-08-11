@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared;
 
 
-import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.model.TaxNominationColumnEnum;
+import com.aplana.sbrf.taxaccounting.model.TaxNominationColumnEnum;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
 import java.util.List;

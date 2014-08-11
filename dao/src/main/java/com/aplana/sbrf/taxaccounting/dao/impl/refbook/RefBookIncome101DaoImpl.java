@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookValueMapper;
@@ -8,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookIncome101Dao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
@@ -15,11 +15,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.*;
@@ -43,9 +45,26 @@ public class RefBookIncome101DaoImpl extends AbstractDao implements RefBookIncom
         return getRecords(pagingParams, filter, sortAttribute, true);
     }
 
+
+    private final static String INCOME_101_FILTER_BY_DEPARTMENT = "select res.id record_id from INCOME_101 res\n" +
+            "join REF_BOOK_RECORD rbr on res.ACCOUNT_PERIOD_ID = rbr.ID\n" +
+            "join REF_BOOK_VALUE rbv on rbr.id = rbv.RECORD_ID\n" +
+            "  where attribute_id = 1073 and %s";
     @Override
     public List<Long> getUniqueRecordIds(String filter) {
-        return refBookDao.getUniqueRecordIds(REF_BOOK_ID, TABLE_NAME, filter);
+        //Грязь связанная с изменением структуры хранения БО
+        //http://conf.aplana.com/pages/viewpage.action?pageId=9584598
+        if (filter.toUpperCase().contains("DEPARTMENT_ID")){
+            String filterDep = filter.toUpperCase().replace("DEPARTMENT_ID", "REFERENCE_VALUE");
+            return getJdbcTemplate().query(String.format(INCOME_101_FILTER_BY_DEPARTMENT, filterDep),
+                    new RowMapper<Long>() {
+                @Override
+                public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+                    return SqlUtils.getLong(rs, RefBook.RECORD_ID_ALIAS);
+                }
+            });
+        }else
+            return refBookDao.getUniqueRecordIds(REF_BOOK_ID, TABLE_NAME, filter);
     }
 
     @Override
@@ -99,7 +118,7 @@ public class RefBookIncome101DaoImpl extends AbstractDao implements RefBookIncom
                 throw new DaoException("Поля " + errors.toString() + "являются обязательными для заполнения");
             }
 
-            long accountPeriodId = record.get("ACCOUNT_PERIOD_ID").getReferenceValue().longValue();
+            long accountPeriodId = record.get("ACCOUNT_PERIOD_ID").getReferenceValue();
             delList.add(accountPeriodId);
         }
 
@@ -197,7 +216,7 @@ public class RefBookIncome101DaoImpl extends AbstractDao implements RefBookIncom
                             ps.setNull(8, Types.VARCHAR);
                         }
 
-                        ps.setLong(9, map.get("ACCOUNT_PERIOD_ID").getReferenceValue().longValue());
+                        ps.setLong(9, map.get("ACCOUNT_PERIOD_ID").getReferenceValue());
                     }
 
                     @Override
@@ -212,4 +231,26 @@ public class RefBookIncome101DaoImpl extends AbstractDao implements RefBookIncom
 	public void deleteRecords(List<Long> uniqueRecordIds) {
 		getJdbcTemplate().update("delete from income_101 where " + SqlUtils.transformToSqlInStatement("id", uniqueRecordIds));
 	}
+
+    private final static String INCOME_101_GET_SEPARATE_VALUE =
+            "select (select number_value nv from REF_BOOK_VALUE where attribute_id = 1071 and record_id = (select INCOME_101.ACCOUNT_PERIOD_ID from INCOME_101 where id = :incomeId)) || ' ' || v2.STRING_VALUE rp_name \n" +
+                    "from INCOME_101 res\n" +
+                    "join REF_BOOK_VALUE rbv on res.ACCOUNT_PERIOD_ID = rbv.RECORD_ID\n" +
+                    "join REF_BOOK_ATTRIBUTE rba on rbv.ATTRIBUTE_ID = rba.ID\n" +
+                    "join ref_book_value v2 on v2.record_id=rbv.reference_value\n" +
+                    "  where res.id = :incomeId and rba.REF_BOOK_ID = :refBookId and rbv.ATTRIBUTE_ID = 1072 and v2.ATTRIBUTE_ID = 1062";
+
+    @Override
+    public String getPeriodNameFromRefBook(final long recordId) {
+        try {
+            return getNamedParameterJdbcTemplate().queryForObject(INCOME_101_GET_SEPARATE_VALUE,
+                    new HashMap<String, Object>(){{put("incomeId",recordId);put("refBookId", INCOME_101_AP_REF_BOOK_ID);}},
+                    String.class);
+        } catch (EmptyResultDataAccessException e){
+            return "";
+        } catch (DataAccessException e){
+            logger.error("", e);
+            throw new DaoException("", e);
+        }
+    }
 }

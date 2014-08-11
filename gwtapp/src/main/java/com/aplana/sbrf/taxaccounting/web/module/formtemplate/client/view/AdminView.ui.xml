@@ -23,7 +23,8 @@
             position: absolute !important;
             bottom: 0;
             right: 0;
-            left: 0;
+            left: 10px;
+            left: 10px;
             top: 35px;
         }
 
@@ -76,9 +77,9 @@
                                     <g:Button ui:field="delete" text="Удалить макет"/>
                                 </style:LeftBar>
                             </g:HorizontalPanel>
-                            <g:ScrollPanel addStyleNames="{style.table}">
-                                <style:GenericCellTable ui:field="formTemplateTable" width="100%" height="100%"/>
-                            </g:ScrollPanel>
+                            <g:ResizeLayoutPanel addStyleNames="{style.table}">
+                                <style:GenericDataGrid ui:field="formTemplateTable" width="100%" height="100%"/>
+                            </g:ResizeLayoutPanel>
                         </g:HTMLPanel>
                     </g:center>
                     <g:east size="450">

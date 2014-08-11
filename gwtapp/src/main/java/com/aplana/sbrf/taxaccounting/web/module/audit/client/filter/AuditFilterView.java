@@ -89,6 +89,7 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
 
     @Override
     public void init() {
+        searchCriteria.setText("");
         driver.edit(new LogSystemAuditFilter());
         auditFieldList.setValue(Arrays.asList(AuditFieldList.ALL.getId()));
     }
@@ -136,7 +137,7 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
                 if (sepFlag) errorStr.append(", ");
                 errorStr.append("\"Искать по полям\"");
             }
-            Dialog.errorMessage("Не заполнены обязательные поля", "Для выполнения поиска должны быть заполнены: " + errorStr.toString());
+            Dialog.errorMessage("Не заполнены обязательные поля", "Для выполнения поиска должны быть корректно заполнены " + errorStr.toString());
             return;
         }
 

@@ -10,7 +10,7 @@ import java.io.Serializable;
 public class DateColumn extends Column implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-	private Integer formatId;
+	private Integer formatId = Formats.NONE.getId();
 
 	public Integer getFormatId() {
 		return formatId;

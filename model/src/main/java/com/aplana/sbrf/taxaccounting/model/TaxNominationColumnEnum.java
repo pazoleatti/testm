@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.model;
+package com.aplana.sbrf.taxaccounting.model;
 
 /**
  * Перечисление колонок для сортировки
@@ -6,7 +6,7 @@ package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.model;
  * @author aivanov
  * @since 16.06.2014
  */
-public enum TaxNominationColumnEnum {
+public enum TaxNominationColumnEnum implements SearchOrdering {
     FORM_TYPE,      //Тип налоговой формы
     FORM_KIND,      //Вид налоговой формы
     DEPARTMENT,     //Подразделение

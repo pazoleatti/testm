@@ -52,6 +52,7 @@ public class HistoryView extends PopupViewWithUiHandlers<AplanaUiHandlers> imple
                 return getUiHandlers();
             }
         };
+        dataProvider.setAscSorting(false);
     }
 
     @Override

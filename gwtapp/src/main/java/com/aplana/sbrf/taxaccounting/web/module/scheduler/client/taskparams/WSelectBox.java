@@ -49,7 +49,7 @@ public class WSelectBox extends ParamWidget {
     @Override
     public boolean isValid() {
         if (isRequired() && listBox.getValue() == null){
-            errorMessage = "Поле " + getName() + " обязательно для заполненеия";
+            errorMessage = "Поле «" + getName() + "» обязательно для заполненеия";
             return false;
         } else {
             return true;

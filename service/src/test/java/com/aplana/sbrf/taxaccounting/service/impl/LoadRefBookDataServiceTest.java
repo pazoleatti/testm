@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.LoadRefBookDataService;
 import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
+import com.aplana.sbrf.taxaccounting.service.SignService;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -14,10 +15,12 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 import static org.mockito.Matchers.any;
@@ -66,6 +69,7 @@ public class LoadRefBookDataServiceTest {
         errorFolder = temporaryFolder.newFolder(ConfigurationParam.REF_BOOK_ERROR_DIRECTORY.name());
         mockConfigurationDao();
         mockRefBookScriptingService();
+        mockSignService();
     }
 
     @After
@@ -118,6 +122,11 @@ public class LoadRefBookDataServiceTest {
         ReflectionTestUtils.setField(service, "refBookScriptingService", refBookScriptingService);
     }
 
+    private void mockSignService() {
+        SignService signService = mock(SignService.class);
+        when(signService.checkSign(anyString(), anyInt())).thenReturn(true);
+        ReflectionTestUtils.setField(service, "signService", signService);
+    }
 
     @Test
     public void isNSIFileTest() {
@@ -141,7 +150,8 @@ public class LoadRefBookDataServiceTest {
             Assert.assertTrue("File \"" + name + "\" is Diasoft Custody file!", service.isDiasoftFile(name));
         }
         // Не Diasoft Custody
-        for (String name : new String[]{null, "/", "DS2405121.nsi", "DS240512nsi", "DS240512.nsi0", "DS240512.nsi.", "DS240512..nsi"}) {
+        for (String name : new String[]{null, "/", "DS2405121.nsi", "DS240512nsi", "DS240512.nsi0", "DS240512.nsi.",
+                "DS240512..nsi", "___852-50_______49_0000_00212014.rnu"}) {
             Assert.assertFalse("File \"" + name + "\" is not Diasoft Custody file!", service.isDiasoftFile(name));
         }
     }
@@ -200,7 +210,9 @@ public class LoadRefBookDataServiceTest {
 
         File file = new File(uploadFolder.getPath() + "/" + FILE_NAME_2);
         file.createNewFile();
+
         ImportCounter importCounter = service.importRefBookDiasoft(USER_INFO, new Logger());
+
         // Счетчики
         Assert.assertEquals(1, importCounter.getSuccessCounter());
         Assert.assertEquals(0, importCounter.getFailCounter());

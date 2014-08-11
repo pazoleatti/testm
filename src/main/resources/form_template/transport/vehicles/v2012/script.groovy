@@ -53,6 +53,9 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
+        break
 }
 
 // 1 № пп  -  rowNumber
@@ -501,5 +504,111 @@ void addData(def xml, int headRowCount) {
 
         rows.add(newRow)
     }
+    dataRowHelper.save(rows)
+}
+
+void importTransportData() {
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    addTransportData(xml)
+}
+
+void addTransportData(def xml) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+
+    def int rnuIndexRow = 2
+    def int colOffset = 1
+    def rows = []
+    def int rowIndex = 1
+
+    for (def row : xml.row) {
+        rnuIndexRow++
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
+        editableColumns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
+        autoFillColumns.each {
+            newRow.getCell(it).setStyleAlias('Автозаполняемая')
+        }
+
+        def int xmlIndexCol = 1
+
+        // графа 1
+        xmlIndexCol++
+
+        // графа 2
+        def record = getRecordImport(96, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        newRow.codeOKATO = record?.record_id?.value
+        xmlIndexCol++
+
+        // графа 3
+        if (record != null) {
+            formDataService.checkReferenceValue(96, row.cell[xmlIndexCol].text(), record?.NAME?.value, rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        }
+        xmlIndexCol++
+
+        // графа 4
+        record = getRecordImport(42, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, true)
+        newRow.tsTypeCode = record?.record_id?.value
+        xmlIndexCol++
+
+        // графа 5
+        if (record != null) {
+            formDataService.checkReferenceValue(42, row.cell[xmlIndexCol].text(), record?.NAME?.value, rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        }
+        xmlIndexCol++
+
+        // графа 6
+        newRow.identNumber = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
+
+        // графа 7
+        newRow.model = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
+
+        // графа 8
+        newRow.ecoClass = getRecordIdImport(40, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
+
+        // графа 9
+        newRow.regNumber = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
+
+        // графа 10
+        newRow.powerVal = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        xmlIndexCol++
+
+        // графа 11
+        newRow.baseUnit = getRecordIdImport(12, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
+
+        // графа 12
+        newRow.year = parseDate(row.cell[xmlIndexCol].text(), "yyyy", rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        xmlIndexCol++
+
+        // графа 13
+        newRow.regDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        xmlIndexCol++
+
+        // графа 14
+        newRow.regDateEnd = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        xmlIndexCol++
+
+        // графа 15
+        newRow.stealDateStart = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        xmlIndexCol++
+
+        // графа 16
+        newRow.stealDateEnd = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        rows.add(newRow)
+    }
+
     dataRowHelper.save(rows)
 }

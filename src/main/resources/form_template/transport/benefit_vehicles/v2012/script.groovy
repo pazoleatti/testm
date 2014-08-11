@@ -54,6 +54,9 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
+        break
 }
 
 // графа 1 - rowNumber         - № пп
@@ -528,5 +531,77 @@ void addData(def xml, int headRowCount) {
 
         rows.add(newRow)
     }
+    dataRowHelper.save(rows)
+}
+
+void importTransportData() {
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    addTransportData(xml)
+}
+
+void addTransportData(def xml) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+
+    def int rnuIndexRow = 2
+    def int colOffset = 1
+    def rows = []
+    def int rowIndex = 1
+
+    for (def row : xml.row) {
+        rnuIndexRow++
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
+        editableColumns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
+        autoFillColumns.each {
+            newRow.getCell(it).setStyleAlias('Автозаполняемая')
+        }
+
+        def int xmlIndexCol = 1
+
+        // графа 1
+        xmlIndexCol++
+
+        // графа 2
+        newRow.codeOKATO = getRecordIdImport(96, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
+
+        // графа 3
+        newRow.identNumber = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
+
+        // графа 4
+        newRow.regNumber = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
+
+        // графа 5
+        newRow.powerVal = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        xmlIndexCol++
+
+        // графа 6
+        newRow.baseUnit = getRecordIdImport(12, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
+
+        // графа 7
+        newRow.taxBenefitCode = getRecordIdImport(6, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
+
+        // графа 8
+        newRow.benefitStartDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        xmlIndexCol++
+
+        // графа 9
+        newRow.benefitEndDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        rows.add(newRow)
+    }
+
     dataRowHelper.save(rows)
 }

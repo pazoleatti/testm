@@ -155,9 +155,9 @@ public class LogSystemAuditFilter implements Serializable {
             logSystemAuditFilter = logSystemAuditFilter.getOldLogSystemAuditFilter();
         }
         StringBuffer strBuff = new StringBuffer();
-        for(int i=0; i < ls.size() ; i++) {
+        for(int i=ls.size()-1; i >= 0 ; i--) {
             strBuff.append("'").append(ls.get(i)).append("'");
-            if (i != (ls.size() - 1)) strBuff.append("; ");
+            if (i != 0) strBuff.append("; ");
         }
         return strBuff.toString();
     }

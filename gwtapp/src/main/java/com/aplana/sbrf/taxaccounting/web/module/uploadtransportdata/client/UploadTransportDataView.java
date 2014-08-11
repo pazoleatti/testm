@@ -1,23 +1,21 @@
 package com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.client;
 
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.client.fileupload.FileUploadHandler;
-import com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.client.fileupload.FileUploadWidget;
-import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.EndLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.StartLoadFileEvent;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.dom.client.InputElement;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.FileUpload;
+import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Загрузка ТФ в каталог загрузки
@@ -30,65 +28,69 @@ public class UploadTransportDataView extends ViewWithUiHandlers<UploadTransportD
     interface Binder extends UiBinder<Widget, UploadTransportDataView> {
     }
 
-    @UiField
-    FileUploadWidget uploadWidget;
+    private static String UUID_STRING = "uuid";
+    private static String ERROR_STRING_1 = "error";
+    private static String ERROR_STRING_2 = "<pre>error";
+    private static String jsonPattern = "(<pre.*>)(.+?)(</pre>)";
 
     @UiField
-    DepartmentPickerPopupWidget departmentPicker;
+    FileUpload uploader;
+
+    @UiField
+    FormPanel formPanel;
+
+    @UiField
+    Button uploadButton, loadButton;
 
     @Inject
     @UiConstructor
     public UploadTransportDataView(final Binder uiBinder) {
         initWidget(uiBinder.createAndBindUi(this));
+        formPanel.setAction(getUiHandlers().ACTION_URL);
         initListeners();
     }
 
     private void initListeners() {
-        uploadWidget.addStartLoadHandler(new StartLoadFileEvent.StartLoadFileHandler() {
+        formPanel.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
             @Override
-            public void onStartLoad(StartLoadFileEvent event) {
-                getUiHandlers().onStartLoad(event);
-            }
-        });
-        uploadWidget.addEndLoadHandler(new EndLoadFileEvent.EndLoadFileHandler() {
-            @Override
-            public void onEndLoad(EndLoadFileEvent event) {
-                getUiHandlers().onEndLoad(event);
-            }
-        });
-        departmentPicker.addValueChangeHandler(new ValueChangeHandler<List<Integer>>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<List<Integer>> event) {
-                List<Integer> selectedDepartments = departmentPicker.getValue();
-                String departmentStr = "0";
-                if (selectedDepartments != null && !selectedDepartments.isEmpty()) {
-                    departmentStr = selectedDepartments.get(0).toString();
-                    uploadWidget.setEnabled(true);
+            public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
+                String resultSring = event.getResults().toLowerCase();
+                if (resultSring.startsWith(ERROR_STRING_1) || resultSring.startsWith(ERROR_STRING_2)) {
+                    getUiHandlers().onFailure();
                 } else {
-                    uploadWidget.setEnabled(false);
+                    getUiHandlers().onSuccess();
                 }
-                uploadWidget.setActionUrl(getUiHandlers().ACTION_URL + departmentStr);
+                if (event.getResults().toLowerCase().contains(UUID_STRING)) {
+                    String uuid = event.getResults().replaceAll(jsonPattern, "$2");
+                    int startIndex = uuid.indexOf(UUID_STRING) + UUID_STRING.length() + 1;
+                    int endIndex = startIndex + 36;
+                    if (endIndex <= uuid.length()) {
+                        uuid = uuid.substring(startIndex, endIndex);
+                    }
+                    getUiHandlers().onEndLoad(new EndLoadFileEvent(uuid));
+                } else {
+                    getUiHandlers().onEndLoad(new EndLoadFileEvent(true));
+                }
+                formPanel.reset();
+            }
+        });
+
+        uploader.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+                getUiHandlers().onStartLoad(new StartLoadFileEvent(uploader.getFilename()));
+                formPanel.submit();
             }
         });
     }
 
-    @Override
-    public void setFileUploadHandler(FileUploadHandler fileUploadHandler) {
-        uploadWidget.setFileUploadHandler(fileUploadHandler);
+    @UiHandler("uploadButton")
+    void onUploadClick(ClickEvent event) {
+        uploader.getElement().<InputElement>cast().click();
     }
 
-    @Override
-    public void setDepartments(List<Department> departments, Set<Integer> availableDepartments, final Integer defaultDepartmentId) {
-        departmentPicker.setAvalibleValues(departments, availableDepartments);
-        if (defaultDepartmentId != null) {
-            departmentPicker.setValue(new ArrayList<Integer>(1) {{
-                add(defaultDepartmentId);
-            }}, true);
-        }
-    }
-
-    @Override
-    public void setCanChooseDepartment(boolean canChooseDepartment) {
-        departmentPicker.setEnabled(canChooseDepartment);
+    @UiHandler("loadButton")
+    void onLoadClick(ClickEvent event) {
+        getUiHandlers().onLoadAll();
     }
 }

@@ -461,7 +461,6 @@ public class RefBookUniversal implements RefBookDataProvider {
                 }
 
                 boolean isJustNeedValuesUpdate = (versionFrom == null && versionTo == null);
-
                 //Получаем идентификатор записи справочника без учета версий
                 Long recordId = refBookDao.getRecordId(uniqueRecordId);
                 //Получаем еще неотредактированную версию
@@ -490,6 +489,7 @@ public class RefBookUniversal implements RefBookDataProvider {
                 }
 
                 boolean isRelevancePeriodChanged = false;
+                RefBookRecordVersion previousVersion = null;
                 if (!isJustNeedValuesUpdate) {
                     assert versionFrom != null;
                     isRelevancePeriodChanged = !versionFrom.equals(oldVersionPeriod.getVersionStart())
@@ -504,7 +504,7 @@ public class RefBookUniversal implements RefBookDataProvider {
                             throw new ServiceException(CROSS_ERROR_MSG);
                         }
                         //Проверяем предыдущую версию до даты начала
-                        RefBookRecordVersion previousVersion = refBookDao.getPreviousVersion(refBookId, recordId, oldVersionPeriod.getVersionStart());
+                        previousVersion = refBookDao.getPreviousVersion(refBookId, recordId, oldVersionPeriod.getVersionStart());
                         if (previousVersion != null &&
                                 (previousVersion.isVersionEndFake() && (versionFrom.equals(previousVersion.getVersionEnd())
                                         || versionFrom.before(previousVersion.getVersionEnd())
@@ -532,6 +532,11 @@ public class RefBookUniversal implements RefBookDataProvider {
                 //Обновление периода актуальности
                 if (isRelevancePeriodChanged) {
                     List<Long> uniqueIdAsList = Arrays.asList(uniqueRecordId);
+                    if (previousVersion.isVersionEndFake() && SimpleDateUtils.addDayToDate(previousVersion.getVersionEnd(), 1).equals(versionFrom)) {
+                        //Если установлена дата окончания, которая совпадает с существующей фиктивной версией - то она удаляется
+                        Long previousVersionEnd = refBookDao.findRecord(refBookId, recordId, versionFrom);
+                        refBookDao.deleteRecordVersions(REF_BOOK_RECORD_TABLE_NAME, Arrays.asList(previousVersionEnd));
+                    }
                     //Обновляем дату начала актуальности
                     refBookDao.updateVersionRelevancePeriod(REF_BOOK_RECORD_TABLE_NAME, uniqueRecordId, versionFrom);
                     //Получаем запись - окончание версии. Если = null, то версия не имеет конца
@@ -541,17 +546,17 @@ public class RefBookUniversal implements RefBookDataProvider {
                     }
                     if (versionTo != null) {
                         boolean isVersionEndAlreadyExists = refBookDao.isVersionsExist(refBookId, Arrays.asList(recordId), SimpleDateUtils.addDayToDate(versionTo, 1));
-                        if (relatedVersions.isEmpty()) {
+                        if (relatedVersions.isEmpty() && !isVersionEndAlreadyExists) {
                             //Создаем новую фиктивную версию - дату окончания
                             refBookDao.createFakeRecordVersion(refBookId, recordId, SimpleDateUtils.addDayToDate(versionTo, 1));
                         }
 
                         if (!relatedVersions.isEmpty() && !oldVersionPeriod.getVersionEnd().equals(versionTo)) {
                             if (!isVersionEndAlreadyExists) {
-                                //Изменяем существующую фиктивную версию
+                                //Изменяем существующую дату окончания
                                 refBookDao.updateVersionRelevancePeriod(REF_BOOK_RECORD_TABLE_NAME, relatedVersions.get(0), SimpleDateUtils.addDayToDate(versionTo, 1));
                             } else {
-                                //Удаляем существующую фиктивную версию, теперь дата окончания задается началом следующей версии
+                                //Удаляем дату окончания. Теперь дата окончания задается началом следующей версии
                                 Long currentVersionEnd = refBookDao.findRecord(refBookId, recordId, SimpleDateUtils.addDayToDate(oldVersionPeriod.getVersionEnd(), 1));
                                 refBookDao.deleteRecordVersions(REF_BOOK_RECORD_TABLE_NAME, Arrays.asList(currentVersionEnd));
                             }

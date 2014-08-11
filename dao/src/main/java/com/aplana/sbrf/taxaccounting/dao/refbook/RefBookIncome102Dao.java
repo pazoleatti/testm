@@ -16,6 +16,7 @@ import java.util.Map;
 public interface RefBookIncome102Dao {
 
 	public static final Long REF_BOOK_ID = 52L;
+    static final Long INCOME_102_AP_REF_BOOK_ID = 107L;
 
 	static final String TABLE_NAME = "INCOME_102";
 
@@ -75,4 +76,12 @@ public interface RefBookIncome102Dao {
 	 * @param uniqueRecordIds идентификаторы записей
 	 */
 	void deleteRecords(List<Long> uniqueRecordIds);
+
+    /**
+     * Получает значения для справочника, находящиеся в отдельной таблице.
+     * Наименование отчетного периода.
+     * @param recordId значение для связанной таблицы
+     * @return значение атрибута
+     */
+    String getPeriodNameFromRefBook(long recordId);
 }

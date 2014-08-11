@@ -4,6 +4,8 @@ import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookIncome101Dao;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookIncome102Dao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
@@ -47,6 +49,8 @@ public class RefBookDepartment implements RefBookDataProvider {
     private static final String DEPARTMENT_NAME_ATTRIBUTE = "NAME";
     private static final String DEPARTMENT_PARENT_ATTRIBUTE = "PARENT_ID";
     private static final String DEPARTMENT_ACTIVE_NAME = "IS_ACTIVE";
+    private static final String INCOME_PERIOD_ATTRIBUTE_NAME = "ACCOUNT_PERIOD_ID";
+    private static final long INCOME_PERIOD_ATTRIBUTE_ID = 1072;
     private static final String WARN_MESSAGE_TARGET =
             "Внимание! Форма %s подразделения %s при сохранении будет являться приемником для формы %s подразделения %s, относящимся к разным территориальным банкам";
     private static final String WARN_MESSAGE_SOURCE =
@@ -92,6 +96,10 @@ public class RefBookDepartment implements RefBookDataProvider {
     private RefBookIncome101 refBookIncome101;
     @Autowired
     private RefBookIncome102 refBookIncome102;
+    @Autowired
+    RefBookIncome101Dao refBookIncome101Dao;
+    @Autowired
+    RefBookIncome102Dao refBookIncome102Dao;
     @Autowired
     AuditService auditService;
     @Autowired
@@ -272,7 +280,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                         null, null, null, null,
                         String.format("Создано подразделение %s, значения атрибутов: %s",
                                 refBookValueMap.get(DEPARTMENT_NAME_ATTRIBUTE).toString(),
-                                assembleMessage(refBookValueMap)));
+                                assembleMessage(refBookValueMap)), null);
                 return Arrays.asList((long)depId);
             } finally {
                 for (String lock : lockedObjects) {
@@ -283,8 +291,6 @@ public class RefBookDepartment implements RefBookDataProvider {
             throw new ServiceLoggerException(LOCK_MESSAGE,
                     logEntryService.save(logger.getEntries()));
         }
-
-
     }
 
     @Override
@@ -473,6 +479,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                     }
                 }*/
 
+
                 //Сохранение
                 refBookDepartmentDao.update(uniqueRecordId.intValue(), records, refBook.getAttributes());
 
@@ -480,7 +487,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                         null, null, null, null,
                         String.format("Изменены значения атрибутов подразделения %s, новые значения атрибутов: %s",
                                 departmentService.getDepartment(uniqueRecordId.intValue()).getName(),
-                                assembleMessage(records)));
+                                assembleMessage(records)), null);
             } finally {
                 for (String lock : lockedObjects) {
                     lockService.unlock(lock, userId);
@@ -603,7 +610,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                 deletePeriods(depId, logger);
 
                 auditService.add(FormDataEvent.DELETE_DEPARTMENT, logger.getTaUserInfo(), 0, null, null, null, null,
-                        String.format("Удалено подразделение %s", departmentService.getParentsHierarchy(depId)));
+                        String.format("Удалено подразделение %s", departmentService.getParentsHierarchy(depId)), null);
                 refBookDepartmentDao.remove(depId);
             } finally {
                 for (String lock : lockedObjects) {
@@ -822,14 +829,13 @@ public class RefBookDepartment implements RefBookDataProvider {
         List<Long> ref101 = refBookIncome101.getUniqueRecordIds(null, String.format(FILTER_BY_DEPARTMENT, department.getId()));
         List<Long> ref102 = refBookIncome102.getUniqueRecordIds(null, String.format(FILTER_BY_DEPARTMENT, department.getId()));
         for (Long id : ref101){
-            Map<String, RefBookValue> values = refBookIncome101.getRecordData(id);
+            String periodValue = refBookIncome101Dao.getPeriodNameFromRefBook(id);
             logger.warn(String.format("Существует загруженная для подразделения %s бух. отчетность в периоде %s!",
-                    department.getName(), periodService.getReportPeriod(values.get("REPORT_PERIOD_ID").getNumberValue().intValue())));
+                    department.getName(), refBookIncome101Dao.getPeriodNameFromRefBook(id)));
         }
         for (Long id : ref102){
-            Map<String, RefBookValue> values = refBookIncome102.getRecordData(id);
             logger.warn(String.format("Существует загруженная для подразделения %s бух. отчетность в периоде %s!",
-                    department.getName(), periodService.getReportPeriod(values.get("REPORT_PERIOD_ID").getNumberValue().intValue())));
+                    department.getName(), refBookIncome102Dao.getPeriodNameFromRefBook(id)));
         }
 
         //7 точка запроса

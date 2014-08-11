@@ -64,5 +64,10 @@ public interface LockCoreService {
 	<T extends Number> void unlockAll(TAUserInfo userInfo);
 	
 	<T extends Number> ObjectLock<T> getLock(Class<? extends IdentityObject<T>> clazz, T id, TAUserInfo userInfo);
-	
+
+    /**
+     * Удаляет все блокировки, которые старше заданого времени
+     * @param sec
+     */
+    void unlockIfOlderThan(int sec);
 }

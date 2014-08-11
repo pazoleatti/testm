@@ -1,22 +1,22 @@
 package com.aplana.sbrf.taxaccounting.web.module.sources.server;
 
-import java.util.Date;
-import java.util.List;
-
 import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
+import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
+import com.aplana.sbrf.taxaccounting.model.SearchOrderingFilter;
 import com.aplana.sbrf.taxaccounting.model.source.SourceMode;
+import com.aplana.sbrf.taxaccounting.service.SourceService;
+import com.aplana.sbrf.taxaccounting.web.module.sources.server.assembler.SourcesAssembler;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.GetCurrentAssignsAction;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.GetCurrentAssignsResult;
+import com.gwtplatform.dispatch.server.ExecutionContext;
+import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
+import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
-import com.aplana.sbrf.taxaccounting.service.SourceService;
-import com.aplana.sbrf.taxaccounting.web.module.sources.server.assembler.SourcesAssembler;
-import com.gwtplatform.dispatch.server.ExecutionContext;
-import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
-import com.gwtplatform.dispatch.shared.ActionException;
+import java.util.Date;
+import java.util.List;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
@@ -39,11 +39,15 @@ public class GetCurrentAssignsHandler extends
 
         Date periodFrom = PeriodConvertor.getDateFrom(action.getPeriodsInterval());
         Date periodTo = PeriodConvertor.getDateTo(action.getPeriodsInterval());
+        SearchOrderingFilter filter = new SearchOrderingFilter();
+        filter.setSearchOrdering(action.getOrdering());
+        filter.setAscSorting(action.isAscSorting());
         if(!action.isDeclaration()){
             List<DepartmentFormType> departmentFormTypes;
             if (action.getMode() == SourceMode.SOURCES) {
                 departmentFormTypes = sourceService.
-                        getDFTSourcesByDFT(action.getDepartmentId(), action.getTypeId(), action.getKind(), periodFrom, periodTo);
+                        getDFTSourcesByDFT(action.getDepartmentId(), action.getTypeId(), action.getKind(), periodFrom,
+                                periodTo, filter);
             } else {
                 departmentFormTypes = sourceService.
                         getFormDestinations(action.getDepartmentId(), action.getTypeId(), action.getKind(), periodFrom, periodTo);
@@ -52,7 +56,7 @@ public class GetCurrentAssignsHandler extends
         } else {
             if (action.getMode() == SourceMode.SOURCES) {
                 List<DepartmentFormType> departmentFormTypes = sourceService
-                        .getDFTSourceByDDT(action.getDepartmentId(), action.getTypeId(), periodFrom, periodTo);
+                        .getDFTSourceByDDT(action.getDepartmentId(), action.getTypeId(), periodFrom, periodTo, filter);
                 result.setCurrentSources(sourceAssembler.assembleDFT(departmentFormTypes));
             } else {
                 List<DepartmentDeclarationType> departmentFormTypes = sourceService.
