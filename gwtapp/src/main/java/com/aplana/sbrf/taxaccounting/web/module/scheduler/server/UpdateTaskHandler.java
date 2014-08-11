@@ -50,7 +50,7 @@ public class UpdateTaskHandler extends AbstractActionHandler<UpdateTaskAction, U
             // нати в кеше
             TaskData taskData = taskManager.getTaskData(action.getTaskId());
             if (!taskData.getTaskName().equals(action.getTaskName()) && taskManager.isTaskExist(action.getTaskName())){
-                throw new ActionException("Задача с таким именем уже существует");
+                throw new ActionException("Название задачи не уникально!");
             } else {
                 TaskContext taskContext = new TaskContext();
                 taskContext.setTaskName(action.getTaskName());

@@ -161,10 +161,20 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
     @UiHandler("addLink")
     void onAddLinkClick(ClickEvent event) {
         if (commonPanel.isVisible()) {
-            getUiHandlers().onCommonAddRow();
+            getUiHandlers().onCommonAddRow(getSelectedIndex());
         } else {
-            getUiHandlers().onFormAddRow();
+            getUiHandlers().onFormAddRow(getSelectedIndex());
         }
+    }
+
+    private Integer getSelectedIndex() {
+        DataGrid<DataRow<Cell>> table = commonPanel.isVisible() ? commonTable : formTable;
+        DataRow<Cell> selRow = ((SingleSelectionModel<DataRow<Cell>>) table.getSelectionModel()).getSelectedObject();
+        if (selRow == null) {
+            return null;
+        }
+        List<DataRow<Cell>> rowsData = commonPanel.isVisible() ? commonRowsData : formRowsData;
+        return rowsData.indexOf(selRow);
     }
 
     @UiHandler("delLink")
@@ -246,11 +256,7 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
     };
 
     @Override
-    public void setCommonConfigData(List<DataRow<Cell>> rowsData) {
-        setCommonConfigData(rowsData, true);
-    }
-
-    private void setCommonConfigData(List<DataRow<Cell>> rowsData, boolean needSort) {
+    public void setCommonConfigData(List<DataRow<Cell>> rowsData, boolean needSort) {
         if (needSort) {
             Collections.sort(rowsData, commonComparator);
         }
@@ -261,11 +267,7 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
     }
 
 	@Override
-	public void setFormConfigData(List<DataRow<Cell>> rowsData) {
-        setFormConfigData(rowsData, true);
-	}
-
-    private void setFormConfigData(List<DataRow<Cell>> rowsData, boolean needSort) {
+	public void setFormConfigData(List<DataRow<Cell>> rowsData, boolean needSort) {
         if (needSort) {
             Collections.sort(rowsData, formComparator);
         }
