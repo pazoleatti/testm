@@ -21,6 +21,8 @@ resourceRootLocationId = AdminConfig.getid(resourceRootLocation)
 print 'Found resource root location ID = '+ resourceRootLocationId
 nodeName               = AdminControl.getNode()
 print 'Found node name = '+ nodeName
+scope = 'Node='+nodeName+',Server='+settings.serverName
+print 'Scope="'+scope+'"'
 
 # auth alias
 jaasAlias             = 'TAX'+ settings.suffixForResources
@@ -69,8 +71,7 @@ if jassAuthDataNotFound:
 
 # JDBC provider
 jdbcProviderName = 'Oracle JDBC Driver (XA)'+ settings.suffixForResources
-#jdbcDriverClass  = 'oracle.jdbc.pool.OracleConnectionPoolDataSource'
-jdbcDriverClass  = 'oracle.jdbc.xa.client.OracleXADataSource'
+
 
 print ''
 print '--------------------------------------------'
@@ -80,11 +81,11 @@ if len(jdbcProviderId):
 	print 'Found existing JDBC Provider id='+ jdbcProviderId
 else:
 	print "Initiated the creation of an JDBC Provider"
-	jdbcProviderId = AdminConfig.create('JDBCProvider', resourceRootLocationId, [['classpath', settings.jdbcDriverPath], ['implementationClassName', jdbcDriverClass], ['name', jdbcProviderName]])
+	jdbcProviderId = AdminTask.createJDBCProvider(['-scope', scope, '-databaseType', 'Oracle' ,'-providerType', 'Oracle JDBC Driver' ,'-implementationType', 'XA data source', '-name', jdbcProviderName, '-description', "Oracle JDBC Driver (XA)", '-classpath', settings.jdbcDriverPath, '-nativePath', "" ])
 	print 'id='+ jdbcProviderId
 	AdminConfig.save()
 	print 'Configuration is saved.'	
-
+	
 # datasource info
 dataSuorceName               = 'TAX Datasource'+ settings.suffixForResources
 dataSourceJndi               = 'jdbc/TaxAccDS'+ settings.suffixForResources
@@ -103,10 +104,11 @@ if len(dataSuorceId):
 	print 'Found existing data source id='+ dataSuorceId
 else:
 	print 'Initiated the creation of an data source'
-	dataSuorceId = AdminConfig.create('DataSource', jdbcProviderId, [['name', dataSuorceName], ['jndiName', dataSourceJndi], ['datasourceHelperClassname', dataSourceHelpClass], ['authDataAlias', jaasAlias]])
+	dataSuorceId = AdminTask.createDatasource(jdbcProviderId, ['-name', dataSuorceName, '-jndiName', dataSourceJndi, '-dataStoreHelperClassName', dataSourceHelpClass, '-containerManagedPersistence', 'true', '-componentManagedAuthenticationAlias', jaasAlias, '-xaRecoveryAuthAlias', jaasAlias, '-configureResourceProperties', [['URL', 'java.lang.String', dataSourceUrl]]])
 	print 'id='+ dataSuorceId
-	AdminConfig.create('J2EEResourceProperty', AdminConfig.create('J2EEResourcePropertySet', dataSuorceId, []), [['name', 'URL'], ['type', 'java.lang.String'], ['value', dataSourceUrl]])
 	AdminConfig.create('J2EEResourceProperty', AdminConfig.showAttribute(dataSuorceId, 'propertySet'), [['name', 'connectionProperties'], ['type', 'java.lang.String'], ['value', 'defaultRowPrefetch=1000']])
+	AdminConfig.create('MappingModule', dataSuorceId, [['authDataAlias', jaasAlias], ['mappingConfigAlias', '']])
+	AdminConfig.modify(dataSuorceId, [['authDataAlias', jaasAlias], ['xaRecoveryAuthAlias', jaasAlias]])
 	print 'Parameters are set'
 	AdminConfig.save()
 	print 'Configuration is saved.'
@@ -118,9 +120,10 @@ if len(migrationDataSuorceId):
 	print 'Found existing data source id='+ migrationDataSuorceId
 else:
 	print 'Initiated the creation of an data source'
-	migrationDataSuorceId = AdminConfig.create('DataSource', jdbcProviderId, [['name', migrationDataSuorceName], ['jndiName', migrationDataSourceJndi], ['datasourceHelperClassname', migrationDataSourceHelpClass], ['authDataAlias', migrationJaasAlias]])
+	migrationDataSuorceId = AdminTask.createDatasource(jdbcProviderId, ['-name', migrationDataSuorceName, '-jndiName', migrationDataSourceJndi, '-dataStoreHelperClassName', migrationDataSourceHelpClass, '-containerManagedPersistence', 'true', '-componentManagedAuthenticationAlias', migrationJaasAlias, '-xaRecoveryAuthAlias', migrationJaasAlias, '-configureResourceProperties', [['URL', 'java.lang.String', migrationDataSourceUrl]]])
 	print 'id='+ migrationDataSuorceId
-	AdminConfig.create('J2EEResourceProperty', AdminConfig.create('J2EEResourcePropertySet', migrationDataSuorceId, []), [['name', 'URL'], ['type', 'java.lang.String'], ['value', migrationDataSourceUrl]])
+	AdminConfig.create('MappingModule', migrationDataSuorceId, [['authDataAlias', migrationJaasAlias], ['mappingConfigAlias', '']])
+	AdminConfig.modify(migrationDataSuorceId, [['authDataAlias', migrationJaasAlias], ['xaRecoveryAuthAlias', migrationJaasAlias]])	
 	print 'Parameters are set'
 	AdminConfig.save()
 	print 'Configuration is saved.'

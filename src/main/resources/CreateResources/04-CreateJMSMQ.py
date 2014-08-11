@@ -60,6 +60,8 @@ if MQActivationSpecsId[0] != '':
 			break
 if MQActivationSpecNotFound:
 	print 'Initiated the creation of an MQ activation specifications'
-	print 'id='+ AdminTask.createWMQActivationSpec(resourceRootLocationId, ['-name', MQActivationSpecName, '-jndiName', MQActivationSpecJndi, '-qmgrName', settings.MQServerQueueManager, '-wmqTransportType', 'BINDINGS_THEN_CLIENT', '-qmgrHostname', settings.MQServerHost, '-qmgrPortNumber', settings.MQServerPort, '-qmgrSvrconnChannel', settings.MQServerChanel, '-destinationJndiName', MQQueueJndi, '-destinationType', 'javax.jms.Queue']) 
+	MQActivationSpecsId = AdminTask.createWMQActivationSpec(resourceRootLocationId, ['-name', MQActivationSpecName, '-jndiName', MQActivationSpecJndi, '-qmgrName', settings.MQServerQueueManager, '-wmqTransportType', 'BINDINGS_THEN_CLIENT', '-qmgrHostname', settings.MQServerHost, '-qmgrPortNumber', settings.MQServerPort, '-qmgrSvrconnChannel', settings.MQServerChanel, '-destinationJndiName', MQQueueJndi, '-destinationType', 'javax.jms.Queue'])
+	print 'id='+MQActivationSpecsId
+	AdminTask.modifyWMQActivationSpec(MQActivationSpecsId, ['-sslType', 'CENTRAL'])
 	AdminConfig.save()
 	print 'Configuration is saved.'
