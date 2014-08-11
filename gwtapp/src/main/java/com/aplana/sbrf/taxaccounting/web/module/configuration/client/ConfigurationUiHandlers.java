@@ -19,12 +19,12 @@ public interface ConfigurationUiHandlers extends UiHandlers{
     /**
      * Добавление строки в таблицу общих параметров
      */
-    void onCommonAddRow();
+    void onCommonAddRow(Integer index);
 
     /**
      * Добавление строки в таболицу параметров загрузки НФ
      */
-    void onFormAddRow();
+    void onFormAddRow(Integer index);
 
     /**
      * Проверка достуности путей, указанных в выделенной строкеы

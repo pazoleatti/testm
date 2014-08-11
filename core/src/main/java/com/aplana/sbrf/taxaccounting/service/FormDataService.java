@@ -46,7 +46,7 @@ public interface FormDataService {
     /**
      * Импорт ТФ НФ
      */
-    void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, InputStream is, String fileName, FormDataEvent formDataEvent);
+    void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, Boolean isManual, InputStream is, String fileName, FormDataEvent formDataEvent);
 
     /**
      * Метод для импорта данных из xls-файлов
@@ -59,7 +59,7 @@ public interface FormDataService {
      * 
      * TODO (sgoryachkin) заменить параметры is и fileName на uid блоба
      */
-    void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, InputStream is, String fileName);
+    void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, Boolean isManual, InputStream is, String fileName);
 
     /**
      * Метод для импорта данных из модуля миграции

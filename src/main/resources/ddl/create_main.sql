@@ -397,6 +397,8 @@ create table declaration_data (
   declaration_template_id number(9) not null,
   report_period_id        number(9) not null,
   department_id           number(9) not null,
+  tax_organ_code          varchar2(4),
+  kpp                     varchar2(9),
   data                    varchar2(36),
   is_accepted             number(1) not null,
   data_pdf                varchar2(36),
@@ -409,6 +411,8 @@ comment on column declaration_data.id is 'Идентификатор (перви
 comment on column declaration_data.declaration_template_id is 'Ссылка на шаблон декларации';
 comment on column declaration_data.report_period_id is 'Отчётный период';
 comment on column declaration_data.department_id is 'Подразделение';
+comment on column declaration_data.tax_organ_code is 'Налоговый орган';
+comment on column declaration_data.kpp is 'КПП';
 comment on column declaration_data.data is 'Данные декларации в формате законодателя (XML)';
 comment on column declaration_data.is_accepted is 'Признак того, что декларация принята';
 comment on column declaration_data.data_pdf is 'Данные декларации в формате PDF';
@@ -676,7 +680,8 @@ create table log_system (
   declaration_type_name varchar2(80),
   form_type_name      varchar2(1000),
   form_department_id  number(9),
-  tb_department_id number(9)
+  tb_department_id number(9),
+  blob_data_id        varchar2(36)
 );
 comment on table log_system is  'Системный журнал';
 comment on column log_system.id is 'Код записи';
@@ -694,6 +699,7 @@ comment on column LOG_SYSTEM.DECLARATION_TYPE_NAME is 'Вид деклараци
 comment on column LOG_SYSTEM.FORM_TYPE_NAME is 'Вид налоговой формы';
 comment on column LOG_SYSTEM.FORM_DEPARTMENT_ID is 'Идентификатор подразделения налоговой формы/декларации';
 comment on column log_system.tb_department_id is 'Идентификатор ТБ подразделения налоговой формы/декларации';
+comment on column log_system.blob_data_id is 'Ссылка на логи';
 
 create sequence seq_log_system start with 10000;
 ------------------------------------------------------------------------------------------------------
@@ -766,7 +772,7 @@ create table template_changes (
  id number(9) not null,
  form_template_id number(9),
  declaration_template_id number(9),
- event number(1),
+ event number(9),
  author number(9) not null,
  date_event date
 );
@@ -789,7 +795,7 @@ COMMENT ON TABLE event IS 'Справочник событий в системе
 COMMENT ON COLUMN event.id IS 'Идентификатор события';
 COMMENT ON COLUMN event.name IS 'Наименование события';
 
- create sequence seq_template_changes start with 10000;
+create sequence seq_template_changes start with 10000;
 --------------------------------------------------------------------------------------------------------
 create table lock_data
 (
@@ -802,4 +808,14 @@ comment on table lock_data is 'Информация о блокировках';
 comment on column lock_data.key is 'Код блокировки';
 comment on column lock_data.user_id is 'Идентификатор пользователя, установившего блокировку';
 comment on column lock_data.date_before is 'Срок истечения блокировки';
+
 --------------------------------------------------------------------------------------------------------
+create table department_type
+(
+id number(9) not null,
+name varchar2(50)
+);
+
+comment on table department_type is 'Типы подразделений банка';
+comment on column department_type.id is 'Идентификатор типа';
+comment on column department_type.name is 'Наименование типа';

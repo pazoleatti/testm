@@ -37,6 +37,19 @@ public interface DepartmentFormTypeDao {
      *
      * @param departmentId идентификатор подразделения
      * @param taxType      вид налога
+     * @param periodStart  начало периода, в котором действуют назначения
+     * @param periodEnd    окончание периода, в котором действуют назначения
+     * @param filter       фильтр сортировки
+     * @return список назначенных подразделению форм (с учётом вида и типа) по заданному виду налога
+     */
+    List<DepartmentFormType> getByTaxType(int departmentId, TaxType taxType, Date periodStart, Date periodEnd,
+                                          SearchOrderingFilter filter);
+
+    /**
+     * Возвращает информацию он назначенных подразделению формах по заданному виду налога
+     *
+     * @param departmentId идентификатор подразделения
+     * @param taxType      вид налога
      * @return список назначенных подразделению форм (с учётом вида и типа) по заданному виду налога
      */
     @Deprecated
@@ -92,6 +105,23 @@ public interface DepartmentFormTypeDao {
      *         {@link DepartmentFormType}
      */
     List<DepartmentFormType> getFormSources(int departmentId, int formTypeId, FormDataKind kind, Date periodStart, Date periodEnd);
+
+    /**
+     * Возвращает информацию об источниках, которые должны использоваться при
+     * формировании налоговой формы назначения с заданными параметрами
+     *
+     * @param departmentId идентификатор подразделения формируемой налоговой формы
+     *                     назначения
+     * @param formTypeId   вид налоговой формы
+     * @param kind         тип налоговой формы
+     * @param periodStart  начало периода, в котором действуют назначения
+     * @param periodEnd    окончание периода, в котором действуют назначения
+     * @param filter       фильтр сортировки
+     * @return информация о формах-источниках в виде списка
+     * {@link DepartmentFormType}
+     */
+    List<DepartmentFormType> getFormSources(int departmentId, int formTypeId, FormDataKind kind, Date periodStart,
+                                            Date periodEnd, SearchOrderingFilter filter);
 
     /**
      * Возвращает информацию о всех налоговых формах, которые являются источниками
@@ -240,12 +270,27 @@ public interface DepartmentFormTypeDao {
      *
      * @param departmentId      идентификатор декларации
      * @param declarationTypeId идентификатор вида декларации
-     * @param periodStart  начало периода, в котором действуют назначения
-     * @param periodEnd    окончание периода, в котором действуют назначения
+     * @param periodStart       начало периода, в котором действуют назначения
+     * @param periodEnd         окончание периода, в котором действуют назначения
      * @return информация о формах-источниках в виде списка
-     *         {@link DepartmentFormType}
+     * {@link DepartmentFormType}
      */
     List<DepartmentFormType> getDeclarationSources(int departmentId, int declarationTypeId, Date periodStart, Date periodEnd);
+
+    /**
+     * Возвращает информацию о формах-источниках, которые должны использоваться
+     * при формировании декларации
+     *
+     * @param departmentId      идентификатор декларации
+     * @param declarationTypeId идентификатор вида декларации
+     * @param periodStart       начало периода, в котором действуют назначения
+     * @param periodEnd         окончание периода, в котором действуют назначения
+     * @param filter            фильтр сортировки
+     * @return информация о формах-источниках в виде списка
+     * {@link DepartmentFormType}
+     */
+    List<DepartmentFormType> getDeclarationSources(int departmentId, int declarationTypeId, Date periodStart, Date periodEnd,
+                                                   SearchOrderingFilter filter);
 
     /**
      * Возвращает список назначенных налоговых форм для выбранного налога и подразделения
@@ -258,6 +303,17 @@ public interface DepartmentFormTypeDao {
     List<FormTypeKind> getFormAssigned(Long departmentId, char taxType);
 
     /**
+     * Возвращает список назначенных налоговых форм для выбранного налога и подразделений
+     *
+     * @param departmentIds идентификаторы подразделений
+     * @param taxType       идентификатор вида налога
+     * @param filter        фильтр для сортировки
+     * @return список назначенных налоговых форм для выбранного налога и подразделений
+     */
+    List<FormTypeKind> getAllFormAssigned(List<Long> departmentIds, char taxType, SearchOrderingFilter filter);
+
+    /**
+     * TODO - возможно нужно переместить в {@link com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao}
      * Возвращает список назначенных налоговых форм для выбранного налога и подразделения
      *
      * @param departmentId идентификатор подразделения

@@ -1,19 +1,21 @@
 package com.aplana.sbrf.taxaccounting.web.module.sources.client;
 
-import java.util.*;
-
 import com.aplana.gwt.client.Spinner;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.SourcesSearchOrdering;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.AplanaUiHandlers;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.sortable.AsyncDataProviderWithSortableTable;
 import com.aplana.sbrf.taxaccounting.web.module.sources.client.assingDialog.AssignDialogView;
 import com.aplana.sbrf.taxaccounting.web.module.sources.client.assingDialog.ButtonClickHandlers;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.*;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
-import com.aplana.sbrf.taxaccounting.web.widget.style.*;
+import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
+import com.aplana.sbrf.taxaccounting.web.widget.style.LabelSeparator;
+import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.aplana.sbrf.taxaccounting.web.widget.style.table.CheckBoxHeader;
-import com.aplana.sbrf.taxaccounting.web.widget.style.table.ComparatorWithNull;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.WidgetUtils;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.CheckboxCell;
@@ -29,14 +31,22 @@ import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.IdentityColumn;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ValueListBox;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+
+import static com.aplana.sbrf.taxaccounting.web.module.sources.client.SourcesView.Table.LEFT;
 import static com.google.gwt.view.client.DefaultSelectionEventManager.createCustomManager;
 
 /**
@@ -161,6 +171,19 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
     private MultiSelectionModel<DepartmentAssign> rightSM;
     private MultiSelectionModel<CurrentAssign> downSM;
 
+    private AsyncDataProviderWithSortableTable leftTableDataProvider;
+    private AsyncDataProviderWithSortableTable rightTableDataProvider;
+    private AsyncDataProviderWithSortableTable downTableDataProvider;
+    private SourcesSearchOrdering sortByColumnLeftTable;
+    private SourcesSearchOrdering sortByColumnRightTable;
+    private SourcesSearchOrdering sortByColumnDownTable;
+
+    private Table table;
+
+    public enum Table {
+        LEFT, RIGHT, DOWN
+    }
+
     ProvidesKey<DepartmentAssign> providesKey;
 
     String formKindColumnTitle = "Тип налоговой формы";
@@ -188,6 +211,30 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         setupLeftTables();
         setupRightTables();
         setupDownTables();
+
+        leftTableDataProvider = new AsyncDataProviderWithSortableTable(leftTable, this) {
+            @Override
+            public AplanaUiHandlers getUiHandlersX() {
+                table = LEFT;
+                return getUiHandlers();
+            }
+        };
+
+        rightTableDataProvider = new AsyncDataProviderWithSortableTable(rightTable, this) {
+            @Override
+            public AplanaUiHandlers getUiHandlersX() {
+                table = Table.RIGHT;
+                return getUiHandlers();
+            }
+        };
+
+        downTableDataProvider = new AsyncDataProviderWithSortableTable(downTable, this) {
+            @Override
+            public AplanaUiHandlers getUiHandlersX() {
+                table = Table.DOWN;
+                return getUiHandlers();
+            }
+        };
     }
 
     /**
@@ -229,6 +276,12 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         });
         leftTable.setSelectionModel(leftSM);
         leftTable.setEmptyTableWidget(SourcesUtils.getEmptyWidget(leftDepPicker));
+
+        leftTable.addResizableColumn(leftFormKindColumn, "");
+        leftTable.addResizableColumn(leftNameTypeColumn, "");
+
+        leftFormKindColumn.setDataStoreName(SourcesSearchOrdering.KIND.name());
+        leftNameTypeColumn.setDataStoreName(SourcesSearchOrdering.TYPE.name());
     }
 
     /**
@@ -291,6 +344,12 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
                 }));
 
         rightTable.setEmptyTableWidget(SourcesUtils.getEmptyWidget(rightDepPicker));
+
+        rightTable.addResizableColumn(rightFormKindColumn, "");
+        rightTable.addResizableColumn(rightNameTypeColumn, "");
+
+        rightFormKindColumn.setDataStoreName(SourcesSearchOrdering.KIND.name());
+        rightNameTypeColumn.setDataStoreName(SourcesSearchOrdering.TYPE.name());
     }
 
     /**
@@ -418,6 +477,19 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
             }
         });
         downTable.setEmptyTableWidget(lab);
+
+        downTable.addResizableColumn(downDepartmentColumn, "");
+        downTable.addResizableColumn(downAssignKindColumn, "");
+        downTable.addResizableColumn(downNameTypeColumn, "");
+        downTable.addResizableColumn(downStartColumn, "");
+        downTable.addResizableColumn(downEndColumn, "");
+
+        downDepartmentColumn.setDataStoreName(SourcesSearchOrdering.DEPARTMENT.name());
+        downAssignKindColumn.setDataStoreName(SourcesSearchOrdering.KIND.name());
+        downNameTypeColumn.setDataStoreName(SourcesSearchOrdering.TYPE.name());
+        downStartColumn.setDataStoreName(SourcesSearchOrdering.START.name());
+        downEndColumn.setDataStoreName(SourcesSearchOrdering.END.name());
+
     }
 
     /**
@@ -578,8 +650,8 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         }
 
         downTable.addColumn(downNameTypeColumn, downNameTypeHeader, 100, Style.Unit.PCT);
-        downTable.addColumn(downStartColumn, "Начало назначения", 80, Style.Unit.PX);
-        downTable.addColumn(downEndColumn, "Окончание назначения", 80, Style.Unit.PX);
+        downTable.addColumn(downStartColumn, "Начало назначения", 90, Style.Unit.PX);
+        downTable.addColumn(downEndColumn, "Окончание назначения", 90, Style.Unit.PX);
 
         leftTable.redrawHeaders();
         rightTable.redrawHeaders();
@@ -641,6 +713,68 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         leftDepPicker.setValue(null);
         rightDepPicker.setAvalibleValues(departments, availableDepartments);
         rightDepPicker.setValue(null);
+    }
+
+    @Override
+    public boolean isAscSorting() {
+        return false;
+    }
+
+    @Override
+    public boolean isAscSorting(Table table) {
+        boolean isAscSorting = false;
+
+        switch (table) {
+            case LEFT:
+                isAscSorting = leftTableDataProvider.isAscSorting();
+                break;
+            case RIGHT:
+                isAscSorting = rightTableDataProvider.isAscSorting();
+                break;
+            case DOWN:
+                isAscSorting = downTableDataProvider.isAscSorting();
+        }
+
+        return isAscSorting;
+    }
+
+    @Override
+    public SourcesSearchOrdering getSearchOrderingLeftTable() {
+        if (sortByColumnLeftTable == null) {
+            sortByColumnLeftTable = SourcesSearchOrdering.KIND;
+        }
+        return sortByColumnLeftTable;
+    }
+
+    @Override
+    public SourcesSearchOrdering getSearchOrderingRightTable() {
+        if (sortByColumnRightTable == null) {
+            sortByColumnRightTable = SourcesSearchOrdering.KIND;
+        }
+        return sortByColumnRightTable;
+    }
+
+    @Override
+    public SourcesSearchOrdering getSearchOrderingDownTable() {
+        if (sortByColumnDownTable == null) {
+            sortByColumnDownTable = SourcesSearchOrdering.DEPARTMENT;
+        }
+        return sortByColumnDownTable;
+    }
+
+    @Override
+    public void setSortByColumn(String sortByColumn) {
+        switch (this.table) {
+            case LEFT:
+                this.sortByColumnLeftTable = SourcesSearchOrdering.valueOf(sortByColumn);
+                break;
+            case RIGHT:
+                this.sortByColumnRightTable = SourcesSearchOrdering.valueOf(sortByColumn);
+                break;
+            case DOWN:
+                this.sortByColumnDownTable = SourcesSearchOrdering.valueOf(sortByColumn);
+                break;
+        }
     }
 
     @UiHandler("formDecAnchor")
@@ -717,7 +851,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         loadLeftData();
     }
 
-    private void loadLeftData() {
+    public void loadLeftData() {
         clearLeftTable();
         clearDownTable();
         Integer selected = leftDepPicker.getSingleValue();
@@ -756,6 +890,10 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
                 }
             }
         }
+    }
+
+    public Table getTable() {
+        return table;
     }
 
     private void clearLeftTable() {

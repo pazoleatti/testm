@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.scheduler.task;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskParamType;
 import com.aplana.sbrf.taxaccounting.scheduler.api.form.*;
+import com.aplana.sbrf.taxaccounting.service.PropertyLoader;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskParam;
@@ -33,7 +34,8 @@ public class SimpleUserTask implements UserTask {
 
     @Override
     public String getTaskName() {
-        return "Тестовая задача";
+        System.out.println("PropertyLoader.getVersion(): "+PropertyLoader.getVersion());
+        return "Тестовая задача" + PropertyLoader.getVersion();
     }
 
     @Override

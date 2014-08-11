@@ -126,7 +126,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
                     map.put(I_101_CREDIT_RATE, new RefBookValue(RefBookAttributeType.NUMBER, item.getCreditRate()));
                     map.put(I_101_OUTCOME_DEBET_REMAINS, new RefBookValue(RefBookAttributeType.NUMBER, item.getOutcomeDebetRemains()));
                     map.put(I_101_OUTCOME_CREDIT_REMAINS, new RefBookValue(RefBookAttributeType.NUMBER, item.getOutcomeCreditRemains()));
-                    map.put(I_101_ACCOUNT_PERIOD_ID, new RefBookValue(RefBookAttributeType.NUMBER, accountPeriodId.longValue()));
+                    map.put(I_101_ACCOUNT_PERIOD_ID, new RefBookValue(RefBookAttributeType.REFERENCE, accountPeriodId.longValue()));
                     records.add(map);
                 }
 
@@ -158,7 +158,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
         }
 
         String msg = String.format("Импорт бухгалтерской отчётности: %s", realFileName);
-        auditService.add(FormDataEvent.IMPORT, userInfo, departmentId, null, null, null, null, msg);
+        auditService.add(FormDataEvent.IMPORT, userInfo, departmentId, null, null, null, null, msg, null);
     }
 
     // Проверка расширения Булата Кинзибулатова из com.aplana.sbrf.taxaccounting.web.mvc.BookerStatementsController.getFileExtention()

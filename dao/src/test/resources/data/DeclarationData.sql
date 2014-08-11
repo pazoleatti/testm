@@ -1,4 +1,8 @@
 insert into declaration_template(id, name, version, declaration_type_id) values (1,'Декларация 1', date '2014-01-01', 1);
+
+INSERT INTO department_type (id, name) VALUES (1, 'Банк');
+INSERT INTO department_type (id, name) VALUES (2, 'Территориальный банк');
+
 insert into department (id, name, parent_id, type, code) values (1, 'Department name 1', null, 1, 1);
 insert into department (id, name, parent_id, type, code) values (2, 'Department name 5', 1, 2, 2);
 insert into department (id, name, parent_id, type, code) values (3, 'Department name 2', 1, 2, 3);
@@ -17,7 +21,7 @@ insert into ref_book_record(id, record_id, ref_book_id, version, status) values 
 insert into ref_book_record(id, record_id, ref_book_id, version, status) values (27, 7, 8, date '2013-01-01', 0);
 insert into report_period (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date) values (1, 'Transport report period 2', 1, 21, date '2013-01-01', date '2013-03-31', date '2013-01-01');
 insert into report_period (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date) values (2, 'Transport report period 3', 1, 22, date '2013-04-01', date '2013-06-30', date '2013-04-01');
-insert into declaration_data(id, declaration_template_id, report_period_id, department_id, data, is_accepted) values (1, 1, 1, 2, null, 1);
+insert into declaration_data(id, declaration_template_id, report_period_id, department_id, data, is_accepted, tax_organ_code, kpp) values (1, 1, 1, 2, null, 1, 'CD12', '123456789');
 insert into declaration_data(id, declaration_template_id, report_period_id, department_id, data, is_accepted) values (2, 1, 2, 4, null, 0);
 
 -- для проверки setAccepted 

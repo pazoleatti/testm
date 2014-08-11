@@ -57,9 +57,9 @@ a, a:visited, a:hover {
 .gwt-Button[disabled] {
     cursor: default;
     border: solid 1px #AAA;
-    background-color: #6A6A6A;
+    background-color: #C0C0C0;
     background-image: none;
-    color: #AAA;
+    color: #555;
 }
 
 .gwt-SubmitButton {

@@ -23,6 +23,7 @@ public class LogSearchResultItem implements Serializable {
 	private String note;
 	private String userDepartmentName;
     private String reportPeriodName;
+    private String blobDataId;
 
     public LogSearchResultItem() {
     }
@@ -129,6 +130,14 @@ public class LogSearchResultItem implements Serializable {
 
     public void setUserDepartmentName(String userDepartmentName) {
         this.userDepartmentName = userDepartmentName;
+    }
+
+    public String getBlobDataId() {
+        return blobDataId;
+    }
+
+    public void setBlobDataId(String blobDataId) {
+        this.blobDataId = blobDataId;
     }
 
     @Override

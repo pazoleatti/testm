@@ -9,6 +9,18 @@ import groovy.transform.Field
  *
  *  formTemplateId=604
  */
+
+// графа 1  - rowNum
+// графа    - fix
+// графа 2  - operDate
+// графа 3  - contragent
+// графа 4  - type
+// графа 5  - sum
+// графа 6  - number
+// графа 7  - sum2
+// графа 8  - date
+// графа 9  - number2
+
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
@@ -43,6 +55,9 @@ switch (formDataEvent) {
         importData()
         calc()
         logicCheck()
+        break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
         break
 }
 
@@ -151,16 +166,9 @@ void addData(def xml, int headRowCount) {
             continue
         }
 
-        def newRow = formData.createDataRow()
+        def newRow = getNewRow()
         newRow.setIndex(rowIndex++)
         newRow.setImportIndex(xlsIndexRow)
-        editableColumns.each {
-            newRow.getCell(it).editable = true
-            newRow.getCell(it).setStyleAlias('Редактируемая')
-        }
-        autoFillColumns.each {
-            newRow.getCell(it).setStyleAlias('Автозаполняемая')
-        }
 
         // графа 2
         newRow.operDate = parseDate(row.cell[2].text(), "dd.MM.yyyy", xlsIndexRow, 2 + colOffset, logger, true)
@@ -193,4 +201,110 @@ void addData(def xml, int headRowCount) {
     rows.add(getDataRow(dataRows, 'total'))
 
     dataRowHelper.save(rows)
+}
+
+void importTransportData() {
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    addTransportData(xml)
+}
+
+void addTransportData(def xml) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper?.allCached
+    def int rnuIndexRow = 2
+    def int colOffset = 1
+    def rows = []
+
+    def totalTmp = formData.createDataRow()
+    totalColumns.each { alias ->
+        totalTmp.getCell(alias).setValue(BigDecimal.ZERO, null)
+    }
+
+    for (def row : xml.row) {
+        rnuIndexRow++
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+        def newRow = getNewRow()
+        newRow.setImportIndex(rnuIndexRow)
+
+        // графа 2
+        newRow.operDate = parseDate(row.cell[2].text(), "dd.MM.yyyy", rnuIndexRow, 2 + colOffset, logger, true)
+
+        // графа 3
+        newRow.contragent =  row.cell[3].text()
+
+        // графа 4
+        newRow.type = row.cell[4].text()
+
+        // графа 5
+        newRow.sum = parseNumber(row.cell[5].text(), rnuIndexRow, 5 + colOffset, logger, true)
+
+        // графа 6
+        newRow.number = row.cell[6].text()
+
+        // графа 7
+        newRow.sum2 = parseNumber(row.cell[7].text(), rnuIndexRow, 7 + colOffset, logger, true)
+
+        // графа 8
+        newRow.date = parseDate(row.cell[8].text(), "dd.MM.yyyy", rnuIndexRow, 8 + colOffset, logger, true)
+
+        // графа 9
+        newRow.number2 = row.cell[9].text()
+
+        rows.add(newRow)
+
+        totalColumns.each { alias ->
+            def value1 = totalTmp.getCell(alias).value
+            def value2 = (newRow.getCell(alias).value ?: BigDecimal.ZERO)
+            totalTmp.getCell(alias).setValue(value1 + value2, null)
+        }
+    }
+
+    // сравнение итогов
+    if (xml.rowTotal.size() == 1) {
+        rnuIndexRow = rnuIndexRow + 2
+        def row = xml.rowTotal[0]
+        def total = formData.createDataRow()
+
+        // графа 5
+        total.sum = parseNumber(row.cell[5].text(), rnuIndexRow, 5 + colOffset, logger, true)
+
+        // графа 7
+        total.sum2 = parseNumber(row.cell[7].text(), rnuIndexRow, 7 + colOffset, logger, true)
+
+        def colIndexMap = ['sum' : 5, 'sum2' : 7]
+
+        for (def alias : totalColumns) {
+            def v1 = total.getCell(alias).value
+            def v2 = totalTmp.getCell(alias).value
+            if (v1 == null && v2 == null) {
+                continue
+            }
+            if (v1 == null || v1 != null && v1 != v2) {
+                logger.error(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
+                break
+            }
+        }
+    }
+
+    // расчет итогов
+    def totalRow = getDataRow(dataRows, 'total')
+    calcTotalSum(rows, totalRow, totalColumns)
+    rows.add(totalRow)
+
+    dataRowHelper.save(rows)
+}
+
+def getNewRow() {
+    def newRow = formData.createDataRow()
+    editableColumns.each {
+        newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias('Редактируемая')
+    }
+    autoFillColumns.each {
+        newRow.getCell(it).setStyleAlias('Автозаполняемая')
+    }
+    return newRow
 }

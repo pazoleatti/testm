@@ -16,7 +16,7 @@ import com.google.gwt.view.client.Range;
  */
 public abstract class AsyncDataProviderWithSortableTable<T, B extends AplanaUiHandlers, C extends ViewWithSortableTable> extends AsyncDataProvider<T> {
 
-    private boolean isAscSorting;
+    private boolean isAscSorting = true;
     private GenericDataGrid<T> table;
     private C view;
 
@@ -57,5 +57,9 @@ public abstract class AsyncDataProviderWithSortableTable<T, B extends AplanaUiHa
 
     public boolean isAscSorting() {
         return isAscSorting;
+    }
+
+    public void setAscSorting(boolean isAscSorting) {
+        this.isAscSorting = isAscSorting;
     }
 }

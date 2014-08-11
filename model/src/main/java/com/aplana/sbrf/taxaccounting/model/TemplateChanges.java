@@ -18,7 +18,7 @@ public class TemplateChanges implements Serializable {
      * Идентификатор декларации
      */
     private Integer declarationTemplateId;
-    private TemplateChangesEvent event;
+    private FormDataEvent event;
 
     /**
      * Идентификатор пользователя
@@ -54,11 +54,11 @@ public class TemplateChanges implements Serializable {
         this.declarationTemplateId = declarationTemplateId;
     }
 
-    public TemplateChangesEvent getEvent() {
+    public FormDataEvent getEvent() {
         return event;
     }
 
-    public void setEvent(TemplateChangesEvent event) {
+    public void setEvent(FormDataEvent event) {
         this.event = event;
     }
 

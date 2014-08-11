@@ -1,6 +1,11 @@
 insert into form_kind (id, name) values (1, 'Первичная');
 insert into form_kind (id, name) values (2, 'Консолидированная');
 
+INSERT INTO department_type (id, name) VALUES (1, 'Банк');
+INSERT INTO department_type (id, name) VALUES (2, 'Территориальный банк');
+INSERT INTO department_type (id, name) VALUES (3, 'ЦСКО, ПЦП');
+INSERT INTO department_type (id, name) VALUES (4, 'Управление');
+
 -- DEPARTMENT
 insert into department (id, name, parent_id, type, code) values (1, 'testName1', null, 1, 1);
 insert into department (id, name, parent_id, type, code) values (2, 'testName2', 1, 2, 2);

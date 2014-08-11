@@ -150,7 +150,8 @@ public class LoadRefBookDataServiceTest {
             Assert.assertTrue("File \"" + name + "\" is Diasoft Custody file!", service.isDiasoftFile(name));
         }
         // Не Diasoft Custody
-        for (String name : new String[]{null, "/", "DS2405121.nsi", "DS240512nsi", "DS240512.nsi0", "DS240512.nsi.", "DS240512..nsi"}) {
+        for (String name : new String[]{null, "/", "DS2405121.nsi", "DS240512nsi", "DS240512.nsi0", "DS240512.nsi.",
+                "DS240512..nsi", "___852-50_______49_0000_00212014.rnu"}) {
             Assert.assertFalse("File \"" + name + "\" is not Diasoft Custody file!", service.isDiasoftFile(name));
         }
     }

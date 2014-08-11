@@ -87,6 +87,9 @@ public class GetDeclarationDataHandler
 
         result.setCanDownload(declaration.getXmlDataUuid() != null);
 
+        result.setTaxOrganCode(declaration.getTaxOrganCode());
+        result.setKpp(declaration.getKpp());
+
 		return result;
 	}
 

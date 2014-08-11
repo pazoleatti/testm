@@ -79,8 +79,8 @@
         .table {
             position: absolute !important;
             bottom: 30px;
-            right: 0;
-            left: 0;
+            right: 10px;
+            left: 10px;
             top: 104px;     /*@see com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataView.DEFAULT_TABLE_TOP_POSITION"*/
         }
 
@@ -217,7 +217,7 @@
                             <style:LinkButton ui:field="infoAnchor" text="История изменений"
                                               img="resources/img/exclamation_mark.png"
                                               title="Отобразить историю налоговой формы"/>
-                            <style:LinkButton ui:field="sources" text="Источники и приемники" img="resources/img/star.png"
+                            <style:LinkButton ui:field="sources" text="Источники и приемники" img="resources/img/source-target.png"
                                               title="Источники и приемники"/>
                         </g:VerticalPanel>
                     </g:cell>

@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.scheduler.api.task.UserTask;
 import com.aplana.sbrf.taxaccounting.scheduler.api.task.UserTaskLocal;
 import com.aplana.sbrf.taxaccounting.scheduler.api.task.UserTaskRemote;
 import com.aplana.sbrf.taxaccounting.service.LoadRefBookDataService;
+import com.aplana.sbrf.taxaccounting.service.PropertyLoader;
 import com.aplana.sbrf.taxaccounting.service.SchedulerInterceptor;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +46,7 @@ public class LoadRefBookNsiTask implements UserTask {
 
     @Override
     public String getTaskName() {
-        return "Загрузка ТФ справочников ЦАС НСИ";
+        return "Загрузка ТФ справочников ЦАС НСИ" + PropertyLoader.getVersion();
     }
 
     @Override

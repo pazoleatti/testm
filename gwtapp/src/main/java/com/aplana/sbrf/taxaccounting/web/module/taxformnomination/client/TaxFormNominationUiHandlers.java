@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client;
 
 import com.aplana.sbrf.taxaccounting.model.FormTypeKind;
-import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.model.TaxNominationColumnEnum;
+import com.aplana.sbrf.taxaccounting.model.TaxNominationColumnEnum;
 import com.gwtplatform.mvp.client.UiHandlers;
 
 import java.util.List;

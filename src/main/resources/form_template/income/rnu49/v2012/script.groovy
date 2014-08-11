@@ -155,7 +155,7 @@ def getRecordIdImport(def Long refBookId, def String alias, def String value, de
         return null
     }
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
-            getEndDate(), rowIndex, colIndex, logger, required)
+            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
 }
 
 // Разыменование записи справочника
@@ -388,7 +388,7 @@ void logicCheck() {
         }
 
         // Проверка даты истечения срока полезного использования
-        if (row.usefullLifeEnd > getEndDate()) {
+        if (row.usefullLifeEnd > getReportPeriodEndDate()) {
             logger.error(errorMsg + 'Дата истечения срока полезного использования не может быть больше даты окончания отчетного периода!')
         }
     }
@@ -927,10 +927,10 @@ void addTransportData(def xml) {
     }
 
     // копирование данных по разделам
-    mapRows.keySet().each { sectionKey ->//число от 1 до 6
-        def copyRows = mapRows.get(sectionKey)
+    mapRows.keySet().each { sectionRus ->//буквы русские
+        def copyRows = mapRows.get(sectionRus)
         if (copyRows != null && !copyRows.isEmpty()) {
-            def sectionAlias = groups[Integer.valueOf(sectionKey) - 1]//алиас заголовка подраздела
+            def sectionAlias = groups[groupsRus.indexOf(sectionRus)]//алиас заголовка подраздела
             def insertIndex = getDataRow(dataRows, sectionAlias).getIndex()
             dataRows.addAll(insertIndex, copyRows)
             // поправить индексы, потому что они после вставки не пересчитываются
@@ -953,7 +953,7 @@ def roundValue(def value, int precision) {
 void checkRNU() {
     // проверить рну 45 (id = 341) и 46 (id = 342)
     if (formData.kind == FormDataKind.PRIMARY) {
-        def end = getEndDate()
+        def end = getReportPeriodEndDate()
         def month = end[Calendar.MONTH] + 1
         formDataService.checkMonthlyFormExistAndAccepted(341, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, month, false, logger, true)
         formDataService.checkMonthlyFormExistAndAccepted(342, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, month, false, logger, true)

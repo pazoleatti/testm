@@ -1,23 +1,19 @@
 package com.aplana.sbrf.taxaccounting.web.module.sources.server;
 
-import java.util.*;
-
-import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.source.SourceMode;
+import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.GetDepartmentAssignsAction;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.GetDepartmentAssignsResult;
-import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.CurrentAssign;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.DepartmentAssign;
+import com.gwtplatform.dispatch.server.ExecutionContext;
+import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
+import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
-import com.aplana.sbrf.taxaccounting.service.SourceService;
-import com.gwtplatform.dispatch.server.ExecutionContext;
-import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
-import com.gwtplatform.dispatch.shared.ActionException;
+import java.util.*;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
@@ -37,8 +33,12 @@ public class GetDepartmentAssignsHandler extends AbstractActionHandler<GetDepart
         List<DepartmentAssign> departmentAssigns = new LinkedList<DepartmentAssign>();
         Date periodFrom = PeriodConvertor.getDateFrom(action.getPeriodsInterval());
         Date periodTo = PeriodConvertor.getDateTo(action.getPeriodsInterval());
+        SearchOrderingFilter filter = new SearchOrderingFilter();
+        filter.setSearchOrdering(action.getOrdering());
+        filter.setAscSorting(action.isAscSorting());
         if(action.isForm()){
-            List<DepartmentFormType> depFormAssigns = sourceService.getDFTByDepartment(action.getDepartmentId(), action.getTaxType(), periodFrom, periodTo);
+            List<DepartmentFormType> depFormAssigns = sourceService.getDFTByDepartment(action.getDepartmentId(),
+                    action.getTaxType(), periodFrom, periodTo, filter);
             // если без пейджинга то это формирование норм, с пейджингом нужно выносить в дао формирование
             for (DepartmentFormType dfa : depFormAssigns) {
                 DepartmentAssign departmentAssign = new DepartmentAssign();
@@ -51,7 +51,8 @@ public class GetDepartmentAssignsHandler extends AbstractActionHandler<GetDepart
                 departmentAssigns.add(departmentAssign);
             }
         } else {
-            List<DepartmentDeclarationType> depDecAssigns = sourceService.getDDTByDepartment(action.getDepartmentId(), action.getTaxType(), periodFrom, periodTo);
+            List<DepartmentDeclarationType> depDecAssigns = sourceService.getDDTByDepartment(action.getDepartmentId(),
+                    action.getTaxType(), periodFrom, periodTo, filter);
             for (DepartmentDeclarationType dda : depDecAssigns) {
                 DepartmentAssign departmentAssign = new DepartmentAssign();
                 departmentAssign.setId((long) dda.getId());
@@ -71,11 +72,13 @@ public class GetDepartmentAssignsHandler extends AbstractActionHandler<GetDepart
                 List<DepartmentFormType> departmentFormTypes;
                 if (selectedLeftObject.isDeclaration()) {
                     departmentFormTypes = sourceService.
-                            getDFTSourceByDDT(selectedLeftObject.getDepartmentId(), selectedLeftObject.getTypeId(), periodFrom, periodTo);
+                            getDFTSourceByDDT(selectedLeftObject.getDepartmentId(), selectedLeftObject.getTypeId(),
+                                    periodFrom, periodTo, filter);
                 } else {
                     if (action.getMode() == SourceMode.SOURCES) {
                         departmentFormTypes = sourceService.
-                                getDFTSourcesByDFT(selectedLeftObject.getDepartmentId(), selectedLeftObject.getTypeId(), selectedLeftObject.getKind(), periodFrom, periodTo);
+                                getDFTSourcesByDFT(selectedLeftObject.getDepartmentId(), selectedLeftObject.getTypeId(),
+                                        selectedLeftObject.getKind(), periodFrom, periodTo, filter);
                     } else {
                         departmentFormTypes = sourceService.
                                 getFormDestinations(selectedLeftObject.getDepartmentId(), selectedLeftObject.getTypeId(), selectedLeftObject.getKind(), periodFrom, periodTo);
@@ -87,7 +90,8 @@ public class GetDepartmentAssignsHandler extends AbstractActionHandler<GetDepart
             } else {
                 if (action.getMode() == SourceMode.SOURCES) {
                     List<DepartmentFormType> departmentFormTypes = sourceService
-                            .getDFTSourceByDDT(selectedLeftObject.getDepartmentId(), selectedLeftObject.getTypeId(), periodFrom, periodTo);
+                            .getDFTSourceByDDT(selectedLeftObject.getDepartmentId(), selectedLeftObject.getTypeId(),
+                                    periodFrom, periodTo, filter);
                     for (DepartmentFormType dft : departmentFormTypes) {
                         currentAssigns.add(new ComparableSourceObject(dft.getKind(), dft.getFormTypeId(), null, dft.getDepartmentId()));
                     }

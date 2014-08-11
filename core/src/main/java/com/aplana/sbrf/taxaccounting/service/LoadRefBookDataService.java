@@ -21,9 +21,21 @@ public interface LoadRefBookDataService {
     ImportCounter importRefBookNsi(TAUserInfo userInfo, Logger logger);
 
     /**
+     * Загрузка ТФ справочников из ЦАС НСИ (ACCOUNT_PLAN_UPLOAD_DIRECTORY, OKATO_UPLOAD_DIRECTORY, REGION_UPLOAD_DIRECTORY)
+     * Указанный список файлов
+     */
+    ImportCounter importRefBookNsi(TAUserInfo userInfo, List<String> loadedFileNameList, Logger logger);
+
+    /**
      * Загрузка ТФ справочников из Diasoft (DIASOFT_UPLOAD_DIRECTORY)
      */
     ImportCounter importRefBookDiasoft(TAUserInfo userInfo, Logger logger);
+
+    /**
+     * Загрузка ТФ справочников из Diasoft (DIASOFT_UPLOAD_DIRECTORY)
+     * Указанный список файлов
+     */
+    ImportCounter importRefBookDiasoft(TAUserInfo userInfo, List<String> loadedFileNameList, Logger logger);
 
     /**
      * Соответствие имени файла ТФ справочников, поставляемых ЦАС НСИ:

@@ -1,12 +1,16 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.UploadResult;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.service.LoadFormDataService;
+import com.aplana.sbrf.taxaccounting.service.LoadRefBookDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.UploadTransportDataService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
@@ -22,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -36,6 +41,12 @@ public class TransportDataController {
 
     @Autowired
     UploadTransportDataService uploadTransportDataService;
+
+    @Autowired
+    LoadFormDataService loadFormDataService;
+
+    @Autowired
+    LoadRefBookDataService loadRefBookDataService;
 
     @RequestMapping(value = "transportData/upload", method = RequestMethod.POST)
     public void upload(HttpServletRequest request, HttpServletResponse response)
@@ -57,12 +68,29 @@ public class TransportDataController {
             fileName = fileName.substring(fileName.lastIndexOf("\\") + 1);
         }
 
-        uploadTransportDataService.uploadFile(securityService.currentUserInfo(), fileName,
+        TAUserInfo userInfo = securityService.currentUserInfo();
+
+        // Загрузка в каталог
+        UploadResult uploadResult = uploadTransportDataService.uploadFile(userInfo, fileName,
                 items.get(0).getInputStream(), logger);
 
+        // Загрузка из каталога
+        if (!uploadResult.getDiasoftFileNameList().isEmpty()) {
+            // Diasoft
+            loadRefBookDataService.importRefBookDiasoft(userInfo, uploadResult.getDiasoftFileNameList(), logger);
+        }
+
+        if (!uploadResult.getFormDataFileNameList().isEmpty()) {
+            // НФ
+            // Пересечение списка доступных приложений и списка загруженных приложений
+            List<Integer> departmentList = new ArrayList(CollectionUtils.intersection(
+                    loadFormDataService.getTB(userInfo, logger), uploadResult.getFormDataDepartmentList()));
+
+            loadFormDataService.importFormData(userInfo, departmentList, uploadResult.getFormDataFileNameList(), logger);
+        }
+
         if (!logger.getEntries().isEmpty()) {
-            response.getWriter().printf((logger.containsLevel(LogLevel.ERROR) ? "error " : "") + "uuid %s",
-                    logEntryService.save(logger.getEntries()));
+            response.getWriter().printf("uuid %s", logEntryService.save(logger.getEntries()));
         }
     }
 

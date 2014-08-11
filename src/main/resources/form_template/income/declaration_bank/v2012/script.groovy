@@ -170,7 +170,7 @@ void logicCheck() {
             (stoimRealPTDoSr > viruchRealPTDoSr ?
             (ubit1Prev269 != stoimRealPTDoSr - viruchRealPTDoSr - ubit1Soot269)
             : (ubit1Prev269 != 0))) {
-        logger.error('Результат текущего расчёта не прошёл проверку, приведённую в порядке заполнения налоговой декларации по налогу на прибыль организации.')
+        logger.warn('В Приложении 3 к Листу 02 строка 150 неверно указана сумма.')
     }
 
     // Проверки Приложения № 3 к Листу 02 - Проверка отрицательной разницы (убыток), полученной налогоплательщиком
@@ -185,7 +185,7 @@ void logicCheck() {
             (stoimRealPTPosSr > viruchRealPTPosSr ?
             (ubit2RealPT != stoimRealPTPosSr - viruchRealPTPosSr)
             : (ubit2RealPT != 0))) {
-        logger.error('Результат текущего расчёта не прошёл проверку, приведённую в порядке заполнения налоговой декларации по налогу на прибыль организации.')
+        logger.warn('В Приложении 3 к Листу 02 строка 160 неверно указана сумма.')
     }
 }
 
