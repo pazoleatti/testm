@@ -161,7 +161,7 @@ public class DateMaskInputCell extends
      * @param columnContext
      */
 	public DateMaskInputCell(SafeHtmlRenderer<String> renderer, ColumnContext columnContext) {
-        super(CLICK, KEYDOWN, BLUR);
+		super(CLICK, KEYDOWN, BLUR, KEYPRESS);
 		if (template == null) {
 			template = GWT.create(Template.class);
 		}
