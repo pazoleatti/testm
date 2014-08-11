@@ -7,16 +7,20 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.sortable.AsyncDataProvi
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
+import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.TableCellElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Label;
@@ -175,10 +179,27 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler>
             }
         };
 
-        TextColumn<LogSearchResultItem> eventColumn = new TextColumn<LogSearchResultItem>() {
-            @Override
-            public String getValue(LogSearchResultItem object) {
-                return object.getEvent().getTitle();
+        Column<LogSearchResultItem, LogSearchResultItem> eventColumn = new Column<LogSearchResultItem, LogSearchResultItem>(
+                new AbstractCell<LogSearchResultItem>() {
+
+                    @Override
+                    public void render(Context context,
+                                       LogSearchResultItem logSearchResultItem,
+                                       SafeHtmlBuilder sb) {
+                        if (logSearchResultItem == null) {
+                            return;
+                        }
+                        if (logSearchResultItem.getBlobDataId() == null) {
+                            sb.appendHtmlConstant(logSearchResultItem.getEvent().getTitle());
+                        } else {
+                            sb.appendHtmlConstant("<div class=\"LinkDiv\">"
+                                    + logSearchResultItem.getEvent().getTitle() + "</div>");
+                        }
+                    }
+                }) {
+            public LogSearchResultItem getValue(
+                    LogSearchResultItem object) {
+                return object;
             }
         };
 
@@ -304,5 +325,17 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler>
         userLoginColumn.setDataStoreName(HistoryBusinessSearchOrdering.USER.name());
         userRolesColumn.setDataStoreName(HistoryBusinessSearchOrdering.USER_ROLE.name());
         userIpColumn.setDataStoreName(HistoryBusinessSearchOrdering.IP_ADDRESS.name());
+
+        table.addCellPreviewHandler(new CellPreviewEvent.Handler<LogSearchResultItem>(){
+            @Override
+            public void onCellPreview(final CellPreviewEvent<LogSearchResultItem> event) {
+                 if (event.getColumn() == 1 && Event.getTypeInt(event.getNativeEvent().getType()) == Event.ONCLICK) {
+                     String blobDataId = event.getValue().getBlobDataId();
+                     if (blobDataId != null){
+                         getUiHandlers().onEventClick(blobDataId);
+                     }
+                 }
+            }
+        });
     }
 }
