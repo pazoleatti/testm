@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.refbook;
 
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
@@ -27,6 +28,7 @@ import java.util.Map;
  */
 
 public interface RefBookDataProvider {
+    final static String LOCK_MESSAGE = "Операция не может быть выполнена. Справочник заблокирован другой операцией!";
 
 	/**
 	 * Загружает данные справочника на определенную дату актуальности
@@ -260,7 +262,7 @@ public interface RefBookDataProvider {
      * Вместо этого метода надо использовать {@link RefBookDataProvider#createRecordVersion}
      */
     @Deprecated
-    void insertRecords(Date version, List<Map<String, RefBookValue>> records);
+    void insertRecords(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records);
 
     /**
      * Обновляет значения в справочнике
@@ -270,7 +272,7 @@ public interface RefBookDataProvider {
      * Вместо этого метода надо использовать {@link RefBookDataProvider#updateRecordVersion}
      */
     @Deprecated
-    void updateRecords(Date version, List<Map<String, RefBookValue>> records);
+    void updateRecords(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records);
 
     /**
      * Удаляет записи из справочника
@@ -280,7 +282,7 @@ public interface RefBookDataProvider {
      * Вместо этого метода надо использовать {@link RefBookDataProvider#deleteRecordVersions}
      */
     @Deprecated
-    void deleteRecords(Date version, List<Long> recordIds);
+    void deleteRecords(TAUserInfo taUserInfo, Date version, List<Long> recordIds);
 
     /**
      * Удаление всех записей справочника
@@ -289,5 +291,5 @@ public interface RefBookDataProvider {
      * Вместо этого метода надо использовать {@link RefBookDataProvider#deleteAllRecords}
      */
     @Deprecated
-    void deleteAllRecords(Date version);
+    void deleteAllRecords(TAUserInfo taUserInfo, Date version);
 }

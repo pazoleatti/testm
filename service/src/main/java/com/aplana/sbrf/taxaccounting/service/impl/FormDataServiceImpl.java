@@ -6,12 +6,16 @@ import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.*;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.impl.eventhandler.EventLauncher;
 import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
@@ -40,6 +44,7 @@ public class FormDataServiceImpl implements FormDataService {
     private static final String XLSX_EXT = "xlsx";
     private static final String XLS_EXT = "xls";
     public static final String MSG_IS_EXIST_FORM = "Существует экземпляр налоговой формы %s типа %s в подразделении %s периоде %s";
+    final static String LOCK_MESSAGE = "Операция не может быть выполнена. Налоговая форма заблокирована другой операцией!";
 
     @Autowired
 	private FormDataDao formDataDao;
@@ -78,13 +83,16 @@ public class FormDataServiceImpl implements FormDataService {
     @Autowired
     private LogEntryService logEntryService;
     @Autowired
-    SourceService sourceService;
+    private SourceService sourceService;
     @Autowired
-    TransactionHelper tx;
+    private TransactionHelper tx;
     @Autowired
-    TAUserService userService;
+    private TAUserService userService;
     @Autowired
-    private LockDataService lockDataService;
+    private LockDataService lockService;
+    @Autowired
+    private RefBookDao refBookDao;
+
     // Время блокировки при консолидации (3 часа)
     private static final int BLOCK_TIME =  3 * 60 * 60 * 1000;
 
@@ -528,7 +536,6 @@ public class FormDataServiceImpl implements FormDataService {
      */
     @Override
     public void doMove(long formDataId, boolean manual, TAUserInfo userInfo, WorkflowMove workflowMove, String note, Logger logger) {
-        List<FormData> formDataList = null;
         // Форма не должна быть заблокирована даже текущим пользователем;
         lockCoreService.checkUnlocked(FormData.class, formDataId, userInfo);
         // Временный срез формы должен быть в актуальном состоянии
@@ -546,6 +553,55 @@ public class FormDataServiceImpl implements FormDataService {
 
         FormData formData = formDataDao.get(formDataId, manual);
 
+        if (workflowMove == WorkflowMove.CREATED_TO_PREPARED
+                || workflowMove == WorkflowMove.PREPARED_TO_APPROVED
+                || workflowMove == WorkflowMove.APPROVED_TO_ACCEPTED) {
+            //Устанавливаем блокировку на текущую нф
+            List<String> lockedObjects = new ArrayList<String>();
+            int userId = userInfo.getUser().getId();
+            String lockKey = LockData.LOCK_OBJECTS.TAX_FORM.name() + "_" + formDataId;
+            LockData lockData = lockService.lock(lockKey, userId, LockData.STANDARD_LIFE_TIME);
+            if (lockData == null) {
+                try {
+                    //Блокировка установлена
+                    lockedObjects.add(lockKey);
+                    //Блокируем связанные справочники
+                    for (Column column : formData.getFormColumns()) {
+                        if (column instanceof RefBookColumn) {
+                            Long attributeId = ((RefBookColumn) column).getRefBookAttributeId();
+                            if (attributeId != null) {
+                                RefBook refBook = refBookDao.getByAttribute(attributeId);
+                                String referenceLockKey = LockData.LOCK_OBJECTS.REF_BOOK.name() + "_" + refBook.getId();
+                                LockData referenceLockData = lockService.lock(referenceLockKey, userId, LockData.STANDARD_LIFE_TIME);
+                                if (referenceLockData == null) {
+                                    //Блокировка установлена
+                                    lockedObjects.add(referenceLockKey);
+                                } else {
+                                    throw new ServiceLoggerException(LOCK_MESSAGE,
+                                            logEntryService.save(logger.getEntries()));
+                                }
+                            }
+                        }
+                    }
+
+                    //Проверяем что записи справочников, на которые есть ссылки в нф все еще существуют в периоде формы
+
+                    moveProcess(formData, manual, userInfo, workflowMove, note, logger);
+                } finally {
+                    for (String lock : lockedObjects) {
+                        lockService.unlock(lock, userId);
+                    }
+                }
+            } else {
+                throw new ServiceLoggerException(LOCK_MESSAGE,
+                        logEntryService.save(logger.getEntries()));
+            }
+        } else {
+            moveProcess(formData, manual, userInfo, workflowMove, note, logger);
+        }
+    }
+
+    public void moveProcess(FormData formData, boolean manual, TAUserInfo userInfo, WorkflowMove workflowMove, String note, Logger logger) {
         formDataScriptingService.executeScript(userInfo, formData, workflowMove.getEvent(), logger, null);
 
         if (logger.containsLevel(LogLevel.ERROR)) {
@@ -631,7 +687,7 @@ public class FormDataServiceImpl implements FormDataService {
                         String.valueOf(formData.getPeriodOrder()) : "";
                 String lockKey = formData.getReportPeriodId() + "." + periodOrder + "." + destinationDFT.getDepartmentId()
                         + "." + destinationDFT.getFormTypeId() + "." + destinationDFT.getKind();
-                if (lockDataService.lock(lockKey, userInfo.getUser().getId(), BLOCK_TIME) != null) {
+                if (lockService.lock(lockKey, userInfo.getUser().getId(), BLOCK_TIME) != null) {
                     FormTemplate formTemplate = formTemplateService.get(formTemplateService.getActiveFormTemplateId(destinationDFT.getFormTypeId(), formData.getReportPeriodId()));
                     logger.error(String.format("Заблокирована форма-приемник «%s» в подразделении «%s»",
                             formTemplate.getName(), departmentDao.getDepartment(destinationDFT.getDepartmentId()).getName()));
@@ -683,7 +739,7 @@ public class FormDataServiceImpl implements FormDataService {
             }
         } finally {
             for (String lockKey : lockedForms) {
-                lockDataService.unlock(lockKey, userInfo.getUser().getId());
+                lockService.unlock(lockKey, userInfo.getUser().getId());
             }
         }
     }

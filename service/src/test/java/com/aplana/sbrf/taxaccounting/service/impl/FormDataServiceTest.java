@@ -197,7 +197,7 @@ public class FormDataServiceTest {
                 return null;
             }
         }).when(lockDataService).unlock(anyString(),anyInt());
-        ReflectionTestUtils.setField(formDataService, "lockDataService", lockDataService);
+        ReflectionTestUtils.setField(formDataService, "lockService", lockDataService);
 
         formDataService.compose(WorkflowMove.APPROVED_TO_ACCEPTED, formData, userInfo, logger);
         // проверяем что источник удален
