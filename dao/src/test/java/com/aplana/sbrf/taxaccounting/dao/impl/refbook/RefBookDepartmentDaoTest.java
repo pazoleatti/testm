@@ -115,20 +115,19 @@ public class RefBookDepartmentDaoTest {
     @Test
     public void testCreate() {
 
-        Map<String, RefBookValue> record = new HashMap<String, RefBookValue>()
-        {{
-                put("name", new RefBookValue(RefBookAttributeType.STRING, "dsfs"));
-                put("sbrf_code", new RefBookValue(RefBookAttributeType.STRING, "99_0000_00"));
-                put("type", new RefBookValue(RefBookAttributeType.REFERENCE, DepartmentType.MANAGEMENT.getCode()));
-                put("code", new RefBookValue(RefBookAttributeType.NUMBER, 101));
-        }};
+		RefBook refBook = refBookDao.get(RefBookDepartmentDao.REF_BOOK_ID);
+		Map<String, RefBookValue> record = refBook.createRecord();
+		record.get("name").setValue("dsfs");
+		record.get("sbrf_code").setValue("99_0000_00");
+		record.get("type").setValue(Long.valueOf(DepartmentType.MANAGEMENT.getCode()));
+		record.get("code").setValue(101);
         assertEquals(1000, refBookDepartmentDao.create(record, refBookDao.getAttributes(30l)));
     }
 
     @Test(expected = DaoException.class)
     public void testRemove() {
-        refBookDepartmentDao.remove(2);
-        departmentDao.getDepartment(2);
+        refBookDepartmentDao.remove(1);
+        departmentDao.getDepartment(1);
     }
 
 }

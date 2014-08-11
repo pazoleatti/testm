@@ -1,5 +1,5 @@
-insert into department_type (id, name) values (1, 'Áàíê');
-insert into department_type (id, name) values (2, 'Òåğğèòîğèàëüíûé áàíê');
-insert into department_type (id, name) values (3, 'ÖÑÊÎ, ÏÖÏ');
-insert into department_type (id, name) values (4, 'Óïğàâëåíèå');
+insert into department_type (id, name) values (1, 'Ğ‘Ğ°Ğ½Ğº');
+insert into department_type (id, name) values (2, 'Ğ¢ĞµÑ€Ñ€Ğ¸Ñ‚Ğ¾Ñ€Ğ¸Ğ°Ğ»ÑŒĞ½Ñ‹Ğ¹ Ğ±Ğ°Ğ½Ğº');
+insert into department_type (id, name) values (3, 'Ğ¦Ğ¡ĞšĞ, ĞŸĞ¦ĞŸ');
+insert into department_type (id, name) values (4, 'Ğ£Ğ¿Ñ€Ğ°Ğ²Ğ»ĞµĞ½Ğ¸Ğµ');
 insert into department_type (id, name) values (5, null);

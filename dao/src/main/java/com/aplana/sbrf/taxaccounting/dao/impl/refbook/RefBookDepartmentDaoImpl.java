@@ -173,25 +173,25 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
 
     private static final String CREATE_DEPARTMENT = "insert into department (id, %s) values(seq_department.nextval, %s)";
     @Override
-    public int create(Map<String, RefBookValue> records, List<RefBookAttribute> attributes) {
+    public int create(Map<String, RefBookValue> record, List<RefBookAttribute> attributes) {
         final PreparedStatementData ps = new PreparedStatementData();
         for (RefBookAttribute attribute : attributes) {
             ps.appendQuery(attribute.getAlias() + ",");
 
             if (attribute.getAttributeType().equals(RefBookAttributeType.STRING)) {
-                ps.addParam(records.get(attribute.getAlias()).getStringValue());
+                ps.addParam(record.get(attribute.getAlias()).getStringValue());
             }
             if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
-                ps.addParam(records.get(attribute.getAlias()).getReferenceValue());
+                ps.addParam(record.get(attribute.getAlias()).getReferenceValue());
             }
             if (attribute.getAttributeType().equals(RefBookAttributeType.NUMBER)) {
-                ps.addParam(records.get(attribute.getAlias()).getNumberValue());
+                ps.addParam(record.get(attribute.getAlias()).getNumberValue());
             }
             if (attribute.getAttributeType().equals(RefBookAttributeType.DATE)) {
-                ps.addParam(records.get(attribute.getAlias()).getDateValue());
+                ps.addParam(record.get(attribute.getAlias()).getDateValue());
             }
         }
-        final String ph = SqlUtils.preparePlaceHolders(records.size());
+        final String ph = SqlUtils.preparePlaceHolders(attributes.size());
         try {
             PreparedStatementCreator psc = new PreparedStatementCreator() {
                 @Override
