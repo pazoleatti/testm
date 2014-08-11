@@ -54,7 +54,7 @@
         <checking>false</checking>
         <name>Код ОКТМО</name>
         <order>6</order>
-        <width>5</width>
+        <width>6</width>
         <hierarchical>true</hierarchical>
         <nameAttributeId>841</nameAttributeId>
         <refBookAttributeId>840</refBookAttributeId>
@@ -73,7 +73,7 @@
         <checking>false</checking>
         <name>Признак: здание - 1, помещение - 2</name>
         <order>8</order>
-        <width>5</width>
+        <width>9</width>
         <maxLength>1</maxLength>
         <precision>0</precision>
     </columns>
@@ -82,7 +82,7 @@
         <checking>false</checking>
         <name>Кадастровый номер</name>
         <order>9</order>
-        <width>5</width>
+        <width>6</width>
         <maxLength>100</maxLength>
         <prevLength>0</prevLength>
     </columns>
@@ -100,7 +100,7 @@
         <checking>false</checking>
         <name>Кадастровая стоимость, в т.ч. необлагаемая налогом</name>
         <order>11</order>
-        <width>5</width>
+        <width>6</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -109,7 +109,7 @@
         <checking>false</checking>
         <name>Право собственности, дата возникновения</name>
         <order>12</order>
-        <width>5</width>
+        <width>7</width>
         <formatId>0</formatId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
@@ -117,7 +117,7 @@
         <checking>false</checking>
         <name>Право собственности, дата прекращения</name>
         <order>13</order>
-        <width>5</width>
+        <width>6</width>
         <formatId>0</formatId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
@@ -126,7 +126,7 @@
         <name>Код налоговой льготы</name>
         <order>14</order>
         <width>5</width>
-        <filter>CODE IS NULL OR CODE = 2012000 OR CODE = 2012400 OR CODE = 2012500</filter>
+        <filter>CODE IS NULL OR CODE = '2012000' OR CODE = '2012400' OR CODE = '2012500'</filter>
         <hierarchical>false</hierarchical>
         <nameAttributeId>2022</nameAttributeId>
         <refBookAttributeId>2021</refBookAttributeId>

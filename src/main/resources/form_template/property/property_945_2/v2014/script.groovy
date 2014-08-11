@@ -172,8 +172,10 @@ void addPrevDataRows() {
             }
         }
     }
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    dataRowHelper.save(prevDataRows)
+    if (prevDataRows) {
+        def dataRowHelper = formDataService.getDataRowHelper(formData)
+        dataRowHelper.save(prevDataRows)
+    }
 }
 
 void calc() {
