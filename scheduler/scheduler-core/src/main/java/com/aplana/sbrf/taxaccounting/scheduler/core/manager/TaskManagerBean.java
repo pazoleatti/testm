@@ -99,7 +99,7 @@ public class TaskManagerBean implements TaskManager {
                     taskStatus.getNextFireTime()));
             return Long.parseLong(taskStatus.getTaskId());
         } catch (UserCalendarPeriodInvalid e) {
-            throw new TaskSchedulingException("Не корректно заполнено поле «Расписание»", e);
+            throw new TaskSchedulingException("Значение атрибута «Расписание» не соответствует требованиям формата Cron!", e);
         } catch (Exception e) {
             LOG.error(e.getLocalizedMessage(), e);
             throw new TaskSchedulingException("Не удалось выполнить создание задачи", e);
