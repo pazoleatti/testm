@@ -68,8 +68,9 @@ if jassAuthDataNotFound:
 
 
 # JDBC provider
-jdbcProviderName = 'Oracle JDBC Driver'+ settings.suffixForResources
-jdbcDriverClass  = 'oracle.jdbc.pool.OracleConnectionPoolDataSource'
+jdbcProviderName = 'Oracle JDBC Driver (XA)'+ settings.suffixForResources
+#jdbcDriverClass  = 'oracle.jdbc.pool.OracleConnectionPoolDataSource'
+jdbcDriverClass  = 'oracle.jdbc.xa.client.OracleXADataSource'
 
 print ''
 print '--------------------------------------------'
