@@ -21,7 +21,7 @@ insert into ref_book_record(id, record_id, ref_book_id, version, status) values 
 insert into ref_book_record(id, record_id, ref_book_id, version, status) values (27, 7, 8, date '2013-01-01', 0);
 insert into report_period (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date) values (1, 'Transport report period 2', 1, 21, date '2013-01-01', date '2013-03-31', date '2013-01-01');
 insert into report_period (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date) values (2, 'Transport report period 3', 1, 22, date '2013-04-01', date '2013-06-30', date '2013-04-01');
-insert into declaration_data(id, declaration_template_id, report_period_id, department_id, data, is_accepted) values (1, 1, 1, 2, null, 1);
+insert into declaration_data(id, declaration_template_id, report_period_id, department_id, data, is_accepted, tax_organ_code, kpp) values (1, 1, 1, 2, null, 1, 'CD12', '123456789');
 insert into declaration_data(id, declaration_template_id, report_period_id, department_id, data, is_accepted) values (2, 1, 2, 4, null, 0);
 
 -- для проверки setAccepted 

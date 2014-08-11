@@ -397,6 +397,8 @@ create table declaration_data (
   declaration_template_id number(9) not null,
   report_period_id        number(9) not null,
   department_id           number(9) not null,
+  tax_organ_code          varchar2(4),
+  kpp                     varchar2(9),
   data                    varchar2(36),
   is_accepted             number(1) not null,
   data_pdf                varchar2(36),
@@ -409,6 +411,8 @@ comment on column declaration_data.id is 'Идентификатор (перви
 comment on column declaration_data.declaration_template_id is 'Ссылка на шаблон декларации';
 comment on column declaration_data.report_period_id is 'Отчётный период';
 comment on column declaration_data.department_id is 'Подразделение';
+comment on column declaration_data.tax_organ_code is 'Налоговый орган';
+comment on column declaration_data.kpp is 'КПП';
 comment on column declaration_data.data is 'Данные декларации в формате законодателя (XML)';
 comment on column declaration_data.is_accepted is 'Признак того, что декларация принята';
 comment on column declaration_data.data_pdf is 'Данные декларации в формате PDF';
