@@ -14,10 +14,13 @@ INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, max_length) VALUES
 (652, 74, 'ФИО', 'NAME', 1, 2, NULL, NULL, 1, NULL, 50, 0, 100);
 
+INSERT INTO department_type (id, name) VALUES (1, 'Банк');
+INSERT INTO department_type (id, name) VALUES (2, 'Территориальный банк');
+
 INSERT INTO department (id, name, parent_id, type, shortname, tb_index, sbrf_code, code) VALUES
 (1, 'Главный Банк', NULL, 1, 'Банк', NULL, '018_075_01', 1);
 INSERT INTO department (id, name, parent_id, type, shortname, tb_index, sbrf_code, code) VALUES
-(2, 'Териториальный Банк №1', 1, 2, 'ТБ1', NULL, '018_003_01', 2);
+(2, 'Территориальный Банк №1', 1, 2, 'ТБ1', NULL, '018_003_01', 2);
 
 INSERT INTO sec_user (id, login, name, department_id, is_active, email) VALUES
 (3, 'controlBank', 'Контролёр Банка', 1, 1, NULL);

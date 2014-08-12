@@ -80,6 +80,8 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
     @ProxyEvent
     @Override
     public void onAuditFormSearchButtonClicked(AuditClientSearchEvent event) {
+        LogCleanEvent.fire(this);
+        LogShowEvent.fire(AuditClientPresenter.this, false);
         getView().updateData(0);
     }
 
@@ -137,6 +139,11 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
     @Override
     public void onSortingChanged() {
         getView().updateData();
+    }
+
+    @Override
+    public void onEventClick(String uuid) {
+        LogAddEvent.fire(AuditClientPresenter.this, uuid);
     }
 
     @ProxyEvent

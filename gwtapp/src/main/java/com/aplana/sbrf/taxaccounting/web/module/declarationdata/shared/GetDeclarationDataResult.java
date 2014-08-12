@@ -13,6 +13,8 @@ public class GetDeclarationDataResult implements Result {
     private Integer reportPeriodYear;
 	private String declarationType;
 	private Date docDate;
+    private String taxOrganCode;
+    private String kpp;
 
 	private boolean canAccept;
 	private boolean canReject;
@@ -110,5 +112,21 @@ public class GetDeclarationDataResult implements Result {
 
     public void setReportPeriodYear(Integer reportPeriodYear) {
         this.reportPeriodYear = reportPeriodYear;
+    }
+
+    public String getTaxOrganCode() {
+        return taxOrganCode;
+    }
+
+    public void setTaxOrganCode(String taxOrganCode) {
+        this.taxOrganCode = taxOrganCode;
+    }
+
+    public String getKpp() {
+        return kpp;
+    }
+
+    public void setKpp(String kpp) {
+        this.kpp = kpp;
     }
 }

@@ -6,7 +6,7 @@
     <fullName>Отчёт о суммах НДС начисленных налоговым агентом по договорам аренды имущества (балансовый счёт
         60309.03)
     </fullName>
-    <code></code>
+    <code>(724.7)</code>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rowNum</alias>
         <checking>false</checking>

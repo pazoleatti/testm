@@ -71,7 +71,7 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
 
         int id = formTemplateService.save(formTemplate);
 
-        logging(id, TemplateChangesEvent.MODIFIED, user);
+        logging(id, FormDataEvent.TEMPLATE_MODIFIED, user);
         return id;
     }
 
@@ -91,7 +91,7 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
         checkError(logger, SAVE_MESSAGE);
         int id = formTemplateService.save(formTemplate);
 
-        logging(id, TemplateChangesEvent.CREATED, user);
+        logging(id, FormDataEvent.TEMPLATE_CREATED, user);
         return id;
     }
 
@@ -105,7 +105,7 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
         checkError(logger, SAVE_MESSAGE);
         int id = formTemplateService.save(formTemplate);
 
-        logging(id, TemplateChangesEvent.CREATED, user);
+        logging(id, FormDataEvent.TEMPLATE_CREATED, user);
         return id;
     }
 
@@ -168,7 +168,7 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
             logger.info("Макет удален в связи с удалением его последней версии");
             isDeleteAll = true;
         }
-        logging(templateId, TemplateChangesEvent.DELETED, user);
+        logging(templateId, FormDataEvent.TEMPLATE_DELETED, user);
         return isDeleteAll;
     }
 
@@ -181,10 +181,10 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
                     template.getVersion(), null, logger);
             if (!force && logger.containsLevel(LogLevel.ERROR)) return false;
             formTemplateService.updateVersionStatus(VersionedObjectStatus.DRAFT, templateId);
-            logging(templateId, TemplateChangesEvent.DEACTIVATED, user);
+            logging(templateId, FormDataEvent.TEMPLATE_DEACTIVATED, user);
         } else {
             formTemplateService.updateVersionStatus(VersionedObjectStatus.NORMAL, templateId);
-            logging(templateId, TemplateChangesEvent.ACTIVATED, user);
+            logging(templateId, FormDataEvent.TEMPLATE_ACTIVATED, user);
         }
         return true;
     }
@@ -194,7 +194,7 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
             throw new ServiceLoggerException(errorMsg, logEntryService.save(logger.getEntries()));
     }
 
-    private void logging(int id, TemplateChangesEvent event, TAUser user){
+    private void logging(int id, FormDataEvent event, TAUser user){
         TemplateChanges changes = new TemplateChanges();
         changes.setEvent(event);
         changes.setEventDate(new Date());

@@ -59,6 +59,13 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	Label title;
 
 	@UiField
+    HorizontalPanel propertyBlock;
+    @UiField
+    Label taxOrganCode;
+    @UiField
+    Label kpp;
+
+	@UiField
 	PdfViewerView pdfViewer;
 
     @UiField
@@ -133,7 +140,24 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 		this.department.setTitle(department);
 	}
 
-	@Override
+    @Override
+    public void setTaxOrganCode(String taxOrganCode) {
+        this.taxOrganCode.setText(taxOrganCode);
+        this.taxOrganCode.setTitle(taxOrganCode);
+    }
+
+    @Override
+    public void setKpp(String kpp) {
+        this.kpp.setText(kpp);
+        this.kpp.setTitle(kpp);
+    }
+
+    @Override
+    public void setPropertyBlockVisible(boolean isVisible) {
+        propertyBlock.setVisible(isVisible);
+    }
+
+    @Override
 	public void setReportPeriod(String reportPeriod) {
 		this.reportPeriod.setText(reportPeriod);
 	}

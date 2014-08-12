@@ -1,4 +1,5 @@
-INSERT INTO DEPARTMENT (id, name, parent_id, type, shortname, tb_index, sbrf_code, region_id, code)
+INSERT INTO department_type (id, name) VALUES (1, 'Банк');
+INSERT INTO department (id, name, parent_id, type, shortname, tb_index, sbrf_code, region_id, code)
   VALUES (1, 'Банк', null, 1, null, null, '12', 1, 1);
 
 INSERT INTO sec_user (id, name, login, department_id, is_active, email) VALUES

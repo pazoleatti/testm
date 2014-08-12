@@ -23,7 +23,8 @@
             position: absolute !important;
             bottom: 0;
             right: 0;
-            left: 0;
+            left: 10px;
+            left: 10px;
             top: 35px;
         }
 

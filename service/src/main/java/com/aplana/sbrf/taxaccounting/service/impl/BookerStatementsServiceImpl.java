@@ -126,11 +126,11 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
                     map.put(I_101_CREDIT_RATE, new RefBookValue(RefBookAttributeType.NUMBER, item.getCreditRate()));
                     map.put(I_101_OUTCOME_DEBET_REMAINS, new RefBookValue(RefBookAttributeType.NUMBER, item.getOutcomeDebetRemains()));
                     map.put(I_101_OUTCOME_CREDIT_REMAINS, new RefBookValue(RefBookAttributeType.NUMBER, item.getOutcomeCreditRemains()));
-                    map.put(I_101_ACCOUNT_PERIOD_ID, new RefBookValue(RefBookAttributeType.NUMBER, accountPeriodId.longValue()));
+                    map.put(I_101_ACCOUNT_PERIOD_ID, new RefBookValue(RefBookAttributeType.REFERENCE, accountPeriodId.longValue()));
                     records.add(map);
                 }
 
-                provider.updateRecords(new Date(), records);
+                provider.updateRecords(userInfo, new Date(), records);
             } else {
                 throw new ServiceException(NO_DATA_FILE_MSG);
             }
@@ -150,7 +150,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
                     records.add(map);
                 }
 
-                provider.updateRecords(new Date(), records);
+                provider.updateRecords(userInfo, new Date(), records);
 
             } else {
                 throw new ServiceException(NO_DATA_FILE_MSG);
@@ -158,7 +158,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
         }
 
         String msg = String.format("Импорт бухгалтерской отчётности: %s", realFileName);
-        auditService.add(FormDataEvent.IMPORT, userInfo, departmentId, null, null, null, null, msg);
+        auditService.add(FormDataEvent.IMPORT, userInfo, departmentId, null, null, null, null, msg, null);
     }
 
     // Проверка расширения Булата Кинзибулатова из com.aplana.sbrf.taxaccounting.web.mvc.BookerStatementsController.getFileExtention()
@@ -522,7 +522,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
             map.put(I_101_OUTCOME_CREDIT_REMAINS, new RefBookValue(RefBookAttributeType.NUMBER, null));
             map.put(I_101_ACCOUNT_PERIOD_ID, new RefBookValue(RefBookAttributeType.REFERENCE, ids.get(0)));
             records.add(map);
-            provider.updateRecords(new Date(), records);
+            provider.updateRecords(userInfo, new Date(), records);
 
         } else {
             map.put(I_102_OPU_CODE, new RefBookValue(RefBookAttributeType.STRING, "-1"));
@@ -530,7 +530,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
             map.put(I_102_ITEM_NAME, new RefBookValue(RefBookAttributeType.STRING, null));
             map.put(I_102_ACCOUNT_PERIOD_ID, new RefBookValue(RefBookAttributeType.REFERENCE, ids.get(0)));
             records.add(map);
-            provider.updateRecords(new Date(), records);
+            provider.updateRecords(userInfo, new Date(), records);
         }
     }
 

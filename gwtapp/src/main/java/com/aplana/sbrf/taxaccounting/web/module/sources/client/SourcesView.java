@@ -650,8 +650,8 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         }
 
         downTable.addColumn(downNameTypeColumn, downNameTypeHeader, 100, Style.Unit.PCT);
-        downTable.addColumn(downStartColumn, "Начало назначения", 80, Style.Unit.PX);
-        downTable.addColumn(downEndColumn, "Окончание назначения", 80, Style.Unit.PX);
+        downTable.addColumn(downStartColumn, "Начало назначения", 90, Style.Unit.PX);
+        downTable.addColumn(downEndColumn, "Окончание назначения", 90, Style.Unit.PX);
 
         leftTable.redrawHeaders();
         rightTable.redrawHeaders();
@@ -769,10 +769,10 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
                 this.sortByColumnLeftTable = SourcesSearchOrdering.valueOf(sortByColumn);
                 break;
             case RIGHT:
-                this.sortByColumnLeftTable = SourcesSearchOrdering.valueOf(sortByColumn);
+                this.sortByColumnRightTable = SourcesSearchOrdering.valueOf(sortByColumn);
                 break;
             case DOWN:
-                this.sortByColumnLeftTable = SourcesSearchOrdering.valueOf(sortByColumn);
+                this.sortByColumnDownTable = SourcesSearchOrdering.valueOf(sortByColumn);
                 break;
         }
     }

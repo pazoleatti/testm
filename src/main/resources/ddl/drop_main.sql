@@ -83,3 +83,4 @@ drop sequence seq_ref_book_oktmo;
 drop table form_kind;
 drop table event;
 drop table department;
+drop table department_type;

@@ -147,35 +147,43 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     protected class DepartmentJdbcMapper implements RowMapper<Department> {
 		@Override
 		public Department mapRow(ResultSet rs, int rowNum) throws SQLException {
-			Department department = new Department();
-			department.setId(SqlUtils.getInteger(rs,"id"));
-			department.setName(rs.getString("name"));
-			Integer parentId = SqlUtils.getInteger(rs,"parent_id");
-            // В ResultSet есть особенность что если пришло значение нул то вернет значение по умолчанию - то есть для Integer'a вернет 0
-            // а так как у нас в базе 0 используется в качестве идентификатора то нужно null нужно првоерять через .wasNull()
-            department.setParentId(rs.wasNull() ? null : parentId);
-			department.setType(DepartmentType.fromCode(SqlUtils.getInteger(rs,"type")));
-			department.setShortName(rs.getString("shortname"));
-			department.setTbIndex(rs.getString("tb_index"));
-			department.setSbrfCode(rs.getString("sbrf_code"));
-            department.setRegionId(SqlUtils.getLong(rs,"region_id"));
-            if (rs.wasNull()) {
-                department.setRegionId(null);
+            try {
+                Department department = new Department();
+                department.setId(SqlUtils.getInteger(rs, "id"));
+                department.setName(rs.getString("name"));
+                Integer parentId = SqlUtils.getInteger(rs, "parent_id");
+                // В ResultSet есть особенность что если пришло значение нул то вернет значение по умолчанию - то есть для Integer'a вернет 0
+                // а так как у нас в базе 0 используется в качестве идентификатора то нужно null нужно првоерять через .wasNull()
+                department.setParentId(rs.wasNull() ? null : parentId);
+                department.setType(DepartmentType.fromCode(SqlUtils.getInteger(rs, "type")));
+                department.setShortName(rs.getString("shortname"));
+                department.setTbIndex(rs.getString("tb_index"));
+                department.setSbrfCode(rs.getString("sbrf_code"));
+                department.setRegionId(SqlUtils.getLong(rs, "region_id"));
+                if (rs.wasNull()) {
+                    department.setRegionId(null);
+                }
+                department.setActive(rs.getBoolean("is_active"));
+                department.setCode(rs.getInt("code"));
+                return department;
+            } catch (EmptyResultDataAccessException e) {
+                return null;
             }
-            department.setActive(rs.getBoolean("is_active"));
-            department.setCode(rs.getInt("code"));
-			return department;
-		}
-	}
+        }
+    }
 
 	@Override
-	public Department getDepartmentBySbrfCode(String sbrfCode) {
-		return getJdbcTemplate().queryForObject(
-				"SELECT * FROM department dp WHERE dp.sbrf_code = ?",
-				new Object[]{sbrfCode},
-				new DepartmentJdbcMapper()
-		);
-	}
+    public Department getDepartmentBySbrfCode(String sbrfCode) {
+        try {
+            return getJdbcTemplate().queryForObject(
+                    "SELECT * FROM department dp WHERE dp.sbrf_code = ?",
+                    new Object[]{sbrfCode},
+                    new DepartmentJdbcMapper()
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
 
     @Override
     public Department getDepartmentByCode(int code) {

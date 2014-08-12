@@ -269,6 +269,10 @@ def checkEndBegDates(def BEG_DATE,def END_DATE, def BSSCH, fileRowIndexMap) {
 }
 
 def getFileRecords(def inputStream) {
+    if (inputStream.available() == 0) {
+        logger.error("Файл пуст.")
+        return null
+    }
     def tableQN = QName.valueOf('table')
     def fieldQN = QName.valueOf('field')
     def recordQN = QName.valueOf('record')

@@ -3,6 +3,7 @@ insert into tax_period(id, tax_type, year) values (1, 'T', 2013);
 insert into ref_book(id, name) values (8, 'Коды, определяющие налоговый (отчётный) период');
 insert into ref_book_record(id, record_id, ref_book_id, version, status) values (21, 1, 8, to_date('01.01.2013', 'DD.MM.YY'), 0);
 
+INSERT INTO department_type (id, name) VALUES (1, 'Банк');
 insert into department (id, name, parent_id, type, code) values (1, 'А - департамент', null, 1, 1);
 insert into form_type (id, name, tax_type) values (1, 'А - тип', 'T');
 insert into form_template (id, type_id, data_rows, version, fixed_rows, name, fullname, header)

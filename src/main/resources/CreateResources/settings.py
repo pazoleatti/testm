@@ -1,8 +1,8 @@
 # prefix for resources
-suffixForResources          = '-0.4'
+suffixForResources          = '-0.3.9'
 
 # database info
-jassUserId                  = 'TAX_0_4'
+jassUserId                  = 'TAX_0_3_9'
 jassUserPass                = 'TAX'
 dataBaseHost                = 'nalog-db.aplana.local'
 dataBasePort                = '1521'
@@ -14,13 +14,13 @@ migrationDataBaseHost       = 'nalog-db.aplana.local'
 migrationDataBasePort       = '1521'
 migrationDataBaseSvcName    = 'orcl.aplana.local'
 
-jdbcDriverPath   			= 'C:/IBM_TEST/ojdbc6.jar'
+jdbcDriverPath   			= 'C:/IBM/ojdbc6.jar'
 
 # MQ server info
 MQServerHost                = 'nalog-web.aplana.local'
 MQServerPort                = '1414'
 MQServerChanel              = 'Q_CH'
-MQServerQueueName           = 'Q_MDB_0.4'
+MQServerQueueName           = 'Q_MDB_TEST'
 MQServerQueueManager        = 'QM_MDB'
 
 # server info

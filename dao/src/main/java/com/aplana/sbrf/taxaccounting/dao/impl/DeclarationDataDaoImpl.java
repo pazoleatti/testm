@@ -39,7 +39,9 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 			d.setId(SqlUtils.getLong(rs,"id"));
 			d.setDeclarationTemplateId(SqlUtils.getInteger(rs,"declaration_template_id"));
 			d.setDepartmentId(SqlUtils.getInteger(rs,"department_id"));
-			d.setReportPeriodId(SqlUtils.getInteger(rs,"report_period_id"));
+            d.setTaxOrganCode(rs.getString("tax_organ_code")) ;
+            d.setKpp(rs.getString("kpp"));
+            d.setReportPeriodId(SqlUtils.getInteger(rs,"report_period_id"));
 			d.setAccepted(rs.getBoolean("is_accepted"));
             d.setPdfDataUuid(rs.getString("data_pdf"));
             d.setXlsxDataUuid(rs.getString("data_xlsx"));
@@ -191,12 +193,14 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 
 		id = generateId("seq_declaration_data", Long.class);
 		jt.update(
-			"insert into declaration_data (id, declaration_template_id, report_period_id, department_id, is_accepted) values (?, ?, ?, ?, ?)",
+			"insert into declaration_data (id, declaration_template_id, report_period_id, department_id, is_accepted, tax_organ_code, kpp) values (?, ?, ?, ?, ?, ?, ?)",
 			id,
 			declarationData.getDeclarationTemplateId(),
 			declarationData.getReportPeriodId(),
 			declarationData.getDepartmentId(),
-			declarationData.isAccepted() ? 1 : 0
+			declarationData.isAccepted() ? 1 : 0,
+            declarationData.getTaxOrganCode(),
+            declarationData.getKpp()
 		);
 		declarationData.setId(id);
 		return id.longValue();
@@ -367,6 +371,4 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             throw new DaoException(errorMsg);
         }
     }
-
-
 }

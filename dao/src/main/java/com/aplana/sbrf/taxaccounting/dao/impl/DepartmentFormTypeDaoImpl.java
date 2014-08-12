@@ -13,6 +13,8 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -161,11 +163,10 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         );
     }
 
-    private static final String GET_FORM_SOURCES_SQL = "select distinct src_dft.*, ds.period_start, ds.period_end, d.NAME, ft.NAME, fk.NAME\n" +
+    private static final String GET_FORM_SOURCES_SQL = "select distinct src_dft.*, ds.period_start, ds.period_end, d.NAME, ft.NAME\n" +
             "from department_form_type src_dft \n" +
             "join form_data_source ds on ds.src_department_form_type_id=src_dft.id \n" +
             "join department_form_type dft on ds.department_form_type_id=dft.id \n" +
-            "JOIN form_kind fk ON fk.id = src_dft.kind\n" +
             "JOIN department d ON d.id = src_dft.department_id\n" +
             "JOIN form_type ft ON ft.ID = src_dft.form_type_id\n" +
             "where dft.department_id=:departmentId and (:formTypeId is null or dft.form_type_id=:formTypeId) and (:formKind is null or dft.kind=:formKind) \n" +
@@ -173,14 +174,20 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
 
     @Override
     public List<DepartmentFormType> getFormSources(int departmentId, int formTypeId, FormDataKind kind, Date periodStart,
-                                                   Date periodEnd, SourcesSearchOrdering ordering, boolean isAscSorting) {
+                                                   Date periodEnd) {
+        SearchOrderingFilter filter = getSearchOrderingDefaultFilter();
+        return getFormSources(departmentId, formTypeId, kind, periodStart, periodEnd, filter);
+    }
+
+    @Override
+    public List<DepartmentFormType> getFormSources(int departmentId, int formTypeId, FormDataKind kind, Date periodStart, Date periodEnd, SearchOrderingFilter filter) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("departmentId", departmentId);
         params.put("formTypeId", formTypeId != 0 ? formTypeId : null);
         params.put("formKind", kind != null ? kind.getId() : null);
         params.put("periodStart", periodStart);
         params.put("periodEnd", periodEnd);
-        return getNamedParameterJdbcTemplate().query(GET_FORM_SOURCES_SQL + getSortingClause(ordering, isAscSorting),
+        return getNamedParameterJdbcTemplate().query(GET_FORM_SOURCES_SQL + getSortingClause(filter),
                 params, DFT_MAPPER_WITH_PERIOD);
     }
 
@@ -386,25 +393,29 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                params, DDT_MAPPER);
     }
 
-    private static final String GET_DECLARATION_SOURCES_SQL = "select distinct src_dft.*, ds.period_start, ds.period_end, d.NAME, ft.NAME, fk.NAME\n \n" +
+    private static final String GET_DECLARATION_SOURCES_SQL = "select distinct src_dft.*, ds.period_start, ds.period_end, d.NAME, ft.NAME, src_dft.kind as kind\n" +
             "from department_form_type src_dft \n" +
             "join declaration_source ds on ds.src_department_form_type_id=src_dft.id \n" +
             "join department_declaration_type ddt on ds.department_declaration_type_id = ddt.id \n" +
-            "JOIN form_kind fk ON fk.id = src_dft.kind\n" +
             "JOIN department d ON d.id = src_dft.department_id\n" +
             "JOIN form_type ft ON ft.ID = src_dft.form_type_id\n" +
             "where ddt.department_id=:departmentId and (:declarationTypeId is null or ddt.declaration_type_id = :declarationTypeId) " +
             "and (:periodStart is null or ((ds.period_end >= :periodStart or ds.period_end is null) and (:periodEnd is null or ds.period_start <= :periodEnd)))";
 
     @Override
-    public List<DepartmentFormType> getDeclarationSources(int departmentId, int declarationTypeId, Date periodStart, Date periodEnd,
-                                                          SourcesSearchOrdering ordering, boolean isAscSorting) {
+    public List<DepartmentFormType> getDeclarationSources(int departmentId, int declarationTypeId, Date periodStart, Date periodEnd) {
+        SearchOrderingFilter filter = getSearchOrderingDefaultFilter();
+        return getDeclarationSources(departmentId, declarationTypeId, periodStart, periodEnd, filter);
+    }
+
+    @Override
+    public List<DepartmentFormType> getDeclarationSources(int departmentId, int declarationTypeId, Date periodStart, Date periodEnd, SearchOrderingFilter filter) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("departmentId", departmentId);
         params.put("declarationTypeId", declarationTypeId != 0 ? declarationTypeId : null);
         params.put("periodStart", periodStart);
         params.put("periodEnd", periodEnd);
-        return getNamedParameterJdbcTemplate().query(GET_DECLARATION_SOURCES_SQL + getSortingClause(ordering, isAscSorting),
+        return getNamedParameterJdbcTemplate().query(GET_DECLARATION_SOURCES_SQL + getSortingClause(filter),
                 params, DFT_MAPPER_WITH_PERIOD);
     }
 
@@ -460,6 +471,121 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                 },
                 FORM_ASSIGN_MAPPER
         );
+    }
+
+    private final RowMapper<FormTypeKind> ALL_FORM_ASSIGN_MAPPER = new RowMapper<FormTypeKind>() {
+        @Override
+        public FormTypeKind mapRow(ResultSet rs, int rowNum) throws SQLException {
+            // Подразделение
+            Department department = new Department();
+            department.setId(SqlUtils.getInteger(rs, "department_id"));
+            department.setName(rs.getString("department_name"));
+            Integer departmentParentId = SqlUtils.getInteger(rs, "department_parent_id");
+            // В ResultSet есть особенность что если пришло значение нул то вернет значение по умолчанию - то есть для Integer'a вернет 0
+            // а так как у нас в базе 0 используется в качестве идентификатора то нужно null нужно првоерять через .wasNull()
+            department.setParentId(rs.wasNull() ? null : departmentParentId);
+            department.setType(DepartmentType.fromCode(SqlUtils.getInteger(rs, "department_type")));
+            department.setShortName(rs.getString("department_short_name"));
+            department.setTbIndex(rs.getString("department_tb_index"));
+            department.setSbrfCode(rs.getString("department_sbrf_code"));
+            department.setRegionId(SqlUtils.getLong(rs, "department_region_id"));
+            if (rs.wasNull()) {
+                department.setRegionId(null);
+            }
+            department.setActive(rs.getBoolean("department_is_active"));
+            department.setCode(rs.getInt("department_code"));
+
+            // Исполнитель
+            Integer performerId = SqlUtils.getInteger(rs, "performer_id");
+            Department performer = new Department();
+
+            if (performerId != null) {
+                performer.setId(SqlUtils.getInteger(rs, "performer_id"));
+                performer.setName(rs.getString("performer_name"));
+                Integer performerParentId = SqlUtils.getInteger(rs, "performer_parent_id");
+                // В ResultSet есть особенность что если пришло значение нул то вернет значение по умолчанию - то есть для Integer'a вернет 0
+                // а так как у нас в базе 0 используется в качестве идентификатора то нужно null нужно првоерять через .wasNull()
+                performer.setParentId(rs.wasNull() ? null : performerParentId);
+                performer.setType(DepartmentType.fromCode(SqlUtils.getInteger(rs, "performer_type")));
+                performer.setShortName(rs.getString("performer_short_name"));
+                performer.setTbIndex(rs.getString("performer_tb_index"));
+                performer.setSbrfCode(rs.getString("performer_sbrf_code"));
+                performer.setRegionId(SqlUtils.getLong(rs, "performer_region_id"));
+                if (rs.wasNull()) {
+                    performer.setRegionId(null);
+                }
+                performer.setActive(rs.getBoolean("performer_is_active"));
+                performer.setCode(rs.getInt("performer_code"));
+            }
+
+            FormTypeKind formTypeKind = new FormTypeKind();
+            formTypeKind.setId(SqlUtils.getLong(rs, "id"));
+            formTypeKind.setKind(FormDataKind.fromId(SqlUtils.getInteger(rs, "kind")));
+            formTypeKind.setName(rs.getString("name"));
+            formTypeKind.setFormTypeId(SqlUtils.getLong(rs, "type_id"));
+            formTypeKind.setDepartment(department);
+            formTypeKind.setPerformer(performerId == null ? null : performer);
+            return formTypeKind;
+        }
+    };
+
+    @Override
+    public List<FormTypeKind> getAllFormAssigned(List<Long> departmentIds, char taxType, SearchOrderingFilter filter) {
+
+        SqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("params", departmentIds)
+                .addValue("taxType", String.valueOf(taxType));
+
+        String sql = "SELECT dft.ID,\n" +
+                "  dft.KIND,\n" +
+                "  ft.NAME,\n" +
+                "  ft.ID AS type_id,\n" +
+                "  -- Для подразделения\n" +
+                "  d.ID        AS department_id,\n" +
+                "  d.NAME      AS department_name,\n" +
+                "  d.PARENT_ID AS department_parent_id,\n" +
+                "  d.TYPE      AS department_type,\n" +
+                "  d.SHORTNAME AS department_short_name,\n" +
+                "  d.TB_INDEX  AS department_tb_index,\n" +
+                "  d.SBRF_CODE AS department_sbrf_code,\n" +
+                "  d.REGION_ID AS department_region_id,\n" +
+                "  d.IS_ACTIVE AS department_is_active,\n" +
+                "  d.CODE      AS department_code,\n" +
+                "  -- Для исполнителя\n" +
+                "  dp.ID        AS performer_id,\n" +
+                "  dp.NAME      AS performer_name,\n" +
+                "  dp.PARENT_ID AS performer_parent_id,\n" +
+                "  dp.TYPE      AS performer_type,\n" +
+                "  dp.SHORTNAME AS performer_short_name,\n" +
+                "  dp.TB_INDEX  AS performer_tb_index,\n" +
+                "  dp.SBRF_CODE AS performer_sbrf_code,\n" +
+                "  dp.REGION_ID AS performer_region_id,\n" +
+                "  dp.IS_ACTIVE AS performer_is_active,\n" +
+                "  dp.CODE      AS performer_code,\n" +
+                "  -- Для сортировки\n" +
+                "  ft.NAME  AS form_type,\n" +
+                "  dft.KIND AS form_kind,\n" +
+                "  d.NAME   AS department,\n" +
+                "  dp.NAME  AS performer\n" +
+                "FROM department_form_type dft\n" +
+                "JOIN form_type ft\n" +
+                "ON ft.ID = dft.FORM_TYPE_ID\n" +
+                "JOIN department d\n" +
+                "ON d.ID = dft.DEPARTMENT_ID\n" +
+                "LEFT OUTER JOIN department dp\n" +
+                "ON dp.ID = dft.PERFORMER_DEP_ID\n" +
+                "WHERE dft.department_id IN (:params)\n" +
+                "AND ft.tax_type = :taxType\n";
+
+        String order = null;
+
+        if (filter.getSearchOrdering() != null) {
+            order = "ORDER BY " + filter.getSearchOrdering().toString();
+            if (!filter.isAscSorting())
+                order = order + " DESC";
+        }
+
+        return getNamedParameterJdbcTemplate().query(sql + order, parameters, ALL_FORM_ASSIGN_MAPPER);
     }
 
     private final RowMapper<FormTypeKind> DECLARATION_ASSIGN_MAPPER = new RowMapper<FormTypeKind>() {
@@ -561,25 +687,30 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         );
     }
 
-    private final static String GET_SQL_BY_TAX_TYPE_SQL = "select dft.*, ft.name from department_form_type dft\n" +
-            "LEFT JOIN form_kind fk ON fk.id = dft.KIND\n" +
-            "LEFT JOIN form_type ft ON dft.FORM_TYPE_ID = ft.ID\n" +
+    private final static String GET_SQL_BY_TAX_TYPE_SQL = "select src_dft.*, ft.name from department_form_type src_dft\n" +
+            "LEFT JOIN form_type ft ON src_dft.FORM_TYPE_ID = ft.ID\n" +
             "where department_id = :departmentId and exists (\n" +
             "select 1 from form_type ft \n" +
             "left join form_template ftemp on ftemp.type_id = ft.id \n" +
-            "where ft.id = dft.form_type_id and (:taxType is null or ft.tax_type = :taxType) \n" +
+            "where ft.id = src_dft.form_type_id and (:taxType is null or ft.tax_type = :taxType) \n" +
             //"  and (:periodStart is null or (ftemp.version >= :periodStart and (:periodEnd is null or ftemp.version <= :periodEnd)))\n" +
             ")";
 
     @Override
-    public List<DepartmentFormType> getByTaxType(int departmentId, TaxType taxType, Date periodStart, Date periodEnd,
-                                                 SourcesSearchOrdering ordering, Boolean isAscSorting) {
+    public List<DepartmentFormType> getByTaxType(int departmentId, TaxType taxType, Date periodStart, Date periodEnd) {
+        SearchOrderingFilter filter = getSearchOrderingDefaultFilter();
+        return getByTaxType(departmentId, taxType, periodStart, periodEnd, filter);
+
+    }
+
+    @Override
+    public List<DepartmentFormType> getByTaxType(int departmentId, TaxType taxType, Date periodStart, Date periodEnd, SearchOrderingFilter filter) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("departmentId", departmentId);
         //params.put("periodStart", periodStart);
         //params.put("periodEnd", periodEnd);
         params.put("taxType", taxType != null ? String.valueOf(taxType.getCode()) : null);
-        return getNamedParameterJdbcTemplate().query(GET_SQL_BY_TAX_TYPE_SQL + getSortingClause(ordering, isAscSorting), params, DFT_MAPPER);
+        return getNamedParameterJdbcTemplate().query(GET_SQL_BY_TAX_TYPE_SQL + getSortingClause(filter), params, DFT_MAPPER);
     }
 
     private final static String GET_SQL_BY_TAX_TYPE_SQL_OLD = "select * from department_form_type dft where department_id = ?" +
@@ -840,9 +971,11 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                 performerId, id);
     }
 
-    private String getSortingClause(SourcesSearchOrdering ordering, Boolean isAscSorting) {
+    private String getSortingClause(SearchOrderingFilter filter) {
+        SourcesSearchOrdering ordering = (SourcesSearchOrdering) filter.getSearchOrdering();
         if (ordering == null) ordering = SourcesSearchOrdering.TYPE;
-        if (isAscSorting == null) isAscSorting = true;
+
+        boolean isAscSorting = filter.isAscSorting();
         StringBuilder sorting = new StringBuilder();
 
         switch (ordering) {
@@ -850,7 +983,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                 sorting.append("ORDER BY ft.name\n");
                 break;
             case KIND:
-                sorting.append("ORDER BY fk.name\n");
+                sorting.append("ORDER BY src_dft.kind\n");
                 break;
             case DEPARTMENT:
                 sorting.append("ORDER BY d.name\n");
@@ -866,5 +999,17 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         if (!isAscSorting) sorting.append("DESC\n");
 
         return sorting.toString();
+    }
+
+    /**
+     * Фильтр по умолчанию
+     *
+     * @return
+     */
+    private SearchOrderingFilter getSearchOrderingDefaultFilter() {
+        SearchOrderingFilter filter = new SearchOrderingFilter();
+        filter.setSearchOrdering(SourcesSearchOrdering.TYPE);
+        filter.setAscSorting(true);
+        return filter;
     }
 }

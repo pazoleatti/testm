@@ -79,7 +79,13 @@ public class DeclarationDataPresenter
 		void setPdf(Pdf pdf);
 
 		void setDocDate(Date date);
-	}
+
+        void setTaxOrganCode(String taxOrganCode);
+
+        void setKpp(String kpp);
+
+        void setPropertyBlockVisible(boolean isVisible);
+    }
 
 	private final DispatchAsync dispatcher;
 	private final TaPlaceManager placeManager;
@@ -134,7 +140,12 @@ public class DeclarationDataPresenter
 								getView().setReportPeriod(
 										result.getReportPeriodYear() + ", " + result.getReportPeriod());
 								getView().setDocDate(result.getDocDate());
-								getView().setDepartment(result.getDepartment());
+                                getView().setDepartment(result.getDepartment());
+                                if(taxType.equals(TaxType.PROPERTY)){
+                                    getView().setPropertyBlockVisible(true);
+                                    getView().setTaxOrganCode(result.getTaxOrganCode());
+                                    getView().setKpp(result.getKpp());
+                                }
 								getView()
 										.setBackButton(
 												"#"

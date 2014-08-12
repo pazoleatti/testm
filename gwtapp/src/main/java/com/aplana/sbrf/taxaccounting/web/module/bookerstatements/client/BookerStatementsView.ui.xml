@@ -25,8 +25,8 @@
         .table {
             position: absolute !important;
             bottom: 30px;
-            right: 0;
-            left: 0;
+            right: 10px;
+            left: 10px;
             top: 40px;
         }
 

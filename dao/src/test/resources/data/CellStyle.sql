@@ -1,5 +1,6 @@
 insert into form_kind (id, name) values (3, 'Сводная');
 insert into form_type (id, name, tax_type) values (1, 'FormType - Transport', 'T');
+INSERT INTO department_type (id, name) VALUES (1, 'Банк');
 insert into department (id, name, parent_id, type) values (1, 'Банк', null, 1);
 insert into form_template (id, type_id, data_rows, version, is_active, fixed_rows, name, fullname, header) values (1, 1, null, '0.1', 1, 1, 'name', 'fullname', 'header');
 insert into tax_period(id, tax_type, year) values (1, 'T', 2013);

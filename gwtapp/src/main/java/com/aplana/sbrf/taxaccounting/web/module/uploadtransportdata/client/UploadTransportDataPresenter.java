@@ -1,11 +1,11 @@
 package com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.client;
 
-import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.shared.LoadAllAction;
 import com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.shared.LoadAllResult;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.EndLoadFileEvent;
@@ -18,10 +18,7 @@ import com.gwtplatform.mvp.client.Presenter;
 import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
-import com.gwtplatform.mvp.client.proxy.LockInteractionEvent;
-import com.gwtplatform.mvp.client.proxy.Place;
-import com.gwtplatform.mvp.client.proxy.PlaceManager;
-import com.gwtplatform.mvp.client.proxy.ProxyPlace;
+import com.gwtplatform.mvp.client.proxy.*;
 
 /**
  * Загрузка ТФ в каталог загрузки
@@ -76,12 +73,17 @@ public class UploadTransportDataPresenter extends Presenter<UploadTransportDataP
     }
 
     @Override
+    public void prepareFromRequest(final PlaceRequest request) {
+        LogCleanEvent.fire(this);
+        LogShowEvent.fire(this, false);
+        super.prepareFromRequest(request);
+    }
+
+    @Override
     public void onSuccess() {
-        Dialog.infoMessage("Загрузка транспортных файлов в каталог загрузки", "Загрузка транспортных файлов в каталог загрузки завершена");
     }
 
     @Override
     public void onFailure() {
-        Dialog.errorMessage("Загрузка транспортных файлов в каталог загрузки", "Транспортные файлы не загружены в каталог загрузки. Обратитесь к администратору!");
     }
 }

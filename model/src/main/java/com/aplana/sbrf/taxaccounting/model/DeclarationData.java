@@ -14,6 +14,8 @@ public class DeclarationData extends IdentityObject<Long> {
 	private int reportPeriodId;
 	private int departmentId;
 	private boolean accepted;
+    private String taxOrganCode;
+    private String kpp;
 
     /**
      * Идентификаторы бинарных данных в таблице BLOB_DATA
@@ -118,4 +120,32 @@ public class DeclarationData extends IdentityObject<Long> {
 	public void setAccepted(boolean accepted) {
 		this.accepted = accepted;
 	}
+
+    /**
+     * КПП
+     */
+    public String getKpp() {
+        return kpp;
+    }
+
+    /**
+     * КПП
+     */
+    public void setKpp(String kpp) {
+        this.kpp = kpp;
+    }
+
+    /**
+     * Налоговый орган
+     */
+    public String getTaxOrganCode() {
+        return taxOrganCode;
+    }
+
+    /**
+     * Налоговый орган
+     */
+    public void setTaxOrganCode(String taxOrganCode) {
+        this.taxOrganCode = taxOrganCode;
+    }
 }
