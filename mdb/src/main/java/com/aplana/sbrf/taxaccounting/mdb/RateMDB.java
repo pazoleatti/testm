@@ -263,7 +263,8 @@ public class RateMDB implements MessageListener {
             additionalParameters.put("scriptStatusHolder", scriptStatusHolder);
             refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.IMPORT, logger, additionalParameters);
         } catch (ServiceLoggerException e) {
-            logger.error("uuid = " + e.getUuid());
+            logger.error(e);
+            logger.info("uuid = " + e.getUuid());
             addLog(userInfo, String.format(FAIL_IMPORT, e.getMessage()));
             return;
         } catch (Exception e) {

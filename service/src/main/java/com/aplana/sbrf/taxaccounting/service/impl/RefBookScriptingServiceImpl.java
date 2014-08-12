@@ -133,8 +133,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
                     break;
                 }
             }
-            throw new ServiceLoggerException("Произошли ошибки в скрипте справочника «"
-                    + refBookDao.get(refBookId).getName() + "». " + firstError, logEntryService.save(logger.getEntries()));
+            throw new ServiceLoggerException("Произошли ошибки в скрипте. " + firstError, logEntryService.save(logger.getEntries()));
         }
     }
 
