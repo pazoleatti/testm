@@ -134,7 +134,11 @@ public class TaskPresenter extends Presenter<TaskPresenter.MyView,
                         .defaultCallback(new AbstractCallback<UpdateTaskResult>() {
                             @Override
                             public void onSuccess(UpdateTaskResult result) {
-                                placeManager.revealPlace(new PlaceRequest.Builder().nameToken(SchedulerTokens.taskList).build());
+                                if (result.isHasErrors()){
+                                    Dialog.errorMessage(result.getErrorMessage());
+                                } else {
+                                    placeManager.revealPlace(new PlaceRequest.Builder().nameToken(SchedulerTokens.taskList).build());
+                                }
                             }
                         }, TaskPresenter.this));
             } else {
@@ -145,7 +149,11 @@ public class TaskPresenter extends Presenter<TaskPresenter.MyView,
                         .defaultCallback(new AbstractCallback<CreateTaskResult>() {
                             @Override
                             public void onSuccess(CreateTaskResult result) {
-                                placeManager.revealPlace(new PlaceRequest.Builder().nameToken(SchedulerTokens.taskList).build());
+                                if (result.isHasErrors()){
+                                    Dialog.errorMessage(result.getErrorMessage());
+                                } else {
+                                    placeManager.revealPlace(new PlaceRequest.Builder().nameToken(SchedulerTokens.taskList).build());
+                                }
                             }
                         }, TaskPresenter.this));
             }

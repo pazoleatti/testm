@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.scheduler.server;
 
 import com.aplana.sbrf.taxaccounting.model.TaskParamModel;
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskContext;
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskParam;
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskParamType;
@@ -17,7 +18,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -43,28 +46,49 @@ public class CreateTaskHandler extends AbstractActionHandler<CreateTaskAction, C
         SimpleDateFormat df = new SimpleDateFormat(TaskParam.DATE_FORMAT);
         CreateTaskResult result = new CreateTaskResult();
         try {
-            if (!taskManager.isTaskExist(action.getTaskName())) {
-                TaskContext taskContext = new TaskContext();
-                taskContext.setTaskName(action.getTaskName());
-                taskContext.setSchedule(action.getSchedule());
-                taskContext.setUserTaskJndi(action.getUserTaskJndi());
-                taskContext.setNumberOfRepeats(-1);
-                taskContext.setUserId(securityService.currentUserInfo().getUser().getId());
+            // список ошибок
+            List<String> errors = new ArrayList<String>(2);
 
-                Map<String, TaskParam> taskParams = new HashMap<String, TaskParam>();
-                for (int i = 0; i < action.getParams().size(); i++) {
-                    TaskParamModel param = action.getParams().get(i);
-                    String paramValue = param.getTaskParamValue();
-                    taskParams.put(param.getTaskParamName(),
-                            new TaskParam(i, param.getTaskParamName(),
-                                    TaskParamType.getTypeById(param.getTaskParamType()), paramValue));
-                }
-                taskContext.setParams(taskParams);
-
-                taskManager.createTask(taskContext);
-            } else {
-                throw new ActionException("Название задачи не уникально!");
+            /**
+             * Проверка уникальности названия задачи
+             */
+            if (taskManager.isTaskExist(action.getTaskName())) {
+                errors.add(" Название задачи не уникально!");
             }
+
+            /**
+             * Проверка расписания
+             */
+            if (!taskManager.validateSchedule(action.getSchedule())){
+                errors.add(" Значение атрибута «Расписание» не соответствует требованиям формата Cron!!");
+            }
+
+            if (errors.size() > 0){
+                result.setErrorMessage(StringUtils.join(errors.toArray(), '.'));
+                result.setHasErrors(true);
+
+                return result;
+            }
+
+            TaskContext taskContext = new TaskContext();
+            taskContext.setTaskName(action.getTaskName());
+            taskContext.setSchedule(action.getSchedule());
+            taskContext.setUserTaskJndi(action.getUserTaskJndi());
+            taskContext.setNumberOfRepeats(-1);
+            taskContext.setUserId(securityService.currentUserInfo().getUser().getId());
+
+            Map<String, TaskParam> taskParams = new HashMap<String, TaskParam>();
+            for (int i = 0; i < action.getParams().size(); i++) {
+                TaskParamModel param = action.getParams().get(i);
+                String paramValue = param.getTaskParamValue();
+                taskParams.put(param.getTaskParamName(),
+                        new TaskParam(i, param.getTaskParamName(),
+                                TaskParamType.getTypeById(param.getTaskParamType()), paramValue));
+            }
+            taskContext.setParams(taskParams);
+
+            taskManager.createTask(taskContext);
+
         } catch (TaskSchedulingException e) {
             throw new ActionException(e.getMessage(), e);
         }
