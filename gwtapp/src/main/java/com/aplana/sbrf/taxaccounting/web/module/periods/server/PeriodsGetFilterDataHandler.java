@@ -50,8 +50,6 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
 
 //	    res.setAvalDepartments(filterValues.getDepartmentIds());
 
-	    // По умолчанию отчетный период не выбран
-	    res.setCurrentReportPeriod(null);
 
         TaxType taxType = action.getTaxType();
 	    List<Department> departments = new ArrayList<Department>();

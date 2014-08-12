@@ -59,7 +59,6 @@ public class GetCountFilterValuesHandler extends AbstractActionHandler<GetCountF
     public GetCountFilterValuesResult execute(GetCountFilterValuesAction action, ExecutionContext executionContext)
             throws ActionException {
         GetCountFilterValuesResult result = new GetCountFilterValuesResult();
-        Logger logger = new Logger();
 
         RefBook refBook = refBookFactory.getByAttribute(action.getRefBookAttrId());
 

@@ -53,7 +53,6 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
 		RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(action.getRefBookId());
 
 		GetRefBookTableDataResult result = new GetRefBookTableDataResult();
-        Logger logger = new Logger();
 		RefBook refBook = refBookFactory.get(action.getRefBookId());
 		result.setTableHeaders(refBook.getAttributes());
 		result.setDesc(refBook.getName());

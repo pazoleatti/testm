@@ -33,9 +33,6 @@ public class GetDeclarationHandler extends AbstractActionHandler<GetDeclarationA
 	private SecurityService securityService;
 
     @Autowired
-    private LogEntryService logEntryService;
-
-    @Autowired
     private TAUserService taUserService;
 
     public GetDeclarationHandler() {

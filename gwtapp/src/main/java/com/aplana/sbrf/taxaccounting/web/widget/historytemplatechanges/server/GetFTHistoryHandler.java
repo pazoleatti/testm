@@ -24,9 +24,6 @@ public class GetFTHistoryHandler extends AbstractActionHandler<GetFTHistoryActio
     @Autowired
     private TemplateChangesService templateChangesService;
 
-    @Autowired
-    private FormTemplateService formTemplateService;
-
     public GetFTHistoryHandler() {
         super(GetFTHistoryAction.class);
     }
