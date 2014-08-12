@@ -185,4 +185,9 @@ public class TaskManagerMock implements TaskManager {
         taskInfo.add(new TaskJndiInfo( "test123", "testJndi", params));
         return taskInfo;
     }
+
+    @Override
+    public boolean validateSchedule(String schedule) throws TaskSchedulingException {
+        return true;
+    }
 }

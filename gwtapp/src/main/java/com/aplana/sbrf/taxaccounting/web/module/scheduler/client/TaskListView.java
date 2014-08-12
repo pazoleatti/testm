@@ -51,9 +51,6 @@ public class TaskListView extends ViewWithUiHandlers<TaskListUiHandlers>
     Button resumeButton;
 
     @UiField
-    Button startButton;
-
-    @UiField
     Button deleteButton;
 
     @UiField
@@ -159,7 +156,6 @@ public class TaskListView extends ViewWithUiHandlers<TaskListUiHandlers>
     private void updateButtonsStatuses(){
         boolean status = !selectionModel.getSelectedSet().isEmpty();
         deleteButton.setEnabled(status);
-        startButton.setEnabled(status);
         stopButton.setEnabled(status);
         resumeButton.setEnabled(status);
     }
@@ -189,13 +185,6 @@ public class TaskListView extends ViewWithUiHandlers<TaskListUiHandlers>
     public void onResume(ClickEvent event){
         if(getUiHandlers() != null){
             getUiHandlers().onResumeTask();
-        }
-    }
-
-    @UiHandler("startButton")
-    public void onStart(ClickEvent event){
-        if(getUiHandlers() != null){
-            getUiHandlers().onStartTask();
         }
     }
 

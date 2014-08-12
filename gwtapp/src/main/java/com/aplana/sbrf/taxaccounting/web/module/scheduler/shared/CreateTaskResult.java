@@ -1,12 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.scheduler.shared;
 
-import com.gwtplatform.dispatch.shared.Result;
-
 /**
  * Результат создания задачи для планировщика
  * @author dloshkarev
  */
-public class CreateTaskResult implements Result {
+public class CreateTaskResult extends AbstractResultWithErrors {
     private static final long serialVersionUID = 3183924734177126798L;
 
     /**

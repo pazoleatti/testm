@@ -25,6 +25,7 @@ import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.rmi.PortableRemoteObject;
 import java.io.IOException;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -227,6 +228,42 @@ public class TaskManagerBean implements TaskManager {
         } catch (NamingException e) {
             throw new TaskSchedulingException(e);
         }
+    }
+
+    @Override
+    public boolean validateSchedule(String schedule) throws TaskSchedulingException {
+        try {
+            // Create an initial context
+            InitialContext ctx = null;
+            // Lookup and narrow the default UserCalendar home.
+            UserCalendarHome defaultCalHome = null;
+            try {
+                ctx = new InitialContext();
+                defaultCalHome = (UserCalendarHome) PortableRemoteObject.narrow(ctx.lookup(UserCalendarHome.DEFAULT_CALENDAR_JNDI_NAME), UserCalendarHome.class);
+            } catch (NamingException e) {
+                throw new TaskSchedulingException("NamingException", e);
+            }
+
+            // Create the default UserCalendar instance.
+            UserCalendar defaultCal;
+            try {
+                defaultCal = defaultCalHome.create();
+
+            } catch (CreateException e) {
+                throw new TaskSchedulingException("CreateException", e);
+            }
+
+            defaultCal.validate("CRON", schedule);
+
+        } catch (UserCalendarSpecifierInvalid userCalendarSpecifierInvalid) {
+            throw new TaskSchedulingException("Не верный идентификатор календаря");
+        } catch (UserCalendarPeriodInvalid userCalendarPeriodInvalid) {
+            return false;
+        } catch (RemoteException e) {
+            throw new TaskSchedulingException("Системная ошибка");
+        }
+
+        return true;
     }
 
     /**

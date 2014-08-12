@@ -1,29 +1,97 @@
 package com.aplana.sbrf.taxaccounting.mdb;
 
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.ScriptStatusHolder;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
 import org.apache.commons.io.IOUtils;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.Enumeration;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 
 public class RateMDBTest {
 
+    private final String ERROR_MESSAGE = "Test error";
+    private final String EXCEPTION_MESSAGE = "Test Exception";
+    private final String LOGGER_EXCEPTION_MESSAGE = "Test ServiceLoggerException";
     private RateMDB rmdb;
+
+    private List<String> logList;
+
+    // Флаги для эмуляции ошибок в сервисе скриптов
+    private boolean refBookServiceScriptError;
+    private boolean refBookServiceScriptException;
+    private boolean refBookServiceScriptServiceLoggerException;
 
     @Before
     public void init() {
         rmdb = new RateMDB();
+
+        // Сброс флагов
+        refBookServiceScriptError = false;
+        refBookServiceScriptException = false;
+        refBookServiceScriptServiceLoggerException = false;
+
+        // RefBookScriptingService
         RefBookScriptingService refBookScriptingService = mock(RefBookScriptingService.class);
         ReflectionTestUtils.setField(rmdb, "refBookScriptingService", refBookScriptingService);
+
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                Logger logger = (Logger)invocation.getArguments()[3];
+                if (refBookServiceScriptError) {
+                    logger.error(ERROR_MESSAGE);
+                }
+                if (refBookServiceScriptException) {
+                    throw new Exception(EXCEPTION_MESSAGE);
+                }
+                if (refBookServiceScriptServiceLoggerException) {
+                    throw new ServiceLoggerException(LOGGER_EXCEPTION_MESSAGE, "test uuid");
+                }
+                Map<String, Object> map = (Map<String, Object>) invocation.getArguments()[4];
+                ((ScriptStatusHolder) map.get("scriptStatusHolder")).setSuccessCount(1);
+                return null;
+            }
+        }).when(refBookScriptingService).executeScript(any(TAUserInfo.class), anyLong(), any(FormDataEvent.class),
+                any(Logger.class), anyMapOf(String.class, Object.class));
+
+        // AuditService
+        AuditService auditService = mock(AuditService.class);
+        ReflectionTestUtils.setField(rmdb, "auditService", auditService);
+
+        logList = new LinkedList<String>();
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                String str = (String)invocation.getArguments()[7];
+                logList.add(str);
+                return null;
+            }
+        }).when(auditService).add(any(FormDataEvent.class), any(TAUserInfo.class), any(Integer.class),
+                any(Integer.class), any(String.class), any(String.class), any(Integer.class), any(String.class));
     }
 
     private class TextMessageImpl implements TextMessage {
@@ -243,26 +311,70 @@ public class RateMDBTest {
         @Override
         public void clearBody() throws JMSException {
         }
-    };
+    }
 
+    // Успешный импорт к. валют
     @Test
-    public void onMessageTest1() throws Exception {
+    public void onMessage1Test() throws Exception {
+        StringWriter output = new StringWriter();
+        IOUtils.copy(getCurrencyRateStream(), output);
+        rmdb.onMessage(new TextMessageImpl(output.toString()));
+        Assert.assertEquals(1, logList.size());
+        Assert.assertEquals(logList.get(0), String.format(RateMDB.SUCCESS_IMPORT, 1, "Курсы Валют"));
+    }
+
+    // Успешный импорт к. драг. мет.
+    @Test
+    public void onMessage2Test() throws Exception {
+        StringWriter output = new StringWriter();
+        IOUtils.copy(getMetalRateStream(), output);
+        rmdb.onMessage(new TextMessageImpl(output.toString()));
+        Assert.assertEquals(1, logList.size());
+        Assert.assertEquals(logList.get(0), String.format(RateMDB.SUCCESS_IMPORT, 1, "Курсы драгоценных металлов"));
+    }
+
+    // Сообщение null — неправильный формат
+    @Test
+    public void nullMessageTest() {
+        rmdb.onMessage(new TextMessageImpl(null));
+        Assert.assertEquals(1, logList.size());
+        Assert.assertTrue(logList.contains(String.format(RateMDB.FAIL_IMPORT, RateMDB.ERROR_FORMAT)));
+    }
+
+    // Неправильный формат
+    @Test
+    public void badFormatMessageTest() {
+        rmdb.onMessage(new TextMessageImpl("Test ERROR_MESSAGE"));
+        Assert.assertEquals(1, logList.size());
+        Assert.assertTrue(logList.contains(String.format(RateMDB.FAIL_IMPORT, RateMDB.ERROR_FORMAT)));
+    }
+
+    // Ошибка в скрипте (на всякий случай, но на самом деле должна провоцировать исключение еще в сервисе)
+    @Test(expected = ServiceException.class)
+    public void scriptErrorTest() throws IOException {
+        refBookServiceScriptError = true;
         StringWriter output = new StringWriter();
         IOUtils.copy(getCurrencyRateStream(), output);
         rmdb.onMessage(new TextMessageImpl(output.toString()));
     }
 
-    @Test
-    public void onMessageTest2() throws Exception {
+    // Исключение в скрипте
+    @Test(expected = ServiceException.class)
+    public void scriptExceptionTest() throws IOException {
+        refBookServiceScriptException = true;
         StringWriter output = new StringWriter();
-        IOUtils.copy(getMetalRateStream(), output);
+        IOUtils.copy(getCurrencyRateStream(), output);
         rmdb.onMessage(new TextMessageImpl(output.toString()));
     }
 
-//    @Test
-//    public void onMessageTest3() throws Exception {
-//        rmdb.onMessage(new TextMessageImpl("Bad123"));
-//    }
+    // Исключение ServiceLoggerException в скрипте
+    @Test(expected = ServiceException.class)
+    public void scriptServiceLoggerExceptionTest() throws IOException {
+        refBookServiceScriptServiceLoggerException = true;
+        StringWriter output = new StringWriter();
+        IOUtils.copy(getCurrencyRateStream(), output);
+        rmdb.onMessage(new TextMessageImpl(output.toString()));
+    }
 
     private static InputStream getCurrencyRateStream() {
         return RateMDBTest.class.getResourceAsStream("public-currency_1.xml");
