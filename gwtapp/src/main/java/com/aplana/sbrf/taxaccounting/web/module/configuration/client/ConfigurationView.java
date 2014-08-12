@@ -77,6 +77,7 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
         paramColumn.setFilter(filter);
         paramColumn.setAlias("paramColumn");
         paramColumn.setName("Параметр");
+        paramColumn.setSearchEnabled(false);
         Column<DataRow<Cell>, ?> paramColumnUI = factory.createTableColumn(paramColumn, commonTable);
         commonTable.setColumnWidth(paramColumnUI, 30, Style.Unit.EM);
         commonTable.addColumn(paramColumnUI, paramColumn.getName());

@@ -18,6 +18,8 @@ public class RefBookColumn extends Column {
 
 	private String filter;
 
+    private boolean searchEnabled;
+
     private boolean isHierarchical = false;
 
 	private static Formatter formatter = new Formatter() {
@@ -33,6 +35,10 @@ public class RefBookColumn extends Column {
 			return true;
 		}
 	};
+
+    public RefBookColumn() {
+        searchEnabled = true;
+    }
 
 	public Long getRefBookAttributeId() {
 		return refBookAttributeId;
@@ -83,5 +89,13 @@ public class RefBookColumn extends Column {
 
     public void setRefBookAttributeId2(Long refBookAttributeId2) {
         this.refBookAttributeId2 = refBookAttributeId2;
+    }
+
+    public boolean isSearchEnabled() {
+        return searchEnabled;
+    }
+
+    public void setSearchEnabled(boolean isSearchEnabled) {
+        this.searchEnabled = isSearchEnabled;
     }
 }
