@@ -1,7 +1,9 @@
 package com.aplana.sbrf.taxaccounting.mdb;
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.ScriptStatusHolder;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
@@ -23,6 +25,7 @@ import java.io.StringWriter;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.doAnswer;
@@ -68,6 +71,8 @@ public class RateMDBTest {
                 if (refBookServiceScriptServiceLoggerException) {
                     throw new ServiceLoggerException(LOGGER_EXCEPTION_MESSAGE, "test uuid");
                 }
+                Map<String, Object> map = (Map<String, Object>) invocation.getArguments()[4];
+                ((ScriptStatusHolder) map.get("scriptStatusHolder")).setSuccessCount(1);
                 return null;
             }
         }).when(refBookScriptingService).executeScript(any(TAUserInfo.class), anyLong(), any(FormDataEvent.class),
@@ -315,7 +320,7 @@ public class RateMDBTest {
         IOUtils.copy(getCurrencyRateStream(), output);
         rmdb.onMessage(new TextMessageImpl(output.toString()));
         Assert.assertEquals(1, logList.size());
-        Assert.assertTrue(logList.contains(RateMDB.SUCCESS_IMPORT));
+        Assert.assertEquals(logList.get(0), String.format(RateMDB.SUCCESS_IMPORT, 1, "Курсы Валют"));
     }
 
     // Успешный импорт к. драг. мет.
@@ -325,7 +330,7 @@ public class RateMDBTest {
         IOUtils.copy(getMetalRateStream(), output);
         rmdb.onMessage(new TextMessageImpl(output.toString()));
         Assert.assertEquals(1, logList.size());
-        Assert.assertTrue(logList.contains(RateMDB.SUCCESS_IMPORT));
+        Assert.assertEquals(logList.get(0), String.format(RateMDB.SUCCESS_IMPORT, 1, "Курсы драгоценных металлов"));
     }
 
     // Сообщение null — неправильный формат
@@ -345,36 +350,30 @@ public class RateMDBTest {
     }
 
     // Ошибка в скрипте (на всякий случай, но на самом деле должна провоцировать исключение еще в сервисе)
-    @Test
+    @Test(expected = ServiceException.class)
     public void scriptErrorTest() throws IOException {
         refBookServiceScriptError = true;
         StringWriter output = new StringWriter();
         IOUtils.copy(getCurrencyRateStream(), output);
         rmdb.onMessage(new TextMessageImpl(output.toString()));
-        Assert.assertEquals(1, logList.size());
-        Assert.assertTrue(logList.get(0).contains(ERROR_MESSAGE));
     }
 
     // Исключение в скрипте
-    @Test
+    @Test(expected = ServiceException.class)
     public void scriptExceptionTest() throws IOException {
         refBookServiceScriptException = true;
         StringWriter output = new StringWriter();
         IOUtils.copy(getCurrencyRateStream(), output);
         rmdb.onMessage(new TextMessageImpl(output.toString()));
-        Assert.assertEquals(1, logList.size());
-        Assert.assertTrue(logList.get(0).contains(EXCEPTION_MESSAGE));
     }
 
     // Исключение ServiceLoggerException в скрипте
-    @Test
+    @Test(expected = ServiceException.class)
     public void scriptServiceLoggerExceptionTest() throws IOException {
         refBookServiceScriptServiceLoggerException = true;
         StringWriter output = new StringWriter();
         IOUtils.copy(getCurrencyRateStream(), output);
         rmdb.onMessage(new TextMessageImpl(output.toString()));
-        Assert.assertEquals(1, logList.size());
-        Assert.assertTrue(logList.get(0).contains(LOGGER_EXCEPTION_MESSAGE));
     }
 
     private static InputStream getCurrencyRateStream() {

@@ -85,7 +85,7 @@ void importFromXML() {
                     if (tmp.matches("-?\\d+(\\.\\d+)?")) {
                         lotSize = new BigDecimal(tmp)
                     } else {
-                        throw new ServiceException("Ошибка получения значения атрибута «LotSize», равного \"$tmp\"")
+                        logger.warn("Ошибка получения значения атрибута «LotSize», равного \"$tmp\"")
                     }
                 }
 
@@ -112,7 +112,8 @@ void importFromXML() {
     }
 
     if (fileRecords.empty) {
-        throw new ServiceException(EMPTY_DATA_ERROR)
+        logger.warn(EMPTY_DATA_ERROR)
+        return
     }
 
     // Получение идентификаторов строк
@@ -146,7 +147,8 @@ void importFromXML() {
     }
 
     if (insertList.empty && updateList.empty) {
-        throw new ServiceException(EMPTY_DATA_ERROR)
+        logger.warn(EMPTY_DATA_ERROR)
+        return
     }
     if (!insertList.empty) {
         dataProvider.insertRecords(version, insertList)
@@ -154,4 +156,5 @@ void importFromXML() {
     if (!updateList.empty) {
         dataProvider.updateRecords(version, updateList)
     }
+    scriptStatusHolder.successCount = insertList.size + updateList.size
 }
