@@ -34,21 +34,12 @@ public class RefBookSimpleReadOnly extends AbstractReadOnlyRefBook {
     // Справочник "Пользователи"
     public static final Long USER_REF_BOOK_ID = 74L;
     public static final String USER_TABLE_NAME = "SEC_USER";
-    // Справочник "Журнал аудита"
-    public static final Long AUDIT_FIELD_LIST_REF_BOOK_ID = 74L;
-    public static final String AUDIT_FIELD_LIST_TABLE_NAME = "?";
-    // Справочник "Перечень конфигурационных параметров"
-    public static final Long CONFIGURATION_PARAM_REF_BOOK_ID = 105L;
-    public static final String CONFIGURATION_PARAM_TABLE_NAME = "?";
     // Справочник "Типы подразделений банка"
     public static final Long DEPARTMENT_TYPE_REF_BOOK_ID = 103L;
-    public static final String DEPARTMENT_TYPE_TABLE_NAME = "?";
+    public static final String DEPARTMENT_TYPE_TABLE_NAME = "DEPARTMENT_TYPE";
     // Справочник "Типы налоговых форм"
     public static final Long FORM_DATA_KIND_REF_BOOK_ID = 94L;
     public static final String FORM_DATA_KIND_TABLE_NAME = "FORM_KIND";
-
-	@Autowired
-	private RefBookUtils refBookUtils;
 
 	/** Название таблицы для запроса данных*/
 	private String tableName;

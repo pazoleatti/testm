@@ -6,7 +6,6 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
-import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookSimpleReadOnly;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,13 +20,28 @@ import java.util.Map;
  * @author Dmitriy Levykin
  */
 public class RefBookConfigurationParamTest {
-    private RefBookSimpleReadOnly refBookConfigurationParam;
+    private RefBookConfigurationParam refBookConfigurationParam;
 
     @Before
     public void init() {
-        refBookConfigurationParam = new RefBookSimpleReadOnly();
-        refBookConfigurationParam.setRefBookId(RefBookSimpleReadOnly.CONFIGURATION_PARAM_REF_BOOK_ID);
-        refBookConfigurationParam.setTableName(RefBookSimpleReadOnly.CONFIGURATION_PARAM_TABLE_NAME);
+        RefBook refBook = new RefBook();
+        refBook.setId(RefBookConfigurationParam.REF_BOOK_ID);
+
+        RefBookAttribute attributeCode = new RefBookAttribute();
+        attributeCode.setAlias(RefBookConfigurationParam.ATTRIBUTE_CODE);
+        attributeCode.setAttributeType(RefBookAttributeType.STRING);
+
+        RefBookAttribute attributeName = new RefBookAttribute();
+        attributeName.setAlias(RefBookConfigurationParam.ATTRIBUTE_NAME);
+        attributeName.setAttributeType(RefBookAttributeType.STRING);
+
+        List<RefBookAttribute> attributes = new ArrayList<RefBookAttribute>();
+        attributes.add(attributeCode);
+        attributes.add(attributeName);
+        refBook.setAttributes(attributes);
+
+        refBookConfigurationParam = new RefBookConfigurationParam();
+        ReflectionTestUtils.setField(refBookConfigurationParam, "refBook", refBook);
     }
 
     // Без фильтра

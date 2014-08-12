@@ -6,6 +6,8 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.refbook.impl.fixed.RefBookConfigurationParam;
+import com.aplana.sbrf.taxaccounting.refbook.impl.fixed.RefBookAuditFieldList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -86,21 +88,19 @@ public class RefBookFactoryImpl implements RefBookFactory {
             refBookSimple.setRefBookId(RefBookSimpleReadOnly.DEPARTMENT_TYPE_REF_BOOK_ID);
             refBookSimple.setTableName(RefBookSimpleReadOnly.DEPARTMENT_TYPE_TABLE_NAME);
             return refBookSimple;
-        } else if (RefBookSimpleReadOnly.CONFIGURATION_PARAM_REF_BOOK_ID.equals(refBookId)) {
-            RefBookSimpleReadOnly refBookSimple =  (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
-            refBookSimple.setRefBookId(RefBookSimpleReadOnly.CONFIGURATION_PARAM_REF_BOOK_ID);
-            refBookSimple.setTableName(RefBookSimpleReadOnly.CONFIGURATION_PARAM_TABLE_NAME);
-            return refBookSimple;
-		}  else if (RefBookSimpleReadOnly.AUDIT_FIELD_LIST_REF_BOOK_ID.equals(refBookId)) {
-            RefBookSimpleReadOnly refBookSimple =  (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
-            refBookSimple.setRefBookId(RefBookSimpleReadOnly.AUDIT_FIELD_LIST_REF_BOOK_ID);
-            refBookSimple.setTableName(RefBookSimpleReadOnly.AUDIT_FIELD_LIST_TABLE_NAME);
-            return refBookSimple;
+        } else if (RefBookConfigurationParam.REF_BOOK_ID.equals(refBookId)) {
+            RefBookConfigurationParam dataProvider = applicationContext.getBean("refBookConfigurationParam", RefBookConfigurationParam.class);
+            dataProvider.setRefBookId(refBookId);
+            return dataProvider;
+		}  else if (RefBookAuditFieldList.REF_BOOK_ID.equals(refBookId)) {
+            RefBookAuditFieldList dataProvider = applicationContext.getBean("refBookAuditFieldList", RefBookAuditFieldList.class);
+            dataProvider.setRefBookId(refBookId);
+            return dataProvider;
 		} else if (RefBookBookerStatementPeriod.REF_BOOK_ID.equals(refBookId)) {
             RefBookBookerStatementPeriod dataProvider = applicationContext.getBean("refBookBookerStatementPeriod", RefBookBookerStatementPeriod.class);
             dataProvider.setRefBookId(refBookId);
             return dataProvider;
-        } else{
+        } else {
 			RefBookUniversal refBookUniversal = (RefBookUniversal) applicationContext.getBean("refBookUniversal", RefBookDataProvider.class);
 			refBookUniversal.setRefBookId(refBookId);
 			return refBookUniversal;
