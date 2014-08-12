@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.mdb;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.ScriptStatusHolder;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
@@ -41,7 +40,6 @@ public class RateMDBTest {
     private List<String> logList;
 
     // Флаги для эмуляции ошибок в сервисе скриптов
-    private boolean refBookServiceScriptError;
     private boolean refBookServiceScriptException;
     private boolean refBookServiceScriptServiceLoggerException;
 
@@ -50,7 +48,6 @@ public class RateMDBTest {
         rmdb = new RateMDB();
 
         // Сброс флагов
-        refBookServiceScriptError = false;
         refBookServiceScriptException = false;
         refBookServiceScriptServiceLoggerException = false;
 
@@ -61,10 +58,6 @@ public class RateMDBTest {
         doAnswer(new Answer() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
-                Logger logger = (Logger)invocation.getArguments()[3];
-                if (refBookServiceScriptError) {
-                    logger.error(ERROR_MESSAGE);
-                }
                 if (refBookServiceScriptException) {
                     throw new Exception(EXCEPTION_MESSAGE);
                 }
@@ -349,31 +342,26 @@ public class RateMDBTest {
         Assert.assertTrue(logList.contains(String.format(RateMDB.FAIL_IMPORT, RateMDB.ERROR_FORMAT)));
     }
 
-    // Ошибка в скрипте (на всякий случай, но на самом деле должна провоцировать исключение еще в сервисе)
-    @Test(expected = ServiceException.class)
-    public void scriptErrorTest() throws IOException {
-        refBookServiceScriptError = true;
-        StringWriter output = new StringWriter();
-        IOUtils.copy(getCurrencyRateStream(), output);
-        rmdb.onMessage(new TextMessageImpl(output.toString()));
-    }
-
     // Исключение в скрипте
-    @Test(expected = ServiceException.class)
+    @Test
     public void scriptExceptionTest() throws IOException {
         refBookServiceScriptException = true;
         StringWriter output = new StringWriter();
         IOUtils.copy(getCurrencyRateStream(), output);
         rmdb.onMessage(new TextMessageImpl(output.toString()));
+        Assert.assertEquals(1, logList.size());
+        Assert.assertTrue(logList.get(0).contains(EXCEPTION_MESSAGE));
     }
 
     // Исключение ServiceLoggerException в скрипте
-    @Test(expected = ServiceException.class)
+    @Test
     public void scriptServiceLoggerExceptionTest() throws IOException {
         refBookServiceScriptServiceLoggerException = true;
         StringWriter output = new StringWriter();
         IOUtils.copy(getCurrencyRateStream(), output);
         rmdb.onMessage(new TextMessageImpl(output.toString()));
+        Assert.assertEquals(1, logList.size());
+        Assert.assertTrue(logList.get(0).contains(LOGGER_EXCEPTION_MESSAGE));
     }
 
     private static InputStream getCurrencyRateStream() {

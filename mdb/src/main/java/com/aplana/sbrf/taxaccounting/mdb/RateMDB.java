@@ -5,8 +5,6 @@ import com.aplana.sbrf.taxaccounting.model.ScriptStatusHolder;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
-import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
@@ -19,7 +17,10 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import javax.ejb.*;
+import javax.ejb.ActivationConfigProperty;
+import javax.ejb.MessageDriven;
+import javax.ejb.TransactionManagement;
+import javax.ejb.TransactionManagementType;
 import javax.interceptor.Interceptors;
 import javax.jms.Message;
 import javax.jms.MessageListener;
@@ -41,21 +42,23 @@ import java.util.Map;
         @ActivationConfigProperty(propertyName = "destination", propertyValue = "jms/rateQueue")})
 @Interceptors(TransportInterceptor.class)
 @TransactionManagement(TransactionManagementType.CONTAINER)
-@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED) // Rollback во внешних сервисах не будет отмечать сообщение как необработанное из-за ошибки
+//@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED) // Rollback во внешних сервисах не будет отмечать сообщение как необработанное из-за ошибки
 public class RateMDB implements MessageListener {
 
     private static final Log logger = LogFactory.getLog(RateMDB.class);
     private static final String RATE_ENCODING = "UTF-8";
+    // Максимальное число попыток загрузки одного сообщения
+    private static final int MAX_DELIVERY_COUNT = 100;
 
     static final String ERROR_FORMAT = "Сообщение не соответствует заданному формату";
     static final String ERROR_RATE = "Сообщение не соответствует передаче данных по курсам валют / драгоценным металлам";
     static final String ERROR_PUBLIC = "Сообщение не содержит публичные курсы";
     static final String ERROR_VALUE = "Сообщение не содержит значений";
     static final String ERROR_CODE = "Значения сообщения установлены не по отношению к российскому рублю";
-    static final String ERROR_IMPORT = "Произошли ошибки в скрипте справочника «%s». %s";
     static final String SUCCESS_IMPORT = "Успешный обмен данными с КСШ. Загружено %d курсов справочника «%s».";
     static final String FAIL_IMPORT = "Неуспешная попытка обмена данными с КСШ. %s.";
     static final String ERROR_AUDIT = "Ошибка записи в журнал аудита.";
+    static final String ERROR_COUNT = "Превышено максимальное число попыток загрузки сообщения (" + MAX_DELIVERY_COUNT + ").";
 
     @Autowired
     RefBookScriptingService refBookScriptingService;
@@ -93,22 +96,22 @@ public class RateMDB implements MessageListener {
         // DEBUG
         printParemeters(tm);
 
-        boolean withoutScriptError = false;
         try {
+            if (tm.getIntProperty("JMSXDeliveryCount") > MAX_DELIVERY_COUNT) {
+                logger.error(ERROR_COUNT);
+                return;
+            }
+
             String fileText = tm.getText();
             if (fileText == null) {
                 logger.error(ERROR_FORMAT);
                 addLog(userInfo, String.format(FAIL_IMPORT, ERROR_FORMAT));
                 return;
             }
-            withoutScriptError = importRate(fileText, userInfo);
+            importRate(fileText, userInfo);
         } catch (Exception ex) {
             logger.error("Ошибка при получении сообщения: " + ex.getMessage(), ex);
             addLog(userInfo, String.format(FAIL_IMPORT, ERROR_FORMAT));
-        }
-
-        if (!withoutScriptError) {
-            throw new ServiceException("Ошибка при обработке JMS-сообщения с курсами валют или драгоценных металлов. Сообщение будет загружено повторно.");
         }
     }
 
@@ -119,6 +122,8 @@ public class RateMDB implements MessageListener {
             return;
         }
         try {
+            System.out.println("Thread name = " + Thread.currentThread().getName());
+            System.out.println("Message class = " + tm.getClass());
             System.out.println("tm.getJMSCorrelationID() = " + tm.getJMSCorrelationID());
             System.out.println("tm.getJMSDeliveryMode() = " + tm.getJMSDeliveryMode());
             System.out.println("tm.getJMSExpiration() = " + tm.getJMSExpiration());
@@ -146,7 +151,7 @@ public class RateMDB implements MessageListener {
     /**
      * Импорт курсов из сообщения
      */
-    private boolean importRate(final String fileText, final TAUserInfo userInfo) throws Exception {
+    private void importRate(final String fileText, final TAUserInfo userInfo) throws Exception {
         SAXParserFactory factory = SAXParserFactory.newInstance();
         SAXParser saxParser = factory.newSAXParser();
 
@@ -235,21 +240,21 @@ public class RateMDB implements MessageListener {
         try {
             saxParser.parse(new ByteArrayInputStream(fileText.getBytes(RATE_ENCODING)), handler);
             if (refBookId[0] == null) {
-                throw new ServiceException(ERROR_RATE);
+                logger.error(ERROR_RATE);
+                addLog(userInfo, String.format(FAIL_IMPORT, ERROR_RATE));
+                return;
             }
-            return runScript(refBookId[0], fileText, userInfo);
+            runScript(refBookId[0], fileText, userInfo);
         } catch (Exception ex) {
             logger.error(ERROR_FORMAT, ex);
             addLog(userInfo, String.format(FAIL_IMPORT, ERROR_FORMAT));
         }
-        // Ошибка не в скрипте
-        return true;
     }
 
     /**
      * Запуск скрипта
      */
-    private boolean runScript(Long refBookId, String fileText, TAUserInfo userInfo) {
+    private void runScript(Long refBookId, String fileText, TAUserInfo userInfo) {
         Logger logger = new Logger();
         Map<String, Object> additionalParameters = new HashMap<String, Object>();
         ScriptStatusHolder scriptStatusHolder = new ScriptStatusHolder();
@@ -258,25 +263,15 @@ public class RateMDB implements MessageListener {
             additionalParameters.put("scriptStatusHolder", scriptStatusHolder);
             refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.IMPORT, logger, additionalParameters);
         } catch (ServiceLoggerException e) {
+            logger.error("uuid = " + e.getUuid());
             addLog(userInfo, String.format(FAIL_IMPORT, e.getMessage()));
-            return false;
+            return;
         } catch (Exception e) {
             logger.error(e);
-        }
-        if (logger.containsLevel(LogLevel.ERROR)) {
-            String firstError = null;
-            for (LogEntry logEntry : logger.getEntries()) {
-                if (logEntry.getLevel() == LogLevel.ERROR) {
-                    firstError = logEntry.getMessage();
-                    break;
-                }
-            }
-            String msg = String.format(ERROR_IMPORT, refBookNameMapping.get(refBookId), firstError);
-            addLog(userInfo, String.format(FAIL_IMPORT, msg));
-            return false;
+            addLog(userInfo, String.format(FAIL_IMPORT, e.getMessage()));
+            return;
         }
         addLog(userInfo, String.format(SUCCESS_IMPORT, scriptStatusHolder.getSuccessCount(), refBookNameMapping.get(refBookId)));
-        return true;
     }
 
     /**
