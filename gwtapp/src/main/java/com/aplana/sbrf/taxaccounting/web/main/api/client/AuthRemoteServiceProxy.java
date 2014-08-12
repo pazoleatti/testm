@@ -68,7 +68,7 @@ public class AuthRemoteServiceProxy extends RemoteServiceProxy {
                 // Если ответ 200 ОК и тип HTML, релоадим страницу, так чтобы попать на страницу авторизации.
                 if (status == Response.SC_OK && contentType != null && contentType.contains("html")) {
                     // Illegal content type. Redirect to auth page.
-                    Dialog.infoMessage("Ваша рабочая сессия истекла. Вы будете перенаправлены на форму авторизации.");
+//                    Dialog.infoMessage("Ваша рабочая сессия истекла. Вы будете перенаправлены на форму авторизации.");
                     Window.Location.reload();
                 /*
                  * Если ответ 403, заменяем текст сообщения, т.к. по умолчанию берет с /WEB-INF/jsp/forbidden.jsp

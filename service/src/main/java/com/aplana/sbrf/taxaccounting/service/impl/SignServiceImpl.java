@@ -72,10 +72,16 @@ public class SignServiceImpl implements SignService {
                     logger.warn(String.format("Директории %s с ключами не существует", keyFolderPath));
                     break;
                 }
-                String[] listFileNames = keyResourceFolder.list();
-                if (listFileNames == null || listFileNames.length == 0){
-                    logger.warn(String.format("Директории %s с ключами пустая", keyFolderPath));
-                    break;
+                String[] listFileNames;
+                if (keyResourceFolder.isFile()){
+                    keyFolderPath = keyFolderPath.replaceFirst(keyResourceFolder.getName() + "$", "");
+                    listFileNames = new String[]{keyResourceFolder.getName()};
+                }else {
+                    listFileNames = keyResourceFolder.list();
+                    if (listFileNames == null || listFileNames.length == 0){
+                        logger.warn(String.format("Директории %s с ключами пустая", keyFolderPath));
+                        break;
+                    }
                 }
                 //Проверяем по всем возможным БОК
                 for (String keyName : listFileNames){
