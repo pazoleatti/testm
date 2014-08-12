@@ -34,7 +34,6 @@ def EMPTY_DATA_ERROR = "Сообщение не содержит значени�
 
 void importFromXML() {
     def dataProvider = refBookFactory.getDataProvider(REFBOOK_ID)
-
     def SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd")
     def reader = null
     def Date version = null  //дата актуальности
@@ -99,7 +98,8 @@ void importFromXML() {
     }
 
     if (fileRecords.empty) {
-        throw new ServiceException(EMPTY_DATA_ERROR)
+        logger.warn(EMPTY_DATA_ERROR)
+        return
     }
 
     // Получение идентификаторов строк
@@ -133,13 +133,14 @@ void importFromXML() {
     }
 
     if (insertList.empty && updateList.empty) {
-        throw new ServiceException(EMPTY_DATA_ERROR)
+        logger.warn(EMPTY_DATA_ERROR)
+        return
     }
-
     if (!insertList.empty) {
         dataProvider.insertRecords(version, insertList)
     }
     if (!updateList.empty) {
         dataProvider.updateRecords(version, updateList)
     }
+    scriptStatusHolder.successCount = insertList.size + updateList.size
 }
