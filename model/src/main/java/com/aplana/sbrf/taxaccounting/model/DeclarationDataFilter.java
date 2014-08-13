@@ -27,6 +27,10 @@ public class DeclarationDataFilter implements Serializable {
 
     private DeclarationDataSearchOrdering searchOrdering;
 
+    private String taxOrganCode;
+
+    private String taxOrganKpp;
+
 	/*true, если сортируем по возрастанию, false - по убыванию*/
 	private boolean ascSorting;
 
@@ -108,5 +112,21 @@ public class DeclarationDataFilter implements Serializable {
 
     public void setDeclarationDataId(Long declarationDataId) {
         this.declarationDataId = declarationDataId;
+    }
+
+    public String getTaxOrganCode() {
+        return taxOrganCode;
+    }
+
+    public void setTaxOrganCode(String taxOrganCode) {
+        this.taxOrganCode = taxOrganCode;
+    }
+
+    public String getTaxOrganKpp() {
+        return taxOrganKpp;
+    }
+
+    public void setTaxOrganKpp(String taxOrganKpp) {
+        this.taxOrganKpp = taxOrganKpp;
     }
 }

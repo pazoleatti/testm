@@ -10,6 +10,8 @@ public class GetDeclarationTypeResult implements Result {
 
 	List<DeclarationType> declarationTypes;
 
+    private String filter;
+
 	public List<DeclarationType> getDeclarationTypes() {
 		return declarationTypes;
 	}
@@ -17,4 +19,12 @@ public class GetDeclarationTypeResult implements Result {
 	public void setDeclarationTypes(List<DeclarationType> declarationTypes) {
 		this.declarationTypes = declarationTypes;
 	}
+
+    public String getFilter() {
+        return filter;
+    }
+
+    public void setFilter(String filter) {
+        this.filter = filter;
+    }
 }

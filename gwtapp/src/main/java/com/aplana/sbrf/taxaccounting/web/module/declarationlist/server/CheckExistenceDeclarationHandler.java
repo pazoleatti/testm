@@ -1,9 +1,13 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.server;
 
+import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTypeService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
@@ -17,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -32,6 +37,12 @@ public class CheckExistenceDeclarationHandler extends AbstractActionHandler<Chec
 
     @Autowired
     DeclarationTypeService declarationTypeService;
+
+    @Autowired
+    private RefBookFactory rbFactory;
+
+    @Autowired
+    DepartmentDao departmentDao;
 
     @Autowired
     private LogEntryService logEntryService;
@@ -59,6 +70,21 @@ public class CheckExistenceDeclarationHandler extends AbstractActionHandler<Chec
             logger.error("Декларация с заданными параметрами уже существует");
 		} else {
 			result.setStatus(CheckExistenceDeclarationResult.DeclarationStatus.NOT_EXIST);
+		}
+
+        if(command.getTaxType().equals(TaxType.PROPERTY)) {
+            // TODO проверить
+            StringBuilder filter = new StringBuilder();
+            Long regionId = departmentDao.getDepartment(command.getDepartmentId()).getRegionId();
+            filter.append("TAX_ORGAN_CODE").append(" = ").append(command.getTaxOrganCode())
+                    .append(" and ").append("KPP").append(" = ").append(command.getTaxOrganKpp())
+                    .append(" and ").append("DECLARATION_REGION_ID").append(" = ").append(regionId);
+            RefBookDataProvider provider = rbFactory.getDataProvider(200L);
+            List<Pair<Long, Long>> checkRecordExistence = provider.checkRecordExistence(new Date(), filter.toString());
+            if (checkRecordExistence == null || checkRecordExistence.isEmpty()) {
+                logger.error("Выбранные налоговый орган и КПП не созданы в выбранном периоде (справочник \"Параметры представления деклараций по налогу на имущество\"");
+                result.setStatus(null);
+            }
 		}
 
         result.setUuid(logEntryService.save(logger.getEntries()));

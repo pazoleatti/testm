@@ -3,6 +3,7 @@
              xmlns:g="urn:import:com.google.gwt.user.client.ui"
              xmlns:dep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
              xmlns:rep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client"
+             xmlns:r="urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client"
              xmlns:dw="urn:import:com.aplana.gwt.client">
     <ui:style>
         .content {
@@ -48,6 +49,31 @@
                 </g:cell>
                 <g:cell width="100%">
                     <dw:ListBoxWithTooltipWidget width="100%" ui:field="declarationTypeBox" showTooltip="true"/>
+                </g:cell>
+            </g:HorizontalPanel>
+
+            <g:HorizontalPanel ui:field="codePanel" spacing="6" verticalAlignment="middle"
+                               addStyleNames="{style.content}">
+                <g:cell horizontalAlignment="right">
+                    <g:Label width="140px" wordWrap="false" text="Налоговый орган:" height="16px"/>
+                </g:cell>
+                <g:cell width="100%">
+                    <r:RefBookPickerWidget ui:field="taxOrganCode" width="100%" versionEnabled="false"
+                                           attributeIdInt="2041"
+                                           isHierarchical="false" multiSelect="false"
+                                           title="Выбор кода налогового органа"/>
+                </g:cell>
+            </g:HorizontalPanel>
+
+            <g:HorizontalPanel ui:field="kppPanel" spacing="6" verticalAlignment="middle"
+                               addStyleNames="{style.content}">
+                <g:cell horizontalAlignment="right">
+                    <g:Label width="140px" wordWrap="false" text="КПП:" height="16px"/>
+                </g:cell>
+                <g:cell width="100%">
+                    <r:RefBookPickerWidget ui:field="taxOrganKpp" width="100%" versionEnabled="false"
+                                           attributeIdInt="2051"
+                                           isHierarchical="false" multiSelect="false" title="Выбор КПП"/>
                 </g:cell>
             </g:HorizontalPanel>
 

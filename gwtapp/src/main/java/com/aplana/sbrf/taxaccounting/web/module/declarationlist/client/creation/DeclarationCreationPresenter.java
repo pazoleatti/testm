@@ -1,11 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.creation;
 
 import com.aplana.gwt.client.dialog.Dialog;
-import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
@@ -44,8 +42,12 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
 		Integer getSelectedDeclarationType();
 		List<Integer> getSelectedReportPeriod();
 		List<Integer> getSelectedDepartment();
-        void updateLabel(TaxType taxType);
-	}
+        void setTaxType(TaxType taxType);
+
+        void setTaxOrganFilter(String filter);
+        String getTaxOrganCode();
+        String getTaxOrganKpp();
+    }
 
 	private DispatchAsync dispatcher;
 	private PlaceManager placeManager;
@@ -86,6 +88,8 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
 		filter.setDeclarationTypeId(getView().getSelectedDeclarationType());
 		filter.setDepartmentIds(getView().getSelectedDepartment());
 		filter.setReportPeriodIds(getView().getSelectedReportPeriod());
+		filter.setTaxOrganCode(getView().getTaxOrganCode());
+		filter.setTaxOrganKpp(getView().getTaxOrganKpp());
 		if(isFilterDataCorrect(filter)){
 			LogCleanEvent.fire(this);
 			LogShowEvent.fire(this, false);
@@ -93,6 +97,8 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
 			checkCommand.setDeclarationTypeId(filter.getDeclarationTypeId());
 			checkCommand.setDepartmentId(filter.getDepartmentIds().iterator().next());
 			checkCommand.setReportPeriodId(filter.getReportPeriodIds().iterator().next());
+            checkCommand.setTaxOrganCode(filter.getTaxOrganCode());
+            checkCommand.setTaxOrganKpp(filter.getTaxOrganKpp());
             checkCommand.setTaxType(taxType);
 			dispatcher.execute(checkCommand, CallbackUtils
 					.defaultCallback(new AbstractCallback<CheckExistenceDeclarationResult>() {
@@ -106,6 +112,8 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
 								command.setDeclarationTypeId(filter.getDeclarationTypeId());
 								command.setDepartmentId(filter.getDepartmentIds().iterator().next());
 								command.setReportPeriodId(filter.getReportPeriodIds().iterator().next());
+                                command.setTaxOrganCode(filter.getTaxOrganCode());
+                                command.setTaxOrganKpp(filter.getTaxOrganKpp());
                                 command.setTaxType(taxType);
 								dispatcher.execute(command, CallbackUtils
 										.defaultCallback(new AbstractCallback<CreateDeclarationResult>() {
@@ -127,6 +135,7 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
 	@Override
 	public void onDepartmentChange() {
 		if (getView().getSelectedDepartment().isEmpty() || getView().getSelectedReportPeriod().isEmpty()) {
+            getView().setTaxOrganFilter(null);
 			return;
 		}
 		GetDeclarationTypeAction action = new GetDeclarationTypeAction();
@@ -139,23 +148,22 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
 			@Override
 			public void onSuccess(GetDeclarationTypeResult result) {
 				getView().setAcceptableDeclarationTypes(result.getDeclarationTypes());
+                getView().setTaxOrganFilter(result.getFilter());
 			}
 		}, this) );
 	}
 
 	private boolean isFilterDataCorrect(DeclarationDataFilter filter){
-		if(filter.getDeclarationTypeId() == null && !taxType.equals(TaxType.DEAL)){
-			MessageEvent.fire(this, "Для создания декларации необходимо выбрать вид декларации");
-			return false;
-		}
-		if(filter.getReportPeriodIds() == null || filter.getReportPeriodIds().isEmpty()){
-			MessageEvent.fire(this, "Для создания декларации необходимо выбрать один период");
-			return false;
-		}
-		if(filter.getDepartmentIds() == null || filter.getDepartmentIds().isEmpty()){
-			MessageEvent.fire(this, "Для создания декларации необходимо выбрать одно подразделение");
-			return false;
-		}
+        if ((filter.getReportPeriodIds() == null || filter.getReportPeriodIds().isEmpty())
+                        || (filter.getDepartmentIds() == null || filter.getDepartmentIds().isEmpty())
+                        || (filter.getDeclarationTypeId() == null)
+                        || (taxType.equals(TaxType.PROPERTY)
+                                && ((filter.getTaxOrganCode() == null || filter.getTaxOrganCode().isEmpty())
+                                        || (filter.getTaxOrganKpp() == null || filter.getTaxOrganKpp().isEmpty()))
+                            )){
+            Dialog.errorMessage("Создание декларации", "Заполнены не все параметры декларации");
+            return false;
+        }
 		return true;
 	}
 	
@@ -169,7 +177,7 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
         GetDeclarationFilterData action = new GetDeclarationFilterData();
         action.setTaxType(dataFilter.getTaxType());
 	    this.taxType = dataFilter.getTaxType();
-        getView().updateLabel(this.taxType);
+        getView().setTaxType(this.taxType);
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetDeclarationFilterDataResult>() {
             @Override
             public void onSuccess(GetDeclarationFilterDataResult result) {
