@@ -28,7 +28,6 @@ import javax.jms.TextMessage;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.ByteArrayInputStream;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,7 +41,6 @@ import java.util.Map;
         @ActivationConfigProperty(propertyName = "destination", propertyValue = "jms/rateQueue")})
 @Interceptors(TransportInterceptor.class)
 @TransactionManagement(TransactionManagementType.CONTAINER)
-//@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED) // Rollback во внешних сервисах не будет отмечать сообщение как необработанное из-за ошибки
 public class RateMDB implements MessageListener {
 
     private static final Log logger = LogFactory.getLog(RateMDB.class);
@@ -93,9 +91,6 @@ public class RateMDB implements MessageListener {
 
         TextMessage tm = (TextMessage) message;
 
-        // DEBUG
-        printParemeters(tm);
-
         try {
             if (tm.getIntProperty("JMSXDeliveryCount") > MAX_DELIVERY_COUNT) {
                 logger.error(ERROR_COUNT);
@@ -112,32 +107,6 @@ public class RateMDB implements MessageListener {
         } catch (Exception ex) {
             logger.error("Ошибка при получении сообщения: " + ex.getMessage(), ex);
             addLog(userInfo, String.format(FAIL_IMPORT, ERROR_FORMAT));
-        }
-    }
-
-    // TODO DEBUG, потом убрать этот метод
-    private void printParemeters(TextMessage tm) {
-        System.out.println("=== printParemeters ===");
-        if (tm == null) {
-            return;
-        }
-        try {
-            System.out.println("Thread name = " + Thread.currentThread().getName());
-            System.out.println("Message class = " + tm.getClass());
-            System.out.println("tm.getJMSCorrelationID() = " + tm.getJMSCorrelationID());
-            System.out.println("tm.getJMSDeliveryMode() = " + tm.getJMSDeliveryMode());
-            System.out.println("tm.getJMSExpiration() = " + tm.getJMSExpiration());
-            System.out.println("tm.getJMSMessageID() = " + tm.getJMSMessageID());
-            System.out.println("tm.getJMSTimestamp() = " + tm.getJMSTimestamp());
-            System.out.println("tm.getJMSType() = " + tm.getJMSType());
-            if (tm.getPropertyNames() != null) {
-                for (Enumeration<String> enumeration = tm.getPropertyNames(); enumeration.hasMoreElements();)  {
-                    String paramName = enumeration.nextElement();
-                    System.out.println(paramName + " = " + tm.getStringProperty(paramName));
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
