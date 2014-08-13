@@ -142,5 +142,5 @@ void importFromXML() {
     if (!updateList.empty) {
         dataProvider.updateRecords(version, updateList)
     }
-    scriptStatusHolder.successCount = insertList.size + updateList.size
+    scriptStatusHolder.setSuccessCount(insertList.size() + updateList.size())
 }
