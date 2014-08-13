@@ -54,7 +54,7 @@
             </g:HorizontalPanel>
             <g:HorizontalPanel spacing="2" verticalAlignment="middle" width="245px">
                 <g:cell horizontalAlignment="right" width="95px">
-                    <g:Label text="По дату:" wordWrap="false" addStyleNames="{style.labelBlockMargin}"/>
+                    <g:Label text="До даты:" wordWrap="false" addStyleNames="{style.labelBlockMargin}"/>
                 </g:cell>
                 <d:DateMaskBoxPicker ui:field="toSearchDate" width="148px"/>
             </g:HorizontalPanel>
@@ -70,16 +70,18 @@
                         </g:VerticalPanel>
                     </g:cell>
                 </g:HorizontalPanel>
-                <g:HorizontalPanel spacing="2" verticalAlignment="middle" width="75%">
+                <g:HorizontalPanel spacing="2" verticalAlignment="middle" width="500px">
+                    <g:cell horizontalAlignment="left" width="200px">
+                        <g:CheckBox ui:field="searchResults" text="Искать в найденном"/>
+                    </g:cell>
+
                     <g:cell horizontalAlignment="right" width="115px">
                         <g:Label text="Искать по полям:" addStyleNames="{style.labelBlockMargin}"/>
                     </g:cell>
 
                     <r:RefBookPickerWidget ui:field="auditFieldList" title="Список полей" attributeIdInt="1050" visible="true" width="100%"
                                            isHierarchical="false" multiSelect="true" searchEnabled="false" versionEnabled="false"/>
-                    <g:cell horizontalAlignment="right" width="200px">
-                        <g:CheckBox ui:field="searchResults" text="Искать в найденном"/>
-                    </g:cell>
+
                 </g:HorizontalPanel>
             </g:VerticalPanel>
         </g:cell>
