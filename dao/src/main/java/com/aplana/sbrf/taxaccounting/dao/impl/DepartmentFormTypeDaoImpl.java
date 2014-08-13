@@ -532,9 +532,12 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
     @Override
     public List<FormTypeKind> getAllFormAssigned(List<Long> departmentIds, char taxType, SearchOrderingFilter filter) {
 
-        SqlParameterSource parameters = new MapSqlParameterSource()
-                .addValue("params", departmentIds)
+        MapSqlParameterSource parameters = new MapSqlParameterSource()
                 .addValue("taxType", String.valueOf(taxType));
+
+        if (!departmentIds.isEmpty()){
+            parameters.addValue("params", departmentIds);
+        }
 
         String sql = "SELECT dft.ID,\n" +
                 "  dft.KIND,\n" +
@@ -574,8 +577,8 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                 "ON d.ID = dft.DEPARTMENT_ID\n" +
                 "LEFT OUTER JOIN department dp\n" +
                 "ON dp.ID = dft.PERFORMER_DEP_ID\n" +
-                "WHERE dft.department_id IN (:params)\n" +
-                "AND ft.tax_type = :taxType\n";
+                "WHERE ft.tax_type = :taxType\n" +
+                (departmentIds.size() > 0 ? "AND dft.department_id IN (:params)\n":"");
 
         String order = null;
 
