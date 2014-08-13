@@ -1,8 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.server;
 
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTypeService;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetDeclarationTypeAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetDeclarationTypeResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -22,13 +22,13 @@ public class GetDeclarationTypeForCreateHandler extends AbstractActionHandler<Ge
 	DeclarationTypeService declarationTypeService;
 
     @Autowired
-    DepartmentDao departmentDao;
+    DepartmentService departmentService;
 
 	@Override
 	public GetDeclarationTypeResult execute(GetDeclarationTypeAction action, ExecutionContext executionContext) throws ActionException {
 		GetDeclarationTypeResult result = new GetDeclarationTypeResult();
 		result.setDeclarationTypes(declarationTypeService.getTypes(action.getDepartmentId(), action.getReportPeriod(), action.getTaxType()));
-        Department department = departmentDao.getDepartment(action.getDepartmentId());
+        Department department = departmentService.getDepartment(action.getDepartmentId());
         Long regionId = department.getRegionId();
         result.setFilter("t200.DECLARATION_REGION_ID = "+ regionId);
 
