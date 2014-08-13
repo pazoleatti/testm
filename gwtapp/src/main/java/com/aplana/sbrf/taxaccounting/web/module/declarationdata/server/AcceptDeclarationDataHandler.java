@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationdata.server;
 
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.AcceptDeclarationDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.AcceptDeclarationDataResult;
@@ -22,15 +23,22 @@ public class AcceptDeclarationDataHandler extends AbstractActionHandler<AcceptDe
 	@Autowired
 	private SecurityService securityService;
 
+    @Autowired
+    private LogEntryService logEntryService;
+
     public AcceptDeclarationDataHandler() {
         super(AcceptDeclarationDataAction.class);
     }
 
     @Override
     public AcceptDeclarationDataResult execute(AcceptDeclarationDataAction action, ExecutionContext context) {
-		declarationDataService.setAccepted(new Logger(), action.getDeclarationId(), action.isAccepted(),
+        AcceptDeclarationDataResult result = new AcceptDeclarationDataResult();
+        Logger logger = new Logger();
+		declarationDataService.setAccepted(logger, action.getDeclarationId(), action.isAccepted(),
 				securityService.currentUserInfo());
-	    return new AcceptDeclarationDataResult();
+
+        result.setUuid(logEntryService.save(logger.getEntries()));
+        return result;
     }
 
     @Override

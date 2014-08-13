@@ -92,6 +92,10 @@ void importFromXML() {
                 // Курс валюты
                 if (currencySector && reader.getName().equals(QName.valueOf("Rate"))) {
                     rate = new BigDecimal(reader.getElementText())
+                    // TODO
+                    if (rate == 9999) {
+                        throw new Exception("Test 9999!")
+                    }
                 }
             }
 
@@ -156,5 +160,5 @@ void importFromXML() {
     if (!updateList.empty) {
         dataProvider.updateRecords(version, updateList)
     }
-    scriptStatusHolder.successCount = insertList.size + updateList.size
+    scriptStatusHolder.setSuccessCount(insertList.size() + updateList.size())
 }
