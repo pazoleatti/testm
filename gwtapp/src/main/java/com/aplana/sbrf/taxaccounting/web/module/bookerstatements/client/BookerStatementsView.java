@@ -1,15 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.module.bookerstatements.client;
 
-import com.aplana.sbrf.taxaccounting.model.BookerStatementsSearchOrdering;
-import com.aplana.sbrf.taxaccounting.model.BookerStatementsSearchResultItem;
-import com.aplana.sbrf.taxaccounting.model.BookerStatementsType;
-import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AplanaUiHandlers;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.sortable.AsyncDataProviderWithSortableTable;
 import com.aplana.sbrf.taxaccounting.web.module.bookerstatementsdata.client.BookerStatementsDataTokens;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.cell.client.AbstractCell;
@@ -50,7 +47,7 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
     public static final String DEPARTMENT_TITLE = "Подразделение";
     public static final String BOOKER_STATEMENTS_TYPE_TITLE = "Вид бух. отчётности";
     @UiField
-    RefBookPickerWidget accountPeriodIds;
+    PeriodPickerPopupWidget accountPeriodIds;
     @UiField
     DepartmentPickerPopupWidget departmentIds;
     @UiField(provided = true)
@@ -95,9 +92,6 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
             }
         };
 
-        Date current = new Date();
-        accountPeriodIds.setPeriodDates(current, current);
-        accountPeriodIds.setSearchEnabled(false);
     }
 
     @Override
@@ -134,7 +128,10 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
 
     @Override
     public List<Long> getAccountPeriods() {
-        return accountPeriodIds.getValue();
+        List<Long> list = new ArrayList<Long>(accountPeriodIds.getValue().size());
+        for (Integer integer : accountPeriodIds.getValue())
+            list.add(integer.longValue());
+        return list;
     }
 
     @Override
@@ -175,6 +172,11 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
             sortByColumn = BookerStatementsSearchOrdering.YEAR;
         }
         return sortByColumn;
+    }
+
+    @Override
+    public void setReportPeriods(List<ReportPeriod> reportPeriods) {
+        accountPeriodIds.setPeriods(reportPeriods);
     }
 
     @Override

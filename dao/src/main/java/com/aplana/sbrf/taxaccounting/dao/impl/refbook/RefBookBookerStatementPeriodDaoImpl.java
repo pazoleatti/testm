@@ -4,12 +4,17 @@ import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookValueMapper;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookBookerStatementPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
+import com.aplana.sbrf.taxaccounting.model.Formats;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -18,6 +23,7 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +32,9 @@ public class RefBookBookerStatementPeriodDaoImpl extends AbstractDao implements 
 
     private final Long REF_BOOK_ID_106 = 106L;
     private final Long REF_BOOK_ID_107 = 107L;
+
+    @Autowired
+    RefBookDao refBookDao;
 
     /** Для получения данных из справочника. */
     private static final String SQL_REF_BOOK =
@@ -86,6 +95,60 @@ public class RefBookBookerStatementPeriodDaoImpl extends AbstractDao implements 
         result.setTotalCount(getJdbcTemplate().queryForInt(ps.getQuery().toString(), ps.getParams().toArray()));
 
         return result;
+    }
+
+    private static final String SQL_FOR_RECORD =
+            " --данные из 106 справочнка \n" +
+                    " with \n" +
+                    " t106 as ( \n" +
+                    "     %s \n" +
+                    " ), \n" +
+                    " \n" +
+                    " --данные из 107 справочника \n" +
+                    " t107 as ( \n" +
+                    "     %s \n" +
+                    " ) \n" +
+                    " \n" +
+                    " --данные для справочника 108 \n" +
+                    " select \n" +
+                    "     --id на запись справочника 107 \n" +
+                    "     periods.record_id, \n" +
+                    "     YEAR, \n" +
+                    "     ACCOUNT_PERIOD_ID, \n" +
+                    "     --год + название периода БО \n" +
+                    "     periods.YEAR || ': ' || t106.NAME as PERIOD_NAME \n" +
+                    " from ( \n" +
+                    "     --данные из 107 справочник сгруппированные по году и периоду без подразделения \n" +
+                    "     select \n" +
+                    "         max(t107.record_id) as record_id, \n" +
+                    "         t107.YEAR, \n" +
+                    "         t107.ACCOUNT_PERIOD_ID \n" +
+                    "     from t107 \n" +
+                    "     group by t107.YEAR, t107.ACCOUNT_PERIOD_ID \n" +
+                    " ) periods \n" +
+                    "     --для получения названия периода БО из справочник 106 \n" +
+                    "     left join t106 on t106.record_id = periods.ACCOUNT_PERIOD_ID \n" +
+                    "       where periods.record_id = ?\n";
+
+    @Override
+    public Map<String, RefBookValue> getRecordData(Long recordId) {
+        Long refBookId = RefBookBookerStatementPeriodDao.REF_BOOK_ID;
+        RefBook refBook = get(refBookId);
+        PreparedStatementData ps = new PreparedStatementData();
+        String sqlRefBook106 = getRefBookSelect(REF_BOOK_ID_106);
+        String sqlRefBook107 = getRefBookSelect(REF_BOOK_ID_107);
+
+        String sql = String.format(SQL_FOR_RECORD, sqlRefBook106, sqlRefBook107);
+        ps.appendQuery(sql);
+        ps.addParam(recordId);
+
+        try {
+            List<Map<String, RefBookValue>> records = getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RefBookValueMapper(refBook));
+            return records.isEmpty()? new HashMap<String, RefBookValue>(0) : records.get(0);
+        } catch (DataAccessException e){
+            logger.error("", e);
+            throw new DaoException("", e);
+        }
     }
 
     /** Динамически формирует запрос для справочника. */

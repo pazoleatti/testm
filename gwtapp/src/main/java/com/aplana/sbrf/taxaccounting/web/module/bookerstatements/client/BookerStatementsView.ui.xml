@@ -4,7 +4,7 @@
              xmlns:pager="urn:import:com.aplana.sbrf.taxaccounting.web.widget.pager"
              xmlns:picker="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
              xmlns:fm="urn:import:com.aplana.gwt.client.form"
-             xmlns:r='urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client'>
+             xmlns:periodpicker="urn:import:com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client">
     <ui:style>
         .header {
             font-size: 14px;

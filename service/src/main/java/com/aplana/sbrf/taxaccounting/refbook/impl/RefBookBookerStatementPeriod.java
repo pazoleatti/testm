@@ -54,7 +54,7 @@ public class RefBookBookerStatementPeriod extends AbstractReadOnlyRefBook {
 
     @Override
     public Map<String, RefBookValue> getRecordData(@NotNull Long recordId) {
-        throw new UnsupportedOperationException();
+        return bookerStatementPeriodDao.getRecordData(recordId);
     }
 
     @Override
