@@ -37,7 +37,6 @@ public class GetFTVersionHistoryHandler extends AbstractActionHandler<GetFTVersi
         List<TemplateChanges> changeses = templateChangesService.getByFormTemplateId(action.getTemplateId(),
                 action.getSortFilter().getSearchOrdering(), action.getSortFilter().isAscSorting());
         List<TemplateChangesExt> changesList = new ArrayList<TemplateChangesExt>(changeses.size());
-        FormTemplate formTemplate = formTemplateService.get(action.getTemplateId());
         for (TemplateChanges changes : changeses){
             TemplateChangesExt templateChangesExt = new TemplateChangesExt();
             templateChangesExt.setTemplateChanges(changes);

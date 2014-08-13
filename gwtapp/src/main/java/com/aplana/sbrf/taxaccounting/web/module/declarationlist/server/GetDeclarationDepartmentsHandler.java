@@ -30,9 +30,6 @@ public class GetDeclarationDepartmentsHandler extends AbstractActionHandler<GetD
     private SecurityService securityService;
 
     @Autowired
-    private PeriodService periodService;
-
-    @Autowired
     private DepartmentService departmentService;
 
     @Override

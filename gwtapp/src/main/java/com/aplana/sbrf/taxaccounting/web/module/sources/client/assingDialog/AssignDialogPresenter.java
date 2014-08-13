@@ -29,15 +29,9 @@ public class AssignDialogPresenter extends PresenterWidget<AssignDialogPresenter
         void close();
     }
 
-    private DispatchAsync dispatcher;
-    private PlaceManager placeManager;
-
     @Inject
-    public AssignDialogPresenter(final EventBus eventBus, final MyView view,
-                                 DispatchAsync dispatcher, PlaceManager placeManager) {
+    public AssignDialogPresenter(final EventBus eventBus, final MyView view) {
         super(eventBus, view);
-        this.dispatcher = dispatcher;
-        this.placeManager = placeManager;
         getView().setUiHandlers(this);
     }
 

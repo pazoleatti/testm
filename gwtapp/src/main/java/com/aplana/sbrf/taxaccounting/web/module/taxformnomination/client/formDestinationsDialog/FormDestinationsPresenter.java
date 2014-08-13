@@ -27,7 +27,6 @@ import java.util.Set;
 
 public class FormDestinationsPresenter extends PresenterWidget<FormDestinationsPresenter.MyView> implements FormDestinationsUiHandlers {
 
-    private final PlaceManager placeManager;
     private final DispatchAsync dispatchAsync;
 
     public interface MyView extends PopupView, HasUiHandlers<FormDestinationsUiHandlers> {
@@ -57,9 +56,8 @@ public class FormDestinationsPresenter extends PresenterWidget<FormDestinationsP
 
 
     @Inject
-    public FormDestinationsPresenter(final EventBus eventBus, final MyView view, final DispatchAsync dispatchAsync, PlaceManager placeManager) {
+    public FormDestinationsPresenter(final EventBus eventBus, final MyView view, final DispatchAsync dispatchAsync) {
         super(eventBus, view);
-        this.placeManager = placeManager;
         this.dispatchAsync = dispatchAsync;
         getView().setUiHandlers(this);
     }

@@ -829,7 +829,6 @@ public class RefBookDepartment implements RefBookDataProvider {
         List<Long> ref101 = refBookIncome101.getUniqueRecordIds(null, String.format(FILTER_BY_DEPARTMENT, department.getId()));
         List<Long> ref102 = refBookIncome102.getUniqueRecordIds(null, String.format(FILTER_BY_DEPARTMENT, department.getId()));
         for (Long id : ref101){
-            String periodValue = refBookIncome101Dao.getPeriodNameFromRefBook(id);
             logger.warn(String.format("Существует загруженная для подразделения %s бух. отчетность в периоде %s!",
                     department.getName(), refBookIncome101Dao.getPeriodNameFromRefBook(id)));
         }

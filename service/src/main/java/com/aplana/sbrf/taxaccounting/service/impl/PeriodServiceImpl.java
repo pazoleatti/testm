@@ -224,12 +224,6 @@ public class PeriodServiceImpl implements PeriodService{
 	public void saveOrUpdate(DepartmentReportPeriod departmentReportPeriod, Date correctionDate, List<LogEntry> logs) {
 		DepartmentReportPeriod dp = departmentReportPeriodDao.get(departmentReportPeriod.getReportPeriod().getId(),
 				departmentReportPeriod.getDepartmentId(), departmentReportPeriod.getCorrectPeriod());
-        String balance;
-        if (departmentReportPeriod.isBalance()) {
-            balance = "ввод остатков ";
-        } else {
-            balance = "";
-        }
 		if (dp == null) { //не существует
 			departmentReportPeriodDao.save(departmentReportPeriod);
 		} else if (!dp.isActive()) { // существует и не открыт

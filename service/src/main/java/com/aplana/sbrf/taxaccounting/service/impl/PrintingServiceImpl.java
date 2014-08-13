@@ -74,8 +74,6 @@ public class PrintingServiceImpl implements PrintingService {
             FormDataReport data = new FormDataReport();
             FormData formData = formDataDao.get(formDataId, manual);
             FormTemplate formTemplate = formTemplateDao.get(formData.getFormTemplateId());
-            Department department =  departmentDao.getDepartment(formData.getPerformer() != null ?
-                    formData.getPerformer().getPrintDepartmentId() : formData.getDepartmentId());
             ReportPeriod reportPeriod = reportPeriodDao.get(formData.getReportPeriodId());
             // http://jira.aplana.com/browse/SBRFACCTAX-6399
             if ((formData.getKind() == FormDataKind.PRIMARY || formData.getKind() == FormDataKind.CONSOLIDATED)

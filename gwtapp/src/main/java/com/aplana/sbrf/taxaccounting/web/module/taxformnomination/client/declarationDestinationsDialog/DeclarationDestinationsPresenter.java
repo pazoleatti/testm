@@ -29,7 +29,6 @@ import java.util.Set;
  * @author auldanov
  */
 public class DeclarationDestinationsPresenter extends PresenterWidget<DeclarationDestinationsPresenter.MyView> implements DeclarationDestinationsUiHandlers {
-    private final PlaceManager placeManager;
     private final DispatchAsync dispatchAsync;
 	TaxType taxType;
 
@@ -78,9 +77,8 @@ public class DeclarationDestinationsPresenter extends PresenterWidget<Declaratio
     }
 
     @Inject
-    public DeclarationDestinationsPresenter(final EventBus eventBus, final MyView view, final DispatchAsync dispatchAsync, PlaceManager placeManager) {
+    public DeclarationDestinationsPresenter(final EventBus eventBus, final MyView view, final DispatchAsync dispatchAsync) {
         super(eventBus, view);
-        this.placeManager = placeManager;
         this.dispatchAsync = dispatchAsync;
         getView().setUiHandlers(this);
     }

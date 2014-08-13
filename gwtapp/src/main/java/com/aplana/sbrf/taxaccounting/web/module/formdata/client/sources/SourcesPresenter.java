@@ -36,13 +36,11 @@ public class SourcesPresenter extends PresenterWidget<SourcesPresenter.MyView> i
     }
 
     private final DispatchAsync dispatcher;
-    private final EventBus eventBus;
     private FormData formData;
 
     @Inject
     public SourcesPresenter(final EventBus eventBus, final MyView view, DispatchAsync dispatcher) {
         super(eventBus, view);
-        this.eventBus = eventBus;
         this.dispatcher = dispatcher;
         getView().setUiHandlers(this);
     }
