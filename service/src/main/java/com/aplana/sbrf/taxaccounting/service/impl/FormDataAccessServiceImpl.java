@@ -72,8 +72,6 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
     @Autowired
     private DepartmentFormTypeDao departmentFormTypeDao;
     @Autowired
-    private DepartmentDeclarationTypeDao departmentDeclarationTypeDao;
-    @Autowired
     private PeriodService reportPeriodService;
     @Autowired
     private SourceService sourceService;

@@ -138,6 +138,7 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
                 refBookPikerAlredyInit = true;
                 refBookPiker.setAttributeId(attrId);
                 refBookPiker.setFilter(column.getFilter());
+                refBookPiker.setSearchEnabled(column.isSearchEnabled());
                 refBookPiker.setPeriodDates(columnContext.getStartDate(), columnContext.getEndDate());
             }
 

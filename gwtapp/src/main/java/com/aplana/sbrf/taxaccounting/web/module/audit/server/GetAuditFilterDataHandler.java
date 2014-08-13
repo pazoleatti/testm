@@ -25,8 +25,6 @@ public class GetAuditFilterDataHandler extends AbstractActionHandler<GetAuditFil
 
     @Autowired
     AuditService auditService;
-    @Autowired
-    private SecurityService securityService;
 
     public GetAuditFilterDataHandler() {
         super(GetAuditFilterDataAction.class);

@@ -40,7 +40,6 @@ public class CreateTaskHandler extends AbstractActionHandler<CreateTaskAction, C
 
     @Override
     public CreateTaskResult execute(CreateTaskAction action, ExecutionContext executionContext) throws ActionException {
-        SimpleDateFormat df = new SimpleDateFormat(TaskParam.DATE_FORMAT);
         CreateTaskResult result = new CreateTaskResult();
         try {
             if (!taskManager.isTaskExist(action.getTaskName())) {

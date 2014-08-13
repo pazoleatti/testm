@@ -44,7 +44,6 @@ public class UpdateTaskHandler extends AbstractActionHandler<UpdateTaskAction, U
 
     @Override
     public UpdateTaskResult execute(UpdateTaskAction action, ExecutionContext executionContext) throws ActionException {
-        SimpleDateFormat df = new SimpleDateFormat(TaskParam.DATE_FORMAT);
         UpdateTaskResult result = new UpdateTaskResult();
         try {
             // нати в кеше

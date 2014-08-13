@@ -9,8 +9,6 @@ import java.util.Set;
 public class PeriodsGetFilterDataResult implements Result {
 	private static final long serialVersionUID = 3768478656977415062L;
 
-	private ReportPeriod currentReportPeriod;
-   
 	private int yearFrom;
 	private int yearTo;
 	private int currentYear;
@@ -33,10 +31,6 @@ public class PeriodsGetFilterDataResult implements Result {
     public void setDepartments(List<Department> departments) {
         this.departments = departments;
     }
-
-	public void setCurrentReportPeriod(ReportPeriod currentReportPeriod) {
-		this.currentReportPeriod = currentReportPeriod;
-	}
 
 	public int getYearFrom() {
 		return yearFrom;

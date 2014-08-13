@@ -35,9 +35,6 @@ public class DateMaskInputCell extends
     public static final String CHECKED_EMPTY_VALUE = "__.__.____";
 
 	private ValueUpdater<Date> valueUpdater;
-	private Context context;
-	private Element parent;
-	private ViewData viewData;
 
     private String dateFormat;
     private String mask;
@@ -244,10 +241,7 @@ public class DateMaskInputCell extends
         Object key = context.getKey();
         ViewData vd = getViewData(key);
 
-        this.context = context;
-        this.parent = parent;
         this.valueUpdater = valueUpdater;
-        this.viewData = vd;
 
         if (Element.is(event.getEventTarget())) {
             if (isEditing(vd)) {

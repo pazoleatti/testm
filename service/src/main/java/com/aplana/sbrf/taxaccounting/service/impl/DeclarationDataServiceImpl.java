@@ -101,9 +101,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Autowired
     private TransactionHelper tx;
 
-    @Autowired
-    private TAUserDao userDao;
-
 	public static final String TAG_FILE = "Файл";
 	public static final String TAG_DOCUMENT = "Документ";
 	public static final String ATTR_FILE_ID = "ИдФайл";

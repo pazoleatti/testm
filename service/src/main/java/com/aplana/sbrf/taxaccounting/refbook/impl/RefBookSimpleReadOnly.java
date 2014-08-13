@@ -31,15 +31,15 @@ public class RefBookSimpleReadOnly extends AbstractReadOnlyRefBook {
 	// Справочник "Системные роли"
 	public static final Long SEC_ROLE_REF_BOOK_ID = 95L;
 	public static final String SEC_ROLE_TABLE_NAME = "SEC_ROLE";
-    // Справочник "Подразделения"
-    public static final Long DEPARTMENT_REF_BOOK_ID = 30L;
-    public static final String DEPARTMENT_TABLE_NAME = "DEPARTMENT";
     // Справочник "Пользователи"
     public static final Long USER_REF_BOOK_ID = 74L;
     public static final String USER_TABLE_NAME = "SEC_USER";
-
-	@Autowired
-	private RefBookUtils refBookUtils;
+    // Справочник "Типы подразделений банка"
+    public static final Long DEPARTMENT_TYPE_REF_BOOK_ID = 103L;
+    public static final String DEPARTMENT_TYPE_TABLE_NAME = "DEPARTMENT_TYPE";
+    // Справочник "Типы налоговых форм"
+    public static final Long FORM_DATA_KIND_REF_BOOK_ID = 94L;
+    public static final String FORM_DATA_KIND_TABLE_NAME = "FORM_KIND";
 
 	/** Название таблицы для запроса данных*/
 	private String tableName;
@@ -66,11 +66,7 @@ public class RefBookSimpleReadOnly extends AbstractReadOnlyRefBook {
 
     @Override
     public List<Long> getParentsHierarchy(Long uniqueRecordId) {
-        if (tableName.equals(DEPARTMENT_TABLE_NAME)) {
-            return refBookUtils.getParentsHierarchy(DEPARTMENT_TABLE_NAME, uniqueRecordId);
-        } else {
-            throw new UnsupportedOperationException();
-        }
+        throw new UnsupportedOperationException();
     }
 
     @Override
