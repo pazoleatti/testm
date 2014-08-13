@@ -266,7 +266,7 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
     }
 
     /* Создание и заполнения модели экшена для загрузки с сервера*/
-    private GetRefBookTreeValuesAction createLoadAction(RefBookTreeItem parent, ArrayList<Long> longs) {
+    private GetRefBookTreeValuesAction createLoadAction(RefBookTreeItem parent, List<Long> longs) {
         GetRefBookTreeValuesAction action = new GetRefBookTreeValuesAction();
 
         action.setSearchPattern(ps.getSearchPattern());

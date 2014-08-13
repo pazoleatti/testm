@@ -399,13 +399,11 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 				}
 				fieldsValues.put(field.getKey().getAlias(), value);
 			} catch (NumberFormatException nfe) {
-                nfe.printStackTrace();
 				BadValueException badValueException = new BadValueException();
 				badValueException.setFieldName(field.getKey().getName());
                 badValueException.setDescription("значение некорректно!");
 				throw badValueException;
 			} catch (ClassCastException cce) {
-                cce.printStackTrace();
 				BadValueException badValueException = new BadValueException();
 				badValueException.setFieldName(field.getKey().getName());
                 badValueException.setDescription("значение некорректно!");

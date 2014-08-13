@@ -55,7 +55,7 @@ public class RefBookValue implements Serializable {
 	 * @return
 	 */
 	public Long getReferenceValue() {
-		if (value != null && attributeType == RefBookAttributeType.REFERENCE && value instanceof Long) {
+		if (RefBookAttributeType.REFERENCE.equals(attributeType) && value instanceof Long) {
 			return (Long) value;
 		}
 		return null;

@@ -224,7 +224,7 @@ public class RateMDB implements MessageListener {
             refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.IMPORT, logger, additionalParameters);
         }
         catch (Exception e) {
-            logger.error(e);
+            logger.error(e.getMessage(), e);
         }
         String uuid = logEntryService.save(logger.getEntries());
         if (logger.containsLevel(LogLevel.ERROR)) {

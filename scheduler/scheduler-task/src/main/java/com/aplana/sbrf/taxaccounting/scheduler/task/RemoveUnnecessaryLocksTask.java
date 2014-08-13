@@ -13,6 +13,8 @@ import com.aplana.sbrf.taxaccounting.scheduler.api.task.UserTaskLocal;
 import com.aplana.sbrf.taxaccounting.scheduler.api.task.UserTaskRemote;
 import com.aplana.sbrf.taxaccounting.service.PropertyLoader;
 import com.aplana.sbrf.taxaccounting.service.SchedulerInterceptor;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.ejb.Local;
@@ -34,6 +36,8 @@ import java.util.Map;
 @Interceptors(SchedulerInterceptor.class)
 public class RemoveUnnecessaryLocksTask implements UserTask {
 
+    private final Log logger = LogFactory.getLog(getClass());
+
     private static final String secCountParam = "Время жизни блокировки (секунд)";
 
     @Autowired
@@ -48,7 +52,7 @@ public class RemoveUnnecessaryLocksTask implements UserTask {
                 Integer sec = (Integer) params.get(secCountParam).getTypifiedValue();
                 lockCoreService.unlockIfOlderThan(sec);
             } catch (InvalidTaskParamException e) {
-                e.printStackTrace();
+                logger.error(e.getMessage(), e);
             }
         }
     }

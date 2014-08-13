@@ -1,10 +1,11 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class Translator {
 
-    private static final HashMap<Character, String> charMap = new HashMap<Character, String>();
+    private static final Map<Character, String> charMap = new HashMap<Character, String>();
 
     static {
         charMap.put('А', "A");

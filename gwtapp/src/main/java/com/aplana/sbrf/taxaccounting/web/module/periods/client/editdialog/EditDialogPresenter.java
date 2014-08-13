@@ -60,7 +60,6 @@ public class EditDialogPresenter extends PresenterWidget<EditDialogPresenter.MyV
 
 	@Override
 	public void onContinue(final EditDialogData data) {
-        System.out.println(data.getYear() + " " + data.getReportPeriodId() + " " + data.getDepartmentId());
         if ((data.getYear() == null)
                 || (data.getReportPeriodId() == null)
                 || (data.getDepartmentId() == null)) {

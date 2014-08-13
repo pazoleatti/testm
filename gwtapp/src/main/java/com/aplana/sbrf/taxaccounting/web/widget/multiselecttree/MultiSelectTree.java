@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.multiselecttree;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
@@ -44,7 +41,7 @@ public abstract class MultiSelectTree<H extends List, T extends MultiSelectTreeI
     protected Tree tree;
 
     /** Мапа для получения узлов дерева по чекбоксу. */
-    private HashMap<Widget, T> treeItemsHash = new HashMap<Widget, T>();
+    private Map<Widget, T> treeItemsHash = new HashMap<Widget, T>();
 
     /** Выбирать ли дочерние элементы при выборе узла. */
     private boolean selectChild;

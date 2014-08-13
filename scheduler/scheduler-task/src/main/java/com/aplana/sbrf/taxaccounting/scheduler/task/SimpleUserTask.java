@@ -34,7 +34,6 @@ public class SimpleUserTask implements UserTask {
 
     @Override
     public String getTaskName() {
-        System.out.println("PropertyLoader.getVersion(): "+PropertyLoader.getVersion());
         return "Тестовая задача" + PropertyLoader.getVersion();
     }
 
