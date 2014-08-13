@@ -85,13 +85,17 @@ void importFromXML() {
                     if (tmp.matches("-?\\d+(\\.\\d+)?")) {
                         lotSize = new BigDecimal(tmp)
                     } else {
-                        throw new ServiceException("Ошибка получения значения атрибута «LotSize», равного \"$tmp\"")
+                        logger.warn("Ошибка получения значения атрибута «LotSize», равного \"$tmp\"")
                     }
                 }
 
                 // Курс валюты
                 if (currencySector && reader.getName().equals(QName.valueOf("Rate"))) {
                     rate = new BigDecimal(reader.getElementText())
+                    // TODO
+                    if (rate == 9999) {
+                        throw new Exception("Test 9999!")
+                    }
                 }
             }
 
@@ -112,7 +116,8 @@ void importFromXML() {
     }
 
     if (fileRecords.empty) {
-        throw new ServiceException(EMPTY_DATA_ERROR)
+        logger.warn(EMPTY_DATA_ERROR)
+        return
     }
 
     // Получение идентификаторов строк
@@ -146,7 +151,8 @@ void importFromXML() {
     }
 
     if (insertList.empty && updateList.empty) {
-        throw new ServiceException(EMPTY_DATA_ERROR)
+        logger.warn(EMPTY_DATA_ERROR)
+        return
     }
     if (!insertList.empty) {
         dataProvider.insertRecords(version, insertList)
@@ -154,4 +160,5 @@ void importFromXML() {
     if (!updateList.empty) {
         dataProvider.updateRecords(version, updateList)
     }
+    scriptStatusHolder.setSuccessCount(insertList.size() + updateList.size())
 }

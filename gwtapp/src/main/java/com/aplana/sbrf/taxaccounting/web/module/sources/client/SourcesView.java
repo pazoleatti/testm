@@ -461,7 +461,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
                     }
                 }));
 
-        final Label lab = new Label("Для просмотра данных выберите " + (isSource() ? "приемник" : "источник") + " в таблице " + (isSource() ? "приемников." : "источников."));
+        final Label lab = new Label("Для просмотра данных выберите запись в таблице слева.");
         lab.getElement().getStyle().setColor("#aeaeac");
         lab.addAttachHandler(new AttachEvent.Handler() {
             @Override
@@ -469,7 +469,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
                 if (event.isAttached()) {
                     boolean isSources = isSource();
                     if (leftSM.getSelectedObject() == null) {
-                        lab.setText("Для просмотра данных выберите " + (isSource() ? "приемник" : "источник") + " в таблице " + (isSource() ? "приемников." : "источников."));
+                        lab.setText("Для просмотра данных выберите запись в таблице слева.");
                     } else {
                         lab.setText("У выбранного " + (isSources ? "приемника" : " источника") + " нет указанных " + (isSources ? "источников." : "приемников."));
                     }

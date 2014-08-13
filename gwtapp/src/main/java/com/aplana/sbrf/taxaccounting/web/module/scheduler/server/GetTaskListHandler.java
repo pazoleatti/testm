@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.scheduler.server;
 
 import com.aplana.sbrf.taxaccounting.model.TaskSearchResultItem;
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskData;
+import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskState;
 import com.aplana.sbrf.taxaccounting.scheduler.api.exception.TaskSchedulingException;
 import com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManager;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.GetTaskListAction;
@@ -61,7 +62,7 @@ public class GetTaskListHandler extends AbstractActionHandler<GetTaskListAction,
                 item.setName(task.getTaskName());
                 item.setState(task.getTaskState().getName());
                 item.setModificationDate(df.format(task.getModificationDate()));
-                item.setNextFireTime(df.format(task.getNextFireTime()));
+                item.setNextFireTime(task.getTaskState() != TaskState.SUSPENDED ? df.format(task.getNextFireTime()) : "");
                 item.setContextId(task.getContextId());
 
                 records.add(item);

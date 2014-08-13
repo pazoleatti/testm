@@ -1,12 +1,15 @@
 package com.aplana.sbrf.taxaccounting.mdb;
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.ScriptStatusHolder;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.AuditService;
+import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import com.aplana.sbrf.taxaccounting.service.TransportInterceptor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +17,10 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import javax.ejb.*;
+import javax.ejb.ActivationConfigProperty;
+import javax.ejb.MessageDriven;
+import javax.ejb.TransactionManagement;
+import javax.ejb.TransactionManagementType;
 import javax.interceptor.Interceptors;
 import javax.jms.Message;
 import javax.jms.MessageListener;
@@ -39,16 +45,18 @@ public class RateMDB implements MessageListener {
 
     private static final Log logger = LogFactory.getLog(RateMDB.class);
     private static final String RATE_ENCODING = "UTF-8";
+    // Максимальное число попыток загрузки одного сообщения
+    private static final int MAX_DELIVERY_COUNT = 100;
 
-    private static final String ERROR_FORMAT = "Сообщение не соответствует заданному формату";
-    private static final String ERROR_RATE = "Сообщение не соответствует передаче данных по курсам валют / драгоценным металлам";
-    private static final String ERROR_PUBLIC = "Сообщение не содержит публичные курсы";
-    private static final String ERROR_VALUE = "Сообщение не содержит значений";
-    private static final String ERROR_CODE = "Значения сообщения установлены не по отношению к российскому рублю";
-    private static final String ERROR_IMPORT = "Произошли ошибки в скрипте импорта справочника id = %d";
-    private static final String SUCCESS_IMPORT = "Успешный обмен данными с КСШ.";
-    private static final String FAIL_IMPORT = "Неуспешная попытка обмена данными с КСШ. %s.";
-    private static final String ERROR_AUDIT = "Ошибка записи в журнал аудита.";
+    static final String ERROR_FORMAT = "Сообщение не соответствует заданному формату";
+    static final String ERROR_RATE = "Сообщение не соответствует передаче данных по курсам валют / драгоценным металлам";
+    static final String ERROR_PUBLIC = "Сообщение не содержит публичные курсы";
+    static final String ERROR_VALUE = "Сообщение не содержит значений";
+    static final String ERROR_CODE = "Значения сообщения установлены не по отношению к российскому рублю";
+    static final String SUCCESS_IMPORT = "Успешный обмен данными с КСШ. Загружено %d курсов справочника «%s».";
+    static final String FAIL_IMPORT = "Неуспешная попытка обмена данными с КСШ. %s.";
+    static final String ERROR_AUDIT = "Ошибка записи в журнал аудита.";
+    static final String ERROR_COUNT = "Превышено максимальное число попыток загрузки сообщения (" + MAX_DELIVERY_COUNT + ").";
 
     @Autowired
     RefBookScriptingService refBookScriptingService;
@@ -59,13 +67,16 @@ public class RateMDB implements MessageListener {
     @Autowired
     private TAUserService taUserService;
 
-    @Autowired
-    private LogEntryService logEntryService;
-
-    // Маппинг атрибута "OperName" из файла -> Id справочника
+    // Маппинг атрибута "OperName" из файла → Id справочника
     private static Map<String, Long> rateMapping = new HashMap() {{
         put("Currency", 22L);
         put("Metal", 90L);
+    }};
+
+    // Маппинг Id справочника → Название
+    private static Map<Long, String> refBookNameMapping = new HashMap() {{
+        put(22L, "Курсы Валют");
+        put(90L, "Курсы драгоценных металлов");
     }};
 
     @Override
@@ -74,13 +85,24 @@ public class RateMDB implements MessageListener {
 
         if (message == null || !(message instanceof TextMessage)) {
             logger.error(ERROR_FORMAT);
-            addLog(userInfo,  String.format(FAIL_IMPORT, ERROR_FORMAT));
+            addLog(userInfo, String.format(FAIL_IMPORT, ERROR_FORMAT));
             return;
         }
 
         TextMessage tm = (TextMessage) message;
+
         try {
+            if (tm.getIntProperty("JMSXDeliveryCount") > MAX_DELIVERY_COUNT) {
+                logger.error(ERROR_COUNT);
+                return;
+            }
+
             String fileText = tm.getText();
+            if (fileText == null) {
+                logger.error(ERROR_FORMAT);
+                addLog(userInfo, String.format(FAIL_IMPORT, ERROR_FORMAT));
+                return;
+            }
             importRate(fileText, userInfo);
         } catch (Exception ex) {
             logger.error("Ошибка при получении сообщения: " + ex.getMessage(), ex);
@@ -97,9 +119,6 @@ public class RateMDB implements MessageListener {
 
     /**
      * Импорт курсов из сообщения
-     *
-     * @param fileText
-     * @param userInfo
      */
     private void importRate(final String fileText, final TAUserInfo userInfo) throws Exception {
         SAXParserFactory factory = SAXParserFactory.newInstance();
@@ -190,12 +209,11 @@ public class RateMDB implements MessageListener {
         try {
             saxParser.parse(new ByteArrayInputStream(fileText.getBytes(RATE_ENCODING)), handler);
             if (refBookId[0] == null) {
-                throw new ServiceException(ERROR_RATE);
+                logger.error(ERROR_RATE);
+                addLog(userInfo, String.format(FAIL_IMPORT, ERROR_RATE));
+                return;
             }
             runScript(refBookId[0], fileText, userInfo);
-        } catch (ServiceException ex) {
-            logger.error(ex.getMessage(), ex);
-            addLog(userInfo, String.format(FAIL_IMPORT, ex.getMessage()));
         } catch (Exception ex) {
             logger.error(ERROR_FORMAT, ex);
             addLog(userInfo, String.format(FAIL_IMPORT, ERROR_FORMAT));
@@ -204,30 +222,26 @@ public class RateMDB implements MessageListener {
 
     /**
      * Запуск скрипта
-     *
-     * @param refBookId
-     * @param fileText
      */
     private void runScript(Long refBookId, String fileText, TAUserInfo userInfo) {
         Logger logger = new Logger();
         Map<String, Object> additionalParameters = new HashMap<String, Object>();
+        ScriptStatusHolder scriptStatusHolder = new ScriptStatusHolder();
         try {
             additionalParameters.put("inputStream", new ByteArrayInputStream(fileText.getBytes(RATE_ENCODING)));
+            additionalParameters.put("scriptStatusHolder", scriptStatusHolder);
             refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.IMPORT, logger, additionalParameters);
-        }
-        catch (ServiceException e) {
+        } catch (ServiceLoggerException e) {
+            logger.error(e);
+            logger.info("uuid = " + e.getUuid());
+            addLog(userInfo, String.format(FAIL_IMPORT, e.getMessage()));
+            return;
+        } catch (Exception e) {
+            logger.error(e);
             addLog(userInfo, String.format(FAIL_IMPORT, e.getMessage()));
             return;
         }
-        catch (Exception e) {
-            logger.error(e);
-        }
-        if (logger.containsLevel(LogLevel.ERROR)) {
-            String msg = String.format(ERROR_IMPORT, refBookId);
-            addLog(userInfo, String.format(FAIL_IMPORT, msg));
-            throw new ServiceLoggerException(msg, logEntryService.save(logger.getEntries()));
-        }
-        addLog(userInfo, SUCCESS_IMPORT);
+        addLog(userInfo, String.format(SUCCESS_IMPORT, scriptStatusHolder.getSuccessCount(), refBookNameMapping.get(refBookId)));
     }
 
     /**
@@ -237,10 +251,11 @@ public class RateMDB implements MessageListener {
      * @param msg
      */
     private void addLog(TAUserInfo userInfo, String msg) {
+        // TODO Добавить признак ошибки, когда будет поддержка в ЖА
         try {
             // Ошибка записи в журнал аудита не должна откатывать импорт
             if (auditService != null) {
-                auditService.add(FormDataEvent.IMPORT, userInfo, 1, null, null, null, null, msg);
+                auditService.add(FormDataEvent.IMPORT, userInfo, 0, null, null, null, null, msg);
             }
         } catch (Exception e) {
             logger.error(ERROR_AUDIT, e);
