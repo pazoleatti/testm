@@ -268,7 +268,7 @@ public class RefBookUniversal implements RefBookDataProvider {
                         attrNames.append(", ");
                     }
                 }
-                throw new ServiceException("Нарушено требование к уникальности, уже существует элемент "+attrNames+" в указанном периоде!");
+                throw new ServiceException("Нарушено требование к уникальности, уже существуют элементы "+attrNames+" в указанном периоде!");
             }
         }
 
