@@ -202,7 +202,6 @@
             <version>${project.version}</version>
             <type>war</type>
         </dependency>
-        <!-- TODO: вернуть когда будет внедрен планировщик -->
         <dependency>
             <groupId>com.aplana.taxaccounting</groupId>
             <artifactId>scheduler-core</artifactId>

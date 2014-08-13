@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.server;
 
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
@@ -10,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTypeService;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.CheckExistenceDeclaration;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.CheckExistenceDeclarationResult;
@@ -42,7 +42,7 @@ public class CheckExistenceDeclarationHandler extends AbstractActionHandler<Chec
     private RefBookFactory rbFactory;
 
     @Autowired
-    DepartmentDao departmentDao;
+    DepartmentService departmentService;
 
     @Autowired
     private LogEntryService logEntryService;
@@ -75,7 +75,7 @@ public class CheckExistenceDeclarationHandler extends AbstractActionHandler<Chec
         if(command.getTaxType().equals(TaxType.PROPERTY)) {
             // TODO проверить
             StringBuilder filter = new StringBuilder();
-            Long regionId = departmentDao.getDepartment(command.getDepartmentId()).getRegionId();
+            Long regionId = departmentService.getDepartment(command.getDepartmentId()).getRegionId();
             filter.append("TAX_ORGAN_CODE").append(" = ").append(command.getTaxOrganCode())
                     .append(" and ").append("KPP").append(" = ").append(command.getTaxOrganKpp())
                     .append(" and ").append("DECLARATION_REGION_ID").append(" = ").append(regionId);
