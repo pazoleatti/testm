@@ -32,7 +32,7 @@ public class RefBookConfigurationParamTest {
         attributeCode.setAttributeType(RefBookAttributeType.STRING);
 
         RefBookAttribute attributeName = new RefBookAttribute();
-        attributeName.setAlias(RefBookFormDataKind.ATTRIBUTE_NAME);
+        attributeName.setAlias(RefBookConfigurationParam.ATTRIBUTE_NAME);
         attributeName.setAttributeType(RefBookAttributeType.STRING);
 
         List<RefBookAttribute> attributes = new ArrayList<RefBookAttribute>();

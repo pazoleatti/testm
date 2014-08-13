@@ -56,7 +56,6 @@ public class DeclarationListView extends
 
 	private DeclarationDataSearchOrdering sortByColumn;
 
-    private TaxType taxType;
 	private boolean isAscSorting;
 
     private Map<Integer, String> departmentFullNames;

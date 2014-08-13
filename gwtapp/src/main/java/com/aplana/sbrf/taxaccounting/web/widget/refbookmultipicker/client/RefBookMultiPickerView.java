@@ -54,7 +54,7 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
     private Boolean multiSelect = false;
 
     private HandlerRegistration selectionHandlerRegistration;
-    private HashMap<RefBookItemTextColumn, Integer> sortColumns = new HashMap<RefBookItemTextColumn, Integer>();
+    private Map<RefBookItemTextColumn, Integer> sortColumns = new HashMap<RefBookItemTextColumn, Integer>();
     private String filterText;
 
     private SetSelectionModel<RefBookItem> selectionModel;

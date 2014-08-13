@@ -37,7 +37,7 @@ class ValueChangeHandlerHolder<T> implements HasValueChangeHandlers<T> {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void fireEvent(GwtEvent<?> event) {
-		if (event != null && event instanceof ValueChangeEvent) {
+		if (event instanceof ValueChangeEvent) {
 			for (ValueChangeHandler handler : handlers) {
 				handler.onValueChange((ValueChangeEvent) event);
 			}

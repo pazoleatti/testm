@@ -17,15 +17,12 @@ import java.util.*;
  */
 public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.MyView> implements AuditFilterUIHandlers {
 
-    private final DispatchAsync dispatchAsync;
-
     private LogSystemAuditFilter logSystemAuditFilter;
     private LogSystemAuditFilter previousLogSystemAuditFilter;
 
     @Inject
-    public AuditFilterPresenter(EventBus eventBus, MyView view, DispatchAsync dispatchAsync) {
+    public AuditFilterPresenter(EventBus eventBus, MyView view) {
         super(eventBus, view);
-        this.dispatchAsync = dispatchAsync;
         getView().setUiHandlers(this);
     }
 

@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
@@ -74,7 +73,7 @@ public class GetPeriodIntervalHandler extends AbstractActionHandler<GetPeriodInt
             if (period.getStartDate().equals(dateFrom)) {
                 periodFrom = period;
             }
-            if (dateTo != null && period.getEndDate().equals(dateTo)) {
+            if (period.getEndDate().equals(dateTo)) {
                 periodTo = period;
             }
         }

@@ -256,7 +256,6 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
                 stringBuilder.append(c);
             }
         }
-        System.out.println("getRegex " +stringBuilder.toString()  +"");
         return stringBuilder.toString();
     }
 }

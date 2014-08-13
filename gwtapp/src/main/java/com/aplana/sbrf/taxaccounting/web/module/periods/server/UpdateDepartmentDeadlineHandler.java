@@ -32,9 +32,6 @@ public class UpdateDepartmentDeadlineHandler extends AbstractActionHandler<Updat
     @Autowired
     private DepartmentService departmentService;
 
-	@Autowired
-	private TAUserService userService;
-
     public UpdateDepartmentDeadlineHandler() {
         super(UpdateDepartmentDeadlineAction.class);
     }

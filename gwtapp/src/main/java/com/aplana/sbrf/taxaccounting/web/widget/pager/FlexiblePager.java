@@ -135,11 +135,6 @@ public class FlexiblePager extends AbstractPager {
 		String button();
 
 		/**
-		 * Applied to disabled buttons.
-		 */
-		String disabledButton();
-
-		/**
 		 * Applied to the details text.
 		 */
 		String pageDetails();
@@ -167,14 +162,12 @@ public class FlexiblePager extends AbstractPager {
 		private boolean disabled;
 		private final ImageResource resDisabled;
 		private final ImageResource resEnabled;
-		private final String styleDisabled;
 
 		public ImageButton(ImageResource resEnabled, ImageResource resDiabled,
-						   String disabledStyle, String label) {
+						   String label) {
 			super(resEnabled);
 			this.resEnabled = resEnabled;
 			this.resDisabled = resDiabled;
-			this.styleDisabled = disabledStyle;
 			Roles.getButtonRole().set(getElement());
 			Roles.getButtonRole().setAriaLabelProperty(getElement(), label);
 		}
@@ -331,9 +324,8 @@ public class FlexiblePager extends AbstractPager {
         }
 
 		// Create the buttons.
-		String disabledStyle = style.disabledButton();
 		firstPage = new ImageButton(resources.flexiblePagerFirstPage(),
-				resources.flexiblePagerFirstPageDisabled(), disabledStyle, imageButtonConstants.firstPage());
+				resources.flexiblePagerFirstPageDisabled(), imageButtonConstants.firstPage());
 		firstPage.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
@@ -341,7 +333,7 @@ public class FlexiblePager extends AbstractPager {
 			}
 		});
 		nextPage = new ImageButton(resources.flexiblePagerNextPage(),
-				resources.flexiblePagerNextPageDisabled(), disabledStyle, imageButtonConstants.nextPage());
+				resources.flexiblePagerNextPageDisabled(), imageButtonConstants.nextPage());
 		nextPage.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
@@ -349,8 +341,7 @@ public class FlexiblePager extends AbstractPager {
 			}
 		});
 		prevPage = new ImageButton(resources.flexiblePagerPreviousPage(),
-				resources.flexiblePagerPreviousPageDisabled(), disabledStyle,
-				imageButtonConstants.prevPage());
+				resources.flexiblePagerPreviousPageDisabled(), imageButtonConstants.prevPage());
 		prevPage.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
@@ -359,7 +350,7 @@ public class FlexiblePager extends AbstractPager {
 		});
 		if (showLastPageButton) {
 			lastPage = new ImageButton(resources.flexiblePagerLastPage(),
-					resources.flexiblePagerLastPageDisabled(), disabledStyle, imageButtonConstants.lastPage());
+					resources.flexiblePagerLastPageDisabled(), imageButtonConstants.lastPage());
 			lastPage.addClickHandler(new ClickHandler() {
 				@Override
 				public void onClick(ClickEvent event) {
@@ -371,8 +362,7 @@ public class FlexiblePager extends AbstractPager {
 		}
 		if (showFastForwardButton) {
 			fastForward = new ImageButton(resources.flexiblePagerFastForward(),
-					resources.flexiblePagerFastForwardDisabled(), disabledStyle,
-					imageButtonConstants.fastForward());
+					resources.flexiblePagerFastForwardDisabled(), imageButtonConstants.fastForward());
 			fastForward.addClickHandler(new ClickHandler() {
 				@Override
 				public void onClick(ClickEvent event) {

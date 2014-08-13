@@ -6,10 +6,8 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.refbook.impl.fixed.RefBookDepartmentType;
 import com.aplana.sbrf.taxaccounting.refbook.impl.fixed.RefBookConfigurationParam;
 import com.aplana.sbrf.taxaccounting.refbook.impl.fixed.RefBookAuditFieldList;
-import com.aplana.sbrf.taxaccounting.refbook.impl.fixed.RefBookFormDataKind;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -80,14 +78,16 @@ public class RefBookFactoryImpl implements RefBookFactory {
                 dataProvider.setTableName(RefBookOktmoProvider.OKTMO_TABLE_NAME);
             }
             return dataProvider;
-		} else if (RefBookFormDataKind.REF_BOOK_ID.equals(refBookId)) { // Справавочник "Типы налоговых форм"
-            RefBookFormDataKind dataProvider = applicationContext.getBean("refBookFormDataKind", RefBookFormDataKind.class);
-            dataProvider.setRefBookId(refBookId);
-            return dataProvider;
-		} else if (RefBookDepartmentType.REF_BOOK_ID.equals(refBookId)) { // Справочник "Типы подразделений"
-            RefBookDepartmentType dataProvider = applicationContext.getBean("refBookDepartmentType", RefBookDepartmentType.class);
-            dataProvider.setRefBookId(refBookId);
-            return dataProvider;
+		} else if (RefBookSimpleReadOnly.FORM_DATA_KIND_REF_BOOK_ID.equals(refBookId)) { // Справавочник "Типы налоговых форм"
+            RefBookSimpleReadOnly refBookSimple =  (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
+            refBookSimple.setRefBookId(RefBookSimpleReadOnly.FORM_DATA_KIND_REF_BOOK_ID);
+            refBookSimple.setTableName(RefBookSimpleReadOnly.FORM_DATA_KIND_TABLE_NAME);
+            return refBookSimple;
+		} else if (RefBookSimpleReadOnly.DEPARTMENT_TYPE_REF_BOOK_ID.equals(refBookId)) { // Справочник "Типы подразделений"
+            RefBookSimpleReadOnly refBookSimple =  (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
+            refBookSimple.setRefBookId(RefBookSimpleReadOnly.DEPARTMENT_TYPE_REF_BOOK_ID);
+            refBookSimple.setTableName(RefBookSimpleReadOnly.DEPARTMENT_TYPE_TABLE_NAME);
+            return refBookSimple;
         } else if (RefBookConfigurationParam.REF_BOOK_ID.equals(refBookId)) {
             RefBookConfigurationParam dataProvider = applicationContext.getBean("refBookConfigurationParam", RefBookConfigurationParam.class);
             dataProvider.setRefBookId(refBookId);
@@ -101,7 +101,7 @@ public class RefBookFactoryImpl implements RefBookFactory {
             dataProvider.setRefBookId(refBookId);
             return dataProvider;
         } else {
-            RefBookUniversal refBookUniversal = (RefBookUniversal) applicationContext.getBean("refBookUniversal", RefBookDataProvider.class);
+			RefBookUniversal refBookUniversal = (RefBookUniversal) applicationContext.getBean("refBookUniversal", RefBookDataProvider.class);
 			refBookUniversal.setRefBookId(refBookId);
 			return refBookUniversal;
         }
@@ -236,7 +236,7 @@ public class RefBookFactoryImpl implements RefBookFactory {
                 RefBookSimpleReadOnly.FORM_TYPE_REF_BOOK_ID,
                 RefBookSimpleReadOnly.SEC_ROLE_REF_BOOK_ID,
                 RefBookOktmoProvider.OKTMO_REF_BOOK_ID,
-                RefBookFormDataKind.REF_BOOK_ID};
+                RefBookSimpleReadOnly.FORM_DATA_KIND_REF_BOOK_ID};
 
         for (Long rbId : foreignRefBooks) {
             if (rbId.equals(refBookId)){

@@ -78,12 +78,6 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
                                         result.getDereferenceDepartmentNameMap()), true);
                                 getView().setCommonConfigData(getCommonRowsData(result.getModel()), true);
 							}
-
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                caught.printStackTrace();
-                            }
-                        	
                         }, this).addCallback(TaManualRevealCallback.create(this, placeManager)));
 	}
 

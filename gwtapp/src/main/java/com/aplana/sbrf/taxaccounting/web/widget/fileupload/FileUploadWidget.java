@@ -70,7 +70,6 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
     private static String actionUrl = "upload/uploadController/pattern/";
     private static String actionTempUrl = "upload/uploadController/patterntemp/";
     private static String jsonPattern = "(<pre.*>)(.+?)(</pre>)";
-    private static String uploadPatternIE = "C:.+fakepath?."; //паттерн для IE
 
     @Override
     public String getValue() {

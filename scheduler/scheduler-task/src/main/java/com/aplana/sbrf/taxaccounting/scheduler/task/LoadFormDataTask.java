@@ -15,6 +15,8 @@ import com.aplana.sbrf.taxaccounting.scheduler.api.task.UserTask;
 import com.aplana.sbrf.taxaccounting.scheduler.api.task.UserTaskLocal;
 import com.aplana.sbrf.taxaccounting.scheduler.api.task.UserTaskRemote;
 import com.aplana.sbrf.taxaccounting.service.*;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.ejb.Local;
@@ -35,6 +37,8 @@ import java.util.Map;
 @Stateless
 @Interceptors(SchedulerInterceptor.class)
 public class LoadFormDataTask implements UserTask{
+
+    private final Log logger = LogFactory.getLog(getClass());
 
     @Autowired
     LoadFormDataService loadFormDataService;
@@ -60,7 +64,7 @@ public class LoadFormDataTask implements UserTask{
         try {
             departmentId = (Integer) param.getTypifiedValue();
         } catch (InvalidTaskParamException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
             throw new TaskExecutionException("Не верный тип параметра задачи");
         }
 
