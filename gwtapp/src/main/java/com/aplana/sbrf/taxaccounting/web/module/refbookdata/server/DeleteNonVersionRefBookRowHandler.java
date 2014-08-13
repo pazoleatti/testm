@@ -43,6 +43,7 @@ public class DeleteNonVersionRefBookRowHandler extends AbstractActionHandler<Del
 
         DeleteNonVersionRefBookRowResult result = new DeleteNonVersionRefBookRowResult();
         Logger logger = new Logger();
+        logger.setTaUserInfo(securityService.currentUserInfo());
         if (action.getRecordsId().size() > 0) {
             logger.setTaUserInfo(securityService.currentUserInfo());
             refBookDataProvider.deleteRecordVersions(logger, action.getRecordsId(), action.isOkDelete());

@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.BookerStatementsType;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.bookerstatementsdata.shared.DeleteBookerStatementsAction;
 import com.aplana.sbrf.taxaccounting.web.module.bookerstatementsdata.shared.DeleteBookerStatementsResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -20,6 +21,9 @@ public class DeleteBookerStatementsHandler extends AbstractActionHandler<DeleteB
     @Autowired
     RefBookFactory rbFactory;
 
+    @Autowired
+    private SecurityService securityService;
+
     public DeleteBookerStatementsHandler() {
         super(DeleteBookerStatementsAction.class);
     }
@@ -32,7 +36,9 @@ public class DeleteBookerStatementsHandler extends AbstractActionHandler<DeleteB
         } else {
             provider = rbFactory.getDataProvider(GetBookerStatementsHandler.REF_BOOK_102);
         }
-        provider.deleteRecordVersions(new Logger(), action.getUniqueRecordIds(), false);
+        Logger logger = new Logger();
+        logger.setTaUserInfo(securityService.currentUserInfo());
+        provider.deleteRecordVersions(logger, action.getUniqueRecordIds(), false);
         return new DeleteBookerStatementsResult();
     }
 

@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.DepartmentCombined;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.SaveDepartmentCombinedAction;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.SaveDepartmentCombinedResult;
@@ -68,6 +69,9 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
 
     @Autowired
     DepartmentService departmentService;
+
+    @Autowired
+    private SecurityService securityService;
 
     public SaveDepartmentCombinedHandler() {
         super(SaveDepartmentCombinedAction.class);
@@ -158,6 +162,7 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
             }
 
             Logger logger = new Logger();
+            logger.setTaUserInfo(securityService.currentUserInfo());
             RefBookRecord record = new RefBookRecord();
             record.setValues(paramsMap);
             record.setRecordId(depCombined.getRecordId());

@@ -52,6 +52,7 @@ public class SaveRefBookRowVersionHandler extends AbstractActionHandler<SaveRefB
 		}
 
         Logger logger = new Logger();
+        logger.setTaUserInfo(securityService.currentUserInfo());
 
         // проверка новых значений по БЛ
         List<Map<String, RefBookValue>> saveRecords = new ArrayList<Map<String, RefBookValue>>();
@@ -66,7 +67,6 @@ public class SaveRefBookRowVersionHandler extends AbstractActionHandler<SaveRefB
         } catch (ServiceLoggerException e) {
             result.setException(true);
         }*/
-        logger.setTaUserInfo(securityService.currentUserInfo());
         refBookDataProvider.updateRecordVersion(logger, action.getRecordId(), action.getVersionFrom(), action.getVersionTo(), valueToSave);
         if (logger.containsLevel(LogLevel.ERROR)) {
             result.setException(true);
