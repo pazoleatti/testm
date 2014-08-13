@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.bookerstatements.shared;
 
 import com.aplana.sbrf.taxaccounting.model.BookerStatementsType;
 import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.gwtplatform.dispatch.shared.Result;
 
 import java.util.List;
@@ -26,6 +27,15 @@ public class GetBSOpenListResult implements Result {
     private Department department;
 
     private List<BookerStatementsType> bookerReportTypes;
+    private List<ReportPeriod> reportPeriods;
+
+    public List<ReportPeriod> getReportPeriods() {
+        return reportPeriods;
+    }
+
+    public void setReportPeriods(List<ReportPeriod> reportPeriods) {
+        this.reportPeriods = reportPeriods;
+    }
 
     public List<Department> getDepartments() {
         return departments;

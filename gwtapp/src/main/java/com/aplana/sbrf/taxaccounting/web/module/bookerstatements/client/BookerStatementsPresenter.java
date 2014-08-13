@@ -90,6 +90,7 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
         void updateTable();
 
         BookerStatementsSearchOrdering getSearchOrdering();
+        void setReportPeriods(List<ReportPeriod> reportPeriods);
     }
 
     @ProxyCodeSplit
@@ -159,6 +160,7 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
                                 getView().setDepartments(result.getDepartments(), result.getAvailableDepartments());
                                 // Список достуных видов бухгалтерской отчётности
                                 getView().setBookerReportTypes(result.getBookerReportTypes());
+                                getView().setReportPeriods(result.getReportPeriods());
 
                                 if (filter == null) {
                                     filter = new BookerStatementsFilter();

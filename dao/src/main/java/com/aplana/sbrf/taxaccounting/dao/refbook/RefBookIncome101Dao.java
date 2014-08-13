@@ -16,7 +16,7 @@ import java.util.Map;
 public interface RefBookIncome101Dao {
 
 	static final Long REF_BOOK_ID = 50L;
-    static final Long INCOME_101_AP_REF_BOOK_ID = 107L;
+    static final Long INCOME_101_AP_REF_BOOK_ID = 107L; //справочник периодов-подразделений БО
 
 	static final String TABLE_NAME = "INCOME_101";
 

@@ -31,4 +31,11 @@ public class RefBookBookerStatementPeriodDaoTest {
         assertEquals(4, records.getTotalCount());
         assertEquals(2016, records.get(0).get("YEAR").getNumberValue().intValue());
     }
+
+    @Test
+    public void testGetRecordData(){
+        Map<String, RefBookValue> record = dao.getRecordData(11l);
+        assertEquals(4, record.size());
+        assertEquals(2014, record.get("YEAR").getNumberValue().intValue());
+    }
 }

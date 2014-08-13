@@ -15,4 +15,6 @@ public interface RefBookBookerStatementPeriodDao {
 
     PagingResult<Map<String, RefBookValue>> getRecords();
 
+    Map<String, RefBookValue> getRecordData(Long recordId);
+
 }
