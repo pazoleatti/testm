@@ -284,6 +284,11 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 break;
             case REPORT_PERIOD_YEAR:
                 column = "tp.year";
+                if (!ascSorting) {
+                    column = column + " desc";
+                }
+                column = column + ", ";
+                column = column + "rp.start_date";
                 break;
 		}
 
