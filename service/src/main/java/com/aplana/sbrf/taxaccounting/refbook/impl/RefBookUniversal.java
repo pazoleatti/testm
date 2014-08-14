@@ -281,15 +281,32 @@ public class RefBookUniversal implements RefBookDataProvider {
 
             if (conflictedIds.size() > 0) {
                 StringBuilder attrNames = new StringBuilder();
+                Map<String, Integer> map = new HashMap<String, Integer>();
                 for (Long id : conflictedIds) {
                     for (Pair<Long,String> pair : matchedRecords) {
                         if (pair.getFirst().equals(id)) {
-                            attrNames.append("\"").append(pair.getSecond()).append("\", ");
+                            Integer integer = map.get(pair.getSecond());
+                            if (integer == null) integer = 0;
+                            integer++;
+                            map.put(pair.getSecond(), integer);
                         }
                     }
                 }
-                attrNames.delete(attrNames.length() - 2, attrNames.length());
-                throw new ServiceException("Нарушено требование к уникальности, уже существует элемент с такими значениями атрибута "+attrNames+" в указанном периоде!");
+
+                Iterator<Map.Entry<String, Integer>> iterator = map.entrySet().iterator();
+                while (iterator.hasNext()) {
+                    Map.Entry<String, Integer> pair = iterator.next();
+                    attrNames
+                            .append("(")
+                            .append(pair.getValue())
+                            .append(" шт.) с такими значениями атрибута \"")
+                            .append(pair.getKey())
+                            .append("\"");
+                    if (iterator.hasNext()) {
+                        attrNames.append(", ");
+                    }
+                }
+                throw new ServiceException("Нарушено требование к уникальности, уже существуют элементы "+attrNames+" в указанном периоде!");
             }
         }
 

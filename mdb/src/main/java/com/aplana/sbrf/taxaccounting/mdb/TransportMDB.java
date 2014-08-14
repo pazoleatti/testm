@@ -22,6 +22,7 @@ import javax.jms.MessageListener;
         @ActivationConfigProperty(propertyName = "destination", propertyValue = "jms/transportQueue")})
 @Interceptors(TransportInterceptor.class)
 @TransactionManagement(TransactionManagementType.CONTAINER)
+@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED) // Rollback во внешних сервисах не будет отмечать сообщение как необработанное из-за ошибки
 public class TransportMDB implements MessageListener {
 
     @Autowired
@@ -33,7 +34,7 @@ public class TransportMDB implements MessageListener {
     private static final Log logger = LogFactory.getLog(TransportMDB.class);
 
     @Override
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    // @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void onMessage(Message message) {
         if (message == null || !(message instanceof MapMessage)) {
             return;
