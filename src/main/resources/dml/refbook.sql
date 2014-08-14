@@ -32,7 +32,7 @@ INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) V
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (27,'Классификатор расходов Сбербанка России для целей налогового учёта',1,0,0,null);
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (28,'Классификатор доходов Сбербанка России для целей налогового учёта',1,0,0,null);
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (29,'Классификатор соответствия счетов бухгалтерского учёта кодам налогового учёта',1,0,0,null);
-INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (30,'Подразделения',1,1,0,null);
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (30,'Подразделения',1,1,0,null, 'DEPARTMENT');
 
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (31,'Параметры подразделения по транспортному налогу',0,0,0,null);
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (33,'Параметры подразделения по налогу на прибыль',0,0,0,null);
@@ -45,11 +45,11 @@ INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) V
 
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (41,'Ставки транспортного налога',1,0,0,417);
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (42,'Коды видов транспортных средств',1,1,0,null);
-INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (50,'Оборотная ведомость (Форма 0409101-СБ)',0,0,0,null);
 
-INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (52,'Отчет о прибылях и убытках (Форма 0409102-СБ)',0,0,0,null);
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (50,'Оборотная ведомость (Форма 0409101-СБ)',0,0,0,null, 'INCOME_101');
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (52,'Отчет о прибылях и убытках (Форма 0409102-СБ)',0,0,0,null, 'INCOME_102');
+
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (60,'Части сделок',1,0,0,null);
-
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (61,'Коды сделок',1,0,0,null);
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (62,'Признаки ценных бумаг',1,0,0,null);
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (63,'Коды условий поставки',1,0,0,null);
@@ -64,7 +64,7 @@ INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) V
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (71,'Амортизационные группы',1,0,0,null);
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (72,'Процентные ставки',1,0,0,null);
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (73,'Товарная номенклатура внешнеэкономической деятельности таможенного союза',1,1,0,null);
-INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (74,'Пользователи',0,0,1,null);
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (74,'Пользователи',0,0,1,null, 'SEC_USER');
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (80,'Виды изменений',1,0,0,null);
 
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (82,'Шифры видов реализованного (выбывшего) имущества',1,0,0,null);
@@ -79,10 +79,10 @@ INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) V
 
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (91,'Виды сделок',1,0,0,null);
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (92,'Виды конверсионных сделок',1,0,0,null);
-INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (93,'Виды налоговых форм',1,0,1,null);
-INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (94,'Типы налоговых форм',1,0,1,null);
-INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (95,'Системные роли',1,0,1,null);
-INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (96,'Общероссийский классификатор территорий муниципальных образований (ОКТМО)',1,1,1,null);
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (93,'Виды налоговых форм',1,0,1,null,'FORM_TYPE');
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (94,'Типы налоговых форм',1,0,1,null,'FORM_KIND');
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (95,'Системные роли',1,0,1,null, 'SEC_ROLE');
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (96,'Общероссийский классификатор территорий муниципальных образований (ОКТМО)',1,1,1,null, 'REF_BOOK_OKTMO');
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (97,'Типы акций',1,0,0,null);
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (98,'Параметры подразделения по НДС',0,0,0,null);
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (99,'Параметры подразделения по налогу на имущество',0,0,0,null);
@@ -90,7 +90,7 @@ INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) V
 
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (101,'План счетов бухгалтерского учета',1,0,0,null);
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (102,'Классификатор соответствия кодов операций налоговой формы 724.2.1 по НДС символам ОПУ',1,0,0,null);
-INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (103,'Тип подразделения',1,0,1,null);
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (103,'Тип подразделения',1,0,1,null, 'DEPARTMENT_TYPE');
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (104,'Список полей для Журнала аудита',0,0,1,null);
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (105,'Конфигурационные параметры',0,0,1,null);
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (106,'Коды, определяющие период бухгалтерской отчетности',1,0,1,null);
