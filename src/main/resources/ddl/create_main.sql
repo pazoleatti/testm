@@ -135,7 +135,8 @@ create table ref_book (
   visible number(1) default 1 not null,
   type number(1) default 0 not null,
   read_only number(1) default 0 not null,
-  region_attribute_id number(18,0)
+  region_attribute_id number(18,0),
+  table_name varchar2(100)
 );
 
 comment on table ref_book is 'Справочник';
@@ -146,6 +147,7 @@ comment on column ref_book.visible is 'Признак видимости';
 comment on column ref_book.type is 'Тип справочника (0 - Линейный, 1 - Иерархический)';
 comment on column ref_book.read_only is 'Только для чтения (0 - редактирование доступно пользователю; 1 - редактирование недоступно пользователю)';
 comment on column ref_book.region_attribute_id is 'При его наличии справочник считается региональным. Указывает на атрибут, по которому определяется принадлежность к региону';
+comment on column ref_book.table_name is 'Название таблицы БД, в которой хранятся данные';
 ------------------------------------------------------------------------------------------------------
 create table ref_book_attribute (
   id number(18) not null,
