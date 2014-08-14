@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.LogBusinessDao;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.HistoryBusinessSearchOrdering;
 import com.aplana.sbrf.taxaccounting.model.LogBusiness;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,7 +30,7 @@ public class LogBusinessDaoTest {
 
 	@Test
 	public void testDeclarationGet() {
-		LogBusiness logBusiness = logBusinessDao.getDeclarationLogsBusiness(1).get(0);
+		LogBusiness logBusiness = logBusinessDao.getDeclarationLogsBusiness(1, HistoryBusinessSearchOrdering.DATE, false).get(0);
 		assertEquals(Long.valueOf(1), logBusiness.getId());
 		assertEquals(1, logBusiness.getEventId());
 		assertEquals(LOGIN_CONTROL_BANK, logBusiness.getUserLogin());
@@ -53,7 +54,7 @@ public class LogBusinessDaoTest {
 		logBusiness.setNote("the best note");
 		logBusinessDao.add(logBusiness);
 
-		logBusiness = logBusinessDao.getDeclarationLogsBusiness(1).get(0);
+		logBusiness = logBusinessDao.getDeclarationLogsBusiness(1, HistoryBusinessSearchOrdering.DATE, false).get(0);
 		assertEquals(Long.valueOf(3), logBusiness.getId());
 		assertEquals(3, logBusiness.getEventId());
 		assertEquals(LOGIN_CONTROL_BANK, logBusiness.getUserLogin());
@@ -66,7 +67,7 @@ public class LogBusinessDaoTest {
 
 	@Test
 	public void testFormGet() {
-		LogBusiness logBusiness = logBusinessDao.getFormLogsBusiness(1).get(0);
+		LogBusiness logBusiness = logBusinessDao.getFormLogsBusiness(1, HistoryBusinessSearchOrdering.DATE, false).get(0);
 		assertEquals(Long.valueOf(2), logBusiness.getId());
 		assertEquals(2, logBusiness.getEventId());
 		assertEquals(LOGIN_CONTROL_BANK, logBusiness.getUserLogin());
@@ -80,7 +81,7 @@ public class LogBusinessDaoTest {
 	@Test
 	public void testFormAdd() {
 		logBusinessDao.add(createFormLogBusiness(3, 3l ,new Date()));
-		LogBusiness logBusiness = logBusinessDao.getFormLogsBusiness(1).get(0);
+		LogBusiness logBusiness = logBusinessDao.getFormLogsBusiness(1, HistoryBusinessSearchOrdering.DATE, false).get(0);
 		assertEquals(Long.valueOf(3), logBusiness.getId());
 		assertEquals(3, logBusiness.getEventId());
         assertEquals(LOGIN_CONTROL_BANK, logBusiness.getUserLogin());

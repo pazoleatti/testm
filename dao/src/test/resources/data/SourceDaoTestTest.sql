@@ -19,6 +19,11 @@ insert into form_type (id, name, tax_type) values (12, 'FormType - Transport3', 
 
 insert into form_type (id, name, tax_type) values (21, 'FormType - Income2', 'I');
 
+INSERT INTO department_type (id, name) VALUES (1, 'Банк');
+INSERT INTO department_type (id, name) VALUES (2, 'Территориальный банк');
+INSERT INTO department_type (id, name) VALUES (3, 'ЦСКО, ПЦП');
+INSERT INTO department_type (id, name) VALUES (4, 'Управление');
+
 insert into department (id, name, parent_id, type) values (1, 'Банк', null, 1);
 insert into department (id, name, parent_id, type) values (2, 'ТБ1', 1, 2);
 insert into department (id, name, parent_id, type) values (3, 'ТБ2', 1, 2);

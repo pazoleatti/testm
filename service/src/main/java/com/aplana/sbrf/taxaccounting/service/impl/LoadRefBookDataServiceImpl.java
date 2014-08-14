@@ -3,11 +3,13 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.LoadRefBookDataService;
 import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
+import com.aplana.sbrf.taxaccounting.service.SignService;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
 import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
 import org.apache.commons.io.IOUtils;
@@ -28,13 +30,14 @@ import static java.util.Arrays.asList;
  * @author Dmitriy Levykin
  */
 @Service
-@Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService implements LoadRefBookDataService {
 
     @Autowired
     private RefBookScriptingService refBookScriptingService;
     @Autowired
     private ConfigurationDao configurationDao;
+    @Autowired
+    private SignService signService;
 
     // ЦАС НСИ
     private static long REF_BOOK_OKATO = 3L; // Коды ОКАТО
@@ -43,6 +46,11 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
     // Diasoft Custody
     private static long REF_BOOK_EMITENT = 100L; // Эмитенты
     private static long REF_BOOK_BOND = 84L; // Ценные бумаги
+
+    private final String OKATO_NAME = "справочника ОКАТО";
+    private final String REGION_NAME = "справочника «Субъекты РФ»";
+    private final String ACCOUNT_PLAN_NAME = "справочника «План счетов»";
+    private final String DIASOFT_NAME = "справочников Diasoft";
 
     //// Справочники ЦАС НСИ
     // ОКАТО
@@ -87,15 +95,19 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
      * @param logger                Логгер
      * @param refBookDirectoryParam Путь к директории
      * @param mappingMap            Маппинг имен: Регулярка → Пара(Признак архива, Id справочника)
+     * @param refBookName           Имя справочника для сообщения об ошибке
      * @param move                  Признак необходимости перемещения файла после импорта
+     * @param loadedFileNameList    Список файлов, если необходимо загружать определенные файлы
      */
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     private ImportCounter importRefBook(TAUserInfo userInfo, Logger logger, ConfigurationParam refBookDirectoryParam,
-                                        Map<String, List<Pair<Boolean, Long>>> mappingMap, boolean move) {
+                                        Map<String, List<Pair<Boolean, Long>>> mappingMap, String refBookName, boolean move,
+                                        List<String> loadedFileNameList) {
         // Получение пути к каталогу загрузки ТФ
         ConfigurationParamModel model = configurationDao.getByDepartment(0);
         List<String> refBookDirectoryList = model.get(refBookDirectoryParam, 0);
         if (refBookDirectoryList == null || refBookDirectoryList.isEmpty()) {
-            log(userInfo, LogData.L3, logger);
+            log(userInfo, LogData.L31, logger, refBookName);
             return new ImportCounter();
         }
 
@@ -105,23 +117,38 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
 
         // Каталогов может быть несколько, хоть сейчас в ConfigurationParam и ограничено одним значением для всех справочников
         for (String path : refBookDirectoryList) {
-            List<String> workFilesList;
             // Набор файлов, которые уже обработали
             Set<String> ignoreFileSet = new HashSet<String>();
             // Если изначально нет подходящих файлов то выдаем отдельную ошибку
-            if (getWorkTransportFiles(path, ignoreFileSet, mappingMap.keySet()).isEmpty()) {
-                log(userInfo, LogData.L3, logger);
+            List<String> workFilesList = getWorkTransportFiles(path, ignoreFileSet, mappingMap.keySet(), loadedFileNameList);
+
+            if (workFilesList.isEmpty()) {
+                log(userInfo, LogData.L31, logger, refBookName);
                 return new ImportCounter();
             }
 
             // Обработка всех подходящих файлов, с получением списка на каждой итерации
-            while (!(workFilesList = getWorkTransportFiles(path, ignoreFileSet, mappingMap.keySet())).isEmpty()) {
-                String fileName = workFilesList.get(0);
+            for (String fileName : workFilesList) {
                 ignoreFileSet.add(fileName);
                 FileWrapper currentFile = ResourceUtils.getSharedResource(path + fileName);
 
-                // TODO Проверка ЭЦП (L15, L16, L25) // http://jira.aplana.com/browse/SBRFACCTAX-8059 0.3.9 Реализовать проверку ЭЦП ТФ
-                log(userInfo, LogData.L15, logger, fileName);
+                // ЭЦП
+                List<String> signList = configurationDao.getByDepartment(0).get(ConfigurationParam.SIGN_CHECK, 0);
+                if (signList != null && !signList.isEmpty() && signList.get(0).equals("1")) {
+                    boolean check = false;
+                    try {
+                        check = signService.checkSign(currentFile.getPath(), 0);
+                    } catch (Exception e) {
+                        log(userInfo, LogData.L36, logger, e.getMessage());
+                    }
+                    if (!check) {
+                        log(userInfo, LogData.L16, logger, fileName);
+                        return new ImportCounter();
+                    }
+                    log(userInfo, LogData.L15, logger, fileName);
+                } else {
+                    log(userInfo, LogData.L15_1, logger, fileName);
+                }
 
                 // Один файл может соответствоваь нескольким справочникам
                 List<Pair<Boolean, Long>> matchList = mappingMap.get(mappingMatch(currentFile.getName(), mappingMap.keySet()));
@@ -130,13 +157,16 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                 List<Logger> localLoggerList = new ArrayList<Logger>(matchList.size());
 
                 int skip = 0;
-
+                boolean load = false;
+                // Попытка загрузить один файл в несколько справочников
                 for (int i = 0; i < matchList.size(); i++) {
+                    if (load) {
+                        break;
+                    }
                     Pair<Boolean, Long> refBookMapPair = matchList.get(i);
                     InputStream is = null;
                     Long refBookId = refBookMapPair.getSecond();
                     localLoggerList.add(new Logger());
-
                     ScriptStatusHolder scriptStatusHolder = new ScriptStatusHolder();
                     try {
                         is = new BufferedInputStream(currentFile.getInputStream());
@@ -155,16 +185,31 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                         additionalParameters.put("scriptStatusHolder", scriptStatusHolder);
                         refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.IMPORT_TRANSPORT_FILE,
                                 localLoggerList.get(i), additionalParameters);
+                        IOUtils.closeQuietly(is);
                         // Обработка результата выполнения скрипта
                         switch (scriptStatusHolder.getScriptStatus()) {
                             case SUCCESS:
-                                success++;
-                                // В случае успешного импорта в общий лог попадает только вывод одного скрипта
-                                logger.getEntries().addAll(localLoggerList.get(i).getEntries());
-                                log(userInfo, LogData.L20, logger, currentFile.getName());
-                                // Перемещение в каталог архива
-                                moveToArchiveDirectory(userInfo, getRefBookArchivePath(userInfo, logger), currentFile,
-                                        logger);
+                                // Уже загрузили, больше не пытаемся
+                                load = true;
+                                if (move) {
+                                    // Перемещение в каталог архива
+                                    boolean result = moveToArchiveDirectory(userInfo, getRefBookArchivePath(userInfo,
+                                            logger), currentFile, logger);
+                                    if (result) {
+                                        success++;
+                                        logger.getEntries().addAll(localLoggerList.get(i).getEntries());
+                                        log(userInfo, LogData.L20, logger, currentFile.getName());
+                                    } else {
+                                        fail++;
+                                        // Если в архив не удалось перенести, то пытаемся перенести в каталог ошибок
+                                        moveToErrorDirectory(userInfo, getRefBookErrorPath(userInfo, logger), currentFile,
+                                                Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L12.getText(), ""))), logger);
+                                    }
+                                } else {
+                                    success++;
+                                    logger.getEntries().addAll(localLoggerList.get(i).getEntries());
+                                    log(userInfo, LogData.L20, logger, currentFile.getName());
+                                }
                                 break;
                             case SKIP:
                                 skip++;
@@ -177,16 +222,18 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                                 break;
                         }
                     } catch (Exception e) {
+                        // При ошибке второй раз не пытаемся загрузить
+                        load = true;
+                        IOUtils.closeQuietly(is);
                         fail++;
-                        localLoggerList.get(i).error(e.getMessage());
                         // Ошибка импорта отдельного справочника — откатываются изменения только по нему, импорт продолжается
-                        log(userInfo, LogData.L21, logger);
+                        log(userInfo, LogData.L21, logger, e.getMessage());
                         // Перемещение в каталог ошибок
                         logger.getEntries().addAll(getEntries(localLoggerList));
-                        moveToErrorDirectory(userInfo, getRefBookErrorPath(userInfo, logger), currentFile,
-                                getEntries(localLoggerList), logger);
-                    } finally {
-                        IOUtils.closeQuietly(is);
+                        if (move) {
+                            moveToErrorDirectory(userInfo, getRefBookErrorPath(userInfo, logger), currentFile,
+                                    getEntries(localLoggerList), logger);
+                        }
                     }
                 }
             }
@@ -207,18 +254,23 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
 
     @Override
     public ImportCounter importRefBookNsi(TAUserInfo userInfo, Logger logger) {
+        return importRefBookNsi(userInfo, null, logger);
+    }
+
+    @Override
+    public ImportCounter importRefBookNsi(TAUserInfo userInfo, List<String> loadedFileNameList, Logger logger) {
         log(userInfo, LogData.L23, logger);
         ImportCounter importCounter = new ImportCounter();
         try {
             // ОКАТО
             importCounter.add(importRefBook(userInfo, logger, ConfigurationParam.OKATO_UPLOAD_DIRECTORY,
-                    nsiOkatoMappingMap, false));
+                    nsiOkatoMappingMap, OKATO_NAME, false, loadedFileNameList));
             // Субъекты РФ
             importCounter.add(importRefBook(userInfo, logger, ConfigurationParam.REGION_UPLOAD_DIRECTORY,
-                    nsiRegionMappingMap, false));
+                    nsiRegionMappingMap, REGION_NAME, false, loadedFileNameList));
             // План счетов
             importCounter.add(importRefBook(userInfo, logger, ConfigurationParam.ACCOUNT_PLAN_UPLOAD_DIRECTORY,
-                    nsiAccountPlanMappingMap, false));
+                    nsiAccountPlanMappingMap, ACCOUNT_PLAN_NAME, false, loadedFileNameList));
         } catch (Exception e) {
             // Сюда должны попадать только при общих ошибках при импорте справочников, ошибки конкретного справочника перехватываются в сервисе
             logger.error(IMPORT_REF_BOOK_ERROR, e.getMessage());
@@ -230,11 +282,16 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
 
     @Override
     public ImportCounter importRefBookDiasoft(TAUserInfo userInfo, Logger logger) {
+        return importRefBookDiasoft(userInfo, null, logger);
+    }
+
+    @Override
+    public ImportCounter importRefBookDiasoft(TAUserInfo userInfo, List<String> loadedFileNameList, Logger logger) {
         log(userInfo, LogData.L23, logger);
         ImportCounter importCounter = new ImportCounter();
         try {
             importCounter = importRefBook(userInfo, logger, ConfigurationParam.DIASOFT_UPLOAD_DIRECTORY,
-                    diasoftMappingMap, true);
+                    diasoftMappingMap, DIASOFT_NAME, true, loadedFileNameList);
         } catch (Exception e) {
             // Сюда должны попадать только при общих ошибках при импорте справочников, ошибки конкретного справочника перехватываются в сервисе
             logger.error(IMPORT_REF_BOOK_ERROR, e.getMessage());
@@ -311,20 +368,30 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
     /**
      * Получение спика ТФ НФ из каталога загрузки. Файлы, которые не соответствуют маппингу пропускаются.
      */
-    private List<String> getWorkTransportFiles(String folderPath, Set<String> ignoreFileSet, Set<String> mappingSet) {
+    private List<String> getWorkTransportFiles(String folderPath, Set<String> ignoreFileSet, Set<String> mappingSet,
+                                               List<String> loadedFileNameList) {
         List<String> retVal = new LinkedList<String>();
         FileWrapper catalogFile = ResourceUtils.getSharedResource(folderPath);
         for (String candidateStr : catalogFile.list()) {
             if (ignoreFileSet != null && ignoreFileSet.contains(candidateStr)) {
                 continue;
             }
-            FileWrapper candidateFile = ResourceUtils.getSharedResource(folderPath + candidateStr);
-            // Файл, это файл, а не директория и соответствует формату имени ТФ
-            if (candidateFile.isFile() && mappingMatch(candidateFile.getName(), mappingSet) != null) {
-                retVal.add(candidateStr);
+
+            if (loadedFileNameList != null && !loadedFileNameList.contains(candidateStr)) {
+                // Если задан список определенных имен, а имя не из списка, то не загружаем такой файл
+                continue;
+            }
+
+            // Это файл, а не директория и соответствует формату имени ТФ
+            if (mappingMatch(candidateStr, mappingSet) != null) {
+                FileWrapper candidateFile = ResourceUtils.getSharedResource(folderPath + candidateStr);
+                if (candidateFile.isFile()) {
+                    retVal.add(candidateStr);
+                }
             }
         }
-        // TODO Система сортирует файлы по возрастанию по значению блоков VVV.RR в имени файла.
+        // Система сортирует файлы по возрастанию по значению блоков VVV.RR в имени файла.
+        Collections.sort(retVal);
         return retVal;
     }
 }

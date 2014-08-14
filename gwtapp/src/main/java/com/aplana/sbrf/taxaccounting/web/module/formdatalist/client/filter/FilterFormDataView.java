@@ -199,12 +199,12 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
 
     @Override
     public void setKindFilter(List<FormDataKind> dataKinds) {
-        List<Integer> list = new ArrayList<Integer>(dataKinds.size());
+        List<String> list = new ArrayList<String>(dataKinds.size());
 
         for (FormDataKind kind : dataKinds) {
-            list.add(kind.getId());
+            list.add("record_id = "+kind.getId());
         }
-        formDataKind.setFilter(StringUtils.join(list.toArray(), ','));
+        formDataKind.setFilter(StringUtils.join(list.toArray(), " or ", null));
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 
 import com.aplana.sbrf.taxaccounting.dao.LogBusinessDao;
+import com.aplana.sbrf.taxaccounting.model.HistoryBusinessSearchOrdering;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
@@ -42,10 +43,15 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 	}
 
 	@Override
-	public List<LogBusiness> getDeclarationLogsBusiness(long declarationId) {
-		try {
+	public List<LogBusiness> getDeclarationLogsBusiness(long declarationId, HistoryBusinessSearchOrdering ordering, boolean isAscSorting) {
+        StringBuilder sql = new StringBuilder("select log_business.* from log_business\n");
+        if (ordering == HistoryBusinessSearchOrdering.EVENT)
+            sql.append("left join event ev on log_business.event_id=ev.\"ID\"\n");
+        sql.append("where declaration_data_id = ?\n");
+        sql.append(sortingClause(ordering, isAscSorting));
+        try {
 			return getJdbcTemplate().query(
-					"select * from log_business where declaration_data_id = ? order by log_date desc",
+					sql.toString(),
 					new Object[]{declarationId},
 					new LogBusinessRowMapper()
 			);
@@ -55,10 +61,15 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 	}
 
 	@Override
-	public List<LogBusiness> getFormLogsBusiness(long formId) {
-		try {
+	public List<LogBusiness> getFormLogsBusiness(long formId, HistoryBusinessSearchOrdering ordering, boolean isAscSorting) {
+        StringBuilder sql = new StringBuilder("select log_business.* from log_business\n");
+        if (ordering == HistoryBusinessSearchOrdering.EVENT)
+            sql.append("left join event ev on log_business.event_id=ev.\"ID\"\n");
+        sql.append("where form_data_id = ?\n");
+        sql.append(sortingClause(ordering, isAscSorting));
+        try {
 			return getJdbcTemplate().query(
-					"select * from log_business where form_data_id = ? order by log_date desc",
+					sql.toString(),
 					new Object[]{formId},
 					new LogBusinessRowMapper()
 			);
@@ -118,4 +129,34 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 				logBusiness.getNote()
 		);
 	}
+
+    private String sortingClause(HistoryBusinessSearchOrdering ordering, boolean isAscSorting) {
+
+        StringBuilder clause = new StringBuilder();
+
+        switch (ordering) {
+            case EVENT:
+                clause.append("ORDER BY ev.name");
+                break;
+            case DATE:
+                clause.append("ORDER BY log_date");
+                break;
+            case USER:
+                clause.append("ORDER BY user_login");
+                break;
+            case USER_ROLE:
+                clause.append("ORDER BY roles");
+                break;
+            case DEPARTMENT:
+                clause.append("ORDER BY user_department_id");
+                break;
+            case NOTE:
+                clause.append("ORDER BY note");
+                break;
+        }
+
+        if (!isAscSorting) clause.append(" DESC");
+
+        return clause.toString();
+    }
 }

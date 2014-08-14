@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.scheduler.core.manager;
 
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.*;
 import com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManager;
 import com.aplana.sbrf.taxaccounting.scheduler.api.task.UserTask;
@@ -86,6 +87,7 @@ public class TaskManagerBean implements TaskManager {
             taskContextEntity.setUserTaskJndi(taskContext.getUserTaskJndi());
             taskContextEntity.setId(taskContext.getId());
             taskContextEntity.setModificationDate(new Date());
+            taskContextEntity.setUserId(taskContext.getUserId());
             if (newContext){
                 persistenceService.saveContext(taskContextEntity);
             } else {
@@ -96,6 +98,8 @@ public class TaskManagerBean implements TaskManager {
                     taskStatus.getTaskId(),
                     taskStatus.getNextFireTime()));
             return Long.parseLong(taskStatus.getTaskId());
+        } catch (UserCalendarPeriodInvalid e) {
+            throw new TaskSchedulingException("Значение атрибута «Расписание» не соответствует требованиям формата Cron!", e);
         } catch (Exception e) {
             LOG.error(e.getLocalizedMessage(), e);
             throw new TaskSchedulingException("Не удалось выполнить создание задачи", e);
@@ -178,9 +182,8 @@ public class TaskManagerBean implements TaskManager {
         LOG.info(String.format("Task updating has been started. Task id: %s", taskId));
         //TODO api ibm не позволяет обновлять данные задачи. Надо удалять и создавать новую
         try {
-            scheduler.cancel(taskId.toString(), true);
-            persistenceService.deleteContextByTaskId(taskId);
             createTask(taskContext, false);
+            scheduler.cancel(taskId.toString(), true);
         } catch (Exception e) {
             LOG.error(e.getLocalizedMessage(), e);
             throw new TaskSchedulingException(e);
@@ -210,7 +213,7 @@ public class TaskManagerBean implements TaskManager {
     }
 
     @Override
-    public List<TaskJndiInfo> getTasksJndi() throws TaskSchedulingException {
+    public List<TaskJndiInfo> getTasksJndi(TAUserInfo userInfo) throws TaskSchedulingException {
         LOG.info("Obtaining all tasks jndi");
         try {
             InitialContext ic = new InitialContext();
@@ -218,7 +221,7 @@ public class TaskManagerBean implements TaskManager {
             List<TaskJndiInfo> jndiInfo = new ArrayList<TaskJndiInfo>();
             while (tasks.hasMore()) {
                 Binding binding = tasks.next();
-                traverseJndiTree(binding, BASE_JNDI_NAME, ic, jndiInfo);
+                traverseJndiTree(binding, BASE_JNDI_NAME, ic, jndiInfo, userInfo);
             }
             return jndiInfo;
         } catch (NamingException e) {
@@ -234,7 +237,7 @@ public class TaskManagerBean implements TaskManager {
      * @param jndiInfo список найденных задач планировщика
      * @throws NamingException
      */
-    private void traverseJndiTree(Binding item, String jndiName, InitialContext ic, List<TaskJndiInfo> jndiInfo) throws NamingException {
+    private void traverseJndiTree(Binding item, String jndiName, InitialContext ic, List<TaskJndiInfo> jndiInfo, TAUserInfo userInfo) throws NamingException {
         if (item.getObject() instanceof UserTask) {
             UserTask userTask = (UserTask) PortableRemoteObject.narrow(item.getObject(), UserTask.class);
             StringBuilder jndi = new StringBuilder(jndiName)
@@ -242,7 +245,7 @@ public class TaskManagerBean implements TaskManager {
                     .append(userTask.getTaskClassName())
                     .append("#")
                     .append(UserTaskRemote.class.getName());
-            jndiInfo.add(new TaskJndiInfo(userTask.getTaskName(), jndi.toString(), userTask.getParams()));
+            jndiInfo.add(new TaskJndiInfo(userTask.getTaskName(), jndi.toString(), userTask.getParams(userInfo)));
         }
 
         String newJndiName = jndiName + "/" + item.getName();
@@ -256,7 +259,7 @@ public class TaskManagerBean implements TaskManager {
         }
 
         while (bindings.hasMore()) {
-            traverseJndiTree(bindings.next(), newJndiName, ic, jndiInfo);
+            traverseJndiTree(bindings.next(), newJndiName, ic, jndiInfo, userInfo);
         }
     }
 

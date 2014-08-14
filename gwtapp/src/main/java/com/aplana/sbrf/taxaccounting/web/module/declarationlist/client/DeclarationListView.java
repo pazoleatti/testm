@@ -56,7 +56,6 @@ public class DeclarationListView extends
 
 	private DeclarationDataSearchOrdering sortByColumn;
 
-    private TaxType taxType;
 	private boolean isAscSorting;
 
     private Map<Integer, String> departmentFullNames;
@@ -338,7 +337,7 @@ public class DeclarationListView extends
 		if (DEPARTMENT_TITLE.equals(sortByColumn)){
 			this.sortByColumn = DeclarationDataSearchOrdering.DEPARTMENT_NAME;
 		} else if (PERIOD_TITLE.equals(sortByColumn)){
-			this.sortByColumn = DeclarationDataSearchOrdering.REPORT_PERIOD_NAME;
+			this.sortByColumn = DeclarationDataSearchOrdering.REPORT_PERIOD_YEAR;
 		} else if(DECLARATION_TYPE_TITLE.equals(sortByColumn)){
 			this.sortByColumn = DeclarationDataSearchOrdering.DECLARATION_TYPE_NAME;
         } else if(STATE_TITLE.equals(sortByColumn)){

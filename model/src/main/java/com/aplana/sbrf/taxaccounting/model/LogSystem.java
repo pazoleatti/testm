@@ -25,6 +25,8 @@ public class LogSystem implements Serializable {
 	private String note;
     private String userDepartmentName;
     private Integer formDepartmentId;
+    private Integer departmentTBId;
+    private String blobDataId;
 
     public String getUserLogin() {
         return userLogin;
@@ -136,5 +138,21 @@ public class LogSystem implements Serializable {
 
     public void setFormDepartmentId(Integer formDepartmentId) {
         this.formDepartmentId = formDepartmentId;
+    }
+
+    public Integer getDepartmentTBId() {
+        return departmentTBId;
+    }
+
+    public void setDepartmentTBId(Integer departmentTBId) {
+        this.departmentTBId = departmentTBId;
+    }
+
+    public String getBlobDataId() {
+        return blobDataId;
+    }
+
+    public void setBlobDataId(String blobDataId) {
+        this.blobDataId = blobDataId;
     }
 }

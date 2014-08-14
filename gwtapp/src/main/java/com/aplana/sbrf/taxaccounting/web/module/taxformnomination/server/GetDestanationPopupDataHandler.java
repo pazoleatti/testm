@@ -31,10 +31,6 @@ class GetDestanationPopupDataHandler extends AbstractActionHandler<GetDestanatio
     @Autowired
     private SecurityService securityService;
 
-    @Autowired
-    private SourceService sourceService;
-
-
     public GetDestanationPopupDataHandler() {
         super(GetDestanationPopupDataAction.class);
     }

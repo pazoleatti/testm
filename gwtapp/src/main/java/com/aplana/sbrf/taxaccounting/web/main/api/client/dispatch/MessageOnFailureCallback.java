@@ -71,7 +71,7 @@ public final class MessageOnFailureCallback<T> implements AsyncCallback<T> {
             } else {
                 MessageEvent.fire(hasHandlers, true, caught.getLocalizedMessage(), caught);
             }
-        } else if (caught instanceof StatusCodeException) {
+        } else if (caught instanceof StatusCodeException && ((StatusCodeException) caught).getStatusCode() == 0) {
             MessageEvent.fire(hasHandlers, true, "Не удалось получить ответ сервера на последний запрос.", caught);
         } else {
             MessageEvent.fire(hasHandlers, true, caught.getLocalizedMessage(), caught);

@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.filter.FilterTreeListener;
 import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
@@ -40,128 +39,128 @@ public abstract class AbstractTreeListenerComponent implements FilterTreeListene
     };
 
     @Override
-    public void enterNobrakets(@NotNull FilterTreeParser.NobraketsContext ctx){};
+    public void enterNobrakets(FilterTreeParser.NobraketsContext ctx){};
 
     @Override
-    public void exitNobrakets(@NotNull FilterTreeParser.NobraketsContext ctx){};
+    public void exitNobrakets(FilterTreeParser.NobraketsContext ctx){};
 
     @Override
-    public void enterAlias(@NotNull FilterTreeParser.AliasContext ctx){};
+    public void enterAlias(FilterTreeParser.AliasContext ctx){};
 
     @Override
-    public void exitAlias(@NotNull FilterTreeParser.AliasContext ctx){};
+    public void exitAlias(FilterTreeParser.AliasContext ctx){};
 
     @Override
-    public void enterQuery(@NotNull FilterTreeParser.QueryContext ctx){};
+    public void enterQuery(FilterTreeParser.QueryContext ctx){};
 
     @Override
-    public void exitQuery(@NotNull FilterTreeParser.QueryContext ctx){};
+    public void exitQuery(FilterTreeParser.QueryContext ctx){};
 
     @Override
-    public void enterInternlAlias(@NotNull FilterTreeParser.InternlAliasContext ctx){};
+    public void enterInternlAlias(FilterTreeParser.InternlAliasContext ctx){};
 
     @Override
-    public void exitInternlAlias(@NotNull FilterTreeParser.InternlAliasContext ctx){};
+    public void exitInternlAlias(FilterTreeParser.InternlAliasContext ctx){};
 
     @Override
-    public void enterNumber(@NotNull FilterTreeParser.NumberContext ctx){};
+    public void enterNumber(FilterTreeParser.NumberContext ctx){};
 
     @Override
-    public void exitNumber(@NotNull FilterTreeParser.NumberContext ctx){};
+    public void exitNumber(FilterTreeParser.NumberContext ctx){};
 
     @Override
-    public void enterRoperand(@NotNull FilterTreeParser.RoperandContext ctx){};
+    public void enterRoperand(FilterTreeParser.RoperandContext ctx){};
 
     @Override
-    public void exitRoperand(@NotNull FilterTreeParser.RoperandContext ctx){};
+    public void exitRoperand(FilterTreeParser.RoperandContext ctx){};
 
     @Override
-    public void enterOperand(@NotNull FilterTreeParser.OperandContext ctx){};
+    public void enterOperand(FilterTreeParser.OperandContext ctx){};
 
     @Override
-    public void exitOperand(@NotNull FilterTreeParser.OperandContext ctx){};
+    public void exitOperand(FilterTreeParser.OperandContext ctx){};
 
     @Override
-    public void enterLoperand(@NotNull FilterTreeParser.LoperandContext ctx){};
+    public void enterLoperand(FilterTreeParser.LoperandContext ctx){};
 
     @Override
-    public void exitLoperand(@NotNull FilterTreeParser.LoperandContext ctx){};
+    public void exitLoperand(FilterTreeParser.LoperandContext ctx){};
 
     @Override
-    public void enterExternalAlias(@NotNull FilterTreeParser.ExternalAliasContext ctx){};
+    public void enterExternalAlias(FilterTreeParser.ExternalAliasContext ctx){};
 
     @Override
-    public void exitExternalAlias(@NotNull FilterTreeParser.ExternalAliasContext ctx){};
+    public void exitExternalAlias(FilterTreeParser.ExternalAliasContext ctx){};
 
     @Override
-    public void enterFuncwrap(@NotNull FilterTreeParser.FuncwrapContext ctx){};
+    public void enterFuncwrap(FilterTreeParser.FuncwrapContext ctx){};
 
     @Override
-    public void exitFuncwrap(@NotNull FilterTreeParser.FuncwrapContext ctx){};
+    public void exitFuncwrap(FilterTreeParser.FuncwrapContext ctx){};
 
     @Override
-    public void enterOperand_type(@NotNull FilterTreeParser.Operand_typeContext ctx){};
+    public void enterOperand_type(FilterTreeParser.Operand_typeContext ctx){};
 
     @Override
-    public void exitOperand_type(@NotNull FilterTreeParser.Operand_typeContext ctx){};
+    public void exitOperand_type(FilterTreeParser.Operand_typeContext ctx){};
 
     @Override
-    public void enterString(@NotNull FilterTreeParser.StringContext ctx){};
+    public void enterString(FilterTreeParser.StringContext ctx){};
 
     @Override
-    public void exitString(@NotNull FilterTreeParser.StringContext ctx){};
+    public void exitString(FilterTreeParser.StringContext ctx){};
 
     @Override
-    public void enterStandartExpr(@NotNull FilterTreeParser.StandartExprContext ctx){};
+    public void enterStandartExpr(FilterTreeParser.StandartExprContext ctx){};
 
     @Override
-    public void exitStandartExpr(@NotNull FilterTreeParser.StandartExprContext ctx){};
+    public void exitStandartExpr(FilterTreeParser.StandartExprContext ctx){};
 
     @Override
-    public void enterWithbrakets(@NotNull FilterTreeParser.WithbraketsContext ctx){};
+    public void enterWithbrakets(FilterTreeParser.WithbraketsContext ctx){};
 
     @Override
-    public void exitWithbrakets(@NotNull FilterTreeParser.WithbraketsContext ctx){};
+    public void exitWithbrakets(FilterTreeParser.WithbraketsContext ctx){};
 
     @Override
-    public void enterEAlias(@NotNull FilterTreeParser.EAliasContext ctx){};
+    public void enterEAlias(FilterTreeParser.EAliasContext ctx){};
 
     @Override
-    public void exitEAlias(@NotNull FilterTreeParser.EAliasContext ctx){};
+    public void exitEAlias(FilterTreeParser.EAliasContext ctx){};
 
     @Override
-    public void enterLink_type(@NotNull FilterTreeParser.Link_typeContext ctx){};
+    public void enterLink_type(FilterTreeParser.Link_typeContext ctx){};
 
     @Override
-    public void exitLink_type(@NotNull FilterTreeParser.Link_typeContext ctx){};
+    public void exitLink_type(FilterTreeParser.Link_typeContext ctx){};
 
     @Override
-    public void enterIsNullExpr(@NotNull FilterTreeParser.IsNullExprContext ctx){};
+    public void enterIsNullExpr(FilterTreeParser.IsNullExprContext ctx){};
 
     @Override
-    public void exitIsNullExpr(@NotNull FilterTreeParser.IsNullExprContext ctx){};
+    public void exitIsNullExpr(FilterTreeParser.IsNullExprContext ctx){};
 
     @Override
-    public void enterFunctype(@NotNull FilterTreeParser.FunctypeContext ctx){};
+    public void enterFunctype(FilterTreeParser.FunctypeContext ctx){};
 
     @Override
-    public void exitFunctype(@NotNull FilterTreeParser.FunctypeContext ctx){};
+    public void exitFunctype(FilterTreeParser.FunctypeContext ctx){};
 
     @Override
-    public void enterSimpleoperand(@NotNull FilterTreeParser.SimpleoperandContext ctx){};
+    public void enterSimpleoperand(FilterTreeParser.SimpleoperandContext ctx){};
 
     @Override
-    public void exitSimpleoperand(@NotNull FilterTreeParser.SimpleoperandContext ctx){};
+    public void exitSimpleoperand(FilterTreeParser.SimpleoperandContext ctx){};
 
     @Override
-    public void enterEveryRule(@NotNull ParserRuleContext ctx) {}
+    public void enterEveryRule(ParserRuleContext ctx) {}
 
     @Override
-    public void exitEveryRule(@NotNull ParserRuleContext ctx) {}
+    public void exitEveryRule(ParserRuleContext ctx) {}
 
     @Override
-    public void visitTerminal(@NotNull TerminalNode node) {}
+    public void visitTerminal(TerminalNode node) {}
 
     @Override
-    public void visitErrorNode(@NotNull ErrorNode node) { }
+    public void visitErrorNode(ErrorNode node) { }
 }

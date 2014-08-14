@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -88,7 +89,7 @@ public class ForeignKeyResolverComponent extends AbstractTreeListenerComponent i
      * Вход в узел содержащий поля внешних справочников eAlias
      */
     @Override
-    public void enterEAlias(@NotNull FilterTreeParser.EAliasContext ctx) {
+    public void enterEAlias(FilterTreeParser.EAliasContext ctx) {
         // Устанавливаем текущий атрибут как последний
         lastRefBookAttribute = refBook.getAttribute(ctx.ALIAS().getText());
     }
@@ -104,10 +105,10 @@ public class ForeignKeyResolverComponent extends AbstractTreeListenerComponent i
      */
     @Override
     public void exitEAlias(@NotNull FilterTreeParser.EAliasContext ctx) {
-        ps.appendQuery(buildAliasForForeignTable(ftCounter - 1));
-        ps.appendQuery(".");
-        ps.appendQuery(lastRefBookAttribute.getAttributeType().toString());
-        ps.appendQuery("_value");
+
+        if (factory.getDataProvider(refBook.getId()) instanceof RefBookSimpla
+
+        ps.appendQuery(buildAliasForUniversalRefBook());
 
         StringBuilder builder = new StringBuilder();
         // Генерация всех join'ов со списка
@@ -126,6 +127,7 @@ public class ForeignKeyResolverComponent extends AbstractTreeListenerComponent i
     }
 
     /**
+     * Метод возвращает строку с join запросом для универсального справочника
      *
      * @param serialNumber порядковый номер внешней таблицы (берется с глобального счетчика всех join'ов в пределах работы с полным sql выражением),
      *                     используется для составляения уникальных алиасов "frb"+index при join'ах таблиц
@@ -162,11 +164,54 @@ public class ForeignKeyResolverComponent extends AbstractTreeListenerComponent i
             .append("\n");
     }
 
+    private String buildAliasForUniversalRefBook(){
+        return new StringBuilder()
+            .append(buildAliasForForeignTable(ftCounter - 1))
+            .append(".")
+            .append(lastRefBookAttribute.getAttributeType().toString())
+            .append("_value")
+            .toString();
+    }
+
+    /**
+     * Метод возвращает строку с join запросом для простого справочника
+     *
+     * @param serialNumber порядковый номер внешней таблицы (берется с глобального счетчика всех join'ов в пределах работы с полным sql выражением),
+     *                     используется для составляения уникальных алиасов "frb"+index при join'ах таблиц
+     * @param index порядковый номер в пределах текущего разименовывания (одной цепочки алиасов)
+     * @return
+     */
+    private StringBuilder buildJoinQueryForSimpleRefBook(int serialNumber, int index){
+        // алиас для join'а таблицы
+        String tableAlias = buildAliasForForeignTable(serialNumber);
+
+        // Модель данных для текущего Join'а
+        LinkModel linkModel = foreignTables.get(index);
+
+        // алиас аттрибута справочника который является ссылкой
+        String linkAttributeAlias = linkModel.alias;
+
+        // алиас аттрибута справочника который является ссылкой с учетом алиаса таблицы
+        String linkAttributeAliasWithTableAlias = index == 0 ?
+                "a" + linkAttributeAlias + ".reference_value" :
+                tableAlias + "." + linkAttributeAlias;
+
+        // составления join запроса
+        return new StringBuilder()
+                .append("left join название таблицы ")
+                .append(tableAlias)
+                .append(" on ")
+                .append(tableAlias)
+                .append(".id = ")
+                .append(linkAttributeAliasWithTableAlias)
+                .append("\n");
+    }
+
     /**
      * Вход в узел содержащий алиас поля внешней таблицы
      */
     @Override
-    public void enterExternalAlias(@NotNull FilterTreeParser.ExternalAliasContext ctx) {
+    public void enterExternalAlias(FilterTreeParser.ExternalAliasContext ctx) {
         // увеличим счетчик внешних таблиц
         ftCounter++;
 
@@ -186,7 +231,7 @@ public class ForeignKeyResolverComponent extends AbstractTreeListenerComponent i
      * внешних справочников
      */
     @Override
-    public void exitQuery(@NotNull FilterTreeParser.QueryContext ctx) {
+    public void exitQuery(FilterTreeParser.QueryContext ctx) {
         if (joinStatement.size() > 0) {
             ps.setJoinPartsOfQuery(StringUtils.join(joinStatement.toArray(), '\n'));
         } else {

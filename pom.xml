@@ -6,7 +6,7 @@
 	<artifactId>taxaccounting</artifactId>
 
 	<description>АС "Учёт налогов"</description>
-	<version>0.3.9</version>
+	<version>0.4</version>
 	<packaging>pom</packaging>
 
 	<modules>
@@ -444,6 +444,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-war-plugin</artifactId>
+                    <version>2.4</version>
 					<configuration>
 						<archive>
 							<manifest>

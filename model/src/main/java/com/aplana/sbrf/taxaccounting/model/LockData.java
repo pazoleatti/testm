@@ -11,17 +11,23 @@ import java.util.Date;
 
 public final class LockData {
 
+    public enum LOCK_OBJECTS {
+        REF_BOOK, TAX_FORM
+    }
+
+    public static final int STANDARD_LIFE_TIME = 3600000;  // 1 час
+
 	/* Идентификатор блокировки */
 	private String key;
 	/* Код пользователя, установившего блокировку*/
-	private long userId;
+	private int userId;
 	/* Дата истечения блокировки */
 	private Date dateBefore;
 
 	public LockData(){
 	}
 
-	public LockData(String key, long userId, Date dateBefore) {
+	public LockData(String key, int userId, Date dateBefore) {
 		this.key = key;
 		this.userId = userId;
 		this.dateBefore = dateBefore;
@@ -43,11 +49,11 @@ public final class LockData {
 		this.key = key;
 	}
 
-	public long getUserId() {
+	public int getUserId() {
 		return userId;
 	}
 
-	public void setUserId(long userId) {
+	public void setUserId(int userId) {
 		this.userId = userId;
 	}
 

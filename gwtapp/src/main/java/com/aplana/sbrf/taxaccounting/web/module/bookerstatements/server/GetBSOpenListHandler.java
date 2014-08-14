@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.bookerstatements.server;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -10,13 +12,11 @@ import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import static java.util.Arrays.asList;
 
@@ -35,6 +35,9 @@ public class GetBSOpenListHandler extends AbstractActionHandler<GetBSOpenListAct
 
     @Autowired
     SourceService departmentFormTypService;
+    @Autowired
+    @Qualifier(value = "refBookBookerStatementPeriod")
+    RefBookDataProvider bookerRefBookDataProvider;
 
     public GetBSOpenListHandler() {
         super(GetBSOpenListAction.class);
@@ -81,6 +84,21 @@ public class GetBSOpenListHandler extends AbstractActionHandler<GetBSOpenListAct
         result.setDepartment(departmentService.getDepartment(currUser.getDepartmentId()));
         result.setBookerReportTypes(Arrays.asList(BookerStatementsType.values()));
 
+        PagingResult<Map<String, RefBookValue>> records = bookerRefBookDataProvider.getRecords(null, null, null, null, true);
+        List<ReportPeriod> reportPeriods = new ArrayList<ReportPeriod>(records.size());
+        for (Map<String, RefBookValue> record : records){
+            final int year = record.get("YEAR").getNumberValue().intValue();
+            TaxPeriod taxPeriod = new TaxPeriod();
+            taxPeriod.setYear(year);
+            ReportPeriod reportPeriod = new ReportPeriod();
+            reportPeriod.setName(record.get("PERIOD_NAME").getStringValue().replaceFirst("^" + String.valueOf(year) + ".*:",""));
+            reportPeriod.setId(record.get("record_id").getNumberValue().intValue());
+            reportPeriod.setEndDate(null);
+            reportPeriod.setStartDate(null);
+            reportPeriod.setTaxPeriod(taxPeriod);
+            reportPeriods.add(reportPeriod);
+        }
+        result.setReportPeriods(reportPeriods);
         return result;
     }
 

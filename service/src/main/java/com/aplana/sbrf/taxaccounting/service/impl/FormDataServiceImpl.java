@@ -1,23 +1,27 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockCoreService;
+import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.*;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.impl.eventhandler.EventLauncher;
 import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
-import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -41,6 +45,7 @@ public class FormDataServiceImpl implements FormDataService {
     private static final String XLSX_EXT = "xlsx";
     private static final String XLS_EXT = "xls";
     public static final String MSG_IS_EXIST_FORM = "Существует экземпляр налоговой формы %s типа %s в подразделении %s периоде %s";
+    final static String LOCK_MESSAGE = "Операция не может быть выполнена. Налоговая форма заблокирована другой операцией!";
 
     @Autowired
 	private FormDataDao formDataDao;
@@ -79,11 +84,18 @@ public class FormDataServiceImpl implements FormDataService {
     @Autowired
     private LogEntryService logEntryService;
     @Autowired
-    SourceService sourceService;
+    private SourceService sourceService;
     @Autowired
-    TransactionHelper tx;
+    private TransactionHelper tx;
     @Autowired
-    TAUserService userService;
+    private TAUserService userService;
+    @Autowired
+    private LockDataService lockService;
+    @Autowired
+    private RefBookDao refBookDao;
+
+    // Время блокировки при консолидации (3 часа)
+    private static final int BLOCK_TIME =  3 * 60 * 60 * 1000;
 
 	/**
 	 * Создать налоговую форму заданного типа При создании формы выполняются
@@ -143,28 +155,28 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
-    public void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, InputStream inputStream, String fileName, FormDataEvent formDataEvent) {
-        loadFormData(logger, userInfo, formDataId, inputStream, fileName, formDataEvent);
+    public void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, Boolean isManual, InputStream inputStream, String fileName, FormDataEvent formDataEvent) {
+        loadFormData(logger, userInfo, formDataId, isManual, inputStream, fileName, formDataEvent);
     }
 
     @Override
-    public void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, InputStream inputStream, String fileName) {
-        loadFormData(logger, userInfo, formDataId, inputStream, fileName, FormDataEvent.IMPORT);
+    public void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, Boolean isManual, InputStream inputStream, String fileName) {
+        loadFormData(logger, userInfo, formDataId, isManual, inputStream, fileName, FormDataEvent.IMPORT);
     }
 
     @Override
     @Transactional
     public void migrationFormData(Logger logger, TAUserInfo userInfo, long formDataId, InputStream inputStream, String fileName) {
-        loadFormData(logger, userInfo, formDataId, inputStream, fileName, FormDataEvent.MIGRATION);
+        loadFormData(logger, userInfo, formDataId, false, inputStream, fileName, FormDataEvent.MIGRATION);
     }
 
-    private void loadFormData(Logger logger, TAUserInfo userInfo, long formDataId, InputStream inputStream, String fileName, FormDataEvent formDataEvent) {
+    private void loadFormData(Logger logger, TAUserInfo userInfo, long formDataId, Boolean isManual, InputStream inputStream, String fileName, FormDataEvent formDataEvent) {
 		// Поскольку импорт используется как часть редактирования НФ, т.е. иморт только строк (форма уже существует) то все проверки должны 
     	// соответствовать редактированию (добавление, удаление, пересчет)
     	// Форма должна быть заблокирована текущим пользователем для редактирования
 		lockCoreService.checkLockedMe(FormData.class, formDataId, userInfo);
 
-        formDataAccessService.canEdit(userInfo, formDataId, false);
+        formDataAccessService.canEdit(userInfo, formDataId, isManual);
 
         File dataFile = null;
         File pKeyFile = null;
@@ -179,53 +191,52 @@ public class FormDataServiceImpl implements FormDataService {
             IOUtils.closeQuietly(dataFileOutputStream);
 
             String ext = getFileExtention(fileName);
-            if(!ext.equals(XLS_EXT) && !ext.equals(XLSX_EXT)){
 
-                String pKeyFileUrl = null;
-                List<String> paramList = configurationDao.getAll().get(ConfigurationParam.KEY_FILE, 0);
-                if (paramList != null && !paramList.isEmpty()) {
-                    pKeyFileUrl =  paramList.get(0); // TODO Ключи нужно искать в нескольких каталогах
-                }
-
-                if (pKeyFileUrl != null) { // Необходимо проверить подпись
-                    InputStream pKeyFileInputStream = null;
-
-                    pKeyFile = File.createTempFile("signature", ".sign");
-                    OutputStream pKeyFileOutputStream = new BufferedOutputStream(new FileOutputStream(pKeyFile));
-                    try {
-                        pKeyFileInputStream = new BufferedInputStream(ResourceUtils.getSharedResourceAsStream(pKeyFileUrl));
-                        IOUtils.copy(pKeyFileInputStream, pKeyFileOutputStream);
-                    } catch (Exception e) {
-                        throw new ServiceException("Ошибка доступа к файлу базы открытых ключей.", e);
-                    } finally {
-                        IOUtils.closeQuietly(pKeyFileOutputStream);
-                        IOUtils.closeQuietly(pKeyFileInputStream);
+            // Проверка ЭЦП
+            // Если флаг проверки отсутствует или не равен «1», то файл считается проверенным
+            boolean check = false;
+            if (!ext.equals(XLS_EXT) && !ext.equals(XLSX_EXT)) {
+                List<String> signList = configurationDao.getByDepartment(0).get(ConfigurationParam.SIGN_CHECK, 0);
+                if (signList != null && !signList.isEmpty() && signList.get(0).equals("1")) {
+                    List<String> paramList = configurationDao.getAll().get(ConfigurationParam.KEY_FILE, 0);
+                    if (paramList != null) { // Необходимо проверить подпись
+                        try {
+                            check = signService.checkSign(dataFile.getAbsolutePath(), 0);
+                        } catch (Exception e) {
+                            logger.error("Ошибка при проверке ЭЦП: " + e.getMessage());
+                        }
+                        if (check) {
+                            logger.error("Ошибка проверки цифровой подписи");
+                        }
                     }
-                    if (!signService.checkSign(dataFile.getAbsolutePath(), pKeyFile.getAbsolutePath(), 0)) {
-                        throw new ServiceException("Ошибка проверки цифровой подписи.");
-                    }
+                } else {
+                    check = true;
                 }
+            } else {
+                check = true;
             }
 
             FormData fd = formDataDao.get(formDataId, false);
 
-            dataFileInputStream = new BufferedInputStream(new FileInputStream(dataFile));
-            Map<String, Object> additionalParameters = new HashMap<String, Object>();
-            additionalParameters.put("ImportInputStream", dataFileInputStream);
-            additionalParameters.put("UploadFileName", fileName);
-            formDataScriptingService.executeScript(userInfo, fd, formDataEvent, logger, additionalParameters);
-            IOUtils.closeQuietly(dataFileInputStream);
+            if (check) {
+                dataFileInputStream = new BufferedInputStream(new FileInputStream(dataFile));
+                Map<String, Object> additionalParameters = new HashMap<String, Object>();
+                additionalParameters.put("ImportInputStream", dataFileInputStream);
+                additionalParameters.put("UploadFileName", fileName);
+                formDataScriptingService.executeScript(userInfo, fd, formDataEvent, logger, additionalParameters);
+                IOUtils.closeQuietly(dataFileInputStream);
+            }
 
             if (logger.containsLevel(LogLevel.ERROR)) {
-                throw new ServiceLoggerException(
-                        "Есть критические ошибки при выполнения скрипта.", logEntryService.save(logger.getEntries()));
+                throw new ServiceLoggerException("Есть критические ошибки при выполнения скрипта",
+                        logEntryService.save(logger.getEntries()));
             } else {
-                logger.info("Данные загружены.");
+                logger.info("Данные загружены");
             }
 
             logBusinessService.add(formDataId, null, userInfo, formDataEvent, null);
             auditService.add(formDataEvent, userInfo, fd.getDepartmentId(), fd.getReportPeriodId(),
-                    null, fd.getFormType().getName(), fd.getKind().getId(), fileName);
+                    null, fd.getFormType().getName(), fd.getKind().getId(), fileName, null);
         } catch (IOException e) {
             throw new ServiceException(e.getLocalizedMessage(), e);
         } finally {
@@ -301,7 +312,7 @@ public class FormDataServiceImpl implements FormDataService {
 		logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.CREATE, null);
 		auditService.add(FormDataEvent.CREATE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
 
-				null, formData.getFormType().getName(), formData.getKind().getId(), null);
+				null, formData.getFormType().getName(), formData.getKind().getId(), null, null);
 		// Заполняем начальные строки (но не сохраняем)
 		dataRowDao.saveRows(formData, formTemplate.getRows());
 
@@ -464,9 +475,12 @@ public class FormDataServiceImpl implements FormDataService {
 
 		logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.SAVE, null);
 		auditService.add(FormDataEvent.SAVE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-				null, formData.getFormType().getName(), formData.getKind().getId(), null);
+				null, formData.getFormType().getName(), formData.getKind().getId(), null, null);
 
-        updatePreviousRowNumber(formData);
+        String msg = updatePreviousRowNumber(formData);
+        if (msg != null) {
+            logger.info(msg);
+        }
 
 		return formData.getId();
 	}
@@ -525,7 +539,7 @@ public class FormDataServiceImpl implements FormDataService {
 
             FormData formData = formDataDao.get(formDataId, manual);
             auditService.add(FormDataEvent.DELETE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-                    null, formData.getFormType().getName(), formData.getKind().getId(), null);
+                    null, formData.getFormType().getName(), formData.getKind().getId(), null, null);
             formDataDao.delete(formDataId);
         }
 	}
@@ -539,12 +553,12 @@ public class FormDataServiceImpl implements FormDataService {
      */
     @Override
     public void doMove(long formDataId, boolean manual, TAUserInfo userInfo, WorkflowMove workflowMove, String note, Logger logger) {
-        List<FormData> formDataList = null;
         // Форма не должна быть заблокирована даже текущим пользователем;
         lockCoreService.checkUnlocked(FormData.class, formDataId, userInfo);
         // Временный срез формы должен быть в актуальном состоянии
         dataRowDao.rollback(formDataId);
 
+        formDataAccessService.checkDestinations(formDataId);
         List<WorkflowMove> availableMoves = formDataAccessService.getAvailableMoves(userInfo, formDataId);
         if (!availableMoves.contains(workflowMove)) {
             throw new ServiceException(
@@ -556,6 +570,55 @@ public class FormDataServiceImpl implements FormDataService {
 
         FormData formData = formDataDao.get(formDataId, manual);
 
+        if (workflowMove == WorkflowMove.CREATED_TO_PREPARED
+                || workflowMove == WorkflowMove.PREPARED_TO_APPROVED
+                || workflowMove == WorkflowMove.APPROVED_TO_ACCEPTED) {
+            //Устанавливаем блокировку на текущую нф
+            List<String> lockedObjects = new ArrayList<String>();
+            int userId = userInfo.getUser().getId();
+            String lockKey = LockData.LOCK_OBJECTS.TAX_FORM.name() + "_" + formDataId;
+            LockData lockData = lockService.lock(lockKey, userId, LockData.STANDARD_LIFE_TIME);
+            if (lockData == null) {
+                try {
+                    //Блокировка установлена
+                    lockedObjects.add(lockKey);
+                    //Блокируем связанные справочники
+                    for (Column column : formData.getFormColumns()) {
+                        if (column instanceof RefBookColumn) {
+                            Long attributeId = ((RefBookColumn) column).getRefBookAttributeId();
+                            if (attributeId != null) {
+                                RefBook refBook = refBookDao.getByAttribute(attributeId);
+                                String referenceLockKey = LockData.LOCK_OBJECTS.REF_BOOK.name() + "_" + refBook.getId();
+                                LockData referenceLockData = lockService.lock(referenceLockKey, userId, LockData.STANDARD_LIFE_TIME);
+                                if (referenceLockData == null) {
+                                    //Блокировка установлена
+                                    lockedObjects.add(referenceLockKey);
+                                } else {
+                                    throw new ServiceLoggerException(LOCK_MESSAGE,
+                                            logEntryService.save(logger.getEntries()));
+                                }
+                            }
+                        }
+                    }
+
+                    //Проверяем что записи справочников, на которые есть ссылки в нф все еще существуют в периоде формы
+
+                    moveProcess(formData, manual, userInfo, workflowMove, note, logger);
+                } finally {
+                    for (String lock : lockedObjects) {
+                        lockService.unlock(lock, userId);
+                    }
+                }
+            } else {
+                throw new ServiceLoggerException(LOCK_MESSAGE,
+                        logEntryService.save(logger.getEntries()));
+            }
+        } else {
+            moveProcess(formData, manual, userInfo, workflowMove, note, logger);
+        }
+    }
+
+    public void moveProcess(FormData formData, boolean manual, TAUserInfo userInfo, WorkflowMove workflowMove, String note, Logger logger) {
         formDataScriptingService.executeScript(userInfo, formData, workflowMove.getEvent(), logger, null);
 
         if (logger.containsLevel(LogLevel.ERROR)) {
@@ -585,11 +648,12 @@ public class FormDataServiceImpl implements FormDataService {
 
         logBusinessService.add(formData.getId(), null, userInfo, workflowMove.getEvent(), note);
         auditService.add(workflowMove.getEvent(), userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-                null, formData.getFormType().getName(), formData.getKind().getId(), note);
+                null, formData.getFormType().getName(), formData.getKind().getId(), note, null);
 
-        String msg = updatePreviousRowNumber(formData);
-        if (msg != null) {
-            logger.info(msg);
+        if (workflowMove.getFromState() == WorkflowState.CREATED || workflowMove.getToState() == WorkflowState.CREATED) {
+            String msg = updatePreviousRowNumber(formData);
+            if (msg != null)
+                logger.info(msg);
         }
     }
 
@@ -613,7 +677,7 @@ public class FormDataServiceImpl implements FormDataService {
      *
      *  http://conf.aplana.com/pages/viewpage.action?pageId=8788114
      */
-    void compose(WorkflowMove workflowMove, FormData formData, TAUserInfo userInfo, Logger logger){
+    void compose(WorkflowMove workflowMove, FormData formData, TAUserInfo userInfo, Logger logger) {
         // Проверка перехода ЖЦ. Принятие либо отмена принятия. Прочие переходы не обрабатываются.
         if (workflowMove.getToState() != WorkflowState.ACCEPTED && workflowMove.getFromState() != WorkflowState.ACCEPTED) {
             return;
@@ -630,77 +694,82 @@ public class FormDataServiceImpl implements FormDataService {
         if (departmentFormTypes == null || departmentFormTypes.isEmpty()) {
             return;
         }
-        // Проверяем блокировку приемников
-        List<FormData> lockedForms = new ArrayList<FormData>();
-        SimpleDateFormat dateTimeFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm");
 
-        for (DepartmentFormType destinationDFT : departmentFormTypes) {
-            // Экземпляр формы-приемника
-            FormData destinationForm = findFormData(destinationDFT.getFormTypeId(), destinationDFT.getKind(), destinationDFT.getDepartmentId(), formData.getReportPeriodId(), formData.getPeriodOrder());
-            // Если форма распринимается при отсутствии экземпляра формы-приемника, то такую форму не обрабатываем.
-            if (destinationForm == null) {
-                continue;
-            }
-            ObjectLock lock = lockCoreService.getLock(FormData.class, destinationForm.getId(), userInfo);
-            if (lock != null) {
-                lockedForms.add(destinationForm);
-                logger.error("Невозможно принять налоговую форму и осуществить консолидацию " +
-                        "из-за блокировки другими пользователями форм-приемников " +
-                        "Форма " + destinationForm.getFormType().getName() + " " + destinationForm.getKind().getName() + ", " +
-                        reportPeriodService.getReportPeriod(destinationForm.getReportPeriodId()).getName() + ", " +
-                        departmentDao.getDepartment(destinationForm.getDepartmentId()).getName() + " заблокирована пользователем " +
-                        userService.getUser(lock.getUserId()).getName() + " " + dateTimeFormat.format(lock.getLockTime())
-                );
+       List<String> lockedForms = new ArrayList<String>();
 
-                continue;
-            }
-        }
-        if (!lockedForms.isEmpty()) {
-            throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
-        }
         try {
+            // Проверяем блокировку приемников
+            List<String> errorsList = new ArrayList<String>();
+            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm dd.MM.yyyy");
+            for (DepartmentFormType destinationDFT : departmentFormTypes) {
+                String periodOrder = ((destinationDFT.getKind() == FormDataKind.PRIMARY || destinationDFT.getKind() == FormDataKind.CONSOLIDATED) && formData.getPeriodOrder() != null) ?
+                        String.valueOf(formData.getPeriodOrder()) : "";
+                String lockKey = formData.getReportPeriodId() + "." + periodOrder + "." + destinationDFT.getDepartmentId()
+                        + "." + destinationDFT.getFormTypeId() + "." + destinationDFT.getKind();
+
+                LockData lockData = lockService.lock(lockKey, userInfo.getUser().getId(), BLOCK_TIME);
+                if (lockData != null) {
+                    FormTemplate formTemplate = formTemplateService.get(formTemplateService.getActiveFormTemplateId(destinationDFT.getFormTypeId(), formData.getReportPeriodId()));
+                    errorsList.add(String.format("«%s» %s, %s, «%s» заблокирована пользователем %s, %s",
+                                    formTemplate.getName(), destinationDFT.getKind().getName(),
+                                    reportPeriod.getTaxPeriod().getYear()+" "+reportPeriod.getName(),
+                                    departmentDao.getDepartment(destinationDFT.getDepartmentId()).getName(),
+                                    userService.getUser(lockData.getUserId()).getName(), sdf.format(lockData.getDateBefore())));
+                } else {
+                    lockedForms.add(lockKey);
+                }
+            }
+            if (!errorsList.isEmpty()) {
+                logger.error("Невозможно принять налоговую форму и осуществить консолидацию из-за блокировки другими пользователями форм-приемников:");
+                for(String error : errorsList){
+                    logger.error(error);
+                }
+                throw new ServiceLoggerException("Ошибка при консолидации", logEntryService.save(logger.getEntries()));
+            }
+
             // Проход по типам приемников
             for (DepartmentFormType destinationDFT : departmentFormTypes) {
-
-                    // Экземпляр формы-приемника
-                    FormData destinationForm = findFormData(destinationDFT.getFormTypeId(), destinationDFT.getKind(), destinationDFT.getDepartmentId(), formData.getReportPeriodId(), formData.getPeriodOrder());
-                    // Если форма распринимается при отсутствии экземпляра формы-приемника, то такую форму не обрабатываем.
-                    if (destinationForm == null && workflowMove.getFromState() == WorkflowState.ACCEPTED) {
-                        continue;
+                // Экземпляр формы-приемника
+                FormData destinationForm = findFormData(destinationDFT.getFormTypeId(), destinationDFT.getKind(), destinationDFT.getDepartmentId(), formData.getReportPeriodId(), formData.getPeriodOrder());
+                // Если форма распринимается при отсутствии экземпляра формы-приемника, то такую форму не обрабатываем.
+                if (destinationForm == null && workflowMove.getFromState() == WorkflowState.ACCEPTED) {
+                    continue;
+                }
+                // Список типов источников для текущего типа приемников
+                List<DepartmentFormType> sourceFormTypes = departmentFormTypeDao.getFormSources(
+                        destinationDFT.getDepartmentId(), destinationDFT.getFormTypeId(), destinationDFT.getKind(),
+                        reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
+                // Признак наличия принятых экземпляров источников
+                boolean existAcceptedSources = false;
+                for (DepartmentFormType sourceDFT : sourceFormTypes) {
+                    FormData sourceForm = findFormData(sourceDFT.getFormTypeId(), sourceDFT.getKind(), sourceDFT.getDepartmentId(), formData.getReportPeriodId(), formData.getPeriodOrder());
+                    if (sourceForm != null && sourceForm.getState().equals(WorkflowState.ACCEPTED)) {
+                        existAcceptedSources = true;
+                        break;
                     }
-                    // Список типов источников для текущего типа приемников
-                    List<DepartmentFormType> sourceFormTypes = departmentFormTypeDao.getFormSources(destinationDFT.getDepartmentId(), destinationDFT.getFormTypeId(), destinationDFT.getKind(), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
-                    // Признак наличия принятых экземпляров источников
-                    boolean existAcceptedSources = false;
-                    for (DepartmentFormType sourceDFT : sourceFormTypes) {
-                        FormData sourceForm = findFormData(sourceDFT.getFormTypeId(), sourceDFT.getKind(), sourceDFT.getDepartmentId(), formData.getReportPeriodId(), formData.getPeriodOrder());
-                        if (sourceForm != null && sourceForm.getState().equals(WorkflowState.ACCEPTED)) {
-                            existAcceptedSources = true;
-                            break;
-                        }
-                    }
-                    // Если текущая форма-приемник имеет один или более источников в статусе «Принята» то консолидируем ее, иначе удаляем
-                    if (existAcceptedSources) {
-                        ScriptComponentContextImpl scriptComponentContext = new ScriptComponentContextImpl();
-                        scriptComponentContext.setUserInfo(userInfo);
-                        scriptComponentContext.setLogger(logger);
-                        FormDataCompositionService formDataCompositionService = applicationContext.getBean(FormDataCompositionService.class);
-                        ((ScriptComponentContextHolder) formDataCompositionService).setScriptComponentContext(scriptComponentContext);
-                        Integer periodOrder = (destinationDFT.getKind() == FormDataKind.PRIMARY || destinationDFT.getKind() == FormDataKind.CONSOLIDATED) ? formData.getPeriodOrder() : null;
-                        formDataCompositionService.compose(destinationForm, formData.getReportPeriodId(), periodOrder,
-                                destinationDFT.getDepartmentId(), destinationDFT.getFormTypeId(), destinationDFT.getKind());
-                    } else if (destinationForm != null) {
-                        String formName = destinationForm.getFormType().getName();
-                        String kindName = destinationForm.getKind().getName();
-                        String departmentName = departmentDao.getDepartment(destinationForm.getDepartmentId()).getName();
-                        deleteFormData(logger, userInfo, destinationForm.getId(), formData.isManual());
-                        logger.info("%s: Расформирована налоговая форма-приемник: Подразделение: «%s», Тип: «%s», Вид: «%s».",
-                                FormDataEvent.COMPOSE.getTitle(), departmentName, kindName, formName);
-                    }
+                }
+                // Если текущая форма-приемник имеет один или более источников в статусе «Принята» то консолидируем ее, иначе удаляем
+                if (existAcceptedSources) {
+                    ScriptComponentContextImpl scriptComponentContext = new ScriptComponentContextImpl();
+                    scriptComponentContext.setUserInfo(userInfo);
+                    scriptComponentContext.setLogger(logger);
+                    FormDataCompositionService formDataCompositionService = applicationContext.getBean(FormDataCompositionService.class);
+                    ((ScriptComponentContextHolder) formDataCompositionService).setScriptComponentContext(scriptComponentContext);
+                    Integer periodOrder = (destinationDFT.getKind() == FormDataKind.PRIMARY || destinationDFT.getKind() == FormDataKind.CONSOLIDATED) ? formData.getPeriodOrder() : null;
+                    formDataCompositionService.compose(destinationForm, formData.getReportPeriodId(), periodOrder,
+                            destinationDFT.getDepartmentId(), destinationDFT.getFormTypeId(), destinationDFT.getKind());
+                } else if (destinationForm != null) {
+                    String formName = destinationForm.getFormType().getName();
+                    String kindName = destinationForm.getKind().getName();
+                    String departmentName = departmentDao.getDepartment(destinationForm.getDepartmentId()).getName();
+                    deleteFormData(logger, userInfo, destinationForm.getId(), formData.isManual());
+                    logger.info("%s: Расформирована налоговая форма-приемник: Подразделение: «%s», Тип: «%s», Вид: «%s».",
+                            FormDataEvent.COMPOSE.getTitle(), departmentName, kindName, formName);
+                }
             }
         } finally {
-            for (FormData lockedForm : lockedForms) {
-                lockCoreService.unlock(FormData.class, lockedForm.getId(), userInfo);
+            for (String lockKey : lockedForms) {
+                lockService.unlock(lockKey, userInfo.getUser().getId());
             }
         }
     }

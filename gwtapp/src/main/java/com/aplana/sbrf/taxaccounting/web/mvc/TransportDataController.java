@@ -1,11 +1,16 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.UploadResult;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.service.LoadFormDataService;
+import com.aplana.sbrf.taxaccounting.service.LoadRefBookDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.UploadTransportDataService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
@@ -15,13 +20,13 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -37,31 +42,55 @@ public class TransportDataController {
     @Autowired
     UploadTransportDataService uploadTransportDataService;
 
-    @RequestMapping(value = "transportData/upload/{departmentId}", method = RequestMethod.POST)
-    public void upload(@PathVariable int departmentId, HttpServletRequest request, HttpServletResponse response)
+    @Autowired
+    LoadFormDataService loadFormDataService;
+
+    @Autowired
+    LoadRefBookDataService loadRefBookDataService;
+
+    @RequestMapping(value = "transportData/upload", method = RequestMethod.POST)
+    public void upload(HttpServletRequest request, HttpServletResponse response)
             throws FileUploadException, IOException {
         Logger logger = new Logger();
 
-        if (departmentId == 0) {
-            logger.error("Укажите подразделение!");
-        } else {
-            ServletFileUpload upload = new ServletFileUpload(new DiskFileItemFactory());
-            upload.setHeaderEncoding("UTF-8");
-            List<FileItem> items = upload.parseRequest(request);
+        ServletFileUpload upload = new ServletFileUpload(new DiskFileItemFactory());
+        upload.setHeaderEncoding("UTF-8");
 
-            String fileName = items.get(0).getName();
-            if (fileName.contains("\\")) {
-                // IE Выдает полный путь
-                fileName = fileName.substring(fileName.lastIndexOf("\\") + 1);
-            }
+        List<FileItem> items = upload.parseRequest(request);
 
-            uploadTransportDataService.uploadFile(securityService.currentUserInfo(), departmentId, fileName,
-                    items.get(0).getInputStream(), logger);
+        if (items == null || items.isEmpty()) {
+            throw new ServiceException("Не указан файл для загрузки!");
         }
 
-        if (!logger.getEntries().isEmpty()){
-            response.getWriter().printf((logger.containsLevel(LogLevel.ERROR) ? "error " : "") + "uuid %s",
-                    logEntryService.save(logger.getEntries()));
+        String fileName = items.get(0).getName();
+        if (fileName.contains("\\")) {
+            // IE Выдает полный путь
+            fileName = fileName.substring(fileName.lastIndexOf("\\") + 1);
+        }
+
+        TAUserInfo userInfo = securityService.currentUserInfo();
+
+        // Загрузка в каталог
+        UploadResult uploadResult = uploadTransportDataService.uploadFile(userInfo, fileName,
+                items.get(0).getInputStream(), logger);
+
+        // Загрузка из каталога
+        if (!uploadResult.getDiasoftFileNameList().isEmpty()) {
+            // Diasoft
+            loadRefBookDataService.importRefBookDiasoft(userInfo, uploadResult.getDiasoftFileNameList(), logger);
+        }
+
+        if (!uploadResult.getFormDataFileNameList().isEmpty()) {
+            // НФ
+            // Пересечение списка доступных приложений и списка загруженных приложений
+            List<Integer> departmentList = new ArrayList(CollectionUtils.intersection(
+                    loadFormDataService.getTB(userInfo, logger), uploadResult.getFormDataDepartmentList()));
+
+            loadFormDataService.importFormData(userInfo, departmentList, uploadResult.getFormDataFileNameList(), logger);
+        }
+
+        if (!logger.getEntries().isEmpty()) {
+            response.getWriter().printf("uuid %s", logEntryService.save(logger.getEntries()));
         }
     }
 

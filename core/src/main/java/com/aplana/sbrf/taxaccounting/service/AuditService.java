@@ -23,8 +23,7 @@ public interface AuditService {
 	 * Добавить информацию об логировании
 	 */
 	void add(FormDataEvent event, TAUserInfo userInfo, Integer departmentId, Integer reportPeriodId,
-             String declarationType, String formType, Integer formKindId, String note);
-
+             String declarationType, String formType, Integer formKindId, String note, String blobDataId);
 
     /**
      * Удаляем набор записей из журнала и сразу создаем запись в ЖА об архивировании.
@@ -44,4 +43,16 @@ public interface AuditService {
      * @return записи из ЖА
      */
     public PagingResult<LogSearchResultItem> getLogsBusiness(LogSystemFilter filter, TAUserInfo userInfo);
+
+    /**
+     * Блокировка операции "Архивирование журнала событий"
+     * @param userInfo
+     */
+    LockData lock(TAUserInfo userInfo);
+
+    /**
+     * Снимает блокировку операции "Архивирование журнала событий"
+     * @param userInfo
+     */
+    void unlock(TAUserInfo userInfo);
 }

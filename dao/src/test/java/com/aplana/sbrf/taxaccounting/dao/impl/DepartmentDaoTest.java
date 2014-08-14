@@ -1,10 +1,10 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,6 +14,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.validation.ValidationException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -189,11 +190,10 @@ public class DepartmentDaoTest {
 
 	@Test
 	public void getPerformers2(){
-		Department department2 = departmentDao.getDepartment(2);
-		List<Integer> performers = departmentDao.getPerformers(asList(department2.getId()), asList(TaxType.TRANSPORT));
-		Assert.assertTrue("Department(id=2) has 1 performer", performers.size() == 1);
-		Assert.assertTrue("Department(id=2) has 1 performer with id = 1", performers.get(0) == 1);
-	}
+            Department department2 = departmentDao.getDepartment(2);
+            List<Integer> performers = departmentDao.getPerformers(asList(department2.getId()), asList(TaxType.TRANSPORT));
+            Assert.assertTrue("Department(id=2) has 1 performer", performers.size() == 1);            Assert.assertTrue("Department(id=2) has 1 performer with id = 1", performers.get(0) == 1);
+    }
 
     @Test
     public void getDepartmentIdsByExcutorsTest() {
@@ -234,4 +234,9 @@ public class DepartmentDaoTest {
     public void getDepartmentByCode2Test() {
         Assert.assertNull(departmentDao.getDepartmentByCode(-1));
     }
+
+//    @Test(expected = ValidationException.class)
+//    public void violationTest() throws Exception {
+//        departmentDao.getParentsHierarchy(null);
+//    }
 }

@@ -907,7 +907,7 @@ public final class ScriptUtils {
 
     private static void checkBeforeGetXml(BufferedInputStream inputStream, String fileName) {
         fileName = fileName != null ? fileName.toLowerCase() : null;
-        if (fileName == null || fileName == "") {
+        if (fileName == null || fileName.equals("")) {
             throw new ServiceException(EMPTY_FILE_NAME);
         }
         if (inputStream == null) {
@@ -957,9 +957,9 @@ public final class ScriptUtils {
                 msg = String.format(EMPTY_VALUE, indexRow, getColumnName(row, alias), valueExpected);
             }
             if (required) {
-                logger.error("%s", msg);
+                rowError(logger, row, msg);
             } else {
-                logger.warn("%s", msg);
+                rowWarning(logger, row, msg);
             }
         }
     }

@@ -37,6 +37,10 @@
         .borderCollapse{
             border-collapse: collapse;
         }
+
+        .searchCriteria {
+            font-weight:bold;
+        }
     </ui:style>
 
     <g:HorizontalPanel width="100%" verticalAlignment="middle" addStyleNames="{style.marginTop5}">
@@ -59,15 +63,23 @@
         <g:cell>
             <g:VerticalPanel spacing="0" width="300px" horizontalAlignment="left">
                 <g:HorizontalPanel spacing="2" verticalAlignment="middle" width="100%">
-                    <g:TextBox ui:field="filter" width="300px"/>
+                    <g:TextBox ui:field="filter" width="500px"/>
+                    <g:cell>
+                        <g:VerticalPanel spacing="0" width="150px">
+                            <g:Button ui:field="search" text="Найти" addStyleNames="{style.btnFind}"/>
+                        </g:VerticalPanel>
+                    </g:cell>
                 </g:HorizontalPanel>
-                <g:HorizontalPanel spacing="2" verticalAlignment="middle" width="100%">
+                <g:HorizontalPanel spacing="2" verticalAlignment="middle" width="75%">
                     <g:cell horizontalAlignment="right" width="115px">
                         <g:Label text="Искать по полям:" addStyleNames="{style.labelBlockMargin}"/>
                     </g:cell>
 
                     <r:RefBookPickerWidget ui:field="auditFieldList" title="Список полей" attributeIdInt="1050" visible="true" width="100%"
                                            isHierarchical="false" multiSelect="true" searchEnabled="false" versionEnabled="false"/>
+                    <g:cell horizontalAlignment="right" width="200px">
+                        <g:CheckBox ui:field="searchResults" text="Искать в найденном"/>
+                    </g:cell>
                 </g:HorizontalPanel>
             </g:VerticalPanel>
         </g:cell>
@@ -76,20 +88,14 @@
             <g:HTML addStyleNames="{style.separator}"/>
         </g:cell>
 
-        <g:cell>
-            <g:VerticalPanel spacing="0" width="150px">
-                <g:SubmitButton ui:field="search" text="Найти" addStyleNames="{style.btnFind}"/>
-                <g:CheckBox ui:field="searchResults" text="Искать в найденном" name="searchResult"/>
-            </g:VerticalPanel>
-        </g:cell>
-        <g:cell spacing="0" width="18px" horizontalAlignment="right">
-            <g:HTML addStyleNames="{style.separator}"/>
-        </g:cell>
-
         <g:cell width="100%">
-            <g:VerticalPanel spacing="0" width="100%">
-                <g:Label text="Критерии поиска:" addStyleNames="{style.labelBlockMargin}"/>
-                <g:Label ui:field="searchCriteria" text=" "/>
+            <g:VerticalPanel width="300px" horizontalAlignment="left">
+                <g:cell width="200px">
+                    <g:Label text="Критерии поиска:" addStyleNames="{style.searchCriteria}"/>
+                </g:cell>
+                <g:cell width="200px">
+                    <g:Label ui:field="searchCriteria" text="&nbsp;" addStyleNames="{style.marginTop5}"/>
+                </g:cell>
             </g:VerticalPanel>
         </g:cell>
     </g:HorizontalPanel>

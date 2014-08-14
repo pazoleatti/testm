@@ -44,6 +44,7 @@ public class CreateBookerStatementsHandler extends AbstractActionHandler<CreateB
     public CreateBookerStatementsResult execute(CreateBookerStatementsAction action, ExecutionContext context) throws ActionException {
         CreateBookerStatementsResult result = new CreateBookerStatementsResult();
         Logger logger = new Logger();
+        logger.setTaUserInfo(securityService.currentUserInfo());
         bookerStatementsService.create(logger, action.getYear(), action.getAccountPeriodId(), action.getBookerStatementsTypeId(), action.getDepartmentId(), securityService.currentUserInfo());
         result.setUuid(logEntryService.save(logger.getEntries()));
 

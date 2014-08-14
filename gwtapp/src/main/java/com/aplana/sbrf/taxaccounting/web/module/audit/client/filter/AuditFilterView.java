@@ -7,7 +7,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPicker;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
-import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
@@ -48,7 +48,7 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
 
     @Editor.Ignore
     @UiField
-    SubmitButton search;
+    Button search;
 
     @Editor.Ignore
     @UiField
@@ -89,6 +89,7 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
 
     @Override
     public void init() {
+        searchCriteria.setText("");
         driver.edit(new LogSystemAuditFilter());
         auditFieldList.setValue(Arrays.asList(AuditFieldList.ALL.getId()));
     }
@@ -100,6 +101,19 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
         fromSearchDate.setValue(new Date());
         toSearchDate.setValue(new Date());
         auditFieldList.setPeriodDates(new Date(), new Date());
+
+        KeyPressHandler keyPressHandler = new KeyPressHandler() {
+            @Override
+            public void onKeyPress(KeyPressEvent event) {
+                if (event.getUnicodeCharCode() == KeyCodes.KEY_ENTER) {
+                    search.click();
+                }
+            }
+        };
+
+        fromSearchDate.addKeyPressHandler(keyPressHandler);
+        toSearchDate.addKeyPressHandler(keyPressHandler);
+        filter.addKeyPressHandler(keyPressHandler);
 
         this.driver = driver;
         this.driver.initialize(this);
@@ -123,7 +137,7 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
                 if (sepFlag) errorStr.append(", ");
                 errorStr.append("\"Искать по полям\"");
             }
-            Dialog.errorMessage("Не заполнены обязательные поля", "Для выполнения поиска должны быть заполнены: " + errorStr.toString());
+            Dialog.errorMessage("Не заполнены обязательные поля", "Для выполнения поиска должны быть корректно заполнены " + errorStr.toString());
             return;
         }
 

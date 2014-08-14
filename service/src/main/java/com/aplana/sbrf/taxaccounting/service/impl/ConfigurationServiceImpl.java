@@ -12,17 +12,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static java.util.Arrays.asList;
 
 @Service
 @Transactional
 public class ConfigurationServiceImpl implements ConfigurationService {
-
+    private final static int MAX_LENGTH = 500;
     private final static String NOT_SET_ERROR = "Не задано значение поля «%s»!";
     private final static String DUBLICATE_SET_ERROR = "Значение «%s» уже задано!";
     private final static String ACCESS_READ_ERROR = "Нет прав на просмотр конфигурационных параметров приложения!";
@@ -32,20 +29,21 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private final static String READ_INFO = "«%s»: Присутствует доступ на чтение!";
     private final static String WRITE_INFO = "«%s»: Присутствует доступ на запись!";
     private final static String UNIQUE_PATH_ERROR = "«%s»: Значение параметра «%s» не может быть равно значению параметра «%s» для «%s»!";
+    private final static String MAX_LENGTH_ERROR = "«%s»: Длина значения превышает максимально допустимую (" + MAX_LENGTH + ")!";
 
     @Autowired
-	private ConfigurationDao configurationDao;
+    private ConfigurationDao configurationDao;
 
     @Autowired
     private DepartmentDao departmentDao;
 
-	@Override
-	public ConfigurationParamModel getAllConfig(TAUserInfo userInfo) {
+    @Override
+    public ConfigurationParamModel getAllConfig(TAUserInfo userInfo) {
         if (!userInfo.getUser().hasRole(TARole.ROLE_ADMIN) && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
             throw new AccessDeniedException(ACCESS_READ_ERROR);
-		}
-		return configurationDao.getAll();
-	}
+        }
+        return configurationDao.getAll();
+    }
 
     @Override
     public ConfigurationParamModel getByDepartment(Integer departmentId, TAUserInfo userInfo) {
@@ -56,15 +54,33 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     @Override
-	public void saveAllConfig(TAUserInfo userInfo, ConfigurationParamModel model, Logger logger) {
+    public void saveAllConfig(TAUserInfo userInfo, ConfigurationParamModel model, Logger logger) {
         if (model == null) {
             return;
         }
 
         // Права
-		if (!userInfo.getUser().hasRole(TARole.ROLE_ADMIN)){
-			throw new AccessDeniedException(ACCESS_WRITE_ERROR);
-		}
+        if (!userInfo.getUser().hasRole(TARole.ROLE_ADMIN)) {
+            throw new AccessDeniedException(ACCESS_WRITE_ERROR);
+        }
+
+        // Длина
+        for (ConfigurationParam parameter : model.keySet()) {
+            Map<Integer, List<String>> map = model.get(parameter);
+            if (map == null) {
+                continue;
+            }
+            for (List<String> valueList : map.values()) {
+                if  (valueList == null) {
+                    continue;
+                }
+                for (String value : valueList) {
+                    if (value != null && value.length() > MAX_LENGTH) {
+                        logger.error(MAX_LENGTH_ERROR, parameter.getCaption());
+                    }
+                }
+            }
+        }
 
         // Проверки общих параметров
         for (ConfigurationParam configurationParam : ConfigurationParam.values()) {
@@ -102,30 +118,30 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
         for (ConfigurationParam param : configurationParamSet) {
             for (int departmentId : departmentIdSet) {
-               List<String> list = model.get(param, departmentId);
-               if (list != null && !list.isEmpty()) {
-                   String value = list.get(0);
-                   // Проверка совпадения
-                   for (ConfigurationParam otherParam : configurationParamSet) {
-                       if (otherParam != param) {
-                           List<String> otherList = model.get(otherParam, departmentId);
-                           String otherValue = null;
-                           if (otherList != null && !otherList.isEmpty()) {
-                               otherValue = otherList.get(0);
-                           }
-                           if (value.equalsIgnoreCase(otherValue)) {
-                               Department department = departmentDao.getDepartment(departmentId);
-                               logger.error(UNIQUE_PATH_ERROR, value, param.getCaption(), otherParam.getCaption(),
-                                       department.getName());
-                               return;
-                           }
-                       }
-                   }
-               } else {
-                   // Не все указаны
-                   logger.error(NOT_SET_ERROR, param.getCaption());
-                   return;
-               }
+                List<String> list = model.get(param, departmentId);
+                if (list != null && !list.isEmpty()) {
+                    String value = list.get(0);
+                    // Проверка совпадения
+                    for (ConfigurationParam otherParam : configurationParamSet) {
+                        if (otherParam != param) {
+                            List<String> otherList = model.get(otherParam, departmentId);
+                            String otherValue = null;
+                            if (otherList != null && !otherList.isEmpty()) {
+                                otherValue = otherList.get(0);
+                            }
+                            if (value.equalsIgnoreCase(otherValue)) {
+                                Department department = departmentDao.getDepartment(departmentId);
+                                logger.error(UNIQUE_PATH_ERROR, value, param.getCaption(), otherParam.getCaption(),
+                                        department.getName());
+                                return;
+                            }
+                        }
+                    }
+                } else {
+                    // Не все указаны
+                    logger.error(NOT_SET_ERROR, param.getCaption());
+                    return;
+                }
             }
         }
         if (!logger.containsLevel(LogLevel.ERROR)) {
@@ -140,7 +156,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         }
 
         // Права
-        if (!userInfo.getUser().hasRole(TARole.ROLE_ADMIN)){
+        if (!userInfo.getUser().hasRole(TARole.ROLE_ADMIN)) {
             throw new AccessDeniedException(ACCESS_WRITE_ERROR);
         }
 

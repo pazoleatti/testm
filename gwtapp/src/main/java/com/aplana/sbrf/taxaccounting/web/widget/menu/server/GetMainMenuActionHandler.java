@@ -25,6 +25,7 @@ import com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.client.Uploa
 import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.GetMainMenuAction;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.GetMainMenuResult;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.MenuItem;
+import com.google.gwt.user.client.ui.MenuBar;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
@@ -133,7 +134,9 @@ public class GetMainMenuActionHandler extends
                                             + TYPE + "=" + menu.getMeta()));
                 }
             }
-            taxMenu.getSubMenu().add(new MenuItem("Загрузить ТФ", NUMBER_SIGN + UploadTransportDataTokens.uploadTransportData));
+            MenuItem menuItem = new MenuItem("Сервис", "", "Сервис");
+            menuItem.getSubMenu().add(new MenuItem("Загрузить ТФ", NUMBER_SIGN + UploadTransportDataTokens.uploadTransportData));
+            taxMenu.getSubMenu().add(menuItem);
             menuItems.add(taxMenu);
         }
 		

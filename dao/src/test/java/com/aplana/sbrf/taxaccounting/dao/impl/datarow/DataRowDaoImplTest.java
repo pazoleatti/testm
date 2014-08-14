@@ -36,8 +36,6 @@ public class DataRowDaoImplTest {
 	@Autowired
 	DataRowDao dataRowDao;
 
-    static Long cnt = 1L;
-
 	@Before
 	public void cleanDataRow() {
         ReflectionTestUtils.setField(dataRowDao, "dbUtils", BDUtilsMock.getBDUtils());
@@ -109,18 +107,6 @@ public class DataRowDaoImplTest {
 		return result;
 	}
 
-	private void checkIndexCorrect(List<DataRow<Cell>> dataRows) {
-		checkIndexCorrect(dataRows, new DataRowRange(1, dataRows.size()));
-	}
-	
-	private void checkIndexCorrect(List<DataRow<Cell>> dataRows, DataRowRange range) {
-		int from = range.getOffset();
-		int to =  range.getOffset() + dataRows.size();
-		for (int i = from; i < to; i++) {
-			Assert.assertEquals(Integer.valueOf(i), dataRows.get(i - from).getIndex());	
-		}
-	}
-
 	private Date getDate(int year, int month, int day) {
 		Calendar cal = Calendar.getInstance();
 		cal.set(Calendar.YEAR, year);
@@ -186,36 +172,7 @@ public class DataRowDaoImplTest {
 				new int[] { 100, 0 },
 				dataRowsToStringColumnValues(dataRowDao.getRows(fd, null, null)));
 	}
-/*
-	@Test
-	public void updateRowsSuccess() {
 
-		FormData fd = formDataDao.get(1);
-		List<DataRow<Cell>> dataRows = dataRowDao.getRows(fd, null, null);
-		List<DataRow<Cell>> dataRowsForUpdate = new ArrayList<DataRow<Cell>>();
-
-		DataRow<Cell> dr = dataRows.get(0);
-		dr.put("stringColumn", "11");
-		dr.put("numericColumn", 1.01);
-		Date date = getDate(2012, 11, 31);
-		dr.put("dateColumn", date);
-		dataRowsForUpdate.add(dr);
-
-		dr = dataRows.get(3);
-		dr.setAlias("newAlias0");
-		dr.put("stringColumn", "41");
-		dr.put("numericColumn", 2.02);
-		date = getDate(2013, 0, 1);
-		dr.put("dateColumn", date);
-		dataRowsForUpdate.add(dr);
-
-		dataRowDao.updateRows(fd, dataRowsForUpdate);
-		dataRows = dataRowDao.getRows(fd, null, null);
-		Assert.assertArrayEquals(new int[] { 11, 2, 3, 41, 5 },
-				dataRowsToStringColumnValues(dataRows));
-		checkIndexCorrect(dataRows);
-	}
-	*/
 	@Test(expected=DaoException.class)
 	public void updateRowsErrorDataRowId() {
 
@@ -235,142 +192,7 @@ public class DataRowDaoImplTest {
 
 		dataRowDao.updateRows(fd, dataRowsForUpdate);
 	}
-	
-	
-/*
-	@Test
-	public void updateRowsRepeatSuccess() {
 
-		FormData fd = formDataDao.get(1);
-		List<DataRow<Cell>> dataRows = dataRowDao.getRows(fd, null, null);
-		List<DataRow<Cell>> dataRowsForUpdate = new ArrayList<DataRow<Cell>>();
-
-		DataRow<Cell> dr = dataRows.get(0);
-		dr.put("stringColumn", "11");
-		dr.put("numericColumn", 1.01);
-		Date date = getDate(2012, 11, 31);
-		dr.put("dateColumn", date);
-		dataRowsForUpdate.add(dr);
-
-		dr = dataRows.get(3);
-		dr.setAlias("newAlias0");
-		dr.put("stringColumn", "41");
-		dr.put("numericColumn", 2.02);
-		date = getDate(2013, 0, 1);
-		dr.put("dateColumn", date);
-		dataRowsForUpdate.add(dr);
-
-		dataRowDao.updateRows(fd, dataRowsForUpdate);
-		dataRowsForUpdate.clear();
-		dataRows = dataRowDao.getRows(fd, null, null);
-
-		dr = dataRows.get(0);
-		dr.put("stringColumn", "111");
-		dr.put("numericColumn", 1.01);
-		date = getDate(2012, 11, 31);
-		dr.put("dateColumn", date);
-		dataRowsForUpdate.add(dr);
-
-		dataRowDao.updateRows(fd, dataRowsForUpdate);
-
-		dataRows = dataRowDao.getRows(fd, null, null);
-		Assert.assertArrayEquals(new int[] { 111, 2, 3, 41, 5 },
-				dataRowsToStringColumnValues(dataRows));
-		checkIndexCorrect(dataRows);
-	}
-	*/
-	
-	
-
-/*
-	@Test
-	public void updateRowsRepeat2Success() {
-
-		FormData fd = formDataDao.get(1);
-		List<DataRow<Cell>> dataRows = dataRowDao.getRows(fd, null, null);
-		Set<DataRow<Cell>> dataRowsForUpdate = new HashSet<DataRow<Cell>>();
-
-		DataRow<Cell> dr = dataRows.get(0);
-		dr.put("stringColumn", "11");
-		dr.put("numericColumn", 1.01);
-		Date date = getDate(2012, 11, 31);
-		dr.put("dateColumn", date);
-		dataRowsForUpdate.add(dr);
-
-		dr = dataRows.get(3);
-		dr.setAlias("newAlias0");
-		dr.put("stringColumn", "41");
-		dr.put("numericColumn", 2.02);
-		date = getDate(2013, 0, 1);
-		dr.put("dateColumn", date);
-		dataRowsForUpdate.add(dr);
-
-		dataRowDao.updateRows(fd, dataRowsForUpdate);
-
-		dr = dataRows.get(0);
-		dr.put("stringColumn", "111");
-		dr.put("numericColumn", 1.01);
-		date = getDate(2012, 11, 31);
-		dr.put("dateColumn", date);
-		dataRowsForUpdate.add(dr);
-
-		dataRowDao.updateRows(fd, dataRowsForUpdate);
-
-		dataRows = dataRowDao.getRows(fd, null, null);
-		Assert.assertArrayEquals(new int[] { 111, 2, 3, 41, 5 },
-				dataRowsToStringColumnValues(dataRows));
-		checkIndexCorrect(dataRows);
-	}
-*/
-
-/*	@Test
-	public void insertRowsByIndexCenterSuccess() {
-
-		FormData fd = formDataDao.get(1);
-		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
-
-		DataRow<Cell> dr = fd.createDataRow();
-		dr.put("stringColumn", "21");
-		dr.put("numericColumn", 1.01);
-		Date date = getDate(2012, 11, 31);
-		dr.put("dateColumn", date);
-		dataRows.add(dr);
-
-		dr = fd.createDataRow();
-		dr.setAlias("newAlias0");
-		dr.put("stringColumn", "22");
-		dr.put("numericColumn", 2.02);
-		date = getDate(2013, 0, 1);
-		dr.put("dateColumn", date);
-		dataRows.add(dr);
-
-		dataRowDao.insertRows(fd, 3, dataRows);
-		dataRows = dataRowDao.getRows(fd, null, null);
-		Assert.assertArrayEquals(new int[] { 1, 2, 21, 22, 3, 4, 5 },
-				dataRowsToStringColumnValues(dataRows));
-		checkIndexCorrect(dataRows);
-	}*/
-	
-/*	@SuppressWarnings("unchecked")
-	@Test
-	public void maodifyAndSaveSuccess() {
-
-		FormData fd = formDataDao.get(1);
-		List<DataRow<Cell>> dataRows = dataRowDao.getRows(fd, null, null);
-		checkIndexCorrect(dataRows);
-
-		DataRow<Cell> dr = fd.createDataRow();
-		dr.put("stringColumn", "21");
-		dr.put("numericColumn", 1.01);
-		Date date = getDate(2012, 11, 31);
-		dr.put("dateColumn", date);
-
-		dataRowDao.insertRows(fd, 1, Arrays.asList(dr));
-		dataRows.add(1, dr);
-		dataRowDao.saveRows(fd, dataRows);
-		checkIndexCorrect(dataRowDao.getRows(fd, null, null));
-	}
-	*/
 	@Test(expected=IllegalArgumentException.class)
 	public void maodifyAndSaveErrorDublicat() {
 
@@ -387,66 +209,6 @@ public class DataRowDaoImplTest {
 		dataRows.add(2, dr);
 		dataRowDao.saveRows(fd, dataRows);
 	}
-
-/*	@Test
-	public void insertRowsRepeatedlySuccess() {
-
-		FormData fd = formDataDao.get(1);
-		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
-
-		DataRow<Cell> dr = fd.createDataRow();
-		dr.put("stringColumn", "21");
-		dr.put("numericColumn", 1.01);
-		Date date = getDate(2012, 11, 31);
-		dr.put("dateColumn", date);
-		dataRows.add(dr);
-
-		dr = fd.createDataRow();
-		dr.setAlias("newAlias0");
-		dr.put("stringColumn", "22");
-		dr.put("numericColumn", 2.02);
-		date = getDate(2013, 0, 1);
-		dr.put("dateColumn", date);
-		dataRows.add(dr);
-
-		dataRowDao.insertRows(fd, 3, dataRows);
-		dataRowDao.insertRows(fd, 3, dataRows);
-
-        dataRows = dataRowDao.getRows(fd, null, null);
-		Assert.assertArrayEquals(new int[] { 1, 2, 21, 22, 21, 22, 3, 4, 5 },
-				dataRowsToStringColumnValues(dataRows));
-		checkIndexCorrect(dataRows);
-	}*/
-
-/*
-	@Test
-	public void insertRowsByIndexLastSuccess() {
-
-		FormData fd = formDataDao.get(1);
-		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
-
-		DataRow<Cell> dr = fd.createDataRow();
-		dr.put("stringColumn", "51");
-		dr.put("numericColumn", 1.01);
-		Date date = getDate(2012, 11, 31);
-		dr.put("dateColumn", date);
-		dataRows.add(dr);
-
-		dr = fd.createDataRow();
-		dr.setAlias("newAlias0");
-		dr.put("stringColumn", "52");
-		dr.put("numericColumn", 2.02);
-		date = getDate(2013, 0, 1);
-		dr.put("dateColumn", date);
-		dataRows.add(dr);
-
-		dataRowDao.insertRows(fd, 6, dataRows);
-		Assert.assertArrayEquals(
-				new int[] { 1, 2, 3, 4, 5, 51, 52 },
-				dataRowsToStringColumnValues(dataRowDao.getRows(fd, null, null)));
-		checkIndexCorrect(dataRowDao.getRows(fd, null, null));
-	}
-*/
 
 	@Test
 	public void insertRowsByIndexFirstSuccess() {
@@ -646,40 +408,6 @@ public class DataRowDaoImplTest {
 				dataRowsToStringColumnValues(dataRowDao.getRows(fd, null, null)));
 	}
 
-/*
-	@Test
-	public void getRowsRange1Success() {
-		FormData fd = formDataDao.get(1);
-		DataRowRange range = new DataRowRange(2, 3);
-		Assert.assertArrayEquals(new int[] { 2, 3, 4 },
-				dataRowsToStringColumnValues(dataRowDao
-						.getRows(fd, null, range)));
-		checkIndexCorrect(dataRowDao.getRows(fd, null, range), range);
-	}
-*/
-
-/*	@Test
-	public void getRowsRange2Success() {
-		FormData fd = formDataDao.get(1);
-		DataRowRange range = new DataRowRange(1, 2);
-		Assert.assertArrayEquals(new int[] { 1, 2 },
-				dataRowsToStringColumnValues(dataRowDao
-						.getRows(fd, null, range)));
-		checkIndexCorrect(dataRowDao.getRows(fd, null, range), range);
-	}*/
-
-/*
-	@Test
-	public void getRowsRange3Success() {
-		FormData fd = formDataDao.get(1);
-		DataRowRange range = new DataRowRange(5, 1);
-		Assert.assertArrayEquals(new int[] { 5 },
-				dataRowsToStringColumnValues(dataRowDao
-						.getRows(fd, null, range)));
-		checkIndexCorrect(dataRowDao.getRows(fd, null, range), range);
-	}
-*/
-
 	@Test
 	public void getSavedRowsSuccess() {
 		FormData fd = formDataDao.get(1, false);
@@ -687,165 +415,6 @@ public class DataRowDaoImplTest {
 				dataRowsToStringColumnValues(dataRowDao.getSavedRows(fd, null,
 						null)));
 	}
-
-/*
-	@Test
-	public void getSavedRowsRange1Success() {
-		FormData fd = formDataDao.get(1);
-		DataRowRange range = new DataRowRange(2, 3);
-		Assert.assertArrayEquals(new int[] { 2, 3, 4 },
-				dataRowsToStringColumnValues(dataRowDao.getSavedRows(fd, null,
-						range)));
-	}
-
-/*	@Test
-	public void getSavedRowsRange2Success() {
-		FormData fd = formDataDao.get(1);
-		DataRowRange range = new DataRowRange(1, 2);
-		Assert.assertArrayEquals(new int[] { 1, 2 },
-				dataRowsToStringColumnValues(dataRowDao.getSavedRows(fd, null,
-						range)));
-
-	@Test
-	public void getSavedRowsRange3Success() {
-		FormData fd = formDataDao.get(1);
-		DataRowRange range = new DataRowRange(5, 1);
-		Assert.assertArrayEquals(new int[] { 5 },
-				dataRowsToStringColumnValues(dataRowDao.getSavedRows(fd, null,
-						range)));
-	}
-
-/*	@Test
-	public void commitSuccess() {
-		FormData fd = formDataDao.get(1);
-		List<DataRow<Cell>> dataRows = dataRowDao.getRows(fd, null, null);
-		Set<DataRow<Cell>> dataRowsForUpdate = new HashSet<DataRow<Cell>>();
-
-		DataRow<Cell> dr = dataRows.get(0);
-		dr.put("stringColumn", "11");
-		dr.put("numericColumn", 1.01);
-		Date date = getDate(2012, 11, 31);
-		dr.put("dateColumn", date);
-		dataRowsForUpdate.add(dr);
-
-		dr = dataRows.get(3);
-		dr.setAlias("newAlias0");
-		dr.put("stringColumn", "41");
-		dr.put("numericColumn", 2.02);
-		date = getDate(2013, 0, 1);
-		dr.put("dateColumn", date);
-		dataRowsForUpdate.add(dr);
-
-		dataRowDao.updateRows(fd, dataRowsForUpdate);
-
-		dr = dataRows.get(0);
-		dr.put("stringColumn", "111");
-		dr.put("numericColumn", 1.01);
-		date = getDate(2012, 11, 31);
-		dr.put("dateColumn", date);
-		dataRowsForUpdate.add(dr);
-
-		dataRowDao.updateRows(fd, dataRowsForUpdate);
-		dataRowDao.removeRows(fd, 4, 5);
-		dataRowDao.insertRows(fd, 4, dataRows);
-		dataRowDao.commit(fd.getId());
-		dataRowDao.rollback(fd.getId());
-		dataRowDao.commit(fd.getId());
-		dataRowDao.rollback(fd.getId());
-		dataRowDao.commit(fd.getId());
-		dataRowDao.rollback(fd.getId());
-
-		
-
-		dataRows = dataRowDao.getRows(fd, null, null);
-		Assert.assertArrayEquals(new int[] { 111, 2, 3, 111, 2, 3, 41, 5 },
-				dataRowsToStringColumnValues(dataRows));
-		checkIndexCorrect(dataRows);
-
-		dataRows = dataRowDao.getSavedRows(fd, null, null);
-		Assert.assertArrayEquals(new int[] { 111, 2, 3, 111, 2, 3, 41, 5 },
-				dataRowsToStringColumnValues(dataRows));
-		checkIndexCorrect(dataRows);
-
-	}*/
-
-/*	@Test
-	public void rollbackSuccess() {
-		FormData fd = formDataDao.get(1);
-		List<DataRow<Cell>> dataRows = dataRowDao.getRows(fd, null, null);
-		Set<DataRow<Cell>> dataRowsForUpdate = new HashSet<DataRow<Cell>>();
-
-		DataRow<Cell> dr = dataRows.get(0);
-		dr.put("stringColumn", "11");
-		dr.put("numericColumn", 1.01);
-		Date date = getDate(2012, 11, 31);
-		dr.put("dateColumn", date);
-		dataRowsForUpdate.add(dr);
-
-		dr = dataRows.get(3);
-		dr.setAlias("newAlias0");
-		dr.put("stringColumn", "41");
-		dr.put("numericColumn", 2.02);
-		date = getDate(2013, 0, 1);
-		dr.put("dateColumn", date);
-		dataRowsForUpdate.add(dr);
-
-		dataRowDao.updateRows(fd, dataRowsForUpdate);
-
-		dr = dataRows.get(0);
-		dr.put("stringColumn", "111");
-		dr.put("numericColumn", 1.01);
-		date = getDate(2012, 11, 31);
-		dr.put("dateColumn", date);
-		dataRowsForUpdate.add(dr);
-
-		dataRowDao.updateRows(fd, dataRowsForUpdate);
-		dataRowDao.removeRows(fd, 4, 5);
-		dataRowDao.insertRows(fd, 4, dataRows);
-		dataRowDao.rollback(fd.getId());
-		dataRowDao.rollback(fd.getId());
-		dataRowDao.rollback(fd.getId());
-		dataRowDao.commit(fd.getId());
-		dataRowDao.commit(fd.getId());
-		dataRowDao.commit(fd.getId());
-
-		dataRows = dataRowDao.getRows(fd, null, null);
-		Assert.assertArrayEquals(new int[] { 1, 2, 3, 4, 5 },
-				dataRowsToStringColumnValues(dataRows));
-		checkIndexCorrect(dataRows);
-
-		dataRows = dataRowDao.getSavedRows(fd, null, null);
-		Assert.assertArrayEquals(new int[] { 1, 2, 3, 4, 5 },
-				dataRowsToStringColumnValues(dataRows));
-		checkIndexCorrect(dataRows);
-
-	}
-	*/
-/*	@Test
-	public void performance() {
-
-		FormData fd = formDataDao.get(1);
-		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
-
-		for (int i = 0; i < 5000; i++) {
-			DataRow<Cell> dr = fd.createDataRow();
-			dr.put("stringColumn", String.valueOf(i + 1));
-			dr.put("numericColumn", 1.01);
-			Date date = getDate(2012, 11, 31);
-			dr.put("dateColumn", date);
-			dataRows.add(dr);
-		}
-
-		dataRowDao.removeRows(fd);
-		dataRowDao.insertRows(fd, 1, dataRows);
-		dataRowDao.updateRows(fd, dataRows);
-		//dataRowDao.rollback(fd);
-		dataRowDao.commit(fd.getId());
-		//dataRowDao.rollback(fd);
-		dataRows = dataRowDao.getRows(fd, null, null);
-		checkIndexCorrect(dataRows);
-		Assert.assertEquals(5000, dataRows.size());
-	}*/
 
 	@Test
 	public void repackORDSuccessFirst() {

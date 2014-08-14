@@ -2,10 +2,12 @@ package com.aplana.sbrf.taxaccounting.refbook;
 
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +28,7 @@ import java.util.Map;
  */
 
 public interface RefBookDataProvider {
+    final static String LOCK_MESSAGE = "Операция не может быть выполнена. Справочник заблокирован другой операцией!";
 
 	/**
 	 * Загружает данные справочника на определенную дату актуальности
@@ -35,7 +38,7 @@ public interface RefBookDataProvider {
 	 * @param sortAttribute сортируемый столбец. Может быть не задан
 	 * @return
 	 */
-	PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams,
+	PagingResult<Map<String, RefBookValue>> getRecords(@NotNull Date version, PagingParams pagingParams,
 		String filter, RefBookAttribute sortAttribute, boolean isSortAscending);
 
     /**
@@ -49,6 +52,15 @@ public interface RefBookDataProvider {
      */
     PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams,
                                                        String filter, RefBookAttribute sortAttribute);
+
+    /**
+     * Возвращает версии элементов справочника, удовлетворяющие указанному фильтру
+     * @param version дата актуальности. Может быть null - тогда не учитывается
+     * @param needAccurateVersion признак того, что нужно точное совпадение по дате начала действия записи
+     * @param filter фильтр для отбора записей
+     * @return пары идентификатор версии элемента - идентификатор элемента справочника
+     */
+    List<Pair<Long, Long>> getRecordIdPairs(Long refBookId, Date version, Boolean needAccurateVersion, String filter);
 
     /**
      * Получает уникальные идентификаторы записей, удовлетворяющих условиям фильтра
@@ -113,7 +125,7 @@ public interface RefBookDataProvider {
 	 * @param recordId код строки справочника
 	 * @return
 	 */
-	Map<String, RefBookValue> getRecordData(Long recordId);
+	Map<String, RefBookValue> getRecordData(@NotNull Long recordId);
 
     /**
      * Получение структуры Код строки → Строка справочника по списку кодов строк
@@ -250,7 +262,7 @@ public interface RefBookDataProvider {
      * Вместо этого метода надо использовать {@link RefBookDataProvider#createRecordVersion}
      */
     @Deprecated
-    void insertRecords(Date version, List<Map<String, RefBookValue>> records);
+    void insertRecords(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records);
 
     /**
      * Обновляет значения в справочнике
@@ -260,7 +272,7 @@ public interface RefBookDataProvider {
      * Вместо этого метода надо использовать {@link RefBookDataProvider#updateRecordVersion}
      */
     @Deprecated
-    void updateRecords(Date version, List<Map<String, RefBookValue>> records);
+    void updateRecords(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records);
 
     /**
      * Удаляет записи из справочника
@@ -270,7 +282,7 @@ public interface RefBookDataProvider {
      * Вместо этого метода надо использовать {@link RefBookDataProvider#deleteRecordVersions}
      */
     @Deprecated
-    void deleteRecords(Date version, List<Long> recordIds);
+    void deleteRecords(TAUserInfo taUserInfo, Date version, List<Long> recordIds);
 
     /**
      * Удаление всех записей справочника
@@ -279,5 +291,5 @@ public interface RefBookDataProvider {
      * Вместо этого метода надо использовать {@link RefBookDataProvider#deleteAllRecords}
      */
     @Deprecated
-    void deleteAllRecords(Date version);
+    void deleteAllRecords(TAUserInfo taUserInfo, Date version);
 }

@@ -27,11 +27,7 @@ import static java.util.Arrays.asList;
 public class FillFormTypesHandler extends AbstractActionHandler<FillFormTypesAction, FillFormTypesResult> {
 
     @Autowired
-    private FormDataSearchService formDataSearchService;
-
-    @Autowired
     private FormDataAccessService dataAccessService;
-
 
     @Autowired
     private SecurityService securityService;

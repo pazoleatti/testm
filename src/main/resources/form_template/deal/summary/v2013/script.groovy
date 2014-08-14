@@ -470,7 +470,7 @@ def buildRow(def srcRow, def matrixRow) {
         case 384: // 9
             if (srcRow.transactionMode != null) {
                 def val16Rec = getRefBookValue(14, srcRow.transactionMode)
-                if (val16Rec.ID != null && val16Rec.ID == 1) {
+                if (val16Rec.ID != 2) {
                     val16 = 2
                 }
             }

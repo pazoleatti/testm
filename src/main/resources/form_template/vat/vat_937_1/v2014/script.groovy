@@ -59,6 +59,9 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
+        break
 }
 
 @Field
@@ -384,6 +387,78 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol = 12
         dataRows[i - 1].diff = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
     }
+}
+
+void importTransportData() {
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    addTransportData(xml)
+}
+
+void addTransportData(def xml) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    def int rnuIndexRow = 2
+    def int colOffset = 1
+
+    for (int i in [2, 4, 5, 6]) {
+        rnuIndexRow++
+        def row = xml.row[i - 1]
+
+        // графа 1
+        def xmlIndexCol = 1
+        if (i != 2) { // пропускаем вторую строку
+            dataRows[i - 1].period = row.cell[xmlIndexCol].text()
+        }
+
+        // графа 2
+        xmlIndexCol = 2
+        dataRows[i - 1].bill = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 3
+        xmlIndexCol = 3
+        dataRows[i - 1].dealNds = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 4
+        xmlIndexCol = 4
+        dataRows[i - 1].deal_20 = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 5
+        xmlIndexCol = 5
+        dataRows[i - 1].deal_20_Nds = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 6
+        xmlIndexCol = 6
+        dataRows[i - 1].deal_18 = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 7
+        xmlIndexCol = 7
+        dataRows[i - 1].deal_18_Nds = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 8
+        xmlIndexCol = 8
+        dataRows[i - 1].deal_10 = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 9
+        xmlIndexCol = 9
+        dataRows[i - 1].deal_10_Nds = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 10
+        xmlIndexCol = 10
+        dataRows[i - 1].deal_0 = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 11
+        xmlIndexCol = 11
+        dataRows[i - 1].deal = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 12
+        xmlIndexCol = 12
+        dataRows[i - 1].nds = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+
+        // графа 13
+        xmlIndexCol = 13
+        dataRows[i - 1].diff = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+    }
+    dataRowHelper.save(dataRows)
 }
 
 def checkOverflowAlgorithm(BigDecimal value, DataRow<Cell> row, String alias, int index, int size, String algorithm) {

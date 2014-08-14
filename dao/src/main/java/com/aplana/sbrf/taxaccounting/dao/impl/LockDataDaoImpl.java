@@ -39,7 +39,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
 	}
 
 	@Override
-	public void createLock(String key, long userId, Date dateBefore) {
+	public void createLock(String key, int userId, Date dateBefore) {
 		try {
 			getJdbcTemplate().update("INSERT INTO lock_data (key, user_id, date_before) VALUES (?,?,?)",
 					new Object[] {key,

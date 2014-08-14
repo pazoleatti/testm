@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.scheduler.api.manager;
 
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskContext;
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskData;
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskJndiInfo;
@@ -93,5 +94,5 @@ public interface TaskManager {
      * @return информация о задачах
      * @throws TaskSchedulingException
      */
-    List<TaskJndiInfo> getTasksJndi() throws TaskSchedulingException;
+    List<TaskJndiInfo> getTasksJndi(TAUserInfo userInfo) throws TaskSchedulingException;
 }

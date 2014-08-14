@@ -13,6 +13,8 @@ import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
+import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
@@ -97,7 +99,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private LockCoreService lockCoreService;
 
     @Autowired
-    private TAUserDao userDao;
+    private TransactionHelper tx;
 
 	public static final String TAG_FILE = "Файл";
 	public static final String TAG_DOCUMENT = "Документ";
@@ -139,7 +141,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 		auditService.add(FormDataEvent.CREATE , userInfo, newDeclaration.getDepartmentId(),
 				newDeclaration.getReportPeriodId(),
 				declarationTemplateDao.get(newDeclaration.getDeclarationTemplateId()).getType().getName(),
-				null, null, null);
+				null, null, null, null);
 		return id;
 	}
 
@@ -175,7 +177,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 		auditService.add(FormDataEvent.SAVE , userInfo, declarationData.getDepartmentId(),
 				declarationData.getReportPeriodId(),
 				declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getType().getName(),
-				null, null, null);
+				null, null, null, null);
 	}
 
 	@Override
@@ -211,7 +213,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 			auditService.add(FormDataEvent.DELETE , userInfo, declarationData.getDepartmentId(),
 					declarationData.getReportPeriodId(),
 					declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getType().getName(),
-					null, null, null);
+					null, null, null, null);
 
 	}
 
@@ -234,7 +236,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             String declarationTypeName = declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getType().getName();
             logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, null);
             auditService.add(FormDataEvent.MOVE_CREATED_TO_ACCEPTED , userInfo, declarationData.getDepartmentId(),
-                    declarationData.getReportPeriodId(), declarationTypeName, null, null, null);
+                    declarationData.getReportPeriodId(), declarationTypeName, null, null, null, null);
 		} else {
 			declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_ACCEPTED_TO_CREATED);
 
@@ -247,7 +249,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             String declarationTypeName = declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getType().getName();
 			logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, null);
 			auditService.add(FormDataEvent.MOVE_ACCEPTED_TO_CREATED , userInfo, declarationData.getDepartmentId(),
-					declarationData.getReportPeriodId(), declarationTypeName, null, null, null);
+					declarationData.getReportPeriodId(), declarationTypeName, null, null, null, null);
 
 		}
 		declarationDataDao.setAccepted(id, accepted);
@@ -545,9 +547,19 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void unlock(long declarationDataId, TAUserInfo userInfo) {
-        lockCoreService.unlock(DeclarationData.class, declarationDataId, userInfo);
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void unlock(final long declarationDataId, final TAUserInfo userInfo) {
+        tx.executeInNewTransaction(new TransactionLogic() {
+            @Override
+            public void execute() {
+                lockCoreService.unlock(DeclarationData.class, declarationDataId, userInfo);
+            }
+
+            @Override
+            public Object executeWithReturn() {
+                return null;
+            }
+        });
     }
 
     @Override

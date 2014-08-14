@@ -97,7 +97,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         try {
             return declarationTemplateDao.getActiveDeclarationTemplateId(declarationTypeId, reportPeriodId);
         } catch (DaoException e){
-            throw new ServiceException("Ошибка при получении активного шаблона декларации.", e);
+            throw new ServiceException(e.getMessage(), e);
         }
 
 	}

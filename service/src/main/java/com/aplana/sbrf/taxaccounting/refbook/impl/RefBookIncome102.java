@@ -44,6 +44,11 @@ public class RefBookIncome102 implements RefBookDataProvider {
     }
 
     @Override
+    public List<Pair<Long, Long>> getRecordIdPairs(Long refBookId, Date version, Boolean needAccurateVersion, String filter) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public List<Long> getUniqueRecordIds(Date version, String filter) {
             return dao.getUniqueRecordIds(filter);
     }
@@ -95,22 +100,22 @@ public class RefBookIncome102 implements RefBookDataProvider {
     }
 
     @Override
-    public void insertRecords(Date version, List<Map<String, RefBookValue>> records) {
+    public void insertRecords(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records) {
 		throw new UnsupportedOperationException();
     }
 
     @Override
-    public void updateRecords(Date version, List<Map<String, RefBookValue>> records) {
+    public void updateRecords(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records) {
         dao.updateRecords(records);
     }
 
     @Override
-    public void deleteRecords(Date version, List<Long> recordIds) {
+    public void deleteRecords(TAUserInfo taUserInfo, Date version, List<Long> recordIds) {
 		throw new UnsupportedOperationException();
     }
 
     @Override
-    public void deleteAllRecords(Date version) {
+    public void deleteAllRecords(TAUserInfo taUserInfo, Date version) {
 		throw new UnsupportedOperationException();
     }
 

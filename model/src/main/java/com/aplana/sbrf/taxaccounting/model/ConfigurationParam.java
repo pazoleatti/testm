@@ -9,6 +9,7 @@ package com.aplana.sbrf.taxaccounting.model;
 public enum ConfigurationParam {
     // Общие
     KEY_FILE("Путь к файлу ключей ЭЦП", true, false, false, 1),
+    SIGN_CHECK("Проверять ЭЦП", true, true, false, 0),
     ACCOUNT_PLAN_UPLOAD_DIRECTORY("Путь к каталогу загрузки транспортных файлов, содержащих данные справочника «План счетов»", true, true, true, 1),
     OKATO_UPLOAD_DIRECTORY("Путь к каталогу загрузки транспортных файлов, содержащих данные справочника «ОКАТО»", true, true, true, 1),
     REGION_UPLOAD_DIRECTORY("Путь к каталогу загрузки транспортных файлов, содержащих данные справочника «Субъекты РФ»", true, true, true, 1),
@@ -18,7 +19,8 @@ public enum ConfigurationParam {
     // Загрузка НФ
     FORM_UPLOAD_DIRECTORY("Путь к каталогу загрузки", false, true, true, 2),
     FORM_ARCHIVE_DIRECTORY("Путь к каталогу архива", false, true, true, 2),
-    FORM_ERROR_DIRECTORY("Путь к каталогу ошибок", false, true, true, 2);
+    FORM_ERROR_DIRECTORY("Путь к каталогу ошибок", false, true, true, 2),
+    ENCRYPT_DLL("Путь к библиотеке подписи", true, true, true, 1);
 
     private String caption;
     private boolean common;

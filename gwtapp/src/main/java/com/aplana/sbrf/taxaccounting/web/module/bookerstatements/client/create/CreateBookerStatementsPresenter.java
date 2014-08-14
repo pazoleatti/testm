@@ -85,6 +85,7 @@ public class CreateBookerStatementsPresenter extends PresenterWidget<CreateBooke
                 .wrongStateCallback(new AbstractCallback<BookerStatementsFieldsResult>() {
                     @Override
                     public void onSuccess(BookerStatementsFieldsResult result) {
+                        getView().setYear(result.getYear());
                         getView().setBookerReportTypes(Arrays.asList(BookerStatementsType.values()));
                         getView().setAcceptableDepartments(result.getDepartments(), result.getDepartmentIds());
                         slotForMe.addToPopupSlot(CreateBookerStatementsPresenter.this);

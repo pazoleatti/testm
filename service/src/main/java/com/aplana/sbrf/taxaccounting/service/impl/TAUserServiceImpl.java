@@ -13,6 +13,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -27,7 +28,16 @@ public class TAUserServiceImpl implements TAUserService {
 	@Autowired
 	DepartmentDao departmentDao;
 
-    private final Log logger = LogFactory.getLog(getClass());
+	TAUserInfo systemUserInfo;
+
+    private static final Log logger = LogFactory.getLog(TAUserServiceImpl.class);
+
+	@PostConstruct
+	private void init() {
+		systemUserInfo = new TAUserInfo();
+		systemUserInfo.setIp("127.0.0.1");
+		systemUserInfo.setUser(getUser(TAUser.SYSTEM_USER_ID));
+	}
 
 	/**
 	 * Проверяет, есть ли пользователь с таким логином.
@@ -59,6 +69,11 @@ public class TAUserServiceImpl implements TAUserService {
 	@Override
 	public TAUser getUser(int userId) {
 		return userDao.getUser(userId);
+	}
+
+	@Override
+	public TAUserInfo getSystemUserInfo() {
+		return systemUserInfo;
 	}
 
 	@Override

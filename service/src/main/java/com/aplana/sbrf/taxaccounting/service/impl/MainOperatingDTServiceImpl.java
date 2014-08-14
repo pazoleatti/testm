@@ -80,7 +80,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
 
         int id = declarationTemplateService.save(declarationTemplate);
 
-        logging(id, TemplateChangesEvent.MODIFIED, user);
+        logging(id, FormDataEvent.TEMPLATE_MODIFIED, user);
         return id;
     }
 
@@ -99,7 +99,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
         declarationTemplate.setStatus(VersionedObjectStatus.DRAFT);
         int id = declarationTemplateService.save(declarationTemplate);
 
-        logging(id, TemplateChangesEvent.CREATED, user);
+        logging(id, FormDataEvent.TEMPLATE_CREATED, user);
         return id;
     }
 
@@ -114,7 +114,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
         checkError(logger, SAVE_MESSAGE);
         int id = declarationTemplateService.save(declarationTemplate);
 
-        logging(id, TemplateChangesEvent.CREATED, user);
+        logging(id, FormDataEvent.TEMPLATE_CREATED, user);
         return id;
     }
 
@@ -148,14 +148,14 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
     }
 
     @Override
-    public boolean deleteVersionTemplate(int templateId, Date templateActualEndDate, Logger logger, TAUser user) {
+    public boolean deleteVersionTemplate(int templateId, Logger logger, TAUser user) {
         boolean isDeleteAll = false;//переменная определяющая, удалена ли все версии макета
         DeclarationTemplate template = declarationTemplateService.get(templateId);
         Date dateEndActualize = declarationTemplateService.getDTEndDate(templateId);
         versionOperatingService.isUsedVersion(template.getId(), template.getType().getId(),
                 template.getStatus(), template.getVersion(), dateEndActualize, logger);
         checkError(logger, DELETE_TEMPLATE_VERSION_MESSAGE);
-        versionOperatingService.checkDestinationsSources(template.getType().getId(), template.getVersion(), templateActualEndDate, logger);
+        versionOperatingService.checkDestinationsSources(template.getType().getId(), template.getVersion(), dateEndActualize, logger);
         checkError(logger, DELETE_TEMPLATE_VERSION_MESSAGE);
 
         versionOperatingService.cleanVersions(template.getId(), template.getType().getId(),
@@ -178,7 +178,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
             logger.info("Макет удален в связи с удалением его последней версии");
             isDeleteAll = true;
         }
-        logging(templateId, TemplateChangesEvent.DELETED, user);
+        logging(templateId, FormDataEvent.TEMPLATE_DELETED, user);
         return isDeleteAll;
     }
 
@@ -192,11 +192,11 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
             if (!force && logger.containsLevel(LogLevel.ERROR)) return false;
             declarationTemplate.setStatus(VersionedObjectStatus.DRAFT);
             declarationTemplateService.updateVersionStatus(VersionedObjectStatus.DRAFT, templateId);
-            logging(templateId, TemplateChangesEvent.DEACTIVATED, user);
+            logging(templateId, FormDataEvent.TEMPLATE_DEACTIVATED, user);
         } else {
             declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);
             declarationTemplateService.updateVersionStatus(VersionedObjectStatus.NORMAL, templateId);
-            logging(templateId, TemplateChangesEvent.ACTIVATED, user);
+            logging(templateId, FormDataEvent.TEMPLATE_ACTIVATED, user);
         }
         return true;
     }
@@ -206,7 +206,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
             throw new ServiceLoggerException(errorMsg, logEntryService.save(logger.getEntries()));
     }
 
-    private void logging(int id, TemplateChangesEvent event, TAUser user){
+    private void logging(int id, FormDataEvent event, TAUser user){
         TemplateChanges changes = new TemplateChanges();
         changes.setEvent(event);
         changes.setEventDate(new Date());

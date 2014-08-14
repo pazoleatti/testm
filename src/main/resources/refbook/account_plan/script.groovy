@@ -18,7 +18,12 @@ import java.text.SimpleDateFormat
  * План счетов бухгалтерского учета
  * blob_data.id = 'e2a67f8a-b976-4696-a778-f21a0e602a3f'
  * ref_book_id = 101
+ *
+ * TODO:
+ *      - оставил логи (log), потом убрать
+ *      - оставил вывод в конце скрипта по мапе tmpMap (мапу тоже потом убрать)
  */
+
 switch (formDataEvent) {
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importFromXML()
@@ -31,11 +36,20 @@ SimpleDateFormat sdf = new SimpleDateFormat('yyyy.MM.dd')
 @Field
 def fileRowIndexMap = [:]
 
+@Field
+def REF_BOOK_ID = 101L
+
 // Импорт записей из XML-файла
 void importFromXML() {
-    def dataProvider = refBookFactory.getDataProvider(101L)
+    def dataProvider = refBookFactory.getDataProvider(REF_BOOK_ID)
     def defaultDate = sdf.parse('1970.01.01')
     def fileRecords = getFileRecords(inputStream)
+
+    def tmpMap = [:]
+    def tmpList = (-10..10)
+    tmpList.each {
+        tmpMap[it] = []
+    }
 
     for (def row : fileRecords) {
         def BSSCH    = row?.BSSCH?.value    // Номер счета
@@ -45,37 +59,35 @@ void importFromXML() {
         def END_DATE = row?.END_DATE?.value // Дата закрытия
 
         def date = getSearchDate(DATE, BEG_DATE, END_DATE)
-        def filter = "ACCOUNT = '$BSSCH'"
-        def records = dataProvider.getRecords(date, null, filter, null)
+        def isNewRecord = false
+        def isFirstVersionRecord = null
+        def isLastVersionRecord = null
+        def actualRecordId = null
 
-        // провека нескольких записей с максимальной датой
-        def versionMap = [:]
-        def maxRecord = null
-        RefBookRecordVersion maxRecordVersion = null
-        def count = 0
-        for (def record : records) {
-            def id = record?.record_id?.value
-            RefBookRecordVersion recordVersion = dataProvider.getRecordVersionInfo(id)
-            versionMap[id] = recordVersion
-            if (maxRecordVersion == null || maxRecordVersion.versionEnd < recordVersion.versionEnd) {
-                maxRecord = record
-                maxRecordVersion = recordVersion
+        // список всех версий записи по номеру счета
+        def versionDateMap = getVersionDate(BSSCH, dataProvider)
+        log("=======date = " + date)
+        if (versionDateMap != null) {
+            // поиск актуальной версии среди всех версии записи
+            actualRecordId = getActualRecordId(versionDateMap, date, dataProvider)
+            log("=======actualRecordId = $actualRecordId")
+            if (actualRecordId) {
+                def recordVersionsFlag = getRecordVersionsFlag(versionDateMap, actualRecordId)
+                isFirstVersionRecord = recordVersionsFlag.isFirst
+                isLastVersionRecord = recordVersionsFlag.isLast
+            } else {
+                isNewRecord = true
             }
-        }
-        for (def record : records) {
-            def id = record?.record_id?.value
-            if (versionMap[id].versionEnd == maxRecordVersion.versionEnd) {
-                count++
-            }
+        } else {
+            isNewRecord = true
         }
 
-        if (count > 1) {
-            logger.error("$BSSCH: найдено более одной записи с заданным номером счета!")
-            continue
-        } else if (count == 0) {
+        if (isNewRecord) {
             // не найдено записей, то по таблице 19:
             // 7.
             if (checkEndBegDates(BEG_DATE, END_DATE, BSSCH, fileRowIndexMap)) {
+                tmpMap[7].add(BSSCH)
+                log("$BSSCH=======7. ")
                 // должны быть выполнены шаги 4-6 сценария [3] раздела 3.1.7.1. -  создания элемента справочника
                 def versionFrom = (BEG_DATE ?: defaultDate)
                 def versionTo = END_DATE
@@ -84,18 +96,22 @@ void importFromXML() {
                 refBookRecord.setValues(['ACCOUNT' : row.BSSCH, 'ACCOUNT_NAME' : row.NMBSP])
 
                 dataProvider.createRecordVersion(logger, versionFrom, versionTo, [refBookRecord])
+            } else {
+                tmpMap[-7].add(BSSCH)
+                log("$BSSCH=======7 false. ")
             }
             continue
         }
 
-        def record = maxRecord
+        def recId = actualRecordId
+        def record = dataProvider.getRecordData(actualRecordId)
         def accountName = record?.ACCOUNT_NAME?.value
-        def recId = record?.record_id?.value
-        RefBookRecordVersion recordVersion = maxRecordVersion
+        RefBookRecordVersion recordVersion = dataProvider.getRecordVersionInfo(actualRecordId)
 
-        def versionResult = getRecordVersionsFlag(recId, filter, dataProvider)
-        def isFirstVersionRecord = versionResult.isFirst
-        def isLastVersionRecord = versionResult.isLast
+        log("========recordVersion.versionStart = ${recordVersion.versionStart}")
+        log("========recordVersion.versionEnd   = ${recordVersion.versionEnd}")
+        log("$BSSCH====== isFirstVersionRecord = $isFirstVersionRecord")
+        log("$BSSCH====== isLastVersionRecord = $isLastVersionRecord")
 
         // сравнения с датой начала актуальности системы и даты из тф (если версия записи в системе одна то с BEG_DATE, если версии в системе несколько, то с DATE)
         def startDateFlag = ((isFirstVersionRecord ? BEG_DATE : DATE) == recordVersion.versionStart)
@@ -105,30 +121,36 @@ void importFromXML() {
         // 1, 2, 3 - Запись должна быть проигнорирована при загрузке
         if (NMBSP == accountName) {
             if (DATE <= BEG_DATE && BEG_DATE == recordVersion.versionStart && END_DATE == recordVersion.versionEnd) {
+                tmpMap[1].add(BSSCH)
+                log("$BSSCH=======1. ")
                 // операция 1
                 continue
             } else if ((DATE > BEG_DATE && (END_DATE == null || DATE <= END_DATE)) && startDateFlag && endDateFlag) {
+                tmpMap[2].add(BSSCH)
+                log("$BSSCH=======2. ")
                 // операция 2
                 continue
             } else if (isLastVersionRecord && DATE > BEG_DATE && (END_DATE != null && DATE > END_DATE) &&
                     END_DATE == recordVersion.versionEnd) {
+                tmpMap[3].add(BSSCH)
+                log("$BSSCH=======3. ")
                 // операция 3
                 continue
             }
         }
-        // 4, 5, 6 - Запись справочника должна быть отредактирована
+        // 4, 5, 6 - Запись справочника должна быть отредактирована (операцию 5 убрали)
         if (NMBSP != accountName) {
             def edit = false
             if (DATE <= BEG_DATE && BEG_DATE == recordVersion.versionStart && END_DATE == recordVersion.versionEnd) {
                 // операция 4
-                edit = true
-            } else if (((DATE > BEG_DATE && (END_DATE == null || DATE <= END_DATE) && startDateFlag) ||
-                    (DATE > BEG_DATE && END_DATE != null && DATE > END_DATE)) && endDateFlag) {
-                // операция 5
+                tmpMap[4].add(BSSCH)
+                log("$BSSCH=======4. ")
                 edit = true
             } else if (isLastVersionRecord && DATE > BEG_DATE && (END_DATE != null && DATE > END_DATE) &&
                     END_DATE == recordVersion.versionEnd) {
                 // операция 6
+                tmpMap[6].add(BSSCH)
+                log("$BSSCH=======6. ")
                 edit = true
             }
             if (edit) {
@@ -140,8 +162,10 @@ void importFromXML() {
             }
         }
         // 8.
-        if (DATE <= BEG_DATE && (BEG_DATE == recordVersion.versionStart || END_DATE == recordVersion.versionEnd)) {
+        if (DATE <= BEG_DATE && conditionForOperation8(BEG_DATE == recordVersion.versionStart, END_DATE == recordVersion.versionEnd)) {
             if (checkEndBegDates(BEG_DATE, END_DATE, BSSCH, fileRowIndexMap)) {
+                log("$BSSCH=======8. ")
+                tmpMap[8].add(BSSCH)
                 // операция 8
                 // должны быть выполнены шаги 4-8 сценария [3] раздела 3.1.7.3 - редактирование версии элемента справочника
                 def versionFrom = (BEG_DATE ?: defaultDate)
@@ -149,6 +173,9 @@ void importFromXML() {
                 record?.ACCOUNT_NAME?.value = NMBSP
 
                 dataProvider.updateRecordVersion(logger, recId, versionFrom, versionTo, record)
+            } else {
+                tmpMap[-8].add(BSSCH)
+                log("$BSSCH=======8 false. ")
             }
             continue
         }
@@ -157,6 +184,8 @@ void importFromXML() {
         if (isLastVersionRecord && DATE > BEG_DATE && (END_DATE != null && DATE > END_DATE) &&
                 END_DATE != recordVersion.versionEnd) {
             if (checkEndBegDates(BEG_DATE, END_DATE, BSSCH, fileRowIndexMap)) {
+                tmpMap[9].add(BSSCH)
+                log("$BSSCH=======9. ")
                 // операция 9
                 // должны быть выполнены шаги 4-8 сценария [3] раздела 3.1.7.3 - редактирование версии элемента справочника
                 def versionFrom = recordVersion.versionStart
@@ -164,13 +193,18 @@ void importFromXML() {
                 record?.ACCOUNT_NAME?.value = NMBSP
 
                 dataProvider.updateRecordVersion(logger, recId, versionFrom, versionTo, record)
+            } else {
+                tmpMap[-9].add(BSSCH)
+                log("$BSSCH=======9 false. ")
             }
             continue
         }
 
         // 10.
-        if (DATE > BEG_DATE && (END_DATE == null || DATE <= END_DATE) && (startDateFlag || endDateFlag)) {
+        if (DATE > BEG_DATE && (END_DATE == null || DATE <= END_DATE)) {
             if (checkEndBegDates(BEG_DATE, END_DATE, BSSCH, fileRowIndexMap)) {
+                tmpMap[10].add(BSSCH)
+                log("$BSSCH=======10. ")
                 // операция 10
                 // Иначе должны быть выполнены шаги 5 и 6 сценария [3] раздела 3.1.7.2 - создания версии элемента справочника
                 def versionFrom = DATE
@@ -181,9 +215,18 @@ void importFromXML() {
                 refBookRecord.setValues(['ACCOUNT' : row.BSSCH, 'ACCOUNT_NAME' : row.NMBSP])
 
                 dataProvider.createRecordVersion(logger, versionFrom, versionTo, [refBookRecord])
+            } else {
+                tmpMap[-10].add(BSSCH)
+                log("$BSSCH=======10 false. ")
             }
             continue
         }
+    }
+
+    // TODO (Ramil Timerbaev) потом убрать
+    tmpList.each {
+        def value = tmpMap[it]
+        log("========== $it = " + value.size())
     }
 
     if (logger.containsLevel(LogLevel.ERROR)) {
@@ -193,17 +236,18 @@ void importFromXML() {
     }
 }
 
+// TODO (Ramil Timerbaev)
 void log(def s) {
-    System.out.println(s)
+    // System.out.println(s)
 
-    logger.info(s)
+    // logger.info(s)
 }
 
 void log(def s, def ...args) {
     String msg = String.format(s, args)
-    System.out.println(msg)
+    // System.out.println(msg)
 
-    logger.info(s, args)
+    // logger.info(s, args)
 }
 
 /**
@@ -225,6 +269,10 @@ def checkEndBegDates(def BEG_DATE,def END_DATE, def BSSCH, fileRowIndexMap) {
 }
 
 def getFileRecords(def inputStream) {
+    if (inputStream.available() == 0) {
+        logger.error("Файл пуст.")
+        return null
+    }
     def tableQN = QName.valueOf('table')
     def fieldQN = QName.valueOf('field')
     def recordQN = QName.valueOf('record')
@@ -297,36 +345,101 @@ def getSearchDate(def DATE, def BEG_DATE, def END_DATE) {
 /**
  * Получить мапу со значениями является ли версия записи (по id) первая или последняя.
  *
+ * @param versionDateMap мапа со всеми версиями записи
  * @param recId уникальный идентификатор записи
- * @param filter фильтр для поиска
- * @param dataProvider для обращения к справочнику
  * @return возвращает мапу: с ключами isFirst, isLast для определения версии записи
  */
-def getRecordVersionsFlag(def recId, def filter, def dataProvider) {
+def getRecordVersionsFlag(def versionDateMap, def recId) {
     def result = ['isFirst' : true, 'isLast' : true]
-    List<Pair<Long, Long>> allVersionRecords = dataProvider.checkRecordExistence(null, filter)
-    if (allVersionRecords != null && allVersionRecords.size() > 1) {
+
+    def minDate = null
+    def minId = null
+    def maxDate = null
+    def maxId = null
+    versionDateMap.each { def key, value ->
+        if (minDate == null || minDate > value) {
+            minDate = value
+            minId = key
+        }
+        if (maxDate == null || maxDate < value) {
+            maxDate = value
+            maxId = key
+        }
+    }
+
+    result.isFirst = (minId == recId)
+    result.isLast = (maxId == recId)
+    return result
+}
+
+/**
+ * Условие перед операцией 8.
+ *
+ * | BEG_DATE | END_DATE | результат |
+ * |----------|----------|-----------|
+ * | не равно | не равно | true      |
+ * | не равно | равно    | true      |
+ * | равно    | не равно | true      |
+ * | равно    | равно    | false     |
+ *
+ * @param conditionBeg равен ли BEG_DATE дате начала актуальности
+ * @param conditionEnd равен ли END_DATE дате окончания актуальности
+ */
+def conditionForOperation8(def conditionBeg, def conditionEnd) {
+    return (!conditionBeg && !conditionEnd) || (conditionBeg ^ conditionEnd)
+}
+
+/**
+ * Получить список всех версий записи по номеру счета.
+ *
+ * @param BSSCH номер счетоа
+ * @return мапа уникальный идентификатор записи и дат начала актульности
+ */
+def getVersionDate(def BSSCH, def dataProvider) {
+    // поиск по уникальному атрибуту, если находится запись, то она всегда одна
+    def filter = "ACCOUNT = '$BSSCH'"
+    List<Pair<Long, Long>> pairs = dataProvider.getRecordIdPairs(REF_BOOK_ID, null, null, filter)
+    if (pairs == null || pairs.size() == 0) {
+        return  null
+    } else if (pairs.size() > 0) {
         def list = []
-        for (Pair<Long, Long> pair : allVersionRecords) {
+        for (Pair<Long, Long> pair : pairs) {
             list.add(pair.first)
         }
-        def versionDateMap = dataProvider.getRecordsVersionStart(list)
-        def minDate = null
-        def minId = null
-        def maxDate = null
-        def maxId = null
-        versionDateMap.each { def key, value ->
-            if (minDate == null || minDate > value) {
-                minDate = value
-                minId = key
-            }
-            if (maxDate == null || maxDate < value) {
-                maxDate = value
-                maxId = key
+        return dataProvider.getRecordsVersionStart(list)
+    }
+}
+
+/**
+ * Получить идентификатор актуальной записи из мапы со всеми версиями записи.
+ *
+ * @param versionDateMap мапа со всеми версиями записи
+ * @param date дата на которую надо получить данные
+ * @param dataProvider
+ * @return идентификатор записи (ref_book_record.id)
+ */
+def getActualRecordId(def versionDateMap, def date, def dataProvider) {
+    def actualRecordId = null
+
+    // поиск id актуальной записи на дату date
+    def minDays = null
+    versionDateMap.each { def key, value ->
+        if (minDays != 0) {
+            if (date == value || (date > value && (minDays == null  || date - value < minDays))) {
+                minDays = date - value
+                actualRecordId = key
             }
         }
-        result.isFirst = (minId == recId)
-        result.isLast = (maxId == recId)
     }
-    return result
+    // если нет актуальной записи, то брать следующую за ней
+    if (actualRecordId == null) {
+        minDays = null
+        versionDateMap.each { def key, value ->
+            if (date < value && (minDays == null  || date - value < minDays)) {
+                minDays = date - value
+                actualRecordId = key
+            }
+        }
+    }
+    return actualRecordId
 }

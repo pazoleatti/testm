@@ -169,7 +169,7 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
                       def boolean required = true) {
-    if (value == null || value == '') {
+    if (value == null || value.trim().isEmpty()) {
         return null
     }
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
@@ -253,7 +253,7 @@ void logicCheck() {
         def errorMsg = "Строка $index: "
 
         // 2. Обязательность заполнения полей
-        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
+        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !isMonthBalance())
 
         // 3. Проверка рыночной цены в процентах к номиналу (графа 10, 14)
         if (row.marketPriceOnDateAcquisitionInPerc > 0 && row.redemptionVal != 100) {
@@ -304,9 +304,9 @@ void logicCheck() {
             needValue['excessOfTheSellingPrice'] = calc27(row, code)
             checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
         }
-        def record = dataProvider.getRecords(reportPeriodEndDate, null, "ISSUE = ${row.issue}", null)
+        def record = dataProvider.getRecords(reportPeriodEndDate, null, "SHORTNAME = '${row.issue}'", null)
         if (record.size() == 0) {
-            rowError(logger, row, errorMsg + "Значение графы «Выпуск» отсутствует в справочнике «Ценные бумаги»")
+            loggerError(row, errorMsg + "Значение графы «Выпуск» отсутствует в справочнике «Ценные бумаги»")
         }
     }
 
@@ -636,7 +636,7 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol = 3
         newRow.valuablePaper = getRecordIdImport(62, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
 
-        // графа 4 - атрибут 814 - ISSUE - «Выпуск», из справочника 84 «Ценные бумаги» текстовое значение
+        // графа 4 - атрибут 814 - SHORTNAME - «Выпуск», из справочника 84 «Ценные бумаги» текстовое значение
         xmlIndexCol = 4
         newRow.issue = row.cell[xmlIndexCol].text()
 
@@ -767,7 +767,7 @@ void addTransportData(def xml) {
         xmlIndexCol = 3
         newRow.valuablePaper = getRecordIdImport(62, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
 
-        // графа 4 - атрибут 814 - ISSUE - «Выпуск», из справочника 84 «Ценные бумаги» текстовое значение
+        // графа 4 - атрибут 814 - SHORTNAME - «Выпуск», из справочника 84 «Ценные бумаги» текстовое значение
         xmlIndexCol = 4
         newRow.issue = row.cell[xmlIndexCol].text()
 
@@ -959,7 +959,7 @@ def getTaxPeriod() {
 }
 
 void loggerError(def row, def msg) {
-    if (isBalancePeriod()) {
+    if (isMonthBalance()) {
         rowWarning(logger, row, msg)
     } else {
         rowError(logger, row, msg)

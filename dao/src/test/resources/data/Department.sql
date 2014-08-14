@@ -1,12 +1,18 @@
-insert into DEPARTMENT (id, name, parent_id, type, shortname, tb_index, sbrf_code, region_id, code)
-  values (1, 'Банк', null, 1, null, null, '12', 1, 1);
-insert into DEPARTMENT (id, name, parent_id, type, shortname, tb_index, sbrf_code, region_id, code)
-  values (2, 'ТБ1', 1, 2, null, null, '23', 2, 2);
-insert into DEPARTMENT (id, name, parent_id, type, shortname, tb_index, sbrf_code, region_id, code)
-  values (3, 'ТБ2', 1, 2, null, null, null, 1, 3);
-insert into DEPARTMENT (id, name, parent_id, type, shortname, tb_index, sbrf_code, region_id, code)
-  values (4, 'ЦСКО 1', 3, 3, null, null, null, 2, 4);
-insert into DEPARTMENT (id, name, parent_id, type, shortname, tb_index, sbrf_code, region_id, code)
-  values (5, 'ЦСКО 1', 3, 3, null, null, null, 1, 5);
-insert into DEPARTMENT (id, name, parent_id, type, shortname, tb_index, sbrf_code, region_id, code)
-  values (6, 'ЦСКО 1', 2, 3, null, null, null, 2, 6);
+INSERT INTO department_type (id, name) VALUES (1, 'Банк');
+INSERT INTO department_type (id, name) VALUES (2, 'Территориальный банк');
+INSERT INTO department_type (id, name) VALUES (3, 'ЦСКО, ПЦП');
+INSERT INTO department_type (id, name) VALUES (4, 'Управление');
+INSERT INTO department_type (id, name) VALUES (5, '');
+
+INSERT INTO department (id, name, parent_id, type, shortname, tb_index, sbrf_code, region_id, code)
+  VALUES (1, 'Банк', NULL, 1, NULL, NULL, '12', 1, 1);
+INSERT INTO department (id, name, parent_id, type, shortname, tb_index, sbrf_code, region_id, code)
+  VALUES (2, 'ТБ1', 1, 2, NULL, NULL, '23', 2, 2);
+INSERT INTO department (id, name, parent_id, type, shortname, tb_index, sbrf_code, region_id, code)
+  VALUES (3, 'ТБ2', 1, 2, NULL, NULL, NULL, 1, 3);
+INSERT INTO department (id, name, parent_id, type, shortname, tb_index, sbrf_code, region_id, code)
+  VALUES (4, 'ЦСКО 1', 3, 3, NULL, NULL, NULL, 2, 4);
+INSERT INTO department (id, name, parent_id, type, shortname, tb_index, sbrf_code, region_id, code)
+  VALUES (5, 'ЦСКО 1', 3, 3, NULL, NULL, NULL, 1, 5);
+INSERT INTO department (id, name, parent_id, type, shortname, tb_index, sbrf_code, region_id, code)
+  VALUES (6, 'ЦСКО 1', 2, 3, NULL, NULL, NULL, 2, 6);

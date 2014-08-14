@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskParam;
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskParamType;
 import com.aplana.sbrf.taxaccounting.scheduler.api.exception.TaskSchedulingException;
 import com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManager;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.CreateTaskAction;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.CreateTaskResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -30,13 +31,15 @@ public class CreateTaskHandler extends AbstractActionHandler<CreateTaskAction, C
     @Autowired
     TaskManager taskManager;
 
+    @Autowired
+    SecurityService securityService;
+
     public CreateTaskHandler() {
         super(CreateTaskAction.class);
     }
 
     @Override
     public CreateTaskResult execute(CreateTaskAction action, ExecutionContext executionContext) throws ActionException {
-        SimpleDateFormat df = new SimpleDateFormat(TaskParam.DATE_FORMAT);
         CreateTaskResult result = new CreateTaskResult();
         try {
             if (!taskManager.isTaskExist(action.getTaskName())) {
@@ -45,6 +48,7 @@ public class CreateTaskHandler extends AbstractActionHandler<CreateTaskAction, C
                 taskContext.setSchedule(action.getSchedule());
                 taskContext.setUserTaskJndi(action.getUserTaskJndi());
                 taskContext.setNumberOfRepeats(-1);
+                taskContext.setUserId(securityService.currentUserInfo().getUser().getId());
 
                 Map<String, TaskParam> taskParams = new HashMap<String, TaskParam>();
                 for (int i = 0; i < action.getParams().size(); i++) {
@@ -58,10 +62,10 @@ public class CreateTaskHandler extends AbstractActionHandler<CreateTaskAction, C
 
                 taskManager.createTask(taskContext);
             } else {
-                throw new ActionException("Задача с таким именем уже существует");
+                throw new ActionException("Название задачи не уникально!");
             }
         } catch (TaskSchedulingException e) {
-            throw new ActionException("Ошибка создания задачи планировщика", e);
+            throw new ActionException(e.getMessage(), e);
         }
         return result;
     }

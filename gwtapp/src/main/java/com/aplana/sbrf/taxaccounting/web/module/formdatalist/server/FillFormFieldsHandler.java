@@ -69,8 +69,6 @@ public class FillFormFieldsHandler extends AbstractActionHandler<FillFormFieldsA
                 break;
             case THIRD:
                 List<FormDataKind> kinds = new ArrayList<FormDataKind>();
-	            List<FormTypeKind> formTypeKinds = departmentFormTypeService.getFormAssigned(action.getDepartmentId(), action.getTaxType().getCode());
-	            List<FormType> types = formDataSearchService.getActiveFormTypeInReportPeriod(action.getDepartmentId().intValue(), action.getFieldId(), action.getTaxType(), securityService.currentUserInfo());
                 kinds.addAll(dataAccessService.getAvailableFormDataKind(securityService.currentUserInfo(), asList(action.getTaxType())));
                 result.setDataKinds(kinds);
                 break;

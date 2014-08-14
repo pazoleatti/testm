@@ -1,16 +1,15 @@
 package com.aplana.sbrf.taxaccounting.web.module.bookerstatements.client;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.AplanaUiHandlers;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.sortable.AsyncDataProviderWithSortableTable;
 import com.aplana.sbrf.taxaccounting.web.module.bookerstatementsdata.client.BookerStatementsDataTokens;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.HorizontalAlignment;
-import com.aplana.sbrf.taxaccounting.web.widget.cell.SortingHeaderCell;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.cell.client.AbstractCell;
-import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -22,10 +21,11 @@ import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.ui.*;
-import com.google.gwt.view.client.*;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.ValueListBox;
+import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.Range;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -39,9 +39,6 @@ import java.util.*;
 public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiHandlers>
         implements BookerStatementsPresenter.MyView {
 
-    private boolean isAscSorting;
-    private BookerStatementsSearchOrdering sortByColumn;
-
     interface Binder extends UiBinder<Widget, BookerStatementsView> {
     }
 
@@ -49,29 +46,23 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
     public static final String ACCOUNT_PERIOD_TITLE = "Период";
     public static final String DEPARTMENT_TITLE = "Подразделение";
     public static final String BOOKER_STATEMENTS_TYPE_TITLE = "Вид бух. отчётности";
-
-    private Map<Integer, String> departmentFullNames;
-
     @UiField
-    RefBookPickerWidget accountPeriodIds;
-
+    PeriodPickerPopupWidget accountPeriodIds;
     @UiField
     DepartmentPickerPopupWidget departmentIds;
-
     @UiField(provided = true)
     ValueListBox<BookerStatementsType> bookerReportType;
-
     @UiField
     Button searchButton;
-
     @UiField
-    GenericDataGrid<BookerStatementsSearchResultItem> dataTable;
-
+    GenericDataGrid<BookerStatementsSearchResultItem> table;
     @UiField
     FlexiblePager pager;
-
     @UiField
     LinkButton create;
+    private BookerStatementsSearchOrdering sortByColumn;
+    private AsyncDataProviderWithSortableTable dataProvider;
+    private Map<Integer, String> departmentFullNames;
 
     @Inject
     @UiConstructor
@@ -94,11 +85,13 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
 
         setTableColumns();
 
-        dataTable.setPageSize(pager.getPageSize());
-        pager.setDisplay(dataTable);
+        dataProvider = new AsyncDataProviderWithSortableTable(table, this) {
+            @Override
+            public AplanaUiHandlers getUiHandlersX() {
+                return getUiHandlers();
+            }
+        };
 
-        Date current = new Date();
-        accountPeriodIds.setPeriodDates(current, current);
     }
 
     @Override
@@ -106,15 +99,6 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
         accountPeriodIds.setValue(null);
         departmentIds.setValue(null);
         bookerReportType.setValue(null);
-    }
-
-    private void initListeners() {
-        // Подразделение
-        departmentIds.addValueChangeHandler(new ValueChangeHandler<List<Integer>>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<List<Integer>> event) {
-            }
-        });
     }
 
     @Override
@@ -136,6 +120,7 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
     public void setBookerReportType(BookerStatementsType bookerReportType) {
         this.bookerReportType.setValue(bookerReportType);
     }
+
     @Override
     public List<Integer> getDepartments() {
         return departmentIds.getValue();
@@ -143,7 +128,10 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
 
     @Override
     public List<Long> getAccountPeriods() {
-        return accountPeriodIds.getValue();
+        List<Long> list = new ArrayList<Long>(accountPeriodIds.getValue().size());
+        for (Integer integer : accountPeriodIds.getValue())
+            list.add(integer.longValue());
+        return list;
     }
 
     @Override
@@ -151,30 +139,80 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
         return bookerReportType.getValue();
     }
 
-
     @Override
     public void setTableData(int start, int totalCount, List<BookerStatementsSearchResultItem> dataRows, Map<Integer, String> departmentFullNames) {
         this.departmentFullNames = departmentFullNames;
         if (dataRows == null) {
-            dataTable.setRowCount(0);
-            dataTable.setRowData(new ArrayList<BookerStatementsSearchResultItem>());
+            table.setRowCount(0);
+            table.setRowData(new ArrayList<BookerStatementsSearchResultItem>());
         } else {
             if (totalCount == 0) {
                 start = 0;
                 pager.setPage(0);
             }
-            dataTable.setRowCount(totalCount);
-            dataTable.setRowData(start, dataRows);
+            table.setRowCount(totalCount);
+            table.setRowData(start, dataRows);
         }
     }
 
     @Override
     public void updateTable() {
         Range range = new Range(pager.getPageStart(), pager.getPageSize());
-        dataTable.setVisibleRangeAndClearData(range, true);
+        table.setVisibleRangeAndClearData(range, true);
     }
 
-    public void setTableColumns() {
+    @Override
+    public int getPageSize() {
+        return pager.getPageSize();
+    }
+
+    @Override
+    public BookerStatementsSearchOrdering getSearchOrdering() {
+        if (sortByColumn == null) {
+            sortByColumn = BookerStatementsSearchOrdering.YEAR;
+        }
+        return sortByColumn;
+    }
+
+    @Override
+    public void setReportPeriods(List<ReportPeriod> reportPeriods) {
+        accountPeriodIds.setPeriods(reportPeriods);
+    }
+
+    @Override
+    public void setSortByColumn(String sortByColumn) {
+        this.sortByColumn = BookerStatementsSearchOrdering.valueOf(sortByColumn);
+    }
+
+    @Override
+    public boolean isAscSorting() {
+        return dataProvider.isAscSorting();
+    }
+
+    @UiHandler("searchButton")
+    void onSearchClick(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().onSearch();
+        }
+    }
+
+    @UiHandler("create")
+    void onCreateButtonClicked(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().onCreateClicked();
+        }
+    }
+
+    private void initListeners() {
+        // Подразделение
+        departmentIds.addValueChangeHandler(new ValueChangeHandler<List<Integer>>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<List<Integer>> event) {
+            }
+        });
+    }
+
+    private void setTableColumns() {
         TextColumn<BookerStatementsSearchResultItem> yearColumn = new TextColumn<BookerStatementsSearchResultItem>() {
             @Override
             public String getValue(BookerStatementsSearchResultItem object) {
@@ -214,7 +252,7 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
                                 + bookerStatementsData.getAccountPeriodId() + ";"
                                 + BookerStatementsDataTokens.TYPE_ID + "="
                                 + bookerStatementsData.getBookerStatementsTypeId() + "\">"
-                                + (bookerStatementsData.getBookerStatementsTypeId()==0 ? "Форма 101" : "Форма 102") + "</a>");
+                                + (bookerStatementsData.getBookerStatementsTypeId() == 0 ? "Форма 101" : "Форма 102") + "</a>");
                     }
                 }) {
             public BookerStatementsSearchResultItem getValue(
@@ -223,94 +261,23 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
             }
         };
 
-        dataTable.addColumn(yearColumn, getHeader(PERIOD_YEAR_TITLE, yearColumn));
-        dataTable.setColumnWidth(yearColumn, 5, Style.Unit.EM);
+        table.addColumn(yearColumn, PERIOD_YEAR_TITLE);
+        table.setColumnWidth(yearColumn, 5, Style.Unit.EM);
 
-        dataTable.addColumn(accountPeriodColumn, getHeader(ACCOUNT_PERIOD_TITLE, accountPeriodColumn));
-        dataTable.setColumnWidth(accountPeriodColumn, 9, Style.Unit.EM);
+        table.addColumn(accountPeriodColumn, ACCOUNT_PERIOD_TITLE);
+        table.setColumnWidth(accountPeriodColumn, 9, Style.Unit.EM);
 
-        dataTable.addColumn(linkColumn, getHeader(BOOKER_STATEMENTS_TYPE_TITLE, linkColumn));
-        dataTable.setColumnWidth(linkColumn, 9, Style.Unit.EM);
+        table.addColumn(linkColumn, BOOKER_STATEMENTS_TYPE_TITLE);
+        table.setColumnWidth(linkColumn, 9, Style.Unit.EM);
 
-        dataTable.addColumn(departmentColumn, getHeader(DEPARTMENT_TITLE, departmentColumn));
-    }
+        table.addColumn(departmentColumn, DEPARTMENT_TITLE);
 
-    @Override
-    public int getPageSize() {
-        return pager.getPageSize();
-    }
+        table.setPageSize(pager.getPageSize());
+        pager.setDisplay(table);
 
-    @Override
-    public void assignDataProvider(int pageSize, AbstractDataProvider<BookerStatementsSearchResultItem> data) {
-        dataTable.setPageSize(pageSize);
-        data.addDataDisplay(dataTable);
-    }
-
-    @UiHandler("searchButton")
-    void onSearchClick(ClickEvent event) {
-        if (getUiHandlers() != null) {
-            getUiHandlers().onSearch();
-        }
-    }
-
-    private void setSortByColumn(String sortByColumn){
-        if (BOOKER_STATEMENTS_TYPE_TITLE.equals(sortByColumn)) {
-            this.sortByColumn = BookerStatementsSearchOrdering.BOOKER_STATEMENTS_TYPE_NAME;
-        } else if (DEPARTMENT_TITLE.equals(sortByColumn)){
-            this.sortByColumn = BookerStatementsSearchOrdering.DEPARTMENT_NAME;
-        } else if (ACCOUNT_PERIOD_TITLE.equals(sortByColumn)){
-            this.sortByColumn = BookerStatementsSearchOrdering.ACCOUNT_PERIOD_NAME;
-        } else if (PERIOD_YEAR_TITLE.equals(sortByColumn)){
-            this.sortByColumn = BookerStatementsSearchOrdering.YEAR;
-        } else {
-            this.sortByColumn = BookerStatementsSearchOrdering.ID;
-        }
-    }
-
-    private void setAscSorting(boolean ascSorting){
-        this.isAscSorting = ascSorting;
-    }
-    /**
-     * Добавление заголовка для столбца, который может резайзиться
-     * @param columnName название
-     * @param returnColumn объект колонки
-     * @return заголовок с сортировкой и резайзом
-     */
-    private Header<String> getHeader(final String columnName, Column<BookerStatementsSearchResultItem, ?> returnColumn){
-        GenericDataGrid.DataGridResizableHeader resizableHeader;
-        final SortingHeaderCell headerCell = new SortingHeaderCell();
-        resizableHeader = dataTable.createResizableHeader(columnName, returnColumn, headerCell);
-
-        resizableHeader.setUpdater(new ValueUpdater<String>() {
-            @Override
-            public void update(String value) {
-                setAscSorting(headerCell.isAscSort());
-                setSortByColumn(columnName);
-                if (getUiHandlers() != null) {
-                    getUiHandlers().onSortingChanged();
-                }
-            }
-        });
-        return resizableHeader;
-    }
-
-    @Override
-    public boolean isAscSorting() {
-        return isAscSorting;
-    }
-
-    @Override
-    public BookerStatementsSearchOrdering getSearchOrdering() {
-        if (sortByColumn == null){
-            setSortByColumn("");
-        }
-        return sortByColumn;
-    }
-
-    @UiHandler("create")
-    void onCreateButtonClicked(ClickEvent event) {
-        if (getUiHandlers() != null) {
-            getUiHandlers().onCreateClicked();
-        }
+        yearColumn.setDataStoreName(BookerStatementsSearchOrdering.YEAR.name());
+        accountPeriodColumn.setDataStoreName(BookerStatementsSearchOrdering.ACCOUNT_PERIOD_NAME.name());
+        departmentColumn.setDataStoreName(BookerStatementsSearchOrdering.DEPARTMENT_NAME.name());
+        linkColumn.setDataStoreName(BookerStatementsSearchOrdering.BOOKER_STATEMENTS_TYPE_NAME.name());
     }
 }

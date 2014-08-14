@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookUserDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
@@ -41,6 +42,11 @@ public class RefBookUser implements RefBookDataProvider {
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
         return getRecords(version, pagingParams, filter, sortAttribute, true);
+    }
+
+    @Override
+    public List<Pair<Long, Long>> getRecordIdPairs(Long refBookId, Date version, Boolean needAccurateVersion, String filter) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -97,22 +103,22 @@ public class RefBookUser implements RefBookDataProvider {
     }
 
     @Override
-    public void insertRecords(Date version, List<Map<String, RefBookValue>> records) {
+    public void insertRecords(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void updateRecords(Date version, List<Map<String, RefBookValue>> records) {
+    public void updateRecords(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void deleteRecords(Date version, List<Long> recordIds) {
+    public void deleteRecords(TAUserInfo taUserInfo, Date version, List<Long> recordIds) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void deleteAllRecords(Date version) {
+    public void deleteAllRecords(TAUserInfo taUserInfo, Date version) {
         throw new UnsupportedOperationException();
     }
 

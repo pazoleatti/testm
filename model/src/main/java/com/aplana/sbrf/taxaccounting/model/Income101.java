@@ -7,8 +7,6 @@ public class Income101 {
 
 	// Код записи
 	private Long id;
-	// Идентификатор отчетного периода
-	private Integer reportPeriodId;
 	// Номер счета
 	private String account;
 	// Входящие остатки по дебету
@@ -31,12 +29,6 @@ public class Income101 {
 	}
 	public void setId(Long id) {
 		this.id = id;
-	}
-	public Integer getReportPeriodId() {
-		return reportPeriodId;
-	}
-	public void setReportPeriodId(Integer reportPeriodId) {
-		this.reportPeriodId = reportPeriodId;
 	}
 	public String getAccount() {
 		return account;

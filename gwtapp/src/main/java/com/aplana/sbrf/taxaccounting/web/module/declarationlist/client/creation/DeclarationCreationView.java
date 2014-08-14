@@ -97,7 +97,6 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
 
     private void updateEnabled() {
         // "Подразделение" недоступно если не выбран отчетный период
-        TaxType taxType = getUiHandlers().getTaxType();
         departmentPicker.setEnabled(periodPicker.getValue() != null && !periodPicker.getValue().isEmpty() );
         declarationTypeBox.setEnabled(departmentPicker.getValue() != null && !departmentPicker.getValue().isEmpty());
         continueButton.setEnabled(declarationTypeBox.getValue() != null);
@@ -143,6 +142,9 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
     @UiHandler("periodPicker")
     public void onPeriodPickerChange(ValueChangeEvent<List<Integer>> event) {
         departmentPicker.setValue(null, true);
+        if (getUiHandlers() != null) {
+            getUiHandlers().onReportPeriodChange();
+        }
         updateEnabled();
     }
 

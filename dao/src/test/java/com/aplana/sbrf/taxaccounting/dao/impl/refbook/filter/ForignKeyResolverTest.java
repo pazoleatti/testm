@@ -28,67 +28,88 @@ public class ForignKeyResolverTest {
 
     @Before
     public void init(){
-        // Первый справочник
-        RefBook refBookUser =  new RefBook();
+        // Первый справочник - заказы на перевозки
+        RefBook refBookOrder =  new RefBook();
+        refBookOrder.setId(1L);
+        refBookOrder.setName("Заказы на перевозки");
 
-        // Атрибуты первого справочника - пользователи
-        List<RefBookAttribute> attributeList1 =  new ArrayList();
+        // Атрибуты первого справочника - заказы на перевозки
+        List<RefBookAttribute> attributeList1 =  new ArrayList<RefBookAttribute>();
+        // атрибут - пользователь, который ответственный за перевоз груза
         RefBookAttribute attributeUser = new RefBookAttribute();
         attributeUser.setAttributeType(RefBookAttributeType.REFERENCE);
         // ссылается на справочник c id = 2
+        attributeUser.setId(1L);
         attributeUser.setRefBookId(2L);
         attributeUser.setAlias("user");
         attributeList1.add(attributeUser);
-        refBookUser.setAttributes(attributeList1);
+
+        // атрибут - машина на которой будет осуществляться перевоз груза
+        RefBookAttribute attributeCar = new RefBookAttribute();
+        attributeCar.setAttributeType(RefBookAttributeType.STRING);
+        // ссылается на справочник c id = 2
+        attributeCar.setId(2L);
+        attributeCar.setRefBookId(4L);
+        attributeCar.setAlias("car");
+        attributeList1.add(attributeCar);
+
+        refBookOrder.setAttributes(attributeList1);
 
         // Второй справочник - информация о пользователях
         RefBook refBookUserInfo =  new RefBook();
+        refBookUserInfo.setId(2L);
+        refBookUserInfo.setName("Информация о сотрудниках");
         // атрибуты справочника
         List<RefBookAttribute> attributeList2 =  new ArrayList();
         RefBookAttribute attributeName = new RefBookAttribute();
         attributeName.setAttributeType(RefBookAttributeType.STRING);
+        attributeName.setId(3L);
         attributeName.setAlias("name");
-        attributeUser.setRefBookId(2L);
+        attributeName.setRefBookId(2L);
         attributeName.setId(2L);
         attributeList2.add(attributeName);
 
         RefBookAttribute attributeCity = new RefBookAttribute();
         attributeCity.setAlias("city");
         attributeCity.setRefBookId(3L);
-        attributeCity.setId(3L);
+        attributeCity.setId(4L);
         attributeList2.add(attributeCity);
 
         refBookUserInfo.setAttributes(attributeList2);
 
         // Третий справочник - города
         RefBook refBookCity =  new RefBook();
+        refBookCity.setId(3L);
+        refBookCity.setName("Города");
         List<RefBookAttribute> attributeList3 =  new ArrayList();
         RefBookAttribute attributeCityName = new RefBookAttribute();
         attributeCityName.setAlias("name");
         attributeCityName.setAttributeType(RefBookAttributeType.STRING);
-        attributeCityName.setId(4L);
+        attributeCityName.setId(5L);
         attributeList3.add(attributeCityName);
         refBookCity.setAttributes(attributeList3);
 
-        // Четвертый справочник
-        RefBook refBookAttitude =  new RefBook();
-        List<RefBookAttribute> attributeList4 =  new ArrayList();
-        RefBookAttribute attributeAttitudeName = new RefBookAttribute();
-        attributeAttitudeName.setAlias("name");
-        attributeAttitudeName.setAttributeType(RefBookAttributeType.STRING);
-        attributeAttitudeName.setId(5L);
-        attributeList4.add(attributeAttitudeName);
-        refBookAttitude.setAttributes(attributeList4);
+        // Четвертый справочник - автомобили (простой справочник)
+        RefBook refBookCar =  new RefBook();
+        refBookCar.setId(4L);
+        refBookCar.setName("Автомобили");
+        List<RefBookAttribute> attributeList4 =  new ArrayList<RefBookAttribute>();
+        RefBookAttribute attributeBrand = new RefBookAttribute();
+        attributeBrand.setAlias("brand");
+        attributeBrand.setAttributeType(RefBookAttributeType.STRING);
+        attributeBrand.setId(6L);
+        attributeList4.add(attributeBrand);
+        refBookCar.setAttributes(attributeList4);
 
         RefBookDao refBookDao = mock(RefBookDao.class);
-        when(refBookDao.get(1L)).thenReturn(refBookUser);
+        when(refBookDao.get(1L)).thenReturn(refBookOrder);
         when(refBookDao.get(2L)).thenReturn(refBookUserInfo);
         when(refBookDao.get(3L)).thenReturn(refBookCity);
-        when(refBookDao.get(4L)).thenReturn(refBookAttitude);
+        when(refBookDao.get(4L)).thenReturn(refBookCar);
 
 
         foreignKeyResolverComponent = new ForeignKeyResolverComponent();
-        foreignKeyResolverComponent.setRefBook(refBookUser);
+        foreignKeyResolverComponent.setRefBook(refBookOrder);
         ReflectionTestUtils.setField(foreignKeyResolverComponent, "refBookDao", refBookDao);
     }
 
@@ -108,7 +129,7 @@ public class ForignKeyResolverTest {
         foreignKeyResolverComponent.setPreparedStatementData(result);
         Filter.getFilterQuery("user.city.name = '123'", foreignKeyResolverComponent);
 
-        assertTrue(result.getJoinPartsOfQuery().equals("left join ref_book_value frb0 on frb0.record_id = auser.reference_value and frb0.attribute_id = 3\nleft join ref_book_value frb1 on frb1.record_id = frb1.city and frb1.attribute_id = 4\n"));
+        assertTrue(result.getJoinPartsOfQuery().equals("left join ref_book_value frb0 on frb0.record_id = auser.reference_value and frb0.attribute_id = 4\nleft join ref_book_value frb1 on frb1.record_id = frb1.city and frb1.attribute_id = 5\n"));
         assertTrue(result.getQuery().toString().equals("frb1.STRING_value"));
     }
 
@@ -123,8 +144,8 @@ public class ForignKeyResolverTest {
 
         assertTrue(result1.getJoinPartsOfQuery().equals("left join ref_book_value frb0 on frb0.record_id = auser.reference_value and frb0.attribute_id = 2\n" +
                 "\n" +
-                "left join ref_book_value frb1 on frb1.record_id = auser.reference_value and frb1.attribute_id = 3\n" +
-                "left join ref_book_value frb2 on frb2.record_id = frb2.city and frb2.attribute_id = 4\n"));
+                "left join ref_book_value frb1 on frb1.record_id = auser.reference_value and frb1.attribute_id = 4\n" +
+                "left join ref_book_value frb2 on frb2.record_id = frb2.city and frb2.attribute_id = 5\n"));
 
     }
 
@@ -134,7 +155,11 @@ public class ForignKeyResolverTest {
      */
     @Test
     public void attributeLinkFromUniversalToSimple(){
-
+        PreparedStatementData result = new PreparedStatementData();
+        foreignKeyResolverComponent.setPreparedStatementData(result);
+        Filter.getFilterQuery("car.brand like '%Honda%' ", foreignKeyResolverComponent);
+        assertTrue(result.getJoinPartsOfQuery().equals("left join car frb0 on frb0.id = acar.reference_value\n"));
+        assertTrue(result.getQuery().toString().equals("frb0.brand"));
     }
 
     /**

@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.sudir.ws.departmentendpoint;
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
@@ -34,17 +33,10 @@ public class TaxAccountingSupportPortType extends SpringBeanAutowiringSupport{
 	
 	public List<TaxAccDepartment> getDepartments() {
         List<TaxAccDepartment> taxAccDepartmentList = gais.desassembleDepartments(departmentService.getDepartmentForSudir());
-        TAUserInfo userInfo = getUserInfo();
+        TAUserInfo userInfo = userService.getSystemUserInfo();
         auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(), null, null, null, null,
-                "Успешный обмен данными с вебсервисом СУДИР.");
+                "Успешный обмен данными с вебсервисом СУДИР.", null);
 		return taxAccDepartmentList;
 	}
-
-    private TAUserInfo getUserInfo(){
-        TAUserInfo userInfo = new TAUserInfo();
-        userInfo.setIp("127.0.0.1");
-        userInfo.setUser(userService.getUser(TAUser.SYSTEM_USER_ID));
-        return userInfo;
-    }
 
 }

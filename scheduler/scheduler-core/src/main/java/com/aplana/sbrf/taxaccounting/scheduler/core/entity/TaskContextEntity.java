@@ -71,6 +71,12 @@ public class TaskContextEntity implements Serializable {
     private Date modificationDate;
 
     /**
+     * Идентификатор задачи
+     */
+    @Column(name = "user_id", nullable = false)
+    private Integer userId;
+
+    /**
      * Сериализованный контекст задачи
      */
     @Lob
@@ -132,5 +138,13 @@ public class TaskContextEntity implements Serializable {
 
     public void setModificationDate(Date modificationDate) {
         this.modificationDate = modificationDate;
+    }
+
+    public Integer getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Integer userId) {
+        this.userId = userId;
     }
 }

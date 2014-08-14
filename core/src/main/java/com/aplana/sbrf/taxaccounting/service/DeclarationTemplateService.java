@@ -177,7 +177,7 @@ public interface DeclarationTemplateService {
 
     /**
      * Возвращает количество активных версий для каждого переданного вида шаблона
-     * @param formTypeId вид шаблона
+     * @param formTypeIds вид шаблона
      * @return количество активных версий для id макета
      */
     Map<Long, Integer> versionTemplateCountByFormType(Collection<Integer> formTypeIds);

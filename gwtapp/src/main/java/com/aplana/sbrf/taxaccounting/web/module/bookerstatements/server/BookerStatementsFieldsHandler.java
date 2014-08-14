@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.web.module.bookerstatements.server;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
-import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.shared.BookerStatementsFieldsAction;
 import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.shared.BookerStatementsFieldsResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -13,10 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static java.util.Arrays.asList;
 
@@ -63,6 +59,7 @@ public class BookerStatementsFieldsHandler extends AbstractActionHandler<BookerS
             availableDepartmentSet.add(dep.getId());
         }
         result.setDepartmentIds(availableDepartmentSet);
+        result.setYear(Calendar.getInstance().get(Calendar.YEAR));
 
         return result;
     }

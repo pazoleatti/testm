@@ -62,9 +62,7 @@ public class MappingServiceImpl implements MappingService {
     public void addFormData(String filename, byte[] fileContent) {
         log.info("Принят файл " + filename + ", размер = " + (fileContent == null ? null : fileContent.length));
 
-        TAUserInfo userInfo = new TAUserInfo();
-        userInfo.setUser(taUserService.getUser(TAUser.SYSTEM_USER_ID));
-        userInfo.setIp("127.0.0.1");
+        TAUserInfo userInfo = taUserService.getSystemUserInfo();
 
         RestoreExemplar restoreExemplar;
         Integer departmentId = null;
@@ -174,7 +172,7 @@ public class MappingServiceImpl implements MappingService {
         try {
             // Ошибка записи в журнал аудита не должна откатывать импорт
             auditService.add(FormDataEvent.MIGRATION, userInfo, departmentId, reportPeriodId, null, formTypeName,
-                    FormDataKind.PRIMARY.getId(), msg);
+                    FormDataKind.PRIMARY.getId(), msg, null);
         } catch (Exception e) {
             log.error("Ошибка записи в журнал аудита", e);
         }

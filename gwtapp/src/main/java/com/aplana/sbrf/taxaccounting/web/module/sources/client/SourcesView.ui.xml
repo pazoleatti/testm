@@ -24,13 +24,17 @@
         .table {
             position: absolute !important;
             bottom: 0;
-            right: 0;
-            left: 0;
+            right: 10px;
+            left: 10px;
             top: 41px;
         }
 
         .marginRight5 {
             margin-right: 5px;
+        }
+
+        .marginBottom2 {
+            margin-bottom: 2px;
         }
 
         .searchLabel {
@@ -143,11 +147,11 @@
                 <g:HorizontalPanel spacing="3" addStyleNames="{style.btnPanel}" verticalAlignment="middle">
                     <g:Label text="Период: с" wordWrap="false" addStyleNames="{style.marginRight5}"/>
                     <g:ValueListBox ui:field="periodFrom" width="200px" addStyleNames="{style.marginRight5}"/>
-                    <w:Spinner ui:field="yearFrom" minValue="1900" maxValue="2100" width="60px" height="19px" addStyleNames="{style.marginRight5}"/>
+                    <w:Spinner ui:field="yearFrom" minValue="1900" maxValue="2100" width="60px" height="18px" addStyleNames="{style.marginRight5}, {style.marginBottom2}"/>
                     <g:Label text="по" wordWrap="false" addStyleNames="{style.marginRight5}"/>
                     <g:ValueListBox ui:field="periodTo" width="200px" addStyleNames="{style.marginRight5}"/>
-                    <w:Spinner ui:field="yearTo" minValue="1900" maxValue="2100" width="60px" height="19px"
-                               addStyleNames="{style.marginRight5}"/>
+                    <w:Spinner ui:field="yearTo" minValue="1900" maxValue="2100" width="60px" height="18px"
+                               addStyleNames="{style.marginRight5}, {style.marginBottom2}"/>
 
                     <g:cell width="100%" horizontalAlignment="right">
                         <g:Label addStyleNames="{style.searchLabel}" text="Назначение:"/>

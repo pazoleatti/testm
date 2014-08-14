@@ -36,7 +36,7 @@ public class WTextBox extends ParamWidget {
         String value = textBox.getValue();
         errorMessage = "";
         if (isRequired() && (value == null || value.isEmpty())){
-            errorMessage += "Поле " + getName() + " обязательна для заполнения";
+            errorMessage += "Поле «" + getName() + "» обязательна для заполнения";
             return false;
         } else {
             if (value != null && !value.isEmpty()){
@@ -45,34 +45,34 @@ public class WTextBox extends ParamWidget {
                         try {
                             Integer.parseInt(value);
                         } catch (NumberFormatException e){
-                            errorMessage += "Параметр " + getName() + " должен иметь целочисленное значение";
+                            errorMessage += "Параметр «" + getName() + "» должен иметь целочисленное значение";
                         }
                         break;
                     case LONG:
                         try {
                             Long.parseLong(value);
                         } catch (NumberFormatException e){
-                            errorMessage += "Параметр " + getName() + " должен содержать целочисленное значение";
+                            errorMessage += "Параметр «" + getName() + "» должен содержать целочисленное значение";
                         }
                         break;
                     case FLOAT:
                         try {
                             Float.parseFloat(value);
                         } catch (NumberFormatException e){
-                            errorMessage += "Параметр " + getName() + " должен содержать вещественное значение";
+                            errorMessage += "Параметр «" + getName() + "» должен содержать вещественное значение";
                         }
                         break;
                     case DOUBLE:
                         try {
                             Double.parseDouble(value);
                         } catch (NumberFormatException e){
-                            errorMessage += "Параметр " + getName() + " должен содержать вещественное значение";
+                            errorMessage += "Параметр «" + getName() + "» должен содержать вещественное значение";
                         }
                         break;
                     case STRING:
                         break;
                     default:
-                        errorMessage += "Ошибка при определении типа значения, для поля " + getName();
+                        errorMessage += "Ошибка при определении типа значения, для поля «" + getName() + "»";
                 }
 
                 return errorMessage.isEmpty();

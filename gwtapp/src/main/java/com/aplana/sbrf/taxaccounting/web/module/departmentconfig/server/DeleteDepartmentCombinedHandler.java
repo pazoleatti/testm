@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.DeleteDepartmentCombinedAction;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.DeleteDepartmentCombinedResult;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.DepartmentCombined;
@@ -45,6 +46,9 @@ public class DeleteDepartmentCombinedHandler extends AbstractActionHandler<Delet
 
     @Autowired
     DepartmentService departmentService;
+
+    @Autowired
+    private SecurityService securityService;
 
     private static final String SUCCESS_INFO = "Настройки подразделения в период %s - %s были удалены";
     private static final String SUCCESS_INFO_SHORT = "Настройки подразделения в период %s";
@@ -88,6 +92,7 @@ public class DeleteDepartmentCombinedHandler extends AbstractActionHandler<Delet
             RefBookDataProvider provider = rbFactory.getDataProvider(refBookId);
             ReportPeriod period = reportService.getReportPeriod(action.getReportPeriodId());
             Logger logger = new Logger();
+            logger.setTaUserInfo(securityService.currentUserInfo());
 
             RefBookRecordVersion recordVersion = provider.getRecordVersionInfo(depCombined.getRecordId());
             //recordVersion.updateRecordVersion();

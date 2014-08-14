@@ -36,8 +36,8 @@
         .table {
             position: absolute !important;
             bottom: 0;
-            right: 0;
-            left: 0;
+            right: 10px;
+            left: 10px;
             top: 140px;
             height: inherit !important;
             border-top: 1px solid #aeaeac;

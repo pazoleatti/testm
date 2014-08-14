@@ -72,8 +72,6 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
     @Autowired
     private DepartmentFormTypeDao departmentFormTypeDao;
     @Autowired
-    private DepartmentDeclarationTypeDao departmentDeclarationTypeDao;
-    @Autowired
     private PeriodService reportPeriodService;
     @Autowired
     private SourceService sourceService;
@@ -347,9 +345,11 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                         }
                         return;
                     case ACCEPTED:
-                        // Нельзя редактировать НФ в состоянии "Принята"
-                        throw new AccessDeniedException(String.format(FORM_DATA_EDIT_ERROR,
-                                formData.getFormType().getName(), formData.getState().getName()));
+                        if (!manual) {
+                            // Нельзя редактировать НФ в состоянии "Принята"
+                            throw new AccessDeniedException(String.format(FORM_DATA_EDIT_ERROR,
+                                    formData.getFormType().getName(), formData.getState().getName()));
+                        }
                 }
             }
 
@@ -721,10 +721,11 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
     @Transactional(readOnly = true)
     public void checkDestinations(long formDataId) {
         FormData formData = formDataDao.getWithoutRows(formDataId);
+        ReportPeriod reportPeriod = periodService.getReportPeriod(formData.getReportPeriodId());
         // Проверка вышестоящих налоговых форм
         List<DepartmentFormType> departmentFormTypes =
                 departmentFormTypeDao.getFormDestinations(formData.getDepartmentId(),
-                        formData.getFormType().getId(), formData.getKind());
+                        formData.getFormType().getId(), formData.getKind(), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
         if (departmentFormTypes != null) {
             for (DepartmentFormType departmentFormType : departmentFormTypes) {
                 FormData form = formDataService.findFormData(departmentFormType.getFormTypeId(), departmentFormType.getKind(),

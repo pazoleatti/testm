@@ -50,6 +50,8 @@ public class DeclarationDataDaoTest {
 		assertEquals(1, d1.getDeclarationTemplateId());
 		assertEquals(1, d1.getReportPeriodId());
 		assertEquals(2, d1.getDepartmentId());
+        assertEquals("CD12", d1.getTaxOrganCode());
+        assertEquals("123456789", d1.getKpp());
 		assertTrue(d1.isAccepted());
 
 		DeclarationData d2 = declarationDataDao.get(2);
@@ -58,7 +60,6 @@ public class DeclarationDataDaoTest {
 		assertEquals(2, d2.getReportPeriodId());
 		assertEquals(4, d2.getDepartmentId());
 		assertFalse(d2.isAccepted());
-		
 	}
 	
 	@Test(expected=DaoException.class)
@@ -123,11 +124,15 @@ public class DeclarationDataDaoTest {
 	
 	@Test
 	public void testSaveNew() {
+        String taxOrganCode = "G55";
+        String kpp = "567898678";
 		DeclarationData d = new DeclarationData();
 		d.setAccepted(true);
 		d.setDeclarationTemplateId(1);
 		d.setDepartmentId(1);
 		d.setReportPeriodId(6);
+        d.setTaxOrganCode(taxOrganCode);
+        d.setKpp(kpp);
 		
 		long id = declarationDataDao.saveNew(d);
 
@@ -135,6 +140,8 @@ public class DeclarationDataDaoTest {
 		assertEquals(1, d2.getDeclarationTemplateId());
 		assertEquals(1, d2.getDepartmentId());
 		assertEquals(6, d2.getReportPeriodId());
+        Assert.assertEquals(taxOrganCode, d2.getTaxOrganCode());
+        Assert.assertEquals(kpp, d2.getKpp());
 		assertTrue(d2.isAccepted());
 	}
 	

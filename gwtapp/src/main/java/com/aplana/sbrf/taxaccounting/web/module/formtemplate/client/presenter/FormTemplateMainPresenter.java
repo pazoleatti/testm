@@ -17,7 +17,7 @@ import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.*;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.view.FormTemplateMainUiHandlers;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.client.event.CreateNewVersionEvent;
-import com.aplana.sbrf.taxaccounting.web.widget.historytemplatechanges.client.VersionHistoryPresenter;
+import com.aplana.sbrf.taxaccounting.web.widget.historytemplatechanges.client.FormVersionHistoryPresenter;
 import com.google.gwt.event.shared.GwtEvent.Type;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Window;
@@ -42,7 +42,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 	private FormTemplate formTemplate;
     private FormTemplateExt formTemplateExt;
 
-    protected VersionHistoryPresenter versionHistoryPresenter;
+    protected FormVersionHistoryPresenter versionHistoryPresenter;
 
     @ProxyEvent
     @Override
@@ -152,7 +152,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 
 	@Inject
 	public FormTemplateMainPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy, DispatchAsync dispatcher, PlaceManager placeManager,
-                                     VersionHistoryPresenter versionHistoryPresenter) {
+                                     FormVersionHistoryPresenter versionHistoryPresenter) {
 		super(eventBus, view, proxy, TYPE_SetTabContent, TYPE_RequestTabs, TYPE_ChangeTab, RevealContentTypeHolder.getMainContent());
 		this.dispatcher = dispatcher;
 		this.placeManager = placeManager;
@@ -374,17 +374,10 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 
     @Override
     public void onHistoryClicked() {
-        int id = Integer.valueOf(placeManager.getCurrentPlaceRequest().getParameter(AdminConstants.NameTokens.formTemplateId, ""));
+        Integer id = Integer.valueOf(placeManager.getCurrentPlaceRequest().getParameter(AdminConstants.NameTokens.formTemplateId, ""));
         if (id == 0)
             return;
-        GetVersionHistoryAction action = new GetVersionHistoryAction();
-        action.setFormTemplateId(id);
-        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetVersionHistoryResult>() {
-            @Override
-            public void onSuccess(GetVersionHistoryResult result) {
-                versionHistoryPresenter.initHistory(result.getChanges());
-                addToPopupSlot(versionHistoryPresenter);
-            }
-        }, this));
+        versionHistoryPresenter.init(id);
+        addToPopupSlot(versionHistoryPresenter);
     }
 }

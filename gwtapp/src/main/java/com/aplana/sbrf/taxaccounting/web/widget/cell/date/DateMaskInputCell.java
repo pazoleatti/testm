@@ -17,7 +17,6 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.google.gwt.text.shared.SimpleSafeHtmlRenderer;
-import com.google.gwt.user.client.Window;
 
 import java.util.Date;
 
@@ -29,16 +28,13 @@ import static com.google.gwt.dom.client.BrowserEvents.*;
  * @author add mask aivanov
  */
 public class DateMaskInputCell extends
-		AbstractEditableCell<Date, DateMaskInputCell.ViewData> {
+        AbstractEditableCell<Date, DateMaskInputCell.ViewData> {
 
 	public static final String DEFAULT_DATE_FORMAT = "dd.MM.yyyy";
 	public static final String DEFAULT_DATE_MASK = "99.99.9999";
     public static final String CHECKED_EMPTY_VALUE = "__.__.____";
 
 	private ValueUpdater<Date> valueUpdater;
-	private Context context;
-	private Element parent;
-	private ViewData viewData;
 
     private String dateFormat;
     private String mask;
@@ -162,7 +158,7 @@ public class DateMaskInputCell extends
      * @param columnContext
      */
 	public DateMaskInputCell(SafeHtmlRenderer<String> renderer, ColumnContext columnContext) {
-		super(MOUSEUP, KEYDOWN, BLUR, KEYPRESS);
+		super(CLICK, KEYDOWN, BLUR, KEYPRESS);
 		if (template == null) {
 			template = GWT.create(Template.class);
 		}
@@ -245,10 +241,7 @@ public class DateMaskInputCell extends
         Object key = context.getKey();
         ViewData vd = getViewData(key);
 
-        this.context = context;
-        this.parent = parent;
         this.valueUpdater = valueUpdater;
-        this.viewData = vd;
 
         if (Element.is(event.getEventTarget())) {
             if (isEditing(vd)) {
@@ -256,7 +249,7 @@ public class DateMaskInputCell extends
             } else {
                 //System.out.println("Not Editing - keyCode: " + event.getKeyCode() + " type: " + event.getType() +  " char: " + event.getCharCode());
 
-                if (MOUSEUP.equals(event.getType()) || event.getKeyCode() == KeyCodes.KEY_ENTER) {
+                if (CLICK.equals(event.getType()) || event.getKeyCode() == KeyCodes.KEY_ENTER) {
                     // Перейти в режим редактирования
                     if (vd == null) {
                         vd = new ViewData(value);

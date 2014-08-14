@@ -14,10 +14,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -89,7 +86,7 @@ public class RefBookIncome101DaoTest {
         PagingResult<Map<String, RefBookValue>> records = dao.getRecords(null, null, null);
         Assert.assertEquals(records.size(), 4);
         Map<String, RefBookValue> record = records.get(0);
-        long accountPeriodId = record.get("ACCOUNT_PERIOD_ID").getReferenceValue().longValue();
+        long accountPeriodId = record.get("ACCOUNT_PERIOD_ID").getReferenceValue();
 
         record.put("ACCOUNT_NAME", new RefBookValue(RefBookAttributeType.STRING, testVal1));
         record.put("INCOME_DEBET_REMAINS", new RefBookValue(RefBookAttributeType.NUMBER, testVal2));
@@ -100,7 +97,7 @@ public class RefBookIncome101DaoTest {
 
         boolean catcha = false;
         for (Map<String, RefBookValue> map : records) {
-            long accountPeriodId2 = map.get("ACCOUNT_PERIOD_ID").getReferenceValue().longValue();
+            long accountPeriodId2 = map.get("ACCOUNT_PERIOD_ID").getReferenceValue();
             if (accountPeriodId == accountPeriodId2) {
                 Assert.assertEquals(map.get("ACCOUNT_NAME").getStringValue(), testVal1);
                 Assert.assertEquals(map.get("INCOME_DEBET_REMAINS").getNumberValue().doubleValue(), testVal3.doubleValue(), 0d);
@@ -120,5 +117,15 @@ public class RefBookIncome101DaoTest {
         dao.updateRecords(Arrays.asList(record));
         PagingResult<Map<String, RefBookValue>> records = dao.getRecords(null, null, null);
         Assert.assertEquals(records.size(), 4);
+    }
+
+    @Test
+    public void testUniqueRecordIds(){
+        Assert.assertEquals(0, dao.getUniqueRecordIds("department_id = 0").size());
+    }
+    
+    @Test
+    public void testGetSeparatedValue(){
+        Assert.assertTrue(dao.getPeriodNameFromRefBook(1l).isEmpty());
     }
 }

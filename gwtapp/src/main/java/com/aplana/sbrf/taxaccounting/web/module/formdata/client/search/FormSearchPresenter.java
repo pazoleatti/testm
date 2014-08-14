@@ -32,7 +32,6 @@ public class FormSearchPresenter extends PresenterWidget<FormSearchPresenter.MyV
     }
 
     private final DispatchAsync dispatcher;
-    private final EventBus eventBus;
     private Long formDataId;
     private Integer formTemplateId;
     private List<Integer> hiddenColumns;
@@ -40,7 +39,6 @@ public class FormSearchPresenter extends PresenterWidget<FormSearchPresenter.MyV
     @Inject
     public FormSearchPresenter(final EventBus eventBus, final MyView view, DispatchAsync dispatcher) {
         super(eventBus, view);
-        this.eventBus = eventBus;
         this.dispatcher = dispatcher;
         getView().setUiHandlers(this);
     }

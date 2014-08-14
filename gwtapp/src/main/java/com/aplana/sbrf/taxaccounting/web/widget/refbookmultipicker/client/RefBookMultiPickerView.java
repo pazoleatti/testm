@@ -6,9 +6,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.event.
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.PickerState;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.RefBookItem;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
-import com.google.gwt.cell.client.AbstractCell;
-import com.google.gwt.cell.client.Cell;
-import com.google.gwt.cell.client.CheckboxCell;
+import com.google.gwt.cell.client.*;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.*;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -56,7 +54,7 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
     private Boolean multiSelect = false;
 
     private HandlerRegistration selectionHandlerRegistration;
-    private HashMap<RefBookItemTextColumn, Integer> sortColumns = new HashMap<RefBookItemTextColumn, Integer>();
+    private Map<RefBookItemTextColumn, Integer> sortColumns = new HashMap<RefBookItemTextColumn, Integer>();
     private String filterText;
 
     private SetSelectionModel<RefBookItem> selectionModel;
@@ -262,7 +260,29 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
                 }
             };
             rowSelectColumn.setSortable(false);
-            cellTable.addColumn(rowSelectColumn, "");
+
+            CheckboxCell checkboxCell = new CheckboxCell();
+            Header<Boolean> headerCheckBox = new Header<Boolean>(checkboxCell) {
+                @Override
+                public Boolean getValue() {
+                    return false;
+                }
+            };
+
+            ValueUpdater<Boolean> valueUpdater = new ValueUpdater<Boolean>() {
+
+                @Override
+                public void update(Boolean value) {
+                    if (value) {
+                        selectAll(null);
+                    } else {
+                        clearSelected(true);
+                    }
+                }
+            };
+            headerCheckBox.setUpdater(valueUpdater);
+
+            cellTable.addColumn(rowSelectColumn, headerCheckBox);
             cellTable.setColumnWidth(rowSelectColumn, 5, Style.Unit.EM);
         }
 

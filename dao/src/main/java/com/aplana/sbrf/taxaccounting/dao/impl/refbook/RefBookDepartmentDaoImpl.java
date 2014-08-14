@@ -39,20 +39,18 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
 	private static final String TABLE_NAME = "DEPARTMENT";
 
     @Autowired
-	private RefBookUtils refBookUtils;
-    @Autowired
     ReportPeriodDao reportPeriodDao;
     @Autowired
     RefBookDao refBookDao;
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
-		return refBookUtils.getRecords(REF_BOOK_ID, TABLE_NAME, pagingParams, filter, sortAttribute, isSortAscending, null);
+		return refBookDao.getRecords(REF_BOOK_ID, TABLE_NAME, pagingParams, filter, sortAttribute, isSortAscending, null);
     }
 
     @Override
     public Long getRowNum(Long recordId, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
-        return refBookUtils.getRowNum(REF_BOOK_ID, TABLE_NAME, recordId, filter, sortAttribute, isSortAscending, null);
+        return refBookDao.getRowNum(REF_BOOK_ID, TABLE_NAME, recordId, filter, sortAttribute, isSortAscending, null);
     }
 
     @Override
@@ -62,7 +60,7 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
 
     @Override
     public Map<String, RefBookValue> getRecordData(Long recordId) {
-		return refBookUtils.getRecordData(REF_BOOK_ID, TABLE_NAME, recordId);
+		return refBookDao.getRecordData(REF_BOOK_ID, TABLE_NAME, recordId);
     }
 
     private final static String CHECK_UNIQUE_MATCHES_FOR_NON_VERSION = "select name from department t where %s %s %s";
@@ -175,25 +173,25 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
 
     private static final String CREATE_DEPARTMENT = "insert into department (id, %s) values(seq_department.nextval, %s)";
     @Override
-    public int create(Map<String, RefBookValue> records, List<RefBookAttribute> attributes) {
+    public int create(Map<String, RefBookValue> record, List<RefBookAttribute> attributes) {
         final PreparedStatementData ps = new PreparedStatementData();
         for (RefBookAttribute attribute : attributes) {
             ps.appendQuery(attribute.getAlias() + ",");
 
             if (attribute.getAttributeType().equals(RefBookAttributeType.STRING)) {
-                ps.addParam(records.get(attribute.getAlias()).getStringValue());
+                ps.addParam(record.get(attribute.getAlias()).getStringValue());
             }
             if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
-                ps.addParam(records.get(attribute.getAlias()).getReferenceValue());
+                ps.addParam(record.get(attribute.getAlias()).getReferenceValue());
             }
             if (attribute.getAttributeType().equals(RefBookAttributeType.NUMBER)) {
-                ps.addParam(records.get(attribute.getAlias()).getNumberValue());
+                ps.addParam(record.get(attribute.getAlias()).getNumberValue());
             }
             if (attribute.getAttributeType().equals(RefBookAttributeType.DATE)) {
-                ps.addParam(records.get(attribute.getAlias()).getDateValue());
+                ps.addParam(record.get(attribute.getAlias()).getDateValue());
             }
         }
-        final String ph = SqlUtils.preparePlaceHolders(records.size());
+        final String ph = SqlUtils.preparePlaceHolders(attributes.size());
         try {
             PreparedStatementCreator psc = new PreparedStatementCreator() {
                 @Override
@@ -231,7 +229,7 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
 
     @Override
     public int getRecordsCount(String filter) {
-        return refBookUtils.getRecordsCount(REF_BOOK_ID, TABLE_NAME, filter);
+        return refBookDao.getRecordsCount(REF_BOOK_ID, TABLE_NAME, filter);
     }
 
     private final static String GET_ATTRIBUTES_VALUES = "select \n" +

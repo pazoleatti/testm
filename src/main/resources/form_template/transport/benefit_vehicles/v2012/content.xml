@@ -3,7 +3,7 @@
     <fixedRows>false</fixedRows>
     <name>Сведения о льготируемых транспортных средствах, по которым уплачивается транспортный налог</name>
     <fullName>Сведения о льготируемых транспортных средствах, по которым уплачивается транспортный налог</fullName>
-    <code></code>
+    <code>1084/3/2</code>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rowNumber</alias>
         <checking>false</checking>

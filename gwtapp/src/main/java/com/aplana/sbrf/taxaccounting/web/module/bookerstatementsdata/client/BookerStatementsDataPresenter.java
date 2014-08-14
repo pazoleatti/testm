@@ -104,8 +104,11 @@ public class BookerStatementsDataPresenter extends Presenter<BookerStatementsDat
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetBookerStatementsResult>() {
             @Override
             public void onSuccess(final GetBookerStatementsResult result) {
+                final String boInfo = "(форма «" + getView().getBookerReportType() + "» для подразделения «"
+                        + getView().getDepartmentName() + "» в периоде «" + getView().getAccountPeriodName() + "»)";
                 if (result.getUniqueRecordIds() != null && !result.getUniqueRecordIds().isEmpty()) {
-                    Dialog.confirmMessage("Вы уверены, что хотите удалить данные бухгалтерской отчётности?",
+                    Dialog.confirmMessage("Удаление бухгалтерской отчётности",
+                            "Вы уверены, что хотите удалить данную бухгалтерскую отчётность " + boInfo + "?",
                             new DialogHandler() {
                                 @Override
                                 public void yes() {
@@ -113,13 +116,14 @@ public class BookerStatementsDataPresenter extends Presenter<BookerStatementsDat
                                     action.setStatementsKind(typeId);
                                     action.setUniqueRecordIds(result.getUniqueRecordIds());
                                     dispatcher.execute(action, CallbackUtils
-                                            .defaultCallback(new AbstractCallback<DeleteBookerStatementsResult>() {
-                                                @Override
-                                                public void onSuccess(DeleteBookerStatementsResult result) {
-                                                    Dialog.infoMessage("Данные бухгалтерской отчётности (форма " + getView().getBookerReportType() + " для подразделения " + getView().getDepartmentName() + " в периоде " + getView().getAccountPeriodName() + ") удалены!");
-                                                    onReturnClicked();
-                                                }
-                                            }, BookerStatementsDataPresenter.this)
+                                                    .defaultCallback(new AbstractCallback<DeleteBookerStatementsResult>() {
+                                                        @Override
+                                                        public void onSuccess(DeleteBookerStatementsResult result) {
+                                                            Dialog.infoMessage("Удаление бухгалтерской отчётности",
+                                                                    "Данные бухгалтерской отчётности " + boInfo + " удалены!");
+                                                            onReturnClicked();
+                                                        }
+                                                    }, BookerStatementsDataPresenter.this)
                                     );
                                 }
 
@@ -134,9 +138,7 @@ public class BookerStatementsDataPresenter extends Presenter<BookerStatementsDat
                                 }
                             });
                 } else {
-                    Dialog.errorMessage("Данные бухгалтерской отчётности (форма " + getView().getBookerReportType() +
-                            " для подразделения " + getView().getDepartmentName() +
-                            " в периоде " + getView().getAccountPeriodName() + ") не существуют!");
+                    Dialog.errorMessage("Удаление бухгалтерской отчётности", "Данные бухгалтерской отчётности " + boInfo + " не существуют!");
                 }
             }
         }, BookerStatementsDataPresenter.this));
@@ -194,14 +196,15 @@ public class BookerStatementsDataPresenter extends Presenter<BookerStatementsDat
                 ImportAction importAction = new ImportAction();
                 importAction.setUuid(event.getValue());
                 importAction.setDepartmentId(departmentId);
-                importAction.setReportPeriodId(accountPeriodId);
+                importAction.setAccountPeriodId(accountPeriodId);
                 importAction.setTypeId(typeId);
                 dispatcher.execute(importAction, CallbackUtils.defaultCallback(
                         new AbstractCallback<ImportResult>() {
                             @Override
                             public void onSuccess(ImportResult importResult) {
                                 getView().updateTable();
-                                Dialog.infoMessage("Загрузка бух отчетности выполнена успешно.");
+                                Dialog.infoMessage("Загрузка бухгалтерской отчётности",
+                                                   "Загрузка бухгалтерской отчётности выполнена успешно!");
                             }
                         }, BookerStatementsDataPresenter.this));
             }

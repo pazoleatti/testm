@@ -4,11 +4,14 @@ import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import javax.validation.ValidationException;
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,7 +44,7 @@ public class FormTemplateServiceTest {
 
     FormTemplate formTemplateEdited;
 
-    FormTemplateServiceImpl formTemplateService = new FormTemplateServiceImpl();
+    FormTemplateService formTemplateService = new FormTemplateServiceImpl();
 
     @Before
     public void init() {
@@ -159,4 +162,9 @@ public class FormTemplateServiceTest {
 
         assertTrue(logger.getEntries().size() == 0);
     }
+
+//    @Test(expected = ValidationException.class)
+//    public void validationTest() {
+//        formTemplateService.delete(null);
+//    }
 }

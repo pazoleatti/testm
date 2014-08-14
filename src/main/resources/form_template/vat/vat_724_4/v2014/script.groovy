@@ -9,7 +9,6 @@ import groovy.transform.Field
  * или возврата соответствующих сумм авансовых платежей.
  *
  * formTemplateId=603
- *
  */
 
 // графа 1 - rowNum
@@ -57,6 +56,9 @@ switch (formDataEvent) {
         importData()
         calc()
         logicCheck()
+        break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
         break
 }
 
@@ -430,4 +432,133 @@ def getTotalRow(sectionsRows, def index) {
         }
     }
     return newRow
+}
+
+void importTransportData() {
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    addTransportData(xml)
+}
+
+void addTransportData(def xml) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper?.allCached
+    def int rnuIndexRow = 2
+    def int colOffset = 1
+
+    def mapRows = [:]
+
+    def totalTmp = formData.createDataRow()
+    totalColumns.each { alias ->
+        totalTmp.getCell(alias).setValue(BigDecimal.ZERO, null)
+    }
+
+    for (def row : xml.row) {
+        rnuIndexRow++
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+        def newRow = getNewRow()
+        newRow.setImportIndex(rnuIndexRow)
+
+        // графа 3 - атрибут 900 - ACCOUNT - «Номер балансового счета», справочник 101 «План счетов бухгалтерского учета»
+        rnuIndexCol = 3
+        record = getRecordImport(101, 'ACCOUNT', row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset)
+        newRow.number = record?.record_id?.value
+
+        // графа 2 - зависит от графы 3 - атрибут 901 - ACCOUNT_NAME - «Наименование балансового счета», справочник 101 «План счетов бухгалтерского учета»
+        if (record != null) {
+            rnuIndexCol = 2
+            def value1 = record?.ACCOUNT_NAME?.value?.toString()
+            def value2 = row.cell[rnuIndexCol].text()
+            formDataService.checkReferenceValue(101, value1, value2, rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+        }
+
+        // графа 4
+        rnuIndexCol = 4
+        newRow.sum = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
+        // графа 5
+        rnuIndexCol = 5
+        newRow.number2 = row.cell[rnuIndexCol].text()
+
+        // графа 6
+        rnuIndexCol = 6
+        newRow.sum2 = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
+        // графа 7
+        rnuIndexCol = 7
+        newRow.nds = row.cell[rnuIndexCol].text()
+
+        totalColumns.each { alias ->
+            def value1 = totalTmp.getCell(alias).value
+            def value2 = (newRow.getCell(alias).value ?: BigDecimal.ZERO)
+            totalTmp.getCell(alias).setValue(value1 + value2, null)
+        }
+
+        // Техническое поле(группа)
+        rnuIndexCol = 8
+        def sectionIndex = row.cell[rnuIndexCol].text()
+
+        if (mapRows[sectionIndex] == null) {
+            mapRows[sectionIndex] = []
+        }
+        mapRows[sectionIndex].add(newRow)
+    }
+
+    deleteNotFixedRows(dataRows)
+    // копирование данных по разделам
+    sections.each { section ->
+        def copyRows = mapRows[section]
+        if (copyRows != null && !copyRows.isEmpty()) {
+            def insertIndex = getDataRow(dataRows, 'total' + section).getIndex() - 1
+            dataRows.addAll(insertIndex, copyRows)
+            // поправить индексы, потому что они после вставки не пересчитываются
+            updateIndexes(dataRows)
+        }
+    }
+
+    // сравнение итогов
+    if (xml.rowTotal.size() == 1) {
+        rnuIndexRow = rnuIndexRow + 2
+        def row = xml.rowTotal[0]
+        def total = formData.createDataRow()
+
+        // графа 4
+        rnuIndexCol = 4
+        total.sum = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
+        // графа 6
+        rnuIndexCol = 6
+        total.sum2 = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
+        def colIndexMap = ['sum' : 4, 'sum2' : 6]
+
+        for (def alias : totalColumns) {
+            def v1 = total.getCell(alias).value
+            def v2 = totalTmp.getCell(alias).value
+            if (v1 == null && v2 == null) {
+                continue
+            }
+            if (v1 == null || v1 != null && v1 != v2) {
+                logger.error(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
+                break
+            }
+        }
+    }
+
+    // расчет итогов
+    for (def section : sections) {
+        def firstRow = getDataRow(dataRows, 'head' + section)
+        def lastRow = getDataRow(dataRows, 'total' + section)
+        def from = firstRow.getIndex()
+        def to = lastRow.getIndex() - 1
+
+        // посчитать итоги по разделам
+        def rows = (from <= to ? dataRows[from..to] : [])
+        calcTotalSum(rows, lastRow, totalColumns)
+    }
+    updateIndexes(dataRows)
+
+    dataRowHelper.save(dataRows)
 }

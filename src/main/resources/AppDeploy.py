@@ -2,13 +2,18 @@ print '********************************'
 print '* Start application deploy script'
 
 print '--------------------------------'
-print '- Initialization'
+print '- User data'
 
 # prefix for resources
-suffixForResources = '-muks'
+suffixForResources = ''
+
+# application path
+applicationPath = 'C:/taxaccounting-muks.ear'
+
+print '--------------------------------'
+print '- Initialization'
 
 # application
-applicationPath = 'C:/taxaccounting-muks.ear'
 applicationName = 'taxaccounting'+ suffixForResources
 applicationContext = '/taxaccounting'+ suffixForResources +'/gwtapp'
 

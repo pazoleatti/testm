@@ -44,7 +44,7 @@ public class RefBookDepartmentDaoTest {
     public void getRecords() {
         // Получим записи из бд
         RefBookValue departmentBankid = new RefBookValue(RefBookAttributeType.NUMBER, 1L);
-        RefBookValue departmentTB1Name = new RefBookValue(RefBookAttributeType.STRING, "Териториальный Банк №1");
+        RefBookValue departmentTB1Name = new RefBookValue(RefBookAttributeType.STRING, "Территориальный Банк №1");
         PagingResult<Map<String, RefBookValue>> data = refBookDepartmentDao.getRecords(new PagingParams(), null, null);
         assertTrue(data.getTotalCount() == DEPARTMENTS_TOTAL_RECORDS);
         assertTrue(data.size() == DEPARTMENTS_COUNT);
@@ -79,7 +79,7 @@ public class RefBookDepartmentDaoTest {
     @Test
     public void getRecordData() {
         Map<String, RefBookValue> record = refBookDepartmentDao.getRecordData(2L);
-        RefBookValue expectedValue = new RefBookValue(RefBookAttributeType.STRING, "Териториальный Банк №1");
+        RefBookValue expectedValue = new RefBookValue(RefBookAttributeType.STRING, "Территориальный Банк №1");
         assertTrue(record.get("name").equals(expectedValue));
     }
 
@@ -114,13 +114,13 @@ public class RefBookDepartmentDaoTest {
 
     @Test
     public void testCreate() {
-        Map<String, RefBookValue> record = new HashMap<String, RefBookValue>()
-        {{
-                put("name", new RefBookValue(RefBookAttributeType.STRING, "dsfs"));
-                put("sbrf_code", new RefBookValue(RefBookAttributeType.STRING, "99_0000_00"));
-                put("type", new RefBookValue(RefBookAttributeType.NUMBER, DepartmentType.MANAGEMENT.getCode()));
-                put("code", new RefBookValue(RefBookAttributeType.NUMBER, 101));
-        }};
+
+		RefBook refBook = refBookDao.get(RefBookDepartmentDao.REF_BOOK_ID);
+		Map<String, RefBookValue> record = refBook.createRecord();
+		record.get("name").setValue("dsfs");
+		record.get("sbrf_code").setValue("99_0000_00");
+		record.get("type").setValue(Long.valueOf(DepartmentType.MANAGEMENT.getCode()));
+		record.get("code").setValue(101);
         assertEquals(1000, refBookDepartmentDao.create(record, refBookDao.getAttributes(30l)));
     }
 

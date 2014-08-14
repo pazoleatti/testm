@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.AuditDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -28,12 +28,11 @@ public class AuditServiceImpl implements AuditService {
 	@Autowired
 	private DepartmentService departmentService;
     @Autowired
-	private DeclarationTypeDao declarationTypeDao;
-    @Autowired
     private PeriodService periodService;
     @Autowired
     private TransactionHelper tx;
-
+    @Autowired
+    private LockDataService lockDataService;
 
     @Override
 	public PagingResult<LogSearchResultItem> getLogsByFilter(LogSystemFilter filter) {
@@ -43,7 +42,7 @@ public class AuditServiceImpl implements AuditService {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED, readOnly = false)
 	public void add(final FormDataEvent event, final TAUserInfo userInfo, final Integer departmentId, final Integer reportPeriodId,
-                    final String declarationTypeName, final String formTypeName, final Integer formKindId, final String note) {
+                    final String declarationTypeName, final String formTypeName, final Integer formKindId, final String note, final String blobDataId) {
         tx.executeInNewTransaction(new TransactionLogic() {
             @Override
             public void execute() {
@@ -63,9 +62,11 @@ public class AuditServiceImpl implements AuditService {
                 }
                 log.setRoles(roles.toString());
 
-                String departmentName = departmentId == null ? "" : departmentService.getParentsHierarchy(departmentId);
+                String departmentName = departmentId == null ? "" : (departmentId == 0 ? departmentService.getDepartment(departmentId).getName() : departmentService.getParentsHierarchy(departmentId));
                 log.setFormDepartmentName(departmentName.substring(0, Math.min(departmentName.length(), 2000)));
                 log.setFormDepartmentId(departmentId);
+                if (departmentId != null && departmentId != 0) log.setDepartmentTBId(departmentService.getParentTB(departmentId).getId());
+
                 if (reportPeriodId == null)
                     log.setReportPeriodName(null);
                 else {
@@ -76,8 +77,11 @@ public class AuditServiceImpl implements AuditService {
                 log.setFormTypeName(formTypeName);
                 log.setFormKindId(formKindId);
                 log.setNote(note != null ? note.substring(0, Math.min(note.length(), 2000)) : null);
-                String userDepartmentName = departmentService.getParentsHierarchy(userInfo.getUser().getDepartmentId());
+                int userDepId = userInfo.getUser().getDepartmentId();
+                String userDepartmentName = userDepId == 0 ? departmentService.getDepartment(userDepId).getName() : departmentService.getParentsHierarchy(userDepId);
                 log.setUserDepartmentName(userDepartmentName.substring(0, Math.min(userDepartmentName.length(), 2000)));
+
+                log.setBlobDataId(blobDataId);
 
                 auditDao.add(log);
             }
@@ -98,7 +102,7 @@ public class AuditServiceImpl implements AuditService {
                 listIds.add(item.getId());
             auditDao.removeRecords(listIds);
         }
-        add(FormDataEvent.LOG_SYSTEM_BACKUP, userInfo, userInfo.getUser().getDepartmentId(), null, null, null, null, "Архивация ЖА");
+        add(FormDataEvent.LOG_SYSTEM_BACKUP, userInfo, userInfo.getUser().getDepartmentId(), null, null, null, null, "Архивация ЖА", null);
     }
 
     @Override
@@ -113,10 +117,25 @@ public class AuditServiceImpl implements AuditService {
     @Override
     public PagingResult<LogSearchResultItem> getLogsBusiness(LogSystemFilter filter, TAUserInfo userInfo) {
         List<Integer> departments = departmentService.getTaxFormDepartments(userInfo.getUser(), asList(TaxType.values()), null, null);
+        List<Department> BADepartments = departmentService.getBADepartments(userInfo.getUser());
+        List<Integer> BADepartmentIds = new ArrayList<Integer>();
+        for(Department department: BADepartments) {
+            BADepartmentIds.add(department.getId());
+        }
         try {
-            return auditDao.getLogsBusiness(filter, departments);
+            return auditDao.getLogsBusiness(filter, departments, BADepartmentIds);
         } catch (DaoException e){
             throw new ServiceException("Поиск по НФ/декларациям.", e);
         }
+    }
+
+    @Override
+    public LockData lock(TAUserInfo userInfo) {
+        return lockDataService.lock("LOG_SYSTEM_BACKUP", userInfo.getUser().getId(), 3600000);
+    }
+
+    @Override
+    public void unlock(TAUserInfo userInfo) {
+        lockDataService.unlock("LOG_SYSTEM_BACKUP", userInfo.getUser().getId());
     }
 }

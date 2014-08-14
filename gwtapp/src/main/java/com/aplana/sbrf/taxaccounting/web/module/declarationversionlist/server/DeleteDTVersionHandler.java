@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.server;
 
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.TemplateChanges;
 import com.aplana.sbrf.taxaccounting.model.TemplateChangesEvent;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -44,11 +45,11 @@ public class DeleteDTVersionHandler extends AbstractActionHandler<DeleteDTVersio
     public DeleteDTVersionResult execute(DeleteDTVersionAction action, ExecutionContext context) throws ActionException {
         DeleteDTVersionResult result = new DeleteDTVersionResult();
         Logger logger = new Logger();
-        result.setLastVersion(mainOperatingService.deleteVersionTemplate(action.getDeclarationTemplateId(), null, logger, securityService.currentUserInfo().getUser()));
+        result.setLastVersion(mainOperatingService.deleteVersionTemplate(action.getDeclarationTemplateId(), logger, securityService.currentUserInfo().getUser()));
         result.setLogEntryUuid(logEntryService.save(logger.getEntries()));
 
         TemplateChanges changes = new TemplateChanges();
-        changes.setEvent(TemplateChangesEvent.DELETED);
+        changes.setEvent(FormDataEvent.TEMPLATE_DELETED);
         changes.setEventDate(new Date());
         changes.setDeclarationTemplateId(action.getDeclarationTemplateId());
         changes.setAuthor(securityService.currentUserInfo().getUser());

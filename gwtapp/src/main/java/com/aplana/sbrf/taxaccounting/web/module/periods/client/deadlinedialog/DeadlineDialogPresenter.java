@@ -37,7 +37,6 @@ public class DeadlineDialogPresenter extends PresenterWidget<DeadlineDialogPrese
     }
 
     private DispatchAsync dispatcher;
-    private PlaceManager placeManager;
     private String periodName;
     private int year;
     private TaxType taxType;
@@ -46,10 +45,9 @@ public class DeadlineDialogPresenter extends PresenterWidget<DeadlineDialogPrese
 
     @Inject
     public DeadlineDialogPresenter(final EventBus eventBus, final MyView view,
-                                   DispatchAsync dispatcher, PlaceManager placeManager) {
+                                   DispatchAsync dispatcher) {
         super(eventBus, view);
         this.dispatcher = dispatcher;
-        this.placeManager = placeManager;
         getView().setUiHandlers(this);
     }
 

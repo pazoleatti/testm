@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao;
 
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
@@ -25,7 +26,7 @@ public interface LogEntryDao {
      * @param uuid
      * @return
      */
-    List<LogEntry> get(String uuid);
+    List<LogEntry> get(@NotNull String uuid);
 
     /**
      * Обновление записи

@@ -15,6 +15,6 @@ public interface MainOperatingService {
     <T> int createNewType(T template, Date templateActualEndDate, Logger logger, TAUser user);
     <T> int createNewTemplateVersion(T template, Date templateActualEndDate, Logger logger, TAUser user);
     void deleteTemplate(int typeId, Logger logger, TAUser user);
-    boolean deleteVersionTemplate(int templateId, Date templateActualEndDate, Logger logger, TAUser user);
+    boolean deleteVersionTemplate(int templateId, Logger logger, TAUser user);
     boolean setStatusTemplate(int templateId, Logger logger, TAUser user, boolean force);
 }

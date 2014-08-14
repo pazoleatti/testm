@@ -88,7 +88,7 @@ comment on column form_template.name is 'Наименование формы';
 comment on column form_template.fullname is 'Полное наименование формы';
 comment on column form_template.script is 'Скрипт, реализующий бизнес-логику налоговой формы';
 comment on column form_template.data_headers is 'Описание заголовка таблицы';
-comment on column form_template.status is 'Статус версии (0 - действующая версия; 1 - удаленная версия, 2 - черновик версии, 3 - фиктивная версия)';
+comment on column form_template.status is 'Статус версии (0 - действующая версия; -1 - удаленная версия, 1 - черновик версии, 2 - фиктивная версия)';
 comment on column form_template.monthly is 'Признак ежемесячной формы (0 - не ежемесячная, 1 - ежемесячная)';
 comment on column form_template.header is 'Верхний колонтитул печатной формы';
 
@@ -304,7 +304,6 @@ create sequence seq_report_period start with 100;
 ----------------------------------------------------------------------------------------------------
 create table income_101 (
   id                     number(18) not null,
-  report_period_id       number(9),
   account                varchar2(255 char) not null,
   income_debet_remains   number(22,4),
   income_credit_remains  number(22,4),
@@ -313,12 +312,10 @@ create table income_101 (
   outcome_debet_remains  number(22,4),
   outcome_credit_remains number(22,4),
   account_name           varchar2(255 char),
-  department_id          number(9),
-  account_period_id 	 number(9)
+  account_period_id 	 number(9) not null
 );
 comment on table income_101 is 'Оборотная ведомость (Форма 0409101-СБ)';
 comment on column income_101.id is 'Код записи';
-comment on column income_101.report_period_id is 'Идентификатор отчетного периода';
 comment on column income_101.account is 'Номер счета';
 comment on column income_101.income_debet_remains is 'Входящие остатки по дебету';
 comment on column income_101.income_credit_remains is 'Входящие остатки по кредиту';
@@ -327,27 +324,22 @@ comment on column income_101.credit_rate is 'Обороты по кредиту'
 comment on column income_101.outcome_debet_remains is 'Исходящие остатки по дебету';
 comment on column income_101.outcome_credit_remains is 'Исходящие остатки по кредиту';
 comment on column income_101.account_name is 'Название счёта';
-comment on column income_101.department_id is 'Код подразделения';
 comment on column income_101.account_period_id is 'Идентификатор периода и подразделения БО';
 
 create sequence seq_income_101 start with 100;
 -------------------------------------------------------------------------------------------------------------------------------------------
 create table income_102 (
   id               number(18) not null,
-  report_period_id number(9),
   opu_code         varchar2(25 char) not null,
   total_sum        number(22,4),
   item_name        varchar2(255 char),
-  department_id    number(9),
-  account_period_id number(9)
+  account_period_id number(9) not null
   );
 comment on table income_102 is 'Отчет о прибылях и убытках (Форма 0409102-СБ)';
 comment on column income_102.id is 'Код записи';
-comment on column income_102.report_period_id is 'Идентификатор отчетного периода';
 comment on column income_102.opu_code is 'Код ОПУ';
 comment on column income_102.total_sum is 'Сумма';
 comment on column income_102.item_name is 'Наименование статьи';
-comment on column income_102.department_id is 'Код подразделения';
 comment on column income_102.account_period_id is 'Идентификатор периода и подразделения БО';
 
 create sequence seq_income_102 start with 100;
@@ -405,6 +397,8 @@ create table declaration_data (
   declaration_template_id number(9) not null,
   report_period_id        number(9) not null,
   department_id           number(9) not null,
+  tax_organ_code          varchar2(4),
+  kpp                     varchar2(9),
   data                    varchar2(36),
   is_accepted             number(1) not null,
   data_pdf                varchar2(36),
@@ -417,10 +411,12 @@ comment on column declaration_data.id is 'Идентификатор (перви
 comment on column declaration_data.declaration_template_id is 'Ссылка на шаблон декларации';
 comment on column declaration_data.report_period_id is 'Отчётный период';
 comment on column declaration_data.department_id is 'Подразделение';
-comment on column declaration_data.data is 'Данные декларации в формате законодателя (XML) ';
+comment on column declaration_data.tax_organ_code is 'Налоговый орган';
+comment on column declaration_data.kpp is 'КПП';
+comment on column declaration_data.data is 'Данные декларации в формате законодателя (XML)';
 comment on column declaration_data.is_accepted is 'Признак того, что декларация принята';
-comment on column declaration_data.data_pdf is 'pdf';
-comment on column declaration_data.data_xlsx is 'xlsx';
+comment on column declaration_data.data_pdf is 'Данные декларации в формате PDF';
+comment on column declaration_data.data_xlsx is 'Данные декларации в формате XLSX';
 comment on column declaration_data.jasper_print is 'Сформированный отчет во внутреннем формате Jasper Reports';
 
 create sequence seq_declaration_data start with 10000;
@@ -649,7 +645,7 @@ create table log_business (
   id                  number(18,0) primary key,
   log_date            date not null,
   event_id            number(3,0) not null,
-  user_login          varchar2(100) not null,
+  user_login          varchar2(255) not null,
   roles               varchar2(200) not null,
   declaration_data_id number(9,0),
   form_data_id        number(9,0),
@@ -674,7 +670,7 @@ create table log_system (
   log_date            date not null,
   ip                  varchar2(39),
   event_id            number(3,0) not null,
-  user_login          varchar2(100) not null,
+  user_login          varchar2(255) not null,
   roles               varchar2(200),
   department_name     varchar2(4000 byte) not null,
   report_period_name  varchar2(100),
@@ -684,7 +680,8 @@ create table log_system (
   declaration_type_name varchar2(80),
   form_type_name      varchar2(1000),
   form_department_id  number(9),
-  tb_department_id number(9)
+  tb_department_id number(9),
+  blob_data_id        varchar2(36)
 );
 comment on table log_system is  'Системный журнал';
 comment on column log_system.id is 'Код записи';
@@ -694,7 +691,7 @@ comment on column log_system.event_id is 'Код события (1 - Созда�
 comment on column log_system.user_login is 'Логин пользователя';
 comment on column log_system.roles is 'Список ролей пользователя';
 comment on column log_system.department_name is 'Наименование подразделения НФ\декларации';
-comment on column log_system.report_period_name is 'Имя отчетного периода';
+comment on column log_system.report_period_name is 'Наименование отчетного периода';
 comment on column log_system.form_kind_id is 'Код типа налоговой формы (1,2,3,4,5)';
 comment on column log_system.note is 'Текст сообщения';
 comment on column log_system.user_department_name is 'Наименование подразделения пользователя';
@@ -702,11 +699,12 @@ comment on column LOG_SYSTEM.DECLARATION_TYPE_NAME is 'Вид деклараци
 comment on column LOG_SYSTEM.FORM_TYPE_NAME is 'Вид налоговой формы';
 comment on column LOG_SYSTEM.FORM_DEPARTMENT_ID is 'Идентификатор подразделения налоговой формы/декларации';
 comment on column log_system.tb_department_id is 'Идентификатор ТБ подразделения налоговой формы/декларации';
+comment on column log_system.blob_data_id is 'Ссылка на логи';
 
 create sequence seq_log_system start with 10000;
 ------------------------------------------------------------------------------------------------------
 create table department_report_period (
-  id                  number(18, 0)  primary key,
+  id                  number(18, 0)  not null,
   department_id       number(9) not null,
   report_period_id    number(9) not null,
   is_active           number(1) not null,
@@ -730,14 +728,18 @@ task_name varchar2(100) not null,
 modification_date date not null,
 user_task_jndi varchar2(500) not null,
 custom_params_exist number(9,0) not null,
-serialized_params blob null
+serialized_params blob null,
+user_id number(9) not null
 );
 comment on table task_context is 'Контекст пользовательских задач планировщика';
+comment on column task_context.id is 'Уникальный идентификатор записи';
 comment on column task_context.task_id is 'Идентификатор задачи планировщика websphere';
 comment on column task_context.task_name is 'Название задачи';
 comment on column task_context.user_task_jndi is 'JNDI-имя класса-обработчика задачи';
 comment on column task_context.custom_params_exist is 'Признак наличия пользовательских параметров';
 comment on column task_context.serialized_params is 'Сериализованные пользователькие параметры';
+comment on column task_context.modification_date is 'Дата последнего редактирования задачи';
+comment on column task_context.user_id is 'Идентификатор пользователя';
 
 create sequence seq_task_context start with 100;
 ------------------------------------------------------------------------------------------------------
@@ -753,6 +755,7 @@ deadline date not null
 );
 
 comment on table notification is 'Оповещения';
+comment on column notification.id is 'Уникальный идентификатор оповещения';
 comment on column notification.report_period_id is 'идентификатор отчетного периода'; 
 comment on column notification.sender_department_id is 'идентификатор подразделения-отправителя'; 
 comment on column notification.receiver_department_id is 'идентификатор подразделения-получателя'; 
@@ -769,12 +772,13 @@ create table template_changes (
  id number(9) not null,
  form_template_id number(9),
  declaration_template_id number(9),
- event number(1),
+ event number(9),
  author number(9) not null,
  date_event date
 );
 
 comment on table template_changes is 'Изменение версий налоговых шаблонов';
+comment on column template_changes.id is 'Уникальный идентификатор записи';
 comment on column template_changes.form_template_id is 'Идентификатор налогового шаблона';
 comment on column template_changes.declaration_template_id is 'Идентификатор шаблона декларации';
 comment on column template_changes.event is 'Событие версии';
@@ -791,7 +795,7 @@ COMMENT ON TABLE event IS 'Справочник событий в системе
 COMMENT ON COLUMN event.id IS 'Идентификатор события';
 COMMENT ON COLUMN event.name IS 'Наименование события';
 
- create sequence seq_template_changes start with 10000;
+create sequence seq_template_changes start with 10000;
 --------------------------------------------------------------------------------------------------------
 create table lock_data
 (
@@ -804,4 +808,14 @@ comment on table lock_data is 'Информация о блокировках';
 comment on column lock_data.key is 'Код блокировки';
 comment on column lock_data.user_id is 'Идентификатор пользователя, установившего блокировку';
 comment on column lock_data.date_before is 'Срок истечения блокировки';
+
 --------------------------------------------------------------------------------------------------------
+create table department_type
+(
+id number(9) not null,
+name varchar2(50)
+);
+
+comment on table department_type is 'Типы подразделений банка';
+comment on column department_type.id is 'Идентификатор типа';
+comment on column department_type.name is 'Наименование типа';

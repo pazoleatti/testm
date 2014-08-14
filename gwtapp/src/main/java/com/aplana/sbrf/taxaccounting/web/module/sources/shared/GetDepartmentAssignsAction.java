@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.sources.shared;
 
+import com.aplana.sbrf.taxaccounting.model.SourcesSearchOrdering;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.source.SourceMode;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
@@ -13,6 +14,8 @@ public class GetDepartmentAssignsAction extends UnsecuredActionImpl<GetDepartmen
     private boolean isForm = true;
     private PeriodsInterval periodsInterval;
     private DepartmentAssign selectedLeft;
+    private SourcesSearchOrdering ordering;
+    private boolean ascSorting;
     /** Назначение источников или приемников? */
     private SourceMode mode;
 
@@ -62,6 +65,22 @@ public class GetDepartmentAssignsAction extends UnsecuredActionImpl<GetDepartmen
 
     public void setForm(boolean isForm) {
         this.isForm = isForm;
+    }
+
+    public SourcesSearchOrdering getOrdering() {
+        return ordering;
+    }
+
+    public void setOrdering(SourcesSearchOrdering ordering) {
+        this.ordering = ordering;
+    }
+
+    public boolean isAscSorting() {
+        return ascSorting;
+    }
+
+    public void setAscSorting(boolean ascSorting) {
+        this.ascSorting = ascSorting;
     }
 
     @Override

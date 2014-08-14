@@ -40,7 +40,7 @@ public class DeclarationDataController {
 		TAUserInfo userInfo = securityService.currentUserInfo();
 
 		byte[] xlsxData = declarationService.getXlsxData(id, userInfo);
-		String fileName = URLEncoder.encode(getFileName(id, userInfo, "xlsx"), "UTF-8");
+		String fileName = URLEncoder.encode(getFileName(id, userInfo, "xlsx"), ENCODING);
 
 		response.setContentType("application/octet-stream");
 		response.setHeader("Content-Disposition", "attachment; filename=\""
@@ -68,7 +68,7 @@ public class DeclarationDataController {
 			throws IOException {
 
 		String xmlData = declarationService.getXmlData(id, securityService.currentUserInfo());
-		String fileName = URLEncoder.encode(getFileName(id, securityService.currentUserInfo(), "xml"), "UTF-8");
+		String fileName = URLEncoder.encode(getFileName(id, securityService.currentUserInfo(), "xml"), ENCODING);
 
 		response.setContentType("application/octet-stream");
 		response.setHeader("Content-Disposition", "attachment; filename=\""

@@ -1,25 +1,20 @@
 package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.source.SourceClientData;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
 import javax.validation.constraints.NotNull;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.source.SourceClientData;
-import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
 /**
  * Интерфейс сервиса для работы с привязкой департаментов к подразделениям
  */
 public interface SourceService {
-
 
     /**
      * Возвращает НФ назначения, которые являются источниками
@@ -71,6 +66,20 @@ public interface SourceService {
     List<DepartmentFormType> getDFTByDepartment(int departmentId, TaxType taxType, Date periodStart, Date periodEnd);
 
     /**
+     * Возвращает НФ назначения для подразделения
+     *
+     * @param departmentId идентификатор подразделения
+     * @param taxType      вид налога
+     * @param periodStart  начало периода, в котором действуют назначения
+     * @param periodEnd    окончание периода, в котором действуют назначения
+     * @param filter       фильтр сортировки
+     * @return информация о формах-источниках в виде списка
+     * {@link com.aplana.sbrf.taxaccounting.model.DepartmentFormType}
+     */
+    List<DepartmentFormType> getDFTByDepartment(int departmentId, TaxType taxType, Date periodStart, Date periodEnd,
+                                                SearchOrderingFilter filter);
+
+    /**
      * Возвращает информацию о назначенных подразделению декларациях по заданному виду налога
      *
      * @param departmentId идентификатор подразделения
@@ -80,6 +89,19 @@ public interface SourceService {
      * @return список назначенных подразделению деклараций (с учётом вида и типа) по заданному виду налога
      */
     List<DepartmentDeclarationType> getDDTByDepartment(int departmentId, TaxType taxType, Date periodStart, Date periodEnd);
+
+    /**
+     * Возвращает информацию о назначенных подразделению декларациях по заданному виду налога
+     *
+     * @param departmentId идентификатор подразделения
+     * @param taxType      вид налога
+     * @param periodStart  начало периода, в котором действуют назначения
+     * @param periodEnd    окончание периода, в котором действуют назначения
+     * @param filter       фильтр сортировки
+     * @return список назначенных подразделению деклараций (с учётом вида и типа) по заданному виду налога
+     */
+    List<DepartmentDeclarationType> getDDTByDepartment(int departmentId, TaxType taxType, Date periodStart, Date periodEnd,
+                                                       SearchOrderingFilter filter);
 
     /**
      * Возвращает информацию об источниках, которые должны использоваться при
@@ -100,13 +122,43 @@ public interface SourceService {
      * Возвращает информацию об источниках, которые должны использоваться при
      * формировании налоговой формы назначения с заданными параметрами
      *
-     * @param departmentId
-     * @param formTypeId
-     * @param kind
-     * @param reportPeriodId
+     * @param departmentId идентификатор подразделения формируемой налоговой формы
+     *                     назначения
+     * @param formTypeId   вид налоговой формы
+     * @param kind         тип налоговой формы
+     * @param periodStart  начало периода, в котором действуют назначения
+     * @param periodEnd    окончание периода, в котором действуют назначения
+     * @param filter       фильтр сортировки
+     * @return информация о формах-источниках в виде списка
+     * {@link com.aplana.sbrf.taxaccounting.model.DepartmentFormType}
+     */
+    List<DepartmentFormType> getDFTSourcesByDFT(int departmentId, int formTypeId, FormDataKind kind, Date periodStart,
+                                                Date periodEnd, SearchOrderingFilter filter);
+
+    /**
+     * Возвращает информацию об источниках, которые должны использоваться при
+     * формировании налоговой формы назначения с заданными параметрами
+     *
+     * @param departmentId   идентификатор подразделения
+     * @param formTypeId     вид налоговой формы
+     * @param kind           тип налоговой формы
+     * @param reportPeriodId отчетный период
      * @return
      */
     List<DepartmentFormType> getDFTSourcesByDFT(int departmentId, int formTypeId, FormDataKind kind, int reportPeriodId);
+
+    /**
+     * Возвращает информацию об источниках, которые должны использоваться при
+     * формировании налоговой формы назначения с заданными параметрами
+     *
+     * @param departmentId   идентификатор подразделения
+     * @param formTypeId     вид налоговой формы
+     * @param kind           тип налоговой формы
+     * @param reportPeriodId отчетный период
+     * @return
+     */
+    List<DepartmentFormType> getDFTSourcesByDFT(int departmentId, int formTypeId, FormDataKind kind, int reportPeriodId,
+                                                SearchOrderingFilter filter);
 
     /**
      * Возвращает НФ назначения (DFT), которые являются источником для ДЕ назначения (DDT)
@@ -114,12 +166,27 @@ public interface SourceService {
      *
      * @param departmentId      идентификатор декларации
      * @param declarationTypeId идентификатор вида декларации
-     * @param periodStart  начало периода, в котором действуют назначения
-     * @param periodEnd    окончание периода, в котором действуют назначения
+     * @param periodStart       начало периода, в котором действуют назначения
+     * @param periodEnd         окончание периода, в котором действуют назначения
      * @return информация о формах-источниках в виде списка
      *         {@link com.aplana.sbrf.taxaccounting.model.DepartmentFormType}
      */
     List<DepartmentFormType> getDFTSourceByDDT(int departmentId, int declarationTypeId, Date periodStart, Date periodEnd);
+
+    /**
+     * Возвращает НФ назначения (DFT), которые являются источником для ДЕ назначения (DDT)
+     * (в данном случае DDT и связка департамента и типа декларации - одно и тоже)
+     *
+     * @param departmentId      идентификатор декларации
+     * @param declarationTypeId идентификатор вида декларации
+     * @param periodStart       начало периода, в котором действуют назначения
+     * @param periodEnd         окончание периода, в котором действуют назначения
+     * @param filter            фильтр сортировки
+     * @return информация о формах-источниках в виде списка
+     * {@link com.aplana.sbrf.taxaccounting.model.DepartmentFormType}
+     */
+    List<DepartmentFormType> getDFTSourceByDDT(int departmentId, int declarationTypeId, Date periodStart, Date periodEnd,
+                                               SearchOrderingFilter filter);
 
     /**
      * Возвращает информацию о декларациях-потребителях, которые должны использовать
@@ -159,6 +226,16 @@ public interface SourceService {
     List<FormTypeKind> getDeclarationAssigned(Long departmentId, char taxType);
 
     /**
+     * Возвращает список назначенных деклараций для выбранного налога и подразделений
+     *
+     * @param departmentIds идентификаторы подразделений
+     * @param taxType       идентификатор вида налога
+     * @param filter        фильтр для сортировки
+     * @return список назначенных деклараций для выбранного налога и подразделений
+     */
+    List<FormTypeKind> getAllDeclarationAssigned(List<Long> departmentIds, char taxType, SearchOrderingFilter filter);
+
+    /**
      * Возвращает список назначенных налоговых форм для выбранного налога и подразделения
      *
      * @param departmentId идентификатор подразделения
@@ -167,6 +244,16 @@ public interface SourceService {
      *         {@link com.aplana.sbrf.taxaccounting.model.FormTypeKind}
      */
     List<FormTypeKind> getFormAssigned(Long departmentId, char taxType);
+
+    /**
+     * Возвращает список назначенных налоговых форм для выбранного налога и подразделений
+     *
+     * @param departmentIds идентификаторы подразделений
+     * @param taxType       идентификатор вида налога
+     * @param filter        фильтр для сортировки
+     * @return список назначенных налоговых форм для выбранного налога и подразделений
+     */
+    List<FormTypeKind> getAllFormAssigned(List<Long> departmentIds, char taxType, SearchOrderingFilter filter);
 
     /**
      * Добавляет налоговые формы, назначенные подразделению

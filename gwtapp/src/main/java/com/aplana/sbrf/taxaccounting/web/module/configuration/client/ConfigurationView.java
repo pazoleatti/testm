@@ -2,7 +2,10 @@ package com.aplana.sbrf.taxaccounting.web.module.configuration.client;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.module.configuration.client.ConfigurationPresenter.MyView;
+import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumn;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumnFactory;
+import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellModifiedEvent;
+import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellModifiedEventHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -19,10 +22,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandlers> implements MyView {
     @UiField
@@ -77,6 +77,7 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
         paramColumn.setFilter(filter);
         paramColumn.setAlias("paramColumn");
         paramColumn.setName("Параметр");
+        paramColumn.setSearchEnabled(false);
         Column<DataRow<Cell>, ?> paramColumnUI = factory.createTableColumn(paramColumn, commonTable);
         commonTable.setColumnWidth(paramColumnUI, 30, Style.Unit.EM);
         commonTable.addColumn(paramColumnUI, paramColumn.getName());
@@ -91,6 +92,16 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
         commonTable.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.ENABLED);
         SingleSelectionModel<DataRow<Cell>> singleSelectionModel = new SingleSelectionModel<DataRow<Cell>>();
         commonTable.setSelectionModel(singleSelectionModel);
+
+        // Обновляем таблицу после обновления модели
+        ((DataRowColumn<?>)paramColumnUI).addCellModifiedEventHandler(new CellModifiedEventHandler() {
+            @Override
+            public void onCellModified(CellModifiedEvent event, boolean withReference) {
+                if (getUiHandlers() != null) {
+                    commonTable.redraw();
+                }
+            }
+        });
     }
 
     /**
@@ -126,6 +137,16 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
         formTable.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.ENABLED);
         SingleSelectionModel<DataRow<Cell>> singleSelectionModel = new SingleSelectionModel<DataRow<Cell>>();
         formTable.setSelectionModel(singleSelectionModel);
+
+        // Обновляем таблицу после обновления модели
+        ((DataRowColumn<?>)departmentColumnUI).addCellModifiedEventHandler(new CellModifiedEventHandler() {
+            @Override
+            public void onCellModified(CellModifiedEvent event, boolean withReference) {
+                if (getUiHandlers() != null) {
+                    formTable.redraw();
+                }
+            }
+        });
     }
 
     // Переключение между вкладками
@@ -141,10 +162,20 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
     @UiHandler("addLink")
     void onAddLinkClick(ClickEvent event) {
         if (commonPanel.isVisible()) {
-            getUiHandlers().onCommonAddRow();
+            getUiHandlers().onCommonAddRow(getSelectedIndex());
         } else {
-            getUiHandlers().onFormAddRow();
+            getUiHandlers().onFormAddRow(getSelectedIndex());
         }
+    }
+
+    private Integer getSelectedIndex() {
+        DataGrid<DataRow<Cell>> table = commonPanel.isVisible() ? commonTable : formTable;
+        DataRow<Cell> selRow = ((SingleSelectionModel<DataRow<Cell>>) table.getSelectionModel()).getSelectedObject();
+        if (selRow == null) {
+            return null;
+        }
+        List<DataRow<Cell>> rowsData = commonPanel.isVisible() ? commonRowsData : formRowsData;
+        return rowsData.indexOf(selRow);
     }
 
     @UiHandler("delLink")
@@ -226,11 +257,7 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
     };
 
     @Override
-    public void setCommonConfigData(List<DataRow<Cell>> rowsData) {
-        setCommonConfigData(rowsData, true);
-    }
-
-    private void setCommonConfigData(List<DataRow<Cell>> rowsData, boolean needSort) {
+    public void setCommonConfigData(List<DataRow<Cell>> rowsData, boolean needSort) {
         if (needSort) {
             Collections.sort(rowsData, commonComparator);
         }
@@ -241,11 +268,7 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
     }
 
 	@Override
-	public void setFormConfigData(List<DataRow<Cell>> rowsData) {
-        setFormConfigData(rowsData, true);
-	}
-
-    private void setFormConfigData(List<DataRow<Cell>> rowsData, boolean needSort) {
+	public void setFormConfigData(List<DataRow<Cell>> rowsData, boolean needSort) {
         if (needSort) {
             Collections.sort(rowsData, formComparator);
         }

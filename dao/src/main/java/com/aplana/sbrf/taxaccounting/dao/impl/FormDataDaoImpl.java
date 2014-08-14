@@ -528,7 +528,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
     public List<FormData> getManualInputForms(List<Integer> departments, int reportPeriodId, TaxType taxType, FormDataKind kind, Date periodStart, Date periodEnd) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("reportPeriodId", reportPeriodId);
-        params.put("taxType", taxType.getCode());
+        params.put("taxType", String.valueOf(taxType.getCode()));
         params.put("kind", kind.getId());
         params.put("periodStart", periodStart);
         params.put("periodEnd", periodEnd);

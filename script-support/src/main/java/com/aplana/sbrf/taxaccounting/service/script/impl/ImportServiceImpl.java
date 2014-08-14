@@ -318,7 +318,7 @@ public class ImportServiceImpl implements ImportService {
                 sb.append(st.substring(0, lastIndex));
                 break;
             }
-            sb.append(st);
+            sb.append(StringUtils.cleanString(st));
             sb.append("\n");
         }
         return sb.toString();

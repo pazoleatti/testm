@@ -8,19 +8,25 @@ import java.util.List;
  * Сервис для работы с историей событий налоговых форм/деклараций
  */
 public interface LogBusinessService {
-	/**
-	 * Получить информацию об историей событий деклараций
-	 * @param declarationId идентификатор декларации
-	 * @return объект, представляющий историю событий для декларации
-	 */
-	List<LogBusiness> getDeclarationLogsBusiness(long declarationId);
+    /**
+     * Получить информацию об истории событий деклараций
+     *
+     * @param declarationId идентификатор декларации
+     * @param ordering      столбец, по которому сортировать
+     * @param isAscSorting  сорировать по возрастанию или убыванию
+     * @return объект, представляющий историю событий для декларации
+     */
+    List<LogBusiness> getDeclarationLogsBusiness(long declarationId, HistoryBusinessSearchOrdering ordering, boolean isAscSorting);
 
-	/**
-	 * Получить информацию об историей событий налоговой формы
-	 * @param formId идентификатор формы
-	 * @return объект, представляющий историю событий для налоговой формы
-	 */
-	List<LogBusiness> getFormLogsBusiness(long formId);
+    /**
+     * Получить информацию об истории событий налоговой формы
+     *
+     * @param formId       идентификатор формы
+     * @param ordering     столбец, по которому сортировать
+     * @param isAscSorting сорировать по возрастанию или убыванию
+     * @return объект, представляющий историю событий для налоговой формы
+     */
+    List<LogBusiness> getFormLogsBusiness(long formId, HistoryBusinessSearchOrdering ordering, boolean isAscSorting);
 
 	/**
 	 * Добавить информацию об логировании

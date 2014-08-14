@@ -40,7 +40,7 @@ public class TaskServiceBean implements TaskService {
             //Вызов задачи
             InitialContext ic = new InitialContext();
             UserTask userTask = (UserTask) ic.lookup(taskContextEntity.getUserTaskJndi());
-            userTask.execute(params);
+            userTask.execute(params, taskContextEntity.getUserId());
         } catch (Exception e) {
             LOG.error(e.getLocalizedMessage(), e);
             throw new TaskExecutionException("Ошибка выполнения задачи", e);

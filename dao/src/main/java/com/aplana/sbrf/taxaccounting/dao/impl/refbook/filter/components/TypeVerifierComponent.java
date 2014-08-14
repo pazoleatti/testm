@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.components;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.FilterTreeParser;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import org.antlr.v4.runtime.misc.NotNull;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -35,7 +34,7 @@ public class TypeVerifierComponent extends AbstractTreeListenerComponent {
     private HasLastExternalRefBookAttribute hasLastExternalRefBookAttribute;
 
     @Override
-    public void exitFuncwrap(@NotNull FilterTreeParser.FuncwrapContext ctx) {
+    public void exitFuncwrap(FilterTreeParser.FuncwrapContext ctx) {
         // проверка типа данных для функции
         checkFunctionType(ctx);
 
@@ -50,17 +49,17 @@ public class TypeVerifierComponent extends AbstractTreeListenerComponent {
     }
 
     @Override
-    public void exitString(@NotNull FilterTreeParser.StringContext ctx) {
+    public void exitString(FilterTreeParser.StringContext ctx) {
         setType(OperandType.STRING);
     }
 
     @Override
-    public void exitNumber(@NotNull FilterTreeParser.NumberContext ctx) {
+    public void exitNumber(FilterTreeParser.NumberContext ctx) {
         setType(OperandType.NUMBER);
     }
 
     @Override
-    public void enterRoperand(@NotNull FilterTreeParser.RoperandContext ctx) {
+    public void enterRoperand(FilterTreeParser.RoperandContext ctx) {
         /**
          * Метод устанавливает работу с правым операндом
          */
@@ -69,7 +68,7 @@ public class TypeVerifierComponent extends AbstractTreeListenerComponent {
     }
 
     @Override
-    public void enterStandartExpr(@NotNull FilterTreeParser.StandartExprContext ctx) {
+    public void enterStandartExpr(FilterTreeParser.StandartExprContext ctx) {
         /**
          * Сброс параметров, для повторного использования объекта
          */
@@ -80,7 +79,7 @@ public class TypeVerifierComponent extends AbstractTreeListenerComponent {
     }
 
     @Override
-    public void exitStandartExpr(@NotNull FilterTreeParser.StandartExprContext ctx) {
+    public void exitStandartExpr(FilterTreeParser.StandartExprContext ctx) {
         /**
          * Проверка типов левого и правого операнда
          */
@@ -94,23 +93,23 @@ public class TypeVerifierComponent extends AbstractTreeListenerComponent {
     }
 
     @Override
-    public void enterLoperand(@NotNull FilterTreeParser.LoperandContext ctx) {
+    public void enterLoperand(FilterTreeParser.LoperandContext ctx) {
         startCatchLeftType();
     }
 
     @Override
-    public void enterIsNullExpr(@NotNull FilterTreeParser.IsNullExprContext ctx) {
+    public void enterIsNullExpr(FilterTreeParser.IsNullExprContext ctx) {
         // хотя это совсем не играет роли, чтоб исключить исплючение
         startCatchLeftType();
     }
 
     @Override
-    public void exitExternalAlias(@NotNull FilterTreeParser.ExternalAliasContext ctx) {
+    public void exitExternalAlias(FilterTreeParser.ExternalAliasContext ctx) {
         setAliasType(hasLastExternalRefBookAttribute.getLastExternalRefBookAttribute());
     }
 
     @Override
-    public void exitInternlAlias(@NotNull FilterTreeParser.InternlAliasContext ctx) {
+    public void exitInternlAlias(FilterTreeParser.InternlAliasContext ctx) {
         setAliasType(ctx.getText());
     }
 

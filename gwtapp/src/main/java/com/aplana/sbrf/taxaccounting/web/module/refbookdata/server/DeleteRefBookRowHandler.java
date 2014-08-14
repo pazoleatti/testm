@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.DeleteRefBookRowAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.DeleteRefBookRowResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -28,6 +29,9 @@ public class DeleteRefBookRowHandler extends AbstractActionHandler<DeleteRefBook
     @Autowired
     private LogEntryService logEntryService;
 
+    @Autowired
+    private SecurityService securityService;
+
 	@Override
 	public DeleteRefBookRowResult execute(DeleteRefBookRowAction action, ExecutionContext executionContext) throws ActionException {
 		RefBookDataProvider refBookDataProvider = refBookFactory
@@ -35,6 +39,7 @@ public class DeleteRefBookRowHandler extends AbstractActionHandler<DeleteRefBook
 
         DeleteRefBookRowResult result = new DeleteRefBookRowResult();
         Logger logger = new Logger();
+        logger.setTaUserInfo(securityService.currentUserInfo());
         if (action.getRecordsId().size() > 0) {
             if (action.isDeleteVersion()) {
                 Long nextVersion = refBookDataProvider.getFirstRecordId(action.getRecordsId().get(0));

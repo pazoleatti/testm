@@ -56,6 +56,9 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
+        break
 }
 
 // Автозаполняемые атрибуты (графа 4, 5)
@@ -82,9 +85,6 @@ def calendarStartDate = null
 def endDate = null
 
 @Field
-def prevStartDate = null
-
-@Field
 def prevEndDate = null
 
 @Field
@@ -98,6 +98,9 @@ def calcRowAlias5 = ['R8', 'R9', 'R13']
 
 @Field
 def repordPeriod = null
+
+@Field
+def prevReportPeriod = null
 
 // Cправочник «Отчет о прибылях и убытках (Форма 0409102-СБ)»
 @Field
@@ -174,19 +177,9 @@ def getReportPeriodEndDate() {
     return endDate
 }
 
-def getPrevReportPeriodStartDate() {
-    if (prevStartDate == null) {
-        def prevReportPeriodId = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)?.id
-        if (prevReportPeriodId != null) {
-            prevStartDate = reportPeriodService.getStartDate(prevReportPeriodId).time
-        }
-    }
-    return prevStartDate
-}
-
 def getPrevReportPeriodEndDate() {
     if (prevEndDate == null) {
-        def prevReportPeriodId = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)?.id
+        def prevReportPeriodId = getPrevReportPeriod()?.id
         if (prevReportPeriodId != null) {
             prevEndDate = reportPeriodService.getEndDate(prevReportPeriodId).time
         }
@@ -201,30 +194,52 @@ def getRepordPeriod() {
     return repordPeriod
 }
 
+def getPrevReportPeriod() {
+    if (prevReportPeriod == null) {
+        prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
+    }
+    return prevReportPeriod
+}
+
 // Получение данных из справочника «Отчет о прибылях и убытках» для текужего подразделения и отчетного периода
 def getIncome102Data(def date) {
     if(date==null){
         return []
     }
     if (!income102DataCache.containsKey(date)) {
-        def filter = "DEPARTMENT_ID = ${formData.departmentId}"
-        income102DataCache.put(date, refBookFactory.getDataProvider(52L)?.getRecords(date, null, filter, null))
+        def records = bookerStatementService.getRecords(52L, formData.departmentId, date, null)
+        if (records == null) {
+            return []
+        }
+        income102DataCache.put(date, records)
     }
     return income102DataCache.get(date)
 }
 
 // Проверка наличия необходимых записей в справочнике «Отчет о прибылях и убытках»
 void checkIncome102() {
+    // формирование названия периода
+    def periodName = null
+    def period = null
+    def prevPeriod = null
+
     // Наличие экземпляра Отчета о прибылях и убытках подразделения и периода, для которых сформирована текущая форма
     if (getIncome102Data(getReportPeriodEndDate()) == []) {
-        throw new ServiceException("Экземпляр Отчета о прибылях и убытках за период " +
-                "${getReportPeriodStartDate().format(dateFormat)} - ${getReportPeriodEndDate().format(dateFormat)} " +
-                "не существует (отсутствуют данные для расчета)! Расчеты не могут быть выполнены.")
+        period = getBookerStatementPeriod(getReportPeriodEndDate())
     }
     // Наличие экземпляра Отчета о прибылях и убытках подразделения и предыдущего периода
     if (getRepordPeriod().order > 1 && getIncome102Data(getPrevReportPeriodEndDate()) == []) {
-        throw new ServiceException("Экземпляр Отчета о прибылях и убытках за период " +
-                "${getPrevReportPeriodStartDate().format(dateFormat)} - ${getPrevReportPeriodEndDate().format(dateFormat)} " +
+        prevPeriod = getBookerStatementPeriod(getPrevReportPeriodEndDate())
+    }
+
+    if (prevPeriod && period) {
+        periodName = prevPeriod + " и " + period
+    } else if (prevPeriod || period) {
+        periodName = (prevPeriod ?: period)
+    }
+
+    if (periodName) {
+        throw new ServiceException("Экземпляр Отчета о прибылях и убытках за $periodName " +
                 "не существует (отсутствуют данные для расчета)! Расчеты не могут быть выполнены.")
     }
 }
@@ -284,7 +299,7 @@ def calc4or5(def row, def columnFlag) {
     // список кодов ОПУ из справочника
     def opuCodes = getOpuCodes(row.code, row, columnFlag)
     // сумма кодов ОПУ из отчета 102
-    def sum = getSumByOpuCodes(opuCodes, row.getIndex(), columnFlag)
+    def sum = getSumByOpuCodes(opuCodes, row, columnFlag)
     return roundValue(sum, 2)
 }
 
@@ -459,4 +474,92 @@ void addData(def xml, int headRowCount) {
         dataRow.obtainCost = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
     }
     dataRowHelper.save(dataRows)
+}
+
+void importTransportData() {
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    addTransportData(xml)
+}
+
+void addTransportData(def xml) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    def int rnuIndexRow = 2
+    def int colOffset = 1
+
+    dataRows.each {
+        it.realizeCost = null
+        it.realizeCost = null
+    }
+
+    for (def row : xml.row) {
+        rnuIndexRow++
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        def indexRow = rnuIndexRow - 2
+        def dataRow = dataRows.get(indexRow - 1)
+
+        def values = [:]
+        values.rowNum = parseNumber(row.cell[1].text(), rnuIndexRow, 1 + colOffset, logger, true)
+        values.code = row.cell[2].text()
+        values.name = row.cell[3].text()
+
+        // Проверить фиксированные значения (графа 1..3)
+        ['rowNum', 'code', 'name'].each { alias ->
+            def value = values[alias]?.toString()
+            def valueExpected = dataRow.getCell(alias).value?.toString()
+            checkFixedValue(dataRow, value, valueExpected, indexRow, alias, logger, true)
+        }
+
+        // графа 4
+        dataRow.realizeCost = parseNumber(row.cell[4].text(), rnuIndexRow, 4 + colOffset, logger, true)
+
+        // графа 5
+        dataRow.obtainCost = parseNumber(row.cell[5].text(), rnuIndexRow, 5 + colOffset, logger, true)
+    }
+    def itogValues = calcItog(dataRows)
+    def totalRow = getDataRow(dataRows, 'itog')
+    totalColumns.each { alias ->
+        totalRow[alias] = itogValues[alias]
+    }
+
+    if (xml.rowTotal.size() == 1) {
+        rnuIndexRow += 2
+
+        def row = xml.rowTotal[0]
+
+        def total = formData.createDataRow()
+
+        // графа 4
+        total.realizeCost = parseNumber(row.cell[4].text(), rnuIndexRow, 4 + colOffset, logger, true)
+        // графа 5
+        total.obtainCost = parseNumber(row.cell[5].text(), rnuIndexRow, 5 + colOffset, logger, true)
+
+        def colIndexMap = ['realizeCost' : 4, 'obtainCost' : 5]
+        for (def alias : totalColumns) {
+            def v1 = total[alias]
+            def v2 = totalRow[alias]
+            if (v1 == null && v2 == null) {
+                continue
+            }
+            if (v1 == null || v1 != null && v1 != v2) {
+                logger.error(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
+                break
+            }
+        }
+    }
+    dataRowHelper.save(dataRows)
+}
+
+/**
+ * Получить название периода Бухалтерской отчетности по дате.
+ *
+ * @param date дата.
+ */
+def getBookerStatementPeriod(def date) {
+    def name = bookerStatementService.getPeriodValue(date)?.NAME?.value
+    return name + " " + getRepordPeriod()?.taxPeriod?.year
 }

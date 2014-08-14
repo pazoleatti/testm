@@ -16,6 +16,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.UUID;
 
 import static java.util.Arrays.asList;
 import static org.mockito.Matchers.eq;
@@ -59,12 +61,6 @@ public class ConfigurationServiceTest {
         user.setRoles(asList(role));
         Logger logger = new Logger();
         service.saveAllConfig(userInfo, new ConfigurationParamModel(), logger);
-    }
-
-    private void printLog(Logger logger) {
-        for (LogEntry entry : logger.getEntries()) {
-            System.out.println(entry.getLevel() + " " + entry.getMessage());
-        }
     }
 
     // Сохранение без ошибок
@@ -208,6 +204,26 @@ public class ConfigurationServiceTest {
         Assert.assertTrue(logger.getEntries().get(0).getMessage().contains(ConfigurationParam.FORM_ERROR_DIRECTORY.getCaption()));
     }
 
+    // Превышена длина
+    @Test
+    public void saveAllConfig5Test() throws IOException {
+        Logger logger = new Logger();
+        ConfigurationParamModel model = new ConfigurationParamModel();
+        int length = 500;
+        StringBuilder sb = new StringBuilder();
+        while (sb.length() <= length) {
+            String str = UUID.randomUUID().toString();
+            sb.append(str);
+        }
+
+        model.put(ConfigurationParam.KEY_FILE, 0, Arrays.asList(sb.toString(), sb.toString(), ""));
+        service.saveAllConfig(getUser(), model, logger);
+
+        Assert.assertEquals(10, logger.getEntries().size());
+        Assert.assertTrue(logger.getEntries().get(0).getMessage().contains("(" + length + ")"));
+        Assert.assertTrue(logger.getEntries().get(1).getMessage().contains("(" + length + ")"));
+    }
+
     // Путь недоступен
     @Test
     public void checkReadWriteAccess1Test() throws IOException {
@@ -254,7 +270,7 @@ public class ConfigurationServiceTest {
         archiveFolder.delete();
         errorFolder.delete();
 
-        Assert.assertEquals(10, logger.getEntries().size());
+        Assert.assertEquals(11, logger.getEntries().size());
         Assert.assertTrue(logger.containsLevel(LogLevel.ERROR));
         Assert.assertTrue(logger.containsLevel(LogLevel.INFO));
     }
@@ -306,7 +322,7 @@ public class ConfigurationServiceTest {
         archiveFolder.delete();
         errorFolder.delete();
 
-        Assert.assertEquals(10, logger.getEntries().size());
+        Assert.assertEquals(11, logger.getEntries().size());
         Assert.assertTrue(logger.containsLevel(LogLevel.ERROR));
         Assert.assertTrue(logger.containsLevel(LogLevel.INFO));
     }

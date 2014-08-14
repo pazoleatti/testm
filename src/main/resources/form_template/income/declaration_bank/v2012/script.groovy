@@ -170,7 +170,7 @@ void logicCheck() {
             (stoimRealPTDoSr > viruchRealPTDoSr ?
             (ubit1Prev269 != stoimRealPTDoSr - viruchRealPTDoSr - ubit1Soot269)
             : (ubit1Prev269 != 0))) {
-        logger.error('Результат текущего расчёта не прошёл проверку, приведённую в порядке заполнения налоговой декларации по налогу на прибыль организации.')
+        logger.warn('В Приложении 3 к Листу 02 строка 150 неверно указана сумма.')
     }
 
     // Проверки Приложения № 3 к Листу 02 - Проверка отрицательной разницы (убыток), полученной налогоплательщиком
@@ -185,7 +185,7 @@ void logicCheck() {
             (stoimRealPTPosSr > viruchRealPTPosSr ?
             (ubit2RealPT != stoimRealPTPosSr - viruchRealPTPosSr)
             : (ubit2RealPT != 0))) {
-        logger.error('Результат текущего расчёта не прошёл проверку, приведённую в порядке заполнения налоговой декларации по налогу на прибыль организации.')
+        logger.warn('В Приложении 3 к Листу 02 строка 160 неверно указана сумма.')
     }
 }
 
@@ -1813,11 +1813,14 @@ List<String> getErrorDepartment(record) {
     if (record.OKVED_CODE == null || record.OKVED_CODE.value == null) {
         errorList.add("«Код вида экономической деятельности и по классификатору ОКВЭД»")
     }
-    if (record.NAME == null || record.NAME.value == null || record.NAME.value.isEmpty()) {
-        errorList.add("«ИНН реорганизованного обособленного подразделения»")
-    }
-    if (record.REORG_KPP == null || record.REORG_KPP.value == null || record.REORG_KPP.value.isEmpty()) {
-        errorList.add("«КПП реорганизованного обособленного подразделения»")
+    def reorgFormCode = getRefBookValue(5, record?.REORG_FORM_CODE?.value)?.CODE?.value
+    if (reorgFormCode != null && reorgFormCode != '0') {
+        if (record.REORG_INN == null || record.REORG_INN.value == null || record.REORG_INN.value.isEmpty()) {
+            errorList.add("«ИНН реорганизованного обособленного подразделения»")
+        }
+        if (record.REORG_KPP == null || record.REORG_KPP.value == null || record.REORG_KPP.value.isEmpty()) {
+            errorList.add("«КПП реорганизованного обособленного подразделения»")
+        }
     }
     if (record.SIGNATORY_ID == null || record.SIGNATORY_ID.value == null) {
         errorList.add("«Признак лица подписавшего документ»")
@@ -1828,7 +1831,8 @@ List<String> getErrorDepartment(record) {
     if (record.SIGNATORY_FIRSTNAME == null || record.SIGNATORY_FIRSTNAME.value == null || record.SIGNATORY_FIRSTNAME.value.isEmpty()) {
         errorList.add("«Имя подписанта»")
     }
-    if (record.APPROVE_DOC_NAME == null || record.APPROVE_DOC_NAME.value == null || record.APPROVE_DOC_NAME.value.isEmpty()) {
+    def signatoryId = getRefBookValue(35, record?.SIGNATORY_ID?.value)?.CODE?.value
+    if ((signatoryId != null && signatoryId != 1) && (record.APPROVE_DOC_NAME == null || record.APPROVE_DOC_NAME.value == null || record.APPROVE_DOC_NAME.value.isEmpty())) {
         errorList.add("«Наименование документа, подтверждающего полномочия представителя»")
     }
     if (record.TAX_PLACE_TYPE_CODE == null || record.TAX_PLACE_TYPE_CODE.value == null) {

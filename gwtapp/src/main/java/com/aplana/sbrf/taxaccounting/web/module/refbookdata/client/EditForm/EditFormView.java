@@ -12,9 +12,14 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookRecord
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookValueSerializable;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.event.ChildrenLoadedEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -23,6 +28,7 @@ import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -165,7 +171,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
             oneField.setCellHorizontalAlignment(label, HasHorizontalAlignment.ALIGN_RIGHT);
             oneField.setCellVerticalAlignment(label, HasVerticalAlignment.ALIGN_MIDDLE);
 
-			Widget widget;
+            final Widget widget;
 			switch (col.getAttributeType()) {
 				case NUMBER:
                     if(Formats.BOOLEAN.equals(col.getFormat())){
@@ -192,12 +198,12 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 					break;
 			}
 
-            final HasValue hasValue = (HasValue)widget;
-            hasValue.addValueChangeHandler(new ValueChangeHandler() {
+            ((HasValue)widget).addValueChangeHandler(new ValueChangeHandler() {
                 @Override
                 public void onValueChange(ValueChangeEvent event) {
                     if (getUiHandlers() != null) {
-                        getUiHandlers().valueChanged(col.getAlias(), hasValue.getValue());
+                        checkValueChange(col, widget, event.getValue());
+                        getUiHandlers().valueChanged(col.getAlias(), event.getValue());
                     }
                 }
             });
@@ -225,6 +231,20 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
         updateRefBookPickerPeriod();
 		return widgets;
 	}
+
+    void checkValueChange(RefBookColumn col, Widget widget, Object value) {
+        switch (col.getAttributeType()) {
+            case STRING:
+                if (value != null && value.toString().length() > col.getMaxLength()) {
+                    widget.getElement().getFirstChildElement().getFirstChildElement()
+                            .getStyle().setBackgroundColor("#ffccd2");
+                } else {
+                    widget.getElement().getFirstChildElement().getFirstChildElement()
+                            .getStyle().setBackgroundColor("");
+                }
+                break;
+        }
+    }
 
     /**
      *  Label для input'a редактирования значения справочника
@@ -326,17 +346,18 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
                         checkRequired(field.getKey(), number);
 						if (number != null) {
                             int fractionalPart = number.scale();
-                            int integerPart = fractionalPart < 0 ? (number.precision() - fractionalPart) : number.precision() ;
+                            int integerPart = number.precision();
+                            integerPart = fractionalPart < integerPart ? (integerPart - fractionalPart) : 0;
                             fractionalPart = fractionalPart < 0 ? 0 : fractionalPart;
 
                             Integer maxLength = field.getKey().getMaxLength();
                             Integer precision = field.getKey().getPrecision();
 
                             // пердпологается, что (maxLength - precision) <= 17
-                            if (fractionalPart > precision || (integerPart + fractionalPart) > maxLength) {
+                            if (fractionalPart > precision || integerPart > (maxLength - precision)) {
 								BadValueException badValueException = new BadValueException();
 								badValueException.setFieldName(field.getKey().getName());
-								badValueException.setDescription("Значение не соответствует формату (" + maxLength + ", " + precision + ")");
+								badValueException.setDescription("значение атрибута не соответствует формату: максимальное количество цифр " + maxLength + ", максимальная точность " + precision);
 								throw badValueException;
 							}
 						}
@@ -352,7 +373,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 						if (string!= null && string.length() > maxLength) {
 							BadValueException badValueException = new BadValueException();
 							badValueException.setFieldName(field.getKey().getName());
-							badValueException.setDescription("Значение более " + maxLength + " символов");
+							badValueException.setDescription("значение атрибута превышает максимально допустимое " + maxLength + "!");
 							throw badValueException;
 						}
 						value.setAttributeType(RefBookAttributeType.STRING);
@@ -378,13 +399,11 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 				}
 				fieldsValues.put(field.getKey().getAlias(), value);
 			} catch (NumberFormatException nfe) {
-                nfe.printStackTrace();
 				BadValueException badValueException = new BadValueException();
 				badValueException.setFieldName(field.getKey().getName());
                 badValueException.setDescription("значение некорректно!");
 				throw badValueException;
 			} catch (ClassCastException cce) {
-                cce.printStackTrace();
 				BadValueException badValueException = new BadValueException();
 				badValueException.setFieldName(field.getKey().getName());
                 badValueException.setDescription("значение некорректно!");
