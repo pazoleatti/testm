@@ -92,10 +92,6 @@ void importFromXML() {
                 // Курс валюты
                 if (currencySector && reader.getName().equals(QName.valueOf("Rate"))) {
                     rate = new BigDecimal(reader.getElementText())
-                    // TODO
-                    if (rate == 9999) {
-                        throw new Exception("Test 9999!")
-                    }
                 }
             }
 

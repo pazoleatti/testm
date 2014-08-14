@@ -201,6 +201,7 @@ public class DeclarationDataPresenter
 										@Override
 										public void onSuccess(
 												AcceptDeclarationDataResult result) {
+                                            LogAddEvent.fire(DeclarationDataPresenter.this, result.getUuid());
 											revealPlaceRequest();
 										}
 									}, DeclarationDataPresenter.this));
