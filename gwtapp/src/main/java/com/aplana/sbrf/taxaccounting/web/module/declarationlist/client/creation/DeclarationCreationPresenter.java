@@ -38,7 +38,9 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
 		void setSelectedDeclarationType(Integer id);
 		void setSelectedReportPeriod(List<Integer> periodIds);
 		void setSelectedDepartment(List<Integer> departmentIds);
-		
+		void setSelectedTaxOrganCode(List<Long> taxOrganCode);
+		void setSelectedTaxOrganKpp(List<Long> taxOrganKpp);
+
 		Integer getSelectedDeclarationType();
 		List<Integer> getSelectedReportPeriod();
 		List<Integer> getSelectedDepartment();
@@ -170,7 +172,9 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
 	private void clearValues(){
 		getView().setSelectedDeclarationType(null);
 		getView().setSelectedReportPeriod(null);
-		getView().setSelectedDepartment(null);
+        getView().setSelectedDepartment(null);
+        getView().setSelectedTaxOrganCode(null);
+        getView().setSelectedTaxOrganKpp(null);
 	}
 
     public void initAndShowDialog(final DeclarationDataFilter dataFilter, final HasPopupSlot popupSlot){
