@@ -4,8 +4,10 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.ScriptStatusHolder;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
@@ -29,6 +31,7 @@ import java.util.Map;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class RateMDBTest {
 
@@ -84,7 +87,12 @@ public class RateMDBTest {
                 return null;
             }
         }).when(auditService).add(any(FormDataEvent.class), any(TAUserInfo.class), any(Integer.class),
-                any(Integer.class), any(String.class), any(String.class), any(Integer.class), any(String.class));
+                any(Integer.class), any(String.class), any(String.class), any(Integer.class), any(String.class), anyString());
+
+        // LogEntryService
+        LogEntryService logEntryService = mock(LogEntryService.class);
+        when(logEntryService.save(anyListOf(LogEntry.class))).thenReturn("test-uuid");
+        ReflectionTestUtils.setField(rmdb, "logEntryService", logEntryService);
     }
 
     private class TextMessageImpl implements TextMessage {

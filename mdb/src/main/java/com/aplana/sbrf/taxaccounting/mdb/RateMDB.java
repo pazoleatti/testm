@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.model.ScriptStatusHolder;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.apache.commons.logging.Log;
@@ -83,7 +82,7 @@ public class RateMDB implements MessageListener {
 
         if (message == null || !(message instanceof TextMessage)) {
             logger.error(ERROR_FORMAT);
-            addLog(userInfo, String.format(FAIL_IMPORT, ERROR_FORMAT));
+            addLog(userInfo, String.format(FAIL_IMPORT, ERROR_FORMAT), null);
             return;
         }
 
@@ -98,7 +97,7 @@ public class RateMDB implements MessageListener {
             String fileText = tm.getText();
             if (fileText == null) {
                 logger.error(ERROR_FORMAT);
-                addLog(userInfo, String.format(FAIL_IMPORT, ERROR_FORMAT));
+                addLog(userInfo, String.format(FAIL_IMPORT, ERROR_FORMAT), null);
                 return;
             }
             importRate(fileText, userInfo);
@@ -211,7 +210,7 @@ public class RateMDB implements MessageListener {
             saxParser.parse(new ByteArrayInputStream(fileText.getBytes(RATE_ENCODING)), handler);
             if (refBookId[0] == null) {
                 logger.error(ERROR_RATE);
-                addLog(userInfo, String.format(FAIL_IMPORT, ERROR_RATE));
+                addLog(userInfo, String.format(FAIL_IMPORT, ERROR_RATE), null);
                 return;
             }
             runScript(refBookId[0], fileText, userInfo);
@@ -240,7 +239,8 @@ public class RateMDB implements MessageListener {
             addLog(userInfo, String.format(FAIL_IMPORT, e.getMessage()), logEntryService.save(logger.getEntries()));
             return;
         }        
-        addLog(userInfo, String.format(SUCCESS_IMPORT, scriptStatusHolder.getSuccessCount(), refBookNameMapping.get(refBookId)), logEntryService.save(logger.getEntries()));
+        addLog(userInfo, String.format(SUCCESS_IMPORT, scriptStatusHolder.getSuccessCount(),
+                refBookNameMapping.get(refBookId)), logEntryService.save(logger.getEntries()));
     }
 
     /**
