@@ -29,19 +29,20 @@ public class ForignKeyResolverTest {
     @Before
     public void init(){
         // Первый справочник
-        RefBook refBook =  new RefBook();
+        RefBook refBookUser =  new RefBook();
 
-        // Атрибуты
+        // Атрибуты первого справочника - пользователи
         List<RefBookAttribute> attributeList1 =  new ArrayList();
         RefBookAttribute attributeUser = new RefBookAttribute();
-        attributeUser.setAttributeType(RefBookAttributeType.STRING);
+        attributeUser.setAttributeType(RefBookAttributeType.REFERENCE);
+        // ссылается на справочник c id = 2
         attributeUser.setRefBookId(2L);
         attributeUser.setAlias("user");
         attributeList1.add(attributeUser);
-        refBook.setAttributes(attributeList1);
+        refBookUser.setAttributes(attributeList1);
 
-        // Второй справочник
-        RefBook refBook2 =  new RefBook();
+        // Второй справочник - информация о пользователях
+        RefBook refBookUserInfo =  new RefBook();
         // атрибуты справочника
         List<RefBookAttribute> attributeList2 =  new ArrayList();
         RefBookAttribute attributeName = new RefBookAttribute();
@@ -57,26 +58,37 @@ public class ForignKeyResolverTest {
         attributeCity.setId(3L);
         attributeList2.add(attributeCity);
 
-        refBook2.setAttributes(attributeList2);
+        refBookUserInfo.setAttributes(attributeList2);
 
-        // Третий справочник
-        RefBook refBook3 =  new RefBook();
-        List<RefBookAttribute> attributeList4 =  new ArrayList();
+        // Третий справочник - города
+        RefBook refBookCity =  new RefBook();
+        List<RefBookAttribute> attributeList3 =  new ArrayList();
         RefBookAttribute attributeCityName = new RefBookAttribute();
         attributeCityName.setAlias("name");
         attributeCityName.setAttributeType(RefBookAttributeType.STRING);
         attributeCityName.setId(4L);
-        attributeList4.add(attributeCityName);
-        refBook3.setAttributes(attributeList4);
+        attributeList3.add(attributeCityName);
+        refBookCity.setAttributes(attributeList3);
+
+        // Четвертый справочник
+        RefBook refBookAttitude =  new RefBook();
+        List<RefBookAttribute> attributeList4 =  new ArrayList();
+        RefBookAttribute attributeAttitudeName = new RefBookAttribute();
+        attributeAttitudeName.setAlias("name");
+        attributeAttitudeName.setAttributeType(RefBookAttributeType.STRING);
+        attributeAttitudeName.setId(5L);
+        attributeList4.add(attributeAttitudeName);
+        refBookAttitude.setAttributes(attributeList4);
 
         RefBookDao refBookDao = mock(RefBookDao.class);
-        when(refBookDao.get(1L)).thenReturn(refBook);
-        when(refBookDao.get(2L)).thenReturn(refBook2);
-        when(refBookDao.get(3L)).thenReturn(refBook3);
+        when(refBookDao.get(1L)).thenReturn(refBookUser);
+        when(refBookDao.get(2L)).thenReturn(refBookUserInfo);
+        when(refBookDao.get(3L)).thenReturn(refBookCity);
+        when(refBookDao.get(4L)).thenReturn(refBookAttitude);
 
 
         foreignKeyResolverComponent = new ForeignKeyResolverComponent();
-        foreignKeyResolverComponent.setRefBook(refBook);
+        foreignKeyResolverComponent.setRefBook(refBookUser);
         ReflectionTestUtils.setField(foreignKeyResolverComponent, "refBookDao", refBookDao);
     }
 
