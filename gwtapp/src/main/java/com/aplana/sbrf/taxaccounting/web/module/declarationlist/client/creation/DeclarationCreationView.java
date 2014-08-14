@@ -174,7 +174,7 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
     public void onTaxOrganCodeChange(ValueChangeEvent<List<Long>> event) {
         taxOrganKpp.setValue(null, true);
         if(taxOrganCode.getValue() != null) {
-            taxOrganKpp.setFilter(taxOrganCode.getFilter() + " and TAX_ORGAN_CODE = " + taxOrganCode.getDereferenceValue());
+            taxOrganKpp.setFilter(taxOrganCode.getFilter() + " and TAX_ORGAN_CODE = '" + getTaxOrganCode() + "'");
         }else {
             taxOrganKpp.setFilter(null);
         }
@@ -203,6 +203,15 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
         departmentPicker.setValue(departmentIds);
     }
 
+    @Override
+    public void setSelectedTaxOrganCode(List<Long> code) {
+        taxOrganCode.setValue(code);
+    }
+
+    @Override
+    public void setSelectedTaxOrganKpp(List<Long> kpp) {
+        taxOrganKpp.setValue(kpp);
+    }
 
     @Override
     public Integer getSelectedDeclarationType() {
@@ -240,11 +249,11 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
 
     @Override
     public String getTaxOrganCode() {
-        return taxOrganCode.getDereferenceValue();
+        return taxOrganCode.getDereferenceValue().trim();
     }
 
     @Override
     public String getTaxOrganKpp() {
-        return taxOrganKpp.getDereferenceValue();
+        return taxOrganKpp.getDereferenceValue().trim();
     }
 }

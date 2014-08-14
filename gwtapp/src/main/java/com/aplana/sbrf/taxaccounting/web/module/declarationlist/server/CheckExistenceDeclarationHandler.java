@@ -73,16 +73,15 @@ public class CheckExistenceDeclarationHandler extends AbstractActionHandler<Chec
 		}
 
         if(command.getTaxType().equals(TaxType.PROPERTY)) {
-            // TODO проверить
             StringBuilder filter = new StringBuilder();
             Long regionId = departmentService.getDepartment(command.getDepartmentId()).getRegionId();
-            filter.append("TAX_ORGAN_CODE").append(" = ").append(command.getTaxOrganCode())
-                    .append(" and ").append("KPP").append(" = ").append(command.getTaxOrganKpp())
-                    .append(" and ").append("DECLARATION_REGION_ID").append(" = ").append(regionId);
+            filter.append("TAX_ORGAN_CODE = '").append(command.getTaxOrganCode()).append("'")
+                    .append(" and KPP = '").append(command.getTaxOrganKpp()).append("'")
+                    .append(" and DECLARATION_REGION_ID = ").append(regionId);
             RefBookDataProvider provider = rbFactory.getDataProvider(200L);
-            List<Pair<Long, Long>> checkRecordExistence = provider.checkRecordExistence(new Date(), filter.toString());
+            List<Pair<Long, Long>> checkRecordExistence = provider.checkRecordExistence(null, filter.toString());
             if (checkRecordExistence == null || checkRecordExistence.isEmpty()) {
-                logger.error("Выбранные налоговый орган и КПП не созданы в выбранном периоде (справочник \"Параметры представления деклараций по налогу на имущество\"");
+                logger.error("Выбранные налоговый орган и КПП не созданы в выбранном периоде (справочник \"Параметры представления деклараций по налогу на имущество\")");
                 result.setStatus(null);
             }
 		}

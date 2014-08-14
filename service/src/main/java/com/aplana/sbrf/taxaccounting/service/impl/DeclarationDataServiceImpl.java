@@ -117,6 +117,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         newDeclaration.setReportPeriodId(reportPeriodId);
         newDeclaration.setAccepted(false);
         newDeclaration.setDeclarationTemplateId(declarationTemplateId);
+        newDeclaration.setTaxOrganCode(taxOrganCode);
+        newDeclaration.setKpp(taxOrganKpp);
 
         // Вызываем событие скрипта CREATE
         declarationDataScriptingService.executeScript(userInfo, newDeclaration, FormDataEvent.CREATE, logger, null);
