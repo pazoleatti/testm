@@ -13,6 +13,7 @@ import java.io.Serializable;
 public class TableModel implements Serializable {
 
     private Long id;
+    private int rowNumber;
     private String name;
     private RefBookType refBookType;
 	private boolean readOnly;
@@ -22,8 +23,10 @@ public class TableModel implements Serializable {
     public TableModel() {
     }
 
-    public TableModel(Long id, String name, RefBookType refBookType, boolean readOnly, boolean visible, RefBookAttribute regionAttribute) {
+    public TableModel(Long id, int rowNumber, String name, RefBookType refBookType, boolean readOnly, boolean visible, RefBookAttribute regionAttribute) {
         this.id = id;
+        //нужно чтобы сортировка на форме совпадала с сортировкой БД
+        this.rowNumber = rowNumber;
         this.name = name;
         this.refBookType = refBookType;
         this.readOnly = readOnly;
@@ -37,6 +40,10 @@ public class TableModel implements Serializable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public int getRowNumber() {
+        return rowNumber;
     }
 
     public RefBookType getType() {
