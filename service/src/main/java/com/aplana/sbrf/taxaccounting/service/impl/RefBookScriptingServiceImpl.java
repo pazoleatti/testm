@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * Сервис, реализующий выполение скриптов справочников
@@ -52,6 +53,9 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
 
     @Autowired
     private LogEntryService logEntryService;
+
+    @Autowired
+    private Properties manifestProperties;
 
     @Override
     public void executeScript(TAUserInfo userInfo, long refBookId, FormDataEvent event, Logger logger, Map<String, Object> additionalParameters) {
@@ -101,6 +105,10 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
         bindings.put("formDataEvent", event);
         bindings.put("logger", scriptLogger);
         bindings.put("refBookFactory", refBookFactory);
+        if (manifestProperties != null) {
+            bindings.put("applicationVersion", manifestProperties.getProperty("Implementation-Version"));
+            bindings.put("applicationRevision", manifestProperties.getProperty("X-Git"));
+        }
 
         if (userInfo != null && userInfo.getUser() != null) {
             bindings.put("user", userInfo.getUser());
