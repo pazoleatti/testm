@@ -347,7 +347,7 @@ void addData(def xml, int headRowCount) {
         def records = refBookFactory.getDataProvider(27).getRecords(getReportPeriodEndDate(), null, filter, null)
         if (checkImportRecordsCount(records, refBookFactory.get(27), 'CODE', row.cell[2].text(), getReportPeriodEndDate(), xlsIndexRow, 2, logger, true)) {
             // графа 2
-            newRow.code = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+            newRow.number = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
         }
 
         // графа 5
@@ -390,7 +390,7 @@ void addTransportData(def xml) {
         def records = refBookFactory.getDataProvider(27).getRecords(getReportPeriodEndDate(), null, filter, null)
         if (checkImportRecordsCount(records, refBookFactory.get(27), 'CODE', row.cell[2].text(), getReportPeriodEndDate(), rnuIndexRow, 2, logger, true)) {
             // графа 2
-            newRow.code = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+            newRow.number = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
         }
 
         // графа 5
