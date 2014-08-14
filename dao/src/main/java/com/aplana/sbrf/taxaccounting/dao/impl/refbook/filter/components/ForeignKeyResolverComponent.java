@@ -29,6 +29,12 @@ import java.util.List;
 @Qualifier("foreignKeyResolver")
 public class ForeignKeyResolverComponent extends AbstractTreeListenerComponent implements TypeVerifierComponent.HasLastExternalRefBookAttribute{
 
+    /**
+     * Префикс который используется для составления алиасов для
+     * join'а таблиц
+     */
+    private static final String FOREIGN_TABLE_PREFIX = "frb";
+
     class LinkModel{
         public Long recordId;
         public String alias;
@@ -61,13 +67,10 @@ public class ForeignKeyResolverComponent extends AbstractTreeListenerComponent i
 
     /**
      * Карта внешних зависимостей которые вставляются в нужном порядке
-     * Параметры карты:
-     *  - attribute id
-     *  - record id
      */
     private List<LinkModel> foreignTables = new ArrayList();
 
-    /** foreign tables counter */
+    /** счетчик количества join'ов */
     private int ftCounter;
 
     /**
@@ -101,28 +104,62 @@ public class ForeignKeyResolverComponent extends AbstractTreeListenerComponent i
      */
     @Override
     public void exitEAlias(@NotNull FilterTreeParser.EAliasContext ctx) {
-        ps.appendQuery("frb"+(ftCounter - 1));
+        ps.appendQuery(buildAliasForForeignTable(ftCounter - 1));
         ps.appendQuery(".");
         ps.appendQuery(lastRefBookAttribute.getAttributeType().toString());
         ps.appendQuery("_value");
 
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder builder = new StringBuilder();
         // Генерация всех join'ов со списка
         for(int i=0; i < foreignTables.size(); i++){
-            // алиас лдя таблицы frb - foreign ref book
-            int index = ftCounter - foreignTables.size() + i;
-            String currentAlias = "frb"+index;
-            // TODO завязка на r.id, r алиас главной таблицы
-            String prevLinkCell = i == 0 ? "a"+foreignTables.get(i).alias+".reference_value" : "frb"+index+"."+foreignTables.get(i).alias;
-            // составления join запроса
-            buffer.append("left join ref_book_value ").append(currentAlias).append(" on ");
-            buffer.append(currentAlias).append(".record_id = ");
-            buffer.append(prevLinkCell);
-            buffer.append(" and ").append(currentAlias).append(".attribute_id = ").append(foreignTables.get(i).recordId);
-            buffer.append("\n");
+            /**
+             * порядковый номер внешней таблицы (берется с глобального счетчика всех join'ов в пределах работы с полным sql выражением),
+             * используется для составляения уникальных алиасов "frb"+index при join'ах таблиц
+             */
+            int serialNumber = ftCounter - foreignTables.size() + i;
+
+            // добавляем очередное join выражение в билдер строк
+            builder.append(buildJoinQueryForUniversalRefBook(serialNumber, i));
         }
         foreignTables.clear();
-        joinStatement.add(buffer.toString());
+        joinStatement.add(builder.toString());
+    }
+
+    /**
+     *
+     * @param serialNumber порядковый номер внешней таблицы (берется с глобального счетчика всех join'ов в пределах работы с полным sql выражением),
+     *                     используется для составляения уникальных алиасов "frb"+index при join'ах таблиц
+     * @param index порядковый номер в пределах текущего разименовывания (одной цепочки алиасов)
+     * @return
+     */
+    private StringBuilder buildJoinQueryForUniversalRefBook(int serialNumber, int index){
+        // алиас для join'а таблицы
+        String tableAlias = buildAliasForForeignTable(serialNumber);
+
+        // Модель данных для текущего Join'а
+        LinkModel linkModel = foreignTables.get(index);
+
+        // алиас аттрибута справочника который является ссылкой
+        String linkAttributeAlias = linkModel.alias;
+
+        // алиас аттрибута справочника который является ссылкой с учетом алиаса таблицы
+        String linkAttributeAliasWithTableAlias = index == 0 ?
+                "a" + linkAttributeAlias + ".reference_value" :
+                tableAlias + "." + linkAttributeAlias;
+
+        // составления join запроса
+        return new StringBuilder()
+            .append("left join ref_book_value ")
+            .append(tableAlias)
+            .append(" on ")
+            .append(tableAlias)
+            .append(".record_id = ")
+            .append(linkAttributeAliasWithTableAlias)
+            .append(" and ")
+            .append(tableAlias)
+            .append(".attribute_id = ")
+            .append(linkModel.recordId)
+            .append("\n");
     }
 
     /**
@@ -130,7 +167,7 @@ public class ForeignKeyResolverComponent extends AbstractTreeListenerComponent i
      */
     @Override
     public void enterExternalAlias(@NotNull FilterTreeParser.ExternalAliasContext ctx) {
-        // increment counter of join tables
+        // увеличим счетчик внешних таблиц
         ftCounter++;
 
         // Получение текущего атрибута
@@ -168,5 +205,14 @@ public class ForeignKeyResolverComponent extends AbstractTreeListenerComponent i
      */
     private void addForeignTable(Long id, String alias){
         foreignTables.add(new LinkModel(id, alias));
+    }
+
+    /**
+     * Получение алиаса для таблицы
+     * @param serialNumber порядковый номер таблицы
+     * @return
+     */
+    private String buildAliasForForeignTable(int serialNumber){
+        return FOREIGN_TABLE_PREFIX + serialNumber;
     }
 }
