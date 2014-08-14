@@ -115,4 +115,61 @@ public class ForignKeyResolverTest {
                 "left join ref_book_value frb2 on frb2.record_id = frb2.city and frb2.attribute_id = 4\n"));
 
     }
+
+    /**
+     * Тестирование разименовывания в случае атрибута универсального
+     * справочника который ссылается на простой справочник
+     */
+    @Test
+    public void attributeLinkFromUniversalToSimple(){
+
+    }
+
+    /**
+     * Тестирование правильного разименовывания в случае атрибута
+     * ссылающегося на разные виды справочников:
+     * универальный -> универсальный -> простой
+     */
+    @Test
+    public void attributeLinkFromUniversal2Universal2Simple(){
+
+    }
+
+    /**
+     * Тестирование разименовывания в случае атрибута простого
+     * справочника который ссылается на простой справочник
+     */
+    @Test
+    public void attributeLinkFromSimpleToSimple(){
+
+    }
+
+    /**
+     * Тестирование разименовывания в случае атрибута простого
+     * справочника который ссылается на универсальный справочник
+     */
+    @Test
+    public void attributeLinkFromSimpleToUniversal(){
+
+    }
+
+    /**
+     * Тестирование правильного разименовывания в случае атрибута
+     * ссылающегося на разные виды справочников:
+     * простой -> универсальный -> универсальный
+     */
+    @Test
+    public void attributeLinkFromSimple2Universal2Universal(){
+
+    }
+
+    /**
+     * Тестирование правильного разименовывания в случае атрибута
+     * ссылающегося на разные виды справочников:
+     * простой -> универсальный -> простой -> универсальный
+     */
+    @Test
+    public void attributeLinkFromSimple2Universal2Simple2Universal(){
+
+    }
 }
