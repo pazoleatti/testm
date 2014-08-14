@@ -22,6 +22,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.validation.constraints.NotNull;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -486,6 +487,11 @@ public class RefBookOktmoProvider implements RefBookDataProvider {
     @Override
     public Map<RefBookAttributePair, String> getAttributesValues(List<RefBookAttributePair> attributePairs) {
         return dao.getAttributesValues(attributePairs);
+    }
+
+    @Override
+    public List<Long> getInactiveRecordsInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo) {
+        return dao.isRecordsActiveInPeriod(getTableName(), recordIds, periodFrom, periodTo);
     }
 
     @Override

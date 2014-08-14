@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -255,4 +256,13 @@ public interface RefBookOktmoDao {
      * @return количество
      */
     int getRecordsCount(Long oktmoRefBookId, String tableName, Date version, String filter);
+
+    /**
+     * Проверяет действуют ли записи справочника в указанном периоде
+     * @param recordIds уникальные идентификаторы записей справочника
+     * @param periodFrom начало периода
+     * @param periodTo окончание периода
+     * @return все записи действуют в указанном периоде?
+     */
+    List<Long> isRecordsActiveInPeriod(String tableName, @NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo);
 }
