@@ -39,9 +39,10 @@ public class GetRefBookTableDataHandler extends AbstractActionHandler<GetTableDa
 
         List<TableModel> returnList = new ArrayList<TableModel>();
         boolean isFiltered = action.getFilter() != null && !action.getFilter().isEmpty();
+        int rowNum = 0;
         for (RefBook refBook : list) {
             if (!isFiltered || refBook.getName().toLowerCase().contains(action.getFilter().toLowerCase())) {
-                returnList.add(new TableModel(refBook.getId(), refBook.getName(), RefBookType.get(refBook.getType()),
+                returnList.add(new TableModel(refBook.getId(), rowNum++, refBook.getName(), RefBookType.get(refBook.getType()),
                         refBook.isReadOnly(), refBook.isVisible(), refBook.getRegionAttribute()));
             }
         }
