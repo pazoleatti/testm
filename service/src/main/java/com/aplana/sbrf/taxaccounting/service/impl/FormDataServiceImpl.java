@@ -14,8 +14,8 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.impl.eventhandler.EventLauncher;
 import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
@@ -45,7 +45,9 @@ public class FormDataServiceImpl implements FormDataService {
     private static final String XLSX_EXT = "xlsx";
     private static final String XLS_EXT = "xls";
     public static final String MSG_IS_EXIST_FORM = "Существует экземпляр налоговой формы %s типа %s в подразделении %s периоде %s";
-    final static String LOCK_MESSAGE = "Операция не может быть выполнена. Налоговая форма заблокирована другой операцией!";
+    final static String LOCK_MESSAGE = "Форма заблокирована и не может быть изменена. Попробуйте выполнить операцию позже.";
+    final static String LOCK_REFBOOK_MESSAGE = "Справочник %s заблокирован и не может быть использован для заполнения атрибутов формы. Попробуйте выполнить операцию позже.";
+    final static String REF_BOOK_RECORDS_ERROR =  "Строка %s, атрибут \"%s\": период актуальности значения не пересекается с отчетным периодом формы";
 
     @Autowired
 	private FormDataDao formDataDao;
@@ -93,6 +95,8 @@ public class FormDataServiceImpl implements FormDataService {
     private LockDataService lockService;
     @Autowired
     private RefBookDao refBookDao;
+    @Autowired
+    RefBookFactory refBookFactory;
 
     // Время блокировки при консолидации (3 часа)
     private static final int BLOCK_TIME =  3 * 60 * 60 * 1000;
@@ -570,9 +574,9 @@ public class FormDataServiceImpl implements FormDataService {
 
         FormData formData = formDataDao.get(formDataId, manual);
 
-        if (workflowMove == WorkflowMove.CREATED_TO_PREPARED
+        /*if (workflowMove == WorkflowMove.CREATED_TO_PREPARED
                 || workflowMove == WorkflowMove.PREPARED_TO_APPROVED
-                || workflowMove == WorkflowMove.APPROVED_TO_ACCEPTED) {
+                || workflowMove == WorkflowMove.APPROVED_TO_ACCEPTED) {*/
             //Устанавливаем блокировку на текущую нф
             List<String> lockedObjects = new ArrayList<String>();
             int userId = userInfo.getUser().getId();
@@ -594,15 +598,15 @@ public class FormDataServiceImpl implements FormDataService {
                                     //Блокировка установлена
                                     lockedObjects.add(referenceLockKey);
                                 } else {
-                                    throw new ServiceLoggerException(LOCK_MESSAGE,
+                                    throw new ServiceLoggerException(String.format(LOCK_REFBOOK_MESSAGE, refBook.getName()),
                                             logEntryService.save(logger.getEntries()));
                                 }
                             }
                         }
                     }
-
                     //Проверяем что записи справочников, на которые есть ссылки в нф все еще существуют в периоде формы
-
+                    checkReferenceValues(logger, formData);
+                    //Делаем переход
                     moveProcess(formData, manual, userInfo, workflowMove, note, logger);
                 } finally {
                     for (String lock : lockedObjects) {
@@ -613,8 +617,81 @@ public class FormDataServiceImpl implements FormDataService {
                 throw new ServiceLoggerException(LOCK_MESSAGE,
                         logEntryService.save(logger.getEntries()));
             }
-        } else {
+        /*} else {
             moveProcess(formData, manual, userInfo, workflowMove, note, logger);
+        }*/
+    }
+
+    private class ReferenceInfo {
+        private int rownum;
+        private String columnName;
+
+        private ReferenceInfo(int rownum, String columnName) {
+            this.rownum = rownum;
+            this.columnName = columnName;
+        }
+
+        private int getRownum() {
+            return rownum;
+        }
+
+        private void setRownum(int rownum) {
+            this.rownum = rownum;
+        }
+
+        private String getColumnName() {
+            return columnName;
+        }
+
+        private void setColumnName(String columnName) {
+            this.columnName = columnName;
+        }
+    }
+
+    @Override
+    public void checkReferenceValues(Logger logger, FormData formData) {
+        Map<Long, List<Long>> recordsToCheck = new HashMap<Long, List<Long>>();
+        Map<Long, ReferenceInfo> referenceInfoMap = new HashMap<Long, ReferenceInfo>();
+        List<DataRow<Cell>> rows = dataRowDao.getSavedRows(formData, null, null);
+        for (Column column : formData.getFormColumns()) {
+            if (column instanceof RefBookColumn) {
+                Long attributeId = ((RefBookColumn) column).getRefBookAttributeId();
+                if (attributeId != null) {
+                    RefBook refBook = refBookDao.getByAttribute(attributeId);
+                    for (DataRow<Cell> row : rows) {
+                        if (row.getCell(column.getAlias()).getNumericValue() != null) {
+                            if (!recordsToCheck.containsKey(refBook.getId())) {
+                                recordsToCheck.put(refBook.getId(), new ArrayList<Long>());
+                            }
+                            //Раскладываем значения ссылок по справочникам, на которые они ссылаются
+                            recordsToCheck.get(refBook.getId()).add(row.getCell(column.getAlias()).getNumericValue().longValue());
+
+                            //Сохраняем информацию о местоположении ссылки
+                            referenceInfoMap.put(row.getCell(column.getAlias()).getNumericValue().longValue(),
+                                    new ReferenceInfo(row.getIndex(), column.getName()));
+                        }
+                    }
+                }
+            }
+        }
+
+        ReportPeriod reportPeriod = reportPeriodDao.get(formData.getReportPeriodId());
+        boolean error = false;
+        for (Map.Entry<Long, List<Long>> referencesToCheck : recordsToCheck.entrySet()) {
+            RefBookDataProvider provider = refBookFactory.getDataProvider(referencesToCheck.getKey());
+            List<Long> inactiveRecords = provider.getInactiveRecordsInPeriod(referencesToCheck.getValue(), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
+            if (!inactiveRecords.isEmpty()) {
+                for (Long inactiveRecord : inactiveRecords) {
+                    ReferenceInfo referenceInfo = referenceInfoMap.get(inactiveRecord);
+                    logger.error(String.format(REF_BOOK_RECORDS_ERROR, referenceInfo.getRownum(), referenceInfo.getColumnName()));
+                }
+                error = true;
+            }
+        }
+
+        if (error) {
+            throw new ServiceLoggerException("Произошла ошибка при проверке справочных значений формы",
+                    logEntryService.save(logger.getEntries()));
         }
     }
 

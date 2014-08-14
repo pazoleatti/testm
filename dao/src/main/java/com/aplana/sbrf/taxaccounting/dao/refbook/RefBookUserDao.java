@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -70,4 +71,11 @@ public interface RefBookUserDao {
      * @return
      */
     Long getRowNum(Long recordId, String filter, RefBookAttribute sortAttribute, boolean isSortAscending);
+
+    /**
+     * Проверяет действуют ли записи справочника в указанном периоде
+     * @param recordIds уникальные идентификаторы записей справочника
+     * @return все записи действуют в указанном периоде?
+     */
+    List<Long> isRecordsActiveInPeriod(@NotNull List<Long> recordIds);
 }

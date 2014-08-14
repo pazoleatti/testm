@@ -294,4 +294,10 @@ public interface FormDataService {
      * @return список налоговых форм
      */
     List<FormData> getManualInputForms(List<Integer> departments, int reportPeriodId, TaxType taxType, FormDataKind kind);
+
+    /**
+     * Проверяет ссылки на справочники в нф, действуют ли они в периоде формы
+     * @param formData нф
+     */
+    void checkReferenceValues(Logger logger, FormData formData);
 }

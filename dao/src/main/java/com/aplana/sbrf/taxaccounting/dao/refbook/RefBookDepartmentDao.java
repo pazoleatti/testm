@@ -9,6 +9,8 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
+import javax.validation.constraints.NotNull;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -99,4 +101,13 @@ public interface RefBookDepartmentDao {
      *      значение - строковое представление значения атрибута
      */
     Map<RefBookAttributePair,String> getAttributesValues(List<RefBookAttributePair> attributePairs);
+
+    /**
+     * Проверяет действуют ли записи справочника в указанном периоде
+     * @param recordIds уникальные идентификаторы записей справочника
+     * @param periodFrom начало периода
+     * @param periodTo окончание периода
+     * @return все записи действуют в указанном периоде?
+     */
+    List<Long> isRecordsActiveInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo);
 }

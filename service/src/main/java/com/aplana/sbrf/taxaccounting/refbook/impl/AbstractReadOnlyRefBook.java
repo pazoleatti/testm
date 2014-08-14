@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -186,5 +187,10 @@ public abstract class AbstractReadOnlyRefBook implements RefBookDataProvider {
     public Long getRowNum(Date version, Long recordId, String filter, RefBookAttribute sortAttribute,
                           boolean isSortAscending) {
         return refBookDao.getRowNum(refBookId, version, recordId, filter, sortAttribute, isSortAscending);
+    }
+
+    @Override
+    public List<Long> getInactiveRecordsInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo) {
+        return refBookDao.isRecordsActiveInPeriod(recordIds, new Date(), null);
     }
 }
