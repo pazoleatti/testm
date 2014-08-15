@@ -52,4 +52,42 @@ public final class StringUtils {
 		}
 		return buf.toString();
 	}
+
+	/**
+	 * Подбирает склонения слов для чисел. <br />
+	 * Примеры:
+	 * <pre>
+	 * Вход: 1, "попытка", "попытки", "попыток"
+	 * Выход: "1 попытка"
+	 * </pre>
+	 * <pre>
+	 * Вход: 37, "год", "года", "лет"
+	 * Выход: "37 лет"
+	 * </pre>
+	 *
+	 * @param value значение для которого требуется подобрать окончание
+	 * @param s1 окончание для чисел оканчивающихся на 1, кроме оканчивающихся на 11
+	 * @param s2 окончание для чисел оканчивающихся на 2, 3, 4, кроме оканчивающихся на 12, 13, 14
+	 * @param s3 окончание для всех остальных значений
+	 * @return строка-окончание
+	 */
+	public static String getNumberString(int value, String s1, String s2, String s3) {
+		int t = Math.abs(value);
+		int d = t % 100;
+		if (d < 10 || d > 20) {
+			switch (t % 10) {
+				case 1:
+					return s1;
+				case 2:
+				case 3:
+				case 4:
+					return s2;
+				default:
+					return s3;
+			}
+		} else {
+			return s3;
+		}
+	}
+
 }

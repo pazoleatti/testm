@@ -1,11 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.bookerstatements.server;
 
-import com.aplana.sbrf.taxaccounting.model.BookerStatementsFilter;
-import com.aplana.sbrf.taxaccounting.model.BookerStatementsSearchResultItem;
-import com.aplana.sbrf.taxaccounting.model.FormDataSearchResultItem;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.BookerStatementsService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.shared.GetBookerStatementsListAction;
 import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.shared.GetBookerStatementsListResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -35,11 +33,15 @@ public class GetBookerStatementsListHandler extends AbstractActionHandler<GetBoo
     @Autowired
     private DepartmentService departmentService;
 
+    @Autowired
+    private SecurityService securityService;
+
     @Override
     public GetBookerStatementsListResult execute(GetBookerStatementsListAction action, ExecutionContext executionContext) throws ActionException {
+        TAUser currUser = securityService.currentUserInfo().getUser();
         GetBookerStatementsListResult result = new GetBookerStatementsListResult();
 
-        PagingResult<BookerStatementsSearchResultItem> resultPage = bookerStatementsService.findDataByFilter(action.getFilter());
+        PagingResult<BookerStatementsSearchResultItem> resultPage = bookerStatementsService.findDataByFilter(action.getFilter(), currUser);
 
         Map<Integer, String> departmentFullNames = new HashMap<Integer, String>();
         for(BookerStatementsSearchResultItem item: resultPage) {
