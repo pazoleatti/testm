@@ -141,7 +141,7 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 			column = "fd.kind";
 			break;
 		case REPORT_PERIOD_NAME:
-			column = "to_char(rp.calendar_start_date, 'MM')";
+			column = "(100*extract(month from rp.calendar_start_date)+extract(day from rp.calendar_start_date))";
 			break;
         case REPORT_PERIOD_MONTH_NAME:
             column = "fd.period_order";
