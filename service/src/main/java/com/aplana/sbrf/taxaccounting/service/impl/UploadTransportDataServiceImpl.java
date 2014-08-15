@@ -158,6 +158,8 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                                 log(userInfo, LogData.L33, logger, entry.getName(), e.getMessage());
                                 fail++;
                             }
+                        } else {
+                            fail++;
                         }
                     }
                 } catch (IOException e) {
@@ -189,6 +191,8 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                         log(userInfo, LogData.L33, logger, fileName, e.getMessage());
                         fail++;
                     }
+                } else {
+                    fail++;
                 }
             }
         } finally {
