@@ -30,6 +30,8 @@ import java.util.List;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class DataRowDaoImplTest {
 
+	static final long DEFAULT_ORDER_STEP_TEST = DataRowDaoImplUtils.DEFAULT_ORDER_STEP / 10;
+
 	@Autowired
 	FormDataDao formDataDao;
 
@@ -421,7 +423,7 @@ public class DataRowDaoImplTest {
 		FormData fd = formDataDao.get(1, false);
         int sizeBefore = dataRowDao.getSize(fd,null);
 		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
-		for (int i = 0; i < DataRowDaoImplUtils.DEFAULT_ORDER_STEP; i++) {
+		for (int i = 0; i < DEFAULT_ORDER_STEP_TEST; i++) {
 			DataRow<Cell> dr = fd.createDataRow();
 			dataRows.add(dr);
 		}
@@ -430,10 +432,10 @@ public class DataRowDaoImplTest {
         List<DataRow<Cell>> addedDataRowsAfter = dataRowDao.getRows(fd, null, null);
         Assert.assertNotEquals(addedDataRowsAfter.get(0).getId(), addedDataRowsBefore.get(0).getId());
         Assert.assertNotEquals(addedDataRowsAfter.size(), addedDataRowsBefore.size());
-		Assert.assertEquals(sizeBefore + DataRowDaoImplUtils.DEFAULT_ORDER_STEP, addedDataRowsAfter.size());
+		Assert.assertEquals(sizeBefore + DEFAULT_ORDER_STEP_TEST, addedDataRowsAfter.size());
         //проверка сдвига, id записи должны быть равны, все сдвинулись
         for (int i  =0; i< sizeBefore; i++){
-            Assert.assertEquals(addedDataRowsBefore.get(i).getId(), addedDataRowsAfter.get((int) (DataRowDaoImplUtils.DEFAULT_ORDER_STEP + i)).getId());
+            Assert.assertEquals(addedDataRowsBefore.get(i).getId(), addedDataRowsAfter.get((int) (DEFAULT_ORDER_STEP_TEST + i)).getId());
         }
 	}
 
@@ -443,7 +445,7 @@ public class DataRowDaoImplTest {
         //int sizeBefore = dataRowDao.getSize(fd,null);
 		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
 
-		for (int i = 0; i < DataRowDaoImplUtils.DEFAULT_ORDER_STEP; i++) {
+		for (int i = 0; i < DEFAULT_ORDER_STEP_TEST; i++) {
 			DataRow<Cell> dr = fd.createDataRow();
 			dataRows.add(dr);
 		}
@@ -453,7 +455,7 @@ public class DataRowDaoImplTest {
         Assert.assertEquals(addedDataRowsAfter.get(0).getId(), addedDataRowsBefore.get(0).getId());
         Assert.assertNotEquals(addedDataRowsAfter.size(), addedDataRowsBefore.size());
         //проверка сдвига, id записи должны быть равны(т.е. со сдвигом в данном случае на 100000)
-        Assert.assertEquals(addedDataRowsBefore.get(4).getId(), addedDataRowsAfter.get((int) (DataRowDaoImplUtils.DEFAULT_ORDER_STEP + 4)).getId());
+        Assert.assertEquals(addedDataRowsBefore.get(4).getId(), addedDataRowsAfter.get((int) (DEFAULT_ORDER_STEP_TEST + 4)).getId());
 	}
 
 	@Test
@@ -462,7 +464,7 @@ public class DataRowDaoImplTest {
         int sizeBefore = dataRowDao.getSize(fd,null);
 		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
 
-		for (int i = 0; i < DataRowDaoImplUtils.DEFAULT_ORDER_STEP; i++) {
+		for (int i = 0; i < DEFAULT_ORDER_STEP_TEST; i++) {
 			DataRow<Cell> dr = fd.createDataRow();
 			dataRows.add(dr);
 		}
@@ -494,12 +496,12 @@ public class DataRowDaoImplTest {
         int sizeAfterRem = dataRowDao.getSize(fd,null);
         List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
 
-        for (int i = 0; i < DataRowDaoImplUtils.DEFAULT_ORDER_STEP; i++) {
+        for (int i = 0; i < DEFAULT_ORDER_STEP_TEST; i++) {
             DataRow<Cell> dr = fd.createDataRow();
             dataRows.add(dr);
         }
         dataRowDao.insertRows(fd, 1, dataRows);
-        Assert.assertEquals(DataRowDaoImplUtils.DEFAULT_ORDER_STEP + sizeAfterRem, dataRowDao.getRows(fd, null, null).size());
+        Assert.assertEquals(DEFAULT_ORDER_STEP_TEST + sizeAfterRem, dataRowDao.getRows(fd, null, null).size());
 
         //We check after rollback that second element become first(it could be second)
         dataRowDao.rollback(fd.getId());
