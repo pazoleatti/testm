@@ -107,7 +107,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
         ConfigurationParamModel model = configurationDao.getByDepartment(0);
         List<String> refBookDirectoryList = model.get(refBookDirectoryParam, 0);
         if (refBookDirectoryList == null || refBookDirectoryList.isEmpty()) {
-            log(userInfo, LogData.L31, logger, refBookName);
+            log(userInfo, LogData.L37, logger, refBookName);
             return new ImportCounter();
         }
 
