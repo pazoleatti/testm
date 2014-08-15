@@ -179,13 +179,13 @@ public class SourceServiceImpl implements SourceService {
                 if (pair.getSource().equals(error) || pair.getDestination().equals(error)) {
                     if (isDeclaration) {
                         if (pair.getDestination().equals(error)) {
-                            logger.info(messageBuilder.getDestinationMessage(pair));
+                            logger.warn(messageBuilder.getDestinationMessage(pair));
                         }
                     } else {
                         if (pair.getSource().equals(error)) {
-                            logger.info(messageBuilder.getSourceMessage(pair));
+                            logger.warn(messageBuilder.getSourceMessage(pair));
                         } else {
-                            logger.info(messageBuilder.getDestinationMessage(pair));
+                            logger.warn(messageBuilder.getDestinationMessage(pair));
                         }
                     }
                     it.remove();
