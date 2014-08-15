@@ -106,10 +106,11 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                 getView().setHierarchy(RefBookType.HIERARCHICAL.getId() == result.getRefBookType());
 
                                 getView().createInputFields(result.getColumns());
-                                setMode(FormMode.VIEW);
                                 setIsFormModified(false);
                                 if (readOnly) {
                                     setMode(FormMode.READ);
+                                } else {
+                                    updateMode();
                                 }
                             }
                         }, this));
@@ -409,11 +410,6 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
     public void setMode(FormMode mode){
         this.mode = mode;
         getView().updateMode(mode);
-    }
-
-    @Override
-    public void setModeWithoutUpdate(FormMode mode) {
-        this.mode = mode;
     }
 
     private void updateMode() {
