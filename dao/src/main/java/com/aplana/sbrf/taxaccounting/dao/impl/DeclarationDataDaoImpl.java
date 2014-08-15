@@ -283,7 +283,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 column = "dec.is_accepted";
                 break;
             case REPORT_PERIOD_YEAR:
-                column = "rp.start_date";
+                column = "rp.calendar_start_date";
                 break;
 		}
 
