@@ -5,6 +5,8 @@ import com.aplana.gwt.client.ModalWindow;
 import com.aplana.gwt.client.Spinner;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
+import com.aplana.gwt.client.modal.CanHide;
+import com.aplana.gwt.client.modal.OnHideHandler;
 import com.aplana.sbrf.taxaccounting.model.BookerStatementsType;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
@@ -68,6 +70,13 @@ public class CreateBookerStatementsView extends PopupViewWithUiHandlers<CreateBo
 
         Date current = new Date();
         accountPeriodIds.setPeriodDates(current, current);
+
+        title.setOnHideHandler(new OnHideHandler<CanHide>() {
+            @Override
+            public void OnHide(CanHide modalWindow) {
+                showOnHideDialog();
+            }
+        });
     }
 
     @Override
@@ -92,13 +101,7 @@ public class CreateBookerStatementsView extends PopupViewWithUiHandlers<CreateBo
 
     @UiHandler("cancelButton")
     public void onCancel(ClickEvent event) {
-        Dialog.confirmMessage("Отмена создания бухгалтерской отчётности", "Отменить создание бухгалтерской отчётности?", new DialogHandler() {
-            @Override
-            public void yes() {
-                Dialog.hideMessage();
-                hide();
-            }
-        });
+        showOnHideDialog();
     }
 
     @Override
@@ -157,5 +160,13 @@ public class CreateBookerStatementsView extends PopupViewWithUiHandlers<CreateBo
         return retNames;
     }
 
-
+    private void showOnHideDialog() {
+        Dialog.confirmMessage("Отмена создания бухгалтерской отчётности", "Отменить создание бухгалтерской отчётности?", new DialogHandler() {
+            @Override
+            public void yes() {
+                Dialog.hideMessage();
+                hide();
+            }
+        });
+    }
 }

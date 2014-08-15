@@ -138,7 +138,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
     @Override
     public Date lastArchiveDate() {
         try {
-            return getJdbcTemplate().queryForObject("select log_date from log_system where event_id = 601", Date.class);
+            return getJdbcTemplate().queryForObject("select max(log_date) from log_system where event_id = 601", Date.class);
         } catch (EmptyResultDataAccessException e){
             logger.warn("Не найдено записей об архивации.", e);
             return null;

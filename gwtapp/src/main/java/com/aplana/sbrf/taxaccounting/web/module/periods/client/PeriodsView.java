@@ -280,6 +280,16 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
     }
 
     @Override
+    public void setCanDeletePeriod(boolean canDeletePeriod) {
+        removePeriod.setVisible(canDeletePeriod);
+    }
+
+    @Override
+    public void setCanClosePeriod(boolean canClosePeriod) {
+        closePeriod.setVisible(canClosePeriod);
+    }
+
+    @Override
 	public void setCanEdit(boolean canEdit) {
 		closePeriod.setVisible(canEdit);
 		openPeriod.setVisible(canEdit);
