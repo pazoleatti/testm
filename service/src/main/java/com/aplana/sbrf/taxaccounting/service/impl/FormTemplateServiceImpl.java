@@ -470,13 +470,15 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 
     @Override
     public boolean isAnyAutoNumerationColumn(FormTemplate formTemplate, AutoNumerationColumnType type) {
-        boolean isAutoNumerationColumn = false;
         List<Column> columns = formTemplate.getColumns();
         for (Column column : columns) {
             if (column instanceof AutoNumerationColumn) {
-                isAutoNumerationColumn = (((AutoNumerationColumn) column).getType() == (type.getType()));
+                boolean isAutoNumerationColumn = (((AutoNumerationColumn) column).getType() == (type.getType()));
+                if (isAutoNumerationColumn) {
+                    return true;
+                }
             }
         }
-        return isAutoNumerationColumn;
+        return false;
     }
 }
