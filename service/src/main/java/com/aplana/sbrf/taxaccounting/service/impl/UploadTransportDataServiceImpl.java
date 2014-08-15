@@ -59,10 +59,10 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
 
     protected static enum LogData {
         L32("Файл «%s» сохранен в каталоге загрузки «%s».", LogLevel.INFO, true),
-        L33("Ошибка при сохранении файла «%s» в каталоге загрузки! %s.", LogLevel.ERROR, false),
-        L34_1("Не указан путь к каталогу загрузки справочников Diasoft! Файл «%s» не сохранен.", LogLevel.ERROR, false),
-        L34_2("Не указан путь к каталогу загрузки для ТБ «%s» в конфигурационных параметрах АС «Учет налогов». Файл «%s» не сохранен.", LogLevel.ERROR, false),
-        L35("Завершена процедура загрузки транспортных файлов в каталог загрузки. Файлов загружено: %d. Файлов отклонено: %d.", LogLevel.INFO, false);
+        L33("Ошибка при сохранении файла «%s» в каталоге загрузки! %s.", LogLevel.ERROR, true),
+        L34_1("Не указан путь к каталогу загрузки справочников Diasoft! Файл «%s» не сохранен.", LogLevel.ERROR, true),
+        L34_2("Не указан путь к каталогу загрузки для ТБ «%s» в конфигурационных параметрах АС «Учет налогов». Файл «%s» не сохранен.", LogLevel.ERROR, true),
+        L35("Завершена процедура загрузки транспортных файлов в каталог загрузки. Файлов загружено: %d. Файлов отклонено: %d.", LogLevel.INFO, true);
 
         private LogLevel level;
         private String text;
@@ -341,12 +341,12 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
         // TODO Указать признак ошибки в ЖА. См. logData.getLevel()
         if (logData.isLogSystem()) {
             Integer departmentId = null;
+            String prefix = "";
             if (userInfo != null) {
                 departmentId = userInfo.getUser().getDepartmentId();
-            }
-            String prefix = "";
-            if (userInfo.getUser().getId() == TAUser.SYSTEM_USER_ID) {
-                prefix = "Событие инициировано Системой. ";
+                if (userInfo.getUser().getId() == TAUser.SYSTEM_USER_ID) {
+                    prefix = "Событие инициировано Системой. ";
+                }
             }
             auditService.add(FormDataEvent.UPLOAD_TRANSPORT_FILE, userInfo, departmentId, null,
                     null, null, null, prefix + String.format(logData.getText(), args));
