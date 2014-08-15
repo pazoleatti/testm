@@ -275,7 +275,7 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 					"select rp.id, rp.name, rp.tax_period_id, rp.start_date, rp.end_date, rp.dict_tax_period_id, " +
 							"rp.calendar_start_date from report_period rp join tax_period tp on rp.tax_period_id = tp.id " +
 							"where tp.tax_type = ? and rp.end_date>=? and rp.calendar_start_date<=?",
-					new Object[]{new Object[]{String.valueOf(taxType.getCode())}, startDate, endDate},
+					new Object[]{new Object[]{String.valueOf(taxType.getCode())}, endDate, startDate},
 					new int[] { Types.VARCHAR, Types.DATE, Types.DATE },
 					new ReportPeriodMapper()
 			);
