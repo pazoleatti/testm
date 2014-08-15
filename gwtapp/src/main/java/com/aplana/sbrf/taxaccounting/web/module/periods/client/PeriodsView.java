@@ -300,4 +300,9 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
     public void setCanOpenCorrectPeriod(boolean canOpenCorrectPeriod) {
         openCorrectPeriod.setVisible(canOpenCorrectPeriod);
     }
+
+    @Override
+    public void clearSelection() {
+        selectionModel.clear();
+    }
 }
