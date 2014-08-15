@@ -61,16 +61,16 @@
         </g:VerticalPanel>
 
         <g:cell>
-            <g:VerticalPanel spacing="0" width="550px" horizontalAlignment="left">
-                <g:HorizontalPanel spacing="2" verticalAlignment="middle" width="100%">
-                    <g:cell width="500px">
+            <g:VerticalPanel spacing="0" width="600px" horizontalAlignment="left">
+                <g:HorizontalPanel spacing="2" verticalAlignment="middle" width="600px">
+                    <g:cell width="550px">
                         <g:TextBox ui:field="filter" width="100%"/>
                     </g:cell>
                     <g:cell width="50px">
                         <g:Button ui:field="search" text="Найти" addStyleNames="{style.btnFind}"/>
                     </g:cell>
                 </g:HorizontalPanel>
-                <g:HorizontalPanel spacing="2" verticalAlignment="middle" width="100%">
+                <g:HorizontalPanel spacing="2" verticalAlignment="middle" width="546px">
                     <g:cell horizontalAlignment="left" width="200px">
                         <g:CheckBox ui:field="searchResults" text="Искать в найденном"/>
                     </g:cell>
@@ -79,8 +79,8 @@
                         <g:Label text="Искать по полям:" addStyleNames="{style.labelBlockMargin}"/>
                     </g:cell>
                     <g:cell horizontalAlignment="right" width="230px">
-                    <r:RefBookPickerWidget ui:field="auditFieldList" title="Список полей" attributeIdInt="1050" visible="true" width="100%"
-                                           isHierarchical="false" multiSelect="true" searchEnabled="false" versionEnabled="false"/>
+                        <r:RefBookPickerWidget ui:field="auditFieldList" title="Список полей" attributeIdInt="1050" visible="true" width="100%"
+                                               isHierarchical="false" multiSelect="true" searchEnabled="false" versionEnabled="false" />
 
                     </g:cell>
                 </g:HorizontalPanel>
