@@ -7,7 +7,7 @@
     <fullName>Отчёт по сумме НДС, уплаченного в бюджет, в случае возврата ранее реализованных товаров (отказа от услуг)
         или возврата соответствующих сумм авансовых платежей
     </fullName>
-    <header>(724.4)</header>
+    <header>724.4</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>rowNum</alias>
         <checking>false</checking>

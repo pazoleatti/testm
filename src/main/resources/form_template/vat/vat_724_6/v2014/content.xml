@@ -7,7 +7,7 @@
     <fullName>Отчёт о суммах НДС начисленных налоговым агентом с сумм дохода иностранных юридических лиц (балансовый
         счёт 60309.02)
     </fullName>
-    <code>(724.6)</code>
+    <header>724.6</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rowNum</alias>
         <checking>false</checking>

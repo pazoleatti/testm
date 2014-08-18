@@ -7,7 +7,7 @@
     <fullName>Расчёт суммы налога по операциям по реализации товаров (работ, услуг), обоснованность применения налоговой
         ставки 0 процентов по которым документально подтверждена
     </fullName>
-    <code>Расчёт</code>
+    <header>724.2.2</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rowNum</alias>
         <checking>false</checking>
