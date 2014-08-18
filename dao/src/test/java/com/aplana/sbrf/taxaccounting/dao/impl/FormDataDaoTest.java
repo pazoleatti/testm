@@ -264,10 +264,11 @@ public class FormDataDaoTest {
         Calendar calendar = Calendar.getInstance();
         calendar.set(2012, Calendar.JANUARY, 1);
         Date startDate = calendar.getTime();
-        calendar.set(2013, Calendar.AUGUST, 1);
+        calendar.set(2014, Calendar.DECEMBER, 31);
         Date endDate = calendar.getTime();
-        formDataDao.updateFDPerformerTBDepartmentNames(2, "BankTB2", startDate, endDate);
+        formDataDao.updateFDPerformerTBDepartmentNames("BankTB1", "BankTB2", startDate, endDate);
         Assert.assertEquals("BankTB2", formPerformerDao.get(12).getReportDepartmentName());
+        Assert.assertEquals("BankTB2/Uralsib", formPerformerDao.get(13).getReportDepartmentName());
     }
 
     @Test
