@@ -152,7 +152,6 @@ public interface FormTemplateService {
      * Удаление макетов.
      * Макеты со статусом фиктивной версии удаляются, с остальными статусами помечаются как удаленные
      * @param templateIds макет для удаления
-     * @return обновленные записи
      */
     void delete(@NotNull Collection<Integer> templateIds);
 

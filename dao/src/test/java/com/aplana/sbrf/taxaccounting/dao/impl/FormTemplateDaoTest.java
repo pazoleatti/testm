@@ -217,7 +217,7 @@ public class FormTemplateDaoTest {
 
     @Test
     public void testDelete(){
-        Assert.assertEquals(1, formTemplateDao.delete(2));
+        Assert.assertEquals(2, formTemplateDao.delete(2));
     }
 
     @Test

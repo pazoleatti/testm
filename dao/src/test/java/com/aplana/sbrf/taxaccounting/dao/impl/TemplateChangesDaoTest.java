@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.dao.TemplateChangesDao;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.TemplateChanges;
-import com.aplana.sbrf.taxaccounting.model.TemplateChangesEvent;
 import com.aplana.sbrf.taxaccounting.model.VersionHistorySearchOrdering;
 import org.junit.Assert;
 import org.junit.Test;
@@ -51,6 +50,16 @@ public class TemplateChangesDaoTest {
     public void testGetByTypeId(){
         Assert.assertEquals(1, templateChangesDao.getByFormTypeIds(1, VersionHistorySearchOrdering.DATE, false).size());
         Assert.assertEquals(2, templateChangesDao.getByDeclarationTypeId(1, VersionHistorySearchOrdering.DATE, false).size());
+    }
+
+    @Test
+    public void testGetByFTIds(){
+        Assert.assertEquals(1, templateChangesDao.getByFormTemplateIds(Arrays.asList(1), VersionHistorySearchOrdering.DATE, false).size());
+    }
+
+    @Test
+    public void testGetIdsByFTIds(){
+        Assert.assertEquals(1, templateChangesDao.getIdsByTemplateIds(Arrays.asList(1), null, VersionHistorySearchOrdering.DATE, false).size());
     }
 
     @Test
