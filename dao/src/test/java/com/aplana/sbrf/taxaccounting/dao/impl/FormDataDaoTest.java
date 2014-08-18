@@ -6,7 +6,6 @@ import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.*;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -260,7 +259,6 @@ public class FormDataDaoTest {
         Assert.assertEquals(1, formDataDao.find(Arrays.asList(1), 1).size());
     }
 
-    @Ignore
     @Test
     public void testUpdateFDPerformerTBDepartmentNames() throws ParseException {
         Calendar calendar = Calendar.getInstance();
@@ -268,8 +266,8 @@ public class FormDataDaoTest {
         Date startDate = calendar.getTime();
         calendar.set(2013, Calendar.AUGUST, 1);
         Date endDate = calendar.getTime();
-        formDataDao.updateFDPerformerTBDepartmentNames("Bank1", "Ban", startDate, endDate);
-        Assert.assertEquals("Bank1/Uralsib", formPerformerDao.get(11).getReportDepartmentName());
+        formDataDao.updateFDPerformerTBDepartmentNames(2, "BankTB2", startDate, endDate);
+        Assert.assertEquals("BankTB2", formPerformerDao.get(12).getReportDepartmentName());
     }
 
     @Test

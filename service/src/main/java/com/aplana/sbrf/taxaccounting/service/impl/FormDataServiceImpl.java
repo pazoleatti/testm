@@ -827,13 +827,11 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
-    public void updateFDTBNames(int newDepTBId, int oldDepTBId, Date dateFrom, Date dateTo) {
+    public void updateFDTBNames(int depTBId,  String depName, Date dateFrom, Date dateTo) {
         if (dateFrom == null)
             throw new ServiceException("Должна быть установлена хотя бы \"Дата от\"");
         try {
-            Department departmentTBNew = departmentDao.getDepartment(newDepTBId);
-            Department departmentTBOld = departmentDao.getDepartment(oldDepTBId);
-            formDataDao.updateFDPerformerTBDepartmentNames(departmentTBNew.getName(), departmentTBOld.getName(), dateFrom, dateTo);
+            formDataDao.updateFDPerformerTBDepartmentNames(depTBId, depName, dateFrom, dateTo);
         } catch (ServiceException e){
             throw new ServiceException("Ошибка при обновлении имени ТБ", e);
         }
