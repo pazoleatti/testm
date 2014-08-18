@@ -5,11 +5,11 @@ package com.aplana.sbrf.taxaccounting.model;
  *
  * @author Fail Mukhametdinov
  */
-public class SearchOrderingFilter {
+public class SearchOrderingFilter<T extends Enum<T>> {
     //true, если сортируем по возрастанию, false - по убыванию
     private boolean ascSorting;
     // Столбец, по которому сортируем
-    private SearchOrdering searchOrdering;
+    private Enum<T> searchOrdering;
 
     public boolean isAscSorting() {
         return ascSorting;
@@ -19,11 +19,11 @@ public class SearchOrderingFilter {
         this.ascSorting = ascSorting;
     }
 
-    public SearchOrdering getSearchOrdering() {
+    public Enum<T> getSearchOrdering() {
         return searchOrdering;
     }
 
-    public void setSearchOrdering(SearchOrdering searchOrdering) {
+    public void setSearchOrdering(Enum<T> searchOrdering) {
         this.searchOrdering = searchOrdering;
     }
 }
