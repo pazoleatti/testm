@@ -131,7 +131,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
         // Набор файлов, которые уже обработали
         Set<String> ignoreFileSet = new HashSet<String>();
         // Если изначально нет подходящих файлов то выдаем отдельную ошибку
-        List<String> workFilesList = getWorkTransportFiles(path, ignoreFileSet, loadedFileNameList);
+        List<String> workFilesList = getWorkTransportFiles(userInfo, path, ignoreFileSet, loadedFileNameList, logger);
         if (workFilesList.isEmpty()) {
             log(userInfo, LogData.L3, logger, departmentService.getDepartment(departmentId).getName());
             return new ImportCounter();
@@ -151,9 +151,9 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
 
             // Не задан код подразделения или код формы
             if (departmentCode == null || formCode == null || reportPeriodCode == null || year == null) {
-                log(userInfo, LogData.L4, logger, fileName);
+                log(userInfo, LogData.L4, logger, fileName, path);
                 moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
-                        Arrays.asList(new LogEntry(LogLevel.ERROR, LogData.L4.getText())), logger);
+                        Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L4.getText(), fileName, path))), logger);
                 fail++;
                 continue;
             }
@@ -163,7 +163,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             if (formDepartment == null) {
                 log(userInfo, LogData.L5, logger, fileName);
                 moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
-                        Arrays.asList(new LogEntry(LogLevel.ERROR, LogData.L4.getText())), logger);
+                        Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L5.getText(), fileName))), logger);
                 fail++;
                 continue;
             }
@@ -173,7 +173,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             if (formType == null) {
                 log(userInfo, LogData.L6, logger, fileName);
                 moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
-                        Arrays.asList(new LogEntry(LogLevel.ERROR, LogData.L4.getText())), logger);
+                        Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L6.getText(), fileName))), logger);
                 fail++;
                 continue;
             }
@@ -183,7 +183,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             if (reportPeriod == null) {
                 log(userInfo, LogData.L7, logger, fileName);
                 moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
-                        Arrays.asList(new LogEntry(LogLevel.ERROR, LogData.L4.getText())), logger);
+                        Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L7.getText(), fileName))), logger);
                 fail++;
                 continue;
             }
@@ -192,7 +192,8 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             if (!departmentFormTypeDao.existAssignedForm(formDepartment.getId(), formType.getId(), FormDataKind.PRIMARY)) {
                 log(userInfo, LogData.L14, logger, formType.getName(), formDepartment.getName());
                 moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
-                        Arrays.asList(new LogEntry(LogLevel.ERROR, LogData.L4.getText())), logger);
+                        Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L14.getText(),
+                                formType.getName(), formDepartment.getName()))), logger);
                 fail++;
                 continue;
             }
@@ -203,7 +204,8 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 String reportPeriodName = reportPeriod.getTaxPeriod().getYear() + " - " + reportPeriod.getName();
                 log(userInfo, LogData.L9, logger, formType.getName(), reportPeriodName);
                 moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
-                        Arrays.asList(new LogEntry(LogLevel.ERROR, LogData.L4.getText())), logger);
+                        Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L9.getText(),
+                                formType.getName(), reportPeriodName))), logger);
                 fail++;
                 continue;
             }
@@ -433,8 +435,8 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
     /**
      * Получение спика ТФ НФ из каталога загрузки. Файлы, которые не соответствуют маппингу пропускаются.
      */
-    private List<String> getWorkTransportFiles(String folderPath, Set<String> ignoreFileSet,
-                                               List<String> loadedFileNameList) {
+    private List<String> getWorkTransportFiles(TAUserInfo userInfo, String folderPath, Set<String> ignoreFileSet,
+                                               List<String> loadedFileNameList, Logger logger) {
         List<String> retVal = new LinkedList<String>();
         FileWrapper catalogFile = ResourceUtils.getSharedResource(folderPath);
         for (String candidateStr : catalogFile.list()) {
@@ -453,6 +455,8 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 if (candidateFile.isFile()) {
                     retVal.add(candidateStr);
                 }
+            } else {
+                log(userInfo, LogData.L4, logger, candidateStr, folderPath);
             }
         }
         return retVal;

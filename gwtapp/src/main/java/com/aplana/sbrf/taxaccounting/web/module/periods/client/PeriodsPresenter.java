@@ -72,6 +72,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
         void setCanClosePeriod(boolean canClosePeriod);
 		void setCanEdit(boolean canEdit);
         void setCanOpenCorrectPeriod(boolean canOpenCorrectPeriod);
+        void clearSelection();
 	}
 
 	private final TaPlaceManager placeManager;
@@ -316,6 +317,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 					public void onSuccess(RemovePeriodResult result) {
 						find();
 						LogAddEvent.fire(PeriodsPresenter.this, result.getUuid());
+                        getView().clearSelection();
 					}
 				}, PeriodsPresenter.this));
 	}
@@ -323,6 +325,13 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 	@Override
 	public void selectionChanged() {
         TableRow selectedRow = getView().getSelectedRow();
+        if (selectedRow == null) {
+            getView().setCanEditPeriod(false);
+            getView().setCanClosePeriod(false);
+            getView().setCanDeletePeriod(false);
+            getView().setCanChangeDeadline(false);
+            return;
+        }
         getView().setCanChangeDeadline(!selectedRow.isSubHeader() && selectedRow.isOpen());
         getView().setCanEditPeriod(!selectedRow.isSubHeader() && selectedRow.isOpen());
         getView().setCanClosePeriod(!selectedRow.isSubHeader() && canEdit);

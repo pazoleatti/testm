@@ -194,8 +194,18 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
     public SourcesView(final Binder uiBinder) {
         ValueBoxRenderer abstractRenderer = new ValueBoxRenderer();
         appointmentTypePicker = new ValueListBox<AppointmentType>(abstractRenderer);
-        periodFrom = new ValueListBox<PeriodInfo>(abstractRenderer);
-        periodTo = new ValueListBox<PeriodInfo>(abstractRenderer);
+        periodFrom = new ValueListBox<PeriodInfo>(abstractRenderer, new ProvidesKey<PeriodInfo>() {
+            @Override
+            public Object getKey(PeriodInfo item) {
+                return item != null ? item.getCode() : null;
+            }
+        });
+        periodTo = new ValueListBox<PeriodInfo>(abstractRenderer, new ProvidesKey<PeriodInfo>() {
+            @Override
+            public Object getKey(PeriodInfo item) {
+                return item != null ? item.getCode() : null;
+            }
+        });
 
         initWidget(uiBinder.createAndBindUi(this));
 
