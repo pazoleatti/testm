@@ -189,6 +189,8 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
 
     @Override
     public void updateAccountPeriodIds() {
+        Date current = new Date();
+        accountPeriodIds.setPeriodDates(current, current);
         accountPeriodIds.load();
     }
 

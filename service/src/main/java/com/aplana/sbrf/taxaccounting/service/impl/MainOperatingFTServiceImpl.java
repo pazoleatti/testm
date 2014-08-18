@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -64,6 +64,7 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
         if (formTemplate.getStatus().equals(VersionedObjectStatus.NORMAL)){
             versionOperatingService.isUsedVersion(formTemplate.getId(), formTemplate.getType().getId(),
                     formTemplate.getStatus(), formTemplate.getVersion(), templateActualEndDate, logger);
+            checkError(logger, SAVE_MESSAGE);
         }
 
         formTemplateService.validateFormAutoNumerationColumn(formTemplate, logger);
@@ -115,16 +116,12 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
                 VersionedObjectStatus.NORMAL, VersionedObjectStatus.DRAFT);
         //Проверка использования
         if (formTemplates != null && !formTemplates.isEmpty()){
-            ArrayList<Integer> ids = new ArrayList<Integer>(formTemplates.size());
             for (FormTemplate formTemplate : formTemplates){
                 versionOperatingService.isUsedVersion(formTemplate.getId(), typeId, formTemplate.getStatus(), formTemplate.getVersion(), null, logger);
                 checkError(logger, DELETE_TEMPLATE_MESSAGE);
                 //formTemplate.setStatus(VersionedObjectStatus.DELETED);
-                ids.add(formTemplate.getId());
             }
             //Получение фейковых значений
-            ids.addAll(formTemplateService.getFTVersionIdsByStatus(typeId, VersionedObjectStatus.FAKE));
-            formTemplateService.delete(ids);
         }
         versionOperatingService.checkDestinationsSources(typeId, null, null, logger);
         checkError(logger, DELETE_TEMPLATE_MESSAGE);
@@ -149,7 +146,7 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
         checkError(logger, DELETE_TEMPLATE_VERSION_MESSAGE);
 
         versionOperatingService.cleanVersions(templateId, template.getType().getId(), template.getStatus(), template.getVersion(), dateEndActualize, logger);
-        formTemplateService.delete(template.getId());
+        int deletedFTid = formTemplateService.delete(template.getId());
         List<FormTemplate> formTemplates = formTemplateService.getFormTemplateVersionsByStatus(template.getType().getId(),
                 VersionedObjectStatus.DRAFT, VersionedObjectStatus.NORMAL);
         //Проверка существуют ли еще версии со статусом 0 или 1
@@ -164,6 +161,7 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
 
         //Если нет версий макетов, то можно удалить весь макет
         if (formTemplates.isEmpty()){
+            templateChangesService.deleteByTemplateIds(Arrays.asList(deletedFTid), null);
             formTypeService.delete(template.getType().getId());
             logger.info("Макет удален в связи с удалением его последней версии");
             isDeleteAll = true;

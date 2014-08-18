@@ -47,10 +47,10 @@
         <fm:body>
             <fm:BodyContainer>
                 <g:HorizontalPanel spacing="5" addStyleNames="{style.btnPanel}">
-                    <g:Button text="Создать" ui:field="createButton" />
+                    <g:Button text="Создать задачу" ui:field="createButton" />
+                    <g:Button text="Удалить задачу" ui:field="deleteButton" />
                     <g:Button text="Запустить выполнение по расписанию" ui:field="resumeButton" />
                     <g:Button text="Остановить выполнение по расписанию" ui:field="stopButton" />
-                    <g:Button text="Удалить" ui:field="deleteButton" />
                 </g:HorizontalPanel>
 
                 <g:ResizeLayoutPanel height="100%" width="100%">
