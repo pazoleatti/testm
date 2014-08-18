@@ -877,13 +877,16 @@ public class FormDataServiceImpl implements FormDataService {
     public String updatePreviousRowNumber(FormData formData) {
         String msg = null;
 
+        if (formData.getState() == WorkflowState.CREATED) {
+            return null;
+        }
+
         FormTemplate formTemplate = formTemplateService.get(formData.getFormTemplateId());
         if (formTemplateService.isAnyAutoNumerationColumn(formTemplate, AutoNumerationColumnType.CROSS)) {
             // Получить налоговый период
             TaxPeriod taxPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId()).getTaxPeriod();
             // Получить список экземпляров НФ следующих периодов
-            List<FormData> formDataList = formDataDao.getNextFormDataListForCrossNumeration(formData, taxPeriod.getYear(),
-                    String.valueOf(taxPeriod.getTaxType().getCode()));
+            List<FormData> formDataList = formDataDao.getNextFormDataListForCrossNumeration(formData, taxPeriod);
 
             // Устанавливаем значение для текущего экземпляра НФ
             formDataDao.updatePreviousRowNumber(formData.getId(), getPreviousRowNumber(formData));
