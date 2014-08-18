@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -64,18 +64,10 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
             checkError(logger, SAVE_MESSAGE);
         }
 
-        switch (declarationTemplate.getStatus()){
-            case NORMAL:
-                versionOperatingService.isUsedVersion(declarationTemplate.getId(), declarationTemplate.getType().getId(),
-                        declarationTemplate.getStatus(), declarationTemplate.getVersion(), templateActualEndDate, logger);
-                checkError(logger, SAVE_MESSAGE);
-                //Что то с нумерацией строк
-                checkError(logger, SAVE_MESSAGE);
-                break;
-            case DRAFT:
-                //Что то с нумерацией строк
-                checkError(logger, SAVE_MESSAGE);
-                break;
+        if (declarationTemplate.getStatus().equals(VersionedObjectStatus.NORMAL)){
+            versionOperatingService.isUsedVersion(declarationTemplate.getId(), declarationTemplate.getType().getId(),
+                    declarationTemplate.getStatus(), declarationTemplate.getVersion(), templateActualEndDate, logger);
+            checkError(logger, SAVE_MESSAGE);
         }
 
         int id = declarationTemplateService.save(declarationTemplate);
@@ -123,16 +115,13 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
         List<DeclarationTemplate> templates = declarationTemplateService.getDecTemplateVersionsByStatus(typeId,
                 VersionedObjectStatus.NORMAL, VersionedObjectStatus.DRAFT);
         if (templates != null && !templates.isEmpty()){
-            ArrayList<Integer> ids = new ArrayList<Integer>(templates.size());
+
             for (DeclarationTemplate declarationTemplate : templates){
                 versionOperatingService.isUsedVersion(declarationTemplate.getId(), declarationTemplate.getType().getId(),
                         declarationTemplate.getStatus(), declarationTemplate.getVersion(), null, logger);
                 checkError(logger, DELETE_TEMPLATE_MESSAGE);
                 //declarationTemplate.setStatus(VersionedObjectStatus.DELETED);
-                ids.add(declarationTemplate.getId());
             }
-            ids.addAll(declarationTemplateService.getDTVersionIdsByStatus(typeId, VersionedObjectStatus.FAKE));
-            declarationTemplateService.delete(ids);
         }
         versionOperatingService.checkDestinationsSources(typeId, null, null, logger);
         checkError(logger, DELETE_TEMPLATE_MESSAGE);
@@ -160,7 +149,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
 
         versionOperatingService.cleanVersions(template.getId(), template.getType().getId(),
                 template.getStatus(), template.getVersion(), dateEndActualize, logger);
-        declarationTemplateService.delete(template.getId());
+        int deletedFTid = declarationTemplateService.delete(template.getId());
         List<DeclarationTemplate> declarationTemplates = declarationTemplateService.getDecTemplateVersionsByStatus(template.getType().getId(),
                 VersionedObjectStatus.DRAFT, VersionedObjectStatus.NORMAL);
         if (declarationTemplates.isEmpty()){
@@ -174,6 +163,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
 
         //Если нет версий макетов, то можно удалить весь макет
         if (declarationTemplates.isEmpty()){
+            templateChangesService.deleteByTemplateIds(null, Arrays.asList(deletedFTid));
             declarationTypeService.delete(template.getType().getId());
             logger.info("Макет удален в связи с удалением его последней версии");
             isDeleteAll = true;
