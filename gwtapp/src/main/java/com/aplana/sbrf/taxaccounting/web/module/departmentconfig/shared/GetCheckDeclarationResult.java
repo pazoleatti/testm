@@ -1,11 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.gwtplatform.dispatch.shared.Result;
-
-
-import java.util.List;
-import java.util.Set;
 
 /**
  * @author Dmitriy Levykin
@@ -16,6 +11,15 @@ public class GetCheckDeclarationResult implements Result {
     private String uuid;
     private boolean declarationFormFound = false;
     private boolean hasError = false;
+    private boolean isControlUnp;
+
+    public boolean isControlUnp() {
+        return isControlUnp;
+    }
+
+    public void setControlUnp(boolean controlUnp) {
+        isControlUnp = controlUnp;
+    }
 
     public String getUuid() {
         return uuid;

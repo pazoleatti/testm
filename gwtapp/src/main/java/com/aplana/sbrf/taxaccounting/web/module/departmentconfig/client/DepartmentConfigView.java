@@ -31,7 +31,6 @@ import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 import java.util.*;
-import java.util.Arrays;
 
 /**
  * View для формы настроек подразделений
@@ -83,7 +82,6 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 			signatorySurname,
 			signatoryFirstname,
 			signatoryLastname,
-			appVersion,
 			formatVersion;
 
 	@UiField
@@ -112,7 +110,8 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
     CheckBox prepayment;
 
 	@UiField
-	TextArea name;
+	TextArea name,
+            additionalName;
 
 	// Контейнер для справочника периодов
 	@UiField
@@ -412,6 +411,10 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 	private void enableAllChildren(boolean enable, Widget widget) {
 		if (widget instanceof HasWidgets) {
 			for (Widget nextWidget : ((HasWidgets) widget)) {
+                if (nextWidget == additionalName && getUiHandlers() != null){
+                    additionalName.setEnabled(getUiHandlers().isControlUnp() && enable);
+                    continue;
+                }
 				enableAllChildren(enable, nextWidget);
 				if (nextWidget instanceof HasEnabled) {
 					((HasEnabled) nextWidget).setEnabled(enable);

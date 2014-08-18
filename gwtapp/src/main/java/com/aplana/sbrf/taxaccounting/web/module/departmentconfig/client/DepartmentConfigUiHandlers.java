@@ -59,4 +59,10 @@ public interface DepartmentConfigUiHandlers extends UiHandlers {
      */
     void reloadDepartments(TaxType taxType, Integer currentDepartmentId);
 
+    /**
+     * Проверка конролера УНП
+     * @return
+     */
+    boolean isControlUnp();
+
 }

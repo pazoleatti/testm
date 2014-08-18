@@ -150,10 +150,19 @@
                                     <style:LabelSeparator text="Реквизиты подразделения" addStyleNames="{style.labelSeparetors}"/>
                                     <g:HorizontalPanel width="100%" spacing="1">
                                         <g:cell width="1%" height="22px">
-                                            <g:Label text="Наименование:" addStyleNames="{style.leftLabels}"/>
+                                            <g:Label text="Наименование для титульного листа:" addStyleNames="{style.leftLabels}"/>
                                         </g:cell>
                                         <g:cell width="99%">
                                             <aplana:TextArea ui:field="name" visibleLines="4"/>
+                                        </g:cell>
+                                    </g:HorizontalPanel>
+                                    <g:HorizontalPanel width="100%" spacing="1">
+                                        <g:cell width="1%" height="22px">
+                                            <g:Label text="Наименование для Приложения № 5:"
+                                                     addStyleNames="{style.leftLabels}"/>
+                                        </g:cell>
+                                        <g:cell width="99%">
+                                            <aplana:TextArea ui:field="additionalName" visibleLines="4"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
                                     <g:HorizontalPanel width="100%" spacing="1" verticalAlignment="middle">
@@ -331,15 +340,6 @@
                                         </g:cell>
                                         <g:cell width="99%">
                                             <aplana:DoubleBox ui:field="taxRate" width="200px"/>
-                                        </g:cell>
-                                    </g:HorizontalPanel>
-                                    <g:HorizontalPanel width="100%" spacing="1" verticalAlignment="middle">
-                                        <g:cell width="1%" height="22px">
-                                            <g:Label text="Версия программы, с помощью которой сформирован файл:"
-                                                     addStyleNames="{style.rightLabels}, {style.toLongLabel}"/>
-                                        </g:cell>
-                                        <g:cell width="99%">
-                                            <aplana:TextBox ui:field="appVersion" width="200px" maxLength="20"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
                                     <g:HorizontalPanel width="100%" spacing="1" verticalAlignment="middle">
