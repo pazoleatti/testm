@@ -123,6 +123,15 @@ public interface ReportPeriodService {
     List<ReportPeriod> getReportPeriodsByDate(TaxType taxType, Date startDate, Date endDate);
 
     /**
+     * Возвращает все периоды по виду налога, которые либо пересекаются с указанным диапазоном дат, либо полностью находятся внутри него
+     * @param taxType Вид налога
+     * @param startDate Начало периода
+     * @param endDate Конец периода
+     * @return Список отчетных периодов
+     */
+    List<ReportPeriod> getReportPeriodsInRange(TaxType taxType, Date startDate, Date endDate);
+
+    /**
      * Получить номер корректирующего периода.
      * @param reportPeriodId идентификатор отчетного период
      * @param departmentId идентификатор подразделения

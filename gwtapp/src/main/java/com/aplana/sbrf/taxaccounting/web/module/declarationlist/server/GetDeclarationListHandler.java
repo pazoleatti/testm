@@ -89,7 +89,7 @@ public class GetDeclarationListHandler extends AbstractActionHandler<GetDeclarat
 		PagingResult<DeclarationDataSearchResultItem> page = declarationDataSearchService.search(action.getDeclarationFilter());
         Map<Integer, String> departmentFullNames = new HashMap<Integer, String>();
         for(DeclarationDataSearchResultItem item: page) {
-            if (departmentFullNames.get(item.getDepartmentId()) == null) departmentFullNames.put(item.getDepartmentId(), departmentService.getParentsHierarchy(item.getDepartmentId()));
+            if (departmentFullNames.get(item.getDepartmentId()) == null) departmentFullNames.put(item.getDepartmentId(), departmentService.getParentsHierarchyShortNames(item.getDepartmentId()));
         }
 		result.setRecords(page);
         result.setDepartmentFullNames(departmentFullNames);

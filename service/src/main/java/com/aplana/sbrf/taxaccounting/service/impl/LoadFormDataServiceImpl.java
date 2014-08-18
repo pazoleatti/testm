@@ -130,11 +130,12 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
         int fail = 0;
         // Набор файлов, которые уже обработали
         Set<String> ignoreFileSet = new HashSet<String>();
+        ImportCounter wrongImportCounter = new ImportCounter();
         // Если изначально нет подходящих файлов то выдаем отдельную ошибку
-        List<String> workFilesList = getWorkTransportFiles(userInfo, path, ignoreFileSet, loadedFileNameList, logger);
+        List<String> workFilesList = getWorkTransportFiles(userInfo, path, ignoreFileSet, loadedFileNameList, logger, wrongImportCounter);
         if (workFilesList.isEmpty()) {
             log(userInfo, LogData.L3, logger, departmentService.getDepartment(departmentId).getName());
-            return new ImportCounter();
+            return wrongImportCounter;
         }
 
         // Обработка всех подходящих файлов, с получением списка на каждой итерации
@@ -311,7 +312,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             }
         }
 
-        return new ImportCounter(success, fail);
+        return new ImportCounter(success, fail + wrongImportCounter.getFailCounter());
     }
 
     /**
@@ -436,7 +437,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
      * Получение спика ТФ НФ из каталога загрузки. Файлы, которые не соответствуют маппингу пропускаются.
      */
     private List<String> getWorkTransportFiles(TAUserInfo userInfo, String folderPath, Set<String> ignoreFileSet,
-                                               List<String> loadedFileNameList, Logger logger) {
+                                               List<String> loadedFileNameList, Logger logger, ImportCounter wrongImportCounter) {
         List<String> retVal = new LinkedList<String>();
         FileWrapper catalogFile = ResourceUtils.getSharedResource(folderPath);
         for (String candidateStr : catalogFile.list()) {
@@ -457,6 +458,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 }
             } else {
                 log(userInfo, LogData.L4, logger, candidateStr, folderPath);
+                wrongImportCounter.add(new ImportCounter(0, 1));
             }
         }
         return retVal;

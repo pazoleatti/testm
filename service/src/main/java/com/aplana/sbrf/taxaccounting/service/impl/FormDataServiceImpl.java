@@ -827,13 +827,12 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
-    public void updateFDTBNames(int newDepTBId, int oldDepTBId, Date dateFrom, Date dateTo) {
+    public void updateFDTBNames(int depTBId,  String depName, Date dateFrom, Date dateTo) {
         if (dateFrom == null)
             throw new ServiceException("Должна быть установлена хотя бы \"Дата от\"");
         try {
-            Department departmentTBNew = departmentDao.getDepartment(newDepTBId);
-            Department departmentTBOld = departmentDao.getDepartment(oldDepTBId);
-            formDataDao.updateFDPerformerTBDepartmentNames(departmentTBNew.getName(), departmentTBOld.getName(), dateFrom, dateTo);
+            Department departmentTBOld = departmentDao.getDepartment(depTBId);
+            formDataDao.updateFDPerformerTBDepartmentNames(departmentTBOld.getName(), depName, dateFrom, dateTo);
         } catch (ServiceException e){
             throw new ServiceException("Ошибка при обновлении имени ТБ", e);
         }
@@ -878,13 +877,16 @@ public class FormDataServiceImpl implements FormDataService {
     public String updatePreviousRowNumber(FormData formData) {
         String msg = null;
 
+        if (formData.getState() == WorkflowState.CREATED) {
+            return null;
+        }
+
         FormTemplate formTemplate = formTemplateService.get(formData.getFormTemplateId());
         if (formTemplateService.isAnyAutoNumerationColumn(formTemplate, AutoNumerationColumnType.CROSS)) {
             // Получить налоговый период
             TaxPeriod taxPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId()).getTaxPeriod();
             // Получить список экземпляров НФ следующих периодов
-            List<FormData> formDataList = formDataDao.getNextFormDataListForCrossNumeration(formData, taxPeriod.getYear(),
-                    String.valueOf(taxPeriod.getTaxType().getCode()));
+            List<FormData> formDataList = formDataDao.getNextFormDataListForCrossNumeration(formData, taxPeriod);
 
             // Устанавливаем значение для текущего экземпляра НФ
             formDataDao.updatePreviousRowNumber(formData.getId(), getPreviousRowNumber(formData));

@@ -6,15 +6,14 @@
     <fullName>Отчёт о суммах НДС начисленных налоговым агентом по договорам аренды имущества (балансовый счёт
         60309.03)
     </fullName>
-    <code></code>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+    <header>724.7</header>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>rowNum</alias>
         <checking>false</checking>
         <name>№ пп</name>
         <order>1</order>
         <width>5</width>
-        <maxLength>15</maxLength>
-        <precision>0</precision>
+        <type>0</type>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>fix</alias>

@@ -55,11 +55,12 @@ public class RateMDB implements MessageListener {
     static final String ERROR_CODE = "Значения сообщения установлены не по отношению к российскому рублю";
     static final String SUCCESS_IMPORT = "Успешный обмен данными с КСШ. Загружено %d курсов справочника «%s».";
     static final String FAIL_IMPORT = "Неуспешная попытка обмена данными с КСШ. %s.";
+	static final String FAIL_IMPORT_DELIVERY_COUNT = "Неуспешная попытка обмена данными с КСШ. %s. Попытка № %s";
     static final String ERROR_AUDIT = "Ошибка записи в журнал аудита.";
     static final String ERROR_COUNT = "Превышено максимальное число попыток загрузки сообщения (" + MAX_DELIVERY_COUNT + ").";
 
     @Autowired
-    RefBookScriptingService refBookScriptingService;
+	private RefBookScriptingService refBookScriptingService;
 
     @Autowired
     private AuditService auditService;
@@ -92,7 +93,8 @@ public class RateMDB implements MessageListener {
         TextMessage tm = (TextMessage) message;
 
         try {
-            if (tm.getIntProperty("JMSXDeliveryCount") > MAX_DELIVERY_COUNT) {
+			int deliveryCount = tm.getIntProperty("JMSXDeliveryCount");
+            if (deliveryCount > MAX_DELIVERY_COUNT) {
                 logger.error(ERROR_COUNT);
                 return;
             }
@@ -103,7 +105,7 @@ public class RateMDB implements MessageListener {
                 addLog(userInfo, String.format(FAIL_IMPORT, ERROR_FORMAT));
                 return;
             }
-            importRate(fileText, userInfo);
+            importRate(fileText, userInfo, deliveryCount);
         } catch (Exception ex) {
             logger.error("Ошибка при получении сообщения: " + ex.getMessage(), ex);
             addLog(userInfo, String.format(FAIL_IMPORT, ERROR_FORMAT));
@@ -120,7 +122,7 @@ public class RateMDB implements MessageListener {
     /**
      * Импорт курсов из сообщения
      */
-    private void importRate(final String fileText, final TAUserInfo userInfo) throws Exception {
+    private void importRate(final String fileText, final TAUserInfo userInfo, int deliveryCount) throws Exception {
         SAXParserFactory factory = SAXParserFactory.newInstance();
         SAXParser saxParser = factory.newSAXParser();
 
@@ -213,7 +215,7 @@ public class RateMDB implements MessageListener {
                 addLog(userInfo, String.format(FAIL_IMPORT, ERROR_RATE));
                 return;
             }
-            runScript(refBookId[0], fileText, userInfo);
+            runScript(refBookId[0], fileText, userInfo, deliveryCount);
         } catch (Exception ex) {
             logger.error(ERROR_FORMAT, ex);
             addLog(userInfo, String.format(FAIL_IMPORT, ERROR_FORMAT));
@@ -223,7 +225,7 @@ public class RateMDB implements MessageListener {
     /**
      * Запуск скрипта
      */
-    private void runScript(Long refBookId, String fileText, TAUserInfo userInfo) {
+    private void runScript(Long refBookId, String fileText, TAUserInfo userInfo, int deliveryCount) {
         Logger logger = new Logger();
         Map<String, Object> additionalParameters = new HashMap<String, Object>();
         ScriptStatusHolder scriptStatusHolder = new ScriptStatusHolder();
@@ -234,11 +236,11 @@ public class RateMDB implements MessageListener {
         } catch (ServiceLoggerException e) {
             logger.error(e);
             logger.info("uuid = " + e.getUuid());
-            addLog(userInfo, String.format(FAIL_IMPORT, e.getMessage()));
+            addLog(userInfo, String.format(FAIL_IMPORT_DELIVERY_COUNT, e.getMessage(), deliveryCount));
             return;
         } catch (Exception e) {
             logger.error(e);
-            addLog(userInfo, String.format(FAIL_IMPORT, e.getMessage()));
+            addLog(userInfo, String.format(FAIL_IMPORT_DELIVERY_COUNT, e.getMessage(), deliveryCount));
             return;
         }
         addLog(userInfo, String.format(SUCCESS_IMPORT, scriptStatusHolder.getSuccessCount(), refBookNameMapping.get(refBookId)));

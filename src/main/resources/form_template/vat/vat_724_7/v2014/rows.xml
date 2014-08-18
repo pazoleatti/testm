@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rows>
     <row alias="total">
-        <cell alias="rowNum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="rowNum" colSpan="1" rowSpan="1"/>
         <cell alias="fix" colSpan="2" rowSpan="1" stringValue="Итого" styleAlias="Контрольные суммы"/>
         <cell alias="operDate" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
         <cell alias="name" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
