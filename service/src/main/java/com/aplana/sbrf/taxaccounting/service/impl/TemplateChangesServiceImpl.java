@@ -51,4 +51,12 @@ public class TemplateChangesServiceImpl implements TemplateChangesService {
     public void delete(Collection<Integer> ids) {
         templateChangesDao.delete(ids);
     }
+
+    @Override
+    public void deleteByTemplateIds(Collection<Integer> ftIds, Collection<Integer> dtIds) {
+        List<Integer> changeses = templateChangesDao.getIdsByTemplateIds(ftIds, dtIds, VersionHistorySearchOrdering.DATE, true);
+        if (changeses.isEmpty())
+            return;
+        templateChangesDao.delete(changeses);
+    }
 }

@@ -2,11 +2,12 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.DeclarationType;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
+import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTypeService;
 import com.aplana.sbrf.taxaccounting.service.TemplateChangesService;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Transformer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +28,8 @@ public class DeclarationTypeServiceImpl implements DeclarationTypeService {
 	private ReportPeriodDao reportPeriodDao;
     @Autowired
     private TemplateChangesService templateChangesService;
+    @Autowired
+    private DeclarationTemplateService declarationTemplateService;
 
     @Override
     @Transactional(readOnly = false)
@@ -44,17 +47,13 @@ public class DeclarationTypeServiceImpl implements DeclarationTypeService {
         return declarationTypeDao.get(typeId);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void delete(int typeId) {
-        List<TemplateChanges> changeses = templateChangesService.getByFormTypeIds(typeId, VersionHistorySearchOrdering.DATE, false);
-        if (!changeses.isEmpty())
-            templateChangesService.delete(CollectionUtils.collect(changeses, new Transformer() {
-                @Override
-                public Object transform(Object o) {
-                    return ((TemplateChanges) o).getId();
-                }
-            }));
+        List<Integer> ids = declarationTemplateService.getDTVersionIdsByStatus(typeId);
+        if (!ids.isEmpty()){
+            templateChangesService.deleteByTemplateIds(null, ids);
+            declarationTemplateService.delete(ids);
+        }
         declarationTypeDao.delete(typeId);
     }
 

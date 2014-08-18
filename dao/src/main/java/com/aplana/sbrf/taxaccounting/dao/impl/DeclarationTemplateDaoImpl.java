@@ -384,8 +384,9 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
     @CacheEvict(value = CacheConstants.DECLARATION_TEMPLATE, beforeInvocation = true)
     public int delete(int declarationTemplateId) {
         try {
-            return getJdbcTemplate().update("delete from declaration_template where id = ?", new Object[]{declarationTemplateId},
+            getJdbcTemplate().update("delete from declaration_template where id = ?", new Object[]{declarationTemplateId},
                     new int[]{Types.INTEGER});
+            return declarationTemplateId;
         }catch (DataAccessException e){
             logger.error("Ошибка во время удаления.", e);
             throw new DaoException("Ошибка во время удаления.", e);
