@@ -254,7 +254,6 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 
                 final RecordChanges recordChanges = fillRecordChanges(currentUniqueRecordId, map, action.getVersionFrom(), action.getVersionTo());
 
-                // TODO заменить, сделано для примера
                 if (currentRefBookId == 30) {
                     if (modifiedFields.containsKey("TYPE")){
                         if (map.get("TYPE").getReferenceValue().intValue() != 1 &&  map.get("PARENT_ID").getReferenceValue() == null){
