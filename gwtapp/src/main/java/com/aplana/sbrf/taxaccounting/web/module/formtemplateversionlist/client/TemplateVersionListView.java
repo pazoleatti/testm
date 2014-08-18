@@ -184,11 +184,11 @@ public class TemplateVersionListView extends ViewWithUiHandlers<FTVersionListUiH
         });
     }
 
-    @UiHandler("historyVersion")
+    /*@UiHandler("historyVersion")
     void onHistoryVersionClick(ClickEvent event){
         if (getUiHandlers() != null)
             getUiHandlers().onHistoryClick();
-    }
+    }*/
 
     @UiHandler("returnAnchor")
     void onReturnAnchor(ClickEvent event){
