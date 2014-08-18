@@ -831,7 +831,8 @@ public class FormDataServiceImpl implements FormDataService {
         if (dateFrom == null)
             throw new ServiceException("Должна быть установлена хотя бы \"Дата от\"");
         try {
-            formDataDao.updateFDPerformerTBDepartmentNames(depTBId, depName, dateFrom, dateTo);
+            Department departmentTBOld = departmentDao.getDepartment(depTBId);
+            formDataDao.updateFDPerformerTBDepartmentNames(departmentTBOld.getName(), depName, dateFrom, dateTo);
         } catch (ServiceException e){
             throw new ServiceException("Ошибка при обновлении имени ТБ", e);
         }
