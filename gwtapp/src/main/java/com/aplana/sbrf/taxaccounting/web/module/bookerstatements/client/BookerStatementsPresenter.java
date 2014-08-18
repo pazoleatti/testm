@@ -90,6 +90,8 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
         void updateTable();
 
         BookerStatementsSearchOrdering getSearchOrdering();
+
+        void updateAccountPeriodIds();
     }
 
     @ProxyCodeSplit
@@ -143,6 +145,7 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
                 (lstHistory.get(1) == null || !lstHistory.get(1).startsWith(url))) {
             filter = null;
         }
+        getView().updateAccountPeriodIds();
         dispatcher.execute(new GetBSOpenListAction(),
                 CallbackUtils.defaultCallback(
                         new AbstractCallback<GetBSOpenListResult>() {

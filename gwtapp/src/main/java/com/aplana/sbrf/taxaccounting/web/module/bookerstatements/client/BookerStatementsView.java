@@ -187,6 +187,13 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
         return dataProvider.isAscSorting();
     }
 
+    @Override
+    public void updateAccountPeriodIds() {
+        Date current = new Date();
+        accountPeriodIds.setPeriodDates(current, current);
+        accountPeriodIds.load();
+    }
+
     @UiHandler("searchButton")
     void onSearchClick(ClickEvent event) {
         if (getUiHandlers() != null) {

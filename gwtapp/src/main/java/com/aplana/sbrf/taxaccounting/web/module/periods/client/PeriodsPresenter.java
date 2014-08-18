@@ -46,6 +46,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 
 	private TaxType taxType;
     private int currentYear;
+    private boolean canEdit;
 
 	@ProxyCodeSplit
 	@NameToken(PeriodsTokens.PERIODS)
@@ -67,8 +68,11 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
         void setCanChangeDepartment(boolean canChange);
 		void setCanChangeDeadline(boolean canChangeDeadline);
         void setCanEditPeriod(boolean canEditPeriod);
+        void setCanDeletePeriod(boolean canDeletePeriod);
+        void setCanClosePeriod(boolean canClosePeriod);
 		void setCanEdit(boolean canEdit);
         void setCanOpenCorrectPeriod(boolean canOpenCorrectPeriod);
+        void clearSelection();
 	}
 
 	private final TaPlaceManager placeManager;
@@ -269,6 +273,10 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 
 	@Override
 	public void removePeriod() {
+        if (getView().getSelectedRow() == null) {
+            MessageEvent.fire(this, "В списке не выбран период");
+            return;
+        }
 		Dialog.confirmMessage("Удаление периода", "Вы уверены, что хотите удалить период?",
 				new DialogHandler() {
 					@Override
@@ -309,6 +317,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 					public void onSuccess(RemovePeriodResult result) {
 						find();
 						LogAddEvent.fire(PeriodsPresenter.this, result.getUuid());
+                        getView().clearSelection();
 					}
 				}, PeriodsPresenter.this));
 	}
@@ -316,8 +325,17 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 	@Override
 	public void selectionChanged() {
         TableRow selectedRow = getView().getSelectedRow();
+        if (selectedRow == null) {
+            getView().setCanEditPeriod(false);
+            getView().setCanClosePeriod(false);
+            getView().setCanDeletePeriod(false);
+            getView().setCanChangeDeadline(false);
+            return;
+        }
         getView().setCanChangeDeadline(!selectedRow.isSubHeader() && selectedRow.isOpen());
         getView().setCanEditPeriod(!selectedRow.isSubHeader() && selectedRow.isOpen());
+        getView().setCanClosePeriod(!selectedRow.isSubHeader() && canEdit);
+        getView().setCanDeletePeriod(!selectedRow.isSubHeader() && canEdit);
         List<TaxType> ITD = new ArrayList<TaxType>();
         ITD.add(TaxType.INCOME);
         ITD.add(TaxType.TRANSPORT);
@@ -398,7 +416,8 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 						PeriodsPresenter.this.openDialogPresenter.setTaxType(result.getTaxType());
                         getView().setFilterData(result.getDepartments(), Arrays.asList(result.getSelectedDepartment()), result.getYearFrom(), result.getYearTo());
                         getView().setCanChangeDepartment(result.canChangeDepartment());
-						getView().setCanEdit(result.isCanEdit());
+                        PeriodsPresenter.this.canEdit = result.isCanEdit();
+						getView().setCanEdit(PeriodsPresenter.this.canEdit);
 						openDialogPresenter.setDepartments(result.getDepartments(), result.getAvalDepartments(), Arrays.asList(result.getSelectedDepartment()), true);
                         openDialogPresenter.setCanChangeDepartment(result.canChangeDepartment());
                         editDialogPresenter.setDepartments(result.getDepartments(), result.getAvalDepartments(), Arrays.asList(result.getSelectedDepartment()), true);

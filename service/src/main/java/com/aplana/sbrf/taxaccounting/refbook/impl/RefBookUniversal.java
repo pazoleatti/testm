@@ -483,7 +483,7 @@ public class RefBookUniversal implements RefBookDataProvider {
             //Обновление периода актуальности
             if (isRelevancePeriodChanged) {
                 List<Long> uniqueIdAsList = Arrays.asList(uniqueRecordId);
-                if (previousVersion.isVersionEndFake() && SimpleDateUtils.addDayToDate(previousVersion.getVersionEnd(), 1).equals(versionFrom)) {
+                if (previousVersion != null && (previousVersion.isVersionEndFake() && SimpleDateUtils.addDayToDate(previousVersion.getVersionEnd(), 1).equals(versionFrom))) {
                     //Если установлена дата окончания, которая совпадает с существующей фиктивной версией - то она удаляется
                     Long previousVersionEnd = refBookDao.findRecord(refBookId, recordId, versionFrom);
                     refBookDao.deleteRecordVersions(REF_BOOK_RECORD_TABLE_NAME, Arrays.asList(previousVersionEnd));

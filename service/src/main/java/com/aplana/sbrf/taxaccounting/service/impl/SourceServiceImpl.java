@@ -38,6 +38,10 @@ public class SourceServiceImpl implements SourceService {
     private static final String SIMPLE_INSTANCES_MSG = "Для корректной передачи данных %s \"%s\" необходимо выполнить повторный перевод в статус \"Принята\" всех %s этой формы в периоде c %s по %s";
     private static final String EMPTY_LIST_MSG = "Список назначений пуст!";
 
+    private enum LOG_LEVEL {
+        INFO, WARN, ERROR
+    }
+
 
     private static final ThreadLocal<SimpleDateFormat> formatter = new ThreadLocal<SimpleDateFormat>() {
         @Override
@@ -164,12 +168,15 @@ public class SourceServiceImpl implements SourceService {
      * @param errorDepartmentFormTypes список назначений, которые должны быть исключены
      * @param mode                     режим работы
      * @param isDeclaration            признак того, что идет обработка в режиме "Декларации"
+     * @param emptyIsOk                признак того, что если в результате выполнения входной список оказывается пуст - это нормальная ситуация.
+     *                                 Например в случае пересечения версий, дополнительная обработка не требуется - версии склеиваются на стадии проверки пересечений
+     * @param level                    уровень логгирования
      * @param messageBuilder           билдер для построения информационных сообщений
      * @return обрезанный входной список пар источников-приемников
      */
     public List<SourcePair> truncateSources(Logger logger, List<SourcePair> sourcePairs,
                                             List<Long> errorDepartmentFormTypes,
-                                            SourceMode mode, boolean isDeclaration,
+                                            SourceMode mode, boolean isDeclaration, boolean emptyIsOk, LOG_LEVEL level,
                                             MessageBuilder messageBuilder) {
         List<SourcePair> sourcePairsOut = new LinkedList<SourcePair>(sourcePairs);
         for (Long error : errorDepartmentFormTypes) {
@@ -179,30 +186,60 @@ public class SourceServiceImpl implements SourceService {
                 if (pair.getSource().equals(error) || pair.getDestination().equals(error)) {
                     if (isDeclaration) {
                         if (pair.getDestination().equals(error)) {
-                            logger.info(messageBuilder.getDestinationMessage(pair));
+                            switch (level) {
+                                case ERROR: {
+                                    logger.error(messageBuilder.getDestinationMessage(pair));
+                                    break;
+                                }
+                                case WARN: {
+                                    logger.warn(messageBuilder.getDestinationMessage(pair));
+                                    break;
+                                }
+                                default: logger.info(messageBuilder.getDestinationMessage(pair));
+                            }
                         }
                     } else {
-                        if (pair.getSource().equals(error)) {
-                            logger.info(messageBuilder.getSourceMessage(pair));
-                        } else {
-                            logger.info(messageBuilder.getDestinationMessage(pair));
+                        switch (level) {
+                            case ERROR: {
+                                if (pair.getSource().equals(error)) {
+                                    logger.error(messageBuilder.getSourceMessage(pair));
+                                } else {
+                                    logger.error(messageBuilder.getDestinationMessage(pair));
+                                }
+                                break;
+                            }
+                            case WARN: {
+                                if (pair.getSource().equals(error)) {
+                                    logger.warn(messageBuilder.getSourceMessage(pair));
+                                } else {
+                                    logger.warn(messageBuilder.getDestinationMessage(pair));
+                                }
+                                break;
+                            }
+                            default: {
+                                if (pair.getSource().equals(error)) {
+                                    logger.info(messageBuilder.getSourceMessage(pair));
+                                } else {
+                                    logger.info(messageBuilder.getDestinationMessage(pair));
+                                }
+                            }
                         }
                     }
                     it.remove();
                 }
                 /** Если единственное назначение было удалено, то продолжать нет смысла */
-                if (pair.getSource().equals(error) && mode == SourceMode.DESTINATIONS) {
+                if (!emptyIsOk && pair.getSource().equals(error) && mode == SourceMode.DESTINATIONS) {
                     throw new ServiceLoggerException(String.format(MAIN_SOURCE_NOT_EXIST_MSG, "источника"),
                             logEntryService.save(logger.getEntries()));
                 }
-                if (pair.getDestination().equals(error) && mode == SourceMode.SOURCES) {
+                if (!emptyIsOk && pair.getDestination().equals(error) && mode == SourceMode.SOURCES) {
                     throw new ServiceLoggerException(String.format(MAIN_SOURCE_NOT_EXIST_MSG, "приемника"),
                             logEntryService.save(logger.getEntries()));
                 }
             }
         }
         /** Проверяем оставщиеся связки */
-        if (sourcePairsOut.isEmpty()) {
+        if (!emptyIsOk && sourcePairsOut.isEmpty()) {
             throw new ServiceLoggerException(SOURCES_LIST_IS_EMPTY_MSG,
                     logEntryService.save(logger.getEntries()));
         }
@@ -293,7 +330,7 @@ public class SourceServiceImpl implements SourceService {
 
         @SuppressWarnings("unchecked")
         List<Long> notExistingDFT = (List<Long>) CollectionUtils.subtract(dftIn, sourceDao.checkDFTExistence(dftIn));
-        return truncateSources(logger, sourcePairs, notExistingDFT, mode, isDeclaration,
+        return truncateSources(logger, sourcePairs, notExistingDFT, mode, isDeclaration, false, LOG_LEVEL.ERROR,
                 new MessageBuilder() {
                     @Override
                     public String getSourceMessage(SourcePair sourcePair) {
@@ -347,7 +384,7 @@ public class SourceServiceImpl implements SourceService {
                 }
             }
             /** Убираем назначения из обработки */
-            sourcePairsOut = truncateSources(logger, sourcePairs, new ArrayList<Long>(formsMap.keySet()), mode, isDeclaration,
+            sourcePairsOut = truncateSources(logger, sourcePairs, new ArrayList<Long>(formsMap.keySet()), mode, isDeclaration, false, LOG_LEVEL.ERROR,
                     new MessageBuilder() {
                         private String getMsg(Long departmentFormTypeId, String mode) {
                             FormDataInfo formDataInfo = formsMap.get(departmentFormTypeId).get(0);
@@ -404,7 +441,7 @@ public class SourceServiceImpl implements SourceService {
                 }
             }
             /** Убираем назначения из обработки */
-            sourcePairsOut = truncateSources(logger, sourcePairs, new ArrayList<Long>(declarationsMap.keySet()), mode, isDeclaration,
+            sourcePairsOut = truncateSources(logger, sourcePairs, new ArrayList<Long>(declarationsMap.keySet()), mode, isDeclaration, false, LOG_LEVEL.ERROR,
                     new MessageBuilder() {
 
                         @Override
@@ -469,7 +506,7 @@ public class SourceServiceImpl implements SourceService {
             }
             //Получаем данные о назначениях-причинах зацикливания для вывода в сообщениях
             final Map<Long, String> objectNames = sourceDao.getSourceNames(new ArrayList<Long>(circleCauses));
-            return truncateSources(logger, sourcePairs, unionSourcePairs(loopedSources), mode, isDeclaration,
+            return truncateSources(logger, sourcePairs, unionSourcePairs(loopedSources), mode, isDeclaration, false, LOG_LEVEL.INFO,
                     new MessageBuilder() {
                         @Override
                         public String getSourceMessage(SourcePair sourcePair) {
@@ -525,8 +562,8 @@ public class SourceServiceImpl implements SourceService {
             List<SourceObject> deleteSources = new ArrayList<SourceObject>();
             final Map<SourcePair, SourceObject> unionMap = new HashMap<SourcePair, SourceObject>();
             for (Map.Entry<SourcePair, List<SourceObject>> intersectionGroup : intersections.entrySet()) {
-                Date minDate = intersectionGroup.getValue().get(0).getPeriodStart();
-                Date maxDate = intersectionGroup.getValue().get(0).getPeriodEnd();
+                Date minDate = periodStart;
+                Date maxDate = periodEnd;
 
                 for (SourceObject intersection : intersectionGroup.getValue()) {
                     if (intersection.getPeriodStart().before(minDate)) {
@@ -550,7 +587,7 @@ public class SourceServiceImpl implements SourceService {
 
             /** Убираем назначения с пересечениями из обработки */
             List<Long> intersectingSources = unionSourcePairs(new ArrayList<SourcePair>(intersections.keySet()));
-            return truncateSources(logger, sourcePairs, intersectingSources, mode, isDeclaration,
+            return truncateSources(logger, sourcePairs, intersectingSources, mode, isDeclaration, true, LOG_LEVEL.INFO,
                     new MessageBuilder() {
                         @Override
                         public String getSourceMessage(SourcePair sourcePair) {
@@ -661,29 +698,31 @@ public class SourceServiceImpl implements SourceService {
             sourcePairs = checkIntersections(logger, sourceClientData.getPeriodStart(), sourceClientData.getPeriodEnd(),
                     null, null, sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
 
-            List<SourceObject> sourceObjects = pairsToObjects(sourcePairs, sourceClientData.getPeriodStart(), sourceClientData.getPeriodEnd());
+            if (!sourcePairs.isEmpty()) {
+                List<SourceObject> sourceObjects = pairsToObjects(sourcePairs, sourceClientData.getPeriodStart(), sourceClientData.getPeriodEnd());
 
-            /** Создаем оставшиеся назначения */
-            sourceDao.createAll(sourceObjects, sourceClientData.isDeclaration());
-            for (SourceObject sourceObject : sourceObjects) {
-                if (sourceClientData.getMode() == SourceMode.DESTINATIONS) {
-                    logger.info(SAVE_SUCCESS_MSG,
-                            sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationDeclarationType().getName() :
-                                    sourceObject.getSourcePair().getDestinationKind().getName() + ": " + sourceObject.getSourcePair().getDestinationFormType().getName(),
-                            "приемником",
-                            sourceObject.getSourcePair().getSourceKind().getName() + ": " + sourceObject.getSourcePair().getSourceType().getName(),
-                            formatter.get().format(sourceObject.getPeriodStart()),
-                            sourceObject.getPeriodEnd() != null ? formatter.get().format(sourceObject.getPeriodEnd()) : ""
-                    );
-                } else {
-                    logger.info(SAVE_SUCCESS_MSG,
-                            sourceObject.getSourcePair().getSourceKind().getName() + ": " + sourceObject.getSourcePair().getSourceType().getName(),
-                            "источником",
-                            sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationDeclarationType().getName() :
-                                    sourceObject.getSourcePair().getDestinationKind().getName() + ": " + sourceObject.getSourcePair().getDestinationFormType().getName(),
-                            formatter.get().format(sourceObject.getPeriodStart()),
-                            sourceObject.getPeriodEnd() != null ? formatter.get().format(sourceObject.getPeriodEnd()) : ""
-                    );
+                /** Создаем оставшиеся назначения */
+                sourceDao.createAll(sourceObjects, sourceClientData.isDeclaration());
+                for (SourceObject sourceObject : sourceObjects) {
+                    if (sourceClientData.getMode() == SourceMode.DESTINATIONS) {
+                        logger.info(SAVE_SUCCESS_MSG,
+                                sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationDeclarationType().getName() :
+                                        sourceObject.getSourcePair().getDestinationKind().getName() + ": " + sourceObject.getSourcePair().getDestinationFormType().getName(),
+                                "приемником",
+                                sourceObject.getSourcePair().getSourceKind().getName() + ": " + sourceObject.getSourcePair().getSourceType().getName(),
+                                formatter.get().format(sourceObject.getPeriodStart()),
+                                sourceObject.getPeriodEnd() != null ? formatter.get().format(sourceObject.getPeriodEnd()) : ""
+                        );
+                    } else {
+                        logger.info(SAVE_SUCCESS_MSG,
+                                sourceObject.getSourcePair().getSourceKind().getName() + ": " + sourceObject.getSourcePair().getSourceType().getName(),
+                                "источником",
+                                sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationDeclarationType().getName() :
+                                        sourceObject.getSourcePair().getDestinationKind().getName() + ": " + sourceObject.getSourcePair().getDestinationFormType().getName(),
+                                formatter.get().format(sourceObject.getPeriodStart()),
+                                sourceObject.getPeriodEnd() != null ? formatter.get().format(sourceObject.getPeriodEnd()) : ""
+                        );
+                    }
                 }
             }
         } else {
