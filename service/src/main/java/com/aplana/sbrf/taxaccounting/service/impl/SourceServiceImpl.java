@@ -38,7 +38,8 @@ public class SourceServiceImpl implements SourceService {
     private static final String DELETE_SUCCESS_MSG = "Удалено назначение \"%s\" в роли %s %s %s в периоде с %s.";
     private static final String UPDATE_SUCCESS_MSG = "\"%s\" назначен %s формы \"%s\" в периоде с %s.";
     private static final String CIRCLE_MSG = "\"%s\" уже назначен как приёмник \"%s\"";
-    private static final String SIMPLE_INSTANCES_MSG = "Для корректной передачи данных %s \"%s\" необходимо выполнить повторный перевод в статус \"Принята\" всех %s этой формы в периоде c %s.";
+    private static final String FORM_INSTANCES_MSG = "Для корректной передачи данных из \"<Объект-источник>\" необходимо выполнить повторный перевод в статус \"Принята\" всех экземпляров этой формы в периоде <период назначения>";
+    private static final String DECLARATION_INSTANCES_MSG = "Для корректного передачи данных из \"%s\" необходимо выполнить повторное формирование \"%s\" при помощи кнопки \"Обновить\" во всех экземплярах в периоде %s";
     private static final String EMPTY_LIST_MSG = "Список назначений пуст!";
 
     private enum LOG_LEVEL {
@@ -660,40 +661,41 @@ public class SourceServiceImpl implements SourceService {
      */
     public void instancesNotification(Logger logger, List<SourcePair> sourcePairs, Date periodStart, Date periodEnd, SourceMode mode, boolean isDeclaration) {
         if (sourcePairs != null && !sourcePairs.isEmpty()) {
-            if (mode == SourceMode.DESTINATIONS) {
-                SourcePair source = sourcePairs.get(0);
-                logger.warn(SIMPLE_INSTANCES_MSG,
-                        "из",
-                        source.getSourceKind() + ": " + source.getSourceType(),
-                        "экземпляров",
-                        formatter.get().format(periodStart) + " - " +
-                                (periodEnd != null ? formatter.get().format(periodEnd) : EMPTY_END_PERIOD_INFO)
-                );
-                for (SourcePair pair : sourcePairs) {
-                    logger.warn(SIMPLE_INSTANCES_MSG,
-                            "в",
-                            isDeclaration ? pair.getDestinationType() :
-                                    pair.getDestinationKind() + ": " + pair.getDestinationType(),
-                            "источников",
-                            formatter.get().format(periodStart) + " - " +
-                                    (periodEnd != null ? formatter.get().format(periodEnd) : EMPTY_END_PERIOD_INFO)
-                    );
+            if (isDeclaration) {
+                if (mode == SourceMode.SOURCES) {
+                    SourcePair destination = sourcePairs.get(0);
+                    for (SourcePair pair : sourcePairs) {
+                        logger.warn(DECLARATION_INSTANCES_MSG,
+                                pair.getSourceKind() + ": " + pair.getSourceType(),
+                                destination.getDestinationType(),
+                                formatter.get().format(periodStart) + " - " +
+                                        (periodEnd != null ? formatter.get().format(periodEnd) : EMPTY_END_PERIOD_INFO)
+                        );
+                    }
+                } else {
+                    SourcePair source = sourcePairs.get(0);
+                    for (SourcePair pair : sourcePairs) {
+                        logger.warn(DECLARATION_INSTANCES_MSG,
+                                source.getSourceKind() + ": " + source.getSourceType(),
+                                pair.getDestinationType(),
+                                formatter.get().format(periodStart) + " - " +
+                                        (periodEnd != null ? formatter.get().format(periodEnd) : EMPTY_END_PERIOD_INFO)
+                        );
+                    }
                 }
             } else {
-                SourcePair destination = sourcePairs.get(0);
-                logger.warn(SIMPLE_INSTANCES_MSG,
-                        "в",
-                        isDeclaration ? destination.getDestinationType() :
-                                destination.getDestinationKind() + ": " + destination.getDestinationType(),
-                        "источников",
-                        formatter.get().format(periodStart) + " - " +
-                                (periodEnd != null ? formatter.get().format(periodEnd) : EMPTY_END_PERIOD_INFO)
-                );
-                for (SourcePair pair : sourcePairs) {
-                    logger.warn(SIMPLE_INSTANCES_MSG,
-                            "в",
-                            pair.getSourceKind() + ": " + pair.getSourceType(),
-                            "источников",
+                if (mode == SourceMode.SOURCES) {
+                    for (SourcePair pair : sourcePairs) {
+                        logger.warn(FORM_INSTANCES_MSG,
+                                pair.getSourceKind() + ": " + pair.getSourceType(),
+                                formatter.get().format(periodStart) + " - " +
+                                        (periodEnd != null ? formatter.get().format(periodEnd) : EMPTY_END_PERIOD_INFO)
+                        );
+                    }
+                } else {
+                    SourcePair source = sourcePairs.get(0);
+                    logger.warn(FORM_INSTANCES_MSG,
+                            source.getDestinationKind() + ": " + source.getDestinationType(),
                             formatter.get().format(periodStart) + " - " +
                                     (periodEnd != null ? formatter.get().format(periodEnd) : EMPTY_END_PERIOD_INFO)
                     );

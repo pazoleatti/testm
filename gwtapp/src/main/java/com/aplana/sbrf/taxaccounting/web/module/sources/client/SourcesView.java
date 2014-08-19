@@ -661,7 +661,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         SourcesUtils.setupPeriodTitle(periodTo);
 
         yearFrom.setValue(year);
-        yearTo.setValue(year);
+        yearTo.setValue(null);
 
         assignButton.setEnabled(false);
         cancelButton.setEnabled(false);
