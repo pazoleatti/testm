@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 
-@PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 @Component
 public class GetDeadlineDepartmentsHandler extends AbstractActionHandler<GetDeadlineDepartmentsAction, GetDeadlineDepartmentsResult> {
 

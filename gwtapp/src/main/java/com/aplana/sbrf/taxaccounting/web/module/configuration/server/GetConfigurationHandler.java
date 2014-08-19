@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.configuration.server;
 
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
+import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
@@ -45,9 +46,12 @@ public class GetConfigurationHandler extends
         result.setModel(configurationService.getAllConfig(securityService.currentUserInfo()));
         // Разыменование подразделений
         Set<Integer> needIds = new HashSet<Integer>();
-        for (ConfigurationParam key : result.getModel().keySet()) {
-            for (Integer departmentId : result.getModel().get(key).keySet()) {
-                needIds.add(departmentId);
+        ConfigurationParamModel configurationParamModel = result.getModel();
+        for (ConfigurationParam key : configurationParamModel.keySet()) {
+            if (configurationParamModel.get(key) != null) {
+                for (Integer departmentId : configurationParamModel.get(key).keySet()) {
+                    needIds.add(departmentId);
+                }
             }
         }
         Map<Integer, String> dereferenceValue = new HashMap<Integer, String>();

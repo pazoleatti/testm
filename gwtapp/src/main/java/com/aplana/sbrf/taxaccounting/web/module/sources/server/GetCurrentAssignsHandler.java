@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.sources.server;
 
 import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
 import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
-import com.aplana.sbrf.taxaccounting.model.SearchOrderingFilter;
+import com.aplana.sbrf.taxaccounting.model.QueryParams;
 import com.aplana.sbrf.taxaccounting.model.source.SourceMode;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.web.module.sources.server.assembler.SourcesAssembler;
@@ -39,15 +39,15 @@ public class GetCurrentAssignsHandler extends
 
         Date periodFrom = PeriodConvertor.getDateFrom(action.getPeriodsInterval());
         Date periodTo = PeriodConvertor.getDateTo(action.getPeriodsInterval());
-        SearchOrderingFilter filter = new SearchOrderingFilter();
-        filter.setSearchOrdering(action.getOrdering());
-        filter.setAscSorting(action.isAscSorting());
+        QueryParams queryParams = new QueryParams();
+        queryParams.setSearchOrdering(action.getOrdering());
+        queryParams.setAscending(action.isAscSorting());
         if(!action.isDeclaration()){
             List<DepartmentFormType> departmentFormTypes;
             if (action.getMode() == SourceMode.SOURCES) {
                 departmentFormTypes = sourceService.
                         getDFTSourcesByDFT(action.getDepartmentId(), action.getTypeId(), action.getKind(), periodFrom,
-                                periodTo, filter);
+                                periodTo, queryParams);
             } else {
                 departmentFormTypes = sourceService.
                         getFormDestinations(action.getDepartmentId(), action.getTypeId(), action.getKind(), periodFrom, periodTo);
@@ -56,7 +56,7 @@ public class GetCurrentAssignsHandler extends
         } else {
             if (action.getMode() == SourceMode.SOURCES) {
                 List<DepartmentFormType> departmentFormTypes = sourceService
-                        .getDFTSourceByDDT(action.getDepartmentId(), action.getTypeId(), periodFrom, periodTo, filter);
+                        .getDFTSourceByDDT(action.getDepartmentId(), action.getTypeId(), periodFrom, periodTo, queryParams);
                 result.setCurrentSources(sourceAssembler.assembleDFT(departmentFormTypes));
             } else {
                 List<DepartmentDeclarationType> departmentFormTypes = sourceService.

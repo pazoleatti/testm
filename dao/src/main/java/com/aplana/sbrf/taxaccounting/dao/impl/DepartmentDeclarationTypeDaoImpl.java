@@ -64,7 +64,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
         }
     };
 
-	@Override
+    @Override
 	public Set<Integer> getDepartmentIdsByTaxType(TaxType taxType) {
 		Set<Integer> departmentIds = new HashSet<Integer>();
 		departmentIds.addAll(getJdbcTemplate().queryForList(
@@ -88,20 +88,20 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
 
 	@Override
 	public List<DepartmentDeclarationType> getByTaxType(int departmentId, TaxType taxType, Date periodStart, Date periodEnd) {
-        SearchOrderingFilter filter = new SearchOrderingFilter();
-        filter.setAscSorting(true);
-        return getByTaxType(departmentId, taxType, periodStart, periodEnd, filter);
+        QueryParams queryParams = new QueryParams();
+        queryParams.setAscending(true);
+        return getByTaxType(departmentId, taxType, periodStart, periodEnd, queryParams);
     }
 
     @Override
-    public List<DepartmentDeclarationType> getByTaxType(int departmentId, TaxType taxType, Date periodStart, Date periodEnd, SearchOrderingFilter filter) {
+    public List<DepartmentDeclarationType> getByTaxType(int departmentId, TaxType taxType, Date periodStart, Date periodEnd, QueryParams queryParams) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("departmentId", departmentId);
         params.put("periodEnd", periodEnd);
         params.put("periodStart", periodStart);
         params.put("taxType", taxType != null ? String.valueOf(taxType.getCode()) : null);
         StringBuilder sql = new StringBuilder(GET_SQL_BY_TAX_TYPE_SQL);
-        if (!filter.isAscSorting())  sql.append("desc");
+        if (!queryParams.isAscending())  sql.append("desc");
         return getNamedParameterJdbcTemplate().query(sql.toString(), params, DEPARTMENT_DECLARATION_TYPE_ROW_MAPPER);
     }
 
@@ -237,47 +237,106 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
         }
     };
 
-    @Override
-    public List<FormTypeKind> getAllDeclarationAssigned(List<Long> departmentIds, char taxType, SearchOrderingFilter filter) {
 
-        SqlParameterSource parameters = new MapSqlParameterSource()
-                .addValue("params", departmentIds)
-                .addValue("taxType", String.valueOf(taxType));
+    /**
+     * Метод составляет запрос используя переданные ей параметры
+     *
+     * @param departmentIds подразделелния
+     * @param taxType тип налога
+     * @param queryParams параметры пейджинга, сортировки
+     * @return
+     */
+    private QueryData getAssignedDeclarationsQueryData(List<Long> departmentIds, char taxType, QueryParams queryParams){
+        boolean paging = queryParams != null && queryParams.getCount() != 0;
 
-        String sql = "SELECT ddt.ID,\n" +
-                "  dt.NAME,\n" +
-                "  dt.ID AS type_id,\n" +
-                "  ddt.department_id,\n" +
-                "  -- Для подразделения\n" +
-                "  d.ID        AS department_id,\n" +
-                "  d.NAME      AS department_name,\n" +
-                "  d.PARENT_ID AS department_parent_id,\n" +
-                "  d.TYPE      AS department_type,\n" +
-                "  d.SHORTNAME AS department_short_name,\n" +
-                "  d.TB_INDEX  AS department_tb_index,\n" +
-                "  d.SBRF_CODE AS department_sbrf_code,\n" +
-                "  d.REGION_ID AS department_region_id,\n" +
-                "  d.IS_ACTIVE AS department_is_active,\n" +
-                "  d.CODE      AS department_code,\n" +
-                "  -- Для сортировки\n" +
-                "  dt.NAME AS dec_type,\n" +
-                "  d.NAME  AS department\n" +
-                "FROM declaration_type dt\n" +
-                "JOIN department_declaration_type ddt\n" +
-                "ON ddt.DECLARATION_TYPE_ID = dt.ID\n" +
-                "JOIN department d\n" +
-                "ON d.id = ddt.DEPARTMENT_ID\n" +
-                "WHERE ddt.DEPARTMENT_ID IN (:params)\n" +
-                "AND dt.TAX_TYPE = :taxType\n";
+        MapSqlParameterSource parameters = new MapSqlParameterSource().addValue("taxType", String.valueOf(taxType));
 
-        String order = null;
-
-        if (filter.getSearchOrdering() != null) {
-            order = "ORDER BY " + filter.getSearchOrdering().toString();
-            if (!filter.isAscSorting())
-                order = order + " DESC";
+        // departments
+        String departmentClause = "";
+        if (departmentIds != null && !departmentIds.isEmpty()){
+            departmentClause = "AND ddt.DEPARTMENT_ID IN (:params)\n";
+            parameters.addValue("params", departmentIds);
         }
 
-        return getNamedParameterJdbcTemplate().query(sql + order, parameters, ALL_DECLARATION_ASSIGN_MAPPER);
+        // order
+        String order = "";
+        if (queryParams != null && queryParams.getSearchOrdering() != null) {
+            order = "ORDER BY " + queryParams.getSearchOrdering().toString();
+            if (!queryParams.isAscending())
+                order += " DESC";
+        }
+
+        String query =
+                "SELECT \n"+
+                    "id," +
+                    "name," +
+                    "type_id," +
+                    "department_id, \n" +
+                    "department_name, \n" +
+                    "department_parent_id, \n" +
+                    "department_type, \n" +
+                    "department_short_name, \n" +
+                    "department_tb_index, \n" +
+                    "department_sbrf_code, \n" +
+                    "department_region_id, \n" +
+                    "department_is_active, \n" +
+                    "department_code \n" +
+                    // пейджинг
+                    (paging ? ", rownum as row_number_over \n":"") +
+                "FROM ("+
+                    "SELECT ddt.ID,\n" +
+                    "  dt.NAME,\n" +
+                    "  dt.ID AS type_id,\n" +
+                    "  -- Для подразделения\n" +
+                    "  d.ID        AS department_id,\n" +
+                    "  d.NAME      AS department_name,\n" +
+                    "  d.PARENT_ID AS department_parent_id,\n" +
+                    "  d.TYPE      AS department_type,\n" +
+                    "  d.SHORTNAME AS department_short_name,\n" +
+                    "  d.TB_INDEX  AS department_tb_index,\n" +
+                    "  d.SBRF_CODE AS department_sbrf_code,\n" +
+                    "  d.REGION_ID AS department_region_id,\n" +
+                    "  d.IS_ACTIVE AS department_is_active,\n" +
+                    "  d.CODE      AS department_code,\n" +
+                    "  -- Для сортировки\n" +
+                    "  dt.NAME AS dec_type,\n" +
+                    "  d.NAME  AS department\n" +
+                    "FROM declaration_type dt\n" +
+                    "JOIN department_declaration_type ddt\n" +
+                    "ON ddt.DECLARATION_TYPE_ID = dt.ID\n" +
+                    "JOIN department d\n" +
+                    "ON d.id = ddt.DEPARTMENT_ID\n" +
+                    "WHERE dt.TAX_TYPE = :taxType\n"+
+                    departmentClause +
+                    order+
+                ")";
+
+        // Limit
+        if (queryParams != null && queryParams.getCount() != 0){
+            query = "SELECT * FROM ( " + query + " ) WHERE row_number_over BETWEEN :from and :to";
+            parameters.addValue("from", queryParams.getFrom());
+            parameters.addValue("to", queryParams.getFrom() + queryParams.getCount());
+        }
+
+        QueryData queryData = new QueryData();
+        queryData.setQuery(query);
+        queryData.setParameterSource(parameters);
+
+        return queryData;
+    }
+
+    @Override
+    public List<FormTypeKind> getAllDeclarationAssigned(List<Long> departmentIds, char taxType, QueryParams queryParams) {
+        QueryData assignedDeclarationsQueryData = getAssignedDeclarationsQueryData(departmentIds, taxType, queryParams);
+
+        return getNamedParameterJdbcTemplate().query(assignedDeclarationsQueryData.getQuery(), assignedDeclarationsQueryData.getParameterSource(), ALL_DECLARATION_ASSIGN_MAPPER);
+    }
+
+    @Override
+    public int getAssignedDeclarationsCount(List<Long> departmentsIds, char taxType) {
+        QueryData assignedDeclarationsQueryData = getAssignedDeclarationsQueryData(departmentsIds, taxType, null);
+        String query = "SELECT count(*) FROM ( " + assignedDeclarationsQueryData.getQuery() + " )";
+
+        return getNamedParameterJdbcTemplate().queryForInt(query, assignedDeclarationsQueryData.getParameterSource());
     }
 }

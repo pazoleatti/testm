@@ -652,6 +652,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 
     @Override
     protected void onHide() {
+        super.onHide();
         removeFromPopupSlot(formSearchPresenter);
         formSearchPresenter.close();
     }

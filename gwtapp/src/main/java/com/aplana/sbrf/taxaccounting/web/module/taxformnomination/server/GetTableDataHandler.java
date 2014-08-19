@@ -1,7 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.server;
 
 import com.aplana.sbrf.taxaccounting.model.FormTypeKind;
-import com.aplana.sbrf.taxaccounting.model.SearchOrderingFilter;
+import com.aplana.sbrf.taxaccounting.model.QueryParams;
+import com.aplana.sbrf.taxaccounting.model.TaxNominationColumnEnum;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetTableDataAction;
@@ -42,16 +43,20 @@ public class GetTableDataHandler extends AbstractActionHandler<GetTableDataActio
             departmentsIds.add(Long.valueOf(id));
         }
         // Фильтр для сортировки
-        SearchOrderingFilter filter = new SearchOrderingFilter();
-        filter.setSearchOrdering(action.getSortColumn());
-        filter.setAscSorting(action.isAsc());
+        QueryParams queryParams = new QueryParams();
+        queryParams.setSearchOrdering(action.getSortColumn() == null ? TaxNominationColumnEnum.DEPARTMENT : action.getSortColumn());
+        queryParams.setAscending(action.isAsc());
+        queryParams.setFrom(action.getStartIndex());
+        queryParams.setCount(action.getCount());
 
         List<FormTypeKind> data = new ArrayList<FormTypeKind>();
         // загрузка данных
         if (action.isForm()) {
-            data.addAll(departmentFormTypeService.getAllFormAssigned(departmentsIds, taxType, filter));
+            data.addAll(departmentFormTypeService.getAllFormAssigned(departmentsIds, taxType, queryParams));
+            result.setTotalCount(departmentFormTypeService.getAssignedFormsCount(departmentsIds, taxType));
         } else {
-            data.addAll(departmentFormTypeService.getAllDeclarationAssigned(departmentsIds, taxType, filter));
+            data.addAll(departmentFormTypeService.getAllDeclarationAssigned(departmentsIds, taxType, queryParams));
+            result.setTotalCount(departmentFormTypeService.getAssignedDeclarationsCount(departmentsIds, taxType));
         }
         // формирование мапы с полным названием подразделения
         // TODO - лучше получать иерархические названия подразделений одним запросом!!!
@@ -68,15 +73,7 @@ public class GetTableDataHandler extends AbstractActionHandler<GetTableDataActio
         }
         result.setDepartmentFullNames(departmentFullNames);
 
-        // обрезание по пейджингу
-        if (action.getCount() != 0) {
-            int toIndex = action.getStartIndex() +
-                    action.getCount() > data.size() ? data.size() : action.getStartIndex() + action.getCount();
-            result.setTableData(new ArrayList<FormTypeKind>(data.subList(action.getStartIndex(), toIndex)));
-        } else {
-            result.setTableData(data);
-        }
-        result.setTotalCount(data.size());
+        result.setTableData(data);
 
         return result;
     }

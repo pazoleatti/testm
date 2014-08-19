@@ -72,12 +72,12 @@ public interface SourceService {
      * @param taxType      вид налога
      * @param periodStart  начало периода, в котором действуют назначения
      * @param periodEnd    окончание периода, в котором действуют назначения
-     * @param filter       фильтр сортировки
+     * @param queryParams  параметры пейджинга и фильтра
      * @return информация о формах-источниках в виде списка
      * {@link com.aplana.sbrf.taxaccounting.model.DepartmentFormType}
      */
     List<DepartmentFormType> getDFTByDepartment(int departmentId, TaxType taxType, Date periodStart, Date periodEnd,
-                                                SearchOrderingFilter filter);
+                                                QueryParams queryParams);
 
     /**
      * Возвращает информацию о назначенных подразделению декларациях по заданному виду налога
@@ -97,11 +97,11 @@ public interface SourceService {
      * @param taxType      вид налога
      * @param periodStart  начало периода, в котором действуют назначения
      * @param periodEnd    окончание периода, в котором действуют назначения
-     * @param filter       фильтр сортировки
+     * @param queryParams  параметры пейджинга и фильтра
      * @return список назначенных подразделению деклараций (с учётом вида и типа) по заданному виду налога
      */
     List<DepartmentDeclarationType> getDDTByDepartment(int departmentId, TaxType taxType, Date periodStart, Date periodEnd,
-                                                       SearchOrderingFilter filter);
+                                                       QueryParams queryParams);
 
     /**
      * Возвращает информацию об источниках, которые должны использоваться при
@@ -128,12 +128,12 @@ public interface SourceService {
      * @param kind         тип налоговой формы
      * @param periodStart  начало периода, в котором действуют назначения
      * @param periodEnd    окончание периода, в котором действуют назначения
-     * @param filter       фильтр сортировки
+     * @param queryParams  параметры пейджинга и фильтра
      * @return информация о формах-источниках в виде списка
      * {@link com.aplana.sbrf.taxaccounting.model.DepartmentFormType}
      */
     List<DepartmentFormType> getDFTSourcesByDFT(int departmentId, int formTypeId, FormDataKind kind, Date periodStart,
-                                                Date periodEnd, SearchOrderingFilter filter);
+                                                Date periodEnd, QueryParams queryParams);
 
     /**
      * Возвращает информацию об источниках, которые должны использоваться при
@@ -158,7 +158,7 @@ public interface SourceService {
      * @return
      */
     List<DepartmentFormType> getDFTSourcesByDFT(int departmentId, int formTypeId, FormDataKind kind, int reportPeriodId,
-                                                SearchOrderingFilter filter);
+                                                QueryParams queryParams);
 
     /**
      * Возвращает НФ назначения (DFT), которые являются источником для ДЕ назначения (DDT)
@@ -181,12 +181,12 @@ public interface SourceService {
      * @param declarationTypeId идентификатор вида декларации
      * @param periodStart       начало периода, в котором действуют назначения
      * @param periodEnd         окончание периода, в котором действуют назначения
-     * @param filter            фильтр сортировки
+     * @param queryParams       параметры пейджинга и фильтра
      * @return информация о формах-источниках в виде списка
      * {@link com.aplana.sbrf.taxaccounting.model.DepartmentFormType}
      */
     List<DepartmentFormType> getDFTSourceByDDT(int departmentId, int declarationTypeId, Date periodStart, Date periodEnd,
-                                               SearchOrderingFilter filter);
+                                               QueryParams queryParams);
 
     /**
      * Возвращает информацию о декларациях-потребителях, которые должны использовать
@@ -230,10 +230,10 @@ public interface SourceService {
      *
      * @param departmentIds идентификаторы подразделений
      * @param taxType       идентификатор вида налога
-     * @param filter        фильтр для сортировки
+     * @param queryParams   параметры пейджинга и фильтра
      * @return список назначенных деклараций для выбранного налога и подразделений
      */
-    List<FormTypeKind> getAllDeclarationAssigned(List<Long> departmentIds, char taxType, SearchOrderingFilter filter);
+    List<FormTypeKind> getAllDeclarationAssigned(List<Long> departmentIds, char taxType, QueryParams queryParams);
 
     /**
      * Возвращает список назначенных налоговых форм для выбранного налога и подразделения
@@ -250,10 +250,10 @@ public interface SourceService {
      *
      * @param departmentIds идентификаторы подразделений
      * @param taxType       идентификатор вида налога
-     * @param filter        фильтр для сортировки
+     * @param queryParams   параметры пейджинга и фильтра
      * @return список назначенных налоговых форм для выбранного налога и подразделений
      */
-    List<FormTypeKind> getAllFormAssigned(List<Long> departmentIds, char taxType, SearchOrderingFilter filter);
+    List<FormTypeKind> getAllFormAssigned(List<Long> departmentIds, char taxType, QueryParams queryParams);
 
     /**
      * Добавляет налоговые формы, назначенные подразделению
@@ -448,4 +448,22 @@ public interface SourceService {
      * @param sourceClientData данные связок источников-приемников
      */
     void updateSources(Logger logger, SourceClientData sourceClientData);
+
+    /**
+     * Возвращает количество назначенных налоговых форм для выбранного налога и подразделений
+     *
+     * @param departmentsIds идентификаторы подразделений
+     * @param taxType идентификатор вида налога
+     * @return список назначенных налоговых форм для выбранного налога и подразделений
+     */
+    int getAssignedFormsCount(List<Long> departmentsIds, char taxType);
+
+    /**
+     * Возвращает количество назначенных деклараций для выбранного налога и подразделений
+     *
+     * @param departmentsIds идентификаторы подразделений
+     * @param taxType       идентификатор вида налога
+     * @return список назначенных деклараций для выбранного налога и подразделений
+     */
+    int getAssignedDeclarationsCount(List<Long> departmentsIds, char taxType);
 }

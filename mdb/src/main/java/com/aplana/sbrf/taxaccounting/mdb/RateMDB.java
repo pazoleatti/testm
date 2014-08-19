@@ -46,7 +46,7 @@ public class RateMDB implements MessageListener {
     private static final Log logger = LogFactory.getLog(RateMDB.class);
     private static final String RATE_ENCODING = "UTF-8";
     // Максимальное число попыток загрузки одного сообщения
-    private static final int MAX_DELIVERY_COUNT = 100;
+    private static final int MAX_DELIVERY_COUNT = 10;
 
     static final String ERROR_FORMAT = "Сообщение не соответствует заданному формату";
     static final String ERROR_RATE = "Сообщение не соответствует передаче данных по курсам валют / драгоценным металлам";

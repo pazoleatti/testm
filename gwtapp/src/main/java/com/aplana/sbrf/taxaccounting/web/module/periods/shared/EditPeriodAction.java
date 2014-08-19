@@ -11,7 +11,8 @@ public class EditPeriodAction extends UnsecuredActionImpl<EditPeriodResult> {
     int newReportPeriodId;
     int newDictTaxPeriodId;
     TaxType taxType;
-    long departmentId;
+    long oldDepartmentId;
+    long newDepartmentId;
     Date correctionDate;
     Date newCorrectionDate;
     boolean isBalance;
@@ -32,12 +33,20 @@ public class EditPeriodAction extends UnsecuredActionImpl<EditPeriodResult> {
         this.taxType = taxType;
     }
 
-    public long getDepartmentId() {
-        return departmentId;
+    public long getOldDepartmentId() {
+        return oldDepartmentId;
     }
 
-    public void setDepartmentId(long departmentId) {
-        this.departmentId = departmentId;
+    public void setOldDepartmentId(long oldDepartmentId) {
+        this.oldDepartmentId = oldDepartmentId;
+    }
+
+    public long getNewDepartmentId() {
+        return newDepartmentId;
+    }
+
+    public void setNewDepartmentId(long newDepartmentId) {
+        this.newDepartmentId = newDepartmentId;
     }
 
     public Date getCorrectionDate() {
