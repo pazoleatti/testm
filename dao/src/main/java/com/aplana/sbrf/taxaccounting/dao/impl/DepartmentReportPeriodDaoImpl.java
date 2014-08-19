@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -72,6 +73,16 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements
         if (id == null) {
             id = generateId("seq_department_report_period", Long.class);
         }
+        Date truncatedDate = null;
+        if (departmentReportPeriod.getCorrectPeriod() != null) {
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(departmentReportPeriod.getCorrectPeriod());
+            cal.set(Calendar.HOUR_OF_DAY, 0);
+            cal.set(Calendar.MINUTE, 0);
+            cal.set(Calendar.SECOND, 0);
+            cal.set(Calendar.MILLISECOND, 0);
+            truncatedDate = cal.getTime();
+        }
 		getJdbcTemplate()
 				.update("insert into DEPARTMENT_REPORT_PERIOD (ID, DEPARTMENT_ID, REPORT_PERIOD_ID, IS_ACTIVE, IS_BALANCE_PERIOD," +
                         "CORRECTION_DATE)"
@@ -81,7 +92,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements
 						departmentReportPeriod.getReportPeriod().getId(),
 						departmentReportPeriod.isActive(),
 						departmentReportPeriod.isBalance(),
-                        departmentReportPeriod.getCorrectPeriod());
+                        truncatedDate);
 	}
 
     @Override
@@ -104,7 +115,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements
         } else {
             getJdbcTemplate()
                     .update("update DEPARTMENT_REPORT_PERIOD set IS_ACTIVE=? where REPORT_PERIOD_ID=? and DEPARTMENT_ID=? " +
-                                    "and CORRECTION_DATE = ?",
+                                    "and trunc(CORRECTION_DATE) = ?",
                             active ? 1 : 0, reportPeriodId, departmentId, correctionDate);
         }
 	}
@@ -146,8 +157,8 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements
             }
 
             return getNamedParameterJdbcTemplate().queryForObject(
-                    "select * from DEPARTMENT_REPORT_PERIOD where REPORT_PERIOD_ID=:reportPeriodId and DEPARTMENT_ID= :departmentId" +
-                            " and " + (correctionDate == null ? " CORRECTION_DATE is null" : " CORRECTION_DATE = :correctionDate"),
+                    "select * from DEPARTMENT_REPORT_PERIOD where REPORT_PERIOD_ID= :reportPeriodId and DEPARTMENT_ID= :departmentId" +
+                            " and " + (correctionDate == null ? " CORRECTION_DATE is null" : " TRUNC(CORRECTION_DATE) = :correctionDate"),
                     params,
                     mapper
             );

@@ -484,6 +484,8 @@ INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (1082,108,'Период','ACCOUNT_PERIOD_ID',4,2,106,1062,1,null,20,1,0,null,null,1,null);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (1083,108,'Название периода бухгалтерской отчетности','PERIOD_NAME',1,3,null,null,0,null,20,1,0,null,null,1,2000);
 ---------------------------------------------------------------------------------------------------------
+-- http://jira.aplana.com/browse/SBRFACCTAX-8489 Сделать атрибут DEPARTMENT.SBRF_CODE уникальным.
+UPDATE ref_book_attribute SET is_unique = 1 WHERE id = 166;
 
 COMMIT;
 EXIT;

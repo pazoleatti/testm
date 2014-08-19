@@ -131,6 +131,11 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
     }
 
     @Override
+    public List<ReportPeriod> getReportPeriodsInRange(TaxType taxType, Date startDate, Date endDate) {
+        return reportPeriodDao.getReportPeriodsInRange(taxType, startDate, endDate);
+    }
+
+    @Override
     public int getCorrectionPeriodNumber(int reportPeriodId, long departmentId) {
         return depertmentReportPeriodDao.getCorrectionPeriodNumber(reportPeriodId, departmentId);
     }

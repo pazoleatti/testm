@@ -164,7 +164,7 @@ public class LoadRefBookDataServiceTest {
         ImportCounter importCounter = service.importRefBookDiasoft(USER_INFO, new Logger());
         // Счетчики
         Assert.assertEquals(0, importCounter.getSuccessCounter());
-        Assert.assertEquals(0, importCounter.getFailCounter());
+        Assert.assertEquals(1, importCounter.getFailCounter());
         // Каталог загрузки
         Assert.assertEquals(1, uploadFolder.list().length);
         // Архив
@@ -255,7 +255,8 @@ public class LoadRefBookDataServiceTest {
         ImportCounter importCounter = service.importRefBookNsi(USER_INFO, new Logger());
         // Счетчики
         Assert.assertEquals(1, importCounter.getSuccessCounter());
-        Assert.assertEquals(0, importCounter.getFailCounter());
+        // importRefBookNsi грузит в 3 справочника: ОКАТО, Субъекты РФ, План счетов - в 1ый удачно, для остальные два справочника файл будет пропущен
+        Assert.assertEquals(2, importCounter.getFailCounter());
         // Каталог загрузки
         Assert.assertEquals(1, uploadFolder.list().length);
         // Архив

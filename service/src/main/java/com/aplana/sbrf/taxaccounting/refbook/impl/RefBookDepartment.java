@@ -337,12 +337,11 @@ public class RefBookDepartment implements RefBookDataProvider {
         //7
         if (versionFrom != null){
             if (oldType != TERR_BANK){
-                //7А.3.1.1А  (7А.3.1.1А.1 - 7А.3.1.1А.5)
-                if (isChangeTB){
-                    formDataService.updateFDTBNames(newTBId, oldTBId, versionFrom, versionTo);
-                }
-                //7А.3.1.2
-                formDataService.updateFDDepartmentNames(dep.getId(), records.get(DEPARTMENT_TYPE_ATTRIBUTE).getStringValue(), versionFrom, versionTo);
+                //11А.3.1
+                formDataService.updateFDDepartmentNames(dep.getId(), records.get(DEPARTMENT_NAME_ATTRIBUTE).getStringValue(), versionFrom, versionTo);
+            }else {
+                //11А.3.1А
+                formDataService.updateFDTBNames(dep.getId(), records.get(DEPARTMENT_NAME_ATTRIBUTE).getStringValue(), versionFrom, versionTo);
             }
         }
 

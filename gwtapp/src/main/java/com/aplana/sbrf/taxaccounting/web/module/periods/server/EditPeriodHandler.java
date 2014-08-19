@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
-@PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 @Service
 public class EditPeriodHandler extends AbstractActionHandler<EditPeriodAction, EditPeriodResult> {
 
@@ -36,10 +36,10 @@ public class EditPeriodHandler extends AbstractActionHandler<EditPeriodAction, E
         List<LogEntry> logs = new ArrayList<LogEntry>();
         if (action.getCorrectionDate() == null) {
             periodService.edit(action.getReportPeriodId(), action.getNewDictTaxPeriodId(), action.getYear(),
-                    action.getTaxType(), securityService.currentUserInfo(), action.getDepartmentId(), action.isBalance(), logs);
+                    action.getTaxType(), securityService.currentUserInfo(), action.getNewDepartmentId(), action.isBalance(), logs);
         } else {
-            periodService.editCorrectionPeriod(action.getReportPeriodId(), action.getNewReportPeriodId(),
-                    action.getDepartmentId(), action.getTaxType(), action.getCorrectionDate(), action.getNewCorrectionDate(),  securityService.currentUserInfo(), logs);
+            periodService.editCorrectionPeriod(action.getReportPeriodId(), action.getNewReportPeriodId(), action.getOldDepartmentId(),
+                    action.getNewDepartmentId(), action.getTaxType(), action.getCorrectionDate(), action.getNewCorrectionDate(),  securityService.currentUserInfo(), logs);
         }
         EditPeriodResult result = new EditPeriodResult();
         result.setUuid(logEntryService.save(logs));

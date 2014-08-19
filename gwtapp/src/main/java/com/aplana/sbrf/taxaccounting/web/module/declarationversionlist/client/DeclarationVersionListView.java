@@ -181,11 +181,11 @@ public class DeclarationVersionListView extends ViewWithUiHandlers<DTVersionList
         });
     }
 
-    @UiHandler("historyVersion")
+    /*@UiHandler("historyVersion")
     void onHistoryClick(ClickEvent event){
         if (getUiHandlers() != null)
             getUiHandlers().onHistoryClick();
-    }
+    }*/
 
     public void updateDeleteVersionLinkButton() {
         deleteVersion.setEnabled(getSelectedElement() != null);

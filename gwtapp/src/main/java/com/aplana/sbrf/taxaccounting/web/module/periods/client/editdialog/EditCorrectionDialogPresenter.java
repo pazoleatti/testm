@@ -60,6 +60,7 @@ public class EditCorrectionDialogPresenter extends PresenterWidget<EditCorrectio
     public void onContinue(final EditDialogData data) {
         if ((data.getCorrectionDate() == null)
                 || (data.getReportPeriodId() == null)
+                || (data.getDepartmentId() == null)
                 || (data.getCorrectionDate() == null)) {
             Dialog.errorMessage("Редактирование параметров", "Не заполнены следующие обязательные к заполнению поля:"
                             + ((data.getDepartmentId() == null) ? " \"Подразделение\"" : "")
@@ -130,7 +131,8 @@ public class EditCorrectionDialogPresenter extends PresenterWidget<EditCorrectio
                         action.setTaxType(taxType);
                         action.setCorrectionDate(initData.getCorrectionDate());
                         action.setNewCorrectionDate(data.getCorrectionDate());
-                        action.setDepartmentId(data.getDepartmentId());
+                        action.setOldDepartmentId(initData.getDepartmentId());
+                        action.setNewDepartmentId(data.getDepartmentId());
                         action.setNewReportPeriodId(data.getReportPeriodId().intValue());
                         action.setReportPeriodId(initData.getReportPeriodId().intValue());
                         dispatcher.execute(action, CallbackUtils

@@ -580,14 +580,14 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         appointmentTypePicker.setAcceptableValues(types);
         WidgetUtils.setupOptionTitle(appointmentTypePicker);
 
+        periodFrom.setValue(periods.get(0));
         periodFrom.setAcceptableValues(periods);
         WidgetUtils.setupOptionTitle(periodFrom);
-        periodFrom.setValue(periods.get(0));
         SourcesUtils.setupPeriodTitle(periodFrom);
 
         periodTo.setAcceptableValues(periods);
-        WidgetUtils.setupOptionTitle(periodTo);
         periodTo.setValue(periods.get(periods.size() - 1));
+        WidgetUtils.setupOptionTitle(periodTo);
         SourcesUtils.setupPeriodTitle(periodTo);
 
         yearFrom.setValue(year);

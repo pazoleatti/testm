@@ -302,7 +302,7 @@ public class SourceServiceImpl implements SourceService {
                                            final boolean isDeclaration,
                                            final Integer sourceDepartmentId,
                                            final Integer destinationDepartmentId) {
-        List<Long> dftIn = new ArrayList<Long>();
+        List<Long> rightPart = new ArrayList<Long>();
         if (isDeclaration) {
             if (mode == SourceMode.SOURCES) {
                 //Проверяем единственный приемник
@@ -312,25 +312,29 @@ public class SourceServiceImpl implements SourceService {
                             logEntryService.save(logger.getEntries()));
                 }
                 for (SourcePair pair : sourcePairs) {
-                    dftIn.add(pair.getSource());
+                    rightPart.add(pair.getSource());
                 }
             } else {
-                //Проверяем единственный источник
-                if (sourceDao.checkDDTExistence(Arrays.asList(sourcePairs.get(0).getSource())).isEmpty()) {
+                //Проверяем приемники-декларации
+                if (sourceDao.checkDFTExistence(Arrays.asList(sourcePairs.get(0).getSource())).isEmpty()) {
                     throw new ServiceLoggerException(String.format(MAIN_SOURCE_NOT_EXIST_MSG, "источника"),
                             logEntryService.save(logger.getEntries()));
                 }
                 for (SourcePair pair : sourcePairs) {
-                    dftIn.add(pair.getDestination());
+                    rightPart.add(pair.getDestination());
                 }
             }
         } else {
-            dftIn = unionSourcePairs(sourcePairs);
+            rightPart = unionSourcePairs(sourcePairs);
         }
 
-        @SuppressWarnings("unchecked")
-        List<Long> notExistingDFT = (List<Long>) CollectionUtils.subtract(dftIn, sourceDao.checkDFTExistence(dftIn));
-        return truncateSources(logger, sourcePairs, notExistingDFT, mode, isDeclaration, false, LOG_LEVEL.ERROR,
+        List<Long> notExisting;
+        if (isDeclaration && mode == SourceMode.DESTINATIONS) {
+            notExisting = (List<Long>) CollectionUtils.subtract(rightPart, sourceDao.checkDDTExistence(rightPart));
+        } else {
+            notExisting = (List<Long>) CollectionUtils.subtract(rightPart, sourceDao.checkDFTExistence(rightPart));
+        }
+        return truncateSources(logger, sourcePairs, notExisting, mode, isDeclaration, false, LOG_LEVEL.ERROR,
                 new MessageBuilder() {
                     @Override
                     public String getSourceMessage(SourcePair sourcePair) {
