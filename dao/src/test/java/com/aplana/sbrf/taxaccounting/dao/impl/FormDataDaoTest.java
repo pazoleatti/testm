@@ -174,17 +174,37 @@ public class FormDataDaoTest {
 	}
 
     @Test
-    public void getFormDataIdsTest(){
-        List<Long> list = new ArrayList<Long>() {{ add(1l); add(11l); add(12l); add(13l); }};
-        List<Long> list1 = new ArrayList<Long>() {{ add(14l); add(15l); add(16l); add(17l); add(18l); add(19l); add(20l); }};
+    public void getFormDataIdsTest() {
+        List<Long> list = new ArrayList<Long>() {{
+            add(1L);
+            add(11L);
+            add(12L);
+            add(13L);
+            add(1000L);
+        }};
+        List<Long> list1 = new ArrayList<Long>() {{
+            add(14L);
+            add(15L);
+            add(16L);
+            add(17L);
+            add(18L);
+            add(19L);
+            add(20L);
+        }};
         Assert.assertEquals(list, formDataDao.getFormDataIds(1, FormDataKind.SUMMARY, 1));
         Assert.assertEquals(list1, formDataDao.getFormDataIds(2, FormDataKind.PRIMARY, 1));
     }
 
     @Test
-    public void testGetFormDataIds(){
-        List<Integer> list = new ArrayList<Integer>() {{ add(1); add(11); add(12); add(13); }};
-        Assert.assertEquals(11, formDataDao.getFormDataIds(Arrays.asList(TaxType.values()), list).size());
+    public void testGetFormDataIds() {
+        List<Integer> list = new ArrayList<Integer>() {{
+            add(1);
+            add(11);
+            add(12);
+            add(13);
+            add(1000);
+        }};
+        Assert.assertEquals(12, formDataDao.getFormDataIds(Arrays.asList(TaxType.values()), list).size());
     }
 
     @Test
@@ -226,7 +246,7 @@ public class FormDataDaoTest {
 	
 	@Test(expected=DaoException.class)
 	public void updateStateError() {
-		formDataDao.updateState(1000, WorkflowState.APPROVED);
+		formDataDao.updateState(10000, WorkflowState.APPROVED);
 	}
 	
 	@Test
@@ -239,24 +259,24 @@ public class FormDataDaoTest {
 	
 	@Test(expected=DaoException.class)
 	public void updateReturnSignError() {
-		formDataDao.updateReturnSign(1000, true);
+		formDataDao.updateReturnSign(10000, true);
 	}
 
     @Test
     public void testFindFormDataByFormTemplate(){
-        Assert.assertEquals(9, formDataDao.findFormDataByFormTemplate(1).size());
+        Assert.assertEquals(10, formDataDao.findFormDataByFormTemplate(1).size());
         Assert.assertTrue(formDataDao.findFormDataByFormTemplate(10000).isEmpty());
     }
 
     @Test
     public void testGetFormDataListInActualPeriodByTemplate() throws ParseException {
         SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd");
-        Assert.assertEquals(9, formDataDao.getFormDataListInActualPeriodByTemplate(1, format.parse("2013.01.01")).size());
+        Assert.assertEquals(10, formDataDao.getFormDataListInActualPeriodByTemplate(1, format.parse("2013.01.01")).size());
     }
 
     @Test
     public void testFindByDepAndReportPeriod() throws ParseException {
-        Assert.assertEquals(1, formDataDao.find(Arrays.asList(1), 1).size());
+        Assert.assertEquals(2, formDataDao.find(Arrays.asList(1), 1).size());
     }
 
     @Test

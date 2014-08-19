@@ -402,10 +402,6 @@ public class FormDataServiceImpl implements FormDataService {
 		formDataScriptingService.executeScript(userInfo, formData,
 				FormDataEvent.CALCULATE, logger, null);
 
-        String msg = updatePreviousRowNumber(formData);
-        if (msg != null) {
-            logger.info(msg);
-        }
         if (logger.containsLevel(LogLevel.ERROR)) {
 			throw new ServiceLoggerException("Найдены ошибки при выполнении расчета формы", logEntryService.save(logger.getEntries()));
 		} else {
@@ -461,6 +457,16 @@ public class FormDataServiceImpl implements FormDataService {
 		formDataScriptingService.executeScript(userInfo, formData,
                 FormDataEvent.SAVE, logger, null);
 
+        if (formData.getState() != WorkflowState.CREATED && dataRowDao.isDataRowsCountChanged(formData.getId())) {
+            FormTemplate formTemplate = formTemplateService.get(formData.getFormTemplateId());
+            if (formTemplateService.isAnyAutoNumerationColumn(formTemplate, AutoNumerationColumnType.CROSS)) {
+                String msg = updatePreviousRowNumber(formData);
+                if (msg != null) {
+                    logger.info(msg);
+                }
+            }
+        }
+
 		formDataDao.save(formData);
 		
 		dataRowDao.commit(formData.getId());
@@ -468,11 +474,6 @@ public class FormDataServiceImpl implements FormDataService {
 		logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.SAVE, null);
 		auditService.add(FormDataEvent.SAVE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
 				null, formData.getFormType().getName(), formData.getKind().getId(), null);
-
-        String msg = updatePreviousRowNumber(formData);
-        if (msg != null) {
-            logger.info(msg);
-        }
 
 		return formData.getId();
 	}
@@ -855,8 +856,7 @@ public class FormDataServiceImpl implements FormDataService {
         ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
         TaxPeriod taxPeriod = reportPeriod.getTaxPeriod();
         // Получить упорядоченный список экземпляров НФ, которые участвуют в сквозной нумерации и находятся до указанного экземпляра НФ
-        List<FormData> formDataList = formDataDao.getPrevFormDataListForCrossNumeration(formData, taxPeriod.getYear(),
-                String.valueOf(taxPeriod.getTaxType().getCode()));
+        List<FormData> formDataList = formDataDao.getPrevFormDataListForCrossNumeration(formData, taxPeriod);
 
         // Если экземпляр НФ является не первым экземпляром в сквозной нумерации
         if (formDataList.size() > 0) {
@@ -873,13 +873,14 @@ public class FormDataServiceImpl implements FormDataService {
         return previousRowNumber;
     }
 
+    /**
+     * TODO - написать тесты!!!
+     * @param formData экземпляр НФ, для которой необходимо обновить
+     * @return
+     */
     @Override
     public String updatePreviousRowNumber(FormData formData) {
         String msg = null;
-
-        if (formData.getState() == WorkflowState.CREATED) {
-            return null;
-        }
 
         FormTemplate formTemplate = formTemplateService.get(formData.getFormTemplateId());
         if (formTemplateService.isAnyAutoNumerationColumn(formTemplate, AutoNumerationColumnType.CROSS)) {

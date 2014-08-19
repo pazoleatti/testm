@@ -10,8 +10,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import javax.validation.ValidationException;
-import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,7 +21,7 @@ import static org.mockito.Mockito.when;
 /**
  * @author Fail Mukhametdinov
  */
-public class FormTemplateServiceTest {
+public class FormTemplateServiceImplTest {
 
     public static final int FORM_TEMPLATE_ID = 1;
     public static final int COLUMN_ID = 1;

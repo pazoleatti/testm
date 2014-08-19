@@ -2,11 +2,11 @@ package com.aplana.sbrf.taxaccounting.dao.impl.datarow;
 
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.test.BDUtilsMock;
 import org.junit.Assert;
 import org.junit.Before;
@@ -28,7 +28,7 @@ import java.util.List;
 @ContextConfiguration({ "DataRowDaoImplTest.xml" })
 @Transactional
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-public class DataRowDaoImplTest {
+public class DataRowDaoImplTest extends Assert {
 
 	static final long DEFAULT_ORDER_STEP_TEST = DataRowDaoImplUtils.DEFAULT_ORDER_STEP / 10;
 
@@ -514,4 +514,43 @@ public class DataRowDaoImplTest {
         Assert.assertArrayEquals(rowIdsBefore.toArray(), rowIdsAfterRollback.toArray());
     }
 
+    /**
+     * Система для текущего экземпляра НФ выполняет сравнение количества строк в табличной части до и после
+     * редактирования. Количество строк в табличной части не изменено.
+     */
+    @Test
+    public void testIsDataRowsCountChangedNotChanged() {
+        FormData fd = formDataDao.get(1000L, false);
+
+        dataRowDao.removeRows(fd, 1, 1);
+
+        List<DataRow<Cell>> rows = new ArrayList<DataRow<Cell>>();
+        DataRow<Cell> dataRow = fd.createDataRow();
+        rows.add(dataRow);
+        dataRowDao.insertRows(fd, 1, rows);
+
+        boolean isCountChanged = dataRowDao.isDataRowsCountChanged(1000L);
+        assertFalse("Количество строк не должно было измениться", isCountChanged);
+    }
+
+    /**
+     * Система для текущего экземпляра НФ выполняет сравнение количества строк в табличной части до и после
+     * редактирования. Количество строк в табличной части изменено.
+     */
+    @Test
+    public void testIsDataRowsCountChangedChanged() {
+        FormData fd = formDataDao.get(1000L, false);
+
+        dataRowDao.removeRows(fd, 1, 1);
+
+        List<DataRow<Cell>> rows = new ArrayList<DataRow<Cell>>();
+        for (int i = 0; i < 5; i++) {
+            DataRow<Cell> dataRow = fd.createDataRow();
+            rows.add(dataRow);
+        }
+        dataRowDao.insertRows(fd, 1, rows);
+
+        boolean isCountChanged = dataRowDao.isDataRowsCountChanged(1000L);
+        assertTrue("Количество строк должно было измениться", isCountChanged);
+    }
 }
