@@ -436,7 +436,8 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol++
 
         // графа 4
-        record = getRecordImport(42, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, true)
+        // http://jira.aplana.com/browse/SBRFACCTAX-8572 исправить загрузку Кода Вида ТС (убираю пробелы)
+        record = getRecordImport(42, 'CODE', row.cell[xmlIndexCol].text().replace(' ', ''), xlsIndexRow, xmlIndexCol + colOffset, true)
         newRow.tsTypeCode = record?.record_id?.value
         xmlIndexCol++
 
