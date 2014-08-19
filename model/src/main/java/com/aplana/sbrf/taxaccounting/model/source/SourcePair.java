@@ -23,15 +23,13 @@ public class SourcePair implements Serializable {
      */
 
     /** Тип назначения-источника */
-    private FormType sourceType = null;
-    /** Тип формы-приемника */
-    private FormType destinationFormType = null;
-    /** Тип декларации-источника */
-    private DeclarationType destinationDeclarationType = null;
+    private String sourceType = null;
+    /** Тип назначения-приемника */
+    private String destinationType = null;
     /** Вид назначения-источника */
-    private FormDataKind sourceKind = null;
+    private String sourceKind = null;
     /** Вид назначения-приемника */
-    private FormDataKind destinationKind = null;
+    private String destinationKind = null;
 
     public SourcePair() {}
 
@@ -56,43 +54,35 @@ public class SourcePair implements Serializable {
         this.destination = destination;
     }
 
-    public FormType getSourceType() {
+    public String getSourceType() {
         return sourceType;
     }
 
-    public void setSourceType(FormType sourceType) {
+    public void setSourceType(String sourceType) {
         this.sourceType = sourceType;
     }
 
-    public FormType getDestinationFormType() {
-        return destinationFormType;
+    public String getDestinationType() {
+        return destinationType;
     }
 
-    public void setDestinationFormType(FormType destinationFormType) {
-        this.destinationFormType = destinationFormType;
+    public void setDestinationType(String destinationType) {
+        this.destinationType = destinationType;
     }
 
-    public DeclarationType getDestinationDeclarationType() {
-        return destinationDeclarationType;
-    }
-
-    public void setDestinationDeclarationType(DeclarationType destinationDeclarationType) {
-        this.destinationDeclarationType = destinationDeclarationType;
-    }
-
-    public FormDataKind getSourceKind() {
+    public String getSourceKind() {
         return sourceKind;
     }
 
-    public void setSourceKind(FormDataKind sourceKind) {
+    public void setSourceKind(String sourceKind) {
         this.sourceKind = sourceKind;
     }
 
-    public FormDataKind getDestinationKind() {
+    public String getDestinationKind() {
         return destinationKind;
     }
 
-    public void setDestinationKind(FormDataKind destinationKind) {
+    public void setDestinationKind(String destinationKind) {
         this.destinationKind = destinationKind;
     }
 

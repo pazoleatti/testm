@@ -510,6 +510,9 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         ValueChangeHandler periodsValueHandler = new ValueChangeHandler() {
             @Override
             public void onValueChange(ValueChangeEvent event) {
+                if (periodTo.getValue() == null) {
+                    yearTo.setValue(null);
+                }
                 boolean isPeriodCorrect = SourcesUtils.isCorrectPeriod(getPeriodInterval());
                 //Фикс какой то странной ошибки - если таблицы уже активны и попытаться сделать их активными снова, то гвт падает
                 if (leftDepPicker.isEnabled() && !isPeriodCorrect) {
@@ -585,8 +588,10 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         WidgetUtils.setupOptionTitle(periodFrom);
         SourcesUtils.setupPeriodTitle(periodFrom);
 
+        //List<PeriodInfo> periodsTo = new ArrayList<PeriodInfo>(periods);
+        //periodsTo.add(null);
+        periodTo.setValue(null);
         periodTo.setAcceptableValues(periods);
-        periodTo.setValue(periods.get(periods.size() - 1));
         WidgetUtils.setupOptionTitle(periodTo);
         SourcesUtils.setupPeriodTitle(periodTo);
 
