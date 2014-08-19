@@ -88,7 +88,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                 List<String> valuesList = model.get(configurationParam, 0);
                 if (valuesList == null || valuesList.isEmpty()) {
                     // Обязательность
-                    logger.error(NOT_SET_ERROR, configurationParam.getCaption());
+                    // logger.error(NOT_SET_ERROR, configurationParam.getCaption());
                 } else {
                     if (configurationParam.isUnique() && valuesList.size() != 1) {
                         // Уникальность
