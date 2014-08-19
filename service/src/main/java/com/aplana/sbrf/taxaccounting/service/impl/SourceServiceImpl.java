@@ -104,39 +104,39 @@ public class SourceServiceImpl implements SourceService {
     @Override
     public List<DepartmentFormType> getDFTSourcesByDFT(int departmentId, int formTypeId, FormDataKind kind, Date periodStart,
                                                        Date periodEnd) {
-        SearchOrderingFilter filter = getSearchOrderingDefaultFilter();
+        QueryParams filter = getSearchOrderingDefaultFilter();
         return getDFTSourcesByDFT(departmentId, formTypeId, kind, periodStart, periodEnd, filter);
     }
 
     @Override
     public List<DepartmentFormType> getDFTSourcesByDFT(int departmentId, int formTypeId, FormDataKind kind, Date periodStart,
-                                                       Date periodEnd, SearchOrderingFilter filter) {
-        return departmentFormTypeDao.getFormSources(departmentId, formTypeId, kind, periodStart, periodEnd, filter);
+                                                       Date periodEnd, QueryParams queryParams) {
+        return departmentFormTypeDao.getFormSources(departmentId, formTypeId, kind, periodStart, periodEnd, queryParams);
     }
 
     @Override
     public List<DepartmentFormType> getDFTSourcesByDFT(int departmentId, int formTypeId, FormDataKind kind, int reportPeriodId) {
-        SearchOrderingFilter filter = getSearchOrderingDefaultFilter();
-        return getDFTSourcesByDFT(departmentId, formTypeId, kind, reportPeriodId, filter);
+        QueryParams queryParams = getSearchOrderingDefaultFilter();
+        return getDFTSourcesByDFT(departmentId, formTypeId, kind, reportPeriodId, queryParams);
     }
 
     @Override
     public List<DepartmentFormType> getDFTSourcesByDFT(int departmentId, int formTypeId, FormDataKind kind, int reportPeriodId,
-                                                       SearchOrderingFilter filter) {
+                                                       QueryParams queryParams) {
         ReportPeriod period = reportPeriodDao.get(reportPeriodId);
 
-        return getDFTSourcesByDFT(departmentId, formTypeId, kind, period.getStartDate(), period.getEndDate(), filter);
+        return getDFTSourcesByDFT(departmentId, formTypeId, kind, period.getStartDate(), period.getEndDate(), queryParams);
     }
 
     @Override
     public List<DepartmentFormType> getDFTSourceByDDT(int departmentId, int declarationTypeId, Date periodStart, Date periodEnd) {
-        SearchOrderingFilter filter = getSearchOrderingDefaultFilter();
-        return getDFTSourceByDDT(departmentId, declarationTypeId, periodStart, periodEnd, filter);
+        QueryParams queryParams = getSearchOrderingDefaultFilter();
+        return getDFTSourceByDDT(departmentId, declarationTypeId, periodStart, periodEnd, queryParams);
     }
 
     @Override
-    public List<DepartmentFormType> getDFTSourceByDDT(int departmentId, int declarationTypeId, Date periodStart, Date periodEnd, SearchOrderingFilter filter) {
-        return departmentFormTypeDao.getDeclarationSources(departmentId, declarationTypeId, periodStart, periodEnd, filter);
+    public List<DepartmentFormType> getDFTSourceByDDT(int departmentId, int declarationTypeId, Date periodStart, Date periodEnd, QueryParams queryParams) {
+        return departmentFormTypeDao.getDeclarationSources(departmentId, declarationTypeId, periodStart, periodEnd, queryParams);
     }
 
     /**
@@ -928,6 +928,15 @@ public class SourceServiceImpl implements SourceService {
         }
     }
 
+    @Override
+    public int getAssignedFormsCount(List<Long> departmentsIds, char taxType) {
+        return departmentFormTypeDao.getAssignedFormsCount(departmentsIds, taxType);
+    }
+
+    @Override
+    public int getAssignedDeclarationsCount(List<Long> departmentsIds, char taxType) {
+        return departmentDeclarationTypeDao.getAssignedDeclarationsCount(departmentsIds, taxType);
+    }
 
     @Override
     public List<DepartmentFormType> getFormDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind, Date periodStart, Date periodEnd) {
@@ -948,13 +957,13 @@ public class SourceServiceImpl implements SourceService {
 
     @Override
     public List<DepartmentFormType> getDFTByDepartment(int departmentId, TaxType taxType, Date periodStart, Date periodEnd) {
-        SearchOrderingFilter filter = getSearchOrderingDefaultFilter();
-        return getDFTByDepartment(departmentId, taxType, periodStart, periodEnd, filter);
+        QueryParams queryParams = getSearchOrderingDefaultFilter();
+        return getDFTByDepartment(departmentId, taxType, periodStart, periodEnd, queryParams);
     }
 
     @Override
-    public List<DepartmentFormType> getDFTByDepartment(int departmentId, TaxType taxType, Date periodStart, Date periodEnd, SearchOrderingFilter filter) {
-        return departmentFormTypeDao.getByTaxType(departmentId, taxType, periodStart, periodEnd, filter);
+    public List<DepartmentFormType> getDFTByDepartment(int departmentId, TaxType taxType, Date periodStart, Date periodEnd, QueryParams queryParams) {
+        return departmentFormTypeDao.getByTaxType(departmentId, taxType, periodStart, periodEnd, queryParams);
     }
 
     @Override
@@ -984,8 +993,8 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public List<FormTypeKind> getAllFormAssigned(List<Long> departmentIds, char taxType, SearchOrderingFilter filter) {
-        return departmentFormTypeDao.getAllFormAssigned(departmentIds, taxType, filter);
+    public List<FormTypeKind> getAllFormAssigned(List<Long> departmentIds, char taxType, QueryParams queryParams) {
+        return departmentFormTypeDao.getAllFormAssigned(departmentIds, taxType, queryParams);
     }
 
     @Override
@@ -994,8 +1003,8 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public List<FormTypeKind> getAllDeclarationAssigned(List<Long> departmentIds, char taxType, SearchOrderingFilter filter) {
-        return departmentDeclarationTypeDao.getAllDeclarationAssigned(departmentIds, taxType, filter);
+    public List<FormTypeKind> getAllDeclarationAssigned(List<Long> departmentIds, char taxType, QueryParams queryParams) {
+        return departmentDeclarationTypeDao.getAllDeclarationAssigned(departmentIds, taxType, queryParams);
     }
 
     @Override
@@ -1042,13 +1051,13 @@ public class SourceServiceImpl implements SourceService {
     @Override
     public List<DepartmentDeclarationType> getDDTByDepartment(int departmentId, TaxType taxType, Date periodStart,
                                                               Date periodEnd) {
-        SearchOrderingFilter filter = getSearchOrderingDefaultFilter();
-        return getDDTByDepartment(departmentId, taxType, periodStart, periodEnd, filter);
+        QueryParams queryParams = getSearchOrderingDefaultFilter();
+        return getDDTByDepartment(departmentId, taxType, periodStart, periodEnd, queryParams);
     }
 
     @Override
-    public List<DepartmentDeclarationType> getDDTByDepartment(int departmentId, TaxType taxType, Date periodStart, Date periodEnd, SearchOrderingFilter filter) {
-        return departmentDeclarationTypeDao.getByTaxType(departmentId, taxType, periodStart, periodEnd, filter);
+    public List<DepartmentDeclarationType> getDDTByDepartment(int departmentId, TaxType taxType, Date periodStart, Date periodEnd, QueryParams queryParams) {
+        return departmentDeclarationTypeDao.getByTaxType(departmentId, taxType, periodStart, periodEnd, queryParams);
     }
 
     @Override
@@ -1231,10 +1240,10 @@ public class SourceServiceImpl implements SourceService {
      *
      * @return
      */
-    private SearchOrderingFilter getSearchOrderingDefaultFilter() {
-        SearchOrderingFilter filter = new SearchOrderingFilter();
-        filter.setSearchOrdering(SourcesSearchOrdering.TYPE);
-        filter.setAscSorting(true);
-        return filter;
+    private QueryParams getSearchOrderingDefaultFilter() {
+        QueryParams queryParams = new QueryParams();
+        queryParams.setSearchOrdering(SourcesSearchOrdering.TYPE);
+        queryParams.setAscending(true);
+        return queryParams;
     }
 }
