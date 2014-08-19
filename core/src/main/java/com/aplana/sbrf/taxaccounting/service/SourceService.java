@@ -233,7 +233,7 @@ public interface SourceService {
      * @param queryParams   параметры пейджинга и фильтра
      * @return список назначенных деклараций для выбранного налога и подразделений
      */
-    List<FormTypeKind> getAllDeclarationAssigned(List<Long> departmentIds, char taxType, QueryParams queryParams);
+    List<FormTypeKind> getAllDeclarationAssigned(List<Long> departmentIds, char taxType, QueryParams<TaxNominationColumnEnum> queryParams);
 
     /**
      * Возвращает список назначенных налоговых форм для выбранного налога и подразделения
@@ -253,7 +253,7 @@ public interface SourceService {
      * @param queryParams   параметры пейджинга и фильтра
      * @return список назначенных налоговых форм для выбранного налога и подразделений
      */
-    List<FormTypeKind> getAllFormAssigned(List<Long> departmentIds, char taxType, QueryParams queryParams);
+    List<FormTypeKind> getAllFormAssigned(List<Long> departmentIds, char taxType, QueryParams<TaxNominationColumnEnum> queryParams);
 
     /**
      * Добавляет налоговые формы, назначенные подразделению

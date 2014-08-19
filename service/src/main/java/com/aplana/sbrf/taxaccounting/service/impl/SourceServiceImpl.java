@@ -993,7 +993,7 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public List<FormTypeKind> getAllFormAssigned(List<Long> departmentIds, char taxType, QueryParams queryParams) {
+    public List<FormTypeKind> getAllFormAssigned(List<Long> departmentIds, char taxType, QueryParams<TaxNominationColumnEnum> queryParams) {
         return departmentFormTypeDao.getAllFormAssigned(departmentIds, taxType, queryParams);
     }
 
@@ -1003,7 +1003,7 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public List<FormTypeKind> getAllDeclarationAssigned(List<Long> departmentIds, char taxType, QueryParams queryParams) {
+    public List<FormTypeKind> getAllDeclarationAssigned(List<Long> departmentIds, char taxType, QueryParams<TaxNominationColumnEnum> queryParams) {
         return departmentDeclarationTypeDao.getAllDeclarationAssigned(departmentIds, taxType, queryParams);
     }
 

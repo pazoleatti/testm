@@ -43,8 +43,8 @@ public class GetTableDataHandler extends AbstractActionHandler<GetTableDataActio
             departmentsIds.add(Long.valueOf(id));
         }
         // Фильтр для сортировки
-        QueryParams queryParams = new QueryParams();
-        queryParams.setSearchOrdering(action.getSortColumn() == null ? TaxNominationColumnEnum.DEPARTMENT : action.getSortColumn());
+        QueryParams<TaxNominationColumnEnum> queryParams = new QueryParams<TaxNominationColumnEnum>();
+        queryParams.setSearchOrdering(action.getSortColumn() == null ? TaxNominationColumnEnum.DEPARTMENT_FULL_NAME : action.getSortColumn());
         queryParams.setAscending(action.isAsc());
         queryParams.setFrom(action.getStartIndex());
         queryParams.setCount(action.getCount());
