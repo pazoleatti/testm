@@ -39,11 +39,11 @@ public interface DepartmentFormTypeDao {
      * @param taxType      вид налога
      * @param periodStart  начало периода, в котором действуют назначения
      * @param periodEnd    окончание периода, в котором действуют назначения
-     * @param filter       фильтр сортировки
+     * @param queryParams  параметры пейджинга и фильтрации
      * @return список назначенных подразделению форм (с учётом вида и типа) по заданному виду налога
      */
     List<DepartmentFormType> getByTaxType(int departmentId, TaxType taxType, Date periodStart, Date periodEnd,
-                                          SearchOrderingFilter filter);
+                                          QueryParams queryParams);
 
     /**
      * Возвращает информацию он назначенных подразделению формах по заданному виду налога
@@ -116,12 +116,12 @@ public interface DepartmentFormTypeDao {
      * @param kind         тип налоговой формы
      * @param periodStart  начало периода, в котором действуют назначения
      * @param periodEnd    окончание периода, в котором действуют назначения
-     * @param filter       фильтр сортировки
+     * @param queryParams  параметры пейджинга и фильтрации
      * @return информация о формах-источниках в виде списка
      * {@link DepartmentFormType}
      */
     List<DepartmentFormType> getFormSources(int departmentId, int formTypeId, FormDataKind kind, Date periodStart,
-                                            Date periodEnd, SearchOrderingFilter filter);
+                                            Date periodEnd, QueryParams queryParams);
 
     /**
      * Возвращает информацию о всех налоговых формах, которые являются источниками
@@ -285,12 +285,12 @@ public interface DepartmentFormTypeDao {
      * @param declarationTypeId идентификатор вида декларации
      * @param periodStart       начало периода, в котором действуют назначения
      * @param periodEnd         окончание периода, в котором действуют назначения
-     * @param filter            фильтр сортировки
+     * @param queryParams       параметры пейджинга и фильтрации
      * @return информация о формах-источниках в виде списка
      * {@link DepartmentFormType}
      */
     List<DepartmentFormType> getDeclarationSources(int departmentId, int declarationTypeId, Date periodStart, Date periodEnd,
-                                                   SearchOrderingFilter filter);
+                                                   QueryParams queryParams);
 
     /**
      * Возвращает список назначенных налоговых форм для выбранного налога и подразделения
@@ -307,10 +307,10 @@ public interface DepartmentFormTypeDao {
      *
      * @param departmentIds идентификаторы подразделений
      * @param taxType       идентификатор вида налога
-     * @param filter        фильтр для сортировки
+     * @param queryParams   параметры пейджинга и фильтрации
      * @return список назначенных налоговых форм для выбранного налога и подразделений
      */
-    List<FormTypeKind> getAllFormAssigned(List<Long> departmentIds, char taxType, SearchOrderingFilter filter);
+    List<FormTypeKind> getAllFormAssigned(List<Long> departmentIds, char taxType, QueryParams queryParams);
 
     /**
      * TODO - возможно нужно переместить в {@link com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao}
@@ -403,4 +403,13 @@ public interface DepartmentFormTypeDao {
      * @return список
      */
     List<DepartmentFormType> getDFTByFormType(@NotNull Integer formTypeId);
+
+    /**
+     * Возвращает количество назначенных налоговых форм для выбранного налога и подразделений
+     *
+     * @param departmentsIds идентификаторы подразделений
+     * @param taxType идентификатор вида налога
+     * @return список назначенных налоговых форм для выбранного налога и подразделений
+     */
+    int getAssignedFormsCount(List<Long> departmentsIds, char taxType);
 }

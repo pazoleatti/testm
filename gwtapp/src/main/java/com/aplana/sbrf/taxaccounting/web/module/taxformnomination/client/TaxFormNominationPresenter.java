@@ -15,6 +15,7 @@ import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.declara
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.event.UpdateTable;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.formDestinationsDialog.FormDestinationsPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.*;
+import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -81,6 +82,10 @@ public class TaxFormNominationPresenter
         void clearFilter();
 
         void clearFormFilter();
+
+        FlexiblePager getFormPager();
+
+        FlexiblePager getDeclarationPager();
     }
 
     private TaxType taxType;
@@ -173,6 +178,7 @@ public class TaxFormNominationPresenter
          action.setDepartmentsIds(getView().getDepartments());
          action.setTaxType(taxType.getCode());
          action.setForm(getView().isForm());
+         action.setCount(getView().isForm() ? getView().getFormPager().getPageSize() : getView().getDeclarationPager().getPageSize());
 
          return action;
      }

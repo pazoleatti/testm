@@ -473,4 +473,14 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 		departmentPicker.setValue(null);
 	}
 
+    @Override
+    public FlexiblePager getFormPager() {
+        return formPager;
+    }
+
+    @Override
+    public FlexiblePager getDeclarationPager() {
+        return declarationPager;
+    }
+
 }
