@@ -445,41 +445,57 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 
     @Override
 	public void onWorkflowMove(final WorkflowMove wfMove) {
-        if (formData.isManual() && wfMove.getFromState().equals(WorkflowState.ACCEPTED)) {
-            Dialog.confirmMessage("Подтверждение", "Удалить версию ручного ввода и выполнить переход в статус \""+wfMove.getToState().getName()+"\"?", new DialogHandler() {
-                @Override
-                public void yes() {
-                    LogCleanEvent.fire(FormDataPresenter.this);
-                    LogShowEvent.fire(FormDataPresenter.this, false);
-                    DeleteFormDataAction action = new DeleteFormDataAction();
-                    action.setFormDataId(formData.getId());
-                    action.setManual(true);
-                    dispatcher.execute(action, CallbackUtils
-                            .defaultCallback(new AbstractCallback<DeleteFormDataResult>() {
-                                @Override
-                                public void onSuccess(
-                                        DeleteFormDataResult result) {
-                                    formData.setManual(false);
-                                    commonMoveLogic(wfMove);
-                                }
-                            }, FormDataPresenter.this));
-                    Dialog.hideMessage();
-                }
-
-                @Override
-                public void no() {
-                    Dialog.hideMessage();
-                }
-
-                @Override
-                public void close() {
-                    Dialog.hideMessage();
-                }
-            });
+        if (!formData.isManual() && wfMove.getFromState().equals(WorkflowState.ACCEPTED)) {
+            HasManualVersionAction action = new HasManualVersionAction();
+            action.setFormDataId(formData.getId());
+            dispatcher.execute(action, CallbackUtils
+                    .defaultCallback(new AbstractCallback<HasManualVersionResult>() {
+                        @Override
+                        public void onSuccess(HasManualVersionResult result) {
+                            if (result.isHasManualVersion()) {
+                                deleteManualAndGoForm(wfMove);
+                            }
+                        }
+                    }, FormDataPresenter.this));
+        } else if (formData.isManual() && wfMove.getFromState().equals(WorkflowState.ACCEPTED)) {
+            deleteManualAndGoForm(wfMove);
         } else {
             commonMoveLogic(wfMove);
         }
 	}
+
+    private void deleteManualAndGoForm(final WorkflowMove wfMove) {
+        Dialog.confirmMessage("Подтверждение", "Удалить версию ручного ввода и выполнить переход в статус \""+wfMove.getToState().getName()+"\"?", new DialogHandler() {
+            @Override
+            public void yes() {
+                LogCleanEvent.fire(FormDataPresenter.this);
+                LogShowEvent.fire(FormDataPresenter.this, false);
+                DeleteFormDataAction action = new DeleteFormDataAction();
+                action.setFormDataId(formData.getId());
+                action.setManual(true);
+                dispatcher.execute(action, CallbackUtils
+                        .defaultCallback(new AbstractCallback<DeleteFormDataResult>() {
+                            @Override
+                            public void onSuccess(
+                                    DeleteFormDataResult result) {
+                                formData.setManual(false);
+                                commonMoveLogic(wfMove);
+                            }
+                        }, FormDataPresenter.this));
+                Dialog.hideMessage();
+            }
+
+            @Override
+            public void no() {
+                Dialog.hideMessage();
+            }
+
+            @Override
+            public void close() {
+                Dialog.hideMessage();
+            }
+        });
+    }
 
     private void commonMoveLogic(final WorkflowMove wfMove) {
         if (wfMove.isReasonToMoveShouldBeSpecified()){
@@ -652,6 +668,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 
     @Override
     protected void onHide() {
+        super.onHide();
         removeFromPopupSlot(formSearchPresenter);
         formSearchPresenter.close();
     }

@@ -32,6 +32,17 @@ public class Department implements Serializable {
     private boolean isActive;
     private Integer code;
 
+    /**
+     * Полное имя подразделения
+     * Пример:
+     * Московский банк/
+     *  Московский банк Управление недвижимости и материально-технического обеспечения/
+     *      Отдел транспортного обеспечения/
+     *          Центр сопровождения клиентских операций "Южная столица" (ЮЗБ, г.Ростов-на-Дону)/
+     *              Центр сопровождения клиентских операций "Южная столица" (ЮЗБ, г.Ростов-на-Дону)
+     */
+    private String fullName;
+
     public Integer getCode() {
         return code;
     }
@@ -173,5 +184,13 @@ public class Department implements Serializable {
 
     public void setRegionId(Long regionId) {
         this.regionId = regionId;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public String getFullName() {
+        return fullName;
     }
 }

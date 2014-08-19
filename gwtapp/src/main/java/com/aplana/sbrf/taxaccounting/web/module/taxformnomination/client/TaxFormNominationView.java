@@ -96,7 +96,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 		protected void onRangeChanged(HasData<FormTypeKind> display) {
 			if (getUiHandlers() != null){
 				final Range range = display.getVisibleRange();
-				TaxNominationColumnEnum sort = TaxNominationColumnEnum.DEPARTMENT;
+				TaxNominationColumnEnum sort = TaxNominationColumnEnum.DEPARTMENT_FULL_NAME;
 				boolean asc = true;
 				if(formGrid.getColumnSortList().size()>0){
 					ColumnSortList.ColumnSortInfo columnSortInfo = formGrid.getColumnSortList().get(0);
@@ -114,7 +114,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 		protected void onRangeChanged(HasData<FormTypeKind> display) {
 			if (getUiHandlers() != null){
 				final Range range = display.getVisibleRange();
-				TaxNominationColumnEnum sort = TaxNominationColumnEnum.DEPARTMENT;
+				TaxNominationColumnEnum sort = TaxNominationColumnEnum.DEPARTMENT_FULL_NAME;
 				boolean asc = true;
 				if(decGrid.getColumnSortList().size()>0){
 					ColumnSortList.ColumnSortInfo columnSortInfo = decGrid.getColumnSortList().get(0);
@@ -223,7 +223,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 		performerColumn.setSortable(true);
 		receiverSourcesKindColumn.setDataStoreName(TaxNominationColumnEnum.FORM_KIND.name());
 		receiverSourcesTypeColumn.setDataStoreName(TaxNominationColumnEnum.FORM_TYPE.name());
-		departmentColumn.setDataStoreName(TaxNominationColumnEnum.DEPARTMENT.name());
+		departmentColumn.setDataStoreName(TaxNominationColumnEnum.DEPARTMENT_FULL_NAME.name());
 		performerColumn.setDataStoreName(TaxNominationColumnEnum.PERFORMER.name());
 
 		formGrid.addColumnSortHandler(new ColumnSortEvent.AsyncHandler(formGrid));
@@ -265,7 +265,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 		departmentColumn.setSortable(true);
 		declarationType.setSortable(true);
 
-		departmentColumn.setDataStoreName(TaxNominationColumnEnum.DEPARTMENT.name());
+		departmentColumn.setDataStoreName(TaxNominationColumnEnum.DEPARTMENT_FULL_NAME.name());
 		declarationType.setDataStoreName(TaxNominationColumnEnum.DEC_TYPE.name());
 
 		decGrid.addColumnSortHandler(new ColumnSortEvent.AsyncHandler(decGrid));
@@ -472,5 +472,15 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 	public void clearFormFilter() {
 		departmentPicker.setValue(null);
 	}
+
+    @Override
+    public FlexiblePager getFormPager() {
+        return formPager;
+    }
+
+    @Override
+    public FlexiblePager getDeclarationPager() {
+        return declarationPager;
+    }
 
 }

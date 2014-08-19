@@ -14,7 +14,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -175,19 +174,19 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
     @Override
     public List<DepartmentFormType> getFormSources(int departmentId, int formTypeId, FormDataKind kind, Date periodStart,
                                                    Date periodEnd) {
-        SearchOrderingFilter filter = getSearchOrderingDefaultFilter();
-        return getFormSources(departmentId, formTypeId, kind, periodStart, periodEnd, filter);
+        QueryParams queryParams = getSearchOrderingDefaultFilter();
+        return getFormSources(departmentId, formTypeId, kind, periodStart, periodEnd, queryParams);
     }
 
     @Override
-    public List<DepartmentFormType> getFormSources(int departmentId, int formTypeId, FormDataKind kind, Date periodStart, Date periodEnd, SearchOrderingFilter filter) {
+    public List<DepartmentFormType> getFormSources(int departmentId, int formTypeId, FormDataKind kind, Date periodStart, Date periodEnd, QueryParams queryParams) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("departmentId", departmentId);
         params.put("formTypeId", formTypeId != 0 ? formTypeId : null);
         params.put("formKind", kind != null ? kind.getId() : null);
         params.put("periodStart", periodStart);
         params.put("periodEnd", periodEnd);
-        return getNamedParameterJdbcTemplate().query(GET_FORM_SOURCES_SQL + getSortingClause(filter),
+        return getNamedParameterJdbcTemplate().query(GET_FORM_SOURCES_SQL + getSortingClause(queryParams),
                 params, DFT_MAPPER_WITH_PERIOD);
     }
 
@@ -404,12 +403,12 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
 
     @Override
     public List<DepartmentFormType> getDeclarationSources(int departmentId, int declarationTypeId, Date periodStart, Date periodEnd) {
-        SearchOrderingFilter filter = getSearchOrderingDefaultFilter();
-        return getDeclarationSources(departmentId, declarationTypeId, periodStart, periodEnd, filter);
+        QueryParams queryParams = getSearchOrderingDefaultFilter();
+        return getDeclarationSources(departmentId, declarationTypeId, periodStart, periodEnd, queryParams);
     }
 
     @Override
-    public List<DepartmentFormType> getDeclarationSources(int departmentId, int declarationTypeId, Date periodStart, Date periodEnd, SearchOrderingFilter filter) {
+    public List<DepartmentFormType> getDeclarationSources(int departmentId, int declarationTypeId, Date periodStart, Date periodEnd, QueryParams filter) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("departmentId", departmentId);
         params.put("declarationTypeId", declarationTypeId != 0 ? declarationTypeId : null);
@@ -486,6 +485,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
             department.setParentId(rs.wasNull() ? null : departmentParentId);
             department.setType(DepartmentType.fromCode(SqlUtils.getInteger(rs, "department_type")));
             department.setShortName(rs.getString("department_short_name"));
+            department.setFullName(rs.getString("department_full_name"));
             department.setTbIndex(rs.getString("department_tb_index"));
             department.setSbrfCode(rs.getString("department_sbrf_code"));
             department.setRegionId(SqlUtils.getLong(rs, "department_region_id"));
@@ -529,66 +529,127 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         }
     };
 
-    @Override
-    public List<FormTypeKind> getAllFormAssigned(List<Long> departmentIds, char taxType, SearchOrderingFilter filter) {
+    /**
+     * Метод составляет запрос используя переданные ей параметры
+     *
+     * @param departmentIds подразделелния
+     * @param taxType тип налога
+     * @param queryParams параметры пейджинга, сортировки
+     * @return
+     */
+    private QueryData getAssignedFormsQueryData(List<Long> departmentIds, char taxType, QueryParams<TaxNominationColumnEnum> queryParams){
+        boolean paging = queryParams != null && queryParams.getCount() != 0;
 
         MapSqlParameterSource parameters = new MapSqlParameterSource()
                 .addValue("taxType", String.valueOf(taxType));
 
-        if (!departmentIds.isEmpty()){
+        // order
+        String order = "";
+        if (queryParams != null && queryParams.getSearchOrdering() != null) {
+            order = " ORDER BY " + queryParams.getSearchOrdering().toString();
+            if (!queryParams.isAscending())
+                order += " DESC";
+        }
+
+        // departments
+        String departmentClause = "";
+        if (departmentIds != null && !departmentIds.isEmpty()){
+            departmentClause = "AND dft.department_id IN (:params)\n";
             parameters.addValue("params", departmentIds);
         }
 
-        String sql = "SELECT dft.ID,\n" +
-                "  dft.KIND,\n" +
-                "  ft.NAME,\n" +
-                "  ft.ID AS type_id,\n" +
-                "  -- Для подразделения\n" +
-                "  d.ID        AS department_id,\n" +
-                "  d.NAME      AS department_name,\n" +
-                "  d.PARENT_ID AS department_parent_id,\n" +
-                "  d.TYPE      AS department_type,\n" +
-                "  d.SHORTNAME AS department_short_name,\n" +
-                "  d.TB_INDEX  AS department_tb_index,\n" +
-                "  d.SBRF_CODE AS department_sbrf_code,\n" +
-                "  d.REGION_ID AS department_region_id,\n" +
-                "  d.IS_ACTIVE AS department_is_active,\n" +
-                "  d.CODE      AS department_code,\n" +
-                "  -- Для исполнителя\n" +
-                "  dp.ID        AS performer_id,\n" +
-                "  dp.NAME      AS performer_name,\n" +
-                "  dp.PARENT_ID AS performer_parent_id,\n" +
-                "  dp.TYPE      AS performer_type,\n" +
-                "  dp.SHORTNAME AS performer_short_name,\n" +
-                "  dp.TB_INDEX  AS performer_tb_index,\n" +
-                "  dp.SBRF_CODE AS performer_sbrf_code,\n" +
-                "  dp.REGION_ID AS performer_region_id,\n" +
-                "  dp.IS_ACTIVE AS performer_is_active,\n" +
-                "  dp.CODE      AS performer_code,\n" +
-                "  -- Для сортировки\n" +
-                "  ft.NAME  AS form_type,\n" +
-                "  dft.KIND AS form_kind,\n" +
-                "  d.NAME   AS department,\n" +
-                "  dp.NAME  AS performer\n" +
-                "FROM department_form_type dft\n" +
-                "JOIN form_type ft\n" +
-                "ON ft.ID = dft.FORM_TYPE_ID\n" +
-                "JOIN department d\n" +
-                "ON d.ID = dft.DEPARTMENT_ID\n" +
-                "LEFT OUTER JOIN department dp\n" +
-                "ON dp.ID = dft.PERFORMER_DEP_ID\n" +
-                "WHERE ft.tax_type = :taxType\n" +
-                (departmentIds.size() > 0 ? "AND dft.department_id IN (:params)\n":"");
+        String query =
+                "SELECT "+
+                    "id," +
+                    "kind," +
+                    "name," +
+                    "type_id," +
+                    "department_id, \n" +
+                    "department_name, \n" +
+                    "department_parent_id, \n" +
+                    "department_type, \n" +
+                    "department_short_name, \n" +
+                    "department_full_name, \n" +
+                    "department_tb_index, \n" +
+                    "department_sbrf_code, \n" +
+                    "department_region_id, \n" +
+                    "department_is_active, \n" +
+                    "department_code, \n" +
+                    "performer_id, \n" +
+                    "performer_name, \n" +
+                    "performer_parent_id, \n" +
+                    "performer_type, \n" +
+                    "performer_short_name, \n" +
+                    "performer_tb_index, \n" +
+                    "performer_sbrf_code, \n" +
+                    "performer_region_id, \n" +
+                    "performer_is_active, \n" +
+                    "performer_code \n" +
+                    // пейджинг
+                    (paging ? ", rownum as row_number_over \n":"") +
+                    "FROM (\n"+
+                        "SELECT dft.ID as id,\n" +
+                        "  dft.KIND,\n" +
+                        "  ft.NAME,\n" +
+                        "  ft.ID AS type_id,\n" +
+                        "  -- Для подразделения\n" +
+                        "  d.ID        AS department_id,\n" +
+                        "  d.NAME      AS department_name,\n" +
+                        "  d.PARENT_ID AS department_parent_id,\n" +
+                        "  d.TYPE      AS department_type,\n" +
+                        "  d.SHORTNAME AS department_short_name,\n" +
+                        "  d.TB_INDEX  AS department_tb_index,\n" +
+                        "  d.SBRF_CODE AS department_sbrf_code,\n" +
+                        "  d.REGION_ID AS department_region_id,\n" +
+                        "  d.IS_ACTIVE AS department_is_active,\n" +
+                        "  d.CODE      AS department_code,\n" +
+                        "  -- Для исполнителя\n" +
+                        "  dp.ID        AS performer_id,\n" +
+                        "  dp.NAME      AS performer_name,\n" +
+                        "  dp.PARENT_ID AS performer_parent_id,\n" +
+                        "  dp.TYPE      AS performer_type,\n" +
+                        "  dp.SHORTNAME AS performer_short_name,\n" +
+                        "  dp.TB_INDEX  AS performer_tb_index,\n" +
+                        "  dp.SBRF_CODE AS performer_sbrf_code,\n" +
+                        "  dp.REGION_ID AS performer_region_id,\n" +
+                        "  dp.IS_ACTIVE AS performer_is_active,\n" +
+                        "  dp.CODE      AS performer_code,\n" +
+                        "  -- Для сортировки\n" +
+                        "  ft.NAME  AS form_type,\n" +
+                        "  dft.KIND AS form_kind,\n" +
+                        "  d.NAME   AS department,\n" +
+                        "  dp.NAME  AS performer, \n"+
+                        "  d.FULL_NAME AS department_full_name \n" +
+                        "FROM department_form_type dft\n" +
+                        "JOIN form_type ft\n" +
+                        "ON ft.ID = dft.FORM_TYPE_ID\n" +
+                        "JOIN (SELECT d.*, LTRIM(SYS_CONNECT_BY_PATH(name, '/'), '/') as full_name FROM department d START with parent_id = 0 CONNECT BY PRIOR id = parent_id) d \n" +
+                        "ON d.ID = dft.DEPARTMENT_ID\n" +
+                        "LEFT OUTER JOIN department dp\n" +
+                        "ON dp.ID = dft.PERFORMER_DEP_ID\n" +
+                        "WHERE ft.tax_type = :taxType\n" +
+                        departmentClause +
+                        order+
+                    ")";
 
-        String order = null;
-
-        if (filter.getSearchOrdering() != null) {
-            order = "ORDER BY " + filter.getSearchOrdering().toString();
-            if (!filter.isAscSorting())
-                order = order + " DESC";
+        // Limit
+        if (paging){
+            query = "SELECT * FROM ( " + query + " ) WHERE row_number_over BETWEEN :from and :to";
+            parameters.addValue("from", queryParams.getFrom());
+            parameters.addValue("to", queryParams.getFrom() + queryParams.getCount());
         }
 
-        return getNamedParameterJdbcTemplate().query(sql + order, parameters, ALL_FORM_ASSIGN_MAPPER);
+        QueryData queryData = new QueryData();
+        queryData.setQuery(query);
+        queryData.setParameterSource(parameters);
+
+        return queryData;
+    }
+
+    @Override
+    public List<FormTypeKind> getAllFormAssigned(List<Long> departmentIds, char taxType, QueryParams<TaxNominationColumnEnum> queryParams) {
+        QueryData assignedFormsQueryData = getAssignedFormsQueryData(departmentIds, taxType, queryParams);
+        return getNamedParameterJdbcTemplate().query(assignedFormsQueryData.getQuery(), assignedFormsQueryData.getParameterSource(), ALL_FORM_ASSIGN_MAPPER);
     }
 
     private final RowMapper<FormTypeKind> DECLARATION_ASSIGN_MAPPER = new RowMapper<FormTypeKind>() {
@@ -701,19 +762,19 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
 
     @Override
     public List<DepartmentFormType> getByTaxType(int departmentId, TaxType taxType, Date periodStart, Date periodEnd) {
-        SearchOrderingFilter filter = getSearchOrderingDefaultFilter();
-        return getByTaxType(departmentId, taxType, periodStart, periodEnd, filter);
+        QueryParams queryParams = getSearchOrderingDefaultFilter();
+        return getByTaxType(departmentId, taxType, periodStart, periodEnd, queryParams);
 
     }
 
     @Override
-    public List<DepartmentFormType> getByTaxType(int departmentId, TaxType taxType, Date periodStart, Date periodEnd, SearchOrderingFilter filter) {
+    public List<DepartmentFormType> getByTaxType(int departmentId, TaxType taxType, Date periodStart, Date periodEnd, QueryParams queryParams) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("departmentId", departmentId);
         //params.put("periodStart", periodStart);
         //params.put("periodEnd", periodEnd);
         params.put("taxType", taxType != null ? String.valueOf(taxType.getCode()) : null);
-        return getNamedParameterJdbcTemplate().query(GET_SQL_BY_TAX_TYPE_SQL + getSortingClause(filter), params, DFT_MAPPER);
+        return getNamedParameterJdbcTemplate().query(GET_SQL_BY_TAX_TYPE_SQL + getSortingClause(queryParams), params, DFT_MAPPER);
     }
 
     private final static String GET_SQL_BY_TAX_TYPE_SQL_OLD = "select * from department_form_type dft where department_id = ?" +
@@ -968,17 +1029,27 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
     }
 
     @Override
+    public int getAssignedFormsCount(List<Long> departmentsIds, char taxType) {
+
+        QueryData assignedFormsQueryData = getAssignedFormsQueryData(departmentsIds, taxType, null);
+
+        String query = "SELECT count(*) FROM ( " + assignedFormsQueryData.getQuery() + " )";
+
+        return getNamedParameterJdbcTemplate().queryForInt(query, assignedFormsQueryData.getParameterSource());
+    }
+
+    @Override
     public void updatePerformer(int id, Integer performerId){
         getJdbcTemplate().update(
             "update department_form_type set performer_dep_id = ? where id = ?",
                 performerId, id);
     }
 
-    private String getSortingClause(SearchOrderingFilter filter) {
-        SourcesSearchOrdering ordering = (SourcesSearchOrdering) filter.getSearchOrdering();
+    private String getSortingClause(QueryParams queryParams) {
+        SourcesSearchOrdering ordering = (SourcesSearchOrdering) queryParams.getSearchOrdering();
         if (ordering == null) ordering = SourcesSearchOrdering.TYPE;
 
-        boolean isAscSorting = filter.isAscSorting();
+        boolean isAscSorting = queryParams.isAscending();
         StringBuilder sorting = new StringBuilder();
 
         switch (ordering) {
@@ -1009,10 +1080,10 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
      *
      * @return
      */
-    private SearchOrderingFilter getSearchOrderingDefaultFilter() {
-        SearchOrderingFilter filter = new SearchOrderingFilter();
+    private QueryParams getSearchOrderingDefaultFilter() {
+        QueryParams filter = new QueryParams();
         filter.setSearchOrdering(SourcesSearchOrdering.TYPE);
-        filter.setAscSorting(true);
+        filter.setAscending(true);
         return filter;
     }
 }

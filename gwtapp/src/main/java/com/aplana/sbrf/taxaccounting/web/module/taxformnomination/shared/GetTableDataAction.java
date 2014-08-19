@@ -16,7 +16,7 @@ public class GetTableDataAction extends UnsecuredActionImpl<GetTableDataResult> 
     private boolean isForm = true;
     private int startIndex;
     private int count;
-    private TaxNominationColumnEnum sortColumn = TaxNominationColumnEnum.DEPARTMENT;
+    private TaxNominationColumnEnum sortColumn = TaxNominationColumnEnum.DEPARTMENT_FULL_NAME;
     private boolean asc = true;
 
     public List<Integer> getDepartmentsIds() {
