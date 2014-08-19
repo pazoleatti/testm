@@ -75,7 +75,7 @@ public class FormTemplateImpexPresenter extends Presenter<FormTemplateImpexPrese
 
 	@Override
 	public void uploadFormTemplateFail(String msg) {
-        Dialog.errorMessage("Загрузить макет не удалось. Проверьте источник данных. Ошибка: " + msg);
+        Dialog.errorMessage("Загрузить макет не удалось. Проверьте источник данных.");
 	}
 
 	@Override
