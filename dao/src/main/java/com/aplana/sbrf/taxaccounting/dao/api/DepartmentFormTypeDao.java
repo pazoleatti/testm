@@ -310,7 +310,7 @@ public interface DepartmentFormTypeDao {
      * @param queryParams   параметры пейджинга и фильтрации
      * @return список назначенных налоговых форм для выбранного налога и подразделений
      */
-    List<FormTypeKind> getAllFormAssigned(List<Long> departmentIds, char taxType, QueryParams queryParams);
+    List<FormTypeKind> getAllFormAssigned(List<Long> departmentIds, char taxType, QueryParams<TaxNominationColumnEnum> queryParams);
 
     /**
      * TODO - возможно нужно переместить в {@link com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao}

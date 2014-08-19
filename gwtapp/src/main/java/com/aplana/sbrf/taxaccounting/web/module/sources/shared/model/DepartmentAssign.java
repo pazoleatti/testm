@@ -17,6 +17,8 @@ public class DepartmentAssign implements Serializable {
 	private String typeName;
 	private FormDataKind kind;
     private boolean isDeclaration;
+    private boolean enabled = true;
+    private boolean checked = false;
 
     public Long getId() {
         return id;
@@ -64,5 +66,21 @@ public class DepartmentAssign implements Serializable {
 
     public void setDeclaration(boolean declaration) {
         isDeclaration = declaration;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public boolean isChecked() {
+        return checked;
+    }
+
+    public void setChecked(boolean checked) {
+        this.checked = checked;
     }
 }

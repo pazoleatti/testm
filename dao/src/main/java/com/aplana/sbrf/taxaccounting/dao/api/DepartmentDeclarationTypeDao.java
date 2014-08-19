@@ -77,7 +77,7 @@ public interface DepartmentDeclarationTypeDao {
      * @param queryParams   параметры пейджинга и фильтрации
      * @return список назначенных налоговых форм для выбранного налога и подразделений
      */
-    List<FormTypeKind> getAllDeclarationAssigned(List<Long> departmentIds, char taxType, QueryParams queryParams);
+    List<FormTypeKind> getAllDeclarationAssigned(List<Long> departmentIds, char taxType, QueryParams<TaxNominationColumnEnum> queryParams);
 
     /**
      * Возвращает количество назначенных деклараций для выбранного налога и подразделений

@@ -339,6 +339,7 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
         action.setPeriodsInterval(getView().getPeriodInterval());
         action.setCurrentAssigns(currentAssigns);
         action.setDepartmentAssign(departmentAssign);
+        action.setTaxType(getTaxType());
         dispatcher.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<DeleteCurrentAssignsResult>() {
                     @Override

@@ -219,6 +219,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
             department.setParentId(rs.wasNull() ? null : departmentParentId);
             department.setType(DepartmentType.fromCode(SqlUtils.getInteger(rs, "department_type")));
             department.setShortName(rs.getString("department_short_name"));
+            department.setFullName(rs.getString("department_full_name"));
             department.setTbIndex(rs.getString("department_tb_index"));
             department.setSbrfCode(rs.getString("department_sbrf_code"));
             department.setRegionId(SqlUtils.getLong(rs, "department_region_id"));
@@ -246,7 +247,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
      * @param queryParams параметры пейджинга, сортировки
      * @return
      */
-    private QueryData getAssignedDeclarationsQueryData(List<Long> departmentIds, char taxType, QueryParams queryParams){
+    private QueryData getAssignedDeclarationsQueryData(List<Long> departmentIds, char taxType, QueryParams<TaxNominationColumnEnum> queryParams){
         boolean paging = queryParams != null && queryParams.getCount() != 0;
 
         MapSqlParameterSource parameters = new MapSqlParameterSource().addValue("taxType", String.valueOf(taxType));
@@ -276,6 +277,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
                     "department_parent_id, \n" +
                     "department_type, \n" +
                     "department_short_name, \n" +
+                    "department_full_name, \n" +
                     "department_tb_index, \n" +
                     "department_sbrf_code, \n" +
                     "department_region_id, \n" +
@@ -300,11 +302,12 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
                     "  d.CODE      AS department_code,\n" +
                     "  -- Для сортировки\n" +
                     "  dt.NAME AS dec_type,\n" +
-                    "  d.NAME  AS department\n" +
+                    "  d.NAME  AS department,\n" +
+                    "  d.FULL_NAME AS department_full_name \n" +
                     "FROM declaration_type dt\n" +
                     "JOIN department_declaration_type ddt\n" +
                     "ON ddt.DECLARATION_TYPE_ID = dt.ID\n" +
-                    "JOIN department d\n" +
+                    "JOIN (SELECT d.*, LTRIM(SYS_CONNECT_BY_PATH(name, '/'), '/') as full_name FROM department d START with parent_id = 0 CONNECT BY PRIOR id = parent_id) d \n" +
                     "ON d.id = ddt.DEPARTMENT_ID\n" +
                     "WHERE dt.TAX_TYPE = :taxType\n"+
                     departmentClause +
@@ -326,7 +329,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
     }
 
     @Override
-    public List<FormTypeKind> getAllDeclarationAssigned(List<Long> departmentIds, char taxType, QueryParams queryParams) {
+    public List<FormTypeKind> getAllDeclarationAssigned(List<Long> departmentIds, char taxType, QueryParams<TaxNominationColumnEnum> queryParams) {
         QueryData assignedDeclarationsQueryData = getAssignedDeclarationsQueryData(departmentIds, taxType, queryParams);
 
         return getNamedParameterJdbcTemplate().query(assignedDeclarationsQueryData.getQuery(), assignedDeclarationsQueryData.getParameterSource(), ALL_DECLARATION_ASSIGN_MAPPER);

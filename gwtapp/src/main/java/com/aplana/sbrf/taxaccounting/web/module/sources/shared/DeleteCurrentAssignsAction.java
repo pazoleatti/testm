@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.sources.shared;
 
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.source.SourceMode;
 import com.aplana.sbrf.taxaccounting.model.source.SourcePair;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.CurrentAssign;
@@ -18,6 +19,7 @@ public class DeleteCurrentAssignsAction extends UnsecuredActionImpl<DeleteCurren
     /** Назначение источников или приемников? */
     private SourceMode mode;
     private PeriodsInterval periodsInterval;
+    private TaxType taxType;
 
     public Set<CurrentAssign> getCurrentAssigns() {
         return currentAssigns;
@@ -57,5 +59,13 @@ public class DeleteCurrentAssignsAction extends UnsecuredActionImpl<DeleteCurren
 
     public void setPeriodsInterval(PeriodsInterval periodsInterval) {
         this.periodsInterval = periodsInterval;
+    }
+
+    public TaxType getTaxType() {
+        return taxType;
+    }
+
+    public void setTaxType(TaxType taxType) {
+        this.taxType = taxType;
     }
 }

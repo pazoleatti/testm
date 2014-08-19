@@ -485,6 +485,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
             department.setParentId(rs.wasNull() ? null : departmentParentId);
             department.setType(DepartmentType.fromCode(SqlUtils.getInteger(rs, "department_type")));
             department.setShortName(rs.getString("department_short_name"));
+            department.setFullName(rs.getString("department_full_name"));
             department.setTbIndex(rs.getString("department_tb_index"));
             department.setSbrfCode(rs.getString("department_sbrf_code"));
             department.setRegionId(SqlUtils.getLong(rs, "department_region_id"));
@@ -536,7 +537,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
      * @param queryParams параметры пейджинга, сортировки
      * @return
      */
-    private QueryData getAssignedFormsQueryData(List<Long> departmentIds, char taxType, QueryParams queryParams){
+    private QueryData getAssignedFormsQueryData(List<Long> departmentIds, char taxType, QueryParams<TaxNominationColumnEnum> queryParams){
         boolean paging = queryParams != null && queryParams.getCount() != 0;
 
         MapSqlParameterSource parameters = new MapSqlParameterSource()
@@ -568,6 +569,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                     "department_parent_id, \n" +
                     "department_type, \n" +
                     "department_short_name, \n" +
+                    "department_full_name, \n" +
                     "department_tb_index, \n" +
                     "department_sbrf_code, \n" +
                     "department_region_id, \n" +
@@ -616,11 +618,12 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                         "  ft.NAME  AS form_type,\n" +
                         "  dft.KIND AS form_kind,\n" +
                         "  d.NAME   AS department,\n" +
-                        "  dp.NAME  AS performer\n"+
+                        "  dp.NAME  AS performer, \n"+
+                        "  d.FULL_NAME AS department_full_name \n" +
                         "FROM department_form_type dft\n" +
                         "JOIN form_type ft\n" +
                         "ON ft.ID = dft.FORM_TYPE_ID\n" +
-                        "JOIN department d\n" +
+                        "JOIN (SELECT d.*, LTRIM(SYS_CONNECT_BY_PATH(name, '/'), '/') as full_name FROM department d START with parent_id = 0 CONNECT BY PRIOR id = parent_id) d \n" +
                         "ON d.ID = dft.DEPARTMENT_ID\n" +
                         "LEFT OUTER JOIN department dp\n" +
                         "ON dp.ID = dft.PERFORMER_DEP_ID\n" +
@@ -644,7 +647,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
     }
 
     @Override
-    public List<FormTypeKind> getAllFormAssigned(List<Long> departmentIds, char taxType, QueryParams queryParams) {
+    public List<FormTypeKind> getAllFormAssigned(List<Long> departmentIds, char taxType, QueryParams<TaxNominationColumnEnum> queryParams) {
         QueryData assignedFormsQueryData = getAssignedFormsQueryData(departmentIds, taxType, queryParams);
         return getNamedParameterJdbcTemplate().query(assignedFormsQueryData.getQuery(), assignedFormsQueryData.getParameterSource(), ALL_FORM_ASSIGN_MAPPER);
     }

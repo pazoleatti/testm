@@ -21,7 +21,7 @@ public class SourcesUtils {
         PeriodInfo periodTo = periodsInterval.getPeriodTo();
         Integer yearTo = periodsInterval.getYearTo();
 
-        return yearFrom != null && periodFrom != null &&
+        return periodFrom != null &&
                 (yearTo == null && periodTo == null ||
                         (yearTo != null && periodTo != null &&
                                 (yearFrom < yearTo ||

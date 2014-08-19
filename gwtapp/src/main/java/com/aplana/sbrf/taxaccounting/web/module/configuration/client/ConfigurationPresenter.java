@@ -195,14 +195,6 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
             String value = cleanString(dataRow.getCell(getView().getValueColumn().getAlias()).getStringValue());
             if (param == null || value == null) {
                 // Не полностью заполненные параметры не сохраняем
-                if (notSetFieldSet != null) {
-                    if (param == null) {
-                        notSetFieldSet.add("Параметр");
-                    }
-                    if (value == null) {
-                        notSetFieldSet.add("Значение параметра");
-                    }
-                }
                 continue;
             }
             if (!commonMap.containsKey(param)) {
