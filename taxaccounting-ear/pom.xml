@@ -44,14 +44,14 @@
                             <version>5</version>
                             <defaultLibBundleDir>lib</defaultLibBundleDir>
                             <skinnyWars>true</skinnyWars>
-                            <displayName>${project.parent.artifactId}</displayName>
+                            <displayName>${releaseName}</displayName>
                             <applicationName>${parent.description}</applicationName>
                             <modules>
                                 <webModule>
                                     <groupId>${project.groupId}</groupId>
                                     <artifactId>gwtapp</artifactId>
                                     <bundleFileName>gwtapp.war</bundleFileName>
-                                    <contextRoot>/taxaccounting/gwtapp</contextRoot>
+                                    <contextRoot>/${releaseName}/gwtapp</contextRoot>
                                 </webModule>
                                 <ejbModule>
                                     <groupId>${project.groupId}</groupId>
@@ -155,7 +155,7 @@
                             <version>5</version>
                             <defaultLibBundleDir>lib</defaultLibBundleDir>
                             <skinnyWars>true</skinnyWars>
-                            <displayName>${project.parent.artifactId}</displayName>
+                            <displayName>${releaseName}</displayName>
                             <applicationName>${parent.description}</applicationName>
                             <filtering>true</filtering>
                             <modules>
@@ -163,6 +163,7 @@
                                     <groupId>${project.groupId}</groupId>
                                     <artifactId>gwtapp</artifactId>
                                     <bundleFileName>gwtapp.war</bundleFileName>
+                                    <contextRoot>/${releaseName}/gwtapp</contextRoot>
                                 </webModule>
                                 <ejbModule>
                                     <groupId>${project.groupId}</groupId>
@@ -202,7 +203,6 @@
             <version>${project.version}</version>
             <type>war</type>
         </dependency>
-        <!-- TODO: вернуть когда будет внедрен планировщик -->
         <dependency>
             <groupId>com.aplana.taxaccounting</groupId>
             <artifactId>scheduler-core</artifactId>

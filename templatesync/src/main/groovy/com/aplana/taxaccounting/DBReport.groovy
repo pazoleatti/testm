@@ -10,7 +10,7 @@ class DBReport {
     def static void compareDBFormTemplate(def prefix1, def prefix2) {
         // Запросы на получение макетов
         def sqlTemplate1 = "select id, type_id, data_rows, fixed_rows, name, fullname, header as code, data_headers, to_char(version, 'RRRR') as version, status, script, monthly from form_template where status not in (-1, 2)"
-        def sqlTemplate2 = "select id, type_id, data_rows, fixed_rows, name, fullname, code, data_headers, to_char(version, 'RRRR') as version, status, script, monthly from form_template where status not in (-1, 2)"
+        def sqlTemplate2 = "select id, type_id, data_rows, fixed_rows, name, fullname, header as code, data_headers, to_char(version, 'RRRR') as version, status, script, monthly from form_template where status not in (-1, 2)"
 
         // Запросы на получение колонок
         def sqlColumns1 = "select id, name, form_template_id, ord, alias, type, width, precision, max_length, checking, attribute_id, format, filter, parent_column_id, (select alias from form_column fc2 where fc2.id = fc1.parent_column_id) as parent_alias, attribute_id2 from form_column fc1 where form_template_id in (select distinct id from form_template where status not in (-1, 2)) order by ord"

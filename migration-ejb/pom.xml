@@ -13,10 +13,6 @@
 
     <packaging>ejb</packaging>
 
-    <properties>
-        <buildName>${parent.build.finalName}</buildName>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
