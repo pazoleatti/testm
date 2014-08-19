@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -47,13 +48,11 @@ public class GetConfigurationHandler extends
         // Разыменование подразделений
         Set<Integer> needIds = new HashSet<Integer>();
         ConfigurationParamModel configurationParamModel = result.getModel();
-        for (ConfigurationParam key : configurationParamModel.keySet()) {
-            if (configurationParamModel.get(key) != null) {
-                for (Integer departmentId : configurationParamModel.get(key).keySet()) {
-                    needIds.add(departmentId);
-                }
-            }
-        }
+		for (Map.Entry<ConfigurationParam, Map<Integer, List<String>>> entry : configurationParamModel.entrySet()) {
+			if (entry.getValue() != null) {
+				needIds.addAll(entry.getValue().keySet());
+			}
+		}
         Map<Integer, String> dereferenceValue = new HashMap<Integer, String>();
         RefBookDataProvider provider = refBookFactory.getDataProvider(30L);
         for (Integer departmentId : needIds) {
