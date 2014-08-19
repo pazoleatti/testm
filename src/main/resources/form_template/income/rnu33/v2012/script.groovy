@@ -264,7 +264,7 @@ void logicCheck() {
 
         // 4. Проверка Номера сделки
         if (code != null && code.toString() in codesFromRnu54) {
-            loggerError("Строка $index учитывается в РНУ-64!")
+            loggerError(row, "Строка $index учитывается в РНУ-64!")
         }
 
         // 5. Проверка даты приобретения и даты реализации (графа 2, 5, 6)
