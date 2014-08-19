@@ -236,7 +236,7 @@ def BigDecimal calcDiscountInRub(def row) {
             def map = null
             if (row.implementationDate != null) {
                 // значение поля «Курс валюты» справочника «Курсы валют» на дату из «Графы 10»
-                map = getRecord(22, 'CODE_NUMBER', "${row.currency}", row.number?.intValue(),
+                map = getRecord(22, 'CODE_NUMBER', "${row.currency}", row.number?.intValue() ?: row.getIndex(),
                         getColumnName(row, 'currency'), row.implementationDate)
             }
             if (map != null) {
