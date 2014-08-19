@@ -153,7 +153,7 @@ public class EditDialogPresenter extends PresenterWidget<EditDialogPresenter.MyV
     private void edit(final EditDialogData data) {
         EditPeriodAction action = new EditPeriodAction();
         action.setTaxType(taxType);
-        action.setDepartmentId(data.getDepartmentId());
+        action.setNewDepartmentId(data.getDepartmentId());
         action.setYear(data.getYear());
         action.setBalance(data.isBalance());
         action.setNewDictTaxPeriodId(data.getDictTaxPeriodId().intValue());

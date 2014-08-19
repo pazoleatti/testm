@@ -237,6 +237,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 			Dialog.errorMessage("Указание параметров поиска","Интервал периода поиска указан неверно!");
 		} else {
 			find();
+            getView().clearSelection();
 		}
 	}
 
@@ -333,7 +334,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
             return;
         }
         getView().setCanChangeDeadline(!selectedRow.isSubHeader() && selectedRow.isOpen());
-        getView().setCanEditPeriod(!selectedRow.isSubHeader() && selectedRow.isOpen());
+        getView().setCanEditPeriod(!selectedRow.isSubHeader() && selectedRow.isOpen() && canEdit);
         getView().setCanClosePeriod(!selectedRow.isSubHeader() && canEdit);
         getView().setCanDeletePeriod(!selectedRow.isSubHeader() && canEdit);
         List<TaxType> ITD = new ArrayList<TaxType>();

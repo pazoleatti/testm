@@ -74,7 +74,7 @@
                 <g:HorizontalPanel spacing="5" addStyleNames="{style.btnPanel}">
                     <style:LinkButton text="Создать версию" ui:field="createVersion"/>
                     <style:LinkButton text="Удалить версию" ui:field="deleteVersion" enabled="false"/>
-                    <style:LinkButton text="История изменений" ui:field="historyVersion" visible="false"/>
+                    <!--<style:LinkButton text="История изменений" ui:field="historyVersion" visible="false"/>-->
                 </g:HorizontalPanel>
                 <g:ScrollPanel addStyleNames="{style.table}">
                     <style:GenericCellTable ui:field="ftVersionCellTable" width="100%" height="100%"/>

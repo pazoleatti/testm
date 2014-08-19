@@ -116,6 +116,15 @@ public interface ReportPeriodDao {
     List<ReportPeriod> getClosedPeriodsForFormTemplate(Integer formTemplateId);
 
     /**
+     * Получить список периодов входящих между данными датами
+     * @param taxType
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    List<ReportPeriod> getReportPeriodsInRange(TaxType taxType, Date startDate, Date endDate);
+
+    /**
      * Отчетный период по коду и году
      */
     ReportPeriod getByTaxTypedCodeYear(TaxType taxType, String code, int year);

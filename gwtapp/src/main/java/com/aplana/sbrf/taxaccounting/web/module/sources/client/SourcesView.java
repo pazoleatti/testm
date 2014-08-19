@@ -585,8 +585,8 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         WidgetUtils.setupOptionTitle(periodFrom);
         SourcesUtils.setupPeriodTitle(periodFrom);
 
-        periodTo.setValue(periods.get(periods.size() - 1));
         periodTo.setAcceptableValues(periods);
+        periodTo.setValue(periods.get(periods.size() - 1));
         WidgetUtils.setupOptionTitle(periodTo);
         SourcesUtils.setupPeriodTitle(periodTo);
 

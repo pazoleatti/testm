@@ -477,7 +477,10 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
             "SELECT * FROM list\n";
 
     @Override
-    public List<FormData> getNextFormDataListForCrossNumeration(FormData formData, Integer year, String code) {
+    public List<FormData> getNextFormDataListForCrossNumeration(FormData formData, TaxPeriod taxPeriod) {
+
+        int year = taxPeriod.getYear();
+        String code = String.valueOf(taxPeriod.getTaxType().getCode());
 
         StringBuilder sql = new StringBuilder(GET_FORM_DATA_LIST_QUERY);
         sql.append("WHERE row_number > (SELECT row_number FROM list WHERE id = ?)");
