@@ -454,6 +454,8 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                         public void onSuccess(HasManualVersionResult result) {
                             if (result.isHasManualVersion()) {
                                 deleteManualAndGoForm(wfMove);
+                            } else {
+                                commonMoveLogic(wfMove);
                             }
                         }
                     }, FormDataPresenter.this));
