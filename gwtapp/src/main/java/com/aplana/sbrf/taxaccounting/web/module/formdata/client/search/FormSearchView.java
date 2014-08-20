@@ -27,6 +27,7 @@ import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.PopupViewWithUiHandlers;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -167,6 +168,8 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
     public void onSearchClicked(ClickEvent event){
         if (!filterText.getText().isEmpty()){
             getUiHandlers().onRangeChange(0, pager.getPageSize());
+        } else {
+            setTableData(0, new ArrayList<FormDataSearchResult>(), 0);
         }
     }
 
