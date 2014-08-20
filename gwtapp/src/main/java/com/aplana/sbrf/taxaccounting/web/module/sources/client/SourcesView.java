@@ -744,7 +744,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
     @Override
     public void setAvailableFormRight(List<DepartmentAssign> departmentFormTypes) {
         clearRightTable();
-        rightTable.setRowData(departmentFormTypes);
+        rightTable.setRowData(0, departmentFormTypes);
         for(DepartmentAssign departmentAssign: departmentFormTypes) {
             if (departmentAssign.isChecked())
                 rightSM.setSelected(departmentAssign, true);
@@ -754,7 +754,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
     @Override
     public void setAvailableFormsLeft(List<DepartmentAssign> departmentFormTypes) {
         clearLeftTable();
-        leftTable.setRowData(departmentFormTypes);
+        leftTable.setRowData(0, departmentFormTypes);
     }
 
     @Override
@@ -776,8 +776,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
     @Override
     public void setCurrentSources(List<CurrentAssign> departmentFormTypes) {
         clearDownTable();
-        downTable.setRowData(departmentFormTypes);
-        loadRightData();
+        downTable.setRowData(0, departmentFormTypes);
     }
 
     @Override
@@ -937,6 +936,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
     @UiHandler("leftDepPicker")
     public void leftChangeDep(ValueChangeEvent<List<Integer>> event) {
         loadLeftData();
+        loadRightData();
     }
 
     public void loadLeftData() {
