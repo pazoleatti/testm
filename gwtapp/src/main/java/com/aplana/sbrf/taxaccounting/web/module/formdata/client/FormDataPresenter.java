@@ -446,19 +446,11 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
     @Override
 	public void onWorkflowMove(final WorkflowMove wfMove) {
         if (!formData.isManual() && wfMove.getFromState().equals(WorkflowState.ACCEPTED)) {
-            HasManualVersionAction action = new HasManualVersionAction();
-            action.setFormDataId(formData.getId());
-            dispatcher.execute(action, CallbackUtils
-                    .defaultCallback(new AbstractCallback<HasManualVersionResult>() {
-                        @Override
-                        public void onSuccess(HasManualVersionResult result) {
-                            if (result.isHasManualVersion()) {
-                                deleteManualAndGoForm(wfMove);
-                            } else {
-                                commonMoveLogic(wfMove);
-                            }
-                        }
-                    }, FormDataPresenter.this));
+            if (existManual) {
+                deleteManualAndGoForm(wfMove);
+            } else {
+                commonMoveLogic(wfMove);
+            }
         } else if (formData.isManual() && wfMove.getFromState().equals(WorkflowState.ACCEPTED)) {
             deleteManualAndGoForm(wfMove);
         } else {
