@@ -4,7 +4,9 @@ import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class SaveConfigurationAction extends UnsecuredActionImpl<SaveConfigurationResult> implements ActionName {
@@ -12,7 +14,7 @@ public class SaveConfigurationAction extends UnsecuredActionImpl<SaveConfigurati
     private ConfigurationParamModel model;
 
     private Set<Integer> dublicateDepartmentIdSet = new HashSet<Integer>();
-    private Set<String> notSetFieldSet = new HashSet<String>();
+    private Map<Integer, Set<String>> notSetFields = new HashMap<Integer, Set<String>>();
 
     @Override
     public String getName() {
@@ -31,7 +33,7 @@ public class SaveConfigurationAction extends UnsecuredActionImpl<SaveConfigurati
         return dublicateDepartmentIdSet;
     }
 
-    public Set<String> getNotSetFieldSet() {
-        return notSetFieldSet;
+    public Map<Integer, Set<String>> getNotSetFields() {
+        return notSetFields;
     }
 }

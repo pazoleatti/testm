@@ -40,6 +40,7 @@ public class FormDataServiceImpl implements FormDataService {
 
     private static final String XLSX_EXT = "xlsx";
     private static final String XLS_EXT = "xls";
+    private static final String XLSM_EXT = "xlsm";
     public static final String MSG_IS_EXIST_FORM = "Существует экземпляр налоговой формы %s типа %s в подразделении %s периоде %s";
 
     @Autowired
@@ -187,7 +188,8 @@ public class FormDataServiceImpl implements FormDataService {
             // Проверка ЭЦП
             // Если флаг проверки отсутствует или не равен «1», то файл считается проверенным
             boolean check = false;
-            if (!ext.equals(XLS_EXT) && !ext.equals(XLSX_EXT)) {
+            // исключить проверку ЭЦП для файлов эксель
+            if (!ext.equals(XLS_EXT) && !ext.equals(XLSX_EXT) && !ext.equals(XLSM_EXT)) {
                 List<String> signList = configurationDao.getByDepartment(0).get(ConfigurationParam.SIGN_CHECK, 0);
                 if (signList != null && !signList.isEmpty() && signList.get(0).equals("1")) {
                     List<String> paramList = configurationDao.getAll().get(ConfigurationParam.KEY_FILE, 0);
@@ -197,7 +199,7 @@ public class FormDataServiceImpl implements FormDataService {
                         } catch (Exception e) {
                             logger.error("Ошибка при проверке ЭЦП: " + e.getMessage());
                         }
-                        if (check) {
+                        if (!check) {
                             logger.error("Ошибка проверки цифровой подписи");
                         }
                     }
