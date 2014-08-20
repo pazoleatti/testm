@@ -585,7 +585,7 @@ public class SourceServiceImpl implements SourceService {
                         minDate = intersection.getPeriodStart();
                     }
                     if ((intersection.getPeriodEnd() == null && maxDate != null)
-                            || (intersection.getPeriodEnd() != null && intersection.getPeriodEnd().after(maxDate))) {
+                            || (intersection.getPeriodEnd() != null && maxDate != null && intersection.getPeriodEnd().after(maxDate))) {
                         maxDate = intersection.getPeriodEnd();
                     }
                     deleteSources.add(intersection);

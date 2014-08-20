@@ -432,7 +432,9 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         downSM = new MultiSelectionModel<CurrentAssign>(new ProvidesKey<CurrentAssign>() {
             @Override
             public Object getKey(CurrentAssign item) {
-                return item.getId() + "_" + item.getStartDateAssign().getTime() + "_" + item.getEndDateAssign().getTime();
+                return item.getId() + "_"
+                        + item.getStartDateAssign().getTime() + "_"
+                        + (item.getEndDateAssign() != null ? item.getEndDateAssign().getTime() : "null");
             }
         });
 
