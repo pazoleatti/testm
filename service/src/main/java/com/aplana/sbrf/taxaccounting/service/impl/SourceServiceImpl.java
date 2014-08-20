@@ -38,7 +38,7 @@ public class SourceServiceImpl implements SourceService {
     private static final String DELETE_SUCCESS_MSG = "Удалено назначение \"%s\" в роли %s %s %s в периоде с %s.";
     private static final String UPDATE_SUCCESS_MSG = "\"%s\" назначен %s формы \"%s\" в периоде с %s.";
     private static final String CIRCLE_MSG = "\"%s\" уже назначен как приёмник \"%s\"";
-    private static final String FORM_INSTANCES_MSG = "Для корректной передачи данных из \"<Объект-источник>\" необходимо выполнить повторный перевод в статус \"Принята\" всех экземпляров этой формы в периоде <период назначения>";
+    private static final String FORM_INSTANCES_MSG = "Для корректной передачи данных из \"%s\" необходимо выполнить повторный перевод в статус \"Принята\" всех экземпляров этой формы в периоде %s";
     private static final String DECLARATION_INSTANCES_MSG = "Для корректного передачи данных из \"%s\" необходимо выполнить повторное формирование \"%s\" при помощи кнопки \"Обновить\" во всех экземплярах в периоде %s";
     private static final String EMPTY_LIST_MSG = "Список назначений пуст!";
 
