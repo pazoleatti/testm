@@ -5,7 +5,6 @@ import com.aplana.gwt.client.Spinner;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.web.module.sources.client.SourcesUtils;
 import com.aplana.sbrf.taxaccounting.web.module.sources.client.ValueBoxRenderer;
-import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.AppointmentType;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.PeriodInfo;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.PeriodsInterval;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.WidgetUtils;

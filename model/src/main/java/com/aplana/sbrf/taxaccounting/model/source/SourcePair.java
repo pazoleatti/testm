@@ -1,9 +1,5 @@
 package com.aplana.sbrf.taxaccounting.model.source;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationType;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormType;
-
 import java.io.Serializable;
 
 /**

@@ -4,7 +4,6 @@ import com.aplana.gwt.client.Spinner;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.FormDataSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.SourcesSearchOrdering;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AplanaUiHandlers;
@@ -27,7 +26,6 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
-import com.google.gwt.text.shared.SimpleSafeHtmlRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
@@ -434,7 +432,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         downSM = new MultiSelectionModel<CurrentAssign>(new ProvidesKey<CurrentAssign>() {
             @Override
             public Object getKey(CurrentAssign item) {
-                return item.getId();
+                return item.getId() + "_" + item.getStartDateAssign().getTime() + "_" + item.getEndDateAssign().getTime();
             }
         });
 
