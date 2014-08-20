@@ -493,7 +493,10 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
     }
 
     @Override
-    public List<FormData> getPrevFormDataListForCrossNumeration(FormData formData, Integer year, String code) {
+    public List<FormData> getPrevFormDataListForCrossNumeration(FormData formData, TaxPeriod taxPeriod) {
+
+        int year = taxPeriod.getYear();
+        String code = String.valueOf(taxPeriod.getTaxType().getCode());
 
         StringBuilder sql = new StringBuilder(GET_FORM_DATA_LIST_QUERY);
 
