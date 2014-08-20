@@ -89,6 +89,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                 if (valuesList == null || valuesList.isEmpty()) {
                     // Обязательность
                     // logger.error(NOT_SET_ERROR, configurationParam.getCaption());
+                    model.remove(configurationParam);
                 } else {
                     if (configurationParam.isUnique() && valuesList.size() != 1) {
                         // Уникальность
