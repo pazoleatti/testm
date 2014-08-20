@@ -442,9 +442,9 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol++
 
         // графа 5
-        if (record != null) {
-            formDataService.checkReferenceValue(42, row.cell[xmlIndexCol].text(), record?.NAME?.value, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        }
+//        if (record != null) {
+//            formDataService.checkReferenceValue(42, row.cell[xmlIndexCol].text(), record?.NAME?.value, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+//        }
         xmlIndexCol++
 
         // графа 6
