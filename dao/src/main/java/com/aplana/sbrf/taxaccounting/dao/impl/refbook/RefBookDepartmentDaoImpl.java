@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
@@ -24,6 +25,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
+import javax.validation.constraints.NotNull;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -272,5 +274,22 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
                     }
                 });
         return result;
+    }
+
+    @Override
+    public List<Long> isRecordsActiveInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo) {
+        String sql = "select id from "+ TABLE_NAME +" where %s";
+        Set<Long> result = new HashSet<Long>(recordIds);
+        List<Long> existRecords = new ArrayList<Long>();
+        try {
+            existRecords = getJdbcTemplate().query(String.format(sql, SqlUtils.transformToSqlInStatement("id", recordIds)), new RowMapper<Long>() {
+                @Override
+                public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+                    return rs.getLong("id");
+                }
+            });
+        } catch (EmptyResultDataAccessException ignored) {}
+        result.removeAll(existRecords);
+        return new ArrayList<Long>(result);
     }
 }

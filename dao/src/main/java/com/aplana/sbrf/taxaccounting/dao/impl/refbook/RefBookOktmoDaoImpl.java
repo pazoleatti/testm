@@ -24,6 +24,7 @@ import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.PreparedStatement;
@@ -37,7 +38,7 @@ import java.util.*;
  * @author dloshkarev
  */
 @Repository
-public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookOktmoDao {
+public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao {
 
     @Autowired
     private RefBookDao refBookDao;
@@ -854,5 +855,34 @@ public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookOktmoDa
         RefBook refBook = refBookDao.get(refBookId);
         PreparedStatementData ps = getSimpleQuery(tableName, refBook, null, version, null, filter, null, false, null, true);
         return refBookDao.getRecordsCount(ps);
+    }
+
+    private static final String IS_RECORDS_ACTIVE_IN_PERIOD = "select id from (\n" +
+            "select input.id as input_id, rbr.id, rbr.record_id, rbr.version as start_version, rbr.status, lead (rbr.version) over (partition by rbr.recorD_id order by rbr.version) end_version \n" +
+            "from %s input\n" +
+            "join %s rbr on input.record_id = rbr.record_id \n" +
+            "where %s \n" +
+            ") a where input_id = id \n" +
+            "and (end_version - 1 >= :periodFrom or end_version is null) \n" +
+            "and (:periodTo is null or start_version <= :periodTo)";
+
+    @Override
+    public List<Long> isRecordsActiveInPeriod(String tableName, @NotNull List<Long> recordIds, @NotNull Date periodFrom, @NotNull Date periodTo) {
+        String sql = String.format(IS_RECORDS_ACTIVE_IN_PERIOD, tableName, tableName, SqlUtils.transformToSqlInStatement("input.id", recordIds));
+        Set<Long> result = new HashSet<Long>(recordIds);
+        List<Long> existRecords = new ArrayList<Long>();
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("periodFrom", periodFrom);
+        params.put("periodTo", periodTo);
+        try {
+            existRecords = getNamedParameterJdbcTemplate().query(sql, params, new RowMapper<Long>() {
+                @Override
+                public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+                    return rs.getLong("id");
+                }
+            });
+        } catch (EmptyResultDataAccessException ignored) {}
+        result.removeAll(existRecords);
+        return new ArrayList<Long>(result);
     }
 }

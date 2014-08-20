@@ -25,6 +25,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.validation.constraints.NotNull;
 import java.util.*;
 
 import static com.aplana.sbrf.taxaccounting.model.DepartmentType.*;
@@ -236,24 +237,25 @@ public class RefBookDepartment implements RefBookDataProvider {
         }
         List<String> lockedObjects = new ArrayList<String>();
         int userId = logger.getTaUserInfo().getUser().getId();
-        String lockKey = LockData.LOCK_OBJECTS.REF_BOOK.name() + "_" + REF_BOOK_ID;
+        RefBook refBook = refBookDao.get(REF_BOOK_ID);
+        String lockKey = LockData.LOCK_OBJECTS.REF_BOOK.name() + "_" + refBook.getId();
         LockData lockData = lockService.lock(lockKey, userId, LockData.STANDARD_LIFE_TIME);
         if (lockData == null) {
             try {
                 //Блокировка установлена
                 lockedObjects.add(lockKey);
                 //Блокируем связанные справочники
-                RefBook refBook = refBookDao.get(REF_BOOK_ID);
                 List<RefBookAttribute> attributes = refBook.getAttributes();
                 for (RefBookAttribute attribute : attributes) {
                     if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
-                        String referenceLockKey = LockData.LOCK_OBJECTS.REF_BOOK.name() + "_" + attribute.getRefBookId();
+                        RefBook attributeRefBook = refBookDao.get(attribute.getRefBookId());
+                        String referenceLockKey = LockData.LOCK_OBJECTS.REF_BOOK.name() + "_" + attributeRefBook.getId();
                         LockData referenceLockData = lockService.lock(referenceLockKey, userId, LockData.STANDARD_LIFE_TIME);
                         if (referenceLockData == null) {
                             //Блокировка установлена
                             lockedObjects.add(referenceLockKey);
                         } else {
-                            throw new ServiceLoggerException(LOCK_MESSAGE,
+                            throw new ServiceLoggerException(String.format(LOCK_MESSAGE, attributeRefBook.getName()),
                                     logEntryService.save(logger.getEntries()));
                         }
                     }
@@ -288,7 +290,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                 }
             }
         } else {
-            throw new ServiceLoggerException(LOCK_MESSAGE,
+            throw new ServiceLoggerException(String.format(LOCK_MESSAGE, refBook.getName()),
                     logEntryService.save(logger.getEntries()));
         }
     }
@@ -311,23 +313,24 @@ public class RefBookDepartment implements RefBookDataProvider {
         List<String> lockedObjects = new ArrayList<String>();
         int userId = logger.getTaUserInfo().getUser().getId();
         String lockKey = LockData.LOCK_OBJECTS.REF_BOOK.name() + "_" + REF_BOOK_ID;
+        RefBook refBook = refBookDao.get(REF_BOOK_ID);
         LockData lockData = lockService.lock(lockKey, userId, LockData.STANDARD_LIFE_TIME);
         if (lockData == null) {
             try {
                 //Блокировка установлена
                 lockedObjects.add(lockKey);
                 //Блокируем связанные справочники
-                RefBook refBook = refBookDao.get(REF_BOOK_ID);
                 List<RefBookAttribute> attributes = refBook.getAttributes();
                 for (RefBookAttribute attribute : attributes) {
                     if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
-                        String referenceLockKey = LockData.LOCK_OBJECTS.REF_BOOK.name() + "_" + attribute.getRefBookId();
+                        RefBook attributeRefBook = refBookDao.get(attribute.getId());
+                        String referenceLockKey = LockData.LOCK_OBJECTS.REF_BOOK.name() + "_" + attributeRefBook.getId();
                         LockData referenceLockData = lockService.lock(referenceLockKey, userId, LockData.STANDARD_LIFE_TIME);
                         if (referenceLockData == null) {
                             //Блокировка установлена
                             lockedObjects.add(referenceLockKey);
                         } else {
-                            throw new ServiceLoggerException(LOCK_MESSAGE,
+                            throw new ServiceLoggerException(String.format(LOCK_MESSAGE, attributeRefBook.getName()),
                                     logEntryService.save(logger.getEntries()));
                         }
                     }
@@ -494,7 +497,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                 }
             }
         } else {
-            throw new ServiceLoggerException(LOCK_MESSAGE,
+            throw new ServiceLoggerException(String.format(LOCK_MESSAGE, refBook.getName()),
                     logEntryService.save(logger.getEntries()));
         }
     }
@@ -526,23 +529,24 @@ public class RefBookDepartment implements RefBookDataProvider {
         List<String> lockedObjects = new ArrayList<String>();
         int userId = logger.getTaUserInfo().getUser().getId();
         String lockKey = LockData.LOCK_OBJECTS.REF_BOOK.name() + "_" + REF_BOOK_ID;
+        RefBook refBook = refBookDao.get(REF_BOOK_ID);
         LockData lockData = lockService.lock(lockKey, userId, LockData.STANDARD_LIFE_TIME);
         if (lockData == null) {
             try {
                 //Блокировка установлена
                 lockedObjects.add(lockKey);
                 //Блокируем связанные справочники
-                RefBook refBook = refBookDao.get(REF_BOOK_ID);
                 List<RefBookAttribute> attributes = refBook.getAttributes();
                 for (RefBookAttribute attribute : attributes) {
                     if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
+                        RefBook attributeRefBook = refBookDao.get(attribute.getId());
                         String referenceLockKey = LockData.LOCK_OBJECTS.REF_BOOK.name() + "_" + attribute.getRefBookId();
                         LockData referenceLockData = lockService.lock(referenceLockKey, userId, LockData.STANDARD_LIFE_TIME);
                         if (referenceLockData == null) {
                             //Блокировка установлена
                             lockedObjects.add(referenceLockKey);
                         } else {
-                            throw new ServiceLoggerException(LOCK_MESSAGE,
+                            throw new ServiceLoggerException(String.format(LOCK_MESSAGE, attributeRefBook.getName()),
                                     logEntryService.save(logger.getEntries()));
                         }
                     }
@@ -618,7 +622,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                 }
             }
         } else {
-            throw new ServiceLoggerException(LOCK_MESSAGE,
+            throw new ServiceLoggerException(String.format(LOCK_MESSAGE, refBook.getName()),
                     logEntryService.save(logger.getEntries()));
         }
     }
@@ -636,6 +640,11 @@ public class RefBookDepartment implements RefBookDataProvider {
     @Override
     public Map<RefBookAttributePair, String> getAttributesValues(List<RefBookAttributePair> attributePairs) {
         return refBookDepartmentDao.getAttributesValues(attributePairs);
+    }
+
+    @Override
+    public List<Long> getInactiveRecordsInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo) {
+        return refBookDepartmentDao.isRecordsActiveInPeriod(recordIds, periodFrom, periodTo);
     }
 
     /**

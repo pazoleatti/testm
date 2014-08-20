@@ -258,7 +258,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 		view.showSaveCancelPanel(true);
         view.showEditModeLabel(true);
-		view.showRecalculateButton(true);
+		view.showRecalculateButton(!formData.isManual());
         view.showAddRemoveRowsBlock(!fixedRows);
 
 		view.showPrintAnchor(false);

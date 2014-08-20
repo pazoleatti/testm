@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.core.api.LockCoreService;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -110,7 +109,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
 	@Override
 	@Transactional(readOnly = false)
-	public long create(Logger logger, int declarationTemplateId, int departmentId, TAUserInfo userInfo, int reportPeriodId) {
+	public long create(Logger logger, int declarationTemplateId, int departmentId, TAUserInfo userInfo, int reportPeriodId, String taxOrganCode, String taxOrganKpp) {
 		declarationDataAccessService.checkEvents(userInfo, declarationTemplateId, departmentId, reportPeriodId, FormDataEvent.CREATE);
 
         DeclarationData newDeclaration = new DeclarationData();
@@ -118,6 +117,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         newDeclaration.setReportPeriodId(reportPeriodId);
         newDeclaration.setAccepted(false);
         newDeclaration.setDeclarationTemplateId(declarationTemplateId);
+        newDeclaration.setTaxOrganCode(taxOrganCode);
+        newDeclaration.setKpp(taxOrganKpp);
 
         // Вызываем событие скрипта CREATE
         declarationDataScriptingService.executeScript(userInfo, newDeclaration, FormDataEvent.CREATE, logger, null);

@@ -28,7 +28,8 @@ public class DepartmentCombined implements Serializable {
     private List<Long> reorgFormCode;
     private String reorgInn;
     private String reorgKpp;
-    private String name;
+    //Наименование для титульного листя, Приложения № 5
+    private String name, additionalName;
 
     // Во всех налогах
     private List<Long> signatoryId;
@@ -38,7 +39,7 @@ public class DepartmentCombined implements Serializable {
     private String approveDocName;
     private String approveOrgName;
     private List<Long> taxPlaceTypeCode;
-    private String appVersion;
+
     private String formatVersion;
 
     // В налоге на прибыль и УКС
@@ -52,6 +53,14 @@ public class DepartmentCombined implements Serializable {
 
     // Транспортный налог
     private boolean prepayment;
+
+    public String getAdditionalName() {
+        return additionalName;
+    }
+
+    public void setAdditionalName(String additionalName) {
+        this.additionalName = additionalName;
+    }
 
     public Long getRecordId() {
         return recordId;
@@ -215,14 +224,6 @@ public class DepartmentCombined implements Serializable {
 
     public void setTaxPlaceTypeCode(List<Long> taxPlaceTypeCode) {
         this.taxPlaceTypeCode = taxPlaceTypeCode;
-    }
-
-    public String getAppVersion() {
-        return appVersion;
-    }
-
-    public void setAppVersion(String appVersion) {
-        this.appVersion = appVersion;
     }
 
     public String getFormatVersion() {

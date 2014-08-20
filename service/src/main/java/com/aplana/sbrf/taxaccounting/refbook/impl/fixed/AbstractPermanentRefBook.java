@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributePair;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.impl.AbstractReadOnlyRefBook;
 
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -73,6 +74,11 @@ public abstract class AbstractPermanentRefBook extends AbstractReadOnlyRefBook {
 
     @Override
     public Map<RefBookAttributePair, String> getAttributesValues(List<RefBookAttributePair> attributePairs) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<Long> getInactiveRecordsInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, @NotNull Date periodTo) {
         throw new UnsupportedOperationException();
     }
 }

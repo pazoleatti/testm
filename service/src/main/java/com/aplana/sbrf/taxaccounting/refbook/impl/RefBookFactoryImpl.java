@@ -100,6 +100,14 @@ public class RefBookFactoryImpl implements RefBookFactory {
             RefBookBookerStatementPeriod dataProvider = applicationContext.getBean("refBookBookerStatementPeriod", RefBookBookerStatementPeriod.class);
             dataProvider.setRefBookId(refBookId);
             return dataProvider;
+        } else if (RefBookTaxOrganCode.REF_BOOK_ID.equals(refBookId)) {
+            RefBookTaxOrganCode dataProvider = applicationContext.getBean("refBookTaxOrganCode", RefBookTaxOrganCode.class);
+            dataProvider.setRefBookId(refBookId);
+            return dataProvider;
+        } else if (RefBookTaxOrganKpp.REF_BOOK_ID.equals(refBookId)) {
+            RefBookTaxOrganKpp dataProvider = applicationContext.getBean("refBookTaxOrganKpp", RefBookTaxOrganKpp.class);
+            dataProvider.setRefBookId(refBookId);
+            return dataProvider;
         } else {
 			RefBookUniversal refBookUniversal = (RefBookUniversal) applicationContext.getBean("refBookUniversal", RefBookDataProvider.class);
 			refBookUniversal.setRefBookId(refBookId);

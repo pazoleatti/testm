@@ -31,5 +31,6 @@ public enum DepartmentParamAliases {
     TYPE,
     SUM_TAX,
     SUM_DIVIDENDS,
-    PREPAYMENT;
+    PREPAYMENT,
+    ADDITIONAL_NAME
 }

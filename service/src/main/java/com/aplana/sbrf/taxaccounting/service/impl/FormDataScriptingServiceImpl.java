@@ -20,6 +20,7 @@ import javax.script.Bindings;
 import javax.script.ScriptException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * Реализация сервиса для выполнения скриптов над формой.
@@ -33,6 +34,8 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
     private FormTemplateDao formTemplateDao;
     @Autowired
     private DepartmentService departmentService;
+    @Autowired
+    private Properties manifestProperties;
 
     @Override
     public void executeScript(TAUserInfo userInfo, FormData formData,
@@ -60,10 +63,13 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
             }
         }
         b.putAll(scriptComponents);
-
         b.put("formDataEvent", event);
         b.put("logger", logger);
         b.put("formData", formData);
+        if (manifestProperties != null) {
+            b.put("applicationVersion", manifestProperties.getProperty("Implementation-Version"));
+            b.put("applicationRevision", manifestProperties.getProperty("X-Git"));
+        }
         if (userInfo != null && userInfo.getUser() != null) {
             b.put("user", userInfo.getUser());
             b.put("userDepartment", departmentService.getDepartment(userInfo.getUser().getDepartmentId()));

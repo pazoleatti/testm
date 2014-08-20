@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
@@ -27,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * Сервис, реализующий выполение скриптов справочников
@@ -51,6 +53,9 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
 
     @Autowired
     private LogEntryService logEntryService;
+
+    @Autowired
+    private Properties manifestProperties;
 
     @Override
     public void executeScript(TAUserInfo userInfo, long refBookId, FormDataEvent event, Logger logger, Map<String, Object> additionalParameters) {
@@ -100,6 +105,10 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
         bindings.put("formDataEvent", event);
         bindings.put("logger", scriptLogger);
         bindings.put("refBookFactory", refBookFactory);
+        if (manifestProperties != null) {
+            bindings.put("applicationVersion", manifestProperties.getProperty("Implementation-Version"));
+            bindings.put("applicationRevision", manifestProperties.getProperty("X-Git"));
+        }
 
         if (userInfo != null && userInfo.getUser() != null) {
             bindings.put("user", userInfo.getUser());
@@ -115,7 +124,8 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
         }
 
         // Выполнение импорта скрипта справочника
-        scriptLogger.setMessageDecorator(new ScriptMessageDecorator("Событие «" + event.getTitle() + "» для справочника «" + refBook.getName() + "»"));
+        scriptLogger.setMessageDecorator(new ScriptMessageDecorator("Событие «" + event.getTitle()
+                + "» для справочника «" + refBook.getName() + "»"));
         executeScript(bindings, script, scriptLogger);
         scriptLogger.setMessageDecorator(null);
 
@@ -124,7 +134,14 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
 
         // Откат при возникновении фатальных ошибок в скрипте
         if (scriptLogger.containsLevel(LogLevel.ERROR)) {
-            throw new ServiceLoggerException("Произошли ошибки при выполнении скрипта справочника", logEntryService.save(logger.getEntries()));
+            String firstError = null;
+            for (LogEntry logEntry : logger.getEntries()) {
+                if (logEntry.getLevel() == LogLevel.ERROR) {
+                    firstError = logEntry.getMessage();
+                    break;
+                }
+            }
+            throw new ServiceLoggerException("Произошли ошибки в скрипте. " + firstError, logEntryService.save(logger.getEntries()));
         }
     }
 
