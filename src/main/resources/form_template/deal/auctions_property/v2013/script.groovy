@@ -144,6 +144,11 @@ void logicCheck() {
 
         def docDateCell = row.getCell('docDate')
 
+        if (row.count == 0) {
+            def countName = getColumnName(row, 'count')
+            rowWarning(logger, row, "Строка $rowNum: Графа «$countName» не может содержать значение 0")
+        }
+
         // Проверка доходов
         def sumCell = row.getCell('sum')
         def priceCell = row.getCell('price')
