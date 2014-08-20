@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import org.apache.commons.lang3.SerializationUtils;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -13,15 +14,13 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
  * @author Fail Mukhametdinov
  */
-public class FormTemplateServiceImplTest {
+public class FormTemplateServiceImplTest extends Assert {
 
     public static final int FORM_TEMPLATE_ID = 1;
     public static final int COLUMN_ID = 1;
@@ -159,6 +158,95 @@ public class FormTemplateServiceImplTest {
         formTemplateService.validateFormAutoNumerationColumn(formTemplateEdited, logger);
 
         assertTrue(logger.getEntries().size() == 0);
+    }
+
+    /**
+     * Нет ни одной автонумеруемой графы
+     */
+    @Test
+    public void testIsAnyAutoNumerationColumnNotExist() {
+        FormTemplate formTemplate = new FormTemplate();
+
+        Column numericColumn = new NumericColumn();
+        Column stringColumn = new StringColumn();
+
+        formTemplate.addColumn(numericColumn);
+        formTemplate.addColumn(stringColumn);
+
+        boolean anyCrossAutoNumerationColumn = formTemplateService.isAnyAutoNumerationColumn(formTemplate, AutoNumerationColumnType.CROSS);
+        boolean anySerialAutoNumerationColumn = formTemplateService.isAnyAutoNumerationColumn(formTemplate, AutoNumerationColumnType.SERIAL);
+        assertFalse("Не должно быть ни одной сквозной автонумеруемой графы", anyCrossAutoNumerationColumn);
+        assertFalse("Не должно быть ни одной последовательной автонумеруемой графы", anySerialAutoNumerationColumn);
+    }
+
+    /**
+     * Есть одна последовательная автонумеруемая графа
+     */
+    @Test
+    public void testIsAnyAutoNumerationColumnSerialExist() {
+        FormTemplate formTemplate = new FormTemplate();
+
+        Column numericColumn = new NumericColumn();
+        Column stringColumn = new StringColumn();
+        Column autoNumerationColumn = new AutoNumerationColumn(AutoNumerationColumnType.SERIAL.getName(), AutoNumerationColumnType.SERIAL.getType());
+
+        formTemplate.addColumn(numericColumn);
+        formTemplate.addColumn(stringColumn);
+        formTemplate.addColumn(autoNumerationColumn);
+
+        boolean anyCrossAutoNumerationColumn = formTemplateService.isAnyAutoNumerationColumn(formTemplate, AutoNumerationColumnType.CROSS);
+        boolean anySerialAutoNumerationColumn = formTemplateService.isAnyAutoNumerationColumn(formTemplate, AutoNumerationColumnType.SERIAL);
+        assertFalse("Не должно быть ни одной сквозной автонумеруемой графы", anyCrossAutoNumerationColumn);
+        assertTrue("Должна быть хотя бы одна последовательная автонумеруемая графа", anySerialAutoNumerationColumn);
+    }
+
+    /**
+     * Есть одна сквозная автонумеруемая графа
+     */
+    @Test
+    public void testIsAnyAutoNumerationColumnCrossExist() {
+        FormTemplate formTemplate = new FormTemplate();
+
+        Column numericColumn = new NumericColumn();
+        Column stringColumn = new StringColumn();
+        Column autoNumerationColumn = new AutoNumerationColumn(AutoNumerationColumnType.CROSS.getName(), AutoNumerationColumnType.CROSS.getType());
+
+        formTemplate.addColumn(numericColumn);
+        formTemplate.addColumn(stringColumn);
+        formTemplate.addColumn(autoNumerationColumn);
+
+        boolean anyCrossAutoNumerationColumn = formTemplateService.isAnyAutoNumerationColumn(formTemplate, AutoNumerationColumnType.CROSS);
+        boolean anySerialAutoNumerationColumn = formTemplateService.isAnyAutoNumerationColumn(formTemplate, AutoNumerationColumnType.SERIAL);
+        assertTrue("Должна быть хотя бы одна сквозная автонумеруемая графа", anyCrossAutoNumerationColumn);
+        assertFalse("Не должно быть ни одной последовательной автонумеруемой графы", anySerialAutoNumerationColumn);
+    }
+
+    /**
+     * Есть оба вида автонумеруемых граф
+     */
+    @Test
+    public void testIsAnyAutoNumerationColumnBothExist() {
+        FormTemplate formTemplate = new FormTemplate();
+
+        Column numericColumn = new NumericColumn();
+        Column stringColumn = new StringColumn();
+        Column crossAutoNumerationColumn = new AutoNumerationColumn(AutoNumerationColumnType.CROSS.getName(), AutoNumerationColumnType.CROSS.getType());
+        Column serialAutoNumerationColumn = new AutoNumerationColumn(AutoNumerationColumnType.SERIAL.getName(), AutoNumerationColumnType.SERIAL.getType());
+
+        formTemplate.addColumn(numericColumn);
+        formTemplate.addColumn(crossAutoNumerationColumn);
+        formTemplate.addColumn(stringColumn);
+        formTemplate.addColumn(serialAutoNumerationColumn);
+        formTemplate.addColumn(stringColumn);
+        formTemplate.addColumn(crossAutoNumerationColumn);
+        formTemplate.addColumn(stringColumn);
+        formTemplate.addColumn(serialAutoNumerationColumn);
+        formTemplate.addColumn(stringColumn);
+
+        boolean anyCrossAutoNumerationColumn = formTemplateService.isAnyAutoNumerationColumn(formTemplate, AutoNumerationColumnType.CROSS);
+        boolean anySerialAutoNumerationColumn = formTemplateService.isAnyAutoNumerationColumn(formTemplate, AutoNumerationColumnType.SERIAL);
+        assertTrue("Должна быть хотя бы одна сквозная автонумеруемая графа", anyCrossAutoNumerationColumn);
+        assertTrue("Должна быть хотя бы одна последовательная автонумеруемая графа", anySerialAutoNumerationColumn);
     }
 
 //    @Test(expected = ValidationException.class)
