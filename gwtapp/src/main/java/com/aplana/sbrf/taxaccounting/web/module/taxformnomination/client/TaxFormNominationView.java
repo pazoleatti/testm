@@ -390,7 +390,8 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 
 	@Override
 	public void setDataToFormTable(int start, int totalCount, List<FormTypeKind> departmentFormTypes, Map<Integer, String> departmentFullNames) {
-		if (departmentFormTypes.isEmpty()) {
+        formSM.clear();
+        if (departmentFormTypes.isEmpty()) {
 			formGrid.setRowCount(0);
 			return;
 		}
@@ -401,7 +402,8 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 
 	@Override
 	public void setDataToDeclarationTable(int start, int totalCount, List<FormTypeKind> departmentFormTypes, Map<Integer, String> departmentFullNames) {
-		if (departmentFormTypes.isEmpty()) {
+        decSM.clear();
+        if (departmentFormTypes.isEmpty()) {
 			decGrid.setRowCount(0);
 			return;
 		}
