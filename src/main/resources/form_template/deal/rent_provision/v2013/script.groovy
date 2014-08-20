@@ -166,6 +166,11 @@ void logicCheck() {
         def transactionDateName = row.getCell('transactionDate').column.name
         def costName = row.getCell('cost').column.name
 
+        if (row.count == 0) {
+            def countName = row.getCell('count').column.name
+            rowWarning(logger, row, "Строка $rowNum: Графа «$countName» не может содержать значение 0")
+        }
+
         // Проверка доходности
         if (cost != bankSum) {
             rowWarning(logger, row, "Строка $rowNum: «$costName» не может отличаться от «$msgBankSum»!")
