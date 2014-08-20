@@ -548,19 +548,20 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
                     "                     join REPORT_PERIOD rp on rp.ID = fd.REPORT_PERIOD_ID\n" +
                     "                     join FORM_DATA_PERFORMER on FORM_DATA_PERFORMER.form_data_id = fd.ID\n" +
                     "                      where %s \n" +
-                    "                      and FORM_DATA_PERFORMER.REPORT_DEPARTMENT_NAME = :oldDepartmentName)" +
+                    "                      and FORM_DATA_PERFORMER.PRINT_DEPARTMENT_ID = :departmentId)" +
                     "SELECT * FROM formDataIdsWithRegExp) b on (fdp.form_data_id = b.fd_id) WHEN MATCHED THEN UPDATE SET REPORT_DEPARTMENT_NAME = :newDepartmentName";
     private static final String UPDATE_FORM_DATA_PERFORMER_TB2 =
             "merge into FORM_DATA_PERFORMER fdp using (\n" +
-                    "  with depNameParts as (select SUBSTR(rdn, 0, instr(rdn, '/', 1) - 1) first_dep_name, SUBSTR(rdn, instr(rdn, '/', 1) + 1,length(rdn)) second_dep_name, form_data_id from (select fdp_f.REPORT_DEPARTMENT_NAME rdn, fdp_f.FORM_DATA_ID form_data_id from FORM_DATA_PERFORMER fdp_f where fdp_f.REPORT_DEPARTMENT_NAME like '%%/%%')),\n" +
-                    "       formDataIdsWithRegExp as (select distinct fd.ID fd_id, depNameParts.first_dep_name, depNameParts.second_dep_name from FORM_DATA fd\n" +
+                    "  with depNameParts as (select (SELECT CONNECT_BY_ROOT ID as ID_ROOT FROM DEPARTMENT where id = PRINT_DEPARTMENT_ID START WITH (type = 2) CONNECT BY PRIOR id = PARENT_ID) PRINT_DEPARTMENT_TB_ID, " +
+                    "    SUBSTR(rdn, instr(rdn, '/', 1) + 1,length(rdn)) second_dep_name, form_data_id from (select fdp_f.REPORT_DEPARTMENT_NAME rdn, fdp_f.FORM_DATA_ID form_data_id, fdp_f.PRINT_DEPARTMENT_ID from FORM_DATA_PERFORMER fdp_f where fdp_f.REPORT_DEPARTMENT_NAME like '%%/%%')),\n" +
+                    "       formDataIdsWithRegExp as (select distinct fd.ID fd_id, depNameParts.second_dep_name from FORM_DATA fd\n" +
                     "                     join REPORT_PERIOD rp on rp.ID = fd.REPORT_PERIOD_ID\n" +
                     "                     join depNameParts on depNameParts.form_data_id = fd.ID\n" +
                     "                      where %s \n" +
-                    "                      and depNameParts.first_dep_name = :oldDepartmentName)" +
+                    "                      and depNameParts.PRINT_DEPARTMENT_TB_ID = :departmentId)" +
                     "SELECT * FROM formDataIdsWithRegExp) b on (fdp.form_data_id = b.fd_id) WHEN MATCHED THEN UPDATE SET REPORT_DEPARTMENT_NAME = (:newDepartmentName || '/' || b.second_dep_name)";
     @Override
-    public void updateFDPerformerTBDepartmentNames(String oldDepartmentName, String newDepartmentName, Date dateFrom, Date dateTo) {
+    public void updateFDPerformerTBDepartmentNames(int departmentId, String newDepartmentName, Date dateFrom, Date dateTo) {
         String dateTag = dateFrom != null && dateTo != null ? "(rp.START_DATE between :dateFrom and :dateTo or rp.END_DATE  between :dateFrom and :dateTo)"
                 : dateFrom != null ? "rp.START_DATE >= :dateFrom"
                 : null;
@@ -568,7 +569,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         values.put("dateFrom", dateFrom);
         values.put("dateTo", dateTo);
         values.put("newDepartmentName", newDepartmentName);
-        values.put("oldDepartmentName", oldDepartmentName);
+        values.put("departmentId", departmentId);
         try {
             getNamedParameterJdbcTemplate().update(String.format(UPDATE_FORM_DATA_PERFORMER_TB2, dateTag), values);
             getNamedParameterJdbcTemplate().update(String.format(UPDATE_FORM_DATA_PERFORMER_TB, dateTag), values);

@@ -12,10 +12,6 @@
     <artifactId>scheduler-task</artifactId>
     <packaging>ejb</packaging>
 
-    <properties>
-        <buildName>${parent.parent.build.finalName}</buildName>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>

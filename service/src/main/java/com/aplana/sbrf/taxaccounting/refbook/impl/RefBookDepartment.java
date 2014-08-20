@@ -55,12 +55,6 @@ public class RefBookDepartment implements RefBookDataProvider {
     private static final String WARN_MESSAGE_SOURCE =
             "Внимание! Форма %s подразделения %s при сохранении будет являться источником для формы %s подразделения %s, относящимся к разным территориальным банкам";
 
-
-    public static final String DESTINATION_FTS = "destinationFTs";
-    public static final String SOURCE_FTS = "sourceFTs";
-    public static final String DESTINATION_DTS = "destinationDTs";
-    public static final String SOURCE_DTS = "sourceDTs";
-
     @Autowired
     RefBookDao refBookDao;
     @Autowired
