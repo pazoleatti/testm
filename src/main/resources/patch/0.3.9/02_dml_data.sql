@@ -99,5 +99,9 @@ UPDATE ref_book_oktmo SET code = translate(code, '«»', '""') WHERE instr(code,
 UPDATE ref_book_value SET string_value = translate(string_value, '«»', '""') WHERE instr(string_value, '«')<>0 or instr(string_value, '»')<>0;
 
 ---------------------------------------------------------------------------------------------------------
+-- http://jira.aplana.com/browse/SBRFACCTAX-8586: Исправить записи в справочнике ОКТМО
+UPDATE ref_book_oktmo SET code = substr(code, 1, 8) WHERE substr(code, 9, 3) = '000';
+
+---------------------------------------------------------------------------------------------------------
 COMMIT;
 EXIT;
