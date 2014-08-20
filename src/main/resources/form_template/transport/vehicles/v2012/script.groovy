@@ -460,7 +460,7 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol++
 
         // графа 9
-        newRow.regNumber = row.cell[xmlIndexCol].text()
+        newRow.regNumber = row.cell[xmlIndexCol].text().replace(' ', '')
         xmlIndexCol++
 
         // графа 10
