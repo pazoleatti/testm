@@ -54,7 +54,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     private TaxType taxType;
     private boolean fixedRows;
     // флаг что нужно заскролить к выделенной строке, используется для формы поиска
-    private boolean needScrollToRow = false;
+    private Integer needScrollToRow = null;
     // содержит ссылку на предыдуще выделенную строку при использовании NoSelectionModel
     private DataRow<Cell> prevSelectedRow = null;
 
@@ -326,9 +326,10 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	public void setRowsData(int start, int totalCount, List<DataRow<Cell>> rowsData) {
 		formDataTable.setRowCount(totalCount);
 		formDataTable.setRowData(start, rowsData);
-        if (needScrollToRow && !fixedRows && getSelectedRow() != null) {
-            this.needScrollToRow = false;
-            formDataTable.getRowElement(singleSelectionModel.getSelectedObject().getIndex() - start).scrollIntoView();
+        if (needScrollToRow != null && !fixedRows) {
+            selectRow(needScrollToRow);
+            formDataTable.getRowElement(singleSelectionModel.getSelectedObject().getIndex() - start - 1).scrollIntoView();
+            this.needScrollToRow = null;
         }
     }
 
@@ -734,19 +735,29 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
         if (fixedRows){
             formDataTable.setKeyboardSelectedRow(rowIndex.intValue() - 1);
         } else {
+            singleSelectionModel.clear();
+            /*
             DataRow<Cell> row = new DataRow<Cell>();
             row.setIndex(rowIndex.intValue());
-            singleSelectionModel.setSelected(row, true);
+            singleSelectionModel.setSelected(row, true);*/
 
             // go to essential page
-            Long page = rowIndex / pager.getPageSize() + (rowIndex % pager.getPageSize() > 0 ? 1:0) - 1;
+            Long page = (rowIndex - 1) / pager.getPageSize();
             if (pager.getPage() != page.intValue()){
-                this.needScrollToRow = true;
+                this.needScrollToRow = rowIndex.intValue();
                 pager.setPage(page.intValue());
             } else {
-                formDataTable.getRowElement(singleSelectionModel.getSelectedObject().getIndex() - pager.getPageStart()).scrollIntoView();
+                selectRow(rowIndex.intValue());
+                formDataTable.getRowElement(singleSelectionModel.getSelectedObject().getIndex() - pager.getPageStart() - 1 ).scrollIntoView();
             }
         }
+    }
+
+    void selectRow(int rowIndex) {
+        List<DataRow<Cell>> rows = formDataTable.getVisibleItems();
+        for (DataRow<Cell> cell: rows)
+            if (cell.getIndex()==rowIndex)
+                singleSelectionModel.setSelected(cell, true);
     }
 
     @Override
