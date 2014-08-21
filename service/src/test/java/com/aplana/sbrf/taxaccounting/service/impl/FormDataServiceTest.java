@@ -438,6 +438,7 @@ public class FormDataServiceTest extends Assert {
     /**
      * Текущий экземпляр НФ находится в состоянии отличном от "Создана".
      * Количество строк в табличной части до и после редактирования изменилось.
+     * Нет ни одной сквозной автонумеруемой графы
      * Важен порядок вызова методов!!!
      *
      * 1. Выполнить сравнение количества строк в табличной части до и после редактирования.
@@ -472,6 +473,45 @@ public class FormDataServiceTest extends Assert {
     /**
      * Текущий экземпляр НФ находится в состоянии отличном от "Создана".
      * Количество строк в табличной части до и после редактирования изменилось.
+     * Есть хотя бы одна сквозная автонумеруемая графа.
+     * Случай когда нет экземпляров последующих периодов для обновления "Номера предыдущей налоговой формы".
+     * Важен порядок вызова методов!!!
+     *
+     * 1. Выполнить сравнение количества строк в табличной части до и после редактирования.
+     * 2. Выполнить проверку наличия автонумеруемых граф со сквозной нумерацией.
+     * 3. Обновить сквозную нумерацию в налоговых формах следующих периодов текущей сквозной нумерации.
+     * 4. Не выводить в панель уведомлений сообщение.
+     */
+    @Test
+    public void testSaveFormDataStateNotCreatedDataRowsChangedAnyAutoNumerationExistNotShowMsg() {
+        Logger logger = mock(Logger.class);
+        TAUserInfo userInfo = mock(TAUserInfo.class);
+
+        FormData formData = getFormData();
+
+        final FormDataService dataService = spy(formDataService);
+
+        when(dataRowDao.isDataRowsCountChanged(formData.getId())).thenReturn(true);
+        when(formTemplateService.isAnyAutoNumerationColumn(any(FormTemplate.class), any(AutoNumerationColumnType.class))).thenReturn(true);
+        doReturn(null).when(dataService).updatePreviousRowNumber(any(FormData.class));
+
+        dataService.saveFormData(logger, userInfo, formData);
+
+        InOrder inOrder = inOrder(dataRowDao, formTemplateService, dataService, formDataDao);
+
+        inOrder.verify(dataRowDao, times(1)).isDataRowsCountChanged(anyLong());
+        inOrder.verify(formTemplateService, times(1)).isAnyAutoNumerationColumn(any(FormTemplate.class), any(AutoNumerationColumnType.class));
+        inOrder.verify(dataService, times(1)).updatePreviousRowNumber(any(FormData.class));
+        inOrder.verify(formDataDao).save(any(FormData.class));
+
+        verify(logger, never()).info(anyString());
+    }
+
+    /**
+     * Текущий экземпляр НФ находится в состоянии отличном от "Создана".
+     * Количество строк в табличной части до и после редактирования изменилось.
+     * Есть хотя бы одна сквозная автонумеруемая графа.
+     * Случай когда есть экземпляры последующих периодов для обновления "Номера предыдущей налоговой формы".
      * Важен порядок вызова методов!!!
      *
      * 1. Выполнить сравнение количества строк в табличной части до и после редактирования.
@@ -480,7 +520,7 @@ public class FormDataServiceTest extends Assert {
      * 4. Вывести в панель уведомлений сообщение.
      */
     @Test
-    public void testSaveFormDataStateNotCreatedDataRowsChangedAnyAutoNumerationExist() {
+    public void testSaveFormDataStateNotCreatedDataRowsChangedAnyAutoNumerationExistShowMsg() {
         Logger logger = mock(Logger.class);
         TAUserInfo userInfo = mock(TAUserInfo.class);
 
