@@ -1,7 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.components.AbstractTreeListenerComponent;
-import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.components.ForeignKeyResolverComponent;
+import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.components.foreignkeyresolver.JoinSqlPartBuilder;
+import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.components.foreignkeyresolver.Universal2SimpleJoinSqlPartBuilder;
+import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.components.foreignkeyresolver.Universal2UniversalJoinSqlPartBuilder;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
@@ -9,6 +11,12 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.ArrayList;
@@ -22,9 +30,18 @@ import static org.mockito.Mockito.when;
  * Тестирование помошника лиснера
  * который отвечает за работу с внешними справочниками
  */
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration({ "FilterTreeListenerTest.xml" })
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class ForignKeyResolverTest {
 
+    @Autowired
+    @Qualifier("foreignKeyResolver")
     AbstractTreeListenerComponent foreignKeyResolverComponent;
+
+    @Autowired
+    @Qualifier("universal2SimpleJoinSqlPartBuilder")
+    private Universal2SimpleJoinSqlPartBuilder u2SimpleJoinSqlPartBuilder;
 
     @Before
     public void init(){
@@ -75,6 +92,12 @@ public class ForignKeyResolverTest {
         attributeCity.setId(4L);
         attributeList2.add(attributeCity);
 
+        RefBookAttribute attributeUserCar = new RefBookAttribute();
+        attributeUserCar.setAlias("car");
+        attributeUserCar.setRefBookId(4L);
+        attributeUserCar.setId(5L);
+        attributeList2.add(attributeUserCar);
+
         refBookUserInfo.setAttributes(attributeList2);
 
         // Третий справочник - города
@@ -85,7 +108,7 @@ public class ForignKeyResolverTest {
         RefBookAttribute attributeCityName = new RefBookAttribute();
         attributeCityName.setAlias("name");
         attributeCityName.setAttributeType(RefBookAttributeType.STRING);
-        attributeCityName.setId(5L);
+        attributeCityName.setId(6L);
         attributeList3.add(attributeCityName);
         refBookCity.setAttributes(attributeList3);
 
@@ -93,24 +116,57 @@ public class ForignKeyResolverTest {
         RefBook refBookCar =  new RefBook();
         refBookCar.setId(4L);
         refBookCar.setName("Автомобили");
+        refBookCar.setTableName("car");
+
         List<RefBookAttribute> attributeList4 =  new ArrayList<RefBookAttribute>();
         RefBookAttribute attributeBrand = new RefBookAttribute();
         attributeBrand.setAlias("brand");
         attributeBrand.setAttributeType(RefBookAttributeType.STRING);
-        attributeBrand.setId(6L);
+        attributeBrand.setId(7L);
         attributeList4.add(attributeBrand);
+        RefBookAttribute attributeNumber = new RefBookAttribute();
+        attributeNumber.setAlias("number");
+        attributeNumber.setAttributeType(RefBookAttributeType.REFERENCE);
+        attributeNumber.setRefBookId(5L);
+        attributeNumber.setId(8L);
+        attributeList4.add(attributeNumber);
         refBookCar.setAttributes(attributeList4);
+
+        // Пятый справочник - номера машин (простой справочник)
+        RefBook refBookNumbers =  new RefBook();
+        refBookNumbers.setId(5L);
+        refBookNumbers.setName("Номера автомобилей");
+        refBookNumbers.setTableName("number");
+
+        List<RefBookAttribute> attributeList5 =  new ArrayList<RefBookAttribute>();
+        RefBookAttribute attributeCode = new RefBookAttribute();
+        attributeCode.setAlias("code");
+        attributeCode.setAttributeType(RefBookAttributeType.NUMBER);
+        attributeCode.setId(9L);
+        attributeList5.add(attributeCode);
+        refBookNumbers.setAttributes(attributeList5);
 
         RefBookDao refBookDao = mock(RefBookDao.class);
         when(refBookDao.get(1L)).thenReturn(refBookOrder);
         when(refBookDao.get(2L)).thenReturn(refBookUserInfo);
         when(refBookDao.get(3L)).thenReturn(refBookCity);
         when(refBookDao.get(4L)).thenReturn(refBookCar);
+        when(refBookDao.get(5L)).thenReturn(refBookNumbers);
 
+        when(refBookDao.getByAttribute(1L)).thenReturn(refBookOrder);
+        when(refBookDao.getByAttribute(2L)).thenReturn(refBookOrder);
+        when(refBookDao.getByAttribute(3L)).thenReturn(refBookUserInfo);
+        when(refBookDao.getByAttribute(4L)).thenReturn(refBookUserInfo);
+        when(refBookDao.getByAttribute(5L)).thenReturn(refBookUserInfo);
+        when(refBookDao.getByAttribute(6L)).thenReturn(refBookCity);
+        when(refBookDao.getByAttribute(7L)).thenReturn(refBookCar);
+        when(refBookDao.getByAttribute(8L)).thenReturn(refBookCar);
+        when(refBookDao.getByAttribute(9L)).thenReturn(refBookNumbers);
 
-        foreignKeyResolverComponent = new ForeignKeyResolverComponent();
         foreignKeyResolverComponent.setRefBook(refBookOrder);
         ReflectionTestUtils.setField(foreignKeyResolverComponent, "refBookDao", refBookDao);
+        ReflectionTestUtils.setField(u2SimpleJoinSqlPartBuilder, "refBookDao", refBookDao);
+        ReflectionTestUtils.setField(foreignKeyResolverComponent, "u2SimpleJoinSqlPartBuilder", u2SimpleJoinSqlPartBuilder);
     }
 
     @Test
@@ -129,7 +185,9 @@ public class ForignKeyResolverTest {
         foreignKeyResolverComponent.setPreparedStatementData(result);
         Filter.getFilterQuery("user.city.name = '123'", foreignKeyResolverComponent);
 
-        assertTrue(result.getJoinPartsOfQuery().equals("left join ref_book_value frb0 on frb0.record_id = auser.reference_value and frb0.attribute_id = 4\nleft join ref_book_value frb1 on frb1.record_id = frb1.city and frb1.attribute_id = 5\n"));
+        assertTrue(result.getJoinPartsOfQuery().equals(
+                "left join ref_book_value frb0 on frb0.record_id = auser.reference_value and frb0.attribute_id = 4\n"
+                +"left join ref_book_value frb1 on frb1.record_id = frb1.city and frb1.attribute_id = 6\n"));
         assertTrue(result.getQuery().toString().equals("frb1.STRING_value"));
     }
 
@@ -142,10 +200,11 @@ public class ForignKeyResolverTest {
         foreignKeyResolverComponent.setPreparedStatementData(result1);
         Filter.getFilterQuery("user.name = '123' and user.city.name = '123'", foreignKeyResolverComponent);
 
-        assertTrue(result1.getJoinPartsOfQuery().equals("left join ref_book_value frb0 on frb0.record_id = auser.reference_value and frb0.attribute_id = 2\n" +
+        assertTrue(result1.getJoinPartsOfQuery().equals(
+                "left join ref_book_value frb0 on frb0.record_id = auser.reference_value and frb0.attribute_id = 2\n" +
                 "\n" +
                 "left join ref_book_value frb1 on frb1.record_id = auser.reference_value and frb1.attribute_id = 4\n" +
-                "left join ref_book_value frb2 on frb2.record_id = frb2.city and frb2.attribute_id = 5\n"));
+                "left join ref_book_value frb2 on frb2.record_id = frb2.city and frb2.attribute_id = 6\n"));
 
     }
 
@@ -169,7 +228,14 @@ public class ForignKeyResolverTest {
      */
     @Test
     public void attributeLinkFromUniversal2Universal2Simple(){
+        PreparedStatementData result = new PreparedStatementData();
+        foreignKeyResolverComponent.setPreparedStatementData(result);
+        Filter.getFilterQuery("user.car.brand = '123'", foreignKeyResolverComponent);
 
+        assertTrue(result.getJoinPartsOfQuery().equals(
+                "left join ref_book_value frb0 on frb0.record_id = auser.reference_value and frb0.attribute_id = 5\n"+
+                "left join car frb1 on frb1.id = frb1.car\n"));
+        assertTrue(result.getQuery().toString().equals("frb1.brand"));
     }
 
     /**
@@ -178,7 +244,12 @@ public class ForignKeyResolverTest {
      */
     @Test
     public void attributeLinkFromSimpleToSimple(){
+        PreparedStatementData result = new PreparedStatementData();
+        foreignKeyResolverComponent.setPreparedStatementData(result);
+        Filter.getFilterQuery("car.number.code = 123", foreignKeyResolverComponent);
 
+        assertTrue(result.getJoinPartsOfQuery().equals("left join number frb0 on frb0.id = number\n"));
+        assertTrue(result.getQuery().toString().equals("frb0.code"));
     }
 
     /**

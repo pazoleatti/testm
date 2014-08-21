@@ -2,7 +2,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.components.AbstractTreeListenerComponent;
-import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.components.ForeignKeyResolverComponent;
+import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.components.foreignkeyresolver.ForeignKeyResolverComponent;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.components.TypeVerifierComponent;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.components.UniversalQueryBuilderComponent;
 import com.aplana.sbrf.taxaccounting.dao.refbook.filter.FilterTreeListener;

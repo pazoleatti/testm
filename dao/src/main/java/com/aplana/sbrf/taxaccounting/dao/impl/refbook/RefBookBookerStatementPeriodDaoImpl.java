@@ -187,6 +187,7 @@ public class RefBookBookerStatementPeriodDaoImpl extends AbstractDao implements 
             result.setAttributes(getAttributes(result.getId()));
             result.setType(SqlUtils.getInteger(rs,"type"));
             result.setReadOnly(rs.getBoolean("read_only"));
+            result.setTableName(rs.getString("table_name"));
             BigDecimal regionAttributeId = (BigDecimal) rs.getObject("REGION_ATTRIBUTE_ID");
             if (regionAttributeId == null) {
                 result.setRegionAttribute(null);

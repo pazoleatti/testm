@@ -122,13 +122,14 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     private class RefBookRowMapper implements RowMapper<RefBook> {
         public RefBook mapRow(ResultSet rs, int index) throws SQLException {
             RefBook result = new RefBook();
-            result.setId(SqlUtils.getLong(rs, "id"));
+            result.setId(SqlUtils.getLong(rs,"id"));
             result.setName(rs.getString("name"));
             result.setScriptId(rs.getString("script_id"));
-            result.setVisible(rs.getBoolean("visible"));
+			result.setVisible(rs.getBoolean("visible"));
             result.setAttributes(getAttributes(result.getId()));
-            result.setType(SqlUtils.getInteger(rs, "type"));
-            result.setReadOnly(rs.getBoolean("read_only"));
+			result.setType(SqlUtils.getInteger(rs,"type"));
+			result.setReadOnly(rs.getBoolean("read_only"));
+            result.setTableName(rs.getString("table_name"));
             BigDecimal regionAttributeId = (BigDecimal) rs.getObject("REGION_ATTRIBUTE_ID");
             if (regionAttributeId == null) {
                 result.setRegionAttribute(null);
