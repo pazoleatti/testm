@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.templateversion.VersionOperatingService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +61,17 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
             versionOperatingService.isIntersectionVersion(declarationTemplate.getId(), declarationTemplate.getType().getId(),
                     declarationTemplate.getStatus(), declarationTemplate.getVersion(), templateActualEndDate, logger);
             checkError(logger, SAVE_MESSAGE);
-            versionOperatingService.checkDestinationsSources(declarationTemplate.getType().getId(), declarationTemplate.getVersion(), templateActualEndDate, logger);
+            //Выполенение шага 5.А.1.1
+            Pair<Date, Date> beginRange = null;
+            Pair<Date, Date> endRange = null;
+            if (dbVersionBeginDate.compareTo(declarationTemplate.getVersion()) < 0)
+                beginRange = new Pair<Date, Date>(dbVersionBeginDate, declarationTemplate.getVersion());
+            if (
+                    (dbVersionEndDate == null && templateActualEndDate != null)
+                ||
+                    (dbVersionEndDate != null && templateActualEndDate != null && dbVersionEndDate.compareTo(templateActualEndDate) > 0))
+                endRange = new Pair<Date, Date>(templateActualEndDate, dbVersionEndDate);
+            versionOperatingService.checkDestinationsSources(declarationTemplate.getType().getId(), beginRange, endRange, logger);
             checkError(logger, SAVE_MESSAGE);
         }
 
@@ -123,7 +134,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
                 //declarationTemplate.setStatus(VersionedObjectStatus.DELETED);
             }
         }
-        versionOperatingService.checkDestinationsSources(typeId, null, null, logger);
+        versionOperatingService.checkDestinationsSources(typeId, (Date) null, null, logger);
         checkError(logger, DELETE_TEMPLATE_MESSAGE);
         //Проверка назначений деклараций
         for (DepartmentDeclarationType departmentFormType : sourceService.getDDTByDeclarationType(typeId))
