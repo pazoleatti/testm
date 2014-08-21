@@ -23,12 +23,12 @@ public abstract class AbstractTreeListenerComponent implements FilterTreeListene
     * Модель содержащая данные для PreparedStatement,
     * который используется для составления полного sql запроса
     */
-    PreparedStatementData ps;
+    protected PreparedStatementData ps;
 
     /**
      * Справочник, для которого составляется запрос
      */
-    RefBook refBook;
+    protected RefBook refBook;
 
     public void setRefBook(RefBook refBook){
         this.refBook = refBook;
