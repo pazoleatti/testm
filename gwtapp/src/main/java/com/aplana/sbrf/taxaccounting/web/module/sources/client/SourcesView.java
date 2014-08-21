@@ -754,7 +754,6 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
 
     @Override
     public void setAvailableFormsLeft(List<DepartmentAssign> departmentFormTypes) {
-        System.out.println("departmentFormTypes: "+departmentFormTypes.size());
         clearLeftTable();
         leftTable.setRowData(0, departmentFormTypes);
         leftTable.setVisibleRange(new Range(0, departmentFormTypes.size()));
