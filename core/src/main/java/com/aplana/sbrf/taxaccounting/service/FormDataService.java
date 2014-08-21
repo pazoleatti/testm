@@ -281,9 +281,14 @@ public interface FormDataService {
     /**
      * Обновить Номер последней строки предыдущей НФ
      * @param formData экземпляр НФ, для которой необходимо обновить
-     * @return
      */
-    String updatePreviousRowNumber(FormData formData);
+    void updatePreviousRowNumber(FormData formData, Logger logger);
+
+    /**
+     * Обновить Номер последней строки предыдущей НФ
+     * @param formData экземпляр НФ, для которой необходимо обновить
+     */
+    void updatePreviousRowNumber(FormData formData);
 
     /**
      * Получить налоговые формы которые имеют признак ручного ввода
