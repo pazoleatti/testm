@@ -110,9 +110,11 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
         }
 
         for (Map.Entry<ConfigurationParam, Map<Integer, List<String>>> entry : oldModel.entrySet()) {
-            for (Integer departmentId : entry.getValue().keySet()) {
-                if (!model.containsKey(entry.getKey(), departmentId)) {
-                    deleteParams.add(new Object[]{entry.getKey().name(), departmentId});
+            if (entry.getValue() != null) {
+                for (Integer departmentId : entry.getValue().keySet()) {
+                    if (!model.containsKey(entry.getKey(), departmentId)) {
+                        deleteParams.add(new Object[]{entry.getKey().name(), departmentId});
+                    }
                 }
             }
         }
