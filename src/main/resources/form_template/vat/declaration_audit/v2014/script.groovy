@@ -187,7 +187,7 @@ void generateXML() {
     }
     def taxOrganCode = departmentParam?.TAX_ORGAN_CODE?.value
     def okvedCode = getRefBookValue(34, departmentParam?.OKVED_CODE?.value)?.CODE?.value // ОКВЭД
-    def okato = getRefBookValue(96, departmentParam?.OKTMO?.value)?.CODE?.value // ОКАТО
+    def okato = getOkato(departmentParam?.OKTMO?.value) // ОКАТО
     def taxPlaceTypeCode = getRefBookValue(2, departmentParam?.TAX_PLACE_TYPE_CODE?.value)?.CODE?.value // По месту
     def signatoryId = getRefBookValue(35, departmentParam?.SIGNATORY_ID?.value)?.CODE?.value
     def phone = departmentParam?.PHONE?.value
@@ -699,4 +699,17 @@ def getSumSection7ByCode(def xmlData, def paramName) {
         }
     }
     return sum
+}
+
+def getOkato(def id) {
+    def String okato = null
+    if(id != null){
+        okato = getRefBookValue(96, id)?.CODE?.stringValue
+        if(okato != null) {
+            while (okato.length() < 11) {
+                okato = okato + '0'
+            }
+        }
+    }
+    return okato
 }

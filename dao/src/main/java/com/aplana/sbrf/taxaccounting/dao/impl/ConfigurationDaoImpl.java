@@ -101,7 +101,7 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
                 Object[] entity = new Object[]{model.getFullStringValue(configurationParam, departmentId),
                         configurationParam.name(), departmentId};
                 if (!oldModel.containsKey(configurationParam)
-                        || !oldModel.get(configurationParam).containsKey(departmentId)) {
+                        || (oldModel.get(configurationParam) != null && !oldModel.get(configurationParam).containsKey(departmentId))) {
                     insertParams.add(entity);
                 } else {
                     updateParams.add(entity);

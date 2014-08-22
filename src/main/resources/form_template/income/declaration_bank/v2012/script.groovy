@@ -220,7 +220,7 @@ void generateXML() {
     def kpp = incomeParams?.KPP?.value
     def reorgInn = incomeParams?.REORG_INN?.value
     def reorgKpp = incomeParams?.REORG_KPP?.value
-    def oktmo = getRefBookValue(96, incomeParams?.OKTMO?.value)?.CODE?.value
+    def oktmo = getOkato(incomeParams?.OKTMO?.value)
     def signatoryId = getRefBookValue(35, incomeParams?.SIGNATORY_ID?.value)?.CODE?.value
     def taxRate = incomeParams?.TAX_RATE?.value
     def sumTax = incomeParams?.SUM_TAX?.value // вместо departmentParamIncome.externalTaxSum
@@ -1887,4 +1887,17 @@ def getDataRows(def formDataCollection, def formTemplateId, def kind) {
         dataRows += (formDataService.getDataRowHelper(form)?.getAll()?:[])
     }
     return dataRows.isEmpty() ? null : dataRows
+}
+
+def getOkato(def id) {
+    def String okato = null
+    if(id != null){
+        okato = getRefBookValue(96, id)?.CODE?.stringValue
+        if(okato != null) {
+            while (okato.length() < 11) {
+                okato = okato + '0'
+            }
+        }
+    }
+    return okato
 }

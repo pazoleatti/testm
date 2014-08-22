@@ -114,6 +114,10 @@ public class Logger {
 	public void setMessageDecorator(LogMessageDecorator messageDecorator) {
 		this.messageDecorator = messageDecorator;
 	}
+
+    public LogMessageDecorator getMessageDecorator() {
+        return messageDecorator;
+    }
 	
 	/**
 	 * Очистить содержимое журнала
