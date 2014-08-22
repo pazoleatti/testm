@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.templateversion.VersionOperatingService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +58,17 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
             versionOperatingService.isIntersectionVersion(formTemplate.getId(), formTemplate.getType().getId(),
                     formTemplate.getStatus(), formTemplate.getVersion(), templateActualEndDate, logger);
             checkError(logger, SAVE_MESSAGE);
-            versionOperatingService.checkDestinationsSources(formTemplate.getType().getId(), formTemplate.getVersion(), templateActualEndDate, logger);
+            //Выполенение шага 5.А.1.1
+            Pair<Date, Date> beginRange = null;
+            Pair<Date, Date> endRange = null;
+            if (dbVersionBeginDate.compareTo(formTemplate.getVersion()) < 0)
+                beginRange = new Pair<Date, Date>(dbVersionBeginDate, formTemplate.getVersion());
+            if (
+                    (dbVersionEndDate == null && templateActualEndDate != null)
+                ||
+                    (dbVersionEndDate != null && templateActualEndDate != null && dbVersionEndDate.compareTo(templateActualEndDate) > 0))
+                endRange = new Pair<Date, Date>(templateActualEndDate, dbVersionEndDate);
+            versionOperatingService.checkDestinationsSources(formTemplate.getType().getId(), beginRange, endRange, logger);
             checkError(logger, SAVE_MESSAGE);
         }
 
@@ -123,7 +134,7 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
             }
             //Получение фейковых значений
         }
-        versionOperatingService.checkDestinationsSources(typeId, null, null, logger);
+        versionOperatingService.checkDestinationsSources(typeId, (Date) null, null, logger);
         checkError(logger, DELETE_TEMPLATE_MESSAGE);
         //Проверка назначений НФ
         for (DepartmentFormType departmentFormType : sourceService.getDFTByFormType(typeId))

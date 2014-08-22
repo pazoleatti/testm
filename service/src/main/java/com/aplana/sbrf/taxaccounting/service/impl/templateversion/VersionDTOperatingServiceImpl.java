@@ -178,6 +178,14 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
         }
     }
 
+    @Override
+    public void checkDestinationsSources(int typeId, Pair<Date, Date> beginRange, Pair<Date, Date> endRange, Logger logger) {
+        if (beginRange != null)
+            checkDestinationsSources(typeId, beginRange.getFirst(), beginRange.getSecond(), logger);
+        if (endRange != null)
+            checkDestinationsSources(typeId, endRange.getFirst(), endRange.getSecond(), logger);
+    }
+
     private DeclarationTemplate createFakeTemplate(Date date, int typeId){
         DeclarationTemplate declarationTemplate =  new DeclarationTemplate();
         declarationTemplate.setVersion(date);

@@ -85,7 +85,7 @@ void generateXML() {
     // Код формы отчетности по КНД
     def String KND = '1110025'
 
-    def okato = departmentParam.OKTMO?.referenceValue != null ? getRefBookValue(96, departmentParam.OKTMO?.referenceValue)?.CODE?.stringValue : null
+    def okato = getOkato(departmentParam.OKTMO?.referenceValue)
     def okvedCode = departmentParam.OKVED_CODE?.referenceValue != null ? getRefBookValue(34, departmentParam.OKVED_CODE?.referenceValue)?.CODE?.stringValue : null
     def taxPlaceTypeCode = departmentParam.TAX_PLACE_TYPE_CODE?.referenceValue != null ? getRefBookValue(2, departmentParam.TAX_PLACE_TYPE_CODE?.referenceValue)?.CODE?.stringValue : null
     def matrixRecords = formDataCollection.getRecords()
@@ -382,4 +382,17 @@ def getRefBookValue(def long refBookId, def long recordId) {
         refBookCache.put(recordId, refBookService.getRecordData(refBookId, recordId))
     }
     return refBookCache.get(recordId)
+}
+
+def getOkato(def id) {
+    def String okato = null
+    if(id != null){
+        okato = getRefBookValue(96, id)?.CODE?.stringValue
+        if(okato != null) {
+            while (okato.length() < 11) {
+                okato = okato + '0'
+            }
+        }
+    }
+    return okato
 }

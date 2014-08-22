@@ -459,17 +459,9 @@ public class FormDataServiceImpl implements FormDataService {
 		formDataScriptingService.executeScript(userInfo, formData,
                 FormDataEvent.SAVE, logger, null);
 
-        if (formData.getState() != WorkflowState.CREATED && dataRowDao.isDataRowsCountChanged(formData.getId())) {
-            FormTemplate formTemplate = formTemplateService.get(formData.getFormTemplateId());
-            if (formTemplateService.isAnyAutoNumerationColumn(formTemplate, AutoNumerationColumnType.CROSS)) {
-                String msg = updatePreviousRowNumber(formData);
-                if (msg != null) {
-                    logger.info(msg);
-                }
-            }
-        }
+        updatePreviousRowNumberAttr(formData, logger);
 
-		formDataDao.save(formData);
+        formDataDao.save(formData);
 		
 		dataRowDao.commit(formData.getId());
 
@@ -480,7 +472,7 @@ public class FormDataServiceImpl implements FormDataService {
 		return formData.getId();
 	}
 
-	/**
+    /**
 	 * Получить данные по налоговой форме
 	 *
 	 *
@@ -597,11 +589,7 @@ public class FormDataServiceImpl implements FormDataService {
         auditService.add(workflowMove.getEvent(), userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
                 null, formData.getFormType().getName(), formData.getKind().getId(), note);
 
-        if (workflowMove.getFromState() == WorkflowState.CREATED || workflowMove.getToState() == WorkflowState.CREATED) {
-            String msg = updatePreviousRowNumber(formData);
-            if (msg != null)
-                logger.info(msg);
-        }
+        updatePreviousRowNumberAttr(formData, workflowMove, logger);
     }
 
     /**
@@ -862,7 +850,7 @@ public class FormDataServiceImpl implements FormDataService {
         // Если экземпляр НФ является не первым экземпляром в сквозной нумерации
         if (formDataList.size() > 0) {
             for (FormData aFormData : formDataList) {
-                if (aFormData.getState() != WorkflowState.CREATED) {
+                if (beInOnAutoNumeration(aFormData)) {
                     previousRowNumber += dataRowDao.getSizeWithoutTotal(aFormData, null);
                 }
                 if (aFormData.getId().equals(formData.getId())) {
@@ -875,12 +863,37 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     /**
+     * Обновление значений атрибута "Номер последней строки предыдущей НФ" при сохранении
+     *
+     * @param logger   логгер для регистрации ошибок
+     * @param formData редактируемый экземпляр НФ
+     */
+    public void updatePreviousRowNumberAttr(FormData formData, Logger logger) {
+        if (beInOnAutoNumeration(formData) && dataRowDao.isDataRowsCountChanged(formData.getId())) {
+            updatePreviousRowNumber(formData, logger);
+        }
+    }
+
+    /**
+     * Обновление значений атрибута "Номер последней строки предыдущей НФ" при переходе между ЖЦ
+     *
+     * @param workflowMove переход по ЖЦ
+     * @param logger       логгер для регистрации ошибок
+     * @param formData     редактируемый экземпляр НФ
+     */
+    public void updatePreviousRowNumberAttr(FormData formData, WorkflowMove workflowMove, Logger logger) {
+        if (canUpdatePreviousRowNumberWhenDoMove(workflowMove)) {
+            updatePreviousRowNumber(formData, logger);
+        }
+    }
+
+    /**
      * TODO - написать тесты!!!
      * @param formData экземпляр НФ, для которой необходимо обновить
      * @return
      */
     @Override
-    public String updatePreviousRowNumber(FormData formData) {
+    public void updatePreviousRowNumber(FormData formData, Logger logger) {
         String msg = null;
 
         FormTemplate formTemplate = formTemplateService.get(formData.getFormTemplateId());
@@ -896,27 +909,54 @@ public class FormDataServiceImpl implements FormDataService {
             StringBuilder stringBuilder = new StringBuilder();
             // Обновляем последующие периоды
             int size = formDataList.size();
+
             for (FormData data : formDataList) {
-                // Для экземпляров в статусе "Создано" не обновляем
-                if (data.getState() != WorkflowState.CREATED) {
-                    formDataDao.updatePreviousRowNumber(data.getId(), getPreviousRowNumber(data));
-                    ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(data.getReportPeriodId());
-                    stringBuilder.append(reportPeriod.getName() + " " + reportPeriod.getTaxPeriod().getYear());
-                    // TODO - разобраться с запятой!
-                    if (--size  > 0) {
-                        stringBuilder.append(", ");
-                    }
-                    msg = "Сквозная нумерация обновлена в налоговых формах следующих периодов текущей сквозной нумерации: " +
-                            stringBuilder.toString();
+                formDataDao.updatePreviousRowNumber(data.getId(), getPreviousRowNumber(data));
+                ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(data.getReportPeriodId());
+                stringBuilder.append(reportPeriod.getName() + " " + reportPeriod.getTaxPeriod().getYear());
+                if (--size > 0) {
+                    stringBuilder.append(", ");
                 }
             }
+            msg = "Сквозная нумерация обновлена в налоговых формах следующих периодов текущей сквозной нумерации: " +
+                    stringBuilder.toString();
+
+            if (logger != null) {
+                logger.info(msg);
+            }
         }
-        return msg;
+    }
+
+    @Override
+    public void updatePreviousRowNumber(FormData formData) {
+        updatePreviousRowNumber(formData, null);
     }
 
     @Override
     public List<FormData> getManualInputForms(List<Integer> departments, int reportPeriodId, TaxType taxType, FormDataKind kind) {
         ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
         return formDataDao.getManualInputForms(departments, reportPeriodId, taxType, kind, reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
+    }
+
+    /**
+     * Экземпляры в статусе "Создана" не участвуют в сквозной нумерации
+     * @param formData налоговая форма
+     * @return true - участвует, false - не участвует
+     */
+    public boolean beInOnAutoNumeration(FormData formData) {
+        return formData.getState() != WorkflowState.CREATED;
+    }
+
+    /**
+     * "Номер последней строки предыдущей НФ" обновляется для последующих экземпляров НФ текущей сквозной нумерации
+     * только при переходах по ЖЦ:
+     * 1. из состояния "Создана" в любое состояние
+     * 2. из любого состояния в состояние "Создана"
+     *
+     * @param workflowMove переход по ЖЦ
+     * @return true - может меняться, false - не может
+     */
+    public boolean canUpdatePreviousRowNumberWhenDoMove(WorkflowMove workflowMove) {
+        return workflowMove.getFromState() == WorkflowState.CREATED || workflowMove.getToState() == WorkflowState.CREATED;
     }
 }

@@ -269,7 +269,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                 departmentService.getParentTB(records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue().intValue()) :
                 departmentService.getBankDepartment();
         int newTBId = newTb != null ? newTb.getId() : uniqueRecordId.intValue();
-        boolean isChangeTB = oldTBId != newTBId;
+        boolean isChangeTB = oldTBId != 0 && oldTBId != newTBId;
 
         if (isChangeTB)
             throw new ServiceLoggerException("Невозможно переместить подразделение в состав другого территориального банка!",
@@ -284,16 +284,17 @@ public class RefBookDepartment implements RefBookDataProvider {
                             logEntryService.save(logger.getEntries()));
                 //4 шаг
                 case TERR_BANK:
-                    List<ReportPeriod> openReportPeriods =
-                            new ArrayList<ReportPeriod>(periodService.getOpenPeriodsByTaxTypeAndDepartments(TaxType.TRANSPORT, Arrays.asList(uniqueRecordId.intValue()), true, true));
+                    List<ReportPeriod> openReportPeriods = new ArrayList<ReportPeriod>(0);
+                    openReportPeriods.addAll(periodService.getOpenPeriodsByTaxTypeAndDepartments(TaxType.TRANSPORT, Arrays.asList(uniqueRecordId.intValue()), true, true));
                     openReportPeriods.addAll(periodService.getOpenPeriodsByTaxTypeAndDepartments(TaxType.PROPERTY, Arrays.asList(uniqueRecordId.intValue()), true, true));
                     if (!openReportPeriods.isEmpty()){
                         for (ReportPeriod period : openReportPeriods)
                             logger.warn(
-                                    "Для подразделения %s для налога %s открыт период %s",
+                                    "Для подразделения %s для налога %s уже открыт период %s для %d",
                                     dep.getName(),
                                     period.getTaxPeriod().getTaxType().getName(),
-                                    period.getName());
+                                    period.getName(),
+                                    period.getTaxPeriod().getYear());
                         throw new ServiceLoggerException("Подразделению не может быть изменен тип \"ТБ\", если для него существует период!",
                                 logEntryService.save(logger.getEntries()));
                     }

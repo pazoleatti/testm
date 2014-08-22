@@ -323,12 +323,12 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
     @Override
     public void uploadDectResponseWithErrorUuid(String uuid) {
         LogAddEvent.fire(this, uuid);
-        Dialog.infoMessage("Не удалось импортировать шаблон");
+        Dialog.errorMessage("Не удалось импортировать шаблон");
     }
 
     @Override
 	public void uploadDectFail(String msg) {
-        Dialog.infoMessage("Не удалось импортировать шаблон. Ошибка: " + msg);
+        Dialog.errorMessage("Ошибка: " + msg);
 	}
 
     @Override

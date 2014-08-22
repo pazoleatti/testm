@@ -565,8 +565,8 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
                     "SELECT * FROM formDataIdsWithRegExp) b on (fdp.form_data_id = b.fd_id) WHEN MATCHED THEN UPDATE SET REPORT_DEPARTMENT_NAME = (:newDepartmentName || '/' || b.second_dep_name)";
     @Override
     public void updateFDPerformerTBDepartmentNames(int departmentId, String newDepartmentName, Date dateFrom, Date dateTo) {
-        String dateTag = dateFrom != null && dateTo != null ? "(rp.START_DATE between :dateFrom and :dateTo or rp.END_DATE  between :dateFrom and :dateTo)"
-                : dateFrom != null ? "rp.START_DATE >= :dateFrom"
+        String dateTag = dateFrom != null && dateTo != null ? "(rp.CALENDAR_START_DATE between :dateFrom and :dateTo or rp.END_DATE between :dateFrom and :dateTo or :dateFrom between rp.CALENDAR_START_DATE and rp.END_DATE)"
+                : dateFrom != null ? "(rp.CALENDAR_START_DATE >= :dateFrom or rp.END_DATE <= :dateFrom)"
                 : null;
         HashMap<String, Object> values = new HashMap<String, Object>();
         values.put("dateFrom", dateFrom);
@@ -593,8 +593,8 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
                     "              SELECT * FROM formDataIdsWithRegExp) b on (fdp.form_data_id = b.fd_id) WHEN MATCHED THEN UPDATE SET REPORT_DEPARTMENT_NAME = (b.first_dep_name || '/' || :newDepartmentName)";
     @Override
     public void updateFDPerformerDepartmentNames(int departmentId, String newDepartmentName, Date dateFrom, Date dateTo) {
-        String dateTag = dateFrom != null && dateTo != null ? "(rp.START_DATE between :dateFrom and :dateTo or rp.END_DATE  between :dateFrom and :dateTo)"
-                : dateFrom != null ? "rp.START_DATE >= :dateFrom"
+        String dateTag = dateFrom != null && dateTo != null ? "(rp.CALENDAR_START_DATE between :dateFrom and :dateTo or rp.END_DATE between :dateFrom and :dateTo or :dateFrom between rp.CALENDAR_START_DATE and rp.END_DATE)"
+                : dateFrom != null ? "(rp.CALENDAR_START_DATE >= :dateFrom or rp.END_DATE <= :dateFrom)"
                 : null;
         HashMap<String, Object> values = new HashMap<String, Object>();
         values.put("dateFrom", dateFrom);
