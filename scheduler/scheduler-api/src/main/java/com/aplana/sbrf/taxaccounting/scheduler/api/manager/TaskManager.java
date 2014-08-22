@@ -95,4 +95,9 @@ public interface TaskManager {
      * @throws TaskSchedulingException
      */
     List<TaskJndiInfo> getTasksJndi(TAUserInfo userInfo) throws TaskSchedulingException;
+
+    /**
+     * Валидация расписания
+     */
+    boolean validateSchedule(String schedule) throws TaskSchedulingException;
 }

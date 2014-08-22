@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetCheckDeclarationAction;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetCheckDeclarationResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -58,6 +59,8 @@ public class GetCheckDeclarationHandler extends AbstractActionHandler<GetCheckDe
 
     @Autowired
     DepartmentService departmentService;
+    @Autowired
+    SecurityService securityService;
 
     public GetCheckDeclarationHandler() {
         super(GetCheckDeclarationAction.class);
@@ -115,6 +118,7 @@ public class GetCheckDeclarationHandler extends AbstractActionHandler<GetCheckDe
                 result.setHasError(true);
             }
         }
+        result.setControlUnp(securityService.currentUserInfo().getUser().hasRole(TARole.ROLE_CONTROL_UNP));
         return result;
     }
 

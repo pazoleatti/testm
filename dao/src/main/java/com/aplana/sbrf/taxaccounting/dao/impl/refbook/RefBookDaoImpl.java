@@ -925,6 +925,35 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         return getJdbcTemplate().queryForInt(String.format(sql, SqlUtils.transformToSqlInStatement("record_id", recordIds)), refBookId, version) != 0;
     }
 
+    private static final String IS_RECORDS_ACTIVE_IN_PERIOD = "select id from (\n" +
+            "select input.id as input_id, rbr.id, rbr.record_id, rbr.version as start_version, rbr.status, lead (rbr.version) over (partition by rbr.recorD_id order by rbr.version) end_version \n" +
+            "from ref_book_record input\n" +
+            "join ref_book_record rbr on input.record_id = rbr.record_id and input.ref_book_id = rbr.ref_book_id \n" +
+            "where %s \n" +
+            ") a where input_id = id \n" +
+            "and (end_version - 1 >= :periodFrom or end_version is null) \n" +
+            "and (:periodTo is null or start_version <= :periodTo)";
+
+    @Override
+    public List<Long> isRecordsActiveInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, @NotNull Date periodTo) {
+        String sql = String.format(IS_RECORDS_ACTIVE_IN_PERIOD, SqlUtils.transformToSqlInStatement("input.id", recordIds));
+        Set<Long> result = new HashSet<Long>(recordIds);
+        List<Long> existRecords = new ArrayList<Long>();
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("periodFrom", periodFrom);
+        params.put("periodTo", periodTo);
+        try {
+            existRecords = getNamedParameterJdbcTemplate().query(sql, params, new RowMapper<Long>() {
+                @Override
+                public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+                    return rs.getLong("id");
+                }
+            });
+        } catch (EmptyResultDataAccessException ignored) {}
+        result.removeAll(existRecords);
+        return new ArrayList<Long>(result);
+    }
+
     private static final String CHECK_REF_BOOK_RECORD_UNIQUE_SQL = "select id from ref_book_record " +
             "where ref_book_id = ? and version = trunc(?, 'DD') and record_id = ?";
 

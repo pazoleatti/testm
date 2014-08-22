@@ -46,11 +46,16 @@ public class SignServiceImplTest {
         final URL bicrUrl = Thread.currentThread().getContextClassLoader().getResource(BICR4_DLL);
         assert bicrUrl != null;
 
-        final URL signFile = Thread.currentThread().getContextClassLoader().getResource(COMMON);
+        final URL signFile = Thread.currentThread().getContextClassLoader().getResource(COMMON+"sign.dat");
         assert signFile != null;
+        final URL signDir = Thread.currentThread().getContextClassLoader().getResource(COMMON);
+        assert signDir != null;
 
         ConfigurationParamModel model = new ConfigurationParamModel();
-        ArrayList<String> keys = new ArrayList<String>(){{add(signFile.getProtocol() + "://" + signFile.getPath().substring(1));}};
+        ArrayList<String> keys = new ArrayList<String>(){{
+            add(signFile.getProtocol() + "://" + signFile.getPath().substring(1));
+            add(signDir.getProtocol() + "://" + signDir.getPath().substring(1));
+        }};
         model.put(ConfigurationParam.KEY_FILE, 0, keys);
         ArrayList<String> dlls = new ArrayList<String>(){{add(bicrUrl.getProtocol() + "://" + bicrUrl.getPath().substring(1));}};
         model.put(ConfigurationParam.ENCRYPT_DLL, 0, dlls);

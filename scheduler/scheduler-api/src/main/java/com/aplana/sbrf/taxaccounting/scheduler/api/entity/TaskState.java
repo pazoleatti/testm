@@ -5,9 +5,9 @@ package com.aplana.sbrf.taxaccounting.scheduler.api.entity;
  * @author dloshkarev
  */
 public enum TaskState {
-    SCHEDULED(1, "Запланирована"),
-    SUSPENDED(2, "Приостановлена"),
-    CANCELLED(3, "Остановлена"),
+    SCHEDULED(1, "Активна"),
+    SUSPENDED(2, "Остановлена"),
+    CANCELLED(3, "Отменена"),
     COMPLETE(4, "Завершена"),
     RUNNING(5, "Выполняется"),
     INVALID(-1, "Некорректный"),

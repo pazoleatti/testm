@@ -223,6 +223,8 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 }
                 if (!check) {
                     log(userInfo, LogData.L16, logger, fileName);
+                    moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
+                            Arrays.asList(new LogEntry(LogLevel.ERROR, LogData.L16.getText())), logger);
                     fail++;
                     continue;
                 }

@@ -33,16 +33,17 @@ public class LogSystemLogoutHandler implements LogoutHandler {
                 WebApplicationContextUtils.getWebApplicationContext(request.getSession().getServletContext());
         //System.out.println("springContext: " + springContext);
 
-        UserAuthenticationToken principal = ((UserAuthenticationToken)(SecurityContextHolder.getContext()
-                .getAuthentication().getPrincipal()));
-        TAUserInfo userInfo = principal.getUserInfo();
+        if (SecurityContextHolder.getContext().getAuthentication() != null) {
+            UserAuthenticationToken principal = ((UserAuthenticationToken) (SecurityContextHolder.getContext()
+                    .getAuthentication().getPrincipal()));
+            TAUserInfo userInfo = principal.getUserInfo();
 
-        logger.info("Exit: " + userInfo);
-		lockCoreService.unlockAll(userInfo);
-        AuditService auditService = (AuditService) springContext.getBean("auditServiceImpl");
-        auditService.add(FormDataEvent.LOGOUT, userInfo,
-                userInfo.getUser().getDepartmentId(), null, null, null, null, null, null);
-        logger.info("Security logout system success.");
-
+            logger.info("Exit: " + userInfo);
+            lockCoreService.unlockAll(userInfo);
+            AuditService auditService = (AuditService) springContext.getBean("auditServiceImpl");
+            auditService.add(FormDataEvent.LOGOUT, userInfo,
+                    userInfo.getUser().getDepartmentId(), null, null, null, null, null, null);
+            logger.info("Security logout system success.");
+        }
     }
 }

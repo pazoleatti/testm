@@ -93,8 +93,7 @@
                                 <g:Label text="Период:" addStyleNames="{style.marginRight3}"/>
                             </g:cell>
                             <g:cell width="100%">
-                                <r:RefBookPickerWidget ui:field="accountPeriodIds" width="100%" versionEnabled="false"
-                                                       attributeIdInt="1083" isHierarchical="false" multiSelect="true" title="Выбор периода"/>
+                                <periodpicker:PeriodPickerPopupWidget ui:field="accountPeriodIds" width="100%"  title="Выбор периода" multiselect="true"/>
                             </g:cell>
                         </g:HorizontalPanel>
                     </g:cell>

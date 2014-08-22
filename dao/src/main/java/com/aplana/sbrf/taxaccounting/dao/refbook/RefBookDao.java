@@ -185,6 +185,15 @@ public interface RefBookDao {
     boolean isVersionsExist(@NotNull Long refBookId, @NotNull List<Long> recordIds, @NotNull Date version);
 
     /**
+     * Проверяет действуют ли записи справочника в указанном периоде
+     * @param recordIds уникальные идентификаторы записей справочника
+     * @param periodFrom начало периода
+     * @param periodTo окончание периода
+     * @return идентификаторы записей, которые не действуют в указанном периоде
+     */
+    List<Long> isRecordsActiveInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo);
+
+    /**
      * Проверка и поиск Id записи по:
      * @param refBookId Id справочника
      * @param version Версия

@@ -17,6 +17,10 @@ public class CheckExistenceDeclaration extends UnsecuredActionImpl<CheckExistenc
 
     private TaxType taxType;
 
+    private String taxOrganCode;
+
+    private String taxOrganKpp;
+
 	public Integer getDeclarationTypeId() {
 		return declarationTypeId;
 	}
@@ -47,6 +51,22 @@ public class CheckExistenceDeclaration extends UnsecuredActionImpl<CheckExistenc
 
     public void setTaxType(TaxType taxType) {
         this.taxType = taxType;
+    }
+
+    public String getTaxOrganCode() {
+        return taxOrganCode;
+    }
+
+    public void setTaxOrganCode(String taxOrganCode) {
+        this.taxOrganCode = taxOrganCode;
+    }
+
+    public String getTaxOrganKpp() {
+        return taxOrganKpp;
+    }
+
+    public void setTaxOrganKpp(String taxOrganKpp) {
+        this.taxOrganKpp = taxOrganKpp;
     }
 
     @Override

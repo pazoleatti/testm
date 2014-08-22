@@ -28,7 +28,7 @@ import java.util.Map;
  */
 
 public interface RefBookDataProvider {
-    final static String LOCK_MESSAGE = "Операция не может быть выполнена. Справочник заблокирован другой операцией!";
+    final static String LOCK_MESSAGE = "Справочник %s заблокирован, попробуйте выполнить операцию позже";
 
 	/**
 	 * Загружает данные справочника на определенную дату актуальности
@@ -253,6 +253,15 @@ public interface RefBookDataProvider {
      * @return значения для связок
      */
     Map<RefBookAttributePair, String> getAttributesValues(List<RefBookAttributePair> attributePairs);
+
+    /**
+     * Проверяет действуют ли записи справочника в указанном периоде
+     * @param recordIds уникальные идентификаторы записей справочника
+     * @param periodFrom начало периода
+     * @param periodTo окончание периода
+     * @return идентификаторы записей, которые не действуют в указанном периоде
+     */
+    List<Long> getInactiveRecordsInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo);
 
     /**
      * Создает новые записи в справочнике

@@ -298,7 +298,6 @@
 		</profile>
 		<profile>
 			<id>production</id>
-            <!-- TODO: убрать когда будет внедрен планировщик -->
             <dependencies>
                 <dependency>
                     <groupId>com.aplana.taxaccounting</groupId>

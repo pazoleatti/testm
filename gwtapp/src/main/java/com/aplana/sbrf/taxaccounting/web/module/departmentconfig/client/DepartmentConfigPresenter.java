@@ -46,6 +46,7 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
     private final DispatchAsync dispatcher;
 
     private Department userDepartment;
+    private boolean isControlUnp;
 
     public interface MyView extends View, HasUiHandlers<DepartmentConfigUiHandlers> {
         /**
@@ -222,6 +223,7 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                         new AbstractCallback<GetCheckDeclarationResult>() {
                             @Override
                             public void onSuccess(GetCheckDeclarationResult result) {
+                                isControlUnp = result.isControlUnp();
                                 if (result.getUuid() != null) {
                                     LogAddEvent.fire(DepartmentConfigPresenter.this, result.getUuid());
                                 }
@@ -318,6 +320,11 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                                 reloadDepartmentParams(getView().getCurrentDepartmentId(), getView().getTaxType(), getView().getCurrentReportPeriodId());
                             }
                         }, this).addCallback(new ManualRevealCallback<GetDepartmentTreeDataAction>(this)));
+    }
+
+    @Override
+    public boolean isControlUnp() {
+        return isControlUnp;
     }
 
     @Override

@@ -130,7 +130,7 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
             }
             if (toSearchDate.getValue() == null) {
                 if (sepFlag) errorStr.append(", ");
-                errorStr.append("\"По дату\"");
+                errorStr.append("\"До даты\"");
                 sepFlag = true;
             }
             if (auditFieldList.getValue().isEmpty()) {
