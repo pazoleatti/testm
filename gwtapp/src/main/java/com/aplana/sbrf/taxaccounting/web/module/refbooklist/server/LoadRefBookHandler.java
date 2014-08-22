@@ -71,7 +71,11 @@ public class LoadRefBookHandler extends AbstractActionHandler<LoadRefBookAction,
             if (hasAccountPlan) {
                 catalogStrList.add(ConfigurationParam.ACCOUNT_PLAN_UPLOAD_DIRECTORY.getCaption());
             }
-            logger.info("Получены: %s.", StringUtils.join(catalogStrList.toArray(), ", ", null));
+            if (catalogStrList.size() == 1) {
+                logger.info("Получен: %s.", catalogStrList.get(0));
+            } else {
+                logger.info("Получены: %s.", StringUtils.join(catalogStrList.toArray(), ", ", null));
+            }
             // Импорт справочников из ЦАС НСИ
             loadRefBookDataService.importRefBookNsi(securityService.currentUserInfo(), logger);
             // Импорт справочников из Diasoft Custody
