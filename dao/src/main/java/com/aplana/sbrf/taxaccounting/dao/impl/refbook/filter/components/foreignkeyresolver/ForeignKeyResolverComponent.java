@@ -77,6 +77,14 @@ public class ForeignKeyResolverComponent extends AbstractTreeListenerComponent i
     private JoinSqlPartBuilder u2SimpleJoinSqlPartBuilder;
 
     @Autowired
+    @Qualifier("simple2UniversalJoinSqlPartBuilder")
+    private JoinSqlPartBuilder simple2UniversalJoinSqlPartBuilder;
+
+    @Autowired
+    @Qualifier("simple2SimpleJoinSqlPartBuilder")
+    private JoinSqlPartBuilder simple2SimpleJoinSqlPartBuilder;
+
+    @Autowired
     @Qualifier("simpleRefBookAttributeAliasBuilder")
     private AttributeAliasBuilder simpleAttributeAliasBuilder;
 
@@ -152,9 +160,9 @@ public class ForeignKeyResolverComponent extends AbstractTreeListenerComponent i
         } else if (destinationRefBook.isSimple() && !referenceRefBook.isSimple()){
             return u2SimpleJoinSqlPartBuilder;
         } else if (destinationRefBook.isSimple() && referenceRefBook.isSimple()){
-            throw new UnsupportedOperationException("simple2SimpleJoinSqlPartBuilder does not implemented yet");
+            return simple2SimpleJoinSqlPartBuilder;
         } else if (!destinationRefBook.isSimple() && referenceRefBook.isSimple()){
-            throw new UnsupportedOperationException("simple2UniversalJoinSqlPartBuilder does not implemented yet");
+            return simple2UniversalJoinSqlPartBuilder;
         } else {
             throw new RuntimeException("Не найден соответствующий компонент.");
         }

@@ -71,7 +71,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     public RefBook get(Long refBookId) {
         try {
             return getJdbcTemplate().queryForObject(
-                    "select id, name, script_id, visible, type, read_only, region_attribute_id from ref_book where id = ?",
+                    "select id, name, script_id, visible, type, read_only, region_attribute_id, table_name from ref_book where id = ?",
                     new Object[]{refBookId}, new int[]{Types.NUMERIC},
                     new RefBookRowMapper());
         } catch (EmptyResultDataAccessException e) {
@@ -2175,6 +2175,10 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         simpleFilterTreeListener.setPs(filterPS);
 
         Filter.getFilterQuery(filter, simpleFilterTreeListener);
+        if (filterPS.getJoinPartsOfQuery() != null){
+            ps.appendQuery(filterPS.getJoinPartsOfQuery());
+        }
+
         if (filterPS.getQuery().length() > 0) {
             ps.appendQuery(" WHERE ");
             if (parentId == null) {

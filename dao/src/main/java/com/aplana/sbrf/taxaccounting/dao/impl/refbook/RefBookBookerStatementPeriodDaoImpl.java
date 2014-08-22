@@ -168,7 +168,7 @@ public class RefBookBookerStatementPeriodDaoImpl extends AbstractDao implements 
     private RefBook get(Long refBookId) {
         try {
             return getJdbcTemplate().queryForObject(
-                    "select id, name, script_id, visible, type, read_only, region_attribute_id from ref_book where id = ?",
+                    "select id, name, script_id, visible, type, read_only, region_attribute_id, table_name from ref_book where id = ?",
                     new Object[]{refBookId}, new int[]{Types.NUMERIC},
                     new RefBookRowMapper());
         } catch (EmptyResultDataAccessException e) {
