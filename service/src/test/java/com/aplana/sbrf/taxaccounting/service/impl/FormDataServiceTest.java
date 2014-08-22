@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.impl.eventhandler.EventLauncher;
 import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
 import org.junit.Assert;
 import org.junit.Before;
@@ -36,6 +37,8 @@ public class FormDataServiceTest extends Assert {
     private DataRowDao dataRowDao;
 
     private FormTemplateService formTemplateService;
+
+    private FormDataAccessService formDataAccessService;
 
     private static final int FORM_TEMPLATE_ID = 1;
 
@@ -64,12 +67,14 @@ public class FormDataServiceTest extends Assert {
         PeriodService reportPeriodService = mock(PeriodService.class);
         formTemplateService = mock(FormTemplateService.class);
         LockCoreService lockCoreService = mock(LockCoreService.class);
-        FormDataAccessService formDataAccessService = mock(FormDataAccessService.class);
+        formDataAccessService = mock(FormDataAccessService.class);
         DepartmentDao departmentDao = mock(DepartmentDao.class);
         FormData formData = mock(FormData.class);
         FormDataScriptingService formDataScriptingService = mock(FormDataScriptingService.class);
         LogBusinessService logBusinessService = mock(LogBusinessService.class);
         AuditService auditService = mock(AuditService.class);
+        LogEntryService logEntryService = mock(LogEntryService.class);
+        EventLauncher eventHandlerLauncher = mock(EventLauncher.class);
 
         ReflectionTestUtils.setField(formDataService, "formDataDao", formDataDao);
         ReflectionTestUtils.setField(formDataService, "dataRowDao", dataRowDao);
@@ -81,6 +86,8 @@ public class FormDataServiceTest extends Assert {
         ReflectionTestUtils.setField(formDataService, "formDataScriptingService", formDataScriptingService);
         ReflectionTestUtils.setField(formDataService, "logBusinessService", logBusinessService);
         ReflectionTestUtils.setField(formDataService, "auditService", auditService);
+        ReflectionTestUtils.setField(formDataService, "logEntryService", logEntryService);
+        ReflectionTestUtils.setField(formDataService, "eventHandlerLauncher", eventHandlerLauncher);
 
         when(reportPeriodService.getTaxPeriod(anyInt())).thenReturn(taxPeriod);
         when(formData.getReportPeriodId()).thenReturn(1);
@@ -377,170 +384,150 @@ public class FormDataServiceTest extends Assert {
     }
 
     /**
-     * Текущий экземпляр НФ находится в состоянии "Создана".
-     *
-     * 1. Не выполнять сравнение количества строк в табличной части до и после редактирования.
-     * 2. Не выполнять проверку наличия автонумеруемых граф со сквозной нумерацией.
-     * 3. Не обновлять сквозную нумерацию в налоговых формах следующих периодов текущей сквозной нумерации.
-     * 4. Не выводить в панель уведомлений сообщение.
+     * Проверка обновления атрибутов "Номер последней строки предыдущей НФ" при сохранении
+     * 1. Не учитывается в сквозной нумерации
+     * 2. Количество строк в табличной части до и после редактирования не изменилось
      */
     @Test
-    public void testSaveFormDataStateCreated() {
+    public void testUpdatePreviousRowNumberAttrWhenSave1() {
+        FormData formData = mock(FormData.class);
+        FormDataServiceImpl dataService = spy(formDataService);
+
+        doReturn(false).when(dataService).beInOnAutoNumeration(any(FormData.class));
+        doReturn(false).when(dataRowDao).isDataRowsCountChanged(anyLong());
+
+        dataService.updatePreviousRowNumberAttr(formData, eq(any(Logger.class)));
+        verify(dataService, never()).updatePreviousRowNumber(any(FormData.class), any(Logger.class));
+    }
+
+    /**
+     * Проверка обновления атрибутов "Номер последней строки предыдущей НФ" при сохранении
+     * 1. Учитывается в сквозной нумерации
+     * 2. Количество строк в табличной части до и после редактирования не изменилось
+     */
+    @Test
+     public void testUpdatePreviousRowNumberAttrWhenSave2() {
+        FormData formData = mock(FormData.class);
+        FormDataServiceImpl dataService = spy(formDataService);
+
+        doReturn(true).when(dataService).beInOnAutoNumeration(any(FormData.class));
+        doReturn(false).when(dataRowDao).isDataRowsCountChanged(anyLong());
+        doReturn(1L).when(formData).getId();
+
+        dataService.updatePreviousRowNumberAttr(formData, eq(any(Logger.class)));
+        verify(dataService, never()).updatePreviousRowNumber(any(FormData.class), any(Logger.class));
+    }
+
+    /**
+     * Проверка обновления атрибутов "Номер последней строки предыдущей НФ" при сохранении
+     * 1. Учитывается в сквозной нумерации (статус "Создана")
+     * 2. Количество строк в табличной части до и после редактирования изменилось
+     */
+    @Test
+    public void testUpdatePreviousRowNumberAttrWhenSave3() {
+        FormData formData = mock(FormData.class);
+        FormDataServiceImpl dataService = spy(formDataService);
+
+        doReturn(true).when(dataService).beInOnAutoNumeration(formData);
+        doReturn(true).when(dataRowDao).isDataRowsCountChanged(anyLong());
+        doReturn(1L).when(formData).getId();
+        doReturn(WorkflowState.CREATED).when(formData).getState();
+
+        dataService.updatePreviousRowNumberAttr(formData, eq(any(Logger.class)));
+        verify(dataService, times(1)).updatePreviousRowNumber(any(FormData.class), any(Logger.class));
+    }
+
+    /**
+     * Проверка обновления атрибутов "Номер последней строки предыдущей НФ" при переходе по ЖЦ
+     * 1. Переход не инициирует обновление атрибутов
+     */
+    @Test
+    public void testUpdatePreviousRowNumberAttrWhenDoMove1() {
+        FormDataServiceImpl dataService = spy(formDataService);
+
+        doReturn(false).when(dataService).canUpdatePreviousRowNumberWhenDoMove(any(WorkflowMove.class));
+
+        dataService.updatePreviousRowNumberAttr(any(FormData.class), any(WorkflowMove.class), any(Logger.class));
+        verify(dataService, never()).updatePreviousRowNumber(any(FormData.class), any(Logger.class));
+    }
+
+    /**
+     * Проверка обновления атрибутов "Номер последней строки предыдущей НФ" при переходе по ЖЦ
+     * 1. Переход инициирует обновление атрибутов
+     */
+    @Test
+    public void testUpdatePreviousRowNumberAttrWhenDoMove2() {
+        FormData formData = mock(FormData.class);
+        Logger logger = mock(Logger.class);
+        FormDataServiceImpl dataService = spy(formDataService);
+
+        doReturn(true).when(dataService).canUpdatePreviousRowNumberWhenDoMove(any(WorkflowMove.class));
+
+        dataService.updatePreviousRowNumberAttr(formData, WorkflowMove.ACCEPTED_TO_APPROVED, logger);
+        verify(dataService, times(1)).updatePreviousRowNumber(any(FormData.class), any(Logger.class));
+    }
+
+    /**
+     * При сохранении экземпляра НФ обновление атрибута "Номер последней строки предыдущей НФ" важен порядок вызова методов.
+     */
+    @Test
+    public void testSaveFormDataMethodsInvokeOrder() {
         Logger logger = mock(Logger.class);
         TAUserInfo userInfo = mock(TAUserInfo.class);
-
         FormData formData = getFormData();
+
+        FormDataServiceImpl dataService = spy(formDataService);
+        dataService.saveFormData(logger, userInfo, formData);
+
+        InOrder inOrder = inOrder(dataService, formDataDao);
+
+        inOrder.verify(dataService, times(1)).updatePreviousRowNumberAttr(formData, logger);
+        inOrder.verify(formDataDao, times(1)).save(formData);
+    }
+
+    /**
+     * "Номер последней строки предыдущей НФ" обновляется для последующих экземпляров НФ текущей сквозной нумерации
+     * только при переходах по ЖЦ:
+     * 1. из состояния "Создана" в любое состояние
+     * 2. из любого состояния в состояние "Создана"
+     */
+    @Test
+    public void testCanUpdateAutoNumerationWhenDoMove() {
+        assertTrue(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.CREATED_TO_PREPARED));
+        assertTrue(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.CREATED_TO_ACCEPTED));
+        assertTrue(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.CREATED_TO_APPROVED));
+        assertTrue(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.PREPARED_TO_CREATED));
+        assertTrue(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.ACCEPTED_TO_CREATED));
+        assertTrue(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.APPROVED_TO_CREATED));
+
+        assertFalse(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.PREPARED_TO_ACCEPTED));
+        assertFalse(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.PREPARED_TO_APPROVED));
+        assertFalse(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.ACCEPTED_TO_APPROVED));
+        assertFalse(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.ACCEPTED_TO_PREPARED));
+        assertFalse(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.APPROVED_TO_ACCEPTED));
+        assertFalse(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.APPROVED_TO_PREPARED));
+    }
+
+    /**
+     * Экземпляры в статусе "Создана" не участвуют в сквозной нумерации
+     */
+    @Test
+    public void testBeInOnAutoNumeration() {
+        FormData formData = new FormData();
         formData.setState(WorkflowState.CREATED);
+        assertFalse("Не должен участвовать в сквозной нумерации", formDataService.beInOnAutoNumeration(formData));
 
-        FormDataService dataService = spy(formDataService);
-        dataService.saveFormData(logger, userInfo, formData);
+        FormData formData1 = new FormData();
+        formData1.setState(WorkflowState.ACCEPTED);
+        assertTrue("Должен участвовать в сквозной нумерации", formDataService.beInOnAutoNumeration(formData1));
 
-        verify(dataRowDao, never()).isDataRowsCountChanged(anyLong());
-        verify(formTemplateService, never()).isAnyAutoNumerationColumn(any(FormTemplate.class), any(AutoNumerationColumnType.class));
-        verify(dataService, never()).updatePreviousRowNumber(any(FormData.class));
-        verify(logger, never()).info(anyString());
-    }
+        FormData formData2 = new FormData();
+        formData2.setState(WorkflowState.APPROVED);
+        assertTrue("Должен участвовать в сквозной нумерации", formDataService.beInOnAutoNumeration(formData2));
 
-    /**
-     * Текущий экземпляр НФ находится в состоянии отличном от "Создана".
-     * Количество строк в табличной части до и после редактирования не изменилось.
-     * Важен порядок вызова методов!!!
-     *
-     * 1. Выполнить сравнение количества строк в табличной части до и после редактирования.
-     * 2. Не выполнять проверку наличия автонумеруемых граф со сквозной нумерацией.
-     * 3. Не обновлять сквозную нумерацию в налоговых формах следующих периодов текущей сквозной нумерации.
-     * 4. Не выводить в панель уведомлений сообщение.
-     */
-    @Test
-    public void testSaveFormDataStateNotCreatedDataRowsNotChanged() {
-        Logger logger = mock(Logger.class);
-        TAUserInfo userInfo = mock(TAUserInfo.class);
-
-        FormData formData = getFormData();
-
-        FormDataService dataService = spy(formDataService);
-
-        when(dataRowDao.isDataRowsCountChanged(formData.getId())).thenReturn(false);
-
-        dataService.saveFormData(logger, userInfo, formData);
-
-        InOrder inOrder = inOrder(dataRowDao, formDataDao);
-
-        inOrder.verify(dataRowDao, times(1)).isDataRowsCountChanged(anyLong());
-        inOrder.verify(formDataDao).save(any(FormData.class));
-
-        verify(formTemplateService, never()).isAnyAutoNumerationColumn(any(FormTemplate.class), any(AutoNumerationColumnType.class));
-        verify(dataService, never()).updatePreviousRowNumber(any(FormData.class));
-        verify(logger, never()).info(anyString());
-
-    }
-
-    /**
-     * Текущий экземпляр НФ находится в состоянии отличном от "Создана".
-     * Количество строк в табличной части до и после редактирования изменилось.
-     * Нет ни одной сквозной автонумеруемой графы
-     * Важен порядок вызова методов!!!
-     *
-     * 1. Выполнить сравнение количества строк в табличной части до и после редактирования.
-     * 2. Выполнить проверку наличия автонумеруемых граф со сквозной нумерацией.
-     * 3. Не обновлять сквозную нумерацию в налоговых формах следующих периодов текущей сквозной нумерации.
-     * 4. Не выводить в панель уведомлений сообщение.
-     */
-    @Test
-    public void testSaveFormDataStateNotCreatedDataRowsChangedAnyAutoNumerationNotExist() {
-        Logger logger = mock(Logger.class);
-        TAUserInfo userInfo = mock(TAUserInfo.class);
-
-        FormData formData = getFormData();
-
-        FormDataService dataService = spy(formDataService);
-
-        when(dataRowDao.isDataRowsCountChanged(formData.getId())).thenReturn(true);
-        when(formTemplateService.isAnyAutoNumerationColumn(any(FormTemplate.class), any(AutoNumerationColumnType.class))).thenReturn(false);
-
-        dataService.saveFormData(logger, userInfo, formData);
-
-        InOrder inOrder = inOrder(dataRowDao, formTemplateService, formDataDao);
-
-        inOrder.verify(dataRowDao, times(1)).isDataRowsCountChanged(anyLong());
-        inOrder.verify(formTemplateService, times(1)).isAnyAutoNumerationColumn(any(FormTemplate.class), any(AutoNumerationColumnType.class));
-        inOrder.verify(formDataDao).save(any(FormData.class));
-
-        verify(dataService, never()).updatePreviousRowNumber(any(FormData.class));
-        verify(logger, never()).info(anyString());
-    }
-
-    /**
-     * Текущий экземпляр НФ находится в состоянии отличном от "Создана".
-     * Количество строк в табличной части до и после редактирования изменилось.
-     * Есть хотя бы одна сквозная автонумеруемая графа.
-     * Случай когда нет экземпляров последующих периодов для обновления "Номера предыдущей налоговой формы".
-     * Важен порядок вызова методов!!!
-     *
-     * 1. Выполнить сравнение количества строк в табличной части до и после редактирования.
-     * 2. Выполнить проверку наличия автонумеруемых граф со сквозной нумерацией.
-     * 3. Обновить сквозную нумерацию в налоговых формах следующих периодов текущей сквозной нумерации.
-     * 4. Не выводить в панель уведомлений сообщение.
-     */
-    @Test
-    public void testSaveFormDataStateNotCreatedDataRowsChangedAnyAutoNumerationExistNotShowMsg() {
-        Logger logger = mock(Logger.class);
-        TAUserInfo userInfo = mock(TAUserInfo.class);
-
-        FormData formData = getFormData();
-
-        final FormDataService dataService = spy(formDataService);
-
-        when(dataRowDao.isDataRowsCountChanged(formData.getId())).thenReturn(true);
-        when(formTemplateService.isAnyAutoNumerationColumn(any(FormTemplate.class), any(AutoNumerationColumnType.class))).thenReturn(true);
-        doReturn(null).when(dataService).updatePreviousRowNumber(any(FormData.class));
-
-        dataService.saveFormData(logger, userInfo, formData);
-
-        InOrder inOrder = inOrder(dataRowDao, formTemplateService, dataService, formDataDao);
-
-        inOrder.verify(dataRowDao, times(1)).isDataRowsCountChanged(anyLong());
-        inOrder.verify(formTemplateService, times(1)).isAnyAutoNumerationColumn(any(FormTemplate.class), any(AutoNumerationColumnType.class));
-        inOrder.verify(dataService, times(1)).updatePreviousRowNumber(any(FormData.class));
-        inOrder.verify(formDataDao).save(any(FormData.class));
-
-        verify(logger, never()).info(anyString());
-    }
-
-    /**
-     * Текущий экземпляр НФ находится в состоянии отличном от "Создана".
-     * Количество строк в табличной части до и после редактирования изменилось.
-     * Есть хотя бы одна сквозная автонумеруемая графа.
-     * Случай когда есть экземпляры последующих периодов для обновления "Номера предыдущей налоговой формы".
-     * Важен порядок вызова методов!!!
-     *
-     * 1. Выполнить сравнение количества строк в табличной части до и после редактирования.
-     * 2. Выполнить проверку наличия автонумеруемых граф со сквозной нумерацией.
-     * 3. Обновить сквозную нумерацию в налоговых формах следующих периодов текущей сквозной нумерации.
-     * 4. Вывести в панель уведомлений сообщение.
-     */
-    @Test
-    public void testSaveFormDataStateNotCreatedDataRowsChangedAnyAutoNumerationExistShowMsg() {
-        Logger logger = mock(Logger.class);
-        TAUserInfo userInfo = mock(TAUserInfo.class);
-
-        FormData formData = getFormData();
-
-        final FormDataService dataService = spy(formDataService);
-
-        when(dataRowDao.isDataRowsCountChanged(formData.getId())).thenReturn(true);
-        when(formTemplateService.isAnyAutoNumerationColumn(any(FormTemplate.class), any(AutoNumerationColumnType.class))).thenReturn(true);
-        doReturn("Message").when(dataService).updatePreviousRowNumber(any(FormData.class));
-
-        dataService.saveFormData(logger, userInfo, formData);
-
-        InOrder inOrder = inOrder(dataRowDao, formTemplateService, dataService, logger, formDataDao);
-
-        inOrder.verify(dataRowDao, times(1)).isDataRowsCountChanged(anyLong());
-        inOrder.verify(formTemplateService, times(1)).isAnyAutoNumerationColumn(any(FormTemplate.class), any(AutoNumerationColumnType.class));
-        inOrder.verify(dataService, times(1)).updatePreviousRowNumber(any(FormData.class));
-        inOrder.verify(logger, times(1)).info(anyString());
-        inOrder.verify(formDataDao).save(any(FormData.class));
+        FormData formData3 = new FormData();
+        formData3.setState(WorkflowState.PREPARED);
+        assertTrue("Должен участвовать в сквозной нумерации", formDataService.beInOnAutoNumeration(formData3));
     }
 
     private FormData getFormData() {
