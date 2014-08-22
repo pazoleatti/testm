@@ -269,7 +269,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                 departmentService.getParentTB(records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue().intValue()) :
                 departmentService.getBankDepartment();
         int newTBId = newTb != null ? newTb.getId() : uniqueRecordId.intValue();
-        boolean isChangeTB = oldTBId != newTBId;
+        boolean isChangeTB = oldTBId != 0 && oldTBId != newTBId;
 
         if (isChangeTB)
             throw new ServiceLoggerException("Невозможно переместить подразделение в состав другого территориального банка!",
