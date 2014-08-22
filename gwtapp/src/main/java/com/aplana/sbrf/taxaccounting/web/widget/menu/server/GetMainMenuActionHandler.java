@@ -136,6 +136,13 @@ public class GetMainMenuActionHandler extends
                                             + TYPE + "=" + menu.getMeta()));
                 }
             }
+
+            if (currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+                MenuItem gar = new MenuItem("Гарантии", "", "Гарантии");
+                taxMenu.getSubMenu().add(gar);
+                gar.getSubMenu().add(new MenuItem("Перейти", "/RnuModule0.3.9"));
+            }
+
             MenuItem menuItem = new MenuItem("Сервис", "", "Сервис");
             menuItem.getSubMenu().add(new MenuItem("Загрузить ТФ", NUMBER_SIGN + UploadTransportDataTokens.uploadTransportData));
             taxMenu.getSubMenu().add(menuItem);
