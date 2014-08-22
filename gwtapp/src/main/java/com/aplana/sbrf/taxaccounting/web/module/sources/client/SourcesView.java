@@ -745,6 +745,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
     public void setAvailableFormRight(List<DepartmentAssign> departmentFormTypes) {
         clearRightTable();
         rightTable.setRowData(0, departmentFormTypes);
+        rightTable.setVisibleRange(new Range(0, departmentFormTypes.size()));
         for(DepartmentAssign departmentAssign: departmentFormTypes) {
             if (departmentAssign.isChecked())
                 rightSM.setSelected(departmentAssign, true);
@@ -753,14 +754,17 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
 
     @Override
     public void setAvailableFormsLeft(List<DepartmentAssign> departmentFormTypes) {
+        System.out.println("departmentFormTypes: "+departmentFormTypes.size());
         clearLeftTable();
         leftTable.setRowData(0, departmentFormTypes);
+        leftTable.setVisibleRange(new Range(0, departmentFormTypes.size()));
     }
 
     @Override
     public void setAvailableDecsRight(List<DepartmentAssign> departmentDeclarationTypes) {
         clearRightTable();
         rightTable.setRowData(departmentDeclarationTypes);
+        rightTable.setVisibleRange(new Range(0, departmentDeclarationTypes.size()));
         for(DepartmentAssign departmentAssign: departmentDeclarationTypes) {
             if (departmentAssign.isChecked())
                 rightSM.setSelected(departmentAssign, true);
@@ -771,12 +775,14 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
     public void setAvailableDecsLeft(List<DepartmentAssign> departmentDeclarationTypes) {
         clearLeftTable();
         leftTable.setRowData(departmentDeclarationTypes);
+        leftTable.setVisibleRange(new Range(0, departmentDeclarationTypes.size()));
     }
 
     @Override
     public void setCurrentSources(List<CurrentAssign> departmentFormTypes) {
         clearDownTable();
         downTable.setRowData(0, departmentFormTypes);
+        downTable.setVisibleRange(new Range(0, departmentFormTypes.size()));
     }
 
     @Override

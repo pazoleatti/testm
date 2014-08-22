@@ -185,6 +185,14 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
         }
     }
 
+    @Override
+    public void checkDestinationsSources(int typeId, Pair<Date,Date> beginRange, Pair<Date,Date> endRange, Logger logger) {
+        if (beginRange != null)
+            checkDestinationsSources(typeId, beginRange.getFirst(), beginRange.getSecond(), logger);
+        if (endRange != null)
+            checkDestinationsSources(typeId, endRange.getFirst(), endRange.getSecond(), logger);
+    }
+
     private FormTemplate createFakeTemplate(Date date, int formTypeId){
         FormTemplate formTemplate =  new FormTemplate();
         formTemplate.setVersion(date);

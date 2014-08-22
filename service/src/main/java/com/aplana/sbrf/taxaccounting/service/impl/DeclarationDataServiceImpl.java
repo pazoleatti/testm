@@ -351,10 +351,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         Locale oldLocale = Locale.getDefault();
         Locale.setDefault(new Locale("ru", "RU"));
         String xmlUuid = declarationData.getXmlDataUuid();
-        String xml = "";
-        if (xmlUuid != null) {
-            xml = new String(getBytesFromInputstream(xmlUuid));
+        if (xmlUuid == null) { // не проверяем пустые XML
+            return;
         }
+        String xml = new String(getBytesFromInputstream(xmlUuid));
         DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationData.getDeclarationTemplateId());
 
         if (declarationTemplate.getXsdId() != null && !declarationTemplate.getXsdId().isEmpty()) {

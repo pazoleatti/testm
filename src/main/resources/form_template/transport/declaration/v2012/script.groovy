@@ -257,7 +257,7 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
 
                         resultMap.each { okato, row ->
                             СумПУ(
-                                    ОКТМО: getRefBookValue(96, okato)?.CODE?.stringValue,
+                                    ОКТМО: getOkato(okato),
                                     НалИсчисл: row.taxSumToPay,
                                     АвПУКв1: row.amountOfTheAdvancePayment1.setScale(0, BigDecimal.ROUND_HALF_UP).intValue(),
                                     АвПУКв2: row.amountOfTheAdvancePayment2.setScale(0, BigDecimal.ROUND_HALF_UP).intValue(),
@@ -547,4 +547,17 @@ def getRefBookValue(def refBookId, def recordId) {
         refBookCache.put(recordId, refBookService.getRecordData(refBookId, recordId))
     }
     return refBookCache.get(recordId)
+}
+
+def getOkato(def id) {
+    def String okato = null
+    if(id != null){
+        okato = getRefBookValue(96, id)?.CODE?.stringValue
+        if(okato != null) {
+            while (okato.length() < 11) {
+                okato = okato + '0'
+            }
+        }
+    }
+    return okato
 }
