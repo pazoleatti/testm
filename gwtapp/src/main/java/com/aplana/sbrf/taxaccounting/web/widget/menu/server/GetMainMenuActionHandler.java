@@ -140,7 +140,7 @@ public class GetMainMenuActionHandler extends
             if (currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
                 MenuItem gar = new MenuItem("Гарантии", "", "Гарантии");
                 taxMenu.getSubMenu().add(gar);
-                gar.getSubMenu().add(new MenuItem("Перейти", "/RnuModule0.3.9"));
+                gar.getSubMenu().add(new MenuItem("Перейти", "/taxaccounting-rnu/module"));
             }
 
             MenuItem menuItem = new MenuItem("Сервис", "", "Сервис");
