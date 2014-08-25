@@ -232,7 +232,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         int depId = refBookDepartmentDao.create(refBookValueMap, attributes);
         int terrBankId = departmentService.getParentTB(depId) != null ? departmentService.getParentTB(depId).getId() : 0;
         createPeriods(depId, fromCode(refBookValueMap.get(DEPARTMENT_TYPE_ATTRIBUTE).getReferenceValue().intValue()),
-                terrBankId, logger);
+                terrBankId);
         if (logger.containsLevel(LogLevel.ERROR))
             throw new ServiceLoggerException("Подразделение не создано, обнаружены фатальные ошибки!",
                     logEntryService.save(logger.getEntries()));
@@ -490,7 +490,7 @@ public class RefBookDepartment implements RefBookDataProvider {
             provider.deleteRecordVersions(logger, uniqueIds, false);
         } */
 
-        deletePeriods(depId, logger);
+        deletePeriods(depId);
 
         auditService.add(FormDataEvent.DELETE_DEPARTMENT, logger.getTaUserInfo(), 0, null, null, null, null,
                 String.format("Удалено подразделение %s", departmentService.getParentsHierarchy(depId)));
@@ -602,7 +602,7 @@ public class RefBookDepartment implements RefBookDataProvider {
     }
 
     //http://conf.aplana.com/pages/viewpage.action?pageId=11402881
-    private void createPeriods(long depId, DepartmentType newDepartmentType, int terrBankId, Logger logger){
+    private void createPeriods(long depId, DepartmentType newDepartmentType, int terrBankId){
         //1
         if (newDepartmentType != DepartmentType.TERR_BANK){
             if (departmentService.getParentTB((int) depId) != null){
@@ -622,7 +622,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                         drpCopy.setActive(drp.isActive());
                         drpCopy.setCorrectPeriod(drp.getCorrectPeriod());
                         drpCopy.setBalance(drp.isBalance());
-                        periodService.saveOrUpdate(drpCopy, null, logger.getEntries());
+                        periodService.saveOrUpdate(drpCopy, null, null);
                     }
                     return;
                 }
@@ -644,7 +644,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                 drpCopy.setActive(drp.isActive());
                 drpCopy.setCorrectPeriod(null);
                 drpCopy.setBalance(drp.isBalance());
-                periodService.saveOrUpdate(drpCopy, null, logger.getEntries());
+                periodService.saveOrUpdate(drpCopy, null, null);
             }
         }
     }
@@ -703,7 +703,6 @@ public class RefBookDepartment implements RefBookDataProvider {
         List<Long> ref101 = refBookIncome101.getUniqueRecordIds(null, String.format(FILTER_BY_DEPARTMENT, department.getId()));
         List<Long> ref102 = refBookIncome102.getUniqueRecordIds(null, String.format(FILTER_BY_DEPARTMENT, department.getId()));
         for (Long id : ref101){
-            String periodValue = refBookIncome101Dao.getPeriodNameFromRefBook(id);
             logger.warn(String.format("Существует загруженная для подразделения %s бух. отчетность в периоде %s!",
                     department.getName(), refBookIncome101Dao.getPeriodNameFromRefBook(id)));
         }
@@ -749,13 +748,13 @@ public class RefBookDepartment implements RefBookDataProvider {
             logger.warn("Заданы пути к каталогам транспортных файлов для %s!", department.getName());
     }
 
-    private void deletePeriods(int depId, Logger logger){
+    private void deletePeriods(int depId){
         List<Long> reportPeriods =
                 refBookDepartmentDao.getPeriodsByTaxTypesAndDepartments(
                         Arrays.asList(TaxType.values()),
                         Arrays.asList(depId));
         for (Long id : reportPeriods){
-            periodService.removePeriodWithLog(id.intValue(), null, Arrays.asList(depId), null, logger.getEntries());
+            periodService.removePeriodWithLog(id.intValue(), null, Arrays.asList(depId), null, null);
         }
 
     }
