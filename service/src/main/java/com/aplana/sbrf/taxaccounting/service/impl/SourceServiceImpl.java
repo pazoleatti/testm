@@ -33,7 +33,8 @@ public class SourceServiceImpl implements SourceService {
     private static final String FORM_INSTANCES_EXIST_MSG = "Найдены экземпляры, которые назначены %s формы \"%s\" и имеют статус \"Принят\":  \"%s\". Назначение не может быть выполнено";
     private static final String EMPTY_END_PERIOD_INFO = "дата окончания периода не задана";
     private static final String INTERSECTION_PART = "\"%s\" в качестве %s для \"%s\" в периоде %s";
-    private static final String INTERSECTION_MSG = "Найдены существующие назначения: %s. Новое назначение создано путем слияния с найденными назначениями, новое назначение действует в периоде %s.";
+    private static final String INTERSECTION_MSG_BEGIN = "Найдены существующие назначения:";
+    private static final String INTERSECTION_MSG_END = "Новое назначение создано путем слияния с найденными назначениями, новое назначение действует в периоде %s.";
     private static final String SAVE_SUCCESS_MSG = "\"%s\" назначен %s формы \"%s\" в периоде %s.";
     private static final String DELETE_SUCCESS_MSG = "Удалено назначение \"%s\" в роли %s %s %s в периоде %s.";
     private static final String UPDATE_SUCCESS_MSG = "\"%s\" назначен %s формы \"%s\" в периоде %s.";
@@ -158,7 +159,7 @@ public class SourceServiceImpl implements SourceService {
          * @param sourcePair обрабатываемая пара источник-приемник
          * @return сообщение
          */
-        String getSourceMessage(SourcePair sourcePair);
+        List<String> getSourceMessage(SourcePair sourcePair);
 
         /**
          * Возвращает сообщение при обнаружении вхождения исключаемого назначения в списке приемников
@@ -166,7 +167,7 @@ public class SourceServiceImpl implements SourceService {
          * @param sourcePair обрабатываемая пара источник-приемник
          * @return сообщение
          */
-        String getDestinationMessage(SourcePair sourcePair);
+        List<String> getDestinationMessage(SourcePair sourcePair);
     }
 
     /**
@@ -195,43 +196,13 @@ public class SourceServiceImpl implements SourceService {
                 if (pair.getSource().equals(error) || pair.getDestination().equals(error)) {
                     if (isDeclaration) {
                         if (pair.getDestination().equals(error)) {
-                            switch (level) {
-                                case ERROR: {
-                                    logger.error(messageBuilder.getDestinationMessage(pair));
-                                    break;
-                                }
-                                case WARN: {
-                                    logger.warn(messageBuilder.getDestinationMessage(pair));
-                                    break;
-                                }
-                                default: logger.info(messageBuilder.getDestinationMessage(pair));
-                            }
+                            printMsgs(logger, messageBuilder.getDestinationMessage(pair), level);
                         }
                     } else {
-                        switch (level) {
-                            case ERROR: {
-                                if (pair.getSource().equals(error)) {
-                                    logger.error(messageBuilder.getSourceMessage(pair));
-                                } else {
-                                    logger.error(messageBuilder.getDestinationMessage(pair));
-                                }
-                                break;
-                            }
-                            case WARN: {
-                                if (pair.getSource().equals(error)) {
-                                    logger.warn(messageBuilder.getSourceMessage(pair));
-                                } else {
-                                    logger.warn(messageBuilder.getDestinationMessage(pair));
-                                }
-                                break;
-                            }
-                            default: {
-                                if (pair.getSource().equals(error)) {
-                                    logger.info(messageBuilder.getSourceMessage(pair));
-                                } else {
-                                    logger.info(messageBuilder.getDestinationMessage(pair));
-                                }
-                            }
+                        if (pair.getSource().equals(error)) {
+                            printMsgs(logger, messageBuilder.getSourceMessage(pair), level);
+                        } else {
+                            printMsgs(logger, messageBuilder.getDestinationMessage(pair), level);
                         }
                     }
                     it.remove();
@@ -253,6 +224,22 @@ public class SourceServiceImpl implements SourceService {
                     logEntryService.save(logger.getEntries()));
         }
         return sourcePairsOut;
+    }
+
+    private void printMsgs(Logger logger, List<String> msgs, LOG_LEVEL level) {
+        for (String msg : msgs) {
+            switch (level) {
+                case ERROR: {
+                    logger.error(msg);
+                    break;
+                }
+                case WARN: {
+                    logger.warn(msg);
+                    break;
+                }
+                default: logger.info(msg);
+            }
+        }
     }
 
     /**
@@ -365,18 +352,18 @@ public class SourceServiceImpl implements SourceService {
         return truncateSources(logger, sourcePairs, notExisting, mode, isDeclaration, false, LOG_LEVEL.ERROR,
                 new MessageBuilder() {
                     @Override
-                    public String getSourceMessage(SourcePair sourcePair) {
-                        return String.format(CHECK_EXISTENCE_MSG,
+                    public List<String> getSourceMessage(SourcePair sourcePair) {
+                        return Arrays.asList(String.format(CHECK_EXISTENCE_MSG,
                                 sourcePair.getSourceKind() + ": " + sourcePair.getSourceType(),
-                                departmentDao.getDepartment(sourceDepartmentId));
+                                departmentDao.getDepartment(sourceDepartmentId)));
                     }
 
                     @Override
-                    public String getDestinationMessage(SourcePair sourcePair) {
-                        return String.format(CHECK_EXISTENCE_MSG,
+                    public List<String> getDestinationMessage(SourcePair sourcePair) {
+                        return Arrays.asList(String.format(CHECK_EXISTENCE_MSG,
                                 isDeclaration ? sourcePair.getDestinationType() :
                                         sourcePair.getDestinationKind() + ": " + sourcePair.getDestinationType(),
-                                departmentDao.getDepartment(destinationDepartmentId));
+                                departmentDao.getDepartment(destinationDepartmentId)));
                     }
                 });
     }
@@ -418,7 +405,7 @@ public class SourceServiceImpl implements SourceService {
             /** Убираем назначения из обработки */
             sourcePairsOut = truncateSources(logger, sourcePairs, new ArrayList<Long>(formsMap.keySet()), mode, isDeclaration, false, LOG_LEVEL.ERROR,
                     new MessageBuilder() {
-                        private String getMsg(Long departmentFormTypeId, String mode) {
+                        private List<String> getMsg(Long departmentFormTypeId, String mode) {
                             FormDataInfo formDataInfo = formsMap.get(departmentFormTypeId).get(0);
                             StringBuilder formsInfo = new StringBuilder();
                             for (Iterator<FormDataInfo> it = formsMap.get(departmentFormTypeId).iterator(); it.hasNext(); ) {
@@ -433,20 +420,20 @@ public class SourceServiceImpl implements SourceService {
                                     formsInfo.append(", ");
                                 }
                             }
-                            return String.format(FORM_INSTANCES_EXIST_MSG,
+                            return Arrays.asList(String.format(FORM_INSTANCES_EXIST_MSG,
                                     mode,
                                     formDataInfo.getDepartment() + "-" + formDataInfo.getFormTypeName() + "-" + formDataInfo.getFormKindName(),
                                     formsInfo.toString()
-                            );
+                            ));
                         }
 
                         @Override
-                        public String getSourceMessage(SourcePair sourcePair) {
+                        public List<String> getSourceMessage(SourcePair sourcePair) {
                             return getMsg(sourcePair.getSource(), "источниками");
                         }
 
                         @Override
-                        public String getDestinationMessage(SourcePair sourcePair) {
+                        public List<String> getDestinationMessage(SourcePair sourcePair) {
                             return getMsg(sourcePair.getDestination(), "приемниками");
                         }
                     });
@@ -477,12 +464,12 @@ public class SourceServiceImpl implements SourceService {
                     new MessageBuilder() {
 
                         @Override
-                        public String getSourceMessage(SourcePair sourcePair) {
+                        public List<String> getSourceMessage(SourcePair sourcePair) {
                             throw new ServiceException("При поиске экземпляров деклараций, обнаружено совпадение в нф!");
                         }
 
                         @Override
-                        public String getDestinationMessage(SourcePair sourcePair) {
+                        public List<String> getDestinationMessage(SourcePair sourcePair) {
                             DeclarationDataInfo declarationDataInfo = declarationsMap.get(sourcePair.getDestination()).get(0);
                             StringBuilder declarationInfo = new StringBuilder();
                             for (Iterator<DeclarationDataInfo> it = declarationsMap.get(sourcePair.getDestination()).iterator(); it.hasNext(); ) {
@@ -496,11 +483,11 @@ public class SourceServiceImpl implements SourceService {
                                     declarationInfo.append(", ");
                                 }
                             }
-                            return String.format(FORM_INSTANCES_EXIST_MSG,
+                            return Arrays.asList(String.format(FORM_INSTANCES_EXIST_MSG,
                                     "приемниками",
                                     declarationDataInfo.getDepartment() + "-" + declarationDataInfo.getDeclarationTypeName(),
                                     declarationInfo.toString()
-                            );
+                            ));
                         }
                     });
         }
@@ -541,16 +528,16 @@ public class SourceServiceImpl implements SourceService {
             return truncateSources(logger, sourcePairs, unionSourcePairs(loopedSources), mode, isDeclaration, false, LOG_LEVEL.INFO,
                     new MessageBuilder() {
                         @Override
-                        public String getSourceMessage(SourcePair sourcePair) {
+                        public List<String> getSourceMessage(SourcePair sourcePair) {
                             SourcePair errorPair = loopsMap.get(sourcePair);
-                            return String.format(CIRCLE_MSG,
+                            return Arrays.asList(String.format(CIRCLE_MSG,
                                     objectNames.get(errorPair.getSource()),
                                     objectNames.get(errorPair.getDestination())
-                            );
+                            ));
                         }
 
                         @Override
-                        public String getDestinationMessage(SourcePair sourcePair) {
+                        public List<String> getDestinationMessage(SourcePair sourcePair) {
                             return getSourceMessage(sourcePair);
                         }
                     });
@@ -576,7 +563,7 @@ public class SourceServiceImpl implements SourceService {
      * @return обрезанный входной список связок источников-приемников, для которых не найдены пересечения
      */
     public List<SourcePair> checkIntersections(Logger logger, Date periodStart, Date periodEnd,
-                                               Date excludedPeriodStart, Date excludedPeriodEnd,
+                                               final Date excludedPeriodStart, Date excludedPeriodEnd,
                                                List<SourcePair> sourcePairs,
                                                SourceMode mode,
                                                boolean isDeclaration) {
@@ -590,10 +577,11 @@ public class SourceServiceImpl implements SourceService {
              * Формируем новый период для нового назначения = объединенному периоду обнаруженного пересечения и входного периода
              * Также формируем список на удаление состоящий из пересекающихся назначений
              */
-            Map<SourceObject, Pair<Date, Date>> unionSources = new HashMap<SourceObject, Pair<Date, Date>>();
+            final Map<SourceObject, Pair<Date, Date>> unionSources = new HashMap<SourceObject, Pair<Date, Date>>();
+            final Map<SourcePair, Pair<Date, Date>> unionPairs = new HashMap<SourcePair, Pair<Date, Date>>();
             List<SourceObject> deleteSources = new ArrayList<SourceObject>();
             final Map<SourcePair, SourceObject> unionMap = new HashMap<SourcePair, SourceObject>();
-            final StringBuilder intersectionParts = new StringBuilder();
+            final List<String> intersectionParts = new ArrayList<String>();
             int n = 0;
             for (Map.Entry<SourcePair, List<SourceObject>> intersectionGroup : intersections.entrySet()) {
                 Date minDate = periodStart;
@@ -609,16 +597,16 @@ public class SourceServiceImpl implements SourceService {
                     }
                     deleteSources.add(intersection);
                     if (mode == SourceMode.SOURCES) {
-                        intersectionParts.append(String.format(INTERSECTION_PART,
-                                        isDeclaration ? intersection.getSourcePair().getDestinationType() : intersection.getSourcePair().getDestinationKind() + ": " +  intersection.getSourcePair().getDestinationType(),
+                        intersectionParts.add(String.format(INTERSECTION_PART,
+                                        isDeclaration ? intersection.getSourcePair().getDestinationType() : intersection.getSourcePair().getDestinationKind() + ": " + intersection.getSourcePair().getDestinationType(),
                                         "приемника",
-                                        intersection.getSourcePair().getSourceKind() + ": " +  intersection.getSourcePair().getSourceType(),
+                                        intersection.getSourcePair().getSourceKind() + ": " + intersection.getSourcePair().getSourceType(),
                                         formatter.get().format(intersection.getPeriodStart()) + " - " +
                                                 (intersection.getPeriodEnd() != null ? formatter.get().format(intersection.getPeriodEnd()) : EMPTY_END_PERIOD_INFO)
                                 )
                         );
                     } else {
-                        intersectionParts.append(String.format(INTERSECTION_PART,
+                        intersectionParts.add(String.format(INTERSECTION_PART,
                                         intersection.getSourcePair().getSourceKind() + ": " +  intersection.getSourcePair().getSourceType(),
                                         "источника",
                                         isDeclaration ? intersection.getSourcePair().getDestinationType() : intersection.getSourcePair().getDestinationKind() + ": " +  intersection.getSourcePair().getDestinationType(),
@@ -628,7 +616,7 @@ public class SourceServiceImpl implements SourceService {
                         );
                     }
                     if (n < intersections.size() - 1) {
-                        intersectionParts.append(", ");
+                        //intersectionParts.add(", ");
                     }
                     n++;
                 }
@@ -642,6 +630,7 @@ public class SourceServiceImpl implements SourceService {
                     union = new SourceObject(intersectionGroup.getKey(), excludedPeriodStart, excludedPeriodEnd);
                 }
                 unionSources.put(union, new Pair<Date, Date>(minDate, maxDate));
+                unionPairs.put(union.getSourcePair(), new Pair<Date, Date>(minDate, maxDate));
                 unionMap.put(union.getSourcePair(), union);
             }
 
@@ -666,18 +655,28 @@ public class SourceServiceImpl implements SourceService {
             return truncateSources(logger, sourcePairs, intersectingSources, mode, isDeclaration, true, LOG_LEVEL.INFO,
                     new MessageBuilder() {
                         @Override
-                        public String getSourceMessage(SourcePair sourcePair) {
-                            SourceObject union = unionMap.get(sourcePair);
-                            return String.format(INTERSECTION_MSG,
-                                    intersectionParts.toString(),
-                                    formatter.get().format(union.getPeriodStart()) + " - " +
-                                            (union.getPeriodEnd() != null ? formatter.get().format(union.getPeriodEnd()) : EMPTY_END_PERIOD_INFO)
-
-                            );
+                        public List<String> getSourceMessage(SourcePair sourcePair) {
+                            String period;
+                            if (excludedPeriodStart == null) {
+                                //Идет создание назначений
+                                SourceObject union = unionMap.get(sourcePair);
+                                period = formatter.get().format(union.getPeriodStart()) + " - " +
+                                        (union.getPeriodEnd() != null ? formatter.get().format(union.getPeriodEnd()) : EMPTY_END_PERIOD_INFO);
+                            } else {
+                                //Идет редактирование назначений
+                                Pair<Date, Date> periodDates = unionPairs.get(sourcePair);
+                                period = formatter.get().format(periodDates.getFirst()) + " - " +
+                                        (periodDates.getSecond() != null ? formatter.get().format(periodDates.getSecond()) : EMPTY_END_PERIOD_INFO);
+                            }
+                            List<String> msgs = new ArrayList<String>();
+                            msgs.add(INTERSECTION_MSG_BEGIN);
+                            msgs.addAll(intersectionParts);
+                            msgs.add(String.format(INTERSECTION_MSG_END, period));
+                            return msgs;
                         }
 
                         @Override
-                        public String getDestinationMessage(SourcePair sourcePair) {
+                        public List<String> getDestinationMessage(SourcePair sourcePair) {
                             return getSourceMessage(sourcePair);
                         }
                     });
@@ -903,20 +902,22 @@ public class SourceServiceImpl implements SourceService {
             List<SourcePair> sourcePairs = sourceClientData.getSourcePairs();
             if (periodStart.before(oldPeriodStart)) {
                 /** Дата начала нового периода меньше даты начала старого периода */
-                if (periodEnd != null && oldPeriodEnd != null && periodEnd.before(oldPeriodEnd) && periodEnd.after(oldPeriodStart)) {
+                if (periodEnd != null && ((oldPeriodEnd != null && periodEnd.before(oldPeriodEnd)) || oldPeriodEnd == null) && periodEnd.after(oldPeriodStart)) {
                     /** Дата окончания нового периода меньше даты окончания старого периода и больше даты начала старого периода */
 
                     /** Проверка существования экземпляров нф */
-                    instancesNotification(logger, sourcePairs, periodStart, oldPeriodEnd,
+                    instancesNotification(logger, sourcePairs, periodStart, SimpleDateUtils.addDayToDate(oldPeriodStart, -1),
+                            sourceClientData.getMode(), sourceClientData.isDeclaration());
+                    instancesNotification(logger, sourcePairs, SimpleDateUtils.addDayToDate(periodEnd, 1), oldPeriodEnd,
                             sourceClientData.getMode(), sourceClientData.isDeclaration());
                     /** Проверка зацикливания */
-                    sourcePairs = checkLoops(logger, periodStart, SimpleDateUtils.addDayToDate(oldPeriodEnd, -1),
+                    sourcePairs = checkLoops(logger, periodStart, oldPeriodEnd,
                             sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
                     /** Проверка пересечений */
-                    sourcePairs = checkIntersections(logger, periodStart, SimpleDateUtils.addDayToDate(oldPeriodEnd, -1),
+                    sourcePairs = checkIntersections(logger, periodStart, periodEnd,
                             oldPeriodStart, oldPeriodEnd, sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
-                } else if (periodEnd != null && (periodEnd.before(oldPeriodStart) || periodEnd.equals(oldPeriodStart))) {
-                    /** Дата окончания нового периода меньше либо равна дате начала старого периода */
+                } else if (periodEnd != null && (periodEnd.before(oldPeriodStart))) {
+                    /** Дата окончания нового периода меньше даты начала старого периода */
 
                     /** Проверка существования экземпляров нф */
                     instancesNotification(logger, sourcePairs, oldPeriodStart, oldPeriodEnd,
@@ -934,27 +935,27 @@ public class SourceServiceImpl implements SourceService {
                     /** Дата окончания нового периода больше даты окончания старого периода */
 
                     /** Проверка существования экземпляров нф */
-                    instancesNotification(logger, sourcePairs, periodStart, periodEnd,
+                    instancesNotification(logger, sourcePairs, periodStart, SimpleDateUtils.addDayToDate(oldPeriodStart, -1),
+                            sourceClientData.getMode(), sourceClientData.isDeclaration());
+                    instancesNotification(logger, sourcePairs, SimpleDateUtils.addDayToDate(oldPeriodEnd, 1), periodEnd,
                             sourceClientData.getMode(), sourceClientData.isDeclaration());
                     /** Проверка зацикливания */
-                    sourcePairs = checkLoops(logger, periodStart, SimpleDateUtils.addDayToDate(oldPeriodStart, -1),
-                            sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
-                    sourcePairs = checkLoops(logger, SimpleDateUtils.addDayToDate(oldPeriodEnd, 1), periodEnd,
+                    sourcePairs = checkLoops(logger, periodStart, periodEnd,
                             sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
                     /** Проверка пересечений */
-                    sourcePairs = checkIntersections(logger, SimpleDateUtils.addDayToDate(oldPeriodEnd, 1), periodEnd,
+                    sourcePairs = checkIntersections(logger, periodStart, periodEnd,
                             oldPeriodStart, oldPeriodEnd, sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
                 } else if ((periodEnd == null && oldPeriodEnd == null) || (periodEnd.equals(oldPeriodEnd))) {
                     /** Равна дате окончания старого периода */
 
                     /** Проверка существования экземпляров нф */
-                    instancesNotification(logger, sourcePairs, periodStart, oldPeriodEnd,
+                    instancesNotification(logger, sourcePairs, periodStart, SimpleDateUtils.addDayToDate(oldPeriodStart, -1),
                             sourceClientData.getMode(), sourceClientData.isDeclaration());
                     /** Проверка зацикливания */
-                    sourcePairs = checkLoops(logger, periodStart, oldPeriodEnd,
+                    sourcePairs = checkLoops(logger, periodStart, periodEnd,
                             sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
                     /** Проверка пересечений */
-                    sourcePairs = checkIntersections(logger, periodStart, oldPeriodEnd,
+                    sourcePairs = checkIntersections(logger, periodStart, periodEnd,
                             oldPeriodStart, oldPeriodEnd, sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
                 }
             } else if (periodStart.equals(oldPeriodStart)) {
@@ -963,54 +964,60 @@ public class SourceServiceImpl implements SourceService {
                     /** Дата окончания нового периода меньше даты окончания старого периода */
 
                     /** Проверка существования экземпляров нф */
-                    instancesNotification(logger, sourcePairs, periodEnd, oldPeriodEnd,
+                    instancesNotification(logger, sourcePairs, SimpleDateUtils.addDayToDate(periodEnd, 1), oldPeriodEnd,
                             sourceClientData.getMode(), sourceClientData.isDeclaration());
                 } else if ((periodEnd == null && oldPeriodEnd != null)
                         || (periodEnd != null && periodEnd.after(oldPeriodEnd))) {
                     /** Дата окончания нового периода больше даты окончания старого периода */
 
                     /** Проверка существования экземпляров нф */
-                    instancesNotification(logger, sourcePairs, oldPeriodEnd, periodEnd,
+                    instancesNotification(logger, sourcePairs, SimpleDateUtils.addDayToDate(oldPeriodEnd, 1), periodEnd,
                             sourceClientData.getMode(), sourceClientData.isDeclaration());
                     /** Проверка зацикливания */
-                    sourcePairs = checkLoops(logger, SimpleDateUtils.addDayToDate(oldPeriodEnd, 1), periodEnd,
+                    sourcePairs = checkLoops(logger, periodStart, periodEnd,
                             sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
                     /** Проверка пересечений */
-                    sourcePairs = checkIntersections(logger, SimpleDateUtils.addDayToDate(oldPeriodEnd, 1), periodEnd,
+                    sourcePairs = checkIntersections(logger, periodStart, periodEnd,
                             oldPeriodStart, oldPeriodEnd, sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
                 }
             } else if (periodStart.after(oldPeriodStart) && (
-                    (oldPeriodEnd != null && periodStart.before(oldPeriodEnd)) || oldPeriodEnd == null
+                    (oldPeriodEnd != null && periodStart.before(oldPeriodEnd) || oldPeriodEnd == null)
             )) {
                 /** Дата начала нового периода больше даты начала старого периода и меньше даты окончания старого периода */
-                if ((periodEnd == null && oldPeriodEnd == null) || (periodEnd != null && periodEnd.equals(oldPeriodEnd))) {
+                if ((periodEnd == null && oldPeriodEnd == null) || (periodEnd != null && oldPeriodEnd != null && periodEnd.equals(oldPeriodEnd))) {
                     /** Равна дате окончания старого периода */
 
                     /** Проверка существования экземпляров нф */
-                    instancesNotification(logger, sourcePairs, oldPeriodStart, oldPeriodEnd,
+                    instancesNotification(logger, sourcePairs, oldPeriodStart, SimpleDateUtils.addDayToDate(periodStart, -1),
                             sourceClientData.getMode(), sourceClientData.isDeclaration());
 
-                } else if (periodEnd != null && periodEnd.before(oldPeriodEnd)) {
+                } else if (periodEnd != null && (oldPeriodEnd == null || periodEnd.before(oldPeriodEnd))) {
                     /** Дата окончания нового периода меньше даты окончания старого периода */
 
                     /** Проверка существования экземпляров нф */
-                    instancesNotification(logger, sourcePairs, oldPeriodStart, periodStart,
+                    instancesNotification(logger, sourcePairs, oldPeriodStart, SimpleDateUtils.addDayToDate(periodStart, -1),
                             sourceClientData.getMode(), sourceClientData.isDeclaration());
-                    instancesNotification(logger, sourcePairs, oldPeriodEnd, periodEnd,
+                    instancesNotification(logger, sourcePairs, SimpleDateUtils.addDayToDate(periodEnd, 1), oldPeriodEnd,
                             sourceClientData.getMode(), sourceClientData.isDeclaration());
-                } else if (periodEnd != null && periodEnd.equals(oldPeriodStart)) {
-                    /** Дата окончания нового периода равна дате начала старого периода */
-
-                    /** Проверка существования экземпляров нф */
-                    instancesNotification(logger, sourcePairs, oldPeriodStart, periodStart,
-                            sourceClientData.getMode(), sourceClientData.isDeclaration());
-                } else if (periodEnd != null && periodEnd.after(oldPeriodEnd)) {
+                } else if ((periodEnd == null && oldPeriodEnd != null)|| (periodEnd.after(oldPeriodEnd))) {
                     /** Дата окончания нового периода больше даты окончания старого периода */
 
                     /** Проверка существования экземпляров нф */
-                    instancesNotification(logger, sourcePairs, oldPeriodStart, periodStart,
+                    instancesNotification(logger, sourcePairs, oldPeriodStart, SimpleDateUtils.addDayToDate(periodStart, -1),
                             sourceClientData.getMode(), sourceClientData.isDeclaration());
-                    instancesNotification(logger, sourcePairs, oldPeriodEnd, periodEnd,
+                    instancesNotification(logger, sourcePairs, SimpleDateUtils.addDayToDate(oldPeriodEnd, 1), periodEnd,
+                            sourceClientData.getMode(), sourceClientData.isDeclaration());
+                    /** Проверка зацикливания */
+                    sourcePairs = checkLoops(logger, periodStart, periodEnd,
+                            sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
+                    /** Проверка пересечений */
+                    sourcePairs = checkIntersections(logger, periodStart, periodEnd,
+                            oldPeriodStart, oldPeriodEnd, sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
+                } else if (periodEnd.after(oldPeriodEnd)) {
+                    /** Дата окончания нового периода равна дате окончания старого периода */
+
+                    /** Проверка существования экземпляров нф */
+                    instancesNotification(logger, sourcePairs, oldPeriodStart, SimpleDateUtils.addDayToDate(periodStart, -1),
                             sourceClientData.getMode(), sourceClientData.isDeclaration());
                 }
             } else if (oldPeriodEnd != null && periodStart.after(oldPeriodEnd)) {

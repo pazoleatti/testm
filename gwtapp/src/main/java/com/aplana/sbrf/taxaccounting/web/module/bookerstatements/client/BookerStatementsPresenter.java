@@ -67,6 +67,12 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
         void setBookerReportType(BookerStatementsType bookerReportType);
 
         /**
+         * Установка выбранных периодов
+         * @param reportPeriods
+         */
+        void setAccountPeriodIds(List<Long> reportPeriods);
+
+        /**
          * Получает выбранные подразделения
          */
         List<Integer> getDepartments();
@@ -166,9 +172,11 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
                                 if (filter == null) {
                                     filter = new BookerStatementsFilter();
                                     // Текущее подразделение пользователя
-                                    getView().setDepartment(Arrays.asList(result.getDepartment().getId()));
-                                    getView().setBookerReportType(BookerStatementsType.INCOME101);
+                                    getView().setAccountPeriodIds(null);
+                                    getView().setDepartment(null);
+                                    getView().setBookerReportType(null);
                                 } else {
+                                    getView().setAccountPeriodIds(filter.getAccountPeriodIds());
                                     getView().setDepartment(filter.getDepartmentIds());
                                     getView().setBookerReportType(filter.getBookerStatementsType());
                                 }
