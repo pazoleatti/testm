@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.core.api.LockCoreService;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -24,6 +23,8 @@ import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 import net.sf.jasperreports.engine.query.JRXPathQueryExecuterFactory;
 import net.sf.jasperreports.engine.util.JRXmlUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -57,6 +58,8 @@ import java.util.*;
 @Service
 @Transactional(readOnly = true)
 public class DeclarationDataServiceImpl implements DeclarationDataService {
+
+    protected static final Log log = LogFactory.getLog(DeclarationDataService.class);
 
 	private static final String XML_HEADER = "<?xml version=\"1.0\" encoding=\"windows-1251\"?>";
 
@@ -101,10 +104,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Autowired
     private TransactionHelper tx;
 
-    @Autowired
-    private TAUserDao userDao;
-
-	public static final String TAG_FILE = "Файл";
+    public static final String TAG_FILE = "Файл";
 	public static final String TAG_DOCUMENT = "Документ";
 	public static final String ATTR_FILE_ID = "ИдФайл";
 	public static final String ATTR_DOC_DATE = "ДатаДок";
@@ -398,9 +398,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 });
                 validator.validate(new StreamSource(xmlStream));
             } catch (Exception e) {
+                log.error(VALIDATION_ERR_MSG, e);
                 logger.error(e);
                 Locale.setDefault(oldLocale);
-                throw new ServiceException(VALIDATION_ERR_MSG, logger.getEntries());
+                throw new ServiceLoggerException(VALIDATION_ERR_MSG, logEntryService.save(logger.getEntries()));
             }
 
             if (logger.containsLevel(LogLevel.ERROR)) {
