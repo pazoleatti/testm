@@ -119,6 +119,7 @@ public class AssignDialogView extends ViewWithUiHandlers<AssignDialogUiHandlers>
     public void setAcceptablePeriods(List<PeriodInfo> periods) {
         periodFrom.setValue(periods.get(0));
         periodFrom.setAcceptableValues(periods);
+        periodTo.setValue(null);
         periodTo.setAcceptableValues(periods);
 
         WidgetUtils.setupOptionTitle(periodFrom);
