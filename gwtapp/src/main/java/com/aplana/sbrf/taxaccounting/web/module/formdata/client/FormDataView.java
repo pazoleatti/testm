@@ -202,7 +202,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
                     if (Element.is(eventTarget)) {
                         Element target = Element.as(eventTarget);
                         if ("td".equals(target.getTagName().toLowerCase())) {
-                            TableCellElement cellElement = formDataTable.getRowElement(event.getIndex()).getCells().getItem(event.getColumn());
+                            TableCellElement cellElement = formDataTable.getRowElement(event.getIndex() - 1 - formDataTable.getPageStart()).getCells().getItem(event.getColumn());
                             if (cellElement.getInnerText().replace("\u00A0", "").trim().isEmpty()) {
                                 cellElement.removeAttribute("title");
                             } else {
