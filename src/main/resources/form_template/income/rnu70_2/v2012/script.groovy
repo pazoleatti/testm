@@ -171,7 +171,9 @@ void calc() {
     // сортировка
     sortRows(dataRows, groupColums)
 
+    def rowNumber = 0 // необходим для задания уникального алиаса для строк промежуточных итогов после консолидации
     for (def row : dataRows) {
+        row.rowNumber = ++rowNumber
         row.financialResult1 = getFinancialResult1(row)
         row.rateBR = getRateBR(row, reportDate)
         row.perc = getPerc(row)
