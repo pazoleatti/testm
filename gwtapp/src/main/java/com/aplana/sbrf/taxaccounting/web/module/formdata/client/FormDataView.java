@@ -202,7 +202,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
                     if (Element.is(eventTarget)) {
                         Element target = Element.as(eventTarget);
                         if ("td".equals(target.getTagName().toLowerCase())) {
-                            TableCellElement cellElement = formDataTable.getRowElement(event.getIndex()).getCells().getItem(event.getColumn());
+                            TableCellElement cellElement = formDataTable.getRowElement(event.getIndex() - 1 - formDataTable.getPageStart()).getCells().getItem(event.getColumn());
                             if (cellElement.getInnerText().replace("\u00A0", "").trim().isEmpty()) {
                                 cellElement.removeAttribute("title");
                             } else {
@@ -328,8 +328,8 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		formDataTable.setRowData(start, rowsData);
         if (needScrollToRow != null && !fixedRows) {
             selectRow(needScrollToRow);
-            formDataTable.getRowElement(singleSelectionModel.getSelectedObject().getIndex() - start - 1).scrollIntoView();
-            this.needScrollToRow = null;
+            formDataTable.setKeyboardSelectedRow(needScrollToRow - 1 - formDataTable.getPageStart());
+            needScrollToRow = null;
         }
     }
 
@@ -736,11 +736,6 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
             formDataTable.setKeyboardSelectedRow(rowIndex.intValue() - 1);
         } else {
             singleSelectionModel.clear();
-            /*
-            DataRow<Cell> row = new DataRow<Cell>();
-            row.setIndex(rowIndex.intValue());
-            singleSelectionModel.setSelected(row, true);*/
-
             // go to essential page
             Long page = (rowIndex - 1) / pager.getPageSize();
             if (pager.getPage() != page.intValue()){
@@ -748,7 +743,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
                 pager.setPage(page.intValue());
             } else {
                 selectRow(rowIndex.intValue());
-                formDataTable.getRowElement(singleSelectionModel.getSelectedObject().getIndex() - pager.getPageStart() - 1 ).scrollIntoView();
+                formDataTable.setKeyboardSelectedRow(rowIndex.intValue() - 1 - formDataTable.getPageStart());
             }
         }
     }

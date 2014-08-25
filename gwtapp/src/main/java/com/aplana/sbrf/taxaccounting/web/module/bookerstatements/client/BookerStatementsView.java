@@ -128,6 +128,11 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
     }
 
     @Override
+    public void setAccountPeriodIds(List<Long> accountPeriodIds) {
+        this.accountPeriodIds.setValue(accountPeriodIds);
+    }
+
+    @Override
     public List<Integer> getDepartments() {
         return departmentIds.getValue();
     }
