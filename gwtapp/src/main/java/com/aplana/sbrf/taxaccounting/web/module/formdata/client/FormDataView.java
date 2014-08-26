@@ -329,6 +329,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
         if (needScrollToRow != null && !fixedRows) {
             selectRow(needScrollToRow);
             formDataTable.setKeyboardSelectedRow(needScrollToRow - 1 - formDataTable.getPageStart());
+            formDataTable.setKeyboardSelectedColumn(0);
             needScrollToRow = null;
         }
     }
@@ -737,13 +738,14 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
         } else {
             singleSelectionModel.clear();
             // go to essential page
-            Long page = (rowIndex - 1) / pager.getPageSize();
+            Long page = (rowIndex - 1) / getPageSize();
             if (pager.getPage() != page.intValue()){
                 this.needScrollToRow = rowIndex.intValue();
                 pager.setPage(page.intValue());
             } else {
                 selectRow(rowIndex.intValue());
                 formDataTable.setKeyboardSelectedRow(rowIndex.intValue() - 1 - formDataTable.getPageStart());
+                formDataTable.setKeyboardSelectedColumn(0);
             }
         }
     }
