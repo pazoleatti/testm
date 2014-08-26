@@ -37,6 +37,14 @@
             font-weight: bold;
         }
 
+        .test {
+            min-width: 450px;
+        }
+
+        .test span label {
+            margin-right: 20px!important;
+        }
+
     </ui:style>
 
 
@@ -53,7 +61,7 @@
                     </g:cell>
                     <g:cell>
                         <picker:DepartmentTreeWidget headerVisible="false" ui:field="departmentPicker" height="250px"
-                                                     multiSelection="false"/>
+                                                     multiSelection="false" addStyleNames="{style.test}"/>
                     </g:cell>
                 </g:VerticalPanel>
             </g:cell>

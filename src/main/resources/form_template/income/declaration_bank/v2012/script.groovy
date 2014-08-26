@@ -86,6 +86,9 @@ void checkDeparmentParams(LogLevel logLevel) {
 void logicCheck() {
     // получение данных из xml'ки
     def xmlData = getXmlData(declarationData.reportPeriodId, declarationData.departmentId)
+    if(xmlData == null){
+        return
+    }
     def empty = 0
 
     // Проверки Листа 02 - Превышение суммы налога, выплаченного за пределами РФ (всего)
@@ -1775,6 +1778,9 @@ def getXmlData(def reportPeriodId, def departmentId) {
         def declarationData = declarationService.find(declarationTypeId, departmentId, reportPeriodId)
         if (declarationData != null && declarationData.id != null) {
             def xmlString = declarationService.getXmlData(declarationData.id)
+            if(xmlString == null){
+                return null
+            }
             xmlString = xmlString.replace('<?xml version="1.0" encoding="windows-1251"?>', '')
             return new XmlSlurper().parseText(xmlString)
         }

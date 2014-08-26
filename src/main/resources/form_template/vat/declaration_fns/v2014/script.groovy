@@ -670,6 +670,9 @@ def getPrevEndDate() {
 void logicCheck() {
     // получение данных из xml'ки
     def xmlString = declarationService.getXmlData(declarationData.id)
+    if(xmlString == null){
+        return
+    }
     xmlString = xmlString.replace('<?xml version="1.0" encoding="windows-1251"?>', '')
     def xmlData = new XmlSlurper().parseText(xmlString)
 
