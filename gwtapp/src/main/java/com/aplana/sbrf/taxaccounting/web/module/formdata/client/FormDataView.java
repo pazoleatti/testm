@@ -667,7 +667,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
 	@Override
 	public void assignDataProvider(int pageSize) {
-        formDataTable.setPageSize(pageSize);
+        pager.setPageSize(pageSize);
 		if(!dataProvider.getDataDisplays().contains(formDataTable)) {
 			dataProvider.addDataDisplay(formDataTable);
 		}
