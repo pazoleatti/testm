@@ -5,7 +5,7 @@
     <cell alias="kpp" colSpan="1" rowSpan="2" value="КПП"/>
     <cell alias="oktmo" colSpan="1" rowSpan="2" value="Код ОКТМО"/>
     <cell alias="title" colSpan="1" rowSpan="3" value=""/>
-    <cell alias="cost1" colSpan="13" rowSpan="1" value="Остаточная стоимость основных средств"/>
+    <cell alias="cost1" colSpan="14" rowSpan="1" value="Остаточная стоимость основных средств"/>
     <cell alias="cost2" colSpan="1" rowSpan="1" value="Остаточная стоимость основных средств"/>
     <cell alias="cost3" colSpan="1" rowSpan="1" value="Остаточная стоимость основных средств"/>
     <cell alias="cost4" colSpan="1" rowSpan="1" value="Остаточная стоимость основных средств"/>
@@ -18,7 +18,7 @@
     <cell alias="cost11" colSpan="1" rowSpan="1" value="Остаточная стоимость основных средств"/>
     <cell alias="cost12" colSpan="1" rowSpan="1" value="Остаточная стоимость основных средств"/>
     <cell alias="cost13" colSpan="1" rowSpan="1" value="Остаточная стоимость основных средств"/>
-    <cell alias="cost31_12" colSpan="1" rowSpan="1" value="Остаточная стоимость основных средств, в т.ч. недвижимое имущество (31.12)"/>
+    <cell alias="cost31_12" colSpan="1" rowSpan="1" value="Остаточная стоимость основных средств"/>
   </row>
   <row alias="">
     <cell alias="subject" colSpan="1" rowSpan="1" value="Код субъекта"/>
@@ -38,7 +38,7 @@
     <cell alias="cost10" colSpan="1" rowSpan="1" value="1.10"/>
     <cell alias="cost11" colSpan="1" rowSpan="1" value="1.11"/>
     <cell alias="cost12" colSpan="1" rowSpan="1" value="1.12"/>
-    <cell alias="cost13" colSpan="1" rowSpan="1" value="Остаточная стоимость основных средств, 31.12"/>
+    <cell alias="cost13" colSpan="1" rowSpan="1" value="31.12"/>
     <cell alias="cost31_12" colSpan="1" rowSpan="1" value="в т.ч. недвижимое имущество (31.12)"/>
   </row>
   <row alias="">
@@ -59,7 +59,7 @@
     <cell alias="cost10" colSpan="1" rowSpan="1" value="14"/>
     <cell alias="cost11" colSpan="1" rowSpan="1" value="15"/>
     <cell alias="cost12" colSpan="1" rowSpan="1" value="16"/>
-    <cell alias="cost13" colSpan="1" rowSpan="1" value="Остаточная стоимость основных средств, 31.12"/>
-    <cell alias="cost31_12" colSpan="1" rowSpan="1" value="17"/>
+    <cell alias="cost13" colSpan="1" rowSpan="1" value="17"/>
+    <cell alias="cost31_12" colSpan="1" rowSpan="1" value="18"/>
   </row>
 </rows>

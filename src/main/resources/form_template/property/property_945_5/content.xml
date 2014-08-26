@@ -55,7 +55,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>cost1</alias>
         <checking>false</checking>
-        <name>Остаточная стоимость основных средств, 1.01</name>
+        <name>1.01</name>
         <order>6</order>
         <width>5</width>
         <maxLength>17</maxLength>
@@ -64,7 +64,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>cost2</alias>
         <checking>false</checking>
-        <name>Остаточная стоимость основных средств, 1.02</name>
+        <name>1.02</name>
         <order>7</order>
         <width>5</width>
         <maxLength>17</maxLength>
@@ -73,7 +73,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>cost3</alias>
         <checking>false</checking>
-        <name>Остаточная стоимость основных средств, 1.03</name>
+        <name>1.03</name>
         <order>8</order>
         <width>5</width>
         <maxLength>17</maxLength>
@@ -82,7 +82,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>cost4</alias>
         <checking>false</checking>
-        <name>Остаточная стоимость основных средств, 1.04</name>
+        <name>1.04</name>
         <order>9</order>
         <width>5</width>
         <maxLength>17</maxLength>
@@ -91,7 +91,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>cost5</alias>
         <checking>false</checking>
-        <name>Остаточная стоимость основных средств, 1.05</name>
+        <name>1.05</name>
         <order>10</order>
         <width>5</width>
         <maxLength>17</maxLength>
@@ -100,7 +100,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>cost6</alias>
         <checking>false</checking>
-        <name>Остаточная стоимость основных средств, 1.06</name>
+        <name>1.06</name>
         <order>11</order>
         <width>5</width>
         <maxLength>17</maxLength>
@@ -109,7 +109,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>cost7</alias>
         <checking>false</checking>
-        <name>Остаточная стоимость основных средств, 1.07</name>
+        <name>1.07</name>
         <order>12</order>
         <width>5</width>
         <maxLength>17</maxLength>
@@ -118,7 +118,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>cost8</alias>
         <checking>false</checking>
-        <name>Остаточная стоимость основных средств, 1.08</name>
+        <name>1.08</name>
         <order>13</order>
         <width>5</width>
         <maxLength>17</maxLength>
@@ -127,7 +127,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>cost9</alias>
         <checking>false</checking>
-        <name>Остаточная стоимость основных средств, 1.09</name>
+        <name>1.09</name>
         <order>14</order>
         <width>5</width>
         <maxLength>17</maxLength>
@@ -136,7 +136,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>cost10</alias>
         <checking>false</checking>
-        <name>Остаточная стоимость основных средств, 1.10</name>
+        <name>1.10</name>
         <order>15</order>
         <width>5</width>
         <maxLength>17</maxLength>
@@ -145,7 +145,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>cost11</alias>
         <checking>false</checking>
-        <name>Остаточная стоимость основных средств, 1.11</name>
+        <name>1.11</name>
         <order>16</order>
         <width>5</width>
         <maxLength>17</maxLength>
@@ -154,7 +154,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>cost12</alias>
         <checking>false</checking>
-        <name>Остаточная стоимость основных средств, 1.12</name>
+        <name>1.12</name>
         <order>17</order>
         <width>5</width>
         <maxLength>17</maxLength>
@@ -163,7 +163,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>cost13</alias>
         <checking>false</checking>
-        <name>Остаточная стоимость основных средств, 31.12</name>
+        <name>31.12</name>
         <order>18</order>
         <width>5</width>
         <maxLength>17</maxLength>
@@ -172,7 +172,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>cost31_12</alias>
         <checking>false</checking>
-        <name>Остаточная стоимость основных средств, в т.ч. недвижимое имущество (31.12)</name>
+        <name>в т.ч. недвижимое имущество (31.12)</name>
         <order>19</order>
         <width>10</width>
         <maxLength>17</maxLength>
