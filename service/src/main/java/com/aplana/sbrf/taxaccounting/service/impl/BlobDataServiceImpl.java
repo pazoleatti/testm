@@ -47,7 +47,7 @@ public class BlobDataServiceImpl implements BlobDataService {
         try {
             blobDataDao.delete(blobIdStrings);
         } catch (DaoException e){
-            throw new ServiceException("Ошибка при удалении записей.");
+            throw new ServiceException("Ошибка при удалении записей.", e);
         }
     }
 
