@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
@@ -50,6 +51,8 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
     final static String U2_2 = " Код налоговой формы «%s» не существует в АС «Учет налогов»!";
     final static String U2_3 = " Код отчетного периода «%s» не существует в налоговом периоде %d года в АС «Учет налогов»!";
     final static String U3 = "Файл «%s» не загружен, т.к. пользователь не имеет доступа к содержащейся в нем налоговой форме «%s» подразделения «%s»!";
+    final static String U4 = "Загружаемая налоговая форма «%s» подразделения «%s» не относится ни к одному ТБ, " +
+            "в связи с чем для нее не существует каталог загрузки в конфигурационных параметрах АС «Учет налогов»!";
 
     // Сообщения, которые не учтены в постановка
     final static String USER_NOT_FOUND_ERROR = "Не определен пользователь!";
@@ -157,6 +160,9 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                                 // Ошибка копирования сущности из архива
                                 log(userInfo, LogData.L33, logger, entry.getName(), e.getMessage());
                                 fail++;
+                            }  catch (ServiceException se) {
+                                log(userInfo, LogData.L33, logger, entry.getName(), se.getMessage());
+                                fail++;
                             }
                         } else {
                             fail++;
@@ -165,6 +171,9 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                 } catch (IOException e) {
                     // Ошибка копирования из архива
                     log(userInfo, LogData.L33, logger, fileName, e.getMessage());
+                    fail++;
+                } catch (ServiceException se) {
+                    log(userInfo, LogData.L33, logger, fileName, se.getMessage());
                     fail++;
                 } finally {
                     IOUtils.closeQuietly(zais);
@@ -189,6 +198,9 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                     } catch (IOException e) {
                         // Ошибка копирования файла
                         log(userInfo, LogData.L33, logger, fileName, e.getMessage());
+                        fail++;
+                    } catch (ServiceException se) {
+                        log(userInfo, LogData.L33, logger, fileName, se.getMessage());
                         fail++;
                     }
                 } else {
@@ -298,7 +310,15 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
         }
 
         checkResult.setRefBook(false);
-        Integer departmentTbId = departmentService.getParentTB(formDepartment.getId()).getId();
+
+        // ТБ, к которому относится подразделение, код которого содержится в имени ТФ
+        Department parentTB = departmentService.getParentTB(formDepartment.getId());
+        if(parentTB == null){
+            logger.warn(U4, formType.getName(), formDepartment.getName());
+            return null;
+        }
+        Integer departmentTbId = parentTB.getId();
+
         checkResult.setDepartmentTbId(departmentTbId);
         checkResult.setPath(getUploadPath(userInfo, fileName, ConfigurationParam.FORM_UPLOAD_DIRECTORY, departmentTbId,
                 LogData.L34_2, logger));

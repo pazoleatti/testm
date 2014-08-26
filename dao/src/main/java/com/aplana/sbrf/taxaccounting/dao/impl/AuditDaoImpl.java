@@ -177,6 +177,12 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
             }
 
             if (filter.getAuditFieldList().contains(AuditFieldList.ALL.getId())
+                    || filter.getAuditFieldList().contains(AuditFieldList.TYPE.getId()) ) {
+                ps.appendQuery(String.format(" OR lower(case when ls.form_type_name is not null then '" + AuditFormType.FORM_TYPE_TAX.getName() + "' when ls.declaration_type_name is not null then '" + AuditFormType.FORM_TYPE_DECLARATION.getName() + "' else '' end) LIKE lower(?)"));
+                ps.addParam("%"+filter.getFilter()+"%");
+            }
+
+            if (filter.getAuditFieldList().contains(AuditFieldList.ALL.getId())
                     || filter.getAuditFieldList().contains(AuditFieldList.PERIOD.getId()) ) {
                 ps.appendQuery(String.format(" OR lower(%sreport_period_name) LIKE lower(?)", prefix));
                 ps.addParam("%"+filter.getFilter()+"%");

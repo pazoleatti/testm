@@ -105,7 +105,7 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
     @UiField
     LinkAnchor returnAnchor;
 
-    private static String respPattern = "(<pre.*>)(.+?)(</pre>)";
+    private static String respPattern = "(<(?i:pre.*)>)(.+?)(</(?i:pre)>)";
 
     @Inject
 	@UiConstructor
