@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
@@ -159,6 +160,9 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                                 // Ошибка копирования сущности из архива
                                 log(userInfo, LogData.L33, logger, entry.getName(), e.getMessage());
                                 fail++;
+                            }  catch (ServiceException se) {
+                                log(userInfo, LogData.L33, logger, entry.getName(), se.getMessage());
+                                fail++;
                             }
                         } else {
                             fail++;
@@ -167,6 +171,9 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                 } catch (IOException e) {
                     // Ошибка копирования из архива
                     log(userInfo, LogData.L33, logger, fileName, e.getMessage());
+                    fail++;
+                } catch (ServiceException se) {
+                    log(userInfo, LogData.L33, logger, fileName, se.getMessage());
                     fail++;
                 } finally {
                     IOUtils.closeQuietly(zais);
@@ -191,6 +198,9 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                     } catch (IOException e) {
                         // Ошибка копирования файла
                         log(userInfo, LogData.L33, logger, fileName, e.getMessage());
+                        fail++;
+                    } catch (ServiceException se) {
+                        log(userInfo, LogData.L33, logger, fileName, se.getMessage());
                         fail++;
                     }
                 } else {
