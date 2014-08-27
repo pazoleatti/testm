@@ -28,7 +28,7 @@ public class SourceServiceImpl implements SourceService {
 
     // private static final String FATAL_SAVE_MSG = "Назначение источников-приемников не сохранено. Обнаружены фатальные ошибки";
     private static final String CHECK_EXISTENCE_MSG = "Невозможно назначить источники / приемники: Форма \"%s\" не назначена подразделению %s";
-    private static final String MAIN_SOURCE_NOT_EXIST_MSG = "Назначение, указанное в качестве %s не найдено. Операция не может быть продолжена";
+    private static final String MAIN_SOURCE_NOT_EXIST_MSG = "Назначение источников-приёмников не выполнено";
     private static final String SOURCES_LIST_IS_EMPTY_MSG = "Все назначения были исключены в результате проверок. Продолжение операции невозможно.";
     private static final String FORM_INSTANCES_EXIST_MSG = "Найдены экземпляры, которые назначены %s формы \"%s\" и имеют статус \"Принят\":  \"%s\". Назначение не может быть выполнено";
     private static final String EMPTY_END_PERIOD_INFO = "дата окончания периода не задана";
@@ -209,11 +209,11 @@ public class SourceServiceImpl implements SourceService {
                 }
                 /** Если единственное назначение было удалено, то продолжать нет смысла */
                 if (!emptyIsOk && pair.getSource().equals(error) && mode == SourceMode.DESTINATIONS) {
-                    throw new ServiceLoggerException(String.format(MAIN_SOURCE_NOT_EXIST_MSG, "источника"),
+                    throw new ServiceLoggerException(MAIN_SOURCE_NOT_EXIST_MSG,
                             logEntryService.save(logger.getEntries()));
                 }
                 if (!emptyIsOk && pair.getDestination().equals(error) && mode == SourceMode.SOURCES) {
-                    throw new ServiceLoggerException(String.format(MAIN_SOURCE_NOT_EXIST_MSG, "приемника"),
+                    throw new ServiceLoggerException(MAIN_SOURCE_NOT_EXIST_MSG,
                             logEntryService.save(logger.getEntries()));
                 }
             }
@@ -323,16 +323,23 @@ public class SourceServiceImpl implements SourceService {
                 //Проверяем единственный приемник
                 if (sourceDao.checkDDTExistence(Arrays.asList(sourcePairs.get(0).getDestination())).isEmpty()) {
                     /** Если единственное назначение было удалено, то продолжать нет смысла */
-                    throw new ServiceLoggerException(String.format(MAIN_SOURCE_NOT_EXIST_MSG, "приемника"),
+                    logger.error(String.format(CHECK_EXISTENCE_MSG,
+                            sourcePairs.get(0).getDestinationType(),
+                            departmentDao.getDepartment(sourceDepartmentId)));
+                    throw new ServiceLoggerException(MAIN_SOURCE_NOT_EXIST_MSG,
                             logEntryService.save(logger.getEntries()));
                 }
                 for (SourcePair pair : sourcePairs) {
                     rightPart.add(pair.getSource());
                 }
             } else {
-                //Проверяем приемники-декларации
+                //Проверяем единственный источник
                 if (sourceDao.checkDFTExistence(Arrays.asList(sourcePairs.get(0).getSource())).isEmpty()) {
-                    throw new ServiceLoggerException(String.format(MAIN_SOURCE_NOT_EXIST_MSG, "источника"),
+                    /** Если единственное назначение было удалено, то продолжать нет смысла */
+                    logger.error(String.format(CHECK_EXISTENCE_MSG,
+                            sourcePairs.get(0).getSourceKind() + ": " + sourcePairs.get(0).getSourceType(),
+                            departmentDao.getDepartment(sourceDepartmentId)));
+                    throw new ServiceLoggerException(MAIN_SOURCE_NOT_EXIST_MSG,
                             logEntryService.save(logger.getEntries()));
                 }
                 for (SourcePair pair : sourcePairs) {
@@ -525,7 +532,7 @@ public class SourceServiceImpl implements SourceService {
             }
             //Получаем данные о назначениях-причинах зацикливания для вывода в сообщениях
             final Map<Long, String> objectNames = sourceDao.getSourceNames(new ArrayList<Long>(circleCauses));
-            return truncateSources(logger, sourcePairs, unionSourcePairs(loopedSources), mode, isDeclaration, false, LOG_LEVEL.INFO,
+            return truncateSources(logger, sourcePairs, unionSourcePairs(loopedSources), mode, isDeclaration, false, LOG_LEVEL.ERROR,
                     new MessageBuilder() {
                         @Override
                         public List<String> getSourceMessage(SourcePair sourcePair) {
