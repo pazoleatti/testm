@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -11,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.test.FormTypeMockUtils;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Matchers;
@@ -85,6 +85,9 @@ public class FormDataAccessServiceImplTest {
     private static final int DECLARATION_TYPE_1_ID = 101;
 
 	private final static String LOCAL_IP = "127.0.0.1";
+
+    static DepartmentFormTypeDao departmentFormTypeDao;
+    static FormDataService formDataService;
 
 	@BeforeClass
 	public static void tearUp() {
@@ -184,13 +187,11 @@ public class FormDataAccessServiceImplTest {
         ReflectionTestUtils.setField(service, "periodService", periodService);
 
         // Сводная форма 1 из тербанка 1 является источником для сводной 1 банка
-		DepartmentFormTypeDao departmentFormTypeDao = mock(DepartmentFormTypeDao.class);
+		departmentFormTypeDao = mock(DepartmentFormTypeDao.class);
 		List<DepartmentFormType> dfts = new ArrayList<DepartmentFormType>();
 		dfts.add(mockDepartmentFormType(Department.ROOT_BANK_ID, summaryFormType1.getId(), FormDataKind.SUMMARY));
 		dfts.add(mockDepartmentFormType(Department.ROOT_BANK_ID, summaryFormType2.getId(), FormDataKind.SUMMARY));
 		when(departmentFormTypeDao.getFormDestinations(any(Integer.class), any(Integer.class), any(FormDataKind.class), any(Date.class), any(Date.class))).thenReturn(dfts);
-
-		ReflectionTestUtils.setField(service, "departmentFormTypeDao", departmentFormTypeDao);
 		
 		FormDataDao formDataDao = mock(FormDataDao.class);
 		FormData fd;
@@ -318,11 +319,16 @@ public class FormDataAccessServiceImplTest {
         when(declarationDataDao.find(DECLARATION_TYPE_1_ID, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID)).thenReturn(declarationData);
         ReflectionTestUtils.setField(service, "declarationDataDao", declarationDataDao);
 
-        FormDataService formDataService = mock(FormDataService.class);
+        formDataService = mock(FormDataService.class);
         fd = mockFormData(TB1_CREATED_FORMDATA_ID, TB1_ID, WorkflowState.CREATED, FormDataKind.SUMMARY, REPORT_PERIOD_ACTIVE_ID, summaryFormType1);
         when(formDataService.findFormData(summaryFormType1.getId(), FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID, null)).thenReturn(fd);
-		ReflectionTestUtils.setField(service, "formDataService", formDataService);
 	}
+
+    @Before
+    public void setup() {
+        ReflectionTestUtils.setField(service, "departmentFormTypeDao", departmentFormTypeDao);
+        ReflectionTestUtils.setField(service, "formDataService", formDataService);
+    }
 
     @Test
 	public void testCanReadForFirstLifeCycle(){
@@ -768,5 +774,141 @@ public class FormDataAccessServiceImplTest {
         list = service.getAvailableFormDataKind(userInfo, taxType);
         assertTrue(list.size() == 3);
         assertTrue(kinds.equals(list));
+    }
+
+    @Test
+    public void testCheckForDestinations() {
+        DepartmentFormTypeDao departmentFormTypeDao = mock(DepartmentFormTypeDao.class);
+        ReflectionTestUtils.setField(service, "departmentFormTypeDao", departmentFormTypeDao);
+
+        FormType formType = new FormType();
+        formType.setId(1);
+
+        FormData formData = new FormData();
+        formData.setDepartmentId(1);
+        formData.setFormType(formType);
+        formData.setKind(FormDataKind.PRIMARY);
+
+        ReportPeriod reportPeriod = new ReportPeriod();
+        reportPeriod.setCalendarStartDate(new Date());
+        reportPeriod.setEndDate(new Date());
+
+        when(departmentFormTypeDao.getFormDestinations(any(Integer.class), any(Integer.class), any(FormDataKind.class), any(Date.class), any(Date.class))).thenReturn(null);
+
+        assertFalse(service.checkForDestinations(formData, reportPeriod));
+    }
+
+    @Test
+    public void testCheckForDestinations2() {
+        DepartmentFormTypeDao departmentFormTypeDao = mock(DepartmentFormTypeDao.class);
+        ReflectionTestUtils.setField(service, "departmentFormTypeDao", departmentFormTypeDao);
+
+        FormDataService formDataService = mock(FormDataService.class);
+        ReflectionTestUtils.setField(service, "formDataService", formDataService);
+
+        FormType formType = new FormType();
+        formType.setId(1);
+        // Редактируемая НФ
+        FormData editedFormData = new FormData();
+        editedFormData.setDepartmentId(1);
+        editedFormData.setFormType(formType);
+        editedFormData.setKind(FormDataKind.PRIMARY);
+        editedFormData.setReportPeriodId(1);
+        editedFormData.setPeriodOrder(1);
+
+        ReportPeriod reportPeriod = new ReportPeriod();
+        reportPeriod.setCalendarStartDate(new Date());
+        reportPeriod.setEndDate(new Date());
+
+        DepartmentFormType departmentFormType = new DepartmentFormType();
+        departmentFormType.setFormTypeId(1);
+        departmentFormType.setKind(FormDataKind.PRIMARY);
+        departmentFormType.setDepartmentId(1);
+
+        List<DepartmentFormType> departmentFormTypes = new ArrayList<DepartmentFormType>();
+        departmentFormTypes.add(departmentFormType);
+
+        when(departmentFormTypeDao.getFormDestinations(any(Integer.class), any(Integer.class), any(FormDataKind.class), any(Date.class), any(Date.class))).thenReturn(departmentFormTypes);
+        when(formDataService.findFormData(anyInt(), any(FormDataKind.class), anyInt(), anyInt(), anyInt())).thenReturn(null);
+
+        assertFalse(service.checkForDestinations(editedFormData, reportPeriod));
+    }
+
+    @Test
+    public void testCheckForDestinations3() {
+        DepartmentFormTypeDao departmentFormTypeDao = mock(DepartmentFormTypeDao.class);
+        ReflectionTestUtils.setField(service, "departmentFormTypeDao", departmentFormTypeDao);
+
+        FormDataService formDataService = mock(FormDataService.class);
+        ReflectionTestUtils.setField(service, "formDataService", formDataService);
+
+        FormType formType = new FormType();
+        formType.setId(1);
+        // Редактируемая НФ
+        FormData editedFormData = new FormData();
+        editedFormData.setDepartmentId(1);
+        editedFormData.setFormType(formType);
+        editedFormData.setKind(FormDataKind.PRIMARY);
+        editedFormData.setReportPeriodId(1);
+        editedFormData.setPeriodOrder(1);
+        // Приемник
+        FormData formData = new FormData();
+        formData.setState(WorkflowState.CREATED);
+
+        ReportPeriod reportPeriod = new ReportPeriod();
+        reportPeriod.setCalendarStartDate(new Date());
+        reportPeriod.setEndDate(new Date());
+
+        DepartmentFormType departmentFormType = new DepartmentFormType();
+        departmentFormType.setFormTypeId(1);
+        departmentFormType.setKind(FormDataKind.PRIMARY);
+        departmentFormType.setDepartmentId(1);
+
+        List<DepartmentFormType> departmentFormTypes = new ArrayList<DepartmentFormType>();
+        departmentFormTypes.add(departmentFormType);
+
+        when(departmentFormTypeDao.getFormDestinations(any(Integer.class), any(Integer.class), any(FormDataKind.class), any(Date.class), any(Date.class))).thenReturn(departmentFormTypes);
+        when(formDataService.findFormData(anyInt(), any(FormDataKind.class), anyInt(), anyInt(), anyInt())).thenReturn(formData);
+
+        assertFalse(service.checkForDestinations(editedFormData, reportPeriod));
+    }
+
+    @Test
+    public void testCheckForDestinations4() {
+        DepartmentFormTypeDao departmentFormTypeDao = mock(DepartmentFormTypeDao.class);
+        ReflectionTestUtils.setField(service, "departmentFormTypeDao", departmentFormTypeDao);
+
+        FormDataService formDataService = mock(FormDataService.class);
+        ReflectionTestUtils.setField(service, "formDataService", formDataService);
+
+        FormType formType = new FormType();
+        formType.setId(1);
+        // Редактируемая НФ
+        FormData editedFormData = new FormData();
+        editedFormData.setDepartmentId(1);
+        editedFormData.setFormType(formType);
+        editedFormData.setKind(FormDataKind.PRIMARY);
+        editedFormData.setReportPeriodId(1);
+        editedFormData.setPeriodOrder(1);
+        // Приемник
+        FormData formData = new FormData();
+        formData.setState(WorkflowState.PREPARED);
+
+        ReportPeriod reportPeriod = new ReportPeriod();
+        reportPeriod.setCalendarStartDate(new Date());
+        reportPeriod.setEndDate(new Date());
+
+        DepartmentFormType departmentFormType = new DepartmentFormType();
+        departmentFormType.setFormTypeId(1);
+        departmentFormType.setKind(FormDataKind.PRIMARY);
+        departmentFormType.setDepartmentId(1);
+
+        List<DepartmentFormType> departmentFormTypes = new ArrayList<DepartmentFormType>();
+        departmentFormTypes.add(departmentFormType);
+
+        when(departmentFormTypeDao.getFormDestinations(any(Integer.class), any(Integer.class), any(FormDataKind.class), any(Date.class), any(Date.class))).thenReturn(departmentFormTypes);
+        when(formDataService.findFormData(anyInt(), any(FormDataKind.class), anyInt(), anyInt(), anyInt())).thenReturn(formData);
+
+        assertTrue(service.checkForDestinations(editedFormData, reportPeriod));
     }
 }
