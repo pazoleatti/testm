@@ -566,7 +566,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
     @Override
     public void updateFDPerformerTBDepartmentNames(int departmentId, String newDepartmentName, Date dateFrom, Date dateTo) {
         String dateTag = dateFrom != null && dateTo != null ? "(rp.CALENDAR_START_DATE between :dateFrom and :dateTo or rp.END_DATE between :dateFrom and :dateTo or :dateFrom between rp.CALENDAR_START_DATE and rp.END_DATE)"
-                : dateFrom != null ? "(rp.CALENDAR_START_DATE >= :dateFrom or rp.END_DATE <= :dateFrom)"
+                : dateFrom != null ? "(rp.END_DATE >= :dateFrom)"
                 : null;
         HashMap<String, Object> values = new HashMap<String, Object>();
         values.put("dateFrom", dateFrom);
@@ -594,7 +594,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
     @Override
     public void updateFDPerformerDepartmentNames(int departmentId, String newDepartmentName, Date dateFrom, Date dateTo) {
         String dateTag = dateFrom != null && dateTo != null ? "(rp.CALENDAR_START_DATE between :dateFrom and :dateTo or rp.END_DATE between :dateFrom and :dateTo or :dateFrom between rp.CALENDAR_START_DATE and rp.END_DATE)"
-                : dateFrom != null ? "(rp.CALENDAR_START_DATE >= :dateFrom or rp.END_DATE <= :dateFrom)"
+                : dateFrom != null ? "(rp.END_DATE >= :dateFrom)"
                 : null;
         HashMap<String, Object> values = new HashMap<String, Object>();
         values.put("dateFrom", dateFrom);

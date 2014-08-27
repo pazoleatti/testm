@@ -237,6 +237,7 @@ public class RefBookDepartment implements RefBookDataProvider {
             throw new ServiceLoggerException("Подразделение не создано, обнаружены фатальные ошибки!",
                     logEntryService.save(logger.getEntries()));
 
+        logger.info("Подразделение создано");
         auditService.add(FormDataEvent.ADD_DEPARTMENT, logger.getTaUserInfo(), 0,
                 null, null, null, null,
                 String.format("Создано подразделение %s, значения атрибутов: %s",
@@ -432,6 +433,11 @@ public class RefBookDepartment implements RefBookDataProvider {
     @Override
     public void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds, boolean force) {
         int depId = uniqueRecordIds.get(0).intValue();
+        List<Integer> childIds = departmentService.getAllChildrenIds(depId);
+        if (!childIds.isEmpty() && childIds.size() > 1){
+            logger.error("Обнаружены подчиненные подразделения для %s", departmentService.getDepartment(depId).getName());
+            throw new ServiceLoggerException("Подразделение не удалено!", logEntryService.save(logger.getEntries()));
+        }
         isInUsed(departmentService.getDepartment(depId), logger);
         if (logger.containsLevel(LogLevel.ERROR) || logger.containsLevel(LogLevel.WARNING) && !force)
             return;

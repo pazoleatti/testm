@@ -170,6 +170,8 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
     public void onSearchClicked(ClickEvent event){
         if (!filterText.getText().isEmpty()){
             getUiHandlers().onRangeChange(0, pager.getPageSize());
+        } else {
+            clearTableData();
         }
     }
 
@@ -179,6 +181,8 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
         if (KeyCodes.KEY_ENTER == event.getNativeEvent().getKeyCode()) {
             if (!filterText.getText().isEmpty()){
                 getUiHandlers().onRangeChange(0, pager.getPageSize());
+            } else {
+                clearTableData();
             }
         }
     }
