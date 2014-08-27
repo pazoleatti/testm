@@ -325,7 +325,7 @@ public class SourceServiceImpl implements SourceService {
                     /** Если единственное назначение было удалено, то продолжать нет смысла */
                     logger.error(String.format(CHECK_EXISTENCE_MSG,
                             sourcePairs.get(0).getDestinationType(),
-                            departmentDao.getDepartment(sourceDepartmentId)));
+                            departmentDao.getDepartment(sourceDepartmentId).getName()));
                     throw new ServiceLoggerException(MAIN_SOURCE_NOT_EXIST_MSG,
                             logEntryService.save(logger.getEntries()));
                 }
@@ -338,7 +338,7 @@ public class SourceServiceImpl implements SourceService {
                     /** Если единственное назначение было удалено, то продолжать нет смысла */
                     logger.error(String.format(CHECK_EXISTENCE_MSG,
                             sourcePairs.get(0).getSourceKind() + ": " + sourcePairs.get(0).getSourceType(),
-                            departmentDao.getDepartment(sourceDepartmentId)));
+                            departmentDao.getDepartment(sourceDepartmentId).getName()));
                     throw new ServiceLoggerException(MAIN_SOURCE_NOT_EXIST_MSG,
                             logEntryService.save(logger.getEntries()));
                 }
@@ -362,7 +362,7 @@ public class SourceServiceImpl implements SourceService {
                     public List<String> getSourceMessage(SourcePair sourcePair) {
                         return Arrays.asList(String.format(CHECK_EXISTENCE_MSG,
                                 sourcePair.getSourceKind() + ": " + sourcePair.getSourceType(),
-                                departmentDao.getDepartment(sourceDepartmentId)));
+                                departmentDao.getDepartment(sourceDepartmentId).getName()));
                     }
 
                     @Override
@@ -370,7 +370,7 @@ public class SourceServiceImpl implements SourceService {
                         return Arrays.asList(String.format(CHECK_EXISTENCE_MSG,
                                 isDeclaration ? sourcePair.getDestinationType() :
                                         sourcePair.getDestinationKind() + ": " + sourcePair.getDestinationType(),
-                                departmentDao.getDepartment(destinationDepartmentId)));
+                                departmentDao.getDepartment(destinationDepartmentId).getName()));
                     }
                 });
     }
