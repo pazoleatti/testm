@@ -291,7 +291,7 @@ void addData(def xml, int headRowCount) {
 }
 
 void importTransportData() {
-    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName, 9, 1)
     addTransportData(xml)
 
     def dataRows = formDataService.getDataRowHelper(formData)?.allCached
