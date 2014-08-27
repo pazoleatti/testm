@@ -105,6 +105,8 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
     @UiField
     LinkAnchor returnAnchor;
 
+    private static String respPattern = "(<pre.*>)(.+?)(</pre>)";
+
     @Inject
 	@UiConstructor
 	public DeclarationTemplateView(final Binder uiBinder) {
@@ -120,15 +122,16 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
                     getUiHandlers().uploadDectFail("Ошибки при импорте формы.");
                     return;
                 }
-                if (event.getResults().contains(ERROR_RESP)) {
-                    /*String errorUuid = event.getResults().replaceAll(respPattern, "$2");*/
-                    getUiHandlers().uploadDectResponseWithErrorUuid(event.getResults().replaceFirst(ERROR_RESP, ""));
-                }else if (event.getResults().toLowerCase().contains(ERROR)) {
-                    /*String errorText = event.getResults().replaceAll(respPattern, "$2");*/
-                    getUiHandlers().uploadDectFail(event.getResults().replaceFirst(ERROR, ""));
+                String resultString = event.getResults().toLowerCase();
+                if (resultString.contains(ERROR_RESP)) {
+                    String errorUuid = event.getResults().replaceAll(respPattern, "$2");
+                    getUiHandlers().uploadDectResponseWithErrorUuid(errorUuid.replaceFirst(ERROR_RESP, ""));
+                }else if (resultString.toLowerCase().contains(ERROR)) {
+                    String errorText = event.getResults().replaceAll(respPattern, "$2");
+                    getUiHandlers().uploadDectFail(errorText.replaceFirst(ERROR, ""));
                 } else {
-                    /*String uuid = event.getResults().replaceAll(respPattern, "$2");*/
-                    getUiHandlers().uploadDectResponseWithUuid(event.getResults().replaceFirst(SUCCESS_RESP, ""));
+                    String uuid = resultString.replaceAll(respPattern, "$2");
+                    getUiHandlers().uploadDectResponseWithUuid(uuid.replaceFirst(SUCCESS_RESP, ""));
                 }
 			}
 		});
