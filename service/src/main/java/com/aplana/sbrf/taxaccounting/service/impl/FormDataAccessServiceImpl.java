@@ -20,7 +20,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
 import static java.util.Arrays.asList;
 
@@ -412,6 +415,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
         FormData formData = formDataDao.getWithoutRows(formDataId);
         ReportPeriod reportPeriod = periodService.getReportPeriod(formData.getReportPeriodId());
 
+        if (checkForDestinations(formData, reportPeriod)) return result;
+
         // Проверка открытости периода
         if (!reportPeriodService.isActivePeriod(formData.getReportPeriodId(), formData.getDepartmentId())) {
             logger.warn(String.format(REPORT_PERIOD_IS_CLOSED_LOG, formData.getReportPeriodId()));
@@ -725,5 +730,23 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                 }
             }
         }
+    }
+
+    public boolean checkForDestinations(FormData formData, ReportPeriod reportPeriod) {
+        // Проверка вышестоящих налоговых форм
+        List<DepartmentFormType> departmentFormTypes =
+                departmentFormTypeDao.getFormDestinations(formData.getDepartmentId(),
+                        formData.getFormType().getId(), formData.getKind(), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
+        if (departmentFormTypes != null) {
+            for (DepartmentFormType departmentFormType : departmentFormTypes) {
+                FormData form = formDataService.findFormData(departmentFormType.getFormTypeId(), departmentFormType.getKind(),
+                        departmentFormType.getDepartmentId(), formData.getReportPeriodId(), formData.getPeriodOrder());
+                // Если форма существует и статус отличен от "Создана"
+                if (form != null && form.getState() != WorkflowState.CREATED) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
