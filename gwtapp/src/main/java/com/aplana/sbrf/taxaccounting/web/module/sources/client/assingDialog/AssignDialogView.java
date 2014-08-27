@@ -139,7 +139,7 @@ public class AssignDialogView extends ViewWithUiHandlers<AssignDialogUiHandlers>
             buttonClickHandler.ok(pi);
             window.hide();
         } else {
-            Dialog.errorMessage(window.getTitle(), "Выбранный интервал периодов некорректен.");
+            Dialog.errorMessage(window.getTitle(), "Неверно задан период!");
         }
     }
 
