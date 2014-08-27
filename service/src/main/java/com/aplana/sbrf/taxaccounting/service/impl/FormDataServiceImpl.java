@@ -917,11 +917,12 @@ public class FormDataServiceImpl implements FormDataService {
                 if (--size > 0) {
                     stringBuilder.append(", ");
                 }
+                msg = "Сквозная нумерация обновлена в налоговых формах следующих периодов текущей сквозной нумерации: " +
+                        stringBuilder.toString();
             }
-            msg = "Сквозная нумерация обновлена в налоговых формах следующих периодов текущей сквозной нумерации: " +
-                    stringBuilder.toString();
 
-            if (logger != null) {
+
+            if (logger != null && msg != null) {
                 logger.info(msg);
             }
         }

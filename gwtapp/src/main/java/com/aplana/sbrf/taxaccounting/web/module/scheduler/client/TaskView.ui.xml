@@ -99,11 +99,12 @@
                                 <g:Label styleName="{styles.paramsTitle}" text="Параметры"/>
                                 <g:HorizontalPanel spacing="5" verticalAlignment="middle">
                                     <g:Label text="Название:" addStyleNames="{styles.label}"/>
-                                    <dw:TextBox width="475px" ui:field="taskName"/>
+                                    <g:TextBox width="475px" ui:field="taskName"/>
                                 </g:HorizontalPanel>
                                 <g:HorizontalPanel spacing="5" verticalAlignment="middle">
                                     <g:Label text="Расписание:" addStyleNames="{styles.label}"/>
-                                    <dw:TextBox width="475px" ui:field="taskSchedule"/>
+                                    <g:TextBox width="475px" ui:field="taskSchedule"/>
+                                    <g:Image ui:field="helpImage" url="resources/img/question_mark.png"/>
                                 </g:HorizontalPanel>
                                 <g:HorizontalPanel spacing="5" verticalAlignment="middle">
                                     <g:Label text="Тип задачи:" addStyleNames="{styles.label}"/>
