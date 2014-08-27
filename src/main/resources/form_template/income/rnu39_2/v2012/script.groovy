@@ -649,7 +649,7 @@ def getRate(def row, def Date date) {
 }
 
 void importTransportData() {
-    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName, 15 + 1, 1)
 
     // загрузить данные
     addTransportData(xml)

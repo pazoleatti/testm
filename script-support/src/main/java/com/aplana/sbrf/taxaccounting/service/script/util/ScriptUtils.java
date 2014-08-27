@@ -13,11 +13,20 @@ import com.aplana.sbrf.taxaccounting.service.script.ImportService;
 import groovy.util.XmlSlurper;
 import groovy.util.slurpersupport.GPathResult;
 import org.springframework.util.StringUtils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import groovy.lang.Binding;
+import groovy.lang.GroovyShell;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.StringReader;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -888,7 +897,7 @@ public final class ScriptUtils {
      * Получение xml с общими проверками
      * Используется при импорте из транспортного файла
      */
-    public static GPathResult getTransportXML(BufferedInputStream inputStream, ImportService importService, String fileName) {
+    public static GPathResult getTransportXML(BufferedInputStream inputStream, ImportService importService, String fileName, int columnCount, int totalCount) {
         checkBeforeGetXml(inputStream, fileName);
 
         if (!fileName.endsWith(".rnu")) {
@@ -902,7 +911,92 @@ public final class ScriptUtils {
             throw new ServiceException(e.getMessage());
         }
 
+        int rowIndex = 2;
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder documentBuilder = factory.newDocumentBuilder();
+            InputSource inputSource = new InputSource();
+            inputSource.setCharacterStream(new StringReader(xmlString));
+            Document document = documentBuilder.parse(inputSource);
+            NodeList rows = document.getElementsByTagName("row");
+            for (int i = 0; i < rows.getLength(); i++, rowIndex++) {
+                Element element = (Element) rows.item(i);
+                Integer count = Integer.valueOf(element.getAttribute("count"));
+                if (count != columnCount + 2) {
+                    throw new ServiceException("Строка файла " + rowIndex + " содержит некорректное значение.");
+                }
+            }
+
+            rowIndex+=2;
+
+            NodeList totals = document.getElementsByTagName("rowTotal");
+            if (totalCount != 0) {
+                if (totals.getLength() != totalCount) {
+                    throw new ServiceException("Строка файла " + rowIndex + " содержит некорректное значение.");
+                } else {
+                    for (int i = 0; i < totals.getLength(); i++, rowIndex++) {
+                        Element element = (Element) totals.item(i);
+                        Integer count = Integer.valueOf(element.getAttribute("count"));
+                        if (count != columnCount + 2) {
+                            throw new ServiceException("Строка файла " + rowIndex + " содержит некорректное значение.");
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new ServiceException(e.getMessage());
+        }
+
+//        int errorRowIndex = checkXml(xml, columnCount, totalCount);
+//        if (errorRowIndex == -1) {
+//        } else {
+//            throw new ServiceException("Строка файла " + errorRowIndex + " содержит некорректное значение.");
+//        }
         return getXML(xmlString);
+    }
+
+    private final static class ScriptBuilder {
+        private StringBuilder script = new StringBuilder();
+
+        public ScriptBuilder addLine(final String scriptLine) {
+            script.append(scriptLine);
+            script.append(newLine());
+            return this;
+        }
+
+        private String newLine() {
+            return System.getProperty("line.separator");
+        }
+
+        public String build() {
+            return script.toString();
+        }
+    }
+
+    private static int checkXml(GPathResult xml, int columnCount, int totalSize) {
+        final Binding binding = new Binding();
+        binding.setVariable("xml", xml);
+        // добавляем два служебных поля
+        binding.setVariable("columnCount", columnCount + 2);
+        binding.setVariable("totalSize", totalSize);
+        binding.setVariable("flag", true);
+        binding.setVariable("index", 2);
+
+        final GroovyShell shell = new GroovyShell(binding);
+
+        final ScriptBuilder parseScript = new ScriptBuilder();
+        // проходим по строкам
+        parseScript.addLine("for (def row : xml.row) { index++");
+        // если кол-во столбцов не совпало, то прерываем
+        parseScript.addLine("if (row.cell.size() != columnCount) { return false } }");
+        //
+        parseScript.addLine("if (totalSize != 0 && (xml.rowTotal.size() != totalSize || xml.rowTotal.cell.size() != columnCount)) {index +=2; return false}");
+        parseScript.addLine("flag");
+
+        final Object result = shell.evaluate(parseScript.build());
+        Integer index = (Integer) shell.getVariable("index");
+
+        return (Boolean) result ? -1 : index;
     }
 
     private static void checkBeforeGetXml(BufferedInputStream inputStream, String fileName) {

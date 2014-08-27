@@ -903,7 +903,7 @@ def isBalancePeriod() {
 }
 
 void importTransportData() {
-    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName, 17, 1)
     addTransportData(xml)
 
     def dataRows = formDataService.getDataRowHelper(formData)?.allCached
