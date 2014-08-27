@@ -192,6 +192,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 	@Override
 	public void onSaveClicked() {
 		try {
+            LogCleanEvent.fire(EditFormPresenter.this);
             if (canVersion && getView().getVersionFrom() == null) {
                 Dialog.warningMessage("Версия не сохранена", "Не указана дата начала актуальности");
                 return;
@@ -234,7 +235,6 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                 new AbstractCallback<AddRefBookRowVersionResult>() {
                                     @Override
                                     public void onSuccess(AddRefBookRowVersionResult result) {
-                                        LogCleanEvent.fire(EditFormPresenter.this);
                                         LogAddEvent.fire(EditFormPresenter.this, result.getUuid());
                                         setIsFormModified(false);
                                         Long newId = result.getNewIds() != null && !result.getNewIds().isEmpty() ? result.getNewIds().get(0) : null;
@@ -278,7 +278,6 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                                 new AbstractCallback<SaveRefBookRowVersionResult>() {
                                                     @Override
                                                     public void onSuccess(SaveRefBookRowVersionResult result) {
-                                                        LogCleanEvent.fire(EditFormPresenter.this);
                                                         LogAddEvent.fire(EditFormPresenter.this, result.getUuid());
                                                         UpdateForm.fire(EditFormPresenter.this, !result.isException(), recordChanges);
                                                         if (result.isException()) {
@@ -299,7 +298,6 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                 new AbstractCallback<SaveRefBookRowVersionResult>() {
                                     @Override
                                     public void onSuccess(SaveRefBookRowVersionResult result) {
-                                        LogCleanEvent.fire(EditFormPresenter.this);
                                         LogAddEvent.fire(EditFormPresenter.this, result.getUuid());
                                         UpdateForm.fire(EditFormPresenter.this, !result.isException(), recordChanges);
                                         if (result.isException()) {

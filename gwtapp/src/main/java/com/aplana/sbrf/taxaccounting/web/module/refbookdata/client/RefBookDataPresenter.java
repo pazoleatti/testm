@@ -139,12 +139,12 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 		rowsId.add(getView().getSelectedRow().getRefBookRowId());
 		action.setRecordsId(rowsId);
         action.setDeleteVersion(false);
+        LogCleanEvent.fire(RefBookDataPresenter.this);
 		dispatcher.execute(action,
 				CallbackUtils.defaultCallback(
 						new AbstractCallback<DeleteRefBookRowResult>() {
 							@Override
 							public void onSuccess(DeleteRefBookRowResult result) {
-                                LogCleanEvent.fire(RefBookDataPresenter.this);
                                 LogAddEvent.fire(RefBookDataPresenter.this, result.getUuid());
                                 if (result.isException()) {
                                     Dialog.errorMessage("Удаление всех версий элемента справочника", "Обнаружены фатальные ошибки!", new DialogHandler() {
