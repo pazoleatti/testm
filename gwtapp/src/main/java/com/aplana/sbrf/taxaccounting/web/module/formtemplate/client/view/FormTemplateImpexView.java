@@ -25,7 +25,7 @@ public class FormTemplateImpexView extends ViewWithUiHandlers<FormTemplateImpexU
 	Button downloadFormTemplateButton;
 
     // TODO не работает патерн в хроме. Пример: <pre style="word-wrap: break-word; white-space: pre-wrap;"></pre>
-    private static String respPattern = "(<(?i:pre.*)>)(.+?)(</(?i:pre)>)";
+    private static String respPattern = "(<pre.*>)(.+?)(</pre>)";
 
     @Inject
 	public FormTemplateImpexView(Binder binder) {

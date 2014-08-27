@@ -52,6 +52,8 @@ public class DeclarationTemplateController {
 
     @Autowired
     LogEntryService logEntryService;
+
+    private static final String RESP_CONTENT_TYPE_HTML = "text/html";
 	
 	
 	@RequestMapping(value = "declarationTemplate/downloadDect/{declarationTemplateId}",method = RequestMethod.GET)
@@ -83,15 +85,17 @@ public class DeclarationTemplateController {
 		List<FileItem> items = upload.parseRequest(req);
 
         if (items.get(0) != null && items.get(0).getSize() == 0)
-            exceptionHandler(new ServiceException("Файл jrxml пустой."), resp);
+            throw new ServiceException("Файл jrxml пустой.");
 		DeclarationTemplate declarationTemplate = declarationTemplateImpexService.importDeclarationTemplate
                 (securityService.currentUserInfo(), declarationTemplateId, items.get(0).getInputStream());
         Date endDate = declarationTemplateService.getDTEndDate(declarationTemplateId);
         Logger customLog = new Logger();
         mainOperatingService.edit(declarationTemplate, endDate, customLog, securityService.currentUserInfo().getUser());
 		IOUtils.closeQuietly(items.get(0).getInputStream());
-        if (!customLog.getEntries().isEmpty())
+        if (!customLog.getEntries().isEmpty()){
+            resp.setContentType(RESP_CONTENT_TYPE_HTML);
             resp.getWriter().printf("uuid %s", logEntryService.save(customLog.getEntries()));
+        }
 	}
 
 	@RequestMapping(value = "/downloadJrxml/{declarationTemplateId}",method = RequestMethod.GET)
@@ -137,14 +141,14 @@ public class DeclarationTemplateController {
 
     @ExceptionHandler(ServiceLoggerException.class)
     public void logServiceExceptionHandler(ServiceLoggerException e, final HttpServletResponse response) throws IOException {
-        response.setContentType("text/plain");
+        response.setContentType(RESP_CONTENT_TYPE_HTML);
         response.setCharacterEncoding("UTF-8");
         response.getWriter().printf("errorUuid %s", e.getUuid());
     }
 
 	@ExceptionHandler(Exception.class)
 	public void exceptionHandler(Exception e, final HttpServletResponse response) {
-		response.setContentType("text/plain");
+		response.setContentType(RESP_CONTENT_TYPE_HTML);
 		response.setCharacterEncoding("UTF-8");
 		logger.warn(e.getLocalizedMessage(), e);
 		try {
