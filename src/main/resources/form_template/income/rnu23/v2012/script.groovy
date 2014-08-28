@@ -597,7 +597,7 @@ void loggerError(def row, def msg) {
 }
 
 void importTransportData() {
-    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName, 20, 1)
     addTransportData(xml)
 }
 

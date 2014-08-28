@@ -570,6 +570,8 @@ public class FlexiblePager extends AbstractPager {
             String value = storage.getItem("tax-rowsCountOnPage_" + type);
             if (value != null && !"".equals(value)) {
                 return Integer.valueOf(value);
+            } else {
+                setPageSize(defaultPageSize);
             }
         }
         return defaultPageSize;
@@ -579,6 +581,10 @@ public class FlexiblePager extends AbstractPager {
 	public void setPageSize(int pageSize) {
         if (pageSize < 1) {
             pageSize = getPageSize();
+        }
+        Storage storage = Storage.getLocalStorageIfSupported();
+        if (storage != null) {
+            storage.setItem("tax-rowsCountOnPage_" + type, String.valueOf(pageSize));
         }
 		super.setPageSize(pageSize);
 	}
@@ -725,13 +731,8 @@ public class FlexiblePager extends AbstractPager {
     /**  Обновить количество строк на странице в локальном хранилище браузера. */
     private void updateRowsCountOnPage() {
         if (rowsCountOnPage.getValue() != null) {
-            Storage storage = Storage.getLocalStorageIfSupported();
-            if (storage != null) {
-                storage.setItem("tax-rowsCountOnPage_" + type, String.valueOf(rowsCountOnPage.getValue()));
-            }
+            setPageSize(rowsCountOnPage.getValue());
             getDisplay().setVisibleRange(new Range(0, getPageSize()));
-            setPageSize(getPageSize());
-
         }
     }
 

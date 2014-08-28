@@ -729,7 +729,7 @@ void addData(def xml, int headRowCount) {
 }
 
 void importTransportData() {
-    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName, 27, 1)
     addTransportData(xml)
 }
 

@@ -237,6 +237,7 @@ public class RefBookDepartment implements RefBookDataProvider {
             throw new ServiceLoggerException("Подразделение не создано, обнаружены фатальные ошибки!",
                     logEntryService.save(logger.getEntries()));
 
+        logger.info("Подразделение создано");
         auditService.add(FormDataEvent.ADD_DEPARTMENT, logger.getTaUserInfo(), 0,
                 null, null, null, null,
                 String.format("Создано подразделение %s, значения атрибутов: %s",
@@ -341,7 +342,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         }
 
         //9 шаг. Проверка зацикливания
-        if (dep.getType() != DepartmentType.ROOT_BANK && dep.getParentId() != (parentDep != null ? parentDep.getId() : 0)){
+        if (dep.getType() != DepartmentType.ROOT_BANK && dep.getParentId() != null && dep.getParentId() != (parentDep != null ? parentDep.getId() : 0)){
             checkCycle(dep, parentDep, logger);
             if (logger.containsLevel(LogLevel.ERROR))
                 throw new ServiceLoggerException(ERROR_MESSAGE,
@@ -432,6 +433,11 @@ public class RefBookDepartment implements RefBookDataProvider {
     @Override
     public void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds, boolean force) {
         int depId = uniqueRecordIds.get(0).intValue();
+        List<Integer> childIds = departmentService.getAllChildrenIds(depId);
+        if (!childIds.isEmpty() && childIds.size() > 1){
+            logger.error("Обнаружены подчиненные подразделения для %s", departmentService.getDepartment(depId).getName());
+            throw new ServiceLoggerException("Подразделение не удалено!", logEntryService.save(logger.getEntries()));
+        }
         isInUsed(departmentService.getDepartment(depId), logger);
         if (logger.containsLevel(LogLevel.ERROR) || logger.containsLevel(LogLevel.WARNING) && !force)
             return;
@@ -531,6 +537,10 @@ public class RefBookDepartment implements RefBookDataProvider {
             return;
         }
 
+        if (type != DepartmentType.ROOT_BANK && parentDepartmentId == null){
+            logger.error("Для подразделения должен быть указан код родительского подразделения!");
+            return;
+        }
         if (rootBank != null && type == DepartmentType.ROOT_BANK && (recordId == null || rootBank.getId() != recordId.intValue())){
             logger.error("Подразделение с типом \"Банк\" уже существует!");
             return;

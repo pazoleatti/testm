@@ -429,7 +429,7 @@ def getNewRow() {
 }
 
 void importTransportData() {
-    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName, 9, 1)
     addTransportData(xml)
 }
 

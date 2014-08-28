@@ -162,6 +162,7 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
 
     @Override
     public void onDeleteRowClicked() {
+        LogCleanEvent.fire(RefBookHierDataPresenter.this);
         if (canVersion){
             DeleteRefBookRowAction action = new DeleteRefBookRowAction();
             action.setRefBookId(refBookDataId);
@@ -172,7 +173,6 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
                     new AbstractCallback<DeleteRefBookRowResult>() {
                         @Override
                         public void onSuccess(DeleteRefBookRowResult result) {
-                            LogCleanEvent.fire(RefBookHierDataPresenter.this);
                             LogAddEvent.fire(RefBookHierDataPresenter.this, result.getUuid());
                             if (result.isException()) {
                                 Dialog.errorMessage("Удаление всех версий элемента справочника",
