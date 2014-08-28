@@ -124,10 +124,10 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
                 }
                 String resultString = event.getResults().toLowerCase();
                 if (resultString.contains(ERROR_RESP)) {
-                    String errorUuid = event.getResults().replaceAll(respPattern, "$2");
+                    String errorUuid = resultString.replaceAll(respPattern, "$2");
                     getUiHandlers().uploadDectResponseWithErrorUuid(errorUuid.replaceFirst(ERROR_RESP, ""));
                 }else if (resultString.toLowerCase().contains(ERROR)) {
-                    String errorText = event.getResults().replaceAll(respPattern, "$2");
+                    String errorText = resultString.replaceAll(respPattern, "$2");
                     getUiHandlers().uploadDectFail(errorText.replaceFirst(ERROR, ""));
                 } else {
                     String uuid = resultString.replaceAll(respPattern, "$2");
