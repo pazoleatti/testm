@@ -68,14 +68,14 @@ public class FormTemplateImpexPresenter extends Presenter<FormTemplateImpexPrese
         if (uuid != null && !uuid.isEmpty() && !uuid.toLowerCase().equals("<pre></pre>")){
             LogAddEvent.fire(this, uuid);
         }else {
-            Dialog.infoMessage("Форма сохранена");
+            Dialog.infoMessage("Макет загружен");
         }
 		FormTemplateSaveEvent.fire(this);
 	}
 
 	@Override
 	public void uploadFormTemplateFail(String msg) {
-        Dialog.infoMessage("Не удалось импортировать шаблон. Ошибка: " + msg);
+        Dialog.errorMessage("Загрузить макет не удалось. Проверьте источник данных.");
 	}
 
 	@Override
@@ -86,6 +86,6 @@ public class FormTemplateImpexPresenter extends Presenter<FormTemplateImpexPrese
     @Override
     public void uploadDectResponseWithErrorUuid(String uuid) {
         LogAddEvent.fire(this, uuid);
-        Dialog.infoMessage("Не удалось импортировать шаблон");
+        Dialog.errorMessage("Загрузить макет не удалось. Проверьте источник данных");
     }
 }

@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -59,7 +58,7 @@ public class CreateTaskHandler extends AbstractActionHandler<CreateTaskAction, C
              * Проверка расписания
              */
             if (!taskManager.validateSchedule(action.getSchedule())){
-                errors.add(" Значение атрибута «Расписание» не соответствует требованиям формата Cron!!");
+                errors.add(" Значение атрибута «Расписание» не соответствует требованиям формата Cron");
             }
 
             if (errors.size() > 0){

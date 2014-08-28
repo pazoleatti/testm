@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import com.aplana.sbrf.taxaccounting.model.BookerStatementsFilter;
-import com.aplana.sbrf.taxaccounting.model.BookerStatementsSearchResultItem;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
 import java.io.InputStream;
@@ -30,9 +27,10 @@ public interface BookerStatementsService {
     /**
      * Получение списка бух отчетностей соответсвующих заданному фильтру
      * @param bookerStatementsFilter
+     * @param tAUser
      * @return
      */
-    PagingResult<BookerStatementsSearchResultItem> findDataByFilter(BookerStatementsFilter bookerStatementsFilter);
+    PagingResult<BookerStatementsSearchResultItem> findDataByFilter(BookerStatementsFilter bookerStatementsFilter, TAUser tAUser);
 
     /**
      * Создание бух отчетности.

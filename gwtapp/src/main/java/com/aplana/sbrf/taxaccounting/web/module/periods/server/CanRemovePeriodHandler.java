@@ -57,44 +57,6 @@ public class CanRemovePeriodHandler extends AbstractActionHandler<CanRemovePerio
         String depFilter = buildFilter(departmentIds, action.getReportPeriodId());
 
         List<LogEntry> logs = new ArrayList<LogEntry>();
-        PagingResult<Map<String, RefBookValue>> result101 = null;
-        PagingResult<Map<String, RefBookValue>> result102 = null;
-        if (action.getTaxType() == TaxType.INCOME) {
-            //Check INCOME_101
-            RefBookDataProvider dataProvider = rbFactory.getDataProvider(REF_BOOK_101);
-
-            Date endDate = periodService.getEndDate(action.getReportPeriodId()).getTime();
-            result101 = dataProvider.getRecords(endDate, null, depFilter, null);
-
-            Set<Integer> depInc101Ids = new HashSet<Integer>();
-            for (Map<String, RefBookValue> e : result101) {
-                depInc101Ids.add(e.get("DEPARTMENT_ID").getReferenceValue().intValue());
-            }
-
-            for (Integer id : depInc101Ids) {
-                logs.add(new LogEntry(LogLevel.ERROR, "Форма 101 (бухгалтерская отчётность) в подразделении \"" +
-                        departmentService.getDepartment(id).getName() +
-                        "\" находится в " +
-                        action.getOperationName()
-                        + " периоде!"));
-            }
-
-            //Check INCOME_102
-            dataProvider = rbFactory.getDataProvider(REF_BOOK_102);
-            result102 = dataProvider.getRecords(endDate, null, depFilter, null);
-            Set<Integer> depInc102Ids = new HashSet<Integer>();
-            for (Map<String, RefBookValue> e : result102) {
-                depInc102Ids.add(e.get("DEPARTMENT_ID").getReferenceValue().intValue());
-            }
-
-            for (Integer id : depInc102Ids) {
-                logs.add(new LogEntry(LogLevel.ERROR, "Форма 102 (бухгалтерская отчётность) в подразделении \"" +
-                        departmentService.getDepartment(id).getName() +
-                        "\" находится в " +
-                        action.getOperationName() +
-                        " периоде!"));
-            }
-        }
 
         //Check forms
         List<FormData> formDatas = formDataService.find(departmentIds, action.getReportPeriodId());
@@ -118,9 +80,7 @@ public class CanRemovePeriodHandler extends AbstractActionHandler<CanRemovePerio
                     action.getOperationName() +
                     " периоде!"));
         }
-		result.setCanRemove(((result101 == null) || result101.isEmpty())
-                &&((result102 == null) || result102.isEmpty())
-                && formDatas.isEmpty() && declarations.isEmpty());
+		result.setCanRemove(formDatas.isEmpty() && declarations.isEmpty());
         result.setUuid(logEntryService.save(logs));
 		return result;
 

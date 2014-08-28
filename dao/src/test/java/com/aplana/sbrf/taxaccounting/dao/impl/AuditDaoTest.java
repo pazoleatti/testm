@@ -10,6 +10,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -23,6 +25,7 @@ import static org.junit.Assert.*;
 public class AuditDaoTest {
 
     private static final SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
+    public static final int LENGTH = 1000;
 
     @Autowired
     private AuditDao auditDao;
@@ -203,4 +206,31 @@ public class AuditDaoTest {
         auditDao.add(logSystem);
     }
 
+    @Test
+    public void testCutOffLogSystemFilter() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        Method method = AuditDaoImpl.class.getDeclaredMethod("cutOffLogSystemFilter", LogSystemFilter.class);
+        method.setAccessible(true);
+
+        LogSystemFilter logSystemAuditFilter = new LogSystemFilter();
+
+        LogSystemFilter restrictedLogSystemAuditFilter = (LogSystemFilter) method.invoke(auditDao, logSystemAuditFilter);
+        assertTrue(restrictedLogSystemAuditFilter.getFilter() == null);
+    }
+
+    @Test
+    public void testRestrictFilterLength() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        Method method = AuditDaoImpl.class.getDeclaredMethod("cutOffLogSystemFilter", LogSystemFilter.class);
+        method.setAccessible(true);
+
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < LENGTH + 1; i++) {
+            stringBuilder.append("a");
+        }
+
+        LogSystemFilter logSystemFilter = new LogSystemFilter();
+        logSystemFilter.setFilter(stringBuilder.toString());
+
+        LogSystemFilter restrictedLogSystemAuditFilter = (LogSystemFilter) method.invoke(auditDao, logSystemFilter);
+        assertTrue(restrictedLogSystemAuditFilter.getFilter().length() <= LENGTH);
+    }
 }

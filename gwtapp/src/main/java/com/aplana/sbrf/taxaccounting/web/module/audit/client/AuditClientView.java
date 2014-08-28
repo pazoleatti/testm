@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.audit.client;
 
+import com.aplana.sbrf.taxaccounting.model.AuditFormType;
 import com.aplana.sbrf.taxaccounting.model.HistoryBusinessSearchOrdering;
 import com.aplana.sbrf.taxaccounting.model.LogSearchResultItem;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AplanaUiHandlers;
@@ -227,9 +228,9 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler>
             @Override
             public String getValue(LogSearchResultItem object) {
                 if (object.getFormTypeName() != null) {
-                    return "Налоговые формы";
+                    return AuditFormType.FORM_TYPE_TAX.getName();
                 } else if (object.getDeclarationTypeName() != null) {
-                    return "Декларации";
+                    return AuditFormType.FORM_TYPE_DECLARATION.getName();
                 }
                 return null;
             }

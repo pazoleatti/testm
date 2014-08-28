@@ -2,11 +2,11 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.dao.TemplateChangesDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.TemplateChanges;
 import com.aplana.sbrf.taxaccounting.model.VersionHistorySearchOrdering;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.model.TemplateChanges;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -124,6 +124,55 @@ public class TemplateChangesDaoImpl extends AbstractDao implements TemplateChang
         } catch (DataAccessException e){
             logger.error("Ошибка при получении истории изменнений.", e);
             throw new DaoException("Ошибка при получении истории изменнений.", e);
+        }
+    }
+
+    private static final String GET_TEMPLATE_CHANGES =
+            "SELECT tch.id, event, author, date_event, form_template_id, declaration_template_id\n" +
+            "FROM template_changes tch\n" +
+            "WHERE form_template_id IN\n" +
+            "(:ftIds)\n" +
+            "ORDER BY date_event DESC;";
+    @Override
+    public List<TemplateChanges> getByFormTemplateIds(final Collection<Integer> ftIds, VersionHistorySearchOrdering ordering, boolean isAscSorting) {
+        try {
+            return getNamedParameterJdbcTemplate().query(GET_TEMPLATE_CHANGES,
+                    new HashMap<String, Object>(){{put("ftIds", ftIds);}},
+                    new TemplateChangesMapper() );
+        } catch (DataAccessException e){
+            logger.error("", e);
+            throw new DaoException("", e);
+        }
+    }
+
+    private static final String GET_TEMPLATE_CHANGES_IDS =
+            "SELECT tch.id\n" +
+                    "FROM template_changes tch\n" +
+                    "WHERE %s\n" +
+                    " ORDER BY date_event DESC";
+    @Override
+    public List<Integer> getIdsByTemplateIds(final Collection<Integer> ftIds, final Collection<Integer> dtIds, VersionHistorySearchOrdering ordering, boolean isAscSorting) {
+        try {
+            String odd;
+            HashMap<String, Object> params;
+            if (ftIds != null){
+                odd = " form_template_id IN (:ftIds)";
+                params = new HashMap<String, Object>() {{
+                    put("ftIds", ftIds);
+                }};
+            }
+            else {
+                odd = " declaration_template_id in (:dtIds)";
+                params = new HashMap<String, Object>() {{
+                    put("dtIds", dtIds);
+                }};
+            }
+            return getNamedParameterJdbcTemplate().queryForList(String.format(GET_TEMPLATE_CHANGES_IDS, odd),
+                    params,
+                    Integer.class);
+        } catch (DataAccessException e){
+            logger.error("", e);
+            throw new DaoException("", e);
         }
     }
 

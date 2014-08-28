@@ -33,12 +33,12 @@ public class GetDepartmentAssignsHandler extends AbstractActionHandler<GetDepart
         List<DepartmentAssign> departmentAssigns = new LinkedList<DepartmentAssign>();
         Date periodFrom = PeriodConvertor.getDateFrom(action.getPeriodsInterval());
         Date periodTo = PeriodConvertor.getDateTo(action.getPeriodsInterval());
-        SearchOrderingFilter filter = new SearchOrderingFilter();
-        filter.setSearchOrdering(action.getOrdering());
-        filter.setAscSorting(action.isAscSorting());
+        QueryParams queryParams = new QueryParams();
+        queryParams.setSearchOrdering(action.getOrdering());
+        queryParams.setAscending(action.isAscSorting());
         if(action.isForm()){
             List<DepartmentFormType> depFormAssigns = sourceService.getDFTByDepartment(action.getDepartmentId(),
-                    action.getTaxType(), periodFrom, periodTo, filter);
+                    action.getTaxType(), periodFrom, periodTo, queryParams);
             // если без пейджинга то это формирование норм, с пейджингом нужно выносить в дао формирование
             for (DepartmentFormType dfa : depFormAssigns) {
                 DepartmentAssign departmentAssign = new DepartmentAssign();
@@ -52,7 +52,7 @@ public class GetDepartmentAssignsHandler extends AbstractActionHandler<GetDepart
             }
         } else {
             List<DepartmentDeclarationType> depDecAssigns = sourceService.getDDTByDepartment(action.getDepartmentId(),
-                    action.getTaxType(), periodFrom, periodTo, filter);
+                    action.getTaxType(), periodFrom, periodTo, queryParams);
             for (DepartmentDeclarationType dda : depDecAssigns) {
                 DepartmentAssign departmentAssign = new DepartmentAssign();
                 departmentAssign.setId((long) dda.getId());
@@ -67,31 +67,43 @@ public class GetDepartmentAssignsHandler extends AbstractActionHandler<GetDepart
         /** Получаем уже назначенные связки и обрезаем их */
         DepartmentAssign selectedLeftObject = action.getSelectedLeft();
         List<ComparableSourceObject> currentAssigns = new ArrayList<ComparableSourceObject>();
+        List<ComparableSourceObject> impossibleAssign = new ArrayList<ComparableSourceObject>();
+
         if (selectedLeftObject != null) {
             if (action.isForm()) {
                 List<DepartmentFormType> departmentFormTypes;
+                List<DepartmentFormType> departmentImpFormTypes = new ArrayList<DepartmentFormType>();
                 if (selectedLeftObject.isDeclaration()) {
                     departmentFormTypes = sourceService.
                             getDFTSourceByDDT(selectedLeftObject.getDepartmentId(), selectedLeftObject.getTypeId(),
-                                    periodFrom, periodTo, filter);
+                                    periodFrom, periodTo, queryParams);
                 } else {
                     if (action.getMode() == SourceMode.SOURCES) {
                         departmentFormTypes = sourceService.
                                 getDFTSourcesByDFT(selectedLeftObject.getDepartmentId(), selectedLeftObject.getTypeId(),
-                                        selectedLeftObject.getKind(), periodFrom, periodTo, filter);
+                                        selectedLeftObject.getKind(), periodFrom, periodTo, queryParams);
+                        departmentImpFormTypes = sourceService.
+                                getFormDestinations(selectedLeftObject.getDepartmentId(), selectedLeftObject.getTypeId(), selectedLeftObject.getKind(), periodFrom, periodTo);
                     } else {
                         departmentFormTypes = sourceService.
                                 getFormDestinations(selectedLeftObject.getDepartmentId(), selectedLeftObject.getTypeId(), selectedLeftObject.getKind(), periodFrom, periodTo);
+                        departmentImpFormTypes = sourceService.
+                                getDFTSourcesByDFT(selectedLeftObject.getDepartmentId(), selectedLeftObject.getTypeId(),
+                                        selectedLeftObject.getKind(), periodFrom, periodTo, queryParams);
                     }
+                    impossibleAssign.add(new ComparableSourceObject(selectedLeftObject.getKind(), selectedLeftObject.getTypeId(), null, selectedLeftObject.getDepartmentId()));
                 }
                 for (DepartmentFormType dft : departmentFormTypes) {
                     currentAssigns.add(new ComparableSourceObject(dft.getKind(), dft.getFormTypeId(), null, dft.getDepartmentId()));
+                }
+                for (DepartmentFormType dft : departmentImpFormTypes) {
+                    impossibleAssign.add(new ComparableSourceObject(dft.getKind(), dft.getFormTypeId(), null, dft.getDepartmentId()));
                 }
             } else {
                 if (action.getMode() == SourceMode.SOURCES) {
                     List<DepartmentFormType> departmentFormTypes = sourceService
                             .getDFTSourceByDDT(selectedLeftObject.getDepartmentId(), selectedLeftObject.getTypeId(),
-                                    periodFrom, periodTo, filter);
+                                    periodFrom, periodTo, queryParams);
                     for (DepartmentFormType dft : departmentFormTypes) {
                         currentAssigns.add(new ComparableSourceObject(dft.getKind(), dft.getFormTypeId(), null, dft.getDepartmentId()));
                     }
@@ -110,14 +122,30 @@ public class GetDepartmentAssignsHandler extends AbstractActionHandler<GetDepart
                 if (!assign.isDeclaration() || action.getMode() == SourceMode.SOURCES) {
                     for (ComparableSourceObject currentAssign : currentAssigns) {
                         if (assign.getKind() == currentAssign.formKind && assign.getTypeId() == currentAssign.formTypeId && action.getDepartmentId() == currentAssign.departmentId) {
-                            it.remove();
+                            assign.setEnabled(false);
+                            assign.setChecked(true);
+                            break;
+                        }
+                    }
+                    for (ComparableSourceObject currentAssign : impossibleAssign) {
+                        if (assign.getKind() == currentAssign.formKind && assign.getTypeId() == currentAssign.formTypeId && action.getDepartmentId() == currentAssign.departmentId) {
+                            assign.setEnabled(false);
+                            assign.setChecked(false);
                             break;
                         }
                     }
                 } else {
                     for (ComparableSourceObject currentAssign : currentAssigns) {
                         if (assign.getTypeId() == currentAssign.declarationTypeId && action.getDepartmentId() == currentAssign.departmentId) {
-                            it.remove();
+                            assign.setEnabled(false);
+                            assign.setChecked(true);
+                            break;
+                        }
+                    }
+                    for (ComparableSourceObject currentAssign : impossibleAssign) {
+                        if (assign.getTypeId() == currentAssign.declarationTypeId && action.getDepartmentId() == currentAssign.departmentId) {
+                            assign.setEnabled(false);
+                            assign.setChecked(false);
                             break;
                         }
                     }

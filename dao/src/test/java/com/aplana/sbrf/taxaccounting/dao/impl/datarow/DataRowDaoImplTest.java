@@ -2,11 +2,11 @@ package com.aplana.sbrf.taxaccounting.dao.impl.datarow;
 
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.test.BDUtilsMock;
 import org.junit.Assert;
 import org.junit.Before;
@@ -28,7 +28,9 @@ import java.util.List;
 @ContextConfiguration({ "DataRowDaoImplTest.xml" })
 @Transactional
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-public class DataRowDaoImplTest {
+public class DataRowDaoImplTest extends Assert {
+
+	static final long DEFAULT_ORDER_STEP_TEST = DataRowDaoImplUtils.DEFAULT_ORDER_STEP / 10;
 
 	@Autowired
 	FormDataDao formDataDao;
@@ -421,7 +423,7 @@ public class DataRowDaoImplTest {
 		FormData fd = formDataDao.get(1, false);
         int sizeBefore = dataRowDao.getSize(fd,null);
 		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
-		for (int i = 0; i < DataRowDaoImplUtils.DEFAULT_ORDER_STEP; i++) {
+		for (int i = 0; i < DEFAULT_ORDER_STEP_TEST; i++) {
 			DataRow<Cell> dr = fd.createDataRow();
 			dataRows.add(dr);
 		}
@@ -430,10 +432,10 @@ public class DataRowDaoImplTest {
         List<DataRow<Cell>> addedDataRowsAfter = dataRowDao.getRows(fd, null, null);
         Assert.assertNotEquals(addedDataRowsAfter.get(0).getId(), addedDataRowsBefore.get(0).getId());
         Assert.assertNotEquals(addedDataRowsAfter.size(), addedDataRowsBefore.size());
-		Assert.assertEquals(sizeBefore + DataRowDaoImplUtils.DEFAULT_ORDER_STEP, addedDataRowsAfter.size());
+		Assert.assertEquals(sizeBefore + DEFAULT_ORDER_STEP_TEST, addedDataRowsAfter.size());
         //проверка сдвига, id записи должны быть равны, все сдвинулись
         for (int i  =0; i< sizeBefore; i++){
-            Assert.assertEquals(addedDataRowsBefore.get(i).getId(), addedDataRowsAfter.get((int) (DataRowDaoImplUtils.DEFAULT_ORDER_STEP + i)).getId());
+            Assert.assertEquals(addedDataRowsBefore.get(i).getId(), addedDataRowsAfter.get((int) (DEFAULT_ORDER_STEP_TEST + i)).getId());
         }
 	}
 
@@ -443,7 +445,7 @@ public class DataRowDaoImplTest {
         //int sizeBefore = dataRowDao.getSize(fd,null);
 		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
 
-		for (int i = 0; i < DataRowDaoImplUtils.DEFAULT_ORDER_STEP; i++) {
+		for (int i = 0; i < DEFAULT_ORDER_STEP_TEST; i++) {
 			DataRow<Cell> dr = fd.createDataRow();
 			dataRows.add(dr);
 		}
@@ -453,7 +455,7 @@ public class DataRowDaoImplTest {
         Assert.assertEquals(addedDataRowsAfter.get(0).getId(), addedDataRowsBefore.get(0).getId());
         Assert.assertNotEquals(addedDataRowsAfter.size(), addedDataRowsBefore.size());
         //проверка сдвига, id записи должны быть равны(т.е. со сдвигом в данном случае на 100000)
-        Assert.assertEquals(addedDataRowsBefore.get(4).getId(), addedDataRowsAfter.get((int) (DataRowDaoImplUtils.DEFAULT_ORDER_STEP + 4)).getId());
+        Assert.assertEquals(addedDataRowsBefore.get(4).getId(), addedDataRowsAfter.get((int) (DEFAULT_ORDER_STEP_TEST + 4)).getId());
 	}
 
 	@Test
@@ -462,7 +464,7 @@ public class DataRowDaoImplTest {
         int sizeBefore = dataRowDao.getSize(fd,null);
 		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
 
-		for (int i = 0; i < DataRowDaoImplUtils.DEFAULT_ORDER_STEP; i++) {
+		for (int i = 0; i < DEFAULT_ORDER_STEP_TEST; i++) {
 			DataRow<Cell> dr = fd.createDataRow();
 			dataRows.add(dr);
 		}
@@ -494,12 +496,12 @@ public class DataRowDaoImplTest {
         int sizeAfterRem = dataRowDao.getSize(fd,null);
         List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
 
-        for (int i = 0; i < DataRowDaoImplUtils.DEFAULT_ORDER_STEP; i++) {
+        for (int i = 0; i < DEFAULT_ORDER_STEP_TEST; i++) {
             DataRow<Cell> dr = fd.createDataRow();
             dataRows.add(dr);
         }
         dataRowDao.insertRows(fd, 1, dataRows);
-        Assert.assertEquals(DataRowDaoImplUtils.DEFAULT_ORDER_STEP + sizeAfterRem, dataRowDao.getRows(fd, null, null).size());
+        Assert.assertEquals(DEFAULT_ORDER_STEP_TEST + sizeAfterRem, dataRowDao.getRows(fd, null, null).size());
 
         //We check after rollback that second element become first(it could be second)
         dataRowDao.rollback(fd.getId());
@@ -512,4 +514,43 @@ public class DataRowDaoImplTest {
         Assert.assertArrayEquals(rowIdsBefore.toArray(), rowIdsAfterRollback.toArray());
     }
 
+    /**
+     * Система для текущего экземпляра НФ выполняет сравнение количества строк в табличной части до и после
+     * редактирования. Количество строк в табличной части не изменено.
+     */
+    @Test
+    public void testIsDataRowsCountChangedNotChanged() {
+        FormData fd = formDataDao.get(1000L, false);
+
+        dataRowDao.removeRows(fd, 1, 1);
+
+        List<DataRow<Cell>> rows = new ArrayList<DataRow<Cell>>();
+        DataRow<Cell> dataRow = fd.createDataRow();
+        rows.add(dataRow);
+        dataRowDao.insertRows(fd, 1, rows);
+
+        boolean isCountChanged = dataRowDao.isDataRowsCountChanged(1000L);
+        assertFalse("Количество строк не должно было измениться", isCountChanged);
+    }
+
+    /**
+     * Система для текущего экземпляра НФ выполняет сравнение количества строк в табличной части до и после
+     * редактирования. Количество строк в табличной части изменено.
+     */
+    @Test
+    public void testIsDataRowsCountChangedChanged() {
+        FormData fd = formDataDao.get(1000L, false);
+
+        dataRowDao.removeRows(fd, 1, 1);
+
+        List<DataRow<Cell>> rows = new ArrayList<DataRow<Cell>>();
+        for (int i = 0; i < 5; i++) {
+            DataRow<Cell> dataRow = fd.createDataRow();
+            rows.add(dataRow);
+        }
+        dataRowDao.insertRows(fd, 1, rows);
+
+        boolean isCountChanged = dataRowDao.isDataRowsCountChanged(1000L);
+        assertTrue("Количество строк должно было измениться", isCountChanged);
+    }
 }

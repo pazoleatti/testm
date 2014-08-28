@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.sources.client.assingDialog;
 import com.aplana.gwt.client.ModalWindow;
 import com.aplana.gwt.client.Spinner;
 import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.web.module.sources.client.SourcesUtils;
 import com.aplana.sbrf.taxaccounting.web.module.sources.client.ValueBoxRenderer;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.PeriodInfo;
@@ -119,6 +120,7 @@ public class AssignDialogView extends ViewWithUiHandlers<AssignDialogUiHandlers>
     public void setAcceptablePeriods(List<PeriodInfo> periods) {
         periodFrom.setValue(periods.get(0));
         periodFrom.setAcceptableValues(periods);
+        periodTo.setValue(null);
         periodTo.setAcceptableValues(periods);
 
         WidgetUtils.setupOptionTitle(periodFrom);
@@ -138,14 +140,19 @@ public class AssignDialogView extends ViewWithUiHandlers<AssignDialogUiHandlers>
             buttonClickHandler.ok(pi);
             window.hide();
         } else {
-            Dialog.errorMessage(window.getTitle(), "Выбранный интервал периодов некорректен.");
+            Dialog.errorMessage(window.getTitle(), "Неверно задан период!");
         }
     }
 
     @UiHandler("cancelButton")
     public void cancelClick(ClickEvent event) {
-        buttonClickHandler.cancel();
-        window.hide();
+        Dialog.confirmMessage("Отменить редактирование?", new DialogHandler() {
+            @Override
+            public void yes() {
+                buttonClickHandler.cancel();
+                window.hide();
+            }
+        });
     }
 
     @Override

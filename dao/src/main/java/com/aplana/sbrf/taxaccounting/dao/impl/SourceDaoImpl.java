@@ -3,10 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.SourceDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
-import com.aplana.sbrf.taxaccounting.model.source.DeclarationDataInfo;
-import com.aplana.sbrf.taxaccounting.model.source.FormDataInfo;
-import com.aplana.sbrf.taxaccounting.model.source.SourceObject;
-import com.aplana.sbrf.taxaccounting.model.source.SourcePair;
+import com.aplana.sbrf.taxaccounting.model.source.*;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.RowCallbackHandler;
@@ -44,16 +41,31 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
         return params;
     }
 
-    private final static String GET_FORM_INTERSECTIONS = "select distinct src_department_form_type_id as source, department_form_type_id as destination, period_start, period_end \n" +
+    private final static String GET_FORM_INTERSECTIONS = "select distinct a.src_department_form_type_id as source, s_kind.name as s_kind, s_type.name as s_type, \n" +
+            "a.department_form_type_id as destination, d_kind.name as d_kind, d_type.name as d_type, \n" +
+            "a.period_start, a.period_end \n" +
             "from form_data_source a \n" +
+            "join department_form_type s_dft on s_dft.id = src_department_form_type_id\n" +
+            "join form_kind s_kind on s_kind.id = s_dft.kind\n" +
+            "join form_type s_type on s_type.id = s_dft.form_type_id\n" +
+            "join department_form_type d_dft on d_dft.id = department_form_type_id\n" +
+            "join form_kind d_kind on d_kind.id = d_dft.kind\n" +
+            "join form_type d_type on d_type.id = d_dft.form_type_id\n" +
             "where\n" +
             "(src_department_form_type_id, department_form_type_id) in %s --список пар \n" +
             "and (period_end >= :periodStart or period_end is null) --дата открытия периода \n" +
             "and (:periodEnd is null or period_start <= :periodEnd) --дата окончания периода (может быть передана null)\n" +
             "and (:excludedPeriodStart is null or (period_start, period_end) not in ((:excludedPeriodStart, :excludedPeriodEnd))) --исключить этот период";
 
-    private final static String GET_DECLARATION_INTERSECTIONS = "select distinct src_department_form_type_id as source, department_declaration_type_id as destination, period_start, period_end\n" +
+    private final static String GET_DECLARATION_INTERSECTIONS = "select distinct a.src_department_form_type_id as source, s_kind.name as s_kind, s_type.name as s_type, \n" +
+            "a.department_declaration_type_id as destination, null as d_kind, d_type.name as d_type, \n" +
+            "a.period_start, a.period_end\n" +
             "from declaration_source a\n" +
+            "join department_form_type s_dft on s_dft.id = src_department_form_type_id\n" +
+            "join form_kind s_kind on s_kind.id = s_dft.kind\n" +
+            "join form_type s_type on s_type.id = s_dft.form_type_id\n" +
+            "join department_declaration_type d_ddt on d_ddt.id = department_declaration_type_id\n" +
+            "join declaration_type d_type on d_type.id = d_ddt.declaration_type_id\n" +
             "where\n" +
             "(src_department_form_type_id, department_declaration_type_id) in %s --список пар\n" +
             "and (period_end >= :periodStart or period_end is null) --дата открытия периода\n" +
@@ -62,7 +74,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
 
     @Override
     public Map<SourcePair, List<SourceObject>> getIntersections(List<SourcePair> sourcePairs, Date periodStart, Date periodEnd,
-                                                                Date excludedPeriodStart, Date excludedPeriodEnd, boolean declaration) {
+                                                                Date excludedPeriodStart, Date excludedPeriodEnd, final boolean declaration) {
         final Map<SourcePair, List<SourceObject>> result = new HashMap<SourcePair, List<SourceObject>>();
         PreparedStatementData ps = new PreparedStatementData();
         Map<String, Long> pairParams;
@@ -86,6 +98,11 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             @Override
             public void processRow(ResultSet rs) throws SQLException {
                 SourcePair pair = new SourcePair(rs.getLong("source"), rs.getLong("destination"));
+                pair.setSourceKind(rs.getString("s_kind"));
+                pair.setSourceType(rs.getString("s_type"));
+                pair.setDestinationKind(rs.getString("d_kind"));
+                pair.setDestinationType(rs.getString("d_type"));
+
                 if (result.containsKey(pair)) {
                     result.get(pair).add(new SourceObject(pair, rs.getDate("period_start"), rs.getDate("period_end")));
                 } else {

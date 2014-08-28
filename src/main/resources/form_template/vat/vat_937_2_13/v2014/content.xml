@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
     <fixedRows>false</fixedRows>
-    <name>Расшифровка графы 13 «Расхождение» формы 937.2</name>
-    <fullName>Расшифровка графы 13 «Расхождение» формы 937.2</fullName>
-    <code>(937.2.13)</code>
+    <name>Расшифровка графы 13 "Расхождение" формы 937.2</name>
+    <fullName>Расшифровка графы 13 "Расхождение" формы 937.2</fullName>
+    <header>937.2.13</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rowNum</alias>
         <checking>false</checking>
         <name>№ п/п</name>
         <order>1</order>
-        <width>5</width>
+        <width>11</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>

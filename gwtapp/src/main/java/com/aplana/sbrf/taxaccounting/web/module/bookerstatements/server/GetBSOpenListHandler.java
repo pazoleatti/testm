@@ -64,20 +64,10 @@ public class GetBSOpenListHandler extends AbstractActionHandler<GetBSOpenListAct
 
         // Подразделения доступные пользователю
         Set<Integer> avSet = new HashSet<Integer>();
+        avSet.addAll(departmentService.getBADepartmentIds(currUser));
 
-        if (currUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
-            // Все подразделения
-            result.setDepartments(departmentService.listAll());
-            for (Department dep : result.getDepartments()) {
-                avSet.add(dep.getId());
-            }
-        } else {
-            //TODO в 039 этого уже нет. Убрать после мержа
-            avSet.addAll(departmentService.getTaxFormDepartments(currUser, asList(TaxType.INCOME), null, null));
-
-            // Необходимые для дерева подразделения
-            result.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(avSet).values()));
-        }
+        // Необходимые для дерева подразделения
+        result.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(avSet).values()));
         result.setAvailableDepartments(avSet);
 
         // Подразделение текущего пользователя

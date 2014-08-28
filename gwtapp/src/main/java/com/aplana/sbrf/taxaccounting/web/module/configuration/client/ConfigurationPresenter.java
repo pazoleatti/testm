@@ -175,7 +175,7 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
      * Заполнение модели конфигурационных параметров
      */
     private void fillModel(ConfigurationParamModel model, List<DataRow<Cell>> commonRowsData,
-                                    List<DataRow<Cell>> formRowsData, Set<Integer> dublicateDepartmentIdSet, Set<String> notSetFieldSet) {
+                                    List<DataRow<Cell>> formRowsData, Set<Integer> dublicateDepartmentIdSet, Map<Integer, Set<String>> notSetFields) {
         // Общие параметры
         Map<ConfigurationParam, List<String>> commonMap = new HashMap<ConfigurationParam, List<String>>();
 
@@ -189,14 +189,6 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
             String value = cleanString(dataRow.getCell(getView().getValueColumn().getAlias()).getStringValue());
             if (param == null || value == null) {
                 // Не полностью заполненные параметры не сохраняем
-                if (notSetFieldSet != null) {
-                    if (param == null) {
-                        notSetFieldSet.add("Параметр");
-                    }
-                    if (value == null) {
-                        notSetFieldSet.add("Значение параметра");
-                    }
-                }
                 continue;
             }
             if (!commonMap.containsKey(param)) {
@@ -218,14 +210,27 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
             String archivePath = cleanString(dataRow.getCell(getView().getArchivePathColumn().getAlias()).getStringValue());
             String errorPath = cleanString(dataRow.getCell(getView().getErrorPathColumn().getAlias()).getStringValue());
 
-            if (departmentId == null || (uploadPath == null && archivePath == null && errorPath == null)) {
+            if (departmentId == null || uploadPath == null || archivePath == null || errorPath == null) {
+                Integer idInt = departmentId == null ? null : departmentId.intValue();
+                if (notSetFields.get(idInt) == null) {
+                    notSetFields.put(idInt, new HashSet<String>());
+                }
+                Set<String> notSetFieldSet = notSetFields.get(idInt);
                 if (departmentId == null) {
                     notSetFieldSet.add("Подразделение ТБ");
                 } else {
-                    notSetFieldSet.add(ConfigurationParam.FORM_UPLOAD_DIRECTORY.getCaption());
-                    notSetFieldSet.add(ConfigurationParam.FORM_ARCHIVE_DIRECTORY.getCaption());
-                    notSetFieldSet.add(ConfigurationParam.FORM_ERROR_DIRECTORY.getCaption());
+                    if (uploadPath == null) {
+                        notSetFieldSet.add(ConfigurationParam.FORM_UPLOAD_DIRECTORY.getCaption());
+                    }
+                    if (archivePath == null) {
+                        notSetFieldSet.add(ConfigurationParam.FORM_ARCHIVE_DIRECTORY.getCaption());
+                    }
+                    if (errorPath == null) {
+                        notSetFieldSet.add(ConfigurationParam.FORM_ERROR_DIRECTORY.getCaption());
+                    }
                 }
+            }
+            if (departmentId == null) {
                 continue;
             }
             if (uploadPath != null) {
@@ -255,7 +260,7 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
         List<DataRow<Cell>> commonRowsData = getView().getCommonRowsData();
         List<DataRow<Cell>> formRowsData = getView().getFormRowsData();
 
-        fillModel(model, commonRowsData, formRowsData, action.getDublicateDepartmentIdSet(), action.getNotSetFieldSet());
+        fillModel(model, commonRowsData, formRowsData, action.getDublicateDepartmentIdSet(), action.getNotSetFields());
 
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<SaveConfigurationResult>() {
             @Override

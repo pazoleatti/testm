@@ -106,10 +106,11 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                 getView().setHierarchy(RefBookType.HIERARCHICAL.getId() == result.getRefBookType());
 
                                 getView().createInputFields(result.getColumns());
-                                setMode(FormMode.VIEW);
                                 setIsFormModified(false);
                                 if (readOnly) {
                                     setMode(FormMode.READ);
+                                } else {
+                                    updateMode();
                                 }
                             }
                         }, this));
@@ -191,6 +192,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 	@Override
 	public void onSaveClicked() {
 		try {
+            LogCleanEvent.fire(EditFormPresenter.this);
             if (canVersion && getView().getVersionFrom() == null) {
                 Dialog.warningMessage("Версия не сохранена", "Не указана дата начала актуальности");
                 return;
@@ -233,7 +235,6 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                 new AbstractCallback<AddRefBookRowVersionResult>() {
                                     @Override
                                     public void onSuccess(AddRefBookRowVersionResult result) {
-                                        LogCleanEvent.fire(EditFormPresenter.this);
                                         LogAddEvent.fire(EditFormPresenter.this, result.getUuid());
                                         setIsFormModified(false);
                                         Long newId = result.getNewIds() != null && !result.getNewIds().isEmpty() ? result.getNewIds().get(0) : null;
@@ -253,7 +254,6 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 
                 final RecordChanges recordChanges = fillRecordChanges(currentUniqueRecordId, map, action.getVersionFrom(), action.getVersionTo());
 
-                // TODO заменить, сделано для примера
                 if (currentRefBookId == 30) {
                     if (modifiedFields.containsKey("TYPE")){
                         if (map.get("TYPE").getReferenceValue().intValue() != 1 &&  map.get("PARENT_ID").getReferenceValue() == null){
@@ -278,7 +278,6 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                                 new AbstractCallback<SaveRefBookRowVersionResult>() {
                                                     @Override
                                                     public void onSuccess(SaveRefBookRowVersionResult result) {
-                                                        LogCleanEvent.fire(EditFormPresenter.this);
                                                         LogAddEvent.fire(EditFormPresenter.this, result.getUuid());
                                                         UpdateForm.fire(EditFormPresenter.this, !result.isException(), recordChanges);
                                                         if (result.isException()) {
@@ -299,7 +298,6 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                 new AbstractCallback<SaveRefBookRowVersionResult>() {
                                     @Override
                                     public void onSuccess(SaveRefBookRowVersionResult result) {
-                                        LogCleanEvent.fire(EditFormPresenter.this);
                                         LogAddEvent.fire(EditFormPresenter.this, result.getUuid());
                                         UpdateForm.fire(EditFormPresenter.this, !result.isException(), recordChanges);
                                         if (result.isException()) {
@@ -409,11 +407,6 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
     public void setMode(FormMode mode){
         this.mode = mode;
         getView().updateMode(mode);
-    }
-
-    @Override
-    public void setModeWithoutUpdate(FormMode mode) {
-        this.mode = mode;
     }
 
     private void updateMode() {

@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.configuration.server;
 
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
+import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -45,11 +47,12 @@ public class GetConfigurationHandler extends
         result.setModel(configurationService.getAllConfig(securityService.currentUserInfo()));
         // Разыменование подразделений
         Set<Integer> needIds = new HashSet<Integer>();
-        for (ConfigurationParam key : result.getModel().keySet()) {
-            for (Integer departmentId : result.getModel().get(key).keySet()) {
-                needIds.add(departmentId);
-            }
-        }
+        ConfigurationParamModel configurationParamModel = result.getModel();
+		for (Map.Entry<ConfigurationParam, Map<Integer, List<String>>> entry : configurationParamModel.entrySet()) {
+			if (entry.getValue() != null) {
+				needIds.addAll(entry.getValue().keySet());
+			}
+		}
         Map<Integer, String> dereferenceValue = new HashMap<Integer, String>();
         RefBookDataProvider provider = refBookFactory.getDataProvider(30L);
         for (Integer departmentId : needIds) {

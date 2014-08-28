@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Форма "Исполнитель и подписанты"
+ * Форма "Параметры печатной формы"
  */
 public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> implements SignersPresenter.MyView {
 

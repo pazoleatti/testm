@@ -14,6 +14,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
 import java.sql.*;
@@ -634,6 +636,14 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
         PagingResult<FormDataSearchResult> pagingResult = new PagingResult<FormDataSearchResult>(dataRows, count);
 
         return pagingResult;
+    }
+
+    @Override
+    public boolean isDataRowsCountChanged(long formId) {
+        String sql = "select sum(type) from data_row where form_data_id = :formId";
+        SqlParameterSource sqlParameters = new MapSqlParameterSource().addValue("formId", formId);
+        int difference = getNamedParameterJdbcTemplate().queryForInt(sql, sqlParameters);
+        return difference != 0;
     }
 
     /**

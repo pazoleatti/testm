@@ -7,6 +7,8 @@ import com.aplana.sbrf.taxaccounting.model.TaskParamModel;
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskJndiInfo;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.client.taskparams.TaskParamsWidget;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.GetTaskInfoResult;
+import com.aplana.sbrf.taxaccounting.web.widget.style.Tooltip;
+import com.aplana.sbrf.taxaccounting.web.widget.utils.TextUtils;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -17,6 +19,7 @@ import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -37,10 +40,13 @@ public class TaskView extends ViewWithUiHandlers<TaskUiHandlers>
     Button cancelButton;
 
     @UiField
-    com.aplana.gwt.client.TextBox taskName;
+    TextBox taskName;
 
     @UiField
-    com.aplana.gwt.client.TextBox taskSchedule;
+    TextBox taskSchedule;
+
+    @UiField
+    Image helpImage;
 
     @UiField(provided = true)
     ValueListBox<TaskJndiInfo> jndi;
@@ -59,6 +65,14 @@ public class TaskView extends ViewWithUiHandlers<TaskUiHandlers>
     private TaskParamsWidget paramsWidget;
 
     private List<TaskJndiInfo> jndiList;
+
+    private static final String CRON_HELP = "Расписание задается в в формате IBM CRON: <br>" +
+            "секунда минута час число месяц день недели <br>" +
+            "День недели или месяц не могут быть указаны одновременно. <br>"+
+            "Один из них может быть определен символом '?'. <br>" +
+            "Примеры: <br>" +
+            "0 10 * * * ? выполняется каждый час в 10 минут, т.е 0:10, 1:10 <br>" +
+            "0 0 18 ? SEP MON-FRI выполняется в 18:00 с понедельника по пятницу весь сентябрь";
 
     interface LinkStyle extends CssResource {
         String separator();
@@ -111,6 +125,11 @@ public class TaskView extends ViewWithUiHandlers<TaskUiHandlers>
         initWidget(uiBinder.createAndBindUi(this));
         paramsWidget.setWrapper(formPanel);
         paramsWidget.setLabelStyleName(styles.label());
+
+        Tooltip tooltip = new Tooltip();
+        tooltip.setTextHtml(TextUtils.generateTextBoxHTMLTitle(CRON_HELP));
+        //установка обработчиков для тестовой строк
+        tooltip.addHandlersFor(helpImage);
     }
 
     @UiHandler("createButton")

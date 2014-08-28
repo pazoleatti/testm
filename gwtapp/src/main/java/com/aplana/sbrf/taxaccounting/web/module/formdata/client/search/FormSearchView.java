@@ -20,9 +20,7 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.*;
-import com.google.gwt.view.client.AsyncDataProvider;
-import com.google.gwt.view.client.HasData;
-import com.google.gwt.view.client.Range;
+import com.google.gwt.view.client.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.PopupViewWithUiHandlers;
@@ -53,6 +51,8 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
             }
         }
     };
+
+    private SingleSelectionModel<FormDataSearchResult> selectionModel;
 
     @UiField
     DataGrid<FormDataSearchResult> searchResultTable;
@@ -91,6 +91,15 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
         searchResultTable.setPageSize(pager.getPageSize());
 
         dataProvider.addDataDisplay(searchResultTable);
+
+        selectionModel = new SingleSelectionModel<FormDataSearchResult>();
+        selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                FormDataSearchResult selRow = selectionModel.getSelectedObject();
+                getUiHandlers().onClickFoundItem(selRow.getRowIndex());
+            }
+        });
 
         TextColumn<FormDataSearchResult> counterColumn = new TextColumn<FormDataSearchResult>() {
             @Override
@@ -141,13 +150,7 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
 
         valueColumn.setCellStyleNames("linkCell");
 
-        valueColumn.setFieldUpdater(new FieldUpdater<FormDataSearchResult, String>() {
-            @Override
-            public void update(int index, FormDataSearchResult object, String value) {
-                getUiHandlers().onClickFoundItem(object.getRowIndex());
-            }
-        });
-
+        searchResultTable.setSelectionModel(selectionModel);
         searchResultTable.addColumn(counterColumn, "№");
         searchResultTable.setColumnWidth(counterColumn, 50, Style.Unit.PX);
         searchResultTable.addColumn(rowIndexColumn, "Строка");
@@ -169,7 +172,7 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
         if (!filterText.getText().isEmpty()){
             getUiHandlers().onRangeChange(0, pager.getPageSize());
         } else {
-            setTableData(0, new ArrayList<FormDataSearchResult>(), 0);
+            clearTableData();
         }
     }
 
@@ -179,6 +182,8 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
         if (KeyCodes.KEY_ENTER == event.getNativeEvent().getKeyCode()) {
             if (!filterText.getText().isEmpty()){
                 getUiHandlers().onRangeChange(0, pager.getPageSize());
+            } else {
+                clearTableData();
             }
         }
     }

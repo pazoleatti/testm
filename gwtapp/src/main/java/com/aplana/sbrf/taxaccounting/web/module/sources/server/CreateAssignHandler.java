@@ -45,23 +45,23 @@ public class CreateAssignHandler extends AbstractActionHandler<CreateAssignActio
             SourcePair sourcePair;
             if (action.getMode() == SourceMode.SOURCES) {
                 sourcePair = new SourcePair(right.getId(), action.getLeftObject().getId());
-                sourcePair.setSourceKind(right.getKind());
-                sourcePair.setSourceType(sourceService.getFormType(right.getTypeId()));
-                sourcePair.setDestinationKind(action.getLeftObject().getKind());
+                sourcePair.setSourceKind(right.getKind().getName());
+                sourcePair.setSourceType(sourceService.getFormType(right.getTypeId()).getName());
                 if (action.isDeclaration()) {
-                    sourcePair.setDestinationDeclarationType(sourceService.getDeclarationType(action.getLeftObject().getTypeId()));
+                    sourcePair.setDestinationType(sourceService.getDeclarationType(action.getLeftObject().getTypeId()).getName());
                 } else {
-                    sourcePair.setDestinationFormType(sourceService.getFormType(action.getLeftObject().getTypeId()));
+                    sourcePair.setDestinationKind(action.getLeftObject().getKind().getName());
+                    sourcePair.setDestinationType(sourceService.getFormType(action.getLeftObject().getTypeId()).getName());
                 }
             } else {
                 sourcePair = new SourcePair(action.getLeftObject().getId(), right.getId());
-                sourcePair.setSourceKind(action.getLeftObject().getKind());
-                sourcePair.setSourceType(sourceService.getFormType(action.getLeftObject().getTypeId()));
-                sourcePair.setDestinationKind(right.getKind());
+                sourcePair.setSourceKind(action.getLeftObject().getKind().getName());
+                sourcePair.setSourceType(sourceService.getFormType(action.getLeftObject().getTypeId()).getName());
                 if (action.isDeclaration()) {
-                    sourcePair.setDestinationDeclarationType(sourceService.getDeclarationType(right.getTypeId()));
+                    sourcePair.setDestinationType(sourceService.getDeclarationType(right.getTypeId()).getName());
                 } else {
-                    sourcePair.setDestinationFormType(sourceService.getFormType(right.getTypeId()));
+                    sourcePair.setDestinationKind(right.getKind().getName());
+                    sourcePair.setDestinationType(sourceService.getFormType(right.getTypeId()).getName());
                 }
             }
             sourcePairs.add(sourcePair);

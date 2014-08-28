@@ -32,7 +32,7 @@
 
     </ui:style>
 
-    <dw:ModalWindow iconUrl="resources/img/businessperson-16.png" title="Исполнитель и подписанты">
+    <dw:ModalWindow iconUrl="resources/img/businessperson-16.png" title="Параметры печатной формы">
         <g:VerticalPanel addStyleNames="aplana-ModalWindow-contentBackWhite">
             <g:cell>
                 <g:VerticalPanel addStyleNames="{style.content}">

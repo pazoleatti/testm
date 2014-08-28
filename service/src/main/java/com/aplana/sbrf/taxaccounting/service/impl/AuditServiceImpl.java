@@ -67,7 +67,12 @@ public class AuditServiceImpl implements AuditService {
                 String departmentName = departmentId == null ? "" : (departmentId == 0 ? departmentService.getDepartment(departmentId).getName() : departmentService.getParentsHierarchy(departmentId));
                 log.setFormDepartmentName(departmentName.substring(0, Math.min(departmentName.length(), 2000)));
                 log.setFormDepartmentId(departmentId);
-                if (departmentId != null && departmentId != 0) log.setDepartmentTBId(departmentService.getParentTB(departmentId).getId());
+                if (departmentId != null && departmentId != 0) {
+                    Department department = departmentService.getParentTB(departmentId);
+                    if (department != null) {
+                        log.setDepartmentTBId(department.getId());
+                    }
+                }
 
                 if (reportPeriodId == null)
                     log.setReportPeriodName(null);

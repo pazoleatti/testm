@@ -374,21 +374,21 @@ void logicCheck() {
         // 12. Проверка наличия суммы дохода в налоговом учете, для первичного документа, указанного для суммы дохода в бухгалтерском учёте
         // 13. Проверка значения суммы дохода в налоговом учете, для первичного документа, указанного для суммы дохода в бухгалтерском учёте
         if (row.ruble && row.docDate != null) {
-            date = row.docDate as Date
-            from = new GregorianCalendar()
-            from.setTime(date)
-            from.set(Calendar.YEAR, from.get(Calendar.YEAR) - 3)
+            def Date date = row.docDate
+            def Date from = new SimpleDateFormat('dd.MM.yyyy').parse('01.01.' + (Integer.valueOf(new SimpleDateFormat('yyyy').format(date)) - 3))
+            def reportPeriods = reportPeriodService.getReportPeriodsInRange(TaxType.INCOME, from, date)
+
+            isFind = false
             def sum = 0 // сумма 12-х граф
             def periods = []
-            def reportPeriods = reportPeriodService.getReportPeriodsByDate(TaxType.INCOME, from.getTime(), date)
-            isFind = false
+
             for (reportPeriod in reportPeriods) {
                 def findFormData = formDataService.find(formData.formType.id, formData.kind, formData.departmentId,
                         reportPeriod.id)
                 if (findFormData != null) {
                     for (findRow in formDataService.getDataRowHelper(findFormData).getAllCached()) {
                         // SBRFACCTAX-3531 исключать строку из той же самой формы не надо
-                        if (findRow.code == row.code && findRow.docNumber == row.docNumber
+                        if (findRow.getAlias() == null && findRow.code == row.code && findRow.docNumber == row.docNumber
                                 && findRow.docDate == row.docDate && findRow.taxAccountingRuble > 0) {
                             isFind = true
                             sum += findRow.taxAccountingRuble
@@ -397,13 +397,13 @@ void logicCheck() {
                     }
                 }
             }
-            if (!(sum > row.ruble)) {
-                rowWarning(logger, row, errorMsg + "Операция в налоговом учете имеет сумму, меньше чем указано " +
-                        "в бухгалтерском учете!" + (isFind ? " См. РНУ-7 в отчетных периодах: ${periods.join(", ")}." : ""))
-            }
             if (!isFind) {
                 rowWarning(logger, row, "Операция, указанная в строке " + row.getIndex() + ", в налоговом учете за " +
                         "последние 3 года не проходила!")
+            }
+            if (isFind && !(sum > row.ruble)) {
+                rowWarning(logger, row, errorMsg + "Операция в налоговом учете имеет сумму, меньше чем указано " +
+                        "в бухгалтерском учете! См. РНУ-7 в отчетных периодах: ${periods.join(", ")}.")
             }
         }
     }
@@ -595,7 +595,7 @@ void addData(def xml, int headRowCount) {
 }
 
 void importTransportData() {
-    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName, 12, 1)
     addTransportData(xml)
 }
 

@@ -32,6 +32,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * Класс, реализующий логику определения доступности пунктов меню навигации
@@ -52,6 +53,9 @@ public class GetMainMenuActionHandler extends
 
 	@Autowired
 	private SecurityService securityService;
+
+    @Autowired
+    Properties manifestProperties;
 
 	@Override
 	public GetMainMenuResult execute(GetMainMenuAction action,
@@ -105,8 +109,10 @@ public class GetMainMenuActionHandler extends
                 if (currentUser.hasRole(TARole.ROLE_CONTROL)
                         || currentUser.hasRole(TARole.ROLE_CONTROL_NS)
                         || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
-                    menu.getSubMenu().add(new MenuItem("Настройки подразделений", NUMBER_SIGN
-                            + DepartmentConfigTokens.departamentConfig + ";" + TYPE + "=" + menu.getMeta()));
+                    if (!TaxType.PROPERTY.toString().equals(menu.getMeta())) { // Можно вернуть после реализации "Налог на имущество"
+                        menu.getSubMenu().add(new MenuItem("Настройки подразделений", NUMBER_SIGN
+                                + DepartmentConfigTokens.departamentConfig + ";" + TYPE + "=" + menu.getMeta()));
+                    }
                 }
 
                 // настройки форм и подразделений, назначение источников-приемников
@@ -132,6 +138,14 @@ public class GetMainMenuActionHandler extends
                                             + TYPE + "=" + menu.getMeta()));
                 }
             }
+
+            if (currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+                MenuItem gar = new MenuItem("Гарантии", "", "Гарантии");
+                taxMenu.getSubMenu().add(gar);
+                String url = manifestProperties.getProperty("Url-Guarantee", "#");
+                gar.getSubMenu().add(new MenuItem("Ввод гарантий", url));
+            }
+
             MenuItem menuItem = new MenuItem("Сервис", "", "Сервис");
             menuItem.getSubMenu().add(new MenuItem("Загрузить ТФ", NUMBER_SIGN + UploadTransportDataTokens.uploadTransportData));
             taxMenu.getSubMenu().add(menuItem);

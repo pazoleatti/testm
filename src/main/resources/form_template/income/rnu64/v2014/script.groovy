@@ -151,7 +151,8 @@ void calc() {
 }
 
 def getDataRowsPrev() {
-    if (!isBalancePeriod() && formData.kind == FormDataKind.PRIMARY) {
+    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+    if (!isBalancePeriod() && formData.kind == FormDataKind.PRIMARY && reportPeriod.order != 1) {
         def formDataPrev = formDataService.getFormDataPrev(formData, formData.departmentId)
         formDataPrev = (formDataPrev?.state == WorkflowState.ACCEPTED ? formDataPrev : null)
         if (formDataPrev != null) {
@@ -367,7 +368,7 @@ void prevPeriodCheck() {
 }
 
 void importTransportData() {
-    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName, 5, 1)
     addTransportData(xml)
 
     def dataRows = formDataService.getDataRowHelper(formData)?.allCached

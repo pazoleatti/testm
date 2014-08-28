@@ -6,12 +6,12 @@
 		http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.1.xsd">
 
     <jee:remote-slsb id="messageService"
-                     jndi-name="ejblocal:${buildName}/migration-ejb.jar/MigrationBean#com.aplana.sbrf.taxaccounting.service.MessageServiceLocal"
+                     jndi-name="ejblocal:${releaseName}/migration-ejb.jar/MigrationBean#com.aplana.sbrf.taxaccounting.service.MessageServiceLocal"
                      business-interface="com.aplana.sbrf.taxaccounting.service.MessageService"/>
 
     <jee:remote-slsb
             id="taskManager"
-            jndi-name="ejblocal:${buildName}/scheduler-core.jar/TaskManagerBean#com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManagerLocal"
+            jndi-name="ejblocal:${releaseName}/scheduler-core.jar/TaskManagerBean#com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManagerLocal"
             business-interface="com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManager"
             lookup-home-on-startup="true"
             />

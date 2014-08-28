@@ -39,6 +39,8 @@ public interface TemplateChangesDao {
 
     /**
      * Получает список изменений макета НФ.
+     * Не использовать для получения изменений для удаления, т.к. все версии шаблонов могут быть на тот момент уже все удалены.
+     * Пользоваться {@link #getByFormTemplateIds(java.util.List, com.aplana.sbrf.taxaccounting.model.VersionHistorySearchOrdering, boolean)}
      *
      * @param ftTypeId     идентификатор макета НФ
      * @param ordering     столбец, по которому сортировать
@@ -46,6 +48,16 @@ public interface TemplateChangesDao {
      * @return список изменений
      */
     List<TemplateChanges> getByFormTypeIds(int ftTypeId, VersionHistorySearchOrdering ordering, boolean isAscSorting);
+
+    /**
+     * Получает список изменений макета НФ по версиям макета(возможно уже удаленным).
+     * @param ftIds
+     * @param ordering
+     * @param isAscSorting
+     * @return
+     */
+    List<TemplateChanges> getByFormTemplateIds(Collection<Integer> ftIds, VersionHistorySearchOrdering ordering, boolean isAscSorting);
+    List<Integer> getIdsByTemplateIds(Collection<Integer> ftIds, Collection<Integer> dtIds, VersionHistorySearchOrdering ordering, boolean isAscSorting);
 
     /**
      * Получает список изменений макета деклараций.

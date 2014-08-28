@@ -11,7 +11,7 @@ import java.util.List;
 public class BookerStatementsFilter implements Serializable {
     private static final long serialVersionUID = -756162324197L;
 
-    private List<Long> accountPeriodIds;
+    private List<Integer> accountPeriodIds;
     private List<Integer> departmentIds;
     private BookerStatementsType bookerStatementsType;
 
@@ -26,11 +26,11 @@ public class BookerStatementsFilter implements Serializable {
     /*true, если сортируем по возрастанию, false - по убыванию*/
     private boolean ascSorting;
 
-    public List<Long> getAccountPeriodIds() {
+    public List<Integer> getAccountPeriodIds() {
         return accountPeriodIds;
     }
 
-    public void setAccountPeriodIds(List<Long> accountPeriodIds) {
+    public void setAccountPeriodIds(List<Integer> accountPeriodIds) {
         this.accountPeriodIds = accountPeriodIds;
     }
 

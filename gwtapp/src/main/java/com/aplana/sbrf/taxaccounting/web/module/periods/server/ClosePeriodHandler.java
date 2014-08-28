@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
-@PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 @Service
 public class ClosePeriodHandler extends AbstractActionHandler<ClosePeriodAction, ClosePeriodResult> {
 
@@ -39,7 +39,7 @@ public class ClosePeriodHandler extends AbstractActionHandler<ClosePeriodAction,
 		List<LogEntry> logs = new ArrayList<LogEntry>();
 		reportPeriodService.close(action.getTaxType(), action.getReportPeriodId(), action.getDepartmentId(), action.getCorrectionDate(), logs, securityService.currentUserInfo());
 		ClosePeriodResult result = new ClosePeriodResult();
-        if (logs.get(0).getLevel().equals(LogLevel.WARNING)) {
+        if (!logs.isEmpty() && logs.get(0).getLevel().equals(LogLevel.WARNING)) {
             result.setErrorBeforeClose(true);
         }
         result.setUuid(logEntryService.save(logs));

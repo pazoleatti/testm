@@ -24,13 +24,16 @@ import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSq
 @Repository
 public class AuditDaoImpl extends AbstractDao implements AuditDao {
 
+    private static final int FILTER_LENGTH = 1000;
+
 	@Override
 	public PagingResult<LogSearchResultItem> getLogs(LogSystemFilter filter) {
         return getLogsBusiness(filter, null, null);
     }
 
     @Override
-    public PagingResult<LogSearchResultItem> getLogsBusiness(LogSystemFilter filter, List<Integer> departments, List<Integer> BADepartmentIds) {
+    public PagingResult<LogSearchResultItem> getLogsBusiness(LogSystemFilter logSystemFilter, List<Integer> departments, List<Integer> BADepartmentIds) {
+        LogSystemFilter filter = cutOffLogSystemFilter(logSystemFilter);
         PreparedStatementData ps = new PreparedStatementData();
         ps.appendQuery("select ordDat.* from (select dat.*, rownum as rn from ( select ");
         ps.appendQuery("ls.id, ");
@@ -70,21 +73,21 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         }
 
         ps.appendQuery(orderByClause(filter.getSearchOrdering(), filter.isAscSorting()));
-		ps.appendQuery(") dat) ordDat");
-        if(filter.getCountOfRecords() != 0){
-            ps.appendQuery(" where ordDat.rn between ? and ?"+
+        ps.appendQuery(") dat) ordDat");
+        if (filter.getCountOfRecords() != 0) {
+            ps.appendQuery(" where ordDat.rn between ? and ?" +
                     " order by ordDat.rn");
             ps.addParam(filter.getStartIndex() + 1);
             ps.addParam(filter.getStartIndex() + filter.getCountOfRecords());
-        } else{
+        } else {
             ps.appendQuery(" order by ordDat.rn");
         }
         List<LogSearchResultItem> records = getJdbcTemplate().query(
                 ps.getQuery().toString(),
                 ps.getParams().toArray(),
                 new AuditRowMapper());
-		return new PagingResult<LogSearchResultItem>(records, getCount(filter, departments, BADepartmentIds));
-	}
+        return new PagingResult<LogSearchResultItem>(records, getCount(filter, departments, BADepartmentIds));
+    }
 
 	@Override
 	public void add(LogSystem logSystem) {
@@ -144,7 +147,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
     @Override
     public Date lastArchiveDate() {
         try {
-            return getJdbcTemplate().queryForObject("select log_date from log_system where event_id = 601", Date.class);
+            return getJdbcTemplate().queryForObject("select max(log_date) from log_system where event_id = 601", Date.class);
         } catch (EmptyResultDataAccessException e){
             logger.warn("Не найдено записей об архивации.", e);
             return null;
@@ -179,6 +182,12 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
             if (filter.getAuditFieldList().contains(AuditFieldList.ALL.getId())
                     || filter.getAuditFieldList().contains(AuditFieldList.DECLARATION_TYPE.getId()) ) {
                 ps.appendQuery(String.format(" OR lower(%sdeclaration_type_name) LIKE lower(?)", prefix));
+                ps.addParam("%"+filter.getFilter()+"%");
+            }
+
+            if (filter.getAuditFieldList().contains(AuditFieldList.ALL.getId())
+                    || filter.getAuditFieldList().contains(AuditFieldList.TYPE.getId()) ) {
+                ps.appendQuery(String.format(" OR lower(case when ls.form_type_name is not null then '" + AuditFormType.FORM_TYPE_TAX.getName() + "' when ls.declaration_type_name is not null then '" + AuditFormType.FORM_TYPE_DECLARATION.getName() + "' else '' end) LIKE lower(?)"));
                 ps.addParam("%"+filter.getFilter()+"%");
             }
 
@@ -351,5 +360,19 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                 ps.getQuery().toString(),
                 ps.getParams().toArray()
         );
+    }
+
+    /**
+     * Ограничить строку фильтра, длина которого больше 1000 символов.
+     * @param logSystemFilter фильтр
+     * @return фильтр с ограниченным строковым фильтром
+     */
+    private LogSystemFilter cutOffLogSystemFilter(LogSystemFilter logSystemFilter) {
+        String filter = logSystemFilter.getFilter();
+        if (filter != null && filter.length() > FILTER_LENGTH) {
+            String substring = filter.substring(0, FILTER_LENGTH);
+            logSystemFilter.setFilter(substring);
+        }
+        return logSystemFilter;
     }
 }

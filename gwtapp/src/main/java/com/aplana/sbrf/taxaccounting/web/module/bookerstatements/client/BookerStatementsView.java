@@ -122,15 +122,21 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
     }
 
     @Override
+    public void setAccountPeriodIds(List<Integer> accountPeriodIds) {
+        this.accountPeriodIds.setValue(accountPeriodIds);
+    }
+
+    @Override
     public List<Integer> getDepartments() {
         return departmentIds.getValue();
     }
 
     @Override
-    public List<Long> getAccountPeriods() {
-        List<Long> list = new ArrayList<Long>(accountPeriodIds.getValue().size());
-        for (Integer integer : accountPeriodIds.getValue())
-            list.add(integer.longValue());
+    public List<Integer> getAccountPeriods() {
+        List<Integer> list = new ArrayList<Integer>(accountPeriodIds.getValue().size());
+        for (Integer periodId : accountPeriodIds.getValue()) {
+            list.add(periodId);
+        }
         return list;
     }
 

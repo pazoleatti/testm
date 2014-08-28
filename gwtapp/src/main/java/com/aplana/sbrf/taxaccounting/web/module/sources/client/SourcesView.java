@@ -17,13 +17,13 @@ import com.aplana.sbrf.taxaccounting.web.widget.style.LabelSeparator;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.aplana.sbrf.taxaccounting.web.widget.style.table.CheckBoxHeader;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.WidgetUtils;
-import com.google.gwt.cell.client.AbstractCell;
-import com.google.gwt.cell.client.CheckboxCell;
+import com.google.gwt.cell.client.*;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -41,10 +41,7 @@ import com.google.gwt.view.client.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static com.aplana.sbrf.taxaccounting.web.module.sources.client.SourcesView.Table.LEFT;
 import static com.google.gwt.view.client.DefaultSelectionEventManager.createCustomManager;
@@ -71,7 +68,12 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
 
     interface Binder extends UiBinder<Widget, SourcesView> {
     }
+    private static final SafeHtml INPUT_CHECKED = SafeHtmlUtils.fromSafeConstant("<input type=\"checkbox\" tabindex=\"-1\" checked disabled/>");
 
+    /**
+     * An html string representation of an unchecked input box.
+     */
+    private static final SafeHtml INPUT_UNCHECKED = SafeHtmlUtils.fromSafeConstant("<input type=\"checkbox\" tabindex=\"-1\" checked disabled/>");
     /**
      * Состояние формы
      * 1. Формы Приемник->Источники
@@ -153,8 +155,8 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
     private TextColumn<DepartmentAssign> leftNameTypeColumn;
 
     private Column<DepartmentAssign, Boolean> rightCheckBoxColumn;
-    private TextColumn<DepartmentAssign> rightFormKindColumn;
-    private TextColumn<DepartmentAssign> rightNameTypeColumn;
+    private Column<DepartmentAssign, DepartmentAssign> rightFormKindColumn;
+    private Column<DepartmentAssign, DepartmentAssign> rightNameTypeColumn;
 
     private Column<CurrentAssign, Boolean> downCheckBoxColumn;
     private IdentityColumn<CurrentAssign> downIndexColumn;
@@ -194,8 +196,18 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
     public SourcesView(final Binder uiBinder) {
         ValueBoxRenderer abstractRenderer = new ValueBoxRenderer();
         appointmentTypePicker = new ValueListBox<AppointmentType>(abstractRenderer);
-        periodFrom = new ValueListBox<PeriodInfo>(abstractRenderer);
-        periodTo = new ValueListBox<PeriodInfo>(abstractRenderer);
+        periodFrom = new ValueListBox<PeriodInfo>(abstractRenderer, new ProvidesKey<PeriodInfo>() {
+            @Override
+            public Object getKey(PeriodInfo item) {
+                return item != null ? item.getCode() : null;
+            }
+        });
+        periodTo = new ValueListBox<PeriodInfo>(abstractRenderer, new ProvidesKey<PeriodInfo>() {
+            @Override
+            public Object getKey(PeriodInfo item) {
+                return item != null ? item.getCode() : null;
+            }
+        });
 
         initWidget(uiBinder.createAndBindUi(this));
 
@@ -288,22 +300,79 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
      * Настройка правой таблицы
      */
     private void setupRightTables() {
-        rightSM = new MultiSelectionModel<DepartmentAssign>(providesKey);
-
-        rightFormKindColumn = new TextColumn<DepartmentAssign>() {
+        rightSM = new MultiSelectionModel<DepartmentAssign>(providesKey){
             @Override
-            public String getValue(DepartmentAssign object) {
-                return object.getKind() != null ? object.getKind().getName() : "";
+            public Set<DepartmentAssign> getSelectedSet() {
+                Set<DepartmentAssign> set = super.getSelectedSet();
+                Iterator<DepartmentAssign> it = set.iterator();
+                while (it.hasNext()) {
+                    DepartmentAssign assign = it.next();
+                    if (!assign.isEnabled())
+                        it.remove();
+                }
+                return set;
             }
         };
 
-        rightNameTypeColumn = new TextColumn<DepartmentAssign>() {
+        rightFormKindColumn = new Column<DepartmentAssign, DepartmentAssign>(new AbstractCell<DepartmentAssign>(){
             @Override
-            public String getValue(DepartmentAssign object) {
-                return object.getTypeName();
+            public void render(Context context, DepartmentAssign value, SafeHtmlBuilder sb) {
+                if (value != null) {
+                    String text = value.getKind() != null ? value.getKind().getName() : "";
+                    if (value.isEnabled()) {
+                        sb.appendHtmlConstant(text);
+                    } else {
+                        sb.appendHtmlConstant("<span class=\"gwt-TextBox-readonly\">" + text + "</span>");
+                    }
+                }
+            }
+        }){
+            @Override
+            public DepartmentAssign getValue(DepartmentAssign object) {
+                return object;
             }
         };
-        rightCheckBoxColumn = new Column<DepartmentAssign, Boolean>(new CheckboxCell(true, false)) {
+
+        rightNameTypeColumn =  new Column<DepartmentAssign, DepartmentAssign>(new AbstractCell<DepartmentAssign>(){
+            @Override
+            public void render(Context context, DepartmentAssign value, SafeHtmlBuilder sb) {
+                if (value != null) {
+                    String text = value.getTypeName();
+                    if (value.isEnabled()) {
+                        sb.appendHtmlConstant(text);
+                    } else {
+                        sb.appendHtmlConstant("<span class=\"gwt-TextBox-readonly\">" + text + "</span>");
+                    }
+                }
+            }
+        }){
+            @Override
+            public DepartmentAssign getValue(DepartmentAssign object) {
+                return object;
+            }
+        };
+        rightCheckBoxColumn = new Column<DepartmentAssign, Boolean>(new CheckboxCell(true, false){
+            @Override
+            public void render(Context context, Boolean value, SafeHtmlBuilder sb) {
+                // Get the view data.
+                DepartmentAssign key = (DepartmentAssign)context.getKey();
+                Boolean viewData = getViewData(key);
+                if (viewData != null && viewData.equals(value)) {
+                    clearViewData(key);
+                    viewData = null;
+                }
+                String checked = "";
+                String enabled = "";
+                if (key.isChecked() || value != null && ((viewData != null) ? viewData : value)) {
+                    checked = "checked ";
+                }
+                if (!key.isEnabled()) {
+                    enabled = "disabled ";
+                }
+                sb.appendHtmlConstant("<input type=\"checkbox\" tabindex=\"-1\" " + checked + enabled +"/>");
+
+            }
+        }) {
             @Override
             public Boolean getValue(DepartmentAssign object) {
                 return (object == null || object.getId() == null) ? null : rightSM.isSelected(object);
@@ -339,6 +408,10 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
                     }
 
                     public DefaultSelectionEventManager.SelectAction translateSelectionEvent(CellPreviewEvent<DepartmentAssign> event) {
+                        if (event.getValue() != null && event.getValue().isChecked())
+                            return DefaultSelectionEventManager.SelectAction.SELECT;
+                        else if (event.getValue() != null && !event.getValue().isEnabled())
+                            return DefaultSelectionEventManager.SelectAction.IGNORE;
                         return DefaultSelectionEventManager.SelectAction.TOGGLE;
                     }
                 }));
@@ -359,7 +432,9 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         downSM = new MultiSelectionModel<CurrentAssign>(new ProvidesKey<CurrentAssign>() {
             @Override
             public Object getKey(CurrentAssign item) {
-                return item.getId();
+                return item.getId() + "_"
+                        + item.getStartDateAssign().getTime() + "_"
+                        + (item.getEndDateAssign() != null ? item.getEndDateAssign().getTime() : "null");
             }
         });
 
@@ -500,6 +575,9 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         ValueChangeHandler periodsValueHandler = new ValueChangeHandler() {
             @Override
             public void onValueChange(ValueChangeEvent event) {
+                if (periodTo.getValue() == null) {
+                    yearTo.setValue(null);
+                }
                 boolean isPeriodCorrect = SourcesUtils.isCorrectPeriod(getPeriodInterval());
                 //Фикс какой то странной ошибки - если таблицы уже активны и попытаться сделать их активными снова, то гвт падает
                 if (leftDepPicker.isEnabled() && !isPeriodCorrect) {
@@ -570,18 +648,20 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         appointmentTypePicker.setAcceptableValues(types);
         WidgetUtils.setupOptionTitle(appointmentTypePicker);
 
+        periodFrom.setValue(periods.get(0));
         periodFrom.setAcceptableValues(periods);
         WidgetUtils.setupOptionTitle(periodFrom);
-        periodFrom.setValue(periods.get(0));
         SourcesUtils.setupPeriodTitle(periodFrom);
 
+        //List<PeriodInfo> periodsTo = new ArrayList<PeriodInfo>(periods);
+        //periodsTo.add(null);
+        periodTo.setValue(null);
         periodTo.setAcceptableValues(periods);
         WidgetUtils.setupOptionTitle(periodTo);
-        periodTo.setValue(periods.get(periods.size() - 1));
         SourcesUtils.setupPeriodTitle(periodTo);
 
         yearFrom.setValue(year);
-        yearTo.setValue(year);
+        yearTo.setValue(null);
 
         assignButton.setEnabled(false);
         cancelButton.setEnabled(false);
@@ -664,32 +744,44 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
     @Override
     public void setAvailableFormRight(List<DepartmentAssign> departmentFormTypes) {
         clearRightTable();
-        rightTable.setRowData(departmentFormTypes);
+        rightTable.setRowData(0, departmentFormTypes);
+        rightTable.setVisibleRange(new Range(0, departmentFormTypes.size()));
+        for(DepartmentAssign departmentAssign: departmentFormTypes) {
+            if (departmentAssign.isChecked())
+                rightSM.setSelected(departmentAssign, true);
+        }
     }
 
     @Override
     public void setAvailableFormsLeft(List<DepartmentAssign> departmentFormTypes) {
         clearLeftTable();
-        leftTable.setRowData(departmentFormTypes);
+        leftTable.setRowData(0, departmentFormTypes);
+        leftTable.setVisibleRange(new Range(0, departmentFormTypes.size()));
     }
 
     @Override
     public void setAvailableDecsRight(List<DepartmentAssign> departmentDeclarationTypes) {
         clearRightTable();
         rightTable.setRowData(departmentDeclarationTypes);
+        rightTable.setVisibleRange(new Range(0, departmentDeclarationTypes.size()));
+        for(DepartmentAssign departmentAssign: departmentDeclarationTypes) {
+            if (departmentAssign.isChecked())
+                rightSM.setSelected(departmentAssign, true);
+        }
     }
 
     @Override
     public void setAvailableDecsLeft(List<DepartmentAssign> departmentDeclarationTypes) {
         clearLeftTable();
         leftTable.setRowData(departmentDeclarationTypes);
+        leftTable.setVisibleRange(new Range(0, departmentDeclarationTypes.size()));
     }
 
     @Override
     public void setCurrentSources(List<CurrentAssign> departmentFormTypes) {
         clearDownTable();
-        downTable.setRowData(departmentFormTypes);
-        loadRightData();
+        downTable.setRowData(0, departmentFormTypes);
+        downTable.setVisibleRange(new Range(0, departmentFormTypes.size()));
     }
 
     @Override
@@ -849,6 +941,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
     @UiHandler("leftDepPicker")
     public void leftChangeDep(ValueChangeEvent<List<Integer>> event) {
         loadLeftData();
+        loadRightData();
     }
 
     public void loadLeftData() {

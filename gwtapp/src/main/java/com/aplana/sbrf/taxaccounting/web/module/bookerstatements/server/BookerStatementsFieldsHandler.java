@@ -1,8 +1,11 @@
 package com.aplana.sbrf.taxaccounting.web.module.bookerstatements.server;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.TARole;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.shared.BookerStatementsFieldsAction;
 import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.shared.BookerStatementsFieldsResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -31,9 +34,13 @@ public class BookerStatementsFieldsHandler extends AbstractActionHandler<BookerS
     @Autowired
     FormDataAccessService dataAccessService;
 
+    @Autowired
+    private SecurityService securityService;
+
     @Override
     public BookerStatementsFieldsResult execute(BookerStatementsFieldsAction action, ExecutionContext executionContext) throws ActionException {
         BookerStatementsFieldsResult result = new BookerStatementsFieldsResult();
+        TAUser currUser = securityService.currentUserInfo().getUser();
 
         // TODO дб так, но не работает
                /* Set<Integer> availableDepartmentSet = new HashSet<Integer>();
@@ -52,10 +59,9 @@ public class BookerStatementsFieldsHandler extends AbstractActionHandler<BookerS
                 }
                 */
         Set<Integer> availableDepartmentSet = new HashSet<Integer>();
-        result.setDepartments(departmentService.listAll());
-        for (Department dep : result.getDepartments()) {
-            availableDepartmentSet.add(dep.getId());
-        }
+        availableDepartmentSet.addAll(departmentService.getBADepartmentIds(currUser));
+        // Необходимые для дерева подразделения
+        result.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(availableDepartmentSet).values()));
         result.setDepartmentIds(availableDepartmentSet);
         result.setYear(Calendar.getInstance().get(Calendar.YEAR));
 

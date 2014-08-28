@@ -339,11 +339,13 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
         action.setPeriodsInterval(getView().getPeriodInterval());
         action.setCurrentAssigns(currentAssigns);
         action.setDepartmentAssign(departmentAssign);
+        action.setTaxType(getTaxType());
         dispatcher.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<DeleteCurrentAssignsResult>() {
                     @Override
                     public void onSuccess(DeleteCurrentAssignsResult result) {
                         getCurrentAssigns(departmentAssign);
+                        getView().loadRightData();
                         LogCleanEvent.fire(SourcesPresenter.this);
                         LogAddEvent.fire(SourcesPresenter.this, result.getUuid());
                     }
@@ -397,6 +399,7 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
                         @Override
                         public void onSuccess(CreateAssignResult result) {
                             getCurrentAssigns(leftObject);
+                            getView().loadRightData();
                             LogCleanEvent.fire(SourcesPresenter.this);
                             LogAddEvent.fire(SourcesPresenter.this, result.getUuid());
                         }
@@ -421,6 +424,7 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
                         @Override
                         public void onSuccess(UpdateCurrentAssignsResult result) {
                             getCurrentAssigns(departmentAssign);
+                            getView().loadRightData();
                             LogCleanEvent.fire(SourcesPresenter.this);
                             LogAddEvent.fire(SourcesPresenter.this, result.getUuid());
                         }

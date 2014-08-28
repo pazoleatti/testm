@@ -7,8 +7,8 @@ package com.aplana.sbrf.taxaccounting.model;
  */
 public enum AuditFormType {
 
-    FORM_TYPE_TAX(1, "Налоговые формы"),
-    FORM_TYPE_DECLARATION(2, "Декларации");
+    FORM_TYPE_TAX(1, "Налоговая форма"),
+    FORM_TYPE_DECLARATION(2, "Декларация");
 
     private int id;
     private String name;

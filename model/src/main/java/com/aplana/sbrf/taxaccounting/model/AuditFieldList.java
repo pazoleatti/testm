@@ -10,6 +10,7 @@ public enum AuditFieldList {
     ALL(1, "Все поля"),
     FORM_TYPE(2, "Вид налоговой формы"),
     DECLARATION_TYPE(3, "Вид декларации"),
+    TYPE(12, "Тип формы"),
     PERIOD(4, "Период"),
     DEPARTMENT(5, "Подразделение"),
     USER(6, "Пользователь"),

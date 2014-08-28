@@ -335,14 +335,15 @@ public interface PeriodService {
      * Редактировать корректирующий период
      * @param reportPeriodId идентификатор отчетного период
      * @param newReportPeriodId новый идентификатор отчетного период
-     * @param departmentId идентификатор подразделения
+     * @param oldDepartmentId старый идентификатор подразделения
+     * @param newDepartmentId новый идентификатор подразделения
      * @param taxType тип налога
      * @param correctionDate дата корректировки
      * @param newCorrectionDate новая дата корректировки
      * @param user пользователь, который выполняет действие
      * @param logs логер, при необходимости
      */
-    void editCorrectionPeriod(int reportPeriodId, int newReportPeriodId, long departmentId, TaxType taxType,
+    void editCorrectionPeriod(int reportPeriodId, int newReportPeriodId, long oldDepartmentId, long newDepartmentId, TaxType taxType,
                                      Date correctionDate, Date newCorrectionDate, TAUserInfo user, List<LogEntry> logs);
 
     List<DepartmentReportPeriod> getDRPByDepartmentIds(List<TaxType> taxTypes, List<Long> departmentIds);

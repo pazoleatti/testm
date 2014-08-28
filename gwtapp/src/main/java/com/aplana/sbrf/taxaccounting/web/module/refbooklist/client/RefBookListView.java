@@ -57,10 +57,10 @@ public class RefBookListView extends AbstractRefBookListView implements RefBookL
             }
         };
         nameColumn.setSortable(true);
-        sortHandler.setComparator(nameColumn, new ComparatorWithNull<TableModel, String>() {
+        sortHandler.setComparator(nameColumn, new ComparatorWithNull<TableModel, Integer>() {
             @Override
             public int compare(TableModel o1, TableModel o2) {
-                return compareWithNull(o1.getName(), o2.getName());
+                return compareWithNull(o1.getRowNumber(), o2.getRowNumber());
             }
         });
 
