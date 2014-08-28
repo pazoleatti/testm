@@ -6,5 +6,5 @@ package com.aplana.gwt.client;
  * @author aivanov
  */
 public interface ModalWindowResizeListener {
-    public void onResized(Integer width, Integer height);
+    void onResized(Integer width, Integer height);
 }

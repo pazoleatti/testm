@@ -76,7 +76,7 @@ public class XmlMigrationGenerator {
         Element exemplar = getExemplarElement(ex, document);
         root.appendChild(exemplar);
 
-        exemplar.appendChild(getTableElement(ex, document, rnuRows));
+        exemplar.appendChild(getTableElement(document, rnuRows));
         return document;
     }
 
@@ -187,7 +187,7 @@ public class XmlMigrationGenerator {
         return element;
     }
 
-    private Element getTableElement(Exemplar exemplar, Document doc, List<? extends AbstractRnuRow> rnuRows) {
+    private Element getTableElement(Document doc, List<? extends AbstractRnuRow> rnuRows) {
         Element table = doc.createElement("table");
 
         Element total = doc.createElement("total");

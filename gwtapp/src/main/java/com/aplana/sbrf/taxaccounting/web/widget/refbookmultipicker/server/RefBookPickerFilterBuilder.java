@@ -2,8 +2,6 @@ package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.server;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;

@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.bookerstatements.shared;
 
 import com.aplana.sbrf.taxaccounting.model.BookerStatementsSearchResultItem;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookDataRow;
 import com.gwtplatform.dispatch.shared.Result;
 
 import java.util.List;

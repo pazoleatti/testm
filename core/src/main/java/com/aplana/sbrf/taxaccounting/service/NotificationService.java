@@ -69,5 +69,5 @@ public interface NotificationService {
      * Удалить оповещения для отчетного периода
      * @param reportPeriodId отчетный период
      */
-    public void deleteByReportPeriod(int reportPeriodId);
+    void deleteByReportPeriod(int reportPeriodId);
 }

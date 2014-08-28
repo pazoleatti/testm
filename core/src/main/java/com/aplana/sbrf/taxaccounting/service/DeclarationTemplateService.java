@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 
 import javax.validation.constraints.NotNull;
 import java.io.InputStream;

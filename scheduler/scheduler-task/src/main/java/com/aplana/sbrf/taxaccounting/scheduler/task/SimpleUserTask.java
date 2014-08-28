@@ -7,7 +7,6 @@ import com.aplana.sbrf.taxaccounting.service.PropertyLoader;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskParam;
-import com.aplana.sbrf.taxaccounting.scheduler.api.exception.InvalidTaskParamException;
 import com.aplana.sbrf.taxaccounting.scheduler.api.exception.TaskExecutionException;
 import com.aplana.sbrf.taxaccounting.scheduler.api.task.UserTask;
 import com.aplana.sbrf.taxaccounting.scheduler.api.task.UserTaskLocal;
@@ -17,7 +16,6 @@ import javax.ejb.Local;
 import javax.ejb.Remote;
 import javax.ejb.Stateless;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 

@@ -6,9 +6,7 @@ import java.util.List;
 import com.aplana.gwt.client.ModalWindow;
 import com.aplana.gwt.client.modal.CanHide;
 import com.aplana.gwt.client.modal.OnHideHandler;
-import com.google.gwt.editor.client.IsEditor;
 import com.google.gwt.editor.client.LeafValueEditor;
-import com.google.gwt.editor.client.adapters.TakesValueEditor;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.HasEnabled;
@@ -107,7 +105,7 @@ public interface RefBookPicker extends HasValue<List<Long>>, LeafValueEditor<Lis
      */
     void setOnHideHandler(OnHideHandler<CanHide> hideHandler);
 
-    public boolean isVisible();
+    boolean isVisible();
 
-    public void setVisible(boolean visible);
+    void setVisible(boolean visible);
 }

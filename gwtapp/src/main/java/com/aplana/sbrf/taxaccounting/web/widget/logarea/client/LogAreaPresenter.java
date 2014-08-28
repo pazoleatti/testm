@@ -41,7 +41,7 @@ public class LogAreaPresenter extends
         }
     };
 
-    public static interface MyView extends View, HasUiHandlers<LogAreaUiHandlers> {
+    public interface MyView extends View, HasUiHandlers<LogAreaUiHandlers> {
         LogEntriesView getLogEntriesView();
 
         void setLogEntriesCount(Map<LogLevel, Integer> map);

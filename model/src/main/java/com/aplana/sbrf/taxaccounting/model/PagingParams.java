@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.model;
 
-import javax.validation.constraints.Min;
 import java.io.Serializable;
 
 /**

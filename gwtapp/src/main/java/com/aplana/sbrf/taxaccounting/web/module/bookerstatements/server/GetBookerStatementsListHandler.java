@@ -1,8 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.bookerstatements.server;
 
-import com.aplana.sbrf.taxaccounting.model.BookerStatementsFilter;
 import com.aplana.sbrf.taxaccounting.model.BookerStatementsSearchResultItem;
-import com.aplana.sbrf.taxaccounting.model.FormDataSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.service.BookerStatementsService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;

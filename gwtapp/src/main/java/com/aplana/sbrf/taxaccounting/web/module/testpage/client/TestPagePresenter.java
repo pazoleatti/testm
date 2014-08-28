@@ -18,10 +18,6 @@ import com.gwtplatform.mvp.client.proxy.Place;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
-import java.util.ArrayList;
-import java.util.List;
-
-
 public class TestPagePresenter extends Presenter<TestPagePresenter.MyView,
         TestPagePresenter.MyProxy> implements TestPageUiHandlers {
     @ProxyCodeSplit

@@ -12,7 +12,7 @@ public class FormTemplateMainEvent extends GwtEvent<FormTemplateMainEvent.MyHand
 
     private TaxType taxType;
 
-    public static interface MyHandler extends EventHandler {
+    public interface MyHandler extends EventHandler {
         void onSetData(FormTemplateMainEvent event);
     }
 

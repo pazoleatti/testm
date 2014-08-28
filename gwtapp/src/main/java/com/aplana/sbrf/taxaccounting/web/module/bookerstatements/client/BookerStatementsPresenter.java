@@ -121,11 +121,6 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
 
     @Override
     public void onSearch() {
-        BookerStatementsFilter filter = new BookerStatementsFilter();
-        filter.setBookerStatementsType(getView().getType());
-        filter.setDepartmentIds(getView().getDepartments());
-        filter.setAccountPeriodIds(getView().getAccountPeriods());
-
         getView().updateTable();
     }
 

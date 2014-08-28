@@ -13,8 +13,6 @@ import com.aplana.sbrf.taxaccounting.model.ObjectLock;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 
-import javax.annotation.PostConstruct;
-
 @Service
 @Transactional
 public class LockCoreServiceImpl implements LockCoreService{

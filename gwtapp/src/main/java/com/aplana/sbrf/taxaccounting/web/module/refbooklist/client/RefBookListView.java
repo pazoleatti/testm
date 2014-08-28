@@ -15,7 +15,6 @@ import com.google.gwt.uibinder.client.UiTemplate;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.*;
 import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 

@@ -7,7 +7,6 @@ import com.aplana.sbrf.taxaccounting.model.VersionHistorySearchOrdering;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.TemplateChanges;
-import com.aplana.sbrf.taxaccounting.model.TemplateChangesEvent;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;

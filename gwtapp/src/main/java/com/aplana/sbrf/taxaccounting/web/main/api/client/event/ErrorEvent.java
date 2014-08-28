@@ -13,7 +13,7 @@ import com.google.gwt.event.shared.HasHandlers;
  */
 public class ErrorEvent extends AbstractMessageEvent<ErrorEvent.MyHandler> {
 
-	public static interface MyHandler extends EventHandler {
+	public interface MyHandler extends EventHandler {
 		/**
 		 * @param event
 		 */

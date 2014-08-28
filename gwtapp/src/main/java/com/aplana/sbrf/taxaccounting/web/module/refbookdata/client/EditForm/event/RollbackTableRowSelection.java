@@ -10,7 +10,7 @@ import com.google.gwt.event.shared.HasHandlers;
 public class RollbackTableRowSelection extends
 		GwtEvent<RollbackTableRowSelection.RollbackTableRowSelectionHandler> {
 
-	public static interface RollbackTableRowSelectionHandler extends EventHandler {
+	public interface RollbackTableRowSelectionHandler extends EventHandler {
 		/**
 		 * @param event
 		 */

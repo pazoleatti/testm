@@ -6,7 +6,7 @@ import com.google.gwt.event.shared.HasHandlers;
 
 public class FormTemplateApplyEvent extends GwtEvent<FormTemplateApplyEvent.FormDataApplyHandler> {
 
-	public static interface FormDataApplyHandler extends EventHandler {
+	public interface FormDataApplyHandler extends EventHandler {
 		void onClickFind(FormTemplateApplyEvent event);
 	}
 

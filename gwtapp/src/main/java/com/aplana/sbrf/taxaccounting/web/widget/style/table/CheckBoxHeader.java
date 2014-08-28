@@ -9,7 +9,6 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.cellview.client.AbstractHasData;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.HasValue;

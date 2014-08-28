@@ -126,5 +126,5 @@ public interface DepartmentReportPeriodDao {
      * @param departmentId идентификатор подразделения
      * @param isBalance признак ввода остатков
      */
-    public void changeBalance(int reportPeriodId, int departmentId, boolean isBalance);
+    void changeBalance(int reportPeriodId, int departmentId, boolean isBalance);
 }

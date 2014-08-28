@@ -34,6 +34,8 @@ public class AuditServiceImpl implements AuditService {
     @Autowired
     private LockDataService lockDataService;
 
+    private static final String RP_NAME_PATTERN = "%s %s";
+
     @Override
 	public PagingResult<LogSearchResultItem> getLogsByFilter(LogSystemFilter filter) {
 		return auditDao.getLogs(filter);
@@ -71,7 +73,7 @@ public class AuditServiceImpl implements AuditService {
                     log.setReportPeriodName(null);
                 else {
                     ReportPeriod reportPeriod = periodService.getReportPeriod(reportPeriodId);
-                    log.setReportPeriodName(String.format(AuditService.RP_NAME_PATTERN, reportPeriod.getTaxPeriod().getYear(), reportPeriod.getName()));
+                    log.setReportPeriodName(String.format(RP_NAME_PATTERN, reportPeriod.getTaxPeriod().getYear(), reportPeriod.getName()));
                 }
                 log.setDeclarationTypeName(declarationTypeName);
                 log.setFormTypeName(formTypeName);

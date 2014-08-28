@@ -31,12 +31,12 @@ public interface BDUtils {
     /**
      * Метод возвращает список зарезервированных id для таблицы data_row
      */
-    public List<Long> getNextDataRowIds(Long count);
+    List<Long> getNextDataRowIds(Long count);
 
     /**
      * Метод возвращает список зарезервированных id для таблицы ref_book_record
      */
-    public List<Long> getNextRefBookRecordIds(Long count);
+    List<Long> getNextRefBookRecordIds(Long count);
 
     /**
      * Метод возвращает список зарезервированных id

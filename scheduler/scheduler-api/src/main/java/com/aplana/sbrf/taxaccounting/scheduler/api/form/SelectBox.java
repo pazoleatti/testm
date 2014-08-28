@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.scheduler.api.form;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Элемент - выпадающий список

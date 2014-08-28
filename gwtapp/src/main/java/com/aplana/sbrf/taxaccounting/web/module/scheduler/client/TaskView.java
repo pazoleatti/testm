@@ -1,21 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.module.scheduler.client;
 
-import com.aplana.gwt.client.*;
-import com.aplana.gwt.client.LongBox;
 import com.aplana.gwt.client.ValueListBox;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.TaskParamModel;
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskJndiInfo;
-import com.aplana.sbrf.taxaccounting.model.TaskParamTypeValues;
-import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskJndiInfo;
-import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskParamType;
-import com.aplana.sbrf.taxaccounting.scheduler.api.exception.InvalidTaskParamException;
-import com.aplana.sbrf.taxaccounting.scheduler.api.form.*;
-import com.aplana.sbrf.taxaccounting.scheduler.api.form.CheckBox;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.client.taskparams.TaskParamsWidget;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.GetTaskInfoResult;
-import com.aplana.gwt.client.ListBoxWithTooltip;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -25,13 +16,10 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
-import java.util.Arrays;
 import java.util.List;
 
 

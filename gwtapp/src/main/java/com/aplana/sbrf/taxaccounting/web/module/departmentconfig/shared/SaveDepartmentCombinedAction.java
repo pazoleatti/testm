@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared;
 
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;

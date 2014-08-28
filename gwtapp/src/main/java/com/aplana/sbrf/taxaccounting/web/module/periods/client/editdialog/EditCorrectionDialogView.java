@@ -10,7 +10,6 @@ import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -20,7 +19,6 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.PopupViewWithUiHandlers;
 
 import java.util.*;
-
 
 public class EditCorrectionDialogView extends PopupViewWithUiHandlers<EditCorrectionDialogUiHandlers>
         implements EditCorrectionDialogPresenter.MyView{

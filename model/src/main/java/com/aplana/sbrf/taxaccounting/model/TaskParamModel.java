@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 import java.io.Serializable;
-import java.util.Date;
 
 /**
  * Модель пользовательских параметров задачи

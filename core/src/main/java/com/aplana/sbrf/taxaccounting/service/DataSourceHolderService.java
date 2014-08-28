@@ -8,7 +8,7 @@ import javax.sql.DataSource;
  * @author Dmitriy Levykin
  */
 public interface DataSourceHolderService {
-    public DataSource getApplicationDataSource();
+    DataSource getApplicationDataSource();
 
-    public DataSource getMigrationDataSource();
+    DataSource getMigrationDataSource();
 }

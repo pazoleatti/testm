@@ -46,7 +46,7 @@ public interface ObjectLockDao {
 	 * Разблокировать все формы, заблокированые пользователем
 	 * @param userId ид пользователя
 	 */
-	public void unlockAllObjectByUserId(int userId);
+	void unlockAllObjectByUserId(int userId);
 
 	/**
 	 * Обновляет блокировку на объекте системы (чтобы предотвратить "просрочку" блокировки

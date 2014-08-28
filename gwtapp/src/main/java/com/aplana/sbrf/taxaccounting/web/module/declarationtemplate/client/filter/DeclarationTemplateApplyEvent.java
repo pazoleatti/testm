@@ -6,7 +6,7 @@ import com.google.gwt.event.shared.HasHandlers;
 
 public class DeclarationTemplateApplyEvent extends GwtEvent<DeclarationTemplateApplyEvent.MyHandler> {
 
-	public static interface MyHandler extends EventHandler {
+	public interface MyHandler extends EventHandler {
 		void onClickFind(DeclarationTemplateApplyEvent event);
 	}
 

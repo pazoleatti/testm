@@ -1,13 +1,11 @@
 package com.aplana.sbrf.taxaccounting.web.module.sources.shared;
 
 import com.aplana.sbrf.taxaccounting.model.source.SourceMode;
-import com.aplana.sbrf.taxaccounting.model.source.SourcePair;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.CurrentAssign;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.DepartmentAssign;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.PeriodsInterval;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
-import java.util.List;
 import java.util.Set;
 
 public class DeleteCurrentAssignsAction extends UnsecuredActionImpl<DeleteCurrentAssignsResult> {

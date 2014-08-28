@@ -6,7 +6,7 @@ import com.google.gwt.event.shared.HasHandlers;
 
 public class FormTemplateSaveEvent extends GwtEvent<FormTemplateSaveEvent.MyHandler> {
 
-	public static interface MyHandler extends EventHandler {
+	public interface MyHandler extends EventHandler {
 		void onSave(FormTemplateSaveEvent event);
 	}
 

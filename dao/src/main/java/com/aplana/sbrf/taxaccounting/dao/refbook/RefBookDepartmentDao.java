@@ -78,7 +78,7 @@ public interface RefBookDepartmentDao {
      * @param departmentList
      * @return
      */
-    public List<Long> getPeriodsByTaxTypesAndDepartments(List<TaxType> taxTypes, List<Integer> departmentList);
+    List<Long> getPeriodsByTaxTypesAndDepartments(List<TaxType> taxTypes, List<Integer> departmentList);
 
     void update(int uniqueId, Map<String, RefBookValue> records, List<RefBookAttribute> attributes);
 

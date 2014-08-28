@@ -6,7 +6,7 @@ import com.google.gwt.event.shared.HasHandlers;
 
 public class RootLoadedEvent extends GwtEvent<RootLoadedEvent.RootLoadedHandler> {
 
-    public static interface RootLoadedHandler extends EventHandler {
+    public interface RootLoadedHandler extends EventHandler {
         void onRootLoaded(RootLoadedEvent event);
     }
 

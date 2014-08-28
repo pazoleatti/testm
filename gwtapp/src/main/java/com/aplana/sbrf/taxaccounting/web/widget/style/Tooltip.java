@@ -41,10 +41,10 @@ public class Tooltip extends Composite {
     private HTML tooltipText;
     private boolean isOnPopup = false;
 
-    protected final int SHOW_TIMER_DELAY = 25; //ms
+    protected static final int SHOW_TIMER_DELAY = 25; //ms
     private Timer showTimer;
 
-    protected final int HIDE_TIMER_DELAY = 25; //ms
+    protected static final int HIDE_TIMER_DELAY = 25; //ms
     private Timer hideTimer;
 
     private static final BigDecimal DELTA = BigDecimal.valueOf(1, 1);

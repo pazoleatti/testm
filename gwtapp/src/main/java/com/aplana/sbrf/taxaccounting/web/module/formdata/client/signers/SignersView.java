@@ -5,7 +5,6 @@ import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.FormDataPerformer;
 import com.aplana.sbrf.taxaccounting.model.FormDataSigner;
-import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.TableModel;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;

@@ -206,7 +206,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
         }
     }
 
-    private final RowMapper<FormTypeKind> ALL_DECLARATION_ASSIGN_MAPPER = new RowMapper<FormTypeKind>() {
+    private static final RowMapper<FormTypeKind> ALL_DECLARATION_ASSIGN_MAPPER = new RowMapper<FormTypeKind>() {
         @Override
         public FormTypeKind mapRow(ResultSet rs, int rowNum) throws SQLException {
             // Подразделение

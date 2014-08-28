@@ -93,7 +93,7 @@ public interface ReportPeriodService {
      * @param periodOrder очередность месяца в периоде (значение из formData.periodOrder)
      * @return
      */
-    public Calendar getMonthStartDate(int reportPeriodId, int periodOrder);
+    Calendar getMonthStartDate(int reportPeriodId, int periodOrder);
 
     /**
      * Получить дату окончания месяца.
@@ -102,7 +102,7 @@ public interface ReportPeriodService {
      * @param periodOrder очередность месяца в периоде (значение из formData.periodOrder)
      * @return
      */
-    public Calendar getMonthEndDate(int reportPeriodId, int periodOrder);
+    Calendar getMonthEndDate(int reportPeriodId, int periodOrder);
 
     /**
      * Получить отчетную дату месяцы месяца.
@@ -111,7 +111,7 @@ public interface ReportPeriodService {
      * @param periodOrder очередность месяца в периоде (значение из formData.periodOrder)
      * @return
      */
-    public Calendar getMonthReportDate(int reportPeriodId, int periodOrder);
+    Calendar getMonthReportDate(int reportPeriodId, int periodOrder);
 
     /**
      * Список отчетных периодов за период дат по виду налога

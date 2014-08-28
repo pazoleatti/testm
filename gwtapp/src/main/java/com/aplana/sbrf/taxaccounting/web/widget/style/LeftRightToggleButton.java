@@ -22,7 +22,7 @@ import com.google.gwt.user.client.ui.HasValue;
  */
 public class LeftRightToggleButton extends Button implements HasValue<Boolean>, IsEditor<LeafValueEditor<Boolean>> {
 
-    public static interface IconResource extends ClientBundle {
+    public interface IconResource extends ClientBundle {
         @Source("arrow_left_white.png")
         ImageResource left();
 

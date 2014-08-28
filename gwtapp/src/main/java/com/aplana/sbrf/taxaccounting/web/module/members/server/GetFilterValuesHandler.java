@@ -16,8 +16,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 
-import static java.util.Arrays.asList;
-
 @Component
 @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class GetFilterValuesHandler extends AbstractActionHandler<GetFilterValues, FilterValues> {

@@ -16,7 +16,7 @@ public class GetDeclarationListResult implements Result {
 	//общее количество записей (на всех страницах)
 	private long totalCountOfRecords;
 
-    private Integer Page;
+    private Integer page;
 
 	public GetDeclarationListResult() {
 
@@ -47,10 +47,10 @@ public class GetDeclarationListResult implements Result {
 	}
 
     public Integer getPage() {
-        return Page;
+        return page;
     }
 
     public void setPage(Integer page) {
-        Page = page;
+        this.page = page;
     }
 }

@@ -12,7 +12,7 @@ import java.util.List;
 public class UpdateTable extends
 		GwtEvent<UpdateTable.UpdateTableHandler> {
 
-	public static interface UpdateTableHandler extends EventHandler {
+	public interface UpdateTableHandler extends EventHandler {
 		/**
 		 * @param event
 		 */

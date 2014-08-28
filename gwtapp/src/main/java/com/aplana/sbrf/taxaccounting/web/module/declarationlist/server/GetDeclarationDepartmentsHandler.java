@@ -1,9 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.server;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetDeclarationDepartmentsAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetDeclarationDepartmentsResult;

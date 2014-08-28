@@ -37,7 +37,7 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
         void setAcceptableTypes(List<FormType> types);
         FormDataFilter getFilterData();
         void setFilterData(FormDataFilter filter);
-        public void setFilter(String filter);
+        void setFilter(String filter);
         void updateLabel();
 
         /**

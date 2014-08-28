@@ -7,6 +7,6 @@ package com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch;
  */
 public interface ActionName {
 	
-	public String getName();
+	String getName();
 
 }

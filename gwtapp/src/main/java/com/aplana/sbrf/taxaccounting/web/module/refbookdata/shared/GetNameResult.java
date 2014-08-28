@@ -14,7 +14,7 @@ public class GetNameResult implements Result {
     /** Идентификатор текущей записи без учета версий (тип записи) */
     Long recordId;
 
-    private Integer RefBookType;
+    private Integer refBookType;
 
 	public String getName() {
 		return name;
@@ -41,10 +41,10 @@ public class GetNameResult implements Result {
     }
 
     public Integer getRefBookType() {
-        return RefBookType;
+        return refBookType;
     }
 
     public void setRefBookType(Integer refBookType) {
-        RefBookType = refBookType;
+        this.refBookType = refBookType;
     }
 }

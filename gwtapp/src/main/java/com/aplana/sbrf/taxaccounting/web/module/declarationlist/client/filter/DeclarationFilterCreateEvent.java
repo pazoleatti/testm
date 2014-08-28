@@ -9,7 +9,7 @@ import com.google.gwt.event.shared.HasHandlers;
  */
 public class DeclarationFilterCreateEvent extends GwtEvent<DeclarationFilterCreateEvent.DeclarationFilterCreateHandler> {
 
-    public static interface DeclarationFilterCreateHandler extends EventHandler{
+    public interface DeclarationFilterCreateHandler extends EventHandler{
         void onCreateClick(DeclarationFilterCreateEvent event);
     }
 

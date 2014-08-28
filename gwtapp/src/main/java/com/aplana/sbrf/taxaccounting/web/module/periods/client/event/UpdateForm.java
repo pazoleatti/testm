@@ -10,7 +10,7 @@ import com.google.gwt.event.shared.HasHandlers;
 public class UpdateForm extends
 		GwtEvent<UpdateForm.UpdateFormHandler> {
 
-	public static interface UpdateFormHandler extends EventHandler {
+	public interface UpdateFormHandler extends EventHandler {
 		/**
 		 * @param event
 		 */

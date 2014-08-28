@@ -8,7 +8,7 @@ import com.google.gwt.event.shared.HasHandlers;
  * User: avanteev
  */
 public class AuditClientSearchEvent extends GwtEvent<AuditClientSearchEvent.MyHandler> {
-    public static interface MyHandler extends EventHandler{
+    public interface MyHandler extends EventHandler{
         void onAuditFormSearchButtonClicked(AuditClientSearchEvent event);
     }
 

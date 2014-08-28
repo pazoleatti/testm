@@ -40,32 +40,32 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
     private SignService signService;
 
     // ЦАС НСИ
-    private static long REF_BOOK_OKATO = 3L; // Коды ОКАТО
-    private static long REF_BOOK_RF_SUBJ_CODE = 4L; // Коды субъектов Российской Федерации
-    private static long REF_BOOK_ACCOUNT_PLAN = 101L; // План счетов
+    private static final long REF_BOOK_OKATO = 3L; // Коды ОКАТО
+    private static final long REF_BOOK_RF_SUBJ_CODE = 4L; // Коды субъектов Российской Федерации
+    private static final long REF_BOOK_ACCOUNT_PLAN = 101L; // План счетов
     // Diasoft Custody
-    private static long REF_BOOK_EMITENT = 100L; // Эмитенты
-    private static long REF_BOOK_BOND = 84L; // Ценные бумаги
+    private static final long REF_BOOK_EMITENT = 100L; // Эмитенты
+    private static final long REF_BOOK_BOND = 84L; // Ценные бумаги
 
-    private final String OKATO_NAME = "справочника ОКАТО";
-    private final String REGION_NAME = "справочника «Субъекты РФ»";
-    private final String ACCOUNT_PLAN_NAME = "справочника «План счетов»";
-    private final String DIASOFT_NAME = "справочников Diasoft";
+    private static final String OKATO_NAME = "справочника ОКАТО";
+    private static final String REGION_NAME = "справочника «Субъекты РФ»";
+    private static final String ACCOUNT_PLAN_NAME = "справочника «План счетов»";
+    private static final String DIASOFT_NAME = "справочников Diasoft";
 
     //// Справочники ЦАС НСИ
     // ОКАТО
-    private final static Map<String, List<Pair<Boolean, Long>>> nsiOkatoMappingMap = new HashMap<String, List<Pair<Boolean, Long>>>();
+    private static final Map<String, List<Pair<Boolean, Long>>> nsiOkatoMappingMap = new HashMap<String, List<Pair<Boolean, Long>>>();
     // Субъекты РФ
-    private final static Map<String, List<Pair<Boolean, Long>>> nsiRegionMappingMap = new HashMap<String, List<Pair<Boolean, Long>>>();
+    private static final Map<String, List<Pair<Boolean, Long>>> nsiRegionMappingMap = new HashMap<String, List<Pair<Boolean, Long>>>();
     // План счетов
-    private final static Map<String, List<Pair<Boolean, Long>>> nsiAccountPlanMappingMap = new HashMap<String, List<Pair<Boolean, Long>>>();
+    private static final Map<String, List<Pair<Boolean, Long>>> nsiAccountPlanMappingMap = new HashMap<String, List<Pair<Boolean, Long>>>();
 
     //// Справочники АС Diasoft Custody
     // Ценные бумаги и Эмитенты
-    private final static Map<String, List<Pair<Boolean, Long>>> diasoftMappingMap = new HashMap<String, List<Pair<Boolean, Long>>>();
+    private static final Map<String, List<Pair<Boolean, Long>>> diasoftMappingMap = new HashMap<String, List<Pair<Boolean, Long>>>();
 
     // Сообщения, которые не учтены в постановка
-    final static String IMPORT_REF_BOOK_ERROR = "Ошибка при загрузке транспортных файлов справочников %s.";
+    private static final String IMPORT_REF_BOOK_ERROR = "Ошибка при загрузке транспортных файлов справочников %s.";
 
     static {
         // TODO Левыкин: Каждый конкретный справочник будет загружаться только архивом или только простым файлом, не обоими способами

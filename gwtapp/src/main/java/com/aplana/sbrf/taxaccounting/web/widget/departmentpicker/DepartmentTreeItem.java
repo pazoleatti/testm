@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.web.widget.departmentpicker;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
 import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.MultiSelectTreeItem;
-import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.DOM;
 
 /**

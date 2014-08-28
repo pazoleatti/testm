@@ -9,7 +9,7 @@ import com.google.gwt.event.shared.HasHandlers;
  * User: avanteev
  */
 public class DTCreateNewTypeEvent extends GwtEvent<DTCreateNewTypeEvent.MyHandler> {
-    public static interface MyHandler extends EventHandler {
+    public interface MyHandler extends EventHandler {
         /**
          * @param event
          */

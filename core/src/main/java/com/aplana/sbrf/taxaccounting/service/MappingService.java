@@ -14,5 +14,5 @@ public interface MappingService {
      * @param filename    название файла с расширением xml или rnu
      * @param fileContent содержимое файла
      */
-    public void addFormData(String filename, byte[] fileContent);
+    void addFormData(String filename, byte[] fileContent);
 }

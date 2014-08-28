@@ -6,9 +6,9 @@ import com.google.gwt.view.client.AsyncDataProvider;
 import java.util.List;
 
 public interface LogEntriesView{
-    public void setTableElementId(String id);
-    public void setLogEntries(int start, int totalCount,  List<LogEntry> logEntries);
-    public void clearLogEntries();
-    public void setDataProvider(AsyncDataProvider<LogEntry> dataProvider);
-    public int getPageSize();
+    void setTableElementId(String id);
+    void setLogEntries(int start, int totalCount,  List<LogEntry> logEntries);
+    void clearLogEntries();
+    void setDataProvider(AsyncDataProvider<LogEntry> dataProvider);
+    int getPageSize();
 }

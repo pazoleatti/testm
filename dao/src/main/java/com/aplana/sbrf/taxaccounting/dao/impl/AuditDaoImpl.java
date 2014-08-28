@@ -262,14 +262,6 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 		}
 	}
 
-    private String appendWithClauseDepartment(List<Integer> departments){
-        return "SELECT LTRIM(SYS_CONNECT_BY_PATH(name, '/'), '/') as path" +
-                " FROM department" +
-                " WHERE " +transformToSqlInStatement("id", departments) +
-                " START WITH parent_id in (select id from department where parent_id is null)" +
-                " CONNECT BY PRIOR id = parent_id";
-    }
-
     public String orderByClause(HistoryBusinessSearchOrdering ordering, boolean ascSorting) {
 
         StringBuilder order = new StringBuilder();

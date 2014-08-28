@@ -4,7 +4,7 @@ import com.google.gwt.event.shared.*;
 
 public class FormDataListCreateEvent extends GwtEvent<FormDataListCreateEvent.FormDataCreateHandler> {
 
-	public static interface FormDataCreateHandler extends EventHandler {
+	public interface FormDataCreateHandler extends EventHandler {
 		void onClickCreate(FormDataListCreateEvent event);
 	}
 

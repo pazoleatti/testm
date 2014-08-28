@@ -5,7 +5,7 @@ import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HasHandlers;
 
 public class UpdateTableEvent extends GwtEvent<UpdateTableEvent.MyHandler> {
-    public static interface MyHandler extends EventHandler {
+    public interface MyHandler extends EventHandler {
         /**
          * @param event
          */

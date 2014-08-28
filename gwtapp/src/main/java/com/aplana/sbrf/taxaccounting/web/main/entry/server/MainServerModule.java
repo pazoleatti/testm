@@ -23,7 +23,6 @@ import com.aplana.sbrf.taxaccounting.web.module.scriptExecution.server.ScriptExe
 import com.aplana.sbrf.taxaccounting.web.module.sources.server.SourcesServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.server.TaxFormNominationServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.testpage.server.TestPageServerModule;
-import com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.client.UploadTransportDataPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.server.UploadTransportDataServerModule;
 import com.aplana.sbrf.taxaccounting.web.widget.history.server.HistoryServerModule;
 import com.aplana.sbrf.taxaccounting.web.widget.historytemplatechanges.server.VersionHistoryServerModule;

@@ -3,8 +3,6 @@ package com.aplana.sbrf.taxaccounting.web.module.scheduler.client.taskparams;
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskParamType;
 import com.google.gwt.user.client.ui.Widget;
 
-import java.util.Map;
-
 /**
  * Обертка для всех типов виджетов (поля для ввода параметров задачи)
  *

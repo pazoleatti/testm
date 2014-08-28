@@ -20,5 +20,5 @@ public interface RefBookOkatoDao {
      * @param recordsList
      * @return Записи, которые не нашлись в БД по ОКАТО
      */
-    public List<Map<String, RefBookValue>> updateValueNames(Date version, List<Map<String, RefBookValue>> recordsList);
+    List<Map<String, RefBookValue>> updateValueNames(Date version, List<Map<String, RefBookValue>> recordsList);
 }

@@ -10,7 +10,7 @@ import java.util.List;
 
 public class FormTemplateSetEvent extends GwtEvent<FormTemplateSetEvent.MyHandler> {
 
-	public static interface MyHandler extends EventHandler {
+	public interface MyHandler extends EventHandler {
 		void onSet(FormTemplateSetEvent event);
 	}
 

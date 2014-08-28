@@ -8,5 +8,5 @@ import com.gwtplatform.mvp.client.UiHandlers;
  * @author Dmitriy Levykin
  */
 public interface MigrationUiHandlers extends UiHandlers {
-    public void runImport();
+    void runImport();
 }

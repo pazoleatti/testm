@@ -17,7 +17,7 @@ public final class ModelUtils {
 	 */
 	private ModelUtils() {}
 	
-	public static interface GetPropertiesFunc<T, V>{
+	public interface GetPropertiesFunc<T, V>{
 		V getProperties(T object);
 	}
 	

@@ -4,7 +4,7 @@ import com.google.gwt.event.shared.*;
 
 public class FormDataListApplyEvent extends GwtEvent<FormDataListApplyEvent.FormDataApplyHandler> {
 
-	public static interface FormDataApplyHandler extends EventHandler {
+	public interface FormDataApplyHandler extends EventHandler {
 		void onClickFind(FormDataListApplyEvent event);
 	}
 

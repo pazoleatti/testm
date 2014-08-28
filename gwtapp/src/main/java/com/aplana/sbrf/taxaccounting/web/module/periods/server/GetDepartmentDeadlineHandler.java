@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.web.module.periods.server;
 
 import com.aplana.sbrf.taxaccounting.model.Notification;
 import com.aplana.sbrf.taxaccounting.service.NotificationService;
-import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.GetDepartmentDeadlineAction;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.GetDepartmentDeadlineResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;

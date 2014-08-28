@@ -14,8 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
-import static java.util.Arrays.asList;
-
 /**
  * Получает активные виды налоговых форм. По идее срабатывает после выбора определенных полей.
  * User: avanteev

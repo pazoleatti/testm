@@ -9,7 +9,7 @@ import com.google.gwt.event.shared.HasHandlers;
  */
 public class DialogBoxChangeVisibilityEvent extends GwtEvent<DialogBoxChangeVisibilityEvent.MyHandler> {
 
-	public static interface MyHandler extends EventHandler {
+	public interface MyHandler extends EventHandler {
 		void onChangeVisibility(DialogBoxChangeVisibilityEvent event);
 	}
 

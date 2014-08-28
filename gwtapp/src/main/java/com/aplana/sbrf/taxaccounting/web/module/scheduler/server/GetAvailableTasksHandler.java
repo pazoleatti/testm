@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.web.module.scheduler.server;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskJndiInfo;
 import com.aplana.sbrf.taxaccounting.scheduler.api.exception.TaskSchedulingException;
-import com.aplana.sbrf.taxaccounting.scheduler.api.form.FormElement;
 import com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManager;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.GetAvailableTasksAction;
@@ -15,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**

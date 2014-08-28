@@ -10,7 +10,7 @@ import com.google.gwt.event.shared.HasHandlers;
 public class PeriodCreated extends
 		GwtEvent<PeriodCreated.OpenPeriodHandler> {
 
-	public static interface OpenPeriodHandler extends EventHandler {
+	public interface OpenPeriodHandler extends EventHandler {
 		/**
 		 * @param event
 		 */

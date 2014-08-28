@@ -205,7 +205,7 @@ public interface PeriodService {
      * @param taxType тип налога
      * @param logs логер, при необходимости
      */
-    public void removePeriodWithLog(int reportPeriodId, Date correctionDate, List<Integer> departmentId,  TaxType taxType, List<LogEntry> logs);
+    void removePeriodWithLog(int reportPeriodId, Date correctionDate, List<Integer> departmentId,  TaxType taxType, List<LogEntry> logs);
 
     /**
      * Список отчетных периодов для указанного вида налога и для указанных подразделений
@@ -328,7 +328,7 @@ public interface PeriodService {
      * @param isBalance признак ввода остатков
      * @param logs логер, при необходимости
      */
-    public void edit(int reportPeriodId, int newDictTaxPeriodId, int newYear, TaxType taxType, TAUserInfo user,
+    void edit(int reportPeriodId, int newDictTaxPeriodId, int newYear, TaxType taxType, TAUserInfo user,
                      long departmentId, boolean isBalance,  List<LogEntry> logs);
 
     /**
@@ -342,10 +342,10 @@ public interface PeriodService {
      * @param user пользователь, который выполняет действие
      * @param logs логер, при необходимости
      */
-    public void editCorrectionPeriod(int reportPeriodId, int newReportPeriodId, long departmentId, TaxType taxType,
+    void editCorrectionPeriod(int reportPeriodId, int newReportPeriodId, long departmentId, TaxType taxType,
                                      Date correctionDate, Date newCorrectionDate, TAUserInfo user, List<LogEntry> logs);
 
-    public List<DepartmentReportPeriod> getDRPByDepartmentIds(List<TaxType> taxTypes, List<Long> departmentIds);
+    List<DepartmentReportPeriod> getDRPByDepartmentIds(List<TaxType> taxTypes, List<Long> departmentIds);
 
     /**
      * Отчетный период по коду и году
