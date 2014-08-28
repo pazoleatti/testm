@@ -430,6 +430,7 @@
 								<X-Git-Revision>${git.revision}</X-Git-Revision>
 								<X-Git-Build-Number>${git.buildnumber}</X-Git-Build-Number>
 								<X-Git>${git.buildnumber}(${maven.build.timestamp})</X-Git>
+                                <Url-Guarantee>${guaranteeUrl}</Url-Guarantee>
 							</manifestEntries>
 						</archive>
 					</configuration>
@@ -461,6 +462,7 @@
 								<X-Git-Revision>${git.revision}</X-Git-Revision>
 								<X-Git-Build-Number>${git.buildnumber}</X-Git-Build-Number>
 								<X-Git>${git.buildnumber}.${maven.build.timestamp}</X-Git>
+                                <Url-Guarantee>${guaranteeUrl}</Url-Guarantee>
 							</manifestEntries>
 						</archive>
 					</configuration>
