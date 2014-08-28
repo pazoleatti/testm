@@ -919,7 +919,8 @@ public final class ScriptUtils {
             inputSource.setCharacterStream(new StringReader(xmlString));
             Document document = documentBuilder.parse(inputSource);
             NodeList rows = document.getElementsByTagName("row");
-            for (int i = 0; i < rows.getLength(); i++, rowIndex++) {
+            for (int i = 0; i < rows.getLength(); i++) {
+                rowIndex++;
                 Element element = (Element) rows.item(i);
                 Integer count = Integer.valueOf(element.getAttribute("count"));
                 if (count != columnCount + 2) {
@@ -947,56 +948,7 @@ public final class ScriptUtils {
             throw new ServiceException(e.getMessage());
         }
 
-//        int errorRowIndex = checkXml(xml, columnCount, totalCount);
-//        if (errorRowIndex == -1) {
-//        } else {
-//            throw new ServiceException("Строка файла " + errorRowIndex + " содержит некорректное значение.");
-//        }
         return getXML(xmlString);
-    }
-
-    private final static class ScriptBuilder {
-        private StringBuilder script = new StringBuilder();
-
-        public ScriptBuilder addLine(final String scriptLine) {
-            script.append(scriptLine);
-            script.append(newLine());
-            return this;
-        }
-
-        private String newLine() {
-            return System.getProperty("line.separator");
-        }
-
-        public String build() {
-            return script.toString();
-        }
-    }
-
-    private static int checkXml(GPathResult xml, int columnCount, int totalSize) {
-        final Binding binding = new Binding();
-        binding.setVariable("xml", xml);
-        // добавляем два служебных поля
-        binding.setVariable("columnCount", columnCount + 2);
-        binding.setVariable("totalSize", totalSize);
-        binding.setVariable("flag", true);
-        binding.setVariable("index", 2);
-
-        final GroovyShell shell = new GroovyShell(binding);
-
-        final ScriptBuilder parseScript = new ScriptBuilder();
-        // проходим по строкам
-        parseScript.addLine("for (def row : xml.row) { index++");
-        // если кол-во столбцов не совпало, то прерываем
-        parseScript.addLine("if (row.cell.size() != columnCount) { return false } }");
-        //
-        parseScript.addLine("if (totalSize != 0 && (xml.rowTotal.size() != totalSize || xml.rowTotal.cell.size() != columnCount)) {index +=2; return false}");
-        parseScript.addLine("flag");
-
-        final Object result = shell.evaluate(parseScript.build());
-        Integer index = (Integer) shell.getVariable("index");
-
-        return (Boolean) result ? -1 : index;
     }
 
     private static void checkBeforeGetXml(BufferedInputStream inputStream, String fileName) {
