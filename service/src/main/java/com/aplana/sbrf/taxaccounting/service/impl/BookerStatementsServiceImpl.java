@@ -14,6 +14,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.BookerStatementsService;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -92,6 +93,9 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
 
     @Autowired
     BookerStatementsSearchDao bookerStatementsSearchDao;
+
+    @Autowired
+    private DepartmentService departmentService;
 
     @Override
     public void importXML(String realFileName, InputStream stream, Integer accountPeriodId, int typeId, Integer departmentId, TAUserInfo userInfo) {
@@ -535,7 +539,18 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
     }
 
     @Override
-    public PagingResult<BookerStatementsSearchResultItem> findDataByFilter(BookerStatementsFilter bookerStatementsFilter) {
+    public PagingResult<BookerStatementsSearchResultItem> findDataByFilter(BookerStatementsFilter bookerStatementsFilter, TAUser tAUser) {
+        if (tAUser.hasRole(TARole.ROLE_CONTROL_NS)) {
+            List<Integer> departmentIds = departmentService.getBADepartmentIds(tAUser);
+            if (bookerStatementsFilter.getDepartmentIds() != null && !bookerStatementsFilter.getDepartmentIds().isEmpty()) {
+                bookerStatementsFilter.getDepartmentIds().retainAll(departmentIds);
+                if (bookerStatementsFilter.getDepartmentIds().isEmpty()) {
+                    bookerStatementsFilter.setDepartmentIds(departmentIds);
+                }
+            } else {
+                bookerStatementsFilter.setDepartmentIds(departmentIds);
+            }
+        }
         return bookerStatementsSearchDao.findPage(bookerStatementsFilter, bookerStatementsFilter.getSearchOrdering(),
                 bookerStatementsFilter.isAscSorting(), new PagingParams(bookerStatementsFilter.getStartIndex(),
                         bookerStatementsFilter.getCountOfRecords()));

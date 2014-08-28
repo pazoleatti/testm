@@ -140,6 +140,13 @@ public class EditDialogPresenter extends PresenterWidget<EditDialogPresenter.MyV
                                 if ((result.getStatus() == PeriodStatusBeforeOpen.OPEN)
                                         || (result.getStatus() == PeriodStatusBeforeOpen.CLOSE)) {
                                     Dialog.errorMessage("Редактирование периода", "Указанный период уже заведён в Системе!");
+                                } else if (PeriodStatusBeforeOpen.BALANCE_STATUS_CHANGED.equals(result.getStatus())) {
+                                    if (initData.getDictTaxPeriodId() == data.getReportPeriodId().longValue()) {
+                                        edit(data);
+                                    } else {
+                                        Dialog.errorMessage("Редактирование периода", "Данный период уже заведён в Системе. " +
+                                                "Изменение признака ввода остатков невозможно, так как в Системе может быть заведён только один период с (без) указания признака ввода остатков!");
+                                    }
                                 } else {
                                     edit(data);
                                 }
@@ -152,7 +159,7 @@ public class EditDialogPresenter extends PresenterWidget<EditDialogPresenter.MyV
     private void edit(final EditDialogData data) {
         EditPeriodAction action = new EditPeriodAction();
         action.setTaxType(taxType);
-        action.setDepartmentId(data.getDepartmentId());
+        action.setNewDepartmentId(data.getDepartmentId());
         action.setYear(data.getYear());
         action.setBalance(data.isBalance());
         action.setNewDictTaxPeriodId(data.getDictTaxPeriodId().intValue());

@@ -144,7 +144,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
     @Override
     public Date lastArchiveDate() {
         try {
-            return getJdbcTemplate().queryForObject("select log_date from log_system where event_id = 601", Date.class);
+            return getJdbcTemplate().queryForObject("select max(log_date) from log_system where event_id = 601", Date.class);
         } catch (EmptyResultDataAccessException e){
             logger.warn("Не найдено записей об архивации.", e);
             return null;
@@ -179,6 +179,12 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
             if (filter.getAuditFieldList().contains(AuditFieldList.ALL.getId())
                     || filter.getAuditFieldList().contains(AuditFieldList.DECLARATION_TYPE.getId()) ) {
                 ps.appendQuery(String.format(" OR lower(%sdeclaration_type_name) LIKE lower(?)", prefix));
+                ps.addParam("%"+filter.getFilter()+"%");
+            }
+
+            if (filter.getAuditFieldList().contains(AuditFieldList.ALL.getId())
+                    || filter.getAuditFieldList().contains(AuditFieldList.TYPE.getId()) ) {
+                ps.appendQuery(String.format(" OR lower(case when ls.form_type_name is not null then '" + AuditFormType.FORM_TYPE_TAX.getName() + "' when ls.declaration_type_name is not null then '" + AuditFormType.FORM_TYPE_DECLARATION.getName() + "' else '' end) LIKE lower(?)"));
                 ps.addParam("%"+filter.getFilter()+"%");
             }
 

@@ -163,18 +163,18 @@ public interface FormDataDao {
     List<String> getStringList(Integer columnId, Integer formTemplateTypeId);
 
     /**
-     * Обноляет "первую часть" имени подразделения. Первая часть строки - символы, следующие до символа "/".
+     * Обноляет имя подразделения(если у подразделения тип "ТБ")
+     * @param departmentId идентификатор обновляемого подразделения
      * @param newDepartmentName новое имя подразделеия ТБ
-     * @param oldDepartmentName старое имя подразделения ТБ
      * @param dateFrom дата начала периода, с которой искать НФ
      * @param dateTo дата окончания периода, до которой искать НФ
      */
-    void updateFDPerformerTBDepartmentNames(String newDepartmentName, String oldDepartmentName, Date dateFrom, Date dateTo);
+    void updateFDPerformerTBDepartmentNames(int departmentId, String newDepartmentName, Date dateFrom, Date dateTo);
 
     /**
      * Обноляет "вторую часть" имени подразделения. Вторая часть строки - если символ "/" в строке есть, то все символы после символа "/", иначе вся строка.
      * @param departmentId идентификатор обновляемого подразделения
-     * @param newDepartmentName старое имя подразделения ТБ
+     * @param newDepartmentName новое имя подразделения ТБ
      * @param dateFrom дата начала периода, с которой искать НФ
      * @param dateTo дата окончания периода, до которой искать НФ
      */
@@ -184,23 +184,21 @@ public interface FormDataDao {
      * Получить упорядоченный список экземпляров НФ предшествующих до указанного экземпляра, в пределах которых
      * устанавливается сквозная нумерация строк.
      *
-     * @param formData
-     * @param year Календарный год налогового периода
-     * @param code тип налоговой формы
-     * @return
+     * @param formData экземпляр НФ
+     * @param taxPeriod налоговый период
+     * @return упорядоченный список экземпляров НФ
      */
-    List<FormData> getPrevFormDataListForCrossNumeration(FormData formData, Integer year, String code);
+    List<FormData> getPrevFormDataListForCrossNumeration(FormData formData, TaxPeriod taxPeriod);
 
     /**
      * Получить упорядоченный список экземпляров НФ, следующих после указанного экземпляра, в пределах которых
      * устанавливается сквозная нумерация строк.
      *
-     * @param formData
-     * @param year Календарный год налогового периода
-     * @param code тип налоговой формы
-     * @return
+     * @param formData экземпляр НФ
+     * @param taxPeriod налоговый период
+     * @return упорядоченный список экземпляров НФ
      */
-    List<FormData> getNextFormDataListForCrossNumeration(FormData formData, Integer year, String code);
+    List<FormData> getNextFormDataListForCrossNumeration(FormData formData, TaxPeriod taxPeriod);
 
     /**
      * TODO - возможно лучше сделать batchUpdate

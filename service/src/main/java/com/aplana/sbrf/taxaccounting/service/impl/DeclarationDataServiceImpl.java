@@ -23,6 +23,8 @@ import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 import net.sf.jasperreports.engine.query.JRXPathQueryExecuterFactory;
 import net.sf.jasperreports.engine.util.JRXmlUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -56,6 +58,8 @@ import java.util.*;
 @Service
 @Transactional(readOnly = true)
 public class DeclarationDataServiceImpl implements DeclarationDataService {
+
+    protected static final Log log = LogFactory.getLog(DeclarationDataService.class);
 
 	private static final String XML_HEADER = "<?xml version=\"1.0\" encoding=\"windows-1251\"?>";
 
@@ -151,29 +155,29 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	public void calculate(Logger logger, long id, TAUserInfo userInfo, Date docDate) {
 		declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.CALCULATE);
         DeclarationData declarationData = declarationDataDao.get(id);
-        List<String> strings = new ArrayList<String>();
 
-        //Обнуляем данные в таблице блобов
+        List<String> oldBlobDataIds = new ArrayList<String>(); // список UUID блоб для удаления
         if (declarationData.getJasperPrintUuid() != null){
-            strings.add(declarationData.getJasperPrintUuid());
+            oldBlobDataIds.add(declarationData.getJasperPrintUuid());
             declarationData.setJasperPrintUuid(null);
         }
         if (declarationData.getXlsxDataUuid() != null){
-            strings.add(declarationData.getXlsxDataUuid());
+            oldBlobDataIds.add(declarationData.getXlsxDataUuid());
             declarationData.setXlsxDataUuid(null);
         }
         if (declarationData.getPdfDataUuid() != null){
-            strings.add(declarationData.getPdfDataUuid());
+            oldBlobDataIds.add(declarationData.getPdfDataUuid());
             declarationData.setPdfDataUuid(null);
         }
         if (declarationData.getXmlDataUuid() != null){
-            strings.add(declarationData.getXmlDataUuid());
+            oldBlobDataIds.add(declarationData.getXmlDataUuid());
             declarationData.setXmlDataUuid(null);
         }
-        declarationDataDao.update(declarationData);
-        if (!strings.isEmpty()) blobDataService.delete(strings);
-
 		setDeclarationBlobs(logger, declarationData, docDate, userInfo);
+
+		// удаляем только после успешного формирования новых данных
+		if (!oldBlobDataIds.isEmpty()) blobDataService.delete(oldBlobDataIds);
+
 		logBusinessService.add(null, id, userInfo, FormDataEvent.SAVE, null);
 		auditService.add(FormDataEvent.SAVE , userInfo, declarationData.getDepartmentId(),
 				declarationData.getReportPeriodId(),
@@ -326,7 +330,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         declarationData.setXmlDataUuid(blobDataService.create(new ByteArrayInputStream(xml.getBytes()), ""));
 
         validateDeclaration(declarationData, logger, false);
-        // Заполнение отчета и экспорт в формате PDF и XLSX
+        // Заполнение отчета и экспорт в формате PDF
         JasperPrint jasperPrint = fillReport(xml,
                 declarationTemplateService.getJasper(declarationData.getDeclarationTemplateId()));
         declarationData.setPdfDataUuid(blobDataService.create(new ByteArrayInputStream(exportPDF(jasperPrint)), ""));
@@ -336,7 +340,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             throw new ServiceException(e.getLocalizedMessage(), e);
         }
         declarationDataDao.update(declarationData);
-        /*declarationDataDao.setXlsxDataUuid(declarationData.getId(), blobDataService.create(new ByteArrayInputStream(exportXLSX(jasperPrint)), ""));*/
 	}
 
     /**
@@ -349,6 +352,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         Locale oldLocale = Locale.getDefault();
         Locale.setDefault(new Locale("ru", "RU"));
         String xmlUuid = declarationData.getXmlDataUuid();
+        if (xmlUuid == null) { // не проверяем пустые XML
+            return;
+        }
         String xml = new String(getBytesFromInputstream(xmlUuid));
         DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationData.getDeclarationTemplateId());
 
@@ -393,9 +399,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 });
                 validator.validate(new StreamSource(xmlStream));
             } catch (Exception e) {
+                log.error(VALIDATION_ERR_MSG, e);
                 logger.error(e);
                 Locale.setDefault(oldLocale);
-                throw new ServiceException(VALIDATION_ERR_MSG, logger.getEntries());
+                throw new ServiceLoggerException(VALIDATION_ERR_MSG, logEntryService.save(logger.getEntries()));
             }
 
             if (logger.containsLevel(LogLevel.ERROR)) {

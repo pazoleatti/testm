@@ -13,11 +13,20 @@ import com.aplana.sbrf.taxaccounting.service.script.ImportService;
 import groovy.util.XmlSlurper;
 import groovy.util.slurpersupport.GPathResult;
 import org.springframework.util.StringUtils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import groovy.lang.Binding;
+import groovy.lang.GroovyShell;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.StringReader;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -83,6 +92,8 @@ public final class ScriptUtils {
 
     private static final String IMPORT_ROW_PREFIX = "Строка файла %d: %s";
     private static final String TRANSPORT_FILE_SUM_ERROR = "Итоговая сумма в графе %s строки %s в транспортном файле некорректна. Загрузка файла не выполнена.";
+
+    private static final String ROW_FILE_WRONG = "Строка файла %s содержит некорректное значение.";
 
 
     // Ссылочный, независимая графа: Не найдена версия справочника, соответствующая значению в файле
@@ -888,7 +899,7 @@ public final class ScriptUtils {
      * Получение xml с общими проверками
      * Используется при импорте из транспортного файла
      */
-    public static GPathResult getTransportXML(BufferedInputStream inputStream, ImportService importService, String fileName) {
+    public static GPathResult getTransportXML(BufferedInputStream inputStream, ImportService importService, String fileName, int columnCount, int totalCount) {
         checkBeforeGetXml(inputStream, fileName);
 
         if (!fileName.endsWith(".rnu")) {
@@ -899,6 +910,57 @@ public final class ScriptUtils {
         try {
             xmlString = importService.getData(inputStream, fileName, "cp866");
         } catch (IOException e) {
+            throw new ServiceException(e.getMessage());
+        }
+
+        // в файле rnu по умолчанию пропускаются первые две строки
+        int rowIndex = 2;
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder documentBuilder = factory.newDocumentBuilder();
+            InputSource inputSource = new InputSource();
+            // парсим xml в Document
+            inputSource.setCharacterStream(new StringReader(xmlString));
+            Document document = documentBuilder.parse(inputSource);
+            // получаем узлы соответствующие строкам
+            NodeList rows = document.getElementsByTagName("row");
+            // проходим по строкам
+            for (int i = 0; i < rows.getLength(); i++) {
+                rowIndex++;
+                Element element = (Element) rows.item(i);
+                // получаем атрибут кол-ва столбцов в строке
+                Integer count = Integer.valueOf(element.getAttribute("count"));
+                // добавляем два служебных поля к числу граф и сверяем с их числом в файле
+                if (count != columnCount + 2) {
+                    throw new ServiceException(ROW_FILE_WRONG, rowIndex);
+                }
+            }
+
+            // после строк с данными через одну пустую должны быть итоги
+            rowIndex+=2;
+
+            // проверка на итоги идет только если они ожидаются
+            if (totalCount != 0) {
+                // получаем узлы соответствующие итогам
+                NodeList totals = document.getElementsByTagName("rowTotal");
+                // сверяем кол-во строк итогов
+                if (totals.getLength() != totalCount) {
+                    throw new ServiceException(ROW_FILE_WRONG, rowIndex);
+                } else {
+                    // проходим по итогам
+                    for (int i = 0; i < totals.getLength(); i++) {
+                        rowIndex++;
+                        Element element = (Element) totals.item(i);
+                        // получаем атрибут кол-ва столбцов в строке
+                        Integer count = Integer.valueOf(element.getAttribute("count"));
+                        // добавляем два служебных поля к числу граф и сверяем
+                        if (count != columnCount + 2) {
+                            throw new ServiceException(ROW_FILE_WRONG, rowIndex);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
             throw new ServiceException(e.getMessage());
         }
 

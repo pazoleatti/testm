@@ -161,6 +161,11 @@ void logicCheck() {
         checkNonEmptyColumns(row, rowNum, ['docNum', 'docDate'], logger, true)
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns - ['docNum', 'docDate'], logger, false)
 
+        if (row.count == 0) {
+            def countName = getColumnName(row, 'count')
+            rowWarning(logger, row, "Строка $rowNum: Графа «$countName» не может содержать значение 0")
+        }
+
         // Проверка доходов
         def sumCell = row.getCell('sum')
         def priceCell = row.getCell('price')

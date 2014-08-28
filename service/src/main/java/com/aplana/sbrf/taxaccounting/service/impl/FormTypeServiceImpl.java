@@ -2,11 +2,13 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.FormType;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
+import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import com.aplana.sbrf.taxaccounting.service.FormTypeService;
 import com.aplana.sbrf.taxaccounting.service.TemplateChangesService;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Transformer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +29,8 @@ public class FormTypeServiceImpl implements FormTypeService {
 	private ReportPeriodDao reportPeriodDao;
     @Autowired
     private TemplateChangesService templateChangesService;
+    @Autowired
+    private FormTemplateService formTemplateService;
 
     @Override
     public int save(FormType formType) {
@@ -43,17 +47,13 @@ public class FormTypeServiceImpl implements FormTypeService {
         return formTypeDao.get(formTypeId);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void delete(int formTypeId) {
-        List<TemplateChanges> changeses = templateChangesService.getByFormTypeIds(formTypeId, VersionHistorySearchOrdering.DATE, false);
-        if (!changeses.isEmpty())
-            templateChangesService.delete(CollectionUtils.collect(changeses, new Transformer() {
-                @Override
-                public Object transform(Object o) {
-                    return ((TemplateChanges)o).getId();
-                }
-            }));
+        List<Integer> ids = formTemplateService.getFTVersionIdsByStatus(formTypeId);
+        if (!ids.isEmpty()){
+            templateChangesService.deleteByTemplateIds(ids, null);
+            formTemplateService.delete(ids);
+        }
         formTypeDao.delete(formTypeId);
     }
 

@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
@@ -50,6 +51,8 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
     final static String U2_2 = " Код налоговой формы «%s» не существует в АС «Учет налогов»!";
     final static String U2_3 = " Код отчетного периода «%s» не существует в налоговом периоде %d года в АС «Учет налогов»!";
     final static String U3 = "Файл «%s» не загружен, т.к. пользователь не имеет доступа к содержащейся в нем налоговой форме «%s» подразделения «%s»!";
+    final static String U4 = "Загружаемая налоговая форма «%s» подразделения «%s» не относится ни к одному ТБ, " +
+            "в связи с чем для нее не существует каталог загрузки в конфигурационных параметрах АС «Учет налогов»!";
 
     // Сообщения, которые не учтены в постановка
     final static String USER_NOT_FOUND_ERROR = "Не определен пользователь!";
@@ -59,10 +62,10 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
 
     protected static enum LogData {
         L32("Файл «%s» сохранен в каталоге загрузки «%s».", LogLevel.INFO, true),
-        L33("Ошибка при сохранении файла «%s» в каталоге загрузки! %s.", LogLevel.ERROR, false),
-        L34_1("Не указан путь к каталогу загрузки справочников Diasoft! Файл «%s» не сохранен.", LogLevel.ERROR, false),
-        L34_2("Не указан путь к каталогу загрузки для ТБ «%s» в конфигурационных параметрах АС «Учет налогов». Файл «%s» не сохранен.", LogLevel.ERROR, false),
-        L35("Завершена процедура загрузки транспортных файлов в каталог загрузки. Файлов загружено: %d. Файлов отклонено: %d.", LogLevel.INFO, false);
+        L33("Ошибка при сохранении файла «%s» в каталоге загрузки! %s.", LogLevel.ERROR, true),
+        L34_1("Не указан путь к каталогу загрузки справочников Diasoft! Файл «%s» не сохранен.", LogLevel.ERROR, true),
+        L34_2("Не указан путь к каталогу загрузки для ТБ «%s» в конфигурационных параметрах АС «Учет налогов». Файл «%s» не сохранен.", LogLevel.ERROR, true),
+        L35("Завершена процедура загрузки транспортных файлов в каталог загрузки. Файлов загружено: %d. Файлов отклонено: %d.", LogLevel.INFO, true);
 
         private LogLevel level;
         private String text;
@@ -157,12 +160,20 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                                 // Ошибка копирования сущности из архива
                                 log(userInfo, LogData.L33, logger, entry.getName(), e.getMessage());
                                 fail++;
+                            }  catch (ServiceException se) {
+                                log(userInfo, LogData.L33, logger, entry.getName(), se.getMessage());
+                                fail++;
                             }
+                        } else {
+                            fail++;
                         }
                     }
                 } catch (IOException e) {
                     // Ошибка копирования из архива
                     log(userInfo, LogData.L33, logger, fileName, e.getMessage());
+                    fail++;
+                } catch (ServiceException se) {
+                    log(userInfo, LogData.L33, logger, fileName, se.getMessage());
                     fail++;
                 } finally {
                     IOUtils.closeQuietly(zais);
@@ -188,7 +199,12 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                         // Ошибка копирования файла
                         log(userInfo, LogData.L33, logger, fileName, e.getMessage());
                         fail++;
+                    } catch (ServiceException se) {
+                        log(userInfo, LogData.L33, logger, fileName, se.getMessage());
+                        fail++;
                     }
+                } else {
+                    fail++;
                 }
             }
         } finally {
@@ -294,7 +310,15 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
         }
 
         checkResult.setRefBook(false);
-        Integer departmentTbId = departmentService.getParentTB(formDepartment.getId()).getId();
+
+        // ТБ, к которому относится подразделение, код которого содержится в имени ТФ
+        Department parentTB = departmentService.getParentTB(formDepartment.getId());
+        if(parentTB == null){
+            logger.warn(U4, formType.getName(), formDepartment.getName());
+            return null;
+        }
+        Integer departmentTbId = parentTB.getId();
+
         checkResult.setDepartmentTbId(departmentTbId);
         checkResult.setPath(getUploadPath(userInfo, fileName, ConfigurationParam.FORM_UPLOAD_DIRECTORY, departmentTbId,
                 LogData.L34_2, logger));
@@ -337,12 +361,12 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
         // TODO Указать признак ошибки в ЖА. См. logData.getLevel()
         if (logData.isLogSystem()) {
             Integer departmentId = null;
+            String prefix = "";
             if (userInfo != null) {
                 departmentId = userInfo.getUser().getDepartmentId();
-            }
-            String prefix = "";
-            if (userInfo.getUser().getId() == TAUser.SYSTEM_USER_ID) {
-                prefix = "Событие инициировано Системой. ";
+                if (userInfo.getUser().getId() == TAUser.SYSTEM_USER_ID) {
+                    prefix = "Событие инициировано Системой. ";
+                }
             }
             auditService.add(FormDataEvent.UPLOAD_TRANSPORT_FILE, userInfo, departmentId, null,
                     null, null, null, prefix + String.format(logData.getText(), args), null);

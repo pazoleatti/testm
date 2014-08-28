@@ -1,8 +1,10 @@
 package refbook.account_plan
 
+import com.aplana.sbrf.taxaccounting.log.impl.ScriptMessageDecorator
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.ScriptStatus
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.log.LogMessageDecorator
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion
@@ -34,10 +36,14 @@ switch (formDataEvent) {
 SimpleDateFormat sdf = new SimpleDateFormat('yyyy.MM.dd')
 
 @Field
-def fileRowIndexMap = [:]
+def REF_BOOK_ID = 101L
+
+// текст строго декоратора logger'а
+@Field
+def oldDecoratorMsg = ""
 
 @Field
-def REF_BOOK_ID = 101L
+def BSSCH_FOR_LOG = ""
 
 // Импорт записей из XML-файла
 void importFromXML() {
@@ -46,10 +52,14 @@ void importFromXML() {
     def fileRecords = getFileRecords(inputStream)
 
     def tmpMap = [:]
-    def tmpList = (-10..10)
+    def tmpList = (-9..9)
     tmpList.each {
         tmpMap[it] = []
     }
+
+    // в начало сообщении добавлять «Номер счета <BSSCH>: » (и текст существующего декоратора у logger'а)
+    LogMessageDecorator oldDecorator = logger.getMessageDecorator()
+    logger.setMessageDecorator(getLogMessageDecorator(oldDecorator))
 
     for (def row : fileRecords) {
         def BSSCH    = row?.BSSCH?.value    // Номер счета
@@ -63,14 +73,15 @@ void importFromXML() {
         def isFirstVersionRecord = null
         def isLastVersionRecord = null
         def actualRecordId = null
+        BSSCH_FOR_LOG = BSSCH
 
         // список всех версий записи по номеру счета
         def versionDateMap = getVersionDate(BSSCH, dataProvider)
-        log("=======date = " + date)
+        log("$BSSCH=======date = " + date)
         if (versionDateMap != null) {
             // поиск актуальной версии среди всех версии записи
             actualRecordId = getActualRecordId(versionDateMap, date, dataProvider)
-            log("=======actualRecordId = $actualRecordId")
+            log("$BSSCH=======actualRecordId = $actualRecordId")
             if (actualRecordId) {
                 def recordVersionsFlag = getRecordVersionsFlag(versionDateMap, actualRecordId)
                 isFirstVersionRecord = recordVersionsFlag.isFirst
@@ -84,10 +95,10 @@ void importFromXML() {
 
         if (isNewRecord) {
             // не найдено записей, то по таблице 19:
-            // 7.
-            if (checkEndBegDates(BEG_DATE, END_DATE, BSSCH, fileRowIndexMap)) {
-                tmpMap[7].add(BSSCH)
-                log("$BSSCH=======7. ")
+            // 6.
+            if (checkEndBegDates(BEG_DATE, END_DATE, BSSCH)) {
+                tmpMap[6].add(BSSCH)
+                log("$BSSCH=======6. ")
                 // должны быть выполнены шаги 4-6 сценария [3] раздела 3.1.7.1. -  создания элемента справочника
                 def versionFrom = (BEG_DATE ?: defaultDate)
                 def versionTo = END_DATE
@@ -97,8 +108,8 @@ void importFromXML() {
 
                 dataProvider.createRecordVersion(logger, versionFrom, versionTo, [refBookRecord])
             } else {
-                tmpMap[-7].add(BSSCH)
-                log("$BSSCH=======7 false. ")
+                tmpMap[-6].add(BSSCH)
+                log("$BSSCH=======6 false. ")
             }
             continue
         }
@@ -108,8 +119,8 @@ void importFromXML() {
         def accountName = record?.ACCOUNT_NAME?.value
         RefBookRecordVersion recordVersion = dataProvider.getRecordVersionInfo(actualRecordId)
 
-        log("========recordVersion.versionStart = ${recordVersion.versionStart}")
-        log("========recordVersion.versionEnd   = ${recordVersion.versionEnd}")
+        log("$BSSCH======recordVersion.versionStart = ${recordVersion.versionStart}")
+        log("$BSSCH======recordVersion.versionEnd   = ${recordVersion.versionEnd}")
         log("$BSSCH====== isFirstVersionRecord = $isFirstVersionRecord")
         log("$BSSCH====== isLastVersionRecord = $isLastVersionRecord")
 
@@ -138,7 +149,7 @@ void importFromXML() {
                 continue
             }
         }
-        // 4, 5, 6 - Запись справочника должна быть отредактирована (операцию 5 убрали)
+        // 4, 5 - Запись справочника должна быть отредактирована
         if (NMBSP != accountName) {
             def edit = false
             if (DATE <= BEG_DATE && BEG_DATE == recordVersion.versionStart && END_DATE == recordVersion.versionEnd) {
@@ -148,9 +159,9 @@ void importFromXML() {
                 edit = true
             } else if (isLastVersionRecord && DATE > BEG_DATE && (END_DATE != null && DATE > END_DATE) &&
                     END_DATE == recordVersion.versionEnd) {
-                // операция 6
-                tmpMap[6].add(BSSCH)
-                log("$BSSCH=======6. ")
+                // операция 5
+                tmpMap[5].add(BSSCH)
+                log("$BSSCH=======5. ")
                 edit = true
             }
             if (edit) {
@@ -161,14 +172,34 @@ void importFromXML() {
                 continue
             }
         }
-        // 8.
+        // 7.
         if (DATE <= BEG_DATE && conditionForOperation8(BEG_DATE == recordVersion.versionStart, END_DATE == recordVersion.versionEnd)) {
-            if (checkEndBegDates(BEG_DATE, END_DATE, BSSCH, fileRowIndexMap)) {
-                log("$BSSCH=======8. ")
-                tmpMap[8].add(BSSCH)
-                // операция 8
+            if (checkEndBegDates(BEG_DATE, END_DATE, BSSCH)) {
+                log("$BSSCH=======7. ")
+                tmpMap[7].add(BSSCH)
+                // операция 7
                 // должны быть выполнены шаги 4-8 сценария [3] раздела 3.1.7.3 - редактирование версии элемента справочника
                 def versionFrom = (BEG_DATE ?: defaultDate)
+                def versionTo = END_DATE
+                record?.ACCOUNT_NAME?.value = NMBSP
+
+                dataProvider.updateRecordVersion(logger, recId, versionFrom, versionTo, record)
+            } else {
+                tmpMap[-7].add(BSSCH)
+                log("$BSSCH=======7 false. ")
+            }
+            continue
+        }
+
+        // 8.
+        if (isLastVersionRecord && DATE > BEG_DATE && (END_DATE != null && DATE > END_DATE) &&
+                END_DATE != recordVersion.versionEnd) {
+            if (checkEndBegDates(BEG_DATE, END_DATE, BSSCH)) {
+                tmpMap[8].add(BSSCH)
+                log("$BSSCH=======8. ")
+                // операция 8
+                // должны быть выполнены шаги 4-8 сценария [3] раздела 3.1.7.3 - редактирование версии элемента справочника
+                def versionFrom = recordVersion.versionStart
                 def versionTo = END_DATE
                 record?.ACCOUNT_NAME?.value = NMBSP
 
@@ -181,31 +212,11 @@ void importFromXML() {
         }
 
         // 9.
-        if (isLastVersionRecord && DATE > BEG_DATE && (END_DATE != null && DATE > END_DATE) &&
-                END_DATE != recordVersion.versionEnd) {
-            if (checkEndBegDates(BEG_DATE, END_DATE, BSSCH, fileRowIndexMap)) {
+        if (DATE > BEG_DATE && (END_DATE == null || DATE <= END_DATE)) {
+            if (checkEndBegDates(BEG_DATE, END_DATE, BSSCH)) {
                 tmpMap[9].add(BSSCH)
                 log("$BSSCH=======9. ")
                 // операция 9
-                // должны быть выполнены шаги 4-8 сценария [3] раздела 3.1.7.3 - редактирование версии элемента справочника
-                def versionFrom = recordVersion.versionStart
-                def versionTo = END_DATE
-                record?.ACCOUNT_NAME?.value = NMBSP
-
-                dataProvider.updateRecordVersion(logger, recId, versionFrom, versionTo, record)
-            } else {
-                tmpMap[-9].add(BSSCH)
-                log("$BSSCH=======9 false. ")
-            }
-            continue
-        }
-
-        // 10.
-        if (DATE > BEG_DATE && (END_DATE == null || DATE <= END_DATE)) {
-            if (checkEndBegDates(BEG_DATE, END_DATE, BSSCH, fileRowIndexMap)) {
-                tmpMap[10].add(BSSCH)
-                log("$BSSCH=======10. ")
-                // операция 10
                 // Иначе должны быть выполнены шаги 5 и 6 сценария [3] раздела 3.1.7.2 - создания версии элемента справочника
                 def versionFrom = DATE
                 def versionTo = END_DATE
@@ -216,8 +227,8 @@ void importFromXML() {
 
                 dataProvider.createRecordVersion(logger, versionFrom, versionTo, [refBookRecord])
             } else {
-                tmpMap[-10].add(BSSCH)
-                log("$BSSCH=======10 false. ")
+                tmpMap[-9].add(BSSCH)
+                log("$BSSCH=======9 false. ")
             }
             continue
         }
@@ -234,6 +245,8 @@ void importFromXML() {
     } else {
         scriptStatusHolder.setScriptStatus(ScriptStatus.SUCCESS)
     }
+    // вернуть старый декоратор
+    logger.setMessageDecorator(oldDecorator)
 }
 
 // TODO (Ramil Timerbaev)
@@ -256,13 +269,11 @@ void log(def s, def ...args) {
  * @param BEG_DATE дата начала
  * @param END_DATE дата конца
  * @param BSSCH номер
- * @param fileRowIndexMap мапа с номера строк тф
  * @return true - если ошибки нет, false - если ошибка есть
  */
-def checkEndBegDates(def BEG_DATE,def END_DATE, def BSSCH, fileRowIndexMap) {
+def checkEndBegDates(def BEG_DATE,def END_DATE, def BSSCH) {
     if (END_DATE != null && END_DATE < BEG_DATE) {
-        def index = fileRowIndexMap[BSSCH]
-        logger.error("Строка $index: Запись с (номер счета $BSSCH) не может быть добавлена! Так как период актуальности данной записи некорректен (дата окончания меньше даты начала).")
+        logger.error("Запись не может быть добавлена! Так как период актуальности данной записи некорректен (дата окончания меньше даты начала).")
         return false
     }
     return true
@@ -276,12 +287,9 @@ def getFileRecords(def inputStream) {
     def tableQN = QName.valueOf('table')
     def fieldQN = QName.valueOf('field')
     def recordQN = QName.valueOf('record')
-    def commentQN = QName.valueOf('comment')
 
     def isPlanbs = false // для определения раздела с данными для Плана счетов
     def recordMap = [:]
-    def fileRowIndex = 0
-    fileRowIndexMap = [:]
     def fileRecords = []
 
     def reader
@@ -293,7 +301,6 @@ def getFileRecords(def inputStream) {
 
         // пройтись по файлу и собрать значения
         while (reader.hasNext()) {
-            fileRowIndex++
             if (reader.startElement) {
                 if (!isPlanbs && reader.name.equals(tableQN) && "Planbs" == reader.getAttributeValue(null, 'name')) {
                     // дальше данные Плана счетов
@@ -307,10 +314,6 @@ def getFileRecords(def inputStream) {
                     } else if (value && name in ['DATE', 'BEG_DATE', 'END_DATE']) {
                         recordMap[name] = new RefBookValue(RefBookAttributeType.DATE, sdf.parse(value))
                     }
-                    // определение номера строки в тф
-                    if (name == 'BSSCH') {
-                        fileRowIndexMap[value] = fileRowIndex
-                    }
                 }
             } else if (reader.endElement) {
                 if (isPlanbs && reader.name.equals(tableQN)) {
@@ -319,8 +322,6 @@ def getFileRecords(def inputStream) {
                 } else if (isPlanbs && reader.name.equals(recordQN)) {
                     fileRecords.add(recordMap)
                     recordMap = [:]
-                } else if (reader.name.equals(commentQN)) {
-                    fileRowIndex--
                 }
             }
             reader.next()
@@ -442,4 +443,24 @@ def getActualRecordId(def versionDateMap, def date, def dataProvider) {
         }
     }
     return actualRecordId
+}
+
+/**
+ * Получить новый декоратор для logger'а. Формат сообщения:<br>
+ *     <Тест старого декоратора>: Номер счета <Номер счета>: сообещение
+ *
+ * @param oldDecorator старый декоратор
+ */
+def getLogMessageDecorator(LogMessageDecorator oldDecorator) {
+    if (oldDecorator != null && oldDecorator instanceof ScriptMessageDecorator) {
+        // получить текст строго декоратора
+        oldDecoratorMsg = ((ScriptMessageDecorator) oldDecorator).getScriptName() + ": "
+    }
+    LogMessageDecorator logMessageDecorator = new LogMessageDecorator() {
+        @Override
+        String getDecoratedMessage(String message) {
+            return oldDecoratorMsg + "Номер счета $BSSCH_FOR_LOG: $message"
+        }
+    }
+    return logMessageDecorator
 }

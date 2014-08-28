@@ -48,20 +48,25 @@ public class DeleteCurrentAssignsHandler  extends AbstractActionHandler<DeleteCu
             SourcePair sourcePair;
             if (action.getMode() == SourceMode.SOURCES) {
                 sourcePair = new SourcePair(assign.getId(), action.getDepartmentAssign().getId());
-                sourcePair.setSourceKind(assign.getFormKind());
-                sourcePair.setSourceType(assign.getFormType());
-                sourcePair.setDestinationKind(action.getDepartmentAssign().getKind());
+                sourcePair.setSourceKind(assign.getFormKind().getName());
+                sourcePair.setSourceType(assign.getFormType().getName());
                 if (action.isDeclaration()) {
-                    sourcePair.setDestinationDeclarationType(sourceService.getDeclarationType(action.getDepartmentAssign().getTypeId()));
+                    sourcePair.setDestinationType(sourceService.getDeclarationType(action.getDepartmentAssign().getTypeId()).getName());
                 } else {
-                    sourcePair.setDestinationFormType(sourceService.getFormType(action.getDepartmentAssign().getTypeId()));
+                    sourcePair.setDestinationType(sourceService.getFormType(action.getDepartmentAssign().getTypeId()).getName());
+                    sourcePair.setDestinationKind(action.getDepartmentAssign().getKind().getName());
                 }
             } else {
                 sourcePair = new SourcePair(action.getDepartmentAssign().getId(), assign.getId());
-                sourcePair.setSourceKind(action.getDepartmentAssign().getKind());
-                sourcePair.setSourceType(sourceService.getFormType(action.getDepartmentAssign().getTypeId()));
-                sourcePair.setDestinationKind(assign.getFormKind());
-                sourcePair.setDestinationFormType(assign.getFormType());
+                sourcePair.setSourceKind(action.getDepartmentAssign().getKind().getName());
+                sourcePair.setSourceType(sourceService.getFormType(action.getDepartmentAssign().getTypeId()).getName());
+                sourcePair.setDestinationType(assign.getFormType().getName());
+                if (action.isDeclaration()) {
+                    sourcePair.setDestinationType(assign.getDeclarationType().getName());
+                } else {
+                    sourcePair.setDestinationType(assign.getFormType().getName());
+                    sourcePair.setDestinationKind(assign.getFormKind().getName());
+                }
             }
             SourceObject sourceObject = new SourceObject(sourcePair, assign.getStartDateAssign(), assign.getEndDateAssign());
             sourceObjects.add(sourceObject);

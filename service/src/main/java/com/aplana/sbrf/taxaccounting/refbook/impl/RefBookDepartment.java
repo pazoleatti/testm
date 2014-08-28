@@ -57,12 +57,6 @@ public class RefBookDepartment implements RefBookDataProvider {
     private static final String WARN_MESSAGE_SOURCE =
             "Внимание! Форма %s подразделения %s при сохранении будет являться источником для формы %s подразделения %s, относящимся к разным территориальным банкам";
 
-
-    public static final String DESTINATION_FTS = "destinationFTs";
-    public static final String SOURCE_FTS = "sourceFTs";
-    public static final String DESTINATION_DTS = "destinationDTs";
-    public static final String SOURCE_DTS = "sourceDTs";
-
     @Autowired
     RefBookDao refBookDao;
     @Autowired
@@ -273,11 +267,12 @@ public class RefBookDepartment implements RefBookDataProvider {
                 int depId = refBookDepartmentDao.create(refBookValueMap, attributes);
                 int terrBankId = departmentService.getParentTB(depId) != null ? departmentService.getParentTB(depId).getId() : 0;
                 createPeriods(depId, fromCode(refBookValueMap.get(DEPARTMENT_TYPE_ATTRIBUTE).getReferenceValue().intValue()),
-                        terrBankId, logger);
+                        terrBankId);
                 if (logger.containsLevel(LogLevel.ERROR))
                     throw new ServiceLoggerException("Подразделение не создано, обнаружены фатальные ошибки!",
                             logEntryService.save(logger.getEntries()));
 
+                logger.info("Подразделение создано");
                 auditService.add(FormDataEvent.ADD_DEPARTMENT, logger.getTaUserInfo(), 0,
                         null, null, null, null,
                         String.format("Создано подразделение %s, значения атрибутов: %s",
@@ -350,7 +345,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                                 departmentService.getParentTB(records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue().intValue()) :
                                 departmentService.getBankDepartment();
                 int newTBId = newTb != null ? newTb.getId() : uniqueRecordId.intValue();
-                boolean isChangeTB = oldTBId != newTBId;
+                boolean isChangeTB = oldTBId != 0 && oldTBId != newTBId;
 
                 if (isChangeTB)
                     throw new ServiceLoggerException("Невозможно переместить подразделение в состав другого территориального банка!",
@@ -365,16 +360,17 @@ public class RefBookDepartment implements RefBookDataProvider {
                                     logEntryService.save(logger.getEntries()));
                             //4 шаг
                         case TERR_BANK:
-                            List<ReportPeriod> openReportPeriods =
-                                    new ArrayList<ReportPeriod>(periodService.getOpenPeriodsByTaxTypeAndDepartments(TaxType.TRANSPORT, Arrays.asList(uniqueRecordId.intValue()), true, true));
+                            List<ReportPeriod> openReportPeriods = new ArrayList<ReportPeriod>(0);
+                            openReportPeriods.addAll(periodService.getOpenPeriodsByTaxTypeAndDepartments(TaxType.TRANSPORT, Arrays.asList(uniqueRecordId.intValue()), true, true));
                             openReportPeriods.addAll(periodService.getOpenPeriodsByTaxTypeAndDepartments(TaxType.PROPERTY, Arrays.asList(uniqueRecordId.intValue()), true, true));
                             if (!openReportPeriods.isEmpty()){
                                 for (ReportPeriod period : openReportPeriods)
                                     logger.warn(
-                                            "Для подразделения %s для налога %s открыт период %s",
+                                            "Для подразделения %s для налога %s уже открыт период %s для %d",
                                             dep.getName(),
                                             period.getTaxPeriod().getTaxType().getName(),
-                                            period.getName());
+                                            period.getName(),
+                                            period.getTaxPeriod().getYear());
                                 throw new ServiceLoggerException("Подразделению не может быть изменен тип \"ТБ\", если для него существует период!",
                                         logEntryService.save(logger.getEntries()));
                             }
@@ -410,78 +406,21 @@ public class RefBookDepartment implements RefBookDataProvider {
                 //7
                 if (versionFrom != null){
                     if (oldType != TERR_BANK){
-                        //7А.3.1.1А  (7А.3.1.1А.1 - 7А.3.1.1А.5)
-                        if (isChangeTB){
-                            formDataService.updateFDTBNames(newTBId, oldTBId, versionFrom, versionTo);
-                        }
-                        //7А.3.1.2
-                        formDataService.updateFDDepartmentNames(dep.getId(), records.get(DEPARTMENT_TYPE_ATTRIBUTE).getStringValue(), versionFrom, versionTo);
+                        //11А.3.1
+                        formDataService.updateFDDepartmentNames(dep.getId(), records.get(DEPARTMENT_NAME_ATTRIBUTE).getStringValue(), versionFrom, versionTo);
+                    }else {
+                        //11А.3.1А
+                        formDataService.updateFDTBNames(dep.getId(), records.get(DEPARTMENT_NAME_ATTRIBUTE).getStringValue(), versionFrom, versionTo);
                     }
                 }
 
                 //9 шаг. Проверка зацикливания
-                if (dep.getType() != DepartmentType.ROOT_BANK && dep.getParentId() != (parentDep != null ? parentDep.getId() : 0)){
+                if (dep.getType() != DepartmentType.ROOT_BANK && dep.getParentId() != null && dep.getParentId() != (parentDep != null ? parentDep.getId() : 0)){
                     checkCycle(dep, parentDep, logger);
                     if (logger.containsLevel(LogLevel.ERROR))
                         throw new ServiceLoggerException(ERROR_MESSAGE,
                                 logEntryService.save(logger.getEntries()));
                 }
-
-                //10 шаг
-                //Временно коммнтим до 0.3.9
-                /*if (isChangeTB){
-                    //8A.1
-                    if (!formDataService.existFormDataByTaxAndDepartment(Arrays.asList(TaxType.PROPERTY, TaxType.TRANSPORT), Arrays.asList(dep.getId())) ||
-                            declarationDataSearchService.getDeclarationIds(
-                                    new DeclarationDataFilter(){{
-                                        setTaxType(TaxType.PROPERTY);
-                                        setDepartmentIds(Arrays.asList(dep.getId()));
-                                    }},
-                            DeclarationDataSearchOrdering.ID, true).isEmpty() ||  declarationDataSearchService.getDeclarationIds(
-                            new DeclarationDataFilter(){{
-                                setTaxType(TaxType.TRANSPORT);
-                                setDepartmentIds(Arrays.asList(dep.getId()));
-                            }},
-                            DeclarationDataSearchOrdering.ID, true).isEmpty()){
-                        //10A 1.1, 10А.1.1А
-
-                        Map<String, List> sourcesDestinations = sourceService.getSourcesDestinations(uniqueRecordId.intValue(), newTBId, Arrays.asList(TaxType.TRANSPORT, TaxType.PROPERTY));
-                        List<Pair<DepartmentFormType, DepartmentFormType>> destinationFTs = sourcesDestinations.get(DESTINATION_FTS);
-                        List<Pair<DepartmentFormType, DepartmentFormType>> sourceFTs = sourcesDestinations.get(SOURCE_FTS);
-                        List<Pair<DepartmentFormType, DepartmentDeclarationType>> destinationDTs = sourcesDestinations.get(DESTINATION_DTS);
-                        List<Pair<DepartmentFormType, DepartmentDeclarationType>> sourceDTs = sourcesDestinations.get(SOURCE_DTS);
-                        for (Pair<DepartmentFormType, DepartmentFormType> destinationDFTPair : destinationFTs){
-                            logger.warn(WARN_MESSAGE_TARGET,
-                                    formTypeService.get(destinationDFTPair.getSecond().getFormTypeId()).getName(),
-                                    departmentService.getDepartment(destinationDFTPair.getSecond().getDepartmentId()).getName(),
-                                    formTypeService.get(destinationDFTPair.getFirst().getFormTypeId()).getName(),
-                                    departmentService.getDepartment(newTBId).getName());
-                        }
-                        for (Pair<DepartmentFormType, DepartmentFormType> sourceDFTPair : sourceFTs){
-                            logger.warn(WARN_MESSAGE_SOURCE,
-                                    formTypeService.get(sourceDFTPair.getFirst().getFormTypeId()).getName(),
-                                    departmentService.getDepartment(sourceDFTPair.getFirst().getDepartmentId()).getName(),
-                                    formTypeService.get(sourceDFTPair.getSecond().getFormTypeId()).getName(),
-                                    departmentService.getDepartment(newTBId).getName());
-                        }
-                        for (Pair<DepartmentFormType, DepartmentDeclarationType> destinationDDTPair : destinationDTs){
-                            logger.warn(WARN_MESSAGE_TARGET,
-                                    declarationTypeService.get(destinationDDTPair.getSecond().getDeclarationTypeId()).getName(),
-                                    departmentService.getDepartment(destinationDDTPair.getSecond().getDepartmentId()).getName(),
-                                    formTypeService.get(destinationDDTPair.getFirst().getFormTypeId()).getName(),
-                                    departmentService.getDepartment(newTBId).getName());
-                        }
-                        for (Pair<DepartmentFormType, DepartmentDeclarationType> sourceDDTPair : sourceDTs){
-                            logger.warn(WARN_MESSAGE_SOURCE,
-                                    formTypeService.get(sourceDDTPair.getFirst().getFormTypeId()).getName(),
-                                    departmentService.getDepartment(sourceDDTPair.getFirst().getDepartmentId()).getName(),
-                                    declarationTypeService.get(sourceDDTPair.getSecond().getDeclarationTypeId()).getName(),
-                                    departmentService.getDepartment(newTBId).getName());
-                        }
-                        createPeriods(uniqueRecordId, newType, newTBId, logger);
-                    }
-                }*/
-
 
                 //Сохранение
                 refBookDepartmentDao.update(uniqueRecordId.intValue(), records, refBook.getAttributes());
@@ -553,6 +492,11 @@ public class RefBookDepartment implements RefBookDataProvider {
                 }
 
                 int depId = uniqueRecordIds.get(0).intValue();
+                List<Integer> childIds = departmentService.getAllChildrenIds(depId);
+                if (!childIds.isEmpty() && childIds.size() > 1){
+                    logger.error("Обнаружены подчиненные подразделения для %s", departmentService.getDepartment(depId).getName());
+                    throw new ServiceLoggerException("Подразделение не удалено!", logEntryService.save(logger.getEntries()));
+                }
                 isInUsed(departmentService.getDepartment(depId), logger);
                 if (logger.containsLevel(LogLevel.ERROR) || logger.containsLevel(LogLevel.WARNING) && !force)
                     return;
@@ -611,7 +555,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                     provider.deleteRecordVersions(logger, uniqueIds, false);
                 } */
 
-                deletePeriods(depId, logger);
+                deletePeriods(depId);
 
                 auditService.add(FormDataEvent.DELETE_DEPARTMENT, logger.getTaUserInfo(), 0, null, null, null, null,
                         String.format("Удалено подразделение %s", departmentService.getParentsHierarchy(depId)), null);
@@ -666,6 +610,10 @@ public class RefBookDepartment implements RefBookDataProvider {
             return;
         }
 
+        if (type != DepartmentType.ROOT_BANK && parentDepartmentId == null){
+            logger.error("Для подразделения должен быть указан код родительского подразделения!");
+            return;
+        }
         if (rootBank != null && type == DepartmentType.ROOT_BANK && (recordId == null || rootBank.getId() != recordId.intValue())){
             logger.error("Подразделение с типом \"Банк\" уже существует!");
             return;
@@ -737,7 +685,7 @@ public class RefBookDepartment implements RefBookDataProvider {
     }
 
     //http://conf.aplana.com/pages/viewpage.action?pageId=11402881
-    private void createPeriods(long depId, DepartmentType newDepartmentType, int terrBankId, Logger logger){
+    private void createPeriods(long depId, DepartmentType newDepartmentType, int terrBankId){
         //1
         if (newDepartmentType != DepartmentType.TERR_BANK){
             if (departmentService.getParentTB((int) depId) != null){
@@ -757,7 +705,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                         drpCopy.setActive(drp.isActive());
                         drpCopy.setCorrectPeriod(drp.getCorrectPeriod());
                         drpCopy.setBalance(drp.isBalance());
-                        periodService.saveOrUpdate(drpCopy, null, logger.getEntries());
+                        periodService.saveOrUpdate(drpCopy, null, null);
                     }
                     return;
                 }
@@ -779,7 +727,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                 drpCopy.setActive(drp.isActive());
                 drpCopy.setCorrectPeriod(null);
                 drpCopy.setBalance(drp.isBalance());
-                periodService.saveOrUpdate(drpCopy, null, logger.getEntries());
+                periodService.saveOrUpdate(drpCopy, null, null);
             }
         }
     }
@@ -883,13 +831,13 @@ public class RefBookDepartment implements RefBookDataProvider {
             logger.warn("Заданы пути к каталогам транспортных файлов для %s!", department.getName());
     }
 
-    private void deletePeriods(int depId, Logger logger){
+    private void deletePeriods(int depId){
         List<Long> reportPeriods =
                 refBookDepartmentDao.getPeriodsByTaxTypesAndDepartments(
                         Arrays.asList(TaxType.values()),
                         Arrays.asList(depId));
         for (Long id : reportPeriods){
-            periodService.removePeriodWithLog(id.intValue(), null, Arrays.asList(depId), null, logger.getEntries());
+            periodService.removePeriodWithLog(id.intValue(), null, Arrays.asList(depId), null, null);
         }
 
     }

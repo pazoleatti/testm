@@ -254,16 +254,16 @@ public interface FormDataService {
     boolean existFormDataByTaxAndDepartment(List<TaxType> taxTypes, List<Integer> departmentIds);
 
     /**
-     * Обновляет имена террбанков в печатных формах(полях для печатных форм, первая часть)
-     * @param newDepTBId новый террбанк
-     * @param oldDepTBId террбанк, который был
+     * Обновляет имена тербанков в печатных формах(полях для печатных форм)
+     * @param depTBId идентификатор редактируемого подразделения
+     * @param depName новое наименование
      * @param dateFrom дата отчетного периода, начиная с которой надл=о поменять наименование отчетного периода
      * @param dateTo
      */
-    void updateFDTBNames(int newDepTBId, int oldDepTBId, Date dateFrom, Date dateTo);
+    void updateFDTBNames(int depTBId,  String depName, Date dateFrom, Date dateTo);
 
     /**
-     * Обновляет имена террбанков в печатных формах(полях для печатных форм, вторая часть имени)
+     * Обновляет имена тербанков в печатных формах(полях для печатных форм, вторая часть имени)
      * @param depTBId идентификатор редактируемого подразделения
      * @param depName новое наименование
      * @param dateFrom дата отчетного периода, начиная с которой надо поменять наименование отчетного периода
@@ -281,9 +281,14 @@ public interface FormDataService {
     /**
      * Обновить Номер последней строки предыдущей НФ
      * @param formData экземпляр НФ, для которой необходимо обновить
-     * @return
      */
-    String updatePreviousRowNumber(FormData formData);
+    void updatePreviousRowNumber(FormData formData, Logger logger);
+
+    /**
+     * Обновить Номер последней строки предыдущей НФ
+     * @param formData экземпляр НФ, для которой необходимо обновить
+     */
+    void updatePreviousRowNumber(FormData formData);
 
     /**
      * Получить налоговые формы которые имеют признак ручного ввода

@@ -492,7 +492,7 @@ void importData() {
 }
 
 void importTransportData() {
-    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName, 8, 1)
 
     // загрузить данные
     addTransportData(xml)

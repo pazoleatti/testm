@@ -81,10 +81,10 @@ public interface ReportPeriodDao {
 	ReportPeriod getReportPeriodByDate(TaxType taxType, Date date);
 
 	/**
-	 * Поиск отчетных периодов за период дат
+	 * Возвращает все периоды которые либо пересекаются с указанным диапазоном дат, либо полностью находятся внутри него
 	 * @param taxType
-	 * @param startDate
-	 * @param endDate
+	 * @param startDate начало диапазона
+	 * @param endDate конец диапазона
 	 * @return
 	 */
 	List<ReportPeriod> getReportPeriodsByDate(TaxType taxType, Date startDate, Date endDate);
@@ -114,6 +114,15 @@ public interface ReportPeriodDao {
      * @return список закрытых периодов, где существует экземпляр НФ данной версии
      */
     List<ReportPeriod> getClosedPeriodsForFormTemplate(Integer formTemplateId);
+
+    /**
+     * Получить список периодов входящих между данными датами
+     * @param taxType
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    List<ReportPeriod> getReportPeriodsInRange(TaxType taxType, Date startDate, Date endDate);
 
     /**
      * Отчетный период по коду и году

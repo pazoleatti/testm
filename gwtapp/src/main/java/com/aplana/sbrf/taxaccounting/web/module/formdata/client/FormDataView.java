@@ -54,7 +54,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     private TaxType taxType;
     private boolean fixedRows;
     // флаг что нужно заскролить к выделенной строке, используется для формы поиска
-    private boolean needScrollToRow = false;
+    private Integer needScrollToRow = null;
     // содержит ссылку на предыдуще выделенную строку при использовании NoSelectionModel
     private DataRow<Cell> prevSelectedRow = null;
 
@@ -202,7 +202,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
                     if (Element.is(eventTarget)) {
                         Element target = Element.as(eventTarget);
                         if ("td".equals(target.getTagName().toLowerCase())) {
-                            TableCellElement cellElement = formDataTable.getRowElement(event.getIndex()).getCells().getItem(event.getColumn());
+                            TableCellElement cellElement = formDataTable.getRowElement(event.getIndex() - 1 - formDataTable.getPageStart()).getCells().getItem(event.getColumn());
                             if (cellElement.getInnerText().replace("\u00A0", "").trim().isEmpty()) {
                                 cellElement.removeAttribute("title");
                             } else {
@@ -326,9 +326,11 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	public void setRowsData(int start, int totalCount, List<DataRow<Cell>> rowsData) {
 		formDataTable.setRowCount(totalCount);
 		formDataTable.setRowData(start, rowsData);
-        if (needScrollToRow && !fixedRows && getSelectedRow() != null) {
-            this.needScrollToRow = false;
-            formDataTable.getRowElement(singleSelectionModel.getSelectedObject().getIndex() - start).scrollIntoView();
+        if (needScrollToRow != null && !fixedRows) {
+            selectRow(needScrollToRow);
+            formDataTable.setKeyboardSelectedRow(needScrollToRow - 1 - formDataTable.getPageStart());
+            formDataTable.setKeyboardSelectedColumn(0);
+            needScrollToRow = null;
         }
     }
 
@@ -665,7 +667,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
 	@Override
 	public void assignDataProvider(int pageSize) {
-        formDataTable.setPageSize(pageSize);
+        pager.setPageSize(pageSize);
 		if(!dataProvider.getDataDisplays().contains(formDataTable)) {
 			dataProvider.addDataDisplay(formDataTable);
 		}
@@ -734,19 +736,25 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
         if (fixedRows){
             formDataTable.setKeyboardSelectedRow(rowIndex.intValue() - 1);
         } else {
-            DataRow<Cell> row = new DataRow<Cell>();
-            row.setIndex(rowIndex.intValue());
-            singleSelectionModel.setSelected(row, true);
-
+            singleSelectionModel.clear();
             // go to essential page
-            Long page = rowIndex / pager.getPageSize() + (rowIndex % pager.getPageSize() > 0 ? 1:0) - 1;
+            Long page = (rowIndex - 1) / getPageSize();
             if (pager.getPage() != page.intValue()){
-                this.needScrollToRow = true;
+                this.needScrollToRow = rowIndex.intValue();
                 pager.setPage(page.intValue());
             } else {
-                formDataTable.getRowElement(singleSelectionModel.getSelectedObject().getIndex() - pager.getPageStart()).scrollIntoView();
+                selectRow(rowIndex.intValue());
+                formDataTable.setKeyboardSelectedRow(rowIndex.intValue() - 1 - formDataTable.getPageStart());
+                formDataTable.setKeyboardSelectedColumn(0);
             }
         }
+    }
+
+    void selectRow(int rowIndex) {
+        List<DataRow<Cell>> rows = formDataTable.getVisibleItems();
+        for (DataRow<Cell> cell: rows)
+            if (cell.getIndex()==rowIndex)
+                singleSelectionModel.setSelected(cell, true);
     }
 
     @Override

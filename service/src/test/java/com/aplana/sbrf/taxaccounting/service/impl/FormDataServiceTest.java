@@ -10,9 +10,12 @@ import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.impl.eventhandler.EventLauncher;
 import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.InOrder;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.context.ApplicationContext;
@@ -21,31 +24,23 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
-public class FormDataServiceTest {
+public class FormDataServiceTest extends Assert {
 
     private final FormDataServiceImpl formDataService = new FormDataServiceImpl();
 
     private FormTemplate formTemplate;
 
-    private FormTemplateService formTemplateService;
-
     private FormDataDao formDataDao;
 
     private DataRowDao dataRowDao;
 
-    private FormData formData;
+    private FormTemplateService formTemplateService;
 
-    private ReportPeriod reportPeriod;
-
-    private PeriodService reportPeriodService;
+    private FormDataAccessService formDataAccessService;
 
     private static final int FORM_TEMPLATE_ID = 1;
-    private static final int DEPARTMENT_ID = 1;
-    private static final int REPORT_PERIOD_ID = 1;
 
     @Before
     public void init() {
@@ -63,22 +58,36 @@ public class FormDataServiceTest {
         taxPeriod.setYear(2014);
         taxPeriod.setTaxType(TaxType.INCOME);
 
-        reportPeriod = new ReportPeriod();
+        ReportPeriod reportPeriod = new ReportPeriod();
         reportPeriod.setTaxPeriod(taxPeriod);
 
         // Mock
         formDataDao = mock(FormDataDao.class);
         dataRowDao = mock(DataRowDao.class);
-        reportPeriodService = mock(PeriodService.class);
+        PeriodService reportPeriodService = mock(PeriodService.class);
         formTemplateService = mock(FormTemplateService.class);
+        LockCoreService lockCoreService = mock(LockCoreService.class);
+        formDataAccessService = mock(FormDataAccessService.class);
         DepartmentDao departmentDao = mock(DepartmentDao.class);
-        formData = mock(FormData.class);
+        FormData formData = mock(FormData.class);
+        FormDataScriptingService formDataScriptingService = mock(FormDataScriptingService.class);
+        LogBusinessService logBusinessService = mock(LogBusinessService.class);
+        AuditService auditService = mock(AuditService.class);
+        LogEntryService logEntryService = mock(LogEntryService.class);
+        EventLauncher eventHandlerLauncher = mock(EventLauncher.class);
 
         ReflectionTestUtils.setField(formDataService, "formDataDao", formDataDao);
         ReflectionTestUtils.setField(formDataService, "dataRowDao", dataRowDao);
         ReflectionTestUtils.setField(formDataService, "reportPeriodService", reportPeriodService);
         ReflectionTestUtils.setField(formDataService, "formTemplateService", formTemplateService);
         ReflectionTestUtils.setField(formDataService, "departmentDao", departmentDao);
+        ReflectionTestUtils.setField(formDataService, "lockCoreService", lockCoreService);
+        ReflectionTestUtils.setField(formDataService, "formDataAccessService", formDataAccessService);
+        ReflectionTestUtils.setField(formDataService, "formDataScriptingService", formDataScriptingService);
+        ReflectionTestUtils.setField(formDataService, "logBusinessService", logBusinessService);
+        ReflectionTestUtils.setField(formDataService, "auditService", auditService);
+        ReflectionTestUtils.setField(formDataService, "logEntryService", logEntryService);
+        ReflectionTestUtils.setField(formDataService, "eventHandlerLauncher", eventHandlerLauncher);
 
         when(reportPeriodService.getTaxPeriod(anyInt())).thenReturn(taxPeriod);
         when(formData.getReportPeriodId()).thenReturn(1);
@@ -287,7 +296,7 @@ public class FormDataServiceTest {
         newFormData.setReportPeriodId(1);
         newFormData.setKind(FormDataKind.PRIMARY);
 
-        when(formDataDao.getPrevFormDataListForCrossNumeration(any(FormData.class),anyInt(), anyString()))
+        when(formDataDao.getPrevFormDataListForCrossNumeration(any(FormData.class), any(TaxPeriod.class)))
                 .thenReturn(new ArrayList<FormData>());
         assertTrue("\"Номер последней строки предыдущей НФ\" должен быть равен 0",
                 formDataService.getPreviousRowNumber(newFormData).equals(0));
@@ -324,7 +333,7 @@ public class FormDataServiceTest {
         formDataList.add(formData);
         formDataList.add(formData1);
 
-        when(formDataDao.getPrevFormDataListForCrossNumeration(any(FormData.class), anyInt(), anyString()))
+        when(formDataDao.getPrevFormDataListForCrossNumeration(any(FormData.class), any(TaxPeriod.class)))
                 .thenReturn(formDataList);
         when(dataRowDao.getSizeWithoutTotal(formData, null)).thenReturn(3);
         when(dataRowDao.getSizeWithoutTotal(formData1, null)).thenReturn(5);
@@ -365,7 +374,7 @@ public class FormDataServiceTest {
         formDataList.add(formData);
         formDataList.add(formData1);
 
-        when(formDataDao.getPrevFormDataListForCrossNumeration(any(FormData.class), anyInt(), anyString()))
+        when(formDataDao.getPrevFormDataListForCrossNumeration(any(FormData.class), any(TaxPeriod.class)))
                 .thenReturn(formDataList);
         when(dataRowDao.getSizeWithoutTotal(formData, null)).thenReturn(3);
         when(dataRowDao.getSizeWithoutTotal(formData1, null)).thenReturn(5);
@@ -374,4 +383,164 @@ public class FormDataServiceTest {
                 formDataService.getPreviousRowNumber(newFormData).equals(3));
     }
 
+    /**
+     * Проверка обновления атрибутов "Номер последней строки предыдущей НФ" при сохранении
+     * 1. Не учитывается в сквозной нумерации
+     * 2. Количество строк в табличной части до и после редактирования не изменилось
+     */
+    @Test
+    public void testUpdatePreviousRowNumberAttrWhenSave1() {
+        FormData formData = mock(FormData.class);
+        FormDataServiceImpl dataService = spy(formDataService);
+
+        doReturn(false).when(dataService).beInOnAutoNumeration(any(FormData.class));
+        doReturn(false).when(dataRowDao).isDataRowsCountChanged(anyLong());
+
+        dataService.updatePreviousRowNumberAttr(formData, eq(any(Logger.class)));
+        verify(dataService, never()).updatePreviousRowNumber(any(FormData.class), any(Logger.class));
+    }
+
+    /**
+     * Проверка обновления атрибутов "Номер последней строки предыдущей НФ" при сохранении
+     * 1. Учитывается в сквозной нумерации
+     * 2. Количество строк в табличной части до и после редактирования не изменилось
+     */
+    @Test
+     public void testUpdatePreviousRowNumberAttrWhenSave2() {
+        FormData formData = mock(FormData.class);
+        FormDataServiceImpl dataService = spy(formDataService);
+
+        doReturn(true).when(dataService).beInOnAutoNumeration(any(FormData.class));
+        doReturn(false).when(dataRowDao).isDataRowsCountChanged(anyLong());
+        doReturn(1L).when(formData).getId();
+
+        dataService.updatePreviousRowNumberAttr(formData, eq(any(Logger.class)));
+        verify(dataService, never()).updatePreviousRowNumber(any(FormData.class), any(Logger.class));
+    }
+
+    /**
+     * Проверка обновления атрибутов "Номер последней строки предыдущей НФ" при сохранении
+     * 1. Учитывается в сквозной нумерации (статус "Создана")
+     * 2. Количество строк в табличной части до и после редактирования изменилось
+     */
+    @Test
+    public void testUpdatePreviousRowNumberAttrWhenSave3() {
+        FormData formData = mock(FormData.class);
+        FormDataServiceImpl dataService = spy(formDataService);
+
+        doReturn(true).when(dataService).beInOnAutoNumeration(formData);
+        doReturn(true).when(dataRowDao).isDataRowsCountChanged(anyLong());
+        doReturn(1L).when(formData).getId();
+        doReturn(WorkflowState.CREATED).when(formData).getState();
+
+        dataService.updatePreviousRowNumberAttr(formData, eq(any(Logger.class)));
+        verify(dataService, times(1)).updatePreviousRowNumber(any(FormData.class), any(Logger.class));
+    }
+
+    /**
+     * Проверка обновления атрибутов "Номер последней строки предыдущей НФ" при переходе по ЖЦ
+     * 1. Переход не инициирует обновление атрибутов
+     */
+    @Test
+    public void testUpdatePreviousRowNumberAttrWhenDoMove1() {
+        FormDataServiceImpl dataService = spy(formDataService);
+
+        doReturn(false).when(dataService).canUpdatePreviousRowNumberWhenDoMove(any(WorkflowMove.class));
+
+        dataService.updatePreviousRowNumberAttr(any(FormData.class), any(WorkflowMove.class), any(Logger.class));
+        verify(dataService, never()).updatePreviousRowNumber(any(FormData.class), any(Logger.class));
+    }
+
+    /**
+     * Проверка обновления атрибутов "Номер последней строки предыдущей НФ" при переходе по ЖЦ
+     * 1. Переход инициирует обновление атрибутов
+     */
+    @Test
+    public void testUpdatePreviousRowNumberAttrWhenDoMove2() {
+        FormData formData = mock(FormData.class);
+        Logger logger = mock(Logger.class);
+        FormDataServiceImpl dataService = spy(formDataService);
+
+        doReturn(true).when(dataService).canUpdatePreviousRowNumberWhenDoMove(any(WorkflowMove.class));
+
+        dataService.updatePreviousRowNumberAttr(formData, WorkflowMove.ACCEPTED_TO_APPROVED, logger);
+        verify(dataService, times(1)).updatePreviousRowNumber(any(FormData.class), any(Logger.class));
+    }
+
+    /**
+     * При сохранении экземпляра НФ обновление атрибута "Номер последней строки предыдущей НФ" важен порядок вызова методов.
+     */
+    @Test
+    public void testSaveFormDataMethodsInvokeOrder() {
+        Logger logger = mock(Logger.class);
+        TAUserInfo userInfo = mock(TAUserInfo.class);
+        FormData formData = getFormData();
+
+        FormDataServiceImpl dataService = spy(formDataService);
+        dataService.saveFormData(logger, userInfo, formData);
+
+        InOrder inOrder = inOrder(dataService, formDataDao);
+
+        inOrder.verify(dataService, times(1)).updatePreviousRowNumberAttr(formData, logger);
+        inOrder.verify(formDataDao, times(1)).save(formData);
+    }
+
+    /**
+     * "Номер последней строки предыдущей НФ" обновляется для последующих экземпляров НФ текущей сквозной нумерации
+     * только при переходах по ЖЦ:
+     * 1. из состояния "Создана" в любое состояние
+     * 2. из любого состояния в состояние "Создана"
+     */
+    @Test
+    public void testCanUpdateAutoNumerationWhenDoMove() {
+        assertTrue(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.CREATED_TO_PREPARED));
+        assertTrue(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.CREATED_TO_ACCEPTED));
+        assertTrue(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.CREATED_TO_APPROVED));
+        assertTrue(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.PREPARED_TO_CREATED));
+        assertTrue(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.ACCEPTED_TO_CREATED));
+        assertTrue(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.APPROVED_TO_CREATED));
+
+        assertFalse(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.PREPARED_TO_ACCEPTED));
+        assertFalse(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.PREPARED_TO_APPROVED));
+        assertFalse(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.ACCEPTED_TO_APPROVED));
+        assertFalse(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.ACCEPTED_TO_PREPARED));
+        assertFalse(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.APPROVED_TO_ACCEPTED));
+        assertFalse(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.APPROVED_TO_PREPARED));
+    }
+
+    /**
+     * Экземпляры в статусе "Создана" не участвуют в сквозной нумерации
+     */
+    @Test
+    public void testBeInOnAutoNumeration() {
+        FormData formData = new FormData();
+        formData.setState(WorkflowState.CREATED);
+        assertFalse("Не должен участвовать в сквозной нумерации", formDataService.beInOnAutoNumeration(formData));
+
+        FormData formData1 = new FormData();
+        formData1.setState(WorkflowState.ACCEPTED);
+        assertTrue("Должен участвовать в сквозной нумерации", formDataService.beInOnAutoNumeration(formData1));
+
+        FormData formData2 = new FormData();
+        formData2.setState(WorkflowState.APPROVED);
+        assertTrue("Должен участвовать в сквозной нумерации", formDataService.beInOnAutoNumeration(formData2));
+
+        FormData formData3 = new FormData();
+        formData3.setState(WorkflowState.PREPARED);
+        assertTrue("Должен участвовать в сквозной нумерации", formDataService.beInOnAutoNumeration(formData3));
+    }
+
+    private FormData getFormData() {
+        FormType formType = new FormType();
+        formType.setId(1);
+
+        FormData formData = new FormData();
+        formData.setId(1L);
+        formData.setReportPeriodId(2);
+        formData.setDepartmentId(1);
+        formData.setFormType(formType);
+        formData.setKind(FormDataKind.PRIMARY);
+        formData.setManual(false);
+        return formData;
+    }
 }

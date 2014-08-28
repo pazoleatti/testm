@@ -31,6 +31,8 @@ insert into form_data(id, form_template_id, department_id, state, kind, report_p
 insert into form_data(id, form_template_id, department_id, state, kind, report_period_id, return_sign, period_order) values (20, 2, 1, 1, 1, 15, 0, 6);
 
 insert into form_data_performer(form_data_id, name, phone, PRINT_DEPARTMENT_ID, REPORT_DEPARTMENT_NAME) values (11, 'Bank', '', 1, 'Bank/Uralsib');
+insert into form_data_performer(form_data_id, name, phone, PRINT_DEPARTMENT_ID, REPORT_DEPARTMENT_NAME) values (12, 'Bank', '', 2, 'BankTB1');
+insert into form_data_performer(form_data_id, name, phone, PRINT_DEPARTMENT_ID, REPORT_DEPARTMENT_NAME) values (13, 'Bank', '', 3, 'BankTB1k/Uralsib');
 
 -- Для автонумеруемой графы
 insert into tax_period(id, tax_type, year) values (100, 'I', 2014);
@@ -46,3 +48,10 @@ insert into form_data(id, form_template_id, department_id, state, kind, report_p
 
 insert into form_data(id, form_template_id, department_id, state, kind, report_period_id, return_sign, period_order) values (304, 1, 2, 1, 1, 200, 0, 1);
 insert into form_data(id, form_template_id, department_id, state, kind, report_period_id, return_sign, period_order) values (305, 2, 2, 1, 1, 200, 0, 1);
+
+-- Для проверки изменения количества строк в табличной части НФ
+insert into form_data(id, form_template_id, department_id, state, kind, report_period_id, return_sign) values (1000, 1, 1, 1, 3, 1, 0);
+insert into data_row(id, form_data_id, alias, ord, type) values (1, 1000, null, 1, 0);
+insert into data_row(id, form_data_id, alias, ord, type) values (2, 1000, 'total1', 2, 0);
+insert into data_row(id, form_data_id, alias, ord, type) values (3, 1000, null, 3, 0);
+insert into data_row(id, form_data_id, alias, ord, type) values (4, 1000, 'total2', 4, 0);

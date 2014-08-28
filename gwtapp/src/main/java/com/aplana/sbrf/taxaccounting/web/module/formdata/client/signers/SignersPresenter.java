@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Презентор "Исполнитель и подписанты"
+ * Презентор "Параметры печатной формы"
  */
 
 public class SignersPresenter extends PresenterWidget<SignersPresenter.MyView> implements SignersUiHandlers {

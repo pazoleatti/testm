@@ -161,7 +161,7 @@ public class ImportServiceImpl implements ImportService {
         if (rowCells == null) {
             return;
         }
-        sb.append(TAB).append("<").append(rowName).append(">").append(ENTER);
+        sb.append(TAB).append("<").append(rowName).append(" count=\"").append(rowCells.length).append("\"").append(">").append(ENTER);
         for (String cell : rowCells) {
             sb.append(TAB).append(TAB).append("<cell>");
             sb.append(StringEscapeUtils.escapeXml(StringUtils.cleanString(cell)));

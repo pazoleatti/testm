@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.source.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
@@ -27,16 +28,24 @@ public class SourceServiceImpl implements SourceService {
 
     // private static final String FATAL_SAVE_MSG = "Назначение источников-приемников не сохранено. Обнаружены фатальные ошибки";
     private static final String CHECK_EXISTENCE_MSG = "Невозможно назначить источники / приемники: Форма \"%s\" не назначена подразделению %s";
-    private static final String MAIN_SOURCE_NOT_EXIST_MSG = "Назначение, указанное в качестве %s не найдено. Операция не может быть продолжена";
+    private static final String MAIN_SOURCE_NOT_EXIST_MSG = "Назначение источников-приёмников не выполнено";
     private static final String SOURCES_LIST_IS_EMPTY_MSG = "Все назначения были исключены в результате проверок. Продолжение операции невозможно.";
     private static final String FORM_INSTANCES_EXIST_MSG = "Найдены экземпляры, которые назначены %s формы \"%s\" и имеют статус \"Принят\":  \"%s\". Назначение не может быть выполнено";
-    private static final String INTERSECTION_MSG = "\"%s\" назначен %s формы \"%s\" в периоде с %s по %s.";
-    private static final String SAVE_SUCCESS_MSG = "\"%s\" назначен %s формы \"%s\" в периоде с %s по %s.";
-    private static final String DELETE_SUCCESS_MSG = "Удалено назначение \"%s\" в роли %s %s %s в периоде с %s по %s.";
-    private static final String UPDATE_SUCCESS_MSG = "\"%s\" назначен %s формы \"%s\" в периоде с %s по %s.";
+    private static final String EMPTY_END_PERIOD_INFO = "дата окончания периода не задана";
+    private static final String INTERSECTION_PART = "\"%s\" в качестве %s для \"%s\" в периоде %s";
+    private static final String INTERSECTION_MSG_BEGIN = "Найдены существующие назначения:";
+    private static final String INTERSECTION_MSG_END = "Новое назначение создано путем слияния с найденными назначениями, новое назначение действует в периоде %s.";
+    private static final String SAVE_SUCCESS_MSG = "\"%s\" назначен %s формы \"%s\" в периоде %s.";
+    private static final String DELETE_SUCCESS_MSG = "Удалено назначение \"%s\" в роли %s %s %s в периоде %s.";
+    private static final String UPDATE_SUCCESS_MSG = "\"%s\" назначен %s формы \"%s\" в периоде %s.";
     private static final String CIRCLE_MSG = "\"%s\" уже назначен как приёмник \"%s\"";
-    private static final String SIMPLE_INSTANCES_MSG = "Для корректной передачи данных %s \"%s\" необходимо выполнить повторный перевод в статус \"Принята\" всех %s этой формы в периоде c %s по %s";
+    private static final String FORM_INSTANCES_MSG = "Для корректной передачи данных из \"%s\" необходимо выполнить повторный перевод в статус \"Принята\" всех экземпляров этой формы в периоде %s";
+    private static final String DECLARATION_INSTANCES_MSG = "Для корректного передачи данных из \"%s\" необходимо выполнить повторное формирование \"%s\" при помощи кнопки \"Обновить\" во всех экземплярах в периоде %s";
     private static final String EMPTY_LIST_MSG = "Список назначений пуст!";
+
+    private enum LOG_LEVEL {
+        INFO, WARN, ERROR
+    }
 
 
     private static final ThreadLocal<SimpleDateFormat> formatter = new ThreadLocal<SimpleDateFormat>() {
@@ -69,7 +78,7 @@ public class SourceServiceImpl implements SourceService {
 
     @Autowired
     DeclarationTypeDao declarationTypeDao;
-    
+
     @Autowired
     FormDataService formDataService;
 
@@ -97,42 +106,47 @@ public class SourceServiceImpl implements SourceService {
     @Autowired
     FormTemplateDao formTemplateDao;
 
+    @Autowired
+    RefBookFactory rbFactory;
+
+    private static final Long PERIOD_CODE_REFBOOK = 8L;
+
     @Override
     public List<DepartmentFormType> getDFTSourcesByDFT(int departmentId, int formTypeId, FormDataKind kind, Date periodStart,
                                                        Date periodEnd) {
-        SearchOrderingFilter filter = getSearchOrderingDefaultFilter();
+        QueryParams filter = getSearchOrderingDefaultFilter();
         return getDFTSourcesByDFT(departmentId, formTypeId, kind, periodStart, periodEnd, filter);
     }
 
     @Override
     public List<DepartmentFormType> getDFTSourcesByDFT(int departmentId, int formTypeId, FormDataKind kind, Date periodStart,
-                                                       Date periodEnd, SearchOrderingFilter filter) {
-        return departmentFormTypeDao.getFormSources(departmentId, formTypeId, kind, periodStart, periodEnd, filter);
+                                                       Date periodEnd, QueryParams queryParams) {
+        return departmentFormTypeDao.getFormSources(departmentId, formTypeId, kind, periodStart, periodEnd, queryParams);
     }
 
     @Override
     public List<DepartmentFormType> getDFTSourcesByDFT(int departmentId, int formTypeId, FormDataKind kind, int reportPeriodId) {
-        SearchOrderingFilter filter = getSearchOrderingDefaultFilter();
-        return getDFTSourcesByDFT(departmentId, formTypeId, kind, reportPeriodId, filter);
+        QueryParams queryParams = getSearchOrderingDefaultFilter();
+        return getDFTSourcesByDFT(departmentId, formTypeId, kind, reportPeriodId, queryParams);
     }
 
     @Override
     public List<DepartmentFormType> getDFTSourcesByDFT(int departmentId, int formTypeId, FormDataKind kind, int reportPeriodId,
-                                                       SearchOrderingFilter filter) {
+                                                       QueryParams queryParams) {
         ReportPeriod period = reportPeriodDao.get(reportPeriodId);
 
-        return getDFTSourcesByDFT(departmentId, formTypeId, kind, period.getStartDate(), period.getEndDate(), filter);
+        return getDFTSourcesByDFT(departmentId, formTypeId, kind, period.getStartDate(), period.getEndDate(), queryParams);
     }
 
     @Override
     public List<DepartmentFormType> getDFTSourceByDDT(int departmentId, int declarationTypeId, Date periodStart, Date periodEnd) {
-        SearchOrderingFilter filter = getSearchOrderingDefaultFilter();
-        return getDFTSourceByDDT(departmentId, declarationTypeId, periodStart, periodEnd, filter);
+        QueryParams queryParams = getSearchOrderingDefaultFilter();
+        return getDFTSourceByDDT(departmentId, declarationTypeId, periodStart, periodEnd, queryParams);
     }
 
     @Override
-    public List<DepartmentFormType> getDFTSourceByDDT(int departmentId, int declarationTypeId, Date periodStart, Date periodEnd, SearchOrderingFilter filter) {
-        return departmentFormTypeDao.getDeclarationSources(departmentId, declarationTypeId, periodStart, periodEnd, filter);
+    public List<DepartmentFormType> getDFTSourceByDDT(int departmentId, int declarationTypeId, Date periodStart, Date periodEnd, QueryParams queryParams) {
+        return departmentFormTypeDao.getDeclarationSources(departmentId, declarationTypeId, periodStart, periodEnd, queryParams);
     }
 
     /**
@@ -145,7 +159,7 @@ public class SourceServiceImpl implements SourceService {
          * @param sourcePair обрабатываемая пара источник-приемник
          * @return сообщение
          */
-        String getSourceMessage(SourcePair sourcePair);
+        List<String> getSourceMessage(SourcePair sourcePair);
 
         /**
          * Возвращает сообщение при обнаружении вхождения исключаемого назначения в списке приемников
@@ -153,7 +167,7 @@ public class SourceServiceImpl implements SourceService {
          * @param sourcePair обрабатываемая пара источник-приемник
          * @return сообщение
          */
-        String getDestinationMessage(SourcePair sourcePair);
+        List<String> getDestinationMessage(SourcePair sourcePair);
     }
 
     /**
@@ -164,12 +178,15 @@ public class SourceServiceImpl implements SourceService {
      * @param errorDepartmentFormTypes список назначений, которые должны быть исключены
      * @param mode                     режим работы
      * @param isDeclaration            признак того, что идет обработка в режиме "Декларации"
+     * @param emptyIsOk                признак того, что если в результате выполнения входной список оказывается пуст - это нормальная ситуация.
+     *                                 Например в случае пересечения версий, дополнительная обработка не требуется - версии склеиваются на стадии проверки пересечений
+     * @param level                    уровень логгирования
      * @param messageBuilder           билдер для построения информационных сообщений
      * @return обрезанный входной список пар источников-приемников
      */
     public List<SourcePair> truncateSources(Logger logger, List<SourcePair> sourcePairs,
                                             List<Long> errorDepartmentFormTypes,
-                                            SourceMode mode, boolean isDeclaration,
+                                            SourceMode mode, boolean isDeclaration, boolean emptyIsOk, LOG_LEVEL level,
                                             MessageBuilder messageBuilder) {
         List<SourcePair> sourcePairsOut = new LinkedList<SourcePair>(sourcePairs);
         for (Long error : errorDepartmentFormTypes) {
@@ -179,34 +196,50 @@ public class SourceServiceImpl implements SourceService {
                 if (pair.getSource().equals(error) || pair.getDestination().equals(error)) {
                     if (isDeclaration) {
                         if (pair.getDestination().equals(error)) {
-                            logger.info(messageBuilder.getDestinationMessage(pair));
+                            printMsgs(logger, messageBuilder.getDestinationMessage(pair), level);
                         }
                     } else {
                         if (pair.getSource().equals(error)) {
-                            logger.info(messageBuilder.getSourceMessage(pair));
+                            printMsgs(logger, messageBuilder.getSourceMessage(pair), level);
                         } else {
-                            logger.info(messageBuilder.getDestinationMessage(pair));
+                            printMsgs(logger, messageBuilder.getDestinationMessage(pair), level);
                         }
                     }
                     it.remove();
                 }
                 /** Если единственное назначение было удалено, то продолжать нет смысла */
-                if (pair.getSource().equals(error) && mode == SourceMode.DESTINATIONS) {
-                    throw new ServiceLoggerException(String.format(MAIN_SOURCE_NOT_EXIST_MSG, "источника"),
+                if (!emptyIsOk && pair.getSource().equals(error) && mode == SourceMode.DESTINATIONS) {
+                    throw new ServiceLoggerException(MAIN_SOURCE_NOT_EXIST_MSG,
                             logEntryService.save(logger.getEntries()));
                 }
-                if (pair.getDestination().equals(error) && mode == SourceMode.SOURCES) {
-                    throw new ServiceLoggerException(String.format(MAIN_SOURCE_NOT_EXIST_MSG, "приемника"),
+                if (!emptyIsOk && pair.getDestination().equals(error) && mode == SourceMode.SOURCES) {
+                    throw new ServiceLoggerException(MAIN_SOURCE_NOT_EXIST_MSG,
                             logEntryService.save(logger.getEntries()));
                 }
             }
         }
         /** Проверяем оставщиеся связки */
-        if (sourcePairsOut.isEmpty()) {
+        if (!emptyIsOk && sourcePairsOut.isEmpty()) {
             throw new ServiceLoggerException(SOURCES_LIST_IS_EMPTY_MSG,
                     logEntryService.save(logger.getEntries()));
         }
         return sourcePairsOut;
+    }
+
+    private void printMsgs(Logger logger, List<String> msgs, LOG_LEVEL level) {
+        for (String msg : msgs) {
+            switch (level) {
+                case ERROR: {
+                    logger.error(msg);
+                    break;
+                }
+                case WARN: {
+                    logger.warn(msg);
+                    break;
+                }
+                default: logger.info(msg);
+            }
+        }
     }
 
     /**
@@ -221,6 +254,25 @@ public class SourceServiceImpl implements SourceService {
             for (SourcePair pair : sourcePairs) {
                 set.add(pair.getSource());
                 set.add(pair.getDestination());
+            }
+            return new ArrayList<Long>(set);
+        } else {
+            throw new ServiceException("Список назначений пуст!");
+        }
+    }
+    /**
+     *
+     * Формирует общий список идентификаторов назначений из списка пар источников-приемников
+     *
+     * @param objects список объектов-назначений
+     * @return список идентификаторов назначений
+     */
+    public List<Long> unionSourceObjects(List<SourceObject> objects) {
+        if (objects != null && !objects.isEmpty()) {
+            Set<Long> set = new HashSet<Long>();
+            for (SourceObject object : objects) {
+                set.add(object.getSourcePair().getSource());
+                set.add(object.getSourcePair().getDestination());
             }
             return new ArrayList<Long>(set);
         } else {
@@ -265,49 +317,60 @@ public class SourceServiceImpl implements SourceService {
                                            final boolean isDeclaration,
                                            final Integer sourceDepartmentId,
                                            final Integer destinationDepartmentId) {
-        List<Long> dftIn = new ArrayList<Long>();
+        List<Long> rightPart = new ArrayList<Long>();
         if (isDeclaration) {
             if (mode == SourceMode.SOURCES) {
                 //Проверяем единственный приемник
                 if (sourceDao.checkDDTExistence(Arrays.asList(sourcePairs.get(0).getDestination())).isEmpty()) {
                     /** Если единственное назначение было удалено, то продолжать нет смысла */
-                    throw new ServiceLoggerException(String.format(MAIN_SOURCE_NOT_EXIST_MSG, "приемника"),
+                    logger.error(String.format(CHECK_EXISTENCE_MSG,
+                            sourcePairs.get(0).getDestinationType(),
+                            departmentDao.getDepartment(sourceDepartmentId).getName()));
+                    throw new ServiceLoggerException(MAIN_SOURCE_NOT_EXIST_MSG,
                             logEntryService.save(logger.getEntries()));
                 }
                 for (SourcePair pair : sourcePairs) {
-                    dftIn.add(pair.getSource());
+                    rightPart.add(pair.getSource());
                 }
             } else {
                 //Проверяем единственный источник
-                if (sourceDao.checkDDTExistence(Arrays.asList(sourcePairs.get(0).getSource())).isEmpty()) {
-                    throw new ServiceLoggerException(String.format(MAIN_SOURCE_NOT_EXIST_MSG, "источника"),
+                if (sourceDao.checkDFTExistence(Arrays.asList(sourcePairs.get(0).getSource())).isEmpty()) {
+                    /** Если единственное назначение было удалено, то продолжать нет смысла */
+                    logger.error(String.format(CHECK_EXISTENCE_MSG,
+                            sourcePairs.get(0).getSourceKind() + ": " + sourcePairs.get(0).getSourceType(),
+                            departmentDao.getDepartment(sourceDepartmentId).getName()));
+                    throw new ServiceLoggerException(MAIN_SOURCE_NOT_EXIST_MSG,
                             logEntryService.save(logger.getEntries()));
                 }
                 for (SourcePair pair : sourcePairs) {
-                    dftIn.add(pair.getDestination());
+                    rightPart.add(pair.getDestination());
                 }
             }
         } else {
-            dftIn = unionSourcePairs(sourcePairs);
+            rightPart = unionSourcePairs(sourcePairs);
         }
 
-        @SuppressWarnings("unchecked")
-        List<Long> notExistingDFT = (List<Long>) CollectionUtils.subtract(dftIn, sourceDao.checkDFTExistence(dftIn));
-        return truncateSources(logger, sourcePairs, notExistingDFT, mode, isDeclaration,
+        List<Long> notExisting;
+        if (isDeclaration && mode == SourceMode.DESTINATIONS) {
+            notExisting = (List<Long>) CollectionUtils.subtract(rightPart, sourceDao.checkDDTExistence(rightPart));
+        } else {
+            notExisting = (List<Long>) CollectionUtils.subtract(rightPart, sourceDao.checkDFTExistence(rightPart));
+        }
+        return truncateSources(logger, sourcePairs, notExisting, mode, isDeclaration, false, LOG_LEVEL.ERROR,
                 new MessageBuilder() {
                     @Override
-                    public String getSourceMessage(SourcePair sourcePair) {
-                        return String.format(CHECK_EXISTENCE_MSG,
-                                sourcePair.getSourceKind().getName() + ": " + sourcePair.getSourceType().getName(),
-                                departmentDao.getDepartment(sourceDepartmentId).getName());
+                    public List<String> getSourceMessage(SourcePair sourcePair) {
+                        return Arrays.asList(String.format(CHECK_EXISTENCE_MSG,
+                                sourcePair.getSourceKind() + ": " + sourcePair.getSourceType(),
+                                departmentDao.getDepartment(sourceDepartmentId).getName()));
                     }
 
                     @Override
-                    public String getDestinationMessage(SourcePair sourcePair) {
-                        return String.format(CHECK_EXISTENCE_MSG,
-                                isDeclaration ? sourcePair.getDestinationDeclarationType().getName() :
-                                        sourcePair.getDestinationKind().getName() + ": " + sourcePair.getDestinationFormType().getName(),
-                                departmentDao.getDepartment(destinationDepartmentId).getName());
+                    public List<String> getDestinationMessage(SourcePair sourcePair) {
+                        return Arrays.asList(String.format(CHECK_EXISTENCE_MSG,
+                                isDeclaration ? sourcePair.getDestinationType() :
+                                        sourcePair.getDestinationKind() + ": " + sourcePair.getDestinationType(),
+                                departmentDao.getDepartment(destinationDepartmentId).getName()));
                     }
                 });
     }
@@ -347,9 +410,9 @@ public class SourceServiceImpl implements SourceService {
                 }
             }
             /** Убираем назначения из обработки */
-            sourcePairsOut = truncateSources(logger, sourcePairs, new ArrayList<Long>(formsMap.keySet()), mode, isDeclaration,
+            sourcePairsOut = truncateSources(logger, sourcePairs, new ArrayList<Long>(formsMap.keySet()), mode, isDeclaration, false, LOG_LEVEL.ERROR,
                     new MessageBuilder() {
-                        private String getMsg(Long departmentFormTypeId, String mode) {
+                        private List<String> getMsg(Long departmentFormTypeId, String mode) {
                             FormDataInfo formDataInfo = formsMap.get(departmentFormTypeId).get(0);
                             StringBuilder formsInfo = new StringBuilder();
                             for (Iterator<FormDataInfo> it = formsMap.get(departmentFormTypeId).iterator(); it.hasNext(); ) {
@@ -364,20 +427,20 @@ public class SourceServiceImpl implements SourceService {
                                     formsInfo.append(", ");
                                 }
                             }
-                            return String.format(FORM_INSTANCES_EXIST_MSG,
+                            return Arrays.asList(String.format(FORM_INSTANCES_EXIST_MSG,
                                     mode,
                                     formDataInfo.getDepartment() + "-" + formDataInfo.getFormTypeName() + "-" + formDataInfo.getFormKindName(),
                                     formsInfo.toString()
-                            );
+                            ));
                         }
 
                         @Override
-                        public String getSourceMessage(SourcePair sourcePair) {
+                        public List<String> getSourceMessage(SourcePair sourcePair) {
                             return getMsg(sourcePair.getSource(), "источниками");
                         }
 
                         @Override
-                        public String getDestinationMessage(SourcePair sourcePair) {
+                        public List<String> getDestinationMessage(SourcePair sourcePair) {
                             return getMsg(sourcePair.getDestination(), "приемниками");
                         }
                     });
@@ -404,16 +467,16 @@ public class SourceServiceImpl implements SourceService {
                 }
             }
             /** Убираем назначения из обработки */
-            sourcePairsOut = truncateSources(logger, sourcePairs, new ArrayList<Long>(declarationsMap.keySet()), mode, isDeclaration,
+            sourcePairsOut = truncateSources(logger, sourcePairs, new ArrayList<Long>(declarationsMap.keySet()), mode, isDeclaration, false, LOG_LEVEL.ERROR,
                     new MessageBuilder() {
 
                         @Override
-                        public String getSourceMessage(SourcePair sourcePair) {
+                        public List<String> getSourceMessage(SourcePair sourcePair) {
                             throw new ServiceException("При поиске экземпляров деклараций, обнаружено совпадение в нф!");
                         }
 
                         @Override
-                        public String getDestinationMessage(SourcePair sourcePair) {
+                        public List<String> getDestinationMessage(SourcePair sourcePair) {
                             DeclarationDataInfo declarationDataInfo = declarationsMap.get(sourcePair.getDestination()).get(0);
                             StringBuilder declarationInfo = new StringBuilder();
                             for (Iterator<DeclarationDataInfo> it = declarationsMap.get(sourcePair.getDestination()).iterator(); it.hasNext(); ) {
@@ -427,11 +490,11 @@ public class SourceServiceImpl implements SourceService {
                                     declarationInfo.append(", ");
                                 }
                             }
-                            return String.format(FORM_INSTANCES_EXIST_MSG,
+                            return Arrays.asList(String.format(FORM_INSTANCES_EXIST_MSG,
                                     "приемниками",
                                     declarationDataInfo.getDepartment() + "-" + declarationDataInfo.getDeclarationTypeName(),
                                     declarationInfo.toString()
-                            );
+                            ));
                         }
                     });
         }
@@ -469,19 +532,19 @@ public class SourceServiceImpl implements SourceService {
             }
             //Получаем данные о назначениях-причинах зацикливания для вывода в сообщениях
             final Map<Long, String> objectNames = sourceDao.getSourceNames(new ArrayList<Long>(circleCauses));
-            return truncateSources(logger, sourcePairs, unionSourcePairs(loopedSources), mode, isDeclaration,
+            return truncateSources(logger, sourcePairs, unionSourcePairs(loopedSources), mode, isDeclaration, false, LOG_LEVEL.ERROR,
                     new MessageBuilder() {
                         @Override
-                        public String getSourceMessage(SourcePair sourcePair) {
+                        public List<String> getSourceMessage(SourcePair sourcePair) {
                             SourcePair errorPair = loopsMap.get(sourcePair);
-                            return String.format(CIRCLE_MSG,
+                            return Arrays.asList(String.format(CIRCLE_MSG,
                                     objectNames.get(errorPair.getSource()),
                                     objectNames.get(errorPair.getDestination())
-                            );
+                            ));
                         }
 
                         @Override
-                        public String getDestinationMessage(SourcePair sourcePair) {
+                        public List<String> getDestinationMessage(SourcePair sourcePair) {
                             return getSourceMessage(sourcePair);
                         }
                     });
@@ -497,8 +560,8 @@ public class SourceServiceImpl implements SourceService {
      * http://conf.aplana.com/pages/viewpage.action?pageId=12321539
      *
      * @param logger              логгер
-     * @param periodStart         начало периода
-     * @param periodEnd           окончание периода
+     * @param periodStart         начало периода, в котором выполняется поиск пересечений
+     * @param periodEnd           окончание периода, в котором выполняется поиск пересечений
      * @param excludedPeriodStart начало нового периода, который будет исключен из проверки
      * @param excludedPeriodEnd   конец нового периода, который будет исключен из проверки
      * @param sourcePairs         список связок источников-приемников
@@ -507,7 +570,7 @@ public class SourceServiceImpl implements SourceService {
      * @return обрезанный входной список связок источников-приемников, для которых не найдены пересечения
      */
     public List<SourcePair> checkIntersections(Logger logger, Date periodStart, Date periodEnd,
-                                               Date excludedPeriodStart, Date excludedPeriodEnd,
+                                               final Date excludedPeriodStart, Date excludedPeriodEnd,
                                                List<SourcePair> sourcePairs,
                                                SourceMode mode,
                                                boolean isDeclaration) {
@@ -521,61 +584,107 @@ public class SourceServiceImpl implements SourceService {
              * Формируем новый период для нового назначения = объединенному периоду обнаруженного пересечения и входного периода
              * Также формируем список на удаление состоящий из пересекающихся назначений
              */
-            List<SourceObject> unionSources = new ArrayList<SourceObject>();
+            final Map<SourceObject, Pair<Date, Date>> unionSources = new HashMap<SourceObject, Pair<Date, Date>>();
+            final Map<SourcePair, Pair<Date, Date>> unionPairs = new HashMap<SourcePair, Pair<Date, Date>>();
             List<SourceObject> deleteSources = new ArrayList<SourceObject>();
             final Map<SourcePair, SourceObject> unionMap = new HashMap<SourcePair, SourceObject>();
+            final List<String> intersectionParts = new ArrayList<String>();
+            int n = 0;
             for (Map.Entry<SourcePair, List<SourceObject>> intersectionGroup : intersections.entrySet()) {
-                Date minDate = intersectionGroup.getValue().get(0).getPeriodStart();
-                Date maxDate = intersectionGroup.getValue().get(0).getPeriodEnd();
+                Date minDate = periodStart;
+                Date maxDate = periodEnd;
 
                 for (SourceObject intersection : intersectionGroup.getValue()) {
                     if (intersection.getPeriodStart().before(minDate)) {
                         minDate = intersection.getPeriodStart();
                     }
-                    if ((intersection.getPeriodEnd() == null && maxDate != null) || intersection.getPeriodEnd().after(maxDate)) {
+                    if ((intersection.getPeriodEnd() == null && maxDate != null)
+                            || (intersection.getPeriodEnd() != null && maxDate != null && intersection.getPeriodEnd().after(maxDate))) {
                         maxDate = intersection.getPeriodEnd();
                     }
                     deleteSources.add(intersection);
+                    if (mode == SourceMode.SOURCES) {
+                        intersectionParts.add(String.format(INTERSECTION_PART,
+                                        isDeclaration ? intersection.getSourcePair().getDestinationType() : intersection.getSourcePair().getDestinationKind() + ": " + intersection.getSourcePair().getDestinationType(),
+                                        "приемника",
+                                        intersection.getSourcePair().getSourceKind() + ": " + intersection.getSourcePair().getSourceType(),
+                                        formatter.get().format(intersection.getPeriodStart()) + " - " +
+                                                (intersection.getPeriodEnd() != null ? formatter.get().format(intersection.getPeriodEnd()) : EMPTY_END_PERIOD_INFO)
+                                )
+                        );
+                    } else {
+                        intersectionParts.add(String.format(INTERSECTION_PART,
+                                        intersection.getSourcePair().getSourceKind() + ": " +  intersection.getSourcePair().getSourceType(),
+                                        "источника",
+                                        isDeclaration ? intersection.getSourcePair().getDestinationType() : intersection.getSourcePair().getDestinationKind() + ": " +  intersection.getSourcePair().getDestinationType(),
+                                        formatter.get().format(intersection.getPeriodStart()) + " - " +
+                                                (intersection.getPeriodEnd() != null ? formatter.get().format(intersection.getPeriodEnd()) : EMPTY_END_PERIOD_INFO)
+                                )
+                        );
+                    }
+                    if (n < intersections.size() - 1) {
+                        //intersectionParts.add(", ");
+                    }
+                    n++;
                 }
-                SourceObject union = new SourceObject(intersectionGroup.getKey(), minDate, maxDate);
-                unionSources.add(union);
+                SourceObject union;
+
+                if (excludedPeriodStart == null) {
+                    //Идет создание назначений
+                    union = new SourceObject(intersectionGroup.getKey(), minDate, maxDate);
+                } else {
+                    //Идет редактирование назначений
+                    union = new SourceObject(intersectionGroup.getKey(), excludedPeriodStart, excludedPeriodEnd);
+                }
+                unionSources.put(union, new Pair<Date, Date>(minDate, maxDate));
+                unionPairs.put(union.getSourcePair(), new Pair<Date, Date>(minDate, maxDate));
                 unionMap.put(union.getSourcePair(), union);
             }
 
             /** Удаляем все назначения, с периодами которых были найдены пересечения. */
             sourceDao.deleteAll(deleteSources, isDeclaration);
 
-            /** Создаем новые назначения с объединенными периодами */
-            sourceDao.createAll(unionSources, isDeclaration);
+            List<Long> intersectingSources = unionSourcePairs(new ArrayList<SourcePair>(intersections.keySet()));
+            if (excludedPeriodStart == null) {
+                //Идет создание назначений
+                /** Создаем новые назначения с объединенными периодами */
+                sourceDao.createAll(new ArrayList<SourceObject>(unionSources.keySet()), isDeclaration);
+            } else {
+                //Идет редактирование назначений
+                intersectingSources = unionSourceObjects(deleteSources);
+                for (Map.Entry<SourceObject, Pair<Date, Date>> sourceEntry : unionSources.entrySet()) {
+                    sourceDao.updateAll(Arrays.asList(sourceEntry.getKey()),
+                            sourceEntry.getValue().getFirst(), sourceEntry.getValue().getSecond(), isDeclaration);
+                }
+            }
 
             /** Убираем назначения с пересечениями из обработки */
-            List<Long> intersectingSources = unionSourcePairs(new ArrayList<SourcePair>(intersections.keySet()));
-            return truncateSources(logger, sourcePairs, intersectingSources, mode, isDeclaration,
+            return truncateSources(logger, sourcePairs, intersectingSources, mode, isDeclaration, true, LOG_LEVEL.INFO,
                     new MessageBuilder() {
                         @Override
-                        public String getSourceMessage(SourcePair sourcePair) {
-                            SourceObject union = unionMap.get(sourcePair);
-                            return String.format(INTERSECTION_MSG,
-                                    sourcePair.getSourceKind().getName() + ": " + sourcePair.getSourceType().getName(),
-                                    "источником",
-                                    sourcePair.getDestinationFormType() == null ? sourcePair.getDestinationDeclarationType().getName() :
-                                            sourcePair.getDestinationKind().getName() + ": " + sourcePair.getDestinationFormType().getName(),
-                                    formatter.get().format(union.getPeriodStart()),
-                                    union.getPeriodEnd() != null ? formatter.get().format(union.getPeriodEnd()) : ""
-                            );
+                        public List<String> getSourceMessage(SourcePair sourcePair) {
+                            String period;
+                            if (excludedPeriodStart == null) {
+                                //Идет создание назначений
+                                SourceObject union = unionMap.get(sourcePair);
+                                period = formatter.get().format(union.getPeriodStart()) + " - " +
+                                        (union.getPeriodEnd() != null ? formatter.get().format(union.getPeriodEnd()) : EMPTY_END_PERIOD_INFO);
+                            } else {
+                                //Идет редактирование назначений
+                                Pair<Date, Date> periodDates = unionPairs.get(sourcePair);
+                                period = formatter.get().format(periodDates.getFirst()) + " - " +
+                                        (periodDates.getSecond() != null ? formatter.get().format(periodDates.getSecond()) : EMPTY_END_PERIOD_INFO);
+                            }
+                            List<String> msgs = new ArrayList<String>();
+                            msgs.add(INTERSECTION_MSG_BEGIN);
+                            msgs.addAll(intersectionParts);
+                            msgs.add(String.format(INTERSECTION_MSG_END, period));
+                            return msgs;
                         }
 
                         @Override
-                        public String getDestinationMessage(SourcePair sourcePair) {
-                            SourceObject union = unionMap.get(sourcePair);
-                            return String.format(INTERSECTION_MSG,
-                                    sourcePair.getDestinationFormType() == null ? sourcePair.getDestinationDeclarationType().getName() :
-                                            sourcePair.getDestinationKind().getName() + ": " + sourcePair.getDestinationFormType().getName(),
-                                    "приемником",
-                                    sourcePair.getSourceKind().getName() + ": " + sourcePair.getSourceType().getName(),
-                                    formatter.get().format(union.getPeriodStart()),
-                                    union.getPeriodEnd() != null ? formatter.get().format(union.getPeriodEnd()) : ""
-                            );
+                        public List<String> getDestinationMessage(SourcePair sourcePair) {
+                            return getSourceMessage(sourcePair);
                         }
                     });
         } else {
@@ -588,49 +697,105 @@ public class SourceServiceImpl implements SourceService {
      *
      * @param logger          логгер
      * @param sourcePairs     список пар назначений
-     * @param periodStartName начало периода в текстовом представлении
-     * @param periodEndName   окончание периода в текстовом представлении
+     * @param periodStart начало периода
+     * @param periodEnd   окончание периода
      * @param isDeclaration   признак того, что идет обработка в режиме "Декларации"
      * @param mode            режим
      */
-    public void instancesNotification(Logger logger, List<SourcePair> sourcePairs, String periodStartName, String periodEndName, SourceMode mode, boolean isDeclaration) {
+    public void instancesNotification(Logger logger, List<SourcePair> sourcePairs, Date periodStart, Date periodEnd, SourceMode mode, boolean isDeclaration) {
         if (sourcePairs != null && !sourcePairs.isEmpty()) {
-            if (mode == SourceMode.DESTINATIONS) {
-                SourcePair source = sourcePairs.get(0);
-                logger.warn(SIMPLE_INSTANCES_MSG,
-                        "из",
-                        source.getSourceKind().getName() + ": " + source.getSourceType().getName(),
-                        "экземпляров",
-                        periodStartName,
-                        periodEndName != null ? periodEndName : "-"
-                );
-                for (SourcePair pair : sourcePairs) {
-                    logger.warn(SIMPLE_INSTANCES_MSG,
-                            "в",
-                            isDeclaration ? pair.getDestinationDeclarationType().getName() :
-                                    pair.getDestinationKind().getName() + ": " + pair.getDestinationFormType().getName(),
-                            "источников",
-                            periodStartName,
-                            periodEndName != null ? periodEndName : "-"
-                    );
+            if (isDeclaration) {
+                if (mode == SourceMode.SOURCES) {
+                    SourcePair destination = sourcePairs.get(0);
+                    for (SourcePair pair : sourcePairs) {
+                        logger.warn(DECLARATION_INSTANCES_MSG,
+                                pair.getSourceKind() + ": " + pair.getSourceType(),
+                                destination.getDestinationType(),
+                                formatter.get().format(periodStart) + " - " +
+                                        (periodEnd != null ? formatter.get().format(periodEnd) : EMPTY_END_PERIOD_INFO)
+                        );
+                    }
+                } else {
+                    SourcePair source = sourcePairs.get(0);
+                    for (SourcePair pair : sourcePairs) {
+                        logger.warn(DECLARATION_INSTANCES_MSG,
+                                source.getSourceKind() + ": " + source.getSourceType(),
+                                pair.getDestinationType(),
+                                formatter.get().format(periodStart) + " - " +
+                                        (periodEnd != null ? formatter.get().format(periodEnd) : EMPTY_END_PERIOD_INFO)
+                        );
+                    }
                 }
             } else {
-                SourcePair destination = sourcePairs.get(0);
-                logger.warn(SIMPLE_INSTANCES_MSG,
-                        "в",
-                        isDeclaration ? destination.getDestinationDeclarationType().getName() :
-                                destination.getDestinationKind().getName() + ": " + destination.getDestinationFormType().getName(),
-                        "источников",
-                        periodStartName,
-                        periodEndName != null ? periodEndName : "-"
-                );
-                for (SourcePair pair : sourcePairs) {
-                    logger.warn(SIMPLE_INSTANCES_MSG,
-                            "в",
-                            pair.getSourceKind().getName() + ": " + pair.getSourceType().getName(),
-                            "источников",
-                            periodStartName,
-                            periodEndName != null ? periodEndName : "-"
+                if (mode == SourceMode.SOURCES) {
+                    for (SourcePair pair : sourcePairs) {
+                        logger.warn(FORM_INSTANCES_MSG,
+                                pair.getSourceKind() + ": " + pair.getSourceType(),
+                                formatter.get().format(periodStart) + " - " +
+                                        (periodEnd != null ? formatter.get().format(periodEnd) : EMPTY_END_PERIOD_INFO)
+                        );
+                    }
+                } else {
+                    SourcePair source = sourcePairs.get(0);
+                    logger.warn(FORM_INSTANCES_MSG,
+                            source.getDestinationKind() + ": " + source.getDestinationType(),
+                            formatter.get().format(periodStart) + " - " +
+                                    (periodEnd != null ? formatter.get().format(periodEnd) : EMPTY_END_PERIOD_INFO)
+                    );
+                }
+            }
+        } else {
+            throw new ServiceException("Список назначений пуст!");
+        }
+    }
+
+    /**
+     * Замена сложной проверки существования экземпляров нф и деклараций для назначений
+     *
+     * @param logger          логгер
+     * @param sourceObjects   список пар назначений + их периоды
+     * @param isDeclaration   признак того, что идет обработка в режиме "Декларации"
+     * @param mode            режим
+     */
+    public void instancesNotification(Logger logger, List<SourceObject> sourceObjects,  SourceMode mode, boolean isDeclaration) {
+        if (sourceObjects != null && !sourceObjects.isEmpty()) {
+            if (isDeclaration) {
+                if (mode == SourceMode.SOURCES) {
+                    SourceObject destination = sourceObjects.get(0);
+                    for (SourceObject object : sourceObjects) {
+                        logger.warn(DECLARATION_INSTANCES_MSG,
+                                object.getSourcePair().getSourceKind() + ": " + object.getSourcePair().getSourceType(),
+                                destination.getSourcePair().getDestinationType(),
+                                formatter.get().format(object.getPeriodStart()) + " - " +
+                                        (object.getPeriodEnd() != null ? formatter.get().format(object.getPeriodEnd()) : EMPTY_END_PERIOD_INFO)
+                        );
+                    }
+                } else {
+                    SourceObject source = sourceObjects.get(0);
+                    for (SourceObject object : sourceObjects) {
+                        logger.warn(DECLARATION_INSTANCES_MSG,
+                                source.getSourcePair().getSourceKind() + ": " + source.getSourcePair().getSourceType(),
+                                object.getSourcePair().getDestinationType(),
+                                formatter.get().format(object.getPeriodStart()) + " - " +
+                                        (object.getPeriodEnd() != null ? formatter.get().format(object.getPeriodEnd()) : EMPTY_END_PERIOD_INFO)
+                        );
+                    }
+                }
+            } else {
+                if (mode == SourceMode.SOURCES) {
+                    for (SourceObject object : sourceObjects) {
+                        logger.warn(FORM_INSTANCES_MSG,
+                                object.getSourcePair().getSourceKind() + ": " + object.getSourcePair().getSourceType(),
+                                formatter.get().format(object.getPeriodStart()) + " - " +
+                                        (object.getPeriodEnd() != null ? formatter.get().format(object.getPeriodEnd()) : EMPTY_END_PERIOD_INFO)
+                        );
+                    }
+                } else {
+                    SourceObject source = sourceObjects.get(0);
+                    logger.warn(FORM_INSTANCES_MSG,
+                            source.getSourcePair().getDestinationKind() + ": " + source.getSourcePair().getDestinationType(),
+                            formatter.get().format(source.getPeriodStart()) + " - " +
+                                    (source.getPeriodEnd() != null ? formatter.get().format(source.getPeriodEnd()) : EMPTY_END_PERIOD_INFO)
                     );
                 }
             }
@@ -650,7 +815,7 @@ public class SourceServiceImpl implements SourceService {
             /** Проверка существования экземпляров нф */
             //sourcePairs = checkFormInstances(logger, sourceClientData.getPeriodStart(), sourceClientData.getPeriodEnd(),
             //        sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
-            instancesNotification(logger, sourcePairs, sourceClientData.getPeriodStartName(), sourceClientData.getPeriodEndName(),
+            instancesNotification(logger, sourcePairs, sourceClientData.getPeriodStart(), sourceClientData.getPeriodEnd(),
                     sourceClientData.getMode(), sourceClientData.isDeclaration());
 
             /** Проверка зацикливания */
@@ -661,29 +826,31 @@ public class SourceServiceImpl implements SourceService {
             sourcePairs = checkIntersections(logger, sourceClientData.getPeriodStart(), sourceClientData.getPeriodEnd(),
                     null, null, sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
 
-            List<SourceObject> sourceObjects = pairsToObjects(sourcePairs, sourceClientData.getPeriodStart(), sourceClientData.getPeriodEnd());
+            if (!sourcePairs.isEmpty()) {
+                List<SourceObject> sourceObjects = pairsToObjects(sourcePairs, sourceClientData.getPeriodStart(), sourceClientData.getPeriodEnd());
 
-            /** Создаем оставшиеся назначения */
-            sourceDao.createAll(sourceObjects, sourceClientData.isDeclaration());
-            for (SourceObject sourceObject : sourceObjects) {
-                if (sourceClientData.getMode() == SourceMode.DESTINATIONS) {
-                    logger.info(SAVE_SUCCESS_MSG,
-                            sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationDeclarationType().getName() :
-                                    sourceObject.getSourcePair().getDestinationKind().getName() + ": " + sourceObject.getSourcePair().getDestinationFormType().getName(),
-                            "приемником",
-                            sourceObject.getSourcePair().getSourceKind().getName() + ": " + sourceObject.getSourcePair().getSourceType().getName(),
-                            formatter.get().format(sourceObject.getPeriodStart()),
-                            sourceObject.getPeriodEnd() != null ? formatter.get().format(sourceObject.getPeriodEnd()) : ""
-                    );
-                } else {
-                    logger.info(SAVE_SUCCESS_MSG,
-                            sourceObject.getSourcePair().getSourceKind().getName() + ": " + sourceObject.getSourcePair().getSourceType().getName(),
-                            "источником",
-                            sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationDeclarationType().getName() :
-                                    sourceObject.getSourcePair().getDestinationKind().getName() + ": " + sourceObject.getSourcePair().getDestinationFormType().getName(),
-                            formatter.get().format(sourceObject.getPeriodStart()),
-                            sourceObject.getPeriodEnd() != null ? formatter.get().format(sourceObject.getPeriodEnd()) : ""
-                    );
+                /** Создаем оставшиеся назначения */
+                sourceDao.createAll(sourceObjects, sourceClientData.isDeclaration());
+                for (SourceObject sourceObject : sourceObjects) {
+                    if (sourceClientData.getMode() == SourceMode.DESTINATIONS) {
+                        logger.info(SAVE_SUCCESS_MSG,
+                                sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationType() :
+                                        sourceObject.getSourcePair().getDestinationKind() + ": " + sourceObject.getSourcePair().getDestinationType(),
+                                "приемником",
+                                sourceObject.getSourcePair().getSourceKind() + ": " + sourceObject.getSourcePair().getSourceType(),
+                                formatter.get().format(sourceObject.getPeriodStart()) + " - " +
+                                        (sourceObject.getPeriodEnd() != null ? formatter.get().format(sourceObject.getPeriodEnd()) : EMPTY_END_PERIOD_INFO)
+                        );
+                    } else {
+                        logger.info(SAVE_SUCCESS_MSG,
+                                sourceObject.getSourcePair().getSourceKind() + ": " + sourceObject.getSourcePair().getSourceType(),
+                                "источником",
+                                sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationType() :
+                                        sourceObject.getSourcePair().getDestinationKind() + ": " + sourceObject.getSourcePair().getDestinationType(),
+                                formatter.get().format(sourceObject.getPeriodStart()) + " - " +
+                                        (sourceObject.getPeriodEnd() != null ? formatter.get().format(sourceObject.getPeriodEnd()) : EMPTY_END_PERIOD_INFO)
+                        );
+                    }
                 }
             }
         } else {
@@ -694,39 +861,36 @@ public class SourceServiceImpl implements SourceService {
     @Override
     public void deleteSources(Logger logger, SourceClientData sourceClientData) {
         if (sourceClientData.getSourcePairs() != null && !sourceClientData.getSourcePairs().isEmpty()) {
-            List<SourcePair> sourcePairs = sourceClientData.getSourcePairs();
+            List<SourceObject> sourceObjects = sourceClientData.getSourceObjects();
             /** Проверка существования экземпляров нф */
             //List<SourcePair> sourcePairs = checkFormInstances(logger, sourceClientData.getPeriodStart(), sourceClientData.getPeriodEnd(),
             //        sourceClientData.getSourcePairs(), sourceClientData.getMode(), sourceClientData.isDeclaration());
-            instancesNotification(logger, sourcePairs, sourceClientData.getPeriodStartName(), sourceClientData.getPeriodEndName(),
-                    sourceClientData.getMode(), sourceClientData.isDeclaration());
-
-            List<SourceObject> sourceObjects = sourceClientData.getSourceObjects();
+            instancesNotification(logger, sourceObjects, sourceClientData.getMode(), sourceClientData.isDeclaration());
 
             /** Удаляем все назначения, с периодами которых были найдены пересечения. */
             sourceDao.deleteAll(sourceObjects, sourceClientData.isDeclaration());
             if (sourceClientData.getMode() == SourceMode.DESTINATIONS) {
                 for (SourceObject sourceObject : sourceObjects) {
                     logger.info(DELETE_SUCCESS_MSG,
-                            sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationDeclarationType().getName() :
-                                    sourceObject.getSourcePair().getDestinationKind().getName() + ": " + sourceObject.getSourcePair().getDestinationFormType().getName(),
+                            sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationType() :
+                                    sourceObject.getSourcePair().getDestinationKind() + ": " + sourceObject.getSourcePair().getDestinationType(),
                             "приемника",
                             sourceClientData.isDeclaration() ? "декларации" : "формы",
-                            sourceObject.getSourcePair().getSourceKind().getName() + ": " + sourceObject.getSourcePair().getSourceType().getName(),
-                            sourceClientData.getPeriodStartName(),
-                            sourceClientData.getPeriodEndName() != null ? sourceClientData.getPeriodEndName() : "-"
+                            sourceObject.getSourcePair().getSourceKind() + ": " + sourceObject.getSourcePair().getSourceType(),
+                            formatter.get().format(sourceObject.getPeriodStart()) + " - " +
+                                    (sourceObject.getPeriodEnd() != null ? formatter.get().format(sourceObject.getPeriodEnd()) : EMPTY_END_PERIOD_INFO)
                     );
                 }
             } else {
                 for (SourceObject sourceObject : sourceObjects) {
                     logger.info(DELETE_SUCCESS_MSG,
-                            sourceObject.getSourcePair().getSourceKind().getName() + ": " + sourceObject.getSourcePair().getSourceType().getName(),
+                            sourceObject.getSourcePair().getSourceKind() + ": " + sourceObject.getSourcePair().getSourceType(),
                             "источника",
                             sourceClientData.isDeclaration() ? "декларации" : "формы",
-                            sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationDeclarationType().getName() :
-                                    sourceObject.getSourcePair().getDestinationKind().getName() + ": " + sourceObject.getSourcePair().getDestinationFormType().getName(),
-                            sourceClientData.getPeriodStartName(),
-                            sourceClientData.getPeriodEndName() != null ? sourceClientData.getPeriodEndName() : "-"
+                            sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationType() :
+                                    sourceObject.getSourcePair().getDestinationKind() + ": " + sourceObject.getSourcePair().getDestinationType(),
+                            formatter.get().format(sourceObject.getPeriodStart()) + " - " +
+                                    (sourceObject.getPeriodEnd() != null ? formatter.get().format(sourceObject.getPeriodEnd()) : EMPTY_END_PERIOD_INFO)
                     );
                 }
             }
@@ -745,25 +909,27 @@ public class SourceServiceImpl implements SourceService {
             List<SourcePair> sourcePairs = sourceClientData.getSourcePairs();
             if (periodStart.before(oldPeriodStart)) {
                 /** Дата начала нового периода меньше даты начала старого периода */
-                if (periodEnd != null && oldPeriodEnd != null && periodEnd.before(oldPeriodEnd) && periodEnd.after(oldPeriodStart)) {
+                if (periodEnd != null && ((oldPeriodEnd != null && periodEnd.before(oldPeriodEnd)) || oldPeriodEnd == null) && periodEnd.after(oldPeriodStart)) {
                     /** Дата окончания нового периода меньше даты окончания старого периода и больше даты начала старого периода */
 
                     /** Проверка существования экземпляров нф */
-                    instancesNotification(logger, sourcePairs, sourceClientData.getPeriodStartName(), sourceClientData.getOldPeriodEndName(),
+                    instancesNotification(logger, sourcePairs, periodStart, SimpleDateUtils.addDayToDate(oldPeriodStart, -1),
+                            sourceClientData.getMode(), sourceClientData.isDeclaration());
+                    instancesNotification(logger, sourcePairs, SimpleDateUtils.addDayToDate(periodEnd, 1), oldPeriodEnd,
                             sourceClientData.getMode(), sourceClientData.isDeclaration());
                     /** Проверка зацикливания */
-                    sourcePairs = checkLoops(logger, periodStart, SimpleDateUtils.addDayToDate(oldPeriodEnd, -1),
+                    sourcePairs = checkLoops(logger, periodStart, oldPeriodEnd,
                             sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
                     /** Проверка пересечений */
-                    sourcePairs = checkIntersections(logger, periodStart, SimpleDateUtils.addDayToDate(oldPeriodEnd, -1),
+                    sourcePairs = checkIntersections(logger, periodStart, periodEnd,
                             oldPeriodStart, oldPeriodEnd, sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
-                } else if (periodEnd != null && (periodEnd.before(oldPeriodStart) || periodEnd.equals(oldPeriodStart))) {
-                    /** Дата окончания нового периода меньше либо равна дате начала старого периода */
+                } else if (periodEnd != null && (periodEnd.before(oldPeriodStart))) {
+                    /** Дата окончания нового периода меньше даты начала старого периода */
 
                     /** Проверка существования экземпляров нф */
-                    instancesNotification(logger, sourcePairs, sourceClientData.getOldPeriodStartName(), sourceClientData.getOldPeriodEndName(),
+                    instancesNotification(logger, sourcePairs, oldPeriodStart, oldPeriodEnd,
                             sourceClientData.getMode(), sourceClientData.isDeclaration());
-                    instancesNotification(logger, sourcePairs, sourceClientData.getPeriodStartName(), sourceClientData.getPeriodEndName(),
+                    instancesNotification(logger, sourcePairs, periodStart, periodEnd,
                             sourceClientData.getMode(), sourceClientData.isDeclaration());
                     /** Проверка зацикливания */
                     sourcePairs = checkLoops(logger, periodStart, periodEnd,
@@ -776,15 +942,27 @@ public class SourceServiceImpl implements SourceService {
                     /** Дата окончания нового периода больше даты окончания старого периода */
 
                     /** Проверка существования экземпляров нф */
-                    instancesNotification(logger, sourcePairs, sourceClientData.getPeriodStartName(), sourceClientData.getPeriodEndName(),
+                    instancesNotification(logger, sourcePairs, periodStart, SimpleDateUtils.addDayToDate(oldPeriodStart, -1),
+                            sourceClientData.getMode(), sourceClientData.isDeclaration());
+                    instancesNotification(logger, sourcePairs, SimpleDateUtils.addDayToDate(oldPeriodEnd, 1), periodEnd,
                             sourceClientData.getMode(), sourceClientData.isDeclaration());
                     /** Проверка зацикливания */
-                    sourcePairs = checkLoops(logger, periodStart, SimpleDateUtils.addDayToDate(oldPeriodStart, -1),
-                            sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
-                    sourcePairs = checkLoops(logger, SimpleDateUtils.addDayToDate(oldPeriodEnd, 1), periodEnd,
+                    sourcePairs = checkLoops(logger, periodStart, periodEnd,
                             sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
                     /** Проверка пересечений */
-                    sourcePairs = checkIntersections(logger, SimpleDateUtils.addDayToDate(oldPeriodEnd, 1), periodEnd,
+                    sourcePairs = checkIntersections(logger, periodStart, periodEnd,
+                            oldPeriodStart, oldPeriodEnd, sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
+                } else if ((periodEnd == null && oldPeriodEnd == null) || (periodEnd.equals(oldPeriodEnd))) {
+                    /** Равна дате окончания старого периода */
+
+                    /** Проверка существования экземпляров нф */
+                    instancesNotification(logger, sourcePairs, periodStart, SimpleDateUtils.addDayToDate(oldPeriodStart, -1),
+                            sourceClientData.getMode(), sourceClientData.isDeclaration());
+                    /** Проверка зацикливания */
+                    sourcePairs = checkLoops(logger, periodStart, periodEnd,
+                            sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
+                    /** Проверка пересечений */
+                    sourcePairs = checkIntersections(logger, periodStart, periodEnd,
                             oldPeriodStart, oldPeriodEnd, sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
                 }
             } else if (periodStart.equals(oldPeriodStart)) {
@@ -793,46 +971,60 @@ public class SourceServiceImpl implements SourceService {
                     /** Дата окончания нового периода меньше даты окончания старого периода */
 
                     /** Проверка существования экземпляров нф */
-                    instancesNotification(logger, sourcePairs, sourceClientData.getPeriodEndName(), sourceClientData.getOldPeriodEndName(),
+                    instancesNotification(logger, sourcePairs, SimpleDateUtils.addDayToDate(periodEnd, 1), oldPeriodEnd,
                             sourceClientData.getMode(), sourceClientData.isDeclaration());
                 } else if ((periodEnd == null && oldPeriodEnd != null)
                         || (periodEnd != null && periodEnd.after(oldPeriodEnd))) {
                     /** Дата окончания нового периода больше даты окончания старого периода */
 
                     /** Проверка существования экземпляров нф */
-                    instancesNotification(logger, sourcePairs, sourceClientData.getOldPeriodEndName(), sourceClientData.getPeriodEndName(),
+                    instancesNotification(logger, sourcePairs, SimpleDateUtils.addDayToDate(oldPeriodEnd, 1), periodEnd,
                             sourceClientData.getMode(), sourceClientData.isDeclaration());
                     /** Проверка зацикливания */
-                    sourcePairs = checkLoops(logger, SimpleDateUtils.addDayToDate(oldPeriodEnd, 1), periodEnd,
+                    sourcePairs = checkLoops(logger, periodStart, periodEnd,
                             sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
                     /** Проверка пересечений */
-                    sourcePairs = checkIntersections(logger, SimpleDateUtils.addDayToDate(oldPeriodEnd, 1), periodEnd,
+                    sourcePairs = checkIntersections(logger, periodStart, periodEnd,
                             oldPeriodStart, oldPeriodEnd, sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
                 }
-            } else if (periodStart.after(oldPeriodStart)
-                    && oldPeriodEnd != null && periodStart.before(oldPeriodEnd)) {
+            } else if (periodStart.after(oldPeriodStart) && (
+                    (oldPeriodEnd != null && periodStart.before(oldPeriodEnd) || oldPeriodEnd == null)
+            )) {
                 /** Дата начала нового периода больше даты начала старого периода и меньше даты окончания старого периода */
-                if (periodEnd.before(oldPeriodEnd)) {
+                if ((periodEnd == null && oldPeriodEnd == null) || (periodEnd != null && oldPeriodEnd != null && periodEnd.equals(oldPeriodEnd))) {
+                    /** Равна дате окончания старого периода */
+
+                    /** Проверка существования экземпляров нф */
+                    instancesNotification(logger, sourcePairs, oldPeriodStart, SimpleDateUtils.addDayToDate(periodStart, -1),
+                            sourceClientData.getMode(), sourceClientData.isDeclaration());
+
+                } else if (periodEnd != null && (oldPeriodEnd == null || periodEnd.before(oldPeriodEnd))) {
                     /** Дата окончания нового периода меньше даты окончания старого периода */
 
                     /** Проверка существования экземпляров нф */
-                    instancesNotification(logger, sourcePairs, sourceClientData.getOldPeriodStartName(), sourceClientData.getPeriodStartName(),
+                    instancesNotification(logger, sourcePairs, oldPeriodStart, SimpleDateUtils.addDayToDate(periodStart, -1),
                             sourceClientData.getMode(), sourceClientData.isDeclaration());
-                    instancesNotification(logger, sourcePairs, sourceClientData.getOldPeriodEndName(), sourceClientData.getPeriodEndName(),
+                    instancesNotification(logger, sourcePairs, SimpleDateUtils.addDayToDate(periodEnd, 1), oldPeriodEnd,
                             sourceClientData.getMode(), sourceClientData.isDeclaration());
-                } else if (periodEnd.equals(oldPeriodStart)) {
-                    /** Дата окончания нового периода равна дате начала старого периода */
-
-                    /** Проверка существования экземпляров нф */
-                    instancesNotification(logger, sourcePairs, sourceClientData.getOldPeriodStartName(), sourceClientData.getPeriodStartName(),
-                            sourceClientData.getMode(), sourceClientData.isDeclaration());
-                } else if (periodEnd.after(oldPeriodEnd)) {
+                } else if ((periodEnd == null && oldPeriodEnd != null)|| (periodEnd.after(oldPeriodEnd))) {
                     /** Дата окончания нового периода больше даты окончания старого периода */
 
                     /** Проверка существования экземпляров нф */
-                    instancesNotification(logger, sourcePairs, sourceClientData.getOldPeriodStartName(), sourceClientData.getPeriodStartName(),
+                    instancesNotification(logger, sourcePairs, oldPeriodStart, SimpleDateUtils.addDayToDate(periodStart, -1),
                             sourceClientData.getMode(), sourceClientData.isDeclaration());
-                    instancesNotification(logger, sourcePairs, sourceClientData.getOldPeriodEndName(), sourceClientData.getPeriodEndName(),
+                    instancesNotification(logger, sourcePairs, SimpleDateUtils.addDayToDate(oldPeriodEnd, 1), periodEnd,
+                            sourceClientData.getMode(), sourceClientData.isDeclaration());
+                    /** Проверка зацикливания */
+                    sourcePairs = checkLoops(logger, periodStart, periodEnd,
+                            sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
+                    /** Проверка пересечений */
+                    sourcePairs = checkIntersections(logger, periodStart, periodEnd,
+                            oldPeriodStart, oldPeriodEnd, sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
+                } else if (periodEnd.after(oldPeriodEnd)) {
+                    /** Дата окончания нового периода равна дате окончания старого периода */
+
+                    /** Проверка существования экземпляров нф */
+                    instancesNotification(logger, sourcePairs, oldPeriodStart, SimpleDateUtils.addDayToDate(periodStart, -1),
                             sourceClientData.getMode(), sourceClientData.isDeclaration());
                 }
             } else if (oldPeriodEnd != null && periodStart.after(oldPeriodEnd)) {
@@ -841,9 +1033,9 @@ public class SourceServiceImpl implements SourceService {
                     /** Дата окончания нового периода больше даты окончания старого периода */
 
                     /** Проверка существования экземпляров нф */
-                    instancesNotification(logger, sourcePairs, sourceClientData.getOldPeriodStartName(), sourceClientData.getOldPeriodEndName(),
+                    instancesNotification(logger, sourcePairs, oldPeriodStart, oldPeriodEnd,
                             sourceClientData.getMode(), sourceClientData.isDeclaration());
-                    instancesNotification(logger, sourcePairs, sourceClientData.getPeriodStartName(), sourceClientData.getPeriodEndName(),
+                    instancesNotification(logger, sourcePairs, periodStart, periodEnd,
                             sourceClientData.getMode(), sourceClientData.isDeclaration());
                     /** Проверка зацикливания */
                     sourcePairs = checkLoops(logger, periodStart, periodEnd,
@@ -859,23 +1051,23 @@ public class SourceServiceImpl implements SourceService {
                 if (sourceClientData.getMode() == SourceMode.DESTINATIONS) {
                     for (SourceObject sourceObject : sourceObjects) {
                         logger.info(UPDATE_SUCCESS_MSG,
-                                sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationDeclarationType().getName() :
-                                        sourceObject.getSourcePair().getDestinationKind().getName() + ": " + sourceObject.getSourcePair().getDestinationFormType().getName(),
+                                sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationType() :
+                                        sourceObject.getSourcePair().getDestinationKind() + ": " + sourceObject.getSourcePair().getDestinationType(),
                                 "приемником",
-                                sourceObject.getSourcePair().getSourceKind().getName() + ": " + sourceObject.getSourcePair().getSourceType().getName(),
-                                sourceClientData.getPeriodStartName(),
-                                sourceClientData.getPeriodEndName() != null ? sourceClientData.getPeriodEndName() : "-"
+                                sourceObject.getSourcePair().getSourceKind() + ": " + sourceObject.getSourcePair().getSourceType(),
+                                formatter.get().format(periodStart) + " - " +
+                                        (periodEnd != null ? formatter.get().format(periodEnd) : EMPTY_END_PERIOD_INFO)
                         );
                     }
                 } else {
                     for (SourceObject sourceObject : sourceObjects) {
                         logger.info(UPDATE_SUCCESS_MSG,
-                                sourceObject.getSourcePair().getSourceKind().getName() + ": " + sourceObject.getSourcePair().getSourceType().getName(),
+                                sourceObject.getSourcePair().getSourceKind() + ": " + sourceObject.getSourcePair().getSourceType(),
                                 "источником",
-                                sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationDeclarationType().getName() :
-                                        sourceObject.getSourcePair().getDestinationKind().getName() + ": " + sourceObject.getSourcePair().getDestinationFormType().getName(),
-                                sourceClientData.getPeriodStartName(),
-                                sourceClientData.getPeriodEndName() != null ? sourceClientData.getPeriodEndName() : "-"
+                                sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationType() :
+                                        sourceObject.getSourcePair().getDestinationKind() + ": " + sourceObject.getSourcePair().getDestinationType(),
+                                formatter.get().format(periodStart) + " - " +
+                                        (periodEnd != null ? formatter.get().format(periodEnd) : EMPTY_END_PERIOD_INFO)
                         );
                     }
                 }
@@ -885,6 +1077,15 @@ public class SourceServiceImpl implements SourceService {
         }
     }
 
+    @Override
+    public int getAssignedFormsCount(List<Long> departmentsIds, char taxType) {
+        return departmentFormTypeDao.getAssignedFormsCount(departmentsIds, taxType);
+    }
+
+    @Override
+    public int getAssignedDeclarationsCount(List<Long> departmentsIds, char taxType) {
+        return departmentDeclarationTypeDao.getAssignedDeclarationsCount(departmentsIds, taxType);
+    }
 
     @Override
     public List<DepartmentFormType> getFormDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind, Date periodStart, Date periodEnd) {
@@ -905,13 +1106,13 @@ public class SourceServiceImpl implements SourceService {
 
     @Override
     public List<DepartmentFormType> getDFTByDepartment(int departmentId, TaxType taxType, Date periodStart, Date periodEnd) {
-        SearchOrderingFilter filter = getSearchOrderingDefaultFilter();
-        return getDFTByDepartment(departmentId, taxType, periodStart, periodEnd, filter);
+        QueryParams queryParams = getSearchOrderingDefaultFilter();
+        return getDFTByDepartment(departmentId, taxType, periodStart, periodEnd, queryParams);
     }
 
     @Override
-    public List<DepartmentFormType> getDFTByDepartment(int departmentId, TaxType taxType, Date periodStart, Date periodEnd, SearchOrderingFilter filter) {
-        return departmentFormTypeDao.getByTaxType(departmentId, taxType, periodStart, periodEnd, filter);
+    public List<DepartmentFormType> getDFTByDepartment(int departmentId, TaxType taxType, Date periodStart, Date periodEnd, QueryParams queryParams) {
+        return departmentFormTypeDao.getByTaxType(departmentId, taxType, periodStart, periodEnd, queryParams);
     }
 
     @Override
@@ -941,8 +1142,8 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public List<FormTypeKind> getAllFormAssigned(List<Long> departmentIds, char taxType, SearchOrderingFilter filter) {
-        return departmentFormTypeDao.getAllFormAssigned(departmentIds, taxType, filter);
+    public List<FormTypeKind> getAllFormAssigned(List<Long> departmentIds, char taxType, QueryParams<TaxNominationColumnEnum> queryParams) {
+        return departmentFormTypeDao.getAllFormAssigned(departmentIds, taxType, queryParams);
     }
 
     @Override
@@ -951,8 +1152,8 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public List<FormTypeKind> getAllDeclarationAssigned(List<Long> departmentIds, char taxType, SearchOrderingFilter filter) {
-        return departmentDeclarationTypeDao.getAllDeclarationAssigned(departmentIds, taxType, filter);
+    public List<FormTypeKind> getAllDeclarationAssigned(List<Long> departmentIds, char taxType, QueryParams<TaxNominationColumnEnum> queryParams) {
+        return departmentDeclarationTypeDao.getAllDeclarationAssigned(departmentIds, taxType, queryParams);
     }
 
     @Override
@@ -999,13 +1200,13 @@ public class SourceServiceImpl implements SourceService {
     @Override
     public List<DepartmentDeclarationType> getDDTByDepartment(int departmentId, TaxType taxType, Date periodStart,
                                                               Date periodEnd) {
-        SearchOrderingFilter filter = getSearchOrderingDefaultFilter();
-        return getDDTByDepartment(departmentId, taxType, periodStart, periodEnd, filter);
+        QueryParams queryParams = getSearchOrderingDefaultFilter();
+        return getDDTByDepartment(departmentId, taxType, periodStart, periodEnd, queryParams);
     }
 
     @Override
-    public List<DepartmentDeclarationType> getDDTByDepartment(int departmentId, TaxType taxType, Date periodStart, Date periodEnd, SearchOrderingFilter filter) {
-        return departmentDeclarationTypeDao.getByTaxType(departmentId, taxType, periodStart, periodEnd, filter);
+    public List<DepartmentDeclarationType> getDDTByDepartment(int departmentId, TaxType taxType, Date periodStart, Date periodEnd, QueryParams queryParams) {
+        return departmentDeclarationTypeDao.getByTaxType(departmentId, taxType, periodStart, periodEnd, queryParams);
     }
 
     @Override
@@ -1188,10 +1389,10 @@ public class SourceServiceImpl implements SourceService {
      *
      * @return
      */
-    private SearchOrderingFilter getSearchOrderingDefaultFilter() {
-        SearchOrderingFilter filter = new SearchOrderingFilter();
-        filter.setSearchOrdering(SourcesSearchOrdering.TYPE);
-        filter.setAscSorting(true);
-        return filter;
+    private QueryParams getSearchOrderingDefaultFilter() {
+        QueryParams queryParams = new QueryParams();
+        queryParams.setSearchOrdering(SourcesSearchOrdering.TYPE);
+        queryParams.setAscending(true);
+        return queryParams;
     }
 }

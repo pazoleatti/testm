@@ -89,6 +89,7 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
 
     @Override
     public void init() {
+        searchResults.setValue(false);
         searchCriteria.setText("");
         driver.edit(new LogSystemAuditFilter());
         auditFieldList.setValue(Arrays.asList(AuditFieldList.ALL.getId()));

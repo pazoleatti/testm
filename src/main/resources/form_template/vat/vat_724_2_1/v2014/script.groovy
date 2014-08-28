@@ -99,9 +99,6 @@ def calcRowAlias5 = ['R8', 'R9', 'R13']
 @Field
 def repordPeriod = null
 
-@Field
-def prevReportPeriod = null
-
 // Cправочник «Отчет о прибылях и убытках (Форма 0409102-СБ)»
 @Field
 def income102DataCache = [:]
@@ -179,10 +176,7 @@ def getReportPeriodEndDate() {
 
 def getPrevReportPeriodEndDate() {
     if (prevEndDate == null) {
-        def prevReportPeriodId = getPrevReportPeriod()?.id
-        if (prevReportPeriodId != null) {
-            prevEndDate = reportPeriodService.getEndDate(prevReportPeriodId).time
-        }
+        prevEndDate = getCalendarStartDate() - 1
     }
     return prevEndDate
 }
@@ -192,13 +186,6 @@ def getRepordPeriod() {
         repordPeriod = reportPeriodService.get(formData.reportPeriodId)
     }
     return repordPeriod
-}
-
-def getPrevReportPeriod() {
-    if (prevReportPeriod == null) {
-        prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
-    }
-    return prevReportPeriod
 }
 
 // Получение данных из справочника «Отчет о прибылях и убытках» для текужего подразделения и отчетного периода

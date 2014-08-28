@@ -79,47 +79,30 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
         //Если уникальных атрибутов нет, то поиск не нужен
         if (uniqueAttrs.isEmpty())
             return new ArrayList<Pair<String, String>>(0);
-        String idOddsTag = "";
-        if (recordId != null){
-            idOddsTag = "t.id <> " + recordId;
-        }
+        String idOddsTag = recordId != null ? "t.id <> " + recordId : "";
 
         ArrayList<Pair<String, String>> pairList = new ArrayList<Pair<String, String>>();
         String andTag = !uniqueAttrs.isEmpty() && recordId != null ? "AND" : "";
         for (final RefBookAttribute attribute : uniqueAttrs) {
-            String querySql = null;
+            String querySql;
             Object value = null;
-            for (RefBookRecord record : records) {
-                Map<String, RefBookValue> values = record.getValues();
+            querySql = String.format(CHECK_UNIQUE_MATCHES_FOR_NON_VERSION,
+                    idOddsTag,
+                    andTag,
+                    "t." + attribute.getAlias() + " = ?" );
+            Map<String, RefBookValue> values = records.get(0).getValues();
 
-                if (attribute.getAttributeType().equals(RefBookAttributeType.STRING)) {
-                    querySql = String.format(CHECK_UNIQUE_MATCHES_FOR_NON_VERSION,
-                            idOddsTag,
-                            andTag,
-                            "t." + attribute.getAlias() + " = ?" );
-                    value =  values.get(attribute.getAlias()).getStringValue();
-                }
-                if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
-                    querySql = String.format(CHECK_UNIQUE_MATCHES_FOR_NON_VERSION,
-                            idOddsTag,
-                            andTag,
-                            "t." + attribute.getAlias() + "=?");
-                    value = values.get(attribute.getAlias()).getReferenceValue();
-                }
-                if (attribute.getAttributeType().equals(RefBookAttributeType.NUMBER)) {
-                    querySql = String.format(CHECK_UNIQUE_MATCHES_FOR_NON_VERSION,
-                            idOddsTag,
-                            andTag,
-                            "t." + attribute.getAlias() + "=?");
-                    value = values.get(attribute.getAlias()).getNumberValue();
-                }
-                if (attribute.getAttributeType().equals(RefBookAttributeType.DATE)) {
-                    querySql = String.format(CHECK_UNIQUE_MATCHES_FOR_NON_VERSION,
-                            idOddsTag,
-                            andTag,
-                            "t." + attribute.getAlias() + "=?");
-                    value = values.get(attribute.getAlias()).getDateValue();
-                }
+            if (attribute.getAttributeType().equals(RefBookAttributeType.STRING)) {
+                value =  values.get(attribute.getAlias()).getStringValue();
+            }
+            if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
+                value = values.get(attribute.getAlias()).getReferenceValue();
+            }
+            if (attribute.getAttributeType().equals(RefBookAttributeType.NUMBER)) {
+                value = values.get(attribute.getAlias()).getNumberValue();
+            }
+            if (attribute.getAttributeType().equals(RefBookAttributeType.DATE)) {
+                value = values.get(attribute.getAlias()).getDateValue();
             }
 
             try {

@@ -107,7 +107,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
         ConfigurationParamModel model = configurationDao.getByDepartment(0);
         List<String> refBookDirectoryList = model.get(refBookDirectoryParam, 0);
         if (refBookDirectoryList == null || refBookDirectoryList.isEmpty()) {
-            log(userInfo, LogData.L31, logger, refBookName);
+            log(userInfo, LogData.L37, logger, refBookName);
             return new ImportCounter();
         }
 
@@ -115,16 +115,18 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
         int success = 0;
         int fail = 0;
 
+        ImportCounter wrongImportCounter = new ImportCounter();
         // Каталогов может быть несколько, хоть сейчас в ConfigurationParam и ограничено одним значением для всех справочников
         for (String path : refBookDirectoryList) {
             // Набор файлов, которые уже обработали
             Set<String> ignoreFileSet = new HashSet<String>();
             // Если изначально нет подходящих файлов то выдаем отдельную ошибку
-            List<String> workFilesList = getWorkTransportFiles(path, ignoreFileSet, mappingMap.keySet(), loadedFileNameList);
+            List<String> workFilesList = getWorkTransportFiles(userInfo, path, ignoreFileSet, mappingMap.keySet(),
+                    loadedFileNameList, logger, wrongImportCounter);
 
             if (workFilesList.isEmpty()) {
                 log(userInfo, LogData.L31, logger, refBookName);
-                return new ImportCounter();
+                return wrongImportCounter;
             }
 
             // Обработка всех подходящих файлов, с получением списка на каждой итерации
@@ -217,7 +219,8 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                                     // В случае неуспешного импорта в общий лог попадает вывод всех скриптов
                                     logger.getEntries().addAll(getEntries(localLoggerList));
                                     // Файл пропущен всеми справочниками — неправильный формат
-                                    log(userInfo, LogData.L4, logger);
+                                    log(userInfo, LogData.L4, logger, fileName, path);
+                                    fail++;
                                 }
                                 break;
                         }
@@ -238,7 +241,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                 }
             }
         }
-        return new ImportCounter(success, fail);
+        return new ImportCounter(success, fail + wrongImportCounter.getFailCounter());
     }
 
     /**
@@ -368,8 +371,9 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
     /**
      * Получение спика ТФ НФ из каталога загрузки. Файлы, которые не соответствуют маппингу пропускаются.
      */
-    private List<String> getWorkTransportFiles(String folderPath, Set<String> ignoreFileSet, Set<String> mappingSet,
-                                               List<String> loadedFileNameList) {
+    private List<String> getWorkTransportFiles(TAUserInfo userInfo, String folderPath, Set<String> ignoreFileSet,
+                                               Set<String> mappingSet, List<String> loadedFileNameList, Logger logger,
+                                               ImportCounter wrongImportCounter) {
         List<String> retVal = new LinkedList<String>();
         FileWrapper catalogFile = ResourceUtils.getSharedResource(folderPath);
         for (String candidateStr : catalogFile.list()) {
@@ -388,6 +392,9 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                 if (candidateFile.isFile()) {
                     retVal.add(candidateStr);
                 }
+            } else {
+                log(userInfo, LogData.L4, logger, candidateStr, folderPath);
+                wrongImportCounter.add(new ImportCounter(0, 1));
             }
         }
         // Система сортирует файлы по возрастанию по значению блоков VVV.RR в имени файла.

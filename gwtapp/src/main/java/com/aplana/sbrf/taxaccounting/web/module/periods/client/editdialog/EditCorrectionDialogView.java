@@ -75,7 +75,7 @@ public class EditCorrectionDialogView extends PopupViewWithUiHandlers<EditCorrec
         EditDialogData data = new EditDialogData();
         ReportPeriod reportPeriod = getSelectedPeriod();
         data.setReportPeriodId(reportPeriod == null ? null : reportPeriod.getId());
-        data.setDepartmentId(departmentPicker.getValue().get(0));
+        data.setDepartmentId(departmentPicker.getValue().isEmpty() ? null : departmentPicker.getValue().get(0));
         data.setCorrectionDate(term.getValue());
         data.setPeriodYear(reportPeriod == null ? 0 : reportPeriod.getStartDate().getYear()+1900);
         getUiHandlers().onContinue(data);

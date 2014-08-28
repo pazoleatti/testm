@@ -142,6 +142,11 @@ void logicCheck() {
         checkNonEmptyColumns(row, rowNum, ['contractNum', 'contractDate'], logger, true)
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns - ['contractNum', 'contractDate'], logger, false)
 
+        if (row.count == 0) {
+            def countName = getColumnName(row, 'count')
+            rowWarning(logger, row, "Строка $rowNum: Графа «$countName» не может содержать значение 0")
+        }
+
         // Корректность даты совершения сделки
         if (row.transactionDate < row.contractDate) {
             def msg1 = row.getCell('transactionDate').column.name

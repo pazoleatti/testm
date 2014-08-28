@@ -42,6 +42,16 @@ update declaration_source set period_start = to_date('01.01.2008', 'DD.MM.YYYY')
 alter table form_data_source modify period_start not null;
 alter table declaration_source modify  period_start not null;
 
+--http://jira.aplana.com/browse/SBRFACCTAX-8553 - Изменение PK для возможности создавать одинаковые назначения на разные периоды
+ALTER TABLE declaration_source DROP CONSTRAINT declaration_source_pk;
+ALTER TABLE form_data_source DROP CONSTRAINT form_data_source_pk;
+
+DROP INDEX declaration_source_pk;
+DROP INDEX form_data_source_pk;
+
+ALTER TABLE declaration_source ADD CONSTRAINT declaration_source_pk PRIMARY KEY (department_declaration_type_id, src_department_form_type_id, period_start);
+ALTER TABLE form_data_source ADD CONSTRAINT form_data_source_pk PRIMARY KEY (department_form_type_id, src_department_form_type_id, period_start);
+
 ---------------------------------------------------------------------------------------------------------
 -- http://jira.aplana.com/browse/SBRFACCTAX-8037 - Удалить из БД поля FORM_TEMPLATE.EDITION и DECLARATION_TEMPLATE.EDITION
 ALTER TABLE form_template DROP COLUMN edition;

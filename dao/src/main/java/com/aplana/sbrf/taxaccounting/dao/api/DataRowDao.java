@@ -158,4 +158,12 @@ public interface DataRowDao {
      * @return Set<FormDataSearchResult> - Набор из номера столбца, строки, и самой найденной подстроки
      */
     PagingResult<FormDataSearchResult> searchByKey(Long formDataId, Integer formTemplateId, DataRowRange range, String key, boolean isCaseSensitive);
+
+    /**
+     * Изменилось ли количество строк в табличной части до и после редактирования (до сохранения НФ)
+     *
+     * @param formId идентификатор экземпляра НФ
+     * @return true - изменилось, false - не изменилось
+     */
+    boolean isDataRowsCountChanged(long formId);
 }

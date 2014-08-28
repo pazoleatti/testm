@@ -41,6 +41,8 @@
 		<org.slf4j.version>1.7.2</org.slf4j.version>
         <java.version>1.6</java.version>
         <releasePostfix>-${project.version}</releasePostfix>
+        <releaseName>taxaccounting${releasePostfix}</releaseName>
+        <guaranteeUrl>/taxaccounting-rnu${releasePostfix}/module</guaranteeUrl>
 	</properties>
 
 	<dependencyManagement>
@@ -428,6 +430,7 @@
 								<X-Git-Revision>${git.revision}</X-Git-Revision>
 								<X-Git-Build-Number>${git.buildnumber}</X-Git-Build-Number>
 								<X-Git>${git.buildnumber}(${maven.build.timestamp})</X-Git>
+                                <Url-Guarantee>${guaranteeUrl}</Url-Guarantee>
 							</manifestEntries>
 						</archive>
 					</configuration>
@@ -459,6 +462,7 @@
 								<X-Git-Revision>${git.revision}</X-Git-Revision>
 								<X-Git-Build-Number>${git.buildnumber}</X-Git-Build-Number>
 								<X-Git>${git.buildnumber}.${maven.build.timestamp}</X-Git>
+                                <Url-Guarantee>${guaranteeUrl}</Url-Guarantee>
 							</manifestEntries>
 						</archive>
 					</configuration>
@@ -482,6 +486,7 @@
 								<X-Git-Revision>${git.revision}</X-Git-Revision>
 								<X-Git-Build-Number>${git.buildnumber}</X-Git-Build-Number>
 								<X-Git>${git.buildnumber}.${maven.build.timestamp}</X-Git>
+								<Url-Guarantee>${guaranteeUrl}</Url-Guarantee>
 							</manifestEntries>
 						</archive>
 					</configuration>

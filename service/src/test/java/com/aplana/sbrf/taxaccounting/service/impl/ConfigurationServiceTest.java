@@ -219,7 +219,8 @@ public class ConfigurationServiceTest {
         model.put(ConfigurationParam.KEY_FILE, 0, Arrays.asList(sb.toString(), sb.toString(), ""));
         service.saveAllConfig(getUser(), model, logger);
 
-        Assert.assertEquals(10, logger.getEntries().size());
+        // необязательно указывать все общие параметры, поэтому будет 2 ошибки на превышение длины выше 500 символов
+        Assert.assertEquals(2, logger.getEntries().size());
         Assert.assertTrue(logger.getEntries().get(0).getMessage().contains("(" + length + ")"));
         Assert.assertTrue(logger.getEntries().get(1).getMessage().contains("(" + length + ")"));
     }

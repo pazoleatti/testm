@@ -236,7 +236,7 @@ def BigDecimal calcDiscountInRub(def row) {
             def map = null
             if (row.implementationDate != null) {
                 // значение поля «Курс валюты» справочника «Курсы валют» на дату из «Графы 10»
-                map = getRecord(22, 'CODE_NUMBER', "${row.currency}", row.number?.intValue(),
+                map = getRecord(22, 'CODE_NUMBER', "${row.currency}", row.number?.intValue() ?: row.getIndex(),
                         getColumnName(row, 'currency'), row.implementationDate)
             }
             if (map != null) {
@@ -623,7 +623,7 @@ def isBalancePeriod() {
 }
 
 void importTransportData() {
-    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName, 15, 1)
     addTransportData(xml)
 
     def dataRows = formDataService.getDataRowHelper(formData)?.allCached

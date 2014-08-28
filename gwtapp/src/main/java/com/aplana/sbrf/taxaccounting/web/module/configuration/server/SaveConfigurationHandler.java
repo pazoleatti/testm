@@ -16,12 +16,16 @@ import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
+import java.util.Set;
+
 @Component
 public class SaveConfigurationHandler extends
         AbstractActionHandler<SaveConfigurationAction, SaveConfigurationResult> {
 
     private final static String UNIQUE_DEPARTMENT_ERROR = "Параметры для ТБ «%s» уже заданы!";
-    private final static String NOT_SET_ERROR = "Не задано значение поля «%s»!";
+    private final static String NOT_SET_DEPARTMENT_ERROR = "Не задано значение поля «%s»!";
+    private final static String NOT_SET_ERROR = "Не задано значение поля «%s» для «%s»!";
 
     @Autowired
     private SecurityService securityService;
@@ -52,9 +56,17 @@ public class SaveConfigurationHandler extends
             }
         }
 
-        if (!action.getNotSetFieldSet().isEmpty()) {
-            for (String fieldName : action.getNotSetFieldSet()) {
-                logger.error(NOT_SET_ERROR, fieldName);
+        for (Map.Entry<Integer, Set<String>> entry : action.getNotSetFields().entrySet()) {
+            Integer departmentId = entry.getKey();
+            if (departmentId != null) {
+                Department department = departmentService.getDepartment(departmentId);
+                for (String fieldName : entry.getValue()) {
+                    logger.error(NOT_SET_ERROR, fieldName, department.getName());
+                }
+            } else {
+                for (String fieldName : entry.getValue()) {
+                    logger.error(NOT_SET_DEPARTMENT_ERROR, fieldName);
+                }
             }
         }
 

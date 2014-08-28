@@ -211,9 +211,9 @@
                     <!--Правые кнопки ссылки-->
                     <g:cell horizontalAlignment="right">
                         <g:VerticalPanel width="180px" spacing="2">
-                            <style:LinkButton ui:field="signersAnchor" text="Исполнитель и подписанты"
+                            <style:LinkButton ui:field="signersAnchor" text="Параметры печатной формы"
                                               img="resources/img/businessperson-16.png"
-                                              title="Указать исполнителя и список подписантов налоговой формы"/>
+                                              title="Указать параметры печатной формы"/>
                             <style:LinkButton ui:field="infoAnchor" text="История изменений"
                                               img="resources/img/exclamation_mark.png"
                                               title="Отобразить историю налоговой формы"/>

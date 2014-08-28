@@ -163,6 +163,10 @@ void logicCheck() {
         def countName = row.getCell('count').column.name
         def costName = row.getCell('cost').column.name
 
+        if (row.count == 0) {
+            rowWarning(logger, row, "Строка $rowNum: Графа «$countName» не может содержать значение 0")
+        }
+
         // Проверка стоимости
         if (row.price != calc13(row)) {
             rowWarning(logger, row, "Строка $rowNum: «$costName» не равна произведению «$countName» и «$priceName»!")

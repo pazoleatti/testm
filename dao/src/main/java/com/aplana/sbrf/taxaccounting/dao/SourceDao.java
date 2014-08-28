@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
-import com.aplana.sbrf.taxaccounting.model.source.DeclarationDataInfo;
-import com.aplana.sbrf.taxaccounting.model.source.FormDataInfo;
-import com.aplana.sbrf.taxaccounting.model.source.SourceObject;
-import com.aplana.sbrf.taxaccounting.model.source.SourcePair;
+import com.aplana.sbrf.taxaccounting.model.source.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
 import java.util.Date;

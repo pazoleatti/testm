@@ -11,7 +11,7 @@
         территория Российской Федерации, а также суммы оплаты, частичной оплаты в счет предстоящих поставок (выполнения
         работ, оказания услуг), длительность производственного цикла изготовления которых составляет свыше шести месяцев
     </fullName>
-    <code>(724.2.1)</code>
+    <header>724.2.1</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rowNum</alias>
         <checking>false</checking>

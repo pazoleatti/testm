@@ -122,6 +122,11 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
     }
 
     @Override
+    public void setAccountPeriodIds(List<Long> accountPeriodIds) {
+        this.accountPeriodIds.setValue(accountPeriodIds);
+    }
+
+    @Override
     public List<Integer> getDepartments() {
         return departmentIds.getValue();
     }
@@ -187,6 +192,13 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
     @Override
     public boolean isAscSorting() {
         return dataProvider.isAscSorting();
+    }
+
+    @Override
+    public void updateAccountPeriodIds() {
+        Date current = new Date();
+        accountPeriodIds.setPeriodDates(current, current);
+        accountPeriodIds.load();
     }
 
     @UiHandler("searchButton")
