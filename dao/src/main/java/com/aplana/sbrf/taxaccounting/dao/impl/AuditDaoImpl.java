@@ -24,13 +24,16 @@ import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSq
 @Repository
 public class AuditDaoImpl extends AbstractDao implements AuditDao {
 
+    private static final int FILTER_LENGTH = 1000;
+
 	@Override
 	public PagingResult<LogSearchResultItem> getLogs(LogSystemFilter filter) {
         return getLogsBusiness(filter, null, null);
     }
 
     @Override
-    public PagingResult<LogSearchResultItem> getLogsBusiness(LogSystemFilter filter, List<Integer> departments, List<Integer> BADepartmentIds) {
+    public PagingResult<LogSearchResultItem> getLogsBusiness(LogSystemFilter logSystemFilter, List<Integer> departments, List<Integer> BADepartmentIds) {
+        LogSystemFilter filter = cutOffLogSystemFilter(logSystemFilter);
         PreparedStatementData ps = new PreparedStatementData();
         ps.appendQuery("select ordDat.* from (select dat.*, rownum as rn from ( select ");
         ps.appendQuery("ls.id, ");
@@ -70,21 +73,21 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         }
 
         ps.appendQuery(orderByClause(filter.getSearchOrdering(), filter.isAscSorting()));
-		ps.appendQuery(") dat) ordDat");
-        if(filter.getCountOfRecords() != 0){
-            ps.appendQuery(" where ordDat.rn between ? and ?"+
+        ps.appendQuery(") dat) ordDat");
+        if (filter.getCountOfRecords() != 0) {
+            ps.appendQuery(" where ordDat.rn between ? and ?" +
                     " order by ordDat.rn");
             ps.addParam(filter.getStartIndex() + 1);
             ps.addParam(filter.getStartIndex() + filter.getCountOfRecords());
-        } else{
+        } else {
             ps.appendQuery(" order by ordDat.rn");
         }
         List<LogSearchResultItem> records = getJdbcTemplate().query(
                 ps.getQuery().toString(),
                 ps.getParams().toArray(),
                 new AuditRowMapper());
-		return new PagingResult<LogSearchResultItem>(records, getCount(filter, departments, BADepartmentIds));
-	}
+        return new PagingResult<LogSearchResultItem>(records, getCount(filter, departments, BADepartmentIds));
+    }
 
 	@Override
 	public void add(LogSystem logSystem) {
@@ -359,5 +362,19 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                 ps.getQuery().toString(),
                 ps.getParams().toArray()
         );
+    }
+
+    /**
+     * Ограничить строку фильтра, длина которого больше 1000 символов.
+     * @param logSystemFilter фильтр
+     * @return фильтр с ограниченным строковым фильтром
+     */
+    private LogSystemFilter cutOffLogSystemFilter(LogSystemFilter logSystemFilter) {
+        String filter = logSystemFilter.getFilter();
+        if (filter != null && filter.length() > FILTER_LENGTH) {
+            String substring = filter.substring(0, FILTER_LENGTH);
+            logSystemFilter.setFilter(substring);
+        }
+        return logSystemFilter;
     }
 }
