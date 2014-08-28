@@ -93,6 +93,8 @@ public final class ScriptUtils {
     private static final String IMPORT_ROW_PREFIX = "Строка файла %d: %s";
     private static final String TRANSPORT_FILE_SUM_ERROR = "Итоговая сумма в графе %s строки %s в транспортном файле некорректна. Загрузка файла не выполнена.";
 
+    private static final String ROW_FILE_WRONG = "Строка файла %s содержит некорректное значение.";
+
 
     // Ссылочный, независимая графа: Не найдена версия справочника, соответствующая значению в файле
     public static final String REF_BOOK_NOT_FOUND_IMPORT_ERROR = "Проверка файла: Строка %d, столбец %d: В справочнике «%s» в атрибуте «%s» не найдено значение «%s», актуальное на дату %s!";
@@ -911,35 +913,49 @@ public final class ScriptUtils {
             throw new ServiceException(e.getMessage());
         }
 
+        // в файле rnu по умолчанию пропускаются первые две строки
         int rowIndex = 2;
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder documentBuilder = factory.newDocumentBuilder();
             InputSource inputSource = new InputSource();
+            // парсим xml в Document
             inputSource.setCharacterStream(new StringReader(xmlString));
             Document document = documentBuilder.parse(inputSource);
+            // получаем узлы соответствующие строкам
             NodeList rows = document.getElementsByTagName("row");
+            // проходим по строкам
             for (int i = 0; i < rows.getLength(); i++) {
                 rowIndex++;
                 Element element = (Element) rows.item(i);
+                // получаем атрибут кол-ва столбцов в строке
                 Integer count = Integer.valueOf(element.getAttribute("count"));
+                // добавляем два служебных поля к числу граф и сверяем с их числом в файле
                 if (count != columnCount + 2) {
-                    throw new ServiceException("Строка файла " + rowIndex + " содержит некорректное значение.");
+                    throw new ServiceException(ROW_FILE_WRONG, rowIndex);
                 }
             }
 
+            // после строк с данными через одну пустую должны быть итоги
             rowIndex+=2;
 
-            NodeList totals = document.getElementsByTagName("rowTotal");
+            // проверка на итоги идет только если они ожидаются
             if (totalCount != 0) {
+                // получаем узлы соответствующие итогам
+                NodeList totals = document.getElementsByTagName("rowTotal");
+                // сверяем кол-во строк итогов
                 if (totals.getLength() != totalCount) {
-                    throw new ServiceException("Строка файла " + rowIndex + " содержит некорректное значение.");
+                    throw new ServiceException(ROW_FILE_WRONG, rowIndex);
                 } else {
-                    for (int i = 0; i < totals.getLength(); i++, rowIndex++) {
+                    // проходим по итогам
+                    for (int i = 0; i < totals.getLength(); i++) {
+                        rowIndex++;
                         Element element = (Element) totals.item(i);
+                        // получаем атрибут кол-ва столбцов в строке
                         Integer count = Integer.valueOf(element.getAttribute("count"));
+                        // добавляем два служебных поля к числу граф и сверяем
                         if (count != columnCount + 2) {
-                            throw new ServiceException("Строка файла " + rowIndex + " содержит некорректное значение.");
+                            throw new ServiceException(ROW_FILE_WRONG, rowIndex);
                         }
                     }
                 }
