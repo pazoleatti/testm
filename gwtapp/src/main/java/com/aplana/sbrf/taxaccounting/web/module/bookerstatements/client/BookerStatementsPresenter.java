@@ -70,7 +70,7 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
          * Установка выбранных периодов
          * @param reportPeriods
          */
-        void setAccountPeriodIds(List<Long> reportPeriods);
+        void setAccountPeriodIds(List<Integer> reportPeriods);
 
         /**
          * Получает выбранные подразделения
@@ -80,7 +80,7 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
         /**
          * Получает выбранные отчетные периоды
          */
-        List<Long> getAccountPeriods();
+        List<Integer> getAccountPeriods();
 
         /**
          * Получает тип
@@ -97,8 +97,6 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
 
         BookerStatementsSearchOrdering getSearchOrdering();
         void setReportPeriods(List<ReportPeriod> reportPeriods);
-
-        void updateAccountPeriodIds();
     }
 
     @ProxyCodeSplit
@@ -152,7 +150,6 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
                 (lstHistory.get(1) == null || !lstHistory.get(1).startsWith(url))) {
             filter = null;
         }
-        getView().updateAccountPeriodIds();
         dispatcher.execute(new GetBSOpenListAction(),
                 CallbackUtils.defaultCallback(
                         new AbstractCallback<GetBSOpenListResult>() {

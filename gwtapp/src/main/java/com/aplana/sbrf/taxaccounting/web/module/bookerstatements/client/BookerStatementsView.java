@@ -122,7 +122,7 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
     }
 
     @Override
-    public void setAccountPeriodIds(List<Long> accountPeriodIds) {
+    public void setAccountPeriodIds(List<Integer> accountPeriodIds) {
         this.accountPeriodIds.setValue(accountPeriodIds);
     }
 
@@ -132,10 +132,11 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
     }
 
     @Override
-    public List<Long> getAccountPeriods() {
-        List<Long> list = new ArrayList<Long>(accountPeriodIds.getValue().size());
-        for (Integer integer : accountPeriodIds.getValue())
-            list.add(integer.longValue());
+    public List<Integer> getAccountPeriods() {
+        List<Integer> list = new ArrayList<Integer>(accountPeriodIds.getValue().size());
+        for (Integer periodId : accountPeriodIds.getValue()) {
+            list.add(periodId);
+        }
         return list;
     }
 
@@ -192,13 +193,6 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
     @Override
     public boolean isAscSorting() {
         return dataProvider.isAscSorting();
-    }
-
-    @Override
-    public void updateAccountPeriodIds() {
-        Date current = new Date();
-        accountPeriodIds.setPeriodDates(current, current);
-        accountPeriodIds.load();
     }
 
     @UiHandler("searchButton")
