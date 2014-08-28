@@ -90,7 +90,7 @@ def nonEmptyColumns = ['subject', 'taxAuthority', 'kpp', 'oktmo', 'address', 'si
                        'cadastrePriceTaxFree', 'propertyRightBeginDate']
 
 @Field
-def sortColumns = ['taxAuthority', 'kpp', 'cadastreNum']
+def sortColumns = ['subject', 'taxAuthority', 'kpp', 'oktmo', 'sign', 'cadastreNum']
 
 @Field
 def groupColumns = ['taxAuthority', 'kpp']
@@ -187,7 +187,7 @@ void calc() {
     deleteAllAliased(dataRows)
 
     if (formDataEvent != FormDataEvent.IMPORT) {
-        sortRows(dataRows, sortColumns)
+        sort(dataRows)
     }
 
     addFixedRows(dataRows, totalRow)
@@ -280,7 +280,9 @@ void logicCheck() {
                 }
                 if (rowEqual) {
                     if (!foundEqualsMap[index]) {
-                        foundEqualsMap.put(index, Arrays.asList(index))
+                        def list = new ArrayList()
+                        list.add(index)
+                        foundEqualsMap.put(index, list)
                     }
                     foundEqualsMap[index].add(anotherRow.getIndex())
                 }
@@ -297,6 +299,10 @@ void logicCheck() {
                 if (records.size() == 0) {
                     loggerError(row, errorMsg + "Выбранная льгота для текущего региона не предусмотрена (в справочнике «Параметры налоговых льгот налога на имущество» отсутствует запись по выбранному субъекту и льготе, в которой категория имущества не заполнена)!")
                 }
+            }
+            // Проверка даты возникновения права собственности
+            if (row.propertyRightBeginDate < getReportPeriodStartDate() || row.propertyRightBeginDate > getReportPeriodEndDate()) {
+                loggerError(row, errorMsg + "Дата возникновения права собственности должна попадать в интервал с ${getReportPeriodStartDate().format('dd.MM.yyyy')} до ${getReportPeriodEndDate().format('dd.MM.yyyy')} (включительно)!")
             }
             // Проверка периода действия права собственности
             if (row.propertyRightEndDate != null && row.propertyRightEndDate < row.propertyRightBeginDate) {
@@ -327,10 +333,10 @@ void logicCheck() {
 }
 
 void importData() {
-    def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null)
+    def tempRow = formData.createDataRow()
+    def xml = getXML(ImportInputStream, importService, UploadFileName, getColumnName(tempRow, 'rowNum'), null)
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 13, 2)
-    def tempRow = formData.createDataRow()
 
     def headerMapping = [
             (xml.row[0].cell[0]): getColumnName(tempRow, 'rowNum'),
@@ -439,3 +445,25 @@ void loggerError(def row, def msg) {
     }
 }
 
+void sort(def dataRows) {
+    dataRows.sort { def a, def b ->
+        // графа 2  - subject (справочник)
+        // графа 3  - taxAuthority
+        // графа 4  - kpp
+        // графа 5  - oktmo
+        // графа 7  - sign
+        // графа 8  - cadastreNum
+
+        def valuesA = [(a.subject ? getRefBookValue(4, a.subject) : null), a.taxAuthority, a.kpp, (a.oktmo ? getRefBookValue(96, a.oktmo) : null), a.sign, a.cadastreNum]
+        def valuesB = [(b.subject ? getRefBookValue(4, b.subject) : null), b.taxAuthority, b.kpp, (b.oktmo ? getRefBookValue(96, b.oktmo) : null), b.sign, b.cadastreNum]
+
+        for (int i = 0; i < 6; i++) {
+            def valueA = valuesA[i]
+            def valueB = valuesB[i]
+            if (valueA != valueB) {
+                return valueA <=> valueB
+            }
+        }
+        return 0
+    }
+}

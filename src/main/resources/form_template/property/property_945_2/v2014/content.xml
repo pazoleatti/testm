@@ -3,7 +3,7 @@
     <fixedRows>false</fixedRows>
     <name>Данные о кадастровой стоимости объектов недвижимости для расчета налога на имущество</name>
     <fullName>Данные о кадастровой стоимости объектов недвижимости для расчета налога на имущество</fullName>
-    <header>(945.2)</header>
+    <header>945.2</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>rowNum</alias>
         <checking>false</checking>
