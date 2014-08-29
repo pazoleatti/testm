@@ -228,5 +228,14 @@ WHERE form_template_id IN
 DELETE FROM form_template WHERE type_id IN (361, 378, 367, 395, 369, 374, 373, 370, 368, 396, 410, 359, 363, 327, 502, 371);
 DELETE FROM form_type WHERE id IN (361, 378, 367, 395, 369, 374, 373, 370, 368, 396, 410, 359, 363, 327, 502, 371);
 ---------------------------------------------------------------------------------------------------------
+-- http://jira.aplana.com/browse/SBRFACCTAX-8536: В справочнике "Общероссийский классификатор валют" есть дубль
+
+UPDATE ref_book_record SET status = -1 WHERE id =
+(SELECT MIN(record_id) FROM ref_book_value WHERE attribute_id = 66 AND string_value = 'Бразильский реал')
+AND (SELECT COUNT(record_id) FROM ref_book_value WHERE attribute_id = 66 AND string_value = 'Бразильский реал') = 2;
+
+UPDATE ref_book_value SET string_value = '986' WHERE attribute_id = 64 AND record_id =
+(SELECT r.id FROM ref_book_record r JOIN ref_book_value v ON v.record_id = r.id WHERE v.attribute_id = 66 AND v.string_value = 'Бразильский реал' AND r.status = 0);
+---------------------------------------------------------------------------------------------------------
 COMMIT;
 EXIT;
