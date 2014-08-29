@@ -34,6 +34,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * Класс, реализующий логику определения доступности пунктов меню навигации
@@ -54,6 +55,9 @@ public class GetMainMenuActionHandler extends
 
 	@Autowired
 	private SecurityService securityService;
+
+    @Autowired
+    Properties manifestProperties;
 
 	@Override
 	public GetMainMenuResult execute(GetMainMenuAction action,
@@ -140,7 +144,8 @@ public class GetMainMenuActionHandler extends
             if (currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
                 MenuItem gar = new MenuItem("Гарантии", "", "Гарантии");
                 taxMenu.getSubMenu().add(gar);
-                gar.getSubMenu().add(new MenuItem("Ввод гарантий", "/taxaccounting-rnu/module"));
+                String url = manifestProperties.getProperty("Url-Guarantee", "#");
+                gar.getSubMenu().add(new MenuItem("Ввод гарантий", url));
             }
 
             MenuItem menuItem = new MenuItem("Сервис", "", "Сервис");

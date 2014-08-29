@@ -103,5 +103,130 @@ UPDATE ref_book_value SET string_value = translate(string_value, '«»', '""') W
 UPDATE ref_book_oktmo SET code = substr(code, 1, 8) WHERE substr(code, 9, 3) = '000';
 
 ---------------------------------------------------------------------------------------------------------
+-- http://jira.aplana.com/browse/SBRFACCTAX-8569: Заполнение SBRF_CODE по постановке
+UPDATE department SET sbrf_code = null WHERE sbrf_code = '99_9006_00';
+
+UPDATE department SET sbrf_code = '00__' WHERE id = 0;
+UPDATE department SET sbrf_code = '13_0000_00' WHERE id = 102;
+UPDATE department SET sbrf_code = '13_0001_00' WHERE id = 103;
+UPDATE department SET sbrf_code = '16_0000_00' WHERE id = 97;
+UPDATE department SET sbrf_code = '16_0001_00' WHERE id = 98;
+UPDATE department SET sbrf_code = '18_0000_00' WHERE id = 4;
+UPDATE department SET sbrf_code = '18_0001_00' WHERE id = 5;
+UPDATE department SET sbrf_code = '31_0000_00' WHERE id = 16;
+UPDATE department SET sbrf_code = '31_0001_00' WHERE id = 17;
+UPDATE department SET sbrf_code = '36_0000_00' WHERE id = 59;
+UPDATE department SET sbrf_code = '36_0001_00' WHERE id = 60;
+UPDATE department SET sbrf_code = '38_0000_00' WHERE id = 37;
+UPDATE department SET sbrf_code = '38_0001_00' WHERE id = 38;
+UPDATE department SET sbrf_code = '38_0002_00' WHERE id = 138;
+UPDATE department SET sbrf_code = '38_0002_01' WHERE id = 139;
+UPDATE department SET sbrf_code = '40_0000_00' WHERE id = 88;
+UPDATE department SET sbrf_code = '40_0001_00' WHERE id = 89;
+UPDATE department SET sbrf_code = '42_0000_00' WHERE id = 8;
+UPDATE department SET sbrf_code = '42_0001_00' WHERE id = 9;
+UPDATE department SET sbrf_code = '44_0000_00' WHERE id = 82;
+UPDATE department SET sbrf_code = '44_0001_00' WHERE id = 83;
+UPDATE department SET sbrf_code = '49_0000_00' WHERE id = 32;
+UPDATE department SET sbrf_code = '49_0001_00' WHERE id = 33;
+UPDATE department SET sbrf_code = '52_0000_00' WHERE id = 109;
+UPDATE department SET sbrf_code = '52_0001_00' WHERE id = 110;
+UPDATE department SET sbrf_code = '54_0000_00' WHERE id = 44;
+UPDATE department SET sbrf_code = '54_0000_01' WHERE id = 45;
+UPDATE department SET sbrf_code = '55_0000_00' WHERE id = 64;
+UPDATE department SET sbrf_code = '55_0001_00' WHERE id = 65;
+UPDATE department SET sbrf_code = '60_0000_00' WHERE id = 72;
+UPDATE department SET sbrf_code = '60_0001_00' WHERE id = 73;
+UPDATE department SET sbrf_code = '67_0000_00' WHERE id = 27;
+UPDATE department SET sbrf_code = '67_0001_00' WHERE id = 28;
+UPDATE department SET sbrf_code = '70_0000_00' WHERE id = 20;
+UPDATE department SET sbrf_code = '70_0001_00' WHERE id = 21;
+UPDATE department SET sbrf_code = '77_0000_00' WHERE id = 52;
+UPDATE department SET sbrf_code = '77_0001_00' WHERE id = 53;
+UPDATE department SET sbrf_code = '99_0000_00' WHERE id = 113;
+UPDATE department SET sbrf_code = '99_1000_00' WHERE id = 163;
+UPDATE department SET sbrf_code = '99_1010_00' WHERE id = 164;
+UPDATE department SET sbrf_code = '99_1020_00' WHERE id = 165;
+UPDATE department SET sbrf_code = '99_1030_00' WHERE id = 166;
+UPDATE department SET sbrf_code = '99_1040_00' WHERE id = 167;
+UPDATE department SET sbrf_code = '99_1050_00' WHERE id = 168;
+UPDATE department SET sbrf_code = '99_1060_00' WHERE id = 169;
+UPDATE department SET sbrf_code = '99_1070_00' WHERE id = 170;
+UPDATE department SET sbrf_code = '99_1080_00' WHERE id = 171;
+UPDATE department SET sbrf_code = '99_1090_00' WHERE id = 172;
+UPDATE department SET sbrf_code = '99_1100_00' WHERE id = 173;
+UPDATE department SET sbrf_code = '99_11701_00' WHERE id = 176;
+UPDATE department SET sbrf_code = '99_11701_01' WHERE id = 177;
+UPDATE department SET sbrf_code = '99_11702_00' WHERE id = 224;
+UPDATE department SET sbrf_code = '99_11702_01' WHERE id = 125;
+UPDATE department SET sbrf_code = '99_11702_02_01' WHERE id = 146;
+UPDATE department SET sbrf_code = '99_11702_02_12' WHERE id = 157;
+UPDATE department SET sbrf_code = '99_11702_02_13' WHERE id = 158;
+UPDATE department SET sbrf_code = '99_11702_02' WHERE id = 126;
+UPDATE department SET sbrf_code = '99_11702_02_02' WHERE id = 147;
+UPDATE department SET sbrf_code = '99_11702_02_04' WHERE id = 149;
+UPDATE department SET sbrf_code = '99_11702_02_05' WHERE id = 150;
+UPDATE department SET sbrf_code = '99_11702_02_11' WHERE id = 156;
+UPDATE department SET sbrf_code = '99_11702_02_03' WHERE id = 148;
+UPDATE department SET sbrf_code = '99_11702_02_06' WHERE id = 151;
+UPDATE department SET sbrf_code = '99_11702_02_08' WHERE id = 153;
+UPDATE department SET sbrf_code = '99_11702_02_07' WHERE id = 152;
+UPDATE department SET sbrf_code = '99_11702_02_10' WHERE id = 155;
+UPDATE department SET sbrf_code = '99_11702_02_09' WHERE id = 154;
+UPDATE department SET sbrf_code = '99_11702_02_14' WHERE id = 159;
+UPDATE department SET sbrf_code = '99_11702_03_02' WHERE id = 144;
+UPDATE department SET sbrf_code = '99_11702_03_03' WHERE id = 145;
+UPDATE department SET sbrf_code = '99_11702_03' WHERE id = 123;
+UPDATE department SET sbrf_code = '99_11702_03_01' WHERE id = 143;
+UPDATE department SET sbrf_code = '99_1170_00' WHERE id = 175;
+UPDATE department SET sbrf_code = '99_1180_00' WHERE id = 179;
+UPDATE department SET sbrf_code = '99_1190_00' WHERE id = 180;
+UPDATE department SET sbrf_code = '99_1260_00' WHERE id = 178;
+UPDATE department SET sbrf_code = '99_1260_03' WHERE id = 225;
+UPDATE department SET sbrf_code = '99_2540_00' WHERE id = 142;
+UPDATE department SET sbrf_code = '99_6100_00' WHERE id = 115;
+UPDATE department SET sbrf_code = '99_6100_01' WHERE id = 118;
+UPDATE department SET sbrf_code = '99_6100_02' WHERE id = 116;
+UPDATE department SET sbrf_code = '99_6100_03' WHERE id = 119;
+UPDATE department SET sbrf_code = '99_6100_04' WHERE id = 117;
+UPDATE department SET sbrf_code = '99_6100_05' WHERE id = 120;
+UPDATE department SET sbrf_code = '99_6200_00' WHERE id = 1;
+UPDATE department SET sbrf_code = '99_9000_00' WHERE id = 130;
+UPDATE department SET sbrf_code = '99_9600_00' WHERE id = 160;
+UPDATE department SET sbrf_code = '99_9700_00' WHERE id = 161;
+UPDATE department SET sbrf_code = '99_9800_00' WHERE id = 162;
+
+---------------------------------------------------------------------------------------------------------
+-- http://jira.aplana.com/browse/SBRFACCTAX-8655: Удаление макетов при отсутствии версии
+
+DELETE FROM declaration_source
+WHERE src_department_form_type_id IN
+    (SELECT id
+     FROM department_form_type
+     WHERE form_type_id IN (361, 378, 367, 395, 369, 374, 373, 370, 368, 396, 410, 359, 363, 327, 502, 371));
+
+
+DELETE FROM form_data_source
+WHERE department_form_type_id IN
+    (SELECT id
+     FROM department_form_type
+     WHERE form_type_id IN (361, 378, 367, 395, 369, 374, 373, 370, 368, 396, 410, 359, 363, 327, 502, 371))
+  OR src_department_form_type_id IN
+    (SELECT id
+     FROM department_form_type
+     WHERE form_type_id IN (361, 378, 367, 395, 369, 374, 373, 370, 368, 396, 410, 359, 363, 327, 502, 371));
+
+DELETE FROM department_form_type WHERE form_type_id IN (361, 378, 367, 395, 369, 374, 373, 370, 368, 396, 410, 359, 363, 327, 502, 371);
+
+DELETE FROM form_data
+WHERE form_template_id IN
+    (SELECT id
+     FROM form_template
+     WHERE type_id IN (361, 378, 367, 395, 369, 374, 373, 370, 368, 396, 410, 359, 363, 327, 502, 371));
+
+
+DELETE FROM form_template WHERE type_id IN (361, 378, 367, 395, 369, 374, 373, 370, 368, 396, 410, 359, 363, 327, 502, 371);
+DELETE FROM form_type WHERE id IN (361, 378, 367, 395, 369, 374, 373, 370, 368, 396, 410, 359, 363, 327, 502, 371);
+---------------------------------------------------------------------------------------------------------
 COMMIT;
 EXIT;

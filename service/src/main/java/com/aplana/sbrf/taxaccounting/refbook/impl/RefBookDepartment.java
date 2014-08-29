@@ -342,7 +342,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         }
 
         //9 шаг. Проверка зацикливания
-        if (dep.getType() != DepartmentType.ROOT_BANK && dep.getParentId() != (parentDep != null ? parentDep.getId() : 0)){
+        if (dep.getType() != DepartmentType.ROOT_BANK && dep.getParentId() != null && dep.getParentId() != (parentDep != null ? parentDep.getId() : 0)){
             checkCycle(dep, parentDep, logger);
             if (logger.containsLevel(LogLevel.ERROR))
                 throw new ServiceLoggerException(ERROR_MESSAGE,
@@ -537,6 +537,10 @@ public class RefBookDepartment implements RefBookDataProvider {
             return;
         }
 
+        if (type != DepartmentType.ROOT_BANK && parentDepartmentId == null){
+            logger.error("Для подразделения должен быть указан код родительского подразделения!");
+            return;
+        }
         if (rootBank != null && type == DepartmentType.ROOT_BANK && (recordId == null || rootBank.getId() != recordId.intValue())){
             logger.error("Подразделение с типом \"Банк\" уже существует!");
             return;

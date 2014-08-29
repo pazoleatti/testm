@@ -324,7 +324,7 @@ def getSum(def dataRows, def labelRow, def totalRow, def alias) {
     if (from > to) {
         return 0
     }
-    return summ(formData, dataRows, new ColumnRange(alias, from, to))
+    return ((BigDecimal)summ(formData, dataRows, new ColumnRange(alias, from, to))).setScale(2, BigDecimal.ROUND_HALF_UP)
 }
 
 /** Поправить индексы. */
@@ -492,7 +492,7 @@ void importData() {
 }
 
 void importTransportData() {
-    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName, 8, 1)
 
     // загрузить данные
     addTransportData(xml)

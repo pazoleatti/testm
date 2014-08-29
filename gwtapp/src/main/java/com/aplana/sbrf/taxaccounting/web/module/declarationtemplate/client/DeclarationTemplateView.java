@@ -105,7 +105,7 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
     @UiField
     LinkAnchor returnAnchor;
 
-    private static String respPattern = "(<(?i:pre.*)>)(.+?)(</(?i:pre)>)";
+    private static String respPattern = "(<pre.*>)(.+?)(</pre>)";
 
     @Inject
 	@UiConstructor
@@ -122,14 +122,15 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
                     getUiHandlers().uploadDectFail("Ошибки при импорте формы.");
                     return;
                 }
-                if (event.getResults().contains(ERROR_RESP)) {
-                    String errorUuid = event.getResults().replaceAll(respPattern, "$2");
+                String resultString = event.getResults().toLowerCase();
+                if (resultString.contains(ERROR_RESP)) {
+                    String errorUuid = resultString.replaceAll(respPattern, "$2");
                     getUiHandlers().uploadDectResponseWithErrorUuid(errorUuid.replaceFirst(ERROR_RESP, ""));
-                }else if (event.getResults().toLowerCase().contains(ERROR)) {
-                    String errorText = event.getResults().replaceAll(respPattern, "$2");
+                }else if (resultString.toLowerCase().contains(ERROR)) {
+                    String errorText = resultString.replaceAll(respPattern, "$2");
                     getUiHandlers().uploadDectFail(errorText.replaceFirst(ERROR, ""));
                 } else {
-                    String uuid = event.getResults().replaceAll(respPattern, "$2");
+                    String uuid = resultString.replaceAll(respPattern, "$2");
                     getUiHandlers().uploadDectResponseWithUuid(uuid.replaceFirst(SUCCESS_RESP, ""));
                 }
 			}
