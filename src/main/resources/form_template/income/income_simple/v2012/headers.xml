@@ -3,7 +3,7 @@
     <row alias="">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="2" value="КНУ"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="2" value="Группа дохода"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="2" value="Вид дохода по операции"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="2" value="Вид дохода по операциям"/>
         <cell alias="accountNo" colSpan="1" rowSpan="2" value="Балансовый счёт по учёту дохода"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="2" value="РНУ-6 (графа 10) сумма"/>
         <cell alias="rnu6Field12Accepted" colSpan="2" rowSpan="1" value="РНУ-6 (графа 12)"/>
@@ -19,7 +19,7 @@
     <row alias="">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" value="КНУ"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1" value="Группа дохода"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" value="Вид дохода по операции"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" value="Вид дохода по операциям"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" value="Балансовый счёт по учёту дохода"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1" value="РНУ-6 (графа 10) сумма"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1" value="сумма"/>
