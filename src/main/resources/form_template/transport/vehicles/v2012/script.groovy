@@ -482,7 +482,7 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol++
 
         // графа 12
-        newRow.year = parseDate(row.cell[xmlIndexCol].text(), "yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        newRow.year = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
         // графа 13
