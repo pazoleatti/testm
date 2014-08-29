@@ -93,6 +93,8 @@ public final class ScriptUtils {
     private static final String IMPORT_ROW_PREFIX = "Строка файла %d: %s";
     private static final String TRANSPORT_FILE_SUM_ERROR = "Итоговая сумма в графе %s строки %s в транспортном файле некорректна. Загрузка файла не выполнена.";
 
+    private static final String ROW_FILE_WRONG = "Строка файла %s содержит некорректное значение.";
+
 
     // Ссылочный, независимая графа: Не найдена версия справочника, соответствующая значению в файле
     public static final String REF_BOOK_NOT_FOUND_IMPORT_ERROR = "Проверка файла: Строка %d, столбец %d: В справочнике «%s» в атрибуте «%s» не найдено значение «%s», актуальное на дату %s!";
@@ -911,34 +913,49 @@ public final class ScriptUtils {
             throw new ServiceException(e.getMessage());
         }
 
+        // в файле rnu по умолчанию пропускаются первые две строки
         int rowIndex = 2;
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder documentBuilder = factory.newDocumentBuilder();
             InputSource inputSource = new InputSource();
+            // парсим xml в Document
             inputSource.setCharacterStream(new StringReader(xmlString));
             Document document = documentBuilder.parse(inputSource);
+            // получаем узлы соответствующие строкам
             NodeList rows = document.getElementsByTagName("row");
-            for (int i = 0; i < rows.getLength(); i++, rowIndex++) {
+            // проходим по строкам
+            for (int i = 0; i < rows.getLength(); i++) {
+                rowIndex++;
                 Element element = (Element) rows.item(i);
+                // получаем атрибут кол-ва столбцов в строке
                 Integer count = Integer.valueOf(element.getAttribute("count"));
+                // добавляем два служебных поля к числу граф и сверяем с их числом в файле
                 if (count != columnCount + 2) {
-                    throw new ServiceException("Строка файла " + rowIndex + " содержит некорректное значение.");
+                    throw new ServiceException(ROW_FILE_WRONG, rowIndex);
                 }
             }
 
+            // после строк с данными через одну пустую должны быть итоги
             rowIndex+=2;
 
-            NodeList totals = document.getElementsByTagName("rowTotal");
+            // проверка на итоги идет только если они ожидаются
             if (totalCount != 0) {
+                // получаем узлы соответствующие итогам
+                NodeList totals = document.getElementsByTagName("rowTotal");
+                // сверяем кол-во строк итогов
                 if (totals.getLength() != totalCount) {
-                    throw new ServiceException("Строка файла " + rowIndex + " содержит некорректное значение.");
+                    throw new ServiceException(ROW_FILE_WRONG, rowIndex);
                 } else {
-                    for (int i = 0; i < totals.getLength(); i++, rowIndex++) {
+                    // проходим по итогам
+                    for (int i = 0; i < totals.getLength(); i++) {
+                        rowIndex++;
                         Element element = (Element) totals.item(i);
+                        // получаем атрибут кол-ва столбцов в строке
                         Integer count = Integer.valueOf(element.getAttribute("count"));
+                        // добавляем два служебных поля к числу граф и сверяем
                         if (count != columnCount + 2) {
-                            throw new ServiceException("Строка файла " + rowIndex + " содержит некорректное значение.");
+                            throw new ServiceException(ROW_FILE_WRONG, rowIndex);
                         }
                     }
                 }
@@ -947,56 +964,7 @@ public final class ScriptUtils {
             throw new ServiceException(e.getMessage());
         }
 
-//        int errorRowIndex = checkXml(xml, columnCount, totalCount);
-//        if (errorRowIndex == -1) {
-//        } else {
-//            throw new ServiceException("Строка файла " + errorRowIndex + " содержит некорректное значение.");
-//        }
         return getXML(xmlString);
-    }
-
-    private final static class ScriptBuilder {
-        private StringBuilder script = new StringBuilder();
-
-        public ScriptBuilder addLine(final String scriptLine) {
-            script.append(scriptLine);
-            script.append(newLine());
-            return this;
-        }
-
-        private String newLine() {
-            return System.getProperty("line.separator");
-        }
-
-        public String build() {
-            return script.toString();
-        }
-    }
-
-    private static int checkXml(GPathResult xml, int columnCount, int totalSize) {
-        final Binding binding = new Binding();
-        binding.setVariable("xml", xml);
-        // добавляем два служебных поля
-        binding.setVariable("columnCount", columnCount + 2);
-        binding.setVariable("totalSize", totalSize);
-        binding.setVariable("flag", true);
-        binding.setVariable("index", 2);
-
-        final GroovyShell shell = new GroovyShell(binding);
-
-        final ScriptBuilder parseScript = new ScriptBuilder();
-        // проходим по строкам
-        parseScript.addLine("for (def row : xml.row) { index++");
-        // если кол-во столбцов не совпало, то прерываем
-        parseScript.addLine("if (row.cell.size() != columnCount) { return false } }");
-        //
-        parseScript.addLine("if (totalSize != 0 && (xml.rowTotal.size() != totalSize || xml.rowTotal.cell.size() != columnCount)) {index +=2; return false}");
-        parseScript.addLine("flag");
-
-        final Object result = shell.evaluate(parseScript.build());
-        Integer index = (Integer) shell.getVariable("index");
-
-        return (Boolean) result ? -1 : index;
     }
 
     private static void checkBeforeGetXml(BufferedInputStream inputStream, String fileName) {

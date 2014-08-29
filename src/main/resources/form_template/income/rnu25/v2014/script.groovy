@@ -213,7 +213,7 @@ void calc() {
         // получить строки группы
         def rows = getGroupRows(dataRows, codeName)
         // получить алиас для подитоговой строки по ГРН
-        def totalRowAlias = 'total' + rows[0].rowNumber.toString()
+        def totalRowAlias = 'total' + codeName
         // сформировать подитоговую строку ГРН с суммами
         def subTotalRow = getCalcSubtotalsRow(rows, codeName, totalRowAlias)
         // получить индекс последней строки в группе
@@ -378,7 +378,7 @@ void logicCheck() {
         // получить строки группы
         def rows = getGroupRows(dataRows, codeName)
         // получить алиас для подитоговой строки по ГРН
-        def totalRowAlias = 'total' + rows[0].rowNumber.toString()
+        def totalRowAlias = 'total' + codeName
         // получить посчитанную строку с итогами по ГРН
         def row
         try {

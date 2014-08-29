@@ -57,7 +57,7 @@
         <name>Идентификационный номер</name>
         <order>6</order>
         <width>10</width>
-        <maxLength>17</maxLength>
+        <maxLength>25</maxLength>
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
