@@ -10,7 +10,7 @@ public interface GenericDataGridResources extends DataGrid.Resources {
 	DataGrid.Style dataGridStyle();
 
     @Source("cellTableLoading.gif")
-    @ImageResource.ImageOptions(flipRtl = true)
+    @ImageResource.ImageOptions(flipRtl = true, preventInlining = true)
     ImageResource dataGridLoading();
 
 }
