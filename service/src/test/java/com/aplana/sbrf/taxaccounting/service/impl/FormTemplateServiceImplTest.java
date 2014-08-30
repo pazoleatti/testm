@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Assert;
@@ -14,8 +15,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Fail Mukhametdinov
@@ -40,6 +40,8 @@ public class FormTemplateServiceImplTest extends Assert {
     FormTemplateDao formTemplateDao;
 
     FormTemplate formTemplateEdited;
+
+    FormDataService formDataService;
 
     FormTemplateService formTemplateService = new FormTemplateServiceImpl();
 
@@ -79,10 +81,12 @@ public class FormTemplateServiceImplTest extends Assert {
         when(formTemplateDao.get(FORM_TEMPLATE_ID)).thenReturn(formTemplateFromDB);
 
         reportPeriodDao = mock(ReportPeriodDao.class);
+        formDataService = mock(FormDataService.class);
 
         formTemplateEdited = SerializationUtils.clone(formTemplateFromDB);
 
         ReflectionTestUtils.setField(formTemplateService, "formTemplateDao", formTemplateDao);
+        ReflectionTestUtils.setField(formTemplateService, "formDataService", formDataService);
     }
 
     /**
@@ -91,6 +95,7 @@ public class FormTemplateServiceImplTest extends Assert {
     @Test
     public void validateFormAutoNumerationColumn_notCross() {
         formTemplateService.validateFormAutoNumerationColumn(formTemplateEdited, logger);
+        verify(formDataService, never()).batchUpdatePreviousNumberRow(any(FormTemplate.class));
         assertTrue(logger.getEntries().size() == 0);
     }
 
@@ -108,9 +113,9 @@ public class FormTemplateServiceImplTest extends Assert {
 
         when(reportPeriodDao.getClosedPeriodsForFormTemplate(FORM_TEMPLATE_ID)).thenReturn(new ArrayList<ReportPeriod>());
         ReflectionTestUtils.setField(formTemplateService, "reportPeriodDao", reportPeriodDao);
-
         formTemplateService.validateFormAutoNumerationColumn(formTemplateEdited, logger);
 
+        verify(formDataService, times(1)).batchUpdatePreviousNumberRow(any(FormTemplate.class));
         assertTrue(logger.getEntries().size() == 0);
     }
 
@@ -133,6 +138,7 @@ public class FormTemplateServiceImplTest extends Assert {
 
         formTemplateService.validateFormAutoNumerationColumn(formTemplateEdited, logger);
 
+        verify(formDataService, never()).batchUpdatePreviousNumberRow(any(FormTemplate.class));
         assertTrue(logger.getEntries().size() == 1);
         assertEquals(MESSAGE, logger.getEntries().get(0).getMessage());
     }
@@ -157,6 +163,7 @@ public class FormTemplateServiceImplTest extends Assert {
 
         formTemplateService.validateFormAutoNumerationColumn(formTemplateEdited, logger);
 
+        verify(formDataService, never()).batchUpdatePreviousNumberRow(any(FormTemplate.class));
         assertTrue(logger.getEntries().size() == 0);
     }
 

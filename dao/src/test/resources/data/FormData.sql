@@ -43,8 +43,8 @@ insert into report_period (id, name, tax_period_id, dict_tax_period_id, start_da
 
 insert into form_data(id, form_template_id, department_id, state, kind, report_period_id, return_sign, period_order) values (300, 1, 3, 2, 1, 200, 0, 1);
 insert into form_data(id, form_template_id, department_id, state, kind, report_period_id, return_sign, period_order) values (301, 1, 3, 1, 1, 202, 0, 3);
-insert into form_data(id, form_template_id, department_id, state, kind, report_period_id, return_sign, period_order) values (302, 1, 3, 1, 1, 201, 0, 2);
-insert into form_data(id, form_template_id, department_id, state, kind, report_period_id, return_sign, period_order) values (303, 1, 3, 1, 2, 200, 0, 1);
+insert into form_data(id, form_template_id, department_id, state, kind, report_period_id, return_sign, period_order) values (302, 1, 3, 3, 1, 201, 0, 2);
+insert into form_data(id, form_template_id, department_id, state, kind, report_period_id, return_sign, period_order) values (303, 1, 3, 4, 2, 200, 0, 1);
 
 insert into form_data(id, form_template_id, department_id, state, kind, report_period_id, return_sign, period_order) values (304, 1, 2, 1, 1, 200, 0, 1);
 insert into form_data(id, form_template_id, department_id, state, kind, report_period_id, return_sign, period_order) values (305, 2, 2, 1, 1, 200, 0, 1);
@@ -55,3 +55,9 @@ insert into data_row(id, form_data_id, alias, ord, type) values (1, 1000, null, 
 insert into data_row(id, form_data_id, alias, ord, type) values (2, 1000, 'total1', 2, 0);
 insert into data_row(id, form_data_id, alias, ord, type) values (3, 1000, null, 3, 0);
 insert into data_row(id, form_data_id, alias, ord, type) values (4, 1000, 'total2', 4, 0);
+
+-- Для проверки метода getFormDataListByTemplateId
+insert into form_data(id, form_template_id, department_id, state, kind, report_period_id, return_sign, period_order) values (400, 4, 1, 2, 1, 200, 0, 1);
+insert into form_data(id, form_template_id, department_id, state, kind, report_period_id, return_sign, period_order) values (401, 4, 2, 1, 1, 202, 0, 3);
+insert into form_data(id, form_template_id, department_id, state, kind, report_period_id, return_sign, period_order) values (402, 4, 3, 1, 1, 201, 0, 2);
+insert into form_data(id, form_template_id, department_id, state, kind, report_period_id, return_sign, period_order) values (403, 4, 4, 1, 1, 200, 0, 1);

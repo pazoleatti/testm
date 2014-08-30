@@ -402,7 +402,7 @@ public class FormDataServiceImpl implements FormDataService {
 		formDataAccessService.canEdit(userInfo, formData.getId(), formData.isManual());
 
 		formDataScriptingService.executeScript(userInfo, formData,
-				FormDataEvent.CALCULATE, logger, null);
+                FormDataEvent.CALCULATE, logger, null);
 
         if (logger.containsLevel(LogLevel.ERROR)) {
 			throw new ServiceLoggerException("Найдены ошибки при выполнении расчета формы", logEntryService.save(logger.getEntries()));
@@ -496,8 +496,6 @@ public class FormDataServiceImpl implements FormDataService {
 
 		formDataScriptingService.executeScript(userInfo,
 				formData, FormDataEvent.AFTER_LOAD, logger, null);
-
-        updatePreviousRowNumber(formData);
 
 		return formData;
 	}
@@ -845,7 +843,7 @@ public class FormDataServiceImpl implements FormDataService {
         ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
         TaxPeriod taxPeriod = reportPeriod.getTaxPeriod();
         // Получить упорядоченный список экземпляров НФ, которые участвуют в сквозной нумерации и находятся до указанного экземпляра НФ
-        List<FormData> formDataList = formDataDao.getPrevFormDataListForCrossNumeration(formData, taxPeriod);
+        List<FormData> formDataList = formDataDao.getPrevFormDataList(formData, taxPeriod);
 
         // Если экземпляр НФ является не первым экземпляром в сквозной нумерации
         if (formDataList.size() > 0) {
@@ -887,21 +885,26 @@ public class FormDataServiceImpl implements FormDataService {
         }
     }
 
-    /**
-     * TODO - написать тесты!!!
-     * @param formData экземпляр НФ, для которой необходимо обновить
-     * @return
-     */
+    @Override
+    public void updatePreviousRowNumber(FormData formData) {
+        updatePreviousRowNumber(formData, null);
+    }
+
     @Override
     public void updatePreviousRowNumber(FormData formData, Logger logger) {
+        FormTemplate formTemplate = formTemplateService.get(formData.getFormTemplateId());
+        updatePreviousRowNumber(formData, formTemplate, logger);
+    }
+
+    @Override
+    public void updatePreviousRowNumber(FormData formData, FormTemplate formTemplate, Logger logger) {
         String msg = null;
 
-        FormTemplate formTemplate = formTemplateService.get(formData.getFormTemplateId());
         if (formTemplateService.isAnyAutoNumerationColumn(formTemplate, AutoNumerationColumnType.CROSS)) {
             // Получить налоговый период
             TaxPeriod taxPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId()).getTaxPeriod();
             // Получить список экземпляров НФ следующих периодов
-            List<FormData> formDataList = formDataDao.getNextFormDataListForCrossNumeration(formData, taxPeriod);
+            List<FormData> formDataList = formDataDao.getNextFormDataList(formData, taxPeriod);
 
             // Устанавливаем значение для текущего экземпляра НФ
             formDataDao.updatePreviousRowNumber(formData.getId(), getPreviousRowNumber(formData));
@@ -921,7 +924,6 @@ public class FormDataServiceImpl implements FormDataService {
                         stringBuilder.toString();
             }
 
-
             if (logger != null && msg != null) {
                 logger.info(msg);
             }
@@ -929,14 +931,17 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
-    public void updatePreviousRowNumber(FormData formData) {
-        updatePreviousRowNumber(formData, null);
-    }
-
-    @Override
     public List<FormData> getManualInputForms(List<Integer> departments, int reportPeriodId, TaxType taxType, FormDataKind kind) {
         ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
         return formDataDao.getManualInputForms(departments, reportPeriodId, taxType, kind, reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
+    }
+
+    @Override
+    public void batchUpdatePreviousNumberRow(FormTemplate formTemplate) {
+        List<FormData> formDataList = formDataDao.getFormDataListByTemplateId(formTemplate.getId());
+        for (FormData formData : formDataList) {
+            updatePreviousRowNumber(formData, formTemplate, null);
+        }
     }
 
     /**

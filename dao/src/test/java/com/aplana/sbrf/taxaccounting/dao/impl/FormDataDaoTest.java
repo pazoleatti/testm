@@ -3,8 +3,8 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormPerformerDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,6 +17,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 // TODO: (sgoryachkin) Пришлось вычистить тесты, т.к. они тестировали в основном только работу со строками, что теперь не актуально
 // Нужно написать нормальные тесты на получение сохранение FormData и проверить поля
@@ -190,6 +193,7 @@ public class FormDataDaoTest {
             add(18L);
             add(19L);
             add(20L);
+            add(400L);
         }};
         Assert.assertEquals(list, formDataDao.getFormDataIds(1, FormDataKind.SUMMARY, 1));
         Assert.assertEquals(list1, formDataDao.getFormDataIds(2, FormDataKind.PRIMARY, 1));
@@ -204,7 +208,7 @@ public class FormDataDaoTest {
             add(13);
             add(1000);
         }};
-        Assert.assertEquals(12, formDataDao.getFormDataIds(Arrays.asList(TaxType.values()), list).size());
+        Assert.assertEquals(13, formDataDao.getFormDataIds(Arrays.asList(TaxType.values()), list).size());
     }
 
     @Test
@@ -252,7 +256,7 @@ public class FormDataDaoTest {
 	@Test
 	public void updateReturnSignSuccess() {
 		formDataDao.updateReturnSign(1, true);
-		Assert.assertTrue(formDataDao.get(1, false).isReturnSign());
+		assertTrue(formDataDao.get(1, false).isReturnSign());
 		formDataDao.updateReturnSign(1, false);
 		Assert.assertFalse(formDataDao.get(1, false).isReturnSign());
 	}
@@ -265,7 +269,7 @@ public class FormDataDaoTest {
     @Test
     public void testFindFormDataByFormTemplate(){
         Assert.assertEquals(10, formDataDao.findFormDataByFormTemplate(1).size());
-        Assert.assertTrue(formDataDao.findFormDataByFormTemplate(10000).isEmpty());
+        assertTrue(formDataDao.findFormDataByFormTemplate(10000).isEmpty());
     }
 
     @Test
@@ -290,13 +294,53 @@ public class FormDataDaoTest {
         Assert.assertEquals("Ban/Bank1", formPerformerDao.get(11).getReportDepartmentName());
     }
 
-//    @Ignore
-//    @Test
-//    public void testGetFormDataListForCrossNumeration() {
-//        List<FormData> formDataList = formDataDao.getPrevFormDataListForCrossNumeration(2014, 3, "I", FormDataKind.PRIMARY.getId(), (long) 1);
-//        Assert.assertEquals(3, formDataList.size());
-//        Assert.assertEquals(1, formDataList.get(0).getPeriodOrder().intValue());
-//        Assert.assertEquals(2, formDataList.get(1).getPeriodOrder().intValue());
-//        Assert.assertEquals(3, formDataList.get(2).getPeriodOrder().intValue());
-//    }
+    @Test
+    public void testGetFormDataListByTemplateId() {
+        List<FormData> formDataList = formDataDao.getFormDataListByTemplateId(4);
+        assertEquals(4, formDataList.size());
+    }
+
+    @Test
+    public void testGetPrevFormDataList() {
+        TaxPeriod taxPeriod = new TaxPeriod();
+        taxPeriod.setId(100);
+        taxPeriod.setTaxType(TaxType.INCOME);
+        taxPeriod.setYear(2014);
+
+        FormTemplate template = new FormTemplate();
+        template.setId(1);
+
+        FormData formData = new FormData();
+        formData.setId(301L);
+        formData.initFormTemplateParams(template);
+        formData.setDepartmentId(3);
+        formData.setKind(FormDataKind.PRIMARY);
+
+        List<FormData> formDataList = formDataDao.getPrevFormDataList(formData, taxPeriod);
+        Assert.assertEquals(2, formDataList.size());
+        Assert.assertEquals(Long.valueOf(300), formDataList.get(0).getId());
+        Assert.assertEquals(Long.valueOf(302), formDataList.get(1).getId());
+    }
+
+    @Test
+    public void testGetNextFormDataList() {
+        TaxPeriod taxPeriod = new TaxPeriod();
+        taxPeriod.setId(100);
+        taxPeriod.setTaxType(TaxType.INCOME);
+        taxPeriod.setYear(2014);
+
+        FormTemplate template = new FormTemplate();
+        template.setId(1);
+
+        FormData formData = new FormData();
+        formData.setId(300L);
+        formData.initFormTemplateParams(template);
+        formData.setDepartmentId(3);
+        formData.setKind(FormDataKind.PRIMARY);
+
+        List<FormData> formDataList = formDataDao.getNextFormDataList(formData, taxPeriod);
+        Assert.assertEquals(2, formDataList.size());
+        Assert.assertEquals(Long.valueOf(302), formDataList.get(0).getId());
+        Assert.assertEquals(Long.valueOf(301), formDataList.get(1).getId());
+    }
 }

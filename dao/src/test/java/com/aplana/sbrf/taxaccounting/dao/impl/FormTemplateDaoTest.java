@@ -175,7 +175,7 @@ public class FormTemplateDaoTest {
 
     @Test
     public void testListAll(){
-        Assert.assertEquals(3, formTemplateDao.listAll().size());
+        Assert.assertEquals(4, formTemplateDao.listAll().size());
     }
 
     @Test
@@ -188,7 +188,7 @@ public class FormTemplateDaoTest {
         calendar.set(2012, Calendar.JANUARY, 1);
         calendar.clear();
 
-        Assert.assertEquals(2, formTemplateDao.getFormTemplateVersions(2, list).size());
+        Assert.assertEquals(3, formTemplateDao.getFormTemplateVersions(2, list).size());
     }
 
     @Test
@@ -290,7 +290,7 @@ public class FormTemplateDaoTest {
     public void testFindFTVersionIntersections() throws ParseException {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd");
         Assert.assertEquals(2, formTemplateDao.findFTVersionIntersections(2, 0, dateFormat.parse("2014.01.01"), dateFormat.parse("2014.12.31")).size());
-        Assert.assertEquals(2, formTemplateDao.findFTVersionIntersections(2, 0, dateFormat.parse("2014.01.01"), dateFormat.parse("2015.12.31")).size());
+        Assert.assertEquals(3, formTemplateDao.findFTVersionIntersections(2, 0, dateFormat.parse("2014.01.01"), dateFormat.parse("2015.12.31")).size());
         Assert.assertEquals(1, formTemplateDao.findFTVersionIntersections(2, 2, dateFormat.parse("2014.01.01"), dateFormat.parse("2014.12.31")).size());
         Assert.assertEquals(1, formTemplateDao.findFTVersionIntersections(2, 2, dateFormat.parse("2014.01.01"), null).size());
         Assert.assertEquals(1, formTemplateDao.findFTVersionIntersections(2, 0, dateFormat.parse("2014.01.01"), null).size());

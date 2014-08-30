@@ -4,15 +4,17 @@ import com.aplana.sbrf.taxaccounting.dao.*;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -466,55 +468,57 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
                 String.class);
     }
 
-    String GET_FORM_DATA_LIST_QUERY = "WITH list AS (SELECT row_number() over (ORDER BY rp.calendar_start_date, fd.period_order)\n" +
-            " AS row_number, fd.id, fd.department_id, fd.state, fd.return_sign, fd.kind, fd.report_period_id, fd.period_order, fd.number_previous_row, manual\n" +
+    private static String GET_FORM_DATA_LIST_QUERY = "WITH list AS (SELECT ROWNUM as row_number, sorted.* from " +
+            "(SELECT fd.id, fd.department_id, fd.state, fd.return_sign, fd.kind, fd.report_period_id, fd.period_order, fd.number_previous_row, fd.form_template_id, manual\n" +
             "FROM form_data fd\n" +
             "LEFT JOIN (SELECT MAX(manual) AS manual, form_data_id FROM data_row WHERE manual = 0 GROUP BY form_data_id) r ON r.form_data_id = fd.id\n" +
-            "JOIN form_column fc ON fc.form_template_id = fd.form_template_id\n" +
             "LEFT JOIN report_period rp ON fd.report_period_id = rp.id\n" +
             "LEFT JOIN tax_period tp ON tp.id = rp.tax_period_id\n" +
-            "WHERE fc.type = 'A' AND fc.numeration_row = 1 AND tp.year = ? AND tp.tax_type = ? AND fd.department_id = ? AND fd.kind = ? AND fd.form_template_id = ?)\n" +
+            "WHERE tp.year = :year AND tp.tax_type = :taxType AND fd.department_id = :departmentId AND fd.kind = :kind AND fd.form_template_id = :templateId\n" +
+            "ORDER BY rp.calendar_start_date, fd.period_order) sorted)\n" +
             "SELECT * FROM list\n";
 
     @Override
-    public List<FormData> getNextFormDataListForCrossNumeration(FormData formData, TaxPeriod taxPeriod) {
-
-        int year = taxPeriod.getYear();
-        String code = String.valueOf(taxPeriod.getTaxType().getCode());
-
-        StringBuilder sql = new StringBuilder(GET_FORM_DATA_LIST_QUERY);
-        sql.append("WHERE row_number > (SELECT row_number FROM list WHERE id = ?)");
-
-
-        return getJdbcTemplate().query(sql.toString(),
-                new Object[]{year, code, formData.getDepartmentId(), formData.getKind().getId(),
-                        formData.getFormTemplateId(), formData.getId()},
-                new FormDataWithoutRowMapper());
+    public List<FormData> getNextFormDataList(FormData formData, TaxPeriod taxPeriod) {
+        String whereClause = "WHERE row_number > (SELECT row_number FROM list WHERE id = :formId)";
+        return getFormDataList(formData, taxPeriod, whereClause);
     }
 
     @Override
-    public List<FormData> getPrevFormDataListForCrossNumeration(FormData formData, TaxPeriod taxPeriod) {
+    public List<FormData> getPrevFormDataList(FormData formData, TaxPeriod taxPeriod) {
+        String whereClause = "WHERE row_number < (SELECT row_number FROM list WHERE id = :formId)";
+        return getFormDataList(formData, taxPeriod, whereClause);
+    }
+
+    private List<FormData> getFormDataList(FormData formData, TaxPeriod taxPeriod, String whereClause) {
+        List<FormData> formDataList = new ArrayList<FormData>();
 
         int year = taxPeriod.getYear();
-        String code = String.valueOf(taxPeriod.getTaxType().getCode());
+        String taxType = String.valueOf(taxPeriod.getTaxType().getCode());
 
         StringBuilder sql = new StringBuilder(GET_FORM_DATA_LIST_QUERY);
 
-        List<Object> params = new ArrayList<Object>();
-        params.add(year);
-        params.add(code);
-        params.add(formData.getDepartmentId());
-        params.add(formData.getKind().getId());
-        params.add(formData.getFormTemplateId());
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("year", year)
+                .addValue("taxType", taxType)
+                .addValue("departmentId", formData.getDepartmentId())
+                .addValue("kind", formData.getKind().getId())
+                .addValue("templateId", formData.getFormTemplateId())
+                .addValue("formId", formData.getId());
 
         if (formData.getId() != null) {
-            sql.append("WHERE row_number < (SELECT row_number FROM list WHERE id = ?)");
-            params.add(formData.getId());
+            sql.append(whereClause);
         }
 
-        return getJdbcTemplate().query(sql.toString(),
-                params.toArray(),
-                new FormDataWithoutRowMapper());
+        List<RowMapperResult> query = getNamedParameterJdbcTemplate().query(sql.toString(),
+                params,
+                new FormDataRowMapper());
+
+        for (RowMapperResult result : query) {
+            formDataList.add(result.formData);
+        }
+
+        return formDataList;
     }
 
     @Override
@@ -544,6 +548,27 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
                 new FormDataWithoutRowMapperWithTypeId()) ;
     }
 
+    @Override
+    public List<FormData> getFormDataListByTemplateId(Integer formTemplateId) {
+        List<FormData> formDataList = new ArrayList<FormData>();
+
+        try {
+            List<RowMapperResult> query = getJdbcTemplate().query(
+                        "SELECT * FROM FORM_DATA fd\n" +
+                                "LEFT JOIN (SELECT MAX(manual) AS manual, form_data_id FROM data_row WHERE manual = 0 GROUP BY form_data_id) r ON r.form_data_id = fd.id\n" +
+                                "WHERE fd.form_template_id = ?",
+                        new Object[]{formTemplateId},
+                        new FormDataRowMapper());
+            for (RowMapperResult result : query) {
+                formDataList.add(result.formData);
+            }
+        } catch (EmptyResultDataAccessException e) {
+            throw new DaoException("Записи в таблице FORM_DATA с form_template_id = "
+                    + formTemplateId + " не найдены");
+        }
+
+        return formDataList;
+    }
 
     private static final String UPDATE_FORM_DATA_PERFORMER_TB =
             "merge into FORM_DATA_PERFORMER fdp using (\n" +

@@ -181,24 +181,22 @@ public interface FormDataDao {
     void updateFDPerformerDepartmentNames(int departmentId, String newDepartmentName, Date dateFrom, Date dateTo);
 
     /**
-     * Получить упорядоченный список экземпляров НФ предшествующих до указанного экземпляра, в пределах которых
-     * устанавливается сквозная нумерация строк.
+     * Получить упорядоченный список экземпляров НФ предшествующих до указанного экземпляра, в пределах налогового периода
      *
      * @param formData экземпляр НФ
      * @param taxPeriod налоговый период
      * @return упорядоченный список экземпляров НФ
      */
-    List<FormData> getPrevFormDataListForCrossNumeration(FormData formData, TaxPeriod taxPeriod);
+    List<FormData> getPrevFormDataList(FormData formData, TaxPeriod taxPeriod);
 
     /**
-     * Получить упорядоченный список экземпляров НФ, следующих после указанного экземпляра, в пределах которых
-     * устанавливается сквозная нумерация строк.
+     * Получить упорядоченный список экземпляров НФ, следующих после указанного экземпляра, в пределах налогового периода
      *
      * @param formData экземпляр НФ
      * @param taxPeriod налоговый период
      * @return упорядоченный список экземпляров НФ
      */
-    List<FormData> getNextFormDataListForCrossNumeration(FormData formData, TaxPeriod taxPeriod);
+    List<FormData> getNextFormDataList(FormData formData, TaxPeriod taxPeriod);
 
     /**
      * TODO - возможно лучше сделать batchUpdate
@@ -219,4 +217,12 @@ public interface FormDataDao {
      * @return список налоговых форм
      */
     List<FormData> getManualInputForms(List<Integer> departments, int reportPeriodId, TaxType taxType, FormDataKind kind, Date periodStart, Date periodEnd);
+
+    /**
+     * Получить все существующие экземпляры НФ указанного макета НФ
+     *
+     * @param formTemplateId идентификатор макета НФ
+     * @return список экземпляров НФ
+     */
+    List<FormData> getFormDataListByTemplateId(Integer formTemplateId);
 }

@@ -282,13 +282,24 @@ public interface FormDataService {
      * Обновить Номер последней строки предыдущей НФ
      * @param formData экземпляр НФ, для которой необходимо обновить
      */
+    void updatePreviousRowNumber(FormData formData);
+
+    /**
+     * Обновить Номер последней строки предыдущей НФ
+     *
+     * @param formData экземпляр НФ, для которой необходимо обновить
+     * @param logger   логгер для регистрации ошибок
+     */
     void updatePreviousRowNumber(FormData formData, Logger logger);
 
     /**
      * Обновить Номер последней строки предыдущей НФ
-     * @param formData экземпляр НФ, для которой необходимо обновить
+     *
+     * @param formData     экземпляр НФ, для которой необходимо обновить
+     * @param formTemplate макет НФ
+     * @param logger       логгер для регистрации ошибок
      */
-    void updatePreviousRowNumber(FormData formData);
+    void updatePreviousRowNumber(FormData formData, FormTemplate formTemplate, Logger logger);
 
     /**
      * Получить налоговые формы которые имеют признак ручного ввода
@@ -299,4 +310,11 @@ public interface FormDataService {
      * @return список налоговых форм
      */
     List<FormData> getManualInputForms(List<Integer> departments, int reportPeriodId, TaxType taxType, FormDataKind kind);
+
+    /**
+     * Обновление "Номер последней строки предыдущей НФ" всех существующих экземпляров НФ для указанного шаблона
+     *
+     * @param formTemplate макет НФ
+     */
+    void batchUpdatePreviousNumberRow(FormTemplate formTemplate);
 }
