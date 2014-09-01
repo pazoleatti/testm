@@ -504,16 +504,6 @@ public class RefBookOktmoProvider implements RefBookDataProvider {
         throw new UnsupportedOperationException();
     }
 
-    @Override
-    public void deleteRecords(TAUserInfo taUserInfo, Date version, List<Long> recordIds) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void deleteAllRecords(TAUserInfo taUserInfo, Date version) {
-        throw new UnsupportedOperationException();
-    }
-
     public void setRefBookId(Long refBookId) {
         this.refBookId = refBookId;
     }

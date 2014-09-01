@@ -282,23 +282,4 @@ public interface RefBookDataProvider {
      */
     @Deprecated
     void updateRecords(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records);
-
-    /**
-     * Удаляет записи из справочника
-     * @param version задает дату удаления данных
-     * @param recordIds список уникальных идентификаторов версий записей справочника
-     *
-     * Вместо этого метода надо использовать {@link RefBookDataProvider#deleteRecordVersions}
-     */
-    @Deprecated
-    void deleteRecords(TAUserInfo taUserInfo, Date version, List<Long> recordIds);
-
-    /**
-     * Удаление всех записей справочника
-     * @param version Дата удаления записей
-     *
-     * Вместо этого метода надо использовать {@link RefBookDataProvider#deleteAllRecords}
-     */
-    @Deprecated
-    void deleteAllRecords(TAUserInfo taUserInfo, Date version);
 }

@@ -314,14 +314,14 @@ void importFromXML() {
             //                addCreateRecordList.add(rbRecord)
             //            }
             // dataProvider.createRecordVersion(logger, actualDate, null, addCreateRecordList)
-            dataProvider.insertRecords(actualDate, addList)
+            dataProvider.insertRecords(userInfo, actualDate, addList)
         }
         if (!updList.isEmpty()) {
 //            updList.each { map ->
 //                dataProvider.updateRecordVersion(logger, recIdMap.get(map.CODE.stringValue), actualDate, null, map)
 //            }
             println(updList)
-            dataProvider.updateRecords(actualDate, updList)
+            dataProvider.updateRecords(userInfo, actualDate, updList)
         }
     }
 

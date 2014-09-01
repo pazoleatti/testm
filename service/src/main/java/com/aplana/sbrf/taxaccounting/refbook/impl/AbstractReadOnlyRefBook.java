@@ -83,16 +83,6 @@ public abstract class AbstractReadOnlyRefBook implements RefBookDataProvider {
     }
 
     @Override
-    public void deleteRecords(TAUserInfo taUserInfo, Date version, List<Long> recordIds) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void deleteAllRecords(TAUserInfo taUserInfo, Date version) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public RefBookRecordVersion getRecordVersionInfo(Long uniqueRecordId) {
 		RefBookRecordVersion version = new RefBookRecordVersion();
 		version.setRecordId(uniqueRecordId);
