@@ -3,15 +3,13 @@
     <fixedRows>false</fixedRows>
     <name>Сведения о льготируемых транспортных средствах, по которым уплачивается транспортный налог</name>
     <fullName>Сведения о льготируемых транспортных средствах, по которым уплачивается транспортный налог</fullName>
-    <code></code>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>rowNumber</alias>
         <checking>false</checking>
         <name>№ пп</name>
         <order>1</order>
         <width>5</width>
-        <maxLength>5</maxLength>
-        <precision>0</precision>
+        <type>0</type>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>codeOKATO</alias>
@@ -19,7 +17,7 @@
         <name>Код ОКТМО</name>
         <order>2</order>
         <width>7</width>
-        <hierarchical>false</hierarchical>
+        <hierarchical>true</hierarchical>
         <nameAttributeId>841</nameAttributeId>
         <refBookAttributeId>840</refBookAttributeId>
     </columns>
@@ -28,8 +26,8 @@
         <checking>false</checking>
         <name>Идентификационный номер</name>
         <order>3</order>
-        <width>5</width>
-        <maxLength>17</maxLength>
+        <width>13</width>
+        <maxLength>25</maxLength>
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">

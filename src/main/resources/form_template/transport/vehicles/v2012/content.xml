@@ -3,15 +3,14 @@
     <fixedRows>false</fixedRows>
     <name>Сведения о транспортных средствах, по которым уплачивается транспортный налог</name>
     <fullName>Сведения о транспортных средствах, по которым уплачивается транспортный налог</fullName>
-    <code>1084/3/1</code>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+    <header>1084/3/1</header>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>rowNumber</alias>
         <checking>false</checking>
         <name>№ пп</name>
         <order>1</order>
         <width>5</width>
-        <maxLength>5</maxLength>
-        <precision>0</precision>
+        <type>0</type>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>codeOKATO</alias>
@@ -19,7 +18,7 @@
         <name>Код ОКТМО</name>
         <order>2</order>
         <width>7</width>
-        <hierarchical>false</hierarchical>
+        <hierarchical>true</hierarchical>
         <nameAttributeId>841</nameAttributeId>
         <refBookAttributeId>840</refBookAttributeId>
     </columns>
@@ -56,7 +55,7 @@
         <checking>false</checking>
         <name>Идентификационный номер</name>
         <order>6</order>
-        <width>10</width>
+        <width>13</width>
         <maxLength>25</maxLength>
         <prevLength>0</prevLength>
     </columns>
@@ -152,6 +151,13 @@
         <backColor>LIGHT_BLUE</backColor>
         <bold>false</bold>
         <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Автозаполняемая</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>DARK_GREEN</fontColor>
         <italic>false</italic>
     </styles>
 </formTemplateContent>
