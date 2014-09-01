@@ -98,6 +98,8 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
         BookerStatementsSearchOrdering getSearchOrdering();
 
         void updateAccountPeriodIds();
+
+        void setAscSorting(boolean ascSorting);
     }
 
     @ProxyCodeSplit
@@ -175,6 +177,7 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
                                     getView().setAccountPeriodIds(null);
                                     getView().setDepartment(null);
                                     getView().setBookerReportType(null);
+                                    getView().setAscSorting(false);
                                 } else {
                                     getView().setAccountPeriodIds(filter.getAccountPeriodIds());
                                     getView().setDepartment(filter.getDepartmentIds());
