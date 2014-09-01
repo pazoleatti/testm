@@ -334,19 +334,19 @@ void importFromXML() {
                     if (tempList.size() < 500) {
                         tempList.add(record)
                     } else {
-                        dataProvider.insertRecords(version, tempList)
+                        dataProvider.insertRecords(userInfo, version, tempList)
                         tempList.clear()
                     }
                 }
                 if (!tempList.isEmpty()) {
-                    dataProvider.insertRecords(version, tempList)
+                    dataProvider.insertRecords(userInfo, version, tempList)
                     tempList.clear()
                 }
             }
 
             // Добавление элементов
             if (!addList.isEmpty()) {
-                dataProvider.updateRecords(version, addList)
+                dataProvider.updateRecords(userInfo, version, addList)
             }
 
             println("Import OKATO: DB update/create end " + System.currentTimeMillis())

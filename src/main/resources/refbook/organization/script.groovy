@@ -141,9 +141,9 @@ def addData(def xml) {
 
     def refDataProvider = refBookFactory.getDataProvider(9)
     if (updateList.size() > 0)
-        refDataProvider.updateRecords(new Date(), updateList)
+        refDataProvider.updateRecords(userInfo, new Date(), updateList)
     if (insertList.size() > 0)
-        refDataProvider.insertRecords(new Date(), insertList)
+        refDataProvider.insertRecords(userInfo, new Date(), insertList)
 }
 
 def getNumber(def value) {

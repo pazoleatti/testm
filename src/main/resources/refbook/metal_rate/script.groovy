@@ -137,10 +137,10 @@ void importFromXML() {
         return
     }
     if (!insertList.empty) {
-        dataProvider.insertRecords(version, insertList)
+        dataProvider.insertRecords(userInfo, version, insertList)
     }
     if (!updateList.empty) {
-        dataProvider.updateRecords(version, updateList)
+        dataProvider.updateRecords(userInfo, version, updateList)
     }
     scriptStatusHolder.setSuccessCount(insertList.size() + updateList.size())
 }

@@ -87,6 +87,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
 
         // Локальный логгер для импорта конкретного справочника
         Logger scriptLogger = new Logger();
+        scriptLogger.setTaUserInfo(userInfo);
 
         // Биндиг параметров для выполнения скрипта
         Bindings bindings = scriptEngine.createBindings();
@@ -104,6 +105,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
 
         bindings.put("formDataEvent", event);
         bindings.put("logger", scriptLogger);
+        bindings.put("userInfo", userInfo);
         bindings.put("refBookFactory", refBookFactory);
         if (manifestProperties != null) {
             bindings.put("applicationVersion", manifestProperties.getProperty("Implementation-Version"));
