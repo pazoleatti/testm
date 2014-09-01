@@ -4,6 +4,7 @@ import com.aplana.gwt.client.ModalWindow;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
 import com.google.gwt.editor.client.Editor;
@@ -332,12 +333,11 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
 
     @Override
     public void prepareFormDataKind(List<FormDataKind> dataKinds) {
+        List<String> list = new ArrayList<String>(dataKinds.size());
 
-        StringBuilder filter = new StringBuilder();
-        for (FormDataKind k : dataKinds) {
-            filter.append(k.getId() + ",");
+        for (FormDataKind kind : dataKinds) {
+            list.add("record_id = " + kind.getId());
         }
-        filter.deleteCharAt(filter.length()-1);
-        formDataKind.setFilter(filter.toString());
+        formDataKind.setFilter(StringUtils.join(list.toArray(), " or ", null));
     }
 }

@@ -6,6 +6,7 @@ import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
@@ -214,12 +215,12 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
             formDataKind.setFilter("");
             return;
         }
-		StringBuilder filter = new StringBuilder();
-		for (FormDataKind k : dataKinds) {
-			filter.append(k.getId() + ",");
-		}
-		filter.deleteCharAt(filter.length()-1);
-		formDataKind.setFilter(filter.toString());
+        List<String> list = new ArrayList<String>(dataKinds.size());
+
+        for (FormDataKind kind : dataKinds) {
+            list.add("record_id = " + kind.getId());
+        }
+        formDataKind.setFilter(StringUtils.join(list.toArray(), " or ", null));
 	}
 
 	@Override
