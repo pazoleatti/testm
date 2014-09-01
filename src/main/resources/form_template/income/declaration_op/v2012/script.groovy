@@ -17,6 +17,7 @@ import groovy.xml.MarkupBuilder
 switch (formDataEvent) {
     case FormDataEvent.CREATE : // создать / обновить
         checkDeparmentParams(LogLevel.WARNING)
+        checkDeclarationBank()
         break
     case FormDataEvent.CHECK : // проверить
         checkDeparmentParams(LogLevel.ERROR)
@@ -26,7 +27,8 @@ switch (formDataEvent) {
         break
     case FormDataEvent.CALCULATE:
         checkDeparmentParams(LogLevel.WARNING)
-        generateXML()
+        def xmlBankData = checkDeclarationBank()
+        generateXML(xmlBankData)
         break
     default:
         return
@@ -79,8 +81,42 @@ void checkDeparmentParams(LogLevel logLevel) {
     }
 }
 
+// Провека декларации банка.
+def checkDeclarationBank() {
+    /** Отчётный период. */
+    def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+
+    /** вид декларации 2 - декларация по налогу на прибыль уровня банка. */
+    def declarationTypeId = 2
+
+    /** Идентификатор подразделения Банка. */
+    def departmentBankId = 1
+    def bankDeclarationData = declarationService.find(declarationTypeId, departmentBankId, reportPeriod.id)
+    if (bankDeclarationData == null || !bankDeclarationData.accepted) {
+        logger.error('Декларация Банка по прибыли за указанный период не сформирована или не находится в статусе "Принята".')
+        return
+    }
+
+    /** XML декларации за предыдущий отчетный период. */
+    def xmlBankData = null
+
+    if (bankDeclarationData.id != null) {
+        def xmlString = declarationService.getXmlData(bankDeclarationData.id)
+        xmlString = xmlString.replace('<?xml version="1.0" encoding="windows-1251"?>', '')
+        if (xmlString == null) {
+            logger.error('Данные декларации Банка не заполнены.')
+            return
+        }
+        xmlBankData = new XmlSlurper().parseText(xmlString)
+    }
+    if (xmlBankData == null) {
+        logger.error('Не удалось получить данные декларации Банка.')
+    }
+    return xmlBankData
+}
+
 /** Запуск генерации XML. */
-void generateXML() {
+void generateXML(def xmlBankData) {
     /*
      * Константы.
      */
@@ -125,37 +161,6 @@ void generateXML() {
 
     /** Признак налоговый ли это период. */
     def isTaxPeriod = (reportPeriod != null && reportPeriod.order == 4)
-
-    /*
-     * Провека декларации банка.
-     */
-
-    /** вид декларации 2 - декларация по налогу на прибыль уровня банка. */
-    def declarationTypeId = 2
-
-    /** Идентификатор подразделения Банка. */
-    def departmentBankId = 1
-    def bankDeclarationData = declarationService.find(declarationTypeId, departmentBankId, reportPeriod.id)
-    if (bankDeclarationData == null || !bankDeclarationData.accepted) {
-        logger.error('Декларация Банка по прибыли за указанный период не сформирована или не находится в статусе "Принята".')
-        return
-    }
-
-    /** XML декларации за предыдущий отчетный период. */
-    def xmlBankData = null
-
-    if (bankDeclarationData.id != null) {
-        def xmlString = declarationService.getXmlData(bankDeclarationData.id)
-        xmlString = xmlString.replace('<?xml version="1.0" encoding="windows-1251"?>', '')
-        if (xmlString == null) {
-            logger.error('Данные декларации Банка не заполнены.')
-            return
-        }
-        xmlBankData = new XmlSlurper().parseText(xmlString)
-    }
-    if (xmlBankData == null) {
-        logger.error('Не удалось получить данные декларации Банка.')
-    }
 
     // провека наличия в декларации банка данных для данного подразделения
     def findCurrentDepo = false
