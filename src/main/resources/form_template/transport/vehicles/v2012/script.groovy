@@ -482,7 +482,17 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol++
 
         // графа 12
-        newRow.year = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        def yearStr = row.cell[xmlIndexCol].text()
+        if (yearStr != null) {
+            if (yearStr.contains(".")) {
+                newRow.year = parseDate(yearStr, "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+            } else {
+                def yearNum = parseNumber(yearStr, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+                if (yearNum != null && yearNum != 0) {
+                    newRow.year = new GregorianCalendar(yearNum as Integer, Calendar.JANUARY, 1).getTime()
+                }
+            }
+        }
         xmlIndexCol++
 
         // графа 13
