@@ -371,21 +371,24 @@ void importData() {
             (xml.row[0].cell[6]): 'Марка',
             (xml.row[0].cell[7]): 'Экологический класс',
             (xml.row[0].cell[8]): 'Регистрационный знак',
-            (xml.row[0].cell[9]): 'Мощность (величина)',
-            (xml.row[0].cell[10]): 'Мощность (ед. измерения)',
+            (xml.row[0].cell[9]): 'Мощность',
             (xml.row[0].cell[11]): 'Год изготовления',
-            (xml.row[0].cell[12]): 'Регистрация (дата регистрации)',
-            (xml.row[0].cell[13]): 'Регистрация (дата снятия с регистрации)',
-            (xml.row[0].cell[14]): 'Сведения об угоне (дата начала розыска ТС)',
-            (xml.row[0].cell[15]): 'Сведения об угоне (дата возврата ТС)',
-            (xml.row[1].cell[0]): '1'
+            (xml.row[0].cell[12]): 'Регистрация',
+            (xml.row[0].cell[14]): 'Сведения об угоне',
+            (xml.row[1].cell[9]): 'величина',
+            (xml.row[1].cell[10]): 'ед. измерения',
+            (xml.row[1].cell[12]): 'дата регистрации',
+            (xml.row[1].cell[13]): 'дата снятия с регистрации',
+            (xml.row[1].cell[14]): 'дата начала розыска ТС',
+            (xml.row[1].cell[15]): 'дата возврата ТС',
+            (xml.row[2].cell[0]): '1'
     ]
     (0..15).each { index ->
-        headerMapping.put((xml.row[1].cell[index]), (index + 1).toString())
+        headerMapping.put((xml.row[2].cell[index]), (index + 1).toString())
     }
     checkHeaderEquals(headerMapping)
 
-    addData(xml, 1)
+    addData(xml, 2)
 }
 
 // Заполнить форму данными
