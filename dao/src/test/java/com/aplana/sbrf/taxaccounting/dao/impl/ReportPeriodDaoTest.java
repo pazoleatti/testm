@@ -197,13 +197,13 @@ public class ReportPeriodDaoTest {
     }
 
     @Test
-    public void getReportPeriodsInRangeTest() {
+    public void getReportPeriodsByDateTest() {
         List<ReportPeriod> periodList = new ArrayList<ReportPeriod>();
         periodList.add(reportPeriodDao.get(1));
         periodList.add(reportPeriodDao.get(2));
         Date startDate = new GregorianCalendar(2011, Calendar.JANUARY, 1).getTime();
         Date endDate = new GregorianCalendar(2014, Calendar.JANUARY, 10).getTime();
-        List<ReportPeriod> actualPeriods = reportPeriodDao.getReportPeriodsInRange(TaxType.TRANSPORT, startDate, endDate);
+        List<ReportPeriod> actualPeriods = reportPeriodDao.getReportPeriodsByDate(TaxType.TRANSPORT, startDate, endDate);
         Assert.assertEquals(periodList.get(0).getId(), actualPeriods.get(0).getId());
         Assert.assertEquals(periodList.get(1).getId(), actualPeriods.get(1).getId());
     }
