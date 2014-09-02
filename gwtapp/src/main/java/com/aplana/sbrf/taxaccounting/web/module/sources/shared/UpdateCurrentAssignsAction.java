@@ -24,6 +24,10 @@ public class UpdateCurrentAssignsAction extends UnsecuredActionImpl<UpdateCurren
     private Date oldDateFrom;
     private Date oldDateTo;
     private TaxType taxType;
+    /** Подразделение-слева */
+    private Integer leftDepartmentId;
+    /** Подразделение-справа */
+    private Integer rightDepartmentId;
 
     public Date getOldDateFrom() {
         return oldDateFrom;
@@ -87,5 +91,21 @@ public class UpdateCurrentAssignsAction extends UnsecuredActionImpl<UpdateCurren
 
     public void setTaxType(TaxType taxType) {
         this.taxType = taxType;
+    }
+
+    public Integer getLeftDepartmentId() {
+        return leftDepartmentId;
+    }
+
+    public void setLeftDepartmentId(Integer leftDepartmentId) {
+        this.leftDepartmentId = leftDepartmentId;
+    }
+
+    public Integer getRightDepartmentId() {
+        return rightDepartmentId;
+    }
+
+    public void setRightDepartmentId(Integer rightDepartmentId) {
+        this.rightDepartmentId = rightDepartmentId;
     }
 }

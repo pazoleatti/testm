@@ -44,6 +44,7 @@ public class SourcesAssembler {
     
     private CurrentAssign assemble(DepartmentFormType dft){
     	CurrentAssign result = new CurrentAssign();
+        result.setDepartmentId(dft.getDepartmentId());
     	result.setDepartmentName(departmentService.getParentsHierarchy(dft.getDepartmentId()));
     	result.setId(dft.getId());
         result.setFormType(departmentFormTypeService.getFormType(dft.getFormTypeId()));
@@ -72,6 +73,7 @@ public class SourcesAssembler {
 
     private CurrentAssign assemble(DepartmentDeclarationType ddt){
         CurrentAssign result = new CurrentAssign();
+        result.setDepartmentId(ddt.getDepartmentId());
         result.setDepartmentName(departmentService.getParentsHierarchy(ddt.getDepartmentId()));
         result.setId((long) ddt.getId());
         result.setDeclarationType(departmentFormTypeService.getDeclarationType(ddt.getDeclarationTypeId()));

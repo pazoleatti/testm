@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
 import com.aplana.sbrf.taxaccounting.model.source.*;
-import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
 import java.util.Date;
 import java.util.List;
@@ -94,24 +93,28 @@ public interface SourceDao {
     List<Long> checkDDTExistence(List<Long> departmentDeclarationTypeIds);
 
     /**
-     * Получает список экземпляров налоговых форм, созданных в указанном периоде с определенными назначениями
+     * Возвращает информацию о промежуточных периодах, в которых указанное назначение не действует
      * http://conf.aplana.com/pages/viewpage.action?pageId=12321547
-     *
-     * @param periodStart начало периода
-     * @param periodEnd окончание периода
-     * @param departmentFormTypes список назначений нф подразделениям
-     * @return информация об экземплярах нф
+     * @param sourcePair связка источник-приемник
+     * @param newPeriodStart начало нового периода
+     * @param newPeriodEnd конец нового периода
+     * @return список промежуточных периодов
      */
-    List<FormDataInfo> findForms(Date periodStart, Date periodEnd, List<Long> departmentFormTypes);
+    List<SourceObject> getEmptyPeriods(SourcePair sourcePair, Date newPeriodStart, Date newPeriodEnd);
 
     /**
-     * Получает список экземпляров деклараций, созданных в указанном периоде с определенными назначениями
-     * http://conf.aplana.com/pages/viewpage.action?pageId=12321547
-     *
-     * @param periodStart начало периода
-     * @param periodEnd окончание периода
-     * @param destinationIds список назначений деклараций подразделениям
-     * @return информация об экземплярах нф
+     * Получает список отчетных периодов, в которых существуют принятые экземпляры нф и которые находятся внутри указанного диапазона дат
+     * @param source идентификатор назначения-приемника
+     * @param periodStart начало диапазона
+     * @param periodEnd окончание диапазона
+     * @return информация о периодах в которых существуют принятые источники
      */
-    List<DeclarationDataInfo> findDeclarations(Date periodStart, Date periodEnd, List<Long> destinationIds);
+    List<String> findAcceptedInstances(Long source, Date periodStart, Date periodEnd);
+
+    /**
+     * Возвращает названия подразделений для указанных источников
+     * @param sources пары id источника - название подразделения
+     * @return пары id источника - название подразделения
+     */
+    Map<Long, String> getDepartmentNamesBySource(List<Long> sources);
 }
