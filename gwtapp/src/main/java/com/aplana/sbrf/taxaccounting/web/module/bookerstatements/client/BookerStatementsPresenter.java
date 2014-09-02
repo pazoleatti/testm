@@ -98,8 +98,6 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
         BookerStatementsSearchOrdering getSearchOrdering();
         void setReportPeriods(List<ReportPeriod> reportPeriods);
 
-        void updateAccountPeriodIds();
-
         void setAscSorting(boolean ascSorting);
     }
 
