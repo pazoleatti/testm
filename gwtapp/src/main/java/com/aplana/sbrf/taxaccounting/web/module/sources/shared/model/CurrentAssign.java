@@ -17,6 +17,7 @@ public class CurrentAssign implements Serializable{
 
     /* Идентификатор */
     private Long id;
+    private int departmentId;
     /* Название подразделения */
     private String departmentName;
 
@@ -105,5 +106,13 @@ public class CurrentAssign implements Serializable{
 
     public void setIsForm(Boolean isForm) {
         this.isForm = isForm;
+    }
+
+    public int getDepartmentId() {
+        return departmentId;
+    }
+
+    public void setDepartmentId(int departmentId) {
+        this.departmentId = departmentId;
     }
 }

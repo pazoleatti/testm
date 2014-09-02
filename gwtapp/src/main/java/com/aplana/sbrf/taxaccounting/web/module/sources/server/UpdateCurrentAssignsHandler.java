@@ -131,6 +131,13 @@ public class UpdateCurrentAssignsHandler extends AbstractActionHandler<UpdateCur
         sourceClientData.setOldPeriodStartName(oldPeriodStartName);
         sourceClientData.setOldPeriodEnd(action.getOldDateTo());
         sourceClientData.setOldPeriodEndName(oldPeriodEndName);
+        if (action.getMode() == SourceMode.SOURCES) {
+            sourceClientData.setSourceDepartmentId(action.getRightDepartmentId());
+            sourceClientData.setDestinationDepartmentId(action.getLeftDepartmentId());
+        } else {
+            sourceClientData.setSourceDepartmentId(action.getLeftDepartmentId());
+            sourceClientData.setDestinationDepartmentId(action.getRightDepartmentId());
+        }
 
         sourceService.updateSources(logger, sourceClientData);
         result.setUuid(logEntryService.save(logger.getEntries()));

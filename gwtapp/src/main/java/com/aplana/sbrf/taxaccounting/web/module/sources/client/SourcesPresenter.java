@@ -419,6 +419,8 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
             action.setOldDateFrom(currentAssign.getStartDateAssign());
             action.setOldDateTo(currentAssign.getEndDateAssign());
             action.setTaxType(taxType);
+            action.setLeftDepartmentId(departmentAssign.getDepartmentId());
+            action.setRightDepartmentId(currentAssign.getDepartmentId());
             dispatcher.execute(action, CallbackUtils
                     .defaultCallback(new AbstractCallback<UpdateCurrentAssignsResult>() {
                         @Override
