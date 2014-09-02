@@ -308,7 +308,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                 List<RefBookAttribute> attributes = refBook.getAttributes();
                 for (RefBookAttribute attribute : attributes) {
                     if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
-                        RefBook attributeRefBook = refBookDao.get(attribute.getId());
+                        RefBook attributeRefBook = refBookDao.get(attribute.getRefBookId());
                         String referenceLockKey = LockData.LOCK_OBJECTS.REF_BOOK.name() + "_" + attributeRefBook.getId();
                         LockData referenceLockData = lockService.lock(referenceLockKey, userId, LockData.STANDARD_LIFE_TIME);
                         if (referenceLockData == null) {
@@ -468,7 +468,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                 List<RefBookAttribute> attributes = refBook.getAttributes();
                 for (RefBookAttribute attribute : attributes) {
                     if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
-                        RefBook attributeRefBook = refBookDao.get(attribute.getId());
+                        RefBook attributeRefBook = refBookDao.get(attribute.getRefBookId());
                         String referenceLockKey = LockData.LOCK_OBJECTS.REF_BOOK.name() + "_" + attribute.getRefBookId();
                         LockData referenceLockData = lockService.lock(referenceLockKey, userId, LockData.STANDARD_LIFE_TIME);
                         if (referenceLockData == null) {
