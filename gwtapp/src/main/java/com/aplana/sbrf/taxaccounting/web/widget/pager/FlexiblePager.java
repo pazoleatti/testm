@@ -60,61 +60,61 @@ public class FlexiblePager extends AbstractPager {
 		/**
 		 * The image used to skip ahead multiple pages.
 		 */
-		@ImageOptions(flipRtl = true)
+		@ImageOptions(flipRtl = true, preventInlining = true)
 		ImageResource flexiblePagerFastForward();
 
 		/**
 		 * The disabled "fast forward" image.
 		 */
-		@ImageOptions(flipRtl = true)
+		@ImageOptions(flipRtl = true, preventInlining = true)
 		ImageResource flexiblePagerFastForwardDisabled();
 
 		/**
 		 * The image used to go to the first page.
 		 */
-		@ImageOptions(flipRtl = true)
+		@ImageOptions(flipRtl = true, preventInlining = true)
 		ImageResource flexiblePagerFirstPage();
 
 		/**
 		 * The disabled first page image.
 		 */
-		@ImageOptions(flipRtl = true)
+		@ImageOptions(flipRtl = true, preventInlining = true)
 		ImageResource flexiblePagerFirstPageDisabled();
 
 		/**
 		 * The image used to go to the last page.
 		 */
-		@ImageOptions(flipRtl = true)
+		@ImageOptions(flipRtl = true, preventInlining = true)
 		ImageResource flexiblePagerLastPage();
 
 		/**
 		 * The disabled last page image.
 		 */
-		@ImageOptions(flipRtl = true)
+		@ImageOptions(flipRtl = true, preventInlining = true)
 		ImageResource flexiblePagerLastPageDisabled();
 
 		/**
 		 * The image used to go to the next page.
 		 */
-		@ImageOptions(flipRtl = true)
+		@ImageOptions(flipRtl = true, preventInlining = true)
 		ImageResource flexiblePagerNextPage();
 
 		/**
 		 * The disabled next page image.
 		 */
-		@ImageOptions(flipRtl = true)
+		@ImageOptions(flipRtl = true, preventInlining = true)
 		ImageResource flexiblePagerNextPageDisabled();
 
 		/**
 		 * The image used to go to the previous page.
 		 */
-		@ImageOptions(flipRtl = true)
+		@ImageOptions(flipRtl = true, preventInlining = true)
 		ImageResource flexiblePagerPreviousPage();
 
 		/**
 		 * The disabled previous page image.
 		 */
-		@ImageOptions(flipRtl = true)
+		@ImageOptions(flipRtl = true, preventInlining = true)
 		ImageResource flexiblePagerPreviousPageDisabled();
 
 		/**

@@ -13,8 +13,8 @@ class DBReport {
         def sqlTemplate2 = "select id, type_id, data_rows, fixed_rows, name, fullname, header as code, data_headers, to_char(version, 'RRRR') as version, status, script, monthly from form_template where status not in (-1, 2)"
 
         // Запросы на получение колонок
-        def sqlColumns1 = "select id, name, form_template_id, ord, alias, type, width, precision, max_length, checking, attribute_id, format, filter, parent_column_id, (select alias from form_column fc2 where fc2.id = fc1.parent_column_id) as parent_alias, attribute_id2 from form_column fc1 where form_template_id in (select distinct id from form_template where status not in (-1, 2)) order by ord"
-        def sqlColumns2 = "select id, name, form_template_id, ord, alias, type, width, precision, max_length, checking, attribute_id, format, filter, parent_column_id, (select alias from form_column fc2 where fc2.id = fc1.parent_column_id) as parent_alias, attribute_id2 from form_column fc1 where form_template_id in (select distinct id from form_template where status not in (-1, 2)) order by ord"
+        def sqlColumns1 = "select id, name, form_template_id, ord, alias, type, width, precision, max_length, checking, attribute_id, format, filter, parent_column_id, (select alias from form_column fc2 where fc2.id = fc1.parent_column_id) as parent_alias, attribute_id2, numeration_row from form_column fc1 where form_template_id in (select distinct id from form_template where status not in (-1, 2)) order by ord"
+        def sqlColumns2 = "select id, name, form_template_id, ord, alias, type, width, precision, max_length, checking, attribute_id, format, filter, parent_column_id, (select alias from form_column fc2 where fc2.id = fc1.parent_column_id) as parent_alias, attribute_id2, numeration_row from form_column fc1 where form_template_id in (select distinct id from form_template where status not in (-1, 2)) order by ord"
 
         // Перечень всех всерсий в БД (заполняется в getTemplates)
         def allVersions = [:]
@@ -171,7 +171,7 @@ class DBReport {
                                     // Сравнение граф НФ
                                     def colDiff = null
                                     def headers = ['ord', 'alias', 'name', 'type', 'width', 'precision', 'max_length', 'checking', 'attribute_id',
-                                            'format', 'filter', 'parent_alias', 'attribute_id2']
+                                            'format', 'filter', 'parent_alias', 'attribute_id2', 'numeration_row']
                                     if (columnsSet1 != null && columnsSet2 == null || columnsSet1 == null && columnsSet2 != null) {
                                         colDiff = "Нет в ${columnsSet1 == null ? prefix1 : prefix2}"
                                     } else if (columnsSet1 != null && columnsSet2 != null) {
@@ -378,6 +378,7 @@ class DBReport {
             column.parent_column_id = it.parent_column_id
             column.parent_alias = it.parent_alias
             column.attribute_id2 = it.attribute_id2
+            column.numeration_row = it.numeration_row
             columnsMap[form_template_id].add(column)
         }
 

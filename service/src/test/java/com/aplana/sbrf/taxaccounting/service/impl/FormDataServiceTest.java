@@ -296,7 +296,7 @@ public class FormDataServiceTest extends Assert {
         newFormData.setReportPeriodId(1);
         newFormData.setKind(FormDataKind.PRIMARY);
 
-        when(formDataDao.getPrevFormDataListForCrossNumeration(any(FormData.class), any(TaxPeriod.class)))
+        when(formDataDao.getPrevFormDataList(any(FormData.class), any(TaxPeriod.class)))
                 .thenReturn(new ArrayList<FormData>());
         assertTrue("\"Номер последней строки предыдущей НФ\" должен быть равен 0",
                 formDataService.getPreviousRowNumber(newFormData).equals(0));
@@ -333,7 +333,7 @@ public class FormDataServiceTest extends Assert {
         formDataList.add(formData);
         formDataList.add(formData1);
 
-        when(formDataDao.getPrevFormDataListForCrossNumeration(any(FormData.class), any(TaxPeriod.class)))
+        when(formDataDao.getPrevFormDataList(any(FormData.class), any(TaxPeriod.class)))
                 .thenReturn(formDataList);
         when(dataRowDao.getSizeWithoutTotal(formData, null)).thenReturn(3);
         when(dataRowDao.getSizeWithoutTotal(formData1, null)).thenReturn(5);
@@ -374,7 +374,7 @@ public class FormDataServiceTest extends Assert {
         formDataList.add(formData);
         formDataList.add(formData1);
 
-        when(formDataDao.getPrevFormDataListForCrossNumeration(any(FormData.class), any(TaxPeriod.class)))
+        when(formDataDao.getPrevFormDataList(any(FormData.class), any(TaxPeriod.class)))
                 .thenReturn(formDataList);
         when(dataRowDao.getSizeWithoutTotal(formData, null)).thenReturn(3);
         when(dataRowDao.getSizeWithoutTotal(formData1, null)).thenReturn(5);

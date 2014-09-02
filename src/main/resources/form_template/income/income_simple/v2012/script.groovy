@@ -24,7 +24,7 @@ import java.text.SimpleDateFormat
 
 // графа 1  - incomeTypeId              - КНУ
 // графа 2  - incomeGroup               - Группа дохода
-// графа 3  - incomeTypeByOperation     - Вид дохода по операции
+// графа 3  - incomeTypeByOperation     - Вид дохода по операциям
 // графа 4  - accountNo                 - Балансовый счёт по учёту дохода
 // графа 5  - rnu6Field10Sum            - РНУ-6 (графа 10) cумма
 // графа 6  - rnu6Field12Accepted       - сумма
@@ -530,7 +530,7 @@ void importData() {
     def headerMapping = [
             (xml.row[0].cell[0]): 'КНУ',
             (xml.row[0].cell[1]): 'Группа дохода',
-            (xml.row[0].cell[2]): 'Вид дохода по операции',
+            (xml.row[0].cell[2]): 'Вид дохода по операциям',
             (xml.row[0].cell[3]): 'Балансовый счёт по учёту дохода',
             (xml.row[0].cell[4]): 'РНУ-6 (графа 10) сумма',
             (xml.row[0].cell[5]): 'РНУ-6 (графа 12)',
@@ -615,19 +615,19 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol = 4
 
         // графа 5
-        curRow.rnu6Field10Sum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        curRow.rnu6Field10Sum = parseNumber(normalize(row.cell[xmlIndexCol].text()), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
         // графа 6
-        curRow.rnu6Field12Accepted = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        curRow.rnu6Field12Accepted = parseNumber(normalize(row.cell[xmlIndexCol].text()), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
         // графа 7
-        curRow.rnu6Field12PrevTaxPeriod = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        curRow.rnu6Field12PrevTaxPeriod = parseNumber(normalize(row.cell[xmlIndexCol].text()), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
         // графа 8
-        curRow.rnu4Field5Accepted = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        curRow.rnu4Field5Accepted = parseNumber(normalize(row.cell[xmlIndexCol].text()), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
     }
     if (rowIndex < maxRow) {
         logger.error("Структура файла не соответствует макету налоговой формы в строке с КНУ = $knu. ")

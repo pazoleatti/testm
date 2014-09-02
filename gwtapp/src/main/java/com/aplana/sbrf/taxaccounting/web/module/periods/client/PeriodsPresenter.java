@@ -403,6 +403,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 		super.prepareFromRequest(request);
         LogCleanEvent.fire(this);
         LogShowEvent.fire(this, false);
+        getView().clearSelection();
 
 		PeriodsGetFilterData getFilterData = new PeriodsGetFilterData();
 		getFilterData.setTaxType(TaxType.valueOf(request.getParameter("nType", "")));
