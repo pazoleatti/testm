@@ -611,7 +611,6 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                                 formData.getFormType()
                                                         .getName());
                                 innerLogUuid = result.getUuid();
-	                            getView().updateData(0);
 
                                 getView().updatePageSize(result.getFormData().getFormType().getTaxType());
                             }

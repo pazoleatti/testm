@@ -202,7 +202,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
                     if (Element.is(eventTarget)) {
                         Element target = Element.as(eventTarget);
                         if ("td".equals(target.getTagName().toLowerCase())) {
-                            TableCellElement cellElement = formDataTable.getRowElement(event.getIndex() - 1 - formDataTable.getPageStart()).getCells().getItem(event.getColumn());
+                            TableCellElement cellElement = formDataTable.getRowElement(event.getIndex() - formDataTable.getPageStart()).getCells().getItem(event.getColumn());
                             if (cellElement.getInnerText().replace("\u00A0", "").trim().isEmpty()) {
                                 cellElement.removeAttribute("title");
                             } else {
@@ -688,8 +688,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
         return this;
     }
 
-	@Override
-	public void updateData(int pageNumber) {
+	private void updateData(int pageNumber) {
 		if (pager.getPage() == pageNumber){
 			updateData();
 		} else {
@@ -713,6 +712,8 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
             this.taxType = taxType;
             pager.setType("formData" + taxType.getCode());
             formDataTable.setPageSize(pager.getPageSize());
+        } else {
+            updateData(0);
         }
     }
 
