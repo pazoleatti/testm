@@ -100,8 +100,6 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 		void updateData();
 		
-		void updateData(int pageNumber);
-
         void addFileUploadValueChangeHandler(ValueChangeHandler<String> changeHandler);
 
         void isCanEditPage(boolean visible);
