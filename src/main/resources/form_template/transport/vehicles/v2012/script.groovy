@@ -449,14 +449,15 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol++
 
         // графа 4
-        record = getRecordImport(42, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, true)
+        // http://jira.aplana.com/browse/SBRFACCTAX-8572 исправить загрузку Кода Вида ТС (убираю пробелы)
+        record = getRecordImport(42, 'CODE', row.cell[xmlIndexCol].text().replace(' ', ''), xlsIndexRow, xmlIndexCol + colOffset, true)
         newRow.tsTypeCode = record?.record_id?.value
         xmlIndexCol++
 
         // графа 5
-        if (record != null) {
-            formDataService.checkReferenceValue(42, row.cell[xmlIndexCol].text(), record?.NAME?.value, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        }
+//        if (record != null) {
+//            formDataService.checkReferenceValue(42, row.cell[xmlIndexCol].text(), record?.NAME?.value, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+//        }
         xmlIndexCol++
 
         // графа 6
@@ -472,7 +473,7 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol++
 
         // графа 9
-        newRow.regNumber = row.cell[xmlIndexCol].text()
+        newRow.regNumber = row.cell[xmlIndexCol].text().replace(' ', '')
         xmlIndexCol++
 
         // графа 10
@@ -484,7 +485,17 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol++
 
         // графа 12
-        newRow.year = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        def yearStr = row.cell[xmlIndexCol].text()
+        if (yearStr != null) {
+            if (yearStr.contains(".")) {
+                newRow.year = parseDate(yearStr, "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+            } else {
+                def yearNum = parseNumber(yearStr, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+                if (yearNum != null && yearNum != 0) {
+                    newRow.year = new GregorianCalendar(yearNum as Integer, Calendar.JANUARY, 1).getTime()
+                }
+            }
+        }
         xmlIndexCol++
 
         // графа 13

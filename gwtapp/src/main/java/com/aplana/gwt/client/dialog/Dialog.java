@@ -30,19 +30,19 @@ public final class Dialog extends ModalWindow {
 
     interface ModalWindowResources extends ClientBundle {
         @Source("icon-info.gif")
-        @ImageResource.ImageOptions(repeatStyle = ImageResource.RepeatStyle.Both)
+        @ImageResource.ImageOptions(repeatStyle = ImageResource.RepeatStyle.Both, preventInlining = true)
         ImageResource infoImage();
 
         @Source("icon-error.gif")
-        @ImageResource.ImageOptions(repeatStyle = ImageResource.RepeatStyle.Both)
+        @ImageResource.ImageOptions(repeatStyle = ImageResource.RepeatStyle.Both, preventInlining = true)
         ImageResource errorImage();
 
         @Source("icon-question.gif")
-        @ImageResource.ImageOptions(repeatStyle = ImageResource.RepeatStyle.Both)
+        @ImageResource.ImageOptions(repeatStyle = ImageResource.RepeatStyle.Both, preventInlining = true)
         ImageResource questionImage();
 
         @Source("icon-warning.gif")
-        @ImageResource.ImageOptions(repeatStyle = ImageResource.RepeatStyle.Both)
+        @ImageResource.ImageOptions(repeatStyle = ImageResource.RepeatStyle.Both, preventInlining = true)
         ImageResource warningImage();
     }
 

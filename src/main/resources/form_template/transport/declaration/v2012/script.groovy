@@ -110,7 +110,10 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
     def builder = new MarkupBuilder(xml)
     if (!declarationData.isAccepted()) {
         def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
-        builder.Файл(ИдФайл: declarationService.generateXmlFileId(1, departmentId, declarationData.getReportPeriodId()), ВерсПрог: departmentParamTransport.APP_VERSION, ВерсФорм: departmentParamTransport.FORMAT_VERSION) {
+        builder.Файл(
+                ИдФайл: declarationService.generateXmlFileId(1, departmentId, declarationData.getReportPeriodId()),
+                ВерсПрог: applicationVersion,
+                ВерсФорм: departmentParamTransport.FORMAT_VERSION) {
             Документ(
                     КНД: "1152004",
                     ДатаДок: (docDate != null ? docDate : new Date()).format("dd.MM.yyyy"),
@@ -519,9 +522,6 @@ List<String> getErrorVersion(record) {
     List<String> errorList = new ArrayList<String>()
     if (record.FORMAT_VERSION == null || record.FORMAT_VERSION.stringValue == null || !record.FORMAT_VERSION.stringValue.equals('5.02')) {
         errorList.add("«Версия формата»")
-    }
-    if (record.APP_VERSION == null || record.APP_VERSION.stringValue == null || !record.APP_VERSION.stringValue.equals('XLR_FNP_TAXCOM_5_02')) {
-        errorList.add("«Версия программы, с помощью которой сформирован файл»")
     }
     errorList
 }

@@ -17,6 +17,7 @@ import groovy.xml.MarkupBuilder
 switch (formDataEvent) {
     case FormDataEvent.CREATE : // создать / обновить
         checkDeparmentParams(LogLevel.WARNING)
+        checkDeclarationBank()
         break
     case FormDataEvent.CHECK : // проверить
         checkDeparmentParams(LogLevel.ERROR)
@@ -26,7 +27,8 @@ switch (formDataEvent) {
         break
     case FormDataEvent.CALCULATE:
         checkDeparmentParams(LogLevel.WARNING)
-        generateXML()
+        def xmlBankData = checkDeclarationBank()
+        generateXML(xmlBankData)
         break
     default:
         return
@@ -79,56 +81,10 @@ void checkDeparmentParams(LogLevel logLevel) {
     }
 }
 
-/** Запуск генерации XML. */
-void generateXML() {
-    /*
-     * Константы.
-     */
-
-    def empty = 0
-    def knd = '1151006'
-    def kbk = '18210101011011000110'
-    def kbk2 = '18210101012021000110'
-    def typeNP = '1'
-
-    // справочник "Параметры подразделения по налогу на прибыль" - начало
-    def incomeParams = getProvider(33).getRecords(getEndDate() - 1, null, "DEPARTMENT_ID = ${declarationData.departmentId}", null)?.get(0)
-    if (incomeParams == null) {
-        throw new Exception('Ошибка при получении настроек обособленного подразделения')
-    }
-    def reorgFormCode = getRefBookValue(5, incomeParams?.REORG_FORM_CODE?.value)?.CODE?.value
-    def taxOrganCode = incomeParams?.TAX_ORGAN_CODE?.value
-    def okvedCode = getRefBookValue(34, incomeParams?.OKVED_CODE?.value)?.CODE?.value
-    def phone = incomeParams?.PHONE?.value
-    def name = incomeParams?.NAME?.value
-    def inn = incomeParams?.INN?.value
-    def kpp = incomeParams?.KPP?.value
-    def reorgInn = incomeParams?.REORG_INN?.value
-    def reorgKpp = incomeParams?.REORG_KPP?.value
-    def oktmo = getOkato(incomeParams?.OKTMO?.value)
-    def signatoryId = getRefBookValue(35, incomeParams?.SIGNATORY_ID?.value)?.CODE?.value
-    def appVersion = incomeParams?.APP_VERSION?.value
-    def formatVersion = incomeParams?.FORMAT_VERSION?.value
-    def taxPlaceTypeCode = getRefBookValue(2, incomeParams?.TAX_PLACE_TYPE_CODE?.value)?.CODE?.value
-    def signatorySurname = incomeParams?.SIGNATORY_SURNAME?.value
-    def signatoryFirstName = incomeParams?.SIGNATORY_FIRSTNAME?.value
-    def signatoryLastName = incomeParams?.SIGNATORY_LASTNAME?.value
-    def approveDocName = incomeParams?.APPROVE_DOC_NAME?.value
-    def approveOrgName = incomeParams?.APPROVE_ORG_NAME?.value
-    // справочник "Параметры подразделения по налогу на прибыль" - конец
-
+// Провека декларации банка.
+def checkDeclarationBank() {
     /** Отчётный период. */
     def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
-
-    /** Налоговый период. */
-    def taxPeriod = (reportPeriod != null ? reportPeriod.getTaxPeriod() : null)
-
-    /** Признак налоговый ли это период. */
-    def isTaxPeriod = (reportPeriod != null && reportPeriod.order == 4)
-
-    /*
-     * Провека декларации банка.
-     */
 
     /** вид декларации 2 - декларация по налогу на прибыль уровня банка. */
     def declarationTypeId = 2
@@ -156,6 +112,54 @@ void generateXML() {
     if (xmlBankData == null) {
         logger.error('Не удалось получить данные декларации Банка.')
     }
+    return xmlBankData
+}
+
+/** Запуск генерации XML. */
+void generateXML(def xmlBankData) {
+    /*
+     * Константы.
+     */
+
+    def empty = 0
+    def knd = '1151006'
+    def kbk = '18210101011011000110'
+    def kbk2 = '18210101012021000110'
+    def typeNP = '1'
+
+    // справочник "Параметры подразделения по налогу на прибыль" - начало
+    def incomeParams = getProvider(33).getRecords(getEndDate() - 1, null, "DEPARTMENT_ID = ${declarationData.departmentId}", null)?.get(0)
+    if (incomeParams == null) {
+        throw new Exception('Ошибка при получении настроек обособленного подразделения')
+    }
+    def reorgFormCode = getRefBookValue(5, incomeParams?.REORG_FORM_CODE?.value)?.CODE?.value
+    def taxOrganCode = incomeParams?.TAX_ORGAN_CODE?.value
+    def okvedCode = getRefBookValue(34, incomeParams?.OKVED_CODE?.value)?.CODE?.value
+    def phone = incomeParams?.PHONE?.value
+    def name = incomeParams?.NAME?.value
+    def inn = incomeParams?.INN?.value
+    def kpp = incomeParams?.KPP?.value
+    def reorgInn = incomeParams?.REORG_INN?.value
+    def reorgKpp = incomeParams?.REORG_KPP?.value
+    def oktmo = getOkato(incomeParams?.OKTMO?.value)
+    def signatoryId = getRefBookValue(35, incomeParams?.SIGNATORY_ID?.value)?.CODE?.value
+    def formatVersion = incomeParams?.FORMAT_VERSION?.value
+    def taxPlaceTypeCode = getRefBookValue(2, incomeParams?.TAX_PLACE_TYPE_CODE?.value)?.CODE?.value
+    def signatorySurname = incomeParams?.SIGNATORY_SURNAME?.value
+    def signatoryFirstName = incomeParams?.SIGNATORY_FIRSTNAME?.value
+    def signatoryLastName = incomeParams?.SIGNATORY_LASTNAME?.value
+    def approveDocName = incomeParams?.APPROVE_DOC_NAME?.value
+    def approveOrgName = incomeParams?.APPROVE_ORG_NAME?.value
+    // справочник "Параметры подразделения по налогу на прибыль" - конец
+
+    /** Отчётный период. */
+    def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+
+    /** Налоговый период. */
+    def taxPeriod = (reportPeriod != null ? reportPeriod.getTaxPeriod() : null)
+
+    /** Признак налоговый ли это период. */
+    def isTaxPeriod = (reportPeriod != null && reportPeriod.order == 4)
 
     // провека наличия в декларации банка данных для данного подразделения
     def findCurrentDepo = false
@@ -225,7 +229,7 @@ void generateXML() {
     def xmlbuilder = new MarkupBuilder(xml)
     xmlbuilder.Файл(
             ИдФайл : declarationService.generateXmlFileId(5, declarationData.departmentId, declarationData.reportPeriodId),
-            ВерсПрог : appVersion,
+            ВерсПрог : applicationVersion,
             ВерсФорм : formatVersion) {
 
         // Титульный лист
@@ -429,9 +433,6 @@ List<String> getErrorVersion(record) {
     List<String> errorList = new ArrayList<String>()
     if (record.FORMAT_VERSION == null || record.FORMAT_VERSION.stringValue == null || !record.FORMAT_VERSION.stringValue.equals('5.05')) {
         errorList.add("«Версия формата»")
-    }
-    if (record.APP_VERSION == null || record.APP_VERSION.stringValue == null || !record.APP_VERSION.stringValue.equals('XLR_FNP_TAXCOM_5_05')) {
-        errorList.add("«Версия программы, с помощью которой сформирован файл»")
     }
     errorList
 }

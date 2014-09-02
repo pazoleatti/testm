@@ -7,7 +7,7 @@
     <fullName>(РНУ-30) Расчёт резерва по сомнительным долгам на основании результатов инвентаризации сомнительной
         задолженности и безнадежных долгов.
     </fullName>
-    <code>РНУ-30</code>
+    <header>1210-30</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>number</alias>
         <checking>false</checking>
