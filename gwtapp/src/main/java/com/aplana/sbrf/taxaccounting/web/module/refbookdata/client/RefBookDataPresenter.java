@@ -75,8 +75,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 		RefBookDataRow getSelectedRow();
 		Date getRelevanceDate();
         void setReadOnlyMode(boolean readOnly);
-        public int getPage();
-        public void setPage(int page);
+        int getPage();
+        void setPage(int page);
         /** Метод для получения строки с поля фильтрации*/
         String getSearchPattern();
         /** Сброс значения поля поиска */

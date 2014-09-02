@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.web.module.scheduler.client.taskparams;
 import com.aplana.gwt.client.ValueListBox;
 import com.aplana.sbrf.taxaccounting.scheduler.api.form.SelectBoxItem;
 import com.google.gwt.text.shared.AbstractRenderer;
-import com.google.gwt.text.shared.Renderer;
 import com.google.gwt.user.client.ui.Widget;
 
 import java.util.List;

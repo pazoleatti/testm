@@ -21,7 +21,7 @@ public interface DepartmentService {
      * @return
      */
     @Deprecated
-    public Department getUNPDepartment();
+    Department getUNPDepartment();
 
     /**
      * Получить департамент

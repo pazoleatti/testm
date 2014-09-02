@@ -111,16 +111,6 @@ public class RefBookIncome101 implements RefBookDataProvider {
     }
 
     @Override
-    public void deleteRecords(TAUserInfo taUserInfo, Date version, List<Long> recordIds) {
-		throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void deleteAllRecords(TAUserInfo taUserInfo, Date version) {
-		throw new UnsupportedOperationException();
-    }
-
-    @Override
     public RefBookValue getValue(Long recordId, Long attributeId) {
         RefBook refBook = refBookDao.get(REF_BOOK_ID);
         RefBookAttribute attribute = refBook.getAttribute(attributeId);

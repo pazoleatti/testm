@@ -10,7 +10,7 @@ import com.google.gwt.event.shared.HasHandlers;
 public class SetFocus extends GwtEvent<SetFocus.SetFocusHandler> {
 
     public interface SetFocusHandler extends EventHandler {
-        public void onSetFocus(SetFocus event);
+        void onSetFocus(SetFocus event);
     }
 
     private Long rowIndex;

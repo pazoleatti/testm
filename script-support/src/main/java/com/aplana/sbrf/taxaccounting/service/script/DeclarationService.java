@@ -1,12 +1,9 @@
 package com.aplana.sbrf.taxaccounting.service.script;
 
-
-
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.FormDataCollection;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
-
 
 @ScriptExposed
 public interface DeclarationService {

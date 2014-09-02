@@ -14,7 +14,7 @@ import com.google.gwt.event.shared.HasHandlers;
 public class LogAddEvent extends
 		GwtEvent<LogAddEvent.MyHandler> {
 
-	public static interface MyHandler extends EventHandler {
+	public interface MyHandler extends EventHandler {
 		/**
 		 * @param event
 		 */

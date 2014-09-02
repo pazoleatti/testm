@@ -8,7 +8,6 @@ import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.CreateAssignAction;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.CreateAssignResult;
-import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.CurrentAssign;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.DepartmentAssign;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.PeriodsInterval;
 import com.gwtplatform.dispatch.server.ExecutionContext;

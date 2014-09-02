@@ -55,7 +55,7 @@ public class FlexiblePager extends AbstractPager {
 	/**
 	 * A ClientBundle that provides images for this widget.
 	 */
-	public static interface Resources extends ClientBundle {
+	public interface Resources extends ClientBundle {
 
 		/**
 		 * The image used to skip ahead multiple pages.
@@ -127,7 +127,7 @@ public class FlexiblePager extends AbstractPager {
 	/**
 	 * Styles used by this widget.
 	 */
-	public static interface Style extends CssResource {
+	public interface Style extends CssResource {
 
 		/**
 		 * Applied to buttons.

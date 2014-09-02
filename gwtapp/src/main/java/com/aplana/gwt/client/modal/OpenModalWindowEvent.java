@@ -6,7 +6,7 @@ import com.google.gwt.event.shared.HasHandlers;
 
 public class OpenModalWindowEvent extends GwtEvent<OpenModalWindowEvent.OpenHandler> {
 
-    public static interface OpenHandler extends EventHandler {
+    public interface OpenHandler extends EventHandler {
         void onOpen(OpenModalWindowEvent event);
     }
 

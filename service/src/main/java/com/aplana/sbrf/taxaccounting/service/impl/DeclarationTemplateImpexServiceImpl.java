@@ -7,8 +7,6 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateImpexService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,11 +33,11 @@ public class DeclarationTemplateImpexServiceImpl implements
 	@Autowired
 	DeclarationTemplateService declarationTemplateService;
 
+    public final static String VERSION_FILE = "version";
+    public final static String SCRIPT_FILE = "script.groovy";
+    public final static String REPORT_FILE = "report.jrxml";
+
 	private final static String ENCODING = "UTF-8";
-
-    private static final Log logger = LogFactory.getLog(DeclarationTemplateImpexServiceImpl.class);
-
-    private static final int MAX_NAME_OF_DIR = 50;
 
 	@Override
 	public void exportDeclarationTemplate(TAUserInfo userInfo, Integer id, OutputStream os) {

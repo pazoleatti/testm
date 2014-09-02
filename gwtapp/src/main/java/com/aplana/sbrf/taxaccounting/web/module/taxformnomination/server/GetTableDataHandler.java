@@ -15,9 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
@@ -58,20 +56,6 @@ public class GetTableDataHandler extends AbstractActionHandler<GetTableDataActio
             data.addAll(departmentFormTypeService.getAllDeclarationAssigned(departmentsIds, taxType, queryParams));
             result.setTotalCount(departmentFormTypeService.getAssignedDeclarationsCount(departmentsIds, taxType));
         }
-        // формирование мапы с полным названием подразделения
-        // TODO - лучше получать иерархические названия подразделений одним запросом!!!
-        Map<Integer, String> departmentFullNames = new HashMap<Integer, String>();
-        for (FormTypeKind item : data) {
-            int departmentId = item.getDepartment().getId();
-            Integer performerId = item.getPerformer() != null ? item.getPerformer().getId() : null;
-            if (departmentFullNames.get(departmentId) == null) {
-                departmentFullNames.put(departmentId, departmentService.getParentsHierarchy(departmentId));
-            }
-            if (performerId != null && departmentFullNames.get(performerId) == null) {
-                departmentFullNames.put(performerId, departmentService.getParentsHierarchy(performerId));
-            }
-        }
-        result.setDepartmentFullNames(departmentFullNames);
 
         result.setTableData(data);
 

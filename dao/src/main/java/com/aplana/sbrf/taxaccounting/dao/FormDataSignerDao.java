@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.dao;
 
 import java.util.List;
 
-import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataSigner;
 
 /**

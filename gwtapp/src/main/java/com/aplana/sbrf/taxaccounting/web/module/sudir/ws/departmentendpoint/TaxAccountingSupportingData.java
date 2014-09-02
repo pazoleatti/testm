@@ -28,6 +28,6 @@ public interface TaxAccountingSupportingData {
     @WebResult(name = "department", targetNamespace = "http://taxaccounting.sbt.ru/SupportingData/getDepartments")
     @RequestWrapper(localName = "getDepartments", targetNamespace = "http://taxaccounting.sbt.ru/SupportingData/", className = "ru.sbt.taxaccounting.supportingdata.GetDepartments")
     @ResponseWrapper(localName = "getDepartmentsResponse", targetNamespace = "http://taxaccounting.sbt.ru/SupportingData/", className = "ru.sbt.taxaccounting.supportingdata.GetDepartmentsResponse")
-    public List<TaxAccDepartment> getDepartments();
+    List<TaxAccDepartment> getDepartments();
 
 }

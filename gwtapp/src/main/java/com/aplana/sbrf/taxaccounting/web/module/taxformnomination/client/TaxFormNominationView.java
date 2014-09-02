@@ -76,9 +76,6 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 	private Boolean isForm;
 	private TaxType taxType;
 
-	/* иерархия имен подразделения */
-	Map<Integer, String> departmentFullNames = new HashMap<Integer, String>();
-
 	// изменяемые колонки в таблице
 	private GenericDataGrid.DataGridResizableHeader receiverSourcesKindTitle, receiverSourcesTypeTitle, declarationTypeHeader;
 
@@ -190,19 +187,19 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 			}
 		};
 
-		departmentColumn = new TextColumn<FormTypeKind>(){
-			@Override
-			public String getValue(FormTypeKind object) {
-				return departmentFullNames.get(object.getDepartment().getId());
-			}
-		};
+        departmentColumn = new TextColumn<FormTypeKind>() {
+            @Override
+            public String getValue(FormTypeKind object) {
+                return object.getDepartment().getFullName();
+            }
+        };
 
-		performerColumn = new TextColumn<FormTypeKind>() {
-			@Override
-			public String getValue(FormTypeKind object) {
-				return object.getPerformer() != null ? departmentFullNames.get(object.getPerformer().getId()):"";
-			}
-		};
+        performerColumn = new TextColumn<FormTypeKind>() {
+            @Override
+            public String getValue(FormTypeKind object) {
+                return object.getPerformer() != null ? object.getPerformer().getFullName() : "";
+            }
+        };
 
 		formGrid.addColumn(checkBoxColumn);
 		formGrid.setColumnWidth(checkBoxColumn, 40, Style.Unit.PX);
@@ -243,7 +240,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 		departmentColumn = new TextColumn<FormTypeKind>(){
 			@Override
 			public String getValue(FormTypeKind object) {
-				return departmentFullNames.get(object.getDepartment().getId());
+				return object.getDepartment().getFullName();
 			}
 		};
 
@@ -389,25 +386,23 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 	}
 
 	@Override
-	public void setDataToFormTable(int start, int totalCount, List<FormTypeKind> departmentFormTypes, Map<Integer, String> departmentFullNames) {
+	public void setDataToFormTable(int start, int totalCount, List<FormTypeKind> departmentFormTypes) {
         formSM.clear();
         if (departmentFormTypes.isEmpty()) {
 			formGrid.setRowCount(0);
 			return;
 		}
-		this.departmentFullNames.putAll(departmentFullNames);
 		formGrid.setRowCount(totalCount);
 		formGrid.setRowData(start, departmentFormTypes);
 	}
 
 	@Override
-	public void setDataToDeclarationTable(int start, int totalCount, List<FormTypeKind> departmentFormTypes, Map<Integer, String> departmentFullNames) {
+	public void setDataToDeclarationTable(int start, int totalCount, List<FormTypeKind> departmentFormTypes) {
         decSM.clear();
         if (departmentFormTypes.isEmpty()) {
 			decGrid.setRowCount(0);
 			return;
 		}
-		this.departmentFullNames.putAll(departmentFullNames);
 
 		decGrid.setRowCount(totalCount);
 		decGrid.setRowData(start, departmentFormTypes);

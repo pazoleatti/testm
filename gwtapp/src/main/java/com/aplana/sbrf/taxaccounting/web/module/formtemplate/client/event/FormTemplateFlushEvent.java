@@ -7,7 +7,7 @@ import com.google.gwt.event.shared.HasHandlers;
 
 public class FormTemplateFlushEvent extends GwtEvent<FormTemplateFlushEvent.MyHandler> {
 
-	public static interface MyHandler extends EventHandler {
+	public interface MyHandler extends EventHandler {
 		void onFlush(FormTemplateFlushEvent event);
 	}
 

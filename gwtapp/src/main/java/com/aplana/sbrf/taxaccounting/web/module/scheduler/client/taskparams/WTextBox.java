@@ -1,12 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.scheduler.client.taskparams;
 
 import com.aplana.gwt.client.TextBox;
-import com.google.gwt.user.client.ui.DoubleBox;
-import com.google.gwt.user.client.ui.LongBox;
-import com.google.gwt.user.client.ui.ValueBox;
 import com.google.gwt.user.client.ui.Widget;
-
-import java.sql.Date;
 
 /**
  * Виджет обертка над TextBox'ом,

@@ -93,7 +93,7 @@ public class DeclarationVersionListPresenter extends Presenter<DeclarationVersio
         void setDTVersionTable(List<DeclarationTemplateVersion> fullList);
         DeclarationTemplateVersion getSelectedElement();
         void setLabelName(String labelName);
-        public void resetSelectedLine();
+        void resetSelectedLine();
     }
 
     @Title("Версии макетов деклараций")

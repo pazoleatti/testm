@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.scheduler.client.taskparams;
 
-import com.aplana.sbrf.taxaccounting.scheduler.api.form.FormElement;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Widget;
 

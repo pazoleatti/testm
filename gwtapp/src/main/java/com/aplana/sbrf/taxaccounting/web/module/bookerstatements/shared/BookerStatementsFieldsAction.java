@@ -10,15 +10,15 @@ import java.util.List;
  */
 public class BookerStatementsFieldsAction extends UnsecuredActionImpl<BookerStatementsFieldsResult>{
 
-	private Long DepartmentId;
+	private Long departmentId;
 	private List<Integer> reportPeriodId;
 
 	public Long getDepartmentId() {
-		return DepartmentId;
+		return departmentId;
 	}
 
 	public void setDepartmentId(Long departmentId) {
-		DepartmentId = departmentId;
+		this.departmentId = departmentId;
 	}
 
 	public List<Integer> getReportPeriodId() {

@@ -16,7 +16,7 @@ public interface ReportPeriodDao {
 	 * Получить объект отчётного периода по идентификатору периода
 	 * @param reportPeriodId идентификатор отчётного периода
 	 * @return объект, задаваемый идентификатором
-	 * @throws com.aplana.sbrf.taxaccounting.dao.api.exception.exception.DaoException если периода с заданным идентификатором не существует
+	 * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если периода с заданным идентификатором не существует
 	 */
 	ReportPeriod get(int reportPeriodId);
 
@@ -60,7 +60,7 @@ public interface ReportPeriodDao {
      * @param departmentList Список подразделений
      * @return Список отчетных периодов
      */
-    public List<ReportPeriod> getPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList);
+    List<ReportPeriod> getPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList);
 
     /**
      * Список отчетных периодов для указанного вида налога и для указанных подразделений
@@ -68,7 +68,7 @@ public interface ReportPeriodDao {
      * @param departmentList Список подразделений
      * @return Список отчетных периодов
      */
-    public List<Long> getPeriodsByTaxTypesAndDepartments(List<TaxType> taxTypes, List<Integer> departmentList);
+    List<Long> getPeriodsByTaxTypesAndDepartments(List<TaxType> taxTypes, List<Integer> departmentList);
 
 	/**
 	 * Получить список всех отчетных периодов по заданному виду налога за период. Алгоритм: ищет все отчетные периоды,

@@ -681,7 +681,16 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
                 "           from (  SELECT row_id, column_id, TO_CHAR(value) as val \n" +
                 "                   FROM NUMERIC_VALUE WHERE row_id in (select id from data_row where form_data_id=:fdId) ) rsq \n" +
                 "                       join FORM_COLUMN rfc on rsq.column_id = rfc.parent_column_id \n" +
-                "                   where rfc.form_template_id = :ftId and rfc.type = 'R' and rfc.parent_column_id is not null) d \n" +
+                "                   where rfc.form_template_id = :ftId and rfc.type = 'R' and rfc.parent_column_id is not null \n" +
+                "           UNION all SELECT data_row.id as row_id, rfc.id as column_id, TO_CHAR( (row_number() over(order by data_row.ord)) + \n" +
+                "              case when rfc.NUMERATION_ROW=0 then \n" +
+                "                0 \n" +
+                "              else \n" +
+                "                (select number_previous_row from form_data where form_data.id = :fdId) \n" +
+                "              end) as val \n" +
+                "            FROM data_row \n" +
+                "            JOIN FORM_COLUMN rfc ON rfc.form_template_id = :ftId \n" +
+                "            WHERE rfc.form_template_id = :ftId and rfc.type = 'A' and form_data_id= :fdId and data_row.alias is null) d \n" +
                 "    RIGHT JOIN ( select id, ord from DATA_ROW where form_data_id=:fdId) dr ON dr.id = d.row_id \n"+
                 "    LEFT JOIN FORM_COLUMN dc ON dc.id = d.column_id \n"+
                 "    ORDER BY dr.ord \n" +

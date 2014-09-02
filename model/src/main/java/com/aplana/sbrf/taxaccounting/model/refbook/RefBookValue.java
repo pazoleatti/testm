@@ -66,7 +66,7 @@ public class RefBookValue implements Serializable {
 	 * @return
 	 */
 	public Map<String, RefBookValue> getReferenceObject() {
-		if (value != null && attributeType == RefBookAttributeType.REFERENCE && value instanceof Map) {
+		if (RefBookAttributeType.REFERENCE.equals(attributeType) && value instanceof Map) {
 			return (Map<String, RefBookValue>) value;
 		}
 		return null;

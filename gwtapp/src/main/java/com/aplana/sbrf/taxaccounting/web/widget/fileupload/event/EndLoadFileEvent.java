@@ -24,7 +24,7 @@ public class EndLoadFileEvent extends GwtEvent<EndLoadFileEvent.EndLoadFileHandl
         return TYPE;
     }
 
-    public static interface EndLoadFileHandler extends EventHandler {
+    public interface EndLoadFileHandler extends EventHandler {
         void onEndLoad(EndLoadFileEvent event);
     }
 

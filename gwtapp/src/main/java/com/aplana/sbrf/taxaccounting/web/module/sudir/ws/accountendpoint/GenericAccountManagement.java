@@ -28,7 +28,7 @@ public interface GenericAccountManagement {
     @WebMethod
     @RequestWrapper(localName = "resetPassword", targetNamespace = "http://sberbank.ru/soa/service/sudir/itdi/smallsystem.generic.webservice.connector/1.0.0", className = "ru.sberbank.soa.service.sudir.itdi.smallsystem_generic_webservice_connector._1_0.ResetPassword")
     @ResponseWrapper(localName = "resetPasswordResponse", targetNamespace = "http://sberbank.ru/soa/service/sudir/itdi/smallsystem.generic.webservice.connector/1.0.0", className = "ru.sberbank.soa.service.sudir.itdi.smallsystem_generic_webservice_connector._1_0.ResetPasswordResponse")
-    public void resetPassword(
+    void resetPassword(
         @WebParam(name = "accountId", targetNamespace = "http://sberbank.ru/soa/service/sudir/itdi/smallsystem.generic.webservice.connector/1.0.0")
         String accountId)
         throws GenericAccountManagementException_Exception
@@ -46,7 +46,7 @@ public interface GenericAccountManagement {
     @WebResult(name = "validatePasswordReturn", targetNamespace = "http://sberbank.ru/soa/service/sudir/itdi/smallsystem.generic.webservice.connector/1.0.0")
     @RequestWrapper(localName = "validatePassword", targetNamespace = "http://sberbank.ru/soa/service/sudir/itdi/smallsystem.generic.webservice.connector/1.0.0", className = "ru.sberbank.soa.service.sudir.itdi.smallsystem_generic_webservice_connector._1_0.ValidatePassword")
     @ResponseWrapper(localName = "validatePasswordResponse", targetNamespace = "http://sberbank.ru/soa/service/sudir/itdi/smallsystem.generic.webservice.connector/1.0.0", className = "ru.sberbank.soa.service.sudir.itdi.smallsystem_generic_webservice_connector._1_0.ValidatePasswordResponse")
-    public boolean validatePassword(
+    boolean validatePassword(
         @WebParam(name = "accountId", targetNamespace = "http://sberbank.ru/soa/service/sudir/itdi/smallsystem.generic.webservice.connector/1.0.0")
         String accountId,
         @WebParam(name = "password", targetNamespace = "http://sberbank.ru/soa/service/sudir/itdi/smallsystem.generic.webservice.connector/1.0.0")
@@ -63,7 +63,7 @@ public interface GenericAccountManagement {
     @WebMethod
     @RequestWrapper(localName = "setPassword", targetNamespace = "http://sberbank.ru/soa/service/sudir/itdi/smallsystem.generic.webservice.connector/1.0.0", className = "ru.sberbank.soa.service.sudir.itdi.smallsystem_generic_webservice_connector._1_0.SetPassword")
     @ResponseWrapper(localName = "setPasswordResponse", targetNamespace = "http://sberbank.ru/soa/service/sudir/itdi/smallsystem.generic.webservice.connector/1.0.0", className = "ru.sberbank.soa.service.sudir.itdi.smallsystem_generic_webservice_connector._1_0.SetPasswordResponse")
-    public void setPassword(
+    void setPassword(
         @WebParam(name = "accountId", targetNamespace = "http://sberbank.ru/soa/service/sudir/itdi/smallsystem.generic.webservice.connector/1.0.0")
         String accountId,
         @WebParam(name = "password", targetNamespace = "http://sberbank.ru/soa/service/sudir/itdi/smallsystem.generic.webservice.connector/1.0.0")
@@ -79,7 +79,7 @@ public interface GenericAccountManagement {
     @WebMethod
     @RequestWrapper(localName = "suspendAccount", targetNamespace = "http://sberbank.ru/soa/service/sudir/itdi/smallsystem.generic.webservice.connector/1.0.0", className = "ru.sberbank.soa.service.sudir.itdi.smallsystem_generic_webservice_connector._1_0.SuspendAccount")
     @ResponseWrapper(localName = "suspendAccountResponse", targetNamespace = "http://sberbank.ru/soa/service/sudir/itdi/smallsystem.generic.webservice.connector/1.0.0", className = "ru.sberbank.soa.service.sudir.itdi.smallsystem_generic_webservice_connector._1_0.SuspendAccountResponse")
-    public void suspendAccount(
+    void suspendAccount(
         @WebParam(name = "accountId", targetNamespace = "http://sberbank.ru/soa/service/sudir/itdi/smallsystem.generic.webservice.connector/1.0.0")
         String accountId)
         throws GenericAccountManagementException_Exception
@@ -93,7 +93,7 @@ public interface GenericAccountManagement {
     @WebMethod
     @RequestWrapper(localName = "createAccount", targetNamespace = "http://sberbank.ru/soa/service/sudir/itdi/smallsystem.generic.webservice.connector/1.0.0", className = "ru.sberbank.soa.service.sudir.itdi.smallsystem_generic_webservice_connector._1_0.CreateAccount")
     @ResponseWrapper(localName = "createAccountResponse", targetNamespace = "http://sberbank.ru/soa/service/sudir/itdi/smallsystem.generic.webservice.connector/1.0.0", className = "ru.sberbank.soa.service.sudir.itdi.smallsystem_generic_webservice_connector._1_0.CreateAccountResponse")
-    public void createAccount(
+    void createAccount(
         @WebParam(name = "accountInfo", targetNamespace = "http://sberbank.ru/soa/service/sudir/itdi/smallsystem.generic.webservice.connector/1.0.0")
         GenericAccountInfo accountInfo)
         throws GenericAccountManagementException_Exception
@@ -107,7 +107,7 @@ public interface GenericAccountManagement {
     @WebMethod
     @RequestWrapper(localName = "modifyAccount", targetNamespace = "http://sberbank.ru/soa/service/sudir/itdi/smallsystem.generic.webservice.connector/1.0.0", className = "ru.sberbank.soa.service.sudir.itdi.smallsystem_generic_webservice_connector._1_0.ModifyAccount")
     @ResponseWrapper(localName = "modifyAccountResponse", targetNamespace = "http://sberbank.ru/soa/service/sudir/itdi/smallsystem.generic.webservice.connector/1.0.0", className = "ru.sberbank.soa.service.sudir.itdi.smallsystem_generic_webservice_connector._1_0.ModifyAccountResponse")
-    public void modifyAccount(
+    void modifyAccount(
         @WebParam(name = "accountInfo", targetNamespace = "http://sberbank.ru/soa/service/sudir/itdi/smallsystem.generic.webservice.connector/1.0.0")
         GenericAccountInfo accountInfo)
         throws GenericAccountManagementException_Exception
@@ -121,7 +121,7 @@ public interface GenericAccountManagement {
     @WebMethod
     @RequestWrapper(localName = "restoreAccount", targetNamespace = "http://sberbank.ru/soa/service/sudir/itdi/smallsystem.generic.webservice.connector/1.0.0", className = "ru.sberbank.soa.service.sudir.itdi.smallsystem_generic_webservice_connector._1_0.RestoreAccount")
     @ResponseWrapper(localName = "restoreAccountResponse", targetNamespace = "http://sberbank.ru/soa/service/sudir/itdi/smallsystem.generic.webservice.connector/1.0.0", className = "ru.sberbank.soa.service.sudir.itdi.smallsystem_generic_webservice_connector._1_0.RestoreAccountResponse")
-    public void restoreAccount(
+    void restoreAccount(
         @WebParam(name = "accountId", targetNamespace = "http://sberbank.ru/soa/service/sudir/itdi/smallsystem.generic.webservice.connector/1.0.0")
         String accountId)
         throws GenericAccountManagementException_Exception
@@ -135,7 +135,7 @@ public interface GenericAccountManagement {
     @WebMethod
     @RequestWrapper(localName = "deleteAccount", targetNamespace = "http://sberbank.ru/soa/service/sudir/itdi/smallsystem.generic.webservice.connector/1.0.0", className = "ru.sberbank.soa.service.sudir.itdi.smallsystem_generic_webservice_connector._1_0.DeleteAccount")
     @ResponseWrapper(localName = "deleteAccountResponse", targetNamespace = "http://sberbank.ru/soa/service/sudir/itdi/smallsystem.generic.webservice.connector/1.0.0", className = "ru.sberbank.soa.service.sudir.itdi.smallsystem_generic_webservice_connector._1_0.DeleteAccountResponse")
-    public void deleteAccount(
+    void deleteAccount(
         @WebParam(name = "accountId", targetNamespace = "http://sberbank.ru/soa/service/sudir/itdi/smallsystem.generic.webservice.connector/1.0.0")
         String accountId)
         throws GenericAccountManagementException_Exception
@@ -151,7 +151,7 @@ public interface GenericAccountManagement {
     @WebResult(name = "getAccountListReturn", targetNamespace = "http://sberbank.ru/soa/service/sudir/itdi/smallsystem.generic.webservice.connector/1.0.0")
     @RequestWrapper(localName = "getAccountList", targetNamespace = "http://sberbank.ru/soa/service/sudir/itdi/smallsystem.generic.webservice.connector/1.0.0", className = "ru.sberbank.soa.service.sudir.itdi.smallsystem_generic_webservice_connector._1_0.GetAccountList")
     @ResponseWrapper(localName = "getAccountListResponse", targetNamespace = "http://sberbank.ru/soa/service/sudir/itdi/smallsystem.generic.webservice.connector/1.0.0", className = "ru.sberbank.soa.service.sudir.itdi.smallsystem_generic_webservice_connector._1_0.GetAccountListResponse")
-    public List<GenericAccountInfo> getAccountList()
+    List<GenericAccountInfo> getAccountList()
         throws GenericAccountManagementException_Exception
     ;
 
@@ -166,7 +166,7 @@ public interface GenericAccountManagement {
     @WebResult(name = "getAccountListByIdReturn", targetNamespace = "http://sberbank.ru/soa/service/sudir/itdi/smallsystem.generic.webservice.connector/1.0.0")
     @RequestWrapper(localName = "getAccountListById", targetNamespace = "http://sberbank.ru/soa/service/sudir/itdi/smallsystem.generic.webservice.connector/1.0.0", className = "ru.sberbank.soa.service.sudir.itdi.smallsystem_generic_webservice_connector._1_0.GetAccountListById")
     @ResponseWrapper(localName = "getAccountListByIdResponse", targetNamespace = "http://sberbank.ru/soa/service/sudir/itdi/smallsystem.generic.webservice.connector/1.0.0", className = "ru.sberbank.soa.service.sudir.itdi.smallsystem_generic_webservice_connector._1_0.GetAccountListByIdResponse")
-    public List<GenericAccountInfo> getAccountListById(
+    List<GenericAccountInfo> getAccountListById(
         @WebParam(name = "accountId", targetNamespace = "http://sberbank.ru/soa/service/sudir/itdi/smallsystem.generic.webservice.connector/1.0.0")
         String accountId)
         throws GenericAccountManagementException_Exception

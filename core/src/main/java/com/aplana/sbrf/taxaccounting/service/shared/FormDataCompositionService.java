@@ -42,5 +42,5 @@ public interface FormDataCompositionService {
 	 * @param formTypeId Вид формы-приемника
 	 * @param kind  Тип формы-приемника
 	 */
-	public void compose(FormData dformData, int reportPeriodId, Integer periodOrder, int departmentId, int formTypeId, FormDataKind kind);
+	void compose(FormData dformData, int reportPeriodId, Integer periodOrder, int departmentId, int formTypeId, FormDataKind kind);
 }

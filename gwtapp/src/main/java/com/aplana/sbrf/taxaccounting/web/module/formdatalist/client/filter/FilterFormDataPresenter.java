@@ -32,7 +32,7 @@ public class FilterFormDataPresenter extends PresenterWidget<FilterFormDataPrese
 
 		void setReturnStateList(List<Boolean> list);
 
-        public void setFilter(String filter);
+        void setFilter(String filter);
 
 		void setDepartments(List<Department> list, Set<Integer> availableValues);
 

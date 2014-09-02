@@ -10,7 +10,7 @@ import java.util.Set;
 
 public class DataRowDaoImplUtils {
 
-	static final long DEFAULT_ORDER_STEP = 100000;
+	public static final long DEFAULT_ORDER_STEP = 100000;
 
 	/**
 	 * Массив содержит названия таблиц со значениями ячеек
@@ -76,7 +76,7 @@ public class DataRowDaoImplUtils {
 		return list.size() > set.size();
 	}
 
-	static interface CellValueExtractor {
+	interface CellValueExtractor {
 		public Object getValue(ResultSet rs, String columnLabel)
 				throws SQLException;
 	}

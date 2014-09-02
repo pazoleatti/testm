@@ -28,7 +28,7 @@ public class CreateNewDTVersionEvent  extends GwtEvent<CreateNewDTVersionEvent.M
         handler.onCreateVersion(this);
     }
 
-    public static interface MyHandler extends EventHandler {
+    public interface MyHandler extends EventHandler {
         void onCreateVersion(CreateNewDTVersionEvent event);
     }
 

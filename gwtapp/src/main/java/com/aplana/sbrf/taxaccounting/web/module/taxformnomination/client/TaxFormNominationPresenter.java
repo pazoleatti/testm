@@ -30,7 +30,6 @@ import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -57,9 +56,9 @@ public class TaxFormNominationPresenter
         void init(TaxType nType, boolean isForm);
 
         // установка данные в таблицу отображающую данные вкладки "Назначение деклараций"
-        void setDataToFormTable(int start, int totalCount, List<FormTypeKind> departmentFormTypes, Map<Integer, String> departmentFullNames);
+        void setDataToFormTable(int start, int totalCount, List<FormTypeKind> departmentFormTypes);
         // установка данные в таблицу отображающую данные вкладки "Назначение налоговых форм"
-        void setDataToDeclarationTable(int start, int totalCount, List<FormTypeKind> departmentFormTypes, Map<Integer, String> departmentFullNames);
+        void setDataToDeclarationTable(int start, int totalCount, List<FormTypeKind> departmentFormTypes);
 
         // получение данных
         boolean isForm();
@@ -155,7 +154,7 @@ public class TaxFormNominationPresenter
                 .defaultCallback(new AbstractCallback<GetTableDataResult>() {
                     @Override
                     public void onSuccess(GetTableDataResult result) {
-                        getView().setDataToFormTable(0, result.getTotalCount(), result.getTableData(), result.getDepartmentFullNames());
+                        getView().setDataToFormTable(0, result.getTotalCount(), result.getTableData());
                         getView().updateButtonsEnabled();
                     }
                 }, this));
@@ -167,7 +166,7 @@ public class TaxFormNominationPresenter
 		        .defaultCallback(new AbstractCallback<GetTableDataResult>() {
                     @Override
                     public void onSuccess(GetTableDataResult result) {
-                        getView().setDataToDeclarationTable(0, result.getTotalCount(), result.getTableData(), result.getDepartmentFullNames());
+                        getView().setDataToDeclarationTable(0, result.getTotalCount(), result.getTableData());
                         getView().updateButtonsEnabled();
                     }
                 }, this));
@@ -283,7 +282,7 @@ public class TaxFormNominationPresenter
                 .defaultCallback(new AbstractCallback<GetTableDataResult>() {
                     @Override
                     public void onSuccess(GetTableDataResult result) {
-                        getView().setDataToFormTable(start, result.getTotalCount(), result.getTableData(), result.getDepartmentFullNames());
+                        getView().setDataToFormTable(start, result.getTotalCount(), result.getTableData());
                         getView().updateButtonsEnabled();
                     }
                 }, this));
@@ -302,7 +301,7 @@ public class TaxFormNominationPresenter
                 .defaultCallback(new AbstractCallback<GetTableDataResult>() {
                     @Override
                     public void onSuccess(GetTableDataResult result) {
-                        getView().setDataToDeclarationTable(start, result.getTotalCount(), result.getTableData(), result.getDepartmentFullNames());
+                        getView().setDataToDeclarationTable(start, result.getTotalCount(), result.getTableData());
                         getView().updateButtonsEnabled();
                     }
                 }, this));

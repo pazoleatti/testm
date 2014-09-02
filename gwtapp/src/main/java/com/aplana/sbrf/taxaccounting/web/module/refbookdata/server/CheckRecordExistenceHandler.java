@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.CheckRecordExistenceAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.CheckRecordExistenceResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;

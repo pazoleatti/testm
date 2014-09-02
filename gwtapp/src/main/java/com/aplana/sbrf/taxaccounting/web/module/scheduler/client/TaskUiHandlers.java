@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.scheduler.client;
 
-import com.aplana.sbrf.taxaccounting.model.TaskParamModel;
 import com.gwtplatform.mvp.client.UiHandlers;
 
 /**

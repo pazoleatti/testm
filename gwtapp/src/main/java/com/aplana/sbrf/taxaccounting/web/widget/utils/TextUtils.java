@@ -5,7 +5,6 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.user.client.ui.impl.TextBoxImpl;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 

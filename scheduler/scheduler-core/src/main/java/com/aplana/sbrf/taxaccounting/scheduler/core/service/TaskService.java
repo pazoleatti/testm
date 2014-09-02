@@ -13,12 +13,12 @@ public interface TaskService {
      * @param taskId идентификатор задачи
      * @throws com.aplana.sbrf.taxaccounting.scheduler.api.exception.TaskExecutionException
      */
-    public void startTaskById(Long taskId) throws TaskExecutionException;
+    void startTaskById(Long taskId) throws TaskExecutionException;
 
     /**
      * Запуск задачи с учетом нового контекста. Фактически однократный запуск новой задачи.
      * @param taskContext контекст задачи
      * @throws com.aplana.sbrf.taxaccounting.scheduler.api.exception.TaskExecutionException
      */
-    public void startTaskWithContext(TaskContext taskContext) throws TaskExecutionException;
+    void startTaskWithContext(TaskContext taskContext) throws TaskExecutionException;
 }

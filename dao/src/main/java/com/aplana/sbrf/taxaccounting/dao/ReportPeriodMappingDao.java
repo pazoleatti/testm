@@ -1,7 +1,5 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
-import java.util.Date;
-
 /**
  * DAO-Интерфейс для маппинга отчетного периода
  *

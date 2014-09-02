@@ -30,8 +30,8 @@ import java.util.Map;
 @Repository
 public class RefBookBookerStatementPeriodDaoImpl extends AbstractDao implements RefBookBookerStatementPeriodDao {
 
-    private final Long REF_BOOK_ID_106 = 106L;
-    private final Long REF_BOOK_ID_107 = 107L;
+    private static final Long REF_BOOK_ID_106 = 106L;
+    private static final Long REF_BOOK_ID_107 = 107L;
 
     @Autowired
     RefBookDao refBookDao;

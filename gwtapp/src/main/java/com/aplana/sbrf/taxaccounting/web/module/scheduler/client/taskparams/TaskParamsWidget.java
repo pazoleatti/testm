@@ -1,12 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.scheduler.client.taskparams;
 
-import com.aplana.gwt.client.LongBox;
 import com.aplana.sbrf.taxaccounting.model.TaskParamModel;
 import com.aplana.sbrf.taxaccounting.scheduler.api.form.*;
 import com.aplana.sbrf.taxaccounting.scheduler.api.form.CheckBox;
-import com.aplana.sbrf.taxaccounting.scheduler.api.form.TextBox;
-import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
-import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.user.client.ui.*;
 
 import java.util.ArrayList;

@@ -16,7 +16,6 @@ import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.UpdateCurrentAssignsAction;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.UpdateCurrentAssignsResult;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.CurrentAssign;
-import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.PeriodInfo;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.PeriodsInterval;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;

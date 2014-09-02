@@ -13,7 +13,6 @@ import com.aplana.sbrf.taxaccounting.web.widget.signin.shared.GetUserInfoResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
-import org.springframework.util.StringUtils;
 
 @Component
 public class GetUserInfoActionHandler extends AbstractActionHandler<GetUserInfoAction, GetUserInfoResult>{

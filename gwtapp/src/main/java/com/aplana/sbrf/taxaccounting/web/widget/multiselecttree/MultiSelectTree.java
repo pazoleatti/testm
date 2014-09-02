@@ -49,9 +49,9 @@ public abstract class MultiSelectTree<H extends List, T extends MultiSelectTreeI
     /** Признак возможности выбора нескольких узлов дерева. */
     protected boolean multiSelection;
 
-    private String GROUP_NAME = "treeGroup_" + this.hashCode();
+    private final String GROUP_NAME = "treeGroup_" + this.hashCode();
 
-    public static interface Style extends CssResource {
+    public interface Style extends CssResource {
         String msiHeader();
         String msiMainPanel();
         String msiTree();

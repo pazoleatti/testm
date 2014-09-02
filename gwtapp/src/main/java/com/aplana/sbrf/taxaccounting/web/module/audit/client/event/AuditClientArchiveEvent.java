@@ -30,7 +30,7 @@ public class AuditClientArchiveEvent extends GwtEvent<AuditClientArchiveEvent.Au
         return TYPE;
     }
 
-    public static interface AuditClientArchiveHandler  extends EventHandler{
+    public interface AuditClientArchiveHandler extends EventHandler{
         void onAuditArchiveButtonClick(AuditClientArchiveEvent event);
     }
 }

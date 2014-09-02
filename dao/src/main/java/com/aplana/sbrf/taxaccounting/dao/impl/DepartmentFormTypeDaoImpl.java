@@ -508,6 +508,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                 performer.setParentId(rs.wasNull() ? null : performerParentId);
                 performer.setType(DepartmentType.fromCode(SqlUtils.getInteger(rs, "performer_type")));
                 performer.setShortName(rs.getString("performer_short_name"));
+                performer.setFullName(rs.getString("performer_full_name"));
                 performer.setTbIndex(rs.getString("performer_tb_index"));
                 performer.setSbrfCode(rs.getString("performer_sbrf_code"));
                 performer.setRegionId(SqlUtils.getLong(rs, "performer_region_id"));
@@ -580,6 +581,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                     "performer_parent_id, \n" +
                     "performer_type, \n" +
                     "performer_short_name, \n" +
+                    "performer_full_name, \n" +
                     "performer_tb_index, \n" +
                     "performer_sbrf_code, \n" +
                     "performer_region_id, \n" +
@@ -619,7 +621,8 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                         "  dft.KIND AS form_kind,\n" +
                         "  d.NAME   AS department,\n" +
                         "  dp.NAME  AS performer, \n"+
-                        "  d.FULL_NAME AS department_full_name \n" +
+                        "  d.FULL_NAME AS department_full_name, \n" +
+                        "  p.FULL_NAME AS performer_full_name \n" +
                         "FROM department_form_type dft\n" +
                         "JOIN form_type ft\n" +
                         "ON ft.ID = dft.FORM_TYPE_ID\n" +
@@ -627,6 +630,8 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                         "ON d.ID = dft.DEPARTMENT_ID\n" +
                         "LEFT OUTER JOIN department dp\n" +
                         "ON dp.ID = dft.PERFORMER_DEP_ID\n" +
+                        "LEFT OUTER JOIN (SELECT d.*, LTRIM(SYS_CONNECT_BY_PATH(name, '/'), '/') as full_name FROM department d START with parent_id = 0 CONNECT BY PRIOR id = parent_id) p \n" +
+                        "ON p.ID = dft.PERFORMER_DEP_ID\n" +
                         "WHERE ft.tax_type = :taxType\n" +
                         departmentClause +
                         order+

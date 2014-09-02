@@ -11,9 +11,9 @@ public interface FormSearchUiHandlers extends UiHandlers {
     void open();
     void onRangeChange(int start, int count);
     void onClickFoundItem(Long rowIndex);
-    public void setFormDataId(Long formDataId);
-    public void setFormTemplateId(Integer formTemplateId);
-    public void setHiddenColumns(List<Integer> hiddenColumns);
-    public int getHiddenColumnsCountBefore(Integer columnId);
+    void setFormDataId(Long formDataId);
+    void setFormTemplateId(Integer formTemplateId);
+    void setHiddenColumns(List<Integer> hiddenColumns);
+    int getHiddenColumnsCountBefore(Integer columnId);
     void close();
 }

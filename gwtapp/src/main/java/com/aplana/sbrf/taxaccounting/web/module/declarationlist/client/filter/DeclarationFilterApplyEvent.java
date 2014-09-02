@@ -8,7 +8,7 @@ import com.google.gwt.event.shared.HasHandlers;
  * User: avanteev
  */
 public class DeclarationFilterApplyEvent extends GwtEvent<DeclarationFilterApplyEvent.DeclarationFilterApplyHandler> {
-    public static interface DeclarationFilterApplyHandler extends EventHandler{
+    public interface DeclarationFilterApplyHandler extends EventHandler{
         void onClickApply(DeclarationFilterApplyEvent event);
     }
 

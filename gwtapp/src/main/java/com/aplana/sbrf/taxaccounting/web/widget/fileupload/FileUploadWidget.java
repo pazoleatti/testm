@@ -22,7 +22,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.client.ui.*;
 
 /**
@@ -61,7 +60,7 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
         justButton.setEnabled(enabled);
     }
 
-    public static interface IconResource extends ClientBundle{
+    public interface IconResource extends ClientBundle{
         @Source("importIcon.png")
         ImageResource icon();
     }

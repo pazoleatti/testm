@@ -17,7 +17,7 @@ public class ChildrenLoadedEvent extends GwtEvent<ChildrenLoadedEvent.Handler> {
         this.uiTreeItem = uiTreeItem;
     }
 
-    public static interface Handler extends EventHandler {
+    public interface Handler extends EventHandler {
         void onChildrenLoaded(ChildrenLoadedEvent event);
     }
 

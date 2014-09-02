@@ -20,35 +20,35 @@ public interface TaskManager {
      * @return идентификатор задачи
      * @throws TaskSchedulingException
      */
-    public Long createTask(TaskContext taskContext) throws TaskSchedulingException;
+    Long createTask(TaskContext taskContext) throws TaskSchedulingException;
 
     /**
      * Удаляет указанную задачу из планировщика
      * @param taskId идентификатор задачи
      * @throws TaskSchedulingException
      */
-    public void deleteTask(Long taskId) throws TaskSchedulingException;
+    void deleteTask(Long taskId) throws TaskSchedulingException;
 
     /**
      * Немедленно запускает указанную задачу
      * @param taskId идентификатор задачи
      * @throws TaskSchedulingException
      */
-    public void startTask(Long taskId) throws TaskSchedulingException;
+    void startTask(Long taskId) throws TaskSchedulingException;
 
     /**
      * Останавливает указанную задачу
      * @param taskId идентификатор задачи
      * @throws TaskSchedulingException
      */
-    public void stopTask(Long taskId) throws TaskSchedulingException;
+    void stopTask(Long taskId) throws TaskSchedulingException;
 
     /**
      * Возобновляет выполнение указанной задачи по расписанию
      * @param taskId идентификатор задачи
      * @throws TaskSchedulingException
      */
-    public void resumeTask(Long taskId) throws TaskSchedulingException;
+    void resumeTask(Long taskId) throws TaskSchedulingException;
 
     /**
      * Возвращает данные о запланированной задаче
@@ -56,14 +56,14 @@ public interface TaskManager {
      * @return данные о задаче
      * @throws TaskSchedulingException
      */
-    public TaskData getTaskData(Long taskId) throws TaskSchedulingException;
+    TaskData getTaskData(Long taskId) throws TaskSchedulingException;
 
     /**
      * Возвращает данные обо всех запланированных задачах
      * @return список данных о задачах
      * @throws TaskSchedulingException
      */
-    public List<TaskData> getAllTasksData() throws TaskSchedulingException;
+    List<TaskData> getAllTasksData() throws TaskSchedulingException;
 
     /**
      * Обновление данных задачи
@@ -71,7 +71,7 @@ public interface TaskManager {
      * @param taskContext новые параметры задачи
      * @throws TaskSchedulingException
      */
-    public void updateTask(Long taskId, TaskContext taskContext) throws TaskSchedulingException;
+    void updateTask(Long taskId, TaskContext taskContext) throws TaskSchedulingException;
 
     /**
      * Проверяет существование задачи по ее уникальному имени
@@ -79,7 +79,7 @@ public interface TaskManager {
      * @return задача существует?
      * @throws TaskSchedulingException
      */
-    public Boolean isTaskExist(String taskName) throws TaskSchedulingException;
+    Boolean isTaskExist(String taskName) throws TaskSchedulingException;
 
     /**
      * Проверяет существование задачи по ее идентификатору
@@ -87,7 +87,7 @@ public interface TaskManager {
      * @return задача существует?
      * @throws TaskSchedulingException
      */
-    public Boolean isTaskExist(Long taskId) throws TaskSchedulingException;
+    Boolean isTaskExist(Long taskId) throws TaskSchedulingException;
 
     /**
      * Возвращает информацию о доступных пользовательских задачах

@@ -16,7 +16,7 @@ public class StartLoadFileEvent extends GwtEvent<StartLoadFileEvent.StartLoadFil
         return TYPE;
     }
 
-    public static interface StartLoadFileHandler extends EventHandler {
+    public interface StartLoadFileHandler extends EventHandler {
         void onStartLoad(StartLoadFileEvent event);
     }
 
