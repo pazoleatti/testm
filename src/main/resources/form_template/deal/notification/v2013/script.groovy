@@ -97,7 +97,7 @@ void generateXML() {
 
     builder.Файл(
             ИдФайл: declarationService.generateXmlFileId(notificationType, departmentId, declarationData.reportPeriodId),
-            ВерсПрог: departmentParam.APP_VERSION.stringValue,
+            ВерсПрог: applicationVersion,
             ВерсФорм: departmentParam.FORMAT_VERSION.stringValue) {
         Документ(
                 // Общие атрибуты для всех листов уведомления (титульный лист)
