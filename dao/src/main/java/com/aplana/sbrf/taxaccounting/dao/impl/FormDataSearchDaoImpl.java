@@ -26,9 +26,9 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 	private static final Log logger = LogFactory.getLog(FormDataSearchDaoImpl.class);
 
 	private void appendFromAndWhereClause(StringBuilder sql, FormDataDaoFilter filter) {
-		sql.append(" FROM form_data fd, form_type ft, department dp, report_period rp, tax_period tp")
+		sql.append(" FROM form_data fd, form_type ft, department dp, report_period rp, tax_period tp, log_business lb")
 			.append(" WHERE EXISTS (SELECT 1 FROM FORM_TEMPLATE t WHERE t.id = fd.form_template_id AND t.type_id = ft.id)")
-			.append(" AND dp.id = fd.department_id AND rp.id = fd.report_period_id AND tp.id=rp.tax_period_id");
+			.append(" AND dp.id = fd.department_id AND rp.id = fd.report_period_id AND tp.id=rp.tax_period_id AND lb.form_data_id = fd.id AND lb.event_id = 1");
 	
 		if (filter.getFormTypeIds() != null && !filter.getFormTypeIds().isEmpty()) {
 			sql
@@ -155,8 +155,10 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 		case RETURN:
 			column = "fd.return_sign";
 			break;
-		}
-		
+        case DATE:
+            column = "lb.log_date";
+        }
+
 		if (column != null) {
 			sql.append(column);
 			if (!ascSorting) {

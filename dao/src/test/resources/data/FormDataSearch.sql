@@ -92,3 +92,27 @@ insert into declaration_source (department_declaration_type_id, src_department_f
 insert into declaration_source (department_declaration_type_id, src_department_form_type_id, period_start, period_end) values (1, 22, date '1900-01-01', null);
 insert into declaration_source (department_declaration_type_id, src_department_form_type_id, period_start, period_end) values (1, 31, date '1900-01-01', null);
 insert into declaration_source (department_declaration_type_id, src_department_form_type_id, period_start, period_end) values (1, 32, date '1900-01-01', null);
+
+-- Для проверки сортировки по дате создания экземпляра НФ
+insert into sec_user (id, login, name, department_id, is_active) values (1, 'controlUnp', 'Контролёр УНП', 1, 1);
+insert into sec_user (id, login, name, department_id, is_active) values (2, 'god', 'Настройщик', 2, 1);
+
+insert into log_business (id, log_date, event_id, roles, form_data_id, user_department_id, user_login) values (1, date '2014-01-01', 1, 'Контролёр УНП', 18, 1, 'controlUnp');
+insert into log_business (id, log_date, event_id, roles, form_data_id, user_department_id, user_login) values (2, date '2014-01-05', 6, 'Настройщик', 18, 2, 'god');
+insert into log_business (id, log_date, event_id, roles, form_data_id, user_department_id, user_login) values (3, date '2014-01-02', 1, 'Контролёр УНП', 17, 1, 'controlUnp');
+insert into log_business (id, log_date, event_id, roles, form_data_id, user_department_id, user_login) values (4, date '2014-01-03', 1, 'Настройщик', 16, 2, 'god');
+insert into log_business (id, log_date, event_id, roles, form_data_id, user_department_id, user_login) values (5, date '2014-01-04', 1, 'Контролёр УНП', 15, 1, 'controlUnp');
+insert into log_business (id, log_date, event_id, roles, form_data_id, user_department_id, user_login) values (6, date '2014-01-05', 1, 'Настройщик', 14, 2, 'god');
+insert into log_business (id, log_date, event_id, roles, form_data_id, user_department_id, user_login) values (7, date '2014-01-06', 1, 'Настройщик', 13, 2, 'god');
+insert into log_business (id, log_date, event_id, roles, form_data_id, user_department_id, user_login) values (8, date '2014-01-07', 1, 'Настройщик', 12, 2, 'god');
+insert into log_business (id, log_date, event_id, roles, form_data_id, user_department_id, user_login) values (9, date '2014-01-08', 1, 'Настройщик', 11, 2, 'god');
+insert into log_business (id, log_date, event_id, roles, form_data_id, user_department_id, user_login) values (10, date '2014-01-09', 1, 'Настройщик', 10, 2, 'god');
+insert into log_business (id, log_date, event_id, roles, form_data_id, user_department_id, user_login) values (11, date '2014-01-10', 1, 'Настройщик', 9, 2, 'god');
+insert into log_business (id, log_date, event_id, roles, form_data_id, user_department_id, user_login) values (12, date '2014-01-11', 1, 'Настройщик', 8, 2, 'god');
+insert into log_business (id, log_date, event_id, roles, form_data_id, user_department_id, user_login) values (13, date '2014-01-12', 1, 'Настройщик', 7, 2, 'god');
+insert into log_business (id, log_date, event_id, roles, form_data_id, user_department_id, user_login) values (14, date '2014-01-13', 1, 'Настройщик', 1, 2, 'god');
+insert into log_business (id, log_date, event_id, roles, form_data_id, user_department_id, user_login) values (15, date '2014-01-14', 1, 'Настройщик', 5, 2, 'god');
+insert into log_business (id, log_date, event_id, roles, form_data_id, user_department_id, user_login) values (16, date '2014-01-15', 1, 'Настройщик', 2, 2, 'god');
+insert into log_business (id, log_date, event_id, roles, form_data_id, user_department_id, user_login) values (17, date '2014-01-16', 1, 'Настройщик', 3, 2, 'god');
+insert into log_business (id, log_date, event_id, roles, form_data_id, user_department_id, user_login) values (18, date '2014-01-17', 1, 'Настройщик', 4, 2, 'god');
+insert into log_business (id, log_date, event_id, roles, form_data_id, user_department_id, user_login) values (19, date '2014-01-17', 1, 'Настройщик', 6, 2, 'god');
