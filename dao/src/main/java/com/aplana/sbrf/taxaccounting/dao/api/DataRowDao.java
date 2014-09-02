@@ -166,4 +166,10 @@ public interface DataRowDao {
      * @return true - изменилось, false - не изменилось
      */
     boolean isDataRowsCountChanged(long formId);
+
+    /**
+     * Удаление значений неактуальных граф
+     * @param columnIdList Список Id измененных/удаленных граф
+     */
+    void cleanValue(Collection<Integer> columnIdList);
 }
