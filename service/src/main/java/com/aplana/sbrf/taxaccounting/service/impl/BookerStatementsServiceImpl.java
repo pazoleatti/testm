@@ -27,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -134,7 +135,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
                     records.add(map);
                 }
 
-                provider.updateRecords(userInfo, new Date(), records);
+                provider.updateRecords(userInfo, getStartDate(), records);
             } else {
                 throw new ServiceException(NO_DATA_FILE_MSG);
             }
@@ -154,7 +155,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
                     records.add(map);
                 }
 
-                provider.updateRecords(userInfo, new Date(), records);
+                provider.updateRecords(userInfo, getStartDate(), records);
 
             } else {
                 throw new ServiceException(NO_DATA_FILE_MSG);
@@ -490,6 +491,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
             provider = rbFactory.getDataProvider(RefBookIncome102Dao.REF_BOOK_ID);
         }
 
+        Date date = getStartDate();
         List<Long> ids = rbFactory.getDataProvider(107L).getUniqueRecordIds(null,
                 " account_period_id = " + periodId + " and year = " + year + " and department_id = " + departmentId);
         if (ids.size() > 0) {
@@ -506,7 +508,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
             RefBookRecord record = new RefBookRecord();
             record.setValues(values);
 
-            ids = rbFactory.getDataProvider(107L).createRecordVersion(logger, new Date(), null, Arrays.asList(record));
+            ids = rbFactory.getDataProvider(107L).createRecordVersion(logger, date, null, Arrays.asList(record));
         }
 
         if (logger.containsLevel(LogLevel.ERROR)) {
@@ -526,7 +528,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
             map.put(I_101_OUTCOME_CREDIT_REMAINS, new RefBookValue(RefBookAttributeType.NUMBER, null));
             map.put(I_101_ACCOUNT_PERIOD_ID, new RefBookValue(RefBookAttributeType.REFERENCE, ids.get(0)));
             records.add(map);
-            provider.updateRecords(userInfo, new Date(), records);
+            provider.updateRecords(userInfo, date, records);
 
         } else {
             map.put(I_102_OPU_CODE, new RefBookValue(RefBookAttributeType.STRING, "-1"));
@@ -534,7 +536,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
             map.put(I_102_ITEM_NAME, new RefBookValue(RefBookAttributeType.STRING, null));
             map.put(I_102_ACCOUNT_PERIOD_ID, new RefBookValue(RefBookAttributeType.REFERENCE, ids.get(0)));
             records.add(map);
-            provider.updateRecords(userInfo, new Date(), records);
+            provider.updateRecords(userInfo, date, records);
         }
     }
 
@@ -554,5 +556,9 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
         return bookerStatementsSearchDao.findPage(bookerStatementsFilter, bookerStatementsFilter.getSearchOrdering(),
                 bookerStatementsFilter.isAscSorting(), new PagingParams(bookerStatementsFilter.getStartIndex(),
                         bookerStatementsFilter.getCountOfRecords()));
+    }
+
+    private Date getStartDate() {
+        return new GregorianCalendar(2012, Calendar.JANUARY, 1).getTime();
     }
 }

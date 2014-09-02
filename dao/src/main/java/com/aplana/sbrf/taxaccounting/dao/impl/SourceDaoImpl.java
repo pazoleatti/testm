@@ -11,6 +11,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 import java.sql.*;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Date;
 
@@ -298,15 +299,78 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
         }
     }
 
-    @Override
-    public List<FormDataInfo> findForms(Date periodStart, Date periodEnd, List<Long> departmentFormTypes) {
-        //TODO: Нужен был для проверки существования экземпляров в источниках-приемниках. Оставил пока для компилляции
-        throw new UnsupportedOperationException();
-    }
+    private static final String GET_EMPTY_PERIODS = "WITH \n" +
+            "form_data_src AS\n" +
+            "  (SELECT *\n" +
+            "   FROM form_data_source\n" +
+            "   WHERE department_form_type_id = :destination\n" +
+            "     AND src_department_form_type_id = :source),    \n" +
+            "form_data_src_extended (period_start, period_end) AS\n" +
+            "  (SELECT period_end + interval '1' DAY, lead(period_start) over (ORDER BY period_start) - interval '1' DAY FROM form_data_src\n" +
+            "   UNION ALL \n" +
+            "   SELECT :newPeriodStart AS period_start, min(period_start) - interval '1' DAY\n" +
+            "   FROM form_data_src -- дата начала нового периода\n" +
+            "   UNION ALL \n" +
+            "   SELECT max(coalesce(period_end, to_date('30.12.9999', 'DD.MM.YYYY'))) + interval '1' DAY AS period_start, to_date(:newPeriodEnd, 'DD.MM.YYYY') period_end FROM form_data_src -- дата окончания нового периода\n" +
+            ")\n" +
+            "SELECT *\n" +
+            "FROM form_data_src_extended\n" +
+            "WHERE period_end > period_start\n" +
+            "ORDER BY 1";
 
     @Override
-    public List<DeclarationDataInfo> findDeclarations(Date periodStart, Date periodEnd, List<Long> destinationIds) {
-        //TODO: Нужен был для проверки существования экземпляров в источниках-приемниках. Оставил пока для компилляции
-        throw new UnsupportedOperationException();
+    public List<SourceObject> getEmptyPeriods(final SourcePair sourcePair, Date newPeriodStart, Date newPeriodEnd) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("source", sourcePair.getSource());
+        params.put("destination", sourcePair.getDestination());
+        params.put("newPeriodStart", newPeriodStart);
+        params.put("newPeriodEnd", newPeriodEnd != null ? new SimpleDateFormat("dd.MM.yyyy").format(newPeriodEnd) : null);
+        return getNamedParameterJdbcTemplate().query(GET_EMPTY_PERIODS, params, new RowMapper<SourceObject>() {
+            @Override
+            public SourceObject mapRow(ResultSet rs, int rowNum) throws SQLException {
+                return new SourceObject(sourcePair, rs.getDate("period_start"), rs.getDate("period_end"));
+            }
+        });
+    }
+
+    private static final String FIND_ACCEPTED_INSTANCES = "select rp.name, tp.year from report_period rp\n" +
+            "join tax_period tp on tp.id = rp.tax_period_id\n" +
+            "join form_data fd on fd.report_period_id = rp.id\n" +
+            "join department_form_type dft on (dft.kind = fd.kind and dft.department_id = fd.department_id)\n" +
+            "join form_template ft on (ft.id = fd.form_template_id and ft.type_id = dft.form_type_id)\n" +
+            "where dft.id = :source and fd.state = 4 and (\n" +
+            "  (:periodStart <= rp.calendar_start_date and (:periodEnd is null or :periodEnd >= rp.calendar_start_date)) or\n" +
+            "  (:periodStart >= rp.calendar_start_date and :periodStart <= rp.end_date)\n" +
+            ")";
+
+    @Override
+    public List<String> findAcceptedInstances(Long source, Date periodStart, Date periodEnd) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("source", source);
+        params.put("periodStart", periodStart);
+        params.put("periodEnd", periodEnd);
+        return getNamedParameterJdbcTemplate().query(FIND_ACCEPTED_INSTANCES, params, new RowMapper<String>() {
+            @Override
+            public String mapRow(ResultSet rs, int rowNum) throws SQLException {
+                return rs.getString("name") + " " + rs.getString("year");
+            }
+        });
+    }
+
+    private static final String GET_DEPARTMENT_NAMES = "select dft.id, d.name from department d \n" +
+            "join department_form_type dft on dft.department_id = d.id \n" +
+            "where dft.id %s";
+
+    @Override
+    public Map<Long, String> getDepartmentNamesBySource(List<Long> sources) {
+        final Map<Long, String> result = new HashMap<Long, String>();
+        String sql = String.format(GET_DEPARTMENT_NAMES, SqlUtils.transformToSqlInStatement("dft.id", sources));
+        getJdbcTemplate().query(sql, new RowCallbackHandler() {
+            @Override
+            public void processRow(ResultSet rs) throws SQLException {
+                result.put(rs.getLong("id"), rs.getString("name"));
+            }
+        });
+        return result;
     }
 }

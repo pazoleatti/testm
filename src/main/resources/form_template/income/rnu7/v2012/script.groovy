@@ -376,7 +376,7 @@ void logicCheck() {
         if (row.ruble && row.docDate != null) {
             def Date date = row.docDate
             def Date from = new SimpleDateFormat('dd.MM.yyyy').parse('01.01.' + (Integer.valueOf(new SimpleDateFormat('yyyy').format(date)) - 3))
-            def reportPeriods = reportPeriodService.getReportPeriodsInRange(TaxType.INCOME, from, date)
+            def reportPeriods = reportPeriodService.getReportPeriodsByDate(TaxType.INCOME, from, date)
 
             isFind = false
             def sum = 0 // сумма 12-х граф

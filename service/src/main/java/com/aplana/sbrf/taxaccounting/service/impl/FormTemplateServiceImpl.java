@@ -12,10 +12,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
-import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
-import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
-import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
 import org.apache.commons.lang3.ArrayUtils;
@@ -71,6 +68,8 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     ReportPeriodDao reportPeriodDao;
     @Autowired
     TransactionHelper tx;
+    @Autowired
+    FormDataService formDataService;
 
 	@Override
 	public List<FormTemplate> listAll() {
@@ -436,10 +435,9 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 
     public void validateFormAutoNumerationColumn(FormTemplate formTemplate, Logger logger) {
 
-        Integer formTemplateId = formTemplate.getId();
-
         // Если есть хоть одна автонумеруемая графа
         if (isAnyAutoNumerationColumn(formTemplate, AutoNumerationColumnType.CROSS)) {
+            Integer formTemplateId = formTemplate.getId();
             // Проверяем наличие в версии макета до редактирования хотя бы одной автонумеруемой графы, у которой "Тип нумерации строк" != "Сквозная".
             FormTemplate fullFormTemplate = getFullFormTemplate(formTemplateId);
             if (isAnyAutoNumerationColumn(fullFormTemplate, AutoNumerationColumnType.SERIAL)) {
@@ -458,11 +456,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
                             stringBuilder.toString() + ". " +
                             "Для добавления в макет автонумеруемой графы с типом сквозной нумерации строк необходимо открыть перечисленные периоды!");
                 } else {
-
-                    /*
-                     * Здесь обновляем значение атрибута "Номер последней строки предыдущей НФ".
-                     * http://conf.aplana.com/pages/viewpage.action?pageId=11377661 п.7А.1.1.1
-                     */
+                    formDataService.batchUpdatePreviousNumberRow(formTemplate);
                 }
             }
         }
