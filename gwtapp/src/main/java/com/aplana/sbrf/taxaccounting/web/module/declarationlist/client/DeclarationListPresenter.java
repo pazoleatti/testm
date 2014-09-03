@@ -46,6 +46,7 @@ public class DeclarationListPresenter extends
     private Map<Integer, String> lstHistory = new HashMap<Integer, String>();
     private Long selectedItemId;
     private TaxType taxType;
+    private boolean ready = false;
 
     @ProxyEvent
     @Override
@@ -79,7 +80,7 @@ public class DeclarationListPresenter extends
                 lstHistory.put(1, event.getValue());
             }
         });
-	}
+    }
 
 	@Override
 	public void prepareFromRequest(PlaceRequest request) {
@@ -105,6 +106,7 @@ public class DeclarationListPresenter extends
 			filterPresenter.initFilter(taxType, filterStates.get(taxType));
             filterPresenter.getView().updateFilter(taxType);
             getView().updatePageSize(taxType);
+            ready = false;
 		} catch (Exception e) {
 			ErrorEvent.fire(this, "Не удалось открыть список деклараций", e);
 		}
@@ -114,6 +116,7 @@ public class DeclarationListPresenter extends
 	@Override
 	public void onFilterReady(DeclarationFilterReadyEvent event) {
         if (event.getSource() == filterPresenter) {
+            ready = true;
             DeclarationDataFilter dataFilter = filterPresenter.getFilterData();
             updateTitle(dataFilter.getTaxType());
             getView().updateData(0);
@@ -124,10 +127,13 @@ public class DeclarationListPresenter extends
              уже видна - непонятно.*/
             getProxy().manualReveal(DeclarationListPresenter.this);
 		}
-	}
+    }
 
     @Override
     public void onRangeChange(final int start, final int length) {
+        if (!ready) {
+            return;
+        }
         DeclarationDataFilter filter = filterPresenter.getFilterData();
         filter.setDeclarationDataId(selectedItemId);
         filter.setCountOfRecords(length);
@@ -153,19 +159,26 @@ public class DeclarationListPresenter extends
     }
 
     private void updateTitle(TaxType taxType){
-        // TODO Зачем это? В постановке нет. Виды налога перечислены не все.
 		String description = "";
         String title = "Список деклараций";
-		if(taxType.getName().equals(TaxType.VAT.getName())){
-			description = "Деклараци по НДС";
-		}  else if (taxType.getName().equals(TaxType.PROPERTY.getName())){
-			description = "Деклараци по налогу на имущество";
-		}  else if (taxType.getName().equals(TaxType.TRANSPORT.getName())){
-			description = "Деклараци по транспортному налогу";
-		}  else if (taxType.getName().equals(TaxType.INCOME.getName())){
-			description = "Деклараци по налогу на прибыль";
-		} else if (taxType.getName().equals(TaxType.DEAL.getName())) {
-            title = "Список уведомлений";
+        if (taxType != null) {
+            switch (taxType) {
+                case VAT:
+                    description = "Деклараци по НДС";
+                    break;
+                case PROPERTY:
+                    description = "Деклараци по налогу на имущество";
+                    break;
+                case TRANSPORT:
+                    description = "Деклараци по транспортному налогу";
+                    break;
+                case INCOME:
+                    description = "Деклараци по налогу на прибыль";
+                    break;
+                case DEAL:
+                    title = "Список уведомлений";
+                    break;
+            }
         }
 		TitleUpdateEvent.fire(this, title, description);
 	}

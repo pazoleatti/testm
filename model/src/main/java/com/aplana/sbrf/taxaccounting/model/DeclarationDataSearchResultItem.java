@@ -36,6 +36,10 @@ public class DeclarationDataSearchResultItem implements Serializable {
     private Integer reportPeriodYear;
 	// Идентификатор вида декларации
 	private String declarationType;
+    // Налоговый орган
+    private String taxOrganCode;
+    // КПП
+    private String taxOrganKpp;
 
 	public Long getDeclarationDataId() {
 		return declarationDataId;
@@ -123,5 +127,21 @@ public class DeclarationDataSearchResultItem implements Serializable {
 
     public void setReportPeriodYear(Integer reportPeriodYear) {
         this.reportPeriodYear = reportPeriodYear;
+    }
+
+    public String getTaxOrganCode() {
+        return taxOrganCode;
+    }
+
+    public void setTaxOrganCode(String taxOrganCode) {
+        this.taxOrganCode = taxOrganCode;
+    }
+
+    public String getTaxOrganKpp() {
+        return taxOrganKpp;
+    }
+
+    public void setTaxOrganKpp(String taxOrganKpp) {
+        this.taxOrganKpp = taxOrganKpp;
     }
 }

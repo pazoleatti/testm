@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.DeclarationDataSearchResultItemMapper;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
@@ -16,9 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSqlInStatement;
 
@@ -257,10 +256,31 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 sql.append(" AND dec.is_accepted = 1");
             }
         }
-	}
+        if (filter.getTaxType() == TaxType.PROPERTY) {
+            if (filter.getTaxOrganCode() != null && !filter.getTaxOrganCode().isEmpty()) {
+                String[] codes = filter.getTaxOrganCode().split("; ");
+                for (int i = 0; i < codes.length; i++) {
+                    codes[i] = "'" + codes[i].trim() + "'";
+                }
+                if (codes != null && codes.length != 0) {
+                    sql.append(" AND dec.tax_organ_code in (" + StringUtils.join(Arrays.asList(codes), ",") + ")");
+                }
+            }
+
+            if (filter.getTaxOrganKpp() != null && !filter.getTaxOrganKpp().isEmpty()) {
+                String[] codes = filter.getTaxOrganKpp().split("; ");
+                for (int i = 0; i < codes.length; i++) {
+                    codes[i] = "'" + codes[i].trim() + "'";
+                }
+                if (codes != null && codes.length != 0) {
+                    sql.append(" AND dec.kpp in (" + StringUtils.join(Arrays.asList(codes), ",") + ")");
+                }
+            }
+        }
+    }
 
 	private void appendSelectClause(StringBuilder sql) {
-		sql.append("SELECT dec.ID as declaration_data_id, dec.declaration_template_id, dec.is_accepted,")
+		sql.append("SELECT dec.ID as declaration_data_id, dec.declaration_template_id, dec.is_accepted, dec.tax_organ_code, dec.kpp,")
 				.append(" dectype.ID as declaration_type_id, dectype.NAME as declaration_type_name,")
 				.append(" dp.ID as department_id, dp.NAME as department_name, dp.TYPE as department_type,")
 				.append(" rp.ID as report_period_id, rp.NAME as report_period_name, dectype.TAX_TYPE, tp.year");

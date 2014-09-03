@@ -28,7 +28,7 @@
         bottom: 30px;
         right: 10px;
         left: 10px;
-        top: 41px;
+        top: 41px;     /*@see com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListView.TABLE_TOP1"*/
     }
 
     .marginRight5{
@@ -68,7 +68,7 @@
 
                 <g:HorizontalPanel ui:field="filterContentPanel" addStyleNames="{style.btnPanel}" />
 
-                <g:ResizeLayoutPanel addStyleNames="{style.table}">
+                <g:ResizeLayoutPanel addStyleNames="{style.table}" ui:field="tableWrapper">
                     <style:GenericDataGrid ui:field="declarationTable" width="100%" height="100%"/>
                 </g:ResizeLayoutPanel>
 

@@ -70,9 +70,9 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
 		clearValues();
 		getView().hide();
 	}
-	
+
 	public void setDeclarationFilter(DeclarationDataFilter filter) {
-		
+
 		if(filter.getDeclarationTypeId() != null){
 			getView().setSelectedDeclarationType(filter.getDeclarationTypeId());
 		}
