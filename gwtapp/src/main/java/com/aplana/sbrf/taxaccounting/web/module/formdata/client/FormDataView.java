@@ -34,6 +34,7 @@ import com.google.gwt.view.client.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -85,6 +86,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
 	@UiField
 	DataGrid<DataRow<Cell>> formDataTable;
+    Label noResultLabel = new Label();
 	@UiField
 	FlexiblePager pager;
 	@UiField
@@ -213,6 +215,11 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
                 }
             }
 		});
+
+        // хак для горизонтального скроллбара у пустой таблицы
+        formDataTable.setEmptyTableWidget(noResultLabel);
+        formDataTable.setRowData(new ArrayList());
+
         formDataTable.setPageSize(pager.getPageSize());
         pager.setDisplay(formDataTable);
         recalcReportPeriodLabelWidth();     // пересчитаем при первом отображении страницы
@@ -319,7 +326,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 			tableWidth += Float.parseFloat(width);
 		}
 		formDataTable.setTableWidth(tableWidth, Style.Unit.EM);
-
+        noResultLabel.setWidth(tableWidth + "em");
 	}
 
 	@Override
