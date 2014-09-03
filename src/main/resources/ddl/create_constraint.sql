@@ -88,7 +88,6 @@ alter table department add constraint department_pk primary key (id);
 alter table department add constraint dept_fk_parent_id foreign key (parent_id) references department(id);
 alter table department add constraint department_fk_type foreign key(type) references department_type(id);
 alter table department add constraint department_chk_is_active check (is_active in (0, 1));
-alter table department add constraint department_uniq_code UNIQUE (code);
 
 alter table configuration add constraint configuration_pk primary key (code, department_id);
 alter table configuration add constraint configuration_fk foreign key (department_id) references department(id) on delete cascade;
