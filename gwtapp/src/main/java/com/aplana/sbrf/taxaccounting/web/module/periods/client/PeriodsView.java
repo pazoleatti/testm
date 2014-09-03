@@ -65,10 +65,10 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
     LinkButton editPeriod;
 
     @UiField
-    Button setDeadlineButton;
+    LinkButton setDeadlineButton;
 
 	@UiField
-	Button removePeriod;
+    LinkButton removePeriod;
 
 	@UiField
     DepartmentPickerPopupWidget departmentPicker;
@@ -291,9 +291,7 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 
     @Override
 	public void setCanEdit(boolean canEdit) {
-		closePeriod.setVisible(canEdit);
 		openPeriod.setVisible(canEdit);
-		removePeriod.setVisible(canEdit);
 	}
 
     @Override
