@@ -76,7 +76,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 					new DeclarationTemplateRowMapper()
 			);
 		} catch (EmptyResultDataAccessException e) {
-			throw new DaoException("Шаблон декларации с id = %d не найдена в БД", declarationTemplateId);
+			throw new DaoException("Шаблон декларации с id = %d не найден в БД", declarationTemplateId);
 		}
 	}
 
@@ -422,7 +422,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
         }
         catch (DataAccessException e){
             logger.error("Ошибка при получении числа версий.", e);
-            throw new DaoException("Ошибка при получении числа версий.", e.getMessage());
+            throw new DaoException("Ошибка при получении числа версий. %s", e.getMessage());
         }
     }
 
@@ -437,7 +437,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
             return getNamedParameterJdbcTemplate().queryForList(sql, valueMap);
         } catch (DataAccessException e){
             logger.error("Ошибка при получении числа версий.", e);
-            throw new DaoException("Ошибка при получении числа версий.", e.getMessage());
+            throw new DaoException("Ошибка при получении числа версий. %s", e.getMessage());
         }
     }
 

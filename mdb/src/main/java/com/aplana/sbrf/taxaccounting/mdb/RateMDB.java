@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -47,7 +48,7 @@ public class RateMDB implements MessageListener {
     static final String ERROR_PUBLIC = "Сообщение не содержит публичные курсы";
     static final String ERROR_VALUE = "Сообщение не содержит значений";
     static final String ERROR_CODE = "Значения сообщения установлены не по отношению к российскому рублю";
-    static final String SUCCESS_IMPORT = "Успешный обмен данными с КСШ. Загружено %d курсов справочника «%s».";
+    static final String SUCCESS_IMPORT = "Успешный обмен данными с КСШ. %s %d %s справочника «%s».";
     static final String FAIL_IMPORT = "Неуспешная попытка обмена данными с КСШ. %s.";
 	static final String FAIL_IMPORT_DELIVERY_COUNT = "Неуспешная попытка обмена данными с КСШ. %s. Попытка № %s";
     static final String ERROR_AUDIT = "Ошибка записи в журнал аудита.";
@@ -242,8 +243,12 @@ public class RateMDB implements MessageListener {
             logger.error(e);
             addLog(userInfo, String.format(FAIL_IMPORT_DELIVERY_COUNT, e.getMessage(), deliveryCount), logEntryService.save(logger.getEntries()));
             return;
-        }        
-        addLog(userInfo, String.format(SUCCESS_IMPORT, scriptStatusHolder.getSuccessCount(),
+        }
+        int successCount = scriptStatusHolder.getSuccessCount();
+        addLog(userInfo, String.format(SUCCESS_IMPORT,
+                StringUtils.getNumberString(successCount, "Загружен", "Загружено", "Загружено"),
+                successCount,
+                StringUtils.getNumberString(successCount, "курс", "курса", "курсов"),
                 refBookNameMapping.get(refBookId)), logEntryService.save(logger.getEntries()));
     }
 

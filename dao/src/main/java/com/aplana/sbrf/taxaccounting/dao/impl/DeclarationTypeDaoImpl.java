@@ -80,7 +80,7 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
             return typeId;
         } catch (DataAccessException e){
             logger.error("Ошибка при создании макета", e);
-            throw new DaoException("Ошибка при создании макета", e.getMessage());
+            throw new DaoException("Ошибка при создании макета. %s", e.getMessage());
         }
     }
 

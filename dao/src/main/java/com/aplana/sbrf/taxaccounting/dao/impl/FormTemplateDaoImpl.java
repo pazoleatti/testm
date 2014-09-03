@@ -465,7 +465,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
             return getNamedParameterJdbcTemplate().queryForInt(builder.toString(), valueMap);
         } catch (DataAccessException e){
             logger.error("Ошибка при получении числа версий.", e);
-            throw new DaoException("Ошибка при получении числа версий.", e.getMessage());
+            throw new DaoException("Ошибка при получении числа версий. %s", e.getMessage());
         }
     }
 
@@ -479,7 +479,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
             return getNamedParameterJdbcTemplate().queryForList(sql, valueMap);
         } catch (DataAccessException e){
             logger.error("Ошибка при получении числа версий.", e);
-            throw new DaoException("Ошибка при получении числа версий.", e.getMessage());
+            throw new DaoException("Ошибка при получении числа версий. %s", e.getMessage());
         }
     }
 
