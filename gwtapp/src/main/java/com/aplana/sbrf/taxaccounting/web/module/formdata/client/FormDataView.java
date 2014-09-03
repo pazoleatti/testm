@@ -712,9 +712,8 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
             this.taxType = taxType;
             pager.setType("formData" + taxType.getCode());
             formDataTable.setPageSize(pager.getPageSize());
-        } else {
-            updateData(0);
         }
+        updateData(0);
     }
 
     @Override
