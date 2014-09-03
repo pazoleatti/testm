@@ -48,7 +48,7 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
 				new FormTypeMapper()
 			);
 		} catch (EmptyResultDataAccessException e) {
-			throw new DaoException("Вид формы с id = " + typeId + " не найден в БД");
+			throw new DaoException("Вид формы с id = %d не найден в БД", typeId);
 		}
 	}
 
@@ -100,7 +100,7 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
             return formTypeId;
         } catch (DataAccessException e){
             logger.error("Ошибка при создании макета", e);
-            throw new DaoException("Ошибка при создании макета", e.getMessage());
+            throw new DaoException("Ошибка при создании макета. %s", e.getMessage());
         }
     }
 
