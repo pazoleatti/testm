@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
@@ -321,7 +322,11 @@ public class RateMDBTest {
         IOUtils.copy(getCurrencyRateStream(), output);
         rmdb.onMessage(new TextMessageImpl(output.toString()));
         Assert.assertEquals(1, logList.size());
-        Assert.assertEquals(logList.get(0), String.format(RateMDB.SUCCESS_IMPORT, 1, "Курсы Валют"));
+        Assert.assertEquals(logList.get(0), String.format(RateMDB.SUCCESS_IMPORT,
+                StringUtils.getNumberString(1, "Загружен", "Загружено", "Загружено"),
+                1,
+                StringUtils.getNumberString(1, "курс", "курса", "курсов"),
+                "Курсы Валют"));
     }
 
     // Успешный импорт к. драг. мет.
@@ -331,7 +336,11 @@ public class RateMDBTest {
         IOUtils.copy(getMetalRateStream(), output);
         rmdb.onMessage(new TextMessageImpl(output.toString()));
         Assert.assertEquals(1, logList.size());
-        Assert.assertEquals(logList.get(0), String.format(RateMDB.SUCCESS_IMPORT, 1, "Курсы драгоценных металлов"));
+        Assert.assertEquals(logList.get(0), String.format(RateMDB.SUCCESS_IMPORT,
+                StringUtils.getNumberString(1, "Загружен", "Загружено", "Загружено"),
+                1,
+                StringUtils.getNumberString(1, "курс", "курса", "курсов"),
+                "Курсы драгоценных металлов"));
     }
 
     // Сообщение null — неправильный формат
