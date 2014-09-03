@@ -41,7 +41,7 @@ public class LockDataServiceImpl implements LockDataService {
             @Override
             public LockData executeWithReturn() {
                 try {
-                    synchronized(this) {
+                    synchronized(LockDataServiceImpl.class) {
                         LockData lock = validateLock(dao.get(key));
                         if (lock != null) {
                             return lock;
@@ -89,7 +89,7 @@ public class LockDataServiceImpl implements LockDataService {
             @Override
             public void execute() {
                 try {
-                    synchronized(this) {
+                    synchronized(LockDataServiceImpl.class) {
                         LockData lock = validateLock(dao.get(key));
                         if (lock != null) {
                             if (lock.getUserId() != userId) {
@@ -122,7 +122,7 @@ public class LockDataServiceImpl implements LockDataService {
             @Override
             public void execute() {
                 try {
-                    synchronized(this) {
+                    synchronized(LockDataServiceImpl.class) {
                         LockData lock = validateLock(dao.get(key));
                         if (lock != null) {
                             if (lock.getUserId() != userId) {
