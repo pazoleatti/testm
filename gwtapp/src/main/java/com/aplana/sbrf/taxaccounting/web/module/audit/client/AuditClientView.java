@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.web.module.audit.client;
 import com.aplana.sbrf.taxaccounting.model.AuditFormType;
 import com.aplana.sbrf.taxaccounting.model.HistoryBusinessSearchOrdering;
 import com.aplana.sbrf.taxaccounting.model.LogSearchResultItem;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.AplanaUiHandlers;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.sortable.AsyncDataProviderWithSortableTable;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
@@ -79,9 +78,9 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler>
 
         setTableColumns();
 
-        dataProvider = new AsyncDataProviderWithSortableTable(table, this) {
+        dataProvider = new AsyncDataProviderWithSortableTable<LogSearchResultItem, AuditClientUIHandler, AuditClientView>(table, this) {
             @Override
-            public AplanaUiHandlers getUiHandlersX() {
+            public AuditClientUIHandler getViewUiHandlers() {
                 return getUiHandlers();
             }
         };

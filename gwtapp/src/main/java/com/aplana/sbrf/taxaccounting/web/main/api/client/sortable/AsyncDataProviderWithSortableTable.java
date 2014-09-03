@@ -40,20 +40,20 @@ public abstract class AsyncDataProviderWithSortableTable<T, B extends AplanaUiHa
 
     @Override
     protected void onRangeChanged(HasData<T> display) {
-        if (getUiHandlersX() != null) {
-            // Сортировка
+        if (getViewUiHandlers() != null) {
             final ColumnSortList sortList = table.getColumnSortList();
 
             if (sortList.size() > 0) {
+                // Сортировка только по одному столбцу
                 isAscSorting = sortList.get(0).isAscending();
                 view.setSortByColumn(sortList.get(0).getColumn().getDataStoreName());
             }
             final Range range = display.getVisibleRange();
-            getUiHandlersX().onRangeChange(range.getStart(), range.getLength());
+            getViewUiHandlers().onRangeChange(range.getStart(), range.getLength());
         }
     }
 
-    public abstract B getUiHandlersX();
+    public abstract B getViewUiHandlers();
 
     public boolean isAscSorting() {
         return isAscSorting;

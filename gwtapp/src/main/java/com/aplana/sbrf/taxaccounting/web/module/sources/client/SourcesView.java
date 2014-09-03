@@ -6,7 +6,6 @@ import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.SourcesSearchOrdering;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.AplanaUiHandlers;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.sortable.AsyncDataProviderWithSortableTable;
 import com.aplana.sbrf.taxaccounting.web.module.sources.client.assingDialog.AssignDialogView;
 import com.aplana.sbrf.taxaccounting.web.module.sources.client.assingDialog.ButtonClickHandlers;
@@ -17,7 +16,8 @@ import com.aplana.sbrf.taxaccounting.web.widget.style.LabelSeparator;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.aplana.sbrf.taxaccounting.web.widget.style.table.CheckBoxHeader;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.WidgetUtils;
-import com.google.gwt.cell.client.*;
+import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.AttachEvent;
@@ -224,25 +224,25 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         setupRightTables();
         setupDownTables();
 
-        leftTableDataProvider = new AsyncDataProviderWithSortableTable(leftTable, this) {
+        leftTableDataProvider = new AsyncDataProviderWithSortableTable<DepartmentAssign, SourcesUiHandlers, SourcesView>(leftTable, this) {
             @Override
-            public AplanaUiHandlers getUiHandlersX() {
+            public SourcesUiHandlers getViewUiHandlers() {
                 table = LEFT;
                 return getUiHandlers();
             }
         };
 
-        rightTableDataProvider = new AsyncDataProviderWithSortableTable(rightTable, this) {
+        rightTableDataProvider = new AsyncDataProviderWithSortableTable<DepartmentAssign, SourcesUiHandlers, SourcesView>(rightTable, this) {
             @Override
-            public AplanaUiHandlers getUiHandlersX() {
+            public SourcesUiHandlers getViewUiHandlers() {
                 table = Table.RIGHT;
                 return getUiHandlers();
             }
         };
 
-        downTableDataProvider = new AsyncDataProviderWithSortableTable(downTable, this) {
+        downTableDataProvider = new AsyncDataProviderWithSortableTable<CurrentAssign, SourcesUiHandlers, SourcesView>(downTable, this) {
             @Override
-            public AplanaUiHandlers getUiHandlersX() {
+            public SourcesUiHandlers getViewUiHandlers() {
                 table = Table.DOWN;
                 return getUiHandlers();
             }
