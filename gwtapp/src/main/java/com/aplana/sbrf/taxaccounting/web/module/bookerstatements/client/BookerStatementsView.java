@@ -91,7 +91,7 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
                 return getUiHandlers();
             }
         };
-
+        dataProvider.setAscSorting(false);
     }
 
     @Override
@@ -193,11 +193,6 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
     @Override
     public boolean isAscSorting() {
         return dataProvider.isAscSorting();
-    }
-
-    @Override
-    public void setAscSorting(boolean ascSorting) {
-        dataProvider.setAscSorting(ascSorting);
     }
 
     @UiHandler("searchButton")
