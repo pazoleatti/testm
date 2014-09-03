@@ -129,10 +129,12 @@
                                           ui:field="openCorrectPeriod" visible="false"/>
                         <style:LinkButton img="resources/img/lock-16.png" text="Закрыть период"
                                           ui:field="closePeriod"/>
-                        <style:LinkButton img="resources/img/lock-16.png" text="Редактировать период"
+                        <style:LinkButton img="resources/img/pencil-16.png" text="Редактировать период"
                                           ui:field="editPeriod" visible="false"/>
-                        <g:Button ui:field="removePeriod" text="Удалить период"/>
-                        <g:Button ui:field="setDeadlineButton" visible="false" text="Назначить срок сдачи"/>
+                        <style:LinkButton img="resources/img/row-delete.png" text="Удалить период"
+                                          ui:field="removePeriod"/>
+                        <style:LinkButton img="resources/img/available-check-16.png" text="Назначить срок сдачи"
+                                          ui:field="setDeadlineButton" visible="false"/>
                     </style:LeftBar>
                 </g:HorizontalPanel>
 
