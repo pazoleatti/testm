@@ -217,19 +217,21 @@ def logicCheck() {
     // 5. Проверка наличия формы предыдущего периода
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
     def prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
-    def str = ''
-    if (reportPeriod.order == 4) {
-        str += checkPrevPeriod(prevReportPeriod)
-        prevReportPeriod = reportPeriodService.getPrevReportPeriod(prevReportPeriod.id)
-        str += checkPrevPeriod(prevReportPeriod)
-        prevReportPeriod = reportPeriodService.getPrevReportPeriod(prevReportPeriod.id)
-        str += checkPrevPeriod(prevReportPeriod)
-    } else {
-        str = checkPrevPeriod(prevReportPeriod)
-    }
-    if (str.length() > 2) {
-        logger.warn("Данные ТС из предыдущих отчётных периодов не были скопированы. В Системе " +
-                "не создавались формы за следующие периоды: " + str.substring(0, str.size() - 2) + ".")
+    if (prevReportPeriod != null) {
+        def str = ''
+        if (reportPeriod.order == 4) {
+            str += checkPrevPeriod(prevReportPeriod)
+            prevReportPeriod = reportPeriodService.getPrevReportPeriod(prevReportPeriod.id)
+            str += checkPrevPeriod(prevReportPeriod)
+            prevReportPeriod = reportPeriodService.getPrevReportPeriod(prevReportPeriod.id)
+            str += checkPrevPeriod(prevReportPeriod)
+        } else {
+            str = checkPrevPeriod(prevReportPeriod)
+        }
+        if (str.length() > 2) {
+            logger.warn("Данные ТС из предыдущих отчётных периодов не были скопированы. В Системе " +
+                    "не создавались формы за следующие периоды: " + str.substring(0, str.size() - 2) + ".")
+        }
     }
 }
 
