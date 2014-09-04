@@ -81,11 +81,13 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 
         Date date = new Date();
         taxOrganisationPicker = new RefBookPickerWidget(false, true);
+        taxOrganisationPicker.setTitle("Выбор налогового органа");
         taxOrganisationPicker.setAttributeId(2041L);
         taxOrganisationPicker.setPeriodDates(date, date);
         taxOrganisationPicker.setVersionEnabled(false);
 
         kppPicker = new RefBookPickerWidget(false, true);
+        kppPicker.setTitle("Выбор КПП");
         kppPicker.setAttributeId(2051L);
         kppPicker.setPeriodDates(date, date);
         kppPicker.setVersionEnabled(false);
