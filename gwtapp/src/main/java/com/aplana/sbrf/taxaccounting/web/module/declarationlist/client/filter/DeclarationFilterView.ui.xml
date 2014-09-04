@@ -3,10 +3,10 @@
     <ui:style>
         .separator {
             height: 22px;
-            margin: 0 9px;
+            margin: 0 9px 0 4px;
             border-right: 1px solid #aeaeac;
         }
-        .right15{
+        .right15 {
             margin-right: 15px;
         }
     </ui:style>
@@ -14,7 +14,7 @@
         <g:cell width="100%">
             <g:HTMLPanel ui:field="panel" width="100%"/>
         </g:cell>
-        <g:cell verticalAlignment="middle" horizontalAlignment="right">
+        <g:cell verticalAlignment="top" horizontalAlignment="right">
             <g:HTML ui:field="separator" addStyleNames="{style.separator}"/>
         </g:cell>
         <g:cell verticalAlignment="middle">
