@@ -2,6 +2,7 @@ package form_template.property.property_945_2.v2014
 
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
+import com.aplana.sbrf.taxaccounting.model.Department
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import groovy.transform.Field
 
@@ -20,12 +21,14 @@ import groovy.transform.Field
 // графа 5  - oktmo                     Код ОКТМО
 // графа 6  - address                   Адрес объекта
 // графа 7  - sign                      Признак: здание - 1, помещение - 2
-// графа 8  - cadastreNum               Кадастровый номер
-// графа 9  - cadastrePriceJanuary      Кадастровая стоимость, на 1 января
-// графа 10 - cadastrePriceTaxFree      Кадастровая стоимость, в т.ч. необлагаемая налогом
-// графа 11 - propertyRightBeginDate    Право собственности, дата возникновения
-// графа 12 - propertyRightEndDate      Право собственности, дата прекращения
-// графа 13 - taxBenefitCode            Код налоговой льготы
+// графа 8  - cadastreNumBuilding       Кадастровый номер, здание
+// графа 9  - cadastreNumRoom           Кадастровый номер, помещение
+// графа 10 - cadastrePriceJanuary      Кадастровая стоимость, на 1 января
+// графа 11 - cadastrePriceTaxFree      Кадастровая стоимость, в т.ч. необлагаемая налогом
+// графа 12 - propertyRightBeginDate    Право собственности, дата возникновения
+// графа 13 - propertyRightEndDate      Право собственности, дата прекращения
+// графа 14 - taxBenefitCode            Код налоговой льготы
+// графа 15 - benefitBasis              Основание льготы
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
@@ -73,24 +76,26 @@ def refBookCache = [:]
 
 // все атрибуты
 @Field
-def allColumns = ['rowNum', 'fix', 'subject', 'taxAuthority', 'kpp', 'oktmo', 'address', 'sign', 'cadastreNum',
-        'cadastrePriceJanuary', 'cadastrePriceTaxFree', 'propertyRightBeginDate', 'propertyRightEndDate', 'taxBenefitCode']
+def allColumns = ['rowNum', 'fix', 'subject', 'taxAuthority', 'kpp', 'oktmo', 'address', 'sign', 'cadastreNumBuilding',
+        'cadastreNumRoom', 'cadastrePriceJanuary', 'cadastrePriceTaxFree', 'propertyRightBeginDate',
+        'propertyRightEndDate', 'taxBenefitCode', 'benefitBasis']
 
 // Редактируемые атрибуты
 @Field
-def editableColumns = ['subject', 'taxAuthority', 'kpp', 'oktmo', 'address', 'sign', 'cadastreNum', 'cadastrePriceJanuary',
-                       'cadastrePriceTaxFree', 'propertyRightBeginDate', 'propertyRightEndDate', 'taxBenefitCode']
+def editableColumns = ['subject', 'taxAuthority', 'kpp', 'oktmo', 'address', 'sign', 'cadastreNumBuilding',
+                       'cadastreNumRoom', 'cadastrePriceJanuary', 'cadastrePriceTaxFree', 'propertyRightBeginDate',
+                       'propertyRightEndDate', 'taxBenefitCode']
 
 // Автозаполняемые атрибуты
 @Field
 def autoFillColumns = ['rowNum']
 
 @Field
-def nonEmptyColumns = ['subject', 'taxAuthority', 'kpp', 'oktmo', 'address', 'sign', 'cadastrePriceJanuary',
-                       'cadastrePriceTaxFree', 'propertyRightBeginDate']
+def nonEmptyColumns = ['subject', 'taxAuthority', 'kpp', 'oktmo', 'address', 'sign', 'cadastreNumBuilding',
+                       'cadastrePriceJanuary', 'cadastrePriceTaxFree', 'propertyRightBeginDate']
 
 @Field
-def sortColumns = ['subject', 'taxAuthority', 'kpp', 'oktmo', 'sign', 'cadastreNum']
+def sortColumns = ['subject', 'taxAuthority', 'kpp', 'oktmo', 'sign', 'cadastreNumBuilding', 'cadastreNumRoom']
 
 @Field
 def groupColumns = ['taxAuthority', 'kpp']
@@ -189,10 +194,31 @@ void calc() {
     if (formDataEvent != FormDataEvent.IMPORT) {
         sort(dataRows)
     }
+    for (def row : dataRows) {
+        def basis = calcBasis(row.taxBenefitCode)
+        row.benefitBasis = basis
+    }
 
     addFixedRows(dataRows, totalRow)
 
     dataRowHelper.save(dataRows)
+}
+
+def calcBasis(def code) {
+    if (code == null) {
+        return null
+    }
+    String filter = "TAX_BENEFIT_ID = " + code
+    def records = refBookFactory.getDataProvider(203).getRecords(getReportPeriodEndDate(), null, filter, null)
+    if (records.size() != 1) {
+        return null
+    } else {
+        def record = records.get(0)
+        def section = record.SECTION.value ?: ''
+        def item = record.ITEM.value ?: ''
+        def subitem = record.SUBITEM.value ?: ''
+        return String.format("%s%s%s", section.padLeft(4, '0'), item.padLeft(4, '0'), subitem.padLeft(4, '0'))
+    }
 }
 
 void addFixedRows(def dataRows, totalRow) {
@@ -242,21 +268,23 @@ void logicCheck() {
     }
     // мапа индексов строк "идентичных" текущей
     def Map<Integer, List<Integer>> foundEqualsMap = [:]
+    def Department department = departmentService.get(formData.departmentId)
     for (def row : dataRows) {
         def index = row.getIndex()
         def errorMsg = "Строка $index: "
         if (row.getAlias() == null) {
 
             // Проверка на заполнение поля
-            checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
-            def int sign = row.sign
+            def Integer sign = row.sign
+            def columns = (sign == 2)? (nonEmptyColumns + 'cadastreNumRoom') : nonEmptyColumns
+            checkNonEmptyColumns(row, index, columns, logger, true)
             // Проверка допустимых значений «Графы 7»
             if (!(sign in [1, 2])) {
                 loggerError(row, errorMsg + "Графа «${getColumnName(row, 'sign')}» заполнена неверно")
             }
             // Проверка наличия кадастрового номера при указании признака здания
-            if (sign == 1 && row.cadastreNum == null) {
-                loggerError(row, errorMsg + "При установке признака «Здание - 1» графа «${getColumnName(row, 'sign')}» должна быть заполнена!")
+            if (sign == 2 && row.cadastreNumRoom == null) {
+                loggerError(row, errorMsg + "При установке признака «Помещение - 2» графа «${getColumnName(row, 'cadastreNumRoom')}» должна быть заполнена!")
             }
             // Проверка необлагаемой налогом кадастровой стоимости
             if (row.cadastrePriceJanuary < row.cadastrePriceTaxFree) {
@@ -267,10 +295,10 @@ void logicCheck() {
                 logger.warn("Данные о кадастровой стоимости из предыдущего отчетного периода не были скопированы. В Системе не создавалась первичная налоговая форма «${formData.formType.name}» за предыдущий отчетный период!")
             }
 
-            // Проверка наличия в списке объектов недвижимости строк, для которых графы 3, 4, 5, 7, 8 («Код НО», «КПП», «Код ОКТМО», «Признак: здание – 1, помещение - 2», «Кадастровый номер») одинаковы
+            // Проверка наличия в списке объектов недвижимости строк, для которых графы 3, 4, 5, 7, 8, 9 одинаковы
             rowsToCompare.remove(row)
             for (def anotherRow : rowsToCompare) {
-                def compareColumns = ['taxAuthority', 'kpp', 'oktmo', 'sign', 'cadastreNum']
+                def compareColumns = ['taxAuthority', 'kpp', 'oktmo', 'sign', 'cadastreNumBuilding', 'cadastreNumRoom']
                 def boolean rowEqual = true
                 for (def column in compareColumns) {
                     if (row[column] != anotherRow[column]) {
@@ -288,17 +316,21 @@ void logicCheck() {
                 }
             }
             if (foundEqualsMap[index]) {
-                loggerError(null, "Обнаружены строки ${foundEqualsMap[index].join(', ')}, у которых следующие параметры совпадают: Код НО = ${row.taxAuthority}, КПП = ${row.kpp}, Код ОКТМО = ${row.oktmo}, Признак: здание – 1, помещение – 2 = ${row.sign}, Кадастровый номер = ${row.cadastreNum}!")
+                loggerError(null, "Обнаружены строки ${foundEqualsMap[index].join(', ')}, у которых совпадают значения Граф 3, 4, 5, 7, 8, 9!")
                 rowsToCompare.removeAll { e -> e.getIndex() in foundEqualsMap[index] }
             }
-            // Проверка допустимых значений «Графы 13» реализована в макете
-            // Проверка существования параметров для выбранной льготы
-            if (row.taxBenefitCode != null) {
-                String filter = "REGION_ID = " + row.subject?.toString() + " and TAX_BENEFIT_ID = " + row.taxBenefitCode + " and ASSETS_CATEGORY is null"
+            // Проверка допустимых значений «Графы 14»
+            if (department.regionId && row.subject && row.taxBenefitCode) {
+                String filter = "DECLARATION_REGION_ID = " + department.regionId?.toString() + " and REGION_ID = " + row.subject?.toString() + " and TAX_BENEFIT_ID = " + row.taxBenefitCode
+                // TODO «Назначение параметра» = 2
                 def records = refBookFactory.getDataProvider(203).getRecords(getReportPeriodEndDate(), null, filter, null)
                 if (records.size() == 0) {
-                    loggerError(row, errorMsg + "Выбранная льгота для текущего региона не предусмотрена (в справочнике «Параметры налоговых льгот налога на имущество» отсутствует запись по выбранному субъекту и льготе, в которой категория имущества не заполнена)!")
+                    loggerError(row, errorMsg + "Графа «${getColumnName(row, 'taxBenefitCode')}» заполнена неверно!")
                 }
+            }
+            // Проверка основания льготы (в справочнике «Параметры налоговых льгот по налогу на имущество» для льготы, выбранной в «Графе 14», основание может быть изменено)
+            if (row.benefitBasis != calcBasis(row.taxBenefitCode)) {
+                loggerError(row, errorMsg + "Графа «${getColumnName(row, 'benefitBasis')}» заполнена неверно!")
             }
             // Проверка даты возникновения права собственности
             if (row.propertyRightBeginDate < getReportPeriodStartDate() || row.propertyRightBeginDate > getReportPeriodEndDate()) {
@@ -309,10 +341,12 @@ void logicCheck() {
                 loggerError(row, errorMsg + "Дата возникновения права собственности не может быть больше даты прекращения!")
             }
             // Проверка существования выбранных параметров декларации
-            filter = "REGION_ID = " + row.subject?.toString() + " and LOWER(TAX_ORGAN_CODE) = LOWER('" + row.taxAuthority + "') and LOWER(KPP) = LOWER('" + row.kpp + "') and OKTMO = " + row.oktmo?.toString()
-            records = refBookFactory.getDataProvider(200).getRecords(getReportPeriodEndDate(), null, filter, null)
-            if (records.size() == 0) {
-                loggerError(row, errorMsg + "Текущие параметры представления декларации (Код субъекта, Код НО, КПП, Код ОКТМО) не предусмотрены (в справочнике «Параметры представления деклараций по налогу на имущество» отсутствует такая запись)!")
+            if (row.subject && row.taxAuthority && row.kpp && row.oktmo) {
+                filter = "DECLARATION_REGION_ID = " + department.regionId?.toString() + " and REGION_ID = " + row.subject?.toString() + " and LOWER(TAX_ORGAN_CODE) = LOWER('" + row.taxAuthority + "') and LOWER(KPP) = LOWER('" + row.kpp + "') and OKTMO = " + row.oktmo?.toString()
+                records = refBookFactory.getDataProvider(200).getRecords(getReportPeriodEndDate(), null, filter, null)
+                if (records.size() == 0) {
+                    rowWarning(logger, row, errorMsg + "Текущие параметры представления декларации (Код субъекта, Код НО, КПП, Код ОКТМО) не предусмотрены (в справочнике «Параметры представления деклараций по налогу на имущество» отсутствует такая запись)!")
+                }
             }
         } else {
             // Проверка итоговых значений
@@ -346,17 +380,20 @@ void importData() {
             (xml.row[0].cell[5]): getColumnName(tempRow, 'oktmo'),
             (xml.row[0].cell[6]): getColumnName(tempRow, 'address'),
             (xml.row[0].cell[7]): getColumnName(tempRow, 'sign'),
-            (xml.row[0].cell[8]): getColumnName(tempRow, 'cadastreNum'),
-            (xml.row[0].cell[9]): 'Кадастровая стоимость',
-            (xml.row[0].cell[11]): 'Право собственности',
-            (xml.row[0].cell[13]): getColumnName(tempRow, 'taxBenefitCode'),
-            (xml.row[1].cell[9]): 'на 1 января',
-            (xml.row[1].cell[10]): 'в т.ч. необлагаемая налогом',
-            (xml.row[1].cell[11]): 'Дата возникновения',
-            (xml.row[1].cell[12]): 'Дата прекращения',
+            (xml.row[0].cell[8]): 'Кадастровый номер',
+            (xml.row[0].cell[10]): 'Кадастровая стоимость',
+            (xml.row[0].cell[12]): 'Право собственности',
+            (xml.row[0].cell[14]): getColumnName(tempRow, 'taxBenefitCode'),
+            (xml.row[0].cell[15]): getColumnName(tempRow, 'benefitBasis'),
+            (xml.row[1].cell[8]): 'Здание',
+            (xml.row[1].cell[9]): 'Помещение',
+            (xml.row[1].cell[10]): 'на 1 января',
+            (xml.row[1].cell[11]): 'в т.ч. необлагаемая налогом',
+            (xml.row[1].cell[12]): 'Дата возникновения',
+            (xml.row[1].cell[13]): 'Дата прекращения',
             (xml.row[2].cell[0]): '1'
     ]
-    (2..13).each { index ->
+    (2..15).each { index ->
         headerMapping.put((xml.row[2].cell[index]), index.toString())
     }
     checkHeaderEquals(headerMapping)
@@ -418,17 +455,21 @@ void addData(def xml, int headRowCount) {
         // графа 7
         newRow.sign = parseNumber(row.cell[7].text(), xlsIndexRow, 7 + colOffset, logger, true)
         // графа 8
-        newRow.cadastreNum = row.cell[8].text()
+        newRow.cadastreNumBuilding = row.cell[8].text()
         // графа 9
-        newRow.cadastrePriceJanuary = parseNumber(row.cell[9].text(), xlsIndexRow, 9 + colOffset, logger, true)
+        newRow.cadastreNumRoom = row.cell[9].text()
         // графа 10
-        newRow.cadastrePriceTaxFree = parseNumber(row.cell[10].text(), xlsIndexRow, 10 + colOffset, logger, true)
+        newRow.cadastrePriceJanuary = parseNumber(row.cell[10].text(), xlsIndexRow, 10 + colOffset, logger, true)
         // графа 11
-        newRow.propertyRightBeginDate = parseDate(row.cell[11].text(), 'dd.MM.yyyy', xlsIndexRow, 11 + colOffset, logger, true)
+        newRow.cadastrePriceTaxFree = parseNumber(row.cell[11].text(), xlsIndexRow, 11 + colOffset, logger, true)
         // графа 12
-        newRow.propertyRightEndDate = parseDate(row.cell[12].text(), 'dd.MM.yyyy', xlsIndexRow, 12 + colOffset, logger, true)
+        newRow.propertyRightBeginDate = parseDate(row.cell[12].text(), 'dd.MM.yyyy', xlsIndexRow, 12 + colOffset, logger, true)
         // графа 13
-        newRow.taxBenefitCode = parseNumber(row.cell[13].text(), xlsIndexRow, 13 + colOffset, logger, true)
+        newRow.propertyRightEndDate = parseDate(row.cell[13].text(), 'dd.MM.yyyy', xlsIndexRow, 13 + colOffset, logger, true)
+        // графа 14
+        newRow.taxBenefitCode = parseNumber(row.cell[14].text(), xlsIndexRow, 14 + colOffset, logger, true)
+        // графа 15
+        newRow.benefitBasis = row.cell[15].text()
 
         rows.add(newRow)
     }
@@ -452,12 +493,15 @@ void sort(def dataRows) {
         // графа 4  - kpp
         // графа 5  - oktmo
         // графа 7  - sign
-        // графа 8  - cadastreNum
+        // графа 8  - cadastreNumBuilding
+        // графа 9  - cadastreNumRoom
 
-        def valuesA = [(a.subject ? getRefBookValue(4, a.subject) : null), a.taxAuthority, a.kpp, (a.oktmo ? getRefBookValue(96, a.oktmo) : null), a.sign, a.cadastreNum]
-        def valuesB = [(b.subject ? getRefBookValue(4, b.subject) : null), b.taxAuthority, b.kpp, (b.oktmo ? getRefBookValue(96, b.oktmo) : null), b.sign, b.cadastreNum]
+        def valuesA = [(a.subject ? getRefBookValue(4, a.subject)?.NAME?.value : null), a.taxAuthority, a.kpp,
+                       (a.oktmo ? getRefBookValue(96, a.oktmo)?.CODE?.value : null), a.sign, a.cadastreNumBuilding, a.cadastreNumRoom]
+        def valuesB = [(b.subject ? getRefBookValue(4, b.subject)?.NAME?.value : null), b.taxAuthority, b.kpp,
+                       (b.oktmo ? getRefBookValue(96, b.oktmo)?.CODE?.value : null), b.sign, b.cadastreNumBuilding, b.cadastreNumRoom]
 
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < 7; i++) {
             def valueA = valuesA[i]
             def valueB = valuesB[i]
             if (valueA != valueB) {
