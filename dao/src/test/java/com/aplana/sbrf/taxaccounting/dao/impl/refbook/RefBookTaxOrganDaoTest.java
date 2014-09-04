@@ -26,27 +26,37 @@ public class RefBookTaxOrganDaoTest {
     RefBookTaxOrganDao dao;
 
     @Test
-    public void getRecordsCodeTest() {
-        PagingResult<Map<String, RefBookValue>> records = dao.getRecordsCode();
+    public void getRecordsTest() {
+        // Код
+        PagingResult<Map<String, RefBookValue>> records = dao.getRecords(RefBookTaxOrganDao.REF_BOOK_CODE_ID);
         assertEquals(2, records.size());
         assertEquals(2, records.getTotalCount());
         assertEquals("1", records.get(0).get("TAX_ORGAN_CODE").getStringValue());
         assertEquals("2", records.get(1).get("TAX_ORGAN_CODE").getStringValue());
 
-        assertEquals(1, dao.getRecordsCode("DECLARATION_REGION_ID = 1").size());
-        assertEquals(2,dao.getRecordsCode(null).size());
-    }
+        assertEquals(1, dao.getRecords(RefBookTaxOrganDao.REF_BOOK_CODE_ID, "DECLARATION_REGION_ID = 1").size());
+        assertEquals(2,dao.getRecords(RefBookTaxOrganDao.REF_BOOK_CODE_ID, null).size());
 
-    @Test
-    public void getRecordsKppTest() {
-        PagingResult<Map<String, RefBookValue>> records = dao.getRecordsKpp();
+        // КПП
+        records = dao.getRecords(RefBookTaxOrganDao.REF_BOOK_KPP_ID);
         assertEquals(4, records.size());
         assertEquals(4, records.getTotalCount());
         assertEquals("11", records.get(0).get("KPP").getStringValue());
 
-        assertEquals(3, dao.getRecordsKpp("TAX_ORGAN_CODE = '1'").size());
-        assertEquals(3, dao.getRecordsKpp("TAX_ORGAN_CODE = '2'").size());
-        assertTrue(dao.getRecordsKpp("TAX_ORGAN_CODE = '3'").isEmpty());
-        assertEquals(4,dao.getRecordsKpp(null).size());
+        assertEquals(3, dao.getRecords(RefBookTaxOrganDao.REF_BOOK_KPP_ID, "TAX_ORGAN_CODE = '1'").size());
+        assertEquals(3, dao.getRecords(RefBookTaxOrganDao.REF_BOOK_KPP_ID, "TAX_ORGAN_CODE = '2'").size());
+        assertTrue(dao.getRecords(RefBookTaxOrganDao.REF_BOOK_KPP_ID, "TAX_ORGAN_CODE = '3'").isEmpty());
+        assertEquals(4,dao.getRecords(RefBookTaxOrganDao.REF_BOOK_KPP_ID, null).size());
+    }
+
+    @Test
+    public void getRecordsCountTest() {
+        // Код
+        assertEquals(1, dao.getRecordsCount(RefBookTaxOrganDao.REF_BOOK_CODE_ID,  "DECLARATION_REGION_ID = 1"));
+        assertEquals(2, dao.getRecordsCount(RefBookTaxOrganDao.REF_BOOK_CODE_ID,  null));
+
+        // КПП
+        assertEquals(3, dao.getRecordsCount(RefBookTaxOrganDao.REF_BOOK_KPP_ID,  "TAX_ORGAN_CODE = '2'"));
+        assertEquals(4, dao.getRecordsCount(RefBookTaxOrganDao.REF_BOOK_KPP_ID,  null));
     }
 }
