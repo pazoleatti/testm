@@ -9,12 +9,17 @@
         .right15 {
             margin-right: 15px;
         }
+        @external .gwt-Label;
+        .pnl .gwt-Label {
+            margin-right: 5px;
+            margin-left: 10px;
+        }
     </ui:style>
     <g:HorizontalPanel width="100%">
         <g:cell width="100%">
-            <g:HTMLPanel ui:field="panel" width="100%"/>
+            <g:HTMLPanel ui:field="panel" width="100%" addStyleNames="{style.pnl}"/>
         </g:cell>
-        <g:cell verticalAlignment="top" horizontalAlignment="right">
+        <g:cell verticalAlignment="middle" horizontalAlignment="right">
             <g:HTML ui:field="separator" addStyleNames="{style.separator}"/>
         </g:cell>
         <g:cell verticalAlignment="middle">

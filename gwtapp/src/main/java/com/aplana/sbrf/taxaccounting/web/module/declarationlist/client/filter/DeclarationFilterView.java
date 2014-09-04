@@ -170,7 +170,6 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 
     private void fillDeal() {
         HorizontalPanel horizontalPanel = new HorizontalPanel();
-        horizontalPanel.setSpacing(5);
         horizontalPanel.setWidth("100%");
         Label label = new Label("Подразделение:");
         horizontalPanel.add(label);
@@ -189,7 +188,6 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 
     private void fillProperty() {
         HorizontalPanel horizontalPanel = new HorizontalPanel();
-        horizontalPanel.setSpacing(5);
         horizontalPanel.setWidth("100%");
         VerticalPanel verticalPanel1 = new VerticalPanel();
         VerticalPanel verticalPanel2 = new VerticalPanel();
@@ -243,7 +241,6 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 
     private void fillDefault() {
         HorizontalPanel horizontalPanel = new HorizontalPanel();
-        horizontalPanel.setSpacing(5);
         horizontalPanel.setWidth("100%");
         Label label = new Label("Подразделение:");
         horizontalPanel.add(label);
