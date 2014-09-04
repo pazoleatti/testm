@@ -1,31 +1,42 @@
 package com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.client;
 
+import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.shared.Pdf;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.shared.PdfPage;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
-import com.google.gwt.event.dom.client.*;
-import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.DomEvent;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.view.client.HasRows;
+import com.google.gwt.view.client.Range;
+import com.google.gwt.view.client.RangeChangeEvent;
+import com.google.gwt.view.client.RowCountChangeEvent;
 
-public class PdfViewerWidget extends Composite implements PdfViewerView {
+public class PdfViewerWidget extends Composite implements PdfViewerView, HasRows {
 
 	private static PdfViewerWidgetUiBinder uiBinder = GWT
 			.create(PdfViewerWidgetUiBinder.class);
+    private RangeChangeEvent.Handler rangeChangeHandler;
+    private RowCountChangeEvent.Handler rowCountChangeEventHandler;
 
-	interface PdfViewerWidgetUiBinder extends UiBinder<Widget, PdfViewerWidget> {
+    interface PdfViewerWidgetUiBinder extends UiBinder<Widget, PdfViewerWidget> {
 	}
 
-	Pdf pdf;
+	private Pdf pdf;
+
+    private int page = 0;
 
 	@UiField
 	Image pdfPage;
 
-	@UiField
-	Tree pages;
+    @UiField
+    FlexiblePager pager;
 
 	@UiField
 	ListBox scale;
@@ -40,39 +51,35 @@ public class PdfViewerWidget extends Composite implements PdfViewerView {
 
 	public PdfViewerWidget() {
 		initWidget(uiBinder.createAndBindUi(this));
-		setPages(null);
 		pdfPage.setPixelSize(DEFAULT_PAGE_WIDTH, DEFAULT_PAGE_HEIGHT);
 
 		for (int i=50; i<=200; i+=10) {
 			scale.addItem(i + "%");
 		}
-		scale.setSelectedIndex(DEFAULT_SCALE_POSITION); //Select 100%
 
+		scale.setSelectedIndex(DEFAULT_SCALE_POSITION); //Select 100%
 	}
+
+    private void toPage(int pageNum) {
+        if (pdf != null && pdf.getPdfPages() != null && !pdf.getPdfPages().isEmpty()) {
+            if (pageNum >= pdf.getPdfPages().size() || pageNum < 0) {
+                return;
+            }
+            PdfPage page = pdf.getPdfPages().get(pageNum);
+            if (page != null) {
+                pdfPage.setUrl(page.getSrc());
+            }
+            this.page = pageNum;
+            pager.setPageNumber(pageNum + 1);
+        }
+    }
 
 	@Override
 	public void setPages(Pdf pdf) {
-		pages.clear();
-		if (pdf != null) {
-			this.pdf = pdf;
-			TreeItem rootItem = new TreeItem();
-			rootItem.setText(pdf.getTitle());
-			rootItem.setState(true);
-            if (pdf.getPdfPages() != null) {
-                pdfPage.setVisible(true);
-                for (PdfPage page : pdf.getPdfPages()) {
-                    TreeItem pageItem = new TreeItem();
-                    pageItem.setText(page.getTitle());
-                    pageItem.setUserObject(page);
-                    rootItem.addItem(pageItem);
-                }
-            } else {
-                pdfPage.setVisible(false);
-            }
-			pages.addItem(rootItem);
-			rootItem.setState(true);
-			pages.setSelectedItem(rootItem.getChild(0));
-		}
+        this.pdf = pdf;
+        toPage(0);
+        pager.setDisplay(this);
+        pager.setPageSize(1);
 	}
 
 	@UiHandler("scale")
@@ -81,14 +88,6 @@ public class PdfViewerWidget extends Composite implements PdfViewerView {
 				scale.getItemText(scale.getSelectedIndex()).length() - 1));
 
 		pdfPage.setPixelSize((int)(DEFAULT_PAGE_WIDTH *(scaleValue/100.)), (int)(DEFAULT_PAGE_HEIGHT *(scaleValue/100.)));
-	}
-
-	@UiHandler("pages")
-	public void onSelection(SelectionEvent<TreeItem> event) {
-		PdfPage page = (PdfPage)event.getSelectedItem().getUserObject();
-		if (page != null) {
-			pdfPage.setUrl(page.getSrc());
-		}
 	}
 
 	@UiHandler("plusButton")
@@ -117,4 +116,49 @@ public class PdfViewerWidget extends Composite implements PdfViewerView {
 		pdfPage.setPixelSize((int)(pdfPage.getWidth() * mul), (int)(pdfPage.getHeight() * mul));
 	}
 
+    @Override
+    public void setRowCount(int count) {}
+
+    @Override
+    public void setRowCount(int count, boolean isExact) {}
+
+    @Override
+    public HandlerRegistration addRangeChangeHandler(RangeChangeEvent.Handler handler) {
+        this.rangeChangeHandler = handler;
+        return null;
+    }
+
+    @Override
+    public HandlerRegistration addRowCountChangeHandler(RowCountChangeEvent.Handler handler) {
+        this.rowCountChangeEventHandler = handler;
+        return null;
+    }
+
+    @Override
+    public int getRowCount() {
+        if (pdf == null || pdf.getPdfPages() == null) {
+            return 0;
+        }
+        return pdf.getPdfPages().size();
+    }
+
+    @Override
+    public Range getVisibleRange() {
+        return new Range(page, 1);
+    }
+
+    @Override
+    public boolean isRowCountExact() {
+        return true;
+    }
+
+    @Override
+    public void setVisibleRange(int start, int length) {
+        toPage(start);
+    }
+
+    @Override
+    public void setVisibleRange(Range range) {
+        toPage(range.getStart());
+    }
 }
