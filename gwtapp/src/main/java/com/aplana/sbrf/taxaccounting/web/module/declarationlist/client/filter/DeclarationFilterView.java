@@ -24,8 +24,6 @@ import java.util.Set;
 public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterUIHandlers>
         implements DeclarationFilterPresenter.MyView {
 
-    private final String style1 = "margin: 0 5px 0 0; white-space: nowrap; text-align: right";
-    private final String style2 = "margin: 0 5px 0 10px; white-space: nowrap; text-align: right";
     private DeclarationDataFilter formDataFilter;
 
     interface MyBinder extends UiBinder<Widget, DeclarationFilterView> {}
@@ -172,18 +170,16 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 
     private void fillDeal() {
         HorizontalPanel horizontalPanel = new HorizontalPanel();
+        horizontalPanel.setSpacing(5);
         horizontalPanel.setWidth("100%");
         Label label = new Label("Подразделение:");
         horizontalPanel.add(label);
-        label.getElement().setPropertyString("style", style1);
         horizontalPanel.add(departmentPicker);
         label = new Label("Период:");
         horizontalPanel.add(label);
-        label.getElement().setPropertyString("style", style2);
         horizontalPanel.add(reportPeriodPicker);
         label = new Label("Состояние:");
         horizontalPanel.add(label);
-        label.getElement().setPropertyString("style", style2);
         horizontalPanel.add(formStatePicker);
         horizontalPanel.setCellWidth(departmentPicker, "33%");
         horizontalPanel.setCellWidth(reportPeriodPicker, "33%");
@@ -193,6 +189,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 
     private void fillProperty() {
         HorizontalPanel horizontalPanel = new HorizontalPanel();
+        horizontalPanel.setSpacing(5);
         horizontalPanel.setWidth("100%");
         VerticalPanel verticalPanel1 = new VerticalPanel();
         VerticalPanel verticalPanel2 = new VerticalPanel();
@@ -219,26 +216,25 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         horizontalPanel.setCellWidth(verticalPanel6, "33%");
 
         Label label = new Label("Подразделение:");
-        label.getElement().setPropertyString("style", style1);
         verticalPanel1.add(label);
         label = new Label("Период:");
-        label.getElement().setPropertyString("style", style1);
+        label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
         verticalPanel1.add(label);
         verticalPanel2.add(departmentPicker);
         verticalPanel2.add(reportPeriodPicker);
         label = new Label("Вид декларации:");
-        label.getElement().setPropertyString("style", style2);
+        label.setWordWrap(false);
         verticalPanel3.add(label);
         label = new Label("Состояние:");
-        label.getElement().setPropertyString("style", style2);
+        label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
         verticalPanel3.add(label);
         verticalPanel4.add(declarationTypePicker);
         verticalPanel4.add(formStatePicker);
         label = new Label("Налоговый орган:");
-        label.getElement().setPropertyString("style", style2);
+        label.setWordWrap(false);
         verticalPanel5.add(label);
         label = new Label("КПП:");
-        label.getElement().setPropertyString("style", style2);
+        label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
         verticalPanel5.add(label);
         verticalPanel6.add(taxOrganisationPicker);
         verticalPanel6.add(kppPicker);
@@ -247,24 +243,24 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 
     private void fillDefault() {
         HorizontalPanel horizontalPanel = new HorizontalPanel();
+        horizontalPanel.setSpacing(5);
         horizontalPanel.setWidth("100%");
         Label label = new Label("Подразделение:");
         horizontalPanel.add(label);
-        label.getElement().setPropertyString("style", style1);
         horizontalPanel.add(departmentPicker);
         label = new Label("Период:");
+        label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
         horizontalPanel.add(label);
-        label.getElement().setPropertyString("style", style2);
         horizontalPanel.add(reportPeriodPicker);
 
         label = new Label("Вид декларации:");
+        label.setWordWrap(false);
         horizontalPanel.add(label);
-        label.getElement().setPropertyString("style", style2);
         horizontalPanel.add(declarationTypePicker);
 
         label = new Label("Состояние:");
+        label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
         horizontalPanel.add(label);
-        label.getElement().setPropertyString("style", style2);
         horizontalPanel.add(formStatePicker);
         horizontalPanel.setCellWidth(departmentPicker, "25%");
         horizontalPanel.setCellWidth(reportPeriodPicker, "25%");
