@@ -59,6 +59,9 @@ public class RefBook implements Serializable {
 	/** Редактируемый (0 - редактирование недоступно пользователю, 1 - редактирование доступно пользователю) */
 	private boolean readOnly;
 
+    /** Название таблицы справочника, заполняется в случае если справочник не универсальный */
+    private String tableName;
+
     private RefBookAttribute regionAttribute;
 
 	public static RefBookAttribute getVersionFromAttribute() {
@@ -286,7 +289,20 @@ public class RefBook implements Serializable {
 		sb.append(", visible=").append(visible);
 		sb.append(", type=").append(type);
 		sb.append(", readOnly=").append(readOnly);
+		sb.append(", tableName=").append(tableName);
 		sb.append('}');
 		return sb.toString();
 	}
+
+    public String getTableName() {
+        return tableName;
+    }
+
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
+    }
+
+    public boolean isSimple(){
+        return tableName != null;
+    }
 }

@@ -168,7 +168,7 @@ public class RefBookBookerStatementPeriodDaoImpl extends AbstractDao implements 
     private RefBook get(Long refBookId) {
         try {
             return getJdbcTemplate().queryForObject(
-                    "select id, name, script_id, visible, type, read_only, region_attribute_id from ref_book where id = ?",
+                    "select id, name, script_id, visible, type, read_only, region_attribute_id, table_name from ref_book where id = ?",
                     new Object[]{refBookId}, new int[]{Types.NUMERIC},
                     new RefBookRowMapper());
         } catch (EmptyResultDataAccessException e) {
@@ -187,6 +187,7 @@ public class RefBookBookerStatementPeriodDaoImpl extends AbstractDao implements 
             result.setAttributes(getAttributes(result.getId()));
             result.setType(SqlUtils.getInteger(rs,"type"));
             result.setReadOnly(rs.getBoolean("read_only"));
+            result.setTableName(rs.getString("table_name"));
             BigDecimal regionAttributeId = (BigDecimal) rs.getObject("REGION_ATTRIBUTE_ID");
             if (regionAttributeId == null) {
                 result.setRegionAttribute(null);

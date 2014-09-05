@@ -238,7 +238,8 @@ public class RefBookFactoryImpl implements RefBookFactory {
      * @return
      */
     private boolean isSimpleRefBool(Long refBookId){
-        Long[] foreignRefBooks = new Long[]{
+        return true;
+        /*Long[] foreignRefBooks = new Long[]{
                 RefBookDepartment.REF_BOOK_ID,
                 RefBookIncome101.REF_BOOK_ID,
                 RefBookIncome102.REF_BOOK_ID,
@@ -254,6 +255,6 @@ public class RefBookFactoryImpl implements RefBookFactory {
             }
         }
 
-        return true;
+        return true;*/
     }
 }
