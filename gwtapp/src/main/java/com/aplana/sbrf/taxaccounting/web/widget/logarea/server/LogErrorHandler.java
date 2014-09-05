@@ -39,7 +39,7 @@ public class LogErrorHandler extends AbstractActionHandler<LogErrorAction, LogEr
         try {
             String filePath = printingService.generateExcelLogEntry(logErrorAction.getLogEntries());
             InputStream fileInputStream = new FileInputStream(filePath);
-            String uuid = blobDataService.createTemporary(fileInputStream, "Список_ошибок.xlsx");
+            String uuid = blobDataService.create(fileInputStream, "Список_ошибок.xlsx");
 
             LogErrorResult result = new LogErrorResult();
             result.setUuid(uuid);

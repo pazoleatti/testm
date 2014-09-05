@@ -34,7 +34,6 @@ public class BlobDataServiceImplTest {
         blobData.setInputStream(new FileInputStream(file));
         blobData.setCreationDate(new Date());
         blobData.setUuid(UUID.randomUUID().toString().toLowerCase());
-        blobData.setType(1);
     }
 
     @Test

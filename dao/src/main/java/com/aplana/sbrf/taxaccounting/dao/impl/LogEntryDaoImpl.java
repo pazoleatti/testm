@@ -36,7 +36,6 @@ public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
             blobData.setInputStream(is);
             blobData.setUuid(uuid);
             blobData.setCreationDate(new java.util.Date());
-            blobData.setType(0);
 
             blobDataDao.create(blobData);
         } catch (Exception e) {

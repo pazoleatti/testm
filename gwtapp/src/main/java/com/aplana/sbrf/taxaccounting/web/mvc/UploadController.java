@@ -38,28 +38,23 @@ public class UploadController {
     @RequestMapping(value = "/patterntemp", method = RequestMethod.POST)
     public void processUploadXlsTemp(HttpServletRequest request, HttpServletResponse response)
             throws FileUploadException, IOException {
-        processUpload(request, response, true);
+        processUpload(request, response);
     }
 
     @RequestMapping(value = "/pattern", method = RequestMethod.POST)
     public void processUploadXls(HttpServletRequest request, HttpServletResponse response)
             throws FileUploadException, IOException {
-        processUpload(request, response, false);
+        processUpload(request, response);
     }
 
-    private void processUpload(HttpServletRequest request, HttpServletResponse response, boolean uploadAsTemporal) throws IOException, FileUploadException {
+    private void processUpload(HttpServletRequest request, HttpServletResponse response) throws IOException, FileUploadException {
         request.setCharacterEncoding("UTF-8");
 
         FileItemFactory factory = new DiskFileItemFactory();
         ServletFileUpload upload = new ServletFileUpload(factory);
         List<FileItem> items = upload.parseRequest(request);
         FileItem fileItem = items.get(0);
-        String uuid;
-        if (uploadAsTemporal) {
-            uuid = blobDataService.createTemporary(fileItem.getInputStream(), fileItem.getName());
-        } else {
-            uuid = blobDataService.create(fileItem.getInputStream(), fileItem.getName());
-        }
+        String uuid = blobDataService.create(fileItem.getInputStream(), fileItem.getName());
         response.getWriter().printf("{uuid : \"%s\"}", uuid);
     }
 
