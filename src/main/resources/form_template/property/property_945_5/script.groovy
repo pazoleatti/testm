@@ -13,10 +13,9 @@ import groovy.transform.Field
  * formTemplateId=10640
  *
  * TODO:
- *      - расчеты
- *      - убрать лишнее
- *      - в чтз большие изменения: сбор данных (консолидация) выполняется при рассчитать, добавились логические проверки и т.д. сверить все по чтз
+ *      - добавились логические проверки
  *      - графа title возможно будет справочной
+ *      - убрать лишнее
  *
  * @author Ramil Timerbaev
  */
@@ -133,6 +132,10 @@ def groupColumns = ['subject', 'taxAuthority', 'kpp', 'oktmo']
 def totalColumns = ['cost1', 'cost2', 'cost3', 'cost4', 'cost5', 'cost6', 'cost7',
         'cost8', 'cost9', 'cost10', 'cost11', 'cost12', 'cost13', 'cost31_12']
 
+// графа 2..8 первичной 945.1
+@Field
+def columnsFromPrimary945_5 = ['taxBase1', 'taxBase2', 'taxBase3', 'taxBase4', 'taxBase5', 'taxBaseSum']
+
 // TODO (Ramil Timerbaev) убрать лишние переменные
 @Field
 def startDate = null
@@ -170,7 +173,7 @@ def ROW_2_VALUE = 'Стоимость движимого имущества, о�
 def ROW_TOTAL_VALUE = 'ИТОГО с учетом корректировки'
 
 @Field
-def GROUP_1_2_2_2_BEGIN = 'Льготируемое имущество (всего)'
+def GROUP_1_2_2_2_BEGIN = 'Льготируемое имущество'
 
 @Field
 def ROW_27_VALUE_BEGIN = 'ИТОГО'
@@ -180,6 +183,9 @@ def ROW_27_VALUE_END = 'с учетом корректировки'
 
 @Field
 def TOTAL_ROW_TITLE = 'В т.ч. стоимость льготируемого имущества (всего):'
+
+@Field
+def UNCATEGORIZED = 'Без категории'
 
 @Field
 def SEPARATOR = '#'
@@ -208,13 +214,17 @@ def formDataSources = null
 def sourceFormName = null
 
 @Field
-def refBook200Name = null
+def refBookNameMap = [:]
 
 @Field
 def sourcesPeriodMap = null
 
 @Field
 def prevDataRows = null
+
+// мапа для хранения первых строк новых групп для вывода информационных сообщении для них
+@Field
+def infoMessagesRowMap = [:]
 
 // TODO (Ramil Timerbaev) убрать?
 //def getReportPeriodStartDate() {
@@ -238,34 +248,57 @@ def getYearStartDate() {
     return yearStartDate
 }
 
-// TODO (Ramil Timerbaev) убрать?
-//// Разыменование записи справочника
-//def getRefBookValue(def long refBookId, def Long recordId) {
-//    if (recordId == null) {
-//        return null
-//    }
-//    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
-//}
+// Разыменование записи справочника
+def getRefBookValue(def long refBookId, def Long recordId) {
+    if (recordId == null) {
+        return null
+    }
+    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
+}
 
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    // def dataRows = dataRowHelper.allCached
+    def dataRows = dataRowHelper.allCached
 
-    // TODO (Ramil Timerbaev) пока при расчете данные формируются занова, по чтз нужно обновлять не все группы
-    def newDataRows = getConsolidationRows()
+    // получить группы со строками
+    def groupsMap = getGroupsMap(dataRows)
+
+    // получить группы из источников
+    def tmpGroupsMap = getConsolidationGroupsRows()
+
+    // получить обновленные группы формы из текущих групп и временных групп из источников
+    def newGroupsMap = getNewGroupsMap(groupsMap, tmpGroupsMap)
+
+    // сортировка / группировка
+    def newDataRows = sort(newGroupsMap)
+
+    // дополнить данными из формы предыдущего отчетного периода
+    addPrevData(newDataRows)
 
     // расчет итогов - во второй строке каждой группы
-    // получить группы со строками
-    def groupsMap = getGroupsMap(newDataRows)
-
-    // расчет итогов для каждой группы
-    groupsMap.keySet().each {
-        def rows = groupsMap[it]
+    newGroupsMap.keySet().each {
+        def rows = newGroupsMap[it]
         def row2 = rows.get(1)
         def from = 2
         def to = rows.size() - 1
         def categoryRows = rows[from..to]
         calcTotalSum(categoryRows, row2, totalColumns)
+    }
+
+    // вывод информационного сообщения №2
+    newDataRows.eachWithIndex { row, i ->
+        row.setIndex(i + 1)
+    }
+    infoMessagesRowMap.keySet().each { key ->
+        def row = infoMessagesRowMap[key]
+
+        def index = row.getIndex()
+        def subject = getRefBookValue(4L, row.subject)?.CODE?.value
+        def taxAuthority = row.taxAuthority
+        def kpp = row.kpp
+        def oktmo = getRefBookValue(96L, row.oktmo)?.CODE?.value
+        logger.info("Строка $index: Создана группа строк по параметрам декларации " +
+                "«Код субъекта» = $subject, «Код НО» = $taxAuthority, «КПП» = $kpp, «Код ОКТМО» = $oktmo")
     }
 
     dataRowHelper.save(newDataRows)
@@ -330,6 +363,8 @@ void logicCheck() {
             list.add("Графа «$columnName» = $value")
         }
         if (list) {
+            def subject = getRefBookValue(4, row.subject)?.CODE?.value
+            def oktmo = getRefBookValue(96, row.oktmo)?.CODE?.value
             def msgColumnNames = list.join(', ')
             logger.error("Параметры декларации «Код субъекта» = $subject, «Код ОКТМО» = $oktmo: " +
                     "Итоговые значения остаточной стоимости основных средств, " +
@@ -346,7 +381,8 @@ void logicCheck() {
     // TODO (Ramil Timerbaev) аналогично логической проверке 4, только для строк с критериями
 }
 
-def getConsolidationRows() {
+/** Получить мапу с группами строк из источников. */
+def getConsolidationGroupsRows() {
     // мапа для хранения строк по группам (ключ - значение 4ех графов: Код субъекта, Код НО, КПП, Код ОКТМО)
     def groupRowsMap = [:]
 
@@ -365,14 +401,7 @@ def getConsolidationRows() {
             processRowsGroup1(rows, alias, source.id, groupRowsMap)
         }
     }
-
-    // сортировка / группировка
-    def dataRows = sort(groupRowsMap)
-
-    // дополнить данными из формы предыдущего отчетного периода
-    addPrevData(dataRows)
-
-    return dataRows
+    return groupRowsMap
 }
 
 def getReportPeriod() {
@@ -472,7 +501,7 @@ void processRowsGroup1(def rows, def alias, def sourceFormId, def groupRowsMap) 
             def sourceFormName = getSourceFormName()
             // название периода и года (месяц и год)
             def periodName = periodNameMap[sourceFormId]
-            def refBookName = getRefBook200Name()
+            def refBookName = getRefBookName(200L)
             logger.error("Параметры декларации «Код субъекта» = $subject и «Код ОКТМО» = $oktmo " +
                     "формы «$sourceFormName» за $periodName г. не предусмотрены " +
                     "(в справочнике «$refBookName» отсутствует такая запись)!")
@@ -740,9 +769,21 @@ void addNewRowsFromGroup1_2_2(def group1_2_2, def alias, def key, groupRowsMap) 
             println "property_945_5: impossible to get the category name from ${row27.name}." // TODO (Ramil Timerbaev)
         }
 
-        // проверить название категории
+        // проверить название категории - если названия нет, то это группа 1.2.2.2 из строк 19-21 (без категории)
         if (!categoryName) {
-            categoryName = "Без категории"
+            // если у строки 21 (из группы где нет категории) все значения равны 0, то для нее не добавляем строку в сводную
+            def hasOnlyZero = true
+            for (def column : columnsFromPrimary945_5) {
+                if (row27.getCell(column).value) {
+                    hasOnlyZero = false
+                    break
+                }
+            }
+            // все значения в строке 21 равны 0, тогда пропускаем эту строку
+            if (hasOnlyZero) {
+                continue
+            }
+            categoryName = UNCATEGORIZED
         }
 
         // определить по глобальной мапе по ключу key есть ли в группе строка с такой категорией
@@ -790,7 +831,7 @@ def getGroupsMap(def dataRows) {
     def groupsMap = [:]
     // найти группы
     dataRows.each { row ->
-        def key = row.subject + SEPARATOR + row.taxAuthority + SEPARATOR + row.kpp + SEPARATOR + row.oktmo
+        def key = getGroupKey(row)
         if (groupsMap[key] == null) {
             groupsMap[key] = []
         }
@@ -808,12 +849,12 @@ def getSourceFormName() {
 }
 
 
-/** Получить название справочника 200. */
-def getRefBook200Name() {
-    if (refBook200Name == null) {
-        refBook200Name = refBookFactory.get(200L)?.name
+/** Получить название справочника по идентификатору. */
+def getRefBookName(def refBookId) {
+    if (refBookNameMap[refBookId] == null) {
+        refBookNameMap[refBookId] = refBookFactory.get(refBookId)?.name
     }
-    return refBook200Name
+    return refBookNameMap[refBookId]
 }
 
 /**
@@ -927,14 +968,14 @@ void addPrevData(def dataRows) {
         }
         // скопировать если текущая форма: 1кв - не надо копировать, полгода - 5..8 графа, 9 месяцев 9..11, год - 12..14
         def someColumns = editableColumnsMap[getReportPeriod().order - 1]
-        if (prevGroupRows) {
-            def prevCategoryRow = getRowByName(prevGroupRows, 'title', row.title)
+        def prevCategoryRow = getRowByName(prevGroupRows, 'title', row.title)
+        if (prevCategoryRow) {
             someColumns.each { column ->
                 def value = prevCategoryRow.getCell(column).value
                 row.getCell(column).setValue(value, null)
             }
         } else {
-            // если в предыдущей форме не было такой группы, то занулять
+            // если в предыдущей форме не было такой категории в группе, то занулять
             someColumns.each { column ->
                 row.getCell(column).setValue(BigDecimal.ZERO, null)
             }
@@ -957,7 +998,7 @@ def sort(def groupRowsMap) {
 
             // сортировка категории группы по алфавиту
             def categoryRows = rows - row1 - row2
-            sortRows(categoryRows, ['title'])
+            sortCategoryRows(categoryRows)
             def sortedRows = [row1, row2] + categoryRows
 
             // добавить строки групп в форму
@@ -994,4 +1035,168 @@ def getCloneRow(def row) {
         newCell.rowSpan = cell.rowSpan
     }
     return newRow
+}
+
+/**
+ * Отсортировать категории внутри группы. Сортировать по кодам льгот.
+ * Порядок сортировки: 2012000, 2012500, 2012400, (2012400 и 2012500).
+ */
+void sortCategoryRows(def rows) {
+    rows.sort { def a, def b ->
+        def codesA = getValueForSort(a)
+        def codesB = getValueForSort(b)
+        if (codesA.size() == codesB.size()) {
+            if (codesA.size() > 1) {
+                return -1
+            } else if (codesA.size() == 1) {
+                def sortedCodes = ['2012000' : 1, '2012500' : 2, '2012400' : 3]
+                def indexA = sortedCodes[codesA[0]]
+                def indexB = sortedCodes[codesB[0]]
+                return indexA <=> indexB
+            }
+        }
+        return codesA.size() <=> codesB.size()
+    }
+}
+
+/** Получить список кодов льгот категории для сортировки. */
+def getValueForSort(def row) {
+    def hasCategory = !UNCATEGORIZED.equals(row.title)
+
+    // получение данных их справочника 203 "Параметры налоговых льгот налога на имущество"
+    def regioId = formDataDepartment.regionId
+    def subjectId = row.subject
+    def paramDectination = (hasCategory ? 1 : 0)
+
+    def filter = "DECLARATION_REGION_ID = $regioId " +
+            "and REGION_ID = $subjectId " +
+            "and PARAM_DESTINATION = $paramDectination"
+    if (hasCategory) {
+        def category = row.title
+        filter = filter + " and ASSETS_CATEGORY = '$category'"
+    }
+    def provider = formDataService.getRefBookProvider(refBookFactory, 203, providerCache)
+    def records = provider.getRecords(getReportPeriodEndDate(), null, filter, null)
+    if (!records) {
+        // если записей нет, то ошибка
+        def subject = getRefBookValue(4, subjectId)?.CODE?.value
+        def refBookName = getRefBookName(200L)
+        throw new Exception("Для кода субъекта $subject не предусмотрена налоговая льгота без категории " +
+                "(в справочнике «$refBookName» отсутствует необходимая запись)!")
+    }
+
+    // получение налоговых льгот - записи из справочника 202 "Коды налоговых льгот налога на имущество"
+    def list = []
+    records.each { record ->
+        def record202 = getRefBookValue(202L, record.TAX_BENEFIT_ID.value)
+        list.add(record202?.CODE?.value)
+    }
+    return list
+}
+
+/**
+ * Обновить строки формы из источников.
+ *
+ * @param groupsMap мапа с текущими группами
+ * @param tmpGroupsMap мапа с временными обновленными группами (из источников)
+ */
+def getNewGroupsMap(def groupsMap, def tmpGroupsMap) {
+    // для новых групп
+    def newGroupsMap = [:]
+
+    // мапа для хранения списка строк по ключу: Код субъекта, Код ОКТМО (для проверки количества групп с заданным ключом)
+    def checkGroupsMap = [:]
+
+    // пройтись по текущим строкам и сравнить их с обновленными (временными), пропустить удаленные, найти группы для дальнейшей проверки
+    groupsMap.keySet().each { key ->
+        def tmpGroupRows = tmpGroupsMap[key]
+        def row = groupsMap[key][0]
+        if (tmpGroupRows) {
+            // ключ (Код субъекта, Код ОКТМО)
+            def subjectAndOktmoKey = row.subject + SEPARATOR + row.oktmo
+            if (!checkGroupsMap[subjectAndOktmoKey]) {
+                checkGroupsMap[subjectAndOktmoKey] = []
+            }
+            checkGroupsMap[subjectAndOktmoKey].add(tmpGroupRows)
+        } else {
+            // среди временных обновленных строк нет такой группы - удалить ее (пропустить)
+            def subject = getRefBookValue(4L, row.subject)?.CODE?.value
+            def taxAuthority = row.taxAuthority
+            def kpp = row.kpp
+            def oktmo = getRefBookValue(96L, row.oktmo)?.CODE?.value
+            logger.info("Удалена группа строк по параметрам декларации «Код субъекта» = $subject, " +
+                    "«Код НО» = $taxAuthority, «КПП» = $kpp, «Код ОКТМО» = $oktmo")
+        }
+    }
+
+    // проверить наличие обновленных групп в существующих, если нет среди существующих, то добавить
+    tmpGroupsMap.keySet().each { key ->
+        def groupRows = groupsMap[key]
+        if (!groupRows) {
+            newGroupsMap[key] = tmpGroupsMap[key]
+            // для вывода информационного сообещения №2
+            infoMessagesRowMap[key] = tmpGroupsMap[key][0]
+        }
+    }
+
+    // проверить найденые группы соответствующие текущим и обновленным группам
+    checkGroupsMap.keySet().each { key ->
+        def groups = checkGroupsMap[key]
+        if (groups.size() == 1) {
+            // группа не имеет схожих групп по "Код субъекта" и "Код ОКТМО", обновить группу (взять обновленную временную)
+            // 1ая строка 1ой группы
+            def row = groups[0][0]
+            def groupKey = getGroupKey(row)
+            newGroupsMap[groupKey] = groups[0]
+        } else {
+            // группа имеет схожие группы по "Код субъекта" и "Код ОКТМО"
+            groups.each { groupRows ->
+                def groupKey = getGroupKey(groupRows[0])
+                def group = groupsMap[groupKey]
+                def tmpGroup = tmpGroupsMap[groupKey]
+
+                def newGroup = [group[0], group[1]]
+                def categoryRows = group - group[0] - group[1]
+                def tmpCategoryRows = tmpGroup - tmpGroup[0] - tmpGroup[1]
+
+                // если текущая категория существует во временных, то не меняем ее, если такой категории уже не существует, то пропускаем
+                for (def row : categoryRows) {
+                    if (containCategory(tmpCategoryRows, row.title)) {
+                        newGroup.add(row)
+                    }
+                }
+                // если временной категории нет в текущих, то добавить ее
+                for (def tmpRow : tmpCategoryRows) {
+                    if (!containCategory(categoryRows, tmpRow.title)) {
+                        newGroup.add(tmpRow)
+                    }
+                }
+                newGroupsMap[groupKey] = newGroup
+            }
+        }
+    }
+
+    return newGroupsMap
+}
+
+/** Получить ключ группы (Код субъекта, Код НО, КПП, Код ОКТМО). */
+def getGroupKey(def row) {
+    def subject = getRefBookValue(4L, row.subject)?.CODE?.value
+    def oktmo = getRefBookValue(96L, row.oktmo)?.CODE?.value
+    return subject + SEPARATOR + row.taxAuthority + SEPARATOR + row.kpp + SEPARATOR + oktmo
+}
+
+/**
+ * Проверить если ли среди строк заданная категория.
+ *
+ * @param rows строки
+ * @param value название категории
+ */
+def containCategory(def rows, def value) {
+    for (def row : rows) {
+        if (row.title == value) {
+            return true
+        }
+    }
+    return false
 }
