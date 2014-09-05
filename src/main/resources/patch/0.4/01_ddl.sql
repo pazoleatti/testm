@@ -46,5 +46,10 @@ COMMENT ON COLUMN declaration_data.tax_organ_code IS 'Налоговый орг�
 COMMENT ON COLUMN declaration_data.kpp IS 'КПП';
 
 ---------------------------------------------------------------------------------------------------
+-- http://jira.aplana.com/browse/SBRFACCTAX-8738 - Удаление поля BLOB_DATA.TYPE
+ALTER TABLE blob_data DROP CONSTRAINT blob_data_chk_type;
+ALTER TABLE blob_data DROP COLUMN type;
+
+---------------------------------------------------------------------------------------------------
 COMMIT;
 EXIT;
