@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.server;
 
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.ObjectLock;
+import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
@@ -76,12 +76,12 @@ public class GetFormHandler extends AbstractActionHandler<GetFormAction, GetForm
      */
     private void fillLockData(GetFormAction action, TAUserInfo userInfo,
                               GetFormResult result) {
-        ObjectLock<Integer> lockInformation = formTemplateService.getObjectLock(action
+        LockData lockInformation = formTemplateService.getObjectLock(action
                 .getId(), securityService.currentUserInfo());
         if (lockInformation != null) {
             // Если данная форма уже заблокирована
             result.setLockedByUser(taUserService.getUser(lockInformation.getUserId()).getName());
-            result.setLockDate(getFormedDate(lockInformation.getLockTime()));
+            result.setLockDate(getFormedDate(lockInformation.getDateBefore()));
             if (lockInformation.getUserId() != userInfo.getUser().getId()) {
                 result.setLockedByAnotherUser(true);
             }

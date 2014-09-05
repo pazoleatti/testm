@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.core.api.LockCoreService;
+import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
@@ -99,10 +99,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private LogEntryService logEntryService;
 
     @Autowired
-    private LockCoreService lockCoreService;
-
-    @Autowired
     private TransactionHelper tx;
+    @Autowired
+    private LockDataService lockDataService;
 
 	public static final String TAG_FILE = "Файл";
 	public static final String TAG_DOCUMENT = "Документ";
@@ -551,7 +550,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @Transactional
     public void lock(long declarationDataId, TAUserInfo userInfo) {
-        lockCoreService.lock(DeclarationData.class, declarationDataId, userInfo);
+        checkLock(lockDataService.lock(LockData.LOCK_OBJECTS.DECLARATION_DATA.name() + "_" + declarationDataId, userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME),
+                userInfo.getUser());
     }
 
     @Override
@@ -560,7 +560,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         tx.executeInNewTransaction(new TransactionLogic() {
             @Override
             public void execute() {
-                lockCoreService.unlock(DeclarationData.class, declarationDataId, userInfo);
+                lockDataService.unlock(LockData.LOCK_OBJECTS.DECLARATION_DATA.name() + "_" + declarationDataId, userInfo.getUser().getId());
             }
 
             @Override
@@ -572,6 +572,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     public void checkLockedMe(Long declarationDataId, TAUserInfo userInfo) {
-        lockCoreService.checkNoLockedAnother(DeclarationData.class, declarationDataId, userInfo);
+        checkLock(lockDataService.lock(LockData.LOCK_OBJECTS.DECLARATION_DATA.name() + "_" + declarationDataId, userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME),
+                userInfo.getUser());
+    }
+
+    private void checkLock(LockData lockData, TAUser user){
+        if (lockData!= null)
+            throw new ServiceException(String.format(LockDataService.LOCK_DATA, user.getName(), user.getId()));
     }
 }

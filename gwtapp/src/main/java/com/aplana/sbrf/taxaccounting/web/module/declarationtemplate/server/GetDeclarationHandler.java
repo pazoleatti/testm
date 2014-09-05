@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.server;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.model.ObjectLock;
+import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
@@ -56,12 +56,12 @@ public class GetDeclarationHandler extends AbstractActionHandler<GetDeclarationA
      */
     private void fillLockData(GetDeclarationAction action, TAUserInfo userInfo,
                               GetDeclarationResult result) {
-        ObjectLock<Integer> lockInformation = declarationTemplateService.getObjectLock(action
+        LockData lockInformation = declarationTemplateService.getObjectLock(action
                 .getId(), securityService.currentUserInfo());
         if (lockInformation != null) {
             // Если данная форма уже заблокирована
             result.setLockedByUser(taUserService.getUser(lockInformation.getUserId()).getName());
-            result.setLockDate(getFormedDate(lockInformation.getLockTime()));
+            result.setLockDate(getFormedDate(lockInformation.getDateBefore()));
             if (lockInformation.getUserId() != userInfo.getUser().getId()) {
                 result.setLockedByAnotherUser(true);
             }

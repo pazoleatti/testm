@@ -12,7 +12,12 @@ import java.util.Date;
 public final class LockData {
 
     public enum LOCK_OBJECTS {
-        REF_BOOK, TAX_FORM
+        REF_BOOK,
+        TAX_FORM,
+        DECLARATION_DATA,
+        FORM_DATA,
+        DECLARATION_TEMPLATE,
+        FORM_TEMPLATE
     }
 
     public static final int STANDARD_LIFE_TIME = 3600000;  // 1 час
