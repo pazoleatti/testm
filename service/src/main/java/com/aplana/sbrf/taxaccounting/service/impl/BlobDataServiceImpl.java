@@ -68,4 +68,9 @@ public class BlobDataServiceImpl implements BlobDataService {
         blobData.setUuid(blobId.isEmpty() ? UUID.randomUUID().toString().toLowerCase() : blobId);
         return blobData;
     }
+
+    @Override
+    public int clean() {
+        return blobDataDao.clean();
+    }
 }

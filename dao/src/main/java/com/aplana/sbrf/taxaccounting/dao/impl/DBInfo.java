@@ -30,6 +30,11 @@ public final class DBInfo {
      */
     private boolean withRecursive;
 
+    /**
+     * Признак целочисленной разницы дат (для Oracle)
+     */
+    private boolean dateDiffNumber;
+
     private DBInfo() {
     }
 
@@ -41,6 +46,7 @@ public final class DBInfo {
         String dbName = ((JdbcTemplate)namedParameterJdbcTemplate.getJdbcOperations()).getDataSource().getConnection().getMetaData().getDatabaseProductName();
         supportOver = !HSQLDB_NAME_ENGINE.equals(dbName);
         withRecursive = HSQLDB_NAME_ENGINE.equals(dbName);
+        dateDiffNumber = !HSQLDB_NAME_ENGINE.equals(dbName);
     }
 
     public boolean isSupportOver(){
@@ -49,5 +55,9 @@ public final class DBInfo {
 
     public boolean isWithRecursive() {
         return withRecursive;
+    }
+
+    public boolean isDateDiffNumber() {
+        return dateDiffNumber;
     }
 }
