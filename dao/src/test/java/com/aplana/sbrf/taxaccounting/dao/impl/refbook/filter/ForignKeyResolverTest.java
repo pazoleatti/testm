@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.components.AbstractTreeListenerComponent;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.components.foreignkeyresolver.JoinSqlPartBuilder;
+import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.components.foreignkeyresolver.Simple2SimpleJoinSqlPartBuilder;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.components.foreignkeyresolver.Universal2SimpleJoinSqlPartBuilder;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.components.foreignkeyresolver.Universal2UniversalJoinSqlPartBuilder;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
@@ -22,6 +23,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -40,8 +42,16 @@ public class ForignKeyResolverTest {
     AbstractTreeListenerComponent foreignKeyResolverComponent;
 
     @Autowired
+    @Qualifier("foreignKeyResolver")
+    AbstractTreeListenerComponent foreignKeyResolverComponent2;
+
+    @Autowired
     @Qualifier("universal2SimpleJoinSqlPartBuilder")
     private Universal2SimpleJoinSqlPartBuilder u2SimpleJoinSqlPartBuilder;
+
+    @Autowired
+    @Qualifier("simple2SimpleJoinSqlPartBuilder")
+    private Simple2SimpleJoinSqlPartBuilder simple2SimpleJoinSqlPartBuilder;
 
     @Before
     public void init(){
@@ -143,12 +153,13 @@ public class ForignKeyResolverTest {
         attributeCode.setAlias("code");
         attributeCode.setAttributeType(RefBookAttributeType.NUMBER);
         attributeCode.setId(9L);
+        attributeList5.add(attributeCode);
         RefBookAttribute attributeRegisterCity = new RefBookAttribute();
         attributeRegisterCity.setAlias("city");
         attributeRegisterCity.setAttributeType(RefBookAttributeType.REFERENCE);
         attributeRegisterCity.setId(10L);
         attributeRegisterCity.setRefBookId(3L);
-        attributeList5.add(attributeCode);
+        attributeList5.add(attributeRegisterCity);
         refBookNumbers.setAttributes(attributeList5);
 
         RefBookDao refBookDao = mock(RefBookDao.class);
@@ -167,11 +178,19 @@ public class ForignKeyResolverTest {
         when(refBookDao.getByAttribute(7L)).thenReturn(refBookCar);
         when(refBookDao.getByAttribute(8L)).thenReturn(refBookCar);
         when(refBookDao.getByAttribute(9L)).thenReturn(refBookNumbers);
+        when(refBookDao.getByAttribute(10L)).thenReturn(refBookNumbers);
 
         foreignKeyResolverComponent.setRefBook(refBookOrder);
         ReflectionTestUtils.setField(foreignKeyResolverComponent, "refBookDao", refBookDao);
         ReflectionTestUtils.setField(u2SimpleJoinSqlPartBuilder, "refBookDao", refBookDao);
+        ReflectionTestUtils.setField(simple2SimpleJoinSqlPartBuilder, "refBookDao", refBookDao);
         ReflectionTestUtils.setField(foreignKeyResolverComponent, "u2SimpleJoinSqlPartBuilder", u2SimpleJoinSqlPartBuilder);
+        ReflectionTestUtils.setField(foreignKeyResolverComponent, "simple2SimpleJoinSqlPartBuilder", simple2SimpleJoinSqlPartBuilder);
+
+        foreignKeyResolverComponent2.setRefBook(refBookCar);
+        ReflectionTestUtils.setField(foreignKeyResolverComponent2, "refBookDao", refBookDao);
+        ReflectionTestUtils.setField(foreignKeyResolverComponent2, "u2SimpleJoinSqlPartBuilder", u2SimpleJoinSqlPartBuilder);
+        ReflectionTestUtils.setField(foreignKeyResolverComponent2, "simple2SimpleJoinSqlPartBuilder", simple2SimpleJoinSqlPartBuilder);
     }
 
     @Test
@@ -246,29 +265,32 @@ public class ForignKeyResolverTest {
     /**
      * Тестирование разименовывания в случае атрибута простого
      * справочника который ссылается на простой справочник
+     *
      */
-   /* @Test
+    @Test
     public void attributeLinkFromSimpleToSimple(){
         PreparedStatementData result = new PreparedStatementData();
         foreignKeyResolverComponent.setPreparedStatementData(result);
         Filter.getFilterQuery("car.number.code = 123", foreignKeyResolverComponent);
 
-        assertTrue(result.getJoinPartsOfQuery().equals("left join number frb0 on frb0.id = number\n"));
-        assertTrue(result.getQuery().toString().equals("frb0.code"));
+        assertEquals(result.getJoinPartsOfQuery(), "left join car frb0 on frb0.id = acar.reference_value\n" +
+                "left join number frb1 on frb1.id = frb.number\n");
+        assertEquals(result.getQuery().toString(), "frb1.code");
     }
-*/
+
     /**
      * Тестирование разименовывания в случае атрибута простого
      * справочника который ссылается на универсальный справочник
+     * простой -> простой
      */
     @Test
     public void attributeLinkFromSimpleToUniversal(){
-/*        PreparedStatementData result = new PreparedStatementData();
-        foreignKeyResolverComponent.setPreparedStatementData(result);
-        Filter.getFilterQuery("number.city = 123", foreignKeyResolverComponent);
+        PreparedStatementData result = new PreparedStatementData();
+        foreignKeyResolverComponent2.setPreparedStatementData(result);
+        Filter.getFilterQuery("number.city = 123", foreignKeyResolverComponent2);
 
-        assertTrue(result.getJoinPartsOfQuery().equals("left join ref_book_value frb0 on frb0.record_id = city and frbo.attribute_id = \n"));
-        assertTrue(result.getQuery().toString().equals("frb0.code"));*/
+        assertEquals(result.getJoinPartsOfQuery(), "left join number frb0 on frb0.id = frb.number\n");
+        assertEquals(result.getQuery().toString(), "frb0.city");
     }
 
     /**

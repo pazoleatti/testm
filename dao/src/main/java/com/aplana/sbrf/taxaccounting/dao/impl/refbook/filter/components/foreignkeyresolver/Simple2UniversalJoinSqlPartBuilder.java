@@ -22,7 +22,7 @@ public class Simple2UniversalJoinSqlPartBuilder implements JoinSqlPartBuilder {
                 .append(foreignTableAlias)
                 .append(" on ")
                 .append(foreignTableAlias)
-                .append(".record_id = ")
+                .append(".record_id = frb.")
                 .append(linkAttributeAlias)
                 .append(" and ")
                 .append(foreignTableAlias)

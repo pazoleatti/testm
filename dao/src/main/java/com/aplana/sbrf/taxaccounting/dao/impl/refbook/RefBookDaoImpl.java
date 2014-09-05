@@ -512,7 +512,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
         StringBuilder fromSql = new StringBuilder("\nfrom\n");
 
-        fromSql.append("  ref_book_record r join t on (r.version = t.version and r.record_id = t.record_id)\n");
+        fromSql.append("  ref_book_record frb join t on (frb.version = t.version and frb.record_id = t.record_id)\n");
         if (version != null) {
             ps.appendQuery(WITH_STATEMENT);
             ps.addParam(refBookId);
@@ -525,7 +525,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
         ps.appendQuery("SELECT * FROM "); //TODO: заменить "select *" на полное перечисление полей (Marat Fayzullin 30.01.2014)
         ps.appendQuery("(select\n");
-        ps.appendQuery("  r.id as ");
+        ps.appendQuery(" frb.id as ");
         ps.appendQuery(RefBook.RECORD_ID_ALIAS);
         ps.appendQuery(",\n");
 
@@ -556,22 +556,23 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             fromSql.append(alias);
             fromSql.append(" on a");
             fromSql.append(alias);
-            fromSql.append(".record_id = r.id and a");
+            fromSql.append(".record_id = frb.id and a");
             fromSql.append(alias);
             fromSql.append(".attribute_id = ");
             fromSql.append(attribute.getId());
         }
 
         // добавляем join'ы относящиеся к фильтру
+        fromSql.append("\n");
         if (filterPS.getJoinPartsOfQuery() != null) {
             fromSql.append(filterPS.getJoinPartsOfQuery());
         }
 
         ps.appendQuery(fromSql.toString());
-        ps.appendQuery(" where\n  r.ref_book_id = ");
+        ps.appendQuery(" where\n  frb.ref_book_id = ");
         ps.appendQuery("?");
         ps.addParam(refBookId);
-        ps.appendQuery(" and\n  status <> -1\n");
+        ps.appendQuery(" and\n  frb.status <> -1\n");
 
         if (version == null) {
             ps.appendQuery("order by t.version\n");
@@ -2076,10 +2077,10 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             ps.appendQuery(attribute.getAlias());
         }
         ps.appendQuery(" FROM (SELECT ");
-        appendSortClause(ps, refBook, sortAttribute, isSortAscending);
-        ps.appendQuery(", t.* FROM ");
+        appendSortClause(ps, refBook, sortAttribute, isSortAscending, "frb.");
+        ps.appendQuery(", frb.* FROM ");
         ps.appendQuery(tableName);
-        ps.appendQuery(" t");
+        ps.appendQuery(" frb ");
 
         PreparedStatementData filterPS = new PreparedStatementData();
         SimpleFilterTreeListener simpleFilterTreeListener = applicationContext.getBean("simpleFilterTreeListener", SimpleFilterTreeListener.class);
@@ -2087,6 +2088,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         simpleFilterTreeListener.setPs(filterPS);
 
         Filter.getFilterQuery(filter, simpleFilterTreeListener);
+        if (filterPS.getJoinPartsOfQuery() != null){
+            ps.appendQuery(filterPS.getJoinPartsOfQuery());
+        }
         if (filterPS.getQuery().length() > 0) {
             ps.appendQuery(" WHERE ");
             ps.appendQuery(filterPS.getQuery().toString());
@@ -2117,12 +2121,13 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         return ps;
     }
 
-    private void appendSortClause(PreparedStatementData ps, RefBook refBook, RefBookAttribute sortAttribute, boolean isSortAscending) {
+    private void appendSortClause(PreparedStatementData ps, RefBook refBook, RefBookAttribute sortAttribute, boolean isSortAscending, String prefix) {
         RefBookAttribute defaultSort = refBook.getSortAttribute();
         String sortAlias = sortAttribute == null ? (defaultSort == null ? "id" : defaultSort.getAlias()) : sortAttribute.getAlias();
         if (isSupportOver()) {
             // row_number() over (order by ... asc\desc)
             ps.appendQuery("row_number() over ( order by ");
+            ps.appendQuery(prefix);
             ps.appendQuery(sortAlias);
             ps.appendQuery(isSortAscending ? " ASC)" : " DESC)");
         } else {
@@ -2150,7 +2155,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         PreparedStatementData ps = new PreparedStatementData();
         ps.appendQuery("SELECT ");
         ps.appendQuery("RECORD_ID, ");
-        appendSortClause(ps, refBook, sortAttribute, isSortAscending);
+        appendSortClause(ps, refBook, sortAttribute, isSortAscending, "");
 
         for (RefBookAttribute attribute : refBook.getAttributes()) {
             ps.appendQuery(", ");
@@ -2159,7 +2164,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         ps.appendQuery(" FROM (SELECT distinct ");
         ps.appendQuery(" CONNECT_BY_ROOT ID as \"RECORD_ID\" ");
         for (RefBookAttribute attribute : refBook.getAttributes()) {
-            ps.appendQuery(", CONNECT_BY_ROOT ");
+            ps.appendQuery(", CONNECT_BY_ROOT frb.");
             ps.appendQuery(attribute.getAlias());
             ps.appendQuery(" as \"");
             ps.appendQuery(attribute.getAlias());
@@ -2168,6 +2173,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
         ps.appendQuery(" FROM ");
         ps.appendQuery(tableName);
+        ps.appendQuery(" frb ");
 
         PreparedStatementData filterPS = new PreparedStatementData();
         SimpleFilterTreeListener simpleFilterTreeListener = applicationContext.getBean("simpleFilterTreeListener", SimpleFilterTreeListener.class);
@@ -2182,7 +2188,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         if (filterPS.getQuery().length() > 0) {
             ps.appendQuery(" WHERE ");
             if (parentId == null) {
-                ps.appendQuery("PARENT_ID is null or (");
+                ps.appendQuery("frb.PARENT_ID is null or (");
             }
             ps.appendQuery(filterPS.getQuery().toString());
             if (filterPS.getParams().size() > 0) {
@@ -2193,9 +2199,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             }
         }
 
-        ps.appendQuery(" CONNECT BY NOCYCLE PRIOR id = PARENT_ID ");
+        ps.appendQuery(" CONNECT BY NOCYCLE PRIOR frb.id = frb.PARENT_ID ");
         ps.appendQuery(" START WITH ");
-        ps.appendQuery(parentId == null ? " PARENT_ID is null " : " PARENT_ID = " + parentId);
+        ps.appendQuery(parentId == null ? " frb.PARENT_ID is null " : " frb.PARENT_ID = " + parentId);
 
         ps.appendQuery(")");
 
