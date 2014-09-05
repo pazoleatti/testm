@@ -1,6 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormToFormRelation;
+import com.aplana.sbrf.taxaccounting.model.WorkflowState;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.SourceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -12,6 +18,8 @@ import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormDataRe
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+
+import java.util.List;
 
 /**
  * 
@@ -28,16 +36,46 @@ public class DeleteFormDataHandler extends AbstractActionHandler<DeleteFormDataA
 	@Autowired
 	private SecurityService securityService;
 
+    @Autowired
+    SourceService sourceService;
+
+    @Autowired
+    private LogEntryService logEntryService;
+
 	public DeleteFormDataHandler() {
 		super(DeleteFormDataAction.class);
 	}
 
 	@Override
-	public DeleteFormDataResult execute(DeleteFormDataAction action,
-			ExecutionContext context) throws ActionException {
-		formDataService.deleteFormData(new Logger(), securityService.currentUserInfo(), action.getFormDataId(), action.isManual());
-		return new DeleteFormDataResult();
-	}
+    public DeleteFormDataResult execute(DeleteFormDataAction action, ExecutionContext context) throws ActionException {
+        DeleteFormDataResult result = new DeleteFormDataResult();
+        FormData formData = action.getFormData();
+
+        if (!action.isManual()) {
+            // проверка существования принятых форм-источников
+            List<FormToFormRelation> formDataList = sourceService.getRelations(
+                    formData.getDepartmentId(),
+                    formData.getFormType().getId(),
+                    formData.getKind(),
+                    formData.getReportPeriodId(),
+                    formData.getPeriodOrder(),
+                    false, true, false);
+            Logger logger = new Logger();
+            for (FormToFormRelation item : formDataList) {
+                if (item.getState().equals(WorkflowState.ACCEPTED)) {
+                    logger.error("Найдена форма-источник «%s», «%s» которая имеет статус \"Принята\"!",
+                            item.getFormType().getName(), item.getFullDepartmentName());
+                }
+            }
+            if (logger.containsLevel(LogLevel.ERROR)) {
+                result.setUuid(logEntryService.save(logger.getEntries()));
+                return result;
+            }
+        }
+
+        formDataService.deleteFormData(new Logger(), securityService.currentUserInfo(), action.getFormDataId(), action.isManual());
+        return result;
+    }
 
 	@Override
 	public void undo(DeleteFormDataAction action, DeleteFormDataResult result,
