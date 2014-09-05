@@ -153,7 +153,7 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
             ps.appendQuery("SELECT * FROM ");
         }
 
-        ps.appendQuery("(select r.id as ");
+        ps.appendQuery("(select frb.id as ");
         ps.appendQuery(RefBook.RECORD_ID_ALIAS);
 
         if (version == null) {
@@ -181,13 +181,13 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
         }
 
         for (RefBookAttribute attribute : refBook.getAttributes()) {
-            ps.appendQuery(", ");
+            ps.appendQuery(", frb.");
             ps.appendQuery(attribute.getAlias());
         }
 
         ps.appendQuery(" FROM t, ");
         ps.appendQuery(tableName);
-        ps.appendQuery(" r");
+        ps.appendQuery(" frb ");
 
         PreparedStatementData filterPS = new PreparedStatementData();
         SimpleFilterTreeListener simpleFilterTreeListener =  applicationContext.getBean("simpleFilterTreeListener", SimpleFilterTreeListener.class);
@@ -195,6 +195,9 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
         simpleFilterTreeListener.setPs(filterPS);
 
         Filter.getFilterQuery(filter, simpleFilterTreeListener);
+        if (filterPS.getJoinPartsOfQuery() != null){
+            ps.appendQuery(filterPS.getJoinPartsOfQuery());
+        }
         if (filterPS.getQuery().length() > 0) {
             ps.appendQuery(" WHERE (");
             ps.appendQuery(filterPS.getQuery().toString());
@@ -218,7 +221,7 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
         } else {
             ps.appendQuery(" where ");
         }
-        ps.appendQuery("(r.version = t.version and r.record_id = t.record_id)");
+        ps.appendQuery("(frb.version = t.version and frb.record_id = t.record_id)");
 
         if (version == null) {
             ps.appendQuery(" order by t.version\n");
@@ -289,7 +292,7 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
 
         ps.appendQuery(" FROM ");
         ps.appendQuery("(select distinct ");
-        ps.appendQuery("CONNECT_BY_ROOT r.id as \"RECORD_ID\"");
+        ps.appendQuery("CONNECT_BY_ROOT frb.id as \"RECORD_ID\"");
 
         if (version == null) {
             ps.appendQuery(",  t.version as ");
@@ -304,7 +307,7 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
 
         for (RefBookAttribute attribute : refBook.getAttributes()) {
             ps.appendQuery(", ");
-            ps.appendQuery("CONNECT_BY_ROOT ");
+            ps.appendQuery("CONNECT_BY_ROOT frb.");
             ps.appendQuery(attribute.getAlias());
             ps.appendQuery(" as \"");
             ps.appendQuery(attribute.getAlias());
@@ -313,7 +316,7 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
 
         ps.appendQuery(" FROM t, ");
         ps.appendQuery(tableName);
-        ps.appendQuery(" r");
+        ps.appendQuery(" frb ");
 
         PreparedStatementData filterPS = new PreparedStatementData();
         SimpleFilterTreeListener simpleFilterTreeListener =  applicationContext.getBean("simpleFilterTreeListener", SimpleFilterTreeListener.class);
@@ -321,6 +324,9 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
         simpleFilterTreeListener.setPs(filterPS);
 
         Filter.getFilterQuery(filter, simpleFilterTreeListener);
+        if (filterPS.getJoinPartsOfQuery() != null){
+            ps.appendQuery(filterPS.getJoinPartsOfQuery());
+        }
         if (filterPS.getQuery().length() > 0) {
             ps.appendQuery(" WHERE (");
             ps.appendQuery(filterPS.getQuery().toString());
@@ -344,11 +350,11 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
         } else {
             ps.appendQuery(" where ");
         }
-        ps.appendQuery("(r.version = t.version and r.record_id = t.record_id)");
+        ps.appendQuery("(frb.version = t.version and frb.record_id = t.record_id)");
 
-        ps.appendQuery(" CONNECT BY NOCYCLE PRIOR r.id = PARENT_ID");
+        ps.appendQuery(" CONNECT BY NOCYCLE PRIOR frb.id = frb.PARENT_ID");
         ps.appendQuery(" START WITH ");
-        ps.appendQuery(uniqueRecordId == null ? " PARENT_ID is null" : "PARENT_ID = "+uniqueRecordId);
+        ps.appendQuery(uniqueRecordId == null ? " frb.PARENT_ID is null" : "frb.PARENT_ID = "+uniqueRecordId);
 
         if (version == null) {
             ps.appendQuery(" order by t.version\n");
@@ -399,6 +405,7 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
             return getRecords(tableName, refBookId, version, pagingParams, fullFilter, sortAttribute, true);
         }
         else {
+            //return refBookDao.getChildrenRecords(refBookId, tableName, parentRecordId, pagingParams, filter, sortAttribute, true);
             return getChildrenRecords(tableName, refBookId, parentRecordId, version, pagingParams, filter, sortAttribute, true);
         }
     }

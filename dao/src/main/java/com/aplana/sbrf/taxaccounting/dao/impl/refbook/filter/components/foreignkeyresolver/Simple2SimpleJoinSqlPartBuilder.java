@@ -32,7 +32,7 @@ public class Simple2SimpleJoinSqlPartBuilder implements JoinSqlPartBuilder {
                 .append(foreignTableAlias)
                 .append(" on ")
                 .append(foreignTableAlias)
-                .append(".id = ")
+                .append(".id = frb.")
                 .append(linkAttributeAlias)
                 .append("\n")
                 .toString();
