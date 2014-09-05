@@ -1,11 +1,10 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.core.api.LockCoreService;
+import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.ObjectLockDao;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
@@ -44,17 +43,13 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 	@Autowired
 	DeclarationTemplateDao declarationTemplateDao;
 
-	@Autowired
-	private ObjectLockDao lockDao;
-
-    @Autowired
-    private LockCoreService lockCoreService;
-
     @Autowired
     BlobDataService blobDataService;
 
     @Autowired
     TransactionHelper tx;
+    @Autowired
+    LockDataService lockDataService;
 
     @Override
 	public List<DeclarationTemplate> listAll() {
@@ -151,7 +146,8 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 	@Override
 	public void checkLockedByAnotherUser(Integer declarationTemplateId, TAUserInfo userInfo){
 		if (declarationTemplateId!=null){
-			ObjectLock<Integer> objectLock = lockDao.getObjectLock(declarationTemplateId, DeclarationTemplate.class);
+			LockData objectLock = lockDataService.lock(LockData.LOCK_OBJECTS.DECLARATION_TEMPLATE.name() + "_" + declarationTemplateId,
+                    userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME);
 			if(objectLock != null && objectLock.getUserId() != userInfo.getUser().getId()){
 				throw new AccessDeniedException("Шаблон декларации заблокирован другим пользователем");
 			}
@@ -160,11 +156,12 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public ObjectLock<Integer> getObjectLock(final Integer declarationTemplateId, final TAUserInfo userInfo) {
-        return tx.returnInNewTransaction(new TransactionLogic<ObjectLock<Integer>>() {
+    public LockData getObjectLock(final Integer declarationTemplateId, final TAUserInfo userInfo) {
+        return tx.returnInNewTransaction(new TransactionLogic<LockData>() {
             @Override
-            public ObjectLock<Integer> executeWithReturn() {
-                return lockCoreService.getLock(DeclarationTemplate.class, declarationTemplateId, userInfo);
+            public LockData executeWithReturn() {
+                return lockDataService.lock(LockData.LOCK_OBJECTS.DECLARATION_TEMPLATE.name() + "_" + declarationTemplateId,
+                        userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME);
             }
 
             @Override
@@ -268,24 +265,16 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 
     @Override
 	public boolean lock(int declarationTemplateId, TAUserInfo userInfo){
-		ObjectLock<Integer> objectLock = lockDao.getObjectLock(declarationTemplateId, DeclarationTemplate.class);
-		if(objectLock != null && objectLock.getUserId() != userInfo.getUser().getId()){
-			return false;
-		} else {
-			lockDao.lockObject(declarationTemplateId, DeclarationTemplate.class ,userInfo.getUser().getId());
-			return true;
-		}
-	}
+        LockData objectLock = lockDataService.lock(LockData.LOCK_OBJECTS.DECLARATION_TEMPLATE.name() + "_" + declarationTemplateId,
+                userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME);
+        return !(objectLock != null && objectLock.getUserId() != userInfo.getUser().getId());
+    }
 
 	@Override
 	public boolean unlock(int declarationTemplateId, TAUserInfo userInfo){
-		ObjectLock<Integer> objectLock = lockDao.getObjectLock(declarationTemplateId, DeclarationTemplate.class);
-		if(objectLock != null && objectLock.getUserId() != userInfo.getUser().getId()){
-			return false;
-		} else {
-			lockDao.unlockObject(declarationTemplateId, DeclarationTemplate.class, userInfo.getUser().getId());
-			return true;
-		}
+        lockDataService.unlock(LockData.LOCK_OBJECTS.DECLARATION_TEMPLATE.name() + "_" + declarationTemplateId,
+                userInfo.getUser().getId());
+        return true;
 	}
 
     private List<Integer> createStatusList(VersionedObjectStatus[] status){

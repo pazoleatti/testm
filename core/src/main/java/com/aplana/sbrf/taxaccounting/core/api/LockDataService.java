@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.core.api;
 
 import com.aplana.sbrf.taxaccounting.model.LockData;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 
 /**
@@ -38,6 +39,8 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
  */
 
 public interface LockDataService {
+
+    public static final String LOCK_DATA = "Объект заблокирован для редактирования пользователем \"%s\"(id=%s)";
 
 	/**
 	 * Устанавливает новую блокировку до времени = now + age. Если блокировка успешно установилась, то возвращается null.
@@ -81,5 +84,9 @@ public interface LockDataService {
 	 * @throws ServiceException если блокировка была установлена другим пользователем
 	 */
 	void extend(String key, int userId, long age);
+
+    void unlockAll(TAUserInfo userInfo);
+
+    void unlockIfOlderThan(int sec);
 
 }

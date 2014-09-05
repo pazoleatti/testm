@@ -1,10 +1,11 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.core.api.LockCoreService;
+import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.DataRowService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,7 +18,7 @@ import java.util.List;
 public class DataRowServiceImpl implements DataRowService {
 	
 	@Autowired
-	LockCoreService lockCoreService;
+    LockDataService lockDataService;
 	
 	@Autowired
 	private DataRowDao dataRowDao;
@@ -45,7 +46,8 @@ public class DataRowServiceImpl implements DataRowService {
 	@Override
 	@Transactional(readOnly = false)
 	public void update(TAUserInfo userInfo, long formDataId, List<DataRow<Cell>> dataRows, boolean manual) {
-		lockCoreService.checkLockedMe(FormData.class, formDataId, userInfo);
+        checkLockedMe(lockDataService.lock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formDataId,
+                userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME), userInfo.getUser());
 		if ((dataRows != null) && (!dataRows.isEmpty())) {
 			FormData fd = formDataDao.get(formDataId, manual);
 			dataRowDao.updateRows(fd, dataRows);
@@ -54,12 +56,19 @@ public class DataRowServiceImpl implements DataRowService {
 
 	@Override
 	public void rollback(TAUserInfo userInfo, long formDataId) {
-		lockCoreService.checkLockedMe(FormData.class, formDataId, userInfo);
+        checkLockedMe(lockDataService.lock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formDataId,
+                userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME), userInfo.getUser());
 		dataRowDao.rollback(formDataId);
 	}
 
     @Override
     public PagingResult<FormDataSearchResult> searchByKey(Long formDataId, Integer formTemplateId, DataRowRange range, String key, boolean isCaseSensitive) {
         return dataRowDao.searchByKey(formDataId, formTemplateId, range, key, isCaseSensitive);
+    }
+
+    private void checkLockedMe(LockData lockData, TAUser user){
+        if (lockData.getUserId() != user.getId()) {
+            throw new ServiceException("Объект не заблокирован текущим пользователем");
+        }
     }
 }

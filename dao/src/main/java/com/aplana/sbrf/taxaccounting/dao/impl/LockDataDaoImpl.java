@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -80,7 +81,32 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
 		}
 	}
 
-	private static final class LockDataMapper implements RowMapper<LockData> {
+    @Override
+    public void unlockAllByUserId(int userId) {
+        try {
+            getJdbcTemplate().update("delete from lock_data where user_id = ?",
+                    userId);
+        } catch (DataAccessException e){
+            throw new LockException("Ошибка при удалении блокировок для пользователя с id = %d. %s", userId, e.getMessage());
+        }
+    }
+
+    @Override
+    public void unlockIfOlderThan(int sec) {
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.SECOND, -sec);
+        try {
+            getJdbcTemplate().update(
+                    "delete from lock_data where date_before < ?",
+                    cal.getTime()
+            );
+        } catch (DataAccessException e){
+            logger.error("", e);
+            throw new LockException("Ошибка при удалении блокировок. %s", e.getMessage());
+        }
+    }
+
+    private static final class LockDataMapper implements RowMapper<LockData> {
 		public LockData mapRow(ResultSet rs, int index) throws SQLException {
 			LockData result = new LockData();
 			result.setKey(rs.getString("key"));

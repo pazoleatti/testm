@@ -80,7 +80,7 @@ public interface FormTemplateService {
      * @param formTemplateId - идентификатор шаблон формы
      * @return информацию о блокировке объекта
      */
-    ObjectLock<Integer> getObjectLock(final Integer formTemplateId, final TAUserInfo userInfo);
+    LockData getObjectLock(final Integer formTemplateId, final TAUserInfo userInfo);
 
     /**
      * Исполяет для теста написанный скрипт от имени пользователя controlUnp

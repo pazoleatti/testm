@@ -41,4 +41,12 @@ public interface LockDataDao {
 	 */
 	void deleteLock(String key);
 
+    void unlockAllByUserId(int userId);
+
+    /**
+     * Удаляет все блокировки, которые старше заданого времени
+     * @param sec
+     */
+    void unlockIfOlderThan(int sec);
+
 }

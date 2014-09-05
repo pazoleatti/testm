@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.core.api.LockCoreService;
+import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
@@ -48,11 +48,11 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
     @Autowired
     private FormTypeService formTypeService;
     @Autowired
-    private LockCoreService lockCoreService;
-    @Autowired
     private SignService signService;
     @Autowired
     private DepartmentDao departmentDao;
+    @Autowired
+    private LockDataService lockDataService;
 
     @Override
     public ImportCounter importFormData(TAUserInfo userInfo, List<Integer> departmentIdList,
@@ -345,7 +345,10 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
         }
 
         // Блокировка
-        lockCoreService.lock(FormData.class, formData.getId(), userInfo);
+        LockData lockData = lockDataService.lock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formData.getId(),
+                userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME);
+        if (lockData!=null)
+            throw new ServiceException(String.format(LockDataService.LOCK_DATA, userInfo.getUser().getName(), userInfo.getUser().getId()));
 
         try {
             // Скрипт
@@ -381,7 +384,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             }
         } finally {
             // Снимаем блокировку
-            lockCoreService.unlock(FormData.class, formData.getId(), userInfo);
+            lockDataService.unlock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formData.getId(), userInfo.getUser().getId());
         }
 
         // Загрузка формы завершена

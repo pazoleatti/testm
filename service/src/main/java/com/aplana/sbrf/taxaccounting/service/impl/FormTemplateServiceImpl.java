@@ -1,13 +1,12 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.core.api.LockCoreService;
+import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.ObjectLockDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -51,10 +50,6 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 
     @Autowired
 	private FormTemplateDao formTemplateDao;
-	@Autowired
-	private ObjectLockDao lockDao;
-    @Autowired
-    private LockCoreService lockCoreService;
     @Autowired
     private FormDataScriptingService scriptingService;
     @Autowired
@@ -70,6 +65,8 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     TransactionHelper tx;
     @Autowired
     FormDataService formDataService;
+    @Autowired
+    LockDataService lockDataService;
 
 	@Override
 	public List<FormTemplate> listAll() {
@@ -110,7 +107,8 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 	@Override
 	public void checkLockedByAnotherUser(Integer formTemplateId, TAUserInfo userInfo){
 		if (formTemplateId!=null){
-			ObjectLock<Integer> objectLock = lockDao.getObjectLock(formTemplateId, FormTemplate.class);
+            LockData objectLock = lockDataService.lock(LockData.LOCK_OBJECTS.FORM_TEMPLATE.name() + "_" + formTemplateId,
+                    userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME);
 			if(objectLock != null && objectLock.getUserId() != userInfo.getUser().getId()){
 				throw new AccessDeniedException("Шаблон формы заблокирован другим пользователем");
 			}
@@ -119,11 +117,12 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public ObjectLock<Integer> getObjectLock(final Integer formTemplateId, final TAUserInfo userInfo) {
-        return tx.returnInNewTransaction(new TransactionLogic<ObjectLock<Integer>>() {
+    public LockData getObjectLock(final Integer formTemplateId, final TAUserInfo userInfo) {
+        return tx.returnInNewTransaction(new TransactionLogic<LockData>() {
             @Override
-            public ObjectLock<Integer> executeWithReturn() {
-                return lockCoreService.getLock(FormTemplate.class, formTemplateId, userInfo);
+            public LockData executeWithReturn() {
+                return lockDataService.lock(LockData.LOCK_OBJECTS.FORM_TEMPLATE.name() + "_" + formTemplateId,
+                        userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME);
             }
 
             @Override
@@ -322,24 +321,16 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 
     @Override
 	public boolean lock(int formTemplateId, TAUserInfo userInfo){
-		ObjectLock<Integer> objectLock = lockDao.getObjectLock(formTemplateId, FormTemplate.class);
-		if(objectLock != null && objectLock.getUserId() != userInfo.getUser().getId()){
-			return false;
-		} else {
-			lockDao.lockObject(formTemplateId, FormTemplate.class, userInfo.getUser().getId());
-			return true;
-		}
+        LockData objectLock = lockDataService.lock(LockData.LOCK_OBJECTS.FORM_TEMPLATE.name() + "_" + formTemplateId,
+                userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME);
+        return !(objectLock != null && objectLock.getUserId() != userInfo.getUser().getId());
 	}
 
 	@Override
 	public boolean unlock(int formTemplateId, TAUserInfo userInfo){
-		ObjectLock<Integer> objectLock = lockDao.getObjectLock(formTemplateId, FormTemplate.class);
-		if(objectLock != null && objectLock.getUserId() != userInfo.getUser().getId()){
-			return false;
-		} else {
-			lockDao.unlockObject(formTemplateId, FormTemplate.class, userInfo.getUser().getId());
-			return true;
-		}
+        lockDataService.unlock(LockData.LOCK_OBJECTS.FORM_TEMPLATE.name() + "_" + formTemplateId,
+                userInfo.getUser().getId());
+        return true;
 	}
 
 	@Override

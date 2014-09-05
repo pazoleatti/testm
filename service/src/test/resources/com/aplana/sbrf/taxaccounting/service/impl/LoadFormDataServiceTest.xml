@@ -18,9 +18,6 @@
         <constructor-arg value="com.aplana.sbrf.taxaccounting.service.PeriodService"/>
     </bean>
     <bean class="org.mockito.Mockito" factory-method="mock">
-        <constructor-arg value="com.aplana.sbrf.taxaccounting.core.api.LockCoreService"/>
-    </bean>
-    <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.service.AuditService"/>
     </bean>
     <bean class="org.mockito.Mockito" factory-method="mock">
@@ -28,6 +25,9 @@
     </bean>
     <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.service.SignService"/>
+    </bean>
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.core.api.LockDataService"/>
     </bean>
 
     <bean id="loadFormDataService" class="com.aplana.sbrf.taxaccounting.service.impl.LoadFormDataServiceImpl"/>

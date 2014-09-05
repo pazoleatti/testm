@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.LockDataDao;
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
@@ -150,7 +151,17 @@ public class LockDataServiceImpl implements LockDataService {
         });
 	}
 
-	/**
+    @Override
+    public void unlockAll(TAUserInfo userInfo) {
+        dao.unlockAllByUserId(userInfo.getUser().getId());
+    }
+
+    @Override
+    public void unlockIfOlderThan(int sec) {
+        dao.unlockIfOlderThan(sec);
+    }
+
+    /**
 	 * Проверяет блокировку. Если срок ее действия вышел, то она удаляется
 	 */
 	private LockData validateLock(LockData lock) {
