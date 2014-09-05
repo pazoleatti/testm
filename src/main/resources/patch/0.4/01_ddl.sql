@@ -32,7 +32,7 @@ SELECT * FROM dual;
 ALTER TABLE department DROP CONSTRAINT dept_chk_type;
 ALTER TABLE department ADD CONSTRAINT department_fk_type FOREIGN KEY(type) REFERENCES department_type(id);
 
--- 0.4 Доработка проверки корректности подразделения
+-- http://jira.aplana.com/browse/SBRFACCTAX-8678 - 0.4 Доработка проверки корректности подразделения
 ALTER TABLE department DROP CONSTRAINT department_uniq_code;
 DROP INDEX department_uniq_code;
 
