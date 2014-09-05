@@ -27,7 +27,6 @@ public class BlobDataDaoImpl extends AbstractDao implements BlobDataDao {
         @Override
         public BlobData mapRow(ResultSet rs, int rowNum) throws SQLException {
             BlobData blobData = new BlobData();
-            blobData.setType(SqlUtils.getInteger(rs, "type"));
             blobData.setCreationDate(rs.getDate("creation_date"));
             blobData.setName(rs.getString("name"));
             blobData.setUuid(rs.getString("id"));
@@ -47,12 +46,11 @@ public class BlobDataDaoImpl extends AbstractDao implements BlobDataDao {
 
                     PreparedStatement ps = con
                             .prepareStatement(
-                                    "INSERT INTO blob_data (id, name, data, creation_date, type) VALUES (?,?,?,?,?)");
+                                    "INSERT INTO blob_data (id, name, data, creation_date) VALUES (?,?,?,?)");
                     ps.setString(1, blobData.getUuid());
                     ps.setString(2, blobData.getName());
                     ps.setBlob(3, blobData.getInputStream());
                     ps.setDate(4, new java.sql.Date(blobData.getCreationDate().getTime()));
-                    ps.setInt(5, blobData.getType());
                     return ps;
                 }
             };
@@ -118,7 +116,7 @@ public class BlobDataDaoImpl extends AbstractDao implements BlobDataDao {
     /*@Cacheable("DataBlobsCache")*/
     public BlobData get(String uuid) {
         try{
-            return getJdbcTemplate().queryForObject("SELECT id, name, data, creation_date, type FROM blob_data WHERE id = ?",
+            return getJdbcTemplate().queryForObject("SELECT id, name, data, creation_date FROM blob_data WHERE id = ?",
                     new Object[]{uuid},
                     new int[]{Types.CHAR},
                     new BlobDataRowMapper());

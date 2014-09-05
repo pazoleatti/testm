@@ -31,7 +31,6 @@ alter table form_style add constraint form_style_chk_bold check (bold in (0,1));
 alter table form_style add constraint form_style_uniq_alias unique (form_template_id, alias);
 
 alter table blob_data add constraint blob_data_pk primary key(id);
-alter table blob_data add constraint blob_data_chk_type check (type in (0, 1));
 
 alter table ref_book add constraint ref_book_pk primary key (id);
 alter table ref_book add constraint ref_book_fk_script_id foreign key (script_id) references blob_data(id);

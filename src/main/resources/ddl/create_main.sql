@@ -118,15 +118,13 @@ create table blob_data (
   id            varchar2(36) not null,
   name          varchar2(530) null,
   data          blob not null,
-  creation_date date not null,
-  type          number(1) default 0 not null
+  creation_date date not null
 );
 comment on table blob_data is 'Файловое хранилище';
 comment on column blob_data.id is 'Уникальный идентификатор';
 comment on column blob_data.name is 'Название файла';
 comment on column blob_data.data is 'Бинарные данные';
 comment on column blob_data.creation_date is 'Дата создания';
-comment on column blob_data.type is 'Тип данных (0 - постоянные, 1 - временные)';
 ----------------------------------------------------------------------------------------------------
 create table ref_book (
   id number(18,0) not null,

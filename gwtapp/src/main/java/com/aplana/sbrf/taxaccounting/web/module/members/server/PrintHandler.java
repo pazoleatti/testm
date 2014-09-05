@@ -46,7 +46,7 @@ public class PrintHandler  extends AbstractActionHandler<PrintAction, PrintResul
 			InputStream fileInputStream = new FileInputStream(filePath);
 
 			PrintResult result = new PrintResult();
-			result.setUuid(blobDataService.createTemporary(fileInputStream, "Список_пользователей.xlsx"));
+			result.setUuid(blobDataService.create(fileInputStream, "Список_пользователей.xlsx"));
 			return result;
 		} catch (FileNotFoundException e) {
 			throw new ServiceException("Проблема при генерации списка пользователей." , e);

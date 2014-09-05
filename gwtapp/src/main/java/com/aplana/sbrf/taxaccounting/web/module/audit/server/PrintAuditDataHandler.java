@@ -54,7 +54,7 @@ public class PrintAuditDataHandler extends AbstractActionHandler<PrintAuditDataA
             InputStream fileInputStream = new FileInputStream(filePath);
 
             PrintAuditDataResult result = new PrintAuditDataResult();
-            result.setUuid(blobDataService.createTemporary(fileInputStream, "Журнал_аудита.xlsx"));
+            result.setUuid(blobDataService.create(fileInputStream, "Журнал_аудита.xlsx"));
             return result;
         } catch (FileNotFoundException e) {
             throw new ServiceException("Проблема при генерации отчета журнала аудита." , e);

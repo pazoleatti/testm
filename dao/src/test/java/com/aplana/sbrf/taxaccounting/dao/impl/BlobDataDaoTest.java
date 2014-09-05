@@ -49,7 +49,6 @@ public class BlobDataDaoTest {
         blobData.setName("hello.xls");
         blobData.setInputStream(new FileInputStream(file));
         blobData.setCreationDate(new Date());
-        blobData.setType(0);
     }
 
     @Test

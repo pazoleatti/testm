@@ -27,13 +27,7 @@ public class BlobDataServiceImpl implements BlobDataService {
 
     @Override
     public String create(InputStream is, String name) {
-        BlobData blobData = initBlob("", is, name, 0);
-        return blobDataDao.create(blobData);
-    }
-
-    @Override
-    public String createTemporary(InputStream is, String name) {
-        BlobData blobData = initBlob("", is, name, 1);
+        BlobData blobData = initBlob("", is, name);
         return blobDataDao.create(blobData);
     }
 
@@ -53,7 +47,7 @@ public class BlobDataServiceImpl implements BlobDataService {
 
     @Override
     public void save(String blobId, InputStream is) {
-        blobDataDao.save(initBlob(blobId, is, "", 0));
+        blobDataDao.save(initBlob(blobId, is, ""));
     }
 
     @Override
@@ -61,7 +55,7 @@ public class BlobDataServiceImpl implements BlobDataService {
         return blobDataDao.get(blobId);
     }
 
-    private BlobData initBlob(String blobId, InputStream is, String name, int isTemp){
+    private BlobData initBlob(String blobId, InputStream is, String name){
         BlobData blobData = new BlobData();
         blobData.setName(name);
         try {
@@ -72,7 +66,6 @@ public class BlobDataServiceImpl implements BlobDataService {
         blobData.setInputStream(is);
         blobData.setCreationDate(new Date());
         blobData.setUuid(blobId.isEmpty() ? UUID.randomUUID().toString().toLowerCase() : blobId);
-        blobData.setType(isTemp);
         return blobData;
     }
 }
