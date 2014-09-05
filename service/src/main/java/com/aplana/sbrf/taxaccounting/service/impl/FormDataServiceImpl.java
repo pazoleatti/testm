@@ -428,8 +428,8 @@ public class FormDataServiceImpl implements FormDataService {
 	@Override
 	public void doCheck(Logger logger, TAUserInfo userInfo, FormData formData) {
 		// Форма не должна быть заблокирована для редактирования другим пользователем
-		checkLock(lockService.lock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formData.getId(),
-                userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME), logger);
+		checkLockAnotherUser(lockService.lock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formData.getId(),
+                userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME), logger, userInfo.getUser());
 		// Временный срез формы должен быть в актуальном состоянии
 		// Если не заблокировано то откат среза на всякий случай
 		if (getObjectLock(formData.getId(), userInfo)==null){
@@ -530,8 +530,8 @@ public class FormDataServiceImpl implements FormDataService {
 	@Transactional
 	public void deleteFormData(Logger logger, TAUserInfo userInfo, long formDataId, boolean manual) {
 		// Форма не должна быть заблокирована для редактирования другим пользователем
-        checkLock(lockService.lock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formDataId, userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME),
-                logger);
+        checkLockAnotherUser(lockService.lock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formDataId, userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME),
+                logger,  userInfo.getUser());
 
 		//lockCoreService.checkNoLockedAnother(FormData.class, formDataId, userInfo);
 
@@ -558,8 +558,8 @@ public class FormDataServiceImpl implements FormDataService {
     @Override
     public void doMove(long formDataId, boolean manual, TAUserInfo userInfo, WorkflowMove workflowMove, String note, Logger logger) {
         // Форма не должна быть заблокирована даже текущим пользователем;
-        checkLock(lockService.lock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formDataId,
-                userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME), logger);
+        checkLockAnotherUser(lockService.lock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formDataId,
+                userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME), logger,  userInfo.getUser());
         // Временный срез формы должен быть в актуальном состоянии
         dataRowDao.rollback(formDataId);
 
@@ -583,7 +583,7 @@ public class FormDataServiceImpl implements FormDataService {
             int userId = userInfo.getUser().getId();
             String lockKey = LockData.LOCK_OBJECTS.TAX_FORM.name() + "_" + formDataId;
             LockData lockData = lockService.lock(lockKey, userId, LockData.STANDARD_LIFE_TIME);
-            checkLock(lockData, logger);
+            checkLockAnotherUser(lockData, logger,  userInfo.getUser());
             if (lockData == null) {
                 try {
                     //Блокировка установлена
@@ -864,8 +864,8 @@ public class FormDataServiceImpl implements FormDataService {
     @Override
 	@Transactional
 	public void lock(long formDataId, TAUserInfo userInfo) {
-        checkLock(lockService.lock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formDataId,
-                userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME), null);
+        checkLockAnotherUser(lockService.lock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formDataId,
+                userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME), null,  userInfo.getUser());
 		dataRowDao.rollback(formDataId);
 	}
 
@@ -1111,8 +1111,8 @@ public class FormDataServiceImpl implements FormDataService {
         return workflowMove.getFromState() == WorkflowState.CREATED || workflowMove.getToState() == WorkflowState.CREATED;
     }
 
-    private void checkLock(LockData lockData, Logger logger){
-        if (lockData!= null)
+    private void checkLockAnotherUser(LockData lockData, Logger logger, TAUser user){
+        if (lockData!= null && lockData.getUserId() != user.getId())
             throw new ServiceLoggerException(LOCK_MESSAGE,
                     logEntryService.save(logger.getEntries()));
     }

@@ -15,7 +15,7 @@ public class BlobData {
     private String name;
     /*Данные загружаемого файла*/
     private InputStream inputStream;
-    /*Дата создания(текущий день)*/
+    /*Дата создания (sysdate в БД)*/
     private Date creationDate;
 
     public String getUuid() {

@@ -577,7 +577,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     private void checkLock(LockData lockData, TAUser user){
-        if (lockData!= null)
+        if (lockData!= null && lockData.getUserId() != user.getId())
             throw new ServiceException(String.format(LockDataService.LOCK_DATA, user.getName(), user.getId()));
     }
 }

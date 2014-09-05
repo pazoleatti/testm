@@ -41,4 +41,10 @@ public interface BlobDataDao {
      * @return {@link BlobData}
      */
     BlobData get(String uuid);
+
+    /**
+     * Удаление записей, на которые нет ссылок из других таблиц и которые старше 24 часов
+     * @return Количество удаленных запсией
+     */
+    int clean();
 }

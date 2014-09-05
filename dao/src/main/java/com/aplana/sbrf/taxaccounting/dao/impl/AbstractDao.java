@@ -39,4 +39,8 @@ public abstract class AbstractDao {
     protected boolean isWithRecursive() {
         return dbInfo.isWithRecursive();
     }
+
+    protected boolean isDateDiffNumber() {
+        return dbInfo.isDateDiffNumber();
+    }
 }
