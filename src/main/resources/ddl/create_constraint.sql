@@ -246,6 +246,8 @@ ALTER TABLE log_system DROP CONSTRAINT log_system_chk_event_id;
 
 alter table lock_data add constraint lock_data_pk primary key (key);
 alter table lock_data add constraint lock_data_fk_user_id foreign key (user_id) references sec_user(id) on delete cascade;
+
+alter table async_task_type add constraint async_task_type_pk primary key (id);
 ------------------------------------------------------------------------------------------------------
 create index i_department_parent_id on department(parent_id);
 create index i_data_row_form_data_id on data_row(form_data_id);
