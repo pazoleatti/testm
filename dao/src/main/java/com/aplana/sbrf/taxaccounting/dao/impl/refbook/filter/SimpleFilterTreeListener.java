@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.components.Abstract
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.components.SimpleQueryBuilderComponent;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.components.TypeVerifierComponent;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.components.foreignkeyresolver.ForeignKeyResolverComponent;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;

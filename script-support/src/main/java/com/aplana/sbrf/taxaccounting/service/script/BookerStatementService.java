@@ -12,8 +12,8 @@ import java.util.Map;
  */
 @ScriptExposed
 public interface BookerStatementService {
-    public final static Long INCOME_101 = 50L;
-    public final static Long INCOME_102 = 52L;
+    Long INCOME_101 = 50L;
+    Long INCOME_102 = 52L;
 
     /**
      * Получить идентификатор периода и подразделения БО (ACCOUNT_PERIOD_ID) по id подразделения и по дате.
@@ -35,5 +35,5 @@ public interface BookerStatementService {
      */
     PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, Long departmentId, Date date, String filter);
 
-    public Map<String, RefBookValue> getPeriodValue(Date date);
+    Map<String, RefBookValue> getPeriodValue(Date date);
 }

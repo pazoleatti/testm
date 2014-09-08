@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.MembersFilterData;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
@@ -17,7 +16,7 @@ public interface TAUserDao {
 	 * Получить информацию о пользователе по идентификатору
 	 * @param userId идентификатор пользователя
 	 * @return объект, представляющий пользователя
-	 * @throws DaoException если пользователя с таким идентификатором не существует
+	 * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если пользователя с таким идентификатором не существует
 	 */	
 	TAUser getUser(int userId);
 	
@@ -25,7 +24,7 @@ public interface TAUserDao {
 	 * Получить id пользователя по логину
 	 * @param login идентификатор пользователя
 	 * @return userId
-	 * @throws DaoException если пользователя с таким логином не существует
+	 * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если пользователя с таким логином не существует
 	 */	
 	int getUserIdByLogin(String login);
 	

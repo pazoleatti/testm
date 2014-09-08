@@ -2,12 +2,11 @@ package com.aplana.sbrf.taxaccounting.service;
 
 import java.util.Set;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 
 /**
- * Интерфейс для проверки прав пользователя на работу с {@link DeclarationData декларациями}
+ * Интерфейс для проверки прав пользователя на работу с {@link com.aplana.sbrf.taxaccounting.model.DeclarationData декларациями}
  * @author dsultanbekov
  */
 public interface DeclarationDataAccessService {

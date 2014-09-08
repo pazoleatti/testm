@@ -1,7 +1,5 @@
 package com.aplana.sbrf.taxaccounting.model.source;
 
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;

@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.*;
 
 import java.util.Date;
@@ -75,7 +74,7 @@ public interface FormDataDao {
 	 * @param departmentId идентификатор {@link com.aplana.sbrf.taxaccounting.model.Department подразделения}
 	 * @param reportPeriodId идентификатор {@link com.aplana.sbrf.taxaccounting.model.ReportPeriod отчетного периода}
 	 * @return форма или null, если такой формы не найдено
-	 * @throws DaoException если будет найдено несколько записей, удовлетворяющих условию поиска
+	 * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если будет найдено несколько записей, удовлетворяющих условию поиска
 	 */
 	FormData find(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId);
 
@@ -99,7 +98,7 @@ public interface FormDataDao {
      * @param taxPeriodId Налоговый период
      * @param periodOrder Порядковый номер (равен номеру месяца, при нумерации с 1)
      * @return Форма или null, если такой формы не найдено
-     * @throws DaoException если будет найдено несколько записей, удовлетворяющих условию поиска
+     * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если будет найдено несколько записей, удовлетворяющих условию поиска
      */
     FormData findMonth(int formTypeId, FormDataKind kind, int departmentId, int taxPeriodId, int periodOrder);
 
@@ -141,9 +140,8 @@ public interface FormDataDao {
 
     /**
      * Получить список id форм типа/вида/подразделения без привязки к периоду
-     * @param formTypeId тип формы
-     * @param kind вид формы
-     * @param departmentId подразделение
+     * @param taxTypes типы налога
+     * @param departmentIds подразделения
      * @return список id форм
      */
     List<Long> getFormDataIds(List<TaxType> taxTypes, List<Integer> departmentIds);

@@ -11,7 +11,7 @@ import java.util.Map;
  */
 public interface RefBookBookerStatementPeriodDao {
 
-    static final Long REF_BOOK_ID = 108L;
+    Long REF_BOOK_ID = 108L;
 
     PagingResult<Map<String, RefBookValue>> getRecords();
 

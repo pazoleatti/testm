@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.dao.api;
 
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.*;
 
 import java.util.List;
@@ -14,7 +13,7 @@ public interface FormTypeDao {
 	 * Получить вид налоговой формы по идентификатору
 	 * @param typeId идентификатор вида
 	 * @return Объект, представляющий вид налоговой формы
-	 * @throws DaoException если в БД нет записи с соответствующим ключом
+	 * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если в БД нет записи с соответствующим ключом
 	 */
 	FormType get(int typeId);
 	

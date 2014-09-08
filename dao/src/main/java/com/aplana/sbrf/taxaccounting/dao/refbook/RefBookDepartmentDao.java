@@ -19,7 +19,7 @@ import java.util.Map;
  */
 public interface RefBookDepartmentDao {
 
-	static final Long REF_BOOK_ID = 30L;
+	Long REF_BOOK_ID = 30L;
 
     /**
      * Загружает данные справочника
