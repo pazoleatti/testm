@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.components.foreignkeyresolver;
 
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import org.springframework.stereotype.Service;
 
 /**

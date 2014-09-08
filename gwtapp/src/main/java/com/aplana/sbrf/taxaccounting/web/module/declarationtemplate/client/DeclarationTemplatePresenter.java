@@ -86,9 +86,9 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	}
 
 	public interface MyView extends View, HasUiHandlers<DeclarationTemplateUiHandlers> {
-        static final String ERROR_RESP = "errorUuid ";
-        static final String SUCCESS_RESP = "uuid ";
-        static final String ERROR = "error ";
+        String ERROR_RESP = "errorUuid ";
+        String SUCCESS_RESP = "uuid ";
+        String ERROR = "error ";
 
         void setDeclarationTemplate(DeclarationTemplateExt declaration);
         void addDeclarationValueHandler(ValueChangeHandler<String> valueChangeHandler);

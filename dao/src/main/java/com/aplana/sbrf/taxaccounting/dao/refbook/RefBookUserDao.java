@@ -16,7 +16,7 @@ import java.util.Map;
  */
 public interface RefBookUserDao {
 
-    public static final Long REF_BOOK_ID = 74L;
+    Long REF_BOOK_ID = 74L;
 
     /**
      * Вариант перегрузки, для обратной совместимости интерфейса

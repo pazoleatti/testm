@@ -24,8 +24,8 @@ import java.util.Map;
 @ScriptExposed
 public interface FormDataService {
 
-    public static String EDITABLE_CELL_STYLE = "Редактируемая";
-    public static String AUTO_FILL_CELL_STYLE = "Автозаполняемая";
+    String EDITABLE_CELL_STYLE = "Редактируемая";
+    String AUTO_FILL_CELL_STYLE = "Автозаполняемая";
 
     /**
      * Поиск налоговой формы
@@ -276,7 +276,7 @@ public interface FormDataService {
      * @param logger логгер
      * @param required фатальность
      */
-    public void checkFormExistAndAccepted(int formTypeId, FormDataKind kind, int departmentId,
+    void checkFormExistAndAccepted(int formTypeId, FormDataKind kind, int departmentId,
                                           int currentReportPeriodId, Boolean prevPeriod,
                                           Logger logger, boolean required) throws ServiceException;
 
@@ -292,7 +292,7 @@ public interface FormDataService {
      * @param logger логгер
      * @param required фатальность
      */
-    public void checkMonthlyFormExistAndAccepted(int formTypeId, FormDataKind kind, int departmentId,
+    void checkMonthlyFormExistAndAccepted(int formTypeId, FormDataKind kind, int departmentId,
                                                  int currentReportPeriodId, Integer currentPeriodOrder, Boolean prevPeriod,
                                                  Logger logger, boolean required);
 }

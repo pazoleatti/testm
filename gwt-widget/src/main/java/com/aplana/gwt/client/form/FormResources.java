@@ -10,9 +10,9 @@ import com.google.gwt.resources.client.CssResource;
  */
 public interface FormResources extends ClientBundle {
 
-    public static final FormResources INSTANCE = GWT.create(FormResources.class);
+    FormResources INSTANCE = GWT.create(FormResources.class);
 
-    public interface Style extends CssResource {
+    interface Style extends CssResource {
 
         String typicalFormHeader();
 
