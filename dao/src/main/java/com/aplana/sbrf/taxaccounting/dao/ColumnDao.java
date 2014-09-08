@@ -1,9 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
-import java.util.List;
-
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+
+import java.util.List;
 
 /**
  * Dao для работы с объявлениями столбцов формы
@@ -28,4 +28,6 @@ public interface ColumnDao {
      * @return список атрибутов второго уровня всех колонок где используется attributeId
      */
     List<Long> getAttributeId2(Long attributeId);
+
+    int getColumnIdByAlias(int formTemplateId, String columnAlias);
 }
