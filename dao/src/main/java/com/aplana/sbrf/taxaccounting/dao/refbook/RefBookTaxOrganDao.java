@@ -12,8 +12,8 @@ import java.util.Map;
  */
 public interface RefBookTaxOrganDao {
 
-    static final Long REF_BOOK_CODE_ID = 204L;
-    static final Long REF_BOOK_KPP_ID = 205L;
+    Long REF_BOOK_CODE_ID = 204L;
+    Long REF_BOOK_KPP_ID = 205L;
 
     PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId);
 

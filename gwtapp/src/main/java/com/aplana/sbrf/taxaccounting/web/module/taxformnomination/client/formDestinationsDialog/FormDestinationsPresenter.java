@@ -18,7 +18,6 @@ import com.gwtplatform.mvp.client.HasPopupSlot;
 import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.PopupView;
 import com.gwtplatform.mvp.client.PresenterWidget;
-import com.gwtplatform.mvp.client.proxy.PlaceManager;
 
 import java.util.ArrayList;
 import java.util.List;

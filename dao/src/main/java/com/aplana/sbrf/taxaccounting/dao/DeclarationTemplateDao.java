@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.VersionSegment;
 import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
@@ -27,7 +26,7 @@ public interface DeclarationTemplateDao {
      * Скрипт получается с помощью метода {@link #getDeclarationTemplateScript(int)}
 	 * @param declarationTemplateId идентификатор шаблона декларации
 	 * @return объект шаблона декларации
-	 * @throws DaoException если декларации с таким id не существует
+	 * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если декларации с таким id не существует
 	 */
 	DeclarationTemplate get(int declarationTemplateId);
 	/**
@@ -35,7 +34,7 @@ public interface DeclarationTemplateDao {
 	 * Такое описание для каждого вида декларации в любой отчетном периоде может быть только одно
 	 * @param declarationTypeId идентификатор вида декларации
 	 * @return идентификатор описания декларации
-	 * @throws DaoException если не удалось найти активное описание декларации по заданному типу,
+	 * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если не удалось найти активное описание декларации по заданному типу,
 	 * 	или если обнаружено несколько действуюшие описаний по данному виду декларации
 	 */
 	int getActiveDeclarationTemplateId(int declarationTypeId, int reportPeriodId);
@@ -66,7 +65,7 @@ public interface DeclarationTemplateDao {
 	 * Задать Jrxml-файла
 	 * @param declarationTemplateId идентификатор шаблона декларации
 	 * @param jrxmlBlobId идентификатор бинарного представления шаблона
-	 * @throws DaoException если не существует шаблона декларации с таким id
+	 * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если не существует шаблона декларации с таким id
 	 */
 	void setJrxml(int declarationTemplateId, String jrxmlBlobId);
 

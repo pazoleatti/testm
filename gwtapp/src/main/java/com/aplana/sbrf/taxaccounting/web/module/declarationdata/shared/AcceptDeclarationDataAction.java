@@ -1,8 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared;
 
+import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
-public class AcceptDeclarationDataAction extends UnsecuredActionImpl<AcceptDeclarationDataResult> {
+public class AcceptDeclarationDataAction extends UnsecuredActionImpl<AcceptDeclarationDataResult> implements ActionName {
     private long declarationId;
 	private boolean accepted;
 	private String reasonForReturn;
@@ -30,4 +31,9 @@ public class AcceptDeclarationDataAction extends UnsecuredActionImpl<AcceptDecla
 	public void setReasonForReturn(String reasonForReturn) {
 		this.reasonForReturn = reasonForReturn;
 	}
+
+    @Override
+    public String getName() {
+        return "Принять";
+    }
 }

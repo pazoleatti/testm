@@ -25,7 +25,6 @@ import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.PopupViewWithUiHandlers;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**

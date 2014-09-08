@@ -108,7 +108,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	public static final String ATTR_FILE_ID = "ИдФайл";
 	public static final String ATTR_DOC_DATE = "ДатаДок";
 	private static final SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
-    private static final String VALIDATION_ERR_MSG = "Декларация / Уведомление не может быть создана, т.к. шаблон некорректен. Обратитесь к настройщику шаблонов";
+    private static final String VALIDATION_ERR_MSG = "Операция «s» не выполнена. Обнаружены фатальные ошибки!";
 
 	@Override
 	@Transactional(readOnly = false)
@@ -188,7 +188,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	public void check(Logger logger, long id, TAUserInfo userInfo) {
         declarationDataScriptingService.executeScript(userInfo,
                 declarationDataDao.get(id), FormDataEvent.CHECK, logger, null);
-        validateDeclaration(declarationDataDao.get(id), logger, true);
+        validateDeclaration(declarationDataDao.get(id), logger, true, FormDataEvent.CHECK);
         // Проверяем ошибки при пересчете
         if (logger.containsLevel(LogLevel.ERROR)) {
             throw new ServiceLoggerException(
@@ -232,7 +232,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             Map<String, Object> exchangeParams = new HashMap<String, Object>();
             declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, logger, exchangeParams);
 
-            validateDeclaration(declarationDataDao.get(id), logger, true);
+            validateDeclaration(declarationDataDao.get(id), logger, true, FormDataEvent.MOVE_CREATED_TO_ACCEPTED);
             declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_CREATED_TO_ACCEPTED);
 
             declarationData.setAccepted(true);
@@ -328,7 +328,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 		String xml = XML_HEADER.concat(writer.toString());
         declarationData.setXmlDataUuid(blobDataService.create(new ByteArrayInputStream(xml.getBytes()), ""));
 
-        validateDeclaration(declarationData, logger, false);
+        validateDeclaration(declarationData, logger, false, FormDataEvent.CALCULATE);
         // Заполнение отчета и экспорт в формате PDF
         JasperPrint jasperPrint = fillReport(xml,
                 declarationTemplateService.getJasper(declarationData.getDeclarationTemplateId()));
@@ -346,8 +346,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
      * @param declarationData идентификатор данных декларации
      * @param logger логгер лог панели
      * @param isErrorFatal признак того, что операция не может быть продолжена с невалидным xml
+     * @param operation Событие (для сообщения об ошибке)
      */
-    private void validateDeclaration(DeclarationData declarationData, final Logger logger, final boolean isErrorFatal) {
+    private void validateDeclaration(DeclarationData declarationData, final Logger logger, final boolean isErrorFatal,
+                                     FormDataEvent operation) {
         Locale oldLocale = Locale.getDefault();
         Locale.setDefault(new Locale("ru", "RU"));
         String xmlUuid = declarationData.getXmlDataUuid();
@@ -398,15 +400,15 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 });
                 validator.validate(new StreamSource(xmlStream));
             } catch (Exception e) {
-                log.error(VALIDATION_ERR_MSG, e);
+                log.error(String.format(VALIDATION_ERR_MSG, operation), e);
                 logger.error(e);
                 Locale.setDefault(oldLocale);
-                throw new ServiceLoggerException(VALIDATION_ERR_MSG, logEntryService.save(logger.getEntries()));
+                throw new ServiceLoggerException(String.format(VALIDATION_ERR_MSG, operation), logEntryService.save(logger.getEntries()));
             }
 
             if (logger.containsLevel(LogLevel.ERROR)) {
                 Locale.setDefault(oldLocale);
-                throw new ServiceLoggerException(VALIDATION_ERR_MSG, logEntryService.save(logger.getEntries()));
+                throw new ServiceLoggerException(String.format(VALIDATION_ERR_MSG, operation), logEntryService.save(logger.getEntries()));
             }
 
             Locale.setDefault(oldLocale);

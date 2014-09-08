@@ -3,8 +3,6 @@ package com.aplana.sbrf.taxaccounting.web.module.scheduler.client.taskparams;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Widget;
 
-import java.util.List;
-
 /**
  * Виджет обертка над CheckBox'ом,
  * является частным случаем ParamWidget

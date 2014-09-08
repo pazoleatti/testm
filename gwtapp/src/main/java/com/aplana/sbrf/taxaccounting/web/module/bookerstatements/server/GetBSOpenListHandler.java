@@ -18,8 +18,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
-import static java.util.Arrays.asList;
-
 /**
  * @author Dmitriy Levykin
  */

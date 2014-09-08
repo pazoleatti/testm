@@ -77,7 +77,7 @@ public class DataRowDaoImplUtils {
 	}
 
 	interface CellValueExtractor {
-		public Object getValue(ResultSet rs, String columnLabel)
+		Object getValue(ResultSet rs, String columnLabel)
 				throws SQLException;
 	}
 

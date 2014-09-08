@@ -15,10 +15,10 @@ import java.util.Map;
  */
 public interface RefBookIncome102Dao {
 
-	public static final Long REF_BOOK_ID = 52L;
-    static final Long INCOME_102_AP_REF_BOOK_ID = 107L;
+	Long REF_BOOK_ID = 52L;
+    Long INCOME_102_AP_REF_BOOK_ID = 107L;
 
-	static final String TABLE_NAME = "INCOME_102";
+	String TABLE_NAME = "INCOME_102";
 
     /**
      * Получение записей справочника

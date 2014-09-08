@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
@@ -47,6 +48,8 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
     private DepartmentService departmentService;
     @Autowired
     private DataRowDao dataRowDao;
+    @Autowired
+    private ColumnDao columnDao;
 
     @Override
     public <T> int edit(T template, Date templateActualEndDate, Logger logger, TAUser user) {
@@ -110,17 +113,17 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
         for (Column oldColumn : oldTemplate.getColumns()) {
             boolean found = false;
             for (Column newColumn : newTemplate.getColumns()) {
-                if (oldColumn.getId().equals(newColumn.getId())) {
+                if (oldColumn.getAlias().equals(newColumn.getAlias())) {
                     found = true;
                     if (!oldColumn.getClass().equals(newColumn.getClass())) {
                         // Тип графы изменился
-                        cleanColumnList.add(oldColumn.getId());
+                        cleanColumnList.add(columnDao.getColumnIdByAlias(oldTemplate.getId(), oldColumn.getAlias()));
                     }
                 }
             }
             if (!found) {
                 // Графа была удалена
-                cleanColumnList.add(oldColumn.getId());
+                cleanColumnList.add(columnDao.getColumnIdByAlias(oldTemplate.getId(), oldColumn.getAlias()));
             }
         }
         if (cleanColumnList.isEmpty()) {
