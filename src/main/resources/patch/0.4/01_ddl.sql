@@ -55,5 +55,21 @@ ALTER TABLE blob_data DROP CONSTRAINT blob_data_chk_type;
 ALTER TABLE blob_data DROP COLUMN type;
 
 ---------------------------------------------------------------------------------------------------
+-- http://jira.aplana.com/browse/SBRFACCTAX-8759 - Таблица для асинхронных задач
+CREATE TABLE async_task_type
+(
+id NUMBER(18) NOT NULL,
+name VARCHAR2(100) NOT NULL,
+handler_jndi VARCHAR2(500) NOT NULL
+);
+
+ALTER TABLE async_task_type ADD CONSTRAINT async_task_type_pk primary key (id);
+
+COMMENT ON TABLE async_task_type IS 'Типы асинхронных задач';
+COMMENT ON COLUMN async_task_type.id IS 'Идентификатор строки';
+COMMENT ON COLUMN async_task_type.name IS 'Название типа задачи';
+COMMENT ON COLUMN async_task_type.handler_jndi IS 'JNDI имя класса-обработчика';
+
+---------------------------------------------------------------------------------------------------
 COMMIT;
 EXIT;

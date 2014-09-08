@@ -807,3 +807,16 @@ name varchar2(50)
 comment on table department_type is 'Типы подразделений банка';
 comment on column department_type.id is 'Идентификатор типа';
 comment on column department_type.name is 'Наименование типа';
+
+--------------------------------------------------------------------------------------------------------
+create table async_task_type
+(
+id number(18) not null,
+name varchar2(100) not null,
+handler_jndi varchar2(500) not null
+);
+
+comment on table async_task_type is 'Типы асинхронных задач';
+comment on column async_task_type.id is 'Идентификатор строки';
+comment on column async_task_type.name is 'Название типа задачи';
+comment on column async_task_type.handler_jndi is 'JNDI имя класса-обработчика';
