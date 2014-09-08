@@ -242,7 +242,7 @@ public class RefBookBookerStatementPeriodDaoImpl extends AbstractDao implements 
             result.setWidth(SqlUtils.getInteger(rs, "width"));
             result.setRequired(rs.getBoolean("required"));
             result.setReadOnly(rs.getBoolean("read_only"));
-            result.setUnique(rs.getBoolean("is_unique"));
+            result.setUnique(rs.getInt("is_unique"));
             result.setSortOrder(SqlUtils.getInteger(rs, "sort_order"));
             result.setMaxLength(SqlUtils.getInteger(rs, "max_length"));
             Integer formatId = SqlUtils.getInteger(rs, "format");

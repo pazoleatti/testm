@@ -55,7 +55,7 @@ public class RefBookAttribute implements Serializable {
 	private int width;
 
     /** Признак уникальности атрибута */
-    private boolean unique;
+    private int unique;
 
 	/** Определяет порядок сортировки данных по умолчанию */
 	private Integer sortOrder;
@@ -233,15 +233,15 @@ public class RefBookAttribute implements Serializable {
         this.required = required;
     }
 
-    public boolean isUnique() {
+    public int getUnique() {
         return unique;
     }
 
-    public void setUnique(boolean unique) {
+    public void setUnique(int unique) {
         this.unique = unique;
     }
 
-	public Integer getSortOrder() {
+    public Integer getSortOrder() {
 		return sortOrder;
 	}
 

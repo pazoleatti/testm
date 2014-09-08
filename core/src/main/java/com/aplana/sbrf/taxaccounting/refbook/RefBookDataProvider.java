@@ -194,7 +194,7 @@ public interface RefBookDataProvider {
      * @param uniqueRecordId идентификатор версии записи
      * @return not null всегда - ожидается возврат результата
      */
-    List<Pair<RefBookAttribute, RefBookValue>> getUniqueAttributeValues(Long uniqueRecordId);
+    Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>> getUniqueAttributeValues(Long uniqueRecordId);
 
     /**
      * Обновляет данные версии записи справочника

@@ -138,7 +138,7 @@ public class RefBookIncome101 implements RefBookDataProvider {
     }
 
     @Override
-    public List<Pair<RefBookAttribute, RefBookValue>> getUniqueAttributeValues(Long recordId) {
+    public Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>> getUniqueAttributeValues(Long recordId) {
         throw new UnsupportedOperationException();
     }
 
