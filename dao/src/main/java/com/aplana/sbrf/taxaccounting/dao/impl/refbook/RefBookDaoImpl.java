@@ -183,7 +183,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }
     }
 
-    private void appendSortClause(PreparedStatementData ps, RefBook refBook, RefBookAttribute sortAttribute, boolean isSortAscending, boolean isHierarchical) {
+    private void appendSortClause(PreparedStatementData ps, RefBook refBook, RefBookAttribute sortAttribute, boolean isSortAscending, boolean isHierarchical, String prefix) {
         RefBookAttribute defaultSort = refBook.getSortAttribute();
         if (isSupportOver()) {
             // row_number() over (order by ... asc\desc)
@@ -193,6 +193,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 RefBookAttributeType sortType = sortAttribute == null ? defaultSort.getAttributeType() : sortAttribute.getAttributeType();
 
                 if (isHierarchical) {
+                    ps.appendQuery(prefix);
                     ps.appendQuery(sortAlias);
                 } else {
                     ps.appendQuery("a");
@@ -202,6 +203,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                     ps.appendQuery("_value ");
                 }
             } else {
+                ps.appendQuery(prefix);
                 if (isHierarchical) {
                     ps.appendQuery(RefBook.RECORD_PARENT_ID_ALIAS);
                 } else {
@@ -539,7 +541,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             ps.appendQuery("\",\n");
         }
 
-        appendSortClause(ps, refBook, sortAttribute, isSortAscending, false);
+        appendSortClause(ps, refBook, sortAttribute, isSortAscending, false, "frb.");
 
         for (int i = 0; i < attributes.size(); i++) {
             RefBookAttribute attribute = attributes.get(i);
@@ -635,7 +637,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
         ps.appendQuery(" SELECT ");
 
-        appendSortClause(ps, refBook, sortAttribute, isSortAscending, true);
+        appendSortClause(ps, refBook, sortAttribute, isSortAscending, true, "");
         ps.appendQuery(",");
 
         // выбираем все алиасы + row_number_over
