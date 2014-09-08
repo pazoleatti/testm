@@ -111,8 +111,7 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 		logger.setMessageDecorator(null);
 
 		if (logger.containsLevel(LogLevel.ERROR)) {
-			throw new ServiceLoggerException("Есть критические ошибки при выполнении скрипта",
-                    logEntryService.save(logger.getEntries()));
+			throw new ServiceLoggerException("Обнаружены фатальные ошибки!", logEntryService.save(logger.getEntries()));
 		}
 	}
 
