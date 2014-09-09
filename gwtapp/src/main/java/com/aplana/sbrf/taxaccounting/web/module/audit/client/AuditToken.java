@@ -6,5 +6,7 @@ package com.aplana.sbrf.taxaccounting.web.module.audit.client;
  */
 public final class AuditToken {
 
+    private AuditToken() {}
+
     public static final String AUDIT = "!audit";
 }

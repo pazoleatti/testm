@@ -20,7 +20,7 @@ import java.util.Date;
  * Специально не сокращал код условий что бы можно было легко проследить логику
  * @author aivanov
  */
-public class WidgetUtils {
+public final class WidgetUtils {
 
     public static DateTimeFormat dateTimeFormat = DateTimeFormat.getFormat("dd.MM.yyyy");
     public static String iconUrl = "resources/img/picker-icons/clear-icon.png";
@@ -31,6 +31,8 @@ public class WidgetUtils {
 
     public static String PICK_ALL = "Выделить все";
     public static String UNPICK_ALL = "Снять выделение";
+
+    private WidgetUtils() {}
 
     /**
      * Проверка невхождения даты в ограничивающий период

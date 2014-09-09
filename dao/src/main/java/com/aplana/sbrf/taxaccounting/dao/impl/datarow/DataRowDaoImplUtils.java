@@ -8,9 +8,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class DataRowDaoImplUtils {
+public final class DataRowDaoImplUtils {
 
 	public static final long DEFAULT_ORDER_STEP = 100000;
+
+    private DataRowDaoImplUtils() {}
 
 	/**
 	 * Массив содержит названия таблиц со значениями ячеек

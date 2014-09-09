@@ -4,7 +4,9 @@ package com.aplana.gwt.client.mask;
  * Класс статических методов для работы с масками
  * @author aivanov
  */
-public class MaskUtils {
+public final class MaskUtils {
+
+    private MaskUtils() {}
 
     /**
      * Формирование строки которая показывается в элементе ввода

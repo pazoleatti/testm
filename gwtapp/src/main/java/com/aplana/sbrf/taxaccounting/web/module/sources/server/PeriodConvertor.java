@@ -5,7 +5,10 @@ import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.PeriodsInte
 import java.util.Calendar;
 import java.util.Date;
 
-public class PeriodConvertor {
+public final class PeriodConvertor {
+
+    private PeriodConvertor() {}
+
     public static Date getDateFrom(PeriodsInterval interval) {
         Calendar periodFrom = Calendar.getInstance();
         periodFrom.setTime(interval.getPeriodFrom().getStartDate());

@@ -9,6 +9,8 @@ public final class AdminConstants {
 
     public static int oneDayMilliseconds = 86400000;
 
+    private AdminConstants() {}
+
 	/**
 	 * Имена страниц
 	 */

@@ -8,7 +8,10 @@ import javax.sql.DataSource;
  *
  * @author Dmitriy Levykin
  */
-public class ApplicationDataSource {
+public final class ApplicationDataSource {
+
+    private ApplicationDataSource() {}
+
     public static DataSource getDataSource(DataSourceHolderService holder) {
         return holder.getApplicationDataSource();
     }

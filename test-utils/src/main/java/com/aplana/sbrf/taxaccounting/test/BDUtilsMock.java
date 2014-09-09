@@ -19,10 +19,12 @@ import static org.mockito.Mockito.when;
  * @since 05.02.14 14:33
  */
 
-public class BDUtilsMock {
+public final class BDUtilsMock {
 
 	// Иммитация Sequence
 	private static long cnt = 100;
+
+    private BDUtilsMock() {}
 
 	public static BDUtils getBDUtils() {
 		BDUtils bdUtils = mock(BDUtils.class);

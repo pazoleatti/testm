@@ -10,7 +10,9 @@ import java.util.Map;
  * Вспомогательный класс для работы с деревом
  * @author Eugene Stetsenko
  */
-public class TreeUtils {
+public final class TreeUtils {
+
+    private TreeUtils() {}
 
 	private static List<Integer> getHierarchy(Department department, Map<Integer, Department> idToDepMap) {
 		List<Integer> result = new ArrayList<Integer>();

@@ -5,7 +5,10 @@ import static org.mockito.Mockito.when;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 
-public class DeclarationDataMockUtils {
+public final class DeclarationDataMockUtils {
+
+    private DeclarationDataMockUtils() {}
+
 	public static DeclarationData mockDeclarationData(long id, int departmentId, boolean accepted) {
 		DeclarationData d = mock(DeclarationData.class);
 		when(d.getId()).thenReturn(id);

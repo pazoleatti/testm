@@ -13,7 +13,9 @@ import com.google.gwt.user.client.ui.ValueListBox;
  * @author aivanov
  * @since 28.05.2014
  */
-public class SourcesUtils {
+public final class SourcesUtils {
+
+    private SourcesUtils() {}
 
     public static boolean isCorrectPeriod(PeriodsInterval periodsInterval) {
         PeriodInfo periodFrom = periodsInterval.getPeriodFrom();

@@ -14,7 +14,9 @@ import java.util.List;
  *
  * @author aivanov
  */
-public class RefBookPickerUtils {
+public final class RefBookPickerUtils {
+
+    private RefBookPickerUtils() {}
 
     public static final String NO_REGION_MATCHES_FLAG = "NO_REGION_MATCHES";
 
