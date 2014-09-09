@@ -444,7 +444,7 @@ public class RefBookUniversal implements RefBookDataProvider {
     }
 
     @Override
-    public List<Pair<RefBookAttribute, RefBookValue>> getUniqueAttributeValues(Long uniqueRecordId) {
+    public Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>> getUniqueAttributeValues(Long uniqueRecordId) {
         return refBookDao.getUniqueAttributeValues(refBookId, uniqueRecordId);
     }
 

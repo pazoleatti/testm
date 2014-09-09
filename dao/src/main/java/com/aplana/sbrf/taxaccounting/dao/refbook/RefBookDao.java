@@ -245,7 +245,7 @@ public interface RefBookDao {
      * @param recordId идентификатор записи
      * @return
      */
-    List<Pair<RefBookAttribute, RefBookValue>> getUniqueAttributeValues(@NotNull Long refBookId, @NotNull Long recordId);
+    Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>> getUniqueAttributeValues(@NotNull Long refBookId, @NotNull Long recordId);
 
     /**
      * По коду справочника возвращает набор его атрибутов
@@ -548,7 +548,7 @@ public interface RefBookDao {
      * @param values  список значений уникальных атрибутов
      * @return
      */
-    String buildUniqueRecordName(RefBook refBook, List<Pair<RefBookAttribute, RefBookValue>> values);
+    String buildUniqueRecordName(RefBook refBook, Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>> values);
 
     /**
      * Удаляет указанные версии записи из справочника

@@ -73,7 +73,7 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
         ps.appendQuery(CHECK_UNIQUE_MATCHES_FOR_NON_VERSION);
         ArrayList<RefBookAttribute> uniqueAttrs = new ArrayList<RefBookAttribute>();
         for (RefBookAttribute attribute : attributes) {
-            if (attribute.isUnique()){
+            if (attribute.getUnique() != 0){
                 uniqueAttrs.add(attribute);
             }
         }
