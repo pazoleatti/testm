@@ -98,16 +98,6 @@ public class GetRefBookTreeValuesHandler extends AbstractActionHandler<GetRefBoo
         return result;
     }
 
-    private RefBookAttribute getRefBookAttributeById(RefBook refBook, int attributeId) {
-        int i = 0;
-        for (RefBookAttribute refBookAttribute : refBook.getAttributes()) {
-            if (refBookAttribute.isVisible() && i++ == attributeId) {
-                return refBookAttribute;
-            }
-        }
-        return null;
-    }
-
     // Преобразуем в гуи модельку
     private PagingResult<RefBookTreeItem> asseblRefBookPage(GetRefBookTreeValuesAction action,
                                                             PagingResult<Map<String, RefBookValue>> refBookPage,

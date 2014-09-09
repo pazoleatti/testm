@@ -266,13 +266,6 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
         return result;
     }
 
-    private Date addDayToDate(Date date, int days) {
-        Calendar c = Calendar.getInstance();
-        c.setTime(date);
-        c.add(Calendar.DATE, days);
-        return c.getTime();
-    }
-
     @Override
     public void undo(SaveDepartmentCombinedAction action, SaveDepartmentCombinedResult result,
                      ExecutionContext executionContext) throws ActionException {

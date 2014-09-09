@@ -332,23 +332,6 @@ public abstract class MultiSelectTree<H extends List, T extends MultiSelectTreeI
         }
     }
 
-    /**
-     * Получить дочерние элементы узла.
-     *
-     * @param item узел для которого ищутся узлы
-     * @return список дочерних элеметов
-     */
-    @Deprecated
-    private List<T> getItemChild(T item) {
-        List<T> list = new ArrayList<T>();
-        if (item.getChildCount() > 0) {
-            for (int i = 0; i < item.getChildCount(); i++) {
-                list.add((T) item.getChild(i));
-            }
-        }
-        return list;
-    }
-
     public String getHeader() {
         return label.getText();
     }

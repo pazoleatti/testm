@@ -110,7 +110,7 @@ public class RefBookUniversal implements RefBookDataProvider {
     }
 
     @Override
-    public List<Long>  getUniqueRecordIds(Date version, String filter) {
+    public List<Long> getUniqueRecordIds(Date version, String filter) {
         //TODO: возможно нужно точное совпадение версии
         List<Pair<Long, Long>> pairs = refBookDao.getRecordIdPairs(refBookId, version, false, filter);
         List<Long> uniqueRecordIds = new ArrayList<Long>(pairs.size());
@@ -162,7 +162,7 @@ public class RefBookUniversal implements RefBookDataProvider {
     }
 
     @Override
-    public List<Long> createRecordVersion(Logger logger,  Date versionFrom, Date versionTo, List<RefBookRecord> records) {
+    public List<Long> createRecordVersion(Logger logger, Date versionFrom, Date versionTo, List<RefBookRecord> records) {
         if (logger == null) {
             throw new ServiceException("Logger не может быть null!");
         }
@@ -432,17 +432,17 @@ public class RefBookUniversal implements RefBookDataProvider {
      * @param results все результаты проверки пересечения
      * @param wantedResult результат, для которого было выполнено устранение конфликта
      */
-    private void updateResults(List<CheckCrossVersionsResult> results, CheckCrossVersionsResult wantedResult) {
-        for (CheckCrossVersionsResult result : results) {
-            if (result.getNum() == wantedResult.getNum() - 1) {
-                if (result.getResult() == CrossResult.FATAL_ERROR) {
-                    result.setResult(CrossResult.OK);
-                } else {
-                    throw new ServiceException("Недопустимая ситуация. Начало редактируемой версии является фиктивным: "+result.getResult());
-                }
-            }
-        }
-    }
+//    private void updateResults(List<CheckCrossVersionsResult> results, CheckCrossVersionsResult wantedResult) {
+//        for (CheckCrossVersionsResult result : results) {
+//            if (result.getNum() == wantedResult.getNum() - 1) {
+//                if (result.getResult() == CrossResult.FATAL_ERROR) {
+//                    result.setResult(CrossResult.OK);
+//                } else {
+//                    throw new ServiceException("Недопустимая ситуация. Начало редактируемой версии является фиктивным: "+result.getResult());
+//                }
+//            }
+//        }
+//    }
 
     @Override
     public Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>> getUniqueAttributeValues(Long uniqueRecordId) {

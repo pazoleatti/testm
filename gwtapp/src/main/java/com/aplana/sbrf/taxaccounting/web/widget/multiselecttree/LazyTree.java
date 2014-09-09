@@ -274,22 +274,6 @@ public class LazyTree<H extends LazyTreeItem> extends Tree implements HasLazyTre
         }
     }
 
-    /**
-     * Получить дочерние элементы узла.
-     *
-     * @param item узел для которого ищутся узлы
-     * @return список дочерних элеметов
-     */
-    private List<H> getItemChild(H item) {
-        List<H> list = new ArrayList<H>();
-        if (item.getChildCount() > 0) {
-            for (int i = 0; i < item.getChildCount(); i++) {
-                list.add((H) item.getChild(i));
-            }
-        }
-        return list;
-    }
-
     @Override
     @Deprecated
     public void setSelectedItem(TreeItem item) {

@@ -26,6 +26,7 @@ public class RefBookAuditFieldList extends AbstractPermanentRefBook {
     private RefBook refBook;
 
     @PostConstruct
+    @SuppressWarnings("unused") // https://jira.codehaus.org/browse/SONARJAVA-117
     private void init() {
         refBook = refBookFactory.get(REF_BOOK_ID);
     }
@@ -56,5 +57,4 @@ public class RefBookAuditFieldList extends AbstractPermanentRefBook {
         }
         return records;
     }
-
 }

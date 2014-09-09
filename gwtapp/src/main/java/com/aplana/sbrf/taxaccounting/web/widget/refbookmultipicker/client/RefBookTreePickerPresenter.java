@@ -244,27 +244,6 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
                 WidgetUtils.isWasChange(ps.getVersionDate(), newPs.getVersionDate());
     }
 
-    /* Проверка на изменения входных параметров*/
-    private boolean isNewParams(PickerState newPs) {
-        Boolean hasChange =
-                WidgetUtils.isWasChange(ps.getRefBookAttrId(), newPs.getRefBookAttrId()) ||
-                        WidgetUtils.isWasChange(ps.isMultiSelect(), newPs.isMultiSelect()) ||
-                        WidgetUtils.isWasChange(ps.getVersionDate(), newPs.getVersionDate()) ||
-                        WidgetUtils.isWasChange(ps.getFilter(), newPs.getFilter()) ||
-                        WidgetUtils.isWasChange(ps.getSearchPattern(), newPs.getSearchPattern());
-
-
-        if (hasChange) {
-            ps.setRefBookAttrId(newPs.getRefBookAttrId());
-            ps.setFilter(newPs.getFilter());
-            ps.setSearchPattern(newPs.getSearchPattern());
-            ps.setVersionDate(newPs.getVersionDate());
-            ps.setMultiSelect(newPs.isMultiSelect());
-        }
-
-        return hasChange;
-    }
-
     /* Создание и заполнения модели экшена для загрузки с сервера*/
     private GetRefBookTreeValuesAction createLoadAction(RefBookTreeItem parent, List<Long> longs) {
         GetRefBookTreeValuesAction action = new GetRefBookTreeValuesAction();
