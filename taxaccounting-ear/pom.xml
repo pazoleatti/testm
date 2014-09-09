@@ -30,6 +30,12 @@
                 </dependency>
                 <dependency>
                     <groupId>com.aplana.taxaccounting</groupId>
+                    <artifactId>async-task</artifactId>
+                    <version>${project.version}</version>
+                    <type>ejb</type>
+                </dependency>
+                <dependency>
+                    <groupId>com.aplana.taxaccounting</groupId>
                     <artifactId>scheduler-task</artifactId>
                     <version>${project.version}</version>
                     <type>ejb</type>
@@ -72,6 +78,16 @@
                                     <groupId>${project.groupId}</groupId>
                                     <artifactId>scheduler-core</artifactId>
                                     <bundleFileName>scheduler-core.jar</bundleFileName>
+                                </ejbModule>
+                                <ejbModule>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>async-core</artifactId>
+                                    <bundleFileName>async-core.jar</bundleFileName>
+                                </ejbModule>
+                                <ejbModule>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>async-task</artifactId>
+                                    <bundleFileName>async-task.jar</bundleFileName>
                                 </ejbModule>
                             </modules>
                         </configuration>
@@ -145,6 +161,27 @@
                         </exclusion>
                     </exclusions>
                 </dependency>
+                <dependency>
+                    <groupId>com.aplana.taxaccounting</groupId>
+                    <artifactId>async-task</artifactId>
+                    <version>${project.version}</version>
+                    <type>ejb</type>
+                    <classifier>jar-with-dependencies</classifier>
+                    <exclusions>
+                        <exclusion>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>service</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>dao</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>core</artifactId>
+                        </exclusion>
+                    </exclusions>
+                </dependency>
             </dependencies>
             <build>
                 <plugins>
@@ -188,6 +225,16 @@
                                     <artifactId>scheduler-core</artifactId>
                                     <bundleFileName>scheduler-core.jar</bundleFileName>
                                 </ejbModule>
+                                <ejbModule>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>async-core</artifactId>
+                                    <bundleFileName>async-core.jar</bundleFileName>
+                                </ejbModule>
+                                <ejbModule>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>async-task</artifactId>
+                                    <bundleFileName>async-task.jar</bundleFileName>
+                                </ejbModule>
                             </modules>
                         </configuration>
                     </plugin>
@@ -214,6 +261,12 @@
                     <artifactId>ws-runtime</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.aplana.taxaccounting</groupId>
+            <artifactId>async-core</artifactId>
+            <version>${project.version}</version>
+            <type>ejb</type>
         </dependency>
     </dependencies>
 
