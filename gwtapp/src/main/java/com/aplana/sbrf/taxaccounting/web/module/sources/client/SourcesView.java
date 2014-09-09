@@ -403,10 +403,12 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         });
         rightTable.setSelectionModel(rightSM, createCustomManager(
                 new DefaultSelectionEventManager.CheckboxEventTranslator<DepartmentAssign>(0) {
+                    @Override
                     public boolean clearCurrentSelection(CellPreviewEvent<DepartmentAssign> event) {
                         return false;
                     }
 
+                    @Override
                     public DefaultSelectionEventManager.SelectAction translateSelectionEvent(CellPreviewEvent<DepartmentAssign> event) {
                         if (event.getValue() != null && event.getValue().isChecked())
                             return DefaultSelectionEventManager.SelectAction.SELECT;
@@ -527,10 +529,12 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
 
         downTable.setSelectionModel(downSM, createCustomManager(
                 new DefaultSelectionEventManager.CheckboxEventTranslator<CurrentAssign>(0) {
+                    @Override
                     public boolean clearCurrentSelection(CellPreviewEvent<CurrentAssign> event) {
                         return false;
                     }
 
+                    @Override
                     public DefaultSelectionEventManager.SelectAction translateSelectionEvent(CellPreviewEvent<CurrentAssign> event) {
                         return DefaultSelectionEventManager.SelectAction.TOGGLE;
                     }
@@ -944,6 +948,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         loadRightData();
     }
 
+    @Override
     public void loadLeftData() {
         clearLeftTable();
         clearDownTable();
@@ -986,6 +991,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         }
     }
 
+    @Override
     public Table getTable() {
         return table;
     }

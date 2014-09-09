@@ -13,6 +13,7 @@ import com.google.gwt.dom.client.Style;
  */
 public class TrickUtilsIe8 extends TrickUtils {
 
+    @Override
     public String getOpacity(Element element) {
         return cssGetOpacity(element.getStyle());
     }

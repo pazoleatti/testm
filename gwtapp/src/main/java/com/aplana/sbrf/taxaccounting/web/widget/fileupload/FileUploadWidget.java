@@ -173,6 +173,7 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
         return uploadButton.getText();
     }
 
+    @Override
     public void setWidth(String width){
         uploadButton.setWidth(width);
         justButton.setWidth(width);

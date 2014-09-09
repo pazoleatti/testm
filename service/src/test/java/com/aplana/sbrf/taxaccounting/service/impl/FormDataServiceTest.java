@@ -132,6 +132,7 @@ public class FormDataServiceTest {
         when(departmentDao.getDepartment(formData1.getDepartmentId())).thenReturn(department);
 
         doAnswer(new Answer<Object>() {
+            @Override
             public Object answer(InvocationOnMock invocation) {
                 for (DepartmentFormType departmentFormType1 : list) {
                     if (departmentFormType1.getDepartmentId() == formData.getDepartmentId() &&
@@ -151,6 +152,7 @@ public class FormDataServiceTest {
 
         final Map<String, LockData> map = new HashMap<String, LockData>();
         doAnswer(new Answer<Object>() {
+            @Override
             public Object answer(InvocationOnMock invocation) {
                 Object[] arguments = invocation.getArguments();
                 Object key = invocation.getArguments()[0];
@@ -162,6 +164,7 @@ public class FormDataServiceTest {
             }
         }).when(lockDataService).lock(anyString(), anyInt(), anyInt());
         doAnswer(new Answer<Object>() {
+            @Override
             public Object answer(InvocationOnMock invocation) {
                 map.remove(invocation.getArguments()[0]);
                 return null;

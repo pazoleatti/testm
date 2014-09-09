@@ -22,7 +22,8 @@ import java.util.List;
 public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
 	
 	private static final class FormTypeMapper implements RowMapper<FormType> {
-		public FormType mapRow(ResultSet rs, int index) throws SQLException {
+		@Override
+        public FormType mapRow(ResultSet rs, int index) throws SQLException {
 			FormType result = new FormType();
 			result.setId(SqlUtils.getInteger(rs,"id"));
 			result.setName(rs.getString("name"));

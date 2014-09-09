@@ -196,6 +196,7 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler>
                         }
                     }
                 }) {
+            @Override
             public LogSearchResultItem getValue(
                     LogSearchResultItem object) {
                 return object;

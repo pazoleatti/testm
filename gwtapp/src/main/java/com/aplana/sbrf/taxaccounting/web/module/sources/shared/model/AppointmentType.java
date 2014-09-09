@@ -15,6 +15,7 @@ public enum AppointmentType implements HasName {
         this.name = name;
     }
 
+    @Override
     public String getName() {
         return name;
     }

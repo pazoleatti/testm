@@ -41,6 +41,7 @@ public class Cell extends AbstractCell {
         this.formStyleList = formStyleList;
     }
 
+    @Override
     public Object getValue() {
         // Получаем значение из главной ячейки (SBRFACCTAX-2082)
         if (hasValueOwner()) {
@@ -62,6 +63,7 @@ public class Cell extends AbstractCell {
         return null;
     }
 
+    @Override
     public Object setValue(Object value, Integer rowNumber) {
         // Устанавливаем значение в главную ячейку (SBRFACCTAX-2082)
         if (hasValueOwner()) {

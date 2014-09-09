@@ -222,7 +222,8 @@ public class PeriodServiceImpl implements PeriodService{
 		}
 	}
 
-	public void saveOrUpdate(DepartmentReportPeriod departmentReportPeriod, Date correctionDate, List<LogEntry> logs) {
+	@Override
+    public void saveOrUpdate(DepartmentReportPeriod departmentReportPeriod, Date correctionDate, List<LogEntry> logs) {
 		DepartmentReportPeriod dp = departmentReportPeriodDao.get(departmentReportPeriod.getReportPeriod().getId(),
 				departmentReportPeriod.getDepartmentId(), departmentReportPeriod.getCorrectPeriod());
 		if (dp == null) { //не существует

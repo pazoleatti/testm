@@ -23,7 +23,8 @@ public class SignInView extends ViewImpl implements MyView{
 		initWidget(binder.createAndBindUi(this));
 	}
 
-	public void setUserName(String userName) {
+	@Override
+    public void setUserName(String userName) {
 		this.userName.setText(userName);
 	}
 

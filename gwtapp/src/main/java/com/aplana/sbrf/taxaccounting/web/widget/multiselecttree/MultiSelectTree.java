@@ -66,9 +66,11 @@ public abstract class MultiSelectTree<H extends List, T extends MultiSelectTreeI
 
     public interface MultiSelectTreeResources extends Tree.Resources {
 
+        @Override
         @ImageResource.ImageOptions
         ImageResource treeClosed();
 
+        @Override
         @ImageResource.ImageOptions
         ImageResource treeOpen();
     }

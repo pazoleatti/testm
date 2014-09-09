@@ -25,7 +25,8 @@ import java.util.*;
 public class FormStyleDaoImpl extends AbstractDao implements FormStyleDao {
 
 	private final static class FormStyleMapper implements RowMapper<FormStyle> {
-		public FormStyle mapRow(ResultSet rs, int index) throws SQLException {
+		@Override
+        public FormStyle mapRow(ResultSet rs, int index) throws SQLException {
 			final FormStyle result = new FormStyle();
 			result.setId(SqlUtils.getInteger(rs, "id"));
 			result.setAlias(rs.getString("alias"));

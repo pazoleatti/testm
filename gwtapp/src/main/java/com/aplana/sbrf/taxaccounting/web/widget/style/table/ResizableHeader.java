@@ -201,6 +201,7 @@ public abstract class ResizableHeader<T> extends Header<String> {
             current = null;
         }
 
+        @Override
         public void dragFinished() {
             dragging = false;
             cleanUp();

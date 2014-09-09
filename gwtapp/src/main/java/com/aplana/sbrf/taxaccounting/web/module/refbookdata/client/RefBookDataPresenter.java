@@ -153,12 +153,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 							public void onSuccess(DeleteRefBookRowResult result) {
                                 LogAddEvent.fire(RefBookDataPresenter.this, result.getUuid());
                                 if (result.isException()) {
-                                    Dialog.errorMessage("Удаление всех версий элемента справочника", "Обнаружены фатальные ошибки!", new DialogHandler() {
-                                        @Override
-                                        public void close() {
-                                            super.close();
-                                        }
-                                    });
+                                    Dialog.errorMessage("Удаление всех версий элемента справочника", "Обнаружены фатальные ошибки!", new DialogHandler() {});
                                 }
 								editFormPresenter.show(null);
 								editFormPresenter.setMode(mode);

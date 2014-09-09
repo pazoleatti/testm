@@ -12,6 +12,7 @@ import com.google.gwt.user.datepicker.client.MonthSelector;
  * Касмотный селектор даты c выбором года и месяца
  * @author srybakov
  */
+@SuppressWarnings("override")
 public  class MonthAndYearSelector extends MonthSelector {
 
 	private static final String BASE_NAME = "datePicker" ;
@@ -47,7 +48,8 @@ public  class MonthAndYearSelector extends MonthSelector {
 		// Set up backwards.
 		PushButton backwards = new PushButton();
 		backwards.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent event) {
+			@Override
+            public void onClick(ClickEvent event) {
 				addMonths(-1);
 			}
 		});
@@ -59,7 +61,8 @@ public  class MonthAndYearSelector extends MonthSelector {
 		forwards.getUpFace().setHTML("&rsaquo;");
 		forwards.setStyleName(BASE_NAME + "NextButton");
 		forwards.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent event) {
+			@Override
+            public void onClick(ClickEvent event) {
 				addMonths(+1);
 			}
 		});
@@ -67,7 +70,8 @@ public  class MonthAndYearSelector extends MonthSelector {
 		// Set up backwards year
 		PushButton backwardsYear = new PushButton();
 		backwardsYear.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent event) {
+			@Override
+            public void onClick(ClickEvent event) {
 				addMonths(-12);
 			}
 		});
@@ -79,7 +83,8 @@ public  class MonthAndYearSelector extends MonthSelector {
 		forwardsYear.getUpFace().setHTML("&raquo;");
 		forwardsYear.setStyleName(BASE_NAME + "NextButton");
 		forwardsYear.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent event) {
+			@Override
+            public void onClick(ClickEvent event) {
 				addMonths(+12);
 			}
 		});
@@ -102,7 +107,8 @@ public  class MonthAndYearSelector extends MonthSelector {
 		initWidget(grid);
 	}
 
-	public void addMonths(int numMonths) {
+	@Override
+    public void addMonths(int numMonths) {
 		model.shiftCurrentMonth(numMonths);
 		picker.refreshComponents();
 	}

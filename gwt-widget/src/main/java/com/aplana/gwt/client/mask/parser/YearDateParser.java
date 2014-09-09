@@ -27,6 +27,7 @@ public class YearDateParser implements Parser<Date> {
     protected YearDateParser() {
     }
 
+    @Override
     public Date parse(CharSequence object) throws ParseException {
         if ("".equals(object.toString())) {
             return null;

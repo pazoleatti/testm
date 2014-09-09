@@ -538,6 +538,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
         }
     }
 
+    @Override
     protected void updateLabelValue() {
         setLabelValue(getDereferenceValue());
     }

@@ -23,6 +23,7 @@ public class TransactionHelperImpl implements TransactionHelper {
         TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
         transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
         transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+            @Override
             public void doInTransactionWithoutResult(TransactionStatus status) {
                 logic.execute();
             }

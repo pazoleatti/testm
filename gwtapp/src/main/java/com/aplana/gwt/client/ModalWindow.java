@@ -186,6 +186,7 @@ public class ModalWindow extends DialogBox implements CanHide {
         super.onPreviewNativeEvent(event);
     }
 
+    @Override
     public void center() {
         super.center();
         OpenModalWindowEvent.fire(this);
@@ -198,6 +199,7 @@ public class ModalWindow extends DialogBox implements CanHide {
         getCellElement(1, 1).getStyle().setPropertyPx(propName, value);
     }
 
+    @Override
     public void setSize(String width, String height) {
         setWidth(width);
         setHeight(height);
@@ -211,11 +213,13 @@ public class ModalWindow extends DialogBox implements CanHide {
         setMainInnerElementProperty("minHeight", minHeight);
     }
 
+    @Override
     public void setWidth(String width) {
         setMainInnerElementProperty("width", width);
         //getWidget().setWidth(width);
     }
 
+    @Override
     public void setHeight(String height) {
         if (height != null && !height.isEmpty()) {
             Integer heightInt = Integer.valueOf(height.replace("px", "")) - CAPTION_HEIGHT;

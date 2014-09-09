@@ -910,6 +910,7 @@ public class FormDataServiceImpl implements FormDataService {
         });
 	}
 
+    @Override
     public List<Long> getFormDataListInActualPeriodByTemplate(int templateId, Date startDate) {
         return formDataDao.getFormDataListInActualPeriodByTemplate(templateId, startDate);
     }
@@ -982,6 +983,7 @@ public class FormDataServiceImpl implements FormDataService {
         }
     }
 
+    @Override
     public Integer getPreviousRowNumber(FormData formData) {
         int previousRowNumber = 0;
         // Получить налоговый период

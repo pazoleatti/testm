@@ -103,11 +103,13 @@ public class LeftRightToggleButton extends Button implements HasValue<Boolean>, 
         }
     }
 
+    @Override
     public HandlerRegistration addValueChangeHandler(
             ValueChangeHandler<Boolean> handler) {
         return addHandler(handler, ValueChangeEvent.getType());
     }
 
+    @Override
     public LeafValueEditor<Boolean> asEditor() {
         if (editor == null) {
             editor = TakesValueEditor.of(this);

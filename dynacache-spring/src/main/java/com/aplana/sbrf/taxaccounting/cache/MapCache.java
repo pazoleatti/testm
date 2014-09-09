@@ -37,7 +37,8 @@ public class MapCache implements Cache {
 		this(name, store, true, true);
 	}
 
-	public String getName() {
+	@Override
+    public String getName() {
 		return this.name;
 	}
 
@@ -55,7 +56,8 @@ public class MapCache implements Cache {
 		return this.allowNullValues;
 	}
 
-	public ValueWrapper get(Object key) {
+	@Override
+    public ValueWrapper get(Object key) {
 		Object value = this.store.get(new KeyWrapper(this.name, key));
 		if (log.isDebugEnabled()) {
 			log.debug("Get element with key = " + key + " from cache '" + name
@@ -65,7 +67,8 @@ public class MapCache implements Cache {
 				: null);
 	}
 
-	public void put(Object key, Object value) {
+	@Override
+    public void put(Object key, Object value) {
 		if (log.isDebugEnabled()) {
 			log.debug("Put element with key = " + key + " to cache '" + name
 					+ "'");

@@ -48,11 +48,4 @@ public class HomePagePresenter extends
         LogShowEvent.fire(this, false);
 		// setInSlot(TYPE_testPresenter, filterPresenter);
 	}
-
-	@Override
-	protected void onHide() {
-		super.onHide();
-		// clearSlot(TYPE_testPresenter);
-	}
-
 }

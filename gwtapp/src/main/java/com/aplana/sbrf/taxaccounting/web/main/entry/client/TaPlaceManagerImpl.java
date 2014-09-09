@@ -44,7 +44,8 @@ public class TaPlaceManagerImpl extends PlaceManagerImpl implements TaPlaceManag
 	}
 	
 	
-	public void navigateBackQuietly() {
+	@Override
+    public void navigateBackQuietly() {
 		quietlyChange = true;
 		History.back();
 	}

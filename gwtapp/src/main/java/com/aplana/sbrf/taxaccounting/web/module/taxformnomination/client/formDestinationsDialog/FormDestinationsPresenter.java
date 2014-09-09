@@ -83,12 +83,6 @@ public class FormDestinationsPresenter extends PresenterWidget<FormDestinationsP
     }
 
     @Override
-    protected void onReveal() {
-
-        super.onReveal();
-    }
-
-    @Override
     public void onConfirm() {
         AssignFormsAction action = new AssignFormsAction();
         action.setDepartments(getView().getDepartments());

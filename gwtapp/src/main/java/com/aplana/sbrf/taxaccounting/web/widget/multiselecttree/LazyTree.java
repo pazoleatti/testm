@@ -24,9 +24,11 @@ public class LazyTree<H extends LazyTreeItem> extends Tree implements HasLazyTre
 
     public interface MultiSelectTreeResources extends Tree.Resources {
 
+        @Override
         @ImageResource.ImageOptions
         ImageResource treeClosed();
 
+        @Override
         @ImageResource.ImageOptions
         ImageResource treeOpen();
     }
@@ -300,6 +302,7 @@ public class LazyTree<H extends LazyTreeItem> extends Tree implements HasLazyTre
         // заглушка
     }
 
+    @Override
     @Deprecated
     public H getSelectedItem() {
         // заглушка

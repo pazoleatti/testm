@@ -34,7 +34,8 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
     private RefBookDao refBookDao;
 
 	private class ColumnMapper implements RowMapper<Column> {
-		public Column mapRow(ResultSet rs, int index) throws SQLException {
+		@Override
+        public Column mapRow(ResultSet rs, int index) throws SQLException {
 			final Column result;
 			String type = rs.getString("type");
 			if ("N".equals(type)) {
@@ -91,7 +92,8 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 		}
 	}
 	
-	public List<Column> getFormColumns(int formId) {
+	@Override
+    public List<Column> getFormColumns(int formId) {
 		return getJdbcTemplate().query(
 				"SELECT " +
 				"  id, name, form_template_id, alias, type, width, precision, ord, max_length, " +

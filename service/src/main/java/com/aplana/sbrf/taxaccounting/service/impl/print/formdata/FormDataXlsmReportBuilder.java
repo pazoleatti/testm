@@ -170,6 +170,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         }
 	}
 
+    @Override
     protected void fillHeader(){
 
         int nullColumnCount = 0;
@@ -273,7 +274,8 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         createCellByRange(XlsxReportMetadata.RANGE_REPORT_PERIOD, sb.toString(), 0, formTemplate.getColumns().size()/2);
     }
 
-	protected void createTableHeaders(){
+	@Override
+    protected void createTableHeaders(){
         //Поскольку имеется шаблон с выставленными алиасами, то чтобы не записать данные в ячейку с алиасом
         //делаем проверку на то, что сумма начала записи таблицы и кол-ва строк не превышает номер строки с алиасом
         //и если превышает,то сдвигаем
@@ -307,7 +309,8 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         }
     }
 
-	protected void createDataForTable(){
+	@Override
+    protected void createDataForTable(){
         rowNumber = (rowNumber > sheet.getLastRowNum()?sheet.getLastRowNum():rowNumber);//if we have empty strings
         sheet.shiftRows(rowNumber, sheet.getLastRowNum(), dataRows.size() + 2);
         for (DataRow<com.aplana.sbrf.taxaccounting.model.Cell> dataRow : dataRows) {
@@ -375,6 +378,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         super.cellAlignment();
     }
 
+    @Override
     protected void fillFooter(){
         AreaReference ar;
         Row r;

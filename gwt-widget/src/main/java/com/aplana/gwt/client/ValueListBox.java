@@ -19,10 +19,12 @@ public class ValueListBox<T> extends DoubleStateWrapper<com.google.gwt.user.clie
         super(new com.google.gwt.user.client.ui.ValueListBox(renderer));
     }
 
+    @Override
     public void setAcceptableValues(Collection<T> newValues) {
         widget.setAcceptableValues(newValues);
     }
 
+    @Override
     public HandlerRegistration addValueChangeHandler(ValueChangeHandler<T> handler) {
         return widget.addValueChangeHandler(handler);
     }

@@ -30,11 +30,6 @@ public class DateMaskBox extends MaskBox<Date> {
         setMask(mask);
     }
 
-    @Override
-    public Date getValue() {
-        return super.getValue();
-    }
-
     /**
      * В отличии от метода getValue() может вернуть null при некорректной дате.
      * Использовать можно там, где требуется проверка заполненности обязательных полей.

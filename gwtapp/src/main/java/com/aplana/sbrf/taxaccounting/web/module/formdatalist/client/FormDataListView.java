@@ -158,6 +158,7 @@ public class FormDataListView extends ViewWithUiHandlers<FormDataListUiHandlers>
                                 + formData.getFormTypeName() + "</a>");
                     }
                 }) {
+            @Override
             public FormDataSearchResultItem getValue(
                     FormDataSearchResultItem object) {
                 return object;

@@ -328,14 +328,4 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
     public boolean isMultiSelect() {
         return multiSelect;
     }
-
-    @Override
-    public boolean isEnabled() {
-        return super.isEnabled();
-    }
-
-    @Override
-    public void setEnabled(boolean enabled) {
-        super.setEnabled(enabled);
-    }
 }
