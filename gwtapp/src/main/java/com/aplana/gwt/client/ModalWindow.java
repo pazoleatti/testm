@@ -141,7 +141,7 @@ public class ModalWindow extends DialogBox implements CanHide {
         this.hideHandler = hideHandler;
     }
 
-    public void setIconUrl(String iconUrl) {
+    public final void setIconUrl(String iconUrl) {
         if (iconUrl != null && !iconUrl.trim().isEmpty()) {
             icon.setUrl(iconUrl);
             icon.getElement().getStyle().setFloat(Style.Float.LEFT);
@@ -155,7 +155,7 @@ public class ModalWindow extends DialogBox implements CanHide {
     }
 
     @Override
-    public void setTitle(String title) {
+    public final void setTitle(String title) {
         this.title.setText(title);
     }
 

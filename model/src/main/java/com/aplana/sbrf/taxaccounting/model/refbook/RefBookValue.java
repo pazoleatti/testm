@@ -78,7 +78,7 @@ public class RefBookValue implements Serializable {
 	 *              атрибутов-ссылок в качестве значения можно передавать как код строки (примитив), на которую
 	 *              ссылаемся, так и непосредственно сам объект-строка.
 	 */
-	public void setValue(Object value) {
+	public final void setValue(Object value) {
 		if (value == null ||
 				(attributeType == RefBookAttributeType.NUMBER && value instanceof Number) ||
 				(attributeType == RefBookAttributeType.STRING && value instanceof String) ||

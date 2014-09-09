@@ -548,7 +548,7 @@ public class FlexiblePager extends AbstractPager {
 	}
 
 	@Override
-	public void setDisplay(HasRows display) {
+	public final void setDisplay(HasRows display) {
 		// Enable or disable all buttons.
 		boolean disableButtons = (display == null);
 		setFastForwardDisabled(disableButtons);

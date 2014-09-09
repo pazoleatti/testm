@@ -21,7 +21,7 @@ public class BodyContainer extends HTMLPanel {
         setupStyle();
     }
 
-    public void setupStyle() {
+    public final void setupStyle() {
         style = FormResources.INSTANCE.style();
         style.ensureInjected();
 

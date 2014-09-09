@@ -154,7 +154,7 @@ public abstract class MultiSelectTree<H extends List, T extends MultiSelectTreeI
     }
 
     @Override
-    public HandlerRegistration addValueChangeHandler(ValueChangeHandler<H> handler) {
+    public final HandlerRegistration addValueChangeHandler(ValueChangeHandler<H> handler) {
         return addHandler(handler, ValueChangeEvent.getType());
     }
 
@@ -351,7 +351,7 @@ public abstract class MultiSelectTree<H extends List, T extends MultiSelectTreeI
         return label.getText();
     }
 
-    public void setHeader(String text) {
+    public final void setHeader(String text) {
         label.setText(text == null ? "" : text);
     }
 
@@ -409,7 +409,7 @@ public abstract class MultiSelectTree<H extends List, T extends MultiSelectTreeI
     }
 
     /** Установить признак возможности выбора нескольких узлов дерева. */
-    public void setMultiSelection(boolean multiSelection) {
+    public final void setMultiSelection(boolean multiSelection) {
         this.multiSelection = multiSelection;
         for (T i : getItems()) {
             if (i.isMultiSelection() != null) {

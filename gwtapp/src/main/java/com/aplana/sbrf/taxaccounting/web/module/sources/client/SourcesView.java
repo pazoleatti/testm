@@ -785,12 +785,12 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
     }
 
     @Override
-    public PeriodsInterval getPeriodInterval() {
+    public final PeriodsInterval getPeriodInterval() {
         return new PeriodsInterval(yearFrom.getValue(), periodFrom.getValue(), yearTo.getValue(), periodTo.getValue());
     }
 
     @Override
-    public boolean isSource() {
+    public final boolean isSource() {
         return AppointmentType.SOURCES.equals(appointmentTypePicker.getValue());
     }
 
@@ -969,7 +969,8 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         loadRightData();
     }
 
-    public void loadRightData() {
+    @Override
+    public final void loadRightData() {
         clearRightTable();
         Integer selected = rightDepPicker.getSingleValue();
         if (selected != null) {

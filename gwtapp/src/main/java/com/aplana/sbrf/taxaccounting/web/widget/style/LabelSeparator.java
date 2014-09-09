@@ -49,7 +49,7 @@ public class LabelSeparator extends Composite implements HasText {
         setTextRight(false);
     }
 
-    public void setTextRight(boolean textRight){
+    public final void setTextRight(boolean textRight){
         panel.clear();
         if (textRight) {
             panel.add(htmlPanel);

@@ -157,7 +157,7 @@ public class FixedScrollPanel extends SimplePanel implements SourcesScrollEvents
      * @param alwaysShow
      *            <code>true</code> to show scroll bars at all times
      */
-    public void setAlwaysShowScrollBars(boolean alwaysShow) {
+    public final void setAlwaysShowScrollBars(boolean alwaysShow) {
         DOM.setStyleAttribute(getElement(), "overflow", alwaysShow ? "scroll"
                 : "auto");
     }
