@@ -82,7 +82,7 @@ public interface RefBookDataProvider {
      * Проверяет, существуют ли версии элемента справочника, удовлетворяющие указанному фильтру
      * @param version дата актуальности. Может быть null - тогда не учитывается
      * @param filter
-     * @return пары идентификатор версии элемента - идентификаторидентификатор элемента справочника
+     * @return пары идентификатор версии элемента - идентификатор элемента справочника
      */
     List<Pair<Long, Long>> checkRecordExistence(Date version, String filter);
 
@@ -194,7 +194,7 @@ public interface RefBookDataProvider {
      * @param uniqueRecordId идентификатор версии записи
      * @return not null всегда - ожидается возврат результата
      */
-    List<Pair<RefBookAttribute, RefBookValue>> getUniqueAttributeValues(Long uniqueRecordId);
+    Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>> getUniqueAttributeValues(Long uniqueRecordId);
 
     /**
      * Обновляет данные версии записи справочника

@@ -24,7 +24,8 @@
 		<module>mdb</module>
 		<module>scheduler</module>
         <module>gwt-widget</module>
-	</modules>
+        <module>async</module>
+    </modules>
 
 	<properties>
 		<maven.build.timestamp.format>yyyy.MM.dd-HH:mm</maven.build.timestamp.format>
@@ -380,6 +381,17 @@
                 <groupId>javax.persistence</groupId>
                 <artifactId>persistence-api</artifactId>
                 <version>1.0.2</version>
+            </dependency>
+            <!-- Email -->
+            <dependency>
+                <groupId>javax.mail</groupId>
+                <artifactId>mail</artifactId>
+                <version>1.4.7</version>
+            </dependency>
+            <dependency>
+                <groupId>dumbster</groupId>
+                <artifactId>dumbster</artifactId>
+                <version>1.6</version>
             </dependency>
         </dependencies>
 	</dependencyManagement>

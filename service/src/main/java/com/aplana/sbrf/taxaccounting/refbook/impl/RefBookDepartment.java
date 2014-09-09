@@ -283,8 +283,8 @@ public class RefBookDepartment implements RefBookDataProvider {
     }
 
     @Override
-    public List<Pair<RefBookAttribute, RefBookValue>> getUniqueAttributeValues(Long recordId) {
-        return new ArrayList<Pair<RefBookAttribute, RefBookValue>>();
+    public Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>> getUniqueAttributeValues(Long recordId) {
+        return new HashMap<Integer, List<Pair<RefBookAttribute, RefBookValue>>>();
     }
 
     //http://conf.aplana.com/pages/viewpage.action?pageId=11378355

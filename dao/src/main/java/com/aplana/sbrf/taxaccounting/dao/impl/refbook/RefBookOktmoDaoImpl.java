@@ -454,7 +454,7 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
         String paramRestriction = null;
         List<Pair<Long,String>> matches = new ArrayList<Pair<Long, String>>();
         for (final RefBookAttribute attribute : attributes) {
-            if (attribute.isUnique()) {
+            if (attribute.getUnique() != 0) {
                 StringBuilder query = new StringBuilder(CHECK_UNIQUE_MATCHES).append(" and ");
                 for (int i=0; i < records.size(); i++) {
                     Map<String, RefBookValue> values = records.get(i).getValues();

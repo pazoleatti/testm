@@ -153,6 +153,13 @@
             <version>${project.version}</version>
         </dependency>
 
+        <!-- Асинхронные задачи -->
+        <dependency>
+            <groupId>com.aplana.taxaccounting</groupId>
+            <artifactId>async-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <!-- Tester component -->
 		<dependency>
 			<groupId>com.gwtplatform</groupId>
@@ -173,11 +180,6 @@
 
 	<build>
 		<outputDirectory>${webappDirectory}/WEB-INF/classes</outputDirectory>
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-            </resource>
-        </resources>
 		<plugins>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -243,6 +245,17 @@
 		<profile>
 			<id>development</id>
 			<build>
+                <resources>
+                    <resource>
+                        <directory>src/main/profiles/development</directory>
+                        <includes>
+                            <include>spring/*.*</include>
+                        </includes>
+                    </resource>
+                    <resource>
+                        <directory>src/main/resources</directory>
+                    </resource>
+                </resources>
 				<plugins>
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
@@ -293,6 +306,11 @@
                     <artifactId>scheduler-mock</artifactId>
                     <version>${project.version}</version>
                 </dependency>
+                <dependency>
+                    <groupId>com.aplana.taxaccounting</groupId>
+                    <artifactId>async-mock</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
 			</dependencies>
 		</profile>
 		<profile>
@@ -305,6 +323,19 @@
                 </dependency>
             </dependencies>
 			<build>
+                <resources>
+                    <resource>
+                        <directory>src/main/profiles/production</directory>
+                        <filtering>true</filtering>
+                        <includes>
+                            <include>spring/*.*</include>
+                        </includes>
+                    </resource>
+                    <resource>
+                        <filtering>true</filtering>
+                        <directory>src/main/resources</directory>
+                    </resource>
+                </resources>
 				<plugins>
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>

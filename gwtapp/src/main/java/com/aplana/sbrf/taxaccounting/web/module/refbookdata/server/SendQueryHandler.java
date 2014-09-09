@@ -3,10 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.service.TARoleService;
-import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.SendQueryAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.SendQueryResult;
@@ -19,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 
 @Service
@@ -42,6 +40,9 @@ public class SendQueryHandler extends AbstractActionHandler<SendQueryAction, Sen
     @Autowired
     private DepartmentService departmentService;
 
+    @Autowired
+    private EmailService emailService;
+
     public SendQueryHandler() {
         super(SendQueryAction.class);
     }
@@ -51,31 +52,27 @@ public class SendQueryHandler extends AbstractActionHandler<SendQueryAction, Sen
         SendQueryResult result = new SendQueryResult();
         Logger logger = new Logger();
 
-        String emails = getEmails();
-        String title = TITLE;
-        String message = getMessage(action.getMessage());
-
-        //TODO отправка письма http://jira.aplana.com/browse/SBRFACCTAX-8470
+        emailService.send(getEmails(), TITLE, getMessage(action.getMessage()));
 
         logger.info("Запрос на изменение отправлен на рассмотрение Контролёрам УНП");
         result.setUuid(logEntryService.save(logger.getEntries()));
         return result;
     }
 
-    private String getEmails(){
-        StringBuilder emails = new StringBuilder();
-        PagingResult<TAUserView> list = taUserService.getUsersByFilter(new MembersFilterData() {{
-            setRoleIds(new ArrayList<Long>(Arrays.asList((long)taRoleService.getByAlias(TARole.ROLE_CONTROL_UNP).getId())));
+    private List<String> getEmails() {
+        List<String> returnList = new ArrayList<String>();
+        PagingResult<TAUserView> unpList = taUserService.getUsersByFilter(new MembersFilterData() {{
+            setRoleIds(new ArrayList<Long>(Arrays.asList((long) taRoleService.getByAlias(TARole.ROLE_CONTROL_UNP).getId())));
         }});
-        for (TAUserView userView : list) {
+        for (TAUserView userView : unpList) {
             if (userView.getEmail() != null) {
-                emails.append(userView.getEmail()).append(";");
+                returnList.add(userView.getEmail());
             }
         }
-        return  emails.toString();
+        return returnList;
     }
 
-    private String getMessage(String msg){
+    private String getMessage(String msg) {
         TAUser user = securityService.currentUserInfo().getUser();
         StringBuilder message = new StringBuilder();
         message.append("Пользователь ").append(user.getName())
