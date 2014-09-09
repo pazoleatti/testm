@@ -40,7 +40,7 @@ public class StartTaskHandler extends AbstractActionHandler<StartTaskAction, Sta
     }
 
     @Override
-    public void undo(StartTaskAction StartTaskAction, StartTaskResult StartTaskResult, ExecutionContext executionContext) throws ActionException {
+    public void undo(StartTaskAction startTaskAction, StartTaskResult startTaskResult, ExecutionContext executionContext) throws ActionException {
         //do nothing
     }
 }

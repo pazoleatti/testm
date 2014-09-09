@@ -55,7 +55,7 @@ public class DeleteTaskHandler extends AbstractActionHandler<DeleteTaskAction, D
     }
 
     @Override
-    public void undo(DeleteTaskAction DeleteTaskAction, DeleteTaskResult DeleteTaskResult, ExecutionContext executionContext) throws ActionException {
+    public void undo(DeleteTaskAction deleteTaskAction, DeleteTaskResult deleteTaskResult, ExecutionContext executionContext) throws ActionException {
         //do nothing
     }
 }

@@ -46,7 +46,7 @@ public class FillFormTypesHandler extends AbstractActionHandler<FillFormTypesAct
     }
 
     @Override
-    public void undo(FillFormTypesAction FillFormTypesAction, FillFormTypesResult fillFormTypesResult, ExecutionContext executionContext) throws ActionException {
+    public void undo(FillFormTypesAction fillFormTypesAction, FillFormTypesResult fillFormTypesResult, ExecutionContext executionContext) throws ActionException {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 }
