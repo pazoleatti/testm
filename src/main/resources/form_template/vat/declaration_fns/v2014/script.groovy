@@ -747,11 +747,6 @@ def getOkato(def id) {
     def String okato = null
     if(id != null){
         okato = getRefBookValue(96, id)?.CODE?.stringValue
-        if(okato != null) {
-            while (okato.length() < 11) {
-                okato = okato + '0'
-            }
-        }
     }
     return okato
 }
