@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -34,21 +35,21 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
 		} catch (EmptyResultDataAccessException e) {
 			return null;
 		} catch (Exception e) {
-			throw new LockException("Ошибка при поиске блокировки с кодом = \"" + key + "\"");
+			throw new LockException("Ошибка при поиске блокировки с кодом = %s", key);
 		}
 	}
 
 	@Override
 	public void createLock(String key, int userId, Date dateBefore) {
 		try {
-			getJdbcTemplate().update("INSERT INTO lock_data (key, user_id, date_before) VALUES (?,?,?)",
+            getJdbcTemplate().update("INSERT INTO lock_data (key, user_id, date_before) VALUES (?,?,?)",
 					new Object[] {key,
 							userId,
 							dateBefore},
 					new int[] {Types.VARCHAR, Types.NUMERIC, Types.TIMESTAMP});
 		} catch (DataAccessException e) {
-			throw new LockException(String.format("Ошибка при создании блокировки. (%s, %s, %s)", key, userId, dateBefore), e.getMessage());
-		}
+			throw new LockException("Ошибка при создании блокировки (%s, %s, %s). %s", key, userId, dateBefore, e.getMessage());
+        }
 	}
 
 	@Override
@@ -59,10 +60,10 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
 							key},
 					new int[] {Types.TIMESTAMP, Types.VARCHAR});
 			if (affectedCount == 0) {
-				throw new LockException("Ошибка обновления. Блокировка с кодом = \"" + key + "\" не найдена в БД");
+				throw new LockException("Ошибка обновления. Блокировка с кодом = %s не найдена в БД.", key);
 			}
 		} catch (DataAccessException e) {
-			throw new LockException("Ошибка при обновлении блокировки с кодом = " + key + "\"", e.getMessage());
+			throw new LockException("Ошибка при обновлении блокировки с кодом = %s. %s", key, e.getMessage());
 		}
 	}
 
@@ -73,14 +74,39 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
 					new Object[] {key},
 					new int[] {Types.VARCHAR});
 			if (affectedCount == 0) {
-				throw new LockException("Ошибка удаления. Блокировка с кодом = \"" + key + "\" не найдена в БД");
+				throw new LockException("Ошибка удаления. Блокировка с кодом = %s не найдена в БД.", key);
 			}
 		} catch (DataAccessException e) {
-			throw new LockException("Ошибка при удалении блокировки с кодом = \"" + key + "\"", e.getMessage());
+			throw new LockException("Ошибка при удалении блокировки с кодом = %s. %s", key, e.getMessage());
 		}
 	}
 
-	private static final class LockDataMapper implements RowMapper<LockData> {
+    @Override
+    public void unlockAllByUserId(int userId) {
+        try {
+            getJdbcTemplate().update("delete from lock_data where user_id = ?",
+                    userId);
+        } catch (DataAccessException e){
+            throw new LockException("Ошибка при удалении блокировок для пользователя с id = %d. %s", userId, e.getMessage());
+        }
+    }
+
+    @Override
+    public void unlockIfOlderThan(int sec) {
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.SECOND, -sec);
+        try {
+            getJdbcTemplate().update(
+                    "delete from lock_data where date_before < ?",
+                    cal.getTime()
+            );
+        } catch (DataAccessException e){
+            logger.error("", e);
+            throw new LockException("Ошибка при удалении блокировок. %s", e.getMessage());
+        }
+    }
+
+    private static final class LockDataMapper implements RowMapper<LockData> {
 		public LockData mapRow(ResultSet rs, int index) throws SQLException {
 			LockData result = new LockData();
 			result.setKey(rs.getString("key"));

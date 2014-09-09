@@ -743,4 +743,14 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		}
 	}
 
+    @Override
+    public void cleanValue(final Collection<Integer> columnIdList) {
+        if (columnIdList == null || columnIdList.isEmpty()) {
+            return;
+        }
+        Map<String, Object> paramMap = new HashMap<String, Object>() {{put("ids", columnIdList);}};
+        getNamedParameterJdbcTemplate().update("delete from string_value where column_id in (:ids)", paramMap);
+        getNamedParameterJdbcTemplate().update("delete from numeric_value where column_id in (:ids)", paramMap);
+        getNamedParameterJdbcTemplate().update("delete from date_value where column_id in (:ids)", paramMap);
+    }
 }

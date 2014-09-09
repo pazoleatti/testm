@@ -31,7 +31,6 @@ alter table form_style add constraint form_style_chk_bold check (bold in (0,1));
 alter table form_style add constraint form_style_uniq_alias unique (form_template_id, alias);
 
 alter table blob_data add constraint blob_data_pk primary key(id);
-alter table blob_data add constraint blob_data_chk_type check (type in (0, 1));
 
 alter table ref_book add constraint ref_book_pk primary key (id);
 alter table ref_book add constraint ref_book_fk_script_id foreign key (script_id) references blob_data(id);
@@ -88,7 +87,6 @@ alter table department add constraint department_pk primary key (id);
 alter table department add constraint dept_fk_parent_id foreign key (parent_id) references department(id);
 alter table department add constraint department_fk_type foreign key(type) references department_type(id);
 alter table department add constraint department_chk_is_active check (is_active in (0, 1));
-alter table department add constraint department_uniq_code UNIQUE (code);
 
 alter table configuration add constraint configuration_pk primary key (code, department_id);
 alter table configuration add constraint configuration_fk foreign key (department_id) references department(id) on delete cascade;
@@ -194,9 +192,6 @@ alter table sec_user add constraint sec_user_fk_dep_id foreign key (department_i
 alter table sec_user add constraint sec_user_uniq_login_active unique (login);
 alter table sec_user add constraint sec_user_chk_is_active check (is_active in (0, 1));
 
-alter table object_lock add constraint object_lock_pk primary key (object_id, class);
-alter table object_lock add constraint object_lock_fk_user_id foreign key (user_id) references sec_user(id) on delete cascade;
-
 alter table sec_role add constraint sec_role_pk primary key (id);
 alter table sec_role add constraint sec_role_uniq_alias unique (alias);
 
@@ -251,6 +246,8 @@ ALTER TABLE log_system DROP CONSTRAINT log_system_chk_event_id;
 
 alter table lock_data add constraint lock_data_pk primary key (key);
 alter table lock_data add constraint lock_data_fk_user_id foreign key (user_id) references sec_user(id) on delete cascade;
+
+alter table async_task_type add constraint async_task_type_pk primary key (id);
 ------------------------------------------------------------------------------------------------------
 create index i_department_parent_id on department(parent_id);
 create index i_data_row_form_data_id on data_row(form_data_id);

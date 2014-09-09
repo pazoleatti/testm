@@ -59,18 +59,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         ps.appendQuery("left join event ev on ls.event_id=ev.\"ID\" ");
         ps.appendQuery("left join form_kind fk on ls.form_kind_id=fk.\"ID\" ");
 
-        if (departments != null) {
-            ps.appendQuery(" WHERE ");
-            ps.appendQuery(SqlUtils.transformToSqlInStatement("ls.event_id", Arrays.asList(AVAILABLE_CONTROL_EVENTS)));
-            ps.appendQuery(" AND (");
-            ps.appendQuery(transformToSqlInStatement("form_department_id", departments));
-            ps.appendQuery(" OR (not form_department_id in (select id from department) AND ");
-            ps.appendQuery(transformToSqlInStatement("tb_department_id", BADepartmentIds));
-            ps.appendQuery("))");
-            appendSelectWhereClause(ps, filter, " AND");
-        } else {
-            appendSelectWhereClause(ps, filter, " WHERE");
-        }
+        addDepartmentCause(ps, filter, departments, BADepartmentIds);
 
         ps.appendQuery(orderByClause(filter.getSearchOrdering(), filter.isAscSorting()));
         ps.appendQuery(") dat) ordDat");
@@ -339,15 +328,12 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         return order.toString();
     }
 
-
-    private int getCount(LogSystemFilter filter, List<Integer> departments, List<Integer> BADepartmentIds) {
-        PreparedStatementData ps = new PreparedStatementData();
-        ps.appendQuery("select count(*) from log_system ls ");
-        ps.appendQuery("left join event ev on ls.event_id=ev.\"ID\" ");
-        /*ps.appendQuery("left join sec_user su on ls.user_id=su.\"ID\" ");*/
-        ps.appendQuery("left join form_kind fk on ls.form_kind_id=fk.\"ID\" ");
+    private void addDepartmentCause(PreparedStatementData ps, LogSystemFilter filter, List<Integer> departments,
+                                    List<Integer> BADepartmentIds) {
         if (departments != null) {
-            ps.appendQuery(" WHERE (ls.form_type_name is not null OR ls.declaration_type_name is not null ) AND (");
+            ps.appendQuery(" WHERE ");
+            ps.appendQuery(SqlUtils.transformToSqlInStatement("ls.event_id", Arrays.asList(AVAILABLE_CONTROL_EVENTS)));
+            ps.appendQuery(" AND (");
             ps.appendQuery(transformToSqlInStatement("form_department_id", departments));
             ps.appendQuery(" OR (not form_department_id in (select id from department) AND ");
             ps.appendQuery(transformToSqlInStatement("tb_department_id", BADepartmentIds));
@@ -356,6 +342,14 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         } else {
             appendSelectWhereClause(ps, filter, " WHERE");
         }
+    }
+
+    private int getCount(LogSystemFilter filter, List<Integer> departments, List<Integer> BADepartmentIds) {
+        PreparedStatementData ps = new PreparedStatementData();
+        ps.appendQuery("select count(*) from log_system ls ");
+        ps.appendQuery("left join event ev on ls.event_id=ev.\"ID\" ");
+        ps.appendQuery("left join form_kind fk on ls.form_kind_id=fk.\"ID\" ");
+        addDepartmentCause(ps, filter, departments, BADepartmentIds);
         return getJdbcTemplate().queryForInt(
                 ps.getQuery().toString(),
                 ps.getParams().toArray()

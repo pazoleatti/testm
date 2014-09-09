@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.main.api.client;
 
-import com.aplana.gwt.client.dialog.Dialog;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;

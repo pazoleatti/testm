@@ -125,67 +125,65 @@ public class RefBookFactoryImpl implements RefBookFactory {
         StringBuilder resultSearch = new StringBuilder();
         RefBook refBook = get(refBookId);
         for (RefBookAttribute attribute : refBook.getAttributes()) {
-            if (!attribute.getAlias().equals(RefBook.RECORD_PARENT_ID_ALIAS)) {
-                if (resultSearch.length() > 0){
-                    resultSearch.append(" or ");
-                }
+            if (resultSearch.length() > 0){
+                resultSearch.append(" or ");
+            }
 
-                switch (attribute.getAttributeType()) {
-                    case STRING:
-                        resultSearch
-                                .append("LOWER(")
-                                .append(attribute.getAlias())
-                                .append(")");
-                        break;
-                    case NUMBER:
+            switch (attribute.getAttributeType()) {
+                case STRING:
+                    resultSearch
+                            .append("LOWER(")
+                            .append(attribute.getAlias())
+                            .append(")");
+                    break;
+                case NUMBER:
+                    resultSearch
+                            .append("TO_CHAR(")
+                            .append(attribute.getAlias())
+                            .append(")");
+                    break;
+                case DATE:
+                    resultSearch.append(attribute.getAlias());
+                    break;
+                case REFERENCE:
+                    if (isSimpleRefBool(refBookId)){
+                        String fullAlias = getStackAlias(attribute);
+                        switch (getLastAttribute(attribute).getAttributeType()){
+                            case STRING:
+                                resultSearch
+                                        .append("LOWER(")
+                                        .append(fullAlias)
+                                        .append(")");
+                                break;
+                            case NUMBER:
+                                resultSearch
+                                        .append("TO_CHAR(")
+                                        .append(fullAlias)
+                                        .append(")");
+                                break;
+                            case DATE:
+                                resultSearch.append(fullAlias);
+                                break;
+                            default:
+                                throw new RuntimeException("Unknown RefBookAttributeType");
+                        }
+                    } else {
                         resultSearch
                                 .append("TO_CHAR(")
                                 .append(attribute.getAlias())
                                 .append(")");
-                        break;
-                    case DATE:
-                        resultSearch.append(attribute.getAlias());
-                        break;
-                    case REFERENCE:
-                        if (isSimpleRefBool(refBookId)){
-                            String fullAlias = getStackAlias(attribute);
-                            switch (getLastAttribute(attribute).getAttributeType()){
-                                case STRING:
-                                    resultSearch
-                                            .append("LOWER(")
-                                            .append(fullAlias)
-                                            .append(")");
-                                    break;
-                                case NUMBER:
-                                    resultSearch
-                                            .append("TO_CHAR(")
-                                            .append(fullAlias)
-                                            .append(")");
-                                    break;
-                                case DATE:
-                                    resultSearch.append(fullAlias);
-                                    break;
-                                default:
-                                    throw new RuntimeException("Unknown RefBookAttributeType");
-                            }
-                        } else {
-                            resultSearch
-                                    .append("TO_CHAR(")
-                                    .append(attribute.getAlias())
-                                    .append(")");
-                        }
-                        break;
-                    default:
-                        throw new RuntimeException("Unknown RefBookAttributeType");
+                    }
+                    break;
+                default:
+                    throw new RuntimeException("Unknown RefBookAttributeType");
 
-                }
-
-                resultSearch
-                        .append(" like ")
-                        .append("'%")
-                        .append(q)
-                        .append("%'");
             }
+
+            resultSearch
+                    .append(" like ")
+                    .append("'%")
+                    .append(q)
+                    .append("%'");
         }
 
         return resultSearch.toString();
@@ -238,7 +236,8 @@ public class RefBookFactoryImpl implements RefBookFactory {
      * @return
      */
     private boolean isSimpleRefBool(Long refBookId){
-        Long[] foreignRefBooks = new Long[]{
+        return true;
+        /*Long[] foreignRefBooks = new Long[]{
                 RefBookDepartment.REF_BOOK_ID,
                 RefBookIncome101.REF_BOOK_ID,
                 RefBookIncome102.REF_BOOK_ID,
@@ -254,6 +253,6 @@ public class RefBookFactoryImpl implements RefBookFactory {
             }
         }
 
-        return true;
+        return true;*/
     }
 }

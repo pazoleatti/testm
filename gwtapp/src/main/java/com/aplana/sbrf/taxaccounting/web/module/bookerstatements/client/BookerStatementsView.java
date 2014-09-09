@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.bookerstatements.client;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.AplanaUiHandlers;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.sortable.AsyncDataProviderWithSortableTable;
 import com.aplana.sbrf.taxaccounting.web.module.bookerstatementsdata.client.BookerStatementsDataTokens;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
@@ -29,7 +28,10 @@ import com.google.gwt.view.client.Range;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * View для Формы фильтрации бухгалтерской отчётности
@@ -85,13 +87,13 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
 
         setTableColumns();
 
-        dataProvider = new AsyncDataProviderWithSortableTable(table, this) {
+        dataProvider = new AsyncDataProviderWithSortableTable<BookerStatementsSearchResultItem, BookerStatementsUiHandlers, BookerStatementsView>(table, this) {
             @Override
-            public AplanaUiHandlers getUiHandlersX() {
+            public BookerStatementsUiHandlers getViewUiHandlers() {
                 return getUiHandlers();
             }
         };
-
+        dataProvider.setAscSorting(false);
     }
 
     @Override
@@ -193,11 +195,6 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
     @Override
     public boolean isAscSorting() {
         return dataProvider.isAscSorting();
-    }
-
-    @Override
-    public void setAscSorting(boolean ascSorting) {
-        dataProvider.setAscSorting(ascSorting);
     }
 
     @UiHandler("searchButton")

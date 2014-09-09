@@ -50,9 +50,9 @@ public class TemplateHistoryView extends PopupViewWithUiHandlers<AplanaUiHandler
         initWidget(binder.createAndBindUi(this));
         setTableColumns();
 
-        dataProvider = new AsyncDataProviderWithSortableTable(versionHistoryCellTable, this) {
+        dataProvider = new AsyncDataProviderWithSortableTable<TemplateChangesExt, AplanaUiHandlers, TemplateHistoryView>(versionHistoryCellTable, this) {
             @Override
-            public AplanaUiHandlers getUiHandlersX() {
+            public AplanaUiHandlers getViewUiHandlers() {
                 return getUiHandlers();
             }
         };

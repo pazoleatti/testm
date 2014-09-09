@@ -12,15 +12,14 @@ import java.util.Map;
  */
 public interface RefBookTaxOrganDao {
 
-    static final Long REF_BOOK_CODE_ID = 204L;
-    static final Long REF_BOOK_KPP_ID = 205L;
+    Long REF_BOOK_CODE_ID = 204L;
+    Long REF_BOOK_KPP_ID = 205L;
 
-    PagingResult<Map<String, RefBookValue>> getRecordsCode();
+    PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId);
 
-    PagingResult<Map<String, RefBookValue>> getRecordsCode(String filter);
+    PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, String filter);
 
-    PagingResult<Map<String, RefBookValue>> getRecordsKpp();
+    Map<String, RefBookValue> getRecordData(Long refBookId, Long recordId);
 
-    PagingResult<Map<String, RefBookValue>> getRecordsKpp(String filter);
-
+    int getRecordsCount(Long refBookId, String filter);
 }

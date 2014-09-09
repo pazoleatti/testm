@@ -30,6 +30,7 @@
         <hierarchical>false</hierarchical>
         <nameAttributeId>10</nameAttributeId>
         <refBookAttributeId>9</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>taxAuthority</alias>
@@ -58,6 +59,7 @@
         <hierarchical>true</hierarchical>
         <nameAttributeId>841</nameAttributeId>
         <refBookAttributeId>840</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>address</alias>
@@ -78,10 +80,19 @@
         <precision>0</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>cadastreNum</alias>
+        <alias>cadastreNumBuilding</alias>
         <checking>false</checking>
-        <name>Кадастровый номер</name>
+        <name>Кадастровый номер, здание</name>
         <order>9</order>
+        <width>6</width>
+        <maxLength>100</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>cadastreNumRoom</alias>
+        <checking>false</checking>
+        <name>Кадастровый номер, помещение</name>
+        <order>10</order>
         <width>6</width>
         <maxLength>100</maxLength>
         <prevLength>0</prevLength>
@@ -90,7 +101,7 @@
         <alias>cadastrePriceJanuary</alias>
         <checking>false</checking>
         <name>Кадастровая стоимость, на 1 января</name>
-        <order>10</order>
+        <order>11</order>
         <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -99,7 +110,7 @@
         <alias>cadastrePriceTaxFree</alias>
         <checking>false</checking>
         <name>Кадастровая стоимость, в т.ч. необлагаемая налогом</name>
-        <order>11</order>
+        <order>12</order>
         <width>6</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -108,7 +119,7 @@
         <alias>propertyRightBeginDate</alias>
         <checking>false</checking>
         <name>Право собственности, дата возникновения</name>
-        <order>12</order>
+        <order>13</order>
         <width>7</width>
         <formatId>0</formatId>
     </columns>
@@ -116,7 +127,7 @@
         <alias>propertyRightEndDate</alias>
         <checking>false</checking>
         <name>Право собственности, дата прекращения</name>
-        <order>13</order>
+        <order>14</order>
         <width>6</width>
         <formatId>0</formatId>
     </columns>
@@ -124,12 +135,22 @@
         <alias>taxBenefitCode</alias>
         <checking>false</checking>
         <name>Код налоговой льготы</name>
-        <order>14</order>
+        <order>15</order>
         <width>5</width>
         <filter>CODE IS NULL OR CODE = '2012000' OR CODE = '2012400' OR CODE = '2012500'</filter>
         <hierarchical>false</hierarchical>
         <nameAttributeId>2022</nameAttributeId>
         <refBookAttributeId>2021</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>benefitBasis</alias>
+        <checking>false</checking>
+        <name>Основание льготы</name>
+        <order>16</order>
+        <width>6</width>
+        <maxLength>12</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <styles>
         <alias>Контрольные суммы</alias>

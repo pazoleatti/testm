@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -16,10 +17,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.ui.IsWidget;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.Range;
@@ -43,14 +41,20 @@ public class DeclarationListView extends
 
     public static final String DECLARATION_TYPE_TITLE = "Вид декларации";
     public static final String DEPARTMENT_TITLE = "Подразделение";
+    public static final String TAX_ORGAN_CODE_TITLE = "Налоговый орган";
+    public static final String TAX_ORGAN_CODE_KPP_TITLE = "КПП";
     public static final String STATE_TITLE = "Состояние";
     public static final String PERIOD_TITLE = "Период";
 
-	interface MyBinder extends UiBinder<Widget, DeclarationListView> {
-	}
+    private static final int TABLE_TOP1 = 41;
+    private static final int TABLE_TOP2 = 75;
+
+	interface MyBinder extends UiBinder<Widget, DeclarationListView> {}
 
     private GenericDataGrid.DataGridResizableHeader declarationTypeHeader;
     private TextColumn<DeclarationDataSearchResultItem> declarationTypeColumn;
+    private TextColumn<DeclarationDataSearchResultItem> declarationTaxOrganColumn;
+    private TextColumn<DeclarationDataSearchResultItem> declarationTaxOrganKppColumn;
     private GenericDataGrid.DataGridResizableHeader reportPeriodHeader;
     private Column<DeclarationDataSearchResultItem, DeclarationDataSearchResultItem> reportPeriodColumn;
 
@@ -77,8 +81,12 @@ public class DeclarationListView extends
 
 	@UiField
 	Label titleDesc;
+
     @UiField
     LinkButton create;
+
+    @UiField
+    ResizeLayoutPanel tableWrapper;
 
     private final AsyncDataProvider<DeclarationDataSearchResultItem> dataProvider = new AsyncDataProvider<DeclarationDataSearchResultItem>() {
         @Override
@@ -108,10 +116,13 @@ public class DeclarationListView extends
         declarationTable.addColumnSortHandler(new ColumnSortEvent.AsyncHandler(declarationTable));
 
         declarationTable.getColumnSortList().setLimit(1);       // сортировка только по одной колонке
-	}
+    }
 
     @Override
     public void initTable(TaxType taxType) {
+        Style tableStyle = tableWrapper.getElement().getStyle();
+        tableStyle.setProperty("top", taxType != TaxType.PROPERTY ? TABLE_TOP1 : TABLE_TOP2 , Style.Unit.PX);
+
         clearTable();
 
         TextColumn<DeclarationDataSearchResultItem> departmentColumn = new TextColumn<DeclarationDataSearchResultItem>() {
@@ -186,6 +197,20 @@ public class DeclarationListView extends
             }
         };
 
+        declarationTaxOrganColumn = new TextColumn<DeclarationDataSearchResultItem>() {
+            @Override
+            public String getValue(DeclarationDataSearchResultItem object) {
+                return object.getTaxOrganCode();
+            }
+        };
+
+        declarationTaxOrganKppColumn = new TextColumn<DeclarationDataSearchResultItem>() {
+            @Override
+            public String getValue(DeclarationDataSearchResultItem object) {
+                return object.getTaxOrganKpp();
+            }
+        };
+
         TextColumn<DeclarationDataSearchResultItem> stateColumn = new TextColumn<DeclarationDataSearchResultItem>() {
             @Override
             public String getValue(DeclarationDataSearchResultItem object) {
@@ -197,6 +222,8 @@ public class DeclarationListView extends
         reportPeriodYearColumn.setSortable(true);
         reportPeriodColumn.setSortable(true);
         declarationTypeColumn.setSortable(true);
+        declarationTaxOrganColumn.setSortable(true);
+        declarationTaxOrganKppColumn.setSortable(true);
         stateColumn.setSortable(true);
 
         declarationTypeHeader = declarationTable.createResizableHeader(DECLARATION_TYPE_TITLE, declarationTypeColumn);
@@ -211,6 +238,10 @@ public class DeclarationListView extends
             // http://jira.aplana.com/browse/SBRFACCTAX-7742
             //declarationTable.setColumnWidth(declarationTypeColumn, 0, Style.Unit.EM);
             declarationTable.addColumn(departmentColumn, declarationTable.createResizableHeader(DEPARTMENT_TITLE, departmentColumn));
+            if (taxType == TaxType.PROPERTY) {
+                declarationTable.addColumn(declarationTaxOrganColumn, declarationTable.createResizableHeader(TAX_ORGAN_CODE_TITLE, declarationTaxOrganColumn));
+                declarationTable.addColumn(declarationTaxOrganKppColumn, declarationTable.createResizableHeader(TAX_ORGAN_CODE_KPP_TITLE, declarationTaxOrganKppColumn));
+            }
             declarationTable.addColumn(reportPeriodColumn, reportPeriodHeader);
             // http://jira.aplana.com/browse/SBRFACCTAX-7742
             //declarationTable.setColumnWidth(reportPeriodColumn, 0, Style.Unit.EM);

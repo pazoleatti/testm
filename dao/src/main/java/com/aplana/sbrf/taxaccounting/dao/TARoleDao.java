@@ -20,4 +20,10 @@ public interface TARoleDao {
 	 * @return список идентификаторов ролей
 	 */
 	List<Integer> getAll();
+
+    /**
+     * возвращает роль по алиасу
+     * @return роль
+     */
+    TARole getRoleByAlias(String alias);
 }

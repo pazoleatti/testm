@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.scheduler.task;
 
-import com.aplana.sbrf.taxaccounting.core.api.LockCoreService;
+import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskParam;
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskParamType;
@@ -41,7 +41,7 @@ public class RemoveUnnecessaryLocksTask implements UserTask {
     private static final String secCountParam = "Время жизни блокировки (секунд)";
 
     @Autowired
-    LockCoreService lockCoreService;
+    LockDataService lockDataService;
 
     @Override
     public void execute(Map<String, TaskParam> params, int userId) throws TaskExecutionException {
@@ -50,7 +50,7 @@ public class RemoveUnnecessaryLocksTask implements UserTask {
         } else {
             try {
                 Integer sec = (Integer) params.get(secCountParam).getTypifiedValue();
-                lockCoreService.unlockIfOlderThan(sec);
+                lockDataService.unlockIfOlderThan(sec);
             } catch (InvalidTaskParamException e) {
                 logger.error(e.getMessage(), e);
             }

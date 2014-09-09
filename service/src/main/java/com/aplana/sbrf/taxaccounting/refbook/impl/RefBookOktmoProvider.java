@@ -24,10 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.constraints.NotNull;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Провайдер для больших справочников, которые хранятся в отдельных таблицах
@@ -319,15 +316,27 @@ public class RefBookOktmoProvider implements RefBookDataProvider {
     }
 
     @Override
-    public List<Pair<RefBookAttribute, RefBookValue>> getUniqueAttributeValues(Long uniqueRecordId) {
-        List<Pair<RefBookAttribute, RefBookValue>> values = new ArrayList<Pair<RefBookAttribute, RefBookValue>>();
+    public Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>> getUniqueAttributeValues(Long uniqueRecordId) {
+        Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>> groups = new HashMap<Integer, List<Pair<RefBookAttribute, RefBookValue>>>();
+
         List<RefBookAttribute> attributes = refBookDao.getAttributes(refBookId);
+
         for (RefBookAttribute attribute : attributes) {
-            if (attribute.isUnique()) {
+            if (attribute.getUnique() != 0) {
+
+                List<Pair<RefBookAttribute, RefBookValue>> values = null;
+                if (groups.get(attribute.getUnique()) != null) {
+                    values = groups.get(attribute.getUnique());
+                } else {
+                    values = new ArrayList<Pair<RefBookAttribute, RefBookValue>>();
+                }
+
                 values.add(new Pair<RefBookAttribute, RefBookValue>(attribute, getValue(uniqueRecordId, attribute.getId())));
+                groups.put(attribute.getUnique(), values);
             }
         }
-        return values;
+
+        return groups;
     }
 
     @Override

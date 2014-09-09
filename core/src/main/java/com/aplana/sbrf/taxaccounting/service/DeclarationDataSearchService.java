@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 
 import java.util.List;
 
@@ -25,7 +24,7 @@ public interface DeclarationDataSearchService {
 	 * @param userInfo информация о пользователе
 	 * @param taxType вид налога
 	 * @return объект, содержащий информацию о допустимых значениях фильтров для поиска по декларациям
-	 * @throws AccessDeniedException если у пользователя нет ролей, необходимых для поиска деклараций
+	 * @throws com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException если у пользователя нет ролей, необходимых для поиска деклараций
 	 */
 	DeclarationDataFilterAvailableValues getFilterAvailableValues(TAUserInfo userInfo, TaxType taxType);
 

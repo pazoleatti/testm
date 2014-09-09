@@ -1,10 +1,10 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.test.BDUtilsMock;
@@ -23,7 +23,6 @@ import java.util.*;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
 
 
 //TODO: Необходимо добавить тесты для getRecords с фильтром (Marat Fayzullin 2013-08-31)
@@ -427,10 +426,14 @@ public class RefBookDaoTest {
     }
 
     @Test
-    public void getUniqueAttributeValues() {
-        List<Pair<RefBookAttribute, RefBookValue>> values = refBookDao.getUniqueAttributeValues(1L, 1L);
-        assertEquals(1, values.size());
-        assertEquals("Алиса в стране чудес", values.get(0).getSecond().getStringValue());
+    public void getGroupUniqueAttributeValues() {
+        Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>> groups = refBookDao.getUniqueAttributeValues(1L, 1L);
+        assertEquals(2, groups.size());
+        assertEquals(2, groups.get(1).size());
+        assertEquals(1, groups.get(2).size());
+        assertEquals("Алиса в стране чудес", groups.get(1).get(0).getSecond().toString());
+        assertEquals("5", groups.get(1).get(1).getSecond().toString());
+        assertEquals("1113", groups.get(2).get(0).getSecond().toString());
     }
 
     @Test

@@ -48,8 +48,6 @@ public class BlobDataDaoTest {
         blobData.setUuid(UUID.randomUUID().toString().toLowerCase());
         blobData.setName("hello.xls");
         blobData.setInputStream(new FileInputStream(file));
-        blobData.setCreationDate(new Date());
-        blobData.setType(0);
     }
 
     @Test
@@ -78,5 +76,37 @@ public class BlobDataDaoTest {
         strings.add(blobDataDao.create(blobData));
         blobDataDao.delete(strings);
         Assert.assertNull(blobDataDao.get(strings.get(0)));
+    }
+
+    @Test
+    public void clean() {
+        String uuid1 = "uuid_1";
+        String uuid2 = "uuid_2";
+        String uuid3 = "uuid_3";
+        String uuid4 = "uuid_4";
+
+        BlobData bd1 = blobDataDao.get(uuid1);
+        BlobData bd2 = blobDataDao.get(uuid2);
+        BlobData bd3 = blobDataDao.get(uuid3);
+        BlobData bd4 = blobDataDao.get(uuid4);
+
+        Assert.assertNotNull(bd1);
+        Assert.assertNotNull(bd2);
+        Assert.assertNotNull(bd3);
+        Assert.assertNotNull(bd4);
+
+        int deleted = blobDataDao.clean();
+
+        Assert.assertEquals(2, deleted);
+
+        bd1 = blobDataDao.get(uuid1);
+        bd2 = blobDataDao.get(uuid2);
+        bd3 = blobDataDao.get(uuid3);
+        bd4 = blobDataDao.get(uuid4);
+
+        Assert.assertNotNull(bd1);
+        Assert.assertNotNull(bd2);
+        Assert.assertNull(bd3);
+        Assert.assertNull(bd4);
     }
 }

@@ -31,4 +31,10 @@ public class TARoleDaoTest {
 	public void testGetAll() {
 		Assert.assertEquals(3, taRoleDao.getAll().size());
 	}
+	@Test
+	public void testGetRoleByAlias() {
+        Assert.assertEquals(1, taRoleDao.getRoleByAlias("ROLE_CONTROL").getId());
+        Assert.assertEquals("ROLE_OPER", taRoleDao.getRoleByAlias("ROLE_OPER").getAlias());
+        Assert.assertEquals("Контролёр УНП", taRoleDao.getRoleByAlias("ROLE_CONTROL_UNP").getName());
+	}
 }

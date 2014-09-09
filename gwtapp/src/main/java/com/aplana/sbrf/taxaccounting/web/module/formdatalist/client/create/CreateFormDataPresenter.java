@@ -56,6 +56,12 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
     }
 
     @Override
+    protected void onHide() {
+        LogCleanEvent.fire(this);
+        LogShowEvent.fire(this, false);
+    }
+
+    @Override
     public void onConfirm() {
         FormDataFilter filterFormData = getView().getFilterData();
         LogCleanEvent.fire(this);

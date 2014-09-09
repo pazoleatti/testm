@@ -44,7 +44,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 	}
 
 	@UiField
-	Button assignAnchor;
+    LinkButton assignAnchor;
 	@UiField
 	LinkButton cancelAnchor;
 	@UiField

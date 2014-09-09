@@ -17,7 +17,6 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.RowStyles;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
@@ -65,10 +64,10 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
     LinkButton editPeriod;
 
     @UiField
-    Button setDeadlineButton;
+    LinkButton setDeadlineButton;
 
 	@UiField
-	Button removePeriod;
+    LinkButton removePeriod;
 
 	@UiField
     DepartmentPickerPopupWidget departmentPicker;
@@ -291,9 +290,7 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 
     @Override
 	public void setCanEdit(boolean canEdit) {
-		closePeriod.setVisible(canEdit);
 		openPeriod.setVisible(canEdit);
-		removePeriod.setVisible(canEdit);
 	}
 
     @Override

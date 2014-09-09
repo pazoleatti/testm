@@ -16,11 +16,16 @@ public enum ConfigurationParam {
     DIASOFT_UPLOAD_DIRECTORY("Путь к каталогу справочников Diasoft", true, true, true, 2),
     REF_BOOK_ARCHIVE_DIRECTORY("Путь к каталогу архива справочников", true, true, true, 2),
     REF_BOOK_ERROR_DIRECTORY("Путь к каталогу ошибок справочников", true, true, true, 2),
+    ENCRYPT_DLL("Путь к библиотеке подписи", true, true, true, 1),
     // Загрузка НФ
     FORM_UPLOAD_DIRECTORY("Путь к каталогу загрузки", false, true, true, 2),
     FORM_ARCHIVE_DIRECTORY("Путь к каталогу архива", false, true, true, 2),
     FORM_ERROR_DIRECTORY("Путь к каталогу ошибок", false, true, true, 2),
-    ENCRYPT_DLL("Путь к библиотеке подписи", true, true, true, 1);
+    // Электронная почта
+    EMAIL_LOGIN("Имя пользователя",true,false,false,0),
+    EMAIL_PASSWORD("Пароль",true,false,false,0),
+    EMAIL_SERVER("Адрес сервера исходящей почты",true,false,false,0);
+
 
     private String caption;
     private boolean common;

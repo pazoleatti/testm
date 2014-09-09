@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.core.api.LockCoreService;
+import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
@@ -99,17 +99,16 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private LogEntryService logEntryService;
 
     @Autowired
-    private LockCoreService lockCoreService;
-
-    @Autowired
     private TransactionHelper tx;
+    @Autowired
+    private LockDataService lockDataService;
 
 	public static final String TAG_FILE = "Файл";
 	public static final String TAG_DOCUMENT = "Документ";
 	public static final String ATTR_FILE_ID = "ИдФайл";
 	public static final String ATTR_DOC_DATE = "ДатаДок";
 	private static final SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
-    private static final String VALIDATION_ERR_MSG = "Декларация / Уведомление не может быть создана, т.к. шаблон некорректен. Обратитесь к настройщику шаблонов";
+    private static final String VALIDATION_ERR_MSG = "Операция «s» не выполнена. Обнаружены фатальные ошибки!";
 
 	@Override
 	@Transactional(readOnly = false)
@@ -189,7 +188,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	public void check(Logger logger, long id, TAUserInfo userInfo) {
         declarationDataScriptingService.executeScript(userInfo,
                 declarationDataDao.get(id), FormDataEvent.CHECK, logger, null);
-        validateDeclaration(declarationDataDao.get(id), logger, true);
+        validateDeclaration(declarationDataDao.get(id), logger, true, FormDataEvent.CHECK);
         // Проверяем ошибки при пересчете
         if (logger.containsLevel(LogLevel.ERROR)) {
             throw new ServiceLoggerException(
@@ -233,7 +232,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             Map<String, Object> exchangeParams = new HashMap<String, Object>();
             declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, logger, exchangeParams);
 
-            validateDeclaration(declarationDataDao.get(id), logger, true);
+            validateDeclaration(declarationDataDao.get(id), logger, true, FormDataEvent.MOVE_CREATED_TO_ACCEPTED);
             declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_CREATED_TO_ACCEPTED);
 
             declarationData.setAccepted(true);
@@ -329,7 +328,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 		String xml = XML_HEADER.concat(writer.toString());
         declarationData.setXmlDataUuid(blobDataService.create(new ByteArrayInputStream(xml.getBytes()), ""));
 
-        validateDeclaration(declarationData, logger, false);
+        validateDeclaration(declarationData, logger, false, FormDataEvent.CALCULATE);
         // Заполнение отчета и экспорт в формате PDF
         JasperPrint jasperPrint = fillReport(xml,
                 declarationTemplateService.getJasper(declarationData.getDeclarationTemplateId()));
@@ -347,8 +346,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
      * @param declarationData идентификатор данных декларации
      * @param logger логгер лог панели
      * @param isErrorFatal признак того, что операция не может быть продолжена с невалидным xml
+     * @param operation Событие (для сообщения об ошибке)
      */
-    private void validateDeclaration(DeclarationData declarationData, final Logger logger, final boolean isErrorFatal) {
+    private void validateDeclaration(DeclarationData declarationData, final Logger logger, final boolean isErrorFatal,
+                                     FormDataEvent operation) {
         Locale oldLocale = Locale.getDefault();
         Locale.setDefault(new Locale("ru", "RU"));
         String xmlUuid = declarationData.getXmlDataUuid();
@@ -399,15 +400,15 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 });
                 validator.validate(new StreamSource(xmlStream));
             } catch (Exception e) {
-                log.error(VALIDATION_ERR_MSG, e);
+                log.error(String.format(VALIDATION_ERR_MSG, operation), e);
                 logger.error(e);
                 Locale.setDefault(oldLocale);
-                throw new ServiceLoggerException(VALIDATION_ERR_MSG, logEntryService.save(logger.getEntries()));
+                throw new ServiceLoggerException(String.format(VALIDATION_ERR_MSG, operation), logEntryService.save(logger.getEntries()));
             }
 
             if (logger.containsLevel(LogLevel.ERROR)) {
                 Locale.setDefault(oldLocale);
-                throw new ServiceLoggerException(VALIDATION_ERR_MSG, logEntryService.save(logger.getEntries()));
+                throw new ServiceLoggerException(String.format(VALIDATION_ERR_MSG, operation), logEntryService.save(logger.getEntries()));
             }
 
             Locale.setDefault(oldLocale);
@@ -551,7 +552,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @Transactional
     public void lock(long declarationDataId, TAUserInfo userInfo) {
-        lockCoreService.lock(DeclarationData.class, declarationDataId, userInfo);
+        checkLock(lockDataService.lock(LockData.LOCK_OBJECTS.DECLARATION_DATA.name() + "_" + declarationDataId, userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME),
+                userInfo.getUser());
     }
 
     @Override
@@ -560,7 +562,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         tx.executeInNewTransaction(new TransactionLogic() {
             @Override
             public void execute() {
-                lockCoreService.unlock(DeclarationData.class, declarationDataId, userInfo);
+                lockDataService.unlock(LockData.LOCK_OBJECTS.DECLARATION_DATA.name() + "_" + declarationDataId, userInfo.getUser().getId());
             }
 
             @Override
@@ -572,6 +574,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     public void checkLockedMe(Long declarationDataId, TAUserInfo userInfo) {
-        lockCoreService.checkNoLockedAnother(DeclarationData.class, declarationDataId, userInfo);
+        checkLock(lockDataService.lock(LockData.LOCK_OBJECTS.DECLARATION_DATA.name() + "_" + declarationDataId, userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME),
+                userInfo.getUser());
+    }
+
+    private void checkLock(LockData lockData, TAUser user){
+        if (lockData!= null && lockData.getUserId() != user.getId())
+            throw new ServiceException(String.format(LockDataService.LOCK_DATA, user.getName(), user.getId()));
     }
 }

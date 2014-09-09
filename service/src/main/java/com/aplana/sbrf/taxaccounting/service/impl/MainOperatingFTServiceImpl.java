@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
@@ -14,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -43,12 +46,17 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
     private SourceService sourceService;
     @Autowired
     private DepartmentService departmentService;
+    @Autowired
+    private DataRowDao dataRowDao;
+    @Autowired
+    private ColumnDao columnDao;
 
     @Override
     public <T> int edit(T template, Date templateActualEndDate, Logger logger, TAUser user) {
         FormTemplate formTemplate = (FormTemplate)template;
         /*versionOperatingService.isCorrectVersion(action.getForm(), action.getVersionEndDate(), logger);*/
-        Date dbVersionBeginDate = formTemplateService.get(formTemplate.getId()).getVersion();
+        FormTemplate oldFormTemplate = formTemplateService.get(formTemplate.getId());
+        Date dbVersionBeginDate = oldFormTemplate.getVersion();
         Date dbVersionEndDate = formTemplateService.getFTEndDate(formTemplate.getId());
 
         if (dbVersionBeginDate.compareTo(formTemplate.getVersion()) !=0
@@ -82,9 +90,46 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
         checkError(logger, SAVE_MESSAGE);
 
         int id = formTemplateService.save(formTemplate);
+        cleanData(oldFormTemplate, formTemplate);
 
         logging(id, FormDataEvent.TEMPLATE_MODIFIED, user);
         return id;
+    }
+
+    /**
+     * Удаление устаревших данных НФ, при смене типа хранения графы
+     * http://jira.aplana.com/browse/SBRFACCTAX-8467
+     *
+     * @param oldTemplate
+     * @param newTemplate
+     */
+    private void cleanData(FormTemplate oldTemplate, FormTemplate newTemplate) {
+        if (oldTemplate.getColumns() == null || oldTemplate.getColumns().isEmpty()
+                || newTemplate.getColumns() == null || newTemplate.getColumns().isEmpty()) {
+            return;
+        }
+        // Список граф, данные которых нужно удалить
+        List<Integer> cleanColumnList = new LinkedList<Integer>();
+        for (Column oldColumn : oldTemplate.getColumns()) {
+            boolean found = false;
+            for (Column newColumn : newTemplate.getColumns()) {
+                if (oldColumn.getAlias().equals(newColumn.getAlias())) {
+                    found = true;
+                    if (!oldColumn.getClass().equals(newColumn.getClass())) {
+                        // Тип графы изменился
+                        cleanColumnList.add(columnDao.getColumnIdByAlias(oldTemplate.getId(), oldColumn.getAlias()));
+                    }
+                }
+            }
+            if (!found) {
+                // Графа была удалена
+                cleanColumnList.add(columnDao.getColumnIdByAlias(oldTemplate.getId(), oldColumn.getAlias()));
+            }
+        }
+        if (cleanColumnList.isEmpty()) {
+            return;
+        }
+        dataRowDao.cleanValue(cleanColumnList);
     }
 
     @Override

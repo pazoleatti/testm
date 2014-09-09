@@ -11,21 +11,12 @@ import java.util.List;
 public interface BlobDataService {
 
     /**
-     * Создание постоянной записи
+     * Создание записи
      * @param is содержимое файла
      * @param name имя для базы
      * @return uuid идентификатор
      */
     String create(InputStream is, String name);
-
-    /**
-     * Созадние временной записи в таблице.
-     * Предполагается, что шедулер будет очищать таблицу от временных записей.
-     * @param is содержимое файла
-     * @param name имя для базы
-     * @return uuid идентификатор
-     */
-    String createTemporary(InputStream is, String name);
 
     /**
      * Удаление записи.
@@ -47,10 +38,16 @@ public interface BlobDataService {
     void save(String blobId, InputStream is);
 
     /**
-     * ПОлучение данных из фйалового хранилища
+     * Получение данных из фйалового хранилища
      *
      * @param blobId uuid
      * @return {@link BlobData}
      */
     BlobData get(String blobId);
+
+    /**
+     * Удаление записей, на которые нет ссылок из других таблиц и которые старше 24 часов
+     * @return Количество удаленных запсией
+     */
+    int clean();
 }

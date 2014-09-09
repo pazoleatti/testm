@@ -190,6 +190,10 @@ public class FormDataSearchDaoTest {
 		res = formDataSearchDao.findPage(filter, FormDataSearchOrdering.RETURN, false, pageParams);
 		assertIdsEquals(new long[] {12, 8, 5, 2, 18}, res);
 
+        res = formDataSearchDao.findPage(filter, FormDataSearchOrdering.DATE, true, pageParams);
+        assertIdsEquals(new long[] {18, 17, 16, 15, 14}, res);
+        res = formDataSearchDao.findPage(filter, FormDataSearchOrdering.DATE, false, pageParams);
+        assertIdsEquals(new long[] {6, 4, 3, 2, 5}, res);
 	}
 	
 	@Test

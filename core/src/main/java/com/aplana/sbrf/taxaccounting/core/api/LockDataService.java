@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.core.api;
 
 import com.aplana.sbrf.taxaccounting.model.LockData;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 
 /**
  <h1>Сервис блокировок</h1>
@@ -39,6 +39,8 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 
 public interface LockDataService {
 
+    String LOCK_DATA = "Объект заблокирован для редактирования пользователем \"%s\"(id=%s)";
+
 	/**
 	 * Устанавливает новую блокировку до времени = now + age. Если блокировка успешно установилась, то возвращается null.
 	 * Если блокировка уже существовала, то возвращется информация по этой блокировке в виде объекта LockData
@@ -58,7 +60,7 @@ public interface LockDataService {
 	 * @param userId код установившего блокировку пользователя
 	 * @param age относительное время жизни блокировки в миллисекундах
 	 * @param timeout максимальное относительное время ожидания для установки новой блокировки
-	 * @throws ServiceException если время ожидания timeout истекло
+	 * @throws com.aplana.sbrf.taxaccounting.model.exception.ServiceException если время ожидания timeout истекло
 	 */
 	void lockWait(String key, int userId, long age, long timeout);
 
@@ -67,7 +69,7 @@ public interface LockDataService {
 	 *
 	 * @param key код блокировки
 	 * @param userId код установившего блокировку пользователя
-	 * @throws ServiceException если блокировка была установлена другим пользователем, либо блокировки не было в бд
+	 * @throws com.aplana.sbrf.taxaccounting.model.exception.ServiceException если блокировка была установлена другим пользователем, либо блокировки не было в бд
 	 */
 	void unlock(String key, int userId);
 
@@ -78,8 +80,12 @@ public interface LockDataService {
 	 * @param key код блокировки
 	 * @param userId код установившего блокировку пользователя
 	 * @param age относительное время жизни блокировки в миллисекундах
-	 * @throws ServiceException если блокировка была установлена другим пользователем
+	 * @throws com.aplana.sbrf.taxaccounting.model.exception.ServiceException если блокировка была установлена другим пользователем
 	 */
 	void extend(String key, int userId, long age);
+
+    void unlockAll(TAUserInfo userInfo);
+
+    void unlockIfOlderThan(int sec);
 
 }

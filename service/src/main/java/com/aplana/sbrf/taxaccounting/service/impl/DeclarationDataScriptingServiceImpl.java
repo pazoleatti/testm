@@ -18,6 +18,7 @@ import javax.script.Bindings;
 import javax.script.ScriptException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * Реализация сервиса для запуска скриптов по декларациями
@@ -34,7 +35,10 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 
     @Autowired
     private LogEntryService logEntryService;
-	
+
+    @Autowired
+    private Properties manifestProperties;
+
 	/**
 	 * Возвращает спринг-бины доcтупные для использования в скрипте создания декларации.
 	 * @param taxType вид налога
@@ -88,6 +92,9 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 		b.put("formDataEvent", event);
 		b.put("logger", logger);
 		b.put("declarationData", declarationData);
+        if (manifestProperties != null) {
+            b.put("applicationVersion", manifestProperties.getProperty("Implementation-Version"));
+        }
 		if (exchangeParams != null) {
 			for (Map.Entry<String, Object> entry : exchangeParams.entrySet()) {
 				if (b.containsKey(entry.getKey()))
@@ -104,8 +111,7 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 		logger.setMessageDecorator(null);
 
 		if (logger.containsLevel(LogLevel.ERROR)) {
-			throw new ServiceLoggerException("Есть критические ошибки при выполнении скрипта",
-                    logEntryService.save(logger.getEntries()));
+			throw new ServiceLoggerException("Обнаружены фатальные ошибки!", logEntryService.save(logger.getEntries()));
 		}
 	}
 

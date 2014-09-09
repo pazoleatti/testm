@@ -1,14 +1,16 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.core.api.LockCoreService;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.api.*;
+import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
@@ -60,9 +62,7 @@ public class FormDataServiceImpl implements FormDataService {
 	private FormDataAccessService formDataAccessService;
 	@Autowired
 	private FormDataScriptingService formDataScriptingService;
-	@Autowired
-	private LockCoreService lockCoreService;
-	@Autowired
+    @Autowired
 	private LogBusinessService logBusinessService;
 	@Autowired
 	private AuditService auditService;
@@ -86,8 +86,6 @@ public class FormDataServiceImpl implements FormDataService {
 	private ApplicationContext applicationContext;
     @Autowired
     private LogEntryService logEntryService;
-    @Autowired
-    private SourceService sourceService;
     @Autowired
     private TransactionHelper tx;
     @Autowired
@@ -179,7 +177,8 @@ public class FormDataServiceImpl implements FormDataService {
 		// Поскольку импорт используется как часть редактирования НФ, т.е. иморт только строк (форма уже существует) то все проверки должны 
     	// соответствовать редактированию (добавление, удаление, пересчет)
     	// Форма должна быть заблокирована текущим пользователем для редактирования
-		lockCoreService.checkLockedMe(FormData.class, formDataId, userInfo);
+        checkLockedMe(lockService.lock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formDataId,
+                userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME), userInfo.getUser());
 
         formDataAccessService.canEdit(userInfo, formDataId, isManual);
 
@@ -351,7 +350,8 @@ public class FormDataServiceImpl implements FormDataService {
 	@Override
 	public void addRow(Logger logger, TAUserInfo userInfo, FormData formData, DataRow<Cell> currentDataRow) {
 		// Форма должна быть заблокирована текущим пользователем для редактирования
-		lockCoreService.checkLockedMe(FormData.class, formData.getId(), userInfo);
+        checkLockedMe(lockService.lock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formData.getId(),
+                userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME), userInfo.getUser());
 
 		FormTemplate formTemplate = formTemplateDao.get(formData.getFormTemplateId());
 		
@@ -375,7 +375,8 @@ public class FormDataServiceImpl implements FormDataService {
 	@Override
 	public void deleteRow(Logger logger, TAUserInfo userInfo, FormData formData, DataRow<Cell> currentDataRow) {
 		// Форма должна быть заблокирована текущим пользователем для редактирования
-		lockCoreService.checkLockedMe(FormData.class, formData.getId(), userInfo);
+        checkLockedMe(lockService.lock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formData.getId(),
+                userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME), userInfo.getUser());
 
 		FormTemplate formTemplate = formTemplateDao.get(formData.getFormTemplateId());
 		
@@ -409,7 +410,8 @@ public class FormDataServiceImpl implements FormDataService {
 	@Override
 	public void doCalc(Logger logger, TAUserInfo userInfo, FormData formData) {
 		// Форма должна быть заблокирована текущим пользователем для редактирования
-		lockCoreService.checkLockedMe(FormData.class, formData.getId(), userInfo);
+        checkLockedMe(lockService.lock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formData.getId(),
+                userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME), userInfo.getUser());
 
 		formDataAccessService.canEdit(userInfo, formData.getId(), formData.isManual());
 
@@ -426,7 +428,8 @@ public class FormDataServiceImpl implements FormDataService {
 	@Override
 	public void doCheck(Logger logger, TAUserInfo userInfo, FormData formData) {
 		// Форма не должна быть заблокирована для редактирования другим пользователем
-		lockCoreService.checkNoLockedAnother(FormData.class, formData.getId(), userInfo);
+		checkLockAnotherUser(lockService.lock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formData.getId(),
+                userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME), logger, userInfo.getUser());
 		// Временный срез формы должен быть в актуальном состоянии
 		// Если не заблокировано то откат среза на всякий случай
 		if (getObjectLock(formData.getId(), userInfo)==null){
@@ -464,7 +467,8 @@ public class FormDataServiceImpl implements FormDataService {
 	@Transactional
 	public long saveFormData(Logger logger, TAUserInfo userInfo, FormData formData) {
 		// Форма должна быть заблокирована текущим пользователем для редактирования
-		lockCoreService.checkLockedMe(FormData.class, formData.getId(), userInfo);
+        checkLockedMe(lockService.lock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formData.getId(),
+                userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME), userInfo.getUser());
 
 		formDataAccessService.canEdit(userInfo, formData.getId(), formData.isManual());
 
@@ -526,7 +530,10 @@ public class FormDataServiceImpl implements FormDataService {
 	@Transactional
 	public void deleteFormData(Logger logger, TAUserInfo userInfo, long formDataId, boolean manual) {
 		// Форма не должна быть заблокирована для редактирования другим пользователем
-		lockCoreService.checkNoLockedAnother(FormData.class, formDataId, userInfo);
+        checkLockAnotherUser(lockService.lock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formDataId, userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME),
+                logger,  userInfo.getUser());
+
+		//lockCoreService.checkNoLockedAnother(FormData.class, formDataId, userInfo);
 
         if (manual) {
             formDataAccessService.canDeleteManual(logger, userInfo, formDataId);
@@ -551,7 +558,8 @@ public class FormDataServiceImpl implements FormDataService {
     @Override
     public void doMove(long formDataId, boolean manual, TAUserInfo userInfo, WorkflowMove workflowMove, String note, Logger logger) {
         // Форма не должна быть заблокирована даже текущим пользователем;
-        lockCoreService.checkUnlocked(FormData.class, formDataId, userInfo);
+        checkLockAnotherUser(lockService.lock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formDataId,
+                userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME), logger,  userInfo.getUser());
         // Временный срез формы должен быть в актуальном состоянии
         dataRowDao.rollback(formDataId);
 
@@ -575,6 +583,7 @@ public class FormDataServiceImpl implements FormDataService {
             int userId = userInfo.getUser().getId();
             String lockKey = LockData.LOCK_OBJECTS.TAX_FORM.name() + "_" + formDataId;
             LockData lockData = lockService.lock(lockKey, userId, LockData.STANDARD_LIFE_TIME);
+            checkLockAnotherUser(lockData, logger,  userInfo.getUser());
             if (lockData == null) {
                 try {
                     //Блокировка установлена
@@ -855,7 +864,8 @@ public class FormDataServiceImpl implements FormDataService {
     @Override
 	@Transactional
 	public void lock(long formDataId, TAUserInfo userInfo) {
-		lockCoreService.lock(FormData.class, formDataId, userInfo);
+        checkLockAnotherUser(lockService.lock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formDataId,
+                userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME), null,  userInfo.getUser());
 		dataRowDao.rollback(formDataId);
 	}
 
@@ -865,7 +875,7 @@ public class FormDataServiceImpl implements FormDataService {
         tx.executeInNewTransaction(new TransactionLogic() {
             @Override
             public void execute() {
-                lockCoreService.unlock(FormData.class, formDataId, userInfo);
+                lockService.unlock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formDataId, userInfo.getUser().getId());
                 dataRowDao.rollback(formDataId);
             }
 
@@ -886,11 +896,12 @@ public class FormDataServiceImpl implements FormDataService {
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
-	public ObjectLock<Long> getObjectLock(final long formDataId, final TAUserInfo userInfo) {
-        return tx.returnInNewTransaction(new TransactionLogic<ObjectLock<Long>>() {
+	public LockData getObjectLock(final long formDataId, final TAUserInfo userInfo) {
+        return tx.returnInNewTransaction(new TransactionLogic<LockData>() {
             @Override
-            public ObjectLock<Long> executeWithReturn() {
-                return lockCoreService.getLock(FormData.class, formDataId, userInfo);
+            public LockData executeWithReturn() {
+                return lockService.lock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formDataId,
+                        userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME);
             }
 
             @Override
@@ -1098,5 +1109,17 @@ public class FormDataServiceImpl implements FormDataService {
      */
     public boolean canUpdatePreviousRowNumberWhenDoMove(WorkflowMove workflowMove) {
         return workflowMove.getFromState() == WorkflowState.CREATED || workflowMove.getToState() == WorkflowState.CREATED;
+    }
+
+    private void checkLockAnotherUser(LockData lockData, Logger logger, TAUser user){
+        if (lockData!= null && lockData.getUserId() != user.getId())
+            throw new ServiceLoggerException(LOCK_MESSAGE,
+                    logEntryService.save(logger.getEntries()));
+    }
+
+    private void checkLockedMe(LockData lockData, TAUser user){
+        if (lockData.getUserId() != user.getId()) {
+            throw new ServiceException("Объект не заблокирован текущим пользователем");
+        }
     }
 }

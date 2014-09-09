@@ -10,4 +10,5 @@ public interface RefBookDataUiHandlers extends UiHandlers {
     void setMode(FormMode mode);
     void onBackClicked();
     void cancelChanges();
+    void sendQuery();
 }

@@ -32,6 +32,10 @@ SELECT * FROM dual;
 ALTER TABLE department DROP CONSTRAINT dept_chk_type;
 ALTER TABLE department ADD CONSTRAINT department_fk_type FOREIGN KEY(type) REFERENCES department_type(id);
 
+-- http://jira.aplana.com/browse/SBRFACCTAX-8678 - 0.4 Доработка проверки корректности подразделения
+ALTER TABLE department DROP CONSTRAINT department_uniq_code;
+DROP INDEX department_uniq_code;
+
 ---------------------------------------------------------------------------------------------------
 -- http://jira.aplana.com/browse/SBRFACCTAX-7074 - Реализовать хранение в ЖА ссылок на LogEntry-сущности в BLOB_DATA с возможностью просмотра
 ALTER TABLE log_system ADD blob_data_id VARCHAR2(36);
@@ -44,6 +48,27 @@ ALTER TABLE declaration_data ADD kpp VARCHAR2(9);
 
 COMMENT ON COLUMN declaration_data.tax_organ_code IS 'Налоговый орган';
 COMMENT ON COLUMN declaration_data.kpp IS 'КПП';
+
+---------------------------------------------------------------------------------------------------
+-- http://jira.aplana.com/browse/SBRFACCTAX-8738 - Удаление поля BLOB_DATA.TYPE
+ALTER TABLE blob_data DROP CONSTRAINT blob_data_chk_type;
+ALTER TABLE blob_data DROP COLUMN type;
+
+---------------------------------------------------------------------------------------------------
+-- http://jira.aplana.com/browse/SBRFACCTAX-8759 - Таблица для асинхронных задач
+CREATE TABLE async_task_type
+(
+id NUMBER(18) NOT NULL,
+name VARCHAR2(100) NOT NULL,
+handler_jndi VARCHAR2(500) NOT NULL
+);
+
+ALTER TABLE async_task_type ADD CONSTRAINT async_task_type_pk primary key (id);
+
+COMMENT ON TABLE async_task_type IS 'Типы асинхронных задач';
+COMMENT ON COLUMN async_task_type.id IS 'Идентификатор строки';
+COMMENT ON COLUMN async_task_type.name IS 'Название типа задачи';
+COMMENT ON COLUMN async_task_type.handler_jndi IS 'JNDI имя класса-обработчика';
 
 ---------------------------------------------------------------------------------------------------
 COMMIT;

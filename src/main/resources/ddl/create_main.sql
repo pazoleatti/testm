@@ -118,15 +118,13 @@ create table blob_data (
   id            varchar2(36) not null,
   name          varchar2(530) null,
   data          blob not null,
-  creation_date date not null,
-  type          number(1) default 0 not null
+  creation_date date not null
 );
 comment on table blob_data is 'Файловое хранилище';
 comment on column blob_data.id is 'Уникальный идентификатор';
 comment on column blob_data.name is 'Название файла';
 comment on column blob_data.data is 'Бинарные данные';
 comment on column blob_data.creation_date is 'Дата создания';
-comment on column blob_data.type is 'Тип данных (0 - постоянные, 1 - временные)';
 ----------------------------------------------------------------------------------------------------
 create table ref_book (
   id number(18,0) not null,
@@ -600,18 +598,6 @@ comment on column sec_user.is_active is 'Признак активности п�
 comment on column sec_user.email is 'Адрес электронной почты';
 
 create sequence seq_sec_user start with 10000;
----------------------------------------------------------------------------------------------------
-create table object_lock (
-  object_id number(20) not null,
-  class varchar2(100) not null,
-  user_id number(9) not null,
-  lock_time date not null
-);
-comment on table object_lock is 'Сведения о пользовательских блокировках объектов';
-comment on column object_lock.object_id is 'Идентификатор объекта';
-comment on column object_lock.class is 'Имя класса объекта';
-comment on column object_lock.user_id is 'Идентификатор пользователя, заблокировавшего объект';
-comment on column object_lock.lock_time is 'Время блокировки';
 -------------------------------------------------------------------------------------------------------------------------------------
 create table sec_role (
   id number(9) not null,
@@ -821,3 +807,16 @@ name varchar2(50)
 comment on table department_type is 'Типы подразделений банка';
 comment on column department_type.id is 'Идентификатор типа';
 comment on column department_type.name is 'Наименование типа';
+
+--------------------------------------------------------------------------------------------------------
+create table async_task_type
+(
+id number(18) not null,
+name varchar2(100) not null,
+handler_jndi varchar2(500) not null
+);
+
+comment on table async_task_type is 'Типы асинхронных задач';
+comment on column async_task_type.id is 'Идентификатор строки';
+comment on column async_task_type.name is 'Название типа задачи';
+comment on column async_task_type.handler_jndi is 'JNDI имя класса-обработчика';

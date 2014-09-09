@@ -15,8 +15,9 @@ public class SimpleQueryBuilderComponent extends AbstractQueryBuilderComponent {
     @Override
     public void enterInternlAlias(FilterTreeParser.InternlAliasContext ctx) {
         if (ctx.getText().equalsIgnoreCase(RefBook.RECORD_ID_ALIAS)){
-            ps.appendQuery("id");
+            ps.appendQuery("frb.id");
         } else{
+            ps.appendQuery("frb.");
             ps.appendQuery(ctx.getText());
         }
     }

@@ -198,13 +198,13 @@ public class GetFormDataHandler extends
 			GetFormDataResult result) {
 		FormMode formMode = FormMode.READ_LOCKED;
 
-		ObjectLock<Long> lockInformation = formDataService.getObjectLock(action
+		LockData lockInformation = formDataService.getObjectLock(action
 				.getFormDataId(), securityService.currentUserInfo());
 		if (lockInformation != null) {
 			
 			// Если данная форма уже заблокирована другим пользотелем
 			result.setLockedByUser(taUserService.getUser(lockInformation.getUserId()).getName());
-			result.setLockDate(getFormedDate(lockInformation.getLockTime()));
+			result.setLockDate(getFormedDate(lockInformation.getDateBefore()));
 			if (lockInformation.getUserId() == userInfo.getUser().getId()) {
 				if (action.isReadOnly()) {
 					formMode = FormMode.READ_UNLOCKED;

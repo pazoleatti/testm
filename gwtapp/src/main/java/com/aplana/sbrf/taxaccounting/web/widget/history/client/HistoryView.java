@@ -46,9 +46,9 @@ public class HistoryView extends PopupViewWithUiHandlers<AplanaUiHandlers> imple
         initWidget(uiBinder.createAndBindUi(this));
         setTableColumns();
 
-        dataProvider = new AsyncDataProviderWithSortableTable(logsTable, this) {
+        dataProvider = new AsyncDataProviderWithSortableTable<LogBusinessClient, AplanaUiHandlers, HistoryView>(logsTable, this) {
             @Override
-            public AplanaUiHandlers getUiHandlersX() {
+            public AplanaUiHandlers getViewUiHandlers() {
                 return getUiHandlers();
             }
         };

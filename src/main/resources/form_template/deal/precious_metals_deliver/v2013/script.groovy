@@ -152,12 +152,14 @@ void logicCheck() {
         }
         def rowNum = row.getIndex()
 
-        // графа 14 = элемент с кодом «1»
-        def isSignPhis = (getRefBookValue(18, row.signPhis)?.CODE?.numberValue == 1)
+        // графа 14 = элемент с кодом «1» ("ОМС")
+        def isOMS = (getRefBookValue(18, row.signPhis)?.CODE?.numberValue == 1)
+        // графа 14 = элемент с кодом «2» ("Физическая поставка")
+        def isPhysics = (getRefBookValue(18, row.signPhis)?.CODE?.numberValue == 2)
 
         checkNonEmptyColumns(row, rowNum, ['contractNum', 'contractDate'], logger, true)
         checkNonEmptyColumns(row, rowNum,
-                isSignPhis ?
+                isOMS ?
                     nonEmptyColumns - ['contractNum', 'contractDate'] :
                     nonEmptyColumns - ['contractNum', 'contractDate'] + ['countryCode2']
                 , logger, false)
@@ -172,7 +174,8 @@ void logicCheck() {
         def transactionDate = row.transactionDate
 
         // Проверка зависимости от признака физической поставки
-        if (isSignPhis) {
+        if (isOMS) {
+            // 1
             def isHaveNotEmptyField = false
             def checkField = ['countryCode2', 'region1', 'city1', 'settlement1', 'countryCode3', 'region2', 'city2', 'settlement2', 'conditionCode']
             for (it in checkField) {
@@ -193,6 +196,52 @@ void logicCheck() {
                 }
                 def msg1 = row.getCell('signPhis').column.name
                 rowWarning(logger, row, "Строка $rowNum: В графе «$msg1» указан «ОМС», графы ${builder.toString()} заполняться не должны!")
+            }
+        } else if(isPhysics){
+            // 2a
+            if(row.countryCode2 == null || row.countryCode3 == null){
+                def msg1 = row.getCell('signPhis').column.name
+                def msg2 = row.getCell('countryCode2').column.name
+                def msg3 = row.getCell('countryCode3').column.name
+                rowWarning(logger, row, "Строка $rowNum: В графе «$msg1» указано значение «Физическая поставка», графы «$msg2», «$msg3» должны быть заполнены!")
+            }
+            // 2bc
+            def country = getRefBookValue(10, row.countryCode2)?.CODE?.stringValue
+            if (country != null) {
+                def regionName = row.getCell('region1').column.name
+                def countryName = row.getCell('countryCode2').column.name
+                if (country == '643' && row.region1 == null) {
+                    rowWarning(logger, row, "Строка $rowNum: «$regionName» должен быть заполнен, т.к. в «$countryName» указан код 643!")
+                } else if (country != '643' && row.region1 != null) {
+                    rowWarning(logger, row, "Строка $rowNum: «$regionName» не должен быть заполнен, т.к. в «$countryName» указан код, отличный от 643!")
+                }
+            }
+            // 2de
+            country = getRefBookValue(10, row.countryCode3)?.CODE?.stringValue
+            if (country != null) {
+                def regionName = row.getCell('region2').column.name
+                def countryName = row.getCell('countryCode3').column.name
+                if (country == '643' && row.region2 == null) {
+                    rowWarning(logger, row, "Строка $rowNum: «$regionName» должен быть заполнен, т.к. в «$countryName» указан код 643!")
+                } else if (country != '643' && row.region2 != null) {
+                    rowWarning(logger, row, "Строка $rowNum: «$regionName» не должен быть заполнен, т.к. в «$countryName» указан код, отличный от 643!")
+                }
+            }
+            // 2fg
+            def msg1 = row.getCell('city1').column.name
+            def msg2 = row.getCell('settlement1').column.name
+            if (row.city1 == null && row.settlement1 == null) {
+                rowWarning(logger, row, "Строка $rowNum: Должна быть заполнена графа «$msg1» или «$msg2»!")
+            } else if (row.city1 != null && row.settlement1 != null){
+                rowWarning(logger, row, "Строка $rowNum: Должна быть заполнена только графа «$msg1» или только графа «$msg2», но не обе одновременно!")
+            }
+            // 2hi
+            msg1 = row.getCell('city2').column.name
+            msg2 = row.getCell('settlement2').column.name
+            if (row.city2 == null && row.settlement2 == null) {
+                rowWarning(logger, row, "Строка $rowNum: Должна быть заполнена графа «$msg1» или «$msg2»!")
+            } else if (row.city2 != null && row.settlement2 != null){
+                rowWarning(logger, row, "Строка $rowNum: Должна быть заполнена только графа «$msg1» или только графа «$msg2», но не обе одновременно!")
             }
         }
 
@@ -242,7 +291,7 @@ void logicCheck() {
         // Проверка количества
         if (count != null && count != 1) {
             def msg = row.getCell('count').column.name
-            rowWarning(logger, row, "Строка $rowNum: В графе «$msg» может быть указано только значение «1» в!")
+            rowWarning(logger, row, "Строка $rowNum: В графе «$msg» может быть указано только значение «1»!")
         }
 
         // Корректность дат сделки
@@ -257,30 +306,6 @@ void logicCheck() {
             def msg1 = row.getCell('priceOne').column.name
             def msg2 = row.getCell('totalNds').column.name
             rowWarning(logger, row, "Строка $rowNum: «$msg1» не может отличаться от «$msg2» сделки!")
-        }
-
-        // Проверка заполнения региона отправки
-        def country = getRefBookValue(10, row.countryCode2)?.CODE?.stringValue
-        if (country != null) {
-            def regionName = row.getCell('region1').column.name
-            def countryName = row.getCell('countryCode2').column.name
-            if (country == '643' && row.region1 == null) {
-                rowWarning(logger, row, "Строка $rowNum: «$regionName» должен быть заполнен, т.к. в «$countryName» указан код 643!")
-            } else if (country != '643' && row.region1 != null) {
-                rowWarning(logger, row, "Строка $rowNum: «$regionName» не должен быть заполнен, т.к. в «$countryName» указан код, отличный от 643!")
-            }
-        }
-
-        // Проверка заполнения региона доставки
-        country = getRefBookValue(10, row.countryCode3)?.CODE?.stringValue
-        if (country != null) {
-            def regionName = row.getCell('region2').column.name
-            def countryName = row.getCell('countryCode3').column.name
-            if (country == '643' && row.region2 == null) {
-                rowWarning(logger, row, "Строка $rowNum: «$regionName» должен быть заполнен, т.к. в «$countryName» указан код 643!")
-            } else if (country != '643' && row.region2 != null) {
-                rowWarning(logger, row, "Строка $rowNum: «$regionName» не должен быть заполнен, т.к. в «$countryName» указан код, отличный от 643!")
-            }
         }
     }
 

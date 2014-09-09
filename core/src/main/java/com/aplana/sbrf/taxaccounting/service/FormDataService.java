@@ -208,7 +208,7 @@ public interface FormDataService {
 	 * @param formDataId - идентификатор налоговой формы
 	 * @return информацию о блокировке объекта
 	 */
-	ObjectLock<Long> getObjectLock(long formDataId, TAUserInfo userInfo);
+	LockData getObjectLock(long formDataId, TAUserInfo userInfo);
 
     /**
      * Ищет налоговые формы, которые использует данную версию макета, у которых период от #startDate

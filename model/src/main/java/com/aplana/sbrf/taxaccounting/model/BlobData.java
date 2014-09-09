@@ -15,10 +15,8 @@ public class BlobData {
     private String name;
     /*Данные загружаемого файла*/
     private InputStream inputStream;
-    /*Дата создания(текущий день)*/
+    /*Дата создания (sysdate в БД)*/
     private Date creationDate;
-    /*Тип записи,временная или постоянная(если временная, type = 1)*/
-    private int type;
 
     public String getUuid() {
         return uuid;
@@ -50,13 +48,5 @@ public class BlobData {
 
     public void setCreationDate(Date creationDate) {
         this.creationDate = creationDate;
-    }
-
-    public int getType() {
-        return type;
-    }
-
-    public void setType(int type) {
-        this.type = type;
     }
 }

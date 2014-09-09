@@ -129,6 +129,8 @@
                         <g:Button title="Завершить редактирование" text="Завершить редактирование"
                                   ui:field="cancelEdit"/>
                         <style:LinkButton title="Редактировать" text="Редактировать" ui:field="edit" img="resources/img/pencil-16.png"/>
+                        <style:LinkButton title="Создать запрос на изменение..." text="Создать запрос на изменение..." ui:field="sendQuery"
+                                          img="resources/img/pencil-16.png" visible="false"/>
                     </g:HorizontalPanel>
 
                 </g:HorizontalPanel>

@@ -33,7 +33,7 @@ public class RefBookTaxOrganCode extends AbstractReadOnlyRefBook {
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
-        PagingResult<Map<String, RefBookValue>> filteredRecords = refBookTaxOrganCodeDao.getRecordsCode(filter);
+        PagingResult<Map<String, RefBookValue>> filteredRecords = refBookTaxOrganCodeDao.getRecords(REF_BOOK_ID, filter);
         if (pagingParams == null) {
             return filteredRecords;
         } else {
@@ -54,7 +54,7 @@ public class RefBookTaxOrganCode extends AbstractReadOnlyRefBook {
 
     @Override
     public Map<String, RefBookValue> getRecordData(@NotNull Long recordId) {
-        throw new UnsupportedOperationException();
+        return refBookTaxOrganCodeDao.getRecordData(REF_BOOK_ID, recordId);
     }
 
     @Override
@@ -65,5 +65,10 @@ public class RefBookTaxOrganCode extends AbstractReadOnlyRefBook {
     @Override
     public Map<RefBookAttributePair, String> getAttributesValues(List<RefBookAttributePair> attributePairs) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public int getRecordsCount(Date version, String filter) {
+        return refBookTaxOrganCodeDao.getRecordsCount(REF_BOOK_ID, filter);
     }
 }

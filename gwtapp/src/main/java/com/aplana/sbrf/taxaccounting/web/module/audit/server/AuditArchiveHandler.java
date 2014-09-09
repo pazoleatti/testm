@@ -60,7 +60,7 @@ public class AuditArchiveHandler extends AbstractActionHandler<AuditArchiveActio
                     throw new ServiceException("Нет записей за указанную дату.");
                 File filePath = new File(printingService.generateAuditCsv(records));
                 try {
-                    String uuid = blobDataService.createTemporary(new FileInputStream(filePath), filePath.getName());
+                    String uuid = blobDataService.create(new FileInputStream(filePath), filePath.getName());
                     result.setFileUuid(uuid);
                     auditService.removeRecords(records, securityService.currentUserInfo());
                     result.setCountOfRemoveRecords(records.getTotalCount());

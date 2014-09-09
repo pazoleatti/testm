@@ -40,7 +40,6 @@ public class DeclarationDataDaoTest {
         blobData.setInputStream(new ByteArrayInputStream("test-data-string-2".getBytes()));
         blobData.setCreationDate(new Date());
         blobData.setUuid(UUID.randomUUID().toString().toLowerCase());
-        blobData.setType(0);
     }
 	
 	@Test

@@ -42,7 +42,7 @@ public class TARoleDaoImpl extends AbstractDao implements TARoleDao {
 					TA_ROLE_MAPPER
 			);
 		} catch (EmptyResultDataAccessException e) {
-			throw new DaoException("Роль с id = " + id + " не найден в БД");
+			throw new DaoException("Роль с id = " + id + " не найдена в БД");
 		}
 
 		return role;
@@ -56,4 +56,21 @@ public class TARoleDaoImpl extends AbstractDao implements TARoleDao {
 			throw new DaoException("Ошибка при получении ролей. " + e.getLocalizedMessage());
 		}
 	}
+
+    @Override
+    public TARole getRoleByAlias(String alias) {
+        TARole role;
+        try {
+            role = getJdbcTemplate().queryForObject(
+                    "select id, alias, name from sec_role where alias = ?",
+                    new Object[] { alias },
+                    new int[] { Types.VARCHAR },
+                    TA_ROLE_MAPPER
+            );
+        } catch (EmptyResultDataAccessException e) {
+            throw new DaoException("Роль с alias = " + alias + " не найдена в БД");
+        }
+
+        return role;
+    }
 }

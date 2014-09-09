@@ -6,12 +6,15 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookTaxOrganDao;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Repository;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -21,6 +24,11 @@ public class RefBookTaxOrganDaoImpl extends AbstractDao implements RefBookTaxOrg
     private final Long REF_BOOK_ID_200 = 200L;
     private final String CODE = "t200.TAX_ORGAN_CODE";
     private final String KPP = "t200.KPP";
+
+    private final Map<Long, String> refBookNameMapping = new HashMap() {{
+        put(REF_BOOK_CODE_ID, CODE);
+        put(REF_BOOK_KPP_ID, KPP);
+    }};
 
     @Autowired
     RefBookDao refBookDao;
@@ -51,39 +59,61 @@ public class RefBookTaxOrganDaoImpl extends AbstractDao implements RefBookTaxOrg
                     "     %s \n" +
                     "     group by %s \n";
 
+    private static final String SQL_FOR_RECORD =
+            " with \n" +
+                    " t200 as ( \n" +
+                    "     %s \n" +
+                    " ) \n" +
+                    " \n" +
+                    "     select \n" +
+                    "         max(t200.record_id) as record_id, \n" +
+                    "         %s \n" +
+                    "     from t200 \n" +
+                    "     where periods.record_id = ?\n";
+
     @Override
-    public PagingResult<Map<String, RefBookValue>> getRecordsCode() {
-        return getRecordsCode(null);
+    public PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId) {
+        return getRecords(refBookId, null);
     }
 
     @Override
-    public PagingResult<Map<String, RefBookValue>> getRecordsCode(String filter) {
-        PreparedStatementData ps = getRefBookSql(filter, CODE);
-        return getRecords(RefBookTaxOrganDao.REF_BOOK_CODE_ID, ps);
-    }
+    public PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, String filter) {
+        PreparedStatementData ps = getRefBookSql(filter, refBookNameMapping.get(refBookId));
 
-    @Override
-    public PagingResult<Map<String, RefBookValue>> getRecordsKpp() {
-        return getRecordsKpp(null);
-    }
-
-    @Override
-    public PagingResult<Map<String, RefBookValue>> getRecordsKpp(String filter) {
-        PreparedStatementData ps = getRefBookSql(filter, KPP);
-        return getRecords(RefBookTaxOrganDao.REF_BOOK_KPP_ID, ps);
-    }
-
-    private PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, PreparedStatementData ps) {
         RefBook refBook = refBookDao.get(refBookId);
 
         List<Map<String, RefBookValue>> records = getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RefBookValueMapper(refBook));
         PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
 
         // Получение количества данных в справкочнике
-        ps.setQuery(new StringBuilder("SELECT count(*) FROM (" + ps.getQuery().toString() + ")"));
-        result.setTotalCount(getJdbcTemplate().queryForInt(ps.getQuery().toString(), ps.getParams().toArray()));
+        result.setTotalCount(getRecordsCount(refBookId, filter));
 
         return result;
+    }
+
+    @Override
+    public Map<String, RefBookValue> getRecordData(Long refBookId, Long recordId) {
+        RefBook refBook = refBookDao.get(REF_BOOK_ID_200);
+        PreparedStatementData ps = new PreparedStatementData();
+
+        String sql = String.format(SQL_FOR_RECORD, getRefBookSelect(REF_BOOK_ID_200), refBookNameMapping.get(refBookId), recordId);
+        ps.appendQuery(sql);
+        ps.addParam(recordId);
+
+        try {
+            List<Map<String, RefBookValue>> records = getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RefBookValueMapper(refBook));
+            return records.isEmpty() ? new HashMap<String, RefBookValue>(0) : records.get(0);
+        } catch (DataAccessException e) {
+            logger.error("", e);
+            throw new DaoException("", e);
+        }
+    }
+
+    @Override
+    public int getRecordsCount(Long refBookId, String filter) {
+        PreparedStatementData ps = getRefBookSql(filter, refBookNameMapping.get(refBookId));
+        ps.setQuery(new StringBuilder("SELECT count(*) FROM (" + ps.getQuery().toString() + ")"));
+        return getJdbcTemplate().queryForInt(ps.getQuery().toString(), ps.getParams().toArray());
     }
 
     /**

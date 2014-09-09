@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl.datarow;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
@@ -19,10 +20,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({ "DataRowDaoImplTest.xml" })
@@ -552,5 +550,72 @@ public class DataRowDaoImplTest extends Assert {
 
         boolean isCountChanged = dataRowDao.isDataRowsCountChanged(1000L);
         assertTrue("Количество строк должно было измениться", isCountChanged);
+    }
+
+    @Test
+    public void cleanValueTest() {
+        FormData formData = formDataDao.get(1000L, false);
+
+        // Исходные данные
+        List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>(2);
+        DataRow<Cell> row1 = formData.createDataRow();
+        DataRow<Cell> row2 = formData.createDataRow();
+        dataRows.add(row1);
+        dataRows.add(row2);
+
+        row1.put("stringColumn", "1");
+        row1.put("numericColumn", 1);
+        row1.put("dateColumn", new Date());
+
+        row2.put("stringColumn", "2");
+        row2.put("numericColumn", 2);
+        row2.put("dateColumn", new Date());
+
+        dataRowDao.saveRows(formData, dataRows);
+
+        dataRows = dataRowDao.getRows(formData, null, null);
+        Assert.assertEquals(2, dataRows.size());
+
+        // Пустое удаление
+        dataRowDao.cleanValue(null);
+        dataRowDao.cleanValue(new ArrayList<Integer>(0));
+        dataRows = dataRowDao.getRows(formData, null, null);
+        Assert.assertEquals(2, dataRows.size());
+        Assert.assertNotNull(dataRows.get(0).get("stringColumn"));
+        Assert.assertNotNull(dataRows.get(0).get("numericColumn"));
+        Assert.assertNotNull(dataRows.get(0).get("dateColumn"));
+        Assert.assertNotNull(dataRows.get(1).get("stringColumn"));
+        Assert.assertNotNull(dataRows.get(1).get("numericColumn"));
+        Assert.assertNotNull(dataRows.get(1).get("dateColumn"));
+        // Удаление несуществующих ID
+        dataRowDao.cleanValue(Arrays.asList(-1, 0));
+        dataRows = dataRowDao.getRows(formData, null, null);
+        Assert.assertEquals(2, dataRows.size());
+        Assert.assertNotNull(dataRows.get(0).get("stringColumn"));
+        Assert.assertNotNull(dataRows.get(0).get("numericColumn"));
+        Assert.assertNotNull(dataRows.get(0).get("dateColumn"));
+        Assert.assertNotNull(dataRows.get(1).get("stringColumn"));
+        Assert.assertNotNull(dataRows.get(1).get("numericColumn"));
+        Assert.assertNotNull(dataRows.get(1).get("dateColumn"));
+        // Удаление одного значения
+        dataRowDao.cleanValue(Arrays.asList(1));
+        dataRows = dataRowDao.getRows(formData, null, null);
+        Assert.assertEquals(2, dataRows.size());
+        Assert.assertNull(dataRows.get(0).get("stringColumn"));
+        Assert.assertNotNull(dataRows.get(0).get("numericColumn"));
+        Assert.assertNotNull(dataRows.get(0).get("dateColumn"));
+        Assert.assertNull(dataRows.get(1).get("stringColumn"));
+        Assert.assertNotNull(dataRows.get(1).get("numericColumn"));
+        Assert.assertNotNull(dataRows.get(1).get("dateColumn"));
+        // Удаление еще одного значения
+        dataRowDao.cleanValue(Arrays.asList(1, 3));
+        dataRows = dataRowDao.getRows(formData, null, null);
+        Assert.assertEquals(2, dataRows.size());
+        Assert.assertNull(dataRows.get(0).get("stringColumn"));
+        Assert.assertNotNull(dataRows.get(0).get("numericColumn"));
+        Assert.assertNull(dataRows.get(0).get("dateColumn"));
+        Assert.assertNull(dataRows.get(1).get("stringColumn"));
+        Assert.assertNotNull(dataRows.get(1).get("numericColumn"));
+        Assert.assertNull(dataRows.get(1).get("dateColumn"));
     }
 }

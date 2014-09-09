@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.widget.historytemplatechanges.server;
 
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.TemplateChanges;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import com.aplana.sbrf.taxaccounting.service.TemplateChangesService;

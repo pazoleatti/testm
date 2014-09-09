@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.dao.ObjectLockDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
@@ -49,9 +49,6 @@ public class PeriodServiceImpl implements PeriodService{
 	private DepartmentService departmentService;
 
 	@Autowired
-	private ObjectLockDao objectLockDao;
-
-	@Autowired
 	private FormDataDao formDataDao;
 
 	@Autowired
@@ -62,6 +59,9 @@ public class PeriodServiceImpl implements PeriodService{
 
     @Autowired
     private NotificationService notificationService;
+
+    @Autowired
+    private LockDataService lockDataService;
 
 	@Override
 	public List<ReportPeriod> listByTaxPeriod(int taxPeriodId) {
@@ -182,7 +182,7 @@ public class PeriodServiceImpl implements PeriodService{
 			departments.add(dep.getId());
 		}
 
-		if (checkBeforeClose(departments, reportPeriodId, logs)) {
+		if (checkBeforeClose(departments, reportPeriodId, logs, user.getUser())) {
 			for (Department dep : getAvailableDepartments(taxType, user.getUser(), Operation.CLOSE, (int)departmentId)) {
 				closePeriodWithLog(reportPeriodId, dep.getId(), correctionDate, logs);
 			}
@@ -190,11 +190,12 @@ public class PeriodServiceImpl implements PeriodService{
 
 	}
 
-	private boolean checkBeforeClose(List<Integer> departments, int reportPeriodId, List<LogEntry> logs) {
+	private boolean checkBeforeClose(List<Integer> departments, int reportPeriodId, List<LogEntry> logs, TAUser user) {
 		boolean allGood = true;
         List<FormData> formDataList = formDataDao.find(departments, reportPeriodId);
         for (FormData fd : formDataList) {
-            ObjectLock<Long> lock = objectLockDao.getObjectLock(fd.getId(), FormData.class);
+            LockData lock = lockDataService.lock(LockData.LOCK_OBJECTS.FORM_TEMPLATE.name() + "_" + fd.getId(),
+                    user.getId(), LockData.STANDARD_LIFE_TIME);
             if (lock != null) {
                 logs.add(new LogEntry(LogLevel.WARNING,
                         "Форма " + fd.getFormType().getName() +

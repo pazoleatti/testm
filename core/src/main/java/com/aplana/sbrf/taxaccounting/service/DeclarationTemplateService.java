@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 
 import javax.validation.constraints.NotNull;
 import java.io.InputStream;
@@ -34,7 +31,7 @@ public interface DeclarationTemplateService {
      * Производится очистка blob_data, в случае если значение идентификаторов было измененно по сравнению с базой.
 	 * @param declarationTemplate объект шаблона декларации
 	 * @return идентификатор сохранённой записи в БД
-	 * @throws AccessDeniedException если у пользователя нет прав на изменение шаблона декларации 
+	 * @throws com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException если у пользователя нет прав на изменение шаблона декларации
 	 */
 	int save(DeclarationTemplate declarationTemplate);
 
@@ -48,7 +45,7 @@ public interface DeclarationTemplateService {
 	 * Такое описание для каждого вида декларации в любой момент времени может быть только одно
 	 * @param declarationTypeId идентификатор вида декларации
 	 * @return идентификатор описания декларации
-	 * @throws DaoException если не удалось найти активное описание декларации по заданному типу,
+	 * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если не удалось найти активное описание декларации по заданному типу,
 	 * 	или если обнаружено несколько действуюшие описаний по данному виду декларации
 	 */
 	int getActiveDeclarationTemplateId(int declarationTypeId, int reportPeriodId);
@@ -57,8 +54,8 @@ public interface DeclarationTemplateService {
 	 * Метод компилирует jrxml-файл и записиывает в БД, как сам jrxml-файл, так и его откомпилированную версию (jasper-файл).
 	 * @param declarationTemplateId идентификатор шаблона декларации 
 	 * @param jrxml jrxml в виде строки
-	 * @throws AccessDeniedException если у пользователя нет прав на изменение шаблона декларации
-	 * @throws ServiceException если при компиляции jrxml произошла ошибка
+	 * @throws com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException если у пользователя нет прав на изменение шаблона декларации
+	 * @throws com.aplana.sbrf.taxaccounting.model.exception.ServiceException если при компиляции jrxml произошла ошибка
 	 */
 	void setJrxml(int declarationTemplateId, InputStream jrxml);
 	/**
@@ -103,7 +100,7 @@ public interface DeclarationTemplateService {
      * @param declarationTemplateId - идентификатор вида декларации
      * @return информацию о блокировке объекта
      */
-    ObjectLock<Integer> getObjectLock(final Integer declarationTemplateId, final TAUserInfo userInfo);
+    LockData getObjectLock(final Integer declarationTemplateId, final TAUserInfo userInfo);
 
     /**
      * Получение тела скрипта.

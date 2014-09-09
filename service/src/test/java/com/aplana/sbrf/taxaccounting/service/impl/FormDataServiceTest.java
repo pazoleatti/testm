@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.core.api.LockCoreService;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
@@ -9,16 +8,19 @@ import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.*;
-import com.aplana.sbrf.taxaccounting.service.impl.eventhandler.EventLauncher;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.*;
@@ -26,19 +28,28 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.mockito.Mockito.*;
 
-public class FormDataServiceTest extends Assert {
-
-    private final FormDataServiceImpl formDataService = new FormDataServiceImpl();
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("FormDataServiceTest.xml")
+public class FormDataServiceTest {
 
     private FormTemplate formTemplate;
-
+    @Autowired
     private FormDataDao formDataDao;
-
+    @Autowired
     private DataRowDao dataRowDao;
+    @Autowired
+    DepartmentFormTypeDao departmentFormTypeDao;
+    @Autowired
+    ReportPeriodDao reportPeriodDao;
+    @Autowired
+    DepartmentDao departmentDao;
 
-    private FormTemplateService formTemplateService;
-
-    private FormDataAccessService formDataAccessService;
+    @Autowired
+    private FormDataServiceImpl formDataService;
+    @Autowired
+    PeriodService periodService;
+    @Autowired
+    private LockDataService lockDataService;
 
     private static final int FORM_TEMPLATE_ID = 1;
 
@@ -61,37 +72,9 @@ public class FormDataServiceTest extends Assert {
         ReportPeriod reportPeriod = new ReportPeriod();
         reportPeriod.setTaxPeriod(taxPeriod);
 
-        // Mock
-        formDataDao = mock(FormDataDao.class);
-        dataRowDao = mock(DataRowDao.class);
-        PeriodService reportPeriodService = mock(PeriodService.class);
-        formTemplateService = mock(FormTemplateService.class);
-        LockCoreService lockCoreService = mock(LockCoreService.class);
-        formDataAccessService = mock(FormDataAccessService.class);
-        DepartmentDao departmentDao = mock(DepartmentDao.class);
         FormData formData = mock(FormData.class);
-        FormDataScriptingService formDataScriptingService = mock(FormDataScriptingService.class);
-        LogBusinessService logBusinessService = mock(LogBusinessService.class);
-        AuditService auditService = mock(AuditService.class);
-        LogEntryService logEntryService = mock(LogEntryService.class);
-        EventLauncher eventHandlerLauncher = mock(EventLauncher.class);
 
-        ReflectionTestUtils.setField(formDataService, "formDataDao", formDataDao);
-        ReflectionTestUtils.setField(formDataService, "dataRowDao", dataRowDao);
-        ReflectionTestUtils.setField(formDataService, "reportPeriodService", reportPeriodService);
-        ReflectionTestUtils.setField(formDataService, "formTemplateService", formTemplateService);
-        ReflectionTestUtils.setField(formDataService, "departmentDao", departmentDao);
-        ReflectionTestUtils.setField(formDataService, "lockCoreService", lockCoreService);
-        ReflectionTestUtils.setField(formDataService, "formDataAccessService", formDataAccessService);
-        ReflectionTestUtils.setField(formDataService, "formDataScriptingService", formDataScriptingService);
-        ReflectionTestUtils.setField(formDataService, "logBusinessService", logBusinessService);
-        ReflectionTestUtils.setField(formDataService, "auditService", auditService);
-        ReflectionTestUtils.setField(formDataService, "logEntryService", logEntryService);
-        ReflectionTestUtils.setField(formDataService, "eventHandlerLauncher", eventHandlerLauncher);
-
-        when(reportPeriodService.getTaxPeriod(anyInt())).thenReturn(taxPeriod);
         when(formData.getReportPeriodId()).thenReturn(1);
-        when(reportPeriodService.getReportPeriod(anyInt())).thenReturn(reportPeriod);
     }
     /**
      * Тест удаления приемника при распринятии последнего источника
@@ -116,16 +99,13 @@ public class FormDataServiceTest extends Assert {
         Logger logger = new Logger();
 
         // мок для сервиса который возвращает баллансовый ли это период
-        PeriodService reportPeriodService = mock(PeriodService.class);
         // период с id = 1 для подразделения с id=1 будет баллансовым
-        when(reportPeriodService.isBalancePeriod(1, 1)).thenReturn(true);
+        when(periodService.isBalancePeriod(1, 1)).thenReturn(true);
         // период с id = 2 для подразделения с id=1 Не будет баллансовым
-        when(reportPeriodService.isBalancePeriod(2, 1)).thenReturn(false);
+        when(periodService.isBalancePeriod(2, 1)).thenReturn(false);
         // подменяем reportPeriodService у тестируемого объекта
-        ReflectionTestUtils.setField(formDataService, "reportPeriodService", reportPeriodService);
 
         // имеем 3 формы, 2 источника и 1 приемник
-        DepartmentFormTypeDao departmentFormTypeDao = mock(DepartmentFormTypeDao.class);
         // готовим тип формы для
         DepartmentFormType departmentFormType = new DepartmentFormType();
         departmentFormType.setDepartmentId(1);
@@ -137,19 +117,11 @@ public class FormDataServiceTest extends Assert {
 
         when(departmentFormTypeDao.getFormDestinations(2, 1, FormDataKind.PRIMARY, null, null)).thenReturn(new ArrayList<DepartmentFormType>());
         when(departmentFormTypeDao.getFormDestinations(1, 1, FormDataKind.PRIMARY, null, null)).thenReturn(list);
-        ReflectionTestUtils.setField(formDataService, "departmentFormTypeDao", departmentFormTypeDao);
-        ReportPeriodDao reportPeriodDao = mock(ReportPeriodDao.class);
         when(reportPeriodDao.get(any(Integer.class))).thenReturn(mock(ReportPeriod.class));
-        ReflectionTestUtils.setField(formDataService, "reportPeriodDao", reportPeriodDao);
 
         Department department = new Department();
         department.setName("Тестовое подразделение");
 
-        DepartmentDao departmentDao = mock(DepartmentDao.class);
-        ReflectionTestUtils.setField(formDataService, "departmentDao", departmentDao);
-
-
-        FormDataDao formDataDao = mock(FormDataDao.class);
         FormData formData1 = new FormData();
         formData1.setId(2L);
         formData1.setFormType(formType);
@@ -170,7 +142,6 @@ public class FormDataServiceTest extends Assert {
                 return null;
             }
         }).when(formDataDao).delete(formData1.getId());
-        ReflectionTestUtils.setField(formDataService, "formDataDao", formDataDao);
 
         FormDataCompositionService formDataCompositionService = mock(FormDataCompositionService.class);
 
@@ -178,16 +149,6 @@ public class FormDataServiceTest extends Assert {
         when(applicationContext.getBean(FormDataCompositionService.class)).thenReturn(formDataCompositionService);
         ReflectionTestUtils.setField(formDataService, "applicationContext", applicationContext);
 
-        LockCoreService lockCoreService = mock(LockCoreService.class);
-        ReflectionTestUtils.setField(formDataService, "lockCoreService", lockCoreService);
-
-        FormDataAccessService formDataAccessService = mock(FormDataAccessService.class);
-        ReflectionTestUtils.setField(formDataService, "formDataAccessService", formDataAccessService);
-
-        AuditService auditService = mock(AuditService.class);
-        ReflectionTestUtils.setField(formDataService, "auditService", auditService);
-
-        LockDataService lockDataService = mock(LockDataService.class);
         final Map<String, LockData> map = new HashMap<String, LockData>();
         doAnswer(new Answer<Object>() {
             public Object answer(InvocationOnMock invocation) {
@@ -206,11 +167,10 @@ public class FormDataServiceTest extends Assert {
                 return null;
             }
         }).when(lockDataService).unlock(anyString(),anyInt());
-        ReflectionTestUtils.setField(formDataService, "lockService", lockDataService);
 
         formDataService.compose(WorkflowMove.APPROVED_TO_ACCEPTED, formData, userInfo, logger);
         // проверяем что источник удален
-        assertTrue(list.size() == 0);
+        Assert.assertTrue(list.size() == 0);
     }
 
     @Test
@@ -261,27 +221,19 @@ public class FormDataServiceTest extends Assert {
             add(2l);
         }};
 
-        FormDataDao formDataDao = mock(FormDataDao.class);
-        ReflectionTestUtils.setField(formDataService, "formDataDao", formDataDao);
 
         when(formDataDao.getFormDataIds(1, FormDataKind.SUMMARY, 1)).thenReturn(list);
         when(formDataDao.getWithoutRows(1)).thenReturn(formData);
         when(formDataDao.getWithoutRows(2)).thenReturn(formData1);
 
-        ReportPeriodDao reportPeriodDao = mock(ReportPeriodDao.class);
-        ReflectionTestUtils.setField(formDataService, "reportPeriodDao", reportPeriodDao);
-
         when(reportPeriodDao.get(1)).thenReturn(reportPeriod);
         when(reportPeriodDao.get(2)).thenReturn(reportPeriod1);
 
-        DepartmentDao departmentDao = mock(DepartmentDao.class);
-        ReflectionTestUtils.setField(formDataService, "departmentDao", departmentDao);
-
         when(departmentDao.getDepartment(1)).thenReturn(department);
 
-        assertTrue(formDataService.existFormData(1, FormDataKind.SUMMARY, 1, logger));
-        assertEquals("Существует экземпляр налоговой формы Тестовый тип НФ типа Сводная в подразделении Тестовое подразделение периоде Тестовый период 2014", logger.getEntries().get(0).getMessage());
-        assertEquals("Существует экземпляр налоговой формы Тестовый тип НФ типа Сводная в подразделении Тестовое подразделение периоде Второй тестовый период 2014", logger.getEntries().get(1).getMessage());
+        Assert.assertTrue(formDataService.existFormData(1, FormDataKind.SUMMARY, 1, logger));
+        Assert.assertEquals("Существует экземпляр налоговой формы Тестовый тип НФ типа Сводная в подразделении Тестовое подразделение периоде Тестовый период 2014", logger.getEntries().get(0).getMessage());
+        Assert.assertEquals("Существует экземпляр налоговой формы Тестовый тип НФ типа Сводная в подразделении Тестовое подразделение периоде Второй тестовый период 2014", logger.getEntries().get(1).getMessage());
     }
 
     /**
@@ -298,7 +250,8 @@ public class FormDataServiceTest extends Assert {
 
         when(formDataDao.getPrevFormDataList(any(FormData.class), any(TaxPeriod.class)))
                 .thenReturn(new ArrayList<FormData>());
-        assertTrue("\"Номер последней строки предыдущей НФ\" должен быть равен 0",
+        when(periodService.getReportPeriod(1)).thenReturn(new ReportPeriod());
+        Assert.assertTrue("\"Номер последней строки предыдущей НФ\" должен быть равен 0",
                 formDataService.getPreviousRowNumber(newFormData).equals(0));
     }
 
@@ -338,7 +291,8 @@ public class FormDataServiceTest extends Assert {
         when(dataRowDao.getSizeWithoutTotal(formData, null)).thenReturn(3);
         when(dataRowDao.getSizeWithoutTotal(formData1, null)).thenReturn(5);
 
-        assertTrue("\"Номер последней строки предыдущей НФ\" должен быть равен 8",
+        when(periodService.getReportPeriod(3)).thenReturn(new ReportPeriod());
+        Assert.assertTrue("\"Номер последней строки предыдущей НФ\" должен быть равен 8",
                 formDataService.getPreviousRowNumber(newFormData).equals(8));
 
     }
@@ -379,7 +333,8 @@ public class FormDataServiceTest extends Assert {
         when(dataRowDao.getSizeWithoutTotal(formData, null)).thenReturn(3);
         when(dataRowDao.getSizeWithoutTotal(formData1, null)).thenReturn(5);
 
-        assertTrue("\"Номер последней строки предыдущей НФ\" должен быть равен 3",
+        when(periodService.getReportPeriod(3)).thenReturn(new ReportPeriod());
+        Assert.assertTrue("\"Номер последней строки предыдущей НФ\" должен быть равен 3",
                 formDataService.getPreviousRowNumber(newFormData).equals(3));
     }
 
@@ -472,10 +427,17 @@ public class FormDataServiceTest extends Assert {
      */
     @Test
     public void testSaveFormDataMethodsInvokeOrder() {
+        TAUser user = new TAUser();
+        user.setId(1);
         Logger logger = mock(Logger.class);
         TAUserInfo userInfo = mock(TAUserInfo.class);
+        when(userInfo.getUser()).thenReturn(user);
         FormData formData = getFormData();
+        LockData lockData = new LockData();
+        lockData.setUserId(user.getId());
 
+        when(lockDataService.lock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formData.getId(), user.getId(), LockData.STANDARD_LIFE_TIME)).
+                thenReturn(lockData);
         FormDataServiceImpl dataService = spy(formDataService);
         dataService.saveFormData(logger, userInfo, formData);
 
@@ -493,19 +455,19 @@ public class FormDataServiceTest extends Assert {
      */
     @Test
     public void testCanUpdateAutoNumerationWhenDoMove() {
-        assertTrue(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.CREATED_TO_PREPARED));
-        assertTrue(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.CREATED_TO_ACCEPTED));
-        assertTrue(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.CREATED_TO_APPROVED));
-        assertTrue(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.PREPARED_TO_CREATED));
-        assertTrue(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.ACCEPTED_TO_CREATED));
-        assertTrue(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.APPROVED_TO_CREATED));
+        Assert.assertTrue(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.CREATED_TO_PREPARED));
+        Assert.assertTrue(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.CREATED_TO_ACCEPTED));
+        Assert.assertTrue(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.CREATED_TO_APPROVED));
+        Assert.assertTrue(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.PREPARED_TO_CREATED));
+        Assert.assertTrue(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.ACCEPTED_TO_CREATED));
+        Assert.assertTrue(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.APPROVED_TO_CREATED));
 
-        assertFalse(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.PREPARED_TO_ACCEPTED));
-        assertFalse(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.PREPARED_TO_APPROVED));
-        assertFalse(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.ACCEPTED_TO_APPROVED));
-        assertFalse(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.ACCEPTED_TO_PREPARED));
-        assertFalse(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.APPROVED_TO_ACCEPTED));
-        assertFalse(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.APPROVED_TO_PREPARED));
+        Assert.assertFalse(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.PREPARED_TO_ACCEPTED));
+        Assert.assertFalse(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.PREPARED_TO_APPROVED));
+        Assert.assertFalse(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.ACCEPTED_TO_APPROVED));
+        Assert.assertFalse(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.ACCEPTED_TO_PREPARED));
+        Assert.assertFalse(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.APPROVED_TO_ACCEPTED));
+        Assert.assertFalse(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.APPROVED_TO_PREPARED));
     }
 
     /**
@@ -515,19 +477,19 @@ public class FormDataServiceTest extends Assert {
     public void testBeInOnAutoNumeration() {
         FormData formData = new FormData();
         formData.setState(WorkflowState.CREATED);
-        assertFalse("Не должен участвовать в сквозной нумерации", formDataService.beInOnAutoNumeration(formData));
+        Assert.assertFalse("Не должен участвовать в сквозной нумерации", formDataService.beInOnAutoNumeration(formData));
 
         FormData formData1 = new FormData();
         formData1.setState(WorkflowState.ACCEPTED);
-        assertTrue("Должен участвовать в сквозной нумерации", formDataService.beInOnAutoNumeration(formData1));
+        Assert.assertTrue("Должен участвовать в сквозной нумерации", formDataService.beInOnAutoNumeration(formData1));
 
         FormData formData2 = new FormData();
         formData2.setState(WorkflowState.APPROVED);
-        assertTrue("Должен участвовать в сквозной нумерации", formDataService.beInOnAutoNumeration(formData2));
+        Assert.assertTrue("Должен участвовать в сквозной нумерации", formDataService.beInOnAutoNumeration(formData2));
 
         FormData formData3 = new FormData();
         formData3.setState(WorkflowState.PREPARED);
-        assertTrue("Должен участвовать в сквозной нумерации", formDataService.beInOnAutoNumeration(formData3));
+        Assert.assertTrue("Должен участвовать в сквозной нумерации", formDataService.beInOnAutoNumeration(formData3));
     }
 
     private FormData getFormData() {

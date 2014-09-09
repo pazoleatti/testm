@@ -100,7 +100,6 @@ public class CacheTest {
 		BlobData blob = new BlobData();
 		blob.setCreationDate(new Date());
 		blob.setUuid(SAMPLE_BLOB_ID);
-		blob.setType(0);
 		blob.setInputStream(new ByteArrayInputStream(sampleBlobData.getBytes("UTF-8")));
 		blobDataDao.create(blob);
     }

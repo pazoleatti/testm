@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.handlers;
 
-import com.aplana.sbrf.taxaccounting.core.api.LockCoreService;
+import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
@@ -24,8 +24,8 @@ public class LogSystemLogoutHandler implements LogoutHandler {
 
     protected Log logger = LogFactory.getLog(getClass());
 
-	@Autowired
-	private LockCoreService lockCoreService;
+    @Autowired
+    private LockDataService lockDataService;
 
     @Override
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
@@ -39,7 +39,7 @@ public class LogSystemLogoutHandler implements LogoutHandler {
             TAUserInfo userInfo = principal.getUserInfo();
 
             logger.info("Exit: " + userInfo);
-            lockCoreService.unlockAll(userInfo);
+            lockDataService.unlockAll(userInfo);
             AuditService auditService = (AuditService) springContext.getBean("auditServiceImpl");
             auditService.add(FormDataEvent.LOGOUT, userInfo,
                     userInfo.getUser().getDepartmentId(), null, null, null, null, null, null);

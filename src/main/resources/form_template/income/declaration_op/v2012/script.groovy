@@ -143,7 +143,6 @@ void generateXML(def xmlBankData) {
     def reorgKpp = incomeParams?.REORG_KPP?.value
     def oktmo = getOkato(incomeParams?.OKTMO?.value)
     def signatoryId = getRefBookValue(35, incomeParams?.SIGNATORY_ID?.value)?.CODE?.value
-    def appVersion = incomeParams?.APP_VERSION?.value
     def formatVersion = incomeParams?.FORMAT_VERSION?.value
     def taxPlaceTypeCode = getRefBookValue(2, incomeParams?.TAX_PLACE_TYPE_CODE?.value)?.CODE?.value
     def signatorySurname = incomeParams?.SIGNATORY_SURNAME?.value
@@ -230,7 +229,7 @@ void generateXML(def xmlBankData) {
     def xmlbuilder = new MarkupBuilder(xml)
     xmlbuilder.Файл(
             ИдФайл : declarationService.generateXmlFileId(5, declarationData.departmentId, declarationData.reportPeriodId),
-            ВерсПрог : appVersion,
+            ВерсПрог : applicationVersion,
             ВерсФорм : formatVersion) {
 
         // Титульный лист
@@ -435,9 +434,6 @@ List<String> getErrorVersion(record) {
     if (record.FORMAT_VERSION == null || record.FORMAT_VERSION.stringValue == null || !record.FORMAT_VERSION.stringValue.equals('5.05')) {
         errorList.add("«Версия формата»")
     }
-    if (record.APP_VERSION == null || record.APP_VERSION.stringValue == null || !record.APP_VERSION.stringValue.equals('XLR_FNP_TAXCOM_5_05')) {
-        errorList.add("«Версия программы, с помощью которой сформирован файл»")
-    }
     errorList
 }
 
@@ -457,11 +453,6 @@ def getOkato(def id) {
     def String okato = null
     if(id != null){
         okato = getRefBookValue(96, id)?.CODE?.stringValue
-        if(okato != null) {
-            while (okato.length() < 11) {
-                okato = okato + '0'
-            }
-        }
     }
     return okato
 }

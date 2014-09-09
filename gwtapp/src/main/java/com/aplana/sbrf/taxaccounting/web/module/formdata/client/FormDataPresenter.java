@@ -368,6 +368,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
             @Override
             public void yes() {
                 DeleteFormDataAction action = new DeleteFormDataAction();
+                action.setFormData(formData);
                 action.setFormDataId(formData.getId());
                 action.setManual(false);
                 dispatcher
@@ -378,7 +379,12 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                             @Override
                                             public void onSuccess(
                                                     DeleteFormDataResult result) {
-                                                revealFormDataList();
+                                                if (result.getUuid() != null){
+                                                    LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
+                                                    Dialog.errorMessage("Ошибка", "Форма не может быть удалена!");
+                                                }  else{
+                                                    revealFormDataList();
+                                                }
                                             }
 
                                         }, FormDataPresenter.this));

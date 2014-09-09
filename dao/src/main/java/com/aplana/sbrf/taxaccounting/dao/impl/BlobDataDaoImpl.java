@@ -27,8 +27,7 @@ public class BlobDataDaoImpl extends AbstractDao implements BlobDataDao {
         @Override
         public BlobData mapRow(ResultSet rs, int rowNum) throws SQLException {
             BlobData blobData = new BlobData();
-            blobData.setType(SqlUtils.getInteger(rs, "type"));
-            blobData.setCreationDate(rs.getDate("creation_date"));
+            blobData.setCreationDate(rs.getTimestamp("creation_date"));
             blobData.setName(rs.getString("name"));
             blobData.setUuid(rs.getString("id"));
             blobData.setInputStream(rs.getBlob("data").getBinaryStream());
@@ -47,12 +46,10 @@ public class BlobDataDaoImpl extends AbstractDao implements BlobDataDao {
 
                     PreparedStatement ps = con
                             .prepareStatement(
-                                    "INSERT INTO blob_data (id, name, data, creation_date, type) VALUES (?,?,?,?,?)");
+                                    "INSERT INTO blob_data (id, name, data, creation_date) VALUES (?,?,?,sysdate)");
                     ps.setString(1, blobData.getUuid());
                     ps.setString(2, blobData.getName());
                     ps.setBlob(3, blobData.getInputStream());
-                    ps.setDate(4, new java.sql.Date(blobData.getCreationDate().getTime()));
-                    ps.setInt(5, blobData.getType());
                     return ps;
                 }
             };
@@ -118,7 +115,7 @@ public class BlobDataDaoImpl extends AbstractDao implements BlobDataDao {
     /*@Cacheable("DataBlobsCache")*/
     public BlobData get(String uuid) {
         try{
-            return getJdbcTemplate().queryForObject("SELECT id, name, data, creation_date, type FROM blob_data WHERE id = ?",
+            return getJdbcTemplate().queryForObject("SELECT id, name, data, creation_date FROM blob_data WHERE id = ?",
                     new Object[]{uuid},
                     new int[]{Types.CHAR},
                     new BlobDataRowMapper());
@@ -128,4 +125,22 @@ public class BlobDataDaoImpl extends AbstractDao implements BlobDataDao {
         }
     }
 
+    @Override
+    public int clean() {
+        try {
+            return getJdbcTemplate().update("delete from blob_data bd where id not in " +
+                    "(select distinct id from " +
+                    "(select script_id id from ref_book " +
+                    "union select xsd from declaration_template " +
+                    "union select jrxml from declaration_template " +
+                    "union select jasper_print from declaration_data " +
+                    "union select data from declaration_data " +
+                    "union select data_pdf from declaration_data " +
+                    "union select data_xlsx from declaration_data " +
+                    "union select blob_data_id from log_system) where id is not null) " +
+                    "and (sysdate - bd.creation_date) > " + (isDateDiffNumber() ? "1" : "numtodsinterval(24, 'hour')"));
+        } catch (DataAccessException e){
+            throw new DaoException(String.format("Ошибка при удалении устаревших записей таблицы BLOB_DATA. %s.", e.getMessage()));
+        }
+    }
 }

@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server;
 
+import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
@@ -32,6 +33,8 @@ public class GetRefBookAttributesHandler extends AbstractActionHandler<GetRefBoo
 
     @Autowired
     DepartmentService departmentService;
+
+    private final Long ORGANIZATION_REF_BOOL_ID = 9L;
 
 	public GetRefBookAttributesHandler() {
 		super(GetRefBookAttributesAction.class);
@@ -70,11 +73,11 @@ public class GetRefBookAttributesHandler extends AbstractActionHandler<GetRefBoo
 		}
 
         TAUser currentUser = securityService.currentUserInfo().getUser();
-        if (currentUser.hasRole("ROLE_CONTROL_UNP")){ // Контроллер УНП
+        if (currentUser.hasRole(TARole.ROLE_CONTROL_UNP)){ // Контроллер УНП
             // Контроллер УНП может редактировать все справочники
             result.setReadOnly(refBook.isReadOnly());
         } else { // Оператор, Контролёр, Контролёр НС
-            if (currentUser.hasRole("ROLE_CONTROL_NS") && refBook.getRegionAttribute() != null){
+            if (currentUser.hasRole(TARole.ROLE_CONTROL_NS) && refBook.getRegionAttribute() != null){
                 /*
                  * контролер НС может редактировать данные справочника, сделано без фильтра
                  * так как при показе строки уже фильтруются
@@ -84,6 +87,10 @@ public class GetRefBookAttributesHandler extends AbstractActionHandler<GetRefBoo
                 result.setReadOnly(true);
             }
         }
+
+        // доступность  кнопки-ссылка "Создать запрос на изменение..." для справочника "Организации-участники контролируемых сделок"
+        result.setSendQuery(refBook.getId().equals(ORGANIZATION_REF_BOOL_ID) &&
+                (currentUser.hasRole(TARole.ROLE_CONTROL_NS) || currentUser.hasRole(TARole.ROLE_CONTROL)));
 
 		result.setColumns(columns);
 		return result;

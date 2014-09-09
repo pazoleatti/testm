@@ -84,3 +84,4 @@ drop table form_kind;
 drop table event;
 drop table department;
 drop table department_type;
+drop table async_task_type;

@@ -483,6 +483,15 @@ public class FlexiblePager extends AbstractPager {
 		super.firstPage();
 	}
 
+    /**
+     * Постраничный режим (одна строка). Используется при просмотре декларации.
+     */
+    public void setOnlyPages(boolean onlyPages) {
+        leftLabel.setVisible(!onlyPages);
+        rightLabel.setVisible(!onlyPages);
+        rowsCountOnPage.setVisible(!onlyPages);
+    }
+
 	@Override
 	public int getPage() {
 		return super.getPage();
@@ -627,6 +636,29 @@ public class FlexiblePager extends AbstractPager {
         rowsCountOnPage.setValue(getPageSize());
 	}
 
+    /**
+     * Установка отображаемого номера страницы
+     * @param number
+     */
+    public void setPageNumber(int number) {
+        HasRows display = getDisplay();
+
+        if (display == null) {
+            return;
+        }
+
+        pageNumber.setValue(number);
+
+        // Update the prev and first buttons.
+        setPrevPageButtonsDisabled(!hasPreviousPage());
+
+        // Update the next and last buttons.
+        if (display.isRowCountExact()) {
+            setNextPageButtonsDisabled(!hasNextPage());
+            setFastForwardDisabled(!hasNextPages(getFastForwardPages()));
+        }
+    }
+
 	@Override
 	protected void onRangeOrRowCountChanged() {
 		HasRows display = getDisplay();
@@ -641,7 +673,7 @@ public class FlexiblePager extends AbstractPager {
 
 		leftLabel.setHTML(templates.leftLabel(startIntex + "-" + endIndex, display.getRowCount()));
 		middleLeftLabel.setText("Страница: ");
-		pageNumber.setValue(page);
+        pageNumber.setValue(page);
 		middleRightLabel.setText((exact ? " из " : " более ") + pageCount);
         setPageSize(range.getLength());
         rowsCountOnPage.setValue(range.getLength());

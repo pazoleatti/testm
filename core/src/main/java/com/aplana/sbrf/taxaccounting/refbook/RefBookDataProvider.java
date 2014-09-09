@@ -28,7 +28,7 @@ import java.util.Map;
  */
 
 public interface RefBookDataProvider {
-    final static String LOCK_MESSAGE = "Справочник %s заблокирован, попробуйте выполнить операцию позже";
+    String LOCK_MESSAGE = "Справочник %s заблокирован, попробуйте выполнить операцию позже";
 
 	/**
 	 * Загружает данные справочника на определенную дату актуальности
@@ -194,7 +194,7 @@ public interface RefBookDataProvider {
      * @param uniqueRecordId идентификатор версии записи
      * @return not null всегда - ожидается возврат результата
      */
-    List<Pair<RefBookAttribute, RefBookValue>> getUniqueAttributeValues(Long uniqueRecordId);
+    Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>> getUniqueAttributeValues(Long uniqueRecordId);
 
     /**
      * Обновляет данные версии записи справочника

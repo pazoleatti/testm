@@ -100,9 +100,9 @@
                 <g:Label addStyleNames="{style.horSep}"/>
 
                 <style:LeftBar addStyleNames="{style.filterPanel}" marginRight="10" childValign="middle">
-                    <g:Button ui:field="assignAnchor" title="Назначить" text="Назначить..."/>
-                    <style:LinkButton ui:field="editAnchor" enabled="false" text="Редактировать"/>
-                    <style:LinkButton enabled="false" ui:field="cancelAnchor" text="Отменить назначение"/>
+                    <style:LinkButton ui:field="assignAnchor" text="Назначить" img="resources/img/add.png"/>
+                    <style:LinkButton ui:field="editAnchor" enabled="false" text="Редактировать" img="resources/img/pencil-16.png"/>
+                    <style:LinkButton ui:field="cancelAnchor" enabled="false" text="Отменить назначение" img="resources/img/row-delete.png"/>
                 </style:LeftBar>
 
                 <g:ResizeLayoutPanel ui:field="formGridWrapper" addStyleNames="{style.table}">

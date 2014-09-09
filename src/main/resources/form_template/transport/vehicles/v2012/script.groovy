@@ -226,19 +226,21 @@ def logicCheck() {
 
     // 6. Проверка наличия формы предыдущего периода
     def prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
-    def str = ''
-    if (reportPeriod.order == 4) {
-        str += checkPrevPeriod(prevReportPeriod)
-        prevReportPeriod = reportPeriodService.getPrevReportPeriod(prevReportPeriod.id)
-        str += checkPrevPeriod(prevReportPeriod)
-        prevReportPeriod = reportPeriodService.getPrevReportPeriod(prevReportPeriod.id)
-        str += checkPrevPeriod(prevReportPeriod)
-    } else {
-        str = checkPrevPeriod(prevReportPeriod)
-    }
-    if (str.length() > 2) {
-        logger.warn("Данные ТС из предыдущих отчётных периодов не были скопированы. В Системе " +
-                "не создавались формы за следующие периоды: " + str.substring(0, str.size() - 2) + ".")
+    if (prevReportPeriod != null) {
+        def str = ''
+        if (reportPeriod.order == 4) {
+            str += checkPrevPeriod(prevReportPeriod)
+            prevReportPeriod = reportPeriodService.getPrevReportPeriod(prevReportPeriod.id)
+            str += checkPrevPeriod(prevReportPeriod)
+            prevReportPeriod = reportPeriodService.getPrevReportPeriod(prevReportPeriod.id)
+            str += checkPrevPeriod(prevReportPeriod)
+        } else {
+            str = checkPrevPeriod(prevReportPeriod)
+        }
+        if (str.length() > 2) {
+            logger.warn("Данные ТС из предыдущих отчётных периодов не были скопированы. В Системе " +
+                    "не создавались формы за следующие периоды: " + str.substring(0, str.size() - 2) + ".")
+        }
     }
 }
 
@@ -600,7 +602,17 @@ void addTransportData(def xml) {
         xmlIndexCol++
 
         // графа 12
-        newRow.year = parseDate(row.cell[xmlIndexCol].text(), "yyyy", rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        def yearStr = row.cell[xmlIndexCol].text()
+        if (yearStr != null) {
+            if (yearStr.contains(".")) {
+                newRow.year = parseDate(yearStr, "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+            } else {
+                def yearNum = parseNumber(yearStr, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+                if (yearNum != null && yearNum != 0) {
+                    newRow.year = new GregorianCalendar(yearNum as Integer, Calendar.JANUARY, 1).getTime()
+                }
+            }
+        }
         xmlIndexCol++
 
         // графа 13

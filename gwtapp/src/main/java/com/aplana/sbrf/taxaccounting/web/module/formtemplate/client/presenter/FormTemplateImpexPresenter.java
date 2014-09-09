@@ -37,9 +37,9 @@ public class FormTemplateImpexPresenter extends Presenter<FormTemplateImpexPrese
 	}
 
 	public interface MyView extends View, HasUiHandlers<FormTemplateImpexUiHandlers> {
-        static final String ERROR_RESP = "erroruuid ";
-        static final String SUCCESS_RESP = "uuid ";
-        static final String ERROR = "error ";
+        String ERROR_RESP = "erroruuid ";
+        String SUCCESS_RESP = "uuid ";
+        String ERROR = "error ";
 
 		void setFormId(int formId);
 	}
@@ -75,7 +75,7 @@ public class FormTemplateImpexPresenter extends Presenter<FormTemplateImpexPrese
 
 	@Override
 	public void uploadFormTemplateFail(String msg) {
-        Dialog.errorMessage("Загрузить макет не удалось. Проверьте источник данных.");
+        Dialog.errorMessage("Загрузить макет не удалось. Ошибка: " + msg);
 	}
 
 	@Override

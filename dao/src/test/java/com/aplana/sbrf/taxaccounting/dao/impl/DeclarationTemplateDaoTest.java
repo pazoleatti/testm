@@ -47,7 +47,6 @@ public class DeclarationTemplateDaoTest {
 		BlobData blob = new BlobData();
 		blob.setCreationDate(new Date());
 		blob.setUuid(SAMPLE_BLOB_ID);
-		blob.setType(0);
 		blob.setInputStream(new ByteArrayInputStream(sampleBlobData.getBytes("UTF-8")));
 		blobDataDao.create(blob);
 	}
@@ -225,7 +224,6 @@ public class DeclarationTemplateDaoTest {
         calendar.set(2013, Calendar.DECEMBER, 31, 0, 0);
         calendar.set(Calendar.MILLISECOND, 0);
         Assert.assertEquals(calendar.getTime(), declarationTemplateDao.getDTVersionEndDate(1, actualBeginVersion));
-
     }
 
     @Test
@@ -239,7 +237,6 @@ public class DeclarationTemplateDaoTest {
         list.add(VersionedObjectStatus.NORMAL.getId());
         list.add(VersionedObjectStatus.DRAFT.getId());
         Assert.assertEquals(1, declarationTemplateDao.getNearestDTVersionIdRight(1, list, actualBeginVersion));
-
     }
 
     @Test
@@ -253,7 +250,6 @@ public class DeclarationTemplateDaoTest {
         calendar.clear();
 
         Assert.assertEquals(2, declarationTemplateDao.versionTemplateCount(1, list));
-
     }
 
     @Test

@@ -173,7 +173,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
                 );
             } catch (DataIntegrityViolationException e){
                 logger.error("", e);
-                throw new DaoException("Обнаружено использование колонки с алиасом " + alias[0], e);
+                throw new DaoException("Обнаружено использование колонки", e);
             }
 		}
 
@@ -465,7 +465,8 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
         }
     }
 
-    private int getColumnIdByAlias(int formTemplateId, String columnAlias){
+    @Override
+    public int getColumnIdByAlias(int formTemplateId, String columnAlias){
         try {
             return getJdbcTemplate().queryForInt(
                     "SELECT id FROM form_column WHERE form_template_id = ? and alias = ?",
