@@ -24,4 +24,9 @@ public class TARoleServiceImpl implements TARoleService {
 		}
 		return roles;
 	}
+
+    @Override
+    public TARole getByAlias(String alias) {
+        return taRoleDao.getRoleByAlias(alias);
+    }
 }

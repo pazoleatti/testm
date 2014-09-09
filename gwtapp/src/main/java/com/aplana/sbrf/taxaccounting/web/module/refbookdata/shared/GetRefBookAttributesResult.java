@@ -8,6 +8,7 @@ public class GetRefBookAttributesResult implements Result {
 	List<RefBookColumn> columns;
     private boolean readOnly;
     private Integer refBookType;
+    private boolean sendQuery;
 
     public boolean isReadOnly() {
         return readOnly;
@@ -32,4 +33,13 @@ public class GetRefBookAttributesResult implements Result {
     public void setRefBookType(Integer refBookType) {
         this.refBookType = refBookType;
     }
+
+    public boolean isSendQuery() {
+        return sendQuery;
+    }
+
+    public void setSendQuery(boolean sendQuery) {
+        this.sendQuery = sendQuery;
+    }
+
 }

@@ -71,6 +71,8 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
     TextBox filterText;
     @UiField
     Label relevanceDateLabel;
+    @UiField
+    LinkButton sendQuery;
 
     private String searchPattern;
 
@@ -308,6 +310,11 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
         getUiHandlers().setMode(FormMode.EDIT);
     }
 
+    @UiHandler("sendQuery")
+    void sendQueryButtonClicked(ClickEvent event) {
+        getUiHandlers().sendQuery();
+    }
+
 	@UiHandler("deleteRow")
 	void deleteRowButtonClicked(ClickEvent event) {
 		if (selectionModel.getSelectedObject() == null) {
@@ -382,6 +389,12 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
                 separator.setVisible(false);
                 break;
         }
+    }
+
+    @Override
+    public void updateSendQuery(boolean isAvailable) {
+        sendQuery.setVisible(isAvailable);
+        edit.setVisible(!isAvailable && edit.isVisible());
     }
 
     @Override

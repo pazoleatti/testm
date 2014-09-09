@@ -1,0 +1,46 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:dw="urn:import:com.aplana.gwt.client">
+
+    <ui:style>
+        .content {
+            margin: 10px;
+        }
+
+        .footerPanel {
+            background-color: #E8E1CF;
+            width: 100%;
+            height: 38px;
+        }
+
+        .footerButton {
+            margin: 8px 10px 8px 0 !important;
+            width: 125px;
+        }
+
+        .textArea {
+            resize: none;
+            width: 543px;
+            height: 200px;
+        }
+    </ui:style>
+
+    <dw:ModalWindow title="Запрос на изменение справочника «Организации - участники контролируемых сделок»">
+        <g:VerticalPanel addStyleNames="aplana-ModalWindow-contentBackWhite">
+            <g:cell>
+                <g:VerticalPanel addStyleNames="{style.content}">
+                    <g:Label>Опишите изменения, которые необходимо внести в справочник:</g:Label>
+                    <g:TextArea addStyleNames="{style.textArea}" focus="true" ui:field="textArea"/>
+                </g:VerticalPanel>
+            </g:cell>
+            <g:cell horizontalAlignment="ALIGN_RIGHT">
+                <g:FlowPanel addStyleNames="{style.footerPanel}">
+                    <g:Button addStyleNames="{style.footerButton}" text="Отправить запрос" ui:field="sendButton"/>
+                    <g:Button addStyleNames="{style.footerButton}" text="Отменить" ui:field="cancelButton"/>
+                </g:FlowPanel>
+            </g:cell>
+        </g:VerticalPanel>
+    </dw:ModalWindow>
+
+</ui:UiBinder> 

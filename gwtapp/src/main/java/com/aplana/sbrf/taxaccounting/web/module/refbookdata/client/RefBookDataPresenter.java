@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.Edit
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.event.RollbackTableRowSelection;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.VersionForm.RefBookVersionPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.sendQueryDialog.DialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.client.RefBookListTokens;
 import com.google.gwt.view.client.AbstractDataProvider;
@@ -55,6 +56,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 
 	EditFormPresenter editFormPresenter;
     RefBookVersionPresenter versionPresenter;
+    DialogPresenter dialogPresenter;
 
 	private final DispatchAsync dispatcher;
 	private final TaPlaceManager placeManager;
@@ -83,18 +85,22 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         void resetSearchInputBox();
         /** Обновление вьюшки для определенного состояния */
         void updateMode(FormMode mode);
+        /** доступность  кнопки-ссылка "Создать запрос на изменение..." для справочника "Организации-участники контролируемых сделок" */
+        void updateSendQuery(boolean isAvailable);
         //Показывает/скрывает поля, которые необходимы только для версионирования
         void setVersionedFields(boolean isVisible);
     }
 
 	@Inject
-	public RefBookDataPresenter(final EventBus eventBus, final MyView view, EditFormPresenter editFormPresenter, RefBookVersionPresenter versionPresenter, PlaceManager placeManager, final MyProxy proxy,
-	                            DispatchAsync dispatcher) {
+	public RefBookDataPresenter(final EventBus eventBus, final MyView view, EditFormPresenter editFormPresenter,
+                                RefBookVersionPresenter versionPresenter, DialogPresenter dialogPresenter,
+                                PlaceManager placeManager, final MyProxy proxy, DispatchAsync dispatcher) {
 		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
 		this.dispatcher = dispatcher;
 		this.placeManager = (TaPlaceManager)placeManager;
 		this.editFormPresenter = editFormPresenter;
         this.versionPresenter = versionPresenter;
+        this.dialogPresenter = dialogPresenter;
 		getView().setUiHandlers(this);
 		getView().assignDataProvider(getView().getPageSize(), dataProvider);
 	}
@@ -216,6 +222,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                 if (result.isReadOnly()){
                                     setMode(FormMode.READ);
                                 }
+                                getView().updateSendQuery(result.isSendQuery());
                                 editFormPresenter.init(refBookDataId, result.isReadOnly());
                                 getProxy().manualReveal(RefBookDataPresenter.this);
 							}
@@ -302,5 +309,15 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
     public void cancelChanges() {
         editFormPresenter.setIsFormModified(false);
         editFormPresenter.onCancelClicked();
+    }
+
+    @Override
+    public void sendQuery() {
+        addToPopupSlot(dialogPresenter);
+    }
+
+    @Override
+    public void onReset(){
+        this.dialogPresenter.getView().hide();
     }
 }

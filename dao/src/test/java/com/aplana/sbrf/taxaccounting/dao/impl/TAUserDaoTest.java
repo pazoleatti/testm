@@ -167,6 +167,15 @@ public class TAUserDaoTest {
 		Assert.assertEquals(3, userDao.getByFilter(filter).size());
 		filter.setActive(true);
 		Assert.assertEquals(2, userDao.getByFilter(filter).size());
-
 	}
+
+    @Test
+    public void testGetUsersByFilter(){
+        MembersFilterData membersFilterData = new MembersFilterData();
+        membersFilterData.setRoleIds(new ArrayList<Long>(Arrays.asList(2L,3L)));
+        Assert.assertEquals(0, userDao.getByFilter(membersFilterData).size());
+        membersFilterData.setRoleIds(new ArrayList<Long>(Arrays.asList(1L)));
+        Assert.assertEquals(3, userDao.getByFilter(membersFilterData).size());
+    }
+
 }
