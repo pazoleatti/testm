@@ -49,7 +49,7 @@ public abstract class MultiSelectTree<H extends List, T extends MultiSelectTreeI
     /** Признак возможности выбора нескольких узлов дерева. */
     protected boolean multiSelection;
 
-    private final String GROUP_NAME = "treeGroup_" + this.hashCode();
+    private final String groupName = "treeGroup_" + this.hashCode();
 
     public interface Style extends CssResource {
         String msiHeader();
@@ -248,7 +248,7 @@ public abstract class MultiSelectTree<H extends List, T extends MultiSelectTreeI
         }
         // получить все дочерние элементы узла и выделить для них checkBox'ы
         for (T child : getAllChild(item)) {
-            child.setGroup(GROUP_NAME);
+            child.setGroup(groupName);
             if (child.isMultiSelection() == null) {
                 continue;
             }

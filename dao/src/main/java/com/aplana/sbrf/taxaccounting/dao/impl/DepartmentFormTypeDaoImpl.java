@@ -439,7 +439,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         );
     }
 
-    private final RowMapper<FormTypeKind> FORM_ASSIGN_MAPPER = new RowMapper<FormTypeKind>() {
+    private final RowMapper<FormTypeKind> formAssignMapper = new RowMapper<FormTypeKind>() {
         @Override
         public FormTypeKind mapRow(ResultSet rs, int rowNum) throws SQLException {
             FormTypeKind formTypeKind = new FormTypeKind();
@@ -468,11 +468,11 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                         departmentId,
                         String.valueOf(taxType)
                 },
-                FORM_ASSIGN_MAPPER
+                formAssignMapper
         );
     }
 
-    private final RowMapper<FormTypeKind> ALL_FORM_ASSIGN_MAPPER = new RowMapper<FormTypeKind>() {
+    private final RowMapper<FormTypeKind> allFormAssignMapper = new RowMapper<FormTypeKind>() {
         @Override
         public FormTypeKind mapRow(ResultSet rs, int rowNum) throws SQLException {
             // Подразделение
@@ -654,10 +654,10 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
     @Override
     public List<FormTypeKind> getAllFormAssigned(List<Long> departmentIds, char taxType, QueryParams<TaxNominationColumnEnum> queryParams) {
         QueryData assignedFormsQueryData = getAssignedFormsQueryData(departmentIds, taxType, queryParams);
-        return getNamedParameterJdbcTemplate().query(assignedFormsQueryData.getQuery(), assignedFormsQueryData.getParameterSource(), ALL_FORM_ASSIGN_MAPPER);
+        return getNamedParameterJdbcTemplate().query(assignedFormsQueryData.getQuery(), assignedFormsQueryData.getParameterSource(), allFormAssignMapper);
     }
 
-    private final RowMapper<FormTypeKind> DECLARATION_ASSIGN_MAPPER = new RowMapper<FormTypeKind>() {
+    private final RowMapper<FormTypeKind> declarationAssignMapper = new RowMapper<FormTypeKind>() {
         @Override
         public FormTypeKind mapRow(ResultSet rs, int rowNum) throws SQLException {
             FormTypeKind formTypeKind = new FormTypeKind();
@@ -683,7 +683,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                         departmentId,
                         String.valueOf(taxType)
                 },
-                DECLARATION_ASSIGN_MAPPER
+                declarationAssignMapper
         );
     }
 
