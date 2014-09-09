@@ -153,6 +153,21 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
 		creationDate = data.getCreationDate();
         this.refBookValue = refBookValue;
         cellStyleBuilder = new CellStyleBuilder();
+        if (!isShowChecked) {
+            Iterator<Column> iterator = data.getFormTemplate().getColumns().iterator();
+            while (iterator.hasNext()) {
+                Column c = iterator.next();
+                if (c.isChecking()) {
+                    for(DataRow<com.aplana.sbrf.taxaccounting.model.Cell> dataRow: this.dataRows) {
+                        dataRow.removeColumn(c);
+                    }
+                    for(DataRow<HeaderCell> header: formTemplate.getHeaders()) {
+                        header.removeColumn(c);
+                    }
+                    iterator.remove();
+                }
+            }
+        }
 	}
 
     protected void fillHeader(){
