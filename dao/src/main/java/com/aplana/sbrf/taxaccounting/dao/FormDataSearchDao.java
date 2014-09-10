@@ -38,9 +38,11 @@ public interface FormDataSearchDao {
 	PagingResult<FormDataSearchResultItem> findPage(FormDataDaoFilter filter, FormDataSearchOrdering ordering, boolean ascSorting, PagingParams pageParams);
 	
 	/**
-	 * Получить количество записей, удовлетворяющих запросу
+	 * Получить количество записей, удовлетворяющих запросу.
+     * Получать количество можно в один запрос, это делается в {@link #findPage}
 	 * @param filter фильтр, по которому происходит поиск
 	 * @return количество записей, удовлетворяющих фильтру
 	 */
+    @Deprecated
 	int getCount(FormDataDaoFilter filter);
 }
