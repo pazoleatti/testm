@@ -52,7 +52,7 @@ public class CanRemovePeriodHandler extends AbstractActionHandler<CanRemovePerio
 		CanRemovePeriodResult result = new CanRemovePeriodResult();
         TAUserInfo user = securityService.currentUserInfo();
         List<Integer> departmentIds = departmentService.getBADepartmentIds(user.getUser());
-        String depFilter = buildFilter(departmentIds, action.getReportPeriodId());
+        // String depFilter = buildFilter(departmentIds, action.getReportPeriodId());
 
         List<LogEntry> logs = new ArrayList<LogEntry>();
 
@@ -64,7 +64,6 @@ public class CanRemovePeriodHandler extends AbstractActionHandler<CanRemovePerio
                     action.getOperationName() +
                     " периоде!"));
         }
-
 
         DeclarationDataFilter filter = new DeclarationDataFilter();
         filter.setDepartmentIds(departmentIds);
@@ -84,20 +83,20 @@ public class CanRemovePeriodHandler extends AbstractActionHandler<CanRemovePerio
 
 	}
 
-    private String buildFilter(List<Integer> departments, long reportPeriodId) {
-        if ((departments == null) || departments.isEmpty()) {
-            return "";
-        }
-        StringBuilder sb = new StringBuilder("(");
-        for (Integer dep : departments) {
-            sb.append("DEPARTMENT_ID=" + dep + " or ");
-        }
-
-        sb.delete(sb.length() - 4, sb.length() - 1);
-        sb.append(")");
-        sb.append(" and REPORT_PERIOD_ID=" + reportPeriodId);
-        return sb.toString();
-    }
+//    private String buildFilter(List<Integer> departments, long reportPeriodId) {
+//        if ((departments == null) || departments.isEmpty()) {
+//            return "";
+//        }
+//        StringBuilder sb = new StringBuilder("(");
+//        for (Integer dep : departments) {
+//            sb.append("DEPARTMENT_ID=" + dep + " or ");
+//        }
+//
+//        sb.delete(sb.length() - 4, sb.length() - 1);
+//        sb.append(")");
+//        sb.append(" and REPORT_PERIOD_ID=" + reportPeriodId);
+//        return sb.toString();
+//    }
 
 	@Override
 	public void undo(CanRemovePeriodAction canRemovePeriodAction, CanRemovePeriodResult canRemovePeriodResult, ExecutionContext executionContext) throws ActionException {
