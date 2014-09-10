@@ -294,7 +294,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
         }
     }
 
-    private static String INTERSECTION_VERSION_SQL = "with segmentIntersection as (Select ID, TYPE_ID, STATUS, VERSION, row_number() %s" +
+    private static final String INTERSECTION_VERSION_SQL = "with segmentIntersection as (Select ID, TYPE_ID, STATUS, VERSION, row_number() %s" +
             " rn from FORM_TEMPLATE where TYPE_ID = :typeId AND STATUS in (0,1,2)) " +
             " select * from (select rv.ID ID, rv.STATUS, rv.TYPE_ID RECORD_ID, rv.VERSION versionFrom, rv2.version - interval '1' day versionTo" +
             " FROM segmentIntersection rv " +

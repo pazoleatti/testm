@@ -61,8 +61,8 @@ public class SourceServiceImpl implements SourceService {
     };
 
     private static final Calendar CALENDAR = Calendar.getInstance();
-    private static Date MAX_DATE;
-    private static Date MIN_DATE;
+    private static final Date MAX_DATE;
+    private static final Date MIN_DATE;
     static {
         CALENDAR.clear();
         CALENDAR.set(9999, Calendar.DECEMBER, 31);

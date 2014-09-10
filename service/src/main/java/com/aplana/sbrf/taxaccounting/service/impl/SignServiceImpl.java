@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 @Service
 public class SignServiceImpl implements SignService {
 
-    private static Pattern DLL_PATTERN = Pattern.compile(".+\\.dll");
+    private static final Pattern DLL_PATTERN = Pattern.compile(".+\\.dll");
 
     @Autowired
     ConfigurationDao configurationDao;

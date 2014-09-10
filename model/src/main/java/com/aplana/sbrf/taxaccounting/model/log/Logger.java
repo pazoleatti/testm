@@ -33,7 +33,7 @@ public class Logger {
     }
 
     // Ограничение по длине для каждого сообщения об ошибке из Exception
-    private static int MAX_EXCEPTION_LOG_MESSAGE_LENGTH = 10000;
+    private static final int MAX_EXCEPTION_LOG_MESSAGE_LENGTH = 10000;
 
 	/**
 	 * Добавить информационное сообщение в журнал (это сообщения, не требующие особой реакции пользователя) 

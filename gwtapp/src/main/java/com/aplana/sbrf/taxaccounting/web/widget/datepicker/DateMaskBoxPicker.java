@@ -49,8 +49,8 @@ public class DateMaskBoxPicker extends DoubleStateComposite implements HasEnable
     @UiField
     HorizontalPanel mainPanel;
 
-    protected static int POPUP_PANEL_WIDTH_CHECK = 160;
-    protected static int POPUP_PANEL_HEIGHT_CHECK = 166;
+    protected static final int POPUP_PANEL_WIDTH_CHECK = 160;
+    protected static final int POPUP_PANEL_HEIGHT_CHECK = 166;
 
     private final DatePickerWithYearSelector datePicker = new DatePickerWithYearSelector();
     private final PopupPanel datePickerPanel = new PopupPanel(true, true);

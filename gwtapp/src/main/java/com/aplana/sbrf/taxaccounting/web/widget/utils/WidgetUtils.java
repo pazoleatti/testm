@@ -6,9 +6,9 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.ValueListBox;
@@ -22,15 +22,15 @@ import java.util.Date;
  */
 public final class WidgetUtils {
 
-    public static DateTimeFormat dateTimeFormat = DateTimeFormat.getFormat("dd.MM.yyyy");
-    public static String iconUrl = "resources/img/picker-icons/clear-icon.png";
-    public static String dummyUrl = "resources/img/picker-icons/clear-icon-dummy.png";
+    public static final DateTimeFormat dateTimeFormat = DateTimeFormat.getFormat("dd.MM.yyyy");
+    public static final String iconUrl = "resources/img/picker-icons/clear-icon.png";
+    public static final String dummyUrl = "resources/img/picker-icons/clear-icon-dummy.png";
 
-    public static SafeHtml UNCHECKABLE_TRUE = SafeHtmlUtils.fromSafeConstant("<input type=\"checkbox\" onclick=\"this.checked = true;\" readonly tabindex=\"-1\" checked/>");
-    public static SafeHtml UNCHECKABLE_FALSE = SafeHtmlUtils.fromSafeConstant("<input type=\"checkbox\" onclick=\"this.checked = false;\" readonly tabindex=\"-1\" />");
+    public static final SafeHtml UNCHECKABLE_TRUE = SafeHtmlUtils.fromSafeConstant("<input type=\"checkbox\" onclick=\"this.checked = true;\" readonly tabindex=\"-1\" checked/>");
+    public static final SafeHtml UNCHECKABLE_FALSE = SafeHtmlUtils.fromSafeConstant("<input type=\"checkbox\" onclick=\"this.checked = false;\" readonly tabindex=\"-1\" />");
 
-    public static String PICK_ALL = "Выделить все";
-    public static String UNPICK_ALL = "Снять выделение";
+    public static final String PICK_ALL = "Выделить все";
+    public static final String UNPICK_ALL = "Снять выделение";
 
     private WidgetUtils() {}
 

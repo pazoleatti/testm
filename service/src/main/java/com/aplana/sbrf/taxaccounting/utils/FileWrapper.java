@@ -15,14 +15,14 @@ public class FileWrapper {
     private File file = null;
     private SmbFile smbFile = null;
 
-    private static String ERROR_TYPE_SMB = "Ошибка получения типа ресурса через протокол smb!";
-    private static String ERROR_TYPE = "Ошибка получения типа ресурса. Ресурс не проинициализирован!";
-    private static String ERROR_RESOURCE = "Ошибка получения ресурса. Ресурс не найден!";
-    private static String ERROR_RESOURCE_SMB = "Ошибка получения ресурса через протокол smb!";
-    private static String ERROR_RESOURCE_INIT = "Ошибка получения ресурса. Ресурс не проинициализирован!";
-    private static String ERROR_LIST_SMB = "Ошибка получения списка файлов через протокол smb!";
-    private static String ERROR_LIST_INIT = "Ошибка получения списка файлов. Ресурс не проинициализирован!";
-    private static String ERROR_DELETE = "Не удалось удалить файл!";
+    private static final String ERROR_TYPE_SMB = "Ошибка получения типа ресурса через протокол smb!";
+    private static final String ERROR_TYPE = "Ошибка получения типа ресурса. Ресурс не проинициализирован!";
+    private static final String ERROR_RESOURCE = "Ошибка получения ресурса. Ресурс не найден!";
+    private static final String ERROR_RESOURCE_SMB = "Ошибка получения ресурса через протокол smb!";
+    private static final String ERROR_RESOURCE_INIT = "Ошибка получения ресурса. Ресурс не проинициализирован!";
+    private static final String ERROR_LIST_SMB = "Ошибка получения списка файлов через протокол smb!";
+    private static final String ERROR_LIST_INIT = "Ошибка получения списка файлов. Ресурс не проинициализирован!";
+    private static final String ERROR_DELETE = "Не удалось удалить файл!";
 
     public FileWrapper(File file) {
         this.file = file;

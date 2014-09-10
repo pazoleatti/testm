@@ -23,10 +23,10 @@ import java.util.List;
 @Transactional
 public class MainOperatingDTServiceImpl implements MainOperatingService {
 
-    private static String SAVE_MESSAGE = "Версия макета не сохранена, обнаружены фатальные ошибки!";
-    private static String DELETE_TEMPLATE_MESSAGE = "УУдаление невозможно, обнаружено использование макета!";
-    private static String DELETE_TEMPLATE_VERSION_MESSAGE = "Удаление невозможно, обнаружены ссылки на удаляемую версию макета!";
-    private static String HAVE_DDT_MESSAGE = "Существует назначение налоговой формы подразделению %s!";
+    private static final String SAVE_MESSAGE = "Версия макета не сохранена, обнаружены фатальные ошибки!";
+    private static final String DELETE_TEMPLATE_MESSAGE = "УУдаление невозможно, обнаружено использование макета!";
+    private static final String DELETE_TEMPLATE_VERSION_MESSAGE = "Удаление невозможно, обнаружены ссылки на удаляемую версию макета!";
+    private static final String HAVE_DDT_MESSAGE = "Существует назначение налоговой формы подразделению %s!";
 
     @Autowired
     private LogEntryService logEntryService;

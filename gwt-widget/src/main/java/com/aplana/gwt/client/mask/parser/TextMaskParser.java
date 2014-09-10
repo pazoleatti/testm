@@ -12,7 +12,7 @@ import java.text.ParseException;
  */
 public class TextMaskParser implements Parser<String> {
 
-    private static TextMaskParser INSTANCE;
+    private static TextMaskParser instance;
     private String mask;
     private String maskPicture;
 
@@ -20,10 +20,10 @@ public class TextMaskParser implements Parser<String> {
      * Returns the instance of the no-op renderer.
      */
     public static Parser<String> instance(String mask) {
-        if (INSTANCE == null || (INSTANCE.mask != null && !INSTANCE.mask.equals(mask))) {
-            INSTANCE = new TextMaskParser(mask);
+        if (instance == null || (instance.mask != null && !instance.mask.equals(mask))) {
+            instance = new TextMaskParser(mask);
         }
-        return INSTANCE;
+        return instance;
     }
 
     protected TextMaskParser(String mask) {

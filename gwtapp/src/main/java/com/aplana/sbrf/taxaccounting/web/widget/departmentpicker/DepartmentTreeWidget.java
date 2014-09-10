@@ -16,7 +16,7 @@ import java.util.*;
  */
 public class DepartmentTreeWidget extends MultiSelectTree<List<DepartmentPair>, DepartmentTreeItem> implements PairDepartmentPicker {
 
-    public static String RED_STAR_SPAN = "<span style=\"color: #ff0000;\">*</span>";
+    public static final String RED_STAR_SPAN = "<span style=\"color: #ff0000;\">*</span>";
 
     private List<Integer> availableValuesList = new LinkedList<Integer>();
     private boolean showDisabledDepartment = false;

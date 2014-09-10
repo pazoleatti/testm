@@ -18,7 +18,7 @@ import com.gwtplatform.dispatch.shared.DispatchAsync;
  */
 public class MainMenuPresenter extends AbstractMenuPresenter<MainMenuPresenter.MyView> {
 
-    private static int NOTIFICATION_UPDATE_TIME = 5 * 60 * 1000; //5min
+    private static final int NOTIFICATION_UPDATE_TIME = 5 * 60 * 1000; //5min
     private DialogPresenter dialogPresenter;
 
     private Timer refreshTimer;
