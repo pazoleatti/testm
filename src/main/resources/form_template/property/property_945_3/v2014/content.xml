@@ -78,15 +78,25 @@
         <width>5</width>
         <filter>CODE = '2012000'</filter>
         <hierarchical>false</hierarchical>
-        <nameAttributeId>2022</nameAttributeId>
-        <refBookAttributeId>2021</refBookAttributeId>
+        <nameAttributeId>2033</nameAttributeId>
+        <refBookAttributeId>2033</refBookAttributeId>
+        <refBookAttributeId2>2021</refBookAttributeId2>
         <searchEnabled>true</searchEnabled>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>benefitBasis</alias>
+        <checking>false</checking>
+        <name>Основание льготы</name>
+        <order>9</order>
+        <width>7</width>
+        <maxLength>12</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>priceAverageTaxFree</alias>
         <checking>false</checking>
         <name>Средняя/Среднегодовая стоимость необлагаемого имущества</name>
-        <order>9</order>
+        <order>10</order>
         <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -95,7 +105,7 @@
         <alias>taxBase</alias>
         <checking>false</checking>
         <name>Налоговая база</name>
-        <order>10</order>
+        <order>11</order>
         <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -104,19 +114,29 @@
         <alias>taxBenefitCodeReduction</alias>
         <checking>false</checking>
         <name>Код налоговой льготы (понижение налоговой ставки)</name>
-        <order>11</order>
+        <order>12</order>
         <width>5</width>
         <filter>CODE = '2012400'</filter>
         <hierarchical>false</hierarchical>
-        <nameAttributeId>2022</nameAttributeId>
-        <refBookAttributeId>2021</refBookAttributeId>
+        <nameAttributeId>2033</nameAttributeId>
+        <refBookAttributeId>2033</refBookAttributeId>
+        <refBookAttributeId2>2021</refBookAttributeId2>
         <searchEnabled>true</searchEnabled>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>benefitReductionBasis</alias>
+        <checking>false</checking>
+        <name>Основание льготы</name>
+        <order>13</order>
+        <width>7</width>
+        <maxLength>12</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>taxRate</alias>
         <checking>false</checking>
         <name>Налоговая ставка</name>
-        <order>12</order>
+        <order>14</order>
         <width>5</width>
         <maxLength>3</maxLength>
         <precision>2</precision>
@@ -125,7 +145,7 @@
         <alias>taxSum</alias>
         <checking>false</checking>
         <name>Сумма налога (авансового платежа)</name>
-        <order>13</order>
+        <order>15</order>
         <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -134,7 +154,7 @@
         <alias>sumPayment</alias>
         <checking>false</checking>
         <name>Сумма авансовых платежей, исчисленная за отчетные периоды</name>
-        <order>14</order>
+        <order>16</order>
         <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -143,19 +163,29 @@
         <alias>taxBenefitCodeDecrease</alias>
         <checking>false</checking>
         <name>Код налоговой льготы (в виде уменьшения суммы налога)</name>
-        <order>15</order>
+        <order>17</order>
         <width>5</width>
         <filter>CODE = '2012500'</filter>
         <hierarchical>false</hierarchical>
-        <nameAttributeId>2022</nameAttributeId>
-        <refBookAttributeId>2021</refBookAttributeId>
+        <nameAttributeId>2033</nameAttributeId>
+        <refBookAttributeId>2033</refBookAttributeId>
+        <refBookAttributeId2>2021</refBookAttributeId2>
         <searchEnabled>true</searchEnabled>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>benefitDecreaseBasis</alias>
+        <checking>false</checking>
+        <name>Основание льготы</name>
+        <order>18</order>
+        <width>7</width>
+        <maxLength>12</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sumDecrease</alias>
         <checking>false</checking>
         <name>Сумма уменьшения платежа</name>
-        <order>16</order>
+        <order>19</order>
         <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -164,7 +194,7 @@
         <alias>residualValue</alias>
         <checking>false</checking>
         <name>Остаточная стоимость основных средств</name>
-        <order>17</order>
+        <order>20</order>
         <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
