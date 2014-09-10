@@ -107,7 +107,8 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     }
 
     private static final class LockDataMapper implements RowMapper<LockData> {
-		public LockData mapRow(ResultSet rs, int index) throws SQLException {
+		@Override
+        public LockData mapRow(ResultSet rs, int index) throws SQLException {
 			LockData result = new LockData();
 			result.setKey(rs.getString("key"));
 			result.setUserId(rs.getInt("user_id"));

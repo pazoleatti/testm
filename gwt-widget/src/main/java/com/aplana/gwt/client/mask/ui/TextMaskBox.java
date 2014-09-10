@@ -27,6 +27,7 @@ public class TextMaskBox extends MaskBox<String> {
         return isEqualsTextPicture(super.getText()) ? "" : super.getText();
     }
 
+    @Override
     public void setText(String text){
         if (getMask() != null) {
             if (text != null) {

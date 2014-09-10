@@ -18,7 +18,6 @@ public class PagingParams implements Serializable{
 	private int count = 10;
 	
 	public PagingParams() {
-		
 	}
 	
 	public PagingParams(int startIndex, int count) {
@@ -38,7 +37,7 @@ public class PagingParams implements Serializable{
 	 * Задать стартовый индекс
 	 * @param startIndex стартовый индекс записи (начиная с 0)
 	 */
-	public void setStartIndex(int startIndex) {
+	public final void setStartIndex(int startIndex) {
 		this.startIndex = startIndex;
 	}
 	
@@ -54,7 +53,7 @@ public class PagingParams implements Serializable{
 	 * Задать количество записей, которые нужно вернуть (может быть возвращено меньше)
 	 * @param count количество записей (по умолчанию - значение 10)
 	 */
-	public void setCount(Integer count) {
+	public final void setCount(Integer count) {
 		this.count = count;
 	}
 

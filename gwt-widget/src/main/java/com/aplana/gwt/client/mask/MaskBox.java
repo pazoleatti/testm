@@ -57,6 +57,7 @@ public class MaskBox<T> extends ValueBox<T> implements LeafValueEditor<T> {
         if (maskListener == null) {
             maskListener = new MaskListener(this, mask);
             addBlurHandler(new BlurHandler() {
+                @Override
                 public void onBlur(BlurEvent event) {
                     try {
                         setValue(getText().equals(textPicture) ? null : parser.parse(getText()), true);

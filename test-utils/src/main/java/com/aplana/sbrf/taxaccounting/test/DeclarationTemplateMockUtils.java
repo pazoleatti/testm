@@ -7,7 +7,10 @@ import static com.aplana.sbrf.taxaccounting.test.DeclarationTypeMockUtils.mockDe
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class DeclarationTemplateMockUtils {
+public final class DeclarationTemplateMockUtils {
+
+    private DeclarationTemplateMockUtils() {}
+
 	public static DeclarationTemplate mockDeclarationTemplate(int id, int declarationTypeId) {
 		DeclarationType declarationType = mockDeclarationType(declarationTypeId);
 		

@@ -25,6 +25,7 @@ public class MigrationDaoImpl extends AbstractDao implements MigrationDao {
     private static final String ACTUAL_EXEMPLAR_NOT_FOUND_MESSAGE = "Актуального экземпляра записей для типа РНУ - %d не найдено в БД";
 
     private class ExemplarRowMapper implements RowMapper<Exemplar> {
+        @Override
         public Exemplar mapRow(ResultSet rs, int index) throws SQLException {
             Exemplar exemplar = new Exemplar();
 
@@ -78,6 +79,7 @@ public class MigrationDaoImpl extends AbstractDao implements MigrationDao {
     }
 
     private class Rnu25RowMapper implements RowMapper<Rnu25Row> {
+        @Override
         public Rnu25Row mapRow(ResultSet rs, int index) throws SQLException {
             Rnu25Row row = new Rnu25Row();
 
@@ -139,6 +141,7 @@ public class MigrationDaoImpl extends AbstractDao implements MigrationDao {
     }
 
     private class Rnu26RowMapper implements RowMapper<Rnu26Row> {
+        @Override
         public Rnu26Row mapRow(ResultSet rs, int index) throws SQLException {
             Rnu26Row row = new Rnu26Row();
 
@@ -206,6 +209,7 @@ public class MigrationDaoImpl extends AbstractDao implements MigrationDao {
     }
 
     private class Rnu27RowMapper implements RowMapper<Rnu27Row> {
+        @Override
         public Rnu27Row mapRow(ResultSet rs, int index) throws SQLException {
             Rnu27Row row = new Rnu27Row();
 
@@ -274,6 +278,7 @@ public class MigrationDaoImpl extends AbstractDao implements MigrationDao {
 
 
     private class Rnu31RowMapper implements RowMapper<Rnu31Row> {
+        @Override
         public Rnu31Row mapRow(ResultSet rs, int index) throws SQLException {
             Rnu31Row row = new Rnu31Row();
 
@@ -334,6 +339,7 @@ public class MigrationDaoImpl extends AbstractDao implements MigrationDao {
 
 
     private class Rnu64RowMapper implements RowMapper<Rnu64Row> {
+        @Override
         public Rnu64Row mapRow(ResultSet rs, int index) throws SQLException {
             Rnu64Row row = new Rnu64Row();
 
@@ -379,6 +385,7 @@ public class MigrationDaoImpl extends AbstractDao implements MigrationDao {
     }
 
     private class RnuCommonRowMapper implements RowMapper<RnuCommonRow> {
+        @Override
         public RnuCommonRow mapRow(ResultSet rs, int index) throws SQLException {
             RnuCommonRow row = new RnuCommonRow();
 
@@ -557,6 +564,7 @@ public class MigrationDaoImpl extends AbstractDao implements MigrationDao {
     }
 
     private class Rnu51RowMapper implements RowMapper<Rnu51Row> {
+        @Override
         public Rnu51Row mapRow(ResultSet rs, int index) throws SQLException {
             Rnu51Row row = new Rnu51Row();
 

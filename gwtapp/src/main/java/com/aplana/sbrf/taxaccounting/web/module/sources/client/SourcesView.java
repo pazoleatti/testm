@@ -403,10 +403,12 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         });
         rightTable.setSelectionModel(rightSM, createCustomManager(
                 new DefaultSelectionEventManager.CheckboxEventTranslator<DepartmentAssign>(0) {
+                    @Override
                     public boolean clearCurrentSelection(CellPreviewEvent<DepartmentAssign> event) {
                         return false;
                     }
 
+                    @Override
                     public DefaultSelectionEventManager.SelectAction translateSelectionEvent(CellPreviewEvent<DepartmentAssign> event) {
                         if (event.getValue() != null && event.getValue().isChecked())
                             return DefaultSelectionEventManager.SelectAction.SELECT;
@@ -527,10 +529,12 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
 
         downTable.setSelectionModel(downSM, createCustomManager(
                 new DefaultSelectionEventManager.CheckboxEventTranslator<CurrentAssign>(0) {
+                    @Override
                     public boolean clearCurrentSelection(CellPreviewEvent<CurrentAssign> event) {
                         return false;
                     }
 
+                    @Override
                     public DefaultSelectionEventManager.SelectAction translateSelectionEvent(CellPreviewEvent<CurrentAssign> event) {
                         return DefaultSelectionEventManager.SelectAction.TOGGLE;
                     }
@@ -785,12 +789,12 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
     }
 
     @Override
-    public PeriodsInterval getPeriodInterval() {
+    public final PeriodsInterval getPeriodInterval() {
         return new PeriodsInterval(yearFrom.getValue(), periodFrom.getValue(), yearTo.getValue(), periodTo.getValue());
     }
 
     @Override
-    public boolean isSource() {
+    public final boolean isSource() {
         return AppointmentType.SOURCES.equals(appointmentTypePicker.getValue());
     }
 
@@ -944,6 +948,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         loadRightData();
     }
 
+    @Override
     public void loadLeftData() {
         clearLeftTable();
         clearDownTable();
@@ -969,7 +974,8 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         loadRightData();
     }
 
-    public void loadRightData() {
+    @Override
+    public final void loadRightData() {
         clearRightTable();
         Integer selected = rightDepPicker.getSingleValue();
         if (selected != null) {
@@ -985,6 +991,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         }
     }
 
+    @Override
     public Table getTable() {
         return table;
     }

@@ -32,7 +32,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
     }
 
     @Override
-    public PagingResult<LogSearchResultItem> getLogsBusiness(LogSystemFilter logSystemFilter, List<Integer> departments, List<Integer> BADepartmentIds) {
+    public PagingResult<LogSearchResultItem> getLogsBusiness(LogSystemFilter logSystemFilter, List<Integer> departments, List<Integer> bADepartmentIds) {
         LogSystemFilter filter = cutOffLogSystemFilter(logSystemFilter);
         PreparedStatementData ps = new PreparedStatementData();
         ps.appendQuery("select ordDat.* from (select dat.*, rownum as rn from ( select ");
@@ -59,7 +59,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         ps.appendQuery("left join event ev on ls.event_id=ev.\"ID\" ");
         ps.appendQuery("left join form_kind fk on ls.form_kind_id=fk.\"ID\" ");
 
-        addDepartmentCause(ps, filter, departments, BADepartmentIds);
+        addDepartmentCause(ps, filter, departments, bADepartmentIds);
 
         ps.appendQuery(orderByClause(filter.getSearchOrdering(), filter.isAscSorting()));
         ps.appendQuery(") dat) ordDat");
@@ -75,7 +75,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                 ps.getQuery().toString(),
                 ps.getParams().toArray(),
                 new AuditRowMapper());
-        return new PagingResult<LogSearchResultItem>(records, getCount(filter, departments, BADepartmentIds));
+        return new PagingResult<LogSearchResultItem>(records, getCount(filter, departments, bADepartmentIds));
     }
 
 	@Override
@@ -329,14 +329,14 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
     }
 
     private void addDepartmentCause(PreparedStatementData ps, LogSystemFilter filter, List<Integer> departments,
-                                    List<Integer> BADepartmentIds) {
+                                    List<Integer> bADepartmentIds) {
         if (departments != null) {
             ps.appendQuery(" WHERE ");
             ps.appendQuery(SqlUtils.transformToSqlInStatement("ls.event_id", Arrays.asList(AVAILABLE_CONTROL_EVENTS)));
             ps.appendQuery(" AND (");
             ps.appendQuery(transformToSqlInStatement("form_department_id", departments));
             ps.appendQuery(" OR (not form_department_id in (select id from department) AND ");
-            ps.appendQuery(transformToSqlInStatement("tb_department_id", BADepartmentIds));
+            ps.appendQuery(transformToSqlInStatement("tb_department_id", bADepartmentIds));
             ps.appendQuery("))");
             appendSelectWhereClause(ps, filter, " AND");
         } else {
@@ -344,12 +344,12 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         }
     }
 
-    private int getCount(LogSystemFilter filter, List<Integer> departments, List<Integer> BADepartmentIds) {
+    private int getCount(LogSystemFilter filter, List<Integer> departments, List<Integer> bADepartmentIds) {
         PreparedStatementData ps = new PreparedStatementData();
         ps.appendQuery("select count(*) from log_system ls ");
         ps.appendQuery("left join event ev on ls.event_id=ev.\"ID\" ");
         ps.appendQuery("left join form_kind fk on ls.form_kind_id=fk.\"ID\" ");
-        addDepartmentCause(ps, filter, departments, BADepartmentIds);
+        addDepartmentCause(ps, filter, departments, bADepartmentIds);
         return getJdbcTemplate().queryForInt(
                 ps.getQuery().toString(),
                 ps.getParams().toArray()

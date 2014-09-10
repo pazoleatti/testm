@@ -264,38 +264,38 @@ public class RefBookOktmoProvider implements RefBookDataProvider {
         }
     }
 
-    private List<Long> createVersions(Date versionFrom, Date versionTo, List<RefBookRecord> records, long countIds, Logger logger) {
-        //Генерим record_id для новых записей. Нужно для связи настоящей и фиктивной версий
-        List<Long> generatedIds = dbUtils.getNextIds(BDUtils.Sequence.REF_BOOK_OKTMO, countIds);
-
-        int counter = 0;
-        for (RefBookRecord record : records) {
-            RefBookRecordVersion nextVersion = null;
-            if (record.getRecordId() != null) {
-                nextVersion = dao.getNextVersion(getTableName(), record.getRecordId(), versionFrom);
-            } else {
-                record.setRecordId(generatedIds.get(counter));
-                counter++;
-            }
-            if (versionTo == null) {
-                if (nextVersion != null && logger != null) {
-                    logger.info("Установлена дата окончания актуальности версии "+sdf.format(SimpleDateUtils.addDayToDate(nextVersion.getVersionStart(), -1))+" в связи с наличием следующей версии");
-                }
-            } else {
-                if (nextVersion == null) {
-                    //Следующая версия не существует - создаем фиктивную версию
-                    dao.createFakeRecordVersion(getTableName(), record.getRecordId(), SimpleDateUtils.addDayToDate(versionTo, 1));
-                } else {
-                    int days = SimpleDateUtils.daysBetween(versionTo, nextVersion.getVersionStart());
-                    if (days != 1) {
-                        dao.createFakeRecordVersion(getTableName(), record.getRecordId(), SimpleDateUtils.addDayToDate(versionTo, 1));
-                    }
-                }
-            }
-        }
-
-        return dao.createRecordVersion(getTableName(), refBookId, versionFrom, VersionedObjectStatus.NORMAL, records);
-    }
+//    private List<Long> createVersions(Date versionFrom, Date versionTo, List<RefBookRecord> records, long countIds, Logger logger) {
+//        //Генерим record_id для новых записей. Нужно для связи настоящей и фиктивной версий
+//        List<Long> generatedIds = dbUtils.getNextIds(BDUtils.Sequence.REF_BOOK_OKTMO, countIds);
+//
+//        int counter = 0;
+//        for (RefBookRecord record : records) {
+//            RefBookRecordVersion nextVersion = null;
+//            if (record.getRecordId() != null) {
+//                nextVersion = dao.getNextVersion(getTableName(), record.getRecordId(), versionFrom);
+//            } else {
+//                record.setRecordId(generatedIds.get(counter));
+//                counter++;
+//            }
+//            if (versionTo == null) {
+//                if (nextVersion != null && logger != null) {
+//                    logger.info("Установлена дата окончания актуальности версии "+sdf.format(SimpleDateUtils.addDayToDate(nextVersion.getVersionStart(), -1))+" в связи с наличием следующей версии");
+//                }
+//            } else {
+//                if (nextVersion == null) {
+//                    //Следующая версия не существует - создаем фиктивную версию
+//                    dao.createFakeRecordVersion(getTableName(), record.getRecordId(), SimpleDateUtils.addDayToDate(versionTo, 1));
+//                } else {
+//                    int days = SimpleDateUtils.daysBetween(versionTo, nextVersion.getVersionStart());
+//                    if (days != 1) {
+//                        dao.createFakeRecordVersion(getTableName(), record.getRecordId(), SimpleDateUtils.addDayToDate(versionTo, 1));
+//                    }
+//                }
+//            }
+//        }
+//
+//        return dao.createRecordVersion(getTableName(), refBookId, versionFrom, VersionedObjectStatus.NORMAL, records);
+//    }
 
     /**
      * Обновляет значение результата для пересекаемых версий, конфликт которых решается изменением соседних
@@ -430,20 +430,20 @@ public class RefBookOktmoProvider implements RefBookDataProvider {
         }
     }
 
-    private void checkChildren(List<Long> uniqueRecordIds) {
-        //Если есть дочерние элементы - удалять нельзя
-        List<Date> parentVersions = dao.hasChildren(getTableName(), uniqueRecordIds);
-        if (parentVersions != null && !parentVersions.isEmpty()) {
-            StringBuilder versions = new StringBuilder();
-            for (int i=0; i<parentVersions.size(); i++) {
-                versions.append(sdf.format(parentVersions));
-                if (i < parentVersions.size() - 1) {
-                    versions.append(", ");
-                }
-            }
-            throw new ServiceException("Удаление версии от "+ versions +" невозможно, существует дочерние элементы!");
-        }
-    }
+//    private void checkChildren(List<Long> uniqueRecordIds) {
+//        //Если есть дочерние элементы - удалять нельзя
+//        List<Date> parentVersions = dao.hasChildren(getTableName(), uniqueRecordIds);
+//        if (parentVersions != null && !parentVersions.isEmpty()) {
+//            StringBuilder versions = new StringBuilder();
+//            for (int i=0; i<parentVersions.size(); i++) {
+//                versions.append(sdf.format(parentVersions));
+//                if (i < parentVersions.size() - 1) {
+//                    versions.append(", ");
+//                }
+//            }
+//            throw new ServiceException("Удаление версии от "+ versions +" невозможно, существует дочерние элементы!");
+//        }
+//    }
 
     @Override
     public void deleteAllRecords(Logger logger, List<Long> uniqueRecordIds) {

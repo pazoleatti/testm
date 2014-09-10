@@ -232,16 +232,6 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
                     public void yes() {
                         Dialog.infoMessage("kfkfkfk");
                     }
-
-                    @Override
-                    public void no() {
-                        super.no();
-                    }
-
-                    @Override
-                    public void cancel() {
-                        super.cancel();
-                    }
                 });
             }
         });

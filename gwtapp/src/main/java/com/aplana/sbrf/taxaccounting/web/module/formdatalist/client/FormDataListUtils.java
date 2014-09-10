@@ -8,7 +8,9 @@ import com.aplana.sbrf.taxaccounting.model.FormDataSearchOrdering;
  * @author aivanov
  * @since 10.06.2014
  */
-public class FormDataListUtils {
+public final class FormDataListUtils {
+
+    private FormDataListUtils() {}
 
     public static final String FORM_DATA_KIND_TITLE = "Тип налоговой формы";
     public static final String FORM_DATA_KIND_TITLE_D = "Тип формы";

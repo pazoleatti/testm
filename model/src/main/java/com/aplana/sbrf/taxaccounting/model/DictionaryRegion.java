@@ -51,9 +51,4 @@ public class DictionaryRegion {
         }
         return false;
     }
-
-	@Override
-	public int hashCode() {
-		return super.hashCode();
-	}
 }

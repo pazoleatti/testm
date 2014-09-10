@@ -131,11 +131,13 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 
 		DefaultSelectionEventManager<FormTypeKind> multiSelectManager = createCustomManager(
 				new DefaultSelectionEventManager.CheckboxEventTranslator<FormTypeKind>(0) {
-					public boolean clearCurrentSelection(CellPreviewEvent<FormTypeKind> event) {
+					@Override
+                    public boolean clearCurrentSelection(CellPreviewEvent<FormTypeKind> event) {
 						return false;
 					}
 
-					public DefaultSelectionEventManager.SelectAction translateSelectionEvent(CellPreviewEvent<FormTypeKind> event) {
+					@Override
+                    public DefaultSelectionEventManager.SelectAction translateSelectionEvent(CellPreviewEvent<FormTypeKind> event) {
 						return DefaultSelectionEventManager.SelectAction.TOGGLE;
 					}
 				});

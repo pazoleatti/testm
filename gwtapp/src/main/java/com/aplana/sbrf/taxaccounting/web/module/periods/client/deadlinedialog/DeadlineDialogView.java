@@ -77,16 +77,6 @@ public class DeadlineDialogView extends PopupViewWithUiHandlers<DeadlineDialogUi
                             deadlineDialog.hide();
                             super.yes();
                         }
-
-                        @Override
-                        public void no() {
-                            super.no();
-                        }
-
-                        @Override
-                        public void close() {
-                            super.close();
-                        }
                     });
                 } else {
                     deadlineDialog.hide();

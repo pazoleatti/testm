@@ -3,6 +3,8 @@ package com.aplana.sbrf.taxaccounting.model.util;
 
 public final class StringUtils {
 
+    private StringUtils(){}
+
     /**
      * Удаление двоиных пробелов, пробелов перед и после текста,
      * замена вида кавычек.

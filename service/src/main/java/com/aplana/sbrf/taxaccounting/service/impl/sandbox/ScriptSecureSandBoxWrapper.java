@@ -144,7 +144,7 @@ public class ScriptSecureSandBoxWrapper implements ScriptEngine {
 		scriptEngine.setContext(context);
 	}
 	
-	public void setPermissions(Collection<Permission> permissionCollection) throws MalformedURLException{
+	public final void setPermissions(Collection<Permission> permissionCollection) throws MalformedURLException{
 		Permissions perm = new Permissions();
 		if(permissionCollection != null){
 			for (Permission p : permissionCollection) {

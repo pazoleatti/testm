@@ -532,10 +532,12 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
         asWidget().fireEvent(event);
     }
 
+    @Override
     public boolean isVisible(){
         return scrollPanel.isVisible();
     }
 
+    @Override
     public void setVisible(boolean visible){
         scrollPanel.setVisible(visible);
     }

@@ -434,17 +434,6 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
         clear();
 	}
 
-	private void afterCheckUnsaved(Integer repPeriodId) {
-		this.currentReportPeriodId = repPeriodId;
-
-		// Редактировать можно только открытые периоды
-		editButton.setEnabled(repPeriodId != null && isReportPeriodActive);
-
-		updateVisibility();
-		//reloadDepartmentParams();
-		resetRefBookWidgetsDatePeriod(currentReportPeriodId);
-	}
-
 	@Override
 	public void setDepartments(List<Department> departments, Set<Integer> availableDepartments) {
 		departmentPicker.setAvalibleValues(departments, availableDepartments);

@@ -211,32 +211,4 @@ public class TaskPresenter extends Presenter<TaskPresenter.MyView,
 
         return true;
     }
-
-    /**
-     * Проверка строки на число
-     * @param string
-     * @return true - если это число
-     */
-    private boolean checkStringAsInt(String string, Boolean isFloatExpected) {
-        if (string == null || string.length() == 0) return false;
-
-        int i = 0;
-        if (string.charAt(0) == '-') {
-            if (string.length() == 1) {
-                return false;
-            }
-            i = 1;
-        }
-
-        char c;
-        for (; i < string.length(); i++) {
-            c = string.charAt(i);
-            if (!(c >= '0' && c <= '9') &&
-                    !(isFloatExpected && (c == '.' || c == ','))) {
-                return false;
-            }
-        }
-        return true;
-    }
-
 }

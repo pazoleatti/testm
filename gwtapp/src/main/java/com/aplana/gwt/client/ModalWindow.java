@@ -141,7 +141,7 @@ public class ModalWindow extends DialogBox implements CanHide {
         this.hideHandler = hideHandler;
     }
 
-    public void setIconUrl(String iconUrl) {
+    public final void setIconUrl(String iconUrl) {
         if (iconUrl != null && !iconUrl.trim().isEmpty()) {
             icon.setUrl(iconUrl);
             icon.getElement().getStyle().setFloat(Style.Float.LEFT);
@@ -155,7 +155,7 @@ public class ModalWindow extends DialogBox implements CanHide {
     }
 
     @Override
-    public void setTitle(String title) {
+    public final void setTitle(String title) {
         this.title.setText(title);
     }
 
@@ -186,6 +186,7 @@ public class ModalWindow extends DialogBox implements CanHide {
         super.onPreviewNativeEvent(event);
     }
 
+    @Override
     public void center() {
         super.center();
         OpenModalWindowEvent.fire(this);
@@ -198,6 +199,7 @@ public class ModalWindow extends DialogBox implements CanHide {
         getCellElement(1, 1).getStyle().setPropertyPx(propName, value);
     }
 
+    @Override
     public void setSize(String width, String height) {
         setWidth(width);
         setHeight(height);
@@ -211,11 +213,13 @@ public class ModalWindow extends DialogBox implements CanHide {
         setMainInnerElementProperty("minHeight", minHeight);
     }
 
+    @Override
     public void setWidth(String width) {
         setMainInnerElementProperty("width", width);
         //getWidget().setWidth(width);
     }
 
+    @Override
     public void setHeight(String height) {
         if (height != null && !height.isEmpty()) {
             Integer heightInt = Integer.valueOf(height.replace("px", "")) - CAPTION_HEIGHT;

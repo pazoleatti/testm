@@ -64,7 +64,7 @@ public class GetTaskInfoHandler extends AbstractActionHandler<GetTaskInfoAction,
     }
 
     @Override
-    public void undo(GetTaskInfoAction GetTaskInfoAction, GetTaskInfoResult GetTaskInfoResult, ExecutionContext executionContext) throws ActionException {
+    public void undo(GetTaskInfoAction getTaskInfoAction, GetTaskInfoResult getTaskInfoResult, ExecutionContext executionContext) throws ActionException {
         //do nothing
     }
 }

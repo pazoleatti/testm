@@ -42,6 +42,7 @@ public final class DBInfo {
     NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     @PostConstruct
+    @SuppressWarnings("unused") // https://jira.codehaus.org/browse/SONARJAVA-117
     private void init() throws SQLException {
         String dbName = ((JdbcTemplate)namedParameterJdbcTemplate.getJdbcOperations()).getDataSource().getConnection().getMetaData().getDatabaseProductName();
         supportOver = !HSQLDB_NAME_ENGINE.equals(dbName);

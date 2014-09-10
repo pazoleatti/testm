@@ -1006,6 +1006,7 @@ public class SourceServiceImpl implements SourceService {
         return getDeclarationDestinations(sourceDepartmentId, sourceFormTypeId, sourceKind, period.getStartDate(), period.getEndDate());
     }
 
+    @Override
     public List<FormTypeKind> getFormAssigned(Long departmentId, char taxType) {
         return departmentFormTypeDao.getFormAssigned(departmentId, taxType);
     }

@@ -156,7 +156,6 @@ public class DialogPanel extends Composite {
                     }));
                     break;
             }
-
         }
     }
 

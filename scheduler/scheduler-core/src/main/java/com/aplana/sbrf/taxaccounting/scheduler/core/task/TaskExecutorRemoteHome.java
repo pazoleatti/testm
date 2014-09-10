@@ -7,5 +7,6 @@ import javax.ejb.CreateException;
 import java.rmi.RemoteException;
 
 public interface TaskExecutorRemoteHome extends TaskHandlerHome {
+    @Override
     TaskHandler create() throws CreateException, RemoteException;
 }

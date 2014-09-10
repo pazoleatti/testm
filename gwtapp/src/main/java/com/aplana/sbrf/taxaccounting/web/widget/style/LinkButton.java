@@ -137,7 +137,7 @@ public class LinkButton extends FocusWidget implements HasHorizontalAlignment,
 	}
 
 	@Override
-	public void setHTML(SafeHtml html) {
+	public final void setHTML(SafeHtml html) {
 		setHTML(html.asString());
 	}
 

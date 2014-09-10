@@ -49,7 +49,8 @@ public class LinkAnchor extends Anchor{
         getElement().getStyle().setWhiteSpace(Style.WhiteSpace.NOWRAP);
 	}
 
-	public void setText(String text){
+	@Override
+    public void setText(String text){
 		this.text = text;
         setupHtml();
 	}

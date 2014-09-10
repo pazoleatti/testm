@@ -424,6 +424,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
         return formTemplate.isMonthly();
     }
 
+    @Override
     public void validateFormAutoNumerationColumn(FormTemplate formTemplate, Logger logger) {
 
         // Если есть хоть одна автонумеруемая графа

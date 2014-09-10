@@ -148,12 +148,7 @@ public final class Dialog extends ModalWindow {
      * @param text  - Текст сообщения
      */
     public static void errorMessage(String title, String text) {
-        errorMessage(title, text, new DialogHandler() {
-            @Override
-            public void close() {
-                super.close();
-            }
-        });
+        errorMessage(title, text, new DialogHandler() {});
     }
 
     /**
@@ -197,12 +192,7 @@ public final class Dialog extends ModalWindow {
      * @param text  - Текст сообщения
      */
     public static void infoMessage(String title, String text) {
-        infoMessage(title, text, new DialogHandler() {
-            @Override
-            public void ok() {
-                super.ok();
-            }
-        });
+        infoMessage(title, text, new DialogHandler(){});
     }
 
     /**
@@ -257,11 +247,6 @@ public final class Dialog extends ModalWindow {
             public void no() {
                 super.no();
                 Dialog.hideMessage();
-            }
-
-            @Override
-            public void close() {
-                super.close();
             }
         });
     }

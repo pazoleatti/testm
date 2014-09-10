@@ -14,7 +14,9 @@ import java.util.Iterator;
  *
  * @author aivanov
  */
-public class TextUtils {
+public final class TextUtils {
+
+    private TextUtils() {}
 
     private static TextBoxImpl impl = GWT.create(TextBoxImpl.class);
 

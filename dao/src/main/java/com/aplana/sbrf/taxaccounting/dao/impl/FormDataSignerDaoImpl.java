@@ -20,7 +20,8 @@ import java.util.*;
 public class FormDataSignerDaoImpl extends AbstractDao implements FormDataSignerDao {
 
 	private final static class FormDataSignerMapper implements RowMapper<FormDataSigner> {
-		public FormDataSigner mapRow(ResultSet rs, int index) throws SQLException {
+		@Override
+        public FormDataSigner mapRow(ResultSet rs, int index) throws SQLException {
 			final FormDataSigner result = new FormDataSigner();
 			result.setId(SqlUtils.getLong(rs, "id"));
 			result.setName(rs.getString("name"));

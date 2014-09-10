@@ -24,7 +24,8 @@ public class MainHandlerModule<A extends Action<R>, R extends Result> extends
 	@Autowired
 	private ListableBeanFactory listableBeanFactory;
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Override
+    @SuppressWarnings({ "unchecked", "rawtypes" })
 	protected void configureHandlers() {
 
 		for (Map.Entry<String, ActionHandler> entry : listableBeanFactory

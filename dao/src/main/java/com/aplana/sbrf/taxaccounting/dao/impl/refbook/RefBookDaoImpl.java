@@ -120,6 +120,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
      * Настройка маппинга для справочника
      */
     private class RefBookRowMapper implements RowMapper<RefBook> {
+        @Override
         public RefBook mapRow(ResultSet rs, int index) throws SQLException {
             RefBook result = new RefBook();
             result.setId(SqlUtils.getLong(rs,"id"));
@@ -158,6 +159,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
      * Настройка маппинга для атрибутов справочника
      */
     private class RefBookAttributeRowMapper implements RowMapper<RefBookAttribute> {
+        @Override
         public RefBookAttribute mapRow(ResultSet rs, int index) throws SQLException {
 
             RefBookAttribute result = new RefBookAttribute();

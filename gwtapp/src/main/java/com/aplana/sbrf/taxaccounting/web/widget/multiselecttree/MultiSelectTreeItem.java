@@ -146,7 +146,7 @@ public class MultiSelectTreeItem extends TreeItem implements HasClickHandlers,
     }
 
     /** Установить чекбокс или радиокнопку. */
-    public void setMultiSelection(Boolean multiSelection) {
+    public final void setMultiSelection(Boolean multiSelection) {
         this.multiSelection = multiSelection;
         setWidget(multiSelection == null ? label : multiSelection ? checkBox : radioButton);
     }

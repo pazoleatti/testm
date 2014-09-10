@@ -94,7 +94,7 @@ public class CreateTaskHandler extends AbstractActionHandler<CreateTaskAction, C
     }
 
     @Override
-    public void undo(CreateTaskAction CreateTaskAction, CreateTaskResult CreateTaskResult, ExecutionContext executionContext) throws ActionException {
+    public void undo(CreateTaskAction createTaskAction, CreateTaskResult createTaskResult, ExecutionContext executionContext) throws ActionException {
         //do nothing
     }
 }

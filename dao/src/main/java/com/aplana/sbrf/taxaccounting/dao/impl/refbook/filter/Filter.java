@@ -15,8 +15,10 @@ import java.util.List;
  *
  * @author auldanov
  */
-public class Filter
-{
+public final class Filter {
+
+    private Filter() {}
+
     public static class VerboseParser extends BaseErrorListener {
         @Override
         public void syntaxError(Recognizer<?, ?> recognizer,

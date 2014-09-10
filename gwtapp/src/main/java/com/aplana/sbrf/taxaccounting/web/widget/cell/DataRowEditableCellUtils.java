@@ -3,7 +3,9 @@ package com.aplana.sbrf.taxaccounting.web.widget.cell;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.formdata.AbstractCell;
 
-public class DataRowEditableCellUtils {
+public final class DataRowEditableCellUtils {
+
+    private DataRowEditableCellUtils() {}
 	
 	/**
 	 * Ячейка в режиме чтений когда:
@@ -27,5 +29,4 @@ public class DataRowEditableCellUtils {
 		return !((columnContext.getMode() == ColumnContext.Mode.READONLY_MODE)
 				|| (columnContext.getMode() == ColumnContext.Mode.NORMAL_EDIT_MODE && !editableCell));
 	}
-
 }

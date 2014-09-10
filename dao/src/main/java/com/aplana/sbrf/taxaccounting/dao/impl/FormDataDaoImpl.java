@@ -54,7 +54,8 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 	}
 
 	private class FormDataRowMapper implements RowMapper<RowMapperResult> {
-		public RowMapperResult mapRow(ResultSet rs, int index)
+		@Override
+        public RowMapperResult mapRow(ResultSet rs, int index)
 				throws SQLException {
 			RowMapperResult result = new RowMapperResult();
 
@@ -83,6 +84,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 	}
 
     private class FormDataWithoutRowMapper implements RowMapper<FormData> {
+        @Override
         public FormData mapRow(ResultSet rs, int index)
                 throws SQLException {
             FormData result = new FormData();
@@ -102,7 +104,8 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
     }
 
 	private class FormDataWithoutRowMapperWithTypeId extends FormDataWithoutRowMapper {
-		public FormData mapRow(ResultSet rs, int index)
+		@Override
+        public FormData mapRow(ResultSet rs, int index)
 				throws SQLException {
 			FormData result = new FormData();
 			result.setId(SqlUtils.getLong(rs, "id"));
@@ -119,6 +122,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 
 	}
 
+    @Override
     public FormData get(final long formDataId) {
         JdbcTemplate jt = getJdbcTemplate();
         final FormData formData;
@@ -139,7 +143,8 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         return formData;
     }
 
-	public FormData get(final long formDataId, Boolean manual) {
+	@Override
+    public FormData get(final long formDataId, Boolean manual) {
 		JdbcTemplate jt = getJdbcTemplate();
 		final FormData formData;
 		try {

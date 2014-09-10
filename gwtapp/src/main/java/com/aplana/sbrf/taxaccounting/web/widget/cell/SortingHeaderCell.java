@@ -90,6 +90,7 @@ public class SortingHeaderCell extends AbstractSafeHtmlCell<String> {
             isAscSort = !isAscSort;
 
             popupWithArrow.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
+                @Override
                 public void setPosition(int offsetWidth, int offsetHeight) {
                     lastPositionX = lastParent.getAbsoluteLeft() + lastParent.getClientWidth()  - exceedOffsetX;
                     lastPositionY = lastParent.getAbsoluteTop() + (lastParent.getOffsetHeight() / 2) - exceedOffsetY;

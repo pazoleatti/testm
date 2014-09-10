@@ -7,7 +7,10 @@ import javax.sql.DataSource;
  *
  * @author Dmitriy Levykin
  */
-public class MigrationDataSource {
+public final class MigrationDataSource {
+
+    private MigrationDataSource() {}
+
     public static DataSource getDataSource(DataSourceHolderService holder) {
         return holder.getMigrationDataSource();
     }

@@ -14,7 +14,9 @@ import java.util.regex.Pattern;
  * Утилитный класс для получения удаленных ресурсов
  * @author dloshkarev
  */
-public class ResourceUtils {
+public final class ResourceUtils {
+
+    private ResourceUtils() {}
 
     public static FileWrapper getSharedResource(String destinationUri) {
         return getSharedResource(destinationUri, true);

@@ -263,6 +263,7 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
                                 + (bookerStatementsData.getBookerStatementsTypeId() == 0 ? "Форма 101" : "Форма 102") + "</a>");
                     }
                 }) {
+            @Override
             public BookerStatementsSearchResultItem getValue(
                     BookerStatementsSearchResultItem object) {
                 return object;

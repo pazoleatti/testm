@@ -61,6 +61,7 @@ public class FixedScrollPanel extends SimplePanel implements SourcesScrollEvents
         setWidget(child);
     }
 
+    @Override
     public HandlerRegistration addScrollHandler(ScrollHandler handler) {
         return addDomHandler(handler, ScrollEvent.getType());
     }
@@ -68,6 +69,7 @@ public class FixedScrollPanel extends SimplePanel implements SourcesScrollEvents
     /**
      * @deprecated Use {@link #addScrollHandler} instead
      */
+    @Override
     @Deprecated
     public void addScrollListener(ScrollListener listener) {
         ListenerWrapper.WrappedScrollListener.add(this, listener);
@@ -104,6 +106,7 @@ public class FixedScrollPanel extends SimplePanel implements SourcesScrollEvents
         return DOM.getElementPropertyInt(getElement(), "scrollTop");
     }
 
+    @Override
     public void onResize() {
         Widget child = getWidget();
         if ((child != null) && (child instanceof RequiresResize)) {
@@ -115,6 +118,7 @@ public class FixedScrollPanel extends SimplePanel implements SourcesScrollEvents
      * @deprecated Use the {@link HandlerRegistration#removeHandler} method on
      *             the object returned by {@link #addScrollHandler} instead
      */
+    @Override
     @Deprecated
     public void removeScrollListener(ScrollListener listener) {
         ListenerWrapper.WrappedScrollListener.remove(this, listener);
@@ -157,22 +161,9 @@ public class FixedScrollPanel extends SimplePanel implements SourcesScrollEvents
      * @param alwaysShow
      *            <code>true</code> to show scroll bars at all times
      */
-    public void setAlwaysShowScrollBars(boolean alwaysShow) {
+    public final void setAlwaysShowScrollBars(boolean alwaysShow) {
         DOM.setStyleAttribute(getElement(), "overflow", alwaysShow ? "scroll"
                 : "auto");
-    }
-
-    /**
-     * Sets the object's height. This height does not include decorations such
-     * as border, margin, and padding.
-     *
-     * @param height
-     *            the object's new height, in absolute CSS units (e.g. "10px",
-     *            "1em" but not "50%")
-     */
-    @Override
-    public void setHeight(String height) {
-        super.setHeight(height);
     }
 
     /**
@@ -195,35 +186,7 @@ public class FixedScrollPanel extends SimplePanel implements SourcesScrollEvents
         DOM.setElementPropertyInt(getElement(), "scrollTop", position);
     }
 
-    /**
-     * Sets the object's size. This size does not include decorations such as
-     * border, margin, and padding.
-     *
-     * @param width
-     *            the object's new width, in absolute CSS units (e.g. "10px",
-     *            "1em", but not "50%")
-     * @param height
-     *            the object's new height, in absolute CSS units (e.g. "10px",
-     *            "1em", but not "50%")
-     */
     @Override
-    public void setSize(String width, String height) {
-        super.setSize(width, height);
-    }
-
-    /**
-     * Sets the object's width. This width does not include decorations such as
-     * border, margin, and padding.
-     *
-     * @param width
-     *            the object's new width, in absolute CSS units (e.g. "10px",
-     *            "1em", but not "50%")
-     */
-    @Override
-    public void setWidth(String width) {
-        super.setWidth(width);
-    }
-
     protected Element getContainerElement() {
         return containerElem;
     }

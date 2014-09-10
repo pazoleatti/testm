@@ -42,10 +42,6 @@ public class GenericDataGrid<T> extends DataGrid<T>{
         protected int getTableBodyHeight() {
             return GenericDataGrid.this.getTableBodyElement().getOffsetHeight();
         }
-
-        public void setUpdater(ValueUpdater<String> updater) {
-            super.setUpdater(updater);
-        }
     }
 
     public DataGridResizableHeader createResizableHeader(String title, Column<T, ?> column) {

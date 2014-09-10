@@ -10,9 +10,12 @@ import java.util.Properties;
  * Получает значения конфигурационных параметров для модуля
  * @author dloshkarev
  */
-public class PropertyLoader {
+public final class PropertyLoader {
+
     private static final Log LOG = LogFactory.getLog(PropertyLoader.class);
     private static final String PROPERTIES_PATH = "/module.properties";
+
+    private PropertyLoader() {}
 
     /**
      * Получает версию текущего ejb-модуля

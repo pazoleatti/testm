@@ -2,12 +2,13 @@
 package com.aplana.sbrf.taxaccounting.web.module.home.client;
 
 
-public class HomeNameTokens {
+public final class HomeNameTokens {
 
-  public static final String homePage = "!homePage";
+    private HomeNameTokens() {}
 
-  public static String getHomePage() {
-    return homePage;
-  }
+    public static final String homePage = "!homePage";
 
+    public static String getHomePage() {
+        return homePage;
+    }
 }

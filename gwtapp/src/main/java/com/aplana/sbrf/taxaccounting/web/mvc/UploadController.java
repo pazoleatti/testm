@@ -57,19 +57,4 @@ public class UploadController {
         String uuid = blobDataService.create(fileItem.getInputStream(), fileItem.getName());
         response.getWriter().printf("{uuid : \"%s\"}", uuid);
     }
-
-    // пример использования SignService
-    private boolean checkSign(FileItem signFile) throws IOException {
-        String pathToSignFile = "/" + signFile.getName();
-        File file = new File(pathToSignFile);
-        FileOutputStream fileOutputStream = new FileOutputStream(file);
-        fileOutputStream.write(signFile.get());
-        IOUtils.closeQuietly(fileOutputStream);
-
-        // означает что подпись удалять не будем
-        int delFlag = 0;
-        boolean result = signService.checkSign(file.getAbsolutePath(), delFlag);
-        file.delete();
-        return result;
-    }
 }

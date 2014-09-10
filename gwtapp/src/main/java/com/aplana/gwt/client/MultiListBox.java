@@ -241,7 +241,7 @@ public class MultiListBox<T> extends Composite implements HasValue<List<T>>, Lea
         cnt.setText(Integer.toString(this.countSelect));
     }
 
-    public boolean isMultiselect() {
+    public final boolean isMultiselect() {
         return multiselect;
     }
 
@@ -274,7 +274,7 @@ public class MultiListBox<T> extends Composite implements HasValue<List<T>>, Lea
     }
 
     @Override
-    public void setEnabled(boolean enabled) {
+    public final void setEnabled(boolean enabled) {
         this.enabled = enabled;
         selectButton.setEnabled(enabled);
     }
@@ -289,10 +289,10 @@ public class MultiListBox<T> extends Composite implements HasValue<List<T>>, Lea
         private MyLabel linkedLabel;
 
         public SavedData(T value, boolean chk, CheckBox linkedElement, MyLabel linkedLabel) {
-            this.setValue(value);
-            this.setLinkedElement(linkedElement);
+            setValue(value);
+            setLinkedElement(linkedElement);
             setChk(chk);
-            this.setLinkedLabel(linkedLabel);
+            setLinkedLabel(linkedLabel);
             getLinkedLabel().setLinkToData(this);
             getLinkedLabel().setText(getName());
         }
@@ -305,12 +305,12 @@ public class MultiListBox<T> extends Composite implements HasValue<List<T>>, Lea
             return chk;
         }
 
-        public void setChk(boolean chk) {
+        public final void setChk(boolean chk) {
             this.chk = chk;
             getLinkedElement().setValue(chk);
         }
 
-        public String getName() {
+        public final String getName() {
             return renderer.render(value);
         }
 
@@ -318,7 +318,7 @@ public class MultiListBox<T> extends Composite implements HasValue<List<T>>, Lea
             return linkedElement;
         }
 
-        public void setLinkedElement(CheckBox linkedElement) {
+        public final void setLinkedElement(CheckBox linkedElement) {
             this.linkedElement = linkedElement;
         }
 
@@ -326,18 +326,17 @@ public class MultiListBox<T> extends Composite implements HasValue<List<T>>, Lea
             return value;
         }
 
-        public void setValue(T value) {
+        public final void setValue(T value) {
             this.value = value;
         }
 
-        public MyLabel getLinkedLabel() {
+        public final MyLabel getLinkedLabel() {
             return linkedLabel;
         }
 
-        public void setLinkedLabel(MyLabel linkedLabel) {
+        public final void setLinkedLabel(MyLabel linkedLabel) {
             this.linkedLabel = linkedLabel;
         }
-
     }
 
     /**

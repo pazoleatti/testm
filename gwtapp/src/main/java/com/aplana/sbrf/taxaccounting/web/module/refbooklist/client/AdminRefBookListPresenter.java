@@ -53,11 +53,6 @@ public class AdminRefBookListPresenter extends AbstractRefBookListPresenter<Admi
     }
 
     @Override
-    protected void onReveal() {
-        super.onReveal();
-    }
-
-    @Override
     protected Long getSelectedId() {
         return selectedItemId;
     }

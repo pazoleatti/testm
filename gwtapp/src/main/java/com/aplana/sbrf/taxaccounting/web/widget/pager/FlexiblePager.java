@@ -492,63 +492,13 @@ public class FlexiblePager extends AbstractPager {
         rowsCountOnPage.setVisible(!onlyPages);
     }
 
-	@Override
-	public int getPage() {
-		return super.getPage();
-	}
+    @Override
+    public int getPage() {
+        return super.getPage();
+    }
 
 	@Override
-	public int getPageCount() {
-		return super.getPageCount();
-	}
-
-	@Override
-	public boolean hasNextPage() {
-		return super.hasNextPage();
-	}
-
-	@Override
-	public boolean hasNextPages(int pages) {
-		return super.hasNextPages(pages);
-	}
-
-	@Override
-	public boolean hasPage(int index) {
-		return super.hasPage(index);
-	}
-
-	@Override
-	public boolean hasPreviousPage() {
-		return super.hasPreviousPage();
-	}
-
-	@Override
-	public boolean hasPreviousPages(int pages) {
-		return super.hasPreviousPages(pages);
-	}
-
-	@Override
-	public void lastPage() {
-		super.lastPage();
-	}
-
-	@Override
-	public void lastPageStart() {
-		super.lastPageStart();
-	}
-
-	@Override
-	public void nextPage() {
-		super.nextPage();
-	}
-
-	@Override
-	public void previousPage() {
-		super.previousPage();
-	}
-
-	@Override
-	public void setDisplay(HasRows display) {
+	public final void setDisplay(HasRows display) {
 		// Enable or disable all buttons.
 		boolean disableButtons = (display == null);
 		setFastForwardDisabled(disableButtons);

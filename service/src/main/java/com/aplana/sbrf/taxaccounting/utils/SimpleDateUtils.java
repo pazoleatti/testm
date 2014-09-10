@@ -7,7 +7,10 @@ import java.util.Date;
  * Утилита для работы с датами
  * @author dloshkarev
  */
-public class SimpleDateUtils {
+public final class SimpleDateUtils {
+
+    private SimpleDateUtils() {}
+
     public static Date addDayToDate(Date date, int days) {
         Calendar c = Calendar.getInstance();
         c.setTime(date);

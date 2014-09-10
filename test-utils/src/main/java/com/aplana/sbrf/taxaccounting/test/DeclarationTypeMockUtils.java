@@ -6,7 +6,10 @@ import static org.mockito.Mockito.when;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 
-public class DeclarationTypeMockUtils {
+public final class DeclarationTypeMockUtils {
+
+    private DeclarationTypeMockUtils() {}
+
 	public static DeclarationType mockDeclarationType(int id, TaxType taxType) {
 		DeclarationType dt = mock(DeclarationType.class);
 		when(dt.getId()).thenReturn(id);

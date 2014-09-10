@@ -33,7 +33,8 @@ public class LogEntryReportBuilder extends AbstractReportBuilder {
         this.sheet.setColumnWidth(2, cellWidthMin * 256 * 4);
 	}
 	
-	protected void createTableHeaders(){
+	@Override
+    protected void createTableHeaders(){
 		CellStyle cs = workBook.createCellStyle();
 		cs.setAlignment(CellStyle.ALIGN_LEFT);
 		cs.setBorderBottom(CellStyle.BORDER_THICK);
@@ -72,6 +73,7 @@ public class LogEntryReportBuilder extends AbstractReportBuilder {
         //No need to implement
     }
 
+    @Override
     protected void createDataForTable(){
         CellStyle csType = workBook.createCellStyle();
         csType.setAlignment(CellStyle.ALIGN_CENTER);

@@ -117,16 +117,6 @@ public class PeriodPickerPopupWidget extends DoubleStateComposite implements
     }
 
     @Override
-    public boolean isEnabled() {
-        return super.isEnabled();
-    }
-
-    @Override
-    public void setEnabled(boolean enabled) {
-        super.setEnabled(enabled);
-    }
-
-    @Override
     public Pair<Date, Date> getPeriodDates(Integer reportPeriodId) {
         return reportPeriodDates.get(reportPeriodId);
     }
@@ -183,6 +173,7 @@ public class PeriodPickerPopupWidget extends DoubleStateComposite implements
         return editor;
     }
 
+    @Override
     public void setWidth(String width) {
         wrappingPanel.setWidth(width);
     }

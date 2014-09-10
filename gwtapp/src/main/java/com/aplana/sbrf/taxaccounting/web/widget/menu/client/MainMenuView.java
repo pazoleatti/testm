@@ -61,6 +61,7 @@ public class MainMenuView extends AbstractMenuView implements MainMenuPresenter.
         menu.selectItem(notificationMenuItem);
     }
 
+    @Override
     public void setMenuItems(List<MenuItem> menuItems) {
         menu.clearItems();
         for (MenuItem item : menuItems) {

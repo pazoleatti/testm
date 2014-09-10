@@ -31,6 +31,7 @@ public class TextMaskParser implements Parser<String> {
         this.maskPicture = MaskUtils.createMaskPicture(mask);
     }
 
+    @Override
     public String parse(CharSequence object) throws ParseException {
         String obj = object.toString();
         try {

@@ -33,10 +33,6 @@ public class GenericCellTable<T> extends CellTable<T>{
         protected int getTableBodyHeight() {
             return GenericCellTable.this.getTableBodyElement().getOffsetHeight();
         }
-
-        public void setUpdater(ValueUpdater<String> updater) {
-            super.setUpdater(updater);
-        }
     }
 
     public TableCellResizableHeader createResizableHeader(String title, Column<T, ?> column) {

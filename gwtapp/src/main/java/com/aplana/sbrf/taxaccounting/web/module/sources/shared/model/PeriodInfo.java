@@ -15,6 +15,7 @@ public class PeriodInfo implements HasName, Serializable {
     private Date startDate;
     private Date endDate;
 
+    @Override
     public String getName() {
         return name;
     }

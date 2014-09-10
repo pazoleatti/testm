@@ -21,9 +21,9 @@ import java.util.Map;
 @Repository
 public class RefBookTaxOrganDaoImpl extends AbstractDao implements RefBookTaxOrganDao {
 
-    private final Long REF_BOOK_ID_200 = 200L;
-    private final String CODE = "t200.TAX_ORGAN_CODE";
-    private final String KPP = "t200.KPP";
+    private final static Long REF_BOOK_ID_200 = 200L;
+    private final static String CODE = "t200.TAX_ORGAN_CODE";
+    private final static String KPP = "t200.KPP";
 
     private final Map<Long, String> refBookNameMapping = new HashMap() {{
         put(REF_BOOK_CODE_ID, CODE);

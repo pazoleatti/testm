@@ -49,7 +49,7 @@ public class LabelSeparator extends Composite implements HasText {
         setTextRight(false);
     }
 
-    public void setTextRight(boolean textRight){
+    public final void setTextRight(boolean textRight){
         panel.clear();
         if (textRight) {
             panel.add(htmlPanel);
@@ -67,26 +67,27 @@ public class LabelSeparator extends Composite implements HasText {
         htmlPanel.getElement().getStyle().setBorderWidth(hide ? 0 : 1, com.google.gwt.dom.client.Style.Unit.PX);
     }
 
+    @Override
     public void setText(String text){
         textBox.setText(text);
     }
 
+    @Override
     public String getText(){
         return textBox.getText();
     }
 
+    @Override
     public void setWidth(String width){
         panel.setWidth(width);
     }
 
-    public int getOffsetWidth(){
-      return super.getOffsetWidth();
-    }
-
+    @Override
     public void setVisible(boolean visible){
         panel.setVisible(visible);
     }
 
+    @Override
     public boolean isVisible(){
         return panel.isVisible();
     }

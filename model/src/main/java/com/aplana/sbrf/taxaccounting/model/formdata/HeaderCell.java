@@ -25,7 +25,8 @@ public class HeaderCell extends AbstractCell {
 		super(column);
 	}
 
-	public Object getValue() {
+	@Override
+    public Object getValue() {
 		if (hasValueOwner()) {
 			return getValueOwner().getValue();
 		}

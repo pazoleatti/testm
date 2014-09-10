@@ -24,6 +24,7 @@ public class ListBoxWithTooltipWidget<T> extends DoubleStateWrapper<ListBoxWithT
         widget.setShowTooltip(showTooltip);
     }
 
+    @Override
     public HandlerRegistration addValueChangeHandler(ValueChangeHandler<T> handler) {
         return widget.addValueChangeHandler(handler);
     }

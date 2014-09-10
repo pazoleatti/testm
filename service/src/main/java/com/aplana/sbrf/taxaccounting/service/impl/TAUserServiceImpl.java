@@ -33,6 +33,7 @@ public class TAUserServiceImpl implements TAUserService {
     private static final Log logger = LogFactory.getLog(TAUserServiceImpl.class);
 
 	@PostConstruct
+    @SuppressWarnings("unused") // https://jira.codehaus.org/browse/SONARJAVA-117
 	private void init() {
 		systemUserInfo = new TAUserInfo();
 		systemUserInfo.setIp("127.0.0.1");

@@ -29,6 +29,7 @@ public class ManualMenuView extends AbstractMenuView implements ManualMenuPresen
         initWidget(binder.createAndBindUi(this));
     }
 
+    @Override
     public void setMenuItems(List<MenuItem> menuItems) {
         menu.clearItems();
         com.google.gwt.user.client.ui.MenuItem aboutItem =

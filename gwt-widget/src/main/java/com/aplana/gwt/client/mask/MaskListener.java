@@ -33,6 +33,7 @@ public class MaskListener {
          *   Через KeyDown обрабатываем удаление
          */
         textbox.addKeyDownHandler(new KeyDownHandler() {
+            @Override
             public void onKeyDown(KeyDownEvent event) {
                 int nativeKeyCode = event.getNativeKeyCode();
                 debug("KeyDown " + nativeKeyCode);
@@ -122,6 +123,7 @@ public class MaskListener {
          * В KeyPressEvent можно достучаться до кода клавиши в ASCII, используем его
 		 */
         textbox.addKeyPressHandler(new KeyPressHandler() {
+            @Override
             public void onKeyPress(KeyPressEvent event) {
 
                 int keyCode = event.getNativeEvent().getKeyCode();

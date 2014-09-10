@@ -30,34 +30,33 @@ public enum DepartmentRnuMapping implements Serializable {
     DEP_19("130", "9", "13", 158),
     DEP_20("130", "9", "14", 159);
 
-
     private static final long serialVersionUID = 1L;
 
     private final String stringPPP;         // значение подразделения в названии ТФ
     private final String systemSymbol;      // символ системы в названии ТФ
     private final String subSystemString;   // код подсистемы
-    private final int department_id;        // значение подразделения в новой системе
+    private final int departmentId;        // значение подразделения в новой системе
 
-    private DepartmentRnuMapping(String stringPPP, String systemSymbol, String subSystemString, int department_id) {
+    private DepartmentRnuMapping(String stringPPP, String systemSymbol, String subSystemString, int departmentId) {
         this.stringPPP = stringPPP;
         this.systemSymbol = systemSymbol;
         this.subSystemString = subSystemString;
-        this.department_id = department_id;
+        this.departmentId = departmentId;
     }
 
     public static int getDepartmentId(String stringPPP, String systemSymbol, String subSystemString) {
         for (DepartmentRnuMapping t : values()) {
             if (DEP_5.getStringPPP().equals(stringPPP)) {
                 // независимо от системы для этого старого значения подразделения новый ид подразделения будет один
-                return DEP_5.department_id;
+                return DEP_5.departmentId;
             } else {
                 if (subSystemString == null) {
                     if (t.stringPPP.equals(stringPPP) && t.systemSymbol.equals(systemSymbol)) {
-                        return t.department_id;
+                        return t.departmentId;
                     }
                 } else {
                     if (t.stringPPP.equals(stringPPP) && t.systemSymbol.equals(systemSymbol) && t.subSystemString.equals(subSystemString)) {
-                        return t.department_id;
+                        return t.departmentId;
                     }
                 }
             }
@@ -77,7 +76,7 @@ public enum DepartmentRnuMapping implements Serializable {
         return subSystemString;
     }
 
-    public int getDepartment_id() {
-        return department_id;
+    public int getDepartmentId() {
+        return departmentId;
     }
 }

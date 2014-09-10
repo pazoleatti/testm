@@ -49,7 +49,7 @@ public abstract class MultiSelectTree<H extends List, T extends MultiSelectTreeI
     /** Признак возможности выбора нескольких узлов дерева. */
     protected boolean multiSelection;
 
-    private final String GROUP_NAME = "treeGroup_" + this.hashCode();
+    private final String groupName = "treeGroup_" + this.hashCode();
 
     public interface Style extends CssResource {
         String msiHeader();
@@ -66,9 +66,11 @@ public abstract class MultiSelectTree<H extends List, T extends MultiSelectTreeI
 
     public interface MultiSelectTreeResources extends Tree.Resources {
 
+        @Override
         @ImageResource.ImageOptions
         ImageResource treeClosed();
 
+        @Override
         @ImageResource.ImageOptions
         ImageResource treeOpen();
     }
@@ -154,7 +156,7 @@ public abstract class MultiSelectTree<H extends List, T extends MultiSelectTreeI
     }
 
     @Override
-    public HandlerRegistration addValueChangeHandler(ValueChangeHandler<H> handler) {
+    public final HandlerRegistration addValueChangeHandler(ValueChangeHandler<H> handler) {
         return addHandler(handler, ValueChangeEvent.getType());
     }
 
@@ -246,7 +248,7 @@ public abstract class MultiSelectTree<H extends List, T extends MultiSelectTreeI
         }
         // получить все дочерние элементы узла и выделить для них checkBox'ы
         for (T child : getAllChild(item)) {
-            child.setGroup(GROUP_NAME);
+            child.setGroup(groupName);
             if (child.isMultiSelection() == null) {
                 continue;
             }
@@ -330,28 +332,11 @@ public abstract class MultiSelectTree<H extends List, T extends MultiSelectTreeI
         }
     }
 
-    /**
-     * Получить дочерние элементы узла.
-     *
-     * @param item узел для которого ищутся узлы
-     * @return список дочерних элеметов
-     */
-    @Deprecated
-    private List<T> getItemChild(T item) {
-        List<T> list = new ArrayList<T>();
-        if (item.getChildCount() > 0) {
-            for (int i = 0; i < item.getChildCount(); i++) {
-                list.add((T) item.getChild(i));
-            }
-        }
-        return list;
-    }
-
     public String getHeader() {
         return label.getText();
     }
 
-    public void setHeader(String text) {
+    public final void setHeader(String text) {
         label.setText(text == null ? "" : text);
     }
 
@@ -409,7 +394,7 @@ public abstract class MultiSelectTree<H extends List, T extends MultiSelectTreeI
     }
 
     /** Установить признак возможности выбора нескольких узлов дерева. */
-    public void setMultiSelection(boolean multiSelection) {
+    public final void setMultiSelection(boolean multiSelection) {
         this.multiSelection = multiSelection;
         for (T i : getItems()) {
             if (i.isMultiSelection() != null) {

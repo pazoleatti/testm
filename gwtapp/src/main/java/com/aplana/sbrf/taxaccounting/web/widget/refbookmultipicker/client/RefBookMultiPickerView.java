@@ -68,10 +68,12 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
             };
     private DefaultSelectionEventManager<RefBookItem> multiSelectManager = createCustomManager(
             new CheckboxEventTranslator<RefBookItem>(0) {
+                @Override
                 public boolean clearCurrentSelection(CellPreviewEvent<RefBookItem> event) {
                     return false;
                 }
 
+                @Override
                 public SelectAction translateSelectionEvent(CellPreviewEvent<RefBookItem> event) {
                     return SelectAction.TOGGLE;
                 }

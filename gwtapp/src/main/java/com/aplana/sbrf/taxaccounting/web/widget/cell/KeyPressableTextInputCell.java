@@ -45,6 +45,7 @@ public class KeyPressableTextInputCell extends
     }
 
     interface TemplateTextRight extends Template {
+        @Override
         @Template("<input type=\"text\" value=\"{0}\" style=\"text-align:right; \" tabindex=\"-1\"></input>")
         SafeHtml input(String value);
     }
