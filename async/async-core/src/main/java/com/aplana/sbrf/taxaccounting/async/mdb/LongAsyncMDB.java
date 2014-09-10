@@ -34,7 +34,7 @@ public class LongAsyncMDB implements MessageListener {
 
     @Override
     public void onMessage(Message message) {
-        if (message == null || !(message instanceof ObjectMessage)) {
+        if (!(message instanceof ObjectMessage)) {
             LOG.error("Incorrect message type!");
             return;
         }
