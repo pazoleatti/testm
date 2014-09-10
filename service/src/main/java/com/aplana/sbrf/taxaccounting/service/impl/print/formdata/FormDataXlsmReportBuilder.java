@@ -195,17 +195,8 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
 
         //Fill subdivision
         if (data.getPerformer() != null) {
-            createCellByRange(XlsxReportMetadata.RANGE_SUBDIVISION,  data.getPerformer().getReportDepartmentName(), 0, 0);
+            createCellByRange(XlsxReportMetadata.RANGE_SUBDIVISION,  data.getPerformer().getReportDepartmentName(), 0, notNullColumn);
         }
-        if (notNullColumn != 0) {
-            AreaReference arDN = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_SUBDIVISION).getRefersToFormula());
-            Row rDN = sheet.getRow(arDN.getFirstCell().getRow()) != null ? sheet.getRow(arDN.getFirstCell().getRow())
-                    : sheet.createRow(arDN.getFirstCell().getRow());
-            createNotHiddenCell(notNullColumn, rDN).setCellValue(rDN.getCell(0).getRichStringCellValue());
-        }
-
-        //Fill subdivision signature
-        createCellByRange(XlsxReportMetadata.RANGE_SUBDIVISION_SIGN, null, 0, 0);
 
         //Fill date
         StringBuilder sb = new StringBuilder();
