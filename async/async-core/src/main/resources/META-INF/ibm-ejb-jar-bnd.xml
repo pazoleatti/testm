@@ -4,5 +4,12 @@
 	xsi:schemaLocation="http://websphere.ibm.com/xml/ns/javaee
 		http://websphere.ibm.com/xml/ns/javaee/ibm-ejb-jar-bnd_1_0.xsd"
 	version="1.0">
+
+    <session name="AsyncManagerBean">
+        <resource-ref binding-name="jms/shortAsyncConnectionFactory" name="jms/shortAsyncConnectionFactory${releasePostfix}"/>
+        <message-destination-ref binding-name="jms/shortAsyncQueue" name="jms/shortAsyncQueue${releasePostfix}"/>
+        <resource-ref binding-name="jms/longAsyncConnectionFactory" name="jms/longAsyncConnectionFactory${releasePostfix}"/>
+        <message-destination-ref binding-name="jms/longAsyncQueue" name="jms/longAsyncQueue${releasePostfix}"/>
+    </session>
     
 </ejb-jar-bnd>
