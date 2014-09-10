@@ -83,7 +83,6 @@ public class DeclarationDestinationsPresenter extends PresenterWidget<Declaratio
     }
 
     public void initAndShowDialog(final HasPopupSlot slotForMe, TaxType taxType) {
-        //getView().resetForm();
 	    this.taxType = taxType;
         slotForMe.addToPopupSlot(DeclarationDestinationsPresenter.this);
         getView().updateLabel(taxType);

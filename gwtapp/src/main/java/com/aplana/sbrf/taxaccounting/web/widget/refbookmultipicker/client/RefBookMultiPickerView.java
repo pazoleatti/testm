@@ -6,9 +6,14 @@ import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.event.
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.PickerState;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.RefBookItem;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
-import com.google.gwt.cell.client.*;
+import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.cell.client.Cell;
+import com.google.gwt.cell.client.CheckboxCell;
+import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.*;
+import com.google.gwt.dom.client.BrowserEvents;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.GwtEvent;
@@ -18,8 +23,11 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.cellview.client.*;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.ColumnSortEvent;
+import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
+import com.google.gwt.user.cellview.client.Header;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.*;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -34,8 +42,6 @@ import static com.google.gwt.view.client.DefaultSelectionEventManager.*;
  */
 public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPickerUiHandlers>
         implements RefBookMultiPickerPresenter.MyView, RefBookView {
-
-
 
     interface Binder extends UiBinder<Widget, RefBookMultiPickerView> {
     }
@@ -410,22 +416,6 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
     @Override
     public void selectAll(DeferredInvokeHandler handler) {
         if (multiSelect) {
-            /* оставлю на будущее мало ли постановка поменяется
-            if(cellTable.getRowCount() == cellTable.getVisibleItemCount()){
-                // если отображены все итемы на одной странице
-                for (RefBookItem refBookItem : cellTable.getVisibleItems()) {
-                    selectionModel.setSelected(refBookItem, true);
-                }
-                widgetFireChangeEvent(getSelectedIds());
-                if (handler != null) {
-                    handler.onInvoke();
-                }
-            } else {
-                // или подгружаем записи с сервера
-                // подгружаем потому что нужны разименованные значения
-                getUiHandlers().loadingForSelection(new ArrayList<Long>(), handler);
-            }
-            */
             for (RefBookItem refBookItem : cellTable.getVisibleItems()) {
                 selectionModel.setSelected(refBookItem, true);
             }

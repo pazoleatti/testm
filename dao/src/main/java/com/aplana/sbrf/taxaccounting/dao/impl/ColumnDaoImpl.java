@@ -1,10 +1,10 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
@@ -114,17 +114,6 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 		final int formTemplateId = formTemplate.getId();
 
 		JdbcTemplate jt = getJdbcTemplate();
-
-        //Обнуляем все parent_id, чтобы можно было спокойно удалить записи
-        /*try {
-            int updatedColumns = jt.update(
-                    "update form_column set parent_column_id = null where parent_column_id is not null and form_template_id = ?",
-                    formTemplateId);
-            logger.info("Модифицированно " + updatedColumns + " колонок");
-        } catch (DataAccessException e){
-            logger.error("", e);
-            throw new DaoException("", e);
-        }*/
 
 		final Set<String> removedColumns = new HashSet<String>(jt.queryForList(
 			"SELECT alias FROM form_column WHERE form_template_id = ?",
@@ -372,7 +361,6 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
                                     ps.setNull(13, Types.NULL);
                                 }
                                 ps.setNull(14, Types.NUMERIC);
-                                //ps.setLong(13, ((RefBookColumn) col).getRefBookAttributeId2());
 							} else if (col instanceof ReferenceColumn) {
                                 ps.setNull(7, Types.INTEGER);
                                 ps.setNull(9, Types.INTEGER);
@@ -416,18 +404,6 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 					}
 			);
 		}
-
-		/*jt.query(
-			"SELECT id, alias FROM form_column WHERE form_template_id = " + formTemplateId,
-			new RowCallbackHandler() {
-				@Override
-				public void processRow(ResultSet rs) throws SQLException {
-					String alias = rs.getString("alias");
-					int columnId = SqlUtils.getInteger(rs, "id");
-					formTemplate.getColumn(alias).setId(columnId);
-				}
-			}
-		);*/
 	}
 
     @Override

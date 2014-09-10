@@ -8,7 +8,10 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.migration.RestoreExemplar;
-import com.aplana.sbrf.taxaccounting.model.migration.enums.*;
+import com.aplana.sbrf.taxaccounting.model.migration.enums.DepartmentRnuMapping;
+import com.aplana.sbrf.taxaccounting.model.migration.enums.DepartmentXmlMapping;
+import com.aplana.sbrf.taxaccounting.model.migration.enums.NalogFormType;
+import com.aplana.sbrf.taxaccounting.model.migration.enums.PeriodMapping;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -220,7 +223,6 @@ public class MappingServiceImpl implements MappingService {
 
             //по году определяем TAX_PERIOD
             String year = YEAR_FORMAT.format(exemplar.getBeginDate());
-            //year = DATE_APPENDER_RNU + year;
             exemplar.setTaxPeriod(reportPeriodMappingDao.getTaxPeriodByDate(year));
 
             // по коду отчетного периода 7 символа в назавании файла DICT_TAX_PERIOD

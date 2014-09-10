@@ -8,8 +8,6 @@ import java.util.List;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlSeeAlso({DateColumn.class, StringColumn.class, NumericColumn.class, RefBookColumn.class, ReferenceColumn.class, AutoNumerationColumn.class})
 public class FormTemplateContent {
-	/*@XmlElement
-	private FormType type;*/
 	@XmlElement
 	private boolean fixedRows;
 	@XmlElement
@@ -32,7 +30,6 @@ public class FormTemplateContent {
                                 ((ReferenceColumn) col).getParentId()).getAlias());
             }
         }
-		/*this.type = formTemplate.getType();*/
 		this.fixedRows = formTemplate.isFixedRows();
 		this.name = formTemplate.getName();
 		this.fullName = formTemplate.getFullName();
@@ -42,7 +39,6 @@ public class FormTemplateContent {
 	}
 
 	public void fillFormTemplate(FormTemplate formTemplate) {
-		/*formTemplate.setType(type);*/
 		formTemplate.setFixedRows(fixedRows);
 		formTemplate.setName(name);
 		formTemplate.setFullName(fullName);

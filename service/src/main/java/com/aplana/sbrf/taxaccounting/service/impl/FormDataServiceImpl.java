@@ -889,8 +889,6 @@ public class FormDataServiceImpl implements FormDataService {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
 	public boolean unlockAllByUser(TAUserInfo userInfo) {
-		//Это зло
-		//lockDao.unlockAllObjectByUserId(userInfo.getUser().getId());
 		return true;// TODO обработать возможные ошибки
 	}
 

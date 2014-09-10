@@ -6,8 +6,8 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.refbook.impl.fixed.RefBookConfigurationParam;
 import com.aplana.sbrf.taxaccounting.refbook.impl.fixed.RefBookAuditFieldList;
+import com.aplana.sbrf.taxaccounting.refbook.impl.fixed.RefBookConfigurationParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -236,23 +236,7 @@ public class RefBookFactoryImpl implements RefBookFactory {
      * @return
      */
     private boolean isSimpleRefBool(Long refBookId){
+        // TODO Левыкин: нереализованный метод?
         return true;
-        /*Long[] foreignRefBooks = new Long[]{
-                RefBookDepartment.REF_BOOK_ID,
-                RefBookIncome101.REF_BOOK_ID,
-                RefBookIncome102.REF_BOOK_ID,
-                RefBookUser.REF_BOOK_ID,
-                RefBookSimpleReadOnly.FORM_TYPE_REF_BOOK_ID,
-                RefBookSimpleReadOnly.SEC_ROLE_REF_BOOK_ID,
-                RefBookOktmoProvider.OKTMO_REF_BOOK_ID,
-                RefBookSimpleReadOnly.FORM_DATA_KIND_REF_BOOK_ID};
-
-        for (Long rbId : foreignRefBooks) {
-            if (rbId.equals(refBookId)){
-                return false;
-            }
-        }
-
-        return true;*/
     }
 }

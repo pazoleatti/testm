@@ -8,7 +8,6 @@ import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContext;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 
 /**
  * Компонент позволяет из скриптов работать с данными НФ
@@ -28,14 +26,12 @@ import java.util.List;
  */
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextHolder{
+public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextHolder {
 	
 	private FormData fd;
 
     private List<DataRow<Cell>> dataRows;
-	
-	private ScriptComponentContext context;
-	
+
 	@Autowired
 	private DataRowDao dataRowDao;
 
@@ -48,9 +44,7 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
 	}
 
 	@Override
-	public void setScriptComponentContext(ScriptComponentContext context) {
-		this.context = context;
-	}
+	public void setScriptComponentContext(ScriptComponentContext context) {}
 
 	@Override
 	public List<DataRow<Cell>> getAllSaved() {

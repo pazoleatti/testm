@@ -95,7 +95,6 @@ public class DeleteDepartmentCombinedHandler extends AbstractActionHandler<Delet
             logger.setTaUserInfo(securityService.currentUserInfo());
 
             RefBookRecordVersion recordVersion = provider.getRecordVersionInfo(depCombined.getRecordId());
-            //recordVersion.updateRecordVersion();
             List<Long> deleteList = new ArrayList<Long>();
             deleteList.add(recordVersion.getRecordId());
 
@@ -121,7 +120,6 @@ public class DeleteDepartmentCombinedHandler extends AbstractActionHandler<Delet
 
     @Override
     public void undo(DeleteDepartmentCombinedAction deleteDepartmentCombinedAction, DeleteDepartmentCombinedResult deleteDepartmentCombinedResult, ExecutionContext executionContext) throws ActionException {
-        //To change body of implemented methods use File | Settings | File Templates.
     }
 
     private Date addDayToDate(Date date, int days) {

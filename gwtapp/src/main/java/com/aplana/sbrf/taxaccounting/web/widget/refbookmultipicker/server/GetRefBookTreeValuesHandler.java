@@ -12,7 +12,8 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerUtils;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.*;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.GetRefBookTreeValuesAction;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.GetRefBookTreeValuesResult;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.RefBookRecordDereferenceValue;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.RefBookTreeItem;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -22,7 +23,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Хендлер для загрузки данных для иерархичного компнента
@@ -117,11 +120,6 @@ public class GetRefBookTreeValuesHandler extends AbstractActionHandler<GetRefBoo
             List<RefBookRecordDereferenceValue> refBookDereferenceValues = new LinkedList<RefBookRecordDereferenceValue>();
 
             item.setId(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
-
-            // список ид которые нужно открыть так как они попадают под фильтр пользователя
-//            if(filterIds.contains(item.getId())){
-//                item.setNeedToOpen(true);
-//            }
 
             for (RefBookAttribute refBookAttribute : attributes) {
                 String alias = refBookAttribute.getAlias();

@@ -6,7 +6,10 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.source.*;
+import com.aplana.sbrf.taxaccounting.model.source.SourceClientData;
+import com.aplana.sbrf.taxaccounting.model.source.SourceMode;
+import com.aplana.sbrf.taxaccounting.model.source.SourceObject;
+import com.aplana.sbrf.taxaccounting.model.source.SourcePair;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
@@ -49,7 +52,6 @@ public class SourceServiceImpl implements SourceService {
     private enum LOG_LEVEL {
         INFO, WARN, ERROR
     }
-
 
     private static final ThreadLocal<SimpleDateFormat> formatter = new ThreadLocal<SimpleDateFormat>() {
         @Override
@@ -111,8 +113,6 @@ public class SourceServiceImpl implements SourceService {
 
     @Autowired
     RefBookFactory rbFactory;
-
-    private static final Long PERIOD_CODE_REFBOOK = 8L;
 
     @Override
     public List<DepartmentFormType> getDFTSourcesByDFT(int departmentId, int formTypeId, FormDataKind kind, Date periodStart,
@@ -543,9 +543,6 @@ public class SourceServiceImpl implements SourceService {
                                                 (intersection.getPeriodEnd() != null ? formatter.get().format(intersection.getPeriodEnd()) : EMPTY_END_PERIOD_INFO)
                                 )
                         );
-                    }
-                    if (n < intersections.size() - 1) {
-                        //intersectionParts.add(", ");
                     }
                     n++;
                 }

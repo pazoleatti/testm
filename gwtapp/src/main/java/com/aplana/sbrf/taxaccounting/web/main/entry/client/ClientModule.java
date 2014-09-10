@@ -18,6 +18,7 @@ import com.aplana.sbrf.taxaccounting.web.module.error.client.ErrorModule;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataModule;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListClientModule;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.gin.AdminModule;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.client.TemplateVersionListModule;
 import com.aplana.sbrf.taxaccounting.web.module.home.client.HomeModule;
 import com.aplana.sbrf.taxaccounting.web.module.home.client.HomeNameTokens;
 import com.aplana.sbrf.taxaccounting.web.module.members.client.MembersModule;
@@ -30,7 +31,6 @@ import com.aplana.sbrf.taxaccounting.web.module.scriptExecution.client.ScriptExe
 import com.aplana.sbrf.taxaccounting.web.module.sources.client.SourcesModule;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.TaxFormNominationModule;
 import com.aplana.sbrf.taxaccounting.web.module.testpage.client.TestPageModule;
-import com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.client.TemplateVersionListModule;
 import com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.client.UploadTransportDataModule;
 import com.aplana.sbrf.taxaccounting.web.widget.history.client.HistoryClientModule;
 import com.aplana.sbrf.taxaccounting.web.widget.logarea.client.LogAreaClientModule;
@@ -49,23 +49,16 @@ import com.gwtplatform.mvp.client.proxy.TokenFormatter;
 public class ClientModule extends AbstractPresenterModule {
 	@Override
 	protected void configure() {
-
-		// Default implementation of standard resources
-		// install(new DefaultModule(PlaceManager.class));
-
 		bind(EventBus.class).to(SimpleEventBus.class).in(Singleton.class);
-		bind(TokenFormatter.class).to(ParameterTokenFormatter.class).in(
-				Singleton.class);
+		bind(TokenFormatter.class).to(ParameterTokenFormatter.class).in(Singleton.class);
 		bind(TaRootPresenter.class).asEagerSingleton();
-		// bind(GoogleAnalytics.class).to(GoogleAnalyticsImpl.class).in(Singleton.class);
 		bind(PlaceManager.class).to(TaPlaceManagerImpl.class).in(Singleton.class);
 
 		install(new DispatchAsyncModule());
 
 		requestStaticInjection(EventBus.class);
 
-		bindConstant().annotatedWith(DefaultPlace.class).to(
-				HomeNameTokens.homePage);
+		bindConstant().annotatedWith(DefaultPlace.class).to(HomeNameTokens.homePage);
 
 		bindPresenter(MainPagePresenter.class, MainPagePresenter.MyView.class,
 				MainPageView.class, MainPagePresenter.MyProxy.class);

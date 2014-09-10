@@ -21,8 +21,6 @@ import java.util.Map;
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class BookerStatementServiceImpl implements BookerStatementService, ScriptComponentContextHolder {
 
-    private ScriptComponentContext context;
-
     @Autowired
     private RefBookFactory refBookFactory;
 
@@ -103,7 +101,5 @@ public class BookerStatementServiceImpl implements BookerStatementService, Scrip
     }
 
     @Override
-    public void setScriptComponentContext(ScriptComponentContext context) {
-        this.context = context;
-    }
+    public void setScriptComponentContext(ScriptComponentContext context) {}
 }

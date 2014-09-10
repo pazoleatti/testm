@@ -23,7 +23,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -68,12 +67,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
 
     interface Binder extends UiBinder<Widget, SourcesView> {
     }
-    private static final SafeHtml INPUT_CHECKED = SafeHtmlUtils.fromSafeConstant("<input type=\"checkbox\" tabindex=\"-1\" checked disabled/>");
 
-    /**
-     * An html string representation of an unchecked input box.
-     */
-    private static final SafeHtml INPUT_UNCHECKED = SafeHtmlUtils.fromSafeConstant("<input type=\"checkbox\" tabindex=\"-1\" checked disabled/>");
     /**
      * Состояние формы
      * 1. Формы Приемник->Источники
@@ -568,7 +562,6 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         downNameTypeColumn.setDataStoreName(SourcesSearchOrdering.TYPE.name());
         downStartColumn.setDataStoreName(SourcesSearchOrdering.START.name());
         downEndColumn.setDataStoreName(SourcesSearchOrdering.END.name());
-
     }
 
     /**
@@ -657,8 +650,6 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         WidgetUtils.setupOptionTitle(periodFrom);
         SourcesUtils.setupPeriodTitle(periodFrom);
 
-        //List<PeriodInfo> periodsTo = new ArrayList<PeriodInfo>(periods);
-        //periodsTo.add(null);
         periodTo.setValue(null);
         periodTo.setAcceptableValues(periods);
         WidgetUtils.setupOptionTitle(periodTo);
@@ -919,7 +910,6 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
                 getUiHandlers().deleteCurrentAssign(leftSM.getSelectedObject(), downSM.getSelectedSet());
             }
         });
-
     }
 
     @UiHandler("editButton")

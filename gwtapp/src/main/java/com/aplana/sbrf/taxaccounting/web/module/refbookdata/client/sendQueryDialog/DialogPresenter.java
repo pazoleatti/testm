@@ -15,7 +15,6 @@ import com.gwtplatform.mvp.client.proxy.PlaceManager;
 
 public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> implements DialogUiHandlers {
 
-    private final PlaceManager placeManager;
     private final DispatchAsync dispatchAsync;
 
     public interface MyView extends PopupView, HasUiHandlers<DialogUiHandlers> {
@@ -24,11 +23,9 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
         String getComment();
     }
 
-
     @Inject
     public DialogPresenter(final EventBus eventBus, final MyView view, final DispatchAsync dispatchAsync, PlaceManager placeManager) {
         super(eventBus, view);
-        this.placeManager = placeManager;
         this.dispatchAsync = dispatchAsync;
         getView().setUiHandlers(this);
     }

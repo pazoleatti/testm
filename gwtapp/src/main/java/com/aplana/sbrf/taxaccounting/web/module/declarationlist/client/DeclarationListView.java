@@ -235,16 +235,12 @@ public class DeclarationListView extends
             declarationTable.addColumn(stateColumn, declarationTable.createResizableHeader(STATE_TITLE, stateColumn));
         } else {
             declarationTable.addColumn(declarationTypeColumn, declarationTypeHeader);
-            // http://jira.aplana.com/browse/SBRFACCTAX-7742
-            //declarationTable.setColumnWidth(declarationTypeColumn, 0, Style.Unit.EM);
             declarationTable.addColumn(departmentColumn, declarationTable.createResizableHeader(DEPARTMENT_TITLE, departmentColumn));
             if (taxType == TaxType.PROPERTY) {
                 declarationTable.addColumn(declarationTaxOrganColumn, declarationTable.createResizableHeader(TAX_ORGAN_CODE_TITLE, declarationTaxOrganColumn));
                 declarationTable.addColumn(declarationTaxOrganKppColumn, declarationTable.createResizableHeader(TAX_ORGAN_CODE_KPP_TITLE, declarationTaxOrganKppColumn));
             }
             declarationTable.addColumn(reportPeriodColumn, reportPeriodHeader);
-            // http://jira.aplana.com/browse/SBRFACCTAX-7742
-            //declarationTable.setColumnWidth(reportPeriodColumn, 0, Style.Unit.EM);
             declarationTable.addColumn(stateColumn, declarationTable.createResizableHeader(STATE_TITLE, stateColumn));
         }
     }

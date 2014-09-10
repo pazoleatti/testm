@@ -51,7 +51,6 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
     @Override
     public <T> int edit(T template, Date templateActualEndDate, Logger logger, TAUser user) {
         DeclarationTemplate declarationTemplate = (DeclarationTemplate)template;
-        /*versionOperatingService.isCorrectVersion(action.getForm(), action.getVersionEndDate(), logger);*/
         Date dbVersionBeginDate = declarationTemplateService.get(declarationTemplate.getId()).getVersion();
         Date dbVersionEndDate = declarationTemplateService.getDTEndDate(declarationTemplate.getId());
         if (dbVersionBeginDate.compareTo(declarationTemplate.getVersion()) !=0
@@ -90,8 +89,6 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
     @Override
     public <T> int createNewType(T template, Date templateActualEndDate, Logger logger, TAUser user) {
         DeclarationTemplate declarationTemplate = (DeclarationTemplate)template;
-        /*versionOperatingService.isCorrectVersion(template, templateActualEndDate, logger);
-        checkError(logger);*/
         DeclarationType type = declarationTemplate.getType();
         type.setStatus(VersionedObjectStatus.NORMAL);
         type.setName(declarationTemplate.getName() != null && !declarationTemplate.getName().isEmpty()?declarationTemplate.getName():"");
@@ -109,7 +106,6 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
     @Override
     public <T> int createNewTemplateVersion(T template, Date templateActualEndDate, Logger logger, TAUser user) {
         DeclarationTemplate declarationTemplate = (DeclarationTemplate)template;
-        /*versionOperatingService.isCorrectVersion(action.getForm(), action.getVersionEndDate(), logger);*/
         checkError(logger, SAVE_MESSAGE);
         declarationTemplate.setStatus(VersionedObjectStatus.DRAFT);
         versionOperatingService.isIntersectionVersion(0, declarationTemplate.getType().getId(),
@@ -131,7 +127,6 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
                 versionOperatingService.isUsedVersion(declarationTemplate.getId(), declarationTemplate.getType().getId(),
                         declarationTemplate.getStatus(), declarationTemplate.getVersion(), null, logger);
                 checkError(logger, DELETE_TEMPLATE_MESSAGE);
-                //declarationTemplate.setStatus(VersionedObjectStatus.DELETED);
             }
         }
         versionOperatingService.checkDestinationsSources(typeId, (Date) null, null, logger);
@@ -143,8 +138,6 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
                             departmentService.getDepartment(departmentFormType.getDepartmentId()).getName()));
         checkError(logger, DELETE_TEMPLATE_MESSAGE);
         declarationTypeService.delete(typeId);
-
-        /*logging(typeId, TemplateChangesEvent.DELETED, user);*/
     }
 
     @Override

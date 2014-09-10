@@ -9,7 +9,10 @@ import com.google.gwt.dom.builder.shared.DivBuilder;
 import com.google.gwt.dom.builder.shared.TableCellBuilder;
 import com.google.gwt.dom.builder.shared.TableRowBuilder;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.user.cellview.client.*;
+import com.google.gwt.user.cellview.client.AbstractCellTable;
+import com.google.gwt.user.cellview.client.AbstractCellTableBuilder;
+import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.RowStyles;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.view.client.SelectionModel;
@@ -234,22 +237,13 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 	}
 
 	private void applyOurCustomStyles(TableCellBuilder out, FormStyle ourStyle) {
-//        out.style().fontStyle(ourStyle.isItalic() ? Style.FontStyle.ITALIC : Style.FontStyle.NORMAL)
-//                   .fontWeight(ourStyle.isBold() ? Style.FontWeight.BOLD : Style.FontWeight.NORMAL);
-//        if (Color.WHITE != ourStyle.getBackColor()) {
-//            out.style().trustedBackgroundColor(convertColorToRGBString(ourStyle.getBackColor()));
-//        }
-//        out.style().trustedColor(convertColorToRGBString(ourStyle.getFontColor()))
-//                   .endStyle();
-
         out.style()
-//
-				.fontStyle(ourStyle.isItalic() ? Style.FontStyle.ITALIC : Style.FontStyle.NORMAL)
-				.fontWeight(ourStyle.isBold() ? Style.FontWeight.BOLD : Style.FontWeight.NORMAL)
-				.trustedBackgroundColor(convertColorToRGBString(ourStyle.getBackColor()))
-				.trustedColor(convertColorToRGBString(ourStyle.getFontColor()))
-			.endStyle();
-	}
+                .fontStyle(ourStyle.isItalic() ? Style.FontStyle.ITALIC : Style.FontStyle.NORMAL)
+                .fontWeight(ourStyle.isBold() ? Style.FontWeight.BOLD : Style.FontWeight.NORMAL)
+                .trustedBackgroundColor(convertColorToRGBString(ourStyle.getBackColor()))
+                .trustedColor(convertColorToRGBString(ourStyle.getFontColor()))
+                .endStyle();
+    }
 
 	private String convertColorToRGBString(Color color) {
 		return "rgb(" +

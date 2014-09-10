@@ -10,7 +10,8 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Tree;
+import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.view.client.*;
 
 import java.util.*;
@@ -23,7 +24,6 @@ import java.util.*;
 public class LazyTree<H extends LazyTreeItem> extends Tree implements HasLazyTreeSelectionHandlers<H> {
 
     public interface MultiSelectTreeResources extends Tree.Resources {
-
         @Override
         @ImageResource.ImageOptions
         ImageResource treeClosed();
@@ -93,13 +93,9 @@ public class LazyTree<H extends LazyTreeItem> extends Tree implements HasLazyTre
                 LazyTree.this.onSelectionChange();
             }
         });
-
     }
 
     private void onSelectionChange(){
-//        for (H h : getAllLoadedItems()) {
-//            h.setItemState(selectionModel.isSelected(h) ? true : null);
-//        }
     }
 
     @Override
@@ -145,7 +141,6 @@ public class LazyTree<H extends LazyTreeItem> extends Tree implements HasLazyTre
                 LazyTree.this.onSelectionChange();
             }
         });
-
     }
 
     /**
@@ -345,46 +340,6 @@ public class LazyTree<H extends LazyTreeItem> extends Tree implements HasLazyTre
         parent.addItem("Загрузка...");
         parent.setState(false);
     }
-//
-//    /**
-//     * Удалить элементы из дерева.
-//     */
-//    public void removeItems(Set<H> items) {
-//        for (H i : items) {
-//            super.removeItem(i);
-//        }
-//    }
-
-
-//    /**
-//     * Фильтр элементов дерева по названию.
-//     *
-//     * @param filter строка для фильтра
-//     */
-//    public void filter(String filter) {
-//        List<H> list = getItems();
-//        if (filter == null || "".equals(filter)) {
-//            for (H item : list) {
-//                item.setVisible(true);
-//            }
-//            return;
-//        }
-//        for (H item : list) {
-//            String itemValue = item.getName().toLowerCase();
-//            if (itemValue.contains(filter.toLowerCase())) {
-//                item.setVisible(true);
-//                H parent = (H) item.getParentItem();
-//                while (parent != null) {
-//                    parent.setVisible(true);
-//                    parent.setState(true);
-//                    parent = (H) parent.getParentItem();
-//                }
-//            } else {
-//                item.setVisible(false);
-//                item.setState(false);
-//            }
-//        }
-//    }
 
     private SetSelectionModel<H> getSelectionModel(boolean multiSelect, ProvidesKey<H> key) {
         return multiSelect ?

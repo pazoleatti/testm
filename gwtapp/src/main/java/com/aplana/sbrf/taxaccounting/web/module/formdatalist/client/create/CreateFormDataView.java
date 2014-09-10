@@ -18,9 +18,9 @@ import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -112,14 +112,6 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
 
     @Override
     public void init() {
-        // Сброс состояния формы
-        // убрал потому что при сеттинге нового бина это установка в нул и так будет
-//        reportPeriodIds.setValue(null);
-//        departmentPicker.setValue(null);
-//        formDataKind.setValue(null);
-//        formDataKind.setDereferenceValue(null);
-//        //formTypeId.setValue(null);
-//        formMonth.setValue(null);
         monthPanel.setVisible(false);
         updateEnabled();
     }

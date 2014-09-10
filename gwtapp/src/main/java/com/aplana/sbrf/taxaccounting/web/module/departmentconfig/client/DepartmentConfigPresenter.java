@@ -175,7 +175,6 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                     public void onSuccess(SaveDepartmentCombinedResult result) {
                         LogAddEvent.fire(DepartmentConfigPresenter.this, result.getUuid());
                         if (!result.isHasError()) {
-                            //MessageEvent.fire(DepartmentConfigPresenter.this, "Параметры подразделения сохранены");
                             if (result.isDeclarationFormFound()) {
                                 Dialog.infoMessage(getView().getTaxType().equals(TaxType.DEAL) ? SAVE_FOUND_TEXT_D : SAVE_FOUND_TEXT);
                             }

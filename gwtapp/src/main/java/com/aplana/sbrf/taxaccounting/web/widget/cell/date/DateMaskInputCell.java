@@ -171,7 +171,6 @@ public class DateMaskInputCell extends
         this.dateFormat = DEFAULT_DATE_FORMAT;
         this.mask = DEFAULT_DATE_MASK;
         this.maskPicture = MaskUtils.createMaskPicture(this.mask);
-
 	}
 
     public DateMaskInputCell(SafeHtmlRenderer<String> renderer, ColumnContext columnContext, String mask, String dateFormat) {
@@ -247,8 +246,6 @@ public class DateMaskInputCell extends
             if (isEditing(vd)) {
                 editEvent(context, parent, value, vd, event, valueUpdater);
             } else {
-                //System.out.println("Not Editing - keyCode: " + event.getKeyCode() + " type: " + event.getType() +  " char: " + event.getCharCode());
-
                 if (CLICK.equals(event.getType()) || event.getKeyCode() == KeyCodes.KEY_ENTER) {
                     // Перейти в режим редактирования
                     if (vd == null) {
@@ -267,15 +264,11 @@ public class DateMaskInputCell extends
      * Обработка события нажатия если у ячейки режим редактирования
      */
     private void editEvent(Context context, Element parent, Date value, ViewData viewData, NativeEvent event, ValueUpdater<Date> valueUpdater) {
-
         String type = event.getType();
         int keyCode = event.getKeyCode();
 
         if (KEYDOWN.equals(type)) {
             // обработка нажатий специальных клавиш
-
-            //System.out.println("Editing - type: keydown " + "keyCode: " + event.getKeyCode());
-
             if (keyCode == KeyCodes.KEY_ENTER) {
                 commitIfValueIsCorrect(context, parent, value, viewData, valueUpdater);
             } else if (keyCode == KeyCodes.KEY_ESCAPE) {
@@ -289,7 +282,6 @@ public class DateMaskInputCell extends
 
         } else if (KEYPRESS.equals(type)) {
             // обрабатываем
-            //System.out.println("Editing - type: keypress " + "keyCode: " + event.getKeyCode() + " char: \"" + String.valueOf(Character.toChars(event.getCharCode())) + "\"");
             if (keyCode == KeyCodes.KEY_ENTER) {
                 //игнорим нажатие по ентеру потому что он ловится на onPress'е
                 return;
@@ -301,7 +293,6 @@ public class DateMaskInputCell extends
             updateViewData(parent, viewData, true);
 
         } else if (BLUR.equals(type)) {   // Фокус потерян
-            //System.out.println("Editing - type: blur");
             EventTarget eventTarget = event.getEventTarget();
             if (Element.is(eventTarget)) {
                 Element target = Element.as(eventTarget);
@@ -523,21 +514,7 @@ public class DateMaskInputCell extends
 		return value;
 	}
 
-	private void updateViewData(Date value, ViewData viewData, boolean isEditing) {
-		viewData.setText(value);
-		viewData.setEditing(isEditing);
-	}
-
 	private String getFormattedDate(Date date){
-//		final String dateShortStart = DateTimeFormat.getFormat(dateFormat).format(date);
-//
-//		int startDayIndex = dateShortStart.lastIndexOf('-');
-//		int startMonthIndex = dateShortStart.indexOf('-');
-//
-//		String startDate =  dateShortStart.substring(startDayIndex + 1, dateShortStart.length()) + '.' +
-//				dateShortStart.substring(startMonthIndex + 1, startDayIndex) + '.' +
-//				dateShortStart.substring(0, startMonthIndex);
-
 		return DateTimeFormat.getFormat(dateFormat).format(date);
 	}
 
@@ -598,5 +575,4 @@ public class DateMaskInputCell extends
 			}
 		}
 	}
-
 }

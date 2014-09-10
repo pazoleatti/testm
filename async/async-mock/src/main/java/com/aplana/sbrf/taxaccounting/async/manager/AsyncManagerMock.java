@@ -6,8 +6,6 @@ import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskPersistenceException;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskSerializationException;
 import com.aplana.sbrf.taxaccounting.async.task.AsyncTask;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -16,7 +14,6 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 
-import javax.sql.DataSource;
 import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -28,7 +25,7 @@ import java.util.Map;
  */
 @Service
 public class AsyncManagerMock implements AsyncManager {
-    private final Log log = LogFactory.getLog(getClass());
+    // private final Log log = LogFactory.getLog(getClass());
 
     @Autowired
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;

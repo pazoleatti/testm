@@ -1,9 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.BlobDataDao;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.BlobData;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.PreparedStatementCreator;
@@ -61,7 +61,6 @@ public class BlobDataDaoImpl extends AbstractDao implements BlobDataDao {
     }
 
     @Override
-    /*@CacheEvict(value = "DataBlobsCache", key = "#uuid", beforeInvocation = true)*/
     public void delete(String uuid) {
         try{
             getJdbcTemplate().update("DELETE FROM blob_data WHERE id = ?",
@@ -85,7 +84,6 @@ public class BlobDataDaoImpl extends AbstractDao implements BlobDataDao {
     }
 
     @Override
-    /*@CacheEvict(value = "DataBlobsCache", key = "#blobData.uuid", beforeInvocation = true)*/
     public void save(final BlobData blobData) {
         try{
             PreparedStatementCreator psc = new PreparedStatementCreator() {
@@ -112,7 +110,6 @@ public class BlobDataDaoImpl extends AbstractDao implements BlobDataDao {
     }
 
     @Override
-    /*@Cacheable("DataBlobsCache")*/
     public BlobData get(String uuid) {
         try{
             return getJdbcTemplate().queryForObject("SELECT id, name, data, creation_date FROM blob_data WHERE id = ?",

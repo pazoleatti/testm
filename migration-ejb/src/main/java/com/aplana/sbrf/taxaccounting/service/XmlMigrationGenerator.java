@@ -235,7 +235,6 @@ public class XmlMigrationGenerator {
     private Element generateRecordXml(RnuCommonRow row, Document doc) {
         Element record = doc.createElement("record");
 
-        //record.appendChild(getFieldElement("NUM", row.getNum(), doc));
         record.appendChild(getFieldElement("NUMDEAL", row.getNumDeal(), doc, true));
         record.appendChild(getFieldElement("DEFPAPER", row.getDefPaper(), doc, true));
         record.appendChild(getFieldElement("CODECURRENCY", row.getCodecurrency(), doc, true));

@@ -12,7 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static java.util.Arrays.asList;
 
@@ -21,7 +24,7 @@ import static java.util.Arrays.asList;
 public class ConfigurationServiceImpl implements ConfigurationService {
     private final static int MAX_LENGTH = 500;
     private final static String NOT_SET_ERROR = "Не задано значение поля «%s»!";
-    private final static String DUBLICATE_SET_ERROR = "Значение «%s» уже задано!";
+    private final static String DUPLICATE_SET_ERROR = "Значение «%s» уже задано!";
     private final static String ACCESS_READ_ERROR = "Нет прав на просмотр конфигурационных параметров приложения!";
     private final static String ACCESS_WRITE_ERROR = "Нет прав на изменение конфигурационных параметров приложения!";
     private final static String READ_ERROR = "«%s»: Отсутствует доступ на чтение!";
@@ -88,12 +91,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                 List<String> valuesList = model.get(configurationParam, 0);
                 if (valuesList == null || valuesList.isEmpty()) {
                     // Обязательность
-                    // logger.error(NOT_SET_ERROR, configurationParam.getCaption());
                     model.remove(configurationParam);
                 } else {
                     if (configurationParam.isUnique() && valuesList.size() != 1) {
                         // Уникальность
-                        logger.error(DUBLICATE_SET_ERROR, configurationParam.getCaption());
+                        logger.error(DUPLICATE_SET_ERROR, configurationParam.getCaption());
                     }
                 }
             }

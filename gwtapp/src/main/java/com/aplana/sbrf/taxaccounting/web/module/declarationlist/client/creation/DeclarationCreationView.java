@@ -94,7 +94,6 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
 
         initWidget(uiBinder.createAndBindUi(this));
         init();
-        //updateEnabled();
 
         Date current = new Date();
         taxOrganCode.setPeriodDates(current, current);

@@ -1,7 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client;
 
-import java.util.*;
-
 import com.aplana.gwt.client.DoubleStateComposite;
 import com.aplana.gwt.client.ModalWindow;
 import com.aplana.gwt.client.dialog.Dialog;
@@ -21,13 +19,18 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
-import com.google.gwt.event.logical.shared.*;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.*;
+
+import java.util.*;
 
 /**
  * Версионный справочник с выбором значения из линейного или иерархичного опредставления
@@ -171,27 +174,6 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
         style.setRight(0, Style.Unit.PX);
         style.setBottom(0, Style.Unit.PX);
         style.setZIndex(2147483647); // Maximum z-index
-
-        // оставлю для примера
-//        modalPanel.setOnHideHandler(new OnHideHandler<CanHide>() {
-//            @Override
-//            public void OnHide(CanHide modalWindow) {
-//                Dialog.confirmMessage("Закрыть окно выбора из справочника",
-//                        "Закрытие окна приведет к отмене выбора. Продолжить?",
-//                        new DialogHandler() {
-//                            @Override
-//                            public void yes() {
-//                                cancelPick();
-//                                super.yes();
-//                            }
-//
-//                            @Override
-//                            public void no() {
-//                                super.no();
-//                            }
-//                        });
-//            }
-//        });
     }
 
     @UiHandler("pickImageButton")
@@ -235,7 +217,6 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
         if (state.getSetIds() != null) {
             state.getSetIds().clear();
         }
-        //clearSearchPattern();
         if (isHierarchical() && getMultiSelect()) {
             // для иерархического мультивыбора галочка "Выбрать все" находится на окне выбора
             pickAll.setValue(false);
@@ -292,7 +273,6 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
             });
         }
     }
-
 
     private void clearAndSetValues(Collection<Long> longs) {
         state.setSetIds(new LinkedList<Long>(longs));

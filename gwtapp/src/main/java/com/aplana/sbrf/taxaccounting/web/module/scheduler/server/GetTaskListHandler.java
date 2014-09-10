@@ -37,19 +37,6 @@ public class GetTaskListHandler extends AbstractActionHandler<GetTaskListAction,
 
     @Override
     public GetTaskListResult execute(GetTaskListAction getTaskListAction, ExecutionContext executionContext) throws ActionException {
-/*        GetTaskListResult result = new GetTaskListResult();
-        List<TaskSearchResultItem> records = new ArrayList<TaskSearchResultItem>();
-        TaskSearchResultItem item = new TaskSearchResultItem();
-        item.setId((long) 1);
-        item.setName("Test");
-        item.setState("State");
-        item.setNumberOfRepeats(1);
-        item.setRepeatsLeft(2);
-        item.setTimeChanged("11.11.2014");
-        item.setNextFireTime("11.11.2015");
-        records.add(item);
-        result.setTasks(records);
-        return result;*/
         try {
             SimpleDateFormat df = new SimpleDateFormat(DATE_FORMAT);
             GetTaskListResult result = new GetTaskListResult();

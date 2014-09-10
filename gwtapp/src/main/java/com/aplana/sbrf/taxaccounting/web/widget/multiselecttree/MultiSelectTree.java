@@ -1,18 +1,20 @@
 package com.aplana.sbrf.taxaccounting.web.widget.multiselecttree;
 
-import java.util.*;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.editor.client.LeafValueEditor;
-import com.google.gwt.event.logical.shared.*;
+import com.google.gwt.event.logical.shared.OpenHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.*;
+
+import java.util.*;
 
 /**
  * Дерево множественного выбора.
@@ -262,9 +264,9 @@ public abstract class MultiSelectTree<H extends List, T extends MultiSelectTreeI
         NodeList<Element> tableTags = item.getElement().getElementsByTagName("table");
         for (int i = 0; i < tableTags.getLength(); i++) {
             Element tableTag = tableTags.getItem(i);
-            tableTag.addClassName(style.msiTableTag()); // tableTag.getStyle().setWidth(100, Style.Unit.PCT);
+            tableTag.addClassName(style.msiTableTag());
             NodeList<Element> tdTags = tableTag.getElementsByTagName("td");
-            tdTags.getItem(0).addClassName(style.msiImg()); // tdTags.getItem(0).getStyle().setWidth(16, Style.Unit.PX);
+            tdTags.getItem(0).addClassName(style.msiImg());
         }
     }
 

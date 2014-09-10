@@ -2,20 +2,20 @@ package com.aplana.sbrf.taxaccounting.scheduler.core.manager;
 
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.*;
+import com.aplana.sbrf.taxaccounting.scheduler.api.exception.TaskSchedulingException;
 import com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManager;
+import com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManagerLocal;
+import com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManagerRemote;
 import com.aplana.sbrf.taxaccounting.scheduler.api.task.UserTask;
 import com.aplana.sbrf.taxaccounting.scheduler.api.task.UserTaskRemote;
+import com.aplana.sbrf.taxaccounting.scheduler.core.entity.TaskContextEntity;
+import com.aplana.sbrf.taxaccounting.scheduler.core.persistence.TaskPersistenceServiceLocal;
+import com.aplana.sbrf.taxaccounting.scheduler.core.service.TaskServiceLocal;
 import com.aplana.sbrf.taxaccounting.scheduler.core.task.TaskExecutorRemoteHome;
 import com.aplana.sbrf.taxaccounting.scheduler.core.utils.TaskUtils;
 import com.ibm.websphere.scheduler.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.aplana.sbrf.taxaccounting.scheduler.api.exception.TaskSchedulingException;
-import com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManagerLocal;
-import com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManagerRemote;
-import com.aplana.sbrf.taxaccounting.scheduler.core.entity.TaskContextEntity;
-import com.aplana.sbrf.taxaccounting.scheduler.core.persistence.TaskPersistenceServiceLocal;
-import com.aplana.sbrf.taxaccounting.scheduler.core.service.TaskServiceLocal;
 
 import javax.annotation.Resource;
 import javax.ejb.*;
@@ -69,8 +69,6 @@ public class TaskManagerBean implements TaskManager {
             taskInfo.setStartTimeInterval(taskContext.getSchedule());
             taskInfo.setRepeatInterval(taskContext.getSchedule());
             taskInfo.setName(taskContext.getTaskName());
-            //Параметр для длительных задач
-            //taskInfo.setQOS(com.ibm.websphere.scheduler.TaskData.QOS_ATLEASTONCE);
 
             TaskStatus taskStatus = scheduler.create(taskInfo);
 

@@ -78,10 +78,6 @@ public class RefBookUtils extends AbstractDao {
                     }
                 }
 
-                /*if (a.getId() == 164L && !Arrays.asList(DepartmentType.values()).contains(DepartmentType.fromCode(value.getNumberValue().intValue()))){
-                   errors.add("Атрибута справочника \"Тип подразделенеия\" должно принимать одно из значений: 1,2,3,4,5");
-                }*/
-
                 if (a.getAttributeType().equals(RefBookAttributeType.STRING) && value.getStringValue() != null && a.getMaxLength() != null && value.getStringValue().length() > a.getMaxLength()) {
                     errors.add("\"" + a.getName() + "\": значение атрибута превышает максимально допустимое " + a.getMaxLength() + "!");
                 }

@@ -67,18 +67,6 @@ public class DeclarationTemplateImpexServiceImpl implements
 			    zos.write(dtJrxm.getBytes(ENCODING));
 			zos.closeEntry();
 
-			// content
-            //Убрал в связи с тем, что ввели версионирование
-			/*ze = new ZipEntry(CONTENT_FILE);
-			zos.putNextEntry(ze);
-			DeclarationTemplateContent dtc = new DeclarationTemplateContent();
-			dtc.setType(dt.getType());
-			//dtc.setVersion(dt.getVersion());
-			JAXBContext jaxbContext = JAXBContext.newInstance(DeclarationTemplateContent.class);
-			Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
-			jaxbMarshaller.marshal(dtc, zos);
-			zos.closeEntry();*/
-			
 			zos.finish();
 		} catch (Exception e) {
 			throw new ServiceException("Не удалось экспортировать шаблон", e);
@@ -108,15 +96,6 @@ public class DeclarationTemplateImpexServiceImpl implements
             if ("1.0".equals(version)){
             	DeclarationTemplate dt = declarationTemplateDao.get(id);
 
-				/*if (files.get(CONTENT_FILE).length != 0) {
-					DeclarationTemplateContent dtc;
-					JAXBContext jaxbContext = JAXBContext.newInstance(DeclarationTemplateContent.class);
-					Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-					dtc = (DeclarationTemplateContent) jaxbUnmarshaller.
-							unmarshal(new ByteArrayInputStream(files.get(CONTENT_FILE)));
-					dt.setType(dtc.getType());
-					//dt.setVersion(dtc.getVersion());
-				}*/
 				if (files.get("script.groovy").length != 0) {
                     byte[] bytes = files.get("script.groovy");
 					dt.setCreateScript(new String(bytes, 0, bytes.length, Charset.forName("UTF-8")));

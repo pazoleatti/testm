@@ -1,7 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.server;
 
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
+import com.aplana.sbrf.taxaccounting.service.FormDataSearchService;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.FillFormFieldsAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.FillFormFieldsResult;
@@ -12,7 +17,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static java.util.Arrays.asList;
 
@@ -38,9 +46,6 @@ public class FillFormFieldsHandler extends AbstractActionHandler<FillFormFieldsA
 
     @Autowired
     private PeriodService periodService;
-
-	@Autowired
-	private SourceService departmentFormTypeService;
 
     @Autowired
     FormDataAccessService dataAccessService;
@@ -82,6 +87,5 @@ public class FillFormFieldsHandler extends AbstractActionHandler<FillFormFieldsA
 
     @Override
     public void undo(FillFormFieldsAction action, FillFormFieldsResult result, ExecutionContext executionContext) throws ActionException {
-
     }
 }

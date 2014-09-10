@@ -6,16 +6,16 @@ import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.client.PdfViewerView;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.shared.Pdf;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
-import com.google.gwt.event.dom.client.*;
-import com.google.gwt.uibinder.client.*;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiConstructor;
+import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.*;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Label;
-import com.google.inject.*;
-import com.gwtplatform.mvp.client.*;
+import com.google.inject.Inject;
+import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 import java.util.Date;
-
 
 public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHandlers>
 		implements DeclarationDataPresenter.MyView{
@@ -98,7 +98,6 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 
 	@Override
 	public void showRecalculateButton(boolean show) {
-		//dateBox.setVisible(show);
 		recalculateButton.setVisible(show);
 		dateBox.setEnabled(show);
 	}

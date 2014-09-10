@@ -13,7 +13,8 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.PopupViewWithUiHandlers;
@@ -58,7 +59,6 @@ public class EditCorrectionDialogView extends PopupViewWithUiHandlers<EditCorrec
 
     @Override
     public void setTaxType(TaxType taxType) {
-//        period.setFilter(taxType.getCode() + "=1");
     }
 
     @Override
@@ -85,7 +85,7 @@ public class EditCorrectionDialogView extends PopupViewWithUiHandlers<EditCorrec
             @Override
             public void yes() {
                 hide();
-                super.yes();    //To change body of overridden methods use File | Settings | File Templates.
+                super.yes();
             }
         });
     }

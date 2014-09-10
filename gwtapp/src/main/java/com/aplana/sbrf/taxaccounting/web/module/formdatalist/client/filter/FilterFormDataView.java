@@ -117,16 +117,11 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
     @Override
     public void setDataFilter(FormDataFilter formDataFilter) {
         driver.edit(formDataFilter);
-        // DepartmentPiker не реализует asEditor, поэтому сетим значение руками.
-        //departmentPicker.setValue(formDataFilter.getDepartmentIds());
     }
-
 
     @Override
     public FormDataFilter getDataFilter() {
     	FormDataFilter filter = driver.flush();
-        // DepartmentPiker не реализует asEditor, поэтому сетим значение руками.
-    	//filter.setDepartmentIds(departmentPicker.getValue());
         return filter;
     }
 
@@ -141,7 +136,6 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
 		returnState.setValue(null);
 		returnState.setAcceptableValues(list);
 	}
-
 
 	@Override
 	public void setReportPeriods(List<ReportPeriod> reportPeriods) {

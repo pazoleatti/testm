@@ -173,7 +173,6 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
                         getView().init();
                         getView().setAcceptableReportPeriods(result.getReportPeriods());
 
-                        // setSelectedFilterValues(filter);
                         // в текущей постановке фильтры не передаются
                         getView().setFilterData(new FormDataFilter());
 
@@ -204,20 +203,4 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
     public TaxType getTaxType() {
         return taxType;
     }
-    //	private void setSelectedFilterValues(FormDataFilter formDataFilter){
-//		FormDataFilter filter = new FormDataFilter();
-//		if(formDataFilter.getFormTypeId() != null){
-//			 filter.setFormTypeId(formDataFilter.getFormTypeId());
-//		}
-//		if(formDataFilter.getFormDataKind() != null){
-//			filter.setFormDataKind(formDataFilter.getFormDataKind());
-//		}
-//		if(formDataFilter.getDepartmentIds()!= null && formDataFilter.getDepartmentIds().size() == 1){
-//			filter.setDepartmentIds(formDataFilter.getDepartmentIds());
-//		}
-//		if (formDataFilter.getReportPeriodIds()!=null && formDataFilter.getReportPeriodIds().size() == 1){
-//			filter.setReportPeriodIds(formDataFilter.getReportPeriodIds());
-//		}
-//		getView().setFilterData(filter);
-//	}
 }

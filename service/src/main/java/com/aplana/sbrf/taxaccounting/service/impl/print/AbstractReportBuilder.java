@@ -57,7 +57,6 @@ public abstract class AbstractReportBuilder {
 
     protected void cellAlignment() {
         for (Map.Entry<Integer, Integer> width : widthCellsMap.entrySet()) {
-            //logger.debug("----n" + width.getKey() + ":" + width.getValue());
             sheet.setColumnWidth(width.getKey(), width.getValue() *256 *2);
         }
     }

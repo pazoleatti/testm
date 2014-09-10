@@ -2,7 +2,10 @@ package com.aplana.sbrf.taxaccounting.web.widget.style;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,10 +45,4 @@ public class DropdownButton extends LinkButton {
     public void clear() {
         pnl.clear();
     }
-
-//    @UiChild(limit = 1)
-//    public void addWidget(IsWidget widget) {
-//        pnl.add(widget);
-//        addItems(widget);
-//    }
 }

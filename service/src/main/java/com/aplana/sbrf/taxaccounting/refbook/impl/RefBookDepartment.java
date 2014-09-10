@@ -50,12 +50,6 @@ public class RefBookDepartment implements RefBookDataProvider {
     private static final String DEPARTMENT_NAME_ATTRIBUTE = "NAME";
     private static final String DEPARTMENT_PARENT_ATTRIBUTE = "PARENT_ID";
     private static final String DEPARTMENT_ACTIVE_NAME = "IS_ACTIVE";
-    private static final String INCOME_PERIOD_ATTRIBUTE_NAME = "ACCOUNT_PERIOD_ID";
-    private static final long INCOME_PERIOD_ATTRIBUTE_ID = 1072;
-    private static final String WARN_MESSAGE_TARGET =
-            "Внимание! Форма %s подразделения %s при сохранении будет являться приемником для формы %s подразделения %s, относящимся к разным территориальным банкам";
-    private static final String WARN_MESSAGE_SOURCE =
-            "Внимание! Форма %s подразделения %s при сохранении будет являться источником для формы %s подразделения %s, относящимся к разным территориальным банкам";
 
     @Autowired
     RefBookDao refBookDao;
@@ -104,7 +98,6 @@ public class RefBookDepartment implements RefBookDataProvider {
     @Autowired
     private LockDataService lockService;
 
-
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
         return refBookDepartmentDao.getRecords(pagingParams, filter, sortAttribute, isSortAscending);
@@ -143,7 +136,7 @@ public class RefBookDepartment implements RefBookDataProvider {
     @Override
     public Long getRowNum(Date version, Long recordId,
                           String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
-        throw new UnsupportedOperationException();//return refBookDepartmentDao.getRowNum(recordId, filter, sortAttribute, isSortAscending);
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -544,12 +537,6 @@ public class RefBookDepartment implements RefBookDataProvider {
                 if (!uniqueIds.isEmpty()){
                     provider.deleteRecordVersions(logger, uniqueIds, false);
                 }
-                //Когда атрибуты появятся
-                /*provider = rbFactory.getDataProvider(RefBook.DEPARTMENT_CONFIG_PROPERTY);
-                uniqueIds = provider.getUniqueRecordIds(calendar.getTime(), String.format(FILTER_BY_DEPARTMENT, depId));
-                if (!uniqueIds.isEmpty()){
-                    provider.deleteRecordVersions(logger, uniqueIds, false);
-                } */
 
                 deletePeriods(depId);
 
@@ -801,7 +788,6 @@ public class RefBookDepartment implements RefBookDataProvider {
         List<DepartmentFormType> departmentFormTypesDest = sourceService.getFormDestinations(department.getId(), 0, null, null, null);
         List<DepartmentDeclarationType> departmentDeclarationTypesDest = sourceService.getDeclarationDestinations(department.getId(), 0, null, null, null);
         List<DepartmentFormType> depFTSources = sourceService.getDFTSourcesByDFT(department.getId(), 0 , null, null, null);
-        //List<DepartmentFormType> depDTSources = sourceService.getDFTSourceByDDT(department.getId(), 0);
         //TODO : Доделать после того как Денис сделает источники-приемники
         for (DepartmentFormType departmentFormType : departmentFormTypesDest){
             logger.warn(String.format("назначение является источником для %s - %s - %s приемника",
@@ -835,7 +821,6 @@ public class RefBookDepartment implements RefBookDataProvider {
         for (Long id : reportPeriods){
             periodService.removePeriodWithLog(id.intValue(), null, Arrays.asList(depId), null, null);
         }
-
     }
 
     private void checkCycle(Department department, Department parentDep, Logger logger){
@@ -845,13 +830,6 @@ public class RefBookDepartment implements RefBookDataProvider {
         if (isChild)
             logger.error("Подразделение %s не может быть указано как родительское, т.к. входит в иерархию подчинённости подразделения %s",
                     parentDep.getName(), department.getName());
-
-        /*List<Integer> parentIds = departmentService.getAllParentIds(department.getId());
-        //>2 т.к. запрос всегда как минимум возвращает переданный id и подразделение Банк
-        boolean isParent = !parentIds.isEmpty() && parentIds.size() > 2 && parentIds.contains(department.getId());
-        if (isParent)
-            logger.error("Подразделение %s не может быть включено в орг. структуру подразделения %s, т.к. уже содержит его в своей орг. структуре!",
-                    parentDep.getName(), department.getName());*/
     }
 
     private String assembleMessage(Map<String, RefBookValue> records){

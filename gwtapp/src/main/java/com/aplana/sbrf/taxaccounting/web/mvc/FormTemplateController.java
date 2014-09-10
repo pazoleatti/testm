@@ -5,7 +5,10 @@ import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.FormTemplateImpexService;
+import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.MainOperatingService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
@@ -111,7 +114,6 @@ public class FormTemplateController {
 
 	@ExceptionHandler(Exception.class)
 	public void exceptionHandler(Exception e, final HttpServletResponse response) {
-        /*response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);*/
 		response.setContentType("text/plain");
 		response.setCharacterEncoding("UTF-8");
 		logger.warn(e.getLocalizedMessage(), e);

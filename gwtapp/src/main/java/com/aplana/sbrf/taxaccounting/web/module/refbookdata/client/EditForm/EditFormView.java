@@ -27,7 +27,10 @@ import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> implements EditFormPresenter.MyView{
 
@@ -128,7 +131,6 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
                 }
             }
         }
-
     }
 
     @Override
@@ -283,7 +285,6 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
                         isNeedToReload = false;
                         rbw.reload();
                     }
-                    //rbw.setPeriodDates(versionStart.getValue(), versionEnd.getValue());
 					rbw.setDereferenceValue(recordValue.getDereferenceValue());
 					rbw.setSingleValue(recordValue.getReferenceValue());
 				} else if(w.getValue() instanceof HasText) {
@@ -291,13 +292,13 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
                         if (w.getValue() instanceof CheckBox) {
                             if(recordValue.getValue() == null){
                                 w.getValue().setValue(false);
-                            } else if(BigDecimal.ZERO.equals((BigDecimal) recordValue.getValue())){
+                            } else if(BigDecimal.ZERO.equals(recordValue.getValue())){
                                 w.getValue().setValue(false);
                             } else {
                                 w.getValue().setValue(true);
                             }
                         } else {
-                            w.getValue().setValue(((BigDecimal) recordValue.getValue()) == null ? ""
+                            w.getValue().setValue((recordValue.getValue()) == null ? ""
                                     : ((BigDecimal) recordValue.getValue()).toPlainString());
                         }
                     } else {
@@ -380,8 +381,6 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 						value.setDateValue(date);
 						break;
 					case REFERENCE:
-                        //dloshkarev: так не работало для окато и октмо
-                        //Long longValue = field.getValue().getValue() == null ? null : (Long)field.getValue().getValue();
                         Long longValue = (field.getValue().getValue() == null || ((List<Long>) field.getValue().getValue()).isEmpty()) ? null : ((List<Long>)field.getValue().getValue()).get(0);
 						checkRequired(field.getKey(), longValue);
 						value.setAttributeType(RefBookAttributeType.REFERENCE);
@@ -435,7 +434,6 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
                 }
             }
         }
-
     }
 
     @Override

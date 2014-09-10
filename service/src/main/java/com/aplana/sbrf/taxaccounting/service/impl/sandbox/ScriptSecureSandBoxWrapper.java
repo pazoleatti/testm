@@ -3,27 +3,16 @@ package com.aplana.sbrf.taxaccounting.service.impl.sandbox;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import javax.script.*;
 import java.io.FilePermission;
 import java.io.Reader;
 import java.lang.reflect.ReflectPermission;
 import java.net.MalformedURLException;
-import java.security.AccessControlContext;
-import java.security.AccessController;
-import java.security.CodeSource;
-import java.security.Permission;
-import java.security.Permissions;
-import java.security.PrivilegedAction;
-import java.security.ProtectionDomain;
+import java.security.*;
 import java.security.cert.Certificate;
 import java.util.Collection;
 import java.util.PropertyPermission;
 import java.util.logging.LoggingPermission;
-
-import javax.script.Bindings;
-import javax.script.ScriptContext;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineFactory;
-import javax.script.ScriptException;
 
 public class ScriptSecureSandBoxWrapper implements ScriptEngine {
 
@@ -33,14 +22,12 @@ public class ScriptSecureSandBoxWrapper implements ScriptEngine {
 	private AccessControlContext accessControlContext;
 	
 	public ScriptSecureSandBoxWrapper(){
-		
 	}
 	
 	public ScriptSecureSandBoxWrapper(ScriptEngine scriptEngine) throws MalformedURLException {
 		this.scriptEngine = scriptEngine;
 		setPermissions(null);
 	}
-	
 
 	@Override
 	public Bindings createBindings() {
@@ -65,9 +52,6 @@ public class ScriptSecureSandBoxWrapper implements ScriptEngine {
 					logger.error(e.getMessage(), e);
 				}
 				return null;
-				//AccessControlContext acc = (AccessControlContext) sm.getSecurityContext();
-				/*GroovyCodeSource groovyCodeSource = new GroovyCodeSource(script, "accessScript", "/restrictedScript");
-				return new GroovyShell().evaluate(groovyCodeSource);*/
 			}
 		},accessControlContext);
 	}
@@ -151,8 +135,7 @@ public class ScriptSecureSandBoxWrapper implements ScriptEngine {
 				perm.add(p);
 			}
 		}
-		
-		//perm.add(new GroovyCodeSourcePermission("/restrictedScript"));
+
 		perm.add(new RuntimePermission("accessDeclaredMembers"));
 		perm.add(new FilePermission("<<ALL FILES>>", "read,write"));
 		perm.add(new PropertyPermission("ANTLR_DO_NOT_EXIT", "read"));
@@ -176,11 +159,5 @@ public class ScriptSecureSandBoxWrapper implements ScriptEngine {
 		
 		accessControlContext = new AccessControlContext(
 				new ProtectionDomain[]{protectionDomain});
-		/*AccessControlContext acc = (AccessControlContext)AccessController.getContext();
-		AccessController.checkPermission(new GroovyCodeSourcePermission("/groovy/script"));
-		accessControlContext.checkPermission(new GroovyCodeSourcePermission("/groovy/script"));*/
-		
-		
 	}
-
 }

@@ -1,19 +1,17 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
-import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookOktmoDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookOktmoDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.util.BDUtils;
 import com.aplana.sbrf.taxaccounting.utils.SimpleDateUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,9 +56,6 @@ public class RefBookOktmoProvider implements RefBookDataProvider {
 
     @Autowired
     LogEntryService logEntryService;
-
-    @Autowired
-    private BDUtils dbUtils;
 
     private final static SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
@@ -157,73 +152,6 @@ public class RefBookOktmoProvider implements RefBookDataProvider {
     public List<Long> createRecordVersion(Logger logger, Date versionFrom, Date versionTo, List<RefBookRecord> records) {
         //TODO dloshkarev: надо все перепроверять. Т.к пока эти справочники read only, то эти методы не нужны
         throw new UnsupportedOperationException();
-        /*try {
-            RefBook refBook = rbDao.get(refBookId);
-            List<RefBookAttribute> attributes = refBook.getAttributes();
-            List<Long> recordIds = new ArrayList<Long>();
-
-            long countIds = 0;
-            for (RefBookRecord record : records) {
-                if (record.getRecordId() == null) {
-                    countIds++;
-                } else {
-                    recordIds.add(record.getRecordId());
-                }
-            }
-
-            List<String> errors;
-
-            //Проверка обязательности заполнения записей справочника
-            errors = refBookUtils.checkFillRequiredRefBookAtributes(attributes, records);
-            if (errors.size() > 0){
-                throw new ServiceException("Поля " + errors.toString() + " являются обязательными для заполнения");
-            }
-
-            //Проверка корректности значений атрибутов
-            errors = refBookUtils.checkRefBookAtributeValues(attributes, records);
-            if (errors.size() > 0){
-                for (String error : errors) {
-                    logger.error(error);
-                }
-                throw new ServiceException("Обнаружено некорректное значение атрибута");
-            }
-
-            //Проверка корректности
-            List<Pair<Long,String>> matchedRecords = dao.getMatchedRecordsByUniqueAttributes(getTableName(), attributes, records);
-            if (matchedRecords == null || matchedRecords.size() == 0) {
-                //Проверка ссылочных значений
-                boolean isReferencesOk = refBookUtils.isReferenceValuesCorrect(getTableName(), versionFrom, attributes, records);
-                if (!isReferencesOk) {
-                    logger.info("Период актуальности выбранного значения меньше периода актуальности версии");
-                }
-            } else {
-                //Проверка на пересечение версий у записей справочника, в которых совпали уникальные атрибуты
-                dao.checkConflictValuesVersions(getTableName(), matchedRecords, versionFrom, versionTo);
-            }
-
-            if (recordIds.size() > 0 && dao.isVersionsExist(getTableName(), recordIds, versionFrom)) {
-                throw new ServiceException("Версия с указанной датой актуальности уже существует");
-            }
-
-            for (RefBookRecord record : records) {
-                //Проверка пересечения версий
-                if (record.getRecordId() != null) {
-                    crossVersionsProcessing(dao.checkCrossVersions(getTableName(), record.getRecordId(), versionFrom, versionTo, null),
-                            versionFrom, versionTo, logger);
-                }
-            }
-
-            //Создание настоящей и фиктивной версии
-            return createVersions(versionFrom, versionTo, records, countIds, logger);
-        } catch (Exception e) {
-            if (logger != null) {
-                logger.error(e);
-                throw new ServiceLoggerException("Версия не создана, обнаружены фатальные ошибки!",
-                        logEntryService.save(logger.getEntries()));
-            } else {
-                throw new ServiceException("Версия не создана, обнаружены фатальные ошибки!");
-            }
-        }*/
     }
 
     /**
@@ -263,39 +191,6 @@ public class RefBookOktmoProvider implements RefBookDataProvider {
             throw new ServiceException("Обнаружено пересечение указанного срока актуальности с существующей версией!");
         }
     }
-
-//    private List<Long> createVersions(Date versionFrom, Date versionTo, List<RefBookRecord> records, long countIds, Logger logger) {
-//        //Генерим record_id для новых записей. Нужно для связи настоящей и фиктивной версий
-//        List<Long> generatedIds = dbUtils.getNextIds(BDUtils.Sequence.REF_BOOK_OKTMO, countIds);
-//
-//        int counter = 0;
-//        for (RefBookRecord record : records) {
-//            RefBookRecordVersion nextVersion = null;
-//            if (record.getRecordId() != null) {
-//                nextVersion = dao.getNextVersion(getTableName(), record.getRecordId(), versionFrom);
-//            } else {
-//                record.setRecordId(generatedIds.get(counter));
-//                counter++;
-//            }
-//            if (versionTo == null) {
-//                if (nextVersion != null && logger != null) {
-//                    logger.info("Установлена дата окончания актуальности версии "+sdf.format(SimpleDateUtils.addDayToDate(nextVersion.getVersionStart(), -1))+" в связи с наличием следующей версии");
-//                }
-//            } else {
-//                if (nextVersion == null) {
-//                    //Следующая версия не существует - создаем фиктивную версию
-//                    dao.createFakeRecordVersion(getTableName(), record.getRecordId(), SimpleDateUtils.addDayToDate(versionTo, 1));
-//                } else {
-//                    int days = SimpleDateUtils.daysBetween(versionTo, nextVersion.getVersionStart());
-//                    if (days != 1) {
-//                        dao.createFakeRecordVersion(getTableName(), record.getRecordId(), SimpleDateUtils.addDayToDate(versionTo, 1));
-//                    }
-//                }
-//            }
-//        }
-//
-//        return dao.createRecordVersion(getTableName(), refBookId, versionFrom, VersionedObjectStatus.NORMAL, records);
-//    }
 
     /**
      * Обновляет значение результата для пересекаемых версий, конфликт которых решается изменением соседних
@@ -343,77 +238,6 @@ public class RefBookOktmoProvider implements RefBookDataProvider {
     public void updateRecordVersion(Logger logger, Long uniqueRecordId, Date versionFrom, Date versionTo, Map<String, RefBookValue> values) {
         //TODO dloshkarev: надо все перепроверять. Т.к пока эти справочники read only, то эти методы не нужны
         throw new UnsupportedOperationException();
-        /*try {
-            boolean isJustNeedValuesUpdate = (versionFrom == null && versionTo == null);
-
-            List<RefBookAttribute> attributes = rbDao.getAttributes(refBookId);
-            //Получаем идентификатор записи справочника без учета версий
-            Long recordId = dao.getRecordId(getTableName(), uniqueRecordId);
-
-            //Проверка обязательности заполнения записей справочника
-            List<String> errors= refBookUtils.checkFillRequiredRefBookAtributes(attributes, values);
-            if (errors.size() > 0){
-                throw new ServiceException("Поля " + errors.toString() + " являются обязательными для заполнения");
-            }
-
-            RefBookRecordVersion oldVersionPeriod = dao.getRecordVersionInfo(getTableName(), uniqueRecordId);
-
-            boolean isRelevancePeriodChanged = false;
-            if (!isJustNeedValuesUpdate) {
-                isRelevancePeriodChanged = !versionFrom.equals(oldVersionPeriod.getVersionStart())
-                        || (versionTo != null && !versionTo.equals(oldVersionPeriod.getVersionEnd()))
-                        || (oldVersionPeriod.getVersionEnd() != null && !oldVersionPeriod.getVersionEnd().equals(versionTo));
-
-                if (isRelevancePeriodChanged) {
-                    //Проверка пересечения версий
-                    crossVersionsProcessing(dao.checkCrossVersions(getTableName(), recordId, versionFrom, versionTo, uniqueRecordId),
-                            versionFrom, versionTo, logger);
-                }
-
-                //Проверка использования
-                boolean isReferenceToVersionExists = dao.isVersionUsed(getTableName(), refBookId, uniqueRecordId, versionFrom);
-                if (isReferenceToVersionExists) {
-                    throw new ServiceException("Обнаружено использование версии в других точках запроса");
-                }
-            }
-
-            //Обновление периода актуальности
-            if (isRelevancePeriodChanged) {
-                List<Long> uniqueIdAsList = Arrays.asList(uniqueRecordId);
-                //Обновляем дату начала актуальности
-                refBookUtils.updateVersionRelevancePeriod(getTableName(), uniqueRecordId, versionFrom);
-                //Получаем запись - окончание версии. Если = null, то версия не имеет конца
-                List<Long> relatedVersions = dao.getRelatedVersions(getTableName(), uniqueIdAsList);
-                if (!relatedVersions.isEmpty() && relatedVersions.size() > 1) {
-                    throw new ServiceException("Обнаружено несколько фиктивных версий");
-                }
-                if (relatedVersions.isEmpty() && versionTo != null) {
-                    //Создаем новую фиктивную версию - дату окончания
-                    dao.createFakeRecordVersion(getTableName(), recordId, SimpleDateUtils.addDayToDate(versionTo, 1));
-                }
-
-                if (!relatedVersions.isEmpty() && versionTo == null) {
-                    //Удаляем фиктивную запись - теперь у версии нет конца
-                    refBookUtils.deleteRecordVersions(getTableName(), relatedVersions);
-                }
-
-                if (!relatedVersions.isEmpty() && versionTo != null) {
-                    //Изменяем существующую фиктивную версию
-                    refBookUtils.updateVersionRelevancePeriod(getTableName(), relatedVersions.get(0), versionTo);
-                }
-            }
-
-            //Обновление значений атрибутов версии
-            dao.updateRecordVersion(getTableName(), refBookId, uniqueRecordId, values);
-        } catch (Exception e) {
-            if (logger != null) {
-                logger.error(e);
-                throw new ServiceLoggerException("Версия не сохранена, обнаружены фатальные ошибки!",
-                        logEntryService.save(logger.getEntries()));
-            } else {
-                throw new ServiceException("Версия не сохранена, обнаружены фатальные ошибки!");
-            }
-        }*/
     }
 
     @Override
@@ -430,21 +254,6 @@ public class RefBookOktmoProvider implements RefBookDataProvider {
         }
     }
 
-//    private void checkChildren(List<Long> uniqueRecordIds) {
-//        //Если есть дочерние элементы - удалять нельзя
-//        List<Date> parentVersions = dao.hasChildren(getTableName(), uniqueRecordIds);
-//        if (parentVersions != null && !parentVersions.isEmpty()) {
-//            StringBuilder versions = new StringBuilder();
-//            for (int i=0; i<parentVersions.size(); i++) {
-//                versions.append(sdf.format(parentVersions));
-//                if (i < parentVersions.size() - 1) {
-//                    versions.append(", ");
-//                }
-//            }
-//            throw new ServiceException("Удаление версии от "+ versions +" невозможно, существует дочерние элементы!");
-//        }
-//    }
-
     @Override
     public void deleteAllRecords(Logger logger, List<Long> uniqueRecordIds) {
         //TODO реализовать когда нужен будет импорт
@@ -460,27 +269,6 @@ public class RefBookOktmoProvider implements RefBookDataProvider {
     public void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds) {
         //TODO dloshkarev: надо все перепроверять. Т.к пока эти справочники read only, то эти методы не нужны
         throw new UnsupportedOperationException();
-        /*try {
-            boolean isReferenceToVersionExists = dao.isVersionUsed(getTableName(), refBookId, uniqueRecordIds);
-            if (isReferenceToVersionExists) {
-                throw new ServiceException("Удаление невозможно, обнаружено использование элемента справочника!");
-            }
-            RefBook refBook = rbDao.get(refBookId);
-            if (refBook.isHierarchic()) {
-                checkChildren(uniqueRecordIds);
-            }
-            List<Long> fakeVersionIds = dao.getRelatedVersions(getTableName(), uniqueRecordIds);
-            uniqueRecordIds.addAll(fakeVersionIds);
-            refBookUtils.deleteRecordVersions(getTableName(), uniqueRecordIds);
-        } catch (Exception e) {
-            if (logger != null) {
-                logger.error(e);
-                throw new ServiceLoggerException("Версия элемента справочника не удалена, обнаружены фатальные ошибки!",
-                        logEntryService.save(logger.getEntries()));
-            } else {
-                throw new ServiceException("Версия элемента справочника не удалена, обнаружены фатальные ошибки!");
-            }
-        }*/
     }
 
     @Override

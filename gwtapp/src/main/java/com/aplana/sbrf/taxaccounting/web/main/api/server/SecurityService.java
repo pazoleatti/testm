@@ -17,9 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class SecurityService {
 
-	/*@Autowired
-	private TAUserService userService;*/
-	
 	/**
 	 * Получает текущую информацию о клиенте
 	 * TODO: добавить кэширование
@@ -33,12 +30,8 @@ public class SecurityService {
 		// TODO: (sgoryachkin) Инфу о пользователе нужно получать не из ДАО, 
 		// а из Authentication.credentials и Authentication.details
 		// ДАО должен использоваться только при авторизации
-		/*userInfo.setUser(userService.getUser(auth.getName()));
-		userInfo.setIp(((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
-				.getRequest().getRemoteAddr());*/
         UserAuthenticationToken authenticationToken = ((UserAuthenticationToken)auth.getPrincipal());
 
         return authenticationToken!=null?authenticationToken.getUserInfo():null;
 	}
-
 }

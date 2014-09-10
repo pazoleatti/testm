@@ -31,7 +31,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
     private final Log logger = LogFactory.getLog(getClass());
 
     private int rowNumber = 9;
-    /*private int cellNumber = 0;*/
+
     private boolean isShowChecked;
 
     private CellStyleBuilder cellStyleBuilder;
@@ -293,10 +293,8 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                 if(headerCell.getColSpan() > 1){
                     i = i + headerCell.getColSpan() - 1;
                 }
-                /*cellNumber = row.getLastCellNum();*/
             }
             rowNumber++;
-            /*cellNumber = 0;*/
         }
     }
 
@@ -394,7 +392,6 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
             crsP.setCellStyle(cs);
             crsS.setCellStyle(cs);
             crsFio.setCellStyle(cs);
-			/*sheet.shiftRows(rowNumber, sheet.getLastRowNum(), 1);*/
             rowNumber++;
         }
 
@@ -424,9 +421,6 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         sheet.setAutobreaks(true);
         sheet.getPrintSetup().setFitHeight((short) 0);
         sheet.getPrintSetup().setFitWidth((short) 1);
-        /*sheet.getPrintSetup().setScale((short) 400);*/
-        /*sheet.getPrintSetup().setPaperSize(XSSFPrintSetup.A4_PAPERSIZE);*/
-        /*((XSSFSheet)sheet).setRowBreak(2);*/
     }
 
     /*
@@ -477,12 +471,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
             RegionUtil.setBorderTop(CellStyle.BORDER_THICK, region, sheet, workBook);
             RegionUtil.setBorderRight(CellStyle.BORDER_THICK, region, sheet, workBook);
             RegionUtil.setBorderLeft(CellStyle.BORDER_THICK, region, sheet, workBook);
-        }/*else {
-            RegionUtil.setBorderBottom(CellStyle.BORDER_THIN, region, sheet, workBook);
-            RegionUtil.setBorderTop(CellStyle.BORDER_THIN, region, sheet, workBook);
-            RegionUtil.setBorderRight(CellStyle.BORDER_THIN, region, sheet, workBook);
-            RegionUtil.setBorderLeft(CellStyle.BORDER_THIN, region, sheet, workBook);
-        }*/
+        }
         sheet.addMergedRegion(region);
     }
 
@@ -520,6 +509,4 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         }
         c.setCellValue(richTextString);
     }
-
-
 }
