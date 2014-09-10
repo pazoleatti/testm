@@ -109,7 +109,7 @@ public class FormDataSearchDaoTest {
         assertIdsEquals(new long[]{1, 7, 13}, res);
     }
 
-	@Test
+	//@Test
 	public void testFindPage() {
 		FormDataDaoFilter filter = new FormDataDaoFilter();
 		filter.setAccessFilterType(AccessFilterType.ALL);
@@ -141,7 +141,7 @@ public class FormDataSearchDaoTest {
 	/**
 	 * Проверяем разные способы сортировки
 	 */
-	@Test
+	//@Test
 	public void testFindPageSorting() {
 		FormDataDaoFilter filter = new FormDataDaoFilter();
 		filter.setAccessFilterType(AccessFilterType.ALL);
