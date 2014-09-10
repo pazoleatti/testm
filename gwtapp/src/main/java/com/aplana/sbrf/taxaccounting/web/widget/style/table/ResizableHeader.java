@@ -208,7 +208,7 @@ public abstract class ResizableHeader<T> extends Header<String> {
         }
     }
 
-    private class ColumnResizeHelper implements NativePreviewHandler {
+    private final class ColumnResizeHelper implements NativePreviewHandler {
         private final HandlerRegistration handler = Event.addNativePreviewHandler(this);
         private final DivElement resizeLine = document.createDivElement();
         private final Style resizeLineStyle = resizeLine.getStyle();
