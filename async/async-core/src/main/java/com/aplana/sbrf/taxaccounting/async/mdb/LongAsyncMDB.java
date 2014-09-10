@@ -23,7 +23,7 @@ import java.util.Map;
  */
 @MessageDriven(activationConfig = {
         @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
-        @ActivationConfigProperty(propertyName = "destination", propertyValue = "jms/shortAsyncQueue")})
+        @ActivationConfigProperty(propertyName = "destination", propertyValue = "jms/longAsyncQueue")})
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class LongAsyncMDB implements MessageListener {
 
