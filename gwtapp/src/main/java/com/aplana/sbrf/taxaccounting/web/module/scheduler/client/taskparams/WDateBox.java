@@ -26,11 +26,7 @@ public class WDateBox extends ParamWidget {
 
     @Override
     boolean isValid() {
-        if (isRequired() && datePicker.getValue() == null){
-            return false;
-        } else{
-            return true;
-        }
+        return isRequired() && datePicker.getValue() == null;
     }
 
     public void setWidth(String width){
