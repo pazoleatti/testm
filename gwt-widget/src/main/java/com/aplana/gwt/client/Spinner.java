@@ -207,7 +207,7 @@ public class Spinner extends DoubleStateComposite
 	 * @return текущее значение
 	 */
 	@Override
-	public Integer getValue() {
+	public final Integer getValue() {
 		return value;
 	}
 
