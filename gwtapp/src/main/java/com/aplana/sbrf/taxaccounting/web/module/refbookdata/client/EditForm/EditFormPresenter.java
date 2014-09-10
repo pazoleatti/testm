@@ -197,10 +197,6 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                 Dialog.warningMessage("Версия не сохранена", "Не указана дата начала актуальности");
                 return;
             }
-            if (canVersion && getView().getVersionTo() != null && (getView().getVersionFrom().getTime() >= getView().getVersionTo().getTime())) {
-                Dialog.warningMessage("Версия не сохранена", "Дата окончания должна быть больше даты начала актуальности");
-                return;
-            }
             Map<String, RefBookValueSerializable> map = getView().getFieldsValues();
             //TODO : Специфические для справочника подразделений проверки. Подумать над возможностью избавиться
             if (currentRefBookId == 30) {
