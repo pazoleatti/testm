@@ -15,7 +15,7 @@ import java.util.Map;
 @Component("TestAsyncTaskSpring")
 public class TestAsyncTaskSpring implements AsyncTask {
 
-    private final Log LOG = LogFactory.getLog(getClass());
+    // private final Log log = LogFactory.getLog(getClass());
 
     @Autowired
     TAUserService userService;

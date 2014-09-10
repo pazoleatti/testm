@@ -30,7 +30,7 @@ import java.util.Map;
 @Stateless
 @Interceptors(SchedulerInterceptor.class)
 public class CleanBlobDataTask implements UserTask {
-    private final Log LOG = LogFactory.getLog(getClass());
+    // private final Log log = LogFactory.getLog(getClass());
 
     @Autowired
     BlobDataService blobDataService;

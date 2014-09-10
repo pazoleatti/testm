@@ -34,7 +34,7 @@ public class GetRefBookAttributesHandler extends AbstractActionHandler<GetRefBoo
     @Autowired
     DepartmentService departmentService;
 
-    private final Long ORGANIZATION_REF_BOOL_ID = 9L;
+    private static final Long ORGANIZATION_REF_BOOL_ID = 9L;
 
 	public GetRefBookAttributesHandler() {
 		super(GetRefBookAttributesAction.class);

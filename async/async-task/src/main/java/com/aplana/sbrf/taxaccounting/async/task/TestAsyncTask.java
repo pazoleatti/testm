@@ -22,7 +22,7 @@ import java.util.Map;
 @Interceptors(AsyncTaskInterceptor.class)
 public class TestAsyncTask implements AsyncTask {
 
-    private final Log LOG = LogFactory.getLog(getClass());
+    // private final Log log = LogFactory.getLog(getClass());
 
     @Autowired
     TAUserService userService;
