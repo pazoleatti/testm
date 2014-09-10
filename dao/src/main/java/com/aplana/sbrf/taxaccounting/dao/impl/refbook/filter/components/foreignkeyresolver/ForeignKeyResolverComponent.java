@@ -194,7 +194,7 @@ public class ForeignKeyResolverComponent extends AbstractTreeListenerComponent i
         if (joinStatement.size() > 0) {
             ps.setJoinPartsOfQuery(StringUtils.join(joinStatement.toArray(), '\n'));
         } else {
-            ps.setJoinPartsOfQuery(new String());
+            ps.setJoinPartsOfQuery("");
         }
     }
 
