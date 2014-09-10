@@ -311,10 +311,10 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
             Long recordId = recordCache.get(refBookId).get(dateStr + filter);
 
             // Сравнение объектов
-            if (recordId == NULL_VALUE_MARKER) {
+            if (NULL_VALUE_MARKER.equals(recordId)) {
                 // Нашли маркер
                 return null;
-            } else if (recordId == TOO_MANY_VALUE_MARKER) {
+            } else if (TOO_MANY_VALUE_MARKER.equals(recordId)) {
                 throw new ArrayStoreException();
             }
 

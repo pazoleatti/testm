@@ -479,7 +479,7 @@ public class FlexiblePager extends AbstractPager {
 	}
 
 	@Override
-    @SuppressWarnings("unused")
+    @SuppressWarnings("all")
 	public void firstPage() {
 		super.firstPage();
 	}
@@ -494,7 +494,7 @@ public class FlexiblePager extends AbstractPager {
     }
 
 	@Override
-    @SuppressWarnings("unused")
+    @SuppressWarnings("all")
     public int getPage() {
         return super.getPage();
     }
@@ -510,7 +510,7 @@ public class FlexiblePager extends AbstractPager {
 	}
 
     @Override
-    @SuppressWarnings("unused")
+    @SuppressWarnings("all")
 	public void setPage(int index) {
 		super.setPage(index);
 	}
