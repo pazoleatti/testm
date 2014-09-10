@@ -5,7 +5,10 @@ import static org.mockito.Mockito.when;
 
 import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
 
-public class DepartmentDeclarationTypeMockUtils {
+public final class DepartmentDeclarationTypeMockUtils {
+
+    private DepartmentDeclarationTypeMockUtils() {}
+
 	public static DepartmentDeclarationType mockDepartmentDeclarationType(int departmentId, int declarationTypeId) {
 		DepartmentDeclarationType ddt = mock(DepartmentDeclarationType.class);
 		when(ddt.getDepartmentId()).thenReturn(departmentId);

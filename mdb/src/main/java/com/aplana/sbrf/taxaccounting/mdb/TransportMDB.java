@@ -36,7 +36,7 @@ public class TransportMDB implements MessageListener {
     @Override
     // @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void onMessage(Message message) {
-        if (message == null || !(message instanceof MapMessage)) {
+        if (!(message instanceof MapMessage)) {
             return;
         }
 

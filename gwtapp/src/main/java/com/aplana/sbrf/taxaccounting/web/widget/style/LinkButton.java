@@ -142,7 +142,7 @@ public class LinkButton extends FocusWidget implements HasHorizontalAlignment,
 	}
 
 	@Override
-	public void setHTML(String html) {
+	public final void setHTML(String html) {
 		directionalTextHelper.setTextOrHtml(html, true);
         DOM.getChild((Element) getElement().getFirstChildElement(), 0).getStyle().setDisplay(disable ? Style.Display.NONE: Style.Display.INLINE);
         DOM.getChild((Element) getElement().getFirstChildElement(), 1).getStyle().setMarginLeft(disable ? 0 : 19, Style.Unit.PX);

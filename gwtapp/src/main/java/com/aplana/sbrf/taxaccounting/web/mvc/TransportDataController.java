@@ -65,7 +65,7 @@ public class TransportDataController {
         String fileName = items.get(0).getName();
         if (fileName.contains("\\")) {
             // IE Выдает полный путь
-            fileName = fileName.substring(fileName.lastIndexOf("\\") + 1);
+            fileName = fileName.substring(fileName.lastIndexOf('\\') + 1);
         }
 
         TAUserInfo userInfo = securityService.currentUserInfo();

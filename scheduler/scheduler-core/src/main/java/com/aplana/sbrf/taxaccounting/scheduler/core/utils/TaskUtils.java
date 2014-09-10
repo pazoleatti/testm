@@ -12,7 +12,9 @@ import java.util.*;
  *
  * @author dloshkarev
  */
-public class TaskUtils {
+public final class TaskUtils {
+
+    private  TaskUtils() {}
 
     /**
      * Сериализация параметров задачи для сохранения в бд

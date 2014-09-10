@@ -28,7 +28,7 @@ public class TransportMessageListener implements MessageListener {
     @Override
     public void onMessage(Message message) {
         logger.debug("onMessage: " + message);
-        if (message == null || !(message instanceof MapMessage)) {
+        if (!(message instanceof MapMessage)) {
             return;
         }
 

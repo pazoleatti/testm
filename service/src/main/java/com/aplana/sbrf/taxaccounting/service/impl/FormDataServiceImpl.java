@@ -624,7 +624,7 @@ public class FormDataServiceImpl implements FormDataService {
         }
     }
 
-    private class ReferenceInfo {
+    private final class ReferenceInfo {
         private int rownum;
         private String columnName;
 

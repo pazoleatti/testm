@@ -82,7 +82,7 @@ public class RateMDB implements MessageListener {
     public void onMessage(Message message) {
         TAUserInfo userInfo = getUser();
 
-        if (message == null || !(message instanceof TextMessage)) {
+        if (!(message instanceof TextMessage)) {
             logger.error(ERROR_FORMAT);
             addLog(userInfo, String.format(FAIL_IMPORT, ERROR_FORMAT), null);
             return;

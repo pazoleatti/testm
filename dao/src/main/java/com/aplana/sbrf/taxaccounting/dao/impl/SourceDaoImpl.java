@@ -159,7 +159,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
         return result;
     }
 
-    private class SourceBatchPreparedStatementSetter implements BatchPreparedStatementSetter {
+    private final class SourceBatchPreparedStatementSetter implements BatchPreparedStatementSetter {
         private List<SourceObject> sources;
         private Date periodStart;
         private Date periodEnd;

@@ -164,7 +164,7 @@ public class GetDepartmentAssignsHandler extends AbstractActionHandler<GetDepart
         // Nothing!
     }
 
-    private class ComparableSourceObject {
+    private final class ComparableSourceObject {
         private FormDataKind formKind;
         private Integer formTypeId;
         private Integer declarationTypeId;

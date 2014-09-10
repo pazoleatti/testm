@@ -332,11 +332,8 @@ public class ModalWindow extends DialogBox implements CanHide {
         int width = this.getOffsetWidth();
 
         //правый нижний угол (площадь 10 пикселей)
-        if (((initialX + width - 10) < cursorX && cursorX <= (initialX + width)) &&
-                ((initialY + height - 10) < cursorY && cursorY <= (initialY + height)))
-            return true;
-        else
-            return false;
+        return ((initialX + width - 10) < cursorX && cursorX <= (initialX + width)) &&
+                ((initialY + height - 10) < cursorY && cursorY <= (initialY + height));
     }
 
     /**

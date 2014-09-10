@@ -217,7 +217,7 @@ public class Spinner extends DoubleStateComposite
 	 * @param value новое значение
 	 */
 	@Override
-	public void setValue(Integer value) {
+	public final void setValue(Integer value) {
 		if (value == null) {
 			this.value = null;
 		} else if (minValue <= value && value <= maxValue) {
@@ -245,7 +245,7 @@ public class Spinner extends DoubleStateComposite
 	 *                   в противном случае никаких событий не вызывается.
 	 */
 	@Override
-	public void setValue(Integer value, boolean fireEvents) {
+	public final void setValue(Integer value, boolean fireEvents) {
 		setValue(value);
 		if (fireEvents) {
 			ValueChangeEvent.fire(this, value);

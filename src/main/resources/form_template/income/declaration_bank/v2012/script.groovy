@@ -66,7 +66,7 @@ void checkDeparmentParams(LogLevel logLevel) {
     def departmentParam = getProvider(33).getRecords(getEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null)
 
     if (departmentParam == null ||  departmentParam.size() ==0 || departmentParam.get(0) == null) {
-        throw new Exception("Ошибка при получении настроек обособленного подразделения")
+        throw new Exception("Ошибка при получении настроек обособленного подразделения!")
     }
 
     departmentParam = departmentParam.get(0)
@@ -74,11 +74,13 @@ void checkDeparmentParams(LogLevel logLevel) {
     // Проверки подразделения
     def List<String> errorList = getErrorDepartment(departmentParam)
     for (String error : errorList) {
-        logger.log(logLevel, String.format("Для данного подразделения на форме настроек подразделений отсутствует значение атрибута %s", error))
+        logger.log(logLevel, String.format("Для данного подразделения на форме настроек подразделений отсутствует значение атрибута %s!", error))
     }
     errorList = getErrorVersion(departmentParam)
     for (String error : errorList) {
-        logger.log(logLevel, String.format("Неверно указано значение атрибута %s на форме настроек подразделений для %s", error, departmentParam.NAME.stringValue))
+        def name = departmentParam.NAME.stringValue
+        name = name == null ? "!" : " для $name!"
+        logger.log(logLevel, String.format("Неверно указано значение атрибута %s на форме настроек подразделений%s", error, name))
     }
 }
 
@@ -96,7 +98,7 @@ void logicCheck() {
     def nalIschisl = getXmlValue(xmlData.Документ.Прибыль.РасчНал.@НалИсчисл.text())
     if (nalVipl311 != null && nalIschisl != null &&
             nalVipl311 > nalIschisl) {
-        logger.error('Сумма налога, выплаченная за пределами РФ (всего) превышает сумму исчисленного налога на прибыль (всего)')
+        logger.error('Сумма налога, выплаченная за пределами РФ (всего) превышает сумму исчисленного налога на прибыль (всего)!')
     }
 
     // Проверки Листа 02 - Превышение суммы налога, выплаченного за пределами РФ (в федеральный бюджет)
@@ -104,7 +106,7 @@ void logicCheck() {
     def nalIschislFB = getXmlValue(xmlData.Документ.Прибыль.РасчНал.@НалИсчислФБ.text())
     if (nalVipl311FB != null && nalIschislFB != null &&
             nalVipl311FB > nalIschislFB) {
-        logger.error('Сумма налога, выплаченная за пределами РФ (в федеральный бюджет) превышает сумму исчисленного налога на прибыль (в федеральный бюджет)')
+        logger.error('Сумма налога, выплаченная за пределами РФ (в федеральный бюджет) превышает сумму исчисленного налога на прибыль (в федеральный бюджет)!')
     }
 
     // Проверки Листа 02 - Превышение суммы налога, выплаченного за пределами РФ (в бюджет субъекта РФ)
@@ -112,7 +114,7 @@ void logicCheck() {
     def nalIschislSub = getXmlValue(xmlData.Документ.Прибыль.РасчНал.@НалИсчислСуб.text())
     if (nalVipl311Sub != null && nalIschislSub != null &&
             nalVipl311Sub > nalIschislSub) {
-        logger.error('Сумма налога, выплаченная за пределами РФ (в бюджет субъекта РФ) превышает сумму исчисленного налога на прибыль (в бюджет субъекта РФ)')
+        logger.error('Сумма налога, выплаченная за пределами РФ (в бюджет субъекта РФ) превышает сумму исчисленного налога на прибыль (в бюджет субъекта РФ)!')
     }
 
     // Проверки Приложения № 1 к Листу 02 - Превышение суммы составляющих над общим показателем («Внереализационные доходы (всего)»)
@@ -173,7 +175,7 @@ void logicCheck() {
             (stoimRealPTDoSr > viruchRealPTDoSr ?
             (ubit1Prev269 != stoimRealPTDoSr - viruchRealPTDoSr - ubit1Soot269)
             : (ubit1Prev269 != 0))) {
-        logger.warn('В Приложении 3 к Листу 02 строка 150 неверно указана сумма.')
+        logger.warn('В Приложении 3 к Листу 02 строка 150 неверно указана сумма!')
     }
 
     // Проверки Приложения № 3 к Листу 02 - Проверка отрицательной разницы (убыток), полученной налогоплательщиком
@@ -188,7 +190,7 @@ void logicCheck() {
             (stoimRealPTPosSr > viruchRealPTPosSr ?
             (ubit2RealPT != stoimRealPTPosSr - viruchRealPTPosSr)
             : (ubit2RealPT != 0))) {
-        logger.warn('В Приложении 3 к Листу 02 строка 160 неверно указана сумма.')
+        logger.warn('В Приложении 3 к Листу 02 строка 160 неверно указана сумма!')
     }
 }
 
@@ -212,7 +214,7 @@ void generateXML() {
     // справочник "Параметры подразделения по налогу на прибыль" - начало
     def incomeParams = getProvider(33).getRecords(getEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null)?.get(0)
     if (incomeParams == null) {
-        throw new Exception('Ошибка при получении настроек обособленного подразделения.')
+        throw new Exception('Ошибка при получении настроек обособленного подразделения!')
     }
     def reorgFormCode = getRefBookValue(5, incomeParams?.REORG_FORM_CODE?.value)?.CODE?.value
     def taxOrganCode = incomeParams?.TAX_ORGAN_CODE?.value

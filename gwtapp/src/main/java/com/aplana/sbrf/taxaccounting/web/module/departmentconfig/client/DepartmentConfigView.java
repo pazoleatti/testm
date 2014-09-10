@@ -423,7 +423,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 		}
 	}
 
-	public void onReportPeriodsSelected(Integer reportPeriodId) {
+	public final void onReportPeriodsSelected(Integer reportPeriodId) {
 		// Проверка совпадения выбранного подразделения с текущим
 		if (this.currentReportPeriodId != null && reportPeriodId != null && this.currentReportPeriodId.equals(reportPeriodId)) {
 			return;
@@ -493,7 +493,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 	}
 
 	@Override
-	public void resetRefBookWidgetsDatePeriod(Integer reportPeriodId) {
+	public final void resetRefBookWidgetsDatePeriod(Integer reportPeriodId) {
 		Date startDate = null;
 		Date endDate = null;
 		Pair<Date, Date> dates = periodPickerPopup.getPeriodDates(reportPeriodId);
