@@ -146,7 +146,7 @@ public class SimpleDatePicker extends Composite
 	 * @param value новое значение
 	 */
 	@Override
-	public void setValue(Date value) {
+	public final void setValue(Date value) {
 		this.value = value;
 
 		// TODO Надо б что-нибудь получше придумать.
@@ -156,7 +156,7 @@ public class SimpleDatePicker extends Composite
 	}
 
 	@Override
-	public void setValue(Date value, boolean fireEvents) {
+	public final void setValue(Date value, boolean fireEvents) {
 		setValue(value);
 		if (fireEvents) {
 			ValueChangeEvent.fire(this, value);

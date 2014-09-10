@@ -439,7 +439,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
     }
 
 	@Override
-	public void setColumnList(List<Column> columnList, boolean isFormChanged) {
+	public final void setColumnList(List<Column> columnList, boolean isFormChanged) {
 		columns = columnList;
 		setAttributesPanel();
 
@@ -451,13 +451,12 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 	}
 
 	@Override
-	public void flush() {
+	public final void flush() {
 		Column column = columnAttributeEditor.flush();
 		if (column!=null){
 			getUiHandlers().flushColumn(column);
 		}
 	}
-
 
 	private void setupColumns(int index) {
 		setColumnList();
@@ -722,12 +721,12 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 	}
 
 	@Override
-	public void setColumn(Column column) {
+	public final void setColumn(Column column) {
 		columnAttributeEditor.setValue(column);
 	}
 
     @Override
-    public void setRefBookList(List<RefBook> refBookList) {
+    public final void setRefBookList(List<RefBook> refBookList) {
         if (refBookList.isEmpty())
             return;
         refBookBox.setValue(refBookList.get(0));

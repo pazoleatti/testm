@@ -125,7 +125,7 @@ public abstract class MultiSelectTree<H extends List, T extends MultiSelectTreeI
     public abstract H getValue();
 
     @Override
-    public void setValue(H value) {
+    public final void setValue(H value) {
         setValue(value, false);
     }
 
@@ -341,13 +341,13 @@ public abstract class MultiSelectTree<H extends List, T extends MultiSelectTreeI
     }
 
     @Override
-    public void setWidth(String width) {
+    public final void setWidth(String width) {
         super.setWidth(width);
         scrollPanel.setWidth(width);
     }
 
     @Override
-    public void setHeight(String height) {
+    public final void setHeight(String height) {
         super.setHeight(height);
         scrollPanel.setHeight(height);
     }

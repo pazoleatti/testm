@@ -46,7 +46,6 @@ public class DataRow<C extends AbstractCell> extends IdentityObject<Long> implem
 	 * Конструктор нужен для сериализации
 	 */
 	public DataRow() {
-
 	}
 
 	public static final class MapEntry<C extends AbstractCell> implements Map.Entry<String, Object> {
@@ -122,7 +121,7 @@ public class DataRow<C extends AbstractCell> extends IdentityObject<Long> implem
 	 * Добавить столбец в существующую мапу Этот метод нужен для админки
 	 * @param col столбец
 	 */
-	public void addColumn( C col) {
+	public final void addColumn( C col) {
 		 C oldValue = getCell(col.getColumn().getAlias(), false);
 		if (oldValue == null) {
 			 C cellValue = col;

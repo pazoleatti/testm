@@ -218,12 +218,12 @@ public class DateMaskBoxPicker extends DoubleStateComposite implements HasEnable
     }
 
     @Override
-    public void setValue(Date value) {
+    public final void setValue(Date value) {
         this.setValue(value, false);
     }
 
     @Override
-    public void setValue(Date value, boolean fireEvents) {
+    public final void setValue(Date value, boolean fireEvents) {
         if (isInLimitPeriod(startLimitDate, endLimitDate, value)) {
             setCheckedValue(value, fireEvents);
         } else {

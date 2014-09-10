@@ -949,7 +949,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
     }
 
     @Override
-    public void loadLeftData() {
+    public final void loadLeftData() {
         clearLeftTable();
         clearDownTable();
         Integer selected = leftDepPicker.getSingleValue();
