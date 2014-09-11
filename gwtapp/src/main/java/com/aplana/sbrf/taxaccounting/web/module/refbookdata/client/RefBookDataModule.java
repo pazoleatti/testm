@@ -1,17 +1,17 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client;
 
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.EditFormPresenter;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.EditFormView;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.renameDialog.RenameDialogPresenter;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.renameDialog.RenameDialogView;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.VersionForm.RefBookVersionPresenter;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.VersionForm.RefBookVersionView;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.EditFormPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.EditFormView;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.renamedialog.RenameDialogPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.renamedialog.RenameDialogView;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.hierarchy.RefBookHierDataPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.hierarchy.RefBookHierDataView;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.script.RefBookScriptPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.script.RefBookScriptView;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.sendQueryDialog.DialogPresenter;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.sendQueryDialog.DialogView;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.sendquerydialog.DialogPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.sendquerydialog.DialogView;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.versionform.RefBookVersionPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.versionform.RefBookVersionView;
 import com.gwtplatform.mvp.client.gin.AbstractPresenterModule;
 
 public class RefBookDataModule extends AbstractPresenterModule {

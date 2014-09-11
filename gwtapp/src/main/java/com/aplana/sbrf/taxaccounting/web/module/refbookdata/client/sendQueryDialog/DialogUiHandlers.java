@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.sendQueryDialog;
+package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.sendquerydialog;
 
 
 import com.gwtplatform.mvp.client.UiHandlers;

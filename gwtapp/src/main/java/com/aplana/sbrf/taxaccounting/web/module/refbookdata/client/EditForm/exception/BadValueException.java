@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.exception;
+package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.exception;
 
 public class BadValueException extends Exception {
 	String fieldName;

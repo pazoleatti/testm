@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.renameDialog;
+package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.renamedialog;
 
 import com.aplana.gwt.client.ModalWindow;
 import com.aplana.gwt.client.dialog.Dialog;

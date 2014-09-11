@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.VersionForm;
+package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.versionform;
 
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.FormMode;
 import com.gwtplatform.mvp.client.UiHandlers;
