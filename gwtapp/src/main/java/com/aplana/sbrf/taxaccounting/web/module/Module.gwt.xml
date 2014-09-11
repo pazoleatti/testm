@@ -32,7 +32,7 @@
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.sources.Sources"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.taxformnomination.TaxFormNomination"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.testpage.TestPage"/>
-    <inherits name="com.aplana.sbrf.taxaccounting.web.module.scriptExecution.ScriptExecution"/>
+    <inherits name="com.aplana.sbrf.taxaccounting.web.module.scriptexecution.ScriptExecution"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.UploadTransportData"/>
 
     <replace-with class="com.google.gwt.user.cellview.client.CustomCellBasedWidgetImplTrident">

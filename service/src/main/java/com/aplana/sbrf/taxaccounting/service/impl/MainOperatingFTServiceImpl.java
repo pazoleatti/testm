@@ -26,10 +26,10 @@ import java.util.List;
 @Transactional
 public class MainOperatingFTServiceImpl implements MainOperatingService {
 
-    private static String SAVE_MESSAGE = "Версия макета не сохранена, обнаружены фатальные ошибки!";
-    private static String DELETE_TEMPLATE_MESSAGE = "Удаление невозможно, обнаружено использование макета!";
-    private static String DELETE_TEMPLATE_VERSION_MESSAGE = "Удаление невозможно, обнаружено использование макета!";
-    private static String HAVE_DFT_MESSAGE = "Существует назначение налоговой формы подразделению %s!";
+    private static final String SAVE_MESSAGE = "Версия макета не сохранена, обнаружены фатальные ошибки!";
+    private static final String DELETE_TEMPLATE_MESSAGE = "Удаление невозможно, обнаружено использование макета!";
+    private static final String DELETE_TEMPLATE_VERSION_MESSAGE = "Удаление невозможно, обнаружено использование макета!";
+    private static final String HAVE_DFT_MESSAGE = "Существует назначение налоговой формы подразделению %s!";
 
     @Autowired
     private LogEntryService logEntryService;
@@ -54,7 +54,6 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
     @Override
     public <T> int edit(T template, Date templateActualEndDate, Logger logger, TAUser user) {
         FormTemplate formTemplate = (FormTemplate)template;
-        /*versionOperatingService.isCorrectVersion(action.getForm(), action.getVersionEndDate(), logger);*/
         FormTemplate oldFormTemplate = formTemplateService.get(formTemplate.getId());
         Date dbVersionBeginDate = oldFormTemplate.getVersion();
         Date dbVersionEndDate = formTemplateService.getFTEndDate(formTemplate.getId());
@@ -135,8 +134,6 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
     @Override
     public <T> int createNewType(T template, Date templateActualEndDate, Logger logger, TAUser user) {
         FormTemplate formTemplate = (FormTemplate)template;
-        /*versionOperatingService.isCorrectVersion(template, templateActualEndDate, logger);
-        checkError(logger);*/
         FormType type = formTemplate.getType();
         type.setStatus(VersionedObjectStatus.NORMAL);
         type.setName(formTemplate.getName() != null ? formTemplate.getName() : "");
@@ -155,8 +152,6 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
     @Override
     public <T> int createNewTemplateVersion(T template, Date templateActualEndDate, Logger logger, TAUser user) {
         FormTemplate formTemplate = (FormTemplate)template;
-        /*versionOperatingService.isCorrectVersion(action.getForm(), action.getVersionEndDate(), logger);
-        checkError(logger);*/
         versionOperatingService.isIntersectionVersion(0, formTemplate.getType().getId(), VersionedObjectStatus.DRAFT,
                 formTemplate.getVersion(), templateActualEndDate, logger);
         checkError(logger, SAVE_MESSAGE);
@@ -175,7 +170,6 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
             for (FormTemplate formTemplate : formTemplates){
                 versionOperatingService.isUsedVersion(formTemplate.getId(), typeId, formTemplate.getStatus(), formTemplate.getVersion(), null, logger);
                 checkError(logger, DELETE_TEMPLATE_MESSAGE);
-                //formTemplate.setStatus(VersionedObjectStatus.DELETED);
             }
             //Получение фейковых значений
         }
@@ -188,7 +182,6 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
                             departmentService.getDepartment(departmentFormType.getDepartmentId()).getName()));
         checkError(logger, DELETE_TEMPLATE_MESSAGE);
         formTypeService.delete(typeId);
-        /*logging(typeId, TemplateChangesEvent.DELETED, user);*/
     }
 
     @Override

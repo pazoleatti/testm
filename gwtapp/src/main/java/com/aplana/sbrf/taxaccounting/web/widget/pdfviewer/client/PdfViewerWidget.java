@@ -22,8 +22,6 @@ public class PdfViewerWidget extends Composite implements PdfViewerView, HasRows
 
 	private static PdfViewerWidgetUiBinder uiBinder = GWT
 			.create(PdfViewerWidgetUiBinder.class);
-    private RangeChangeEvent.Handler rangeChangeHandler;
-    private RowCountChangeEvent.Handler rowCountChangeEventHandler;
 
     interface PdfViewerWidgetUiBinder extends UiBinder<Widget, PdfViewerWidget> {
 	}
@@ -124,13 +122,11 @@ public class PdfViewerWidget extends Composite implements PdfViewerView, HasRows
 
     @Override
     public HandlerRegistration addRangeChangeHandler(RangeChangeEvent.Handler handler) {
-        this.rangeChangeHandler = handler;
         return null;
     }
 
     @Override
     public HandlerRegistration addRowCountChangeHandler(RowCountChangeEvent.Handler handler) {
-        this.rowCountChangeEventHandler = handler;
         return null;
     }
 

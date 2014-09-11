@@ -70,7 +70,6 @@ public class DoubleStateWrapper<W extends Widget, T> extends DoubleStateComposit
 		if(widget instanceof HasValueChangeHandlers){
 			return ((HasValueChangeHandlers)widget).addValueChangeHandler(handler);
 		} else {
-            //throw new UnsupportedOperationException("The widget is not instance of HasValueChangeHandlers.");
             return null;
         }
     }

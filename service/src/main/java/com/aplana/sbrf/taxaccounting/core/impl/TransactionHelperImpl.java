@@ -19,7 +19,6 @@ public class TransactionHelperImpl implements TransactionHelper {
 
     @Override
     public void executeInNewTransaction(final TransactionLogic logic) {
-        //PlatformTransactionManager transactionManager = (PlatformTransactionManager) applicationContext.getBean("transactionManager");
         TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
         transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
         transactionTemplate.execute(new TransactionCallbackWithoutResult() {

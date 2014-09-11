@@ -31,7 +31,6 @@ public class LogSystemLogoutHandler implements LogoutHandler {
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
         WebApplicationContext springContext =
                 WebApplicationContextUtils.getWebApplicationContext(request.getSession().getServletContext());
-        //System.out.println("springContext: " + springContext);
 
         if (SecurityContextHolder.getContext().getAuthentication() != null) {
             UserAuthenticationToken principal = ((UserAuthenticationToken) (SecurityContextHolder.getContext()

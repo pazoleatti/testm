@@ -25,8 +25,6 @@ public class TestPagePresenter extends Presenter<TestPagePresenter.MyView,
     public interface MyProxy extends ProxyPlace<TestPagePresenter>, Place {
     }
 
-    private final DispatchAsync dispatcher;
-
     public interface MyView extends View, HasUiHandlers<TestPageUiHandlers> {
         void setIds(int fpicker, int hpicker);
     }
@@ -35,9 +33,7 @@ public class TestPagePresenter extends Presenter<TestPagePresenter.MyView,
     public TestPagePresenter(final EventBus eventBus, final MyView view, final MyProxy proxy,
                                 DispatchAsync dispatcher) {
         super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
-        this.dispatcher = dispatcher;
         getView().setUiHandlers(this);
-
     }
 
     private int fpicker;

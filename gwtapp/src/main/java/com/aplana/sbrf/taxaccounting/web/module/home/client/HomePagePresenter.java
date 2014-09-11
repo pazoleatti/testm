@@ -31,7 +31,6 @@ public class HomePagePresenter extends
 
 	@SuppressWarnings("unused")
 	private PlaceManager placeManager;
-	// static final Object TYPE_testPresenter = new Object();
 
 	@Inject
 	public HomePagePresenter(final EventBus eventBus, final MyView view,
@@ -46,6 +45,5 @@ public class HomePagePresenter extends
         TitleUpdateEvent.fire(this, "Домашняя страница");
         LogCleanEvent.fire(this);
         LogShowEvent.fire(this, false);
-		// setInSlot(TYPE_testPresenter, filterPresenter);
 	}
 }

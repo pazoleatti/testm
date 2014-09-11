@@ -7,7 +7,7 @@ public class LazyTreeSelectionEvent<T extends LazyTreeItem> extends GwtEvent<Laz
     /**
      * Handler type.
      */
-    private static Type<LazyTreeSelectionHandler<?>> TYPE;
+    private static Type<LazyTreeSelectionHandler<?>> type;
 
     /**
      * Fires a selection event on all registered handlers in the handler
@@ -18,7 +18,7 @@ public class LazyTreeSelectionEvent<T extends LazyTreeItem> extends GwtEvent<Laz
      * @param selectedItem the selected item
      */
     public static <T extends LazyTreeItem> void fire(HasLazyTreeSelectionHandlers<T> source, T selectedItem) {
-        if (TYPE != null) {
+        if (type != null) {
             LazyTreeSelectionEvent<T> event = new LazyTreeSelectionEvent<T>(selectedItem);
             source.fireEvent(event);
         }
@@ -30,10 +30,10 @@ public class LazyTreeSelectionEvent<T extends LazyTreeItem> extends GwtEvent<Laz
      * @return returns the handler type
      */
     public static Type<LazyTreeSelectionHandler<?>> getType() {
-        if (TYPE == null) {
-            TYPE = new Type<LazyTreeSelectionHandler<?>>();
+        if (type == null) {
+            type = new Type<LazyTreeSelectionHandler<?>>();
         }
-        return TYPE;
+        return type;
     }
 
     private final T selectedItem;
@@ -47,12 +47,12 @@ public class LazyTreeSelectionEvent<T extends LazyTreeItem> extends GwtEvent<Laz
         this.selectedItem = selectedItem;
     }
 
-    // The instance knows its BeforeSelectionHandler is of type I, but the TYPE
+    // The instance knows its BeforeSelectionHandler is of type I, but the type
     // field itself does not, so we have to do an unsafe cast here.
     @SuppressWarnings("unchecked")
     @Override
     public final Type<LazyTreeSelectionHandler<T>> getAssociatedType() {
-        return (Type) TYPE;
+        return (Type) type;
     }
 
     /**

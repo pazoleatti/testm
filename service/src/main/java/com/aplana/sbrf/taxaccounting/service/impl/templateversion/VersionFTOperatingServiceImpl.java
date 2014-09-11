@@ -46,6 +46,7 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
 
     @Autowired
     private PeriodService periodService;
+
     @Autowired
     private SourceService sourceService;
 
@@ -53,8 +54,6 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
 
     @Override
     public void isUsedVersion(int templateId, int typeId, VersionedObjectStatus status, Date versionActualDateStart, Date versionActualDateEnd, Logger logger) {
-        /*if (status == VersionedObjectStatus.DRAFT)
-            return;*/
         List<Long> fdIds = formDataService.getFormDataListInActualPeriodByTemplate(templateId, versionActualDateStart);
         if (!fdIds.isEmpty()){
             for(Long id: fdIds) {

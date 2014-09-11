@@ -561,7 +561,6 @@ public class FlexiblePager extends AbstractPager {
         isVisibleLayoutChild(pageNumber, visible);
         isVisibleLayoutChild(middleRightLabel, visible);
         isVisibleLayoutChild(nextPage, visible);
-        //isVisibleLayoutChild(fastForward, visible);
         isVisibleLayoutChild(lastPage, visible);
         isVisibleLayoutChild(rightLabel, visible);
         isVisibleLayoutChild(rowsCountOnPage, visible);

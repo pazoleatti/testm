@@ -251,7 +251,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
     }
 
 	@Override
-	public void clear() {
+	public final void clear() {
         if (dereferenceValues != null) {
             dereferenceValues.clear();
         }

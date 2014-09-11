@@ -12,7 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static java.util.Arrays.asList;
 
@@ -20,8 +23,9 @@ import static java.util.Arrays.asList;
 @Transactional
 public class ConfigurationServiceImpl implements ConfigurationService {
     private final static int MAX_LENGTH = 500;
+    private final static int EMAIL_MAX_LENGTH = 150;
     private final static String NOT_SET_ERROR = "Не задано значение поля «%s»!";
-    private final static String DUBLICATE_SET_ERROR = "Значение «%s» уже задано!";
+    private final static String DUPLICATE_SET_ERROR = "Значение «%s» уже задано!";
     private final static String ACCESS_READ_ERROR = "Нет прав на просмотр конфигурационных параметров приложения!";
     private final static String ACCESS_WRITE_ERROR = "Нет прав на изменение конфигурационных параметров приложения!";
     private final static String READ_ERROR = "«%s»: Отсутствует доступ на чтение!";
@@ -29,7 +33,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private final static String READ_INFO = "«%s»: Присутствует доступ на чтение!";
     private final static String WRITE_INFO = "«%s»: Присутствует доступ на запись!";
     private final static String UNIQUE_PATH_ERROR = "«%s»: Значение параметра «%s» не может быть равно значению параметра «%s» для «%s»!";
-    private final static String MAX_LENGTH_ERROR = "«%s»: Длина значения превышает максимально допустимую (" + MAX_LENGTH + ")!";
+    private final static String MAX_LENGTH_ERROR = "«%s»: Длина значения превышает максимально допустимую (%d)!";
 
     @Autowired
     private ConfigurationDao configurationDao;
@@ -67,6 +71,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         // Длина
         for (ConfigurationParam parameter : model.keySet()) {
             Map<Integer, List<String>> map = model.get(parameter);
+            int maxLength = parameter.getGroup().equals(ConfigurationParamGroup.EMAIL) ? EMAIL_MAX_LENGTH : MAX_LENGTH;
             if (map == null) {
                 continue;
             }
@@ -75,8 +80,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                     continue;
                 }
                 for (String value : valueList) {
-                    if (value != null && value.length() > MAX_LENGTH) {
-                        logger.error(MAX_LENGTH_ERROR, parameter.getCaption());
+                    if (value != null && value.length() > maxLength) {
+                        logger.error(MAX_LENGTH_ERROR, parameter.getCaption(), maxLength);
                     }
                 }
             }
@@ -84,16 +89,15 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
         // Проверки общих параметров
         for (ConfigurationParam configurationParam : ConfigurationParam.values()) {
-            if (configurationParam.isCommon()) {
+            if (configurationParam.getGroup().equals(ConfigurationParamGroup.COMMON)) {
                 List<String> valuesList = model.get(configurationParam, 0);
                 if (valuesList == null || valuesList.isEmpty()) {
                     // Обязательность
-                    // logger.error(NOT_SET_ERROR, configurationParam.getCaption());
                     model.remove(configurationParam);
                 } else {
                     if (configurationParam.isUnique() && valuesList.size() != 1) {
                         // Уникальность
-                        logger.error(DUBLICATE_SET_ERROR, configurationParam.getCaption());
+                        logger.error(DUPLICATE_SET_ERROR, configurationParam.getCaption());
                     }
                 }
             }
@@ -102,12 +106,10 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         // Уникальность ТБ для параметров загрузки НФ (дубли могут проверяться только на клиенте)
         Set<Integer> departmentIdSet = new HashSet<Integer>();
         for (Map.Entry<ConfigurationParam, Map<Integer, List<String>>> entry : model.entrySet()) {
-            if (entry.getKey().isCommon()) {
-                // Общие параметры не проверяются
-                continue;
-            }
-            for (int departmentId : entry.getValue().keySet()) {
-                departmentIdSet.add(departmentId);
+            if (entry.getKey().getGroup().equals(ConfigurationParamGroup.FORM)) {
+                for (int departmentId : entry.getValue().keySet()) {
+                    departmentIdSet.add(departmentId);
+                }
             }
         }
 
@@ -145,6 +147,22 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                 }
             }
         }
+        // Проверки параметров электронной почты
+        for (ConfigurationParam configurationParam : ConfigurationParam.values()) {
+            if (configurationParam.getGroup().equals(ConfigurationParamGroup.EMAIL)) {
+                List<String> valuesList = model.get(configurationParam, 0);
+                if (valuesList == null || valuesList.isEmpty()) {
+                    // Обязательность
+                    // logger.error(NOT_SET_ERROR, configurationParam.getCaption());
+                    model.remove(configurationParam);
+                } else {
+                    if (configurationParam.isUnique() && valuesList.size() != 1) {
+                        // Уникальность
+                        logger.error(DUPLICATE_SET_ERROR, configurationParam.getCaption());
+                    }
+                }
+            }
+        }
         if (!logger.containsLevel(LogLevel.ERROR)) {
             configurationDao.save(model);
         }
@@ -163,7 +181,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
         // Проверки общих параметров
         for (ConfigurationParam configurationParam : ConfigurationParam.values()) {
-            if (configurationParam.isCommon()) {
+            if (configurationParam.getGroup().equals(ConfigurationParamGroup.COMMON)) {
                 List<String> valuesList = model.get(configurationParam, 0);
                 if (valuesList != null)
                     for (String value : valuesList) {
@@ -191,12 +209,10 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         // Уникальность ТБ для параметров загрузки НФ (дубли могут проверяться только на клиенте)
         Set<Integer> departmentIdSet = new HashSet<Integer>();
         for (Map.Entry<ConfigurationParam, Map<Integer, List<String>>> entry : model.entrySet()) {
-            if (entry.getKey().isCommon()) {
-                // Общие параметры не проверяются
-                continue;
-            }
-            for (int departmentId : entry.getValue().keySet()) {
-                departmentIdSet.add(departmentId);
+            if (entry.getKey().getGroup().equals(ConfigurationParamGroup.FORM)) {
+                for (int departmentId : entry.getValue().keySet()) {
+                    departmentIdSet.add(departmentId);
+                }
             }
         }
 

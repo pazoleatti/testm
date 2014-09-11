@@ -1,12 +1,12 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.datarow;
 
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowFilter;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.util.BDUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +18,9 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -93,7 +95,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		batchRemoveCells(forUpdate);
 		batchInsertCells(forUpdate);
 
-		physicalUpdateRowsType(fd, forCreate, TypeFlag.DEL);
+		physicalUpdateRowsType(forCreate, TypeFlag.DEL);
 		physicalInsertRows(fd, forCreate, null, null, forCreateOrder);
 
 	}
@@ -289,8 +291,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 						toType.getKey(), formDataId, fromType.getKey());
 	}
 
-	private void physicalUpdateRowsType(FormData formData,
-                                        final List<DataRow<Cell>> dataRows, final TypeFlag toType) {
+	private void physicalUpdateRowsType(final List<DataRow<Cell>> dataRows, final TypeFlag toType) {
 
 		if (!dataRows.isEmpty()) {
 
@@ -325,8 +326,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
 		List<DataRow<Cell>> dataRows = getNamedParameterJdbcTemplate().query(
 				sql.getFirst(), sql.getSecond(), dataRowMapper);
-		// SBRFACCTAX-2082
-		// FormDataUtils.setValueOners(dataRows);
+
 		return dataRows;
 	}
 
@@ -387,7 +387,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
                         String rowAlias = drow.getAlias();
                         ps.setString(3, rowAlias);
 
-                        Long order = null;
+                        Long order;
                         if (orders != null) {
                             order = orders.get(i);
                         } else {

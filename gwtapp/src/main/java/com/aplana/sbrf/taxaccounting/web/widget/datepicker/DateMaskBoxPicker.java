@@ -49,8 +49,8 @@ public class DateMaskBoxPicker extends DoubleStateComposite implements HasEnable
     @UiField
     HorizontalPanel mainPanel;
 
-    protected static int POPUP_PANEL_WIDTH_CHECK = 160;
-    protected static int POPUP_PANEL_HEIDHT_CHECK = 166;
+    protected static final int POPUP_PANEL_WIDTH_CHECK = 160;
+    protected static final int POPUP_PANEL_HEIGHT_CHECK = 166;
 
     private final DatePickerWithYearSelector datePicker = new DatePickerWithYearSelector();
     private final PopupPanel datePickerPanel = new PopupPanel(true, true);
@@ -138,8 +138,8 @@ public class DateMaskBoxPicker extends DoubleStateComposite implements HasEnable
             } else {
                 leftPosition = event.getClientX();
             }
-            if (Window.getClientHeight() - (event.getClientY() + POPUP_PANEL_HEIDHT_CHECK + 10) < 0) {
-                topPosition = Window.getClientHeight() - POPUP_PANEL_HEIDHT_CHECK - 10;
+            if (Window.getClientHeight() - (event.getClientY() + POPUP_PANEL_HEIGHT_CHECK + 10) < 0) {
+                topPosition = Window.getClientHeight() - POPUP_PANEL_HEIGHT_CHECK - 10;
             } else {
                 topPosition = event.getClientY() + 10;
             }
@@ -163,11 +163,6 @@ public class DateMaskBoxPicker extends DoubleStateComposite implements HasEnable
             setValue(null, true);
         }
     }
-
-    // TODO зачем кишки внаружу?
-//    public DateMaskBox getDateBox() {
-//        return dateBox;
-//    }
 
     private void addDatePickerHandlers() {
         datePicker.addValueChangeHandler(new ValueChangeHandler<Date>() {

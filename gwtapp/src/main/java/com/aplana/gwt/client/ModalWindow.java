@@ -13,7 +13,10 @@ import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.Label;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,10 +35,10 @@ import java.util.List;
  */
 public class ModalWindow extends DialogBox implements CanHide {
 
-    private static Integer CAPTION_HEIGHT = 27;
-    private static Integer MIN_WINDOW_HEIGHT = 160;
-    private static Integer MIN_WINDOW_WIDTH = 350;
-    private static String CLOSE_ICON_TITLE = "Закрыть окно";
+    private static final Integer CAPTION_HEIGHT = 27;
+    private static final Integer MIN_WINDOW_HEIGHT = 160;
+    private static final Integer MIN_WINDOW_WIDTH = 350;
+    private static final String CLOSE_ICON_TITLE = "Закрыть окно";
 
     interface ModalWindowResources extends ClientBundle {
         @Source("close.png")
@@ -216,7 +219,6 @@ public class ModalWindow extends DialogBox implements CanHide {
     @Override
     public void setWidth(String width) {
         setMainInnerElementProperty("width", width);
-        //getWidget().setWidth(width);
     }
 
     @Override
@@ -229,8 +231,6 @@ public class ModalWindow extends DialogBox implements CanHide {
         } else {
             setMainInnerElementProperty("height", height);
         }
-
-        //getWidget().setHeight(height);
     }
 
     public HandlerRegistration addOpenModalWindowHandler(OpenModalWindowEvent.OpenHandler handler) {
@@ -282,8 +282,6 @@ public class ModalWindow extends DialogBox implements CanHide {
                     int originalX = DOM.getAbsoluteLeft(getCellElement(1, 1));
                     int originalY = DOM.getAbsoluteTop(getCellElement(1, 1));
 
-                    //System.out.println("absY " + absY + " " + originalY + " "  + (absY - originalY) + " " + getElement().getOffsetHeight());
-                    //System.out.println("absY " + absX + " " + originalX + " "  + (absX - originalX) + " " + getElement().getOffsetWidth());
                     if (absY > originalY && absX > originalX) {
                         boolean isChange = false;
                         Integer height = absY - originalY + 2;
@@ -361,6 +359,4 @@ public class ModalWindow extends DialogBox implements CanHide {
     public void setResizable(boolean isResizable) {
         this.isResizable = isResizable;
     }
-
-
 }

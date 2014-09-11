@@ -11,10 +11,7 @@ import com.google.gwt.event.shared.HasHandlers;
  */
 public class ChildrenLoadedEvent extends GwtEvent<ChildrenLoadedEvent.Handler> {
 
-    private RefBookUiTreeItem uiTreeItem;
-
     public ChildrenLoadedEvent(RefBookUiTreeItem uiTreeItem) {
-        this.uiTreeItem = uiTreeItem;
     }
 
     public interface Handler extends EventHandler {

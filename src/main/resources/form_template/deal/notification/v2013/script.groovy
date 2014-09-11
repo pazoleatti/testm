@@ -328,9 +328,6 @@ List<String> getErrorDepartment(record) {
     if (record.OKVED_CODE?.referenceValue == null) {
         errorList.add("«Код вида экономической деятельности и по классификатору ОКВЭД»")
     }
-    if (record.NAME.stringValue == null || record.NAME.stringValue.isEmpty()) {
-        errorList.add("«ИНН реорганизованного обособленного подразделения»")
-    }
     if (record.SIGNATORY_ID?.referenceValue == null) {
         errorList.add("«Признак лица подписавшего документ»")
     }

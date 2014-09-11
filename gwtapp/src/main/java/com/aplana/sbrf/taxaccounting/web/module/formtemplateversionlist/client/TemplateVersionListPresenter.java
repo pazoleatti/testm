@@ -49,9 +49,6 @@ public class TemplateVersionListPresenter extends Presenter<TemplateVersionListP
 
     @Override
     public void onCreateVersion() {
-        /*placeManager.revealPlace(new PlaceRequest.Builder().nameToken(AdminConstants.NameTokens.formTemplateInfoPage).
-                with(AdminConstants.NameTokens.formTemplateId, "0").
-                with(AdminConstants.NameTokens.formTypeId, placeManager.getCurrentPlaceRequest().getParameter(AdminConstants.NameTokens.formTypeId, "")).build());*/
         CreateNewVersionEvent.fire(this,
                 Integer.valueOf(placeManager.getCurrentPlaceRequest().getParameter(AdminConstants.NameTokens.formTypeId, "")));
     }

@@ -50,14 +50,10 @@ public class SetActiveHandler extends AbstractActionHandler<SetActiveAction, Set
         if (!logger.getEntries().isEmpty())
             result.setUuid(logEntryService.save(logger.getEntries()));
         result.setStatus(declarationTemplateService.get(action.getDtId()).getStatus().getId());
-        /*if (logger.containsLevel(LogLevel.ERROR)){
-            throw new ServiceLoggerException("Найдены экземпляры налоговых форм", logEntryService.onSave(logger.getEntries()));
-        }*/
         return result;
     }
 
     @Override
     public void undo(SetActiveAction action, SetActiveResult result, ExecutionContext context) throws ActionException {
-
     }
 }

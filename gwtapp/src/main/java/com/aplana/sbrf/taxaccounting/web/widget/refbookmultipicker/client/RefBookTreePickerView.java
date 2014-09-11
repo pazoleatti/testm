@@ -14,12 +14,18 @@ import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.
 import com.aplana.sbrf.taxaccounting.web.widget.utils.WidgetUtils;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.event.logical.shared.*;
+import com.google.gwt.event.logical.shared.OpenEvent;
+import com.google.gwt.event.logical.shared.OpenHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.HasVisibility;
+import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.TreeItem;
+import com.google.gwt.user.client.ui.Widget;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 import java.util.*;
@@ -99,7 +105,6 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
         tree.clear();
         for (RefBookTreeItem value : values) {
             RefBookUiTreeItem uiTreeItem = new RefBookUiTreeItem(value, multiSelect);
-            //getUiHandlers().highLightItem(uiTreeItem);
             tree.addTreeItem(uiTreeItem);
             if (openOnLoad) {
                 uiTreeItem.setState(true);
@@ -121,7 +126,6 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
     public void insertChildrens(RefBookUiTreeItem uiTreeItem, List<RefBookTreeItem> values, boolean openOnLoad) {
         for (RefBookTreeItem value : values) {
             RefBookUiTreeItem item = new RefBookUiTreeItem(value, multiSelect);
-            //getUiHandlers().highLightItem(item);
             tree.addTreeItem(uiTreeItem, item);
             if (openOnLoad) {
                 item.setState(true);
@@ -238,7 +242,6 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
                 if (scroll == 0 && maxScroll == 0) {
                     return false;
                 }
-                //System.out.println("scroll " + scroll + " maxScroll " + maxScroll + " absTop " + absTop + " offsetTop " + offsetTop);
 
                 scrollPanel.setVerticalScrollPosition(offsetTop);
 

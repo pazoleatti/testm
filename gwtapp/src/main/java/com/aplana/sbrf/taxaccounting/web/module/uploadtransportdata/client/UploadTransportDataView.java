@@ -28,10 +28,10 @@ public class UploadTransportDataView extends ViewWithUiHandlers<UploadTransportD
     interface Binder extends UiBinder<Widget, UploadTransportDataView> {
     }
 
-    private static String UUID_STRING = "uuid";
-    private static String ERROR_STRING_1 = "error";
-    private static String ERROR_STRING_2 = "<pre>error";
-    private static String jsonPattern = "(<pre.*>)(.+?)(</pre>)";
+    private static final String UUID_STRING = "uuid";
+    private static final String ERROR_STRING_1 = "error";
+    private static final String ERROR_STRING_2 = "<pre>error";
+    private static final String jsonPattern = "(<pre.*>)(.+?)(</pre>)";
 
     @UiField
     FileUpload uploader;

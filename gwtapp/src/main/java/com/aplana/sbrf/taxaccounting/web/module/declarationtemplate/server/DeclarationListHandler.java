@@ -36,7 +36,6 @@ public class DeclarationListHandler	extends AbstractActionHandler<DeclarationLis
 	@Override
 	public DeclarationListResult execute(DeclarationListAction action, ExecutionContext executionContext) throws ActionException {
 		DeclarationListResult result = new DeclarationListResult();
-		/*result.setDeclarations(declarationTemplateService.getByFilter(action.getFilter()));*/
         List<DeclarationType> declarationTypes = declarationTypeService.getByFilter(action.getFilter());
         @SuppressWarnings("unchecked")
         Collection<Integer> ids = CollectionUtils.collect(declarationTypes, new Transformer() {

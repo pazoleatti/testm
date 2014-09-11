@@ -122,7 +122,6 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                     getView().assignDataProvider(getView().getPageSize());
                                 }
                                 getView().isCanEditPage(!fixedRows);
-                                //getView().setPagingVisible(result.getDataRows().getTotalCount() > getView().getPageSize());
                             }
                             modifiedRows.clear();
                         }
@@ -285,7 +284,6 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 					modifiedRows.clear();
                     innerLogUuid = result.getUuid();
 					getView().updateData();
-					//LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
 					getView().setSelectedRow(result.getCurrentRow(), true);
 				}
 				
@@ -535,9 +533,6 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                         new AbstractCallback<GetFormDataResult>() {
                             @Override
                             public void onSuccess(GetFormDataResult result) {
-
-                                //LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
-
                     			// Очищаем возможные изменения на форме перед открытием.
                     			modifiedRows.clear();
 

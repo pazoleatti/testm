@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.LogBusinessDao;
@@ -45,9 +44,6 @@ public class PrintingServiceImpl implements PrintingService {
 
 	@Autowired
 	private FormDataAccessService formDataAccessService;
-
-    @Autowired
-	private DepartmentDao departmentDao;
 
     @Autowired
 	private ReportPeriodDao reportPeriodDao;

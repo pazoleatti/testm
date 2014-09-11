@@ -34,7 +34,6 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
     public static final String LOG_EVENT_AVAILABLE_MOVES = "LOG_EVENT_AVAILABLE_MOVES";
     public static final String LOG_EVENT_READ = "READ";
     public static final String LOG_EVENT_EDIT = "EDIT";
-    //public static final String LOG_EVENT_CREATE = "CREATE";
 
     public static final String LOG_EVENT_READ_RU = "чтение";
     public static final String LOG_EVENT_EDIT_RU = "редактирование";
@@ -53,7 +52,6 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
     private static final String CREATE_FORM_DATA_ERROR_ONLY_CONTROL = "Выбран период ввода остатков. В периоде ввода остатков оператор не может создавать налоговые формы";
     private static final String CREATE_MANUAL_FORM_DATA_ERROR_ONLY_CONTROL_LOG = "Only ROLE_CONTOL can create manual version of form!";
     private static final String CREATE_MANUAL_FORM_DATA_ERROR_ONLY_CONTROL = "Только контролер может создавать версию ручного ввода";
-    // private static final String CREATE_FORM_DATA_ERROR_ACCESS_DENIED = "Недостаточно прав для создания налоговой формы с указанными параметрами";
     private static final String FORM_DATA_ERROR_ACCESS_DENIED = "Недостаточно прав на %s формы с типом \"%s\" в статусе \"%s\"!";
     private static final String FORM_DATA_DEPARTMENT_ACCESS_DENIED_LOG = "Selected department (%d) not available in report period (%d)!";
     private static final String FORM_DATA_DEPARTMENT_ACCESS_DENIED = "Выбранное подразделение недоступно для пользователя!";

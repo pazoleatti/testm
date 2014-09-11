@@ -48,8 +48,6 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
 
     @Override
     public void isUsedVersion(int templateId, int typeId, VersionedObjectStatus status, Date versionActualDateStart, Date versionActualDateEnd, Logger logger) {
-        /*if (status == VersionedObjectStatus.DRAFT)
-            return;*/
         List<Long> ddIds = declarationDataService.getFormDataListInActualPeriodByTemplate(templateId, versionActualDateStart);
         if (!ddIds.isEmpty()){
             for(Long id: ddIds) {

@@ -84,7 +84,7 @@ public class ConfigurationServiceTest {
 
         // Заполнение всех общих параметров
         for (ConfigurationParam param : ConfigurationParam.values()) {
-            if (param.isCommon()) {
+            if (param.getGroup().equals(ConfigurationParamGroup.COMMON)) {
                 if (param.isFolder()) {
                     model.put(param, 0,
                             asList("file://" + path + "/"));
@@ -132,7 +132,7 @@ public class ConfigurationServiceTest {
 
         // Заполнение всех общих параметров
         for (ConfigurationParam param : ConfigurationParam.values()) {
-            if (param.isCommon()) {
+            if (param.getGroup().equals(ConfigurationParamGroup.COMMON)) {
                 if (param.isFolder()) {
                     model.put(param, 0,
                             asList("file://" + path + "/"));
@@ -179,7 +179,7 @@ public class ConfigurationServiceTest {
 
         // Заполнение всех общих параметров
         for (ConfigurationParam param : ConfigurationParam.values()) {
-            if (param.isCommon()) {
+            if (param.getGroup().equals(ConfigurationParamGroup.COMMON)) {
                 if (param.isFolder()) {
                     model.put(param, 0, asList("file://" + path + "/"));
                 } else {
@@ -245,7 +245,7 @@ public class ConfigurationServiceTest {
 
         // Заполнение всех общих параметров
         for (ConfigurationParam param : ConfigurationParam.values()) {
-            if (param.isCommon()) {
+            if (param.getGroup().equals(ConfigurationParamGroup.COMMON)) {
                 if (param.isFolder()) {
                     model.put(param, 0,
                             asList("file://" + path + "/"));
@@ -297,7 +297,7 @@ public class ConfigurationServiceTest {
 
         // Заполнение всех общих параметров
         for (ConfigurationParam param : ConfigurationParam.values()) {
-            if (param.isCommon()) {
+            if (param.getGroup().equals(ConfigurationParamGroup.COMMON)) {
                 if (param.isFolder()) {
                     model.put(param, 0,
                             asList("file://" + path + "/"));

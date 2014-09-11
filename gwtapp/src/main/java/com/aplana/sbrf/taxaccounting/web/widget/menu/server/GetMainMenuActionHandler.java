@@ -151,23 +151,7 @@ public class GetMainMenuActionHandler extends
             taxMenu.getSubMenu().add(menuItem);
             menuItems.add(taxMenu);
         }
-		
-		/*if (currentUser.hasRole(TARole.ROLE_CONF)) {
-			MenuItem confMenuItem = new MenuItem("Конфигурация");
-			confMenuItem.getSubMenu().add(
-					new MenuItem("Шаблоны налоговых форм", NUMBER_SIGN + AdminConstants.NameTokens.adminPage));
-			confMenuItem.getSubMenu().add(
-					new MenuItem("Шаблоны деклараций", NUMBER_SIGN + DeclarationTemplateTokens.declarationTemplateList));
-			confMenuItem.getSubMenu().add(new MenuItem("Сбросить кэш", CLEAR_CACHE_LINK));
 
-			menuItems.add(confMenuItem);
-		}
-        if (currentUser.hasRole(TARole.ROLE_ADMIN)) {
-            MenuItem settingMenuItem = new MenuItem("Настройки");
-            settingMenuItem.getSubMenu().add(new MenuItem("Импорт данных", NUMBER_SIGN + MigrationTokens.migration));
-            settingMenuItem.getSubMenu().add(new MenuItem("Конфигурационные параметры",	NUMBER_SIGN + ConfigurationPresenter.TOKEN));
-            settingMenuItem.getSubMenu().add(new MenuItem("Планировщик задач", NUMBER_SIGN + SchedulerTokens.taskList));
-        }*/
         // НСИ
         if (currentUser.hasRole(TARole.ROLE_CONTROL_UNP) || currentUser.hasRole(TARole.ROLE_CONTROL_NS)
                 || currentUser.hasRole(TARole.ROLE_OPER) || currentUser.hasRole(TARole.ROLE_CONTROL)){
@@ -181,7 +165,6 @@ public class GetMainMenuActionHandler extends
             }
             menuItems.add(nsiMenuItem);
         }
-
 
         // АДМИНИСТРИРОВАНИЕ
         if (currentUser.hasRole(TARole.ROLE_ADMIN)

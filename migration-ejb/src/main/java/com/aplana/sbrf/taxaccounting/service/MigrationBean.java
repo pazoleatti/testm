@@ -41,9 +41,6 @@ public class MigrationBean implements MessageService {
     @Resource(name = "jms/transportQueue")
     private Queue queue;
 
-    // РНУ для миграции
-//    private static long[] rnus = {25L, 26L, 27L, 31L, 51L, 53L, 54L, 59L, 60L, 64L};
-
     // Формат РНУ
     private static final Set<Integer> RNU_SET = new HashSet<Integer>(Arrays.asList(25, 26, 27, 31));
 

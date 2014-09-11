@@ -25,11 +25,13 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 
 	private static final Log logger = LogFactory.getLog(FormDataSearchDaoImpl.class);
 
-	private void appendFromAndWhereClause(StringBuilder sql, FormDataDaoFilter filter) {
-		sql.append(" FROM form_data fd, form_type ft, department dp, report_period rp, tax_period tp, log_business lb")
-			.append(" WHERE EXISTS (SELECT 1 FROM FORM_TEMPLATE t WHERE t.id = fd.form_template_id AND t.type_id = ft.id)")
-			.append(" AND dp.id = fd.department_id AND rp.id = fd.report_period_id AND tp.id=rp.tax_period_id AND lb.form_data_id = fd.id AND lb.event_id = 1");
-	
+    private void appendFromClause(StringBuilder sql){
+        sql.append(" FROM form_data fd, form_type ft, department dp, report_period rp, tax_period tp, log_business lb")
+                .append(" WHERE EXISTS (SELECT 1 FROM FORM_TEMPLATE t WHERE t.id = fd.form_template_id AND t.type_id = ft.id)")
+                .append(" AND dp.id = fd.department_id AND rp.id = fd.report_period_id AND tp.id=rp.tax_period_id AND lb.form_data_id = fd.id AND lb.event_id = 1");
+    }
+
+	private void appendWhereClause(StringBuilder sql, FormDataDaoFilter filter) {
 		if (filter.getFormTypeIds() != null && !filter.getFormTypeIds().isEmpty()) {
 			sql
                 .append(" AND ")
@@ -63,7 +65,7 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 		if (filter.getReturnState() != null) {
 			sql.append(" AND fd.return_sign = ").append(filter.getReturnState() == Boolean.TRUE ? "1" : "0");
 		}
-		
+
 		// Добавляем условия для отбрасывания форм, на которые у пользователя нет прав доступа
 		// Эта реализация должна быть согласована с реализацией в FormDataAccessServiceImpl
 		if (filter.getAccessFilterType() == null) {
@@ -82,19 +84,20 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
             }
         }
 	}
-	
+
 	private void appendSelectClause(StringBuilder sql) {
 		sql.append("SELECT fd.ID as form_data_id, fd.form_template_id, fd.return_sign, fd.KIND as form_data_kind_id, fd.STATE, fd.PERIOD_ORDER as period_order, tp.year,")
-			.append(" ft.ID as form_type_id, ft.NAME as form_type_name, ft.TAX_TYPE,")		
+			.append(" ft.ID as form_type_id, ft.NAME as form_type_name, ft.TAX_TYPE,")
 			.append(" dp.ID as department_id, dp.NAME as department_name, dp.TYPE as department_type,")
 			.append(" rp.ID as report_period_id, rp.NAME as report_period_name");
 	}
-	
+
 	@Override
 	public List<FormDataSearchResultItem> findByFilter(FormDataDaoFilter dataFilter) {
 		StringBuilder sql = new StringBuilder();
 		appendSelectClause(sql);
-		appendFromAndWhereClause(sql, dataFilter);
+        appendFromClause(sql);
+		appendWhereClause(sql, dataFilter);
 
 		if (logger.isTraceEnabled()) {
 			logger.trace(sql);
@@ -109,7 +112,8 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
     public List<Long> findIdsByFilter(FormDataDaoFilter filter) {
         StringBuilder sql = new StringBuilder();
         appendSelectClause(sql);
-        appendFromAndWhereClause(sql, filter);
+        appendFromClause(sql);
+        appendWhereClause(sql, filter);
         if (logger.isTraceEnabled()) {
             logger.trace(sql);
         }
@@ -125,10 +129,10 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 
     public void appendOrderByClause(StringBuilder sql, FormDataSearchOrdering ordering, boolean ascSorting) {
 		sql.append(" order by ");
-		
+
 		String column = null;
 		switch (ordering) {
-		case ID: 
+		case ID:
 			// Сортировка по ID делается всегда, поэтому здесь оставляем null
 			break;
 		case DEPARTMENT_NAME:
@@ -166,7 +170,7 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 			}
 			sql.append(", ");
 		}
-		
+
 		sql.append("fd.id");
 		if (!ascSorting) {
 			sql.append(" desc");
@@ -177,26 +181,46 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
     public Long getRowNumByFilter(FormDataDaoFilter filter, FormDataSearchOrdering ordering, boolean ascSorting, Long formDataId) {
         StringBuilder sql = new StringBuilder("select rn from (select dat.*, rownum as rn from (");
         appendSelectClause(sql);
-        appendFromAndWhereClause(sql, filter);
+        appendFromClause(sql);
+        appendWhereClause(sql, filter);
         appendOrderByClause(sql, ordering, ascSorting);
         sql.append(") dat) ordDat where form_data_id = ?");
 
         try {
             return getJdbcTemplate(). queryForLong(
                     sql.toString(),
-                    new Object[] {
-                            formDataId
-                    });
+                    formDataId);
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
     }
 
+    private final static String FIND_PAGE = "%s" +
+            "select ordDat.* from (\n" +
+            "select dat.*,  count(*) over() cnt, rownum as rn from (\n" +
+            "SELECT fd.ID as form_data_id, fd.form_template_id, fd.return_sign, fd.KIND as form_data_kind_id, fd.STATE, fd.PERIOD_ORDER as period_order, tp.year, ft.ID as form_type_id, ft.NAME as form_type_name, ft.TAX_TYPE, dp.ID as department_id, dp.NAME as department_name, dp.TYPE as department_type, rp.ID as report_period_id, rp.NAME as report_period_name %s\n" +
+            "FROM form_data fd\n" +
+            "LEFT JOIN FORM_TEMPLATE t on t.id = fd.form_template_id \n" +
+            "LEFT JOIN form_type ft on t.type_id = ft.id\n" +
+            "LEFT JOIN department dp on dp.id = fd.department_id\n" +
+            "LEFT JOIN report_period rp on rp.id = fd.report_period_id\n" +
+            "LEFT JOIN tax_period tp on tp.id=rp.tax_period_id\n" +
+            "LEFT JOIN log_business lb on lb.form_data_id = fd.id\n" +
+            "%s" +
+            "  WHERE lb.event_id = 1";
+
 	@Override
 	public PagingResult<FormDataSearchResultItem> findPage(FormDataDaoFilter filter, FormDataSearchOrdering ordering, boolean ascSorting, PagingParams pageParams) {
-		StringBuilder sql = new StringBuilder("select ordDat.* from (select dat.*, rownum as rn from (");
-		appendSelectClause(sql);
-		appendFromAndWhereClause(sql, filter);
+        //Получаем иерархический имя подразделения
+        String withClause = "with hierarchical_dep_name as (SELECT LTRIM(SYS_CONNECT_BY_PATH(name, '/'), '/') as path, id\n" +
+                "                FROM department\n" +
+                "                START WITH parent_id in (select id from department where parent_id is null)\n" +
+                "                CONNECT BY PRIOR id = parent_id)\n";
+		StringBuilder sql = new StringBuilder(String.format(FIND_PAGE,
+                isSupportOver() ? withClause : "",
+                isSupportOver() ? ", hdn.path as  hierarchical_dep_name" : "",
+                isSupportOver() ? " LEFT JOIN hierarchical_dep_name hdn on hdn.id = fd.department_id\n": ""));
+		appendWhereClause(sql, filter);
 		appendOrderByClause(sql, ordering, ascSorting);
 		sql.append(") dat) ordDat where ordDat.rn between ? and ?")
 			.append(" order by ordDat.rn");
@@ -210,15 +234,43 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 					Types.NUMERIC,
 					Types.NUMERIC
 				},
-				new FormDataSearchResultItemMapper()
+				new RowMapper<FormDataSearchResultItem>() {
+                    @Override
+                    public FormDataSearchResultItem mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        FormDataSearchResultItem result = new FormDataSearchResultItem();
+
+                        result.setDepartmentId(SqlUtils.getInteger(rs,"department_id"));
+                        result.setDepartmentName(rs.getString("department_name"));
+                        result.setDepartmentType(DepartmentType.fromCode(SqlUtils.getInteger(rs,"department_type")));
+                        result.setFormDataId(SqlUtils.getLong(rs,"form_data_id"));
+                        result.setFormDataKind(FormDataKind.fromId(SqlUtils.getInteger(rs,"form_data_kind_id")));
+                        result.setFormTemplateId(SqlUtils.getInteger(rs,"form_template_id"));
+                        result.setFormTypeId(SqlUtils.getInteger(rs,"form_type_id"));
+                        result.setFormTypeName(rs.getString("form_type_name"));
+                        result.setReportPeriodId(SqlUtils.getInteger(rs,"report_period_id"));
+                        result.setReportPeriodName(rs.getString("report_period_name"));
+                        result.setState(WorkflowState.fromId(SqlUtils.getInteger(rs,"state")));
+                        result.setTaxType(TaxType.fromCode(rs.getString("tax_type").charAt(0)));
+                        result.setReportPeriodYear(SqlUtils.getInteger(rs,"year"));
+                        Integer reportPeriodMonth = SqlUtils.getInteger(rs,"period_order");
+                        result.setReportPeriodMonth(rs.wasNull() ? null : reportPeriodMonth);
+                        Integer returnSign = SqlUtils.getInteger(rs,"return_sign");
+                        result.setReturnSign(rs.wasNull() ? null : 1 == returnSign);
+                        result.setCount(rs.getInt("cnt"));
+                        result.setHierarchicalDepName(isSupportOver() ? rs.getString("hierarchical_dep_name") : "");
+
+                        return result;
+                    }
+                }
 		);
-		return new PagingResult<FormDataSearchResultItem>(records, getCount(filter));
+		return new PagingResult<FormDataSearchResultItem>(records, (records.isEmpty()? 0:records.get(0).getCount()));
 	}
 
 	@Override
 	public int getCount(FormDataDaoFilter filter) {
 		StringBuilder sql = new StringBuilder("select count(*)");
-		appendFromAndWhereClause(sql, filter);
+        appendFromClause(sql);
+		appendWhereClause(sql, filter);
 		return getJdbcTemplate().queryForInt(sql.toString());
 	}
 }

@@ -356,8 +356,6 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
                         @Override
                         public void onSuccess(UpdateFormResult result) {
                             LogAddEvent.fire(FormTemplateMainPresenter.this, result.getUuid());
-                            /*placeManager.revealPlace(new PlaceRequest.Builder().nameToken(AdminConstants.NameTokens.formTemplateInfoPage).
-                                    with(AdminConstants.NameTokens.formTemplateId, String.valueOf(result.getFormTemplateId())).build());*/
                             Dialog.infoMessage("Форма сохранена");
                         }
                     }, this));

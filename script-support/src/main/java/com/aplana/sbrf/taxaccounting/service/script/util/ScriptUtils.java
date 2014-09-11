@@ -89,10 +89,11 @@ public final class ScriptUtils {
     private static final String EMPTY_EXPECTED_VALUE = "Строка %d: Графа «%s» содержит значение «%s», не соответствующее пустому значению данной графы в макете налоговой формы!";
 
     private static final String IMPORT_ROW_PREFIX = "Строка файла %d: %s";
+
+    @SuppressWarnings("unused")
     private static final String TRANSPORT_FILE_SUM_ERROR = "Итоговая сумма в графе %s строки %s в транспортном файле некорректна. Загрузка файла не выполнена.";
 
     private static final String ROW_FILE_WRONG = "Строка файла %s содержит некорректное значение.";
-
 
     // Ссылочный, независимая графа: Не найдена версия справочника, соответствующая значению в файле
     public static final String REF_BOOK_NOT_FOUND_IMPORT_ERROR = "Проверка файла: Строка %d, столбец %d: В справочнике «%s» в атрибуте «%s» не найдено значение «%s», актуальное на дату %s!";
@@ -100,7 +101,6 @@ public final class ScriptUtils {
     public static final String REF_BOOK_REFERENCE_NOT_FOUND_IMPORT_ERROR = "Проверка файла: Строка %d, столбец %d содержит значение «%s», отсутствующее в справочнике «%s»!";
     // Ссылочный: Найдено несколько записей справочника, соответствующих значению в файле
     public static final String REF_BOOK_TOO_MANY_FOUND_IMPORT_ERROR = "Проверка файла: Строка %d, столбец %d: В справочнике «%s» в атрибуте «%s» найдено более одного значения «%s», актуального на дату %s!";
-
 
     /**
      * Интерфейс для переопределения алгоритма расчета
@@ -233,6 +233,7 @@ public final class ScriptUtils {
      * @param cellB вторая ячейка
      * @return сумма значений
      */
+    @SuppressWarnings("unused")
     public static double summ(Cell cellA, Cell cellB) {
         double a = cellA.getNumericValue() == null ? 0 : cellA.getNumericValue().doubleValue();
         double b = cellB.getNumericValue() == null ? 0 : cellB.getNumericValue().doubleValue();
@@ -246,6 +247,7 @@ public final class ScriptUtils {
      * @param cellB вторая ячейка
      * @return разность
      */
+    @SuppressWarnings("unused")
     public static double substract(Cell cellA, Cell cellB) {
         double a = cellA.getValue() == null ? 0.0 : cellA.getNumericValue().doubleValue();
         double b = cellB.getValue() == null ? 0.0 : cellB.getNumericValue().doubleValue();
@@ -281,6 +283,7 @@ public final class ScriptUtils {
      * @param toRange   диапазон для
      * @throws IllegalArgumentException указаны неправильные диапазоны ячеек
      */
+    @SuppressWarnings("unused")
     public static void copyCellValues(FormData fromFrom, List<DataRow<Cell>> fromDataRows, FormData toForm, List<DataRow<Cell>> toDataRows, Range fromRange, Range toRange) {
         Rect fromRect = fromRange.getRangeRect(fromFrom, fromDataRows);
         Rect toRect = toRange.getRangeRect(toForm, toDataRows);
@@ -395,6 +398,7 @@ public final class ScriptUtils {
      * @param format
      * @return
      */
+    @SuppressWarnings("unused")
     public static String formatDate(Date date, String format) {
         if (date == null || format == null) {
             return null;
@@ -408,6 +412,7 @@ public final class ScriptUtils {
      * @param dataRows
      * @return true если удаления были
      */
+    @SuppressWarnings("unused")
     public static boolean deleteAllAliased(List<DataRow<Cell>> dataRows) {
         List<DataRow<Cell>> delList = new LinkedList<DataRow<Cell>>();
         boolean changed = false;
@@ -427,6 +432,7 @@ public final class ScriptUtils {
      * @param dataRows
      * @param calcAliasRow
      */
+    @SuppressWarnings("unused")
     public static void addAllAliased(List<DataRow<Cell>> dataRows, CalcAliasRow calcAliasRow,
                                      List<String> groupColumns) {
         for (int i = 0; i < dataRows.size(); i++) {
@@ -473,6 +479,7 @@ public final class ScriptUtils {
      * @param dataRows
      * @param groupColums
      */
+    @SuppressWarnings("unused")
     public static void sortRows(List<DataRow<Cell>> dataRows, final List<String> groupColums) {
         Collections.sort(dataRows, new Comparator<DataRow<Cell>>() {
             @Override
@@ -524,6 +531,7 @@ public final class ScriptUtils {
      * @param checkGroupSum
      * @param groupColums
      */
+    @SuppressWarnings("unused")
     public static void checkItogRows(List<DataRow<Cell>> dataRows, List<DataRow<Cell>> testItogRows, List<DataRow<Cell>> itogRows,
                                      List<String> groupColums, Logger logger, GroupString groupString,
                                      CheckGroupSum checkGroupSum) {
@@ -607,6 +615,7 @@ public final class ScriptUtils {
      * @param referenceColSize - количество ожидаемых столбцов
      * @param referenceRowSize - количество ожидаемых строк
      */
+    @SuppressWarnings("unused")
     public static void checkHeaderSize(int currentColSize, int currentRowSize, int referenceColSize, int referenceRowSize) {
         if (currentColSize < referenceColSize) {
             throw new ServiceException(WRONG_HEADER_COL_SIZE);
@@ -646,6 +655,7 @@ public final class ScriptUtils {
      * @param logger
      * @param required
      */
+    @SuppressWarnings("unused")
     public static void checkNonEmptyColumns(DataRow<Cell> row, int index, List<String> nonEmptyColums, Logger logger,
                                             boolean required) {
         for (String alias : nonEmptyColums) {
@@ -670,6 +680,7 @@ public final class ScriptUtils {
      * @param logger
      * @param required
      */
+    @SuppressWarnings("unused")
     public static void checkCalc(DataRow<Cell> row, List<String> calcColumns, Map<String, Object> calcValues,
                                  Logger logger, boolean required) {
         List<String> errorColumns = new LinkedList<String>();
@@ -696,6 +707,7 @@ public final class ScriptUtils {
     /**
      * Возвращает DataRow по алиасу.
      */
+    @SuppressWarnings("unused")
     public static DataRow getDataRow(List<DataRow<Cell>> dataRows, String rowAlias) {
         if (rowAlias == null) {
             throw new NullPointerException("Row alias cannot be null");
@@ -716,6 +728,7 @@ public final class ScriptUtils {
      * @param totalRow
      * @param columns
      */
+    @SuppressWarnings("unused")
     public static void calcTotalSum(List<DataRow<Cell>> dataRows, DataRow<Cell> totalRow, List<String> columns) {
         for (String alias : columns) {
             BigDecimal sum = BigDecimal.valueOf(0);
@@ -739,6 +752,7 @@ public final class ScriptUtils {
      * @param logger
      * @param required
      */
+    @SuppressWarnings("unused")
     public static void checkTotalSum(List<DataRow<Cell>> dataRows, List<String> columns, Logger logger,
                                      boolean required) {
         DataRow<Cell> totalRow = null;
@@ -785,12 +799,12 @@ public final class ScriptUtils {
      * @param logger
      * @param required
      */
+    @SuppressWarnings("unused")
     public static void checkSubTotalSum(List<DataRow<Cell>> dataRows, List<String> columns, Logger logger,
                                         boolean required) {
         Map<String, DataRow<Cell>> totalRows = new HashMap<String, DataRow<Cell>>();
         List<String> subAliases = new ArrayList<String>();
         Map<String, Map<String, BigDecimal>> totalSums = new HashMap<String, Map<String, BigDecimal>>();
-
 
         for (DataRow<Cell> row : dataRows) {
             if (row.getAlias() != null && row.getAlias().length() > 5) {
@@ -860,6 +874,7 @@ public final class ScriptUtils {
     }
 
     /** Выдать сообщение что импорт не предусмотрен. */
+    @SuppressWarnings("unused")
     public static void noImport(Logger logger) {
         logger.error(IMPORT_IS_NOT_PROVIDED);
     }
@@ -868,6 +883,7 @@ public final class ScriptUtils {
      * Получение xml с общими проверками
      * Используется при импорте из собственного формата системы
      */
+    @SuppressWarnings("unused")
     public static GPathResult getXML(BufferedInputStream inputStream, ImportService importService, String fileName, String startStr, String endStr) {
         return getXML(inputStream, importService, fileName, startStr, endStr, null, null);
     }
@@ -897,6 +913,7 @@ public final class ScriptUtils {
      * Получение xml с общими проверками
      * Используется при импорте из транспортного файла
      */
+    @SuppressWarnings("unused")
     public static GPathResult getTransportXML(BufferedInputStream inputStream, ImportService importService, String fileName, int columnCount, int totalCount) {
         checkBeforeGetXml(inputStream, fileName);
 
@@ -1006,6 +1023,7 @@ public final class ScriptUtils {
      * @param logger для вывода лога
      * @param required фатальность
      */
+    @SuppressWarnings("unused")
     public static void checkFixedValue(DataRow<Cell> row, String value, String valueExpected, int indexRow, String alias, Logger logger, boolean required) {
         if (value != null && !value.equals(valueExpected) || value == null && valueExpected != null) {
             String msg;
@@ -1041,6 +1059,7 @@ public final class ScriptUtils {
     /**
      * Вывод исключения с учетом возможного присутствия информации о исходной позиции строки
      */
+    @SuppressWarnings("unused")
     public static void rowServiceException(DataRow<Cell> row, String msg) {
         if (row.getImportIndex() != null) {
             msg = String.format(IMPORT_ROW_PREFIX, row.getImportIndex(), msg);
@@ -1065,6 +1084,7 @@ public final class ScriptUtils {
     /**
      *  Замена "ёлочек" («») на двойные кавычки (")
      */
+    @SuppressWarnings("unused")
     public static String replaceQuotes(String value) {
         if (value != null) {
             value = value.replaceAll("«", "\"").replaceAll("»", "\"");
@@ -1075,6 +1095,7 @@ public final class ScriptUtils {
     /**
      * Проверка количества найденных в скрипте по составному ключу записей справочника во время импорта.
      */
+    @SuppressWarnings("unused")
     public static boolean checkImportRecordsCount(PagingResult<Map<String, RefBookValue>> records, RefBook refBook,
                                                   String alias, String value, Date date, int rowIndex, int colIndex,
                                                   Logger logger, boolean required) {

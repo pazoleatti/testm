@@ -1,9 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.widget.historytemplatechanges.server;
 
 import com.aplana.sbrf.taxaccounting.model.TemplateChanges;
-import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import com.aplana.sbrf.taxaccounting.service.TemplateChangesService;
-import com.aplana.sbrf.taxaccounting.web.widget.historytemplatechanges.shared.*;
+import com.aplana.sbrf.taxaccounting.web.widget.historytemplatechanges.shared.GetFTVersionHistoryAction;
+import com.aplana.sbrf.taxaccounting.web.widget.historytemplatechanges.shared.GetFTVersionHistoryResult;
+import com.aplana.sbrf.taxaccounting.web.widget.historytemplatechanges.shared.TemplateChangesExt;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
@@ -23,8 +24,6 @@ public class GetFTVersionHistoryHandler extends AbstractActionHandler<GetFTVersi
 
     @Autowired
     private TemplateChangesService templateChangesService;
-    @Autowired
-    private FormTemplateService formTemplateService;
 
     public GetFTVersionHistoryHandler() {
         super(GetFTVersionHistoryAction.class);

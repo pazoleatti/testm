@@ -1,11 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.server;
 
-import java.util.*;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
@@ -17,6 +11,11 @@ import com.aplana.sbrf.taxaccounting.web.module.periods.shared.PeriodsGetFilterD
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+
+import java.util.*;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
@@ -42,13 +41,6 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
 	    PeriodsGetFilterDataResult res = new PeriodsGetFilterDataResult();
 	    TAUserInfo userInfo = securityService.currentUserInfo();
 	    res.setTaxType(action.getTaxType());
-
-	    // Используем сервис для инициализации фильтра форм даты (в аналитике ссылка)
-//	    FormDataFilterAvailableValues filterValues = formDataSearchService.getAvailableFilterValues(userInfo, action.getTaxType());
-
-
-//	    res.setAvalDepartments(filterValues.getDepartmentIds());
-
 
         TaxType taxType = action.getTaxType();
 	    List<Department> departments = new ArrayList<Department>();

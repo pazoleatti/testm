@@ -53,9 +53,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     public static final String NOT_HIERARCHICAL_REF_BOOK_ERROR = "Справочник \"%s\" (id=%d) не является иерархичным";
 
-//	public static final String UNKNOWN_ATTRIBUTE_ERROR = "Не указан атрибут справочника";
-//	public static final String UNKNOWN_RECORD_ERROR = "Не указан код элемента справочника";
-
     private static final String DELETE_VERSION = "delete from %s where %s";
 
     @Autowired
@@ -188,7 +185,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     private void appendSortClause(PreparedStatementData ps, RefBook refBook, RefBookAttribute sortAttribute, boolean isSortAscending, boolean isHierarchical, String prefix) {
         RefBookAttribute defaultSort = refBook.getSortAttribute();
         if (isSupportOver()) {
-            // row_number() over (order by ... asc\desc)
             ps.appendQuery("row_number() over ( order by ");
             if (sortAttribute != null || defaultSort != null) {
                 String sortAlias = sortAttribute == null ? defaultSort.getAlias() : sortAttribute.getAlias();
@@ -645,8 +641,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         // выбираем все алиасы + row_number_over
         List<String> aliases = new ArrayList<String>(attributes.size() + 1);
         aliases.add("record_id");
-        //aliases.add("rownum ");
-        //aliases.add(RefBook.RECORD_SORT_ALIAS);
         for (RefBookAttribute attr : attributes) {
             aliases.add(attr.getAlias());
         }

@@ -36,12 +36,9 @@ import java.util.*;
 @Service
 @Transactional
 public class FormTemplateServiceImpl implements FormTemplateService {
-	//private static final int FORM_VERSION_MAX_VALUE = 20;
 	private static final int FORM_STYLE_ALIAS_MAX_VALUE = 40;
 	private static final int FORM_COLUMN_NAME_MAX_VALUE = 1000;
 	private static final int FORM_COLUMN_ALIAS_MAX_VALUE = 100;
-	//TODO: надо подумать как хендлить длину строковой ячейки и нужно ли это тут
-	//private static final int FORM_COLUMN_CHK_MAX_VALUE = 500;
 	private static final int DATA_ROW_ALIAS_MAX_VALUE = 20;
 
 	private Set<String> checkSet = new HashSet<String>();
@@ -91,8 +88,6 @@ public class FormTemplateServiceImpl implements FormTemplateService {
             return formTemplateDao.saveNew(formTemplate);
 	}
 
-
-
     @Override
 	public int getActiveFormTemplateId(int formTypeId, int reportPeriodId) {
         try {
@@ -101,7 +96,6 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 			logger.error(e.getMessage(), e);
             throw new ServiceException(e.getMessage(), e);
         }
-
 	}
 
 	@Override
@@ -154,8 +148,6 @@ public class FormTemplateServiceImpl implements FormTemplateService {
         formData.setKind(FormDataKind.PRIMARY);
         formData.setReportPeriodId(1);
 
-        /*formTemplateDao.saveForm(formTemplate);
-        logger.info("formTemplate is saved with body-text for testing");*/
         Logger log = new Logger();
         scriptingService.executeScript(userInfo, formData, FormDataEvent.TEST, log, null);
         if(!log.getEntries().isEmpty())
@@ -178,7 +170,6 @@ public class FormTemplateServiceImpl implements FormTemplateService {
             logger.error("Ошибка получение НФ.", e.getLocalizedMessage());
             return "";
         }
-
     }
 
     @Override
@@ -267,7 +258,6 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     public FormTemplate getNearestFTRight(int formTemplateId, VersionedObjectStatus... status) {
         FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
 
-        //formTemplate.setVersion(addCalendar(Calendar.DAY_OF_YEAR, 1, formTemplate.getVersion()));
         int id = formTemplateDao.getNearestFTVersionIdRight(formTemplate.getType().getId(), createStatusList(status), formTemplate.getVersion());
         if (id == 0)
             return null;
@@ -335,8 +325,6 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 
 	@Override
 	public void validateFormTemplate(FormTemplate formTemplate, Logger logger) {
-		//TODO: подумать над обработкой уникальности версии, на данный момент версия не меняется
-
 		validateFormColumns(formTemplate, logger);
 		validateFormStyles(formTemplate.getStyles(), logger);
 		validateFormRows(formTemplate.getRows(), logger);
@@ -426,7 +414,6 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 
     @Override
     public void validateFormAutoNumerationColumn(FormTemplate formTemplate, Logger logger) {
-
         // Если есть хоть одна автонумеруемая графа
         if (isAnyAutoNumerationColumn(formTemplate, AutoNumerationColumnType.CROSS)) {
             Integer formTemplateId = formTemplate.getId();

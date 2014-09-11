@@ -1,19 +1,19 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
-import com.aplana.sbrf.taxaccounting.util.BDUtils;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.util.BDUtils;
 import com.aplana.sbrf.taxaccounting.utils.SimpleDateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -198,7 +198,6 @@ public class RefBookUniversal implements RefBookDataProvider {
                     }
                 }
 
-                //long allTime = System.nanoTime();
                 List<Long> excludedVersionEndRecords = new ArrayList<Long>();
 
                 long countIds = 0;
@@ -217,10 +216,6 @@ public class RefBookUniversal implements RefBookDataProvider {
                     //Проверка корректности
                     checkCorrectness(logger, refBook, null, versionFrom, versionTo, attributes, records);
 
-                /*if (recordIds.size() > 0 && refBookDao.isVersionsExist(refBookId, recordIds, versionFrom)) {
-                    throw new ServiceException("Версия с указанной датой актуальности уже существует");
-                }*/
-
                     for (RefBookRecord record : records) {
                         //Проверка пересечения версий
                         if (record.getRecordId() != null) {
@@ -236,7 +231,6 @@ public class RefBookUniversal implements RefBookDataProvider {
 
                 //Создание настоящей и фиктивной версии
                 return createVersions(versionFrom, versionTo, records, countIds, excludedVersionEndRecords, logger);
-                //System.out.println("all: "+((double)(System.nanoTime()-allTime)/1000000000.0)+"s");
             } catch (Exception e) {
                 if (logger != null) {
                     logger.error(e);
@@ -415,34 +409,14 @@ public class RefBookUniversal implements RefBookDataProvider {
             }
             if (result.getResult() == CrossResult.NEED_CHANGE) {
                 refBookDao.updateVersionRelevancePeriod(REF_BOOK_RECORD_TABLE_NAME, result.getRecordId(), SimpleDateUtils.addDayToDate(versionTo, 1));
-                //updateResults(results, result);
                 return false;
             }
             if (result.getResult() == CrossResult.NEED_DELETE) {
                 refBookDao.deleteVersion(REF_BOOK_RECORD_TABLE_NAME, result.getRecordId());
-                //updateResults(results, result);
             }
         }
         return true;
     }
-
-    /**
-     * Обновляет значение результата для пересекаемых версий, конфликт которых решается изменением соседних
-     * В частности возможно удаление либо изменение даты окончания версии, что устраняет часть конфликтов
-     * @param results все результаты проверки пересечения
-     * @param wantedResult результат, для которого было выполнено устранение конфликта
-     */
-//    private void updateResults(List<CheckCrossVersionsResult> results, CheckCrossVersionsResult wantedResult) {
-//        for (CheckCrossVersionsResult result : results) {
-//            if (result.getNum() == wantedResult.getNum() - 1) {
-//                if (result.getResult() == CrossResult.FATAL_ERROR) {
-//                    result.setResult(CrossResult.OK);
-//                } else {
-//                    throw new ServiceException("Недопустимая ситуация. Начало редактируемой версии является фиктивным: "+result.getResult());
-//                }
-//            }
-//        }
-//    }
 
     @Override
     public Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>> getUniqueAttributeValues(Long uniqueRecordId) {
@@ -538,9 +512,6 @@ public class RefBookUniversal implements RefBookDataProvider {
                                         || versionFrom.before(previousVersion.getVersionStart())))) {
                             throw new ServiceException(CROSS_ERROR_MSG);
                         }
-                        //Выполняем стандартную проверку пересечечения
-                        //crossVersionsProcessing(refBookDao.checkCrossVersions(refBookId, recordId, versionFrom, versionTo, uniqueRecordId),
-                        //        versionFrom, versionTo, logger);
                     }
                 }
 
@@ -677,8 +648,6 @@ public class RefBookUniversal implements RefBookDataProvider {
                     if (versionEnd != null && nextVersion != null && versionEnd.after(nextVersion.getVersionStart())) {
                         throw new ServiceException(CROSS_ERROR_MSG);
                     }
-                    //crossVersionsProcessing(refBookDao.checkCrossVersions(refBookId, recordId, versionEnd, null, null),
-                    //        versionEnd, null, logger);
                     refBookDao.createFakeRecordVersion(refBookId, recordId, SimpleDateUtils.addDayToDate(versionEnd, 1));
                 }
             } finally {
@@ -690,7 +659,6 @@ public class RefBookUniversal implements RefBookDataProvider {
             throw new ServiceLoggerException(String.format(LOCK_MESSAGE, refBook.getName()),
                     logEntryService.save(logger.getEntries()));
         }
-
     }
 
     private void checkChildren(List<Long> uniqueRecordIds) {
@@ -846,7 +814,6 @@ public class RefBookUniversal implements RefBookDataProvider {
             throw new ServiceLoggerException(String.format(LOCK_MESSAGE, refBook.getName()),
                     logEntryService.save(logger.getEntries()));
         }
-
     }
 
     @Override

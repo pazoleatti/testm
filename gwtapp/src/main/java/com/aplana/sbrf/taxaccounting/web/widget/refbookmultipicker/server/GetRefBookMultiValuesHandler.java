@@ -13,7 +13,8 @@ import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerUtils;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.*;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.GetRefBookMultiValuesAction;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.GetRefMultiBookValuesResult;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.PickerContext;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.RefBookItem;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.RefBookRecordDereferenceValue;
@@ -24,8 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
-import java.text.NumberFormat;
-import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -132,14 +131,6 @@ public class GetRefBookMultiValuesHandler extends AbstractActionHandler<GetRefBo
         return null;
     }
 
-
-    public static boolean isNumeric(String str) {
-        NumberFormat formatter = NumberFormat.getInstance();
-        ParsePosition pos = new ParsePosition(0);
-        formatter.parse(str, pos);
-        return str.length() == pos.getIndex();
-    }
-
     /**
      * Трансформация объектов из базы в логические модели для таблицы
      *
@@ -151,17 +142,12 @@ public class GetRefBookMultiValuesHandler extends AbstractActionHandler<GetRefBo
     private PagingResult<RefBookItem> asseblRefBookPage(GetRefBookMultiValuesAction action,
                                                         PagingResult<Map<String, RefBookValue>> refBookPage,
                                                         RefBook refBook) {
-        //System.out.println("asseblRefBookPage started");
-        //long allTime = System.nanoTime();
-        //long time = System.nanoTime();
         List<RefBookItem> items = new LinkedList<RefBookItem>();
         List<RefBookAttribute> attributes = refBook.getAttributes();
         Set<Long> attributeIds = new HashSet<Long>();
 
         // кэшируем список дополнительных атрибутов если есть для каждого аттрибута
         Map<Long, List<Long>> attrId2Map = refBookHelper.getAttrToListAttrId2Map(attributes);
-        //System.out.println("getAttrToListAttrId2Map: "+((double)(System.nanoTime()-time)/1000000000.0)+"s");
-        //time = System.nanoTime();
 
         Map<Long, List<RefBookAttributePair>> attributesMap = new HashMap<Long, List<RefBookAttributePair>>();
 
@@ -205,8 +191,6 @@ public class GetRefBookMultiValuesHandler extends AbstractActionHandler<GetRefBo
                 }
             }
         }
-        //System.out.println("prepare: "+((double)(System.nanoTime()-time)/1000000000.0)+"s");
-        //time = System.nanoTime();
 
         /**
          * Получаем провайдеры для каждого справочника и кэшируем их
@@ -219,8 +203,6 @@ public class GetRefBookMultiValuesHandler extends AbstractActionHandler<GetRefBo
             RefBookDataProvider provider = refProviders.get(attribute.getKey());
             dereferencedAttributes.putAll(provider.getAttributesValues(attribute.getValue()));
         }
-        //System.out.println("get values: "+((double)(System.nanoTime()-time)/1000000000.0)+"s");
-        //time = System.nanoTime();
 
         HashMap<Formats, SimpleDateFormat> formatHashMap = new HashMap<Formats, SimpleDateFormat>();
         /**
@@ -287,10 +269,7 @@ public class GetRefBookMultiValuesHandler extends AbstractActionHandler<GetRefBo
             item.setRefBookRecordDereferenceValues(refBookDereferenceValues);
             items.add(item);
         }
-        //System.out.println("get values: "+((double)(System.nanoTime()-time)/1000000000.0)+"s");
-        //System.out.println("time: "+((double)(System.nanoTime()-allTime)/1000000000.0)+"s");
 
         return new PagingResult<RefBookItem>(items, refBookPage.getTotalCount());
     }
-
 }

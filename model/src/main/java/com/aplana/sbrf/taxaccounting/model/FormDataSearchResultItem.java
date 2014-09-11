@@ -44,8 +44,28 @@ public class FormDataSearchResultItem implements Serializable {
     private Integer reportPeriodMonth;
     // Признак возврата
     private Boolean returnSign;
-	
-	public Long getFormDataId() {
+    //Количество записей
+    private int count;
+    //Иерархические имена
+    private String hierarchicalDepName;
+
+    public String getHierarchicalDepName() {
+        return hierarchicalDepName;
+    }
+
+    public void setHierarchicalDepName(String hierarchicalDepName) {
+        this.hierarchicalDepName = hierarchicalDepName;
+    }
+
+    public int getCount() {
+        return count;
+    }
+
+    public void setCount(int count) {
+        this.count = count;
+    }
+
+    public Long getFormDataId() {
 		return formDataId;
 	}
 	public void setFormDataId(Long formDataId) {

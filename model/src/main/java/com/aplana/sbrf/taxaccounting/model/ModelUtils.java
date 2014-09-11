@@ -45,9 +45,4 @@ public final class ModelUtils {
 		}
 		return false;
 	}
-	
-	//mapByProperties(){
-	//	
-	//}
-
 }

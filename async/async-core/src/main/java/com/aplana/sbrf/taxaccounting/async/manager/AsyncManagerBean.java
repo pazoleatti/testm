@@ -22,7 +22,7 @@ import java.util.Map;
 @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class AsyncManagerBean implements AsyncManager {
 
-    private final Log LOG = LogFactory.getLog(getClass());
+    private final Log log = LogFactory.getLog(getClass());
 
     @Resource(name = "jms/shortAsyncConnectionFactory")
     private ConnectionFactory shortAsyncConnectionFactory;
@@ -38,7 +38,7 @@ public class AsyncManagerBean implements AsyncManager {
 
     @Override
     public void executeAsync(long taskTypeId, Map<String, Object> params, BalancingVariants balancingVariant) throws AsyncTaskException {
-        LOG.debug("Async task creation has been started");
+        log.debug("Async task creation has been started");
         ConnectionFactory connectionFactory;
         Queue queue;
         Connection connection = null;
@@ -63,9 +63,9 @@ public class AsyncManagerBean implements AsyncManager {
             ObjectMessage objectMessage = session.createObjectMessage();
             objectMessage.setObject(asyncMdbObject);
             messageProducer.send(objectMessage);
-            LOG.debug("Async task creation has been finished successfully");
-        } catch (Exception e) {
-            LOG.error("Async task creation has been failed!", e);
+            log.debug("Async task creation has been finished successfully");
+        } catch (JMSException e) {
+            log.error("Async task creation has been failed!", e);
             throw new AsyncTaskException(e);
         } finally {
             if (connection != null) {

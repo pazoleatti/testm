@@ -7,10 +7,10 @@ package com.aplana.sbrf.taxaccounting.model;
  * @author Dmitriy Levykin
  */
 public class TransportDataParam {
-    public static int NAME_LENGTH_QUARTER = 36;
-    public static int NAME_LENGTH_MONTH = 38;
-    public static String NAME_EXTENSION = ".rnu";
-    public static String NAME_FORMAT_ERROR = "Имя транспортного файла «%s» не соответствует формату «<Код налоговой формы><Код подразделения><Код периода><Календарный год><Месяц>.rnu»!";
+    public static final int NAME_LENGTH_QUARTER = 36;
+    public static final int NAME_LENGTH_MONTH = 38;
+    public static final String NAME_EXTENSION = ".rnu";
+    public static final String NAME_FORMAT_ERROR = "Имя транспортного файла «%s» не соответствует формату «<Код налоговой формы><Код подразделения><Код периода><Календарный год><Месяц>.rnu»!";
 
     private final String formCode;
     private final String departmentCode;

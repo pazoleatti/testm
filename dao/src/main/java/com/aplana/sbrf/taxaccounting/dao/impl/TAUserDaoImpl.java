@@ -1,9 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.cache.annotation.CacheEvict;
@@ -125,7 +125,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 				@Override
 				public PreparedStatement createPreparedStatement(Connection con)
 						throws SQLException {
-					
+
 					//prepareStatement(sql, string_field) Only for ORACLE using
 					PreparedStatement ps = con
 							.prepareStatement(
@@ -140,24 +140,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 				}
 			}; 
 			getJdbcTemplate().update(psc, keyHolder);
-			/*PreparedStatementCreator psc1 = new PreparedStatementCreator() {
-				
-				@Override
-				public PreparedStatement createPreparedStatement(Connection con)
-						throws SQLException {
-					
-					//prepareStatement(sql, string_field) Only for ORACLE using
-					PreparedStatement ps = con
-							.prepareStatement(
-									"insert into sec_user_role (user_id, role_id) " +
-											"select ?, id from sec_role where alias = ?");
-					ps.setInt(1, keyHolder.getKey().intValue());
-					ps.setString(2, user.getRoles().get(0).getAlias());
-					return ps;
-				}
-			}; 
-			getJdbcTemplate().update(psc1);*/
-			
+
 			getJdbcTemplate().batchUpdate("insert into sec_user_role (user_id, role_id) " +
 					"select ?, id from sec_role where alias = ?",new BatchPreparedStatementSetter() {
 				
@@ -176,8 +159,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 			return keyHolder.getKey().intValue();
 		} catch (DataAccessException e) {
 			throw new DaoException("Пользователя с login = " + user.getLogin() + " не удалось сохранить." + e.getLocalizedMessage());
-		} 
-		
+		}
 	}
 
 	@Transactional(readOnly=false)
@@ -189,7 +171,6 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 				new int[]{Types.NUMERIC, Types.NUMERIC});
 		if(rows == 0)
 			throw new DaoException("Пользователя с id = " + userId + " не существует. Не удалось выставить флаг active.");
-		
 	}
 
 	@Transactional(readOnly=false)
@@ -231,10 +212,6 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 	
 	private void updateUserRoles(final TAUser user) {
 		try {
-			/*final int userRolesCount = getJdbcTemplate().queryForInt(
-					"select count(*) from sec_user_role ur where ur.user_id = " +
-					"(select id from sec_user where login=?)", user.getLogin()
-				);*/
             getJdbcTemplate().update("delete from sec_user_role where user_id=" +
                     "(select id from sec_user where lower(login)=?)",user.getLogin());
 

@@ -61,7 +61,6 @@ public class LogSystemCsvBuilder extends AbstractReportBuilder {
                 SDF_LOG_NAME.format(items.get(0).getLogDate()),
                 SDF_LOG_NAME.format(items.get(items.size() - 1).getLogDate()));
         String tmpDir = System.getProperty("java.io.tmpdir");
-        //File file = File.createTempFile(fileName, ".csv");
         File file = new File(tmpDir + File.separator + fileName + ".csv");
         CSVWriter csvWriter = new CSVWriter(new FileWriter(file), ';');
 
@@ -71,7 +70,6 @@ public class LogSystemCsvBuilder extends AbstractReportBuilder {
         }
         csvWriter.close();
 
-        //File zipFile = File.createTempFile(fileName, POSTFIX);
         File zipFile = new File(tmpDir + File.separator + fileName + POSTFIX);
         ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(zipFile));
         ZipEntry zipEntry = new ZipEntry(file.getName());
@@ -101,5 +99,4 @@ public class LogSystemCsvBuilder extends AbstractReportBuilder {
 
         return entries.toArray(new String[entries.size()]);
     }
-
 }

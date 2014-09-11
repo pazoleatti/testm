@@ -4,10 +4,10 @@ import com.aplana.sbrf.taxaccounting.web.module.audit.server.AuditFormServerModu
 import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.server.BookerStatementsServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.bookerstatementsdata.server.BookerStatementsDataServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.configuration.server.ConfigurationServerModule;
-import com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.server.DeclarationVersionListServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.server.DeclarationDataServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.server.DeclarationServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.server.DeclarationTemplateServerModule;
+import com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.server.DeclarationVersionListServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server.DepartmentConfigServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.server.FormDataServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.server.FormDataListServerModule;
@@ -19,7 +19,7 @@ import com.aplana.sbrf.taxaccounting.web.module.periods.server.PeriodsServerModu
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.server.RefBookDataServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.server.RefBookListServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.server.SchedulerServerModule;
-import com.aplana.sbrf.taxaccounting.web.module.scriptExecution.server.ScriptExecutionServerModule;
+import com.aplana.sbrf.taxaccounting.web.module.scriptexecution.server.ScriptExecutionServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.sources.server.SourcesServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.server.TaxFormNominationServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.testpage.server.TestPageServerModule;

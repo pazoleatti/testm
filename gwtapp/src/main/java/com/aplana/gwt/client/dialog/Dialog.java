@@ -18,15 +18,15 @@ public final class Dialog extends ModalWindow {
         YES, NO, OK, CANCEL, CLOSE
     }
 
-    public static String WARNING_MESSAGE = "Внимание!";
-    public static String ERROR_MESSAGE = "Ошибка";
-    public static String INFO_MESSAGE = "Информация";
-    public static String CONFIRM_MESSAGE = "Подтверждение";
+    public static final String WARNING_MESSAGE = "Внимание!";
+    public static final String ERROR_MESSAGE = "Ошибка";
+    public static final String INFO_MESSAGE = "Информация";
+    public static final String CONFIRM_MESSAGE = "Подтверждение";
 
     private static final Dialog INSTANCE = new Dialog();
 
-    private static DialogPanel dialogPanel = new DialogPanel();
-    private static ModalWindowResources mwRes = GWT.create(ModalWindowResources.class);
+    private static final DialogPanel dialogPanel = new DialogPanel();
+    private static final ModalWindowResources mwRes = GWT.create(ModalWindowResources.class);
 
     interface ModalWindowResources extends ClientBundle {
         @Source("icon-info.gif")

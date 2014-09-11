@@ -193,8 +193,6 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
                         public void onSuccess(UpdateDeclarationResult result) {
                             LogAddEvent.fire(DeclarationTemplatePresenter.this, result.getLogUuid());
                             Dialog.infoMessage("Декларация сохранена");
-                            /*placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplate).
-                                    with(DeclarationTemplateTokens.declarationTemplateId, String.valueOf(result.getDeclarationTemplateId())).build());*/
                         }
                     }, this));
         }

@@ -10,8 +10,6 @@ import com.aplana.sbrf.taxaccounting.scheduler.api.task.UserTaskRemote;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.PropertyLoader;
 import com.aplana.sbrf.taxaccounting.service.SchedulerInterceptor;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.ejb.Local;
@@ -30,7 +28,7 @@ import java.util.Map;
 @Stateless
 @Interceptors(SchedulerInterceptor.class)
 public class CleanBlobDataTask implements UserTask {
-    private final Log LOG = LogFactory.getLog(getClass());
+    // private final Log log = LogFactory.getLog(getClass());
 
     @Autowired
     BlobDataService blobDataService;

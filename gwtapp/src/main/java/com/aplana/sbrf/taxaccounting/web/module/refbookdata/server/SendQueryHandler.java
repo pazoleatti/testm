@@ -23,7 +23,7 @@ import java.util.List;
 @PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_NS')")
 public class SendQueryHandler extends AbstractActionHandler<SendQueryAction, SendQueryResult> {
 
-    private final String TITLE = "АС «Учет налогов». Запрос на изменение справочника «Организации-участники контролируемых сделок»";
+    private static final String TITLE = "АС «Учет налогов». Запрос на изменение справочника «Организации-участники контролируемых сделок»";
 
     @Autowired
     private LogEntryService logEntryService;

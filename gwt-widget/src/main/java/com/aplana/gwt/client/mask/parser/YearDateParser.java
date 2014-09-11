@@ -13,19 +13,18 @@ import java.util.Date;
  */
 public class YearDateParser implements Parser<Date> {
 
-    private static YearDateParser INSTANCE;
+    private static YearDateParser instance;
 
     public static final DateTimeFormat formatY = DateTimeFormat.getFormat("yyyy");
 
     public static Parser<Date> instanceY() {
-        if (INSTANCE == null) {
-            INSTANCE = new YearDateParser();
+        if (instance == null) {
+            instance = new YearDateParser();
         }
-        return INSTANCE;
+        return instance;
     }
 
-    protected YearDateParser() {
-    }
+    protected YearDateParser() {}
 
     @Override
     public Date parse(CharSequence object) throws ParseException {

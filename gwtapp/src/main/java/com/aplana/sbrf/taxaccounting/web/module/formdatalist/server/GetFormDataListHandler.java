@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.web.module.formdatalist.server;
 
 import com.aplana.sbrf.taxaccounting.model.FormDataSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataSearchService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFormDataList;
@@ -26,10 +25,7 @@ public class GetFormDataListHandler extends AbstractActionHandler<GetFormDataLis
 	@Autowired
 	private SecurityService securityService;
 
-    @Autowired
-    private DepartmentService departmentService;
-
-	public GetFormDataListHandler() {
+    public GetFormDataListHandler() {
 		super(GetFormDataList.class);
 	}
 
@@ -49,7 +45,7 @@ public class GetFormDataListHandler extends AbstractActionHandler<GetFormDataLis
                 int countOfRecords = action.getFormDataFilter().getCountOfRecords();
                 int startIndex = action.getFormDataFilter().getStartIndex();
                 res.setPage((int)(rowNum/countOfRecords));
-                if (((int)startIndex/countOfRecords) != res.getPage()) {
+                if ((startIndex /countOfRecords) != res.getPage()) {
                     return res;
                 }
             }
@@ -58,7 +54,7 @@ public class GetFormDataListHandler extends AbstractActionHandler<GetFormDataLis
                 .findDataByUserIdAndFilter(securityService.currentUserInfo(), action.getFormDataFilter());
         Map<Integer, String> departmentFullNames = new HashMap<Integer, String>();
         for(FormDataSearchResultItem item: resultPage) {
-            if (departmentFullNames.get(item.getDepartmentId()) == null) departmentFullNames.put(item.getDepartmentId(), departmentService.getParentsHierarchyShortNames(item.getDepartmentId()));
+            if (departmentFullNames.get(item.getDepartmentId()) == null) departmentFullNames.put(item.getDepartmentId(), item.getHierarchicalDepName());
         }
         res.setTotalCountOfRecords(resultPage.getTotalCount());
         res.setRecords(resultPage);
