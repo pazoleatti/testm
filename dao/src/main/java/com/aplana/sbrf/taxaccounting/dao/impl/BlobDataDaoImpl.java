@@ -117,7 +117,6 @@ public class BlobDataDaoImpl extends AbstractDao implements BlobDataDao {
                     new int[]{Types.CHAR},
                     new BlobDataRowMapper());
         }catch (EmptyResultDataAccessException e){
-            /*throw new DaoException(String.format("Не удалось найти запись с id = %s", uuid), e);*/
             return null;
         }
     }

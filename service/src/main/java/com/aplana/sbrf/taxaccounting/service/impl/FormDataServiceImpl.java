@@ -533,8 +533,6 @@ public class FormDataServiceImpl implements FormDataService {
         checkLockAnotherUser(lockService.lock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formDataId, userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME),
                 logger,  userInfo.getUser());
 
-		//lockCoreService.checkNoLockedAnother(FormData.class, formDataId, userInfo);
-
         if (manual) {
             formDataAccessService.canDeleteManual(logger, userInfo, formDataId);
             formDataDao.deleteManual(formDataId);
@@ -557,7 +555,7 @@ public class FormDataServiceImpl implements FormDataService {
      */
     @Override
     public void doMove(long formDataId, boolean manual, TAUserInfo userInfo, WorkflowMove workflowMove, String note, Logger logger) {
-        // Форма не должна быть заблокирована даже текущим пользователем;
+        // Форма не должна быть заблокирована даже текущим пользователем
         checkLockAnotherUser(lockService.lock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formDataId,
                 userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME), logger,  userInfo.getUser());
         // Временный срез формы должен быть в актуальном состоянии

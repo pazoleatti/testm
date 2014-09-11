@@ -1,6 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.server;
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
+import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.FormTypeKind;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
@@ -52,7 +55,7 @@ public class DeleteFormSoursesHandler extends AbstractActionHandler<DeleteFormsS
         // список id записей назначений
         Set<Long> set = new HashSet<Long>();
         Logger logger = new Logger();
-        // Удаление записей, для которых не указаны источники-приёмники, из таблицы в БД Системы и из списка назначенных налоговых форм / деклараций на подразделение;
+        // Удаление записей, для которых не указаны источники-приёмники, из таблицы в БД Системы и из списка назначенных налоговых форм / деклараций на подразделение
         boolean existFormData = false;
         for (FormTypeKind data: action.getKind()) {
             // проверим наличие форм

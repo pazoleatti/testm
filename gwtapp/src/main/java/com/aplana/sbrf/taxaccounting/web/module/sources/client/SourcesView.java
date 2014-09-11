@@ -890,8 +890,6 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
                         getUiHandlers().closeAssignDialog();
                     }
                 });
-
-        //}
     }
 
     @UiHandler("cancelButton")
