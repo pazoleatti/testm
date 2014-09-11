@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.module.scriptExecution.client;
+package com.aplana.sbrf.taxaccounting.web.module.Tscriptexecution.client;
 
 import com.gwtplatform.mvp.client.UiHandlers;
 

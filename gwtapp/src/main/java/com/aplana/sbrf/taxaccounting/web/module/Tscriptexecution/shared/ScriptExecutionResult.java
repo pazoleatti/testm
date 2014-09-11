@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.module.scriptExecution.shared;
+package com.aplana.sbrf.taxaccounting.web.module.Tscriptexecution.shared;
 
 import com.gwtplatform.dispatch.shared.Result;
 
