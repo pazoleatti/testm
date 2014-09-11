@@ -507,8 +507,6 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
             c.setCellStyle(r.getCell(ar.getFirstCell().getCol())!=null?r.getCell(ar.getFirstCell().getCol()).getCellStyle()
                 : r.createCell(ar.getFirstCell().getCol()).getCellStyle());
         }
-        CellStyle style = c.getCellStyle();
-        style.setWrapText(true);
         c.setCellValue(richTextString);
     }
 }
