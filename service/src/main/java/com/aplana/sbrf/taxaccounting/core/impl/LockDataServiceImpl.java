@@ -161,6 +161,13 @@ public class LockDataServiceImpl implements LockDataService {
         dao.unlockIfOlderThan(sec);
     }
 
+    @Override
+    public boolean checkLock(final String key) {
+        synchronized(LockDataServiceImpl.class) {
+            return validateLock(dao.get(key)) != null;
+        }
+    }
+
     /**
 	 * Проверяет блокировку. Если срок ее действия вышел, то она удаляется
 	 */

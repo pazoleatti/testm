@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.async.entity.AsyncMdbObject;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskSerializationException;
+import com.aplana.sbrf.taxaccounting.async.task.AsyncTask;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -50,13 +51,8 @@ public class AsyncManagerBean implements AsyncManager {
         }
 
         try {
+            checkParams(params);
             AsyncMdbObject asyncMdbObject = new AsyncMdbObject();
-            for (Map.Entry<String, Object> param : params.entrySet()) {
-                //Все параметры должны быть сериализуемы
-                if (!Serializable.class.isAssignableFrom(param.getValue().getClass())) {
-                    throw new AsyncTaskSerializationException("Parameter \"" + param.getKey() + "\" doesn't support serialization!");
-                }
-            }
             asyncMdbObject.setTaskTypeId(taskTypeId);
             asyncMdbObject.setParams(params);
 
@@ -68,7 +64,7 @@ public class AsyncManagerBean implements AsyncManager {
             objectMessage.setObject(asyncMdbObject);
             messageProducer.send(objectMessage);
             LOG.debug("Async task creation has been finished successfully");
-        } catch (JMSException e) {
+        } catch (Exception e) {
             LOG.error("Async task creation has been failed!", e);
             throw new AsyncTaskException(e);
         } finally {
@@ -77,6 +73,28 @@ public class AsyncManagerBean implements AsyncManager {
                     connection.close();
                 }
                 catch (JMSException ignored) { }
+            }
+        }
+    }
+
+    /**
+     * Проверяем обязательные параметры. Они должны быть заполнены и содержать значение правильного типа
+     * @param params параметры
+     */
+    private void checkParams(Map<String, Object> params) throws AsyncTaskSerializationException {
+        for (AsyncTask.RequiredParams key : AsyncTask.RequiredParams.values()) {
+            if (!params.containsKey(key.name())) {
+                throw new IllegalArgumentException("Не указан обязательный параметр \"" + key.name() + "\"!");
+            }
+            if (!key.getClazz().isInstance(params.get(key.name()))) {
+                throw new IllegalArgumentException("Обязательный параметр \"" + key.name() + "\" имеет неправильный тип " + params.get(key.name()).getClass().getName() + "! Должен быть: " + key.getClazz().getName());
+            }
+        }
+
+        for (Map.Entry<String, Object> param : params.entrySet()) {
+            //Все параметры должны быть сериализуемы
+            if (!Serializable.class.isAssignableFrom(param.getValue().getClass())) {
+                throw new AsyncTaskSerializationException("Параметр \"" + param.getKey() + "\" не поддерживает сериализацию!");
             }
         }
     }
