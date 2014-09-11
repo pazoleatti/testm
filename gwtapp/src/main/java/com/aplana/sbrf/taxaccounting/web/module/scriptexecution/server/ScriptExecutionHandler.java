@@ -1,11 +1,11 @@
-package com.aplana.sbrf.taxaccounting.web.module.Tscriptexecution.server;
+package com.aplana.sbrf.taxaccounting.web.module.scriptexecution.server;
 
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.ScriptExecutionService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import com.aplana.sbrf.taxaccounting.web.module.Tscriptexecution.shared.ScriptExecutionAction;
-import com.aplana.sbrf.taxaccounting.web.module.Tscriptexecution.shared.ScriptExecutionResult;
+import com.aplana.sbrf.taxaccounting.web.module.scriptexecution.shared.ScriptExecutionAction;
+import com.aplana.sbrf.taxaccounting.web.module.scriptexecution.shared.ScriptExecutionResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;

@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.module.Tscriptexecution.client;
+package com.aplana.sbrf.taxaccounting.web.module.scriptexecution.client;
 
 /**
  * @author Stanislav Yasinskiy

@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.module.Tscriptexecution.shared;
+package com.aplana.sbrf.taxaccounting.web.module.scriptexecution.shared;
 
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 

@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.main.entry.server;
 
-import com.aplana.sbrf.taxaccounting.web.module.Tscriptexecution.server.ScriptExecutionServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.audit.server.AuditFormServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.server.BookerStatementsServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.bookerstatementsdata.server.BookerStatementsDataServerModule;
@@ -20,6 +19,7 @@ import com.aplana.sbrf.taxaccounting.web.module.periods.server.PeriodsServerModu
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.server.RefBookDataServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.server.RefBookListServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.server.SchedulerServerModule;
+import com.aplana.sbrf.taxaccounting.web.module.scriptexecution.server.ScriptExecutionServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.sources.server.SourcesServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.server.TaxFormNominationServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.testpage.server.TestPageServerModule;

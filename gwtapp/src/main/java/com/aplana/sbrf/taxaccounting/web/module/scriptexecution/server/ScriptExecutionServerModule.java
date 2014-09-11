@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.module.Tscriptexecution.server;
+package com.aplana.sbrf.taxaccounting.web.module.scriptexecution.server;
 
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;

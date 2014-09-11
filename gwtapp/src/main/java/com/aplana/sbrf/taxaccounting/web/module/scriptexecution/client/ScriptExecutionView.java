@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.module.Tscriptexecution.client;
+package com.aplana.sbrf.taxaccounting.web.module.scriptexecution.client;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
