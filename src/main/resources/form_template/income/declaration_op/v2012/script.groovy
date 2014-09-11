@@ -132,6 +132,8 @@ void generateXML(def xmlBankData) {
     if (incomeParams == null) {
         throw new Exception('Ошибка при получении настроек обособленного подразделения')
     }
+    if (!xmlBankData)
+        return
     def reorgFormCode = getRefBookValue(5, incomeParams?.REORG_FORM_CODE?.value)?.CODE?.value
     def taxOrganCode = incomeParams?.TAX_ORGAN_CODE?.value
     def okvedCode = getRefBookValue(34, incomeParams?.OKVED_CODE?.value)?.CODE?.value
