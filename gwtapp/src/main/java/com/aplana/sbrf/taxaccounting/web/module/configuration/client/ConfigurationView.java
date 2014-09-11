@@ -26,19 +26,20 @@ import java.util.*;
 
 public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandlers> implements MyView {
     @UiField
-    DataGrid<DataRow<Cell>> commonTable, formTable;
+    DataGrid<DataRow<Cell>> commonTable, formTable, emailTable;
 
     @UiField
     Label titleLabel;
 
     @UiField
-    LinkAnchor formCommonLink;
+    LinkAnchor commonLink, formLink, emailLink;
 
     @UiField
-    Widget commonPanel, formPanel;
+    Widget commonPanel, formPanel, emailPanel;
 
-    List<DataRow<Cell>> formRowsData;
-    List<DataRow<Cell>> commonRowsData;
+    List<DataRow<Cell>> formRowsData = new ArrayList<DataRow<Cell>>();
+    List<DataRow<Cell>> commonRowsData = new ArrayList<DataRow<Cell>>();
+    List<DataRow<Cell>> emailRowsData = new ArrayList<DataRow<Cell>>();
 
     private RefBookColumn paramColumn = new RefBookColumn();
     private StringColumn valueColumn = new StringColumn();
@@ -48,17 +49,43 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
     private StringColumn archivePathColumn = new StringColumn();
     private StringColumn errorPathColumn = new StringColumn();
 
+    private RefBookColumn emailParamColumn = new RefBookColumn();
+    private StringColumn emailValueColumn = new StringColumn();
+
+    private ConfigurationParamGroup activeGroup = ConfigurationParamGroup.COMMON;
+
+    private final Map<ConfigurationParamGroup, DataGrid<DataRow<Cell>>> tableMap = new HashMap<ConfigurationParamGroup, DataGrid<DataRow<Cell>>>();
+    private final Map<ConfigurationParamGroup, List<DataRow<Cell>>> rowsDataMap = new HashMap<ConfigurationParamGroup, List<DataRow<Cell>>>();
+    private final Map<ConfigurationParamGroup, Comparator<DataRow<Cell>>> comparatorMap = new HashMap<ConfigurationParamGroup, Comparator<DataRow<Cell>>>();
+
     private DataRowColumnFactory factory = new DataRowColumnFactory();
 
     interface Binder extends UiBinder<Widget, ConfigurationView> {
-	}
+    }
 
-	@Inject
-	public ConfigurationView(final Binder binder) {
-		initWidget(binder.createAndBindUi(this));
+    @Inject
+    public ConfigurationView(final Binder binder) {
+        initWidget(binder.createAndBindUi(this));
         initCommonTable();
         initFormTable();
-	}
+        initEmailTable();
+
+        initMaps();
+    }
+
+    private void initMaps() {
+        tableMap.put(ConfigurationParamGroup.COMMON, commonTable);
+        tableMap.put(ConfigurationParamGroup.FORM, formTable);
+        tableMap.put(ConfigurationParamGroup.EMAIL, emailTable);
+
+        rowsDataMap.put(ConfigurationParamGroup.COMMON, commonRowsData);
+        rowsDataMap.put(ConfigurationParamGroup.FORM, formRowsData);
+        rowsDataMap.put(ConfigurationParamGroup.EMAIL, emailRowsData);
+
+        comparatorMap.put(ConfigurationParamGroup.COMMON, commonComparator);
+        comparatorMap.put(ConfigurationParamGroup.FORM, formComparator);
+        comparatorMap.put(ConfigurationParamGroup.EMAIL, emailComparator);
+    }
 
     /**
      * Подготовка таблицы общих параметров
@@ -67,14 +94,7 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
         paramColumn.setId(1);
         paramColumn.setRefBookAttributeId(1041L);
         // Допустимые значения
-        String filter = "";
-        for (ConfigurationParam param : ConfigurationParam.values()) {
-            if (param.isCommon()) {
-                filter += param.name() + ",";
-            }
-        }
-        filter = filter.substring(0, filter.length() - 1);
-        paramColumn.setFilter(filter);
+        paramColumn.setFilter(getConfParamFilter(ConfigurationParamGroup.COMMON));
         paramColumn.setAlias("paramColumn");
         paramColumn.setName("Параметр");
         paramColumn.setSearchEnabled(false);
@@ -94,7 +114,7 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
         commonTable.setSelectionModel(singleSelectionModel);
 
         // Обновляем таблицу после обновления модели
-        ((DataRowColumn<?>)paramColumnUI).addCellModifiedEventHandler(new CellModifiedEventHandler() {
+        ((DataRowColumn<?>) paramColumnUI).addCellModifiedEventHandler(new CellModifiedEventHandler() {
             @Override
             public void onCellModified(CellModifiedEvent event, boolean withReference) {
                 if (getUiHandlers() != null) {
@@ -139,7 +159,7 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
         formTable.setSelectionModel(singleSelectionModel);
 
         // Обновляем таблицу после обновления модели
-        ((DataRowColumn<?>)departmentColumnUI).addCellModifiedEventHandler(new CellModifiedEventHandler() {
+        ((DataRowColumn<?>) departmentColumnUI).addCellModifiedEventHandler(new CellModifiedEventHandler() {
             @Override
             public void onCellModified(CellModifiedEvent event, boolean withReference) {
                 if (getUiHandlers() != null) {
@@ -149,75 +169,142 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
         });
     }
 
+    /**
+     * Подготовка таблицы параметров электронной почты
+     */
+    private void initEmailTable() {
+        emailParamColumn.setId(1);
+        emailParamColumn.setRefBookAttributeId(1041L);
+        // Допустимые значения
+        emailParamColumn.setFilter(getConfParamFilter(ConfigurationParamGroup.EMAIL));
+        emailParamColumn.setAlias("emailParamColumn");
+        emailParamColumn.setName("Параметр");
+        emailParamColumn.setSearchEnabled(false);
+        Column<DataRow<Cell>, ?> emailParamColumnUI = factory.createTableColumn(emailParamColumn, emailTable);
+        emailTable.setColumnWidth(emailParamColumnUI, 30, Style.Unit.EM);
+        emailTable.addColumn(emailParamColumnUI, emailParamColumn.getName());
+
+        emailValueColumn.setAlias("emailValueColumn");
+        emailValueColumn.setName("Значение параметра");
+        emailTable.addColumn(factory.createTableColumn(emailValueColumn, emailTable), emailValueColumn.getName());
+
+        emailTable.setRowData(0, new ArrayList<DataRow<Cell>>(0));
+        emailTable.setMinimumTableWidth(40, Style.Unit.EM);
+
+        emailTable.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.ENABLED);
+        SingleSelectionModel<DataRow<Cell>> singleSelectionModel = new SingleSelectionModel<DataRow<Cell>>();
+        emailTable.setSelectionModel(singleSelectionModel);
+
+        // Обновляем таблицу после обновления модели
+        ((DataRowColumn<?>) emailParamColumnUI).addCellModifiedEventHandler(new CellModifiedEventHandler() {
+            @Override
+            public void onCellModified(CellModifiedEvent event, boolean withReference) {
+                if (getUiHandlers() != null) {
+                    emailTable.redraw();
+                }
+            }
+        });
+    }
+
+    // Допустимые значения для справочника конф. параметров
+    private String getConfParamFilter(ConfigurationParamGroup group) {
+        StringBuilder filter = new StringBuilder("");
+        for (ConfigurationParam param : ConfigurationParam.values()) {
+            if (param.getGroup().equals(group)) {
+                filter.append(param.name()).append(",");
+            }
+        }
+        return filter.substring(0, filter.length() - 1);
+    }
+
     // Переключение между вкладками
-    private void showTab(int index) {
-        titleLabel.setText(formCommonLink.getText());
-        formCommonLink.setText(index == 1 ? "Общие параметры" : "Параметры загрузки налоговых форм");
-        commonPanel.setVisible(index == 0);
-        formPanel.setVisible(index == 1);
-        commonTable.redraw();
-        formTable.redraw();
+    private void showTab(ConfigurationParamGroup group) {
+        activeGroup = group;
+
+        titleLabel.setText(activeGroup.getCaption());
+
+        commonLink.setVisible(!activeGroup.equals(ConfigurationParamGroup.COMMON));
+        commonPanel.setVisible(activeGroup.equals(ConfigurationParamGroup.COMMON));
+
+        formLink.setVisible(!activeGroup.equals(ConfigurationParamGroup.FORM));
+        formPanel.setVisible(activeGroup.equals(ConfigurationParamGroup.FORM));
+
+        emailLink.setVisible(!activeGroup.equals(ConfigurationParamGroup.EMAIL));
+        emailPanel.setVisible(activeGroup.equals(ConfigurationParamGroup.EMAIL));
+
+        for (DataGrid<DataRow<Cell>> table : tableMap.values()) {
+            table.redraw();
+        }
     }
 
     @UiHandler("addLink")
     void onAddLinkClick(ClickEvent event) {
-        if (commonPanel.isVisible()) {
-            getUiHandlers().onCommonAddRow(getSelectedIndex());
-        } else {
-            getUiHandlers().onFormAddRow(getSelectedIndex());
-        }
+        getUiHandlers().onAddRow(activeGroup, getSelectedIndex());
+    }
+
+    private DataGrid<DataRow<Cell>> getTable(ConfigurationParamGroup group) {
+        return tableMap.get(group);
+    }
+
+    @Override
+    public List<DataRow<Cell>> getRowsData(ConfigurationParamGroup group) {
+        return rowsDataMap.get(group);
     }
 
     private Integer getSelectedIndex() {
-        DataGrid<DataRow<Cell>> table = commonPanel.isVisible() ? commonTable : formTable;
-        DataRow<Cell> selRow = ((SingleSelectionModel<DataRow<Cell>>) table.getSelectionModel()).getSelectedObject();
+        DataRow<Cell> selRow = ((SingleSelectionModel<DataRow<Cell>>) getTable(activeGroup).getSelectionModel()).getSelectedObject();
         if (selRow == null) {
             return null;
         }
-        List<DataRow<Cell>> rowsData = commonPanel.isVisible() ? commonRowsData : formRowsData;
+        List<DataRow<Cell>> rowsData = getRowsData(activeGroup);
         return rowsData.indexOf(selRow);
     }
 
     @UiHandler("delLink")
     void onDelLinkClick(ClickEvent event) {
-        DataGrid<DataRow<Cell>> table = commonPanel.isVisible() ? commonTable : formTable;
-        List<DataRow<Cell>> rowsData = commonPanel.isVisible() ? commonRowsData : formRowsData;
+        DataGrid<DataRow<Cell>> table = getTable(activeGroup);
         DataRow<Cell> selRow = ((SingleSelectionModel<DataRow<Cell>>) table.getSelectionModel()).getSelectedObject();
         if (selRow == null) {
             return;
         }
+        List<DataRow<Cell>> rowsData = new ArrayList<DataRow<Cell>>(getRowsData(activeGroup));
         rowsData.remove(selRow);
-        if (rowsData == commonRowsData) {
-            setCommonConfigData(rowsData, false);
-        } else {
-            setFormConfigData(rowsData, false);
-        }
-        ((SingleSelectionModel<DataRow<Cell>>) table.getSelectionModel()).setSelected(selRow, false);
+        setConfigData(activeGroup, rowsData, false);
     }
 
-    @UiHandler("formCommonLink")
-    void onFormCommonLinkClick(ClickEvent event) {
-        showTab(commonPanel.isVisible() ? 1 : 0);
+    @UiHandler("commonLink")
+    void onCommonLinkClick(ClickEvent event) {
+        showTab(ConfigurationParamGroup.COMMON);
+    }
+
+    @UiHandler("formLink")
+    void onFormLinkClick(ClickEvent event) {
+        showTab(ConfigurationParamGroup.FORM);
+    }
+
+    @UiHandler("emailLink")
+    void onEmailLinkClick(ClickEvent event) {
+        showTab(ConfigurationParamGroup.EMAIL);
     }
 
     @UiHandler("checkButton")
     void onCheckButtonClick(ClickEvent event) {
-        DataGrid<DataRow<Cell>> table = commonPanel.isVisible() ? commonTable : formTable;
+        DataGrid<DataRow<Cell>> table = getTable(activeGroup);
         DataRow<Cell> selRow = ((SingleSelectionModel<DataRow<Cell>>) table.getSelectionModel()).getSelectedObject();
-        if (selRow == null) {
+        if (selRow == null && !activeGroup.equals(ConfigurationParamGroup.EMAIL)) {
             return;
         }
-        getUiHandlers().onCheckReadWriteAccess(selRow, commonPanel.isVisible());
+        getUiHandlers().onCheckAccess(activeGroup, selRow);
     }
 
     @UiHandler("saveButton")
-	void onSaveButtonClick(ClickEvent event) {
-		getUiHandlers().onSave();
-	}
+    void onSaveButtonClick(ClickEvent event) {
+        getUiHandlers().onSave();
+    }
 
-	@UiHandler("cancelButton")
-	void onCancelButtonClick(ClickEvent event) {
-		getUiHandlers().onCancel();
+    @UiHandler("cancelButton")
+    void onCancelButtonClick(ClickEvent event) {
+        getUiHandlers().onCancel();
     }
 
     private static final Comparator<DataRow<Cell>> commonComparator = new Comparator<DataRow<Cell>>() {
@@ -256,26 +343,36 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
         }
     };
 
-    @Override
-    public void setCommonConfigData(List<DataRow<Cell>> rowsData, boolean needSort) {
-        if (needSort) {
-            Collections.sort(rowsData, commonComparator);
+    private static final Comparator<DataRow<Cell>> emailComparator = new Comparator<DataRow<Cell>>() {
+        @Override
+        public int compare(DataRow<Cell> o1, DataRow<Cell> o2) {
+            String name1 = o1.getCell("emailParamColumn").getRefBookDereference();
+            String name2 = o2.getCell("emailParamColumn").getRefBookDereference();
+            if (name1 == null && name2 == null) {
+                return 0;
+            }
+            if (name1 == null) {
+                return 1;
+            }
+            if (name2 == null) {
+                return -1;
+            }
+            return name1.compareTo(name2);
         }
-        commonRowsData = rowsData;
-        commonTable.setVisibleRange(new Range(0, rowsData.size()));
-        commonTable.setRowCount(rowsData.size());
-        commonTable.setRowData(0, rowsData);
-    }
+    };
 
-	@Override
-	public void setFormConfigData(List<DataRow<Cell>> rowsData, boolean needSort) {
+    @Override
+    public void setConfigData(ConfigurationParamGroup group, List<DataRow<Cell>> rowsData, boolean needSort) {
         if (needSort) {
-            Collections.sort(rowsData, formComparator);
+            Collections.sort(rowsData, comparatorMap.get(group));
         }
-        formRowsData = rowsData;
-        formTable.setVisibleRange(new Range(0, rowsData.size()));
-        formTable.setRowCount(rowsData.size());
-        formTable.setRowData(0, rowsData);
+
+        getRowsData(group).clear();
+        getRowsData(group).addAll(rowsData);
+
+        getTable(group).setVisibleRange(new Range(0, rowsData.size()));
+        getTable(group).setRowCount(rowsData.size());
+        getTable(group).setRowData(0, rowsData);
     }
 
     @Override
@@ -309,18 +406,19 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
     }
 
     @Override
-    public List<DataRow<Cell>> getFormRowsData() {
-        return formRowsData;
+    public RefBookColumn getEmailParamColumn() {
+        return emailParamColumn;
     }
 
     @Override
-    public List<DataRow<Cell>> getCommonRowsData() {
-        return commonRowsData;
+    public StringColumn getEmailValueColumn() {
+        return emailValueColumn;
     }
 
     @Override
     public void clearSelection() {
-        ((SingleSelectionModel)commonTable.getSelectionModel()).clear();
-        ((SingleSelectionModel)formTable.getSelectionModel()).clear();
+        for (DataGrid<DataRow<Cell>> table : tableMap.values()) {
+            ((SingleSelectionModel) table.getSelectionModel()).clear();
+        }
     }
 }
