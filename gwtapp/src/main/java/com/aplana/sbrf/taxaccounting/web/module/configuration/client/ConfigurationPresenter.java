@@ -34,52 +34,64 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
 
     @ProxyStandard
     @NameToken(TOKEN)
-	public interface MyProxy extends ProxyPlace<ConfigurationPresenter> {
-	}
+    public interface MyProxy extends ProxyPlace<ConfigurationPresenter> {
+    }
 
-	public interface MyView extends View, HasUiHandlers<ConfigurationUiHandlers>{
-        void setCommonConfigData(List<DataRow<Cell>> rowsData, boolean needSort);
-        void setFormConfigData(List<DataRow<Cell>> rowsData, boolean needSort);
-        RefBookColumn getDepartmentColumn();
-        StringColumn getUploadPathColumn();
-        StringColumn getArchivePathColumn();
-        StringColumn getErrorPathColumn();
+    public interface MyView extends View, HasUiHandlers<ConfigurationUiHandlers> {
+        void setConfigData(ConfigurationParamGroup group, List<DataRow<Cell>> rowsData, boolean needSort);
+
         RefBookColumn getParamColumn();
+
         StringColumn getValueColumn();
-        List<DataRow<Cell>> getFormRowsData();
-        List<DataRow<Cell>> getCommonRowsData();
+
+        RefBookColumn getDepartmentColumn();
+
+        StringColumn getUploadPathColumn();
+
+        StringColumn getArchivePathColumn();
+
+        StringColumn getErrorPathColumn();
+
+        RefBookColumn getEmailParamColumn();
+
+        StringColumn getEmailValueColumn();
+
+        List<DataRow<Cell>> getRowsData(ConfigurationParamGroup group);
+
         void clearSelection();
-	}
+    }
 
-	private final DispatchAsync dispatcher;
-	private final TaPlaceManager placeManager;
+    private final DispatchAsync dispatcher;
+    private final TaPlaceManager placeManager;
 
-	@Inject
-	public ConfigurationPresenter(final EventBus eventBus, final MyView view,
-			final MyProxy proxy, PlaceManager placeManager,
-			DispatchAsync dispatcher) {
-		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
-		getView().setUiHandlers(this);
-		this.placeManager = (TaPlaceManager) placeManager;
-		this.dispatcher = dispatcher;
-	}
+    @Inject
+    public ConfigurationPresenter(final EventBus eventBus, final MyView view,
+                                  final MyProxy proxy, PlaceManager placeManager,
+                                  DispatchAsync dispatcher) {
+        super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
+        getView().setUiHandlers(this);
+        this.placeManager = (TaPlaceManager) placeManager;
+        this.dispatcher = dispatcher;
+    }
 
-	@Override
-	public void prepareFromRequest(PlaceRequest request) {
+    @Override
+    public void prepareFromRequest(PlaceRequest request) {
         LogCleanEvent.fire(this);
         LogShowEvent.fire(this, false);
-		GetConfigurationAction action = new GetConfigurationAction();
-		dispatcher.execute(action,
+        GetConfigurationAction action = new GetConfigurationAction();
+        dispatcher.execute(action,
                 CallbackUtils.defaultCallback(
                         new AbstractCallback<GetConfigurationResult>() {
-							@Override
-							public void onSuccess(GetConfigurationResult result) {
-								getView().setFormConfigData(getFormRowsData(result.getModel(),
+                            @Override
+                            public void onSuccess(GetConfigurationResult result) {
+                                getView().setConfigData(ConfigurationParamGroup.COMMON, getCommonRowsData(result.getModel()), true);
+                                getView().setConfigData(ConfigurationParamGroup.FORM, getFormRowsData(result.getModel(),
                                         result.getDereferenceDepartmentNameMap()), true);
-                                getView().setCommonConfigData(getCommonRowsData(result.getModel()), true);
-							}
+                                getView().setConfigData(ConfigurationParamGroup.EMAIL, getEmailRowsData(result.getModel()), true);
+                            }
                         }, this).addCallback(TaManualRevealCallback.create(this, placeManager)));
-	}
+    }
+
 
     /**
      * Преобразование данных с серверной стороны в строки таблицы общих параметров
@@ -88,7 +100,7 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
         List<DataRow<Cell>> rowsData = new LinkedList<DataRow<Cell>>();
 
         for (ConfigurationParam key : model.keySet()) {
-            if (!key.isCommon()) {
+            if (!key.getGroup().equals(ConfigurationParamGroup.COMMON)) {
                 continue;
             }
 
@@ -98,7 +110,7 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
             }
 
             for (String value : list) {
-                DataRow<Cell> dataRow = createCommonDataRow();
+                DataRow<Cell> dataRow = createDataRow(ConfigurationParamGroup.COMMON);
                 // Значения
                 dataRow.getCell(getView().getParamColumn().getAlias()).setNumericValue(BigDecimal.valueOf(key.ordinal()));
                 dataRow.getCell(getView().getParamColumn().getAlias()).setRefBookDereference(key.getCaption());
@@ -135,7 +147,7 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
         }
 
         for (Map.Entry<Integer, Map<ConfigurationParam, String>> entry : rowMap.entrySet()) {
-            DataRow<Cell> dataRow = createFormDataRow();
+            DataRow<Cell> dataRow = createDataRow(ConfigurationParamGroup.FORM);
             rowsData.add(dataRow);
             // Значения
             dataRow.getCell(getView().getDepartmentColumn().getAlias())
@@ -152,10 +164,38 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
         return rowsData;
     }
 
-	@Override
-	public boolean useManualReveal() {
-		return true;
-	}
+    /**
+     * Преобразование данных с серверной стороны в строки таблицы параметров электронной почты
+     */
+    private List<DataRow<Cell>> getEmailRowsData(ConfigurationParamModel model) {
+        List<DataRow<Cell>> rowsData = new LinkedList<DataRow<Cell>>();
+
+        for (ConfigurationParam key : model.keySet()) {
+            if (!key.getGroup().equals(ConfigurationParamGroup.EMAIL)) {
+                continue;
+            }
+
+            List<String> list = model.get(key, 0);
+            if (list == null) {
+                continue;
+            }
+
+            for (String value : list) {
+                DataRow<Cell> dataRow = createDataRow(ConfigurationParamGroup.EMAIL);
+                // Значения
+                dataRow.getCell(getView().getEmailParamColumn().getAlias()).setNumericValue(BigDecimal.valueOf(key.ordinal()));
+                dataRow.getCell(getView().getEmailParamColumn().getAlias()).setRefBookDereference(key.getCaption());
+                dataRow.getCell(getView().getEmailValueColumn().getAlias()).setStringValue(value);
+                rowsData.add(dataRow);
+            }
+        }
+        return rowsData;
+    }
+
+    @Override
+    public boolean useManualReveal() {
+        return true;
+    }
 
     /**
      * Обработка строки. Пустая строка считается как null
@@ -175,7 +215,8 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
      * Заполнение модели конфигурационных параметров
      */
     private void fillModel(ConfigurationParamModel model, List<DataRow<Cell>> commonRowsData,
-                                    List<DataRow<Cell>> formRowsData, Set<Integer> dublicateDepartmentIdSet, Map<Integer, Set<String>> notSetFields) {
+                           List<DataRow<Cell>> formRowsData, List<DataRow<Cell>> emailRowsData,
+                           Set<Integer> duplicateDepartmentIdSet, Map<Integer, Set<String>> notSetFields) {
         // Общие параметры
         Map<ConfigurationParam, List<String>> commonMap = new HashMap<ConfigurationParam, List<String>>();
 
@@ -244,23 +285,50 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
             }
             // Проверка дублей
             if (!departmentSet.add(departmentId.intValue())) {
-                if (dublicateDepartmentIdSet != null)
-                    dublicateDepartmentIdSet.add(departmentId.intValue());
+                if (duplicateDepartmentIdSet != null)
+                    duplicateDepartmentIdSet.add(departmentId.intValue());
             }
+        }
+
+        // Параметры электронной почты
+        Map<ConfigurationParam, List<String>> emailMap = new HashMap<ConfigurationParam, List<String>>();
+
+        // Группировка по параметру
+        for (DataRow<Cell> dataRow : emailRowsData) {
+            BigDecimal paramId = dataRow.getCell(getView().getEmailParamColumn().getAlias()).getNumericValue();
+            ConfigurationParam param = null;
+            if (paramId != null) {
+                param = ConfigurationParam.values()[paramId.intValue()];
+            }
+            String value = cleanString(dataRow.getCell(getView().getEmailValueColumn().getAlias()).getStringValue());
+            if (param == null || value == null) {
+                // Не полностью заполненные параметры не сохраняем
+                continue;
+            }
+            if (!emailMap.containsKey(param)) {
+                emailMap.put(param, new LinkedList<String>());
+            }
+            emailMap.get(param).add(value);
+        }
+        for (Map.Entry<ConfigurationParam, List<String>> entry : emailMap.entrySet()) {
+            Map<Integer, List<String>> departmentMap = new HashMap<Integer, List<String>>();
+            departmentMap.put(0, entry.getValue());
+            model.put(entry.getKey(), departmentMap);
         }
     }
 
-	@Override
-	public void onSave() {
+    @Override
+    public void onSave() {
         LogCleanEvent.fire(this);
         ConfigurationParamModel model = new ConfigurationParamModel();
         SaveConfigurationAction action = new SaveConfigurationAction();
         action.setModel(model);
         // Преобразование данных таблиц в ConfigurationParamModel
-        List<DataRow<Cell>> commonRowsData = getView().getCommonRowsData();
-        List<DataRow<Cell>> formRowsData = getView().getFormRowsData();
+        List<DataRow<Cell>> commonRowsData = getView().getRowsData(ConfigurationParamGroup.COMMON);
+        List<DataRow<Cell>> formRowsData = getView().getRowsData(ConfigurationParamGroup.FORM);
+        List<DataRow<Cell>> emailRowsData = getView().getRowsData(ConfigurationParamGroup.EMAIL);
 
-        fillModel(model, commonRowsData, formRowsData, action.getDublicateDepartmentIdSet(), action.getNotSetFields());
+        fillModel(model, commonRowsData, formRowsData, emailRowsData, action.getDublicateDepartmentIdSet(), action.getNotSetFields());
 
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<SaveConfigurationResult>() {
             @Override
@@ -268,98 +336,99 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
                 placeManager.revealCurrentPlace();
             }
         }, this));
-	}
+    }
 
-	@Override
-	public void onCancel() {
+    @Override
+    public void onCancel() {
         getView().clearSelection();
-		placeManager.revealCurrentPlace();
-	}
-
-    /**
-     * Подготовка строки таблицы общих параметров
-     */
-    private DataRow createCommonDataRow() {
-        DataRow<Cell> dataRow = new DataRow<Cell>();
-
-        Cell paramCell = new Cell();
-        paramCell.setColumn(getView().getParamColumn());
-        paramCell.setEditable(true);
-
-        Cell valueCell = new Cell();
-        valueCell.setColumn(getView().getValueColumn());
-        valueCell.setEditable(true);
-
-        dataRow.setFormColumns(asList(paramCell, valueCell));
-        return dataRow;
+        placeManager.revealCurrentPlace();
     }
 
     /**
-     * Подготовка строки таблицы параметров загрузки НФ
+     * Подготовка строки таблицы
      */
-    private DataRow createFormDataRow() {
+    private DataRow<Cell> createDataRow(ConfigurationParamGroup group) {
         DataRow<Cell> dataRow = new DataRow<Cell>();
 
-        Cell departmentCell = new Cell();
-        departmentCell.setColumn(getView().getDepartmentColumn());
-        departmentCell.setEditable(true);
+        if (group.equals(ConfigurationParamGroup.COMMON)) {
+            Cell paramCell = new Cell();
+            paramCell.setColumn(getView().getParamColumn());
+            paramCell.setEditable(true);
 
-        Cell uploadCell = new Cell();
-        uploadCell.setColumn(getView().getUploadPathColumn());
-        uploadCell.setEditable(true);
+            Cell valueCell = new Cell();
+            valueCell.setColumn(getView().getValueColumn());
+            valueCell.setEditable(true);
 
-        Cell archiveCell = new Cell();
-        archiveCell.setColumn(getView().getArchivePathColumn());
-        archiveCell.setEditable(true);
+            dataRow.setFormColumns(asList(paramCell, valueCell));
 
-        Cell errorCell = new Cell();
-        errorCell.setColumn(getView().getErrorPathColumn());
-        errorCell.setEditable(true);
+        } else if (group.equals(ConfigurationParamGroup.FORM)) {
+            Cell departmentCell = new Cell();
+            departmentCell.setColumn(getView().getDepartmentColumn());
+            departmentCell.setEditable(true);
 
-        dataRow.setFormColumns(asList(departmentCell, uploadCell, archiveCell, errorCell));
+            Cell uploadCell = new Cell();
+            uploadCell.setColumn(getView().getUploadPathColumn());
+            uploadCell.setEditable(true);
+
+            Cell archiveCell = new Cell();
+            archiveCell.setColumn(getView().getArchivePathColumn());
+            archiveCell.setEditable(true);
+
+            Cell errorCell = new Cell();
+            errorCell.setColumn(getView().getErrorPathColumn());
+            errorCell.setEditable(true);
+
+            dataRow.setFormColumns(asList(departmentCell, uploadCell, archiveCell, errorCell));
+
+        } else if (group.equals(ConfigurationParamGroup.EMAIL)) {
+            Cell paramCell = new Cell();
+            paramCell.setColumn(getView().getEmailParamColumn());
+            paramCell.setEditable(true);
+
+            Cell valueCell = new Cell();
+            valueCell.setColumn(getView().getEmailValueColumn());
+            valueCell.setEditable(true);
+
+            dataRow.setFormColumns(asList(paramCell, valueCell));
+        }
+
         return dataRow;
     }
 
     @Override
-    public void onFormAddRow(Integer index) {
-        List<DataRow<Cell>> data = getView().getFormRowsData();
+    public void onAddRow(ConfigurationParamGroup group, Integer index) {
+        List<DataRow<Cell>> data = new ArrayList<DataRow<Cell>>(getView().getRowsData(group));
         if (index == null) {
             index = data.size() - 1;
         }
-        data.add(index + 1, createFormDataRow());
-        getView().setFormConfigData(data, false);
+        data.add(index + 1, createDataRow(group));
+        getView().setConfigData(group, data, false);
     }
 
     @Override
-    public void onCommonAddRow(Integer index) {
-        List<DataRow<Cell>> data = getView().getCommonRowsData();
-        if (index == null) {
-            index = data.size() - 1;
-        }
-        data.add(index + 1, createCommonDataRow());
-        getView().setCommonConfigData(data, false);
-    }
-
-    @Override
-    public void onCheckReadWriteAccess(DataRow<Cell> selRow, boolean common) {
+    public void onCheckAccess(ConfigurationParamGroup group, DataRow<Cell> selRow) {
         LogCleanEvent.fire(this);
         ConfigurationParamModel model = new ConfigurationParamModel();
-        final CheckReadWriteAccessAction action = new CheckReadWriteAccessAction();
+        final CheckAccessAction action = new CheckAccessAction();
         action.setModel(model);
+        action.setGroup(group);
         // Преобразование данных таблиц в ConfigurationParamModel
         List<DataRow<Cell>> commonRowsData = new ArrayList<DataRow<Cell>>();
         List<DataRow<Cell>> formRowsData = new ArrayList<DataRow<Cell>>();
-        if (common) {
+        List<DataRow<Cell>> emailRowsData = new ArrayList<DataRow<Cell>>();
+        if (group.equals(ConfigurationParamGroup.COMMON)) {
             commonRowsData.add(selRow);
-        } else {
+        } else if (group.equals(ConfigurationParamGroup.FORM)) {
             formRowsData.add(selRow);
+        }  else if (group.equals(ConfigurationParamGroup.EMAIL)) {
+            emailRowsData.addAll(getView().getRowsData(group));
         }
 
-        fillModel(model, commonRowsData, formRowsData, null, null);
+        fillModel(model, commonRowsData, formRowsData, emailRowsData, null, null);
 
-        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<CheckReadWriteAccessResult>() {
+        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<CheckAccessResult>() {
             @Override
-            public void onSuccess(CheckReadWriteAccessResult result) {
+            public void onSuccess(CheckAccessResult result) {
                 if (result.getUuid() != null) {
                     LogAddEvent.fire(ConfigurationPresenter.this, result.getUuid());
                     LogShowEvent.fire(ConfigurationPresenter.this, true);
@@ -368,4 +437,5 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
             }
         }, this));
     }
+
 }
