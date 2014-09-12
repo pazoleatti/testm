@@ -151,27 +151,28 @@ void logicCheck() {
 
         // Проверка выбранной единицы измерения        
         if (getRefBookValue(12, row.okeiCode)?.CODE?.stringValue != '796') {
-            rowWarning(logger, row, "Строка $rowNum: В поле «Код единицы измерения по ОКЕИ» могут быть указаны только следующие элементы: шт.!")
+            def msg = row.getCell('okeiCode').column.name
+            rowWarning(logger, row, "Строка $rowNum: В графе «$msg» могут быть указаны только следующие элементы: шт.!")
         }
 
         // Проверка количества
         if (row.count != 1) {
             def msg = row.getCell('transactionDate').column.name
-            rowWarning(logger, row, "Строка $rowNum: В графе «$msg» может быть указано только значение «1»!")
+            rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg» может быть только «1»!")
         }
 
         // Корректность даты совершения сделки
         if (transactionDate < contractDate) {
             def msg1 = row.getCell('transactionDate').column.name
             def msg2 = row.getCell('contractDate').column.name
-            rowWarning(logger, row, "Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
+            rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
         }
 
         // Проверка заполнения стоимости сделки
         if (totalCost != price) {
             def msg1 = row.getCell('totalCost').column.name
             def msg2 = row.getCell('price').column.name
-            rowWarning(logger, row, "Строка $rowNum: «$msg1» не может отличаться от «$msg2» сделки!")
+            rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
         }
     }
 }

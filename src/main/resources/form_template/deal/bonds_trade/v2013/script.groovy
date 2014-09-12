@@ -150,7 +150,6 @@ void logicCheck() {
         checkNonEmptyColumns(row, rowNum, ['contractNum', 'contractDate'], logger, true)
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns - ['contractNum', 'contractDate'], logger, false)
 
-        def transactionDeliveryDate = row.transactionDeliveryDate
         def transactionDate = row.transactionDate
         def transactionSumRub = row.transactionSumRub
         def bondCount = row.bondCount
@@ -159,40 +158,31 @@ void logicCheck() {
         def transactionSumCurrency = row.transactionSumCurrency
         def contractDate = row.contractDate
 
-        // Корректность даты сделки
-        if (transactionDeliveryDate < transactionDate) {
-            def msg1 = row.getCell('transactionDeliveryDate').column.name
-            def msg2 = row.getCell('transactionDate').column.name
-            rowWarning(logger, row, "Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
-        }
-
         // Проверка конверсии
         if (courseCB == null || transactionSumCurrency == null || transactionSumRub != (courseCB * transactionSumCurrency).setScale(0, RoundingMode.HALF_UP)) {
             def msg1 = row.getCell('transactionSumRub').column.name
             def msg2 = row.getCell('transactionSumCurrency').column.name
             def msg3 = row.getCell('courseCB').column.name
-            rowWarning(logger, row, "Строка $rowNum: «$msg1» не соответствует «$msg2» с учетом данных «$msg3»!")
+            rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть равно произведению значений графы «$msg2» и графы «$msg3»!")
         }
 
         // Корректность даты заключения сделки
         if (transactionDate < contractDate) {
             def msg1 = row.getCell('transactionDate').column.name
             def msg2 = row.getCell('contractDate').column.name
-            rowWarning(logger, row, "Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
+            rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
         }
 
         // Проверка цены сделки
         def res = null
-
         if (transactionSumRub != null && bondCount != null && bondCount != 0) {
             res = (transactionSumRub / bondCount).setScale(0, RoundingMode.HALF_UP)
         }
-
         if (transactionSumRub == null || bondCount == null || priceOne != res) {
             def msg1 = row.getCell('priceOne').column.name
             def msg2 = row.getCell('transactionSumRub').column.name
             def msg3 = row.getCell('bondCount').column.name
-            rowWarning(logger, row, "Строка $rowNum: «$msg1» не равно отношению «$msg2» и «$msg3»!")
+            rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть равно отношению значений граф «$msg2» и «$msg3»!")
         }
     }
 }

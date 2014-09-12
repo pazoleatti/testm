@@ -158,35 +158,35 @@ void logicCheck() {
 
         // Заполнение граф 13 и 14
         if (percentIncomeSum == null && percentConsumptionSum == null) {
-            def msg1 = row.getCell('percentIncomeSum').column.name
-            def msg2 = row.getCell('percentConsumptionSum').column.name
-            rowWarning(logger, row, "Строка $rowNum: Должна быть заполнена графа «$msg1» или графа «$msg2»!")
+            def msg1 = row.getCell('percentConsumptionSum').column.name
+            def msg2 = row.getCell('percentIncomeSum').column.name
+            rowWarning(logger, row, "Строка $rowNum: Графа «$msg1» должна быть заполнена, если не заполнена графа «$msg2»!")
         }
         if (percentIncomeSum != null && percentConsumptionSum != null) {
-            def msg1 = row.getCell('percentIncomeSum').column.name
-            def msg2 = row.getCell('percentConsumptionSum').column.name
-            rowWarning(logger, row, "Строка $rowNum: Графа «$msg1» и графа «$msg2» не могут быть заполнены одновременно!")
+            def msg1 = row.getCell('percentConsumptionSum').column.name
+            def msg2 = row.getCell('percentIncomeSum').column.name
+            rowWarning(logger, row, "Строка $rowNum: Графа «$msg1» не может быть заполнена одновременно с графой «$msg2»!")
         }
 
         // Корректность даты (заключения) сделки
         if (transactionDeliveryDate < contractDate) {
             def msg1 = row.getCell('transactionDeliveryDate').column.name
             def msg2 = row.getCell('contractDate').column.name
-            rowWarning(logger, row, "Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
+            rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
         }
 
         // Корректность даты исполнения 1–ой части сделки
         def dt1 = row.date1
         if (dt1 != null && (dt1 < dFrom || dt1 > dTo)) {
             def msg = row.getCell('date1').column.name
-            rowWarning(logger, row, "Строка $rowNum: «$msg» не может быть больше даты окончания отчётного периода или меньше даты его начала!")
+            rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg» не может быть больше даты окончания отчётного периода или меньше даты его начала!")
         }
 
         // Корректность даты совершения сделки
         if (transactionDate < transactionDeliveryDate) {
             def msg1 = row.getCell('transactionDate').column.name
             def msg2 = row.getCell('transactionDeliveryDate').column.name
-            rowWarning(logger, row, "Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
+            rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
         }
     }
 }
