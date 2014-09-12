@@ -268,15 +268,15 @@ void logicCheck() {
         }
 
         // Проверка доходов/расходов и стоимости
-        def msgPrice = row.getCell('price').column.name
+        def msgPrice = row.getCell('priceOne').column.name
         if (incomeSumCell.value != null && outcomeSumCell.value != null) {
-            if ((row.price ?: 0).abs() != (incomeSumCell.value - outcomeSumCell.value).abs())
+            if ((row.priceOne ?: 0).abs() != (incomeSumCell.value - outcomeSumCell.value).abs())
                 rowWarning(logger, row, "Строка $rowNum: Значение графы «$msgPrice» должно быть равно разнице значений граф «$msgIn» и «$msgOut» по модулю!")
         } else if (incomeSumCell.value != null) {
-            if (row.price != incomeSumCell.value)
+            if (row.priceOne != incomeSumCell.value)
                 rowWarning(logger, row, "Строка $rowNum: Значение графы «$msgPrice» должно быть равно значению графы «$msgIn»!")
         } else if (outcomeSumCell.value != null) {
-            if (row.price != outcomeSumCell.value)
+            if (row.priceOne != outcomeSumCell.value)
                 rowWarning(logger, row, "Строка $rowNum: Значение графы «$msgPrice» должно быть равно значению графы «$msgOut»!")
         }
 

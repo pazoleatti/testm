@@ -170,11 +170,11 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
                 .wrongStateCallback(new AbstractCallback<FillFormFieldsResult>() {
                     @Override
                     public void onSuccess(FillFormFieldsResult result) {
-                        getView().init();
-                        getView().setAcceptableReportPeriods(result.getReportPeriods());
-
                         // в текущей постановке фильтры не передаются
                         getView().setFilterData(new FormDataFilter());
+
+                        getView().init();
+                        getView().setAcceptableReportPeriods(result.getReportPeriods());
 
                         slotForMe.addToPopupSlot(CreateFormDataPresenter.this);
                     }

@@ -129,19 +129,30 @@ void logicCheck() {
         checkNonEmptyColumns(row, rowNum, ['docNumber', 'docDate'], logger, true)
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns - ['docNumber', 'docDate'], logger, false)
 
+        def dealDateCell = row.getCell('dealDate')
+        def sumCell = row.getCell('outcomeSum')
+        def priceCell = row.getCell('price')
+        def totalCell = row.getCell('total')
+        def msgSum = sumCell.column.name
+
         // Проверка цены
-        if (row.outcomeSum != row.price) {
-            rowWarning(logger, row, "Строка $rowNum: Цена не может отличаться от суммы расходов Банка!")
+        if (sumCell.value != priceCell.value) {
+            def msg = priceCell.column.name
+            rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg» должно быть равно значению графы «$msgSum»!")
         }
 
         // Проверка стоимости
-        if (row.outcomeSum != row.total) {
-            rowWarning(logger, row, "Строка $rowNum: Стоимость не может отличаться от суммы расходов Банка!")
+        if (sumCell.value != totalCell.value) {
+            def msg = totalCell.column.name
+            rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg» должно быть равно значению графы «$msgSum»!")
         }
 
         // Корректность даты сделки
+        def dealDoneDateCell = row.getCell('dealDoneDate')
         if (row.dealDoneDate < row.docDate) {
-            rowWarning(logger, row, "Строка $rowNum: Дата совершения сделки не может быть меньше даты договора!")
+            def msg1 = dealDoneDateCell.column.name
+            def msg2 = dealDateCell.column.name
+            rowWarning(logger, row, "Строка $rowNum:  Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
         }
     }
 
