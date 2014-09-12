@@ -279,6 +279,8 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 		} else {
 			for (Map.Entry<RefBookColumn, HasValue> w : widgets.entrySet()) {
 				RefBookValueSerializable recordValue = record.get(w.getKey().getAlias());
+                if (recordValue == null)
+                    continue;
 				if (w.getValue() instanceof RefBookPickerWidget) {
                     RefBookPickerWidget rbw = (RefBookPickerWidget) w.getValue();
                     if (isNeedToReload) {

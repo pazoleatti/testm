@@ -4,6 +4,7 @@ import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
@@ -19,6 +20,7 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.rena
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
 import com.aplana.sbrf.taxaccounting.web.widget.logarea.shared.SaveLogEntriesAction;
 import com.aplana.sbrf.taxaccounting.web.widget.logarea.shared.SaveLogEntriesResult;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.RefBookTreeItem;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.WidgetUtils;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.inject.Inject;
@@ -128,16 +130,20 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 		this.relevanceDate = relevanceDate;
 	}
 
-	public void show(final Long refBookRecordId) {
-		if (refBookRecordId != null && refBookRecordId.equals(currentUniqueRecordId)) {
-			return;
-		}
-		if (isFormModified) {
+	public void show(Long refBookRecordId) {
+        show(refBookRecordId, null);
+	}
+
+    public void show(final Long refBookRecordId, final RefBookTreeItem parentRefBookRecordId) {
+        if (refBookRecordId != null && refBookRecordId.equals(currentUniqueRecordId)) {
+            return;
+        }
+        if (isFormModified) {
             Dialog.confirmMessage(DIALOG_MESSAGE, new DialogHandler() {
                 @Override
                 public void yes() {
                     setIsFormModified(false);
-                    showRecord(refBookRecordId);
+                    showRecord(refBookRecordId, parentRefBookRecordId);
                 }
 
                 @Override
@@ -150,19 +156,32 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                     no();
                 }
             });
-		} else {
-			showRecord(refBookRecordId);
-		}
-	}
+        } else {
+            showRecord(refBookRecordId, parentRefBookRecordId);
+        }
+    }
 
     private void rollbackIfNo(){
         RollbackTableRowSelection.fire(this, currentUniqueRecordId);
     }
 
-	private void showRecord(final Long refBookRecordId) {
+	private void showRecord(Long refBookRecordId) {
+        showRecord(refBookRecordId, null);
+	}
+
+    private void showRecord(final Long refBookRecordId, RefBookTreeItem parentRefBook) {
         if (refBookRecordId == null) {
-			currentUniqueRecordId = null;
-			getView().fillInputFields(null);
+            currentUniqueRecordId = null;
+            getView().fillInputFields(null);
+            if (parentRefBook != null){
+                RefBookValueSerializable refBookParent = new RefBookValueSerializable();
+                refBookParent.setAttributeType(RefBookAttributeType.REFERENCE);
+                refBookParent.setDereferenceValue(parentRefBook.getDereferenceValue());
+                refBookParent.setReferenceValue(parentRefBook.getId());
+                HashMap<String, RefBookValueSerializable> field = new HashMap<String, RefBookValueSerializable>(1);
+                field.put("PARENT_ID", refBookParent);
+                getView().fillInputFields(field);
+            }
             if (!isVersionMode && mode == FormMode.EDIT) {
                 getView().updateMode(FormMode.CREATE);
             } else {
@@ -171,23 +190,24 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
             getView().setVersionFrom(null);
             getView().setVersionTo(null);
             getView().updateRefBookPickerPeriod();
-			return;
-		}
-		GetRefBookRecordAction action = new GetRefBookRecordAction();
-		action.setRefBookId(currentRefBookId);
-		action.setRefBookRecordId(refBookRecordId);
+            return;
+        }
+        GetRefBookRecordAction action = new GetRefBookRecordAction();
+        action.setRefBookId(currentRefBookId);
+        action.setRefBookRecordId(refBookRecordId);
         dispatchAsync.execute(action,
-				CallbackUtils.defaultCallback(
-						new AbstractCallback<GetRefBookRecordResult>() {
-							@Override
-							public void onSuccess(GetRefBookRecordResult result) {
+                CallbackUtils.defaultCallback(
+                        new AbstractCallback<GetRefBookRecordResult>() {
+                            @Override
+                            public void onSuccess(GetRefBookRecordResult result) {
                                 getView().fillVersionData(result.getVersionData(), currentRefBookId, refBookRecordId);
-								getView().fillInputFields(result.getRecord());
-								currentUniqueRecordId = refBookRecordId;
+                                Map<String, RefBookValueSerializable> fields = result.getRecord();
+                                getView().fillInputFields(result.getRecord());
+                                currentUniqueRecordId = refBookRecordId;
                                 updateMode();
-							}
-						}, this));
-	}
+                            }
+                        }, this));
+    }
 
 	@Override
 	public void onSaveClicked() {
