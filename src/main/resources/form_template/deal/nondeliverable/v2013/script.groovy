@@ -150,63 +150,54 @@ void logicCheck() {
         checkNonEmptyColumns(row, rowNum, ['contractNum', 'contractDate'], logger, true)
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns - ['contractNum', 'contractDate'], logger, false)
 
-        // Проверка доходов и расходов
-        def consumptionSum = row.consumptionSum
-        def incomeSum = row.incomeSum
+
+        def incomeSumCell = row.getCell('incomeSum')
+        def outcomeSumCell = row.getCell('consumptionSum')
         def price = row.price
         def transactionDeliveryDate = row.transactionDeliveryDate
         def contractDate = row.contractDate
         def cost = row.cost
         def transactionDate = row.transactionDate
+        def msgIn = incomeSumCell.column.name
+        def msgOut = outcomeSumCell.column.name
 
-        // В одной строке если не заполнена графа 11, то должна быть заполнена графа 12 и наоборот
+        // Проверка доходов и расходов
         if (consumptionSum == null && incomeSum == null) {
-            def msg1 = row.getCell('consumptionSum').column.name
-            def msg2 = row.getCell('incomeSum').column.name
-            rowWarning(logger, row, "Строка $rowNum: Одна из граф «$msg1» и «$msg2» должна быть заполнена!")
+            rowWarning(logger, row, "Строка $rowNum: Графа «$msgOut» должна быть заполнена, если не заполнена графа «$msgIn»!")
         }
 
         // Корректность даты заключения сделки
         if (transactionDeliveryDate < contractDate) {
             def msg1 = row.getCell('transactionDeliveryDate').column.name
             def msg2 = row.getCell('contractDate').column.name
-            rowWarning(logger, row, "Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
+            rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
         }
 
         // Проверка доходов/расходов и стоимости
-        if (incomeSum != null && consumptionSum == null && price != incomeSum) {
-            def msg1 = row.getCell('price').column.name
-            def msg2 = row.getCell('incomeSum').column.name
-            rowWarning(logger, row, "Строка $rowNum: Графа «$msg1» должна быть равна «$msg2»!")
-        }
-        if (incomeSum == null && consumptionSum != null && price != consumptionSum) {
-            def msg1 = row.getCell('price').column.name
-            def msg2 = row.getCell('consumptionSum').column.name
-            rowWarning(logger, row, "Строка $rowNum: Графа «$msg1» должна быть равна «$msg2»!")
-        }
-        if (incomeSum != null && consumptionSum != null &&
-                (price == null
-                        || consumptionSum == null
-                        || incomeSum == null
-                        || price != (consumptionSum - incomeSum).abs())) {
-            def msg1 = row.getCell('price').column.name
-            def msg2 = row.getCell('consumptionSum').column.name
-            def msg3 = row.getCell('incomeSum').column.name
-            rowWarning(logger, row, "Строка $rowNum: Графа «$msg1» должна быть равна разнице графы «$msg2» и графы «$msg3» по модулю!")
+        def msgPrice = row.getCell('price').column.name
+        if (incomeSumCell.value != null && outcomeSumCell.value != null) {
+            if ((row.price ?: 0).abs() != (incomeSumCell.value - outcomeSumCell.value).abs())
+                rowWarning(logger, row, "Строка $rowNum: Значение графы «$msgPrice» должно быть равно разнице значений граф «$msgIn» и «$msgOut» по модулю!")
+        } else if (incomeSumCell.value != null) {
+            if (row.price != incomeSumCell.value)
+                rowWarning(logger, row, "Строка $rowNum: Значение графы «$msgPrice» должно быть равно значению графы «$msgIn»!")
+        } else if (outcomeSumCell.value != null) {
+            if (row.price != outcomeSumCell.value)
+                rowWarning(logger, row, "Строка $rowNum: Значение графы «$msgPrice» должно быть равно значению графы «$msgOut»!")
         }
 
         // Проверка стоимости сделки
         if (cost != price) {
             def msg1 = row.getCell('cost').column.name
             def msg2 = row.getCell('price').column.name
-            rowWarning(logger, row, "Строка $rowNum: «$msg1» не может отличаться от «$msg2» сделки!")
+            rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
         }
 
         // Корректность дат сделки
         if (transactionDate < transactionDeliveryDate) {
             def msg1 = row.getCell('transactionDate').column.name
             def msg2 = row.getCell('transactionDeliveryDate').column.name
-            rowWarning(logger, row, "Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
+            rowWarning(logger, row, "Строка $rowNum: «$msg1» должно быть не меньше значения графы «$msg2»!")
         }
     }
 

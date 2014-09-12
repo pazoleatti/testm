@@ -60,7 +60,7 @@ def refBookCache = [:]
 // Редактируемые атрибуты
 @Field
 def editableColumns = ['jurName', 'incomeBankSum', 'outcomeBankSum', 'contractNum', 'contractDate', 'country',
-        'region', 'city', 'settlement', 'count', 'price', 'transactionDate']
+                       'region', 'city', 'settlement', 'count', 'price', 'transactionDate']
 
 // Автозаполняемые атрибуты
 @Field
@@ -166,38 +166,38 @@ void logicCheck() {
         def transactionDateName = row.getCell('transactionDate').column.name
         def costName = row.getCell('cost').column.name
 
-        if (row.count == 0) {
-            def countName = row.getCell('count').column.name
-            rowWarning(logger, row, "Строка $rowNum: Графа «$countName» не может содержать значение 0")
-        }
-
-        // Проверка доходности
-        if (cost != bankSum) {
-            rowWarning(logger, row, "Строка $rowNum: «$costName» не может отличаться от «$msgBankSum»!")
-        }
-
-        // Заполнение граф 5.1 и 5.2
-        if (incomeBankSum == null && outcomeBankSum == null) {
-            def msg1 = row.getCell('incomeBankSum').column.name
-            def msg2 = row.getCell('outcomeBankSum').column.name
-            rowWarning(logger, row, "Строка $rowNum: Должна быть заполнена графа «$msg1» или графа «$msg2»!")
-        }
+        // Проверка одновременного заполнения граф 5 и 6
         if (incomeBankSum != null && outcomeBankSum != null) {
             def msg1 = row.getCell('incomeBankSum').column.name
             def msg2 = row.getCell('outcomeBankSum').column.name
-            rowWarning(logger, row, "Строка $rowNum: Графа «$msg1» и графа «$msg2» не могут быть заполнены одновременно!")
+            rowWarning(logger, row, "Строка $rowNum: Графа «$msg1» не может быть заполнена одновременно с графой «$msg2»!")
+        }
+
+        // Проверка заполнения графы 5 или 6
+        if (incomeBankSum == null && outcomeBankSum == null) {
+            def msg1 = row.getCell('incomeBankSum').column.name
+            def msg2 = row.getCell('outcomeBankSum').column.name
+            rowWarning(logger, row, "Строка $rowNum: Графа «$msg1» должна быть заполнена если не заполнена графа «$msg2»!")
+        }
+
+        // Проверка стоимости по графе 5
+        // и
+        // Проверка стоимости по графе 6
+        if ((incomeBankSum != null && outcomeBankSum == null || incomeBankSum == null && outcomeBankSum != null)
+                && cost != bankSum) {
+            rowWarning(logger, row, "Строка $rowNum: Значение графы «$costName» должно быть равно значению графы «$msgBankSum»!")
         }
 
         // Корректность даты совершения сделки
         if (transactionDate < contractDate) {
-            rowWarning(logger, row, "Строка $rowNum: «$transactionDateName» не может быть меньше «$contractDateName»!")
+            rowWarning(logger, row, "Строка $rowNum: Значение графы «$transactionDateName» должно быть не меньше значения графы «$contractDateName»!")
         }
 
         // Проверка заполненности одного из атрибутов
         if (row.city != null && !row.city.toString().isEmpty() && row.settlement != null && !row.settlement.toString().isEmpty()) {
             def cityName = row.getCell('city').column.name
             def settleName = row.getCell('settlement').column.name
-            rowWarning(logger, row, "Строка $rowNum: Если заполнена графа «$cityName», то графа «$settleName» не должна быть заполнена!")
+            rowWarning(logger, row, "Строка $rowNum: Графа «$cityName» не может быть заполнена одновременно с графой «$settleName»!")
         }
 
         // Проверка заполнения региона
@@ -206,10 +206,16 @@ void logicCheck() {
             def regionName = row.getCell('region').column.name
             def countryName = row.getCell('country').column.name
             if (country == '643' && row.region == null) {
-                rowWarning(logger, row, "Строка $rowNum: «$regionName» должен быть заполнен, т.к. в «$countryName» указан код 643!")
+                rowWarning(logger, row, "Строка $rowNum: Графа «$regionName» должна быть заполнена, т.к. в графе «$countryName» указан код 643!")
             } else if (country != '643' && row.region != null) {
-                rowWarning(logger, row, "Строка $rowNum: «$regionName» не должен быть заполнен, т.к. в «$countryName» указан код, отличный от 643!")
+                rowWarning(logger, row, "Строка $rowNum: Графа «$regionName» не должна быть заполнена, т.к. в графе «$countryName» указан код, отличный от 643!")
             }
+        }
+
+        // Проверка количества
+        if (row.count == 0) {
+            def countName = row.getCell('count').column.name
+            rowWarning(logger, row, "Строка $rowNum: Графа «$countName» не может содержать значение 0!")
         }
     }
 }

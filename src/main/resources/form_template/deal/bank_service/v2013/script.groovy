@@ -149,25 +149,25 @@ void logicCheck() {
         def transactionDate = row.transactionDate
         def contractDate = row.contractDate
 
-        // Проверка доходности
+        // Проверка цены
         if (bankIncomeSum != price) {
             def msg1 = row.getCell('bankIncomeSum').column.name
             def msg2 = row.getCell('price').column.name
-            rowWarning(logger, row, "Строка $rowNum: «$msg1» не может отличаться от «$msg2»!")
+            rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
         }
 
-        // Проверка доходности
+        // Проверка стоимости
         if (bankIncomeSum != cost) {
             def msg1 = row.getCell('bankIncomeSum').column.name
             def msg2 = row.getCell('cost').column.name
-            rowWarning(logger, row, "Строка $rowNum: «$msg1» не может отличаться от «$msg2»!")
+            rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
         }
 
         // Корректность даты сделки
         if (transactionDate < contractDate) {
             def msg1 = row.getCell('transactionDate').column.name
             def msg2 = row.getCell('contractDate').column.name
-            rowWarning(logger, row, "Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
+            rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
         }
     }
 }

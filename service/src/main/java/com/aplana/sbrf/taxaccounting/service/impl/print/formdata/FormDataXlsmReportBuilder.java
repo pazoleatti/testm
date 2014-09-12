@@ -194,8 +194,13 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         }
 
         //Fill subdivision
+        AreaReference arSubdivision = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_SUBDIVISION).getRefersToFormula());
+        CellRangeAddress region = new CellRangeAddress(arSubdivision.getFirstCell().getRow(), arSubdivision.getFirstCell().getRow(), notNullColumn, formTemplate.getColumns().size() - 1);
+        sheet.addMergedRegion(region);
         if (data.getPerformer() != null) {
             createCellByRange(XlsxReportMetadata.RANGE_SUBDIVISION,  data.getPerformer().getReportDepartmentName(), 0, notNullColumn);
+        } else {
+            createCellByRange(XlsxReportMetadata.RANGE_SUBDIVISION,  "", 0, notNullColumn);
         }
 
         //Fill date

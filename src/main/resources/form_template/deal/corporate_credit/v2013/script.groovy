@@ -145,31 +145,35 @@ void logicCheck() {
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns - ['docNumber', 'docDate'], logger, false)
 
         def docDateCell = row.getCell('docDate')
-
-        // Проверка количества
-        if (row.count != 1) {
-            def msg = row.getCell('count').column.name
-            rowWarning(logger, row, "Строка $rowNum: В графе «$msg» может быть указано только значение «1»!")
-        }
-        // Проверка доходов
         def sumCell = row.getCell('sum')
         def priceCell = row.getCell('price')
         def costCell = row.getCell('cost')
         def msgSum = sumCell.column.name
+
+        // Проверка количества
+        if (row.count != 1) {
+            def msg = row.getCell('count').column.name
+            rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg» может быть только «1»!")
+        }
+
+        // Проверка цены
         if (priceCell.value != sumCell.value) {
             def msg = priceCell.column.name
-            rowWarning(logger, row, "Строка $rowNum: «$msg» не может отличаться от «$msgSum»!")
+            rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg» должно быть равно значению графы «$msgSum»!")
         }
+
+        // Проверка стоимости
         if (costCell.value != sumCell.value) {
             def msg = costCell.column.name
-            rowWarning(logger, row, "Строка $rowNum: «$msg» не может отличаться от «$msgSum»!")
+            rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg» должно быть равно значению графы «$msgSum»!")
         }
+
         // Корректность даты совершения сделки
         def dealDateCell = row.getCell('dealDate')
         if (docDateCell.value > dealDateCell.value) {
             def msg1 = dealDateCell.column.name
             def msg2 = docDateCell.column.name
-            rowWarning(logger, row, "Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
+            rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
         }
     }
 }
