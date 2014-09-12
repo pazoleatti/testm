@@ -71,5 +71,36 @@ COMMENT ON COLUMN async_task_type.name IS 'Название типа задач�
 COMMENT ON COLUMN async_task_type.handler_jndi IS 'JNDI имя класса-обработчика';
 
 ---------------------------------------------------------------------------------------------------
+-- http://jira.aplana.com/browse/SBRFACCTAX-8815 - Новые типы события для ЖА
+INSERT ALL 
+INTO event (id, name) VALUES(801,'Вход пользователя в модуль') 
+INTO event (id, name) VALUES(802,'Выход пользователя из модуля') 
+INTO event (id, name) VALUES(810,'Загрузка данных о договорах обеспечения') 
+INTO event (id, name) VALUES(811,'Загрузка данных о клиентах') 
+INTO event (id, name) VALUES(812,'Загрузка данных о платежах') 
+INTO event (id, name) VALUES(813,'Загрузка справочника') 
+INTO event (id, name) VALUES(820,'Создание анкеты клиента') 
+INTO event (id, name) VALUES(821,'Редактирование анкеты клиента') 
+INTO event (id, name) VALUES(830,'Создание договора гарантии') 
+INTO event (id, name) VALUES(831,'Редактирование договора гарантии') 
+INTO event (id, name) VALUES(832,'Закрытие договора гарантии') 
+INTO event (id, name) VALUES(840,'Создание договора обеспечения') 
+INTO event (id, name) VALUES(841,'Редактирование договора обеспечения') 
+INTO event (id, name) VALUES(842,'Закрытие договора обеспечения') 
+INTO event (id, name) VALUES(850,'Создание задачи формирования РНУ-23') 
+INTO event (id, name) VALUES(860,'Создание задачи формирования отчета')
+SELECT * FROM dual;
+
+ALTER TABLE log_system DROP CONSTRAINT log_system_chk_dcl_form;
+ALTER TABLE log_system ADD CONSTRAINT log_system_chk_dcl_form CHECK (event_id IN (7, 11, 401, 402, 501, 502, 503, 601, 901, 902, 903, 801, 802, 810, 811, 812, 813, 820, 821, 830, 831, 832, 840, 841, 842, 850, 860) OR declaration_type_name IS NOT NULL OR (form_type_name IS NOT NULL AND form_kind_id IS NOT NULL));
+
+ALTER TABLE log_system DROP CONSTRAINT log_system_chk_rp;
+ALTER TABLE log_system ADD CONSTRAINT log_system_chk_rp CHECK (event_id IN (7, 11, 401, 402, 501, 502, 503, 601, 901, 902, 903, 801, 802, 810, 811, 812, 813, 820, 821, 830, 831, 832, 840, 841, 842, 850, 860) OR report_period_name IS NOT NULL);
+
+---------------------------------------------------------------------------------------------------
+-- http://jira.aplana.com/browse/SBRFACCTAX-8512 - Переход на новый механизм блокировок
+DROP TABLE object_lock;
+
+---------------------------------------------------------------------------------------------------
 COMMIT;
 EXIT;
