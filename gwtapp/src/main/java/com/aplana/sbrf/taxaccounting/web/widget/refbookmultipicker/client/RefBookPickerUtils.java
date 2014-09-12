@@ -90,7 +90,7 @@ public final class RefBookPickerUtils {
         if (recordDereferenceValues != null && alias != null && !alias.isEmpty()) {
             for (RefBookRecordDereferenceValue value : recordDereferenceValues) {
                 if (value.getValueAttrAlias() != null &&
-                        alias.toLowerCase().equals(value.getValueAttrAlias().toLowerCase())) {
+                        alias.equalsIgnoreCase(value.getValueAttrAlias())) {
                     return value.getDereferenceValue();
                 }
             }
