@@ -88,4 +88,11 @@ public interface LockDataService {
 
     void unlockIfOlderThan(int sec);
 
+    /**
+     * Проверяет, установлена ли блокировка на указанном объекте
+     * @param key код блокировки
+     * @return блокировка установлена?
+     */
+    boolean checkLock(String key);
+
 }
