@@ -78,12 +78,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 
 	// изменяемые колонки в таблице
 	private GenericDataGrid.DataGridResizableHeader receiverSourcesKindTitle, receiverSourcesTypeTitle, declarationTypeHeader;
-
-	private TextColumn<FormTypeKind> receiverSourcesKindColumn;
-	private TextColumn<FormTypeKind> receiverSourcesTypeColumn;
 	private TextColumn<FormTypeKind> departmentColumn;
-	private TextColumn<FormTypeKind> performerColumn;
-	private TextColumn<FormTypeKind> declarationType;
 
 	private MultiSelectionModel<FormTypeKind> formSM = new MultiSelectionModel<FormTypeKind>();
 	private MultiSelectionModel<FormTypeKind> decSM = new MultiSelectionModel<FormTypeKind>();
@@ -175,14 +170,14 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 			}
 		};
 
-		receiverSourcesKindColumn = new TextColumn<FormTypeKind>() {
+        TextColumn<FormTypeKind> receiverSourcesKindColumn = new TextColumn<FormTypeKind>() {
 			@Override
 			public String getValue(FormTypeKind object) {
 				return object.getKind() != null ? object.getKind().getName() : "";
 			}
 		};
 
-		receiverSourcesTypeColumn = new TextColumn<FormTypeKind>() {
+        TextColumn<FormTypeKind> receiverSourcesTypeColumn = new TextColumn<FormTypeKind>() {
 			@Override
 			public String getValue(FormTypeKind object) {
 				return object != null && object.getId() != 0 ? object.getName() : "";
@@ -196,7 +191,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
             }
         };
 
-        performerColumn = new TextColumn<FormTypeKind>() {
+        TextColumn<FormTypeKind> performerColumn = new TextColumn<FormTypeKind>() {
             @Override
             public String getValue(FormTypeKind object) {
                 return object.getPerformer() != null ? object.getPerformer().getFullName() : "";
@@ -246,7 +241,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 			}
 		};
 
-		declarationType = new TextColumn<FormTypeKind>() {
+        TextColumn<FormTypeKind> declarationType = new TextColumn<FormTypeKind>() {
 			@Override
 			public String getValue(FormTypeKind object) {
 				return object != null && object.getId() != 0 ? object.getName() : "";

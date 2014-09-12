@@ -9,8 +9,6 @@ import com.google.gwt.user.client.ui.HTMLPanel;
  */
 public class BodyContainer extends HTMLPanel {
 
-    private FormResources.Style style;
-
     public BodyContainer() {
         super("");
         setupStyle();
@@ -22,7 +20,7 @@ public class BodyContainer extends HTMLPanel {
     }
 
     public final void setupStyle() {
-        style = FormResources.INSTANCE.style();
+        FormResources.Style style = FormResources.INSTANCE.style();
         style.ensureInjected();
 
         getElement().addClassName(style.typicalFormBody());

@@ -43,8 +43,7 @@ public abstract class AbstractRefBookListPresenter<V extends AbstractRefBookList
 
     @Override
     public void onFindClicked() {
-        filterText = getView().getFilter();
-        loadData(filterText);
+        loadData(getView().getFilter());
     }
 
     @Override
