@@ -64,7 +64,7 @@ public class AsyncManagerBean implements AsyncManager {
             objectMessage.setObject(asyncMdbObject);
             messageProducer.send(objectMessage);
             log.debug("Async task creation has been finished successfully");
-        } catch (JMSException e) {
+        } catch (Exception e) {
             log.error("Async task creation has been failed!", e);
             throw new AsyncTaskException(e);
         } finally {
