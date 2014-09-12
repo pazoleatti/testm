@@ -162,7 +162,7 @@ void logicCheck() {
         def msgOut = outcomeSumCell.column.name
 
         // Проверка доходов и расходов
-        if (consumptionSum == null && incomeSum == null) {
+        if (outcomeSumCell == null && incomeSum == null) {
             rowWarning(logger, row, "Строка $rowNum: Графа «$msgOut» должна быть заполнена, если не заполнена графа «$msgIn»!")
         }
 

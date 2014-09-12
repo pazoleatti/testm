@@ -141,13 +141,13 @@ public class RefBookDaoTest {
 	 */
 	private void sort(List<Map<String, RefBookValue>> data) {
 		Collections.sort(data, new Comparator<Map<String, RefBookValue>>() {
-			@Override
-			public int compare(Map<String, RefBookValue> o1, Map<String, RefBookValue> o2) {
-				Long l1 = o1.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
-				Long l2 = o2.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
-				return l1.compareTo(l2);
-			}
-		});
+            @Override
+            public int compare(Map<String, RefBookValue> o1, Map<String, RefBookValue> o2) {
+                Long l1 = o1.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
+                Long l2 = o2.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
+                return l1.compareTo(l2);
+            }
+        });
 	}
 
 	@Test
@@ -601,4 +601,18 @@ public class RefBookDaoTest {
 		Long t = null;
 		refBookDao.getByAttribute(t);
 	}
+
+    @Test
+    public void testIsVersionUsedInRefBooks() {
+        List<Long> recordIds = new ArrayList<Long>();
+        recordIds.add(5L);
+        recordIds.add(6L);
+        recordIds.add(7L);
+
+        List<String> recordsOutPeriod = refBookDao.isVersionUsedInRefBooks(2L, recordIds, getDate(1, 2, 2013), getDate(1, 5, 2013), false);
+        assertEquals(1, recordsOutPeriod.size());
+
+        List<String> recordsValueChanged = refBookDao.isVersionUsedInRefBooks(2L, recordIds, getDate(1, 2, 2013), getDate(1, 5, 2013), true);;
+        assertEquals(3, recordsValueChanged.size());
+    }
 }
