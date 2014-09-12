@@ -154,16 +154,17 @@ void logicCheck() {
         def msgIn = incomeSumCell.column.name
         def msgOut = outcomeSumCell.column.name
         if (incomeSumCell.value != null && outcomeSumCell.value != null) {
-            rowWarning(logger, row, "Строка $rowNum: «$msgIn» и «$msgOut» не могут быть одновременно заполнены!")
+            rowWarning(logger, row, "Строка $rowNum: Графа «$msgIn» не может быть заполнена одновременно с графой «$msgOut»!")
         }
         if (incomeSumCell.value == null && outcomeSumCell.value == null) {
-            rowWarning(logger, row, "Строка $rowNum: Одна из граф «$msgIn» и «$msgOut» должна быть заполнена!")
+            rowWarning(logger, row, "Строка $rowNum: Графа «$msgOut» должна быть заполнена, если не заполнена графа «$msgIn»!")
         }
+
         // Проверка выбранной единицы измерения           
         def okei = getRefBookValue(12, row.okeiCode)?.CODE?.stringValue
         if (okei != '796' && okei != '744') {
             def msg = okeiCodeCell.column.name
-            rowWarning(logger, row, "Строка $rowNum: В графе «$msg» могут быть указаны только следующие элементы: шт., процент!")
+            rowWarning(logger, row, "Строка $rowNum: Графа «$msg» может содержать только одно из значений: шт., процент!")
         }
 
         // Проверка цены
@@ -176,19 +177,26 @@ void logicCheck() {
                 def msg1 = priceCell.column.name
                 def msg2 = sumCell.column.name
                 def msg3 = countCell.column.name
-                rowWarning(logger, row, "Строка $rowNum: «$msg1» не равно отношению «$msg2» и «$msg3»!")
+                rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть равно отношению значений граф «$msg2» и «$msg3»!")
             } else if (okei == '744' && priceCell.value != sumCell.value) {
                 def msg1 = priceCell.column.name
                 def msg2 = sumCell.column.name
-                rowWarning(logger, row, "Строка $rowNum: «$msg1» не равно «$msg2»!")
+                rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
             }
         }
+
         // Корректность даты совершения сделки
         def dealDateCell = row.getCell('dealDate')
         if (docDateCell.value > dealDateCell.value) {
             def msg1 = dealDateCell.column.name
             def msg2 = docDateCell.column.name
-            rowWarning(logger, row, "Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
+            rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
+        }
+
+        // Проверка количества
+        if (row.count == 0) {
+            def countName = getColumnName(row, 'count')
+            rowWarning(logger, row, "Строка $rowNum: Графа «$countName» не может содержать значение 0.")
         }
     }
 }

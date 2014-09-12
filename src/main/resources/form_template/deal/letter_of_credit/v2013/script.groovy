@@ -154,32 +154,36 @@ void logicCheck() {
 
         def dealDateCell = row.getCell('dealDate')
         def docDateCell = row.getCell('docDate')
+        def sumCell = row.getCell('sum')
+        def priceCell = row.getCell('price')
+        def totalCell = row.getCell('total')
+        def msgSum = sumCell.column.name
 
         // Корректность даты сделки
         if (docDateCell.value > dealDateCell.value) {
             def msg1 = dealDateCell.column.name
             def msg2 = docDateCell.column.name
-            rowWarning(logger, row, "Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
+            rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
         }
-        // Проверка доходности
-        def sumCell = row.getCell('sum')
-        def priceCell = row.getCell('price')
-        def totalCell = row.getCell('total')
-        def msgSum = sumCell.column.name
+
+        // Проверка цены
         if (priceCell.value != sumCell.value) {
             def msg = priceCell.column.name
-            rowWarning(logger, row, "Строка $rowNum: «$msg» не может отличаться от «$msgSum»!")
+            rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg» должно быть равно значению графы «$msgSum»!")
         }
+
+        // Проверка стоимости
         if (totalCell.value != sumCell.value) {
             def msg = totalCell.column.name
-            rowWarning(logger, row, "Строка $rowNum: «$msg» не может отличаться от «$msgSum»!")
+            rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg» должно быть равно значению графы «$msgSum»!")
         }
+
         // Корректность даты совершения сделки
         def dealDoneDateCell = row.getCell('dealDoneDate')
         if (dealDoneDateCell.value < dealDateCell.value) {
             def msg1 = dealDoneDateCell.column.name
             def msg2 = dealDateCell.column.name
-            rowWarning(logger, row, "Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
+            rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
         }
     }
 

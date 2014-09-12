@@ -153,39 +153,49 @@ void logicCheck() {
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns - ['docNum', 'docDate'], logger, false)
 
         def docDateCell = row.getCell('docDate')
-
-        // Проверка заполнения доходов и расходов Банка
         def incomeSumCell = row.getCell('incomeSum')
         def outcomeSumCell = row.getCell('outcomeSum')
+        def msgIn = incomeSumCell.column.name
+        def msgOut = outcomeSumCell.column.name
+
+        // Проверка заполнения доходов и расходов Банка
         if (incomeSumCell.value != null && outcomeSumCell.value != null) {
-            def msgIn = incomeSumCell.column.name
-            def msgOut = outcomeSumCell.column.name
-            rowWarning(logger, row, "Строка $rowNum: Графы «$msgIn» и «$msgOut» не могут быть одновременно заполнены!")
+            rowWarning(logger, row, "Строка $rowNum: Графа «$msgOut» не может быть заполнена одновременно с графой «$msgIn»!")
         }
         if (incomeSumCell.value == null && outcomeSumCell.value == null) {
-            def msgIn = incomeSumCell.column.name
-            def msgOut = outcomeSumCell.column.name
-            rowWarning(logger, row, "Строка $rowNum: Одна из граф «$msgIn» и «$msgOut» должна быть заполнена!")
+            rowWarning(logger, row, "Строка $rowNum: Графа «$msgOut» должна быть заполнена, если не заполнена графа «$msgIn»!")
         }
+
         // Корректность даты заключения сделки
         def dealDateCell = row.getCell('dealDate')
         if (docDateCell.value > dealDateCell.value) {
             def msg1 = dealDateCell.column.name
             def msg2 = docDateCell.column.name
-            rowWarning(logger, row, "Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
+            rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
         }
-        // Проверка заполнения стоимости сделки
+
+        // Проверка вычисления цены
+        if (incomeSumCell.value != null && outcomeSumCell.value == null && row.price != incomeSumCell.value) {
+            def msgPrice = row.getCell('price').column.name
+                rowWarning(logger, row, "Строка $rowNum: Значение графы «$msgPrice» должно быть равно значению графы «$msgIn»!")
+        } else if (outcomeSumCell.value != null && incomeSumCell.value == null && row.price != outcomeSumCell.value) {
+                def msgPrice = row.getCell('price').column.name
+                rowWarning(logger, row, "Строка $rowNum: Значение графы «$msgPrice» должно быть равно значению графы «$msgOut»!")
+        }
+
+        // Проверка корректности стоимости сделки
         if (row.total != row.price) {
             def msg1 = row.getCell('price').column.name
             def msg2 = row.getCell('total').column.name
-            rowWarning(logger, row, "Строка $rowNum: «$msg1» не может отличаться от «$msg2»!")
+            rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
         }
+
         // Корректность дат сделки dealDate - 9гр, dealDoneDate - 16гр
         def dealDoneDate = row.getCell('dealDoneDate')
         if (dealDateCell.value > dealDoneDate.value) {
             def msg1 = dealDoneDate.column.name
             def msg2 = dealDateCell.column.name
-            rowWarning(logger, row, "Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
+            rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
         }
     }
 

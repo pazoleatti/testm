@@ -163,18 +163,9 @@ void logicCheck() {
         def countName = row.getCell('count').column.name
         def costName = row.getCell('cost').column.name
 
-        if (row.count == 0) {
-            rowWarning(logger, row, "Строка $rowNum: Графа «$countName» не может содержать значение 0")
-        }
-
-        // Проверка стоимости
-        if (row.price != calc13(row)) {
-            rowWarning(logger, row, "Строка $rowNum: «$costName» не равна произведению «$countName» и «$priceName»!")
-        }
-
         // Корректность даты совершения сделки
         if (transactionDate < contractDate) {
-            rowWarning(logger, row, "Строка $rowNum: «$transactionDateName» не может быть меньше «$contractDateName»!")
+            rowWarning(logger, row, "Строка $rowNum: Значение графы «$transactionDateName» должно быть не меньше значения графы «$contractDateName»!")
         }
 
         // Проверка цены сделки
@@ -186,17 +177,13 @@ void logicCheck() {
             }
 
             if (bankSum == null || count == null || price != res) {
-                rowWarning(logger, row, "Строка $rowNum: «$priceName» не равно отношению «$bankSumName» и «$countName»!")
+                rowWarning(logger, row, "Строка $rowNum: Значение графы «$priceName» должно быть равно отношению значений граф «$bankSumName» и «$countName»!")
             }
         } else {
+            // Проверка стоимости
             if (price != bankSum) {
-                rowWarning(logger, row, "Строка $rowNum: «$priceName» не равно «$bankSumName»!")
+                rowWarning(logger, row, "Строка $rowNum: Значение графы «$priceName» должно быть равно значению графы «$bankSumName»!")
             }
-        }
-
-        // Проверка расходов
-        if (cost != bankSum) {
-            rowWarning(logger, row, "«$costName» не равно «$bankSumName» в строке $rowNum!")
         }
 
         // Проверка заполнения региона
@@ -205,9 +192,9 @@ void logicCheck() {
             def regionName = row.getCell('region').column.name
             def countryName = row.getCell('country').column.name
             if (country == '643' && row.region == null) {
-                rowWarning(logger, row, "Строка $rowNum: «$regionName» должен быть заполнен, т.к. в «$countryName» указан код 643!")
+                rowWarning(logger, row, "Строка $rowNum: Графа «$regionName» должна быть заполнена, т.к. в графе «$countryName» указан код 643!")
             } else if (country != '643' && row.region != null) {
-                rowWarning(logger, row, "Строка $rowNum: «$regionName» не должен быть заполнен, т.к. в «$countryName» указан код, отличный от 643!")
+                rowWarning(logger, row, "Строка $rowNum: Графа «$regionName» не должна быть заполнена, т.к. в графе «$countryName» указан код, отличный от 643!")
             }
         }
 
@@ -215,7 +202,12 @@ void logicCheck() {
         if (row.city != null && !row.city.toString().isEmpty() && row.settlement != null && !row.settlement.toString().isEmpty()) {
             def cityName = row.getCell('city').column.name
             def settleName = row.getCell('settlement').column.name
-            rowWarning(logger, row, "Строка $rowNum: Если заполнена графа «$settleName», то графа «$cityName» не должна быть заполнена!")
+            rowWarning(logger, row, "Строка $rowNum: Графа «$settleName» не может быть заполнена одновременно с графой «$cityName»!")
+        }
+
+        // Проверка количества
+        if (row.count == 0) {
+            rowWarning(logger, row, "Строка $rowNum: Графа «$countName» не может содержать значение 0.")
         }
     }
 }
