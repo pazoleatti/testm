@@ -142,23 +142,24 @@ void logicCheck() {
         checkNonEmptyColumns(row, rowNum, ['contractNum', 'contractDate'], logger, true)
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns - ['contractNum', 'contractDate'], logger, false)
 
-        if (row.count == 0) {
-            def countName = getColumnName(row, 'count')
-            rowWarning(logger, row, "Строка $rowNum: Графа «$countName» не может содержать значение 0")
-        }
-
-        // Корректность даты совершения сделки
-        if (row.transactionDate < row.contractDate) {
-            def msg1 = row.getCell('transactionDate').column.name
-            def msg2 = row.getCell('contractDate').column.name
-            rowWarning(logger, row, "Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
-        }
-
-        // Проверка заполнения стоимости сделки
+        // Проверка стоимости
         if (row.totalCost != row.price) {
             def msg1 = row.getCell('totalCost').column.name
             def msg2 = row.getCell('price').column.name
-            rowWarning(logger, row, "Строка $rowNum: «$msg1» не может отличаться от «$msg2»!")
+            rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
+        }
+
+        // Корректность даты сделки
+        if (row.transactionDate < row.contractDate) {
+            def msg1 = row.getCell('transactionDate').column.name
+            def msg2 = row.getCell('contractDate').column.name
+            rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
+        }
+
+        // Проверка количества
+        if (row.count == 0) {
+            def countName = getColumnName(row, 'count')
+            rowWarning(logger, row, "Строка $rowNum: Значение графы «$countName» не может содержать значение 0.")
         }
     }
 }
