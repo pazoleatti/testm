@@ -96,7 +96,7 @@ public final class SqlUtils {
     public static <T> Collection<List<T>> splitCollection(Collection<T> data, int size){
         Collection<List<T>> result = new ArrayList<List<T>>();
         int c = 0;
-        List<T> list =  new ArrayList<T>();;
+        List<T> list =  new ArrayList<T>();
         Iterator<T> iterator = data.iterator();
         while(iterator.hasNext()){
             if (c == size){
