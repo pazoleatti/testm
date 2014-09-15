@@ -1346,6 +1346,10 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
         Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>> attributeValues = getUniqueAttributeValues(refBookId, uniqueRecordId);
 
+        if (attributeValues.size() == 0) {
+            return new ArrayList<Pair<Long, String>>();
+        }
+
         List<Object> params = new ArrayList<Object>();
         params.add(refBookId);
 
