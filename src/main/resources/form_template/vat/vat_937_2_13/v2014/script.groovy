@@ -345,7 +345,7 @@ def checkOverflowAlgorithm(BigDecimal value, DataRow<Cell> row, String alias, in
 
 
 void importTransportData() {
-    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName, 3, 1)
     addTransportData(xml)
 }
 
