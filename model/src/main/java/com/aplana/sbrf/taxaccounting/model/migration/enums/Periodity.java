@@ -14,7 +14,9 @@ public enum Periodity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    @SuppressWarnings("all")
     private final int id;
+    @SuppressWarnings("all")
     private final String desc;
 
     private Periodity(int id, String desc) {

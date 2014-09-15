@@ -244,6 +244,7 @@ public class FlexiblePager extends AbstractPager {
 	/**
 	 * The {@link Style} used by this widget.
 	 */
+    @SuppressWarnings("all")
 	private final Style style;
 
 	/**

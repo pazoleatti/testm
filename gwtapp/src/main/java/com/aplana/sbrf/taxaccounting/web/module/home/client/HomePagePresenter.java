@@ -29,7 +29,7 @@ public class HomePagePresenter extends
 	public interface MyView extends View {
 	}
 
-	@SuppressWarnings("unused")
+	@SuppressWarnings("all")
 	private PlaceManager placeManager;
 
 	@Inject
