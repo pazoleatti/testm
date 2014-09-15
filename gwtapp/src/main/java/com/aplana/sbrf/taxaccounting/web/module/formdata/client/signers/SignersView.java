@@ -190,8 +190,7 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
         FormDataSigner signer = selectionModel.getSelectedObject();
         int ind = clonedSigners.indexOf(signer);
 
-        if (signer != null) {
-            if (ind > 0) {
+        if (signer != null && ind > 0) {
                 FormDataSigner exchange = clonedSigners.get(ind - 1);
                 clonedSigners.set(ind - 1, signer);
                 signer.setOrd(ind + 1);     // переопределяем порядок в модельке
@@ -199,7 +198,6 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
                 exchange.setOrd(ind + 2);   // переопределяем порядок в модельке
                 setSigners();
                 selectionModel.setSelected(signer, true);
-            }
         }
     }
 
@@ -208,8 +206,7 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
         FormDataSigner signer = selectionModel.getSelectedObject();
         int ind = clonedSigners.indexOf(signer);
 
-        if (signer != null) {
-            if (ind < clonedSigners.size() - 1) {
+        if (signer != null && ind < clonedSigners.size() - 1) {
                 FormDataSigner exchange = clonedSigners.get(ind + 1);
                 clonedSigners.set(ind + 1, signer);
                 signer.setOrd(ind + 2);
@@ -217,7 +214,6 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
                 exchange.setOrd(ind + 1);
                 setSigners();
                 selectionModel.setSelected(signer, true);
-            }
         }
     }
 
