@@ -32,7 +32,7 @@ public final class CodeMirrorWrapper extends JavaScriptObject {
    *
    * @return An overlay type representing a codemirror2 object.
    */
-  	public static final native CodeMirrorWrapper createEditor(
+  	public static native CodeMirrorWrapper createEditor(
       	Element hostElement,
       	com.aplana.sbrf.taxaccounting.web.widget.codemirror.client.CodeMirrorConfig config) /*-{
     	return $wnd.CodeMirror(hostElement, config);

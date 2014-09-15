@@ -21,8 +21,6 @@ public class LogSystemFilterAvailableValues implements Serializable {
      */
     private List<DeclarationType> declarationTypes;
 
-    private List<TaxType> taxTypes;
-
     public List<Department> getDepartments() {
         return departments;
     }
@@ -57,7 +55,7 @@ public class LogSystemFilterAvailableValues implements Serializable {
     }
 
     public List<TaxType> getTaxTypes() {
-        taxTypes = new LinkedList<TaxType>();
+        List<TaxType> taxTypes = new LinkedList<TaxType>();
         Collections.addAll(taxTypes, TaxType.values());
         return taxTypes;
     }

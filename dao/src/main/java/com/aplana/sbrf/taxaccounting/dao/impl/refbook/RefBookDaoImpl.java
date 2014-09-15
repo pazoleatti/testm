@@ -1465,23 +1465,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }
     }
 
-    private static final String CHECK_USAGES_IN_REFBOOK = "select \n" +
-            "  b.name as refBookName, \n" +
-            "  r.version as versionStart\n" +
-            "from ref_book b\n" +
-            "join ref_book_record r on r.ref_book_id = b.id \n" +
-            "join ref_book_value v on (v.record_id = r.id and %s)\n" +
-            "join ref_book_attribute a on (a.id = v.attribute_id and a.reference_id = :refBookId)";
-
-    private static final String CHECK_USAGES_IN_REFBOOK_WITH_PERIOD_RESTRICTION = "select refBookName, versionStart from (\n" +
-            "  select r.version as versionStart, (select min(version) - interval '1' day from ref_book_record rn where rn.ref_book_id = r.ref_book_id and rn.record_id = r.record_id and rn.version > r.version) as versionEnd,\n" +
-            "  b.name as refBookName\n" +
-            "  from ref_book b\n" +
-            "  join ref_book_record r on r.ref_book_id = b.id\n" +
-            "  join ref_book_value v on (v.record_id = r.id and %s)\n" +
-            "  join ref_book_attribute a on (a.id = v.attribute_id and a.reference_id = :refBookId)\n" +
-            ") where (:versionTo is not null and :versionTo < versionStart) or (versionEnd is not null and versionEnd < :versionFrom)";
-
     private static final String CHECK_USAGES_IN_FORMS = "with forms as (\n" +
             "  select fd.* from form_data fd \n" +
             "  join data_row dr on dr.form_data_id = fd.id\n" +
@@ -1531,30 +1514,11 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     public List<String> isVersionUsed(Long refBookId, List<Long> uniqueRecordIds, Date versionFrom, Date versionTo,
                                       boolean isValuesChanged) {
         Set<String> results = new HashSet<String>();
-        String in = SqlUtils.transformToSqlInStatement("v.reference_value", uniqueRecordIds);
+        String in;
         String sql;
         Map<String, Object> params = new HashMap<String, Object>();
         //Проверка использования в справочниках
-        try {
-            if (isValuesChanged) {
-                sql = String.format(CHECK_USAGES_IN_REFBOOK, in);
-                params.put("refBookId", refBookId);
-            } else {
-                /** Если атрибуты не были изменены то дополнительно фильтруем по периоду актуальности */
-                sql = String.format(CHECK_USAGES_IN_REFBOOK_WITH_PERIOD_RESTRICTION, in);
-                params.put("refBookId", refBookId);
-                params.put("versionFrom", versionFrom);
-                params.put("versionTo", versionTo);
-            }
-            results.addAll(getNamedParameterJdbcTemplate().query(sql, params, new RowMapper<String>() {
-                @Override
-                public String mapRow(ResultSet rs, int rowNum) throws SQLException {
-                    return "Существует ссылка на запись справочника. Справочник " + rs.getString("refBookName") + ", действует с " + sdf.format(rs.getDate("versionStart")) + ".";
-                }
-            }));
-        } catch (EmptyResultDataAccessException e) {
-            //do nothing
-        }
+        results.addAll(isVersionUsedInRefBooks(refBookId, uniqueRecordIds, versionFrom, versionTo, isValuesChanged));
 
         try {
             //Проверка использования в налоговых формах
@@ -1616,22 +1580,95 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         return new ArrayList<String>(results);
     }
 
-    @Override
-    public Collection<String> isVersionUsedInRefBooks(Long refBookId, List<Long> uniqueRecordIds) {
-        Set<String> results = new HashSet<String>();
+    private static final String CHECK_USAGES_IN_REFBOOK =
+            "SELECT r.id, b.name AS refbookName, r.version AS versionStart, v.string_value, v.number_value, v.date_value, v.reference_value, a.is_unique\n" +
+            "FROM ref_book b\n" +
+            "  JOIN ref_book_record r ON b.id = r.ref_book_id AND r.id IN (\n" +
+            "    SELECT r.id\n" +
+            "    FROM ref_book_record r\n" +
+            "      JOIN ref_book_value v ON v.record_id = r.id AND %s\n" +
+            "      JOIN ref_book_attribute a ON r.ref_book_id = a.ref_book_id AND a.id = v.attribute_id AND a.reference_id = :refBookId)\n" +
+            "  JOIN ref_book_attribute a ON a.ref_book_id = b.id\n" +
+            "  JOIN ref_book_value v ON r.id = v.record_id AND a.id = v.attribute_id";
+
+    private static final String CHECK_USAGES_IN_REFBOOK_WITH_PERIOD_RESTRICTION =
+            "SELECT * FROM (\n" +
+            "SELECT r.id, b.name AS refbookName, r.version AS versionStart, v.string_value, v.number_value, v.date_value, v.reference_value, a.is_unique,\n" +
+            "  (SELECT\n" +
+            "  min(version) - interval '1' DAY FROM ref_book_record rn WHERE rn.ref_book_id = r.ref_book_id AND rn.record_id = r.record_id AND rn.version > r.version) AS versionEnd\n" +
+            "FROM ref_book b\n" +
+            "  JOIN ref_book_record r ON b.id = r.ref_book_id AND r.id IN (\n" +
+            "    SELECT r.id\n" +
+            "    FROM ref_book_record r\n" +
+            "      JOIN ref_book_value v ON v.record_id = r.id AND %s\n" +
+            "      JOIN ref_book_attribute a ON r.ref_book_id = a.ref_book_id AND a.id = v.attribute_id AND a.reference_id = :refBookId)\n" +
+            "  JOIN ref_book_attribute a ON a.ref_book_id = b.id\n" +
+            "  JOIN ref_book_value v ON r.id = v.record_id AND a.id = v.attribute_id)\n" +
+            "WHERE (:versionTo IS NOT NULL AND :versionTo < versionStart) OR (versionEnd IS NOT NULL AND versionEnd < :versionFrom)";
+
+    public List<String> isVersionUsedInRefBooks(Long refBookId, List<Long> uniqueRecordIds, Date versionFrom, Date versionTo,
+                                                boolean isValuesChanged) {
+
+        List<String> results = new ArrayList<String>();
         String in = SqlUtils.transformToSqlInStatement("v.reference_value", uniqueRecordIds);
         String sql;
         Map<String, Object> params = new HashMap<String, Object>();
         //Проверка использования в справочниках
         try {
-            sql = String.format(CHECK_USAGES_IN_REFBOOK, in);
-            params.put("refBookId", refBookId);
-            results.addAll(getNamedParameterJdbcTemplate().query(sql, params, new RowMapper<String>() {
+            if (isValuesChanged) {
+                sql = String.format(CHECK_USAGES_IN_REFBOOK, in);
+                params.put("refBookId", refBookId);
+            } else {
+                /** Если атрибуты не были изменены то дополнительно фильтруем по периоду актуальности */
+                sql = String.format(CHECK_USAGES_IN_REFBOOK_WITH_PERIOD_RESTRICTION, in);
+                params.put("refBookId", refBookId);
+                params.put("versionFrom", versionFrom);
+                params.put("versionTo", versionTo);
+            }
+
+            final Map<Integer, Map<String, String>> records = new HashMap<Integer, Map<String, String>>();
+
+            getNamedParameterJdbcTemplate().query(sql, params, new RowMapper<Map<Integer, Map<String, String>>>() {
                 @Override
-                public String mapRow(ResultSet rs, int rowNum) throws SQLException {
-                    return "Существует ссылка на запись справочника. Справочник " + rs.getString("refBookName") + ", действует с " + sdf.format(rs.getDate("versionStart")) + ".";
+                public Map<Integer, Map<String, String>> mapRow(ResultSet rs, int rowNum) throws SQLException {
+                    int id = rs.getInt("id");
+                    int is_unique = rs.getInt("is_unique");
+                    Map<String, String> recordValues = records.get(id);
+
+                    if (recordValues == null) {
+                        recordValues = new HashMap<String, String>();
+                        recordValues.put("refbookName", rs.getString("refbookName"));
+                        recordValues.put("versionStart", rs.getDate("versionStart").toString());
+
+                        if (is_unique != 0) {
+                            StringBuilder attr = new StringBuilder();
+                            concatAttrs(rs, attr);
+                            recordValues.put("uniqueAttributes", attr.toString());
+                        }
+                        records.put(id, recordValues);
+                    } else if (is_unique != 0) {
+                        StringBuilder attr = new StringBuilder();
+                        if (recordValues.get("uniqueAttributes") != null) {
+                            attr.append(recordValues.get("uniqueAttributes"));
+                        }
+                        concatAttrs(rs, attr);
+                        recordValues.put("uniqueAttributes", attr.toString());
+                        records.put(id, recordValues);
+                    }
+
+                    return records;
                 }
-            }));
+
+                public void concatAttrs(ResultSet rs, StringBuilder attr) throws SQLException {
+                    attr.append(rs.getString("string_value") != null ? rs.getString("string_value") + ", " : "");
+                    attr.append(rs.getString("number_value") != null ? rs.getFloat("number_value") + ", " : "");
+                    attr.append(rs.getDate("date_value") != null ? rs.getDate("date_value") + ", " : "");
+                    // TODO - разыменовать и добавить значение аттрибута ссылки
+                    attr.append(rs.getString("reference_value") != null ? rs.getInt("reference_value") + ", " : "");
+                }
+            });
+
+            results.addAll(createMsgIfVersionUsed(records));
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<String>(0);
         } catch (DataAccessException e) {
@@ -1639,6 +1676,35 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             throw new DaoException("Проверка использования", e);
         }
         return results;
+    }
+
+    @Override
+    public List<String> isVersionUsedInRefBooks(Long refBookId, List<Long> uniqueRecordIds) {
+        return isVersionUsedInRefBooks(refBookId, uniqueRecordIds, null, null, true);
+    }
+
+    /**
+     * Сформировать сообщение об использовании записи в справочниках
+     * @param records
+     * @return
+     */
+    private List<String> createMsgIfVersionUsed(Map<Integer, Map<String, String>> records) {
+        List<String> msgs = new ArrayList<String>();
+        for (Map.Entry<Integer, Map<String, String>> map : records.entrySet()) {
+            Map<String, String> value = map.getValue();
+            StringBuilder msg = new StringBuilder("Существует ссылка на запись справочника. Справочник ");
+            msg.append(value.get("refbookName"));
+            msg.append(", ");
+            if (value.get("uniqueAttributes") != null && !value.get("uniqueAttributes").isEmpty()) {
+                msg.append("запись: ");
+                msg.append(value.get("uniqueAttributes"));
+            }
+            msg.append("действует с ");
+            msg.append(value.get("versionStart"));
+            msg.append(".");
+            msgs.add(msg.toString());
+        }
+        return msgs;
     }
 
     private static final String GET_NEXT_RECORD_VERSION = "with nextVersion as (select r.* from ref_book_record r where r.ref_book_id = ? and r.record_id = ? and r.version  = \n" +

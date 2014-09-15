@@ -54,7 +54,6 @@ public class ModalWindow extends DialogBox implements CanHide {
 
     private Image icon;
     private Image close;
-    private HTMLPanel caption;
     private Label title;
 
     private boolean bDragDrop = false;
@@ -85,7 +84,7 @@ public class ModalWindow extends DialogBox implements CanHide {
         icon.getElement().getStyle().setMargin(4, Style.Unit.PX);
         close.setTitle(CLOSE_ICON_TITLE);
 
-        caption = new HTMLPanel("");
+        HTMLPanel caption = new HTMLPanel("");
         caption.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
         caption.setWidth("100%");
         caption.addStyleName("Caption");
@@ -260,15 +259,13 @@ public class ModalWindow extends DialogBox implements CanHide {
                 }
             }
             if (Event.ONMOUSEDOWN == eventType) {
-                if (isCursorResize(event)) {
+                if (isCursorResize(event) && !bDragDrop) {
                     // вклчюение/выключение резайза
-                    if (!bDragDrop) {
-                        bDragDrop = true;
+                    bDragDrop = true;
 
-                        DOM.setCapture(this.getElement());
-                        event.preventDefault();
-                        event.stopPropagation();
-                    }
+                    DOM.setCapture(this.getElement());
+                    event.preventDefault();
+                    event.stopPropagation();
                 }
             } else if (Event.ONMOUSEMOVE == eventType) {
                 if (!isCursorResize(event)) {
@@ -305,13 +302,11 @@ public class ModalWindow extends DialogBox implements CanHide {
                     event.preventDefault();
                     event.stopPropagation();
                 }
-            } else if (Event.ONMOUSEUP == eventType) {
-                if (bDragDrop) {
-                    bDragDrop = false;
-                    DOM.releaseCapture(this.getElement());
-                    event.preventDefault();
-                    event.stopPropagation();
-                }
+            } else if (Event.ONMOUSEUP == eventType && bDragDrop) {
+                bDragDrop = false;
+                DOM.releaseCapture(this.getElement());
+                event.preventDefault();
+                event.stopPropagation();
             }
         }
         super.onBrowserEvent(event);

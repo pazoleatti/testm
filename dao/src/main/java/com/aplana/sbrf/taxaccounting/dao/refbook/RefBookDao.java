@@ -10,7 +10,6 @@ import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -312,7 +311,25 @@ public interface RefBookDao {
      */
     List<String> isVersionUsed(@NotNull Long refBookId, @NotNull List<Long> uniqueRecordIds, Date versionFrom, Date versionTo, boolean isValuesChanged);
 
-    Collection<String> isVersionUsedInRefBooks(Long refBookId, List<Long> uniqueRecordIds);
+    /**
+     * Проверка использования записи в справочниках
+     * @param refBookId идентификатор справочника
+     * @param uniqueRecordIds уникальные идентификаторы версий записей справочника
+     * @param versionFrom дата актуальности новой версии
+     * @param versionTo дата конца актуальности новой версии
+     * @param isValuesChanged признак того, что были изменены атрибуты
+     * @return результаты проверки. Сообщения об ошибках
+     */
+    List<String> isVersionUsedInRefBooks(Long refBookId, List<Long> uniqueRecordIds, Date versionFrom, Date versionTo,
+                                                boolean isValuesChanged);
+
+    /**
+     * Проверка использования записи в справочниках
+     * @param refBookId идентификатор справочника
+     * @param uniqueRecordIds уникальные идентификаторы версий записей справочника
+     * @return результаты проверки. Сообщения об ошибках
+     */
+    List<String> isVersionUsedInRefBooks(Long refBookId, List<Long> uniqueRecordIds);
 
     /**
      * Возвращает данные о версии следующей за указанной

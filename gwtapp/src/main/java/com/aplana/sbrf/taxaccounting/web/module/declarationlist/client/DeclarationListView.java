@@ -53,8 +53,6 @@ public class DeclarationListView extends
 
     private GenericDataGrid.DataGridResizableHeader declarationTypeHeader;
     private TextColumn<DeclarationDataSearchResultItem> declarationTypeColumn;
-    private TextColumn<DeclarationDataSearchResultItem> declarationTaxOrganColumn;
-    private TextColumn<DeclarationDataSearchResultItem> declarationTaxOrganKppColumn;
     private GenericDataGrid.DataGridResizableHeader reportPeriodHeader;
     private Column<DeclarationDataSearchResultItem, DeclarationDataSearchResultItem> reportPeriodColumn;
 
@@ -197,14 +195,14 @@ public class DeclarationListView extends
             }
         };
 
-        declarationTaxOrganColumn = new TextColumn<DeclarationDataSearchResultItem>() {
+        TextColumn<DeclarationDataSearchResultItem> declarationTaxOrganColumn = new TextColumn<DeclarationDataSearchResultItem>() {
             @Override
             public String getValue(DeclarationDataSearchResultItem object) {
                 return object.getTaxOrganCode();
             }
         };
 
-        declarationTaxOrganKppColumn = new TextColumn<DeclarationDataSearchResultItem>() {
+        TextColumn<DeclarationDataSearchResultItem> declarationTaxOrganKppColumn = new TextColumn<DeclarationDataSearchResultItem>() {
             @Override
             public String getValue(DeclarationDataSearchResultItem object) {
                 return object.getTaxOrganKpp();

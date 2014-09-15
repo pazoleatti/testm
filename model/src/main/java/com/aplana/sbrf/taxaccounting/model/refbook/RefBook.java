@@ -142,7 +142,7 @@ public class RefBook implements Serializable {
 		}
 
 		for(RefBookAttribute attribute : attributes) {
-			if (alias.toLowerCase().equals(attribute.getAlias().toLowerCase())) {
+			if (alias.equalsIgnoreCase(attribute.getAlias())) {
 				return attribute;
 			}
 		}
