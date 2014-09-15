@@ -521,7 +521,7 @@ void addData(def xml, int headRowCount) {
 }
 
 void importTransportData() {
-    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName, 16, 0)
     addTransportData(xml)
 }
 
