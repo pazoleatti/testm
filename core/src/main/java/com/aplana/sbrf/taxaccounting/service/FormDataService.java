@@ -14,26 +14,24 @@ import java.util.List;
 public interface FormDataService {
 	/**
 	 * Создать налоговую форму заданного типа
-	 * При создании формы выполняются следующие действия:
-	 * 1) создаётся пустой объект
-	 * 2) если в объявлении формы заданы строки по-умолчанию (начальные данные), то эти строки копируются в созданную форму
-	 * 3) если в объявлении формы задан скрипт создания, то этот скрипт выполняется над создаваемой формой
-	 * @param logger логгер-объект для фиксации диагностических сообщений
-	 * @param userInfo информация о пользователе, запросившего операцию
-	 * @param formTemplateId идентификатор шаблона формы, по которой создавать объект
-	 * @param departmentId идентификатор {@link com.aplana.sbrf.taxaccounting.model.Department подразделения}, к которому относится форма
-	 * @param kind {@link FormDataKind тип налоговой формы} (первичная, сводная, и т.д.), это поле необходимо, так как некоторые виды
-	 *		налоговых форм в одном и том же подразделении могут существовать в нескольких вариантах (например один и тот же РНУ  на уровне ТБ
-	 *		- в виде первичной и консолидированной)
-	 * @param reportPeriod отчетный период в котором создается форма
-     * @param periodOrder номер месяца для ежемесячных форм (для остальных параметр отсутствует)
-	 * @return созданный и проинициализированный объект данных.
-	 * @throws com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException если у пользователя нет прав создавать налоговую форму с такими параметрами
-	 * @throws com.aplana.sbrf.taxaccounting.model.exception.ServiceException если при создании формы произошли ошибки, вызванные несоблюдением каких-то бизнес-требований, например отсутствием
-	 *		обязательных параметров
+     * @deprecated Неактуально с появлением корректирующих периодов
 	 */
+    @Deprecated
 	long createFormData(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentId, FormDataKind kind,
                         ReportPeriod reportPeriod, Integer periodOrder);
+
+    /**
+     * Создание НФ
+     * @param logger Логгер
+     * @param userInfo Пользователь-инициатор операции
+     * @param formTemplateId Макет
+     * @param departmentReportPeriodId Отчетный период подразделения
+     * @param kind Тип НФ
+     * @param periodOrder Номер месяца для ежемесячных форм (для остальных параметр отсутствует)
+     * @return Id НФ
+     */
+    long createFormData(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentReportPeriodId,
+                        FormDataKind kind, Integer periodOrder);
 
     /**
      * Создает версию ручного ввода
@@ -46,7 +44,8 @@ public interface FormDataService {
     /**
      * Импорт ТФ НФ
      */
-    void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, Boolean isManual, InputStream is, String fileName, FormDataEvent formDataEvent);
+    void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, Boolean isManual, InputStream is,
+                        String fileName, FormDataEvent formDataEvent);
 
     /**
      * Метод для импорта данных из xls-файлов
@@ -169,15 +168,15 @@ public interface FormDataService {
 
     /**
      * Поиск формы по основным параметрам
-     *
-     * @param formTypeId
-     * @param kind
-     * @param departmentId
-     * @param reportPeriodId
-     * @param periodOrder
-     * @return
-     */
+     * @deprecated Неактуально с появлением корректирующих периодов
+    */
+    @Deprecated
     FormData findFormData(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder);
+
+    /**
+     * Поиск НФ
+     */
+    FormData findFormData(int formTypeId, FormDataKind kind, int departmentReportPeriodId, Integer periodOrder);
 
     /**
 	 * Заблокировать FormData.
@@ -194,14 +193,6 @@ public interface FormDataService {
 	 * true - если удалось разблокировать налоговую форму, иначе - false
 	 * */
 	void unlock(long formDataId, TAUserInfo userInfo);
-
-	/**
-	 * Снять все блокировки с FormData для пользователя
-	 * @param userInfo информация о пользователе
-	 * @return true - если удалось разблокировать, иначе - false
-	 */
-	@Deprecated
-	boolean unlockAllByUser(TAUserInfo userInfo);
 
 	/**
 	 * Получить информацию о состоянии блокировки налоговой формы.
@@ -227,14 +218,8 @@ public interface FormDataService {
     boolean existManual(Long formDataId);
 
     /**
-     * Проверяет, является ли указанная нф сводной формой банка - последней формой перед декларацией
-     * @param formDataId идентификатор нф
-     * @return форма - сводная банка?
-     */
-    boolean isBankSummaryForm(long formDataId);
-
-    /**
-     * Поиск налоговой формы
+     * Поиск налоговой формы. Не учитывает корректирующий период, т.е. результатом могут быть как id экземпляров
+     * корректирующих и/или некорректирующих периодов.
      * @param departmentIds подразделения
      * @param reportPeriodId отчетный период
      * @return список налоговых форм, удовлетворяющих критерию

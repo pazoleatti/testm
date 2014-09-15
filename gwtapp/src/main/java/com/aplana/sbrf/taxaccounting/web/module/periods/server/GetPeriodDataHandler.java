@@ -1,14 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.server;
 
-import java.util.*;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Component;
-
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.service.NotificationService;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.Notification;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.service.NotificationService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.GetPeriodDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.GetPeriodDataResult;
@@ -16,6 +12,11 @@ import com.aplana.sbrf.taxaccounting.web.module.periods.shared.TableRow;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Component;
+
+import java.util.*;
 
 
 @PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
@@ -63,7 +64,7 @@ public class GetPeriodDataHandler extends AbstractActionHandler<GetPeriodDataAct
 				row.setBalance(period.isBalance());
 				row.setYear(year);
                 row.setOrd(period.getReportPeriod().getOrder());
-				row.setCorrectPeriod(period.getCorrectPeriod());
+				row.setCorrectPeriod(period.getCorrectionDate());
 				Department dep = departmentMap.get(period.getDepartmentId().intValue());
 				Notification notification = notificationService.get(period.getReportPeriod().getId(), dep.getId(), dep.getParentId());
 				row.setDeadline(notification != null ? notification.getDeadline() : null);

@@ -148,14 +148,10 @@ public class GetFormDataHandler extends
 		result.setFormInClosedPeriod(!reportPeriodService.isActivePeriod(result.getReportPeriod().getId(), formData.getDepartmentId()));
 
         result.setReportPeriodYear(reportPeriod.getTaxPeriod().getYear());
-        boolean isBankSummaryForm = formDataService.isBankSummaryForm(action.getFormDataId());
-        result.setBankSummaryForm(isBankSummaryForm);
-        if (isBankSummaryForm) {
-            result.setExistManual(formDataService.existManual(action.getFormDataId()));
-        } else {
-            //Если это не сводная банка, то нет смысла проверять наличие версии ручного ввода
-            result.setExistManual(false);
-        }
+
+        result.setBankSummaryForm(true);
+
+        result.setExistManual(formDataService.existManual(action.getFormDataId()));
 
         //Является ли форма последней перед декларацией
         List<DepartmentDeclarationType> declarationDestinations = sourceService.getDeclarationDestinations(formData.getDepartmentId(), formData.getFormType().getId(), formData.getKind(), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());

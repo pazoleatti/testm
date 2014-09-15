@@ -1,12 +1,12 @@
 package com.aplana.sbrf.taxaccounting.service.script;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
+
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 @ScriptExposed
 public interface ReportPeriodService {
@@ -68,25 +68,6 @@ public interface ReportPeriodService {
     Calendar getReportDate(int reportPeriodId);
 
     /**
-     * Проверяем, открыт ли период для департамента или нет
-     *
-     * @param reportPeriodId
-     * @param departmentId
-     * @return
-     */
-    boolean isActivePeriod(int reportPeriodId, long departmentId);
-
-    /**
-     * Проверяем, период ли остатков
-     *
-     * @param reportPeriodId
-     * @param departmentId
-     * @return true - если остатков иначе false (не существует тоже false)
-     *
-     */
-    boolean isBalancePeriod(int reportPeriodId, long departmentId);
-
-    /**
      * Получить дату начала месяца.
      *
      * @param reportPeriodId идентификатор отчетного период
@@ -123,9 +104,7 @@ public interface ReportPeriodService {
     List<ReportPeriod> getReportPeriodsByDate(TaxType taxType, Date startDate, Date endDate);
 
     /**
-     * Получить номер корректирующего периода.
-     * @param reportPeriodId идентификатор отчетного период
-     * @param departmentId идентификатор подразделения
+     * Номер корректирующего периода
      */
-    int getCorrectionPeriodNumber(int reportPeriodId, long departmentId);
+    Integer getCorrectionNumber(int id);
 }

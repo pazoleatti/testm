@@ -26,9 +26,9 @@ insert into report_period (id, name, tax_period_id, dict_tax_period_id, start_da
 insert into report_period (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date) values (3, 'VAT report period 1'      , 21, 21, date '2013-01-01', date '2013-03-31', date '2013-01-01');
 insert into report_period (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date) values (4, 'Income report period 1'   , 31, 21, date '2013-01-01', date '2013-03-31', date '2013-01-01');
 
-insert into department_report_period(id, department_id, report_period_id, is_active, is_balance_period) values (1, 1, 1, 1, 0);
-insert into department_report_period(id, department_id, report_period_id, is_active, is_balance_period) values (2, 1, 2, 1, 0);
-insert into department_report_period(id, department_id, report_period_id, is_active, is_balance_period) values (3, 1, 3, 1, 0);
-insert into department_report_period(id, department_id, report_period_id, is_active, is_balance_period) values (4, 1, 4, 1, 0);
-insert into department_report_period(id, department_id, report_period_id, is_active, is_balance_period) values (5, 2, 1, 1, 0);
-insert into department_report_period(id, department_id, report_period_id, is_active, is_balance_period) values (6, 2, 2, 1, 0);
+-- insert into department_report_period(id, department_id, report_period_id, is_active, is_balance_period) values (1, 1, 1, 1, 0);
+-- insert into department_report_period(id, department_id, report_period_id, is_active, is_balance_period) values (2, 1, 2, 1, 0);
+-- insert into department_report_period(id, department_id, report_period_id, is_active, is_balance_period) values (3, 1, 3, 1, 0);
+-- insert into department_report_period(id, department_id, report_period_id, is_active, is_balance_period) values (4, 1, 4, 1, 0);
+-- insert into department_report_period(id, department_id, report_period_id, is_active, is_balance_period) values (5, 2, 1, 1, 0);
+-- insert into department_report_period(id, department_id, report_period_id, is_active, is_balance_period) values (6, 2, 2, 1, 0);

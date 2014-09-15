@@ -5,8 +5,8 @@ import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
@@ -318,7 +318,7 @@ public class DepartmentServiceImpl implements DepartmentService {
         // Подразделения согласно выборке 40 - Выборка для доступа к экземплярам НФ/деклараций
         List<Integer> list = getTaxFormDepartments(tAUser, taxTypes, reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
         for (Integer departmentId : list) {
-            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(reportPeriodId,
+            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.getByDepartmentAndReportPeriod(reportPeriodId,
                     departmentId.longValue());
             if ((departmentReportPeriod != null) && departmentReportPeriod.isActive()) {
                 // Подразделения, для которых открыт указанный период

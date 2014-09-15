@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
@@ -40,8 +41,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
     public static final String LOG_EVENT_DELETE_RU = "удаление";
 
     private static final String FORMDATA_KIND_STATE_ERROR_LOG = "Event type: \"%s\". Unsuppotable case for formData with \"%s\" kind and \"%s\" state!";
-    private static final String REPORT_PERIOD_IS_CLOSED_LOG = "Report period (%d) is closed!";
-    private static final String REPORT_PERIOD_IS_CLOSED = "Выбранный период закрыт!";
+    // private static final String REPORT_PERIOD_IS_CLOSED_LOG = "Report period (%d) is closed!";
+    private static final String REPORT_PERIOD_IS_CLOSED = "Выбранный отчетный период подразделения закрыт!";
     private static final String FORM_TEMPLATE_WRONG_STATUS_LOG = "Form template (%d) does not exist in report period (%d)!";
     private static final String FORM_TEMPLATE_WRONG_STATUS = "Выбранный вид налоговой формы не существует в выбранном периоде!";
     private static final String INCORRECT_DEPARTMENT_FORM_TYPE_LOG = "Form type (%d) and form kind (%d) is not applicated for department (%d)";
@@ -82,6 +83,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
     private PeriodService periodService;
     @Autowired
     private FormDataService formDataService;
+    @Autowired
+    private DepartmentReportPeriodDao departmentReportPeriodDao;
 
     @Override
     public void canRead(TAUserInfo userInfo, long formDataId) {
@@ -131,7 +134,92 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
         // Если выбранный "Период" закрыт, то система выводит сообщение в панель уведомления:
         // "Выбранный период закрыт".
         if (!reportPeriodService.isActivePeriod(reportPeriodId, departmentId)) {
-            logger.warn(String.format(REPORT_PERIOD_IS_CLOSED_LOG, reportPeriodId));
+            // logger.warn(String.format(REPORT_PERIOD_IS_CLOSED_LOG, reportPeriodId));
+            throw new ServiceException(REPORT_PERIOD_IS_CLOSED);
+        }
+
+        // Проверка периода ввода остатков
+        if (!userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
+                && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
+                && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)
+                && reportPeriodService.isBalancePeriod(reportPeriodId, departmentId)) {
+            logger.warn(String.format(CREATE_FORM_DATA_ERROR_ONLY_CONTROL_LOG));
+            throw new ServiceException(CREATE_FORM_DATA_ERROR_ONLY_CONTROL);
+        }
+
+        // Макет формы
+        FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
+
+        // Проверка доступности подразделения
+        if (!departmentService.getOpenPeriodDepartments(userInfo.getUser(),
+                asList(formTemplate.getType().getTaxType()),
+                reportPeriodId).contains(departmentId)) {
+            logger.warn(String.format(FORM_DATA_DEPARTMENT_ACCESS_DENIED_LOG, departmentId, reportPeriodId));
+            throw new ServiceException(FORM_DATA_DEPARTMENT_ACCESS_DENIED);
+        }
+
+        // Id макета
+        int formTypeId = formTemplate.getType().getId();
+
+        // Вид формы
+        FormType formType = formTypeDao.get(formTypeId);
+        ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(reportPeriodId);
+
+        // Если выбранный "Вид формы" не назначен выбранному подразделению,
+        // то система выводит сообщение в панель уведомления: "Выбранный вид налоговой формы не назначен подразделению".
+        // Если у пользователя нет доступа к выбранному виду формы, то система выводит сообщение в панель уведомления:
+        // "Нет прав доступа к созданию формы с заданными параметрами".
+        boolean foundTypeAndKind = false;
+        boolean foundKind = false;
+        for (DepartmentFormType dft : sourceService.getDFTByDepartment(departmentId, formType.getTaxType(),
+                reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate())) {
+            if (dft.getKind() == kind) {
+                foundKind = true;
+                if (dft.getFormTypeId() == formTypeId) {
+                    foundTypeAndKind = true;
+                    break;
+                }
+            }
+        }
+        if (!foundTypeAndKind) {
+            logger.warn(String.format(INCORRECT_DEPARTMENT_FORM_TYPE_LOG, formTypeId, kind.getId(), departmentId));
+            throw new ServiceException(INCORRECT_DEPARTMENT_FORM_TYPE3);
+        }
+        if (!foundKind) {
+            logger.warn(String.format(INCORRECT_DEPARTMENT_FORM_TYPE_LOG, formTypeId, kind.getId(), departmentId));
+            throw new ServiceException(INCORRECT_DEPARTMENT_FORM_TYPE1);
+        }
+
+        // Доступные типы форм
+        List<FormDataKind> formDataKindList = getAvailableFormDataKind(userInfo, asList(formTemplate.getType().getTaxType()));
+        if (!formDataKindList.contains(kind)) {
+            logger.warn(String.format(INCORRECT_DEPARTMENT_FORM_TYPE_LOG, formTypeId, kind.getId(), departmentId));
+            throw new ServiceException(INCORRECT_DEPARTMENT_FORM_TYPE2);
+        }
+
+        // Если период актуальности макета, выбранного в поле "Вид формы", не пересекается с выбранным отчетным
+        // периодом ИЛИ пересекается, но его STATUS не равен 0, то система выводит сообщение в панель уведомления:
+        // "Выбранный вид налоговой формы не существует в выбранном периоде"
+        boolean intersect = isTemplateIntesectReportPeriod(formTemplate, reportPeriodId);
+        if (!intersect || formTemplate.getStatus() != VersionedObjectStatus.NORMAL) {
+            logger.warn(String.format(FORM_TEMPLATE_WRONG_STATUS_LOG, formTemplate.getId(), reportPeriodId));
+            throw new AccessDeniedException(FORM_TEMPLATE_WRONG_STATUS);
+        }
+
+        // Если форма с заданными параметрами существует, то система выводит сообщение в панель уведомления:
+        // "Форма с заданными параметрами уже существует".
+        // Проверка реализована в скриптах, где она требуется.
+    }
+
+    @Override
+    public void canCreate(TAUserInfo userInfo, int formTemplateId, FormDataKind kind, int departmentReportPeriodId) {
+        // http://conf.aplana.com/pages/viewpage.action?pageId=11383566
+
+        // Если выбранный "Период" закрыт, то система выводит сообщение в панель уведомления:
+        // "Выбранный период закрыт".
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(departmentReportPeriodId);
+        if (!departmentReportPeriod.isActive()) {
+            //logger.warn(String.format(REPORT_PERIOD_IS_CLOSED_LOG, reportPeriodId));
             throw new ServiceException(REPORT_PERIOD_IS_CLOSED);
         }
 

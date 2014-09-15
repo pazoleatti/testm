@@ -16,18 +16,22 @@ import java.util.List;
 public interface DeclarationDataService {
 	/**
 	 * Создать декларацию в текущем отчётном периоде. Созданная декларация сразу же сохраняется в БД и возвращается идентификатор созданной записи.
-     * @param logger - объект журнала
-	 * @param declarationTemplateId идентификатор шаблона декларации
-	 * @param departmentId идентификатор подразделения, в котором создаваётся декларация
-	 * @param userInfo информация о пользователе, выполняющего действие
-	 * @param reportPeriodId идентификатор отчетного периода
-	 * @param taxOrganCode налоговый орган (для налога на имущество)
-     * @param taxOrganKpp КПП (для налога на имущество)
-	 * @return идентификатор созданной декларации
-	 * @throws AccessDeniedException - если у пользователя нет прав на создание декларации с заданными параметрами
-	 * 	ServiceException - если при создании декларации произошла ошибка (например декларация с такими параметрами уже существует)
+     * @deprecated Неактуально с появлением корректирующих периодов
 	 */
+    @Deprecated
     long create(Logger logger, int declarationTemplateId, int departmentId, TAUserInfo userInfo, int reportPeriodId, String taxOrganCode, String taxOrganKpp);
+
+    /**
+     * Создание декларации в заданном отчетном периоде подразделения
+     * @param logger - объект журнала
+     * @param declarationTemplateId идентификатор шаблона декларации
+     * @param userInfo информация о пользователе, выполняющего действие
+     * @param departmentReportPeriodId отчетный период подразделения
+     * @param taxOrganCode налоговый орган (для налога на имущество)
+     * @param taxOrganKpp КПП (для налога на имущество)
+     * @return идентификатор созданной декларации
+     */
+    long create(Logger logger, int declarationTemplateId, TAUserInfo userInfo, int departmentReportPeriodId, String taxOrganCode, String taxOrganKpp);
 
 	/**
 	 * Рассчитать декларацию
@@ -116,15 +120,18 @@ public interface DeclarationDataService {
 	Date getXmlDataDocDate(long declarationDataId, TAUserInfo userInfo);
 	
 	/**
-	 * TODO: Колон script-support (sgoryachkin)
-	 * 
-	 * Ищет декларацию по заданным параметрам.
-	 * @param declarationTypeId идентификатор типа декларации
-	 * @param departmentId идентификатор {@link com.aplana.sbrf.taxaccounting.model.Department подразделения}
-	 * @param reportPeriodId идентификатор {@link com.aplana.sbrf.taxaccounting.model.ReportPeriod отчетного периода}
-	 * @return декларацию или null, если такой декларации не найдено
+	 * @deprecated Неактуально с появлением корректирующих периодов
 	 */
+    @Deprecated
 	DeclarationData find(int declarationTypeId, int departmentId, int reportPeriodId);
+
+    /**
+     * Поиск декларации
+     * @param declarationTypeId Тип декларации
+     * @param departmentReportPeriod Отчетный период подразделения
+     * @return
+     */
+    DeclarationData find(int declarationTypeId, int departmentReportPeriod);
 
     List<Long> getFormDataListInActualPeriodByTemplate(int declarationTemplateId, Date startDate);
 

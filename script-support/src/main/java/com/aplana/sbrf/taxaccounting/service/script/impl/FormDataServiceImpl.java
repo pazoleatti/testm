@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.script.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.script.FormDataCacheDao;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -83,6 +84,9 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
 
     @Autowired
     private FormTypeDao formTypeDao;
+
+    @Autowired
+    private DepartmentReportPeriodDao departmentReportPeriodDao;
 
     private Map<Number, DataRowHelper> helperHashMap = new HashMap<Number, DataRowHelper>();
 
@@ -532,9 +536,8 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
 
     @Override
     public boolean checksBalancePeriod(FormData formData, Logger logger) {
-        ReportPeriod reportPeriod = reportPeriodService.get(formData.getReportPeriodId());
-        if (reportPeriod != null && reportPeriodService.isBalancePeriod(formData.getReportPeriodId(),
-                formData.getDepartmentId())) {
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(formData.getDepartmentReportPeriodId());
+        if (departmentReportPeriod.isBalance()) {
             logger.error(CHECK_BALANCE_PERIOD_ERROR);
             return false;
         }

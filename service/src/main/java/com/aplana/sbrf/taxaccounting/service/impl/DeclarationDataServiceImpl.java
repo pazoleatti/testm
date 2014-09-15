@@ -100,6 +100,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Autowired
     private TransactionHelper tx;
+
     @Autowired
     private LockDataService lockDataService;
 
@@ -149,7 +150,13 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 		return id;
 	}
 
-	@Override
+    @Override
+    @Transactional(readOnly = false)
+    public long create(Logger logger, int declarationTemplateId, TAUserInfo userInfo, int departmentReportPeriodId, String taxOrganCode, String taxOrganKpp) {
+        return 0;
+    }
+
+    @Override
 	@Transactional(readOnly = false)
 	public void calculate(Logger logger, long id, TAUserInfo userInfo, Date docDate) {
 		declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.CALCULATE);
@@ -514,6 +521,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	public DeclarationData find(int declarationTypeId, int departmentId, int reportPeriodId) {
 		return declarationDataDao.find(declarationTypeId, departmentId, reportPeriodId);
 	}
+
+    @Override
+    public DeclarationData find(int declarationTypeId, int departmentReportPeriod) {
+        return null;
+    }
 
     @Override
     public List<Long> getFormDataListInActualPeriodByTemplate(int declarationTemplateId, Date startDate) {

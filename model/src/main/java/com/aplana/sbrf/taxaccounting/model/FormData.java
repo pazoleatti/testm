@@ -19,6 +19,7 @@ public class FormData extends IdentityObject<Long> {
 	private FormDataKind kind;
 	private Integer departmentId;
 	private Integer reportPeriodId;
+    private Integer departmentReportPeriodId;
     private Integer periodOrder;
     /** Признак формы ручного ввода */
     private Boolean manual;
@@ -112,7 +113,15 @@ public class FormData extends IdentityObject<Long> {
 		this.reportPeriodId = reportPeriodId;
 	}
 
-	public FormDataKind getKind() {
+    public Integer getDepartmentReportPeriodId() {
+        return departmentReportPeriodId;
+    }
+
+    public void setDepartmentReportPeriodId(Integer departmentReportPeriodId) {
+        this.departmentReportPeriodId = departmentReportPeriodId;
+    }
+
+    public FormDataKind getKind() {
 		return kind;
 	}
 

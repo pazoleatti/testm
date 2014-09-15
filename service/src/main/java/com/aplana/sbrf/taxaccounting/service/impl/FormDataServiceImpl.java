@@ -138,11 +138,18 @@ public class FormDataServiceImpl implements FormDataService {
 	@Override
 	public long createFormData(Logger logger, TAUserInfo userInfo,
 			int formTemplateId, int departmentId, FormDataKind kind, ReportPeriod reportPeriod, Integer periodOrder) {
-        formDataAccessService.canCreate(userInfo, formTemplateId, kind,
-                departmentId, reportPeriod.getId());
+        formDataAccessService.canCreate(userInfo, formTemplateId, kind, departmentId, reportPeriod.getId());
         return createFormDataWithoutCheck(logger, userInfo, formTemplateId, departmentId, kind, reportPeriod.getId(),
                 periodOrder, false);
 	}
+
+    @Override
+    public long createFormData(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentReportPeriodId, FormDataKind kind, Integer periodOrder) {
+        formDataAccessService.canCreate(userInfo, formTemplateId, kind, departmentReportPeriodId);
+        return createFormDataWithoutCheck(logger, userInfo, formTemplateId, departmentId, kind, reportPeriod.getId(),
+                periodOrder, false);
+        return 0;
+    }
 
     @Override
     public void createManualFormData(Logger logger, TAUserInfo userInfo, Long formDataId) {
@@ -860,6 +867,11 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
+    public FormData findFormData(int formTypeId, FormDataKind kind, int departmentReportPeriodId, Integer periodOrder) {
+        return null;
+    }
+
+    @Override
 	@Transactional
 	public void lock(long formDataId, TAUserInfo userInfo) {
         checkLockAnotherUser(lockService.lock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formDataId,
@@ -886,12 +898,6 @@ public class FormDataServiceImpl implements FormDataService {
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
-	public boolean unlockAllByUser(TAUserInfo userInfo) {
-		return true;// TODO обработать возможные ошибки
-	}
-
-	@Override
-	@Transactional(propagation = Propagation.REQUIRED)
 	public LockData getObjectLock(final long formDataId, final TAUserInfo userInfo) {
         return tx.returnInNewTransaction(new TransactionLogic<LockData>() {
             @Override
@@ -914,12 +920,6 @@ public class FormDataServiceImpl implements FormDataService {
     @Override
     public boolean existManual(Long formDataId) {
         return formDataDao.existManual(formDataId);
-    }
-
-    @Override
-    public boolean isBankSummaryForm(long formDataId) {
-        //TODO
-        return true;
     }
 
     @Override

@@ -31,7 +31,7 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
 	TaxPeriodDao taxPeriodDao;
 
     @Autowired
-    DepartmentReportPeriodDao depertmentReportPeriodDao;
+    DepartmentReportPeriodDao departmentReportPeriodDao;
 
     @Autowired(required = false)
     com.aplana.sbrf.taxaccounting.service.PeriodService reportPeriodService;
@@ -101,16 +101,6 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
     }
 
     @Override
-    public boolean isActivePeriod(int reportPeriodId, long departmentId) {
-        return reportPeriodService.isActivePeriod(reportPeriodId, departmentId);
-    }
-
-    @Override
-    public boolean isBalancePeriod(int reportPeriodId, long departmentId) {
-        return reportPeriodService.isBalancePeriod(reportPeriodId, departmentId);
-    }
-
-    @Override
     public Calendar getMonthStartDate(int reportPeriodId, int periodOrder) {
         return reportPeriodService.getMonthStartDate(reportPeriodId, periodOrder);
     }
@@ -131,7 +121,7 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
     }
 
     @Override
-    public int getCorrectionPeriodNumber(int reportPeriodId, long departmentId) {
-        return depertmentReportPeriodDao.getCorrectionPeriodNumber(reportPeriodId, departmentId);
+    public Integer getCorrectionNumber(int id) {
+        return departmentReportPeriodDao.getCorrectionNumber(id);
     }
 }

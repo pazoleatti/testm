@@ -16,7 +16,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.*;
 
-import static com.aplana.sbrf.taxaccounting.test.ReportPeriodMockUtils.mockReportPeriod;
 import static java.util.Arrays.asList;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.*;
@@ -142,12 +141,12 @@ public class DepartmentServiceImplTest {
         DepartmentReportPeriod drpClose = new DepartmentReportPeriod();
         drpClose.setActive(false);
         // Отчетные периоды
-        when(departmentReportPeriodDao.get(0, Long.valueOf(root.getId()))).thenReturn(drpOpen);
-        when(departmentReportPeriodDao.get(0, Long.valueOf(departmentTB2.getId()))).thenReturn(drpOpen);
-        when(departmentReportPeriodDao.get(0, Long.valueOf(departmentTB3.getId()))).thenReturn(drpClose);
-        when(departmentReportPeriodDao.get(0, Long.valueOf(departmentGOSB31.getId()))).thenReturn(drpClose);
-        when(departmentReportPeriodDao.get(0, Long.valueOf(departmentOSB311.getId()))).thenReturn(drpOpen);
-        when(departmentReportPeriodDao.get(1, Long.valueOf(departmentOSB311.getId()))).thenReturn(drpClose);
+        when(departmentReportPeriodDao.getByDepartmentAndReportPeriod(0, Long.valueOf(root.getId()))).thenReturn(drpOpen);
+        when(departmentReportPeriodDao.getByDepartmentAndReportPeriod(0, Long.valueOf(departmentTB2.getId()))).thenReturn(drpOpen);
+        when(departmentReportPeriodDao.getByDepartmentAndReportPeriod(0, Long.valueOf(departmentTB3.getId()))).thenReturn(drpClose);
+        when(departmentReportPeriodDao.getByDepartmentAndReportPeriod(0, Long.valueOf(departmentGOSB31.getId()))).thenReturn(drpClose);
+        when(departmentReportPeriodDao.getByDepartmentAndReportPeriod(0, Long.valueOf(departmentOSB311.getId()))).thenReturn(drpOpen);
+        when(departmentReportPeriodDao.getByDepartmentAndReportPeriod(1, Long.valueOf(departmentOSB311.getId()))).thenReturn(drpClose);
 
         when(departmentReportPeriodDao.isPeriodOpen(root.getId(), 0)).thenReturn(true);
         when(departmentReportPeriodDao.isPeriodOpen(departmentTB2.getId(), 0)).thenReturn(true);

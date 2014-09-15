@@ -7,7 +7,7 @@ public class CheckPeriodStatusAction  extends UnsecuredActionImpl<CheckPeriodSta
 	TaxType taxType;
 	int year;
 	boolean balancePeriod;
-	long departmentId;
+	int departmentId;
 	long dictionaryTaxPeriodId;
 
 	public TaxType getTaxType() {
@@ -34,11 +34,11 @@ public class CheckPeriodStatusAction  extends UnsecuredActionImpl<CheckPeriodSta
 		return balancePeriod;
 	}
 
-	public long getDepartmentId() {
+	public int getDepartmentId() {
 		return departmentId;
 	}
 
-	public void setDepartmentId(long departmentId) {
+	public void setDepartmentId(int departmentId) {
 		this.departmentId = departmentId;
 	}
 

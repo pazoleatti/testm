@@ -27,11 +27,12 @@ public class CheckHasCorrectionPeriodHandler extends AbstractActionHandler<Check
     @Override
     public CheckHasCorrectionPeriodResult execute(CheckHasCorrectionPeriodAction action, ExecutionContext executionContext) throws ActionException {
         CheckHasCorrectionPeriodResult result = new CheckHasCorrectionPeriodResult();
+        // TODO Переписать
         List<DepartmentReportPeriod> drp = periodService.listByDepartmentIdAndTaxType((long)action.getDepartmentId(), action.getTaxType());
         result.setHasCorrectionPeriods(false);
         for (DepartmentReportPeriod rp : drp) {
             if ((rp.getReportPeriod().getId() == action.getReportPeriodId())
-                    &&(rp.getCorrectPeriod() != null)) {
+                    &&(rp.getCorrectionDate() != null)) {
                 result.setHasCorrectionPeriods(true);
             }
         }
@@ -39,7 +40,8 @@ public class CheckHasCorrectionPeriodHandler extends AbstractActionHandler<Check
     }
 
     @Override
-    public void undo(CheckHasCorrectionPeriodAction checkHasCorrectionPeriodAction, CheckHasCorrectionPeriodResult checkHasCorrectionPeriodResult, ExecutionContext executionContext) throws ActionException {
-
+    public void undo(CheckHasCorrectionPeriodAction checkHasCorrectionPeriodAction,
+                     CheckHasCorrectionPeriodResult checkHasCorrectionPeriodResult,
+                     ExecutionContext executionContext) throws ActionException {
     }
 }

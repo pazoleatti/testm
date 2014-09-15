@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataAccessService;
@@ -40,6 +41,9 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 	@Autowired
 	private SourceService sourceService;
 
+    @Autowired
+    private DepartmentReportPeriodDao departmentReportPeriodDao;
+
 	/**
 	 * В сущности эта функция проверяет наличие прав на просмотр декларации,
 	 * логика вынесена в отдельный метод, так как используется в нескольких
@@ -47,28 +51,26 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 	 * 
 	 * @param userInfo
 	 *            информация о пользователе
-	 * @param declarationDepartmentId
-	 *            идентификатор подразделения, к которому относится декларация
-	 * @param reportPeriodId
-	 *            идентификатор отчетного периода
+	 * @param departmentReportPeriodId Отчетный период подразделения
+	 *
      * @param checkedSet
      *            необязательный параметр — набор проверенных наборов параметров, используется для оптимизации
 	 */
-	private void checkRolesForReading(TAUserInfo userInfo,
-			int declarationDepartmentId, int reportPeriodId, Set<String> checkedSet) {
-
+	private void checkRolesForReading(TAUserInfo userInfo, int departmentReportPeriodId, Set<String> checkedSet) {
         if (checkedSet != null) {
-            String key = userInfo.getUser().getId() + "_" + declarationDepartmentId + "_" + reportPeriodId;
+            String key = userInfo.getUser().getId() + "_" + departmentReportPeriodId;
             if (checkedSet.contains(key)) {
                 return;
             }
             checkedSet.add(key);
         }
 
-		Department declarationDepartment = departmentService.getDepartment(declarationDepartmentId);
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(departmentReportPeriodId);
+
+		Department declarationDepartment = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
 
 		// Нельзя работать с декларациями в отчетном периоде вида "ввод остатков"
-		if (reportPeriodService.isBalancePeriod(reportPeriodId, Long.valueOf(declarationDepartment.getId()))) {
+		if (departmentReportPeriod.isBalance()) {
 			throw new AccessDeniedException("Декларация в отчетном периоде вида для ввода остатков");
 		}
 
@@ -82,9 +84,10 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 
         // Контролёр или Контролёр НС
         if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS) || userInfo.getUser().hasRole(TARole.ROLE_CONTROL)) {
-            ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(reportPeriodId);
+            ReportPeriod reportPeriod = departmentReportPeriod.getReportPeriod();
 			if (reportPeriod != null && departmentService.getTaxFormDepartments(userInfo.getUser(),
-					asList(reportPeriod.getTaxPeriod().getTaxType()), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate()).contains(declarationDepartment.getId())) {
+					asList(reportPeriod.getTaxPeriod().getTaxType()), reportPeriod.getCalendarStartDate(),
+                    reportPeriod.getEndDate()).contains(declarationDepartment.getId())) {
 				return;
 			}
         }
@@ -97,25 +100,24 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 		DeclarationData declaration = declarationDataDao.get(declarationDataId);
 		// Просматривать декларацию может только контролёр УНП и контролёр
 		// текущего уровня для обособленных подразделений
-		checkRolesForReading(userInfo, declaration.getDepartmentId(),
-				declaration.getReportPeriodId(), checkedSet);
+		checkRolesForReading(userInfo, declaration.getDepartmentReportPeriodId(), checkedSet);
 	}
 
-	private void canCreate(TAUserInfo userInfo, int declarationTemplateId,
-			int departmentId, int reportPeriodId, Set<String> checkedSet) {
+	private void canCreate(TAUserInfo userInfo, int declarationTemplateId, int departmentReportPeriodId,
+                           Set<String> checkedSet) {
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(departmentReportPeriodId);
+
 		// Для начала проверяем, что в данном подразделении вообще можно
 		// работать с декларациями данного вида
-		if (!reportPeriodService.isActivePeriod(reportPeriodId, departmentId)) {
+		if (!departmentReportPeriod.isActive()) {
 			throw new AccessDeniedException("Выбранный период закрыт");
 		}
-		DeclarationTemplate declarationTemplate = declarationTemplateDao
-				.get(declarationTemplateId);
-		int declarationTypeId = declarationTemplate.getType()
-				.getId();
+		DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationTemplateId);
+		int declarationTypeId = declarationTemplate.getType().getId();
 
-        ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(reportPeriodId);
-		List<DepartmentDeclarationType> ddts = sourceService.getDDTByDepartment(departmentId, declarationTemplate.getType().getTaxType(),
-                reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
+        ReportPeriod reportPeriod = departmentReportPeriod.getReportPeriod();
+		List<DepartmentDeclarationType> ddts = sourceService.getDDTByDepartment(departmentReportPeriod.getDepartmentId(),
+                declarationTemplate.getType().getTaxType(), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
 		boolean found = false;
 		for (DepartmentDeclarationType ddt : ddts) {
 			if (ddt.getDeclarationTypeId() == declarationTypeId) {
@@ -128,7 +130,7 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 		}
 		// Создавать декларацию могут только контролёры УНП и контролёры
 		// текущего уровня обособленного подразделения
-		checkRolesForReading(userInfo, departmentId, reportPeriodId, checkedSet);
+		checkRolesForReading(userInfo, departmentReportPeriod.getId(), checkedSet);
 	}
 
 	private void canAccept(TAUserInfo userInfo, long declarationDataId, Set<String> checkedSet) {
@@ -138,14 +140,15 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 			throw new AccessDeniedException("Декларация уже принята");
 		}
 
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(declaration.getDepartmentReportPeriodId());
+
         // Нельзя принимать декларацию в закрытом периоде
-        if (!reportPeriodService.isActivePeriod(declaration.getReportPeriodId(), declaration.getDepartmentId())) {
+        if (!departmentReportPeriod.isActive()) {
             throw new AccessDeniedException("Период закрыт");
         }
 		// Принять декларацию могут только контолёр текущего уровня
 		// обособленного подразделения и контролёр УНП
-		checkRolesForReading(userInfo, declaration.getDepartmentId(),
-				declaration.getReportPeriodId(), checkedSet);
+		checkRolesForReading(userInfo, declaration.getDepartmentReportPeriodId(), checkedSet);
 	}
 
 	private void canReject(TAUserInfo userInfo, long declarationDataId, Set<String> checkedSet) {
@@ -154,14 +157,16 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 		if (!declaration.isAccepted()) {
 			throw new AccessDeniedException("Декларация не принята");
 		}
+
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(declaration.getDepartmentReportPeriodId());
+
         // Нельзя возвращать декларацию в закрытом периоде
-        if (!reportPeriodService.isActivePeriod(declaration.getReportPeriodId(), declaration.getDepartmentId())) {
+        if (!departmentReportPeriod.isActive()) {
             throw new AccessDeniedException("Период закрыт");
         }
 		// Отменить принятие декларацию могут только контолёр текущего уровня и
 		// контролёр УНП
-		checkRolesForReading(userInfo, declaration.getDepartmentId(),
-				declaration.getReportPeriodId(), checkedSet);
+		checkRolesForReading(userInfo, declaration.getDepartmentReportPeriodId(), checkedSet);
 	}
 
 	private void canDelete(TAUserInfo userInfo, long declarationDataId, Set<String> checkedSet) {
@@ -170,14 +175,16 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 		if (declaration.isAccepted()) {
 			throw new AccessDeniedException("Декларация принята");
 		}
+
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(declaration.getDepartmentReportPeriodId());
+
         // Нельзя удалить декларацию в закрытом периоде
-        if (!reportPeriodService.isActivePeriod(declaration.getReportPeriodId(), declaration.getDepartmentId())) {
+        if (!departmentReportPeriod.isActive()) {
             throw new AccessDeniedException("Период закрыт");
         }
-		// Удалять могут только контолёр текущего уровня и контролёр УНП
-		checkRolesForReading(userInfo, declaration.getDepartmentId(),
-				declaration.getReportPeriodId(), checkedSet);
-	}
+		// Удалять могут только контролёр текущего уровня и контролёр УНП
+        checkRolesForReading(userInfo, declaration.getDepartmentReportPeriodId(), checkedSet);
+    }
 
 	private void canRefresh(TAUserInfo userInfo, long declarationDataId, Set<String> checkedSet) {
 		DeclarationData declaration = declarationDataDao.get(declarationDataId);
@@ -186,14 +193,15 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 			throw new AccessDeniedException("Декларация принята");
 		}
 
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(declaration.getDepartmentReportPeriodId());
+
         // Нельзя обновить декларацию в закрытом периоде
-        if (!reportPeriodService.isActivePeriod(declaration.getReportPeriodId(), declaration.getDepartmentId())) {
+        if (!departmentReportPeriod.isActive()) {
             throw new AccessDeniedException("Период закрыт");
         }
         // Обновлять декларацию могут только контолёр текущего уровня и
 		// контролёр УНП
-		checkRolesForReading(userInfo, declaration.getDepartmentId(),
-                declaration.getReportPeriodId(), checkedSet);
+		checkRolesForReading(userInfo, declaration.getDepartmentReportPeriodId(), checkedSet);
 	}
 
     @Override
@@ -225,18 +233,16 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
     }
 
     @Override
-    public void checkEvents(TAUserInfo userInfo,
-                            Integer declarationTemplateId, Integer departmentId,
-                            Integer reportPeriodId, FormDataEvent scriptEvent) {
-        checkEvents(userInfo, declarationTemplateId, departmentId, reportPeriodId, scriptEvent, null);
+    public void checkEvents(TAUserInfo userInfo, int declarationTemplateId, int departmentReportPeriodId,
+                            FormDataEvent scriptEvent) {
+        checkEvents(userInfo, declarationTemplateId, departmentReportPeriodId, scriptEvent, null);
     }
 
-    private void checkEvents(TAUserInfo userInfo,
-                            Integer declarationTemplateId, Integer departmentId,
-                            Integer reportPeriodId, FormDataEvent scriptEvent, Set<String> checkedSet) {
+    private void checkEvents(TAUserInfo userInfo, int declarationTemplateId, int departmentReportPeriodId,
+                             FormDataEvent scriptEvent, Set<String> checkedSet) {
         switch (scriptEvent) {
             case CREATE:
-                canCreate(userInfo, declarationTemplateId, departmentId, reportPeriodId, checkedSet);
+                canCreate(userInfo, declarationTemplateId, departmentReportPeriodId, checkedSet);
                 break;
             default:
                 throw new AccessDeniedException("Операция не предусмотрена в системе");
@@ -260,14 +266,13 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 	}
 
 	@Override
-	public Set<FormDataEvent> getPermittedEvents(TAUserInfo userInfo,
-			Integer declarationTemplateId, Integer departmentId,
-			Integer reportPeriodId) {
+	public Set<FormDataEvent> getPermittedEvents(TAUserInfo userInfo, int declarationTemplateId,
+                                                 int departmentReportPeriod) {
 		Set<FormDataEvent> result = new HashSet<FormDataEvent>();
         Set<String> checkedSet = new HashSet<String>();
 		for (FormDataEvent scriptEvent : FormDataEvent.values()) {
 			try{
-				checkEvents(userInfo, declarationTemplateId, departmentId, reportPeriodId, scriptEvent, checkedSet);
+				checkEvents(userInfo, declarationTemplateId, departmentReportPeriod, scriptEvent, checkedSet);
 				result.add(scriptEvent);
 			} catch (Exception e) {
 				// Nothink

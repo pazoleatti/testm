@@ -19,28 +19,7 @@ public interface PeriodService {
      * @param departmentId Подразделение
      * @return
      */
-    DepartmentReportPeriod getLastReportPeriod(TaxType taxType, long departmentId);
-    
-
-	/**
-	 * Проверяем, открыт ли период для департамента или нет
-	 * 
-	 * @param reportPeriodId
-	 * @param departmentId
-	 * @return
-	 */
-	boolean isActivePeriod(int reportPeriodId, long departmentId);
-	
-	/**
-	 * Проверяем, период ли остатков
-	 * 
-	 * @param reportPeriodId
-	 * @param departmentId
-	 * @return true - если остатков иначе false (не существует тоже false)
-	 * 
-	 */
-	boolean isBalancePeriod(int reportPeriodId, long departmentId);
-
+    DepartmentReportPeriod getLastReportPeriod(TaxType taxType, int departmentId);
 
 	/**
 	 * Открываем отчетный период для департамента.
@@ -52,9 +31,15 @@ public interface PeriodService {
 	 */
     //TODO Слишком много параметров
 	void open(int year, int dictionaryTaxPeriodId, TaxType taxType, TAUserInfo user,
-	          long departmentId, List<LogEntry> logs, boolean isBalance, Date correctionDate);
+	          int departmentId, List<LogEntry> logs, boolean isBalance, Date correctionDate);
 
-    void saveOrUpdate(DepartmentReportPeriod departmentReportPeriod, Date correctionDate, List<LogEntry> logs);
+    /**
+     * Создание нового отчетного периода подразделения или открытие существующего по комбинации параметров
+     * - Подразделение
+     * - Отчетный период
+     * - Дата корректировки
+     */
+    void saveOrOpen(DepartmentReportPeriod departmentReportPeriod, List<LogEntry> logs);
 
 	/**
 	 * Закрыть период
@@ -64,27 +49,8 @@ public interface PeriodService {
 	 * @param logs логер, при необходимости
 	 * @param user пользователь, который выполняет действие
 	 */
-	void close(TaxType taxType, int reportPeriodId, long departmentId, Date correctionDate, List<LogEntry> logs, TAUserInfo user);
+	void close(TaxType taxType, int reportPeriodId, int departmentId, Date correctionDate, List<LogEntry> logs, TAUserInfo user);
 
-	List<DepartmentReportPeriod> listByDepartmentId(long departmentId);
-
-	/**
-	 * Получает список по подразделению и типу налога
-	 * @param departmentId подразделение
-	 * @param taxType тип налога
-	 * @return список подразделение-отчетный период
-	 */
-	List<DepartmentReportPeriod> listByDepartmentIdAndTaxType(long departmentId, TaxType taxType);
-	
-	/**
-	 * Получает список налоговых периодов по типу налога.
-	 * 
-	 * @param taxType
-	 * @return
-	 */
-	List<TaxPeriod> listByTaxType(TaxType taxType);
-	
-	
 	/**
 	 * Получает список отчетных периодов по отчетному периоду.
 	 * 
@@ -101,16 +67,7 @@ public interface PeriodService {
 	 * @return
 	 */
 	TaxPeriod getTaxPeriod(int taxPeriodId);
-	
-	/**
-	 * Получает последний заведенный налоговый период для типа налога
-	 * 
-	 * @param taxPeriodId
-	 * @return
-	 */
-	TaxPeriod getLastTaxPeriod(TaxType taxType);
-	
-	
+
 	/**
 	 * Получает отчетный период по ID
 	 * 
@@ -118,9 +75,7 @@ public interface PeriodService {
 	 * @return
 	 */
 	ReportPeriod getReportPeriod(int reportPeriodId);
-	
-	
-	
+
     /**
      * Возвращает дату начала отчетного периода
 	 *
@@ -195,7 +150,7 @@ public interface PeriodService {
 	 * @param logs логер, при необходимости
 	 * @param user пользователь, который выполняет действие
 	 */
-	void removeReportPeriod(TaxType taxType, int reportPeriodId, Date correctionDate, long departmentId, List<LogEntry> logs, TAUserInfo user);
+	void removeReportPeriod(TaxType taxType, int reportPeriodId, Date correctionDate, int departmentId, List<LogEntry> logs, TAUserInfo user);
 
     /**
      *
@@ -230,7 +185,7 @@ public interface PeriodService {
 	 * @param departmentId подразделение, для которого осуществляется проверка существования периода
 	 * @return true - существует, false - не существует
 	 */
-	boolean existForDepartment(Integer departmentId, long reportPeriodId);
+	boolean existForDepartment(int departmentId, int reportPeriodId);
 
 	/**
 	 * Проверяет статус периода ОТКРЫТ, ЗАКРЫТ ИЛИ НЕСУЩЕСТВУЕТ
@@ -241,7 +196,7 @@ public interface PeriodService {
 	 * @param dictionaryTaxPeriodId
 	 * @return
 	 */
-	PeriodStatusBeforeOpen checkPeriodStatusBeforeOpen(TaxType taxType, int year, boolean balancePeriod, long departmentId, long dictionaryTaxPeriodId);
+	PeriodStatusBeforeOpen checkPeriodStatusBeforeOpen(TaxType taxType, int year, boolean balancePeriod, int departmentId, long dictionaryTaxPeriodId);
 
     /**
      * Получает список месяцев, в зависимости от выбранного периода
@@ -269,14 +224,6 @@ public interface PeriodService {
      */
     List<ReportPeriod> getOpenPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList,
                                                              boolean withoutBalance, boolean withoutCorrect);
-
-	/**
-	 * Получить признак активности периода для подразделения
-	 * @param departmentId идентификатор подразделения
-	 * @param reportPeriodId идентификатор отчетного периода
-	 * @return  признак активности периода для подразделения
-	 */
-	boolean isPeriodOpen(int departmentId, long reportPeriodId);
 
     /**
      * Возвращает предыдущий отчетный период, не привязываясь к налоговому периоду,
@@ -306,7 +253,7 @@ public interface PeriodService {
      * @param user пользователь, который выполняет действие
      * @param logs логер, при необходимости
      */
-    void openCorrectionPeriod(TaxType taxType, ReportPeriod reportPeriod, long departmentId, Date term, TAUserInfo user, List<LogEntry> logs);
+    void openCorrectionPeriod(TaxType taxType, ReportPeriod reportPeriod, int departmentId, Date term, TAUserInfo user, List<LogEntry> logs);
 
     /**
      * проверяет статус периода перед открытием
@@ -315,7 +262,7 @@ public interface PeriodService {
      * @param term срок сдачи отчетности
      * @return статус периода
      */
-    PeriodStatusBeforeOpen checkPeriodStatusBeforeOpen(ReportPeriod reportPeriod, long departmentId, Date term);
+    PeriodStatusBeforeOpen checkPeriodStatusBeforeOpen(ReportPeriod reportPeriod, int departmentId, Date term);
 
     /**
      * Редактировать отчетный период
@@ -329,7 +276,7 @@ public interface PeriodService {
      * @param logs логер, при необходимости
      */
     void edit(int reportPeriodId, int newDictTaxPeriodId, int newYear, TaxType taxType, TAUserInfo user,
-                     long departmentId, boolean isBalance,  List<LogEntry> logs);
+                     int departmentId, boolean isBalance,  List<LogEntry> logs);
 
     /**
      * Редактировать корректирующий период
@@ -343,10 +290,10 @@ public interface PeriodService {
      * @param user пользователь, который выполняет действие
      * @param logs логер, при необходимости
      */
-    void editCorrectionPeriod(int reportPeriodId, int newReportPeriodId, long oldDepartmentId, long newDepartmentId, TaxType taxType,
+    void editCorrectionPeriod(int reportPeriodId, int newReportPeriodId, int oldDepartmentId, int newDepartmentId, TaxType taxType,
                                      Date correctionDate, Date newCorrectionDate, TAUserInfo user, List<LogEntry> logs);
 
-    List<DepartmentReportPeriod> getDRPByDepartmentIds(List<TaxType> taxTypes, List<Long> departmentIds);
+    List<DepartmentReportPeriod> getDRPByDepartmentIds(List<TaxType> taxTypes, List<Integer> departmentIds);
 
     /**
      * Отчетный период по коду и году
