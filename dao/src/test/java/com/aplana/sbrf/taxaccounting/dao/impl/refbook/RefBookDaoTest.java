@@ -23,6 +23,9 @@ import java.util.*;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.*;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 
 //TODO: Необходимо добавить тесты для getRecords с фильтром (Marat Fayzullin 2013-08-31)
@@ -450,6 +453,26 @@ public class RefBookDaoTest {
         }
         List<Pair<Long,String>> matches = refBookDao.getMatchedRecordsByUniqueAttributes(refBook.getId(), 111L, refBook.getAttributes(), records);
         assertEquals(2, matches.size());
+    }
+
+    @Test
+    public void getMatchedRecordsByUniqueAttributesNotAttributeValues() {
+        RefBookDao spy = spy(refBookDao);
+        RefBook refBook = spy.get(1L);
+
+        PagingResult<Map<String, RefBookValue>> allValues = spy.getRecords(refBook.getId(), getDate(1, 1, 2013), null, null, null);
+
+        assertEquals(2, allValues.size());
+        List<RefBookRecord> records = new ArrayList<RefBookRecord>();
+        for (Map<String, RefBookValue> values : allValues) {
+            RefBookRecord record = new RefBookRecord();
+            record.setValues(values);
+            record.setRecordId(null);
+            records.add(record);
+        }
+        when(spy.getUniqueAttributeValues(anyLong(), anyLong())).thenReturn(new HashMap<Integer, List<Pair<RefBookAttribute, RefBookValue>>>());
+        List<Pair<Long, String>> matches = spy.getMatchedRecordsByUniqueAttributes(refBook.getId(), 111L, refBook.getAttributes(), records);
+        assertEquals(0, matches.size());
     }
 
     /*@Test

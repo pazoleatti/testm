@@ -27,7 +27,8 @@ class Main {
     def static TAX_FOLDERS = ['deal': 'МУКС',
             'income': 'Налог на прибыль',
             'vat': 'НДС',
-            'transport': 'Транспортный налог']
+            'transport': 'Транспортный налог',
+            'property': 'Налог на имущество']
 
     // Названия файлов отчетов
     def static REPORT_GIT_NAME = 'report_git_db_compare.html'
@@ -215,6 +216,13 @@ class Main {
                     'declaration': -1,
                     'summary': 200,
                     'vehicles': 201
+            ],
+            'property': [
+                    'property_945_1': 610,
+                    'property_945_2': 611,
+                    'property_945_3': 613,
+                    'property_945_4': 612,
+                    'property_945_5': 10640
             ]
     ]
 

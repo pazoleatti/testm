@@ -109,7 +109,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	public static final String ATTR_FILE_ID = "ИдФайл";
 	public static final String ATTR_DOC_DATE = "ДатаДок";
 	private static final SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
-    private static final String VALIDATION_ERR_MSG = "Операция «s» не выполнена. Обнаружены фатальные ошибки!";
+    private static final String VALIDATION_ERR_MSG = "Обнаружены фатальные ошибки!";
 
     @Override
     @Transactional(readOnly = false)
@@ -403,12 +403,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 log.error(String.format(VALIDATION_ERR_MSG, operation), e);
                 logger.error(e);
                 Locale.setDefault(oldLocale);
-                throw new ServiceLoggerException(String.format(VALIDATION_ERR_MSG, operation), logEntryService.save(logger.getEntries()));
+                throw new ServiceLoggerException(VALIDATION_ERR_MSG, logEntryService.save(logger.getEntries()));
             }
 
             if (logger.containsLevel(LogLevel.ERROR)) {
                 Locale.setDefault(oldLocale);
-                throw new ServiceLoggerException(String.format(VALIDATION_ERR_MSG, operation), logEntryService.save(logger.getEntries()));
+                throw new ServiceLoggerException(VALIDATION_ERR_MSG, logEntryService.save(logger.getEntries()));
             }
 
             Locale.setDefault(oldLocale);

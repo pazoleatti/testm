@@ -66,53 +66,24 @@ public class GetDepartmentAssignsHandler extends AbstractActionHandler<GetDepart
 
         /** Получаем уже назначенные связки и обрезаем их */
         DepartmentAssign selectedLeftObject = action.getSelectedLeft();
-        List<ComparableSourceObject> currentAssigns = new ArrayList<ComparableSourceObject>();
         List<ComparableSourceObject> impossibleAssign = new ArrayList<ComparableSourceObject>();
 
         if (selectedLeftObject != null) {
             if (action.isForm()) {
-                List<DepartmentFormType> departmentFormTypes;
                 List<DepartmentFormType> departmentImpFormTypes = new ArrayList<DepartmentFormType>();
-                if (selectedLeftObject.isDeclaration()) {
-                    departmentFormTypes = sourceService.
-                            getDFTSourceByDDT(selectedLeftObject.getDepartmentId(), selectedLeftObject.getTypeId(),
-                                    periodFrom, periodTo, queryParams);
-                } else {
+                if (!selectedLeftObject.isDeclaration()) {
                     if (action.getMode() == SourceMode.SOURCES) {
-                        departmentFormTypes = sourceService.
-                                getDFTSourcesByDFT(selectedLeftObject.getDepartmentId(), selectedLeftObject.getTypeId(),
-                                        selectedLeftObject.getKind(), periodFrom, periodTo, queryParams);
                         departmentImpFormTypes = sourceService.
                                 getFormDestinations(selectedLeftObject.getDepartmentId(), selectedLeftObject.getTypeId(), selectedLeftObject.getKind(), periodFrom, periodTo);
                     } else {
-                        departmentFormTypes = sourceService.
-                                getFormDestinations(selectedLeftObject.getDepartmentId(), selectedLeftObject.getTypeId(), selectedLeftObject.getKind(), periodFrom, periodTo);
                         departmentImpFormTypes = sourceService.
                                 getDFTSourcesByDFT(selectedLeftObject.getDepartmentId(), selectedLeftObject.getTypeId(),
                                         selectedLeftObject.getKind(), periodFrom, periodTo, queryParams);
                     }
                     impossibleAssign.add(new ComparableSourceObject(selectedLeftObject.getKind(), selectedLeftObject.getTypeId(), null, selectedLeftObject.getDepartmentId()));
                 }
-                for (DepartmentFormType dft : departmentFormTypes) {
-                    currentAssigns.add(new ComparableSourceObject(dft.getKind(), dft.getFormTypeId(), null, dft.getDepartmentId()));
-                }
                 for (DepartmentFormType dft : departmentImpFormTypes) {
                     impossibleAssign.add(new ComparableSourceObject(dft.getKind(), dft.getFormTypeId(), null, dft.getDepartmentId()));
-                }
-            } else {
-                if (action.getMode() == SourceMode.SOURCES) {
-                    List<DepartmentFormType> departmentFormTypes = sourceService
-                            .getDFTSourceByDDT(selectedLeftObject.getDepartmentId(), selectedLeftObject.getTypeId(),
-                                    periodFrom, periodTo, queryParams);
-                    for (DepartmentFormType dft : departmentFormTypes) {
-                        currentAssigns.add(new ComparableSourceObject(dft.getKind(), dft.getFormTypeId(), null, dft.getDepartmentId()));
-                    }
-                } else {
-                    List<DepartmentDeclarationType> departmentFormTypes = sourceService.
-                            getDeclarationDestinations(selectedLeftObject.getDepartmentId(), selectedLeftObject.getTypeId(), selectedLeftObject.getKind(), periodFrom, periodTo);
-                    for (DepartmentDeclarationType ddt : departmentFormTypes) {
-                        currentAssigns.add(new ComparableSourceObject(null, null, ddt.getDeclarationTypeId(), ddt.getDepartmentId()));
-                    }
                 }
             }
 
@@ -120,13 +91,6 @@ public class GetDepartmentAssignsHandler extends AbstractActionHandler<GetDepart
             while (it.hasNext()) {
                 DepartmentAssign assign = it.next();
                 if (!assign.isDeclaration() || action.getMode() == SourceMode.SOURCES) {
-                    for (ComparableSourceObject currentAssign : currentAssigns) {
-                        if (assign.getKind() == currentAssign.formKind && assign.getTypeId() == currentAssign.formTypeId && action.getDepartmentId() == currentAssign.departmentId) {
-                            assign.setEnabled(false);
-                            assign.setChecked(true);
-                            break;
-                        }
-                    }
                     for (ComparableSourceObject currentAssign : impossibleAssign) {
                         if (assign.getKind() == currentAssign.formKind && assign.getTypeId() == currentAssign.formTypeId && action.getDepartmentId() == currentAssign.departmentId) {
                             assign.setEnabled(false);
@@ -135,13 +99,6 @@ public class GetDepartmentAssignsHandler extends AbstractActionHandler<GetDepart
                         }
                     }
                 } else {
-                    for (ComparableSourceObject currentAssign : currentAssigns) {
-                        if (assign.getTypeId() == currentAssign.declarationTypeId && action.getDepartmentId() == currentAssign.departmentId) {
-                            assign.setEnabled(false);
-                            assign.setChecked(true);
-                            break;
-                        }
-                    }
                     for (ComparableSourceObject currentAssign : impossibleAssign) {
                         if (assign.getTypeId() == currentAssign.declarationTypeId && action.getDepartmentId() == currentAssign.departmentId) {
                             assign.setEnabled(false);

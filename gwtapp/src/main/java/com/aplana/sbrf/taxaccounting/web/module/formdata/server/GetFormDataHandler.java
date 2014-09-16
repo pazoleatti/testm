@@ -58,8 +58,12 @@ public class GetFormDataHandler extends
     @Autowired
     private RefBookFactory refBookFactory;
 
+    @Autowired
+    private DataRowService dataRowService;
+
     private static final long REF_BOOK_ID = 8L;
     private static final String REF_BOOK_VALUE_NAME = "CODE";
+    private TAUserInfo userInfo;
 
 	public GetFormDataHandler() {
 		super(GetFormData.class);
@@ -69,7 +73,7 @@ public class GetFormDataHandler extends
 	public GetFormDataResult execute(GetFormData action,
 			ExecutionContext context) throws ActionException {
 
-		TAUserInfo userInfo = securityService.currentUserInfo();
+		userInfo = securityService.currentUserInfo();
 		
 		// UNLOCK: Попытка разблокировать ту форму которая была открыта ранее
 		try {
@@ -118,6 +122,8 @@ public class GetFormDataHandler extends
 			Logger logger, GetFormDataResult result) {
 
 		FormData formData = formDataService.getFormData(userInfo, action.getFormDataId(), action.isManual(), logger);
+
+        checkManualMode(formData, action.isManual());
 
 		FormTemplate formTemplate = formTemplateService.getFullFormTemplate(formData.getFormTemplateId());
 
@@ -226,4 +232,18 @@ public class GetFormDataHandler extends
 		formatter.format(dateToForm);
 		return (formatter.format(dateToForm));
 	}
+
+    /**
+     * Фикс для только что созданной версии ручного ввода
+     * http://jira.aplana.com/browse/SBRFACCTAX-7676
+     *
+     * @param formData экземпляр НФ
+     * @param isManual признак ручного ввода
+     */
+    private void checkManualMode(FormData formData, boolean isManual) {
+        int rowCount = dataRowService.getRowCount(userInfo, formData.getId(), true, true);
+        if (isManual && rowCount == 0) {
+            formData.setManual(true);
+        }
+    }
 }
