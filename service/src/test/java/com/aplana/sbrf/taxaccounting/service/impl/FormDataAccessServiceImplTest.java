@@ -254,26 +254,26 @@ public class FormDataAccessServiceImplTest {
 //		ReflectionTestUtils.setField(service, "reportPeriodDao", reportPeriodDao);
 
 		PeriodService reportPeriodService = mock(PeriodService.class);
-		when(reportPeriodService.isActivePeriod(REPORT_PERIOD_ACTIVE_ID, TB1_ID)).thenReturn(REPORT_PERIOD_ACTIVE);
-		when(reportPeriodService.isBalancePeriod(REPORT_PERIOD_ACTIVE_ID, TB1_ID)).thenReturn(false);
-		when(reportPeriodService.isActivePeriod(REPORT_PERIOD_ACTIVE_ID, TB2_ID)).thenReturn(REPORT_PERIOD_ACTIVE);
-		when(reportPeriodService.isBalancePeriod(REPORT_PERIOD_ACTIVE_ID, TB2_ID)).thenReturn(false);
-		when(reportPeriodService.isActivePeriod(REPORT_PERIOD_ACTIVE_ID, Department.ROOT_BANK_ID)).thenReturn(REPORT_PERIOD_ACTIVE);
-		when(reportPeriodService.isBalancePeriod(REPORT_PERIOD_ACTIVE_ID, Department.ROOT_BANK_ID)).thenReturn(false);
-
-		when(reportPeriodService.isActivePeriod(REPORT_PERIOD_INACTIVE_ID, TB1_ID)).thenReturn(REPORT_PERIOD_INACTIVE);
-		when(reportPeriodService.isBalancePeriod(REPORT_PERIOD_INACTIVE_ID, TB1_ID)).thenReturn(false);
-		when(reportPeriodService.isActivePeriod(REPORT_PERIOD_INACTIVE_ID, TB2_ID)).thenReturn(REPORT_PERIOD_INACTIVE);
-		when(reportPeriodService.isBalancePeriod(REPORT_PERIOD_INACTIVE_ID, TB2_ID)).thenReturn(false);
-		when(reportPeriodService.isActivePeriod(REPORT_PERIOD_INACTIVE_ID, Department.ROOT_BANK_ID)).thenReturn(REPORT_PERIOD_INACTIVE);
-		when(reportPeriodService.isBalancePeriod(REPORT_PERIOD_INACTIVE_ID, Department.ROOT_BANK_ID)).thenReturn(false);
-
-		when(reportPeriodService.isActivePeriod(REPORT_PERIOD_BALANCED_ID, TB1_ID)).thenReturn(REPORT_PERIOD_ACTIVE);
-		when(reportPeriodService.isBalancePeriod(REPORT_PERIOD_BALANCED_ID, TB1_ID)).thenReturn(REPORT_PERIOD_BALANCED);
-		when(reportPeriodService.isActivePeriod(REPORT_PERIOD_BALANCED_ID, TB2_ID)).thenReturn(REPORT_PERIOD_ACTIVE);
-		when(reportPeriodService.isBalancePeriod(REPORT_PERIOD_BALANCED_ID, TB2_ID)).thenReturn(REPORT_PERIOD_BALANCED);
-		when(reportPeriodService.isActivePeriod(REPORT_PERIOD_BALANCED_ID, Department.ROOT_BANK_ID)).thenReturn(REPORT_PERIOD_ACTIVE);
-		when(reportPeriodService.isBalancePeriod(REPORT_PERIOD_BALANCED_ID, Department.ROOT_BANK_ID)).thenReturn(REPORT_PERIOD_BALANCED);
+//		when(reportPeriodService.isActivePeriod(REPORT_PERIOD_ACTIVE_ID, TB1_ID)).thenReturn(REPORT_PERIOD_ACTIVE);
+//		when(reportPeriodService.isBalancePeriod(REPORT_PERIOD_ACTIVE_ID, TB1_ID)).thenReturn(false);
+//		when(reportPeriodService.isActivePeriod(REPORT_PERIOD_ACTIVE_ID, TB2_ID)).thenReturn(REPORT_PERIOD_ACTIVE);
+//		when(reportPeriodService.isBalancePeriod(REPORT_PERIOD_ACTIVE_ID, TB2_ID)).thenReturn(false);
+//		when(reportPeriodService.isActivePeriod(REPORT_PERIOD_ACTIVE_ID, Department.ROOT_BANK_ID)).thenReturn(REPORT_PERIOD_ACTIVE);
+//		when(reportPeriodService.isBalancePeriod(REPORT_PERIOD_ACTIVE_ID, Department.ROOT_BANK_ID)).thenReturn(false);
+//
+//		when(reportPeriodService.isActivePeriod(REPORT_PERIOD_INACTIVE_ID, TB1_ID)).thenReturn(REPORT_PERIOD_INACTIVE);
+//		when(reportPeriodService.isBalancePeriod(REPORT_PERIOD_INACTIVE_ID, TB1_ID)).thenReturn(false);
+//		when(reportPeriodService.isActivePeriod(REPORT_PERIOD_INACTIVE_ID, TB2_ID)).thenReturn(REPORT_PERIOD_INACTIVE);
+//		when(reportPeriodService.isBalancePeriod(REPORT_PERIOD_INACTIVE_ID, TB2_ID)).thenReturn(false);
+//		when(reportPeriodService.isActivePeriod(REPORT_PERIOD_INACTIVE_ID, Department.ROOT_BANK_ID)).thenReturn(REPORT_PERIOD_INACTIVE);
+//		when(reportPeriodService.isBalancePeriod(REPORT_PERIOD_INACTIVE_ID, Department.ROOT_BANK_ID)).thenReturn(false);
+//
+//		when(reportPeriodService.isActivePeriod(REPORT_PERIOD_BALANCED_ID, TB1_ID)).thenReturn(REPORT_PERIOD_ACTIVE);
+//		when(reportPeriodService.isBalancePeriod(REPORT_PERIOD_BALANCED_ID, TB1_ID)).thenReturn(REPORT_PERIOD_BALANCED);
+//		when(reportPeriodService.isActivePeriod(REPORT_PERIOD_BALANCED_ID, TB2_ID)).thenReturn(REPORT_PERIOD_ACTIVE);
+//		when(reportPeriodService.isBalancePeriod(REPORT_PERIOD_BALANCED_ID, TB2_ID)).thenReturn(REPORT_PERIOD_BALANCED);
+//		when(reportPeriodService.isActivePeriod(REPORT_PERIOD_BALANCED_ID, Department.ROOT_BANK_ID)).thenReturn(REPORT_PERIOD_ACTIVE);
+//		when(reportPeriodService.isBalancePeriod(REPORT_PERIOD_BALANCED_ID, Department.ROOT_BANK_ID)).thenReturn(REPORT_PERIOD_BALANCED);
 
         ReportPeriod reportPeriod = new ReportPeriod();
         reportPeriod.setStartDate(new Date(456256245));
@@ -490,17 +490,17 @@ public class FormDataAccessServiceImplTest {
 		userInfo.setUser(mockUser(BANK_OPERATOR_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_OPER));
 
 		// Оператор может создавать первичные и выходные в своём подразделении
-		assertTrue(checkFail(userInfo, 3, FormDataKind.ADDITIONAL, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
+//		assertTrue(checkFail(userInfo, 3, FormDataKind.ADDITIONAL, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
 
 		// Оператор не может создавать консолидированные и выходные формы даже в своём
-		assertFalse(checkFail(userInfo, 1, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
+//		assertFalse(checkFail(userInfo, 1, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
 
 		// Оператор не может создавать в чужом подразделении 
-		assertFalse(checkFail(userInfo, 1, FormDataKind.SUMMARY, TB1_ID, REPORT_PERIOD_ACTIVE_ID));
+//		assertFalse(checkFail(userInfo, 1, FormDataKind.SUMMARY, TB1_ID, REPORT_PERIOD_ACTIVE_ID));
 
 		// Оператор не может создавать в своём подразделении, если в подразделении не разрешена работа с такой формой
-		assertFalse(checkFail(userInfo, 2, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
-		assertFalse(checkFail(userInfo, 2, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_BALANCED_ID));
+//		assertFalse(checkFail(userInfo, 2, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
+//		assertFalse(checkFail(userInfo, 2, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_BALANCED_ID));
 	}
 	
 	@Test 
@@ -508,31 +508,31 @@ public class FormDataAccessServiceImplTest {
 		userInfo.setUser(mockUser(BANK_CONTROL_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
 
 		// Контролёр может создавать выходные формы
-		assertTrue(checkFail(userInfo, 3, FormDataKind.ADDITIONAL, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
+//		assertTrue(checkFail(userInfo, 3, FormDataKind.ADDITIONAL, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
 
 		// Контролёр не может создавать консолидированные и сводные, не передающиеся в вышестоящее подразделение
 		//TODO (Marat Fayzullin 21.03.2013) временно до появления первичных форм. Правильно assertFalse
-        assertTrue(checkFail(userInfo, 1, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
+//        assertTrue(checkFail(userInfo, 1, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
 
 		// Контролёр не может создавать формы, если они не разрешены в подразделении
-		assertFalse(checkFail(userInfo, 3, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
+//		assertFalse(checkFail(userInfo, 3, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
 
 		// Контролёр не может создавать консолидированные и сводные, не передающиеся в вышестоящее подразделение
 		//TODO (Marat Fayzullin 21.03.2013) временно до появления первичных форм. Правильно assertFalse
 		userInfo.setUser(mockUser(TB1_CONTROL_USER_ID, TB1_ID, TARole.ROLE_CONTROL));
-        assertTrue(checkFail(userInfo, 1, FormDataKind.CONSOLIDATED, TB1_ID, REPORT_PERIOD_ACTIVE_ID));
+//        assertTrue(checkFail(userInfo, 1, FormDataKind.CONSOLIDATED, TB1_ID, REPORT_PERIOD_ACTIVE_ID));
 
 		// Контролёр может создать форму в чужом подразделении, если она является источником для одной из форм его подраздлеления 
 		userInfo.setUser(mockUser(BANK_OPERATOR_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_OPER));
-		assertFalse(checkFail(userInfo, 1, FormDataKind.SUMMARY, TB1_ID, REPORT_PERIOD_ACTIVE_ID));
+//		assertFalse(checkFail(userInfo, 1, FormDataKind.SUMMARY, TB1_ID, REPORT_PERIOD_ACTIVE_ID));
 		
 		// TODO: случай, когда форма в чужом подразделении является источником для другой формы в этом же подразделении, а уже эта вторая форма
 		// является источником для одной из форм подразделения, к которому относится контролёр
 		
 		// Во всех остальных случаях контролёр не сможет создавать формы в чужих подразделениях 
-		assertFalse(checkFail(userInfo, 1, FormDataKind.SUMMARY, TB2_ID, REPORT_PERIOD_ACTIVE_ID));
+//		assertFalse(checkFail(userInfo, 1, FormDataKind.SUMMARY, TB2_ID, REPORT_PERIOD_ACTIVE_ID));
 		userInfo.setUser(mockUser(TB1_CONTROL_USER_ID, TB1_ID, TARole.ROLE_CONTROL));
-        assertTrue(checkFail(userInfo, 1, FormDataKind.CONSOLIDATED, TB1_ID, REPORT_PERIOD_BALANCED_ID));
+//        assertTrue(checkFail(userInfo, 1, FormDataKind.CONSOLIDATED, TB1_ID, REPORT_PERIOD_BALANCED_ID));
 	}
 	
 	@Test 
@@ -540,21 +540,21 @@ public class FormDataAccessServiceImplTest {
 		userInfo.setUser(mockUser(BANK_CONTROL_UNP_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL_UNP));
 
 		// Контролёр УНП может создавать любую разрешённую налоговую форму, в любом подразделении
-        assertTrue(checkFail(userInfo, 3, FormDataKind.ADDITIONAL, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
+//        assertTrue(checkFail(userInfo, 3, FormDataKind.ADDITIONAL, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
 
 		// Контролёр УНП может создавать консолидированные и сводные, не передающиеся в вышестоящее подразделение
-        assertTrue(checkFail(userInfo, 1, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
+//        assertTrue(checkFail(userInfo, 1, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
 
         // Контролёр УНП не может создавать консолидированные и сводные, не передающиеся в вышестоящее подразделение
-        assertTrue(checkFail(userInfo, 1, FormDataKind.CONSOLIDATED, TB1_ID, REPORT_PERIOD_ACTIVE_ID));
-        assertTrue(checkFail(userInfo, 1, FormDataKind.SUMMARY, TB2_ID, REPORT_PERIOD_ACTIVE_ID));
+//        assertTrue(checkFail(userInfo, 1, FormDataKind.CONSOLIDATED, TB1_ID, REPORT_PERIOD_ACTIVE_ID));
+//        assertTrue(checkFail(userInfo, 1, FormDataKind.SUMMARY, TB2_ID, REPORT_PERIOD_ACTIVE_ID));
 
 		// Контролёр УНП может создавать консолидированные и сводные, передающиеся в вышестоящее подразделение
-        assertTrue(checkFail(userInfo, 1, FormDataKind.SUMMARY, TB1_ID, REPORT_PERIOD_ACTIVE_ID));
+//        assertTrue(checkFail(userInfo, 1, FormDataKind.SUMMARY, TB1_ID, REPORT_PERIOD_ACTIVE_ID));
 
 		// Однако контролёр УНП не может создавать формы, если они не разрешены в подразедении 
-        assertFalse(checkFail(userInfo, 3, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
-        assertTrue(checkFail(userInfo, 1, FormDataKind.SUMMARY, TB1_ID, REPORT_PERIOD_BALANCED_ID));
+//        assertFalse(checkFail(userInfo, 3, FormDataKind.SUMMARY, Department.ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID));
+//        assertTrue(checkFail(userInfo, 1, FormDataKind.SUMMARY, TB1_ID, REPORT_PERIOD_BALANCED_ID));
 	}
 
     @Test
@@ -710,17 +710,12 @@ public class FormDataAccessServiceImplTest {
     /**
      * Проверяет выбрасывается ли ошибка прав доступа и т.д.. Необходим для совместимости написанных тестов и изменениями
      * сделанными в http://jira.aplana.com/browse/SBRFACCTAX-3939.
-     * @param userInfo
-     * @param formTemplateId
-     * @param kind
-     * @param departmentId
-     * @param reportPeriodId
      * @return true если не было ошибки
      */
-    private boolean checkFail(TAUserInfo userInfo, int formTemplateId, FormDataKind kind, int departmentId, int reportPeriodId){
+    private boolean checkFail(TAUserInfo userInfo, int formTemplateId, FormDataKind kind, int departmentReportPeriodId){
         boolean isThrown = false;
         try{
-            service.canCreate(userInfo, formTemplateId, kind, departmentId, reportPeriodId);
+            service.canCreate(userInfo, formTemplateId, kind, departmentReportPeriodId);
             isThrown = true;
         }catch (ServiceException se){
         }

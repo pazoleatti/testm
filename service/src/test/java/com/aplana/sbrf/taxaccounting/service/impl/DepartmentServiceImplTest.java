@@ -141,19 +141,19 @@ public class DepartmentServiceImplTest {
         DepartmentReportPeriod drpClose = new DepartmentReportPeriod();
         drpClose.setActive(false);
         // Отчетные периоды
-        when(departmentReportPeriodDao.getByDepartmentAndReportPeriod(0, Long.valueOf(root.getId()))).thenReturn(drpOpen);
-        when(departmentReportPeriodDao.getByDepartmentAndReportPeriod(0, Long.valueOf(departmentTB2.getId()))).thenReturn(drpOpen);
-        when(departmentReportPeriodDao.getByDepartmentAndReportPeriod(0, Long.valueOf(departmentTB3.getId()))).thenReturn(drpClose);
-        when(departmentReportPeriodDao.getByDepartmentAndReportPeriod(0, Long.valueOf(departmentGOSB31.getId()))).thenReturn(drpClose);
-        when(departmentReportPeriodDao.getByDepartmentAndReportPeriod(0, Long.valueOf(departmentOSB311.getId()))).thenReturn(drpOpen);
-        when(departmentReportPeriodDao.getByDepartmentAndReportPeriod(1, Long.valueOf(departmentOSB311.getId()))).thenReturn(drpClose);
-
-        when(departmentReportPeriodDao.isPeriodOpen(root.getId(), 0)).thenReturn(true);
-        when(departmentReportPeriodDao.isPeriodOpen(departmentTB2.getId(), 0)).thenReturn(true);
-        when(departmentReportPeriodDao.isPeriodOpen(departmentTB3.getId(), 0)).thenReturn(false);
-        when(departmentReportPeriodDao.isPeriodOpen(departmentGOSB31.getId(), 0)).thenReturn(false);
-        when(departmentReportPeriodDao.isPeriodOpen(departmentOSB311.getId(), 0)).thenReturn(true);
-        when(departmentReportPeriodDao.isPeriodOpen(departmentOSB311.getId(), 1)).thenReturn(false);
+//        when(departmentReportPeriodDao.getByDepartmentAndReportPeriod(0, Long.valueOf(root.getId()))).thenReturn(drpOpen);
+//        when(departmentReportPeriodDao.getByDepartmentAndReportPeriod(0, Long.valueOf(departmentTB2.getId()))).thenReturn(drpOpen);
+//        when(departmentReportPeriodDao.getByDepartmentAndReportPeriod(0, Long.valueOf(departmentTB3.getId()))).thenReturn(drpClose);
+//        when(departmentReportPeriodDao.getByDepartmentAndReportPeriod(0, Long.valueOf(departmentGOSB31.getId()))).thenReturn(drpClose);
+//        when(departmentReportPeriodDao.getByDepartmentAndReportPeriod(0, Long.valueOf(departmentOSB311.getId()))).thenReturn(drpOpen);
+//        when(departmentReportPeriodDao.getByDepartmentAndReportPeriod(1, Long.valueOf(departmentOSB311.getId()))).thenReturn(drpClose);
+//
+//        when(departmentReportPeriodDao.isPeriodOpen(root.getId(), 0)).thenReturn(true);
+//        when(departmentReportPeriodDao.isPeriodOpen(departmentTB2.getId(), 0)).thenReturn(true);
+//        when(departmentReportPeriodDao.isPeriodOpen(departmentTB3.getId(), 0)).thenReturn(false);
+//        when(departmentReportPeriodDao.isPeriodOpen(departmentGOSB31.getId(), 0)).thenReturn(false);
+//        when(departmentReportPeriodDao.isPeriodOpen(departmentOSB311.getId(), 0)).thenReturn(true);
+//        when(departmentReportPeriodDao.isPeriodOpen(departmentOSB311.getId(), 1)).thenReturn(false);
 
         when(departmentReportPeriodDao.existForDepartment(root.getId(), 0)).thenReturn(true);
         when(departmentReportPeriodDao.existForDepartment(departmentTB2.getId(), 0)).thenReturn(true);

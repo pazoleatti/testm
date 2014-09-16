@@ -100,9 +100,9 @@ public class FormDataServiceTest {
 
         // мок для сервиса который возвращает баллансовый ли это период
         // период с id = 1 для подразделения с id=1 будет баллансовым
-        when(periodService.isBalancePeriod(1, 1)).thenReturn(true);
+//        when(periodService.isBalancePeriod(1, 1)).thenReturn(true);
         // период с id = 2 для подразделения с id=1 Не будет баллансовым
-        when(periodService.isBalancePeriod(2, 1)).thenReturn(false);
+//        when(periodService.isBalancePeriod(2, 1)).thenReturn(false);
         // подменяем reportPeriodService у тестируемого объекта
 
         // имеем 3 формы, 2 источника и 1 приемник
