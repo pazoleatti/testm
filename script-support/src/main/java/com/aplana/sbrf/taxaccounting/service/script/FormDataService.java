@@ -278,7 +278,7 @@ public interface FormDataService {
      */
     void checkFormExistAndAccepted(int formTypeId, FormDataKind kind, int departmentId,
                                           int currentReportPeriodId, Boolean prevPeriod,
-                                          Logger logger, boolean required) throws ServiceException;
+                                          Logger logger, boolean required);
 
     /**
      * Проверить существование и принятость ежемесячной формы, а также наличие данных в ней.

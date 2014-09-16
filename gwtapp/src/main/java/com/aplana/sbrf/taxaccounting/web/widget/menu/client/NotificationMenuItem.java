@@ -15,7 +15,7 @@ public class NotificationMenuItem extends MenuItem {
 
     public void setCount(int count) {
         this.count = count;
-        setText(String.valueOf(count) + " " + name);
+        setText(count + " " + name);
     }
 
     public int getCount() {

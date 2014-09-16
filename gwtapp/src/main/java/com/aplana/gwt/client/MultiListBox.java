@@ -173,8 +173,8 @@ public class MultiListBox<T> extends Composite implements HasValue<List<T>>, Lea
         countSelectedElements();
         popupPanel.setPopupPosition(panel.getAbsoluteLeft(),
                 panel.getAbsoluteTop() + panel.getOffsetHeight());
-        popupPanel.setWidth(String.valueOf(panel.getOffsetWidth() - 1) + "px");
-        scrollPanel.setSize(String.valueOf(panel.getOffsetWidth() - 1) + "px", "100%");
+        popupPanel.setWidth((panel.getOffsetWidth() - 1) + "px");
+        scrollPanel.setSize((panel.getOffsetWidth() - 1) + "px", "100%");
 
         popupPanel.show();
     }

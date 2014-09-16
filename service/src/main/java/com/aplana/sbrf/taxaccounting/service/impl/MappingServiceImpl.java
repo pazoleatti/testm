@@ -208,7 +208,7 @@ public class MappingServiceImpl implements MappingService {
      * @param fileContent содержимое файла
      * @return
      */
-    public RestoreExemplar restoreExemplarFromRnu(String rnuFilename, byte[] fileContent) throws ServiceException {
+    public RestoreExemplar restoreExemplarFromRnu(String rnuFilename, byte[] fileContent) {
         RestoreExemplar exemplar = new RestoreExemplar();
 
         String firstRow;
@@ -266,7 +266,7 @@ public class MappingServiceImpl implements MappingService {
      * @param xmlFilename название файла
      * @return
      */
-    private RestoreExemplar restoreExemplarFromXml(String xmlFilename) throws ServiceException {
+    private RestoreExemplar restoreExemplarFromXml(String xmlFilename) {
         RestoreExemplar exemplar = new RestoreExemplar();
 
         try {
