@@ -2,8 +2,8 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.BlobDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,7 +31,8 @@ public class DeclarationDataDaoTest {
 
     @Autowired
     private BlobDataDao blobDataDao;
-    private  BlobData blobData;
+
+    private BlobData blobData;
 
     @Before
     public void init(){
@@ -45,19 +46,21 @@ public class DeclarationDataDaoTest {
 	@Test
 	public void testGet() {
 		DeclarationData d1 = declarationDataDao.get(1);
-		assertEquals(1, d1.getId().longValue());
+		assertEquals(1, d1.getId().intValue());
 		assertEquals(1, d1.getDeclarationTemplateId());
-		assertEquals(1, d1.getReportPeriodId());
-		assertEquals(2, d1.getDepartmentId());
+        assertEquals(102, d1.getDepartmentReportPeriodId().intValue());
+		assertEquals(2, d1.getReportPeriodId());
+		assertEquals(1, d1.getDepartmentId());
         assertEquals("CD12", d1.getTaxOrganCode());
         assertEquals("123456789", d1.getKpp());
 		assertTrue(d1.isAccepted());
 
 		DeclarationData d2 = declarationDataDao.get(2);
-		assertEquals(2, d2.getId().longValue());
+		assertEquals(2, d2.getId().intValue());
 		assertEquals(1, d2.getDeclarationTemplateId());
-		assertEquals(2, d2.getReportPeriodId());
-		assertEquals(4, d2.getDepartmentId());
+        assertEquals(204 , d2.getDepartmentReportPeriodId().intValue());
+		assertEquals(4, d2.getReportPeriodId());
+		assertEquals(2, d2.getDepartmentId());
 		assertFalse(d2.isAccepted());
 	}
 	
@@ -65,42 +68,41 @@ public class DeclarationDataDaoTest {
 	public void testGetNotExisted() {
 		declarationDataDao.get(1000l);
 	}
-	
-	@Test
-	public void testHasXmlData() {
+
+    @Test
+    public void testHasXmlData() {
         assertFalse(declarationDataDao.hasXmlData(1));
-		assertFalse(declarationDataDao.hasXmlData(2));
-	}
-	
+        assertFalse(declarationDataDao.hasXmlData(2));
+    }
+
 	@Test
 	public void testGetData() {
 		String data = declarationDataDao.get(1).getXmlDataUuid();
 		assertNull(data);
 	}
-	
+
 	@Test
 	public void testGetDataEmpty() {
 		String data = declarationDataDao.get(2).getXmlDataUuid();
 		assertNull(data);
 	}
-	
-	
+
 	@Test(expected=DaoException.class)
 	public void testGetDataNotExisted() {
 		declarationDataDao.get(1000l);
 	}
-	
+
 	@Test
 	public void testSetAccepted() {
 		declarationDataDao.setAccepted(3l, false);
 		DeclarationData d3 = declarationDataDao.get(3l);
 		assertFalse(d3.isAccepted());
-		
+
 		declarationDataDao.setAccepted(4l, true);
 		DeclarationData d4 = declarationDataDao.get(4l);
 		assertTrue(d4.isAccepted());
 	}
-	
+
 	@Test(expected=DaoException.class)
 	public void testSetAcceptedNotExistsed() {
 		declarationDataDao.setAccepted(1000l, true);
@@ -115,12 +117,12 @@ public class DeclarationDataDaoTest {
 		} catch (DaoException e) {
 		}
 	}
-	
+
 	@Test(expected=DaoException.class)
 	public void testDeleteNotExisted() {
 		declarationDataDao.delete(1000l);
 	}
-	
+
 	@Test
 	public void testSaveNew() {
         String taxOrganCode = "G55";
@@ -128,30 +130,29 @@ public class DeclarationDataDaoTest {
 		DeclarationData d = new DeclarationData();
 		d.setAccepted(true);
 		d.setDeclarationTemplateId(1);
-		d.setDepartmentId(1);
-		d.setReportPeriodId(6);
+        d.setDepartmentReportPeriodId(220);
         d.setTaxOrganCode(taxOrganCode);
         d.setKpp(kpp);
-		
+
 		long id = declarationDataDao.saveNew(d);
 
 		DeclarationData d2 = declarationDataDao.get(id);
 		assertEquals(1, d2.getDeclarationTemplateId());
-		assertEquals(1, d2.getDepartmentId());
-		assertEquals(6, d2.getReportPeriodId());
+        assertEquals(220, d2.getDepartmentReportPeriodId().intValue());
+		assertEquals(2, d2.getDepartmentId());
+		assertEquals(20, d2.getReportPeriodId());
         Assert.assertEquals(taxOrganCode, d2.getTaxOrganCode());
         Assert.assertEquals(kpp, d2.getKpp());
 		assertTrue(d2.isAccepted());
 	}
-	
+
 	@Test(expected=DaoException.class)
 	public void testSaveNewWithId() {
 		DeclarationData d = new DeclarationData();
 		d.setId(1000l);
 		d.setAccepted(true);
 		d.setDeclarationTemplateId(1);
-		d.setDepartmentId(1);
-		d.setReportPeriodId(6);		
+        d.setDepartmentReportPeriodId(111);
 		declarationDataDao.saveNew(d);
 	}
 
@@ -186,41 +187,49 @@ public class DeclarationDataDaoTest {
 		PagingResult<DeclarationDataSearchResultItem> res;
 
 		res = declarationDataDao.findPage(filter, DeclarationDataSearchOrdering.ID, true, pageParams);
-		assertIdsEquals(new long[]{1, 2, 3, 4, 5}, res);
-		res = declarationDataDao.findPage(filter, DeclarationDataSearchOrdering.ID, false, pageParams);
-		assertIdsEquals(new long[] {7, 5, 4, 3, 2}, res);
+        assertIdsEquals(new long[]{1, 2, 3, 4, 5}, res);
+        res = declarationDataDao.findPage(filter, DeclarationDataSearchOrdering.ID, false, pageParams);
+        assertIdsEquals(new long[]{7, 5, 4, 3, 2}, res);
 
+        res = declarationDataDao.findPage(filter, DeclarationDataSearchOrdering.REPORT_PERIOD_NAME, true, pageParams);
+        assertIdsEquals(new long[]{2, 7, 3, 4, 5}, res);
+        res = declarationDataDao.findPage(filter, DeclarationDataSearchOrdering.REPORT_PERIOD_NAME, false, pageParams);
+        assertIdsEquals(new long[]{1, 5, 4, 3, 7}, res);
 
-		res = declarationDataDao.findPage(filter, DeclarationDataSearchOrdering.REPORT_PERIOD_NAME, true, pageParams);
-		assertIdsEquals(new long[]{3, 1, 2, 4, 5}, res);
-		res = declarationDataDao.findPage(filter, DeclarationDataSearchOrdering.REPORT_PERIOD_NAME, false, pageParams);
-		assertIdsEquals(new long[] {7, 5, 4, 2, 1}, res);
-
-		res = declarationDataDao.findPage(filter, DeclarationDataSearchOrdering.DEPARTMENT_NAME, true, pageParams);
-		assertIdsEquals(new long[]{4, 3, 2, 5, 7}, res);
-		res = declarationDataDao.findPage(filter, DeclarationDataSearchOrdering.DEPARTMENT_NAME, false, pageParams);
-		assertIdsEquals(new long[] {1, 7, 5, 2, 3}, res);
-
+        res = declarationDataDao.findPage(filter, DeclarationDataSearchOrdering.DEPARTMENT_NAME, true, pageParams);
+        assertIdsEquals(new long[]{1, 3, 2, 4, 5}, res);
+        res = declarationDataDao.findPage(filter, DeclarationDataSearchOrdering.DEPARTMENT_NAME, false, pageParams);
+        assertIdsEquals(new long[]{7, 5, 4, 2, 3}, res);
 	}
 
 	@Test
-	public void findTest() {
-		DeclarationData declaration = declarationDataDao.find(1, 2, 1);
-		assertEquals(1, declaration.getId().longValue());
+	public void find1Test() {
+		DeclarationData declaration = declarationDataDao.find(1, 2, 4);
+		assertEquals(2, declaration.getId().intValue());
 	}
 
+    @Test
+    public void find2Test() {
+        DeclarationData declaration = declarationDataDao.find(1, 204);
+        assertEquals(2, declaration.getId().intValue());
+    }
+
 	@Test
-	public void findEmptyResultTest() {
+	public void findEmptyResult1Test() {
 		DeclarationData declaration = declarationDataDao.find(222, 222, 222);
 		assertNull(declaration);
 	}
 
     @Test
+    public void findEmptyResult2Test() {
+        DeclarationData declaration = declarationDataDao.find(222, 222);
+        assertNull(declaration);
+    }
+
+    @Test
     public void getDeclarationIdsTest(){
-        List<Long> list = new ArrayList<Long>() {{ add(1l);}};
-        List<Long> list1 = new ArrayList<Long>() ;
-        Assert.assertEquals(list, declarationDataDao.getDeclarationIds(1, 2));
-        Assert.assertEquals(list1, declarationDataDao.getDeclarationIds(222, 222));
+        Assert.assertEquals(Arrays.asList(1L, 3L), declarationDataDao.getDeclarationIds(1, 1));
+        Assert.assertEquals(new ArrayList<Long>(), declarationDataDao.getDeclarationIds(222, 222));
     }
 
     @Test

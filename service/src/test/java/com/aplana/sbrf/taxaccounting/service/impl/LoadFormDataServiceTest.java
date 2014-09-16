@@ -29,7 +29,6 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.when;
 
 /**
  * @author Dmitriy Levykin
@@ -169,7 +168,7 @@ public class LoadFormDataServiceTest {
         taxPeriod.setYear(2014);
         reportPeriod.setTaxPeriod(taxPeriod);
         when(periodService.getByTaxTypedCodeYear(TaxType.INCOME, "21", 2014)).thenReturn(reportPeriod);
-        when(periodService.isActivePeriod(1, 147)).thenReturn(true);
+//        when(periodService.isActivePeriod(1, 147)).thenReturn(true);
     }
 
     private void mockDepartmentFormTypeDao() {
@@ -199,7 +198,7 @@ public class LoadFormDataServiceTest {
 
     private void mockFormDataService() {
         when(formDataService.createFormData(any(Logger.class), any(TAUserInfo.class), eq(1), eq(147),
-                eq(FormDataKind.PRIMARY), any(ReportPeriod.class), any(Integer.class))).thenReturn(1L);
+                eq(FormDataKind.PRIMARY), any(Integer.class))).thenReturn(1L);
     }
 
     private void mockSignService() {
@@ -318,7 +317,7 @@ public class LoadFormDataServiceTest {
         taxPeriod.setYear(2014);
         reportPeriod.setTaxPeriod(taxPeriod);
         when(periodService.getByTaxTypedCodeYear(TaxType.INCOME, "21", 2014)).thenReturn(reportPeriod);
-        when(periodService.isActivePeriod(1, 147)).thenReturn(false);
+//        when(periodService.isActivePeriod(1, 147)).thenReturn(false);
         ReflectionTestUtils.setField(loadFormDataService, "periodService", periodService);
 
         ImportCounter importCounter = loadFormDataService.importFormData(USER_INFO, new Logger());
@@ -339,7 +338,7 @@ public class LoadFormDataServiceTest {
 
         FormDataService formDataService = mock(FormDataService.class);
         when(formDataService.createFormData(any(Logger.class), any(TAUserInfo.class), eq(1), eq(147),
-                eq(FormDataKind.PRIMARY), any(ReportPeriod.class), any(Integer.class))).thenReturn(1L);
+                eq(FormDataKind.PRIMARY), any(Integer.class))).thenReturn(1L);
 
         doThrow(new RuntimeException("Test RuntimeException")).when(formDataService).importFormData(any(Logger.class), any(TAUserInfo.class),
                 any(Long.class), any(Boolean.class), any(InputStream.class), anyString(), any(FormDataEvent.class));

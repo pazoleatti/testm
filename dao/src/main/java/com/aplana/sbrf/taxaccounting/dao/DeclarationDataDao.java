@@ -51,7 +51,7 @@ public interface DeclarationDataDao {
 	 */
 	void delete(long declarationDataId);
 
-    Long getRowNumByFilter(DeclarationDataFilter filter, DeclarationDataSearchOrdering ordering, boolean ascSorting, Long declarationDataId);
+    Long getRowNumByFilter(DeclarationDataFilter filter, DeclarationDataSearchOrdering ordering, boolean ascSorting, long declarationDataId);
 
     /**
 	 * Данный метод основывая на параметрах фильтра делает поиск в базе и возвращает список идентификаторов данных
@@ -69,13 +69,15 @@ public interface DeclarationDataDao {
 
 	/**
 	 * Ищет декларацию по заданным параметрам.
-	 * @param declarationTypeId идентификатор типа декларации
-	 * @param departmentId идентификатор {@link com.aplana.sbrf.taxaccounting.model.Department подразделения}
-	 * @param reportPeriodId идентификатор {@link com.aplana.sbrf.taxaccounting.model.ReportPeriod отчетного периода}
-	 * @return декларацию или null, если такой декларации не найдено
-	 * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если будет найдено несколько записей, удовлетворяющих условию поиска
+     * @deprecated Не актуально с появлением корректирующих периодов
 	 */
+    @Deprecated
 	DeclarationData find(int declarationTypeId, int departmentId, int reportPeriodId);
+
+    /**
+     * Декларация по типу и отчетному периоду подразделения
+     */
+    DeclarationData find(int declarationTypeId, int departmentReportPeriodId);
 
 	/**
 	 * Получить количество записей, удовлетворяющих запросу

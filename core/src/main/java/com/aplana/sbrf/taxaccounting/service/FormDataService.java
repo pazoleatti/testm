@@ -158,14 +158,13 @@ public interface FormDataService {
 	void deleteRow(Logger logger, TAUserInfo userInfo, FormData formData, DataRow<Cell> currentDataRow);
 
     /**
-     * Поиск формы по основным параметрам
-     * @deprecated Неактуально с появлением корректирующих периодов
+     * Поиск формы в отчетном периоде
+     * При наличии нескольких отчетных периодов подразделений будет использован открытый (м.б. только один)
     */
-    @Deprecated
     FormData findFormData(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder);
 
     /**
-     * Поиск НФ
+     * Поиск НФ в отчетном периоде подразделений
      */
     FormData findFormData(int formTypeId, FormDataKind kind, int departmentReportPeriodId, Integer periodOrder);
 
@@ -298,4 +297,9 @@ public interface FormDataService {
      * @param formTemplate макет НФ
      */
     void batchUpdatePreviousNumberRow(FormTemplate formTemplate);
+
+    /**
+     * НФ созданная в последнем отчетном периоде подразделения
+     */
+    FormData getLast(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder);
 }

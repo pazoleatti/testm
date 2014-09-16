@@ -1044,6 +1044,11 @@ public class FormDataServiceImpl implements FormDataService {
         }
     }
 
+    @Override
+    public FormData getLast(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder) {
+        return formDataDao.getLast(formTypeId, kind, departmentId, reportPeriodId, periodOrder);
+    }
+
     /**
      * Экземпляры в статусе "Создана" не участвуют в сквозной нумерации
      * @param formData налоговая форма

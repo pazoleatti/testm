@@ -717,13 +717,19 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                         formData.getFormType().getId(), formData.getKind(), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
         if (departmentFormTypes != null) {
             for (DepartmentFormType departmentFormType : departmentFormTypes) {
-                FormData form = formDataService.findFormData(departmentFormType.getFormTypeId(), departmentFormType.getKind(),
+
+                FormData form = formDataDao.getLast(departmentFormType.getFormTypeId(), departmentFormType.getKind(),
                         departmentFormType.getDepartmentId(), formData.getReportPeriodId(), formData.getPeriodOrder());
+
+//                FormData form = formDataService.findFormData(departmentFormType.getFormTypeId(), departmentFormType.getKind(),
+//                        departmentFormType.getDepartmentId(), formData.getReportPeriodId(), formData.getPeriodOrder());
                 // Если форма существует и статус отличен от "Создана"
                 if (form != null && form.getState() != WorkflowState.CREATED) {
                     throw new ServiceException("Переход невозможен, т.к. уже подготовлена/утверждена/принята вышестоящая налоговая форма.");
                 }
-                if (!reportPeriodService.isActivePeriod(formData.getReportPeriodId(), departmentFormType.getDepartmentId())) {
+                DepartmentReportPeriod formDepartmentReportPeriod = departmentReportPeriodDao.get(form.getDepartmentReportPeriodId());
+
+                if (!formDepartmentReportPeriod.isActive()) {
                     throw new ServiceException(ERROR_PERIOD);
                 }
             }
@@ -742,9 +748,10 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                             "принята декларация";
                     throw new ServiceException("Переход невозможен, т.к. уже " + str + ".");
                 }
-                if (declaration != null && !reportPeriodService.isActivePeriod(formData.getReportPeriodId(), declaration.getDepartmentId())) {
-                    throw new ServiceException(ERROR_PERIOD);
-                }
+                //TODO Исправить после ответа на вопрос!!
+//                if (declaration != null && !reportPeriodService.isActivePeriod(formData.getReportPeriodId(), declaration.getDepartmentId())) {
+//                    throw new ServiceException(ERROR_PERIOD);
+//                }
             }
         }
     }

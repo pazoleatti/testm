@@ -141,7 +141,6 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 
 	@Override
     public List<ReportPeriod> getPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList) {
-        // TODO Левыкин: Корректирующие периоды не участвуют?
         return getJdbcTemplate().query(
                 "select rp.id, rp.name, rp.tax_period_id, rp.start_date, rp.end_date, rp.dict_tax_period_id, " +
 						"rp.calendar_start_date from report_period rp, tax_period tp where rp.id in " +
@@ -155,7 +154,6 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 
     @Override
     public List<Long> getPeriodsByTaxTypesAndDepartments(List<TaxType> taxTypes, List<Integer> departmentList) {
-        // TODO Левыкин: Корректирующие периоды не участвуют?
         Object[] params = new Object[departmentList.size()];
         int cnt = 0;
         for (Integer departmentId : departmentList) {
@@ -179,7 +177,6 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
     @Override
 	public List<ReportPeriod> getOpenPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList,
                                                                     boolean withoutBalance, boolean withoutCorrect) {
-        // TODO Левыкин: Корректирующие периоды не участвуют?
 		return getJdbcTemplate().query(
 				"select rp.id, rp.name, rp.tax_period_id, rp.start_date, rp.end_date, rp.dict_tax_period_id, " +
 						"rp.calendar_start_date from report_period rp, tax_period tp where rp.id in " +
@@ -194,7 +191,6 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 
     @Override
     public List<ReportPeriod> getCorrectPeriods(TaxType taxType, int departmentId) {
-        // TODO Левыкин: Корректирующие периоды не участвуют?
         try {
             return getJdbcTemplate().query(
                     "select * from REPORT_PERIOD rp " +
@@ -214,7 +210,6 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 
     @Override
     public List<ReportPeriod> getClosedPeriodsForFormTemplate(Integer formTemplateId) {
-        // TODO Левыкин: Корректирующие периоды не участвуют?
         try {
             return getJdbcTemplate().query(
                     "SELECT DISTINCT " +
