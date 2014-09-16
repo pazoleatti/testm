@@ -7,48 +7,23 @@ public class CreateFormData extends UnsecuredActionImpl<CreateFormDataResult> im
 
 	private Integer formDataTypeId;
 
-	private Integer reportPeriodId;
-
-	private Integer departmentId;
-	
 	private Integer formDataKindId;
 
     private Integer monthId;
+
+    private Integer departmentReportPeriodId;
 
 	public Integer getFormDataTypeId() {
 		return formDataTypeId;
 	}
 
-
 	public void setFormDataTypeId(Integer formDataTypeId) {
 		this.formDataTypeId = formDataTypeId;
 	}
 
-
-	public Integer getReportPeriodId() {
-		return reportPeriodId;
-	}
-
-
-	public void setReportPeriodId(Integer reportPeriodId) {
-		this.reportPeriodId = reportPeriodId;
-	}
-
-
-	public Integer getDepartmentId() {
-		return departmentId;
-	}
-
-
-	public void setDepartmentId(Integer departmentId) {
-		this.departmentId = departmentId;
-	}
-
-
 	public Integer getFormDataKindId() {
 		return formDataKindId;
 	}
-
 
 	public void setFormDataKindId(Integer formDataKindId) {
 		this.formDataKindId = formDataKindId;
@@ -60,6 +35,14 @@ public class CreateFormData extends UnsecuredActionImpl<CreateFormDataResult> im
 
     public void setMonthId(Integer monthId) {
         this.monthId = monthId;
+    }
+
+    public Integer getDepartmentReportPeriodId() {
+        return departmentReportPeriodId;
+    }
+
+    public void setDepartmentReportPeriodId(Integer departmentReportPeriodId) {
+        this.departmentReportPeriodId = departmentReportPeriodId;
     }
 
     @Override

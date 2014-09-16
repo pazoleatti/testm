@@ -429,4 +429,28 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             throw new DaoException(errorMsg);
         }
     }
+
+    @Override
+    public DeclarationData getLast(int declarationTypeId, int departmentId, int reportPeriodId) {
+        try {
+            return getJdbcTemplate().queryForObject(
+                    "select * from " +
+                            "(select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.is_accepted, " +
+                            "dd.data_pdf, dd.data_xlsx, dd.data, dd.jasper_print, dd.department_report_period_id, " +
+                            "drp.report_period_id, drp.department_id, rownum " +
+                            "from declaration_data dd, department_report_period drp, declaration_template dt " +
+                            "where dd.department_report_period_id = drp.id " +
+                            "and dt.id = dd.declaration_template_id " +
+                            "and dt.declaration_type_id = ? " +
+                            "and drp.department_id = ? " +
+                            "and drp.report_period_id = ? " +
+                            "order by drp.correction_date desc nulls last) " +
+                            "where rownum = 1",
+                    new Object[]{declarationTypeId, departmentId, reportPeriodId},
+                    new int[]{Types.NUMERIC, Types.NUMERIC, Types.NUMERIC},
+                    new DeclarationDataRowMapper());
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
 }

@@ -403,7 +403,8 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 
     @Override
     public void onDeleteManualClicked() {
-        Dialog.confirmMessage("Удалить версию ручного ввода и перейти к автоматически сформированной версии?",new DialogHandler() {
+        Dialog.confirmMessage("Удалить версию ручного ввода и перейти к автоматически сформированной версии?",
+                new DialogHandler() {
             @Override
             public void yes() {
                 LogCleanEvent.fire(FormDataPresenter.this);
@@ -584,15 +585,14 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 
                                 getView().setAdditionalFormInfo(
                                         result.getTemplateFormName(),
-                                        result.getFormData().getFormType()
-                                                .getTaxType(),
-                                        result.getFormData().getKind()
-                                                .getName(),
-                                        result.getDepartmenFullName(),
+                                        result.getFormData().getFormType().getTaxType(),
+                                        result.getFormData().getKind().getName(),
+                                        result.getDepartmentFullName(),
                                         buildPeriodName(result),
-                                        result.getFormData().getState()
-                                                .getName(),
-		                                result.getReportPeriodStartDate(), result.getReportPeriodEndDate(), formData.getId());
+                                        result.getFormData().getState().getName(),
+		                                result.getDepartmentReportPeriod().getReportPeriod().getCalendarStartDate(),
+                                        result.getDepartmentReportPeriod().getReportPeriod().getEndDate(),
+                                        formData.getId());
 
                                 getView().setBackButton("#" + FormDataListNameTokens.FORM_DATA_LIST + ";nType="
                                         + result.getFormData().getFormType().getTaxType());
@@ -621,8 +621,8 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 
     private String buildPeriodName(GetFormDataResult retFormDataResult) {
         StringBuilder builder = new StringBuilder();
-        builder.append(retFormDataResult.getReportPeriodYear()).append(", ");
-        builder.append(retFormDataResult.getReportPeriod().getName());
+        builder.append(retFormDataResult.getDepartmentReportPeriod().getReportPeriod().getTaxPeriod().getYear()).append(", ");
+        builder.append(retFormDataResult.getDepartmentReportPeriod().getReportPeriod().getName());
         Integer periodOrder = retFormDataResult.getFormData().getPeriodOrder();
         if (periodOrder != null) {
             builder.append(", ").append(Formats.getRussianMonthNameWithTier(retFormDataResult.getFormData().getPeriodOrder()));

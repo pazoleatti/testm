@@ -156,6 +156,17 @@ public class FormDataDaoTest {
     }
 
     @Test
+    public void find4Test() {
+        List<FormData> formDataList = formDataDao.find(Arrays.asList(1, 2), 20);
+        Assert.assertEquals(5, formDataList.size());
+        Assert.assertEquals(400, formDataList.get(0).getId().intValue());
+        Assert.assertEquals(301, formDataList.get(1).getId().intValue());
+        Assert.assertEquals(302, formDataList.get(2).getId().intValue());
+        Assert.assertEquals(303, formDataList.get(3).getId().intValue());
+        Assert.assertEquals(402, formDataList.get(4).getId().intValue());
+    }
+
+    @Test
     public void getFormDataIdsTest() {
         List<Long> list1 = Arrays.asList(1L, 11L, 12L, 13L, 1000L);
         List<Long> list2 = Arrays.asList(14L, 15L, 16L, 17L, 18L, 19L, 20L, 402L);
@@ -271,12 +282,11 @@ public class FormDataDaoTest {
     @Test
     public void findByDepAndReportPeriodTest() {
         List<FormData> formDataList = formDataDao.find(Arrays.asList(1), 20);
-        Assert.assertEquals(5, formDataList.size());
+        Assert.assertEquals(4, formDataList.size());
         Assert.assertEquals(301, formDataList.get(0).getId().intValue());
         Assert.assertEquals(302, formDataList.get(1).getId().intValue());
         Assert.assertEquals(303, formDataList.get(2).getId().intValue());
-        Assert.assertEquals(400, formDataList.get(3).getId().intValue());
-        Assert.assertEquals(402, formDataList.get(4).getId().intValue());
+        Assert.assertEquals(402, formDataList.get(3).getId().intValue());
     }
 
     @Test
@@ -321,5 +331,17 @@ public class FormDataDaoTest {
         Assert.assertEquals(305, formDataList.get(0).getId().intValue());
         Assert.assertEquals(306, formDataList.get(1).getId().intValue());
         Assert.assertEquals(307, formDataList.get(2).getId().intValue());
+    }
+
+    @Test
+    public void getLastTest() {
+        // Ежемесячная НФ
+        FormData formData = formDataDao.getLast(1, FormDataKind.PRIMARY, 1, 20, 3);
+        Assert.assertNotNull(formData);
+        Assert.assertEquals(303, formData.getId().intValue());
+        // Не ежемесячная форма
+        formData = formDataDao.getLast(1, FormDataKind.SUMMARY, 1, 12, null);
+        Assert.assertNotNull(formData);
+        Assert.assertEquals(12, formData.getId().intValue());
     }
 }

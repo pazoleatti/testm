@@ -813,6 +813,7 @@ public class FormDataServiceImpl implements FormDataService {
 
     @Override
     public FormData findFormData(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder) {
+        // TODO Переписать
         if (periodOrder == null || kind != FormDataKind.PRIMARY && kind != FormDataKind.CONSOLIDATED) {
             // Если форма-источник квартальная или форма-приемник не является первичной или консолидированной, то ищем квартальный экземпляр
             return formDataDao.find(formTypeId, kind, departmentId, reportPeriodId);
@@ -825,6 +826,7 @@ public class FormDataServiceImpl implements FormDataService {
 
     @Override
     public FormData findFormData(int formTypeId, FormDataKind kind, int departmentReportPeriodId, Integer periodOrder) {
+        // TODO
         return null;
     }
 

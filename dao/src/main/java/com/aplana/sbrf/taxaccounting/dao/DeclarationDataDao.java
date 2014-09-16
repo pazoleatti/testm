@@ -101,4 +101,9 @@ public interface DeclarationDataDao {
      * @return список id деклараций
      */
     List<Long> getDeclarationIds(int declarationTypeId, int departmentId);
+
+    /**
+     * Декларация созданная в последнем отчетном периоде подразделения
+     */
+    DeclarationData getLast(int declarationTypeId, int departmentId, int reportPeriodId);
 }

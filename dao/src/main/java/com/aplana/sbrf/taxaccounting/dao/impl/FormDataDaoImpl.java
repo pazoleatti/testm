@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -27,22 +26,23 @@ import java.util.*;
 
 /**
  * Реализация DAO для работы с данными налоговых форм
+ *
  * @author dsultanbekov
  */
 @Repository("formDataDao")
 @Transactional(readOnly = true)
 public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
-	
-	public static final String MSG_FORM_NOT_FOUND = "Форма id=%s не найдена";
-	
-	@Autowired
-	private FormTemplateDao formTemplateDao;
-	@Autowired
-	private FormDataSignerDao formDataSignerDao;
-	@Autowired
-	private FormPerformerDao formPerformerDao;
-	@Autowired
-	private FormTypeDao formTypeDao;
+
+    public static final String MSG_FORM_NOT_FOUND = "Форма id=%s не найдена";
+
+    @Autowired
+    private FormTemplateDao formTemplateDao;
+    @Autowired
+    private FormDataSignerDao formDataSignerDao;
+    @Autowired
+    private FormPerformerDao formPerformerDao;
+    @Autowired
+    private FormTypeDao formTypeDao;
     @Autowired
     private DepartmentDao departmentDao;
     @Autowired
@@ -52,170 +52,142 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
     @Autowired
     private DepartmentReportPeriodDao departmentReportPeriodDao;
 
-    private static class RowMapperResult {
-		FormData formData;
-	}
+    // Общий маппер
+    private void mapCommon(FormData formData, ResultSet rs) throws SQLException {
+        formData.setId(SqlUtils.getLong(rs, "id"));
+        formData.setDepartmentId(SqlUtils.getInteger(rs, "department_id"));
+        formData.setState(WorkflowState.fromId(SqlUtils.getInteger(rs, "state")));
+        formData.setReturnSign(rs.getBoolean("return_sign"));
+        formData.setKind(FormDataKind.fromId(SqlUtils.getInteger(rs, "kind")));
+        formData.setReportPeriodId(SqlUtils.getInteger(rs, "report_period_id"));
+        formData.setDepartmentReportPeriodId(rs.getInt("department_report_period_id"));
+        formData.setPeriodOrder(rs.wasNull() ? null : SqlUtils.getInteger(rs, "period_order"));
+    }
 
-	private class FormDataRowMapper implements RowMapper<RowMapperResult> {
-		@Override
-        public RowMapperResult mapRow(ResultSet rs, int index) throws SQLException {
-			RowMapperResult result = new RowMapperResult();
-
-			int formTemplateId = SqlUtils.getInteger(rs,"form_template_id");
-			FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
-
-			FormData formData = new FormData();
-			formData.initFormTemplateParams(formTemplate);
-			formData.setId(SqlUtils.getLong(rs, "id"));
-			formData.setDepartmentId(SqlUtils.getInteger(rs, "department_id"));
-			formData.setState(WorkflowState.fromId(SqlUtils.getInteger(rs, "state")));
-			formData.setReturnSign(rs.getBoolean("return_sign"));
-			formData.setKind(FormDataKind.fromId(SqlUtils.getInteger(rs, "kind")));
-			formData.setReportPeriodId(SqlUtils.getInteger(rs, "report_period_id"));
-            Integer periodOrder = SqlUtils.getInteger(rs,"period_order");
-            formData.setPeriodOrder(rs.wasNull() ? null : periodOrder);
-			formData.setSigners(formDataSignerDao.getSigners(formData.getId()));
-			formData.setPerformer(formPerformerDao.get(formData.getId()));
-            formData.setManual(rs.getBoolean("manual"));
-            formData.setPreviousRowNumber(rs.getInt("number_previous_row"));
-            formData.setDepartmentReportPeriodId(rs.getInt("department_report_period_id"));
-
-			result.formData = formData;
-			return result;
-		}
-	}
-
-    private class FormDataWithoutRowMapper implements RowMapper<FormData> {
+    // Маппер экземпляра НФ с фиксированными строками из шаблоне
+    private class FormDataRowMapper implements RowMapper<FormData> {
         @Override
         public FormData mapRow(ResultSet rs, int index) throws SQLException {
-            FormData result = new FormData();
-            result.setId(SqlUtils.getLong(rs, "id"));
-            result.setDepartmentId(SqlUtils.getInteger(rs,"department_id"));
-            result.setState(WorkflowState.fromId(SqlUtils.getInteger(rs,"state")));
-            result.setReturnSign(rs.getBoolean("return_sign"));
-            result.setKind(FormDataKind.fromId(SqlUtils.getInteger(rs,"kind")));
-            result.setReportPeriodId(SqlUtils.getInteger(rs,"report_period_id"));
-            Integer periodOrder = SqlUtils.getInteger(rs,"period_order");
-            result.setPeriodOrder(rs.wasNull() ? null : periodOrder);
-            result.setManual(rs.getBoolean("manual"));
-            result.setPreviousRowNumber(rs.getInt("number_previous_row"));
-            result.setDepartmentReportPeriodId(rs.getInt("department_report_period_id"));
-            return result;
+            int formTemplateId = SqlUtils.getInteger(rs, "form_template_id");
+            FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
+            FormData formData = new FormData();
+            formData.initFormTemplateParams(formTemplate);
+            mapCommon(formData, rs);
+            formData.setSigners(formDataSignerDao.getSigners(formData.getId()));
+            formData.setPerformer(formPerformerDao.get(formData.getId()));
+            formData.setManual(rs.getBoolean("manual"));
+            formData.setPreviousRowNumber(rs.getInt("number_previous_row"));
+            return formData;
         }
     }
 
-	private class FormDataWithoutRowMapperWithTypeId extends FormDataWithoutRowMapper {
-		@Override
+    // Маппер экземпляра НФ без фиксированных строк из шаблона
+    private class FormDataWithoutRowMapper implements RowMapper<FormData> {
+        @Override
         public FormData mapRow(ResultSet rs, int index) throws SQLException {
-			FormData result = new FormData();
-			result.setId(SqlUtils.getLong(rs, "id"));
-			result.setDepartmentId(SqlUtils.getInteger(rs,"department_id"));
-			result.setState(WorkflowState.fromId(SqlUtils.getInteger(rs,"state")));
-			result.setReturnSign(rs.getBoolean("return_sign"));
-			result.setKind(FormDataKind.fromId(SqlUtils.getInteger(rs,"kind")));
-			result.setReportPeriodId(SqlUtils.getInteger(rs,"report_period_id"));
-            result.setDepartmentReportPeriodId(SqlUtils.getInteger(rs, "department_report_period_id"));
-            Integer periodOrder = SqlUtils.getInteger(rs,"period_order");
-			result.setPeriodOrder(rs.wasNull() ? null : periodOrder);
-			result.setFormType(formTypeDao.get(SqlUtils.getInteger(rs,"type_id")));
-			return result;
-		}
-	}
+            FormData formData = new FormData();
+            mapCommon(formData, rs);
+            return formData;
+        }
+    }
 
-	@Override
+    // Маппер экземпляра НФ без фиксированных строк из шаблона, но с FormType
+    private class FormDataWithoutRowMapperWithType implements RowMapper<FormData> {
+        @Override
+        public FormData mapRow(ResultSet rs, int index) throws SQLException {
+            FormData formData = new FormData();
+            mapCommon(formData, rs);
+            formData.setFormType(formTypeDao.get(SqlUtils.getInteger(rs, "type_id")));
+            return formData;
+        }
+    }
+
+    @Override
     public FormData get(final long formDataId, Boolean manual) {
-		JdbcTemplate jt = getJdbcTemplate();
-		final FormData formData;
-		try {
-            RowMapperResult res = jt.queryForObject(
+        try {
+            return getJdbcTemplate().queryForObject(
                     "select fd.id, fd.form_template_id, fd.state, fd.kind, fd.return_sign, fd.period_order, fd.number_previous_row, " +
                             "r.manual, fd.department_report_period_id, drp.report_period_id, drp.department_id from form_data fd " +
                             "left join (select max(manual) as manual, form_data_id from data_row group by form_data_id) r " +
                             "on (r.form_data_id = fd.id and (? is null or r.manual = ?)), " +
                             "department_report_period drp where fd.id = ? and fd.department_report_period_id = drp.id",
-                    new Object[] {
+                    new Object[]{
                             manual == null ? null : manual ? 1 : 0,
                             manual == null ? null : manual ? 1 : 0,
-                            formDataId}, new int[] { Types.NUMERIC, Types.NUMERIC, Types.NUMERIC },
-					new FormDataRowMapper());
-			formData = res.formData;
-		} catch (EmptyResultDataAccessException e) {
-			throw new DaoException("Записи в таблице FORM_DATA с id = "	+ formDataId + " не найдено");
-		}
-		return formData;
-	}
-
-	@Override
-	@Transactional(readOnly = false)
-	public long save(final FormData formData) {
-		if (formData.getState() == null) {
-			throw new DaoException("Не указана стадия жизненного цикла");
-		}
-
-		if (formData.getKind() == null) {
-			throw new DaoException("Не указан тип налоговой формы");
-		}
-
-		if (formData.getDepartmentReportPeriodId() == null) {
-			throw new DaoException("Не указан идентификатор отчётного периода подразделения");
-		}
-
-		Long formDataId;
-		JdbcTemplate jt = getJdbcTemplate();
-		if (formData.getId() == null) {
-			formDataId = generateId("seq_form_data", Long.class);
-			jt.update(
-					"insert into form_data (id, form_template_id, department_report_period_id, kind, state, return_sign, period_order, number_previous_row)" +
-							" values (?, ?, ?, ?, ?, ?, ?, ?)",
-					formDataId, formData.getFormTemplateId(),
-					formData.getDepartmentReportPeriodId(), formData.getKind().getId(),
-					formData.getState().getId(), 0, formData.getPeriodOrder(), formData.getPreviousRowNumber());
-			formData.setId(formDataId);
-		} else {
-			formDataId = formData.getId();
-		}
-
-		if (formData.getPerformer() != null &&
-				(StringUtils.hasLength(formData.getPerformer().getName())
-						|| StringUtils.hasLength(formData.getPerformer().getPhone())
-                        || formData.getPerformer().getPrintDepartmentId() != null)
-			) {
-			formPerformerDao.save(formDataId, formData.isManual(), formData.getPerformer());
-		} else {
-			formPerformerDao.clear(formDataId);
-		}
-		if (formData.getSigners() != null) {
-			formDataSignerDao.saveSigners(formDataId, formData.getSigners());
-		}
-		return formDataId;
-	}
-
-	@Override
-	@Transactional(readOnly = false)
-	public void delete(long formDataId) {
-		JdbcTemplate jt = getJdbcTemplate();
-
-		Object[] params = { formDataId };
-		int[] types = { Types.NUMERIC };
-
-		jt.update("delete from form_data where id = ?", params, types);
-	}
+                            formDataId}, new int[]{Types.NUMERIC, Types.NUMERIC, Types.NUMERIC},
+                    new FormDataRowMapper());
+        } catch (EmptyResultDataAccessException e) {
+            throw new DaoException("Записи в таблице FORM_DATA с id = " + formDataId + " не найдено");
+        }
+    }
 
     @Override
-    @Deprecated
+    @Transactional(readOnly = false)
+    public long save(final FormData formData) {
+        if (formData.getState() == null) {
+            throw new DaoException("Не указана стадия жизненного цикла");
+        }
+
+        if (formData.getKind() == null) {
+            throw new DaoException("Не указан тип налоговой формы");
+        }
+
+        if (formData.getDepartmentReportPeriodId() == null) {
+            throw new DaoException("Не указан идентификатор отчётного периода подразделения");
+        }
+
+        Long formDataId;
+        if (formData.getId() == null) {
+            formDataId = generateId("seq_form_data", Long.class);
+            getJdbcTemplate().update(
+                    "insert into form_data (id, form_template_id, department_report_period_id, kind, state, return_sign, " +
+                            "period_order, number_previous_row) " +
+                            "values (?, ?, ?, ?, ?, ?, ?, ?)",
+                    formDataId, formData.getFormTemplateId(),
+                    formData.getDepartmentReportPeriodId(), formData.getKind().getId(),
+                    formData.getState().getId(), 0, formData.getPeriodOrder(), formData.getPreviousRowNumber());
+            formData.setId(formDataId);
+        } else {
+            formDataId = formData.getId();
+        }
+
+        if (formData.getPerformer() != null &&
+                (StringUtils.hasLength(formData.getPerformer().getName())
+                        || StringUtils.hasLength(formData.getPerformer().getPhone())
+                        || formData.getPerformer().getPrintDepartmentId() != null)
+                ) {
+            formPerformerDao.save(formDataId, formData.isManual(), formData.getPerformer());
+        } else {
+            formPerformerDao.clear(formDataId);
+        }
+        if (formData.getSigners() != null) {
+            formDataSignerDao.saveSigners(formDataId, formData.getSigners());
+        }
+        return formDataId;
+    }
+
+    @Override
+    @Transactional(readOnly = false)
+    public void delete(long formDataId) {
+        Object[] params = {formDataId};
+        int[] types = {Types.NUMERIC};
+        getJdbcTemplate().update("delete from form_data where id = ?", params, types);
+    }
+
+    @Override
     public FormData find(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId) {
         try {
             Long formDataId = getJdbcTemplate().queryForLong(
                     "select fd.id from form_data fd, department_report_period drp where fd.department_report_period_id = drp.id " +
                             "and exists (select 1 from form_template ft where fd.form_template_id = ft.id and ft.type_id = ?) " +
                             "and fd.kind = ? and drp.department_id = ? and drp.report_period_id = ? and drp.correction_date is null",
-                    new Object[] {
+                    new Object[]{
                             formTypeId,
                             kind.getId(),
                             departmentId,
                             reportPeriodId
                     },
-                    new int[] {
+                    new int[]{
                             Types.NUMERIC,
                             Types.NUMERIC,
                             Types.NUMERIC,
@@ -243,18 +215,16 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         try {
             return getJdbcTemplate().queryForList(
                     "select fd.id from form_data fd where fd.form_template_id = ?",
-                    new Object[] {formTemplateId},
-                    new int[] {Types.NUMERIC},
+                    new Object[]{formTemplateId},
+                    new int[]{Types.NUMERIC},
                     Long.class
             );
-        } catch (EmptyResultDataAccessException e) {
-            return new ArrayList<Long>();
         } catch (DataAccessException e) {
             throw new DaoException("Ошибка поиска НФ для заданного шаблона %d", formTemplateId);
         }
     }
 
-	@Override
+    @Override
     public FormData findMonth(int formTypeId, FormDataKind kind, int departmentId, int taxPeriodId, int periodOrder) {
         try {
             Long formDataId = getJdbcTemplate().queryForLong(
@@ -264,14 +234,14 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
                             "and fd.kind = ? and drp.department_id = ? and drp.correction_date is null " +
                             "and drp.report_period_id in (select id from report_period where tax_period_id = ?) " +
                             "and fd.period_order = ?",
-                    new Object[] {
+                    new Object[]{
                             formTypeId,
                             kind.getId(),
                             departmentId,
                             taxPeriodId,
                             periodOrder
                     },
-                    new int[] {
+                    new int[]{
                             Types.NUMERIC,
                             Types.NUMERIC,
                             Types.NUMERIC,
@@ -289,7 +259,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
                     formTypeDao.get(formTypeId).getName(),
                     kind.getName(),
                     departmentDao.getDepartment(departmentId).getName(),
-					taxPeriod.getYear(),
+                    taxPeriod.getYear(),
                     periodOrder <= 12 && periodOrder >= 1 ? Formats.months[periodOrder] : periodOrder
             );
         }
@@ -300,32 +270,24 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(departmentReportPeriodId);
         TaxPeriod taxPeriod = departmentReportPeriod.getReportPeriod().getTaxPeriod();
         try {
-            Long formDataId = getJdbcTemplate().queryForLong(
-                    "select id from (select fd.id, rownum " +
-                            "from form_data fd, department_report_period drp " +
-                            "where drp.id = fd.department_report_period_id " +
-                            "and exists (select 1 from form_template ft where fd.form_template_id = ft.id and ft.type_id = ?) " +
-                            "and fd.kind = ? and drp.department_id = ? and drp.report_period_id in " +
-                            "(select id from report_period where tax_period_id = ?) and (? is null or fd.period_order = ?) " +
-                            "order by drp.correction_date desc nulls last) where rownum = 1",
-                    new Object[] {
+            return getJdbcTemplate().queryForObject("select * " +
+                    "from (select fd.id, fd.form_template_id, fd.state, fd.kind, " +
+                    "fd.return_sign, fd.period_order, fd.number_previous_row, fd.department_report_period_id, " +
+                    "drp.report_period_id, drp.department_id, rownum " +
+                    "from form_data fd, department_report_period drp " +
+                    "where drp.id = fd.department_report_period_id " +
+                    "and exists (select 1 from form_template ft where fd.form_template_id = ft.id and ft.type_id = ?) " +
+                    "and fd.kind = ? and drp.department_id = ? and drp.report_period_id in " +
+                    "(select id from report_period where tax_period_id = ?) and (? is null or fd.period_order = ?) " +
+                    "order by drp.correction_date desc nulls last) where rownum = 1",
+                    new Object[]{
                             formTypeId,
                             kind.getId(),
                             departmentReportPeriod.getDepartmentId(),
                             taxPeriod.getId(),
                             periodOrder,
-                            periodOrder
-                    },
-                    new int[] {
-                            Types.NUMERIC,
-                            Types.NUMERIC,
-                            Types.NUMERIC,
-                            Types.NUMERIC,
-                            Types.NUMERIC,
-                            Types.NUMERIC
-                    }
-            );
-            return get(formDataId, null);
+                            periodOrder},
+                    new FormDataWithoutRowMapper());
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
@@ -335,29 +297,20 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
     public List<FormData> find(List<Integer> departmentIds, int reportPeriodId) {
         Map paramMap = new HashMap();
         paramMap.put("rp", reportPeriodId);
-        List<Long> formsId = getNamedParameterJdbcTemplate().queryForList(
-                String.format(
-                        "select fd.id from form_data fd, department_report_period drp " +
-                                "where drp.id = fd.department_report_period_id " +
-                                "%s and drp.report_period_id = :rp",
-                        SqlUtils.transformToSqlInStatement("drp.department_id", departmentIds)),
-                paramMap,
-                Long.class
-        );
-
-        List<FormData> forms = new ArrayList<FormData>();
-        for (Long id : formsId) {
-            forms.add(getWithoutRows(id));
-        }
-        return forms;
+        return getNamedParameterJdbcTemplate().query("select fd.id, fd.form_template_id, fd.state, fd.kind, " +
+                "fd.return_sign, fd.period_order, fd.number_previous_row, fd.department_report_period_id, " +
+                "drp.report_period_id, drp.department_id " +
+                "from form_data fd, department_report_period drp " +
+                "where drp.id = fd.department_report_period_id " +
+                "and " + SqlUtils.transformToSqlInStatement("drp.department_id", departmentIds) +
+                "and drp.report_period_id = :rp order by drp.id", paramMap, new FormDataWithoutRowMapper());
     }
 
     @Override
-	public FormData getWithoutRows(long id){
-		JdbcTemplate jt = getJdbcTemplate();
-		try{
-			return jt.queryForObject(
-					"SELECT fd.id, drp.department_id, fd.state, fd.kind, drp.report_period_id, fd.return_sign, " +
+    public FormData getWithoutRows(long id) {
+        try {
+            return getJdbcTemplate().queryForObject(
+                    "SELECT fd.id, drp.department_id, fd.state, fd.kind, drp.report_period_id, fd.return_sign, " +
                             "fd.period_order, r.manual, fd.department_report_period_id, " +
                             "(SELECT type_id FROM form_template ft WHERE ft.id = fd.form_template_id) type_id " +
                             "FROM form_data fd " +
@@ -365,26 +318,26 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
                             "on r.form_data_id = fd.id, " +
                             "department_report_period drp " +
                             "WHERE fd.id = ? and drp.id = fd.department_report_period_id",
-					new Object[] { id }, new int[] { Types.NUMERIC },
-					new FormDataWithoutRowMapperWithTypeId());
-		} catch (EmptyResultDataAccessException e) {
-			throw new DaoException(String.format(MSG_FORM_NOT_FOUND, id));
-		}
-	}
+                    new Object[]{id}, new int[]{Types.NUMERIC},
+                    new FormDataWithoutRowMapperWithType());
+        } catch (EmptyResultDataAccessException e) {
+            throw new DaoException(String.format(MSG_FORM_NOT_FOUND, id));
+        }
+    }
 
-	@Override
-	public void updateReturnSign(long id, boolean returnSign) {
-		if (getJdbcTemplate().update("update form_data set return_sign=? where id=?", returnSign ? 1 : 0, id) == 0) {
-			throw new DaoException(String.format(MSG_FORM_NOT_FOUND, id));
-		}
-	}
+    @Override
+    public void updateReturnSign(long id, boolean returnSign) {
+        if (getJdbcTemplate().update("update form_data set return_sign=? where id=?", returnSign ? 1 : 0, id) == 0) {
+            throw new DaoException(String.format(MSG_FORM_NOT_FOUND, id));
+        }
+    }
 
-	@Override
-	public void updateState(long id, WorkflowState workflowState) {
-		if (getJdbcTemplate().update("update form_data set state=? where id=?", workflowState.getId(), id) == 0) {
-			throw new DaoException(String.format(MSG_FORM_NOT_FOUND, id));
-		}
-	}
+    @Override
+    public void updateState(long id, WorkflowState workflowState) {
+        if (getJdbcTemplate().update("update form_data set state=? where id=?", workflowState.getId(), id) == 0) {
+            throw new DaoException(String.format(MSG_FORM_NOT_FOUND, id));
+        }
+    }
 
     @Override
     public List<Long> getFormDataListInActualPeriodByTemplate(int templateId, Date startDate) {
@@ -394,9 +347,9 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
                     "IN (SELECT id FROM report_period WHERE calendar_start_date >= ?)",
                     new Object[]{templateId, startDate},
                     Long.class);
-        } catch (EmptyResultDataAccessException e){
+        } catch (EmptyResultDataAccessException e) {
             return new ArrayList<Long>();
-        } catch (DataAccessException e){
+        } catch (DataAccessException e) {
             logger.error("Ошибка при поиске используемых версий", e);
             throw new DaoException("Ошибка при поиске используемых версий", e);
         }
@@ -416,19 +369,19 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
                             "where drp.id = fd.department_report_period_id " +
                             "and exists (select 1 from form_template ft where fd.form_template_id = ft.id and ft.type_id = ?) " +
                             "and fd.kind = ? and drp.department_id = ?",
-                    new Object[] {
+                    new Object[]{
                             formTypeId,
                             kind.getId(),
                             departmentId
                     },
-                    new int[] {
+                    new int[]{
                             Types.NUMERIC,
                             Types.NUMERIC,
                             Types.NUMERIC
                     },
                     Long.class
             );
-        } catch (EmptyResultDataAccessException e){
+        } catch (EmptyResultDataAccessException e) {
             return new ArrayList<Long>(0);
         } catch (DataAccessException e) {
             String errorMsg = String.format("Ошибка при поиске налоговых форм с заданными параметрами: formTypeId = %s, kind = %s, departmentId = %s", formTypeId, kind.getId(), departmentId);
@@ -440,7 +393,9 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
     @Override
     public List<Long> getFormDataIds(List<TaxType> taxTypes, final List<Integer> departmentIds) {
         try {
-            HashMap<String, Object> values = new HashMap<String, Object>(){{put("departmentIds", departmentIds);}};
+            HashMap<String, Object> values = new HashMap<String, Object>() {{
+                put("departmentIds", departmentIds);
+            }};
             String sql = "select fd.id from FORM_DATA fd left join FORM_TEMPLATE ft on fd.FORM_TEMPLATE_ID = ft.id " +
                     "join FORM_TYPE ftype on ft.TYPE_ID = ftype.ID, department_report_period drp " +
                     "where drp.id = fd.department_report_period_id and " +
@@ -451,7 +406,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
                     values,
                     Long.class
             );
-        } catch (EmptyResultDataAccessException e){
+        } catch (EmptyResultDataAccessException e) {
             return new ArrayList<Long>(0);
         } catch (DataAccessException e) {
             logger.error("Ошибка при поиске налоговых форм с заданными параметрами: formTypeId = %s, kind = %s, departmentId = %s", e);
@@ -500,8 +455,6 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
     }
 
     private List<FormData> getFormDataList(FormData formData, TaxPeriod taxPeriod, String whereClause) {
-        List<FormData> formDataList = new ArrayList<FormData>();
-
         int year = taxPeriod.getYear();
         String taxType = String.valueOf(taxPeriod.getTaxType().getCode());
 
@@ -519,15 +472,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
             sql.append(whereClause);
         }
 
-        List<RowMapperResult> query = getNamedParameterJdbcTemplate().query(sql.toString(),
-                params,
-                new FormDataRowMapper());
-
-        for (RowMapperResult result : query) {
-            formDataList.add(result.formData);
-        }
-
-        return formDataList;
+        return getNamedParameterJdbcTemplate().query(sql.toString(), params, new FormDataRowMapper());
     }
 
     @Override
@@ -555,69 +500,52 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         return getNamedParameterJdbcTemplate().query(
                 String.format(GET_MANUAL_UNPUTS_FORMS, SqlUtils.transformToSqlInStatement("drp.department_id", departments)),
                 params,
-                new FormDataWithoutRowMapperWithTypeId()) ;
+                new FormDataWithoutRowMapperWithType());
     }
 
     @Override
     public List<FormData> getFormDataListByTemplateId(Integer formTemplateId) {
-        List<FormData> formDataList = new ArrayList<FormData>();
-
         try {
-            List<RowMapperResult> query = getJdbcTemplate().query(
-                        "SELECT fd.id, fd.form_template_id, fd.state, fd.kind, fd.return_sign, fd.period_order, fd.number_previous_row, " +
-                                "r.manual, fd.department_report_period_id, drp.report_period_id, drp.department_id FROM FORM_DATA fd " +
-                                "LEFT JOIN (SELECT MAX(manual) AS manual, form_data_id FROM data_row WHERE manual = 0 GROUP BY form_data_id) r ON r.form_data_id = fd.id, " +
-                                "department_report_period drp " +
-                                "WHERE drp.id = fd.department_report_period_id and fd.form_template_id = ?",
-                        new Object[]{formTemplateId},
-                        new FormDataRowMapper());
-            for (RowMapperResult result : query) {
-                formDataList.add(result.formData);
-            }
+            return getJdbcTemplate().query(
+                    "SELECT fd.id, fd.form_template_id, fd.state, fd.kind, fd.return_sign, fd.period_order, fd.number_previous_row, " +
+                            "r.manual, fd.department_report_period_id, drp.report_period_id, drp.department_id FROM FORM_DATA fd " +
+                            "LEFT JOIN (SELECT MAX(manual) AS manual, form_data_id FROM data_row WHERE manual = 0 GROUP BY form_data_id) r ON r.form_data_id = fd.id, " +
+                            "department_report_period drp " +
+                            "WHERE drp.id = fd.department_report_period_id and fd.form_template_id = ?",
+                    new Object[]{formTemplateId},
+                    new FormDataRowMapper());
         } catch (EmptyResultDataAccessException e) {
-            throw new DaoException("Записи в таблице FORM_DATA с form_template_id = "
-                    + formTemplateId + " не найдены");
+            throw new DaoException("Записи в таблице FORM_DATA с form_template_id = " + formTemplateId + " не найдены");
         }
-
-        return formDataList;
     }
 
     @Override
     public FormData getLast(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder) {
-        // TODO
-        return null;
+        try {
+            return getJdbcTemplate().queryForObject(
+                    "select * from " +
+                            "(select fd.id, fd.form_template_id, fd.state, fd.kind, fd.return_sign, fd.period_order, " +
+                            "fd.number_previous_row, r.manual, fd.department_report_period_id, drp.report_period_id, " +
+                            "drp.department_id " +
+                            "from form_data fd left join (select max(manual) as manual, form_data_id " +
+                            "from data_row group by form_data_id) r " +
+                            "on (r.form_data_id = fd.id), " +
+                            "department_report_period drp, form_template ft " +
+                            "where drp.id = fd.department_report_period_id " +
+                            "and ft.id = fd.form_template_id " +
+                            "and department_id = ? and report_period_id = ? " +
+                            "and ft.type_id = ? " +
+                            "and fd.kind = ? " +
+                            "and (? is null or fd.period_order = ?) " +
+                            "order by correction_date desc nulls last) " +
+                            "where rownum = 1",
+                    new Object[]{departmentId, reportPeriodId, formTypeId, kind.getId(), periodOrder, periodOrder},
+                    new int[]{Types.NUMERIC, Types.NUMERIC, Types.NUMERIC, Types.NUMERIC, Types.NUMERIC, Types.NUMERIC},
+                    new FormDataWithoutRowMapper());
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
     }
-
-//    @Override
-//    public FormData getLast(int departmentId, int reportPeriodId);
-//
-//
-//        JdbcTemplate jt = getJdbcTemplate();
-//        final FormData formData;
-//
-////    "select fd.id, fd.form_template_id, fd.state, fd.kind, fd.return_sign, fd.period_order, fd.number_previous_row, " +
-////            "r.manual, fd.department_report_period_id, drp.report_period_id, drp.department_id from form_data fd " +
-////            "left join (select max(manual) as manual, form_data_id from data_row group by form_data_id) r " +
-////            "on (r.form_data_id = fd.id and (? is null or r.manual = ?)), " +
-////            "department_report_period drp where fd.id = ? and fd.department_report_period_id = drp.id",
-//
-//        try {
-//            RowMapperResult res = jt.queryForObject(
-//                    "select * from "+
-//                            "(select fd.id, fd.form_template_id, fd.state, fd.kind, fd.return_sign, fd.period_order, fd.number_previous_row, from department_report_period where department_id = ? and report_period_id = ? "+
-//                            "order by correction_date desc nulls last) "+
-//                            "where rownum = 1",
-//                    new Object[] {
-//
-//
-//                            formDataId}, new int[] { Types.NUMERIC, Types.NUMERIC, Types.NUMERIC },
-//                    new FormDataRowMapper());
-//            formData = res.formData;
-//        } catch (EmptyResultDataAccessException e) {
-//            throw new DaoException("Записи в таблице FORM_DATA с id = "	+ formDataId + " не найдено");
-//        }
-//        return formData;
-//    }
 
     private static final String UPDATE_FORM_DATA_PERFORMER_TB =
             "merge into FORM_DATA_PERFORMER fdp using ( " +
@@ -640,6 +568,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
                     "                     where %s " +
                     "                     and depNameParts.PRINT_DEPARTMENT_TB_ID = :departmentId) " +
                     "SELECT * FROM formDataIdsWithRegExp) b on (fdp.form_data_id = b.fd_id) WHEN MATCHED THEN UPDATE SET REPORT_DEPARTMENT_NAME = (:newDepartmentName || '/' || b.second_dep_name)";
+
     @Override
     public void updateFDPerformerTBDepartmentNames(int departmentId, String newDepartmentName, Date dateFrom, Date dateTo) {
         String dateTag = dateFrom != null && dateTo != null ? "(rp.CALENDAR_START_DATE between :dateFrom and :dateTo or rp.END_DATE between :dateFrom and :dateTo or :dateFrom between rp.CALENDAR_START_DATE and rp.END_DATE)"
@@ -653,14 +582,14 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         try {
             getNamedParameterJdbcTemplate().update(String.format(UPDATE_FORM_DATA_PERFORMER_TB2, dateTag), values);
             getNamedParameterJdbcTemplate().update(String.format(UPDATE_FORM_DATA_PERFORMER_TB, dateTag), values);
-        } catch (DataAccessException e){
+        } catch (DataAccessException e) {
             logger.error("Ошибка при обновлении значений.", e);
             throw new DaoException("Ошибка при обновлении значений.", e);
         }
     }
 
     private static final String UPDATE_FORM_DATA_PERFORMER_DEPARTMENT_NAME =
-            "merge into FORM_DATA_PERFORMER fdp using (\n" +
+            "merge into FORM_DATA_PERFORMER fdp using ( " +
                     "  with depNameParts as (select SUBSTR(rdn, 0, instr(rdn, '/', 1) - 1) first_dep_name, SUBSTR(rdn, instr(rdn, '/', 1) + 1,length(rdn)) second_dep_name, form_data_id from " +
                     "    (select fdp_f.REPORT_DEPARTMENT_NAME rdn, fdp_f.FORM_DATA_ID form_data_id from FORM_DATA_PERFORMER fdp_f where fdp_f.PRINT_DEPARTMENT_ID = :departmentId)), " +
                     "       formDataIdsWithRegExp as (select distinct fd.ID fd_id, depNameParts.first_dep_name, depNameParts.second_dep_name from FORM_DATA fd " +
@@ -669,6 +598,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
                     "                     join depNameParts on depNameParts.form_data_id = fd.ID " +
                     "                     where %s) " +
                     "              SELECT * FROM formDataIdsWithRegExp) b on (fdp.form_data_id = b.fd_id) WHEN MATCHED THEN UPDATE SET REPORT_DEPARTMENT_NAME = (b.first_dep_name || '/' || :newDepartmentName)";
+
     @Override
     public void updateFDPerformerDepartmentNames(int departmentId, String newDepartmentName, Date dateFrom, Date dateTo) {
         String dateTag = dateFrom != null && dateTo != null ? "(rp.CALENDAR_START_DATE between :dateFrom and :dateTo or rp.END_DATE between :dateFrom and :dateTo or :dateFrom between rp.CALENDAR_START_DATE and rp.END_DATE)"
@@ -681,7 +611,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         values.put("departmentId", departmentId);
         try {
             getNamedParameterJdbcTemplate().update(String.format(UPDATE_FORM_DATA_PERFORMER_DEPARTMENT_NAME, dateTag), values);
-        } catch (DataAccessException e){
+        } catch (DataAccessException e) {
             logger.error("", e);
             throw new DaoException("", e);
         }

@@ -40,7 +40,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
     public static final String LOG_EVENT_EDIT_RU = "редактирование";
     public static final String LOG_EVENT_DELETE_RU = "удаление";
 
-    private static final String FORMDATA_KIND_STATE_ERROR_LOG = "Event type: \"%s\". Unsuppotable case for formData with \"%s\" kind and \"%s\" state!";
+    private static final String FORM_DATA_KIND_STATE_ERROR_LOG = "Event type: \"%s\". Unsuppotable case for formData with \"%s\" kind and \"%s\" state!";
     private static final String REPORT_PERIOD_IS_CLOSED_LOG = "Department report period (%d) is closed!";
     private static final String REPORT_PERIOD_IS_CLOSED = "Выбранный отчетный период подразделения закрыт!";
     private static final String FORM_TEMPLATE_WRONG_STATUS_LOG = "Form template (%d) does not exist in report period (%d)!";
@@ -49,15 +49,15 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
     private static final String INCORRECT_DEPARTMENT_FORM_TYPE1 = "Выбранный тип налоговой формы не назначен подразделению!";
     private static final String INCORRECT_DEPARTMENT_FORM_TYPE2 = "Нет прав доступа к созданию формы с заданными параметрами!";
     private static final String INCORRECT_DEPARTMENT_FORM_TYPE3 = "Выбранный вид налоговой формы не назначен подразделению";
-    private static final String CREATE_FORM_DATA_ERROR_ONLY_CONTROL_LOG = "Only ROLE_CONTOL can create form in balance period!";
+    private static final String CREATE_FORM_DATA_ERROR_ONLY_CONTROL_LOG = "Only ROLE_CONTROL can create form in balance period!";
     private static final String CREATE_FORM_DATA_ERROR_ONLY_CONTROL = "Выбран период ввода остатков. В периоде ввода остатков оператор не может создавать налоговые формы";
-    private static final String CREATE_MANUAL_FORM_DATA_ERROR_ONLY_CONTROL_LOG = "Only ROLE_CONTOL can create manual version of form!";
+    private static final String CREATE_MANUAL_FORM_DATA_ERROR_ONLY_CONTROL_LOG = "Only ROLE_CONTROL can create manual version of form!";
     private static final String CREATE_MANUAL_FORM_DATA_ERROR_ONLY_CONTROL = "Только контролер может создавать версию ручного ввода";
     private static final String FORM_DATA_ERROR_ACCESS_DENIED = "Недостаточно прав на %s формы с типом \"%s\" в статусе \"%s\"!";
     private static final String FORM_DATA_DEPARTMENT_ACCESS_DENIED_LOG = "Selected department (%d) not available in report period (%d)!";
     private static final String FORM_DATA_DEPARTMENT_ACCESS_DENIED = "Выбранное подразделение недоступно для пользователя!";
     private static final String FORM_DATA_EDIT_ERROR = "Нельзя редактировать форму \"%s\" в состоянии \"%s\"";
-    private static final String ERROR_PERIOD = "Переход невозможен, т.к. у одного из приемников период не открыт.";
+    private static final String ERROR_PERIOD = "Переход невозможен, т.к. у одного из приемников период подразделения не открыт.";
 
     @Autowired
     private FormDataDao formDataDao;
@@ -120,7 +120,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 
         // Непредусмотренное сочетание параметров состояния формы и пользователя - запрет доступа
         // Или подразделение недоступно
-        logger.error(String.format(FORMDATA_KIND_STATE_ERROR_LOG, LOG_EVENT_READ, formData.getKind().getName(),
+        logger.error(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_READ, formData.getKind().getName(),
                 formData.getState().getName()));
 
         throw new AccessDeniedException(String.format(FORM_DATA_ERROR_ACCESS_DENIED, LOG_EVENT_READ_RU,
@@ -357,7 +357,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 		}
 
         // Непредвиденное состояние формы
-        logger.error(String.format(FORMDATA_KIND_STATE_ERROR_LOG, LOG_EVENT_EDIT, formData.getKind().getName(),
+        logger.error(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_EDIT, formData.getKind().getName(),
                 formData.getState().getName()));
         throw new AccessDeniedException(String.format(FORM_DATA_ERROR_ACCESS_DENIED, LOG_EVENT_EDIT_RU,
                 formData.getKind().getName(), formData.getState().getName()));
@@ -446,7 +446,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                     result.add(WorkflowMove.ACCEPTED_TO_CREATED);
                     break;
                 default:
-                    logger.warn(String.format(FORMDATA_KIND_STATE_ERROR_LOG, LOG_EVENT_AVAILABLE_MOVES,
+                    logger.warn(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_AVAILABLE_MOVES,
                             formData.getKind().getName(), formData.getState()));
             }
         } else {
@@ -525,7 +525,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                         }
                         break;
                     default:
-                        logger.warn(String.format(FORMDATA_KIND_STATE_ERROR_LOG, LOG_EVENT_AVAILABLE_MOVES,
+                        logger.warn(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_AVAILABLE_MOVES,
                                 formData.getKind().getName(), formData.getState().getName()));
                 }
             } else if (asList(FormDataKind.PRIMARY, FormDataKind.ADDITIONAL, FormDataKind.UNP).contains(
@@ -558,7 +558,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                         }
                         break;
                     default:
-                        logger.warn(String.format(FORMDATA_KIND_STATE_ERROR_LOG, LOG_EVENT_AVAILABLE_MOVES,
+                        logger.warn(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_AVAILABLE_MOVES,
                                 formData.getKind().getName(), formData.getState().getName()));
                 }
             } else if (asList(FormDataKind.SUMMARY, FormDataKind.CONSOLIDATED).contains(formData.getKind())
@@ -582,7 +582,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                         }
                         break;
                     default:
-                        logger.warn(String.format(FORMDATA_KIND_STATE_ERROR_LOG, LOG_EVENT_AVAILABLE_MOVES,
+                        logger.warn(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_AVAILABLE_MOVES,
                                 formData.getKind().getName(), formData.getState().getName()));
 
                 }
@@ -617,10 +617,10 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                         }
                         break;
                     default:
-                        logger.warn(String.format(FORMDATA_KIND_STATE_ERROR_LOG, LOG_EVENT_AVAILABLE_MOVES, formData.getKind().getName(), formData.getState().getName()));
+                        logger.warn(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_AVAILABLE_MOVES, formData.getKind().getName(), formData.getState().getName()));
                 }
             } else {
-                logger.warn(String.format(FORMDATA_KIND_STATE_ERROR_LOG, LOG_EVENT_AVAILABLE_MOVES,
+                logger.warn(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_AVAILABLE_MOVES,
                         formData.getKind().getName(), formData.getState().getName()));
             }
         }
@@ -709,20 +709,14 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(formData.getDepartmentReportPeriodId());
         ReportPeriod reportPeriod = departmentReportPeriod.getReportPeriod();
-        // TODO Левыкин: Вопрос — У нас консолидация может происходить между НФ разных подразделений. В форму какого отчетного периода подразделения в таком случае должна консолидироваться форма, если их несколько?
-        //ReportPeriod reportPeriod = periodService.getReportPeriod(formData.getReportPeriodId());
         // Проверка вышестоящих налоговых форм
         List<DepartmentFormType> departmentFormTypes =
                 departmentFormTypeDao.getFormDestinations(formData.getDepartmentId(),
                         formData.getFormType().getId(), formData.getKind(), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
         if (departmentFormTypes != null) {
             for (DepartmentFormType departmentFormType : departmentFormTypes) {
-
                 FormData form = formDataDao.getLast(departmentFormType.getFormTypeId(), departmentFormType.getKind(),
-                        departmentFormType.getDepartmentId(), formData.getReportPeriodId(), formData.getPeriodOrder());
-
-//                FormData form = formDataService.findFormData(departmentFormType.getFormTypeId(), departmentFormType.getKind(),
-//                        departmentFormType.getDepartmentId(), formData.getReportPeriodId(), formData.getPeriodOrder());
+                        departmentFormType.getDepartmentId(), reportPeriod.getId(), formData.getPeriodOrder());
                 // Если форма существует и статус отличен от "Создана"
                 if (form != null && form.getState() != WorkflowState.CREATED) {
                     throw new ServiceException("Переход невозможен, т.к. уже подготовлена/утверждена/принята вышестоящая налоговая форма.");
@@ -740,18 +734,22 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                 formData.getDepartmentId(), formData.getFormType().getId(), formData.getKind(), formData.getReportPeriodId());
         if (departmentDeclarationTypes != null) {
             for (DepartmentDeclarationType departmentDeclarationType : departmentDeclarationTypes) {
-                DeclarationData declaration = declarationDataDao.find(departmentDeclarationType.getDeclarationTypeId(),
-                        departmentDeclarationType.getDepartmentId(), formData.getReportPeriodId());
+                DeclarationData declaration = declarationDataDao.getLast(departmentDeclarationType.getDeclarationTypeId(),
+                        departmentDeclarationType.getDepartmentId(), reportPeriod.getId());
+//                DeclarationData declaration = declarationDataDao.find(departmentDeclarationType.getDeclarationTypeId(),
+//                        departmentDeclarationType.getDepartmentId(), formData.getReportPeriodId());
                 // Если декларация существует и статус "Принята"
                 if (declaration != null && declaration.isAccepted()) {
                     String str = formData.getFormType().getTaxType() == TaxType.DEAL ? "принято уведомление" :
                             "принята декларация";
                     throw new ServiceException("Переход невозможен, т.к. уже " + str + ".");
                 }
-                //TODO Исправить после ответа на вопрос!!
-//                if (declaration != null && !reportPeriodService.isActivePeriod(formData.getReportPeriodId(), declaration.getDepartmentId())) {
-//                    throw new ServiceException(ERROR_PERIOD);
-//                }
+                if (declaration != null) {
+                    DepartmentReportPeriod declarationDepartmentReportPeriod = departmentReportPeriodDao.get(declaration.getDepartmentReportPeriodId());
+                    if (!declarationDepartmentReportPeriod.isActive()) {
+                        throw new ServiceException(ERROR_PERIOD);
+                    }
+                }
             }
         }
     }

@@ -284,4 +284,11 @@ public class DeclarationDataDaoTest {
 			fail("Wrong list of ids: " + Arrays.toString(expected) + " expected but " + Arrays.toString(received) + " received");
 		}
 	}
+
+    @Test
+    public void getLastTest() {
+        DeclarationData declarationData = declarationDataDao.getLast(1, 1, 20);
+        Assert.assertNotNull(declarationData);
+        Assert.assertEquals(3, declarationData.getId().intValue());
+    }
 }

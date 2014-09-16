@@ -137,7 +137,6 @@ public class SourceServiceImpl implements SourceService {
     public List<DepartmentFormType> getDFTSourcesByDFT(int departmentId, int formTypeId, FormDataKind kind, int reportPeriodId,
                                                        QueryParams queryParams) {
         ReportPeriod period = reportPeriodDao.get(reportPeriodId);
-
         return getDFTSourcesByDFT(departmentId, formTypeId, kind, period.getStartDate(), period.getEndDate(), queryParams);
     }
 

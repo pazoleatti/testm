@@ -27,7 +27,7 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
 	private FormDataService formDataService;
 
 	@Autowired
-	private PeriodService reportPeriodService;
+	private DepartmentReportPeriodService departmentReportPeriodService;
 
 	@Autowired
 	FormTemplateService formTemplateService;
@@ -38,8 +38,7 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
     @Autowired
     LogEntryService logEntryService;
 
-    private static final String ERROR_SELECT_REPORT_PERIOD = "Период не выбран!";
-    private static final String ERROR_SELECT_DEPARTMENT = "Подразделение не выбрано!";
+    private static final String ERROR_SELECT_REPORT_PERIOD = "Период подразделения не выбран!";
     private static final String ERROR_SELECT_FORM_DATA_KIND = "Тип налоговой формы не выбран!";
     private static final String ERROR_SELECT_FORM_DATA_TYPE = "Вид налоговой формы не выбран!";
 
@@ -54,35 +53,35 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
 		checkAction(action);
 		CreateFormDataResult result = new CreateFormDataResult();
 		Logger logger = new Logger();
-        Integer reportPeriodId = action.getReportPeriodId();
-        ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(reportPeriodId);
 
         /**
          *  Проверка существования назначений источников-приемников
          */
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(action.getDepartmentReportPeriodId());
 
         // 1. Если форма является приемником данных в указанном периоде, то Система выводит сообщение в панель уведомления предупреждение: "Форма является приемником данных."
-        Integer formDataKindId = action.getFormDataKindId();
-        FormDataKind kind = FormDataKind.fromId(formDataKindId);
-        Integer departmentId = action.getDepartmentId();
+        FormDataKind kind = FormDataKind.fromId(action.getFormDataKindId());
         Integer formDataTypeId = action.getFormDataTypeId();
-        List<DepartmentFormType> sources = sourceService.getDFTSourcesByDFT(departmentId, formDataTypeId, kind, reportPeriodId);
+        List<DepartmentFormType> sources = sourceService.getDFTSourcesByDFT(departmentReportPeriod.getDepartmentId(),
+                formDataTypeId, kind, departmentReportPeriod.getReportPeriod().getId());
         if (!sources.isEmpty()){
             logger.warn("Форма является приемником данных.");
         }
 
         // 2. Если форма не является источников данных для других налоговых форм и деклараций в указанном периоде, то Система выводит сообщение в панель уведомления предупреждение: "Не найдены назначения источников-приемников в периоде <Период создания формы>. Форма не является источником данных для декларации."
-        List<DepartmentDeclarationType> declarationDestinations = sourceService.getDeclarationDestinations(departmentId, formDataTypeId, kind, reportPeriodId);
-        List<DepartmentFormType> formDestinations = sourceService.getFormDestinations(departmentId, formDataTypeId, kind, reportPeriodId);
+        List<DepartmentDeclarationType> declarationDestinations = sourceService.getDeclarationDestinations(
+                departmentReportPeriod.getDepartmentId(), formDataTypeId, kind, departmentReportPeriod.getReportPeriod().getId());
+        List<DepartmentFormType> formDestinations = sourceService.getFormDestinations(
+                departmentReportPeriod.getDepartmentId(), formDataTypeId, kind, departmentReportPeriod.getReportPeriod().getId());
         if (declarationDestinations.isEmpty() && formDestinations.isEmpty()){
-            logger.warn("Не найдены назначения источников-приемников в периоде " + reportPeriod.getName() + ". Форма не является источником данных для декларации.");
+            logger.warn("Не найдены назначения источников-приемников в периоде " + departmentReportPeriod.getReportPeriod().getName() + ". Форма не является источником данных для декларации.");
         }
 
-        // TODO Левыкин: для ежемесячных форм передавать periodOrder
-        result.setFormDataId(formDataService.createFormData(logger, userInfo,
-				formTemplateService.getActiveFormTemplateId(formDataTypeId, reportPeriodId), departmentId, FormDataKind.fromId(formDataKindId),
-                        reportPeriod,
-                        action.getMonthId() != null ? action.getMonthId() : null));
+        int templateId = formTemplateService.getActiveFormTemplateId(formDataTypeId, departmentReportPeriod.getReportPeriod().getId());
+        long formDataId = formDataService.createFormData(logger, userInfo, templateId,
+                action.getDepartmentReportPeriodId(), kind, action.getMonthId());
+
+        result.setFormDataId(formDataId);
 
         if (logger.getEntries().size() != 0){
             result.setUuid(logEntryService.save(logger.getEntries()));
@@ -93,12 +92,9 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
 
 	private void checkAction(CreateFormData action) throws ActionException {
         // Проверки заполнения полей (частичное дублирование клиентского кода)
-        if (action.getReportPeriodId() == null) {
+        if (action.getDepartmentReportPeriodId() == null) {
             throw new TaActionException(ERROR_SELECT_REPORT_PERIOD);
 		}
-        if (action.getDepartmentId() == null) {
-            throw new TaActionException(ERROR_SELECT_DEPARTMENT);
-        }
         if (action.getFormDataKindId() == null) {
             throw new TaActionException(ERROR_SELECT_FORM_DATA_KIND);
         }
