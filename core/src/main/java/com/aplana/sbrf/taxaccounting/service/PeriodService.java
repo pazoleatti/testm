@@ -30,7 +30,7 @@ public interface PeriodService {
 	 * @param taxType
 	 */
     //TODO Слишком много параметров
-	void open(int year, int dictionaryTaxPeriodId, TaxType taxType, TAUserInfo user,
+	void open(int year, long dictionaryTaxPeriodId, TaxType taxType, TAUserInfo user,
 	          int departmentId, List<LogEntry> logs, boolean isBalance, Date correctionDate);
 
     /**
@@ -275,7 +275,7 @@ public interface PeriodService {
      * @param isBalance признак ввода остатков
      * @param logs логер, при необходимости
      */
-    void edit(int reportPeriodId, int newDictTaxPeriodId, int newYear, TaxType taxType, TAUserInfo user,
+    void edit(int reportPeriodId, long newDictTaxPeriodId, int newYear, TaxType taxType, TAUserInfo user,
                      int departmentId, boolean isBalance,  List<LogEntry> logs);
 
     /**

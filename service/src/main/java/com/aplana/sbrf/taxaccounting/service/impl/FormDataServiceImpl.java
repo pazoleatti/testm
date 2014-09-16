@@ -4,10 +4,7 @@ import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.api.*;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
@@ -95,60 +92,17 @@ public class FormDataServiceImpl implements FormDataService {
     @Autowired
     private RefBookDao refBookDao;
     @Autowired
-    RefBookFactory refBookFactory;
+    private RefBookFactory refBookFactory;
+    @Autowired
+    private DepartmentReportPeriodDao departmentReportPeriodDao;
 
     // Время блокировки при консолидации (3 часа)
     private static final int BLOCK_TIME =  3 * 60 * 60 * 1000;
 
-	/**
-	 * Создать налоговую форму заданного типа При создании формы выполняются
-	 * следующие действия: 1) создаётся пустой объект 2) если в объявлении формы
-	 * заданы строки по-умолчанию (начальные данные), то эти строки копируются в
-	 * созданную форму 3) если в объявлении формы задан скрипт создания, то этот
-	 * скрипт выполняется над создаваемой формой
-	 *
-	 * @param logger
-	 *            логгер-объект для фиксации диагностических сообщений
-	 * @param userInfo
-	 *            информация о пользователе, запросившего операцию
-	 * @param formTemplateId
-	 *            идентификатор шаблона формы, по которой создавать объект
-	 * @param departmentId
-	 *            идентификатор
-	 *            {@link com.aplana.sbrf.taxaccounting.model.Department
-	 *            подразделения}, к которому относится форма
-	 * @param kind
-	 *            {@link com.aplana.sbrf.taxaccounting.model.FormDataKind тип
-	 *            налоговой формы} (первичная, сводная, и т.д.), это поле
-	 *            необходимо, так как некоторые виды налоговых форм в одном и
-	 *            том же подразделении могут существовать в нескольких вариантах
-	 *            (например один и тот же РНУ на уровне ТБ - в виде первичной и
-	 *            консолидированной)
-	 * @param reportPeriod отчетный период в котором создается форма
-     * @param periodOrder номер месяца для ежемесячных форм (для остальных параметр отсутствует)
-	 * @return созданный и проинициализированный объект данных.
-	 * @throws com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException
-	 *             если у пользователя нет прав создавать налоговую форму с
-	 *             такими параметрами
-	 * @throws com.aplana.sbrf.taxaccounting.model.exception.ServiceException
-	 *             если при создании формы произошли ошибки, вызванные
-	 *             несоблюдением каких-то бизнес-требований, например
-	 *             отсутствием обязательных параметров
-	 */
-	@Override
-	public long createFormData(Logger logger, TAUserInfo userInfo,
-			int formTemplateId, int departmentId, FormDataKind kind, ReportPeriod reportPeriod, Integer periodOrder) {
-        formDataAccessService.canCreate(userInfo, formTemplateId, kind, departmentId, reportPeriod.getId());
-        return createFormDataWithoutCheck(logger, userInfo, formTemplateId, departmentId, kind, reportPeriod.getId(),
-                periodOrder, false);
-	}
-
     @Override
     public long createFormData(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentReportPeriodId, FormDataKind kind, Integer periodOrder) {
         formDataAccessService.canCreate(userInfo, formTemplateId, kind, departmentReportPeriodId);
-        return createFormDataWithoutCheck(logger, userInfo, formTemplateId, departmentId, kind, reportPeriod.getId(),
-                periodOrder, false);
-        return 0;
+        return createFormDataWithoutCheck(logger, userInfo, formTemplateId, departmentReportPeriodId, kind, periodOrder, false);
     }
 
     @Override
@@ -268,48 +222,51 @@ public class FormDataServiceImpl implements FormDataService {
         return filename.substring(dotPos);
     }
 
+    private void fillFromPrevFormData() {
+
+    }
+
     @Override
-	public long createFormDataWithoutCheck(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentId,
-                                           FormDataKind kind, int reportPeriodId, Integer periodOrder, boolean importFormData) {
+	public long createFormDataWithoutCheck(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentReportPeriodId,
+                                           FormDataKind kind, Integer periodOrder, boolean importFormData) {
 		FormTemplate formTemplate = formTemplateService.getFullFormTemplate(formTemplateId);
         FormData formData = new FormData(formTemplate);
 
         formData.setState(WorkflowState.CREATED);
-        formData.setDepartmentId(departmentId);
+        formData.setDepartmentReportPeriodId(departmentReportPeriodId);
         formData.setKind(kind);
-        formData.setReportPeriodId(reportPeriodId);
         formData.setPeriodOrder(periodOrder);
         formData.setManual(false);
 
-        // Execute scripts for the form event CREATE
-        ReportPeriod prevReportPeriod = reportPeriodService.getPrevReportPeriod(reportPeriodId);
-        FormDataPerformer performer = null;
-        if (prevReportPeriod != null) {
-            FormData formDataOld;
-            if (periodOrder == null)
-                formDataOld = formDataDao.find(formTemplate.getType().getId(), kind, departmentId, prevReportPeriod.getId());
-            else
-                formDataOld = formDataDao.findMonth(formTemplate.getType().getId(), kind, departmentId, prevReportPeriod.getId(), periodOrder);
-            if (formDataOld != null) {
-                List<FormDataSigner> signer = new ArrayList<FormDataSigner>();
-                List<FormDataSigner> signerOld = formDataOld.getSigners();
-                for (FormDataSigner formDataSignerOld : signerOld) {
-                    FormDataSigner formDataSigner = new FormDataSigner();
-                    formDataSigner.setName(formDataSignerOld.getName());
-                    formDataSigner.setPosition(formDataSignerOld.getPosition());
-                    signer.add(formDataSigner);
-                }
-                formData.setSigners(signer);
-                performer = formDataOld.getPerformer();
-            }
-        }
-        if (performer == null) {
-            performer = new FormDataPerformer();
-            performer.setName(" ");
-            performer.setPrintDepartmentId(departmentId);
-            performer.setReportDepartmentName(departmentDao.getReportDepartmentName(departmentId));
-        }
-        formData.setPerformer(performer);
+//        ReportPeriod prevReportPeriod = reportPeriodService.getPrevReportPeriod(departmentReportPeriod.getReportPeriod().getId());
+        // TODO Левыкин: Исправить в рамках http://jira.aplana.com/browse/SBRFACCTAX-6073. Вынести в отдельный метод, который должен быть покрыт тестом.
+//        FormDataPerformer performer = null;
+//        if (prevReportPeriod != null) {
+//            FormData formDataOld;
+//            if (periodOrder == null)
+//                formDataOld = formDataDao.find(formTemplate.getType().getId(), kind, departmentId, prevReportPeriod.getId());
+//            else
+//                formDataOld = formDataDao.findMonth(formTemplate.getType().getId(), kind, departmentId, prevReportPeriod.getId(), periodOrder);
+//            if (formDataOld != null) {
+//                List<FormDataSigner> signer = new ArrayList<FormDataSigner>();
+//                List<FormDataSigner> signerOld = formDataOld.getSigners();
+//                for (FormDataSigner formDataSignerOld : signerOld) {
+//                    FormDataSigner formDataSigner = new FormDataSigner();
+//                    formDataSigner.setName(formDataSignerOld.getName());
+//                    formDataSigner.setPosition(formDataSignerOld.getPosition());
+//                    signer.add(formDataSigner);
+//                }
+//                formData.setSigners(signer);
+//                performer = formDataOld.getPerformer();
+//            }
+//        }
+//        if (performer == null) {
+//            performer = new FormDataPerformer();
+//            performer.setName(" ");
+//            performer.setPrintDepartmentId(departmentId);
+//            performer.setReportDepartmentName(departmentDao.getReportDepartmentName(departmentId));
+//        }
+//        formData.setPerformer(performer);
 
         // Execute scripts for the form event CREATE
 		formDataScriptingService.executeScript(userInfo, formData,
@@ -763,8 +720,9 @@ public class FormDataServiceImpl implements FormDataService {
             return;
         }
         // Период ввода остатков не обрабатывается. Если форма ежемесячная, то только первый месяц периода может быть периодом ввода остатков.
-        if ((formData.getPeriodOrder() == null || formData.getPeriodOrder() - 1 % 3 == 0) &&
-                reportPeriodService.isBalancePeriod(formData.getReportPeriodId(), formData.getDepartmentId())) {
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(formData.getDepartmentReportPeriodId());
+
+        if ((formData.getPeriodOrder() == null || formData.getPeriodOrder() - 1 % 3 == 0) && departmentReportPeriod.isBalance()) {
             return;
         }
         ReportPeriod reportPeriod = reportPeriodDao.get(formData.getReportPeriodId());
@@ -836,8 +794,7 @@ public class FormDataServiceImpl implements FormDataService {
                     FormDataCompositionService formDataCompositionService = applicationContext.getBean(FormDataCompositionService.class);
                     ((ScriptComponentContextHolder) formDataCompositionService).setScriptComponentContext(scriptComponentContext);
                     Integer periodOrder = (destinationDFT.getKind() == FormDataKind.PRIMARY || destinationDFT.getKind() == FormDataKind.CONSOLIDATED) ? formData.getPeriodOrder() : null;
-                    formDataCompositionService.compose(destinationForm, formData.getReportPeriodId(), periodOrder,
-                            destinationDFT.getDepartmentId(), destinationDFT.getFormTypeId(), destinationDFT.getKind());
+                    formDataCompositionService.compose(destinationForm, formData.getDepartmentReportPeriodId(), periodOrder, destinationDFT.getFormTypeId(), destinationDFT.getKind());
                 } else if (destinationForm != null) {
                     String formName = destinationForm.getFormType().getName();
                     String kindName = destinationForm.getKind().getName();

@@ -6,7 +6,7 @@ insert into form_kind (id, name) values (4, 'Форма УНП');
 insert into form_kind (id, name) values (5, 'Выходная');
 
 insert into form_data(id, form_template_id, department_report_period_id, state, kind, return_sign) values (1, 1, 101, 1, 3, 0);
-insert into form_data(id, form_template_id, department_report_period_id, state, kind, return_sign) values (11, 1, 111, 1, 3,  0);
+insert into form_data(id, form_template_id, department_report_period_id, state, kind, return_sign) values (11, 1, 111, 1, 3, 0);
 insert into form_data(id, form_template_id, department_report_period_id, state, kind, return_sign) values (12, 1, 112, 1, 3, 0);
 insert into form_data(id, form_template_id, department_report_period_id, state, kind, return_sign) values (13, 1, 112, 1, 3, 0);
 

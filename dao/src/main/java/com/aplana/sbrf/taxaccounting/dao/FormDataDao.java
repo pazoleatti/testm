@@ -59,25 +59,7 @@ public interface FormDataDao {
     @Deprecated
 	FormData find(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId);
 
-    /**
-     * Поиск НФ по отчетному периоду
-     *
-     * @param formTypeId Вид НФ
-     * @param kind Тип НФ
-     * @param departmentReportPeriodId Отчетный период
-     */
-    FormData find(int formTypeId, FormDataKind kind, int departmentReportPeriodId);
-
     List<Long> findFormDataByFormTemplate(int formTemplateId);
-
-	/**
-	 * Поиск налоговой формы. Не учитывает корректирующий период, т.е. результатом могут быть как id экземпляров
-     * корректирующих и/или некорректирующих периодов.
-	 * @param departmentIds подразделения
-	 * @param reportPeriodId отчетный период
-	 * @return список налоговых форм, удовлетворяющих критерию
-	 */
-	List<FormData> find(List<Integer> departmentIds, int reportPeriodId);
 
     /**
      * Поиск ежемесячной налоговой формы (формы в корректирующем периоде не найдутся)
@@ -87,14 +69,22 @@ public interface FormDataDao {
     FormData findMonth(int formTypeId, FormDataKind kind, int departmentId, int taxPeriodId, int periodOrder);
 
     /**
-     * Поиск НФ по отчетному периоду и месяцу
+     * Поиск НФ по отчетному периоду (и месяцу)
      * Если есть формы корректирующих периодов, то вернется форма корректирующего периода с максимальной датой (CORRECT_DATE)
      * @param formTypeId Вид НФ
      * @param kind Тип НФ
      * @param departmentReportPeriodId Отчетный период
-     * @param periodOrder Порядковый номер (равен номеру месяца, при нумерации с 1)
+     * @param periodOrder Порядковый номер (равен номеру месяца, при нумерации с 1) для ежемесячных форм
      */
-    FormData findMonth(int formTypeId, FormDataKind kind, int departmentReportPeriodId, int periodOrder);
+    FormData find(int formTypeId, FormDataKind kind, int departmentReportPeriodId, Integer periodOrder);
+
+    /**
+     * Поиск НФ. Не учитывает корректирующий период, т.е. результатом могут быть как id экземпляров
+     * корректирующих и/или некорректирующих периодов.
+     * @param departmentIds подразделения
+     * @param reportPeriodId отчетный период
+     */
+    List<FormData> find(List<Integer> departmentIds, int reportPeriodId);
 
 	/**
 	 * Обновление признака возврата
@@ -210,4 +200,9 @@ public interface FormDataDao {
      * @return список экземпляров НФ
      */
     List<FormData> getFormDataListByTemplateId(Integer formTemplateId);
+
+    /**
+     * НФ созданная в последнем отчетном периоде подразделения
+     */
+    FormData getLast(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder);
 }

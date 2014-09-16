@@ -25,13 +25,6 @@ public interface FormDataAccessService {
      * @param manual признак версии ручного ввода
 	 */	
 	void canEdit(TAUserInfo userInfo, long formDataId, boolean manual);
-	
-	/**
-	 * Проверка того, что у пользователя есть права на создание карточек налоговых форм
-     * @deprecated  Неактуально с появлением корректирующих периодов
-	 */
-    @Deprecated
-	void canCreate(TAUserInfo userInfo, int formTemplateId, FormDataKind kind, int departmentId, int reportPeriodId);
 
     /**
      * Проверка разрешения пользователю создавать заданную НФ

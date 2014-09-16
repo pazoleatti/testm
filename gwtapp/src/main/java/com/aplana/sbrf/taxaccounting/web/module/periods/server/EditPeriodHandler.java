@@ -48,6 +48,5 @@ public class EditPeriodHandler extends AbstractActionHandler<EditPeriodAction, E
 
     @Override
     public void undo(EditPeriodAction editPeriodAction, EditPeriodResult editPeriodResult, ExecutionContext executionContext) throws ActionException {
-
     }
 }

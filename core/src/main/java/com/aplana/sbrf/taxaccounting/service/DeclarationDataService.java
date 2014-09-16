@@ -14,13 +14,6 @@ import java.util.List;
  * @author dsultanbekov
  */
 public interface DeclarationDataService {
-	/**
-	 * Создать декларацию в текущем отчётном периоде. Созданная декларация сразу же сохраняется в БД и возвращается идентификатор созданной записи.
-     * @deprecated Неактуально с появлением корректирующих периодов
-	 */
-    @Deprecated
-    long create(Logger logger, int declarationTemplateId, int departmentId, TAUserInfo userInfo, int reportPeriodId, String taxOrganCode, String taxOrganKpp);
-
     /**
      * Создание декларации в заданном отчетном периоде подразделения
      * @param logger - объект журнала

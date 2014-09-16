@@ -674,7 +674,7 @@ public class RefBookDepartment implements RefBookDataProvider {
             if (departmentService.getParentTB((int) depId) != null){
                 //1А.1.1
                 List<DepartmentReportPeriod> listDRP =
-                        periodService.getDRPByDepartmentIds(null, Arrays.asList((long) terrBankId));
+                        periodService.getDRPByDepartmentIds(null, Arrays.asList(terrBankId));
                 if (!listDRP.isEmpty()){
                     for (DepartmentReportPeriod drp : listDRP)
                         //1А.1.1.1
@@ -697,7 +697,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         }
         //2
         List<DepartmentReportPeriod> listDRP =
-                periodService.getDRPByDepartmentIds(Arrays.asList(TaxType.INCOME, TaxType.DEAL, TaxType.VAT), Arrays.asList(0l));
+                periodService.getDRPByDepartmentIds(Arrays.asList(TaxType.INCOME, TaxType.DEAL, TaxType.VAT), Arrays.asList(0));
         if (!listDRP.isEmpty()){
             for (DepartmentReportPeriod drp : listDRP)
                 //1А.1.1.1

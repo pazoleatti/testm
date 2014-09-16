@@ -131,7 +131,6 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
                         departmentReportPeriod.isActive(),
                         departmentReportPeriod.isBalance(),
                         departmentReportPeriod.getCorrectionDate());
-
         return id;
     }
 

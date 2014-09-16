@@ -12,14 +12,6 @@ import java.util.List;
  * @author dsultanbekov
  */
 public interface FormDataService {
-	/**
-	 * Создать налоговую форму заданного типа
-     * @deprecated Неактуально с появлением корректирующих периодов
-	 */
-    @Deprecated
-	long createFormData(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentId, FormDataKind kind,
-                        ReportPeriod reportPeriod, Integer periodOrder);
-
     /**
      * Создание НФ
      * @param logger Логгер
@@ -136,15 +128,14 @@ public interface FormDataService {
      * @param logger объект журнала
      * @param userInfo информация о пользователе, выполняющего операцию
      * @param formTemplateId идентификатор шаблона формы
-     * @param departmentId идентификатор подразделения
+     * @param departmentReportPeriodId Отчетный период подразделения
      * @param kind тип налоговой формы
-     * @param reportPeriodId идентифиуатор отчетного периода
      * @param periodOrder номер месяца для ежемесячных форм (для остальных параметр отсутствует)
      * @param importFormData признак импорта
      * @return созданный объект FormData (еще не сохранённый в БД)
      */
-	long createFormDataWithoutCheck(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentId,
-                                    FormDataKind kind, int reportPeriodId, Integer periodOrder, boolean importFormData);
+	long createFormDataWithoutCheck(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentReportPeriodId,
+                                    FormDataKind kind, Integer periodOrder, boolean importFormData);
 
 	/**
 	 * Добавляет строку в форму и выполняет соответствующие скрипты.
@@ -218,11 +209,10 @@ public interface FormDataService {
     boolean existManual(Long formDataId);
 
     /**
-     * Поиск налоговой формы. Не учитывает корректирующий период, т.е. результатом могут быть как id экземпляров
+     * Поиск НФ. Не учитывает корректирующий период, т.е. результатом могут быть как id экземпляров
      * корректирующих и/или некорректирующих периодов.
      * @param departmentIds подразделения
      * @param reportPeriodId отчетный период
-     * @return список налоговых форм, удовлетворяющих критерию
      */
     List<FormData> find(List<Integer> departmentIds, int reportPeriodId);
 

@@ -111,14 +111,13 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	private static final SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
     private static final String VALIDATION_ERR_MSG = "Операция «s» не выполнена. Обнаружены фатальные ошибки!";
 
-	@Override
-	@Transactional(readOnly = false)
-	public long create(Logger logger, int declarationTemplateId, int departmentId, TAUserInfo userInfo, int reportPeriodId, String taxOrganCode, String taxOrganKpp) {
-		declarationDataAccessService.checkEvents(userInfo, declarationTemplateId, departmentId, reportPeriodId, FormDataEvent.CREATE);
+    @Override
+    @Transactional(readOnly = false)
+    public long create(Logger logger, int declarationTemplateId, TAUserInfo userInfo, int departmentReportPeriodId, String taxOrganCode, String taxOrganKpp) {
+        declarationDataAccessService.checkEvents(userInfo, declarationTemplateId, departmentReportPeriodId, FormDataEvent.CREATE);
 
         DeclarationData newDeclaration = new DeclarationData();
-        newDeclaration.setDepartmentId(departmentId);
-        newDeclaration.setReportPeriodId(reportPeriodId);
+        newDeclaration.setDepartmentReportPeriodId(departmentReportPeriodId);
         newDeclaration.setAccepted(false);
         newDeclaration.setDeclarationTemplateId(declarationTemplateId);
         newDeclaration.setTaxOrganCode(taxOrganCode);
@@ -140,20 +139,14 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     logEntryService.save(logger.getEntries()));
         }
 
-		long id = declarationDataDao.saveNew(newDeclaration);
+        long id = declarationDataDao.saveNew(newDeclaration);
 
-		logBusinessService.add(null, id, userInfo, FormDataEvent.CREATE, null);
-		auditService.add(FormDataEvent.CREATE , userInfo, newDeclaration.getDepartmentId(),
-				newDeclaration.getReportPeriodId(),
-				declarationTemplateDao.get(newDeclaration.getDeclarationTemplateId()).getType().getName(),
-				null, null, null, null);
-		return id;
-	}
-
-    @Override
-    @Transactional(readOnly = false)
-    public long create(Logger logger, int declarationTemplateId, TAUserInfo userInfo, int departmentReportPeriodId, String taxOrganCode, String taxOrganKpp) {
-        return 0;
+        logBusinessService.add(null, id, userInfo, FormDataEvent.CREATE, null);
+        auditService.add(FormDataEvent.CREATE , userInfo, newDeclaration.getDepartmentId(),
+                newDeclaration.getReportPeriodId(),
+                declarationTemplateDao.get(newDeclaration.getDeclarationTemplateId()).getType().getName(),
+                null, null, null, null);
+        return id;
     }
 
     @Override
