@@ -96,5 +96,28 @@ DELETE FROM ref_book_attribute WHERE alias = 'APP_VERSION' AND ref_book_id = 98;
 UPDATE ref_book_attribute SET name = 'Наименование для титульного листа' WHERE id IN (217, 228, 191, 865);
 
 ---------------------------------------------------------------------------------------------------
+--http://jira.aplana.com/browse/SBRFACCTAX-8804 - "Код ТН ВЭД" в справочник "Коды драгоценных металлов"
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (1743,17,'Код ТН ВЭД','TN_VED_CODE',4,3,73,648,1,null,10,1,1,null,null,0,null);
+
+MERGE INTO ref_book_value tgt USING (WITH mapping(name, tn_ved_code) AS
+                                      (SELECT 'Палладий', 7110210001 FROM dual
+                                       UNION ALL SELECT 'Платина', 7110110001 FROM dual
+                                       UNION ALL SELECT 'Золото, его сырье и сплавы', 7108120001 FROM dual
+                                       UNION ALL SELECT 'Серебро, его сырье, сплавы и соединения', 7106910001 FROM dual)
+                                     SELECT m.name,
+                                            m.tn_ved_code,
+                                            rbv_tgt.string_value,
+                                            rbv_tgt.record_id AS src_record_id,
+                                            rbr_src.id AS src_reference_id,
+                                            1743 AS src_attribute_id
+                                     FROM mapping m
+                    JOIN ref_book_value rbv_tgt ON rbv_tgt.attribute_id = 42 AND rbv_tgt.string_value = m.name
+                    JOIN ref_book_value rbv_src ON rbv_src.attribute_id = 648 AND rbv_src.number_value = m.tn_ved_code
+                    JOIN ref_book_record rbr_src ON rbr_src.id = rbv_src.record_id AND rbr_src.status <> -1) src 
+ON (tgt.record_id = src.src_record_id AND tgt.attribute_id = src.src_attribute_id) 
+WHEN MATCHED THEN UPDATE SET tgt.reference_value = src.src_reference_id 
+WHEN NOT MATCHED THEN INSERT (tgt.record_id, tgt.attribute_id, tgt.reference_value) VALUES (src.src_record_id, src.src_attribute_id, src.src_reference_id);
+
+---------------------------------------------------------------------------------------------------
 COMMIT;
 EXIT;
