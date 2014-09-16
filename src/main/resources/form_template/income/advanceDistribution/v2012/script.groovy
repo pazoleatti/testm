@@ -20,26 +20,27 @@ import groovy.transform.Field
 // графа 1  - number
 // графа 2  - regionBank
 // графа 3  - regionBankDivision
-// графа 4  - kpp
-// графа 5  - propertyPrice
-// графа 6  - workersCount
-// графа 7  - subjectTaxCredit
-// графа 8  - calcFlag
-// графа 9  - obligationPayTax
-// графа 10 - baseTaxOf
-// графа 11 - baseTaxOfRub
-// графа 12 - subjectTaxStavka
-// графа 13 - taxSum
-// графа 14 - taxSumOutside
-// графа 15 - taxSumToPay
-// графа 16 - taxSumToReduction
-// графа 17 - everyMontherPaymentAfterPeriod
-// графа 18 - everyMonthForKvartalNextPeriod
-// графа 19 - everyMonthForSecondKvartalNextPeriod
-// графа 20 - everyMonthForThirdKvartalNextPeriod
-// графа 21 - everyMonthForFourthKvartalNextPeriod
-// графа 22 - minimizeTaxSum
-// графа 23 - amountTax
+// графа 4  - divisionName
+// графа 5  - kpp
+// графа 6  - propertyPrice
+// графа 7  - workersCount
+// графа 8  - subjectTaxCredit
+// графа 9  - calcFlag
+// графа 10  - obligationPayTax
+// графа 11 - baseTaxOf
+// графа 12 - baseTaxOfRub
+// графа 13 - subjectTaxStavka
+// графа 14 - taxSum
+// графа 15 - taxSumOutside
+// графа 16 - taxSumToPay
+// графа 17 - taxSumToReduction
+// графа 18 - everyMontherPaymentAfterPeriod
+// графа 19 - everyMonthForKvartalNextPeriod
+// графа 20 - everyMonthForSecondKvartalNextPeriod
+// графа 21 - everyMonthForThirdKvartalNextPeriod
+// графа 22 - everyMonthForFourthKvartalNextPeriod
+// графа 23 - minimizeTaxSum
+// графа 24 - amountTax
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
@@ -92,7 +93,7 @@ def refBookCache = [:]
 
 // Все атрибуты
 @Field
-def allColumns = ['number', 'regionBank', 'fix', 'regionBankDivision', 'kpp', 'propertyPrice',
+def allColumns = ['number', 'regionBank', 'fix', 'regionBankDivision', 'divisionName', 'kpp', 'propertyPrice',
         'workersCount', 'subjectTaxCredit', 'calcFlag', 'obligationPayTax',
         'baseTaxOf', 'baseTaxOfRub', 'subjectTaxStavka', 'taxSum',
         'taxSumOutside', 'taxSumToPay', 'taxSumToReduction',
@@ -111,7 +112,7 @@ def autoFillColumns = allColumns - editableColumns
 // Проверяемые на пустые значения атрибуты
 @Field
 def nonEmptyColumns = ['number', 'regionBank', 'regionBankDivision',
-        'kpp', 'propertyPrice', 'workersCount',
+        'divisionName', 'kpp', 'propertyPrice', 'workersCount',
         'subjectTaxCredit', 'calcFlag', 'obligationPayTax',
         'baseTaxOf', 'baseTaxOfRub', 'subjectTaxStavka',
         'taxSum', 'taxSumOutside', 'taxSumToPay',
@@ -207,7 +208,7 @@ void calc() {
         sumNal = new BigDecimal(getValue(sumTaxRecords, 'SUM_TAX').doubleValue())
     }
 
-    // расчет графы 2..4, 8..21
+    // расчет граф 2..5, 9..22
     for (row in dataRows) {
         // графа 2 - название подразделения
         row.regionBank = calc2(row)
@@ -219,30 +220,33 @@ void calc() {
         if (incomeParam == null || incomeParam.isEmpty()) {
             continue
         }
-        // графа 4 - кпп
+        // графа 4 - наименование подразделения в декларации
+        row.divisionName = incomeParam.ADDITIONAL_NAME?.stringValue
+
+        // графа 5 - кпп
         row.kpp = incomeParam.KPP?.stringValue
 
-        // графа 8 - Признак расчёта
+        // графа 9 - Признак расчёта
         row.calcFlag = incomeParam.get('TYPE').getReferenceValue()
 
-        // графа 9 - Обязанность по уплате налога
+        // графа 10 - Обязанность по уплате налога
         row.obligationPayTax = incomeParam.get('OBLIGATION').getReferenceValue()
 
-        // графа 10
-        row.baseTaxOf = calc10(row, propertyPriceSumm, workersCountSumm)
+        // графа 11
+        row.baseTaxOf = calc11(row, propertyPriceSumm, workersCountSumm)
 
         if (formDataEvent != FormDataEvent.COMPOSE) {
-            // графа 11
-            row.baseTaxOfRub = calc11(row, taxBase)
+            // графа 12
+            row.baseTaxOfRub = calc12(row, taxBase)
         }
-        // графа 12
-        row.subjectTaxStavka = calc12(row)
-
         // графа 13
-        row.taxSum = calc13(row)
+        row.subjectTaxStavka = calc13(row)
 
-        // графа 14..21
-        calcColumnFrom14To21(row, sumNal, reportPeriod)
+        // графа 14
+        row.taxSum = calc14(row)
+
+        // графа 15..22
+        calcColumnFrom15To22(row, sumNal, reportPeriod)
     }
 
     // Сортировка
@@ -264,7 +268,7 @@ void calc() {
         row.number = ++index
     }
 
-    // добавить строку ЦА (скорректрированный) (графа 1..21)
+    // добавить строку ЦА (скорректрированный) (графа 1..22)
     def caTotalRow = formData.createDataRow()
     caTotalRow.setAlias('ca')
     caTotalRow.fix = 'Центральный аппарат (скорректированный)'
@@ -272,11 +276,11 @@ void calc() {
     setTotalStyle(caTotalRow)
     dataRows.add(caTotalRow)
 
-    // добавить итого (графа 5..7, 10, 11, 13..21)
+    // добавить итого (графа 5..7, 10, 11, 13..22)
     def totalRow = formData.createDataRow()
     totalRow.setAlias('total')
     totalRow.fix = 'Итого'
-    totalRow.getCell('fix').colSpan = 2
+    totalRow.getCell('fix').colSpan = 3
     setTotalStyle(totalRow)
     calcTotalSum(dataRows, totalRow, totalColumns)
     dataRows.add(totalRow)
@@ -284,8 +288,7 @@ void calc() {
     // найти строку ЦА
     def caRow = findCA(dataRows)
     if (caRow != null) {
-        // расчеты для строки ЦА (скорректированный) графы 1, 3..21
-        // графа 1, 3..10, 12, 13, 15-21
+        // расчеты для строки ЦА (скорректированный)
         ['number', 'regionBankDivision', 'kpp', 'propertyPrice', 'workersCount', 'subjectTaxCredit',
                 'calcFlag', 'obligationPayTax', 'baseTaxOf', 'subjectTaxStavka', 'taxSum', 'taxSumToPay',
                 'taxSumToReduction', 'everyMontherPaymentAfterPeriod', 'everyMonthForKvartalNextPeriod',
@@ -295,18 +298,18 @@ void calc() {
         }
 
         if (formDataEvent != FormDataEvent.COMPOSE) {
-            // графа 11
+            // графа 12
             caTotalRow.baseTaxOfRub = taxBase - totalRow.baseTaxOfRub + caRow.baseTaxOfRub
         }
 
-        // графа 14
+        // графа 15
         caTotalRow.taxSumOutside = sumNal - totalRow.taxSumOutside + caRow.taxSumOutside
     }
 
     dataRowHelper.save(dataRows)
 }
 
-// графа 2 - название подразделения
+// название подразделения
 def calc2(def row) {
     def departmentParam
     if (row.regionBankDivision != null) {
@@ -325,21 +328,21 @@ def calc2(def row) {
     }
 }
 
-def calc10(def row, def propertyPriceSumm, def workersCountSumm) {
+def calc11(def row, def propertyPriceSumm, def workersCountSumm) {
     if (row.propertyPrice != null && row.workersCount != null && propertyPriceSumm > 0 && workersCountSumm > 0) {
         return roundValue((row.propertyPrice / propertyPriceSumm * 100 + row.workersCount / workersCountSumm * 100) / 2, 8)
     }
     return 0
 }
 
-def calc11(def row, def taxBase) {
+def calc12(def row, def taxBase) {
     if (row.baseTaxOf != null && taxBase != null) {
         return roundValue(taxBase * row.baseTaxOf / 100, 0)
     }
     return 0
 }
 
-def calc12(def row) {
+def calc13(def row) {
     def temp = 0
     def minimizeTaxSum = row.minimizeTaxSum ?: 0
     if (row.amountTax == null) {
@@ -361,7 +364,7 @@ def calc12(def row) {
     return temp
 }
 
-def calc13(def row) {
+def calc14(def row) {
     def temp = 0
     def minimizeTaxSum = row.minimizeTaxSum ?: 0
     if (row.baseTaxOfRub > 0) {
@@ -441,24 +444,30 @@ void logicalCheckBeforeCalc() {
         if (incomeParam == null || incomeParam.isEmpty()) {
             logger.error(errorMsg + "Не найдены настройки подразделения!")
         } else {
-            // графа 4 - кпп
+            // графа 4 - наименование подразделения в декларации
+            String errorStr = errorMsg + "Для подразделения «${departmentParam.NAME.stringValue}» на форме настроек подразделений отсутствует значение атрибута «%s»!"
+            if (incomeParam?.get('record_id')?.getNumberValue() == null || incomeParam?.get('ADDITIONAL_NAME')?.getStringValue() == null) {
+                logger.error(errorStr, "Наименование подразделения в декларации")
+            }
+
+            // графа 5 - кпп
             if (incomeParam?.get('record_id')?.getNumberValue() == null || incomeParam?.get('KPP')?.getStringValue() == null) {
-                logger.error(errorMsg + "Для подразделения «${departmentParam.NAME.stringValue}» на форме настроек подразделений отсутствует значение атрибута «КПП»!")
+                logger.error(errorStr, "КПП")
             }
 
-            // графа 8 - Признак расчёта
+            // графа 9 - Признак расчёта
             if (incomeParam?.get('TYPE')?.getReferenceValue() == null) {
-                logger.error(errorMsg + "Для подразделения «${departmentParam.NAME.stringValue}» на форме настроек подразделений отсутствует значение атрибута «Признак расчёта»!")
+                logger.error(errorStr, "Признак расчёта")
             }
 
-            // графа 9 - Обязанность по уплате налога
+            // графа 10 - Обязанность по уплате налога
             if (incomeParam?.get('OBLIGATION')?.getReferenceValue() == null) {
-                logger.error(errorMsg + "Для подразделения «${departmentParam.NAME.stringValue}» на форме настроек подразделений отсутствует значение атрибута «Обязанность по уплате налога»!")
+                logger.error(errorStr, "Обязанность по уплате налога")
             }
 
-            // графа 12
+            // графа 13
             if (incomeParam?.get('record_id')?.getNumberValue() == null || incomeParam?.get('TAX_RATE')?.getNumberValue() == null) {
-                logger.error(errorMsg + "Для подразделения «${departmentParam.NAME.stringValue}» на форме настроек подразделений отсутствует значение атрибута «Ставка налога в бюджет субъекта (%%)»!")
+                logger.error(errorStr, "Ставка налога в бюджет субъекта (%%)")
             }
         }
     }
@@ -886,7 +895,7 @@ def getTaxBase() {
  * @param sumNal значение из настроек подраздления "Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде"
  * @param reportPeriod отчетный период
  */
-void calcColumnFrom14To21(def row, def sumNal, def reportPeriod) {
+void calcColumnFrom15To22(def row, def sumNal, def reportPeriod) {
     def tmp
 
     // графа 14

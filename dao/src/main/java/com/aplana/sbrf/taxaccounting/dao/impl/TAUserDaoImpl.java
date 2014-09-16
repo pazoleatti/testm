@@ -176,7 +176,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 	@Transactional(readOnly=false)
 	@Override
 	@CacheEvict(value="User", key="#user.id", beforeInvocation=true)
-	public void updateUser(final TAUser user) throws DaoException {
+	public void updateUser(final TAUser user) {
 		try {
 			List<Object> array = new ArrayList<Object>();
 			StringBuilder sb = new StringBuilder("update sec_user set");

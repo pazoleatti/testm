@@ -124,7 +124,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     }
 
     @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+    public void setApplicationContext(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
     }
 
@@ -641,7 +641,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     @Override
     public void checkFormExistAndAccepted(int formTypeId, FormDataKind kind, int departmentId,
                                           int currentReportPeriodId, Boolean prevPeriod,
-                                          Logger logger, boolean required) throws ServiceException {
+                                          Logger logger, boolean required) {
         // определение периода формы
         ReportPeriod reportPeriod;
         if (prevPeriod) {

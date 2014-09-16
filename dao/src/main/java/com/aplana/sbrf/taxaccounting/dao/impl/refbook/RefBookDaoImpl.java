@@ -2271,7 +2271,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         ps.appendQuery(RefBook.RECORD_ID_ALIAS);
         ps.appendQuery(" FROM ");
         ps.appendQuery(tableName);
-        ps.appendQuery(" t");
+        ps.appendQuery(" frb");
 
         PreparedStatementData filterPS = new PreparedStatementData();
         SimpleFilterTreeListener simpleFilterTreeListener = applicationContext.getBean("simpleFilterTreeListener", SimpleFilterTreeListener.class);

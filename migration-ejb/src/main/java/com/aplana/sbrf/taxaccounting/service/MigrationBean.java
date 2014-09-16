@@ -50,7 +50,6 @@ public class MigrationBean implements MessageService {
     @Autowired
     private MigrationDao migrationDao;
 
-    private Connection connection;
     private Session session;
     private MessageProducer messageProducer;
 
@@ -173,6 +172,7 @@ public class MigrationBean implements MessageService {
     @Override
     public MigrationSendResult sendFiles(long[] rnus, long[] year) {
         MigrationSendResult result = new MigrationSendResult();
+        Connection connection;
         if (migrationDao == null) {
             // В dev-mode попадем сюда, это нормально
             throw new ServiceException("В Dev-mode не реализована отправка JMS-сообщений.");

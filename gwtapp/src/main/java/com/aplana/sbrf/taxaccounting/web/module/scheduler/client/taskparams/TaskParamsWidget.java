@@ -26,6 +26,7 @@ public class TaskParamsWidget extends HTMLPanel {
     /** Сообщение ошибки которые возникли при валидации */
     private String errorMessage;
     /** Панель оборачивающий текушую*/
+    @SuppressWarnings("all")
     private Panel wrapper;
 
     public TaskParamsWidget() {

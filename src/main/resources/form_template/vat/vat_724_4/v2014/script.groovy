@@ -435,7 +435,7 @@ def getTotalRow(sectionsRows, def index) {
 }
 
 void importTransportData() {
-    def xml = getTransportXML(ImportInputStream, importService, UploadFileName)
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName, 7, 1)
     addTransportData(xml)
 }
 

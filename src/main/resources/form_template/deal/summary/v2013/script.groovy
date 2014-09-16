@@ -613,26 +613,26 @@ def buildRow(def srcRow, def matrixRow) {
             break
     }
 
-    // Графа 25
-    if (formTypeId == 393 || formTypeId == 394) {
-        def values25 = getRefBookValue(64, row.dealType)
-        if (values25 != null && values25.CODE.numberValue == 2) {
-            row.dealSubjectCode1 = getRecordId(73, 'CODE', '7108120001')
-        }
-    }
-
-    // Графа 26
-    def val26 = null
+    def val25and26 = null
     switch (formTypeId) {
         case 393: // 18
-            val26 = srcRow.innerCode
+            val25and26 = srcRow.innerCode
             break
         case 394: // 19
-            val26 = srcRow.metalName
+            val25and26 = srcRow.metalName
             break
     }
-    if (val26 != null) {
-        def String innerCode = getRefBookValue(17, val26).INNER_CODE.stringValue
+    if (val25and26 != null) {
+        metal = getRefBookValue(17, val25and26)
+
+        // Графа 25
+        def values25 = getRefBookValue(64, row.dealType)
+        if (values25 != null && values25.CODE.numberValue == 2) {
+            row.dealSubjectCode1 = metal.TN_VED_CODE.referenceValue
+        }
+
+        // Графа 26
+        def String innerCode = metal.INNER_CODE.stringValue
         def String code = null;
         if ("A33".equals(innerCode)) {
             code = '17 5140'
