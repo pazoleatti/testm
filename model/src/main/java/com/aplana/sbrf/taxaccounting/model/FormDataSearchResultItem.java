@@ -36,6 +36,8 @@ public class FormDataSearchResultItem implements Serializable {
 	private DepartmentType departmentType;
 	// Идентификатор отчётного периода
 	private Integer reportPeriodId;
+    // Отчетный период подразделения
+    private Integer departmentReportPeriodId;
 	// Название отчётного периода
 	private String reportPeriodName;
     // Год отчётного периода
@@ -154,5 +156,13 @@ public class FormDataSearchResultItem implements Serializable {
     }
     public void setReturnSign(Boolean returnSign) {
         this.returnSign = returnSign;
+    }
+
+    public Integer getDepartmentReportPeriodId() {
+        return departmentReportPeriodId;
+    }
+
+    public void setDepartmentReportPeriodId(Integer departmentReportPeriodId) {
+        this.departmentReportPeriodId = departmentReportPeriodId;
     }
 }

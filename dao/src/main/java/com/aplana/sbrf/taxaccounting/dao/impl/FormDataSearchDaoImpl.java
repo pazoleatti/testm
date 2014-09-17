@@ -26,9 +26,9 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 	private static final Log logger = LogFactory.getLog(FormDataSearchDaoImpl.class);
 
     private void appendFromClause(StringBuilder sql){
-        sql.append(" FROM form_data fd, form_type ft, department dp, report_period rp, tax_period tp, log_business lb")
+        sql.append(" FROM form_data fd, department_report_period drp, form_type ft, department dp, report_period rp, tax_period tp, log_business lb")
                 .append(" WHERE EXISTS (SELECT 1 FROM FORM_TEMPLATE t WHERE t.id = fd.form_template_id AND t.type_id = ft.id)")
-                .append(" AND dp.id = fd.department_id AND rp.id = fd.report_period_id AND tp.id=rp.tax_period_id AND lb.form_data_id = fd.id AND lb.event_id = 1");
+                .append(" AND drp.id = fd.department_report_period_id and dp.id = drp.department_id AND rp.id = drp.report_period_id AND tp.id=rp.tax_period_id AND lb.form_data_id = fd.id AND lb.event_id = 1");
     }
 
 	private void appendWhereClause(StringBuilder sql, FormDataDaoFilter filter) {
@@ -51,7 +51,7 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 		if (filter.getDepartmentIds() != null && !filter.getDepartmentIds().isEmpty()) {
 			sql
                 .append(" AND ")
-                .append(transformToSqlInStatement("fd.department_id", filter.getDepartmentIds()));
+                .append(transformToSqlInStatement("dp.id", filter.getDepartmentIds()));
 		}
 
 		if (filter.getFormDataKinds() != null && !filter.getFormDataKinds().isEmpty()) {
@@ -76,7 +76,7 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
                 || filter.getAccessFilterType() == AccessFilterType.AVAILABLE_DEPARTMENTS_WITH_KIND) {
             sql
                 .append(" and ")
-                .append(SqlUtils.transformToSqlInStatement("fd.department_id", filter.getAvailableDepartmentIds()));
+                .append(SqlUtils.transformToSqlInStatement("dp.id", filter.getAvailableDepartmentIds()));
 
             if (filter.getAccessFilterType() == AccessFilterType.AVAILABLE_DEPARTMENTS_WITH_KIND) {
                 sql.append(" and fd.kind in ").append(SqlUtils.transformFormKindsToSqlInStatement(
@@ -196,30 +196,35 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
     }
 
     private final static String FIND_PAGE = "%s" +
-            "select ordDat.* from (\n" +
-            "select dat.*,  count(*) over() cnt, rownum as rn from (\n" +
-            "SELECT fd.ID as form_data_id, fd.form_template_id, fd.return_sign, fd.KIND as form_data_kind_id, fd.STATE, fd.PERIOD_ORDER as period_order, tp.year, ft.ID as form_type_id, ft.NAME as form_type_name, ft.TAX_TYPE, dp.ID as department_id, dp.NAME as department_name, dp.TYPE as department_type, rp.ID as report_period_id, rp.NAME as report_period_name %s\n" +
-            "FROM form_data fd\n" +
-            "LEFT JOIN FORM_TEMPLATE t on t.id = fd.form_template_id \n" +
-            "LEFT JOIN form_type ft on t.type_id = ft.id\n" +
-            "LEFT JOIN department dp on dp.id = fd.department_id\n" +
-            "LEFT JOIN report_period rp on rp.id = fd.report_period_id\n" +
-            "LEFT JOIN tax_period tp on tp.id=rp.tax_period_id\n" +
-            "LEFT JOIN log_business lb on lb.form_data_id = fd.id\n" +
+            "select ordDat.* from ( " +
+            "select dat.*, count(*) over() cnt, rownum as rn from ( " +
+            "SELECT fd.ID as form_data_id, fd.form_template_id, fd.return_sign, fd.KIND as form_data_kind_id, fd.STATE, " +
+            "fd.PERIOD_ORDER as period_order, tp.year, ft.ID as form_type_id, ft.NAME as form_type_name, ft.TAX_TYPE, " +
+            "dp.ID as department_id, dp.NAME as department_name, dp.TYPE as department_type, rp.ID as report_period_id, " +
+            "rp.NAME as report_period_name %s " +
+            "FROM form_data fd " +
+            "join department_report_period drp on drp.id = fd.department_report_period_id " +
+            "JOIN FORM_TEMPLATE t on t.id = fd.form_template_id " +
+            "JOIN form_type ft on t.type_id = ft.id " +
+            "JOIN department dp on dp.id = drp.department_id " +
+            "JOIN report_period rp on rp.id = drp.report_period_id " +
+            "JOIN tax_period tp on tp.id=rp.tax_period_id " +
+            "JOIN log_business lb on lb.form_data_id = fd.id " +
             "%s" +
             "  WHERE lb.event_id = 1";
 
 	@Override
-	public PagingResult<FormDataSearchResultItem> findPage(FormDataDaoFilter filter, FormDataSearchOrdering ordering, boolean ascSorting, PagingParams pageParams) {
+	public PagingResult<FormDataSearchResultItem> findPage(FormDataDaoFilter filter, FormDataSearchOrdering ordering,
+                                                           boolean ascSorting, PagingParams pageParams) {
         //Получаем иерархический имя подразделения
-        String withClause = "with hierarchical_dep_name as (SELECT LTRIM(SYS_CONNECT_BY_PATH(name, '/'), '/') as path, id\n" +
-                "                FROM department\n" +
-                "                START WITH parent_id in (select id from department where parent_id is null)\n" +
-                "                CONNECT BY PRIOR id = parent_id)\n";
+        String withClause = "with hierarchical_dep_name as (SELECT LTRIM(SYS_CONNECT_BY_PATH(name, '/'), '/') as path, id " +
+                "                FROM department " +
+                "                START WITH parent_id in (select id from department where parent_id is null) " +
+                "                CONNECT BY PRIOR id = parent_id) ";
 		StringBuilder sql = new StringBuilder(String.format(FIND_PAGE,
                 isSupportOver() ? withClause : "",
                 isSupportOver() ? ", hdn.path as  hierarchical_dep_name" : "",
-                isSupportOver() ? " LEFT JOIN hierarchical_dep_name hdn on hdn.id = fd.department_id\n": ""));
+                isSupportOver() ? " LEFT JOIN hierarchical_dep_name hdn on hdn.id = fd.department_id ": ""));
 		appendWhereClause(sql, filter);
 		appendOrderByClause(sql, ordering, ascSorting);
 		sql.append(") dat) ordDat where ordDat.rn between ? and ?")
@@ -258,6 +263,7 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
                         result.setReturnSign(rs.wasNull() ? null : 1 == returnSign);
                         result.setCount(rs.getInt("cnt"));
                         result.setHierarchicalDepName(isSupportOver() ? rs.getString("hierarchical_dep_name") : "");
+                        result.setDepartmentReportPeriodId(SqlUtils.getInteger(rs, "department_report_period_id"));
 
                         return result;
                     }
