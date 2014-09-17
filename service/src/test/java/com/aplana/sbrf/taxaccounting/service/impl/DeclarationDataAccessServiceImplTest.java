@@ -34,6 +34,7 @@ import static org.mockito.Mockito.*;
 public class DeclarationDataAccessServiceImplTest {
     private static DeclarationDataAccessServiceImpl service;
 
+    private final static int ROOT_BANK_ID = 1;
     private final static int DEPARTMENT_TB1_ID = 2;
     private final static int DEPARTMENT_TB2_ID = 3;
 
@@ -53,6 +54,10 @@ public class DeclarationDataAccessServiceImplTest {
     private final static int DECLARATION_ACCEPTED_TB1_ID = 122;
     private final static int DECLARATION_CREATED_TB2_ID = 123;
     private final static int DECLARATION_ACCEPTED_TB2_ID = 124;
+
+    private final static int BANK_REPORT_PERIOD_ID = 0;
+    private final static int TB1_REPORT_PERIOD_ID = 1;
+    private final static int TB2_REPORT_PERIOD_ID = 2;
 
     private final static int REPORT_PERIOD_ID = 1;
 
@@ -114,16 +119,16 @@ public class DeclarationDataAccessServiceImplTest {
         service = new DeclarationDataAccessServiceImpl();
 
         // На уровне Банка разрешена работа с декларациями DECLARATION_TYPE_1_ID
-        Department departmentBank = mockDepartment(Department.ROOT_BANK_ID, Department.ROOT_BANK_ID, DepartmentType.ROOT_BANK);
+        Department departmentBank = mockDepartment(ROOT_BANK_ID, ROOT_BANK_ID, DepartmentType.ROOT_BANK);
 
         // В подразделении DEPARTMENT_TB1_ID разрешена работа с декларациями DECLARATION_TYPE_1_ID
-        Department departmentTB1 = mockDepartment(DEPARTMENT_TB1_ID, Department.ROOT_BANK_ID, DepartmentType.TERR_BANK);
+        Department departmentTB1 = mockDepartment(DEPARTMENT_TB1_ID, ROOT_BANK_ID, DepartmentType.TERR_BANK);
 
         // В подразделении DEPARTMENT_TB2_ID разрешена работа с декларациями DECLARATION_TYPE_2_ID
-        Department departmentTB2 = mockDepartment(DEPARTMENT_TB2_ID, Department.ROOT_BANK_ID, DepartmentType.TERR_BANK);
+        Department departmentTB2 = mockDepartment(DEPARTMENT_TB2_ID, ROOT_BANK_ID, DepartmentType.TERR_BANK);
 
         DepartmentService departmentService = mock(DepartmentService.class);
-        when(departmentService.getDepartment(Department.ROOT_BANK_ID)).thenReturn(departmentBank);
+        when(departmentService.getDepartment(ROOT_BANK_ID)).thenReturn(departmentBank);
         when(departmentService.getDepartment(DEPARTMENT_TB1_ID)).thenReturn(departmentTB1);
         when(departmentService.getDepartment(DEPARTMENT_TB2_ID)).thenReturn(departmentTB2);
         // Привязанные подразделения
@@ -167,21 +172,17 @@ public class DeclarationDataAccessServiceImplTest {
         taxPeriod.setTaxType(TaxType.INCOME);
         when(reportPeriod.getTaxPeriod()).thenReturn(taxPeriod);
 
-        final DepartmentReportPeriod[] periods = new DepartmentReportPeriod[]{
-                mockDepartmentReportPeriodData(0, Department.ROOT_BANK_ID, reportPeriod, true, false, null),
-                mockDepartmentReportPeriodData(1, Department.ROOT_BANK_ID, reportPeriod, true, false, null),
-                mockDepartmentReportPeriodData(2, DEPARTMENT_TB1_ID, reportPeriod, true, false, null),
-                mockDepartmentReportPeriodData(3, DEPARTMENT_TB1_ID, reportPeriod, true, false, null),
-                mockDepartmentReportPeriodData(4, DEPARTMENT_TB2_ID, reportPeriod, true, false, null),
-                mockDepartmentReportPeriodData(5, DEPARTMENT_TB2_ID, reportPeriod, true, false, null)
-        };
+        final Map<Integer, DepartmentReportPeriod> periods = new HashMap<Integer, DepartmentReportPeriod>();
+        periods.put(BANK_REPORT_PERIOD_ID, mockDepartmentReportPeriodData(BANK_REPORT_PERIOD_ID, ROOT_BANK_ID, reportPeriod, true, false, null));
+        periods.put(TB1_REPORT_PERIOD_ID, mockDepartmentReportPeriodData(TB1_REPORT_PERIOD_ID, DEPARTMENT_TB1_ID, reportPeriod, true, false, null));
+        periods.put(TB2_REPORT_PERIOD_ID, mockDepartmentReportPeriodData(TB2_REPORT_PERIOD_ID, DEPARTMENT_TB2_ID, reportPeriod, true, false, null));
 
-        DeclarationData declarationCreatedBank = mockDeclarationData(DECLARATION_CREATED_BANK_ID, false, DECLARATION_TEMPLATE_1_ID, periods[0]);
-        DeclarationData declarationAcceptedBank = mockDeclarationData(DECLARATION_ACCEPTED_BANK_ID, true, DECLARATION_TEMPLATE_1_ID, periods[1]);
-        DeclarationData declarationCreatedTB1 = mockDeclarationData(DECLARATION_CREATED_TB1_ID, false, DECLARATION_TEMPLATE_1_ID, periods[2]);
-        DeclarationData declarationAcceptedTB1 = mockDeclarationData(DECLARATION_ACCEPTED_TB1_ID, true, DECLARATION_TEMPLATE_1_ID, periods[3]);
-        DeclarationData declarationCreatedTB2 = mockDeclarationData(DECLARATION_CREATED_TB2_ID, false, DECLARATION_TEMPLATE_2_ID, periods[4]);
-        DeclarationData declarationAcceptedTB2 = mockDeclarationData(DECLARATION_ACCEPTED_TB2_ID, true, DECLARATION_TEMPLATE_2_ID, periods[5]);
+        DeclarationData declarationCreatedBank = mockDeclarationData(DECLARATION_CREATED_BANK_ID, false, DECLARATION_TEMPLATE_1_ID, periods.get(BANK_REPORT_PERIOD_ID));
+        DeclarationData declarationAcceptedBank = mockDeclarationData(DECLARATION_ACCEPTED_BANK_ID, true, DECLARATION_TEMPLATE_1_ID, periods.get(BANK_REPORT_PERIOD_ID));
+        DeclarationData declarationCreatedTB1 = mockDeclarationData(DECLARATION_CREATED_TB1_ID, false, DECLARATION_TEMPLATE_1_ID, periods.get(TB1_REPORT_PERIOD_ID));
+        DeclarationData declarationAcceptedTB1 = mockDeclarationData(DECLARATION_ACCEPTED_TB1_ID, true, DECLARATION_TEMPLATE_1_ID, periods.get(TB1_REPORT_PERIOD_ID));
+        DeclarationData declarationCreatedTB2 = mockDeclarationData(DECLARATION_CREATED_TB2_ID, false, DECLARATION_TEMPLATE_2_ID, periods.get(TB2_REPORT_PERIOD_ID));
+        DeclarationData declarationAcceptedTB2 = mockDeclarationData(DECLARATION_ACCEPTED_TB2_ID, true, DECLARATION_TEMPLATE_2_ID, periods.get(TB2_REPORT_PERIOD_ID));
         DeclarationDataDao declarationDataDao = mock(DeclarationDataDao.class);
         when(declarationDataDao.get(DECLARATION_CREATED_BANK_ID)).thenReturn(declarationCreatedBank);
         when(declarationDataDao.get(DECLARATION_ACCEPTED_BANK_ID)).thenReturn(declarationAcceptedBank);
@@ -195,8 +196,8 @@ public class DeclarationDataAccessServiceImplTest {
         doAnswer(new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) {
-                Integer depRepPerId = (Integer) invocation.getArguments()[0];
-                return periods[depRepPerId];
+                Integer key = (Integer) invocation.getArguments()[0];
+                return periods.get(key);
             }
         }).when(departmentReportPeriodDao).get(anyInt());
         ReflectionTestUtils.setField(service, "departmentReportPeriodDao", departmentReportPeriodDao);
@@ -206,8 +207,8 @@ public class DeclarationDataAccessServiceImplTest {
         ReflectionTestUtils.setField(service, "reportPeriodService", reportPeriodService);
 
         SourceService sourceService = mock(SourceService.class);
-        List<DepartmentDeclarationType> bankDeclarationTypes = Collections.singletonList(mockDepartmentDeclarationType(Department.ROOT_BANK_ID, DECLARATION_TYPE_1_ID));
-        when(sourceService.getDDTByDepartment(Matchers.eq(Department.ROOT_BANK_ID), Matchers.any(TaxType.class), any(Date.class), any(Date.class))).thenReturn(bankDeclarationTypes);
+        List<DepartmentDeclarationType> bankDeclarationTypes = Collections.singletonList(mockDepartmentDeclarationType(ROOT_BANK_ID, DECLARATION_TYPE_1_ID));
+        when(sourceService.getDDTByDepartment(Matchers.eq(ROOT_BANK_ID), Matchers.any(TaxType.class), any(Date.class), any(Date.class))).thenReturn(bankDeclarationTypes);
 
         List<DepartmentDeclarationType> departmentTB1DeclarationTypes = Collections.singletonList(mockDepartmentDeclarationType(DEPARTMENT_TB1_ID, DECLARATION_TYPE_1_ID));
         when(sourceService.getDDTByDepartment(Matchers.eq(DEPARTMENT_TB1_ID), Matchers.any(TaxType.class), any(Date.class), any(Date.class))).thenReturn(departmentTB1DeclarationTypes);
@@ -362,18 +363,18 @@ public class DeclarationDataAccessServiceImplTest {
 
         // Контролёр УНП может создавать декларации в любом подразделении, если они там разрешены
         userInfo.setUser(mockUser(USER_CONTROL_UNP_ID, DEPARTMENT_TB1_ID, TARole.ROLE_CONTROL_UNP));
-        assertTrue(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, 0));
-        assertTrue(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, 2));
-        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_2_ID, 3));
-        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, 4));
-        assertTrue(canCreate(userInfo, DECLARATION_TEMPLATE_2_ID, 5));
+        assertTrue(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, BANK_REPORT_PERIOD_ID));
+        assertTrue(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, TB1_REPORT_PERIOD_ID));
+        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_2_ID, TB1_REPORT_PERIOD_ID));
+        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, TB2_REPORT_PERIOD_ID));
+        assertTrue(canCreate(userInfo, DECLARATION_TEMPLATE_2_ID, TB2_REPORT_PERIOD_ID));
 
         // Оператор не может создавать декларации
         userInfo.setUser(mockUser(USER_OPERATOR_ID, DEPARTMENT_TB1_ID, TARole.ROLE_OPER));
-        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, 1));
-        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, 2));
-        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_2_ID, 3));
-        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, 4));
-        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_2_ID, 5));
+        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, BANK_REPORT_PERIOD_ID));
+        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, TB1_REPORT_PERIOD_ID));
+        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_2_ID, TB1_REPORT_PERIOD_ID));
+        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, TB2_REPORT_PERIOD_ID));
+        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_2_ID, TB2_REPORT_PERIOD_ID));
     }
 }
