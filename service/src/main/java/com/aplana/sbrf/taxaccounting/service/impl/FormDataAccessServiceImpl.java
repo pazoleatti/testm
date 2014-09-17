@@ -717,6 +717,9 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
             for (DepartmentFormType departmentFormType : departmentFormTypes) {
                 FormData form = formDataDao.getLast(departmentFormType.getFormTypeId(), departmentFormType.getKind(),
                         departmentFormType.getDepartmentId(), reportPeriod.getId(), formData.getPeriodOrder());
+                if(form == null){
+                    continue;
+                }
                 // Если форма существует и статус отличен от "Создана"
                 if (form != null && form.getState() != WorkflowState.CREATED) {
                     throw new ServiceException("Переход невозможен, т.к. уже подготовлена/утверждена/принята вышестоящая налоговая форма.");
