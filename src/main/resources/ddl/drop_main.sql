@@ -12,6 +12,7 @@ drop sequence seq_department_report_period;
 drop sequence seq_task_context;
 drop sequence seq_log_system;
 drop sequence seq_log_business;
+drop table report;
 drop table template_changes;
 drop sequence seq_template_changes;
 drop table task_context;
