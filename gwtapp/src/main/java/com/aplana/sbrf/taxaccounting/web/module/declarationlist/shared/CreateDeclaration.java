@@ -11,9 +11,7 @@ public class CreateDeclaration extends UnsecuredActionImpl<CreateDeclarationResu
 
 	private Integer declarationTypeId;
 
-	private Integer reportPeriodId;
-
-	private Integer departmentId;
+	private Integer departmentReportPeriodId;
 
     private TaxType taxType;
 
@@ -29,21 +27,13 @@ public class CreateDeclaration extends UnsecuredActionImpl<CreateDeclarationResu
 		this.declarationTypeId = declarationTypeId;
 	}
 
-	public Integer getReportPeriodId() {
-		return reportPeriodId;
-	}
+    public Integer getDepartmentReportPeriodId() {
+        return departmentReportPeriodId;
+    }
 
-	public void setReportPeriodId(Integer reportPeriodId) {
-		this.reportPeriodId = reportPeriodId;
-	}
-
-	public Integer getDepartmentId() {
-		return departmentId;
-	}
-
-	public void setDepartmentId(Integer departmentId) {
-		this.departmentId = departmentId;
-	}
+    public void setDepartmentReportPeriodId(Integer departmentReportPeriodId) {
+        this.departmentReportPeriodId = departmentReportPeriodId;
+    }
 
     public TaxType getTaxType() {
         return taxType;

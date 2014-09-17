@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-
 public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPresenter.MyView> implements CreateFormDataUiHandlers {
     private final PlaceManager placeManager;
     private final DispatchAsync dispatchAsync;
@@ -67,10 +66,10 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
         LogCleanEvent.fire(this);
         LogShowEvent.fire(this, false);
         CreateFormData action = new CreateFormData();
-        action.setDepartmentId(filterFormData.getDepartmentIds().iterator().next());
+        // TODO Передать отчетный период подразделения http://jira.aplana.com/browse/SBRFACCTAX-8840
+        action.setDepartmentReportPeriodId(-1);
         action.setFormDataKindId(filterFormData.getFormDataKind().get(0).intValue());
         action.setFormDataTypeId(filterFormData.getFormTypeId().get(0).intValue());
-        action.setReportPeriodId(filterFormData.getReportPeriodIds().iterator().next());
         if (filterFormData.getFormMonth() != null) {
             action.setMonthId(filterFormData.getFormMonth().getId());
         }

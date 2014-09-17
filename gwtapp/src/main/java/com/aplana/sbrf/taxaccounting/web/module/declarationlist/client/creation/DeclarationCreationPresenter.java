@@ -19,15 +19,12 @@ import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-
 
 /**
  * Диалог создания декларации
  */
-
 public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCreationPresenter.MyView> implements DeclarationCreationUiHandlers {
 
 	public interface MyView extends PopupView, HasUiHandlers<DeclarationCreationUiHandlers> {
@@ -71,19 +68,6 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
 		getView().hide();
 	}
 
-	public void setDeclarationFilter(DeclarationDataFilter filter) {
-
-		if(filter.getDeclarationTypeId() != null){
-			getView().setSelectedDeclarationType(filter.getDeclarationTypeId());
-		}
-		if(filter.getDepartmentIds()!= null && filter.getDepartmentIds().size() == 1){
-			getView().setSelectedDepartment(Arrays.asList(filter.getDepartmentIds().get(0)));
-		}
-		if (filter.getReportPeriodIds()!=null && filter.getReportPeriodIds().size() == 1){
-			getView().setSelectedReportPeriod(Arrays.asList(filter.getReportPeriodIds().get(0)));
-		}
-	}
-
 	@Override
 	public void onContinue() {
 		final DeclarationDataFilter filter = new DeclarationDataFilter();
@@ -112,8 +96,9 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
                             } else {
 								CreateDeclaration command = new CreateDeclaration();
 								command.setDeclarationTypeId(filter.getDeclarationTypeId());
-								command.setDepartmentId(filter.getDepartmentIds().iterator().next());
-								command.setReportPeriodId(filter.getReportPeriodIds().iterator().next());
+                                // TODO Передать отчетный период подразделения http://jira.aplana.com/browse/SBRFACCTAX-8840
+                                command.setDepartmentReportPeriodId(-1);
+
                                 command.setTaxOrganCode(filter.getTaxOrganCode());
                                 command.setTaxOrganKpp(filter.getTaxOrganKpp());
                                 command.setTaxType(taxType);

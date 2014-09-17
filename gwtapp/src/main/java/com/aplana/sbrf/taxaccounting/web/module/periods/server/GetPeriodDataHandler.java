@@ -3,9 +3,10 @@ package com.aplana.sbrf.taxaccounting.web.module.periods.server;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.Notification;
+import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
+import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.NotificationService;
-import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.GetPeriodDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.GetPeriodDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.TableRow;
@@ -24,13 +25,13 @@ import java.util.*;
 public class GetPeriodDataHandler extends AbstractActionHandler<GetPeriodDataAction, GetPeriodDataResult> {
 
 	@Autowired
-	private	PeriodService periodService;
-
-	@Autowired
 	private DepartmentService departmentService;
 
     @Autowired
     private NotificationService notificationService;
+
+    @Autowired
+    private DepartmentReportPeriodService departmentReportPeriodService;
 
 	public GetPeriodDataHandler() {
 		super(GetPeriodDataAction.class);
@@ -40,9 +41,12 @@ public class GetPeriodDataHandler extends AbstractActionHandler<GetPeriodDataAct
 	public GetPeriodDataResult execute(GetPeriodDataAction action, ExecutionContext executionContext) throws ActionException {
 		GetPeriodDataResult res = new GetPeriodDataResult();
 
-
 		Map<Integer, List<TableRow>> per = new TreeMap<Integer, List<TableRow>>();
-		List<DepartmentReportPeriod> drp = periodService.listByDepartmentIdAndTaxType(action.getDepartmentId(), action.getTaxType());
+        DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
+        filter.setDepartmentIdList(Arrays.asList(action.getDepartmentId()));
+        filter.setTaxTypeList(Arrays.asList(action.getTaxType()));
+
+		List<DepartmentReportPeriod> drp = departmentReportPeriodService.getListByFilter(filter);
 		List<Integer> depIds = new ArrayList<Integer>();
 		for (DepartmentReportPeriod d : drp) {
 			depIds.add(d.getDepartmentId().intValue());

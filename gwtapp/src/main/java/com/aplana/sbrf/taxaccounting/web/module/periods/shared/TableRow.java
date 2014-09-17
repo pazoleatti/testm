@@ -6,15 +6,15 @@ import java.util.Date;
 public class TableRow implements Serializable {
 
 	private int id;
-	private long reportPeriodId;
-	private long departmentId;
+	private int reportPeriodId;
+	private int departmentId;
 	private String periodKind;
 	private String periodName;
 	private Boolean periodCondition;
 	private boolean isSubHeader;
     private Boolean balance;
 	int year; //TODO Возможно не  нужно хранить дату в каждом экземпляре
-    private int dictTaxPeriodId;
+    private long dictTaxPeriodId;
     private int ord; // Порядок следования в налоговом периоде
 
 	public int getYear() {
@@ -40,15 +40,15 @@ public class TableRow implements Serializable {
 		return reportPeriodId;
 	}
 
-	public void setReportPeriodId(long reportPeriodId) {
+	public void setReportPeriodId(int reportPeriodId) {
 		this.reportPeriodId = reportPeriodId;
 	}
 
-	public long getDepartmentId() {
+	public int getDepartmentId() {
 		return departmentId;
 	}
 
-	public void setDepartmentId(long departmentId) {
+	public void setDepartmentId(int departmentId) {
 		this.departmentId = departmentId;
 	}
 
@@ -108,11 +108,11 @@ public class TableRow implements Serializable {
         this.correctPeriod = correctPeriod;
     }
 
-    public int getDictTaxPeriodId() {
+    public long getDictTaxPeriodId() {
         return dictTaxPeriodId;
     }
 
-    public void setDictTaxPeriodId(int dictTaxPeriodId) {
+    public void setDictTaxPeriodId(long dictTaxPeriodId) {
         this.dictTaxPeriodId = dictTaxPeriodId;
     }
 

@@ -579,7 +579,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                         break;
                                 }
 
-	                            manageButtonsForFormInClosedPeriod(result.isFormInClosedPeriod());
+	                            manageButtonsForFormInClosedPeriod(!result.getDepartmentReportPeriod().isActive());
 
                                 manageDeleteRowButtonEnabled();
 

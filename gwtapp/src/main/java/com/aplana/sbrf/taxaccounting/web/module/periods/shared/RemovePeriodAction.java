@@ -8,7 +8,7 @@ import java.util.Date;
 public class RemovePeriodAction extends UnsecuredActionImpl<RemovePeriodResult> {
 	Integer reportPeriodId;
 	TaxType taxType;
-	long departmentId;
+	int departmentId;
     Date correctionDate;
 
 	public Integer getReportPeriodId() {
@@ -27,11 +27,11 @@ public class RemovePeriodAction extends UnsecuredActionImpl<RemovePeriodResult> 
 		this.taxType = taxType;
 	}
 
-	public long getDepartmentId() {
+	public int getDepartmentId() {
 		return departmentId;
 	}
 
-	public void setDepartmentId(long departmentId) {
+	public void setDepartmentId(int departmentId) {
 		this.departmentId = departmentId;
 	}
 
