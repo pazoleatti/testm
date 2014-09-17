@@ -69,11 +69,11 @@ public interface FormDataDao {
     FormData findMonth(int formTypeId, FormDataKind kind, int departmentId, int taxPeriodId, int periodOrder);
 
     /**
-     * Поиск НФ по отчетному периоду (и месяцу)
+     * Поиск НФ по отчетному периоду подразделения (и месяцу)
      * Если есть формы корректирующих периодов, то вернется форма корректирующего периода с максимальной датой (CORRECT_DATE)
      * @param formTypeId Вид НФ
      * @param kind Тип НФ
-     * @param departmentReportPeriodId Отчетный период
+     * @param departmentReportPeriodId Отчетный период подразделения
      * @param periodOrder Порядковый номер (равен номеру месяца, при нумерации с 1) для ежемесячных форм
      */
     FormData find(int formTypeId, FormDataKind kind, int departmentReportPeriodId, Integer periodOrder);
@@ -202,7 +202,8 @@ public interface FormDataDao {
     List<FormData> getFormDataListByTemplateId(Integer formTemplateId);
 
     /**
-     * НФ созданная в последнем отчетном периоде подразделения
+     * НФ созданная в последнем отчетном периоде подразделения, если в нем нет формы, то берется форма из предудущего
+     * отчетного периода подразделения и т.д. в рамках отчетного периода
      */
     FormData getLast(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder);
 }

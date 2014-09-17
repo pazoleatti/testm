@@ -64,7 +64,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         formData.setPeriodOrder(rs.wasNull() ? null : SqlUtils.getInteger(rs, "period_order"));
     }
 
-    // Маппер экземпляра НФ с фиксированными строками из шаблоне
+    // Маппер экземпляра НФ с фиксированными строками из шаблона
     private class FormDataRowMapper implements RowMapper<FormData> {
         @Override
         public FormData mapRow(ResultSet rs, int index) throws SQLException {
@@ -140,12 +140,12 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         if (formData.getId() == null) {
             formDataId = generateId("seq_form_data", Long.class);
             getJdbcTemplate().update(
-                    "insert into form_data (id, form_template_id, department_report_period_id, kind, state, return_sign, " +
-                            "period_order, number_previous_row) " +
-                            "values (?, ?, ?, ?, ?, ?, ?, ?)",
+                    "insert into form_data (id, form_template_id, department_report_period_id, kind, state, " +
+                            "return_sign, period_order, number_previous_row) " +
+                            "values (?, ?, ?, ?, ?, 0, ?, ?)",
                     formDataId, formData.getFormTemplateId(),
                     formData.getDepartmentReportPeriodId(), formData.getKind().getId(),
-                    formData.getState().getId(), 0, formData.getPeriodOrder(), formData.getPreviousRowNumber());
+                    formData.getState().getId(), formData.getPeriodOrder(), formData.getPreviousRowNumber());
             formData.setId(formDataId);
         } else {
             formDataId = formData.getId();
@@ -267,24 +267,18 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 
     @Override
     public FormData find(int formTypeId, FormDataKind kind, int departmentReportPeriodId, Integer periodOrder) {
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(departmentReportPeriodId);
-        TaxPeriod taxPeriod = departmentReportPeriod.getReportPeriod().getTaxPeriod();
         try {
-            return getJdbcTemplate().queryForObject("select * " +
-                    "from (select fd.id, fd.form_template_id, fd.state, fd.kind, " +
+            return getJdbcTemplate().queryForObject("select fd.id, fd.form_template_id, fd.state, fd.kind, " +
                     "fd.return_sign, fd.period_order, fd.number_previous_row, fd.department_report_period_id, " +
-                    "drp.report_period_id, drp.department_id, rownum " +
+                    "drp.report_period_id, drp.department_id " +
                     "from form_data fd, department_report_period drp " +
                     "where drp.id = fd.department_report_period_id " +
                     "and exists (select 1 from form_template ft where fd.form_template_id = ft.id and ft.type_id = ?) " +
-                    "and fd.kind = ? and drp.department_id = ? and drp.report_period_id in " +
-                    "(select id from report_period where tax_period_id = ?) and (? is null or fd.period_order = ?) " +
-                    "order by drp.correction_date desc nulls last) where rownum = 1",
+                    "and fd.kind = ? and drp.id = ? and (? is null or fd.period_order = ?) ",
                     new Object[]{
                             formTypeId,
                             kind.getId(),
-                            departmentReportPeriod.getDepartmentId(),
-                            taxPeriod.getId(),
+                            departmentReportPeriodId,
                             periodOrder,
                             periodOrder},
                     new FormDataWithoutRowMapper());
@@ -525,20 +519,17 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
             return getJdbcTemplate().queryForObject(
                     "select * from " +
                             "(select fd.id, fd.form_template_id, fd.state, fd.kind, fd.return_sign, fd.period_order, " +
-                            "fd.number_previous_row, r.manual, fd.department_report_period_id, drp.report_period_id, " +
-                            "drp.department_id " +
-                            "from form_data fd left join (select max(manual) as manual, form_data_id " +
-                            "from data_row group by form_data_id) r " +
-                            "on (r.form_data_id = fd.id), " +
-                            "department_report_period drp, form_template ft " +
+                            "fd.number_previous_row, fd.department_report_period_id, drp.report_period_id, " +
+                            "drp.department_id, rownum as rn " +
+                            "from form_data fd, department_report_period drp, form_template ft " +
                             "where drp.id = fd.department_report_period_id " +
                             "and ft.id = fd.form_template_id " +
-                            "and department_id = ? and report_period_id = ? " +
+                            "and drp.department_id = ? and drp.report_period_id = ? " +
                             "and ft.type_id = ? " +
                             "and fd.kind = ? " +
                             "and (? is null or fd.period_order = ?) " +
-                            "order by correction_date desc nulls last) " +
-                            "where rownum = 1",
+                            "order by drp.correction_date desc nulls last) " +
+                            "where rn = 1",
                     new Object[]{departmentId, reportPeriodId, formTypeId, kind.getId(), periodOrder, periodOrder},
                     new int[]{Types.NUMERIC, Types.NUMERIC, Types.NUMERIC, Types.NUMERIC, Types.NUMERIC, Types.NUMERIC},
                     new FormDataWithoutRowMapper());

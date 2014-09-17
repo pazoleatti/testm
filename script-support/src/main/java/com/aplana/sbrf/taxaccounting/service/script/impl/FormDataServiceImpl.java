@@ -46,6 +46,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     private ScriptComponentContext scriptComponentContext;
 
     private static final String FIND_ERROR = "FormData не сохранена, id = null.";
+    private static final String CHECK_UNIQ_ERROR = "Налоговая форма с заданными параметрами уже существует!";
     private static final String REF_BOOK_ROW_NOT_FOUND_ERROR = "Строка %d, графа «%s» содержит значение, отсутствующее в справочнике «%s»!";
     private static final String REF_BOOK_NOT_FOUND_ERROR = "В справочнике «%s» не найдено значение «%s», соответствующее атрибуту «%s»!";
     private static final String WRONG_FORM_IS_NOT_ACCEPTED = "Не найдены экземпляры «%s» за %s в статусе «Принята». Расчеты не могут быть выполнены.";
@@ -671,5 +672,19 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
                 logger.warn("%s", msg);
             }
         }
+    }
+
+    @Override
+    public boolean checkUnique(FormData formData, Logger logger) {
+        // поиск формы с учетом периодичности
+        FormData existingFormData = dao.find(formData.getFormType().getId(), formData.getKind(),
+                formData.getDepartmentReportPeriodId().intValue(), formData.getPeriodOrder());
+
+        // форма найдена
+        if (existingFormData != null) {
+            logger.error(CHECK_UNIQ_ERROR);
+            return false;
+        }
+        return true;
     }
 }

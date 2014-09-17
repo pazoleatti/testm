@@ -244,4 +244,9 @@ public interface FormDataService {
     void checkMonthlyFormExistAndAccepted(int formTypeId, FormDataKind kind, int departmentId,
                                                  int currentReportPeriodId, Integer currentPeriodOrder, Boolean prevPeriod,
                                                  Logger logger, boolean required);
+
+    /**
+     * Проверка формы на уникальность с аналогичными параметрам
+     */
+    boolean checkUnique(FormData formData, Logger logger);
 }

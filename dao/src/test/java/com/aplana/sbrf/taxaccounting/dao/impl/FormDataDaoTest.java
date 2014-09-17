@@ -49,6 +49,8 @@ public class FormDataDaoTest {
     @Autowired
     ReportPeriodDao reportPeriodDao;
 
+    private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
+
     @Test
     public void getTest() {
         FormData formData = formDataDao.get(1, null);
@@ -225,7 +227,7 @@ public class FormDataDaoTest {
         formData.setKind(FormDataKind.PRIMARY);
         long id = formDataDao.save(formData);
 
-        formData = formDataDao.find(2, FormDataKind.PRIMARY, 115, Integer.valueOf(4));
+        formData = formDataDao.find(2, FormDataKind.PRIMARY, 1000, Integer.valueOf(4));
         Assert.assertNotNull(formData);
         Assert.assertEquals(id, formData.getId().intValue());
     }
@@ -334,7 +336,7 @@ public class FormDataDaoTest {
     }
 
     @Test
-    public void getLastTest() {
+    public void getLast1Test() {
         // Ежемесячная НФ
         FormData formData = formDataDao.getLast(1, FormDataKind.PRIMARY, 1, 20, 3);
         Assert.assertNotNull(formData);
@@ -343,5 +345,95 @@ public class FormDataDaoTest {
         formData = formDataDao.getLast(1, FormDataKind.SUMMARY, 1, 12, null);
         Assert.assertNotNull(formData);
         Assert.assertEquals(12, formData.getId().intValue());
+    }
+
+    @Test
+    public void getLast2Test() throws ParseException {
+        // Более сложный случай — периодов несколько
+        final int typeId = 1;
+        final int departmentId = 1;
+        Date data1 = SIMPLE_DATE_FORMAT.parse("01.01.2015");
+        Date data2 = SIMPLE_DATE_FORMAT.parse("31.12.2015");
+
+        TaxPeriod taxPeriod = new TaxPeriod();
+        taxPeriod.setYear(2015);
+        taxPeriod.setTaxType(TaxType.INCOME);
+        final int taxPeriodId = taxPeriodDao.add(taxPeriod);
+
+        ReportPeriod reportPeriod = new ReportPeriod();
+        reportPeriod.setCalendarStartDate(data1);
+        reportPeriod.setStartDate(data1);
+        reportPeriod.setEndDate(data2);
+        reportPeriod.setName("Name");
+        reportPeriod.setTaxPeriod(taxPeriodDao.get(taxPeriodId));
+        reportPeriod.setDictTaxPeriodId(21);
+
+        final int reportPeriodId = reportPeriodDao.save(reportPeriod);
+
+        // Закрытый обычный период
+        DepartmentReportPeriod departmentReportPeriod1 = new DepartmentReportPeriod();
+        departmentReportPeriod1.setBalance(false);
+        departmentReportPeriod1.setActive(false);
+        departmentReportPeriod1.setReportPeriod(reportPeriodDao.get(reportPeriodId));
+        departmentReportPeriod1.setDepartmentId(departmentId);
+        final int departmentReportPeriodId1 = departmentReportPeriodDao.save(departmentReportPeriod1);
+
+        // Закрытый корректирующий период
+        DepartmentReportPeriod departmentReportPeriod2 = new DepartmentReportPeriod();
+        departmentReportPeriod2.setBalance(false);
+        departmentReportPeriod2.setActive(false);
+        departmentReportPeriod2.setReportPeriod(reportPeriodDao.get(reportPeriodId));
+        departmentReportPeriod2.setDepartmentId(departmentId);
+        departmentReportPeriod2.setCorrectionDate(SIMPLE_DATE_FORMAT.parse("01.01.2013"));
+        final int departmentReportPeriodId2 = departmentReportPeriodDao.save(departmentReportPeriod2);
+
+        // Открытый корректирующий период
+        DepartmentReportPeriod departmentReportPeriod3 = new DepartmentReportPeriod();
+        departmentReportPeriod3.setBalance(false);
+        departmentReportPeriod3.setActive(true);
+        departmentReportPeriod3.setReportPeriod(reportPeriodDao.get(reportPeriodId));
+        departmentReportPeriod3.setDepartmentId(departmentId);
+        departmentReportPeriod3.setCorrectionDate(SIMPLE_DATE_FORMAT.parse("03.01.2013"));
+        final int departmentReportPeriodId3 = departmentReportPeriodDao.save(departmentReportPeriod3);
+
+        // НФ нет
+        FormData formData = formDataDao.getLast(typeId, FormDataKind.PRIMARY, departmentId, reportPeriodId, null);
+        Assert.assertNull(formData);
+
+        FormTemplate formTemplate = formTemplateDao.get(typeId);
+
+        // НФ в первом периоде
+        FormData formData1 = new FormData(formTemplate);
+        formData1.setDepartmentReportPeriodId(departmentReportPeriodId1);
+        formData1.setKind(FormDataKind.PRIMARY);
+        formData1.setState(WorkflowState.CREATED);
+        final long fd1 = formDataDao.save(formData1);
+        System.out.println("fd1 = " + fd1);
+        formData = formDataDao.getLast(typeId, FormDataKind.PRIMARY, departmentId, reportPeriodId, null);
+        Assert.assertNotNull(formData);
+        Assert.assertEquals(fd1, formData.getId().longValue());
+
+        // НФ во втором периоде
+        FormData formData2 = new FormData(formTemplate);
+        formData2.setDepartmentReportPeriodId(departmentReportPeriodId2);
+        formData2.setKind(FormDataKind.PRIMARY);
+        formData2.setState(WorkflowState.CREATED);
+        final long fd2 = formDataDao.save(formData2);
+        System.out.println("fd2 = " + fd2);
+        formData = formDataDao.getLast(typeId, FormDataKind.PRIMARY, departmentId, reportPeriodId, null);
+        Assert.assertNotNull(formData);
+        Assert.assertEquals(fd2, formData.getId().longValue());
+
+        // НФ в третьем периоде
+//        FormData formData3 = new FormData(formTemplate);
+//        formData3.setDepartmentReportPeriodId(departmentReportPeriodId3);
+//        formData3.setKind(FormDataKind.PRIMARY);
+//        formData3.setState(WorkflowState.CREATED);
+//        final long fd3 = formDataDao.save(formData3);
+//        System.out.println("fd3 = " + fd3);
+//        formData = formDataDao.getLast(typeId, FormDataKind.PRIMARY, departmentId, reportPeriodId, null);
+//        Assert.assertNotNull(formData);
+//        Assert.assertEquals(fd3, formData.getId().longValue());
+
     }
 }
