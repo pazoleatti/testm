@@ -816,3 +816,24 @@ comment on table async_task_type is 'Типы асинхронных задач'
 comment on column async_task_type.id is 'Идентификатор строки';
 comment on column async_task_type.name is 'Название типа задачи';
 comment on column async_task_type.handler_jndi is 'JNDI имя класса-обработчика';
+
+--------------------------------------------------------------------------------------------------------
+create table report
+(
+form_data_id number(18) not null,
+blob_data_id varchar2(36) not null,
+type number(1) not null,
+checking number(1) not null,
+manual number(1) not null,
+absolute number(1) not null
+);
+
+comment on table report is 'Отчет';
+comment on column report.form_data_id is 'Идентификатор налоговой формы';
+comment on column report.blob_data_id is 'Идентификатор отчета';
+comment on column report.type is 'Тип отчета (0 - Excel, 1 - CSV, 2 - PDF, 3 - Jasper)';
+comment on column report.manual is 'Режим ввода данных (0 - обычная версия; 1 - версия ручного ввода)'; 
+comment on column report.checking is 'Типы столбцов (0 - только обычные, 1 - вместе с контрольными)';
+comment on column report.absolute is 'Режим вывода данных (0 - только дельты, 1 - абсолютные значения)';
+
+--------------------------------------------------------------------------------------------------------

@@ -102,5 +102,26 @@ ALTER TABLE log_system ADD CONSTRAINT log_system_chk_rp CHECK (event_id IN (7, 1
 DROP TABLE object_lock;
 
 ---------------------------------------------------------------------------------------------------
+-- http://jira.aplana.com/browse/SBRFACCTAX-8861 - Связь НФ с таблицей BLOB_DATA
+CREATE TABLE report (form_data_id number(18) NOT NULL, blob_data_id varchar2(36) NOT NULL, type number(1) NOT NULL, checking number(1) NOT NULL, manual number(1) NOT NULL, absolute number(1) NOT NULL);
+
+COMMENT ON TABLE report IS 'Отчет';
+COMMENT ON COLUMN report.form_data_id IS 'Идентификатор налоговой формы';
+COMMENT ON COLUMN report.blob_data_id IS 'Идентификатор отчета';
+COMMENT ON COLUMN report.TYPE IS 'Тип отчета (0 - Excel, 1 - CSV, 2 - PDF, 3 - Jasper)';
+COMMENT ON COLUMN report.manual IS 'Режим ввода данных (0 - обычная версия; 1 - версия ручного ввода)';
+COMMENT ON COLUMN report.checking IS 'Типы столбцов (0 - только обычные, 1 - вместе с контрольными)';
+COMMENT ON COLUMN report.ABSOLUTE IS 'Режим вывода данных (0 - только дельты, 1 - абсолютные значения)';
+
+ALTER TABLE report ADD CONSTRAINT report_pk PRIMARY KEY (form_data_id,type, manual,checking,absolute);
+
+ALTER TABLE report ADD CONSTRAINT report_fk_form_data_id FOREIGN KEY (form_data_id) REFERENCES form_data(id);
+ALTER TABLE report ADD CONSTRAINT report_fk_blob_data_id FOREIGN KEY (blob_data_id) REFERENCES blob_data(id);
+ALTER TABLE report ADD CONSTRAINT report_chk_type CHECK (type IN (0,1,2,3));
+ALTER TABLE report ADD CONSTRAINT report_chk_manual CHECK (manual IN (0,1));
+ALTER TABLE report ADD CONSTRAINT report_chk_checking CHECK (checking IN (0,1));
+ALTER TABLE report ADD CONSTRAINT report_chk_absolute CHECK (absolute IN (0,1));
+
+---------------------------------------------------------------------------------------------------
 COMMIT;
 EXIT;
