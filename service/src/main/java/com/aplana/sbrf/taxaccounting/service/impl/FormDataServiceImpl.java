@@ -813,21 +813,20 @@ public class FormDataServiceImpl implements FormDataService {
 
     @Override
     public FormData findFormData(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder) {
-        // TODO Переписать
         if (periodOrder == null || kind != FormDataKind.PRIMARY && kind != FormDataKind.CONSOLIDATED) {
             // Если форма-источник квартальная или форма-приемник не является первичной или консолидированной, то ищем квартальный экземпляр
-            return formDataDao.find(formTypeId, kind, departmentId, reportPeriodId);
-        } else {
-            // Если форма-источник ежемесячная и форма приемник является первичной или консолидированной, то ищем ежемесячный экземпляр
-            Integer taxPeriodId = reportPeriodService.getReportPeriod(reportPeriodId).getTaxPeriod().getId();
-            return formDataDao.findMonth(formTypeId, kind, departmentId, taxPeriodId, periodOrder);
+            periodOrder = null;
         }
+        return formDataDao.getLast(formTypeId, kind, departmentId, reportPeriodId, periodOrder);
     }
 
     @Override
     public FormData findFormData(int formTypeId, FormDataKind kind, int departmentReportPeriodId, Integer periodOrder) {
-        // TODO
-        return null;
+        if (periodOrder == null || kind != FormDataKind.PRIMARY && kind != FormDataKind.CONSOLIDATED) {
+            // Если форма-источник квартальная или форма-приемник не является первичной или консолидированной, то ищем квартальный экземпляр
+            periodOrder = null;
+        }
+        return formDataDao.find(formTypeId, kind, departmentReportPeriodId, periodOrder);
     }
 
     @Override

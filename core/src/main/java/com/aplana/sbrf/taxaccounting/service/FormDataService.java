@@ -159,7 +159,7 @@ public interface FormDataService {
 
     /**
      * Поиск формы в отчетном периоде
-     * При наличии нескольких отчетных периодов подразделений будет использован открытый (м.б. только один)
+     * При наличии нескольких отчетных периодов подразделений будет использован последний
     */
     FormData findFormData(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder);
 

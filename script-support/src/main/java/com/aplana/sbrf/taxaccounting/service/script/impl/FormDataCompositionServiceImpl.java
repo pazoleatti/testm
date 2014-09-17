@@ -85,14 +85,14 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
 
             String formName = formData.getFormType().getName();
             String kindName = formData.getKind().getName();
-            String depatmentName = departmentService.get(formData.getDepartmentId()).getName();
+            String departmentName = departmentService.get(formData.getDepartmentId()).getName();
             if (scriptComponentContext.getLogger().containsLevel(LogLevel.ERROR)) {
                 throw new ServiceLoggerException("Налоговая форма-приемник не сформирована: Подразделение: «%s», Тип: «%s», Вид: «%s».",
                         logEntryService.save(scriptComponentContext.getLogger().getEntries()),
-                        depatmentName, kindName, formName);
+                        departmentName, kindName, formName);
             } else {
                 scriptComponentContext.getLogger().info("%s: %s налоговая форма-приемник: Подразделение: «%s», Тип: «%s», Вид: «%s».",
-                        FormDataEvent.COMPOSE.getTitle(), isRecompose? "Переформирована" : "Сформирована", depatmentName, kindName, formName);
+                        FormDataEvent.COMPOSE.getTitle(), isRecompose? "Переформирована" : "Сформирована", departmentName, kindName, formName);
             }
 
             formDataDao.save(formData);
