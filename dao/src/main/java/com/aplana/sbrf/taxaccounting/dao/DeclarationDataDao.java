@@ -68,7 +68,7 @@ public interface DeclarationDataDao {
     List<Long> findIdsByFilter(DeclarationDataFilter declarationDataFilter, DeclarationDataSearchOrdering ordering, boolean ascSorting);
 
 	/**
-	 * Ищет декларацию по заданным параметрам.
+	 * Ищет декларацию по заданным параметрам (декларации в корректирующем периоде не найдутся)
      * @deprecated Не актуально с появлением корректирующих периодов
 	 */
     @Deprecated
@@ -88,7 +88,6 @@ public interface DeclarationDataDao {
 
     /**
      * Обновление данных декларации(как правило только ссылки на blob_data)
-     * @param declarationData
      */
     void update(DeclarationData declarationData);
 

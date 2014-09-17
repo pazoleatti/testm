@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.script.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.script.FormDataCacheDao;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -21,7 +20,6 @@ import com.aplana.sbrf.taxaccounting.service.script.refbook.RefBookService;
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContext;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
@@ -48,14 +46,9 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     private ScriptComponentContext scriptComponentContext;
 
     private static final String FIND_ERROR = "FormData не сохранена, id = null.";
-
     private static final String REF_BOOK_ROW_NOT_FOUND_ERROR = "Строка %d, графа «%s» содержит значение, отсутствующее в справочнике «%s»!";
     private static final String REF_BOOK_NOT_FOUND_ERROR = "В справочнике «%s» не найдено значение «%s», соответствующее атрибуту «%s»!";
-    private static final String REF_BOOK_DEREFERENCE_ERROR = "Строка %d, графа «%s»: В справочнике «%s» не найден элемент с id = %d»!";
-    private static final String CHECK_UNIQ_ERROR = "Налоговая форма с заданными параметрами уже существует!";
-    private static final String CHECK_BALANCE_PERIOD_ERROR = "Налоговая форма не может создаваться в периоде ввода остатков!";
-    private static final String WRONG_FORM_IS_NOT_ACCEPTED = "Не найдены экземпляры «%s» за %s в статусе «Принята». " +
-            "Расчеты не могут быть выполнены.";
+    private static final String WRONG_FORM_IS_NOT_ACCEPTED = "Не найдены экземпляры «%s» за %s в статусе «Принята». Расчеты не могут быть выполнены.";
     private static final String REF_BOOK_TOO_MANY_FOUND_ERROR = "В справочнике «%s» содержится более одного раза значение «%s», соответствующее атрибуту «%s»!";
     private static final String REF_BOOK_ROW_TOO_MANY_FOUND_ERROR = "Строка %d, графа «%s» содержит значение, встречающееся более одного раза в справочнике «%s»!";
 
@@ -85,9 +78,6 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     @Autowired
     private FormTypeDao formTypeDao;
 
-    @Autowired
-    private DepartmentReportPeriodDao departmentReportPeriodDao;
-
     private Map<Number, DataRowHelper> helperHashMap = new HashMap<Number, DataRowHelper>();
 
     private static ApplicationContext applicationContext;
@@ -105,6 +95,16 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     @Override
     public FormData findMonth(int formTypeId, FormDataKind kind, int departmentId, int taxPeriodId, int periodOrder) {
         return dao.findMonth(formTypeId, kind, departmentId, taxPeriodId, periodOrder);
+    }
+
+    @Override
+    public FormData find(int formTypeId, FormDataKind kind, int departmentReportPeriodId, Integer periodOrder) {
+        return dao.find(formTypeId, kind, departmentReportPeriodId, periodOrder);
+    }
+
+    @Override
+    public FormData getLast(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder) {
+        return dao.getLast(formTypeId, kind, departmentId, reportPeriodId, periodOrder);
     }
 
     @Override
@@ -141,12 +141,12 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     }
 
     @Override
-    public void consolidationSimple(FormData formData, int departmentId, Logger logger) {
-        consolidationTotal(formData, departmentId, logger, null);
+    public void consolidationSimple(FormData formData, Logger logger) {
+        consolidationTotal(formData, logger, null);
     }
 
     @Override
-    public void consolidationTotal(FormData formData, int departmentId, Logger logger, List<String> totalAliases){
+    public void consolidationTotal(FormData formData, Logger logger, List<String> totalAliases){
         DataRowHelper dataRowHelper = getDataRowHelper(formData);
         // Новый список строк
         List<DataRow<Cell>> rows = new LinkedList<DataRow<Cell>>();
@@ -154,7 +154,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
         Date startDate = reportPeriodService.getCalendarStartDate(formData.getReportPeriodId()).getTime();
         Date endDate = reportPeriodService.getEndDate(formData.getReportPeriodId()).getTime();
         // НФ назначения
-        List<DepartmentFormType> typeList = departmentFormTypeService.getFormSources(departmentId,
+        List<DepartmentFormType> typeList = departmentFormTypeService.getFormSources(formData.getDepartmentId(),
                 formData.getFormType().getId(), formData.getKind(), startDate, endDate);
         // периодичность приёмника "ежемесячно"
         boolean isFormDataMonthly = formData.getPeriodOrder() != null;
@@ -486,62 +486,6 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
             refBookCache.put(recordId, refBookService.getRecordData(refBookId, recordId));
         }
         return refBookCache.get(recordId);
-    }
-
-    @Override
-    public boolean checkNSI(long refBookId, Map<Long, Map<String, RefBookValue>> refBookCache, DataRow<Cell> row,
-                            String alias, Logger logger, boolean required) {
-        if (row == null || alias == null) {
-            return true;
-        }
-        Cell cell = row.getCell(alias);
-        if (cell == null || cell.getValue() == null) {
-            return true;
-        }
-        Object value = cell.getValue();
-        if (value instanceof BigDecimal && getRefBookValue(refBookId,
-                ((BigDecimal) value).longValue(), refBookCache) == null) {
-            RefBook rb = refBookFactory.get(refBookId);
-            String msg = String.format(REF_BOOK_DEREFERENCE_ERROR, row.getIndex(), cell.getColumn().getName(),
-                    rb.getName(), value);
-            if (required) {
-                logger.error("%s", msg);
-            } else {
-                logger.warn("%s", msg);
-            }
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public boolean checkUnique(FormData formData, Logger logger) {
-        // поиск формы с учетом периодичности
-        FormData existingFormData;
-        if (formData.getPeriodOrder() == null) {
-            existingFormData = find(formData.getFormType().getId(), formData.getKind(), formData.getDepartmentId(),
-                    formData.getReportPeriodId());
-        } else {
-            Integer taxPeriodId = reportPeriodService.get(formData.getReportPeriodId()).getTaxPeriod().getId();
-            existingFormData = findMonth(formData.getFormType().getId(), formData.getKind(), formData.getDepartmentId(),
-                    taxPeriodId, formData.getPeriodOrder());
-        }
-        // форма найдена
-        if (existingFormData != null) {
-            logger.error(CHECK_UNIQ_ERROR);
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public boolean checksBalancePeriod(FormData formData, Logger logger) {
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(formData.getDepartmentReportPeriodId());
-        if (departmentReportPeriod.isBalance()) {
-            logger.error(CHECK_BALANCE_PERIOD_ERROR);
-            return false;
-        }
-        return true;
     }
 
     @Override

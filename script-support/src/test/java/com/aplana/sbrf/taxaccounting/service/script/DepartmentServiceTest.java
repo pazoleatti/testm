@@ -11,7 +11,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -58,45 +59,13 @@ public class DepartmentServiceTest {
         ReflectionTestUtils.setField(service, "departmentDao", departmentDao);
     }
 
-
-    @Test
-    public void issetName() {
-        assertTrue(service.issetName("Банк1"));
-        assertFalse(service.issetName(""));
-    }
-
-    @Test
-    public void issetSbrfCode() {
-        assertTrue(service.issetSbrfCode("123"));
-        assertFalse(service.issetSbrfCode("321"));
-    }
-
     @Test
     public void getDepartment() {
-        assertEquals(service.get(valid.getName()).getId(), valid.getId());
-        Boolean exception = false;
-        try {
-            service.get("NOT VALID NAME");
-        } catch (IllegalArgumentException e) {
-            exception = true;
-        }
-        assertTrue(exception);
+        Boolean exception;
         assertEquals(service.get(valid.getId()).getName(), valid.getName());
         exception = false;
         try {
             service.get(32134244);  // Must be invalid ID
-        } catch (IllegalArgumentException e) {
-            exception = true;
-        }
-        assertTrue(exception);
-    }
-
-    @Test
-    public void testGetTB() {
-        assertEquals(service.getTB(valid.getTbIndex()).getId(), validTB.getId());   // Должен находить валидный ТерБанк
-        Boolean exception = false;
-        try {
-            service.getTB("NOT VALID tbIndex"); // Must be invalid tbIndex
         } catch (IllegalArgumentException e) {
             exception = true;
         }

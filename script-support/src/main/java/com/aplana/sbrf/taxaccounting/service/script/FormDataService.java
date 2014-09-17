@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
@@ -29,56 +28,54 @@ public interface FormDataService {
 
     /**
      * Поиск налоговой формы
-     * @param formTypeId Тип формы
-     * @param kind Вид формы
-     * @param departmentId Подразделение
-     * @param reportPeriodId Отчетный период
-     * @return
+     * @deprecated Неактуально с появлением корректирующих периодов
      */
+    @Deprecated
 	FormData find(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId);
 
     /**
      * Поиск ежемесячной налоговой формы
-     * @param formTypeId Тип формы
-     * @param kind Вид формы
-     * @param departmentId Подразделение
-     * @param taxPeriodId Налоговый период
-     * @param periodOrder Порядковый номер (равен номеру месяца, при нумерации с 1)
-     * @return
+     * @deprecated Неактуально с появлением корректирующих периодов
      */
+    @Deprecated
     FormData findMonth(int formTypeId, FormDataKind kind, int departmentId, int taxPeriodId, int periodOrder);
 
     /**
-     * Посредник для работы со строками налоговой формы во временном и постоянном срезах
-     * @param fd
-     * @return
+     * НФ по отчетному периоду подразделения
      */
-	DataRowHelper getDataRowHelper(FormData fd);
+    FormData find(int formTypeId, FormDataKind kind, int departmentReportPeriodId, Integer periodOrder);
+
+    /**
+     * НФ созданная в последнем отчетном периоде подразделения
+     */
+    @SuppressWarnings("unused")
+    FormData getLast(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder);
+
+    /**
+     * Посредник для работы со строками налоговой формы во временном и постоянном срезах
+     */
+	DataRowHelper getDataRowHelper(FormData formData);
 
     /**
      * Заполнение кэша значений справочника
      * @param formDataId
      * @param refBookCache
      */
+    @SuppressWarnings("unused")
     void fillRefBookCache(Long formDataId, Map<Long, Map<String, RefBookValue>> refBookCache);
 
     /**
      * Консолидация формы
      * Поиск источников и простое объединение строк
-     * @param formData
-     * @param departmentId
-     * @param logger
      */
-    void consolidationSimple(FormData formData, int departmentId, Logger logger);
+    @SuppressWarnings("unused")
+    void consolidationSimple(FormData formData, Logger logger);
 
     /**
      * Консолидация формы с итоговыми строками
-     * @param formData
-     * @param departmentId
-     * @param logger
-     * @param totalAliases
      */
-     void consolidationTotal(FormData formData, int departmentId, Logger logger, List<String> totalAliases);
+    @SuppressWarnings("unused")
+    void consolidationTotal(FormData formData, Logger logger, List<String> totalAliases);
 
     /**
      * Добавление новой строки
@@ -100,7 +97,8 @@ public interface FormDataService {
      * @param providerCache
      * @return
      */
-    RefBookDataProvider getRefBookProvider(RefBookFactory refBookFactory, Long refBookId, Map<Long, RefBookDataProvider> providerCache);
+    RefBookDataProvider getRefBookProvider(RefBookFactory refBookFactory, Long refBookId,
+                                           Map<Long, RefBookDataProvider> providerCache);
 
     /**
      * Получение Id записи справочника при импорте
@@ -135,6 +133,7 @@ public interface FormDataService {
      * @param required Фатальность
      * @return
      */
+    @SuppressWarnings("unused")
     Map<String, RefBookValue> getRefBookRecordImport(Long refBookId,
                                   Map<Long, Map<String, Long>> recordCache,
                                   Map<Long, RefBookDataProvider> providerCache,
@@ -167,84 +166,32 @@ public interface FormDataService {
      * @param refBookCache
      * @return
      */
+    @SuppressWarnings("unused")
     Map<String, RefBookValue> getRefBookValue(long refBookId, Long recordId,
                                               Map<Long, Map<String, RefBookValue>> refBookCache);
 
     /**
-     * Проверка НСИ (возможность разыменования)
-     * @param refBookId
-     * @param refBookCache
-     * @param row
-     * @param alias
-     * @param logger
-     * @param required Фатальность
-     * @return
-     */
-    boolean checkNSI(long refBookId, Map<Long, Map<String, RefBookValue>> refBookCache, DataRow<Cell> row,
-                  String alias, Logger logger, boolean required);
-
-    /**
-     * Проверка формы на уникальность с аналогичными параметрам
-     * @param formData
-     * @param logger
-     * @return
-     */
-    boolean checkUnique(FormData formData, Logger logger);
-
-    /**
-     * Проверка отчетного периода. Не должен быть периодом ввода остатков.
-     * @param formData
-     * @param logger
-     * @return
-     */
-    boolean checksBalancePeriod(FormData formData, Logger logger);
-
-    /**
      * Получение формы за предыдущий отчетный период. Если форма ежемесячная, то предыдущая форма - это форма за
      * предыдущий месяц.
-     *
-     * @param formData
-     * @param departmentId
-     * @return
      */
     FormData getFormDataPrev(FormData formData, int departmentId);
 
     /**
      * Получение номера последней строки в форме за предыдущий отчетный период
      * Если указанная форма первая в году или предыдущих форм нет, то результат будет 0
-     *
-     * @param formData
-     * @param departmentId
-     * @param alias
-     * @return
      */
+    @SuppressWarnings("unused")
     BigDecimal getPrevRowNumber(FormData formData, int departmentId, String alias);
 
     /**
      * Проверка наличия принятой формы за предыдущий период.
      * Если форма без строк, то считается отсутствующей.
-     *
-     * @param formData
-     * @param departmentId
-     * @return
      */
+    @SuppressWarnings("unused")
     boolean existAcceptedFormDataPrev(FormData formData, int departmentId);
 
     /**
      * Получение записи справочника
-     *
-     * @param refBookId
-     * @param recordCache
-     * @param providerCache
-     * @param refBookCache
-     * @param alias
-     * @param value
-     * @param date
-     * @param rowIndex
-     * @param columnName
-     * @param logger
-     * @param required
-     * @return
      */
     Map<String, RefBookValue> getRefBookRecord(Long refBookId, Map<Long, Map<String, Long>> recordCache,
                                                Map<Long, RefBookDataProvider> providerCache,
@@ -276,6 +223,7 @@ public interface FormDataService {
      * @param logger логгер
      * @param required фатальность
      */
+    @SuppressWarnings("unused")
     void checkFormExistAndAccepted(int formTypeId, FormDataKind kind, int departmentId,
                                           int currentReportPeriodId, Boolean prevPeriod,
                                           Logger logger, boolean required);
@@ -292,6 +240,7 @@ public interface FormDataService {
      * @param logger логгер
      * @param required фатальность
      */
+    @SuppressWarnings("unused")
     void checkMonthlyFormExistAndAccepted(int formTypeId, FormDataKind kind, int departmentId,
                                                  int currentReportPeriodId, Integer currentPeriodOrder, Boolean prevPeriod,
                                                  Logger logger, boolean required);

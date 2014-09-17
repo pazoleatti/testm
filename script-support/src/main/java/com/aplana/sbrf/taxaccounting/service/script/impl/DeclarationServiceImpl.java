@@ -33,7 +33,6 @@ import java.util.*;
 /*
  * author auldanov
  */
-
 @Service("declarationService")
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class DeclarationServiceImpl implements DeclarationService, ScriptComponentContextHolder{
@@ -87,7 +86,17 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 		return declarationDataDao.find(declarationTypeId, departmentId, reportPeriodId);
 	}
 
-	@Override
+    @Override
+    public DeclarationData find(int declarationTypeId, int departmentReportPeriodId) {
+        return declarationDataDao.find(declarationTypeId, departmentReportPeriodId);
+    }
+
+    @Override
+    public DeclarationData getLast(int declarationTypeId, int departmentId, int reportPeriodId) {
+        return declarationDataDao.getLast(declarationTypeId, departmentId, reportPeriodId);
+    }
+
+    @Override
 	public String generateXmlFileId(int declarationTypeId, int departmentId, int reportPeriodId) {
 
         DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
@@ -184,5 +193,4 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
         c.add(Calendar.DATE, days);
         return c.getTime();
     }
-
 }

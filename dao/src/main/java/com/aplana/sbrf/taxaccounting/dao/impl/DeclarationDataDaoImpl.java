@@ -96,7 +96,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                             "from declaration_data dd, department_report_period drp " +
                             "where drp.id = dd.department_report_period_id " +
                             "and exists (select 1 from declaration_template dt where dd.declaration_template_id=dt.id " +
-                            "and dt.declaration_type_id = ?) "+
+                            "and dt.declaration_type_id = ?) and drp.correction_date is null "+
                             "and drp.department_id = ? and drp.report_period_id = ?",
                     new Object[]{
                             declarationTypeId,
