@@ -103,8 +103,10 @@ INSERT INTO form_style (id, alias, form_template_id, font_color, back_color, ita
 
 INSERT INTO form_style (id, alias, form_template_id, font_color, back_color, italic, bold) VALUES (3, 'alias3', 1, 1, 1, 1, 1);
 
+insert into department_report_period(id, department_id, report_period_id, is_active, is_balance_period) values (1, 1, 1, 1, 0);
+
 -- FormData
-INSERT INTO form_data(id, form_template_id, department_id, state, kind, report_period_id, return_sign) VALUES (1, 1, 1, 1, 3, 1, 0);
+INSERT INTO form_data(id, form_template_id, department_report_period_id, state, kind, return_sign) VALUES (1, 1, 1, 1, 3, 0);
 
 -- FormColumn
 INSERT INTO form_column (id, name, form_template_id, ord, alias, type, width, precision, max_length, checking)
