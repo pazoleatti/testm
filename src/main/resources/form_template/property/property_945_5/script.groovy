@@ -12,11 +12,6 @@ import groovy.transform.Field
  * "(945.5) Сводная форма данных бухгалтерского учета для расчета налога на имущество".
  * formTemplateId=10640
  *
- * TODO:
- *      - добавились логические проверки
- *      - графа title возможно будет справочной
- *      - убрать лишнее
- *
  * @author Ramil Timerbaev
  */
 
@@ -136,10 +131,6 @@ def totalColumns = ['cost1', 'cost2', 'cost3', 'cost4', 'cost5', 'cost6', 'cost7
 @Field
 def columnsFromPrimary945_5 = ['taxBase1', 'taxBase2', 'taxBase3', 'taxBase4', 'taxBase5', 'taxBaseSum']
 
-// TODO (Ramil Timerbaev) убрать лишние переменные
-@Field
-def startDate = null
-
 @Field
 def endDate = null
 
@@ -149,9 +140,6 @@ def reportPeriod = null
 // Признак периода ввода остатков
 @Field
 def isBalancePeriod
-
-@Field
-def yearStartDate = null
 
 // для записей справочника 200
 @Field
@@ -194,6 +182,11 @@ def SEPARATOR = '#'
 @Field
 def rows1Map = [:]
 
+// мапа для хранения строк по группам (ключ - значение 4ех графов: Код субъекта, Код НО, КПП, Код ОКТМО)
+// нужно чтобы при проверке после расчетов повторно не обращаться к источникам
+@Field
+def consolidationGroupRowsMap = [:]
+
 // форма 945.1
 @Field
 def sourceFormTypeId = 610
@@ -226,26 +219,11 @@ def prevDataRows = null
 @Field
 def infoMessagesRowMap = [:]
 
-// TODO (Ramil Timerbaev) убрать?
-//def getReportPeriodStartDate() {
-//    if (startDate == null) {
-//        startDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
-//    }
-//    return startDate
-//}
-
 def getReportPeriodEndDate() {
     if (endDate == null) {
         endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     }
     return endDate
-}
-
-def getYearStartDate() {
-    if (yearStartDate == null) {
-        yearStartDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
-    }
-    return yearStartDate
 }
 
 // Разыменование записи справочника
@@ -308,6 +286,10 @@ void logicCheck() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     def periodOrder = getReportPeriod().order
+
+    // получить группы со строками
+    def groupsMap = getGroupsMap(dataRows)
+
     for (def row : dataRows) {
         if (row.getAlias() != null) {
             continue
@@ -323,14 +305,12 @@ void logicCheck() {
         columns = allColumns - columns
         columns.each { alias ->
             if (row.getCell(alias).value) {
-                String msg = String.format("Строка %d: В текущем периоде формы графа «%s» должна быть не заполнена!", index, getColumnName(row, alias))
+                String msg = String.format(errorMsg + "В текущем периоде формы графа «%s» должна быть не заполнена!", getColumnName(row, alias))
                 logger.error(msg)
             }
         }
 
         // 3. Проверка значений Граф 5-17 по строке «В т.ч. стоимость льготируемого имущества (всего):» (подсчет итогов)
-        // получить группы со строками
-        def groupsMap = getGroupsMap(dataRows)
         // расчет итогов для каждой группы
         groupsMap.keySet().each {
             def tmpRow = formData.createDataRow()
@@ -350,42 +330,69 @@ void logicCheck() {
         }
     }
 
-    // 4. Проверка корректности разбития пользователем сумм по группам строк с одинаковым значением параметров «Код субъекта», «Код ОКТМО» (для строки вида «Признаваемых объектом налогообложения»)
-    // По каждой группе строк с одинаковым значением Граф 1, 4:
-    // Сумма значений по «Графе N» по строке «Признаваемых объектом налогообложения» равна значению, рассчитанному согласно Табл. 27,
-    // где N = 5, 6, …, 18
-    // TODO (Ramil Timerbaev)
-    if (false) {
-        def list = []
-        someColumns.each { alias ->
-            def columnName = getColumnName(row, alias)
-            def value = null
-            list.add("Графа «$columnName» = $value")
-        }
-        if (list) {
-            def subject = getRefBookValue(4, row.subject)?.CODE?.value
-            def oktmo = getRefBookValue(96, row.oktmo)?.CODE?.value
-            def msgColumnNames = list.join(', ')
-            logger.error("Параметры декларации «Код субъекта» = $subject, «Код ОКТМО» = $oktmo: " +
-                    "Итоговые значения остаточной стоимости основных средств, " +
-                    "признаваемых объектом налогообложения, заполнены неверно! " +
-                    "Ожидаются следующие значения: $msgColumnNames")
-        }
+    // получить группы из источников
+    def tmpGroupsMap = getConsolidationGroupsRows()
+
+    // получить обновленные группы формы из текущих групп и временных групп из источников
+    def newGroupsMap = getNewGroupsMap(groupsMap, tmpGroupsMap)
+
+    // сортировка / группировка
+    def newDataRows = sort(newGroupsMap)
+
+    // дополнить данными из формы предыдущего отчетного периода
+    addPrevData(newDataRows)
+    newDataRows.eachWithIndex { row, i ->
+        row.setIndex(i + 1)
     }
 
+    // 4. Проверка корректности разбития пользователем сумм по группам строк с одинаковым значением параметров «Код субъекта», «Код ОКТМО» (для строки вида «Признаваемых объектом налогообложения»)
+    // По каждой группе строк с одинаковым значением Граф 1, 4:
+    // Сумма значений по «Графе N» по строке «Признаваемых объектом налогообложения» равна значению, рассчитанному согласно Табл. 31,
+    // где N = 5, 6, …, 18
     // 5. Проверка корректности разбития пользователем сумм по группам строк с одинаковым значением параметров «Код субъекта», «Код ОКТМО» (для каждой строки вида «Категория K»)
     // По каждой категории группы строк с одинаковым значением Граф 1, 4:
-    // Сумма значений по «Графе N» по строке «Категория К» равна значению, рассчитанному согласно Табл. 27,
+    // Сумма значений по «Графе N» по строке «Категория К» равна значению, рассчитанному согласно Табл. 31,
     // где N = 5, 6, …, 18
-    // logger.error("Параметры декларации «Код субъекта» = <Код субъекта>, «Код ОКТМО» = <Код ОКТМО>: Итоговые значения остаточной стоимости основных средств по категории «<Категория K>» заполнены неверно! Ожидаются следующие значения: Графа «Наименование поля 5» = <Значение поля 5>, Графа «Наименование поля 6» = <Значение поля 6>, …, Графа «Наименование поля N» = <Значение поля N>")
-    // TODO (Ramil Timerbaev) аналогично логической проверке 4, только для строк с критериями
+    newGroupsMap.keySet().each {
+        // если не вторая строка в группе
+        def rows = groupsMap[it]
+        def newRows = newGroupsMap[it]
+        def row1 = newRows.get(0)
+        def row2 = newRows.get(1)
+        newRows.each{ row ->
+            if(row != row2){
+                def list = []
+                (allColumns - first5Columns).each { alias ->
+                    def index = newRows.indexOf(row)
+                    if (rows[index][alias] != newRows[index][alias]) {
+                        def columnName = getColumnName(row, alias)
+                        def value = row[alias]?:"''"
+                        list.add("Графа «$columnName» = $value")
+                    }
+                }
+                def title = row.title
+                if (!list.isEmpty()) {
+                    def subject = getRefBookValue(4, row.subject)?.CODE?.value
+                    def oktmo = getRefBookValue(96, row.oktmo)?.CODE?.value
+                    def msgColumnNames = list.join(', ')
+                    logger.error("По группам строк с параметрами декларации «Код субъекта» = $subject, «Код ОКТМО» = $oktmo: " +
+                            "остаточная стоимость основных средств" +
+                            ((row == row1) ?
+                                    ", признаваемых объектом налогообложения, заполнены неверно! " :
+                                    " по строке «$title» заполнена неверно! "
+                            ) +
+                            "Ожидается следующая сумма значений по группам строк: $msgColumnNames")
+                }
+            }
+        }
+    }
 }
 
 /** Получить мапу с группами строк из источников. */
 def getConsolidationGroupsRows() {
-    // мапа для хранения строк по группам (ключ - значение 4ех графов: Код субъекта, Код НО, КПП, Код ОКТМО)
-    def groupRowsMap = [:]
-
+    if (!consolidationGroupRowsMap.isEmpty()) {
+        return consolidationGroupRowsMap
+    }
     // получить список форм источников
     def sources = getFormDataSources()
 
@@ -398,10 +405,10 @@ def getConsolidationGroupsRows() {
         // получить список групп 1
         def rowsGroup1 = getRowsGroupBySubject(sourceRows)
         rowsGroup1.each { rows ->
-            processRowsGroup1(rows, alias, source.id, groupRowsMap)
+            processRowsGroup1(rows, alias, source.id, consolidationGroupRowsMap)
         }
     }
-    return groupRowsMap
+    return consolidationGroupRowsMap
 }
 
 def getReportPeriod() {
@@ -493,7 +500,7 @@ void processRowsGroup1(def rows, def alias, def sourceFormId, def groupRowsMap) 
         def oktmo = getValueInParentheses(oktmoRow?.name)
         def isEqualOktmo = (oktmo == oktmo2)
 
-        // расчет строк1 для всех records сразу, он одинаковый для всех групп относящихся к записям справочнкиа 200
+        // расчет строк1 для всех records сразу, он одинаковый для всех групп относящихся к записям справочника 200
         def row1 = getRow1(subject, oktmo, isEqualOktmo, group1_1, groupRows, alias)
 
         def records = getRecords200(subject, oktmo)
@@ -684,8 +691,8 @@ void addNewRows(def record, def group1_2_2, def alias, def row1, def subject, de
     // ключ по значению 4ех графов (Код субъекта, Код НО, КПП, Код ОКТМО)
     def key = subject + SEPARATOR + record.TAX_ORGAN_CODE.value + SEPARATOR +
             record.KPP.value + SEPARATOR + oktmo
-        if (groupRowsMap[key] == null) {
-        // добавить 2 фиксированные строки в начало каждой группы
+    // добавить 2 фиксированные строки в начало каждой группы
+    if (groupRowsMap[key] == null) {
         def newRow1 = getCloneRow(row1)
         def newRow2 = getNewRow(TOTAL_ROW_TITLE, false)
         groupRowsMap[key] = []
@@ -702,6 +709,11 @@ void addNewRows(def record, def group1_2_2, def alias, def row1, def subject, de
         newRow.taxAuthority = record.TAX_ORGAN_CODE.value
         newRow.kpp          = record.KPP.value
         newRow.oktmo        = record.OKTMO.value
+    }
+
+    // СуммНедвижПоЛьготе2012000 для граф 5-18 строки "Признаваемых объектом налогообложения"
+    if (getRowBenefitCodes(groupRowsMap[key][2]).contains('2012000')){
+        groupRowsMap[key][0][alias] += groupRowsMap[key][2][alias]
     }
 }
 
@@ -762,11 +774,11 @@ void addNewRowsFromGroup1_2_2(def group1_2_2, def alias, def key, groupRowsMap) 
         // 	из строки 27 получить название категории
         def from = ROW_27_VALUE_BEGIN.length()
         def to = row27.name.indexOf(ROW_27_VALUE_END)
-        def categoryName = row27.name
+        def categoryName
         if (to > -1) {
             categoryName = row27.name.substring(from, to).trim()
         } else {
-            println "property_945_5: impossible to get the category name from ${row27.name}." // TODO (Ramil Timerbaev)
+            throw new Exception("Ошибка при получении наименования категории из '${row27.name}'.")
         }
 
         // проверить название категории - если названия нет, то это группа 1.2.2.2 из строк 19-21 (без категории)
@@ -1043,8 +1055,8 @@ def getCloneRow(def row) {
  */
 void sortCategoryRows(def rows) {
     rows.sort { def a, def b ->
-        def codesA = getValueForSort(a)
-        def codesB = getValueForSort(b)
+        def codesA = getRowBenefitCodes(a)
+        def codesB = getRowBenefitCodes(b)
         if (codesA.size() == codesB.size()) {
             if (codesA.size() > 1) {
                 return -1
@@ -1060,17 +1072,17 @@ void sortCategoryRows(def rows) {
 }
 
 /** Получить список кодов льгот категории для сортировки. */
-def getValueForSort(def row) {
+def getRowBenefitCodes(def row) {
     def hasCategory = !UNCATEGORIZED.equals(row.title)
 
     // получение данных их справочника 203 "Параметры налоговых льгот налога на имущество"
-    def regioId = formDataDepartment.regionId
+    def regionId = formDataDepartment.regionId
     def subjectId = row.subject
-    def paramDectination = (hasCategory ? 1 : 0)
+    def paramDestination = (hasCategory ? 1 : 0)
 
-    def filter = "DECLARATION_REGION_ID = $regioId " +
+    def filter = "DECLARATION_REGION_ID = $regionId " +
             "and REGION_ID = $subjectId " +
-            "and PARAM_DESTINATION = $paramDectination"
+            "and PARAM_DESTINATION = $paramDestination"
     if (hasCategory) {
         def category = row.title
         filter = filter + " and ASSETS_CATEGORY = '$category'"

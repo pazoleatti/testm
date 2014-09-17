@@ -96,5 +96,103 @@ DELETE FROM ref_book_attribute WHERE alias = 'APP_VERSION' AND ref_book_id = 98;
 UPDATE ref_book_attribute SET name = 'Наименование для титульного листа' WHERE id IN (217, 228, 191, 865);
 
 ---------------------------------------------------------------------------------------------------
+--http://jira.aplana.com/browse/SBRFACCTAX-8804 - "Код ТН ВЭД" в справочник "Коды драгоценных металлов"
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (1743,17,'Код ТН ВЭД','TN_VED_CODE',4,3,73,648,1,null,10,1,1,null,null,0,null);
+
+MERGE INTO ref_book_value tgt USING (WITH mapping(name, tn_ved_code) AS
+                                      (SELECT 'Палладий', 7110210001 FROM dual
+                                       UNION ALL SELECT 'Платина', 7110110001 FROM dual
+                                       UNION ALL SELECT 'Золото, его сырье и сплавы', 7108120001 FROM dual
+                                       UNION ALL SELECT 'Серебро, его сырье, сплавы и соединения', 7106910001 FROM dual)
+                                     SELECT m.name,
+                                            m.tn_ved_code,
+                                            rbv_tgt.string_value,
+                                            rbv_tgt.record_id AS src_record_id,
+                                            rbr_src.id AS src_reference_id,
+                                            1743 AS src_attribute_id
+                                     FROM mapping m
+                    JOIN ref_book_value rbv_tgt ON rbv_tgt.attribute_id = 42 AND rbv_tgt.string_value = m.name
+                    JOIN ref_book_value rbv_src ON rbv_src.attribute_id = 648 AND rbv_src.number_value = m.tn_ved_code
+                    JOIN ref_book_record rbr_src ON rbr_src.id = rbv_src.record_id AND rbr_src.status <> -1) src 
+ON (tgt.record_id = src.src_record_id AND tgt.attribute_id = src.src_attribute_id) 
+WHEN MATCHED THEN UPDATE SET tgt.reference_value = src.src_reference_id 
+WHEN NOT MATCHED THEN INSERT (tgt.record_id, tgt.attribute_id, tgt.reference_value) VALUES (src.src_record_id, src.src_attribute_id, src.src_reference_id);
+
+---------------------------------------------------------------------------------------------------
+--http://jira.aplana.com/browse/SBRFACCTAX-8783 - Уникальность атрибутов
+
+-- Если в справочнике уже существовало несколько независимых уникальных атрибутов
+UPDATE ref_book_attribute SET is_unique=2 WHERE id = 51;
+UPDATE ref_book_attribute SET is_unique=3 WHERE id = 52;
+UPDATE ref_book_attribute SET is_unique=4 WHERE id = 53;
+UPDATE ref_book_attribute SET is_unique=5 WHERE id = 54;
+UPDATE ref_book_attribute SET is_unique=2 WHERE id = 69;
+UPDATE ref_book_attribute SET is_unique=2 WHERE id = 166;
+UPDATE ref_book_attribute SET is_unique=2 WHERE id = 250;
+UPDATE ref_book_attribute SET is_unique=2 WHERE id = 630;
+UPDATE ref_book_attribute SET is_unique=2 WHERE id = 632;
+UPDATE ref_book_attribute SET is_unique=2 WHERE id = 634;
+UPDATE ref_book_attribute SET is_unique=2 WHERE id = 636;
+UPDATE ref_book_attribute SET is_unique=2 WHERE id = 642;
+UPDATE ref_book_attribute SET is_unique=2 WHERE id = 647;
+UPDATE ref_book_attribute SET is_unique=2 WHERE id = 834;
+UPDATE ref_book_attribute SET is_unique=2 WHERE id = 1743;
+
+-- Уникальность кортежей
+-- Классификатор доходов
+UPDATE ref_book_attribute SET is_unique=1 WHERE id = 140;
+UPDATE ref_book_attribute SET is_unique=1 WHERE id = 143;
+UPDATE ref_book_attribute SET is_unique=1 WHERE id = 144;
+
+-- Классификатор расходов
+UPDATE ref_book_attribute SET is_unique=1 WHERE id = 130;
+UPDATE ref_book_attribute SET is_unique=1 WHERE id = 133;
+UPDATE ref_book_attribute SET is_unique=1 WHERE id = 134;
+
+-- Классификатор соответствия кодов операций налоговой формы 724.2.1 по НДС символам ОПУ
+UPDATE ref_book_attribute SET is_unique=1 WHERE id = 1000;
+UPDATE ref_book_attribute SET is_unique=1 WHERE id = 1001;
+UPDATE ref_book_attribute SET is_unique=1 WHERE id = 1002;
+
+-- Классификатор соответствия счетов бухгалтерского учёта кодам налогового учёта
+UPDATE ref_book_attribute SET is_unique=1 WHERE id = 150;
+UPDATE ref_book_attribute SET is_unique=1 WHERE id = 151;
+UPDATE ref_book_attribute SET is_unique=1 WHERE id = 152;
+UPDATE ref_book_attribute SET is_unique=1 WHERE id = 153;
+UPDATE ref_book_attribute SET is_unique=1 WHERE id = 154;
+
+-- Оборотная ведомость (Форма 0409101-СБ)
+UPDATE ref_book_attribute SET is_unique=1 WHERE id = 502;
+UPDATE ref_book_attribute SET is_unique=1 WHERE id = 511;
+
+-- Отчет о прибылях и убытках (Форма 0409102-СБ)
+UPDATE ref_book_attribute SET is_unique=1 WHERE id = 521;
+UPDATE ref_book_attribute SET is_unique=1 WHERE id = 527;
+
+-- Параметры налоговых льгот транспортного налога
+UPDATE ref_book_attribute SET is_unique=1 WHERE id = 18;
+UPDATE ref_book_attribute SET is_unique=1 WHERE id = 19;
+
+-- Параметры представления деклараций по налогу на имущество
+UPDATE ref_book_attribute SET is_unique=1 WHERE id = 2001;
+UPDATE ref_book_attribute SET is_unique=1 WHERE id = 2002;
+UPDATE ref_book_attribute SET is_unique=1 WHERE id = 2003;
+UPDATE ref_book_attribute SET is_unique=1 WHERE id = 2004;
+UPDATE ref_book_attribute SET is_unique=1 WHERE id = 2005;
+
+-- Ставки налога на имущество
+UPDATE ref_book_attribute SET is_unique=1 WHERE id = 2011;
+UPDATE ref_book_attribute SET is_unique=1 WHERE id = 2012;
+
+-- Ставки транспортного налога
+UPDATE ref_book_attribute SET is_unique=1 WHERE id = 411;
+UPDATE ref_book_attribute SET is_unique=1 WHERE id = 412;
+UPDATE ref_book_attribute SET is_unique=1 WHERE id = 413;
+UPDATE ref_book_attribute SET is_unique=1 WHERE id = 414;
+UPDATE ref_book_attribute SET is_unique=1 WHERE id = 415;
+UPDATE ref_book_attribute SET is_unique=1 WHERE id = 418;
+UPDATE ref_book_attribute SET is_unique=1 WHERE id = 417;
+---------------------------------------------------------------------------------------------------
+
 COMMIT;
 EXIT;

@@ -21,6 +21,8 @@ public class RefBookRecordDereferenceValue implements Comparable<RefBookRecordDe
     /* Мапа для хранения разменованных значений по атрибуту второго уровня */
     private Map<Long, String> attrId2DerefValueMap  = new HashMap<Long, String>();
 
+    private String attrName;
+
     public RefBookRecordDereferenceValue() {
     }
 
@@ -88,6 +90,15 @@ public class RefBookRecordDereferenceValue implements Comparable<RefBookRecordDe
 
     public void setAttrId2DerefValueMap(Map<Long, String> attrId2DerefValueMap) {
         this.attrId2DerefValueMap = attrId2DerefValueMap;
+    }
+
+
+    public String getAttrName() {
+        return attrName;
+    }
+
+    public void setAttrName(String attrName) {
+        this.attrName = attrName;
     }
 
     @Override

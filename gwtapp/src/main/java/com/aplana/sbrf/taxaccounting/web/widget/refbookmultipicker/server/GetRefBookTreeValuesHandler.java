@@ -132,6 +132,7 @@ public class GetRefBookTreeValuesHandler extends AbstractActionHandler<GetRefBoo
                     RefBookRecordDereferenceValue dereferenceValue = new RefBookRecordDereferenceValue(
                             refBookAttribute.getId(),
                             refBookAttribute.getAlias());
+                    dereferenceValue.setAttrName(refBookAttribute.getName());
 
                     if (RefBookAttributeType.REFERENCE.equals(refBookAttribute.getAttributeType())) {
                         Long refValue = record.get(alias).getReferenceValue();

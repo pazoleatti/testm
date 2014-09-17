@@ -1,16 +1,21 @@
 package com.aplana.sbrf.taxaccounting.web.widget.multiselecttree;
 
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.RefBookRecordDereferenceValue;
+import com.aplana.sbrf.taxaccounting.web.widget.ui.HasHighlighting;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Элемент дерева множественного выбора.
  *
  * @author aivanov
  */
-public class LazyTreeItem extends TreeItem {
+public class LazyTreeItem extends TreeItem implements HasHighlighting {
 
     protected Long itemId;
     /* Тип узла дерева: true - с чекбоксом, false - с радиокнопкой, null - только с текстом*/
@@ -131,9 +136,25 @@ public class LazyTreeItem extends TreeItem {
         this.isChildLoaded = isChildLoaded;
     }
 
+    @Override
     public void highLightText(String textToHighLight) {
         if(textToHighLight!= null && !textToHighLight.isEmpty()) {
-            String highLightedString = RegExp.compile(textToHighLight, "gi").replace(getName(), "<span style=\"color: #ff0000;\">$&</span>");
+            String highLightedString = RegExp.compile(textToHighLight, "gi").replace(getName(),
+                    "<span style=\"color: #ff0000;\">$&</span>");
+            //http://conf.aplana.com/pages/viewpage.action?pageId=9597422#id-Формавыбораизсправочника-Элементыформы.1
+            if (!getAdditionalAttributeMatches().isEmpty()){
+                StringBuilder sb = new StringBuilder("(");
+                for (RefBookRecordDereferenceValue value : getAdditionalAttributeMatches()){
+                    if (value.getValueAttrAlias().equals("PARENT_ID") || !value.getDereferenceValue().contains(textToHighLight))
+                        continue;
+                    sb.append(value.getAttrName()).append(": ").append(RegExp.compile(textToHighLight, "gi").replace(value.getDereferenceValue(),
+                            "<span style=\"color: #ff0000;\">$&</span>")).append("; ");
+                }
+                if (sb.length()>3) sb.delete(sb.length() - 2, sb.length());
+                sb.append(")");
+                if (sb.toString().equals("()")) sb.delete(0, sb.length());
+                highLightedString = highLightedString + sb.toString();
+            }
             label.getElement().setInnerHTML(highLightedString);
             DOM.getChild(checkBox.getElement(), 1).setInnerHTML(highLightedString);
             DOM.getChild(radioButton.getElement(), 1).setInnerHTML(highLightedString);
@@ -148,5 +169,9 @@ public class LazyTreeItem extends TreeItem {
         sb.append(", isChildLoaded=").append(isChildLoaded);
         sb.append('}');
         return sb.toString();
+    }
+
+    public List<RefBookRecordDereferenceValue> getAdditionalAttributeMatches(){
+        return new ArrayList<RefBookRecordDereferenceValue>(0);
     }
 }
