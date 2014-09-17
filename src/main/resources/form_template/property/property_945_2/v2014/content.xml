@@ -137,10 +137,10 @@
         <name>Код налоговой льготы</name>
         <order>15</order>
         <width>5</width>
-        <filter>CODE IS NULL OR CODE = '2012000' OR CODE = '2012400' OR CODE = '2012500'</filter>
         <hierarchical>false</hierarchical>
-        <nameAttributeId>2022</nameAttributeId>
-        <refBookAttributeId>2021</refBookAttributeId>
+        <nameAttributeId>2033</nameAttributeId>
+        <refBookAttributeId>2033</refBookAttributeId>
+        <refBookAttributeId2>2021</refBookAttributeId2>
         <searchEnabled>true</searchEnabled>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
