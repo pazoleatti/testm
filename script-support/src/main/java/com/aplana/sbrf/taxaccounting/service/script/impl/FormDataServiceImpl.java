@@ -146,7 +146,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     }
 
     @Override
-    public void consolidationTotal(FormData formData, Logger logger, List<String> totalAliases){
+    public void consolidationTotal(FormData formData, Logger logger, List<String> totalAliases) {
         DataRowHelper dataRowHelper = getDataRowHelper(formData);
         // Новый список строк
         List<DataRow<Cell>> rows = new LinkedList<DataRow<Cell>>();
@@ -161,15 +161,9 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
 
         for (DepartmentFormType type : typeList) {
             // поиск источника с учетом периодичности
-            FormData sourceFormData;
-            if (!isFormDataMonthly) {
-                sourceFormData = find(type.getFormTypeId(), type.getKind(), type.getDepartmentId(),
-                        formData.getReportPeriodId());
-            } else {
-                Integer taxPeriodId = reportPeriodService.get(formData.getReportPeriodId()).getTaxPeriod().getId();
-                sourceFormData = findMonth(type.getFormTypeId(), type.getKind(), type.getDepartmentId(),
-                        taxPeriodId, formData.getPeriodOrder());
-            }
+            // НФ ищется в последнем отчетном периоде подразделения
+            FormData sourceFormData = getLast(type.getFormTypeId(), type.getKind(), type.getDepartmentId(),
+                    formData.getReportPeriodId(), formData.getPeriodOrder());
 
             // источник не нашелся или не в статусе "Принята"
             if (sourceFormData == null || sourceFormData.getState() != WorkflowState.ACCEPTED) {
@@ -192,7 +186,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
         // Добавление итоговых строк
         if (totalAliases != null) {
             for (DataRow<Cell> row : dataRowHelper.getAllCached()) {
-                for (int i=0;i<totalAliases.size();i++) {
+                for (int i = 0; i < totalAliases.size(); i++) {
                     String alias = totalAliases.get(i);
                     if (alias.equals(row.getAlias())) {
                         rows.add(row);
@@ -569,7 +563,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
 
     @Override
     public void checkReferenceValue(Long refBookId, String referenceValue, String expectedValue, int rowIndex, int colIndex,
-                             Logger logger, boolean required) {
+                                    Logger logger, boolean required) {
         if ((referenceValue == null && expectedValue == null) ||
                 (referenceValue == null && "".equals(expectedValue)) ||
                 ("".equals(referenceValue) && expectedValue == null) ||
@@ -623,8 +617,8 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
 
     @Override
     public void checkMonthlyFormExistAndAccepted(int formTypeId, FormDataKind kind, int departmentId,
-                                          int currentReportPeriodId, Integer currentPeriodOrder, Boolean prevPeriod,
-                                          Logger logger, boolean required) {
+                                                 int currentReportPeriodId, Integer currentPeriodOrder, Boolean prevPeriod,
+                                                 Logger logger, boolean required) {
         // определение периода формы
         ReportPeriod reportPeriod = reportPeriodService.get(currentReportPeriodId);
         int month = currentPeriodOrder;
