@@ -46,7 +46,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.COMPOSE:
-        formDataService.consolidationTotal(formData, formDataDepartment.id, logger, ['total'])
+        formDataService.consolidationTotal(formData, logger, ['total'])
         checkRNU()
         calc()
         logicCheck()

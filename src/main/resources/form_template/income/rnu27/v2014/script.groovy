@@ -81,7 +81,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.COMPOSE:
-        formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
+        formDataService.consolidationSimple(formData, logger)
         calc()
         logicCheck()
         break

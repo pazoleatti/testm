@@ -49,7 +49,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.COMPOSE: // Консолидация
-        formDataService.consolidationTotal(formData, formDataDepartment.id, logger, ['total'])
+        formDataService.consolidationTotal(formData, logger, ['total'])
         calc()
         logicCheck()
         break
