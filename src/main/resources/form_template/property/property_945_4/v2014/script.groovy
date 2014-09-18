@@ -1,4 +1,4 @@
-package form_template.property.property_945_4
+package form_template.property.property_945_4.v2014
 
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
@@ -12,11 +12,6 @@ import groovy.transform.Field
  * Сводная "(945.4) Расчёт налога на имущество по кадастровой стоимости".
  * formTemplateId=612
  *
- * TODO:
- *      - расчет графы 17 недоописан в чтз
- *      - при консолидации заполнение графы 11 под вопросом
- *      - после того как прояснится как расчитывать графу 17, возможно надо будет объединить проверку для графы 14 и для графы 17 (логическая проверка 1 и 2)
- *
  * @author Ramil Timerbaev
  */
 
@@ -28,16 +23,19 @@ import groovy.transform.Field
 // графа 5  - oktmo                 - атрибут 840 - CODE - «Код», справочник 96 «Общероссийский классификатор территорий муниципальных образований»
 // графа 6  - address
 // графа 7  - sign
-// графа 8  - cadastreNum
-// графа 9  - cadastrePriceJanuary
-// графа 10 - cadastrePriceTaxFree
-// графа 11 - tenure
-// графа 12 - taxBenefitCode        - атрибут 2021 - CODE - «Код налоговой льготы», справочник 202 «Коды налоговых льгот налога на имущество»
-// графа 13 - taxBase
-// графа 14 - taxRate
-// графа 15 - sum
-// графа 16 - periodSum
-// графа 17 - reductionPaymentSum
+// графа 8  - cadastreNumBuilding
+// графа 9  - cadastreNumRoom
+// графа 10 - cadastrePriceJanuary
+// графа 11 - cadastrePriceTaxFree
+// графа 12 - tenure
+// графа 13 - taxBenefitCode        - атрибут 2033 TAX_BENEFIT_ID справочника 203 «Параметры налоговых льгот налога на имущество»
+//                                     есть атрибут 2021 - CODE - «Код налоговой льготы», справочник 202 «Коды налоговых льгот налога на имущество»
+// графа 14 - benefitBasis
+// графа 15 - taxBase
+// графа 16 - taxRate
+// графа 17 - sum
+// графа 18 - periodSum
+// графа 19 - reductionPaymentSum
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
@@ -78,23 +76,21 @@ switch (formDataEvent) {
 @Field
 def providerCache = [:]
 @Field
-def recordCache = [:]
-@Field
 def refBookCache = [:]
 
 @Field
 def allColumns = ['rowNum', 'fix', 'subject', 'taxAuthority', 'kpp', 'oktmo', 'address',
-        'sign', 'cadastreNum', 'cadastrePriceJanuary', 'cadastrePriceTaxFree', 'tenure',
-        'taxBenefitCode', 'taxBase', 'taxRate', 'sum', 'periodSum', 'reductionPaymentSum']
+        'sign', 'cadastreNumBuilding', 'cadastreNumRoom', 'cadastrePriceJanuary', 'cadastrePriceTaxFree', 'tenure',
+        'taxBenefitCode', 'benefitBasis', 'taxBase', 'taxRate', 'sum', 'periodSum', 'reductionPaymentSum']
 
-// Проверяемые на пустые значения атрибуты (графа 1..7, 9..11, 14, 15)
+// Проверяемые на пустые значения атрибуты (графа 1..8, 9..11, 14, 15)
 @Field
-def nonEmptyColumns = ['rowNum', 'subject', 'taxAuthority', 'kpp', 'oktmo', 'address',
-        'sign', 'cadastrePriceJanuary', 'cadastrePriceTaxFree', 'tenure', 'taxRate', 'sum']
+def nonEmptyColumns = [ 'subject', 'taxAuthority', 'kpp', 'oktmo', 'address',
+        'sign', 'cadastreNumBuilding', 'cadastrePriceJanuary', 'cadastrePriceTaxFree', 'tenure', 'taxRate', 'sum']
 
-// Сортируемые атрибуты (графа 3, 4, 8)
+// Сортируемые атрибуты (графа 2, 3, 4, 5, 7, 8, 9)
 @Field
-def sortColumns = ['taxAuthority', 'kpp', 'cadastreNum']
+def sortColumns = ['subject', 'taxAuthority', 'kpp', 'oktmo', 'sign', 'cadastreNumBuilding', 'cadastreNumRoom']
 
 // Группируевые атрибуты (графа 3, 4)
 @Field
@@ -167,24 +163,27 @@ void calc() {
     def isYear = isPeriodYear()
     for (def row : dataRows) {
 
-        // графа 13
-        row.taxBase = calc13(row, isYear)
-
         // графа 14
-        row.taxRate = calc14(row)
+        row.benefitBasis = calc14(row)
 
         // графа 15
-        row.sum = calc15(row, isYear)
+        row.taxBase = calc15(row, isYear)
 
         // графа 16
-        row.periodSum = calc16(row, isYear)
+        row.taxRate = calc16(row)
 
         // графа 17
-        row.reductionPaymentSum = calc17(row, isYear)
+        row.sum = calc17(row, isYear)
+
+        // графа 18
+        row.periodSum = calc18(row, isYear)
+
+        // графа 19
+        row.reductionPaymentSum = calc19(row, isYear)
     }
 
     // сортировка / групировка
-    sortRows(dataRows, sortColumns)
+    sort(dataRows)
 
     // итоги и промежуточные итоги
     addFixedRows(dataRows, totalRow)
@@ -202,12 +201,20 @@ void logicCheck() {
         def index = row.getIndex()
         def errorMsg = "Строка $index: "
 
+        def Integer sign = row.sign
+        def columns = (sign == 2)? (nonEmptyColumns + 'cadastreNumRoom') : nonEmptyColumns
+        checkNonEmptyColumns(row, index, columns, logger, true)
+
+        // для графы 14
+        if (row.benefitBasis != calc14(row)) {
+            logger.error(errorMsg + "Графа «${getColumnName(row, 'benefitBasis')}» заполнена неверно!")
+        }
+
         def has201Error = false
         def has203Error = false
 
-        // TODO (Ramil Timerbaev) после того как прояснится как расчитывать графу 17, возможно надо будет объединить проверку для графы 14 и для графы 17 (логическая проверка 1 и 2)
-        // для графы 14
-        def is201 = isRefBook201ForCalc14(row)
+        // для графы 16
+        def is201 = isRefBook201ForCalc16(row)
         def records = getRecords(row, is201)
         if (records == null || records.isEmpty()) {
             if (is201) {
@@ -221,8 +228,8 @@ void logicCheck() {
             }
         }
 
-        // для графы 17
-        is201 = isRefBook201ForCalc17(row)
+        // для графы 19
+        is201 = isRefBook201ForCalc19(row)
         records = getRecords(row, is201)
         if (records == null || records.isEmpty()) {
             if (is201) {
@@ -243,7 +250,7 @@ def consolidation() {
     def dataRows = dataRowHelper.getAllCached()
     def totalRow = getDataRow(dataRows, 'total')
 
-    // удалить фикрсированные строки
+    // удалить фиксированные строки
     deleteAllAliased(dataRows)
 
     // форма 945.2
@@ -275,14 +282,16 @@ def consolidation() {
                     // графа 7
                     newRow.sign = sourceRow.sign
                     // графа 8
-                    newRow.cadastreNum = sourceRow.cadastreNum
+                    newRow.cadastreNumBuilding = sourceRow.cadastreNumBuilding
                     // графа 9
-                    newRow.cadastrePriceJanuary = sourceRow.cadastrePriceJanuary
+                    newRow.cadastreNumRoom = sourceRow.cadastreNumRoom
                     // графа 10
-                    newRow.cadastrePriceTaxFree = sourceRow.cadastrePriceTaxFree
+                    newRow.cadastrePriceJanuary = sourceRow.cadastrePriceJanuary
                     // графа 11
-                    newRow.tenure = getTenure(sourceRow)
+                    newRow.cadastrePriceTaxFree = sourceRow.cadastrePriceTaxFree
                     // графа 12
+                    newRow.tenure = getTenure(sourceRow)
+                    // графа 13
                     newRow.taxBenefitCode = sourceRow.taxBenefitCode
 
                     dataRows.add(newRow)
@@ -310,7 +319,19 @@ def roundValue(def value, int newScale) {
     }
 }
 
-def calc13(def row, def isYear) {
+def calc14(def row) {
+    def recordId = row.taxBenefitCode
+    if (recordId == null) {
+        return null
+    }
+    def record = getRefBookValue(203, recordId)
+    def section = record.SECTION.value ?: ''
+    def item = record.ITEM.value ?: ''
+    def subItem = record.SUBITEM.value ?: ''
+    return String.format("%s%s%s", section.padLeft(4, '0'), item.padLeft(4, '0'), subItem.padLeft(4, '0'))
+}
+
+def calc15(def row, def isYear) {
     if (row.cadastrePriceJanuary == null || row.cadastrePriceTaxFree == null) {
         return null
     }
@@ -320,12 +341,12 @@ def calc13(def row, def isYear) {
     return null
 }
 
-def calc14(def row) {
+def calc16(def row) {
     if (row.subject == null) {
         return null
     }
     // определить из какого справочника брать данные
-    def is201 = isRefBook201ForCalc14(row)
+    def is201 = isRefBook201ForCalc16(row)
     // получить данные из справочника
     def records = getRecords(row, is201)
     if (records == null || records.isEmpty()) {
@@ -335,7 +356,7 @@ def calc14(def row) {
     return roundValue(record?.RATE?.value, 2)
 }
 
-def calc15(def row, def isYear) {
+def calc17(def row, def isYear) {
     if (isYear && (row.taxBase == null || row.taxRate == null || row.cadastrePriceTaxFree == null) ||
             !isYear && (row.cadastrePriceJanuary == null || row.cadastrePriceTaxFree == null || row.taxRate == null)) {
         return null
@@ -356,7 +377,7 @@ def calc15(def row, def isYear) {
  * @param isYear признак налоговый ли это периода (не 1 квартал, не полгоде, не 9 месяцев)
  * @return сумма по графе 15 найденных строк
  */
-def calc16(def row, def isYear) {
+def calc18(def row, def isYear) {
     if (!isYear) {
         return null
     }
@@ -380,29 +401,38 @@ def calc16(def row, def isYear) {
     return roundValue(tmp, 2)
 }
 
-def calc17(def row, def isYear) {
-    if (isYear) {
-        if (!isRefBook201ForCalc17(row)) {
-            records = getRecords(row, false)
-            if (records == null || records.isEmpty()) {
-                // TODO (Ramil Timerbaev)
-                logger.error("Не найдены записи в справочниках для графы 17")
-                return null
-            }
-            def record = records?.get(0)
-            return roundValue(record?.REDUCTION_SUM?.value, 2)
-        } else {
+def calc19(def row, def isYear) {
+    if (!isRefBook201ForCalc19(row)) {
+        records = getRecords(row, false)
+        if (records == null || records.isEmpty()) {
+            logger.error("Не найдены записи в справочниках для графы 19")
             return null
         }
+        def record = records?.get(0)
+
+        def reductionPercent = record?.REDUCTION_PCT?.value
+        def reductionSum = record?.REDUCTION_SUM?.value
+        if (reductionPercent != null) {
+            if (isYear) {
+                return (row.sum - row.periodSum) * reductionPercent
+            } else {
+                return (row.sum * reductionPercent / 100) / 4
+            }
+        } else if (reductionSum != null) {
+            if (isYear) {
+                return reductionSum
+            } else {
+                return reductionSum / 4
+            }
+        }
     } else {
-        // TODO (Ramil Timerbaev) в чтз недоописано
         return null
     }
 }
 
-/** Получить «Код налоговой льготы» из справочника 0 «Коды налоговых льгот налога на имущество». */
-def getTaxBenefitCode(row) {
-    return getRefBookValue(202, row.taxBenefitCode)?.CODE?.value
+def getTaxBenefitCode(def parentRecordId) {
+    def recordId = getRefBookValue(203, parentRecordId).TAX_BENEFIT_ID.value
+    return  getRefBookValue(202, recordId).CODE.value
 }
 
 /** Получить предыдущие формы за текущий год. */
@@ -448,7 +478,6 @@ def checkPrevForm() {
     }
 }
 
-// TODO (Ramil Timerbaev) по чтз пока не заполняется
 /**
  * Получить срок владения.
  *
@@ -480,14 +509,17 @@ def getTenure(def sourceRow) {
  * @param is201 true - из 201 справочника, false - из 203 справочника
  * @return список записей из справочника
  */
-def getRecords(row, is201) {
-    def provider = formDataService.getRefBookProvider(refBookFactory, (is201 ? 201 : 203), providerCache)
-    def filter = (is201 ? "REGION_ID = ${row.subject}" :
-        "TAX_BENEFIT_ID = ${row.taxBenefitCode} and REGION_ID = ${row.subject} and ASSETS_CATEGORY is null")
-    if (recordsMap[filter] == null) {
-        recordsMap[filter] = provider.getRecords(getReportPeriodEndDate(), null, filter, null)
+def getRecords(def row, def is201) {
+    if (!is201) {
+        return Arrays.asList(getRefBookValue(203, row.taxBenefitCode))
+    } else {
+        def provider = formDataService.getRefBookProvider(refBookFactory, 201, providerCache)
+        def filter = "REGION_ID = ${row.subject}"
+        if (recordsMap[filter] == null) {
+            recordsMap[filter] = provider.getRecords(getReportPeriodEndDate(), null, filter, null)
+        }
+        return recordsMap[filter]
     }
-    return recordsMap[filter]
 }
 
 // Расчет подитогового значения
@@ -533,19 +565,44 @@ void addFixedRows(def dataRows, totalRow) {
  * Условие при расчете граф 14 для получения данных из справочника 201 "Ставки налога на имущество"
  * или из справочника 203 "Параметры налоговых льгот налога на имущество".
  */
-def isRefBook201ForCalc14(row) {
-    return row.taxBenefitCode == null || getTaxBenefitCode(row) != '2012400'
+def isRefBook201ForCalc16(row) {
+    return row.taxBenefitCode == null || getTaxBenefitCode(row.taxBenefitCode) != '2012400'
 }
 
 /**
- * Условие при расчете граф 17 для получения данных из справочника 201 "Ставки налога на имущество"
- * или из справочника 203 "Параметры налоговых льгот налога на имущество".
+ * Условие при расчете граф 17 для получения данных из справочника 203 "Параметры налоговых льгот налога на имущество".
  */
-def isRefBook201ForCalc17(row) {
-    return row.taxBenefitCode == null || getTaxBenefitCode(row) != '2012500'
+def isRefBook201ForCalc19(row) {
+    return row.taxBenefitCode == null || getTaxBenefitCode(row.taxBenefitCode) != '2012500'
 }
 
 /** Получить признак является ли текущий период годом. */
 def isPeriodYear() {
     return getReportPeriod()?.order == 4
+}
+
+void sort(def dataRows) {
+    dataRows.sort { def a, def b ->
+        // графа 2  - subject (справочник)
+        // графа 3  - taxAuthority
+        // графа 4  - kpp
+        // графа 5  - oktmo
+        // графа 7  - sign
+        // графа 8  - cadastreNumBuilding
+        // графа 9  - cadastreNumRoom
+
+        def valuesA = [(a.subject ? getRefBookValue(4, a.subject)?.NAME?.value : null), a.taxAuthority, a.kpp,
+                       (a.oktmo ? getRefBookValue(96, a.oktmo)?.CODE?.value : null), a.sign, a.cadastreNumBuilding, a.cadastreNumRoom]
+        def valuesB = [(b.subject ? getRefBookValue(4, b.subject)?.NAME?.value : null), b.taxAuthority, b.kpp,
+                       (b.oktmo ? getRefBookValue(96, b.oktmo)?.CODE?.value : null), b.sign, b.cadastreNumBuilding, b.cadastreNumRoom]
+
+        for (int i = 0; i < 7; i++) {
+            def valueA = valuesA[i]
+            def valueB = valuesB[i]
+            if (valueA != valueB) {
+                return valueA <=> valueB
+            }
+        }
+        return 0
+    }
 }

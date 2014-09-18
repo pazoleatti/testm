@@ -44,4 +44,5 @@
     <source path="fileupload"/>
     <source path="multiselecttree"/>
     <source path="filter"/>
+    <source path="ui"/>
 </module>
