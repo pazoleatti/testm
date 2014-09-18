@@ -52,6 +52,11 @@ public interface DepartmentReportPeriodDao {
 	boolean existForDepartment(int departmentId, int reportPeriodId);
 
     /**
+     * Последний отчетный период подразделения для комбинации отчетный период-подразделение
+     */
+    DepartmentReportPeriod getLast(int departmentId, int reportPeriodId);
+
+    /**
      * Номер корректирующего периода
      */
     Integer getCorrectionNumber(int id);

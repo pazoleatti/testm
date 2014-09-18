@@ -764,7 +764,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                         formData.getFormType().getId(), formData.getKind(), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
         if (departmentFormTypes != null) {
             for (DepartmentFormType departmentFormType : departmentFormTypes) {
-                FormData form = formDataService.findFormData(departmentFormType.getFormTypeId(), departmentFormType.getKind(),
+                FormData form = formDataService.getLast(departmentFormType.getFormTypeId(), departmentFormType.getKind(),
                         departmentFormType.getDepartmentId(), formData.getReportPeriodId(), formData.getPeriodOrder());
                 // Если форма существует и статус отличен от "Создана"
                 if (form != null && form.getState() != WorkflowState.CREATED) {

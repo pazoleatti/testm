@@ -373,7 +373,7 @@ public class FormDataAccessServiceImplTest {
 
         formDataService = mock(FormDataService.class);
         fd = mockFormData(TB1_CREATED_FORMDATA_ID, TB1_ID, WorkflowState.CREATED, FormDataKind.SUMMARY, REPORT_PERIOD_ACTIVE_ID, summaryFormType1);
-        when(formDataService.findFormData(summaryFormType1.getId(), FormDataKind.SUMMARY, ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID, null)).thenReturn(fd);
+        when(formDataService.getLast(summaryFormType1.getId(), FormDataKind.SUMMARY, ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID, null)).thenReturn(fd);
     }
 
     @Before
@@ -744,20 +744,20 @@ public class FormDataAccessServiceImplTest {
 		assertEquals(0, service.getAvailableMoves(userInfo, INACTIVE_FORMDATA_ID).size());
 	}
 
-	@Test
+    @Test
     public void testGetAccessParams() {
-            userInfo.setUser(mockUser(BANK_CONTROL_USER_ID, ROOT_BANK_ID, TARole.ROLE_CONTROL));
-            // Проверяем только один случай, так как этот метод просто агрегирует результаты других методов,
-            // а мы их уже оттестировали отдельно
-            FormDataAccessParams params = service.getFormDataAccessParams(userInfo, BANK_PREPARED_ADDITIONAL_FORMDATA_ID, false);
-            assertTrue(params.isCanRead());
-            assertTrue(params.isCanEdit());
-            assertFalse(params.isCanDelete());
-            assertArrayEquals(
-                    new Object[]{WorkflowMove.PREPARED_TO_CREATED, WorkflowMove.PREPARED_TO_APPROVED},
-                    params.getAvailableWorkflowMoves().toArray()
-            );
-        }
+        userInfo.setUser(mockUser(BANK_CONTROL_USER_ID, ROOT_BANK_ID, TARole.ROLE_CONTROL));
+        // Проверяем только один случай, так как этот метод просто агрегирует результаты других методов,
+        // а мы их уже оттестировали отдельно
+        FormDataAccessParams params = service.getFormDataAccessParams(userInfo, BANK_PREPARED_ADDITIONAL_FORMDATA_ID, false);
+        assertTrue(params.isCanRead());
+        assertTrue(params.isCanEdit());
+        assertFalse(params.isCanDelete());
+        assertArrayEquals(
+                new Object[]{WorkflowMove.PREPARED_TO_CREATED, WorkflowMove.PREPARED_TO_APPROVED},
+                params.getAvailableWorkflowMoves().toArray()
+        );
+    }
 
     /**
      * Проверяет выбрасывается ли ошибка прав доступа и т.д.. Необходим для совместимости написанных тестов и изменениями
@@ -874,7 +874,7 @@ public class FormDataAccessServiceImplTest {
         departmentFormTypes.add(departmentFormType);
 
         when(departmentFormTypeDao.getFormDestinations(any(Integer.class), any(Integer.class), any(FormDataKind.class), any(Date.class), any(Date.class))).thenReturn(departmentFormTypes);
-        when(formDataService.findFormData(anyInt(), any(FormDataKind.class), anyInt(), anyInt(), anyInt())).thenReturn(null);
+//        when(formDataService.findFormData(anyInt(), any(FormDataKind.class), anyInt(), anyInt(), anyInt())).thenReturn(null);
 
         assertFalse(service.checkForDestinations(editedFormData, reportPeriod));
     }
@@ -913,7 +913,7 @@ public class FormDataAccessServiceImplTest {
         departmentFormTypes.add(departmentFormType);
 
         when(departmentFormTypeDao.getFormDestinations(any(Integer.class), any(Integer.class), any(FormDataKind.class), any(Date.class), any(Date.class))).thenReturn(departmentFormTypes);
-        when(formDataService.findFormData(anyInt(), any(FormDataKind.class), anyInt(), anyInt(), anyInt())).thenReturn(formData);
+//        when(formDataService.findFormData(anyInt(), any(FormDataKind.class), anyInt(), anyInt(), anyInt())).thenReturn(formData);
 
         assertFalse(service.checkForDestinations(editedFormData, reportPeriod));
     }
@@ -951,8 +951,9 @@ public class FormDataAccessServiceImplTest {
         List<DepartmentFormType> departmentFormTypes = new ArrayList<DepartmentFormType>();
         departmentFormTypes.add(departmentFormType);
 
-        when(departmentFormTypeDao.getFormDestinations(any(Integer.class), any(Integer.class), any(FormDataKind.class), any(Date.class), any(Date.class))).thenReturn(departmentFormTypes);
-        when(formDataService.findFormData(anyInt(), any(FormDataKind.class), anyInt(), anyInt(), anyInt())).thenReturn(formData);
+        when(departmentFormTypeDao.getFormDestinations(any(Integer.class), any(Integer.class), any(FormDataKind.class),
+                any(Date.class), any(Date.class))).thenReturn(departmentFormTypes);
+        when(formDataService.getLast(anyInt(), any(FormDataKind.class), anyInt(), anyInt(), anyInt())).thenReturn(formData);
 
         assertTrue(service.checkForDestinations(editedFormData, reportPeriod));
     }

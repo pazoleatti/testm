@@ -319,7 +319,7 @@ public class DepartmentServiceImpl implements DepartmentService {
         // Подразделения согласно выборке 40 - Выборка для доступа к экземплярам НФ/деклараций
         List<Integer> list = getTaxFormDepartments(tAUser, taxTypes, reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
         for (Integer departmentId : list) {
-            // Открытый период подразделения для пары «Подразделение — Отчетный период» модет быть только один
+            // Открытый период подразделения для пары «Подразделение — Отчетный период» может быть только один
             DepartmentReportPeriodFilter departmentReportPeriodFilter = new DepartmentReportPeriodFilter();
             departmentReportPeriodFilter.setIsActive(true);
             departmentReportPeriodFilter.setDepartmentIdList(Arrays.asList(departmentId));

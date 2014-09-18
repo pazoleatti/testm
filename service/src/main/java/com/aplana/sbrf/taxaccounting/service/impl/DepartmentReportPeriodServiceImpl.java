@@ -62,4 +62,9 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
     public Integer getCorrectionNumber(int id) {
         return departmentReportPeriodDao.getCorrectionNumber(id);
     }
+
+    @Override
+    public DepartmentReportPeriod getLast(int departmentId, int reportPeriodId) {
+        return departmentReportPeriodDao.getLast(departmentId, reportPeriodId);
+    }
 }

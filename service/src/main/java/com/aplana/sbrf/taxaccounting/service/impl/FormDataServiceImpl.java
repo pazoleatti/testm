@@ -767,8 +767,17 @@ public class FormDataServiceImpl implements FormDataService {
 
             // Проход по типам приемников
             for (DepartmentFormType destinationDFT : departmentFormTypes) {
+                // Последний отчетный период подразделения
+                DepartmentReportPeriod destinationDepartmentReportPeriod =
+                        departmentReportPeriodDao.getLast(destinationDFT.getDepartmentId(), formData.getReportPeriodId());
+
+                if (destinationDepartmentReportPeriod == null) {
+                    continue;
+                }
+
                 // Экземпляр формы-приемника
-                FormData destinationForm = findFormData(destinationDFT.getFormTypeId(), destinationDFT.getKind(), destinationDFT.getDepartmentId(), formData.getReportPeriodId(), formData.getPeriodOrder());
+                FormData destinationForm = findFormData(destinationDFT.getFormTypeId(), destinationDFT.getKind(),
+                        destinationDepartmentReportPeriod.getId(), formData.getPeriodOrder());
                 // Если форма распринимается при отсутствии экземпляра формы-приемника, то такую форму не обрабатываем.
                 if (destinationForm == null && workflowMove.getFromState() == WorkflowState.ACCEPTED) {
                     continue;
@@ -780,7 +789,8 @@ public class FormDataServiceImpl implements FormDataService {
                 // Признак наличия принятых экземпляров источников
                 boolean existAcceptedSources = false;
                 for (DepartmentFormType sourceDFT : sourceFormTypes) {
-                    FormData sourceForm = findFormData(sourceDFT.getFormTypeId(), sourceDFT.getKind(), sourceDFT.getDepartmentId(), formData.getReportPeriodId(), formData.getPeriodOrder());
+                    FormData sourceForm = getLast(sourceDFT.getFormTypeId(), sourceDFT.getKind(),
+                            sourceDFT.getDepartmentId(), formData.getReportPeriodId(), formData.getPeriodOrder());
                     if (sourceForm != null && sourceForm.getState().equals(WorkflowState.ACCEPTED)) {
                         existAcceptedSources = true;
                         break;
@@ -809,15 +819,6 @@ public class FormDataServiceImpl implements FormDataService {
                 lockService.unlock(lockKey, userInfo.getUser().getId());
             }
         }
-    }
-
-    @Override
-    public FormData findFormData(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder) {
-        if (periodOrder == null || kind != FormDataKind.PRIMARY && kind != FormDataKind.CONSOLIDATED) {
-            // Если форма-источник квартальная или форма-приемник не является первичной или консолидированной, то ищем квартальный экземпляр
-            periodOrder = null;
-        }
-        return formDataDao.getLast(formTypeId, kind, departmentId, reportPeriodId, periodOrder);
     }
 
     @Override

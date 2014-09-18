@@ -46,7 +46,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     private ScriptComponentContext scriptComponentContext;
 
     private static final String FIND_ERROR = "FormData не сохранена, id = null.";
-    private static final String CHECK_UNIQ_ERROR = "Налоговая форма с заданными параметрами уже существует!";
+    private static final String CHECK_UNIQUE_ERROR = "Налоговая форма с заданными параметрами уже существует!";
     private static final String REF_BOOK_ROW_NOT_FOUND_ERROR = "Строка %d, графа «%s» содержит значение, отсутствующее в справочнике «%s»!";
     private static final String REF_BOOK_NOT_FOUND_ERROR = "В справочнике «%s» не найдено значение «%s», соответствующее атрибуту «%s»!";
     private static final String WRONG_FORM_IS_NOT_ACCEPTED = "Не найдены экземпляры «%s» за %s в статусе «Принята». Расчеты не могут быть выполнены.";
@@ -509,7 +509,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
                     if (taxPeriodList.get(i).getId().equals(taxPeriod.getId())) {
                         currentIndex = i;
                         break;
-                    }
+    }
                 }
                 if (currentIndex == 0 || currentIndex == -1) {
                     return null;
@@ -682,7 +682,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
 
         // форма найдена
         if (existingFormData != null) {
-            logger.error(CHECK_UNIQ_ERROR);
+            logger.error(CHECK_UNIQUE_ERROR);
             return false;
         }
         return true;
