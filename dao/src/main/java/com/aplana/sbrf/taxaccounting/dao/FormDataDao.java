@@ -59,6 +59,9 @@ public interface FormDataDao {
     @Deprecated
 	FormData find(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId);
 
+    /**
+     * Список Id экземпляров НФ по Id шаблона
+     */
     List<Long> findFormDataByFormTemplate(int formTemplateId);
 
     /**
@@ -70,7 +73,6 @@ public interface FormDataDao {
 
     /**
      * Поиск НФ по отчетному периоду подразделения (и месяцу)
-     * Если есть формы корректирующих периодов, то вернется форма корректирующего периода с максимальной датой (CORRECT_DATE)
      * @param formTypeId Вид НФ
      * @param kind Тип НФ
      * @param departmentReportPeriodId Отчетный период подразделения

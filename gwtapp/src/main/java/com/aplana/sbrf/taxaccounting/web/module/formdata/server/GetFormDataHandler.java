@@ -140,12 +140,9 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
             Integer code = Integer.parseInt(refBookValueMap.get(REF_BOOK_VALUE_NAME).getStringValue());
             departmentReportPeriod.getReportPeriod().setName(ReportPeriodSpecificName.fromId(code).getName());
         }
-        result.setBalancePeriod(reportPeriodService.isBalancePeriod(formData.getReportPeriodId(), formData.getDepartmentId()));
-		result.setReportPeriod(reportPeriod);
-		result.setDepartmenName(departmentService.getDepartment(
-				formData.getDepartmentId()).getName());
-        result.setDepartmenFullName(departmentService.getParentsHierarchy(
-                formData.getDepartmentId()));
+        result.setDepartmentReportPeriod(departmentReportPeriod);
+		result.setDepartmentName(departmentService.getDepartment(formData.getDepartmentId()).getName());
+        result.setDepartmentFullName(departmentService.getParentsHierarchy(formData.getDepartmentId()));
 		result.setAllStyles(formTemplate.getStyles());
 		result.setFixedRows(formTemplate.isFixedRows());
 		result.setTemplateFormName(formTemplate.getName());

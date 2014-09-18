@@ -396,8 +396,10 @@ public class FormDataDaoTest {
         departmentReportPeriod3.setCorrectionDate(SIMPLE_DATE_FORMAT.parse("03.01.2013"));
         final int departmentReportPeriodId3 = departmentReportPeriodDao.save(departmentReportPeriod3);
 
+        FormDataKind primary = FormDataKind.PRIMARY;
+        WorkflowState state = WorkflowState.CREATED;
         // НФ нет
-        FormData formData = formDataDao.getLast(typeId, FormDataKind.PRIMARY, departmentId, reportPeriodId, null);
+        FormData formData = formDataDao.getLast(typeId, primary, departmentId, reportPeriodId, null);
         Assert.assertNull(formData);
 
         FormTemplate formTemplate = formTemplateDao.get(typeId);
@@ -405,35 +407,32 @@ public class FormDataDaoTest {
         // НФ в первом периоде
         FormData formData1 = new FormData(formTemplate);
         formData1.setDepartmentReportPeriodId(departmentReportPeriodId1);
-        formData1.setKind(FormDataKind.PRIMARY);
-        formData1.setState(WorkflowState.CREATED);
+        formData1.setKind(primary);
+
+        formData1.setState(state);
         final long fd1 = formDataDao.save(formData1);
-        System.out.println("fd1 = " + fd1);
-        formData = formDataDao.getLast(typeId, FormDataKind.PRIMARY, departmentId, reportPeriodId, null);
+        formData = formDataDao.getLast(typeId, primary, departmentId, reportPeriodId, null);
         Assert.assertNotNull(formData);
         Assert.assertEquals(fd1, formData.getId().longValue());
 
         // НФ во втором периоде
         FormData formData2 = new FormData(formTemplate);
         formData2.setDepartmentReportPeriodId(departmentReportPeriodId2);
-        formData2.setKind(FormDataKind.PRIMARY);
-        formData2.setState(WorkflowState.CREATED);
+        formData2.setKind(primary);
+        formData2.setState(state);
         final long fd2 = formDataDao.save(formData2);
-        System.out.println("fd2 = " + fd2);
-        formData = formDataDao.getLast(typeId, FormDataKind.PRIMARY, departmentId, reportPeriodId, null);
+        formData = formDataDao.getLast(typeId, primary, departmentId, reportPeriodId, null);
         Assert.assertNotNull(formData);
         Assert.assertEquals(fd2, formData.getId().longValue());
 
         // НФ в третьем периоде
-//        FormData formData3 = new FormData(formTemplate);
-//        formData3.setDepartmentReportPeriodId(departmentReportPeriodId3);
-//        formData3.setKind(FormDataKind.PRIMARY);
-//        formData3.setState(WorkflowState.CREATED);
-//        final long fd3 = formDataDao.save(formData3);
-//        System.out.println("fd3 = " + fd3);
-//        formData = formDataDao.getLast(typeId, FormDataKind.PRIMARY, departmentId, reportPeriodId, null);
-//        Assert.assertNotNull(formData);
-//        Assert.assertEquals(fd3, formData.getId().longValue());
-
+        FormData formData3 = new FormData(formTemplate);
+        formData3.setDepartmentReportPeriodId(departmentReportPeriodId3);
+        formData3.setKind(primary);
+        formData3.setState(state);
+        final long fd3 = formDataDao.save(formData3);
+        formData = formDataDao.getLast(typeId, primary, departmentId, reportPeriodId, null);
+        Assert.assertNotNull(formData);
+        Assert.assertEquals(fd3, formData.getId().longValue());
     }
 }

@@ -519,17 +519,17 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
             return getJdbcTemplate().queryForObject(
                     "select * from " +
                             "(select fd.id, fd.form_template_id, fd.state, fd.kind, fd.return_sign, fd.period_order, " +
-                            "fd.number_previous_row, fd.department_report_period_id, drp.report_period_id, " +
-                            "drp.department_id, rownum as rn " +
+                            "fd.number_previous_row, fd.department_report_period_id, drp.report_period_id, drp.department_id " +
                             "from form_data fd, department_report_period drp, form_template ft " +
                             "where drp.id = fd.department_report_period_id " +
                             "and ft.id = fd.form_template_id " +
-                            "and drp.department_id = ? and drp.report_period_id = ? " +
+                            "and drp.department_id = ? " +
+                            "and drp.report_period_id = ? " +
                             "and ft.type_id = ? " +
                             "and fd.kind = ? " +
                             "and (? is null or fd.period_order = ?) " +
                             "order by drp.correction_date desc nulls last) " +
-                            "where rn = 1",
+                            (isSupportOver() ? "where rownum = 1" : "limit 1"),
                     new Object[]{departmentId, reportPeriodId, formTypeId, kind.getId(), periodOrder, periodOrder},
                     new int[]{Types.NUMERIC, Types.NUMERIC, Types.NUMERIC, Types.NUMERIC, Types.NUMERIC, Types.NUMERIC},
                     new FormDataWithoutRowMapper());
