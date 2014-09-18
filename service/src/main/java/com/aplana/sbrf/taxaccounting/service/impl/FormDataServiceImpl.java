@@ -48,6 +48,7 @@ public class FormDataServiceImpl implements FormDataService {
     final static String LOCK_MESSAGE = "Форма заблокирована и не может быть изменена. Попробуйте выполнить операцию позже.";
     final static String LOCK_REFBOOK_MESSAGE = "Справочник %s заблокирован и не может быть использован для заполнения атрибутов формы. Попробуйте выполнить операцию позже.";
     final static String REF_BOOK_RECORDS_ERROR =  "Строка %s, атрибут \"%s\": период актуальности значения не пересекается с отчетным периодом формы";
+    final static String DEPARTMENT_REPORT_PERIOD_NOT_FOUND_ERROR = "Не найден отчетный период подразделения с id = %d.";
 
     @Autowired
 	private FormDataDao formDataDao;
@@ -149,7 +150,6 @@ public class FormDataServiceImpl implements FormDataService {
         InputStream dataFileInputStream = null;
 
         try {
-
             dataFile = File.createTempFile("dataFile", ".original");
             dataFileOutputStream = new BufferedOutputStream(new FileOutputStream(dataFile));
             IOUtils.copy(inputStream, dataFileOutputStream);
@@ -222,9 +222,6 @@ public class FormDataServiceImpl implements FormDataService {
         return filename.substring(dotPos);
     }
 
-    private void fillFromPrevFormData() {
-
-    }
 
     @Override
 	public long createFormDataWithoutCheck(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentReportPeriodId,
@@ -232,8 +229,15 @@ public class FormDataServiceImpl implements FormDataService {
 		FormTemplate formTemplate = formTemplateService.getFullFormTemplate(formTemplateId);
         FormData formData = new FormData(formTemplate);
 
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(departmentReportPeriodId);
+        if (departmentReportPeriod == null) {
+            throw new ServiceException(DEPARTMENT_REPORT_PERIOD_NOT_FOUND_ERROR, departmentReportPeriodId);
+        }
+
         formData.setState(WorkflowState.CREATED);
+        formData.setReportPeriodId(departmentReportPeriod.getReportPeriod().getId());
         formData.setDepartmentReportPeriodId(departmentReportPeriodId);
+        formData.setDepartmentId(departmentReportPeriod.getDepartmentId());
         formData.setKind(kind);
         formData.setPeriodOrder(periodOrder);
         formData.setManual(false);
@@ -280,8 +284,8 @@ public class FormDataServiceImpl implements FormDataService {
 
 		logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.CREATE, null);
 		auditService.add(FormDataEvent.CREATE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-
 				null, formData.getFormType().getName(), formData.getKind().getId(), null, null);
+
 		// Заполняем начальные строки (но не сохраняем)
 		dataRowDao.saveRows(formData, formTemplate.getRows());
 
@@ -599,16 +603,8 @@ public class FormDataServiceImpl implements FormDataService {
             return rownum;
         }
 
-        private void setRownum(int rownum) {
-            this.rownum = rownum;
-        }
-
         private String getColumnName() {
             return columnName;
-        }
-
-        private void setColumnName(String columnName) {
-            this.columnName = columnName;
         }
     }
 
