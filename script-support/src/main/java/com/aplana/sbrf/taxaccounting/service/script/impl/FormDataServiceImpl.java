@@ -29,7 +29,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -530,45 +529,6 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
         }
         return getFormDataPrev(formData.getFormType().getId(), formData.getKind(), formData.getDepartmentId(),
                 formData.getReportPeriodId(), formData.getPeriodOrder());
-    }
-
-    @Override
-    public BigDecimal getPrevRowNumber(FormData formData, String alias) {
-        ReportPeriod reportPeriod = reportPeriodService.get(formData.getReportPeriodId());
-        if (reportPeriod != null) {
-            Calendar rpCalendar = Calendar.getInstance();
-            rpCalendar.setTime(reportPeriod.getCalendarStartDate());
-            if (rpCalendar.get(Calendar.DAY_OF_MONTH) == 1 && rpCalendar.get(Calendar.MONTH) == Calendar.JANUARY) {
-                return BigDecimal.ZERO;
-            }
-        }
-        BigDecimal rowNumber = BigDecimal.ZERO;
-        FormData prevFormData = getFormDataPrev(formData);
-        List<DataRow<Cell>> prevDataRows = (prevFormData != null ? getDataRowHelper(prevFormData).getAllCached() : null);
-        if (prevDataRows != null && !prevDataRows.isEmpty()) {
-            for (int i = prevDataRows.size() - 1; i >= 0; i--) {
-                DataRow<Cell> row = prevDataRows.get(i);
-                if (row.getAlias() == null) {
-                    Object value = row.getCell(alias).getValue();
-                    if (value instanceof BigDecimal) {
-                        rowNumber = (BigDecimal) value;
-                    }
-                    break;
-                }
-            }
-        }
-        return rowNumber == null ? BigDecimal.ZERO : rowNumber;
-    }
-
-    @Override
-    public boolean existAcceptedFormDataPrev(FormData formData) {
-        FormData prevFormData = getFormDataPrev(formData);
-        if (prevFormData != null && prevFormData.getState() == WorkflowState.ACCEPTED) {
-            DataRowHelper dataRowHelper = getDataRowHelper(prevFormData);
-            List<DataRow<Cell>> prevDataRows = dataRowHelper.getAllCached();
-            return !CollectionUtils.isEmpty(prevDataRows);
-        }
-        return false;
     }
 
     @Override

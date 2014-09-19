@@ -11,7 +11,6 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
-import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -176,20 +175,6 @@ public interface FormDataService {
      * Если несколько отчетных периодов подразделений для найденного отчетного периода, то выбирается последний с формой.
      */
     FormData getFormDataPrev(FormData formData);
-
-    /**
-     * Получение номера последней строки в форме за предыдущий отчетный период
-     * Если указанная форма первая в году или предыдущих форм нет, то результат будет 0
-     */
-    @SuppressWarnings("unused")
-    BigDecimal getPrevRowNumber(FormData formData, String alias);
-
-    /**
-     * Проверка наличия принятой формы за предыдущий период.
-     * Если форма без строк, то считается отсутствующей.
-     */
-    @SuppressWarnings("unused")
-    boolean existAcceptedFormDataPrev(FormData formData);
 
     /**
      * Получение записи справочника
