@@ -484,6 +484,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     }
 
     @Override
+    // TODO Переписать http://jira.aplana.com/browse/SBRFACCTAX-8862
     public FormData getFormDataPrev(FormData formData, int departmentId) {
         if (formData == null) {
             return null;
@@ -552,6 +553,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     }
 
     @Override
+    // TODO Переписать http://jira.aplana.com/browse/SBRFACCTAX-8862
     public boolean existAcceptedFormDataPrev(FormData formData, int departmentId) {
         FormData prevFormData = getFormDataPrev(formData, departmentId);
         if (prevFormData != null && prevFormData.getState() == WorkflowState.ACCEPTED) {
@@ -581,6 +583,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     }
 
     @Override
+    // TODO Переписать http://jira.aplana.com/browse/SBRFACCTAX-8862
     public void checkFormExistAndAccepted(int formTypeId, FormDataKind kind, int departmentId,
                                           int currentReportPeriodId, Boolean prevPeriod,
                                           Logger logger, boolean required) {
@@ -617,6 +620,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     }
 
     @Override
+    // TODO Переписать http://jira.aplana.com/browse/SBRFACCTAX-8862
     public void checkMonthlyFormExistAndAccepted(int formTypeId, FormDataKind kind, int departmentId,
                                                  int currentReportPeriodId, Integer currentPeriodOrder, Boolean prevPeriod,
                                                  Logger logger, boolean required) {

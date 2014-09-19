@@ -154,6 +154,7 @@ public class FormDataDaoTest {
     public void find3Test() {
         FormData formData = formDataDao.find(1, FormDataKind.SUMMARY, 111, null);
         Assert.assertNotNull(formData);
+        Assert.assertNotNull(formData.getFormType());
         Assert.assertEquals(11, formData.getId().intValue());
     }
 

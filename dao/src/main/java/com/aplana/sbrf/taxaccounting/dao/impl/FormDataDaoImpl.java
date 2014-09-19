@@ -270,7 +270,8 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         try {
             return getJdbcTemplate().queryForObject("select fd.id, fd.form_template_id, fd.state, fd.kind, " +
                     "fd.return_sign, fd.period_order, fd.number_previous_row, fd.department_report_period_id, " +
-                    "drp.report_period_id, drp.department_id " +
+                    "drp.report_period_id, drp.department_id, " +
+                    "(SELECT type_id FROM form_template ft WHERE ft.id = fd.form_template_id) type_id " +
                     "from form_data fd, department_report_period drp " +
                     "where drp.id = fd.department_report_period_id " +
                     "and exists (select 1 from form_template ft where fd.form_template_id = ft.id and ft.type_id = ?) " +
@@ -281,7 +282,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
                             departmentReportPeriodId,
                             periodOrder,
                             periodOrder},
-                    new FormDataWithoutRowMapper());
+                    new FormDataWithoutRowMapperWithType());
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
