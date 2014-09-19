@@ -132,15 +132,15 @@ void prevPeriodCheck() {
 
 // Признак периода ввода остатков. Отчетный период является периодом ввода остатков и месяц первый в периоде.
 def isMonthBalance() {
-    if (isBalance == null) {
-        // Отчётный период
-        if (!reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId) || formData.periodOrder == null) {
-            isBalance = false
+    if (isBalancePeriod == null) {
+        def departmentReportPeriod = departmentReportPeriodService.get(formData.departmentReportPeriodId)
+        if (!departmentReportPeriod.isBalance() || formData.periodOrder == null) {
+            isBalancePeriod = false
         } else {
-            isBalance = (formData.periodOrder - 1) % 3 == 0
+            isBalancePeriod = formData.periodOrder - 1 % 3 == 0
         }
     }
-    return isBalance
+    return isBalancePeriod
 }
 
 //// Кастомные методы

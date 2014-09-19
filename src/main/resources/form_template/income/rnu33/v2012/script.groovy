@@ -517,7 +517,8 @@ def getRnuRowsById(def id) {
 // Признак периода ввода остатков. Отчетный период является периодом ввода остатков и месяц первый в периоде.
 def isMonthBalance() {
     if (isBalancePeriod == null) {
-        if (!reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId) || formData.periodOrder == null) {
+        def departmentReportPeriod = departmentReportPeriodService.get(formData.departmentReportPeriodId)
+        if (!departmentReportPeriod.isBalance() || formData.periodOrder == null) {
             isBalancePeriod = false
         } else {
             isBalancePeriod = formData.periodOrder - 1 % 3 == 0
