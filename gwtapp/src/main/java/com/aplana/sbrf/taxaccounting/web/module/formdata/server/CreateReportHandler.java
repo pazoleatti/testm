@@ -7,6 +7,8 @@ import com.aplana.sbrf.taxaccounting.async.task.AsyncTask;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.ReportService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.CreateReportAction;
@@ -39,6 +41,9 @@ public class CreateReportHandler extends AbstractActionHandler<CreateReportActio
     @Autowired
     LockDataService lockDataService;
 
+    @Autowired
+    private LogEntryService logEntryService;
+
     public CreateReportHandler() {
         super(CreateReportAction.class);
     }
@@ -47,31 +52,32 @@ public class CreateReportHandler extends AbstractActionHandler<CreateReportActio
     public CreateReportResult execute(CreateReportAction action, ExecutionContext executionContext) throws ActionException {
         CreateReportResult result = new CreateReportResult();
         Map<String, Object> params = new HashMap<String, Object>();
-        String key = action.getFormDataId() + "_isShowChecked_" + action.isShowChecked() + "_manual_" + action.isManual();
+        String key = LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + action.getType().getName() + "_" + action.getFormDataId() + "_isShowChecked_" + action.isShowChecked() + "_manual_" + action.isManual();
         TAUserInfo userInfo = securityService.currentUserInfo();
         params.put("formDataId", action.getFormDataId());
         params.put("isShowChecked", action.isShowChecked());
         params.put("manual", action.isManual());
         params.put(AsyncTask.RequiredParams.USER_ID.name(), userInfo.getUser().getId());
         params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), key);
+        Logger logger = new Logger();
         if (lockDataService.lock(key, userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME * 4) == null) {
             try {
-                String uuid = reportService.get(action.getFormDataId(), action.getType(), action.isShowChecked(), action.isManual(), false);
+                String uuid = reportService.get(userInfo, action.getFormDataId(), action.getType(), action.isShowChecked(), action.isManual(), false);
                 if (uuid == null) {
-                        asyncManager.executeAsync(3L, params, BalancingVariants.SHORT);
+                    asyncManager.executeAsync(3L, params, BalancingVariants.SHORT);
+                    logger.info(String.format("%s отчет текущей налоговой формы(%s) поставлен в очередь на формирование.", action.getType().getName(), action.isManual()?"версия ручного ввода":"автоматическая версия"));
                 } else {
                     result.setExistReport(true);
                     lockDataService.unlock(key, userInfo.getUser().getId());
                 }
-            } catch (AsyncTaskException e) {
-                lockDataService.unlock(key, userInfo.getUser().getId());
-                throw new ActionException(e);
             } catch (Exception e) {
                 lockDataService.unlock(key, userInfo.getUser().getId());
                 throw new ActionException(e);
             }
+        } else {
+            logger.warn(String.format("%s отчет текущей налоговой формы(%s) уже находится в очереди на формирование.", action.getType().getName(), action.isManual() ? "версия ручного ввода" : "автоматическая версия"));
         }
-
+        result.setUuid(logEntryService.save(logger.getEntries()));
         return result;
     }
 

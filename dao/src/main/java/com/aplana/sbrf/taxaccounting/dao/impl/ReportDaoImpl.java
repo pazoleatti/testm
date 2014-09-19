@@ -45,7 +45,6 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
     @Override
     public String get(final long formDataId, final ReportType type, final boolean checking, final boolean manual, final boolean absolute) {
         try{
-
             PreparedStatementData ps = new PreparedStatementData();
             ps.appendQuery("select BLOB_DATA_ID from report " +
                             "where FORM_DATA_ID = ? and TYPE = ? and CHECKING = ? and MANUAL = ? and ABSOLUTE = ?");
@@ -58,7 +57,18 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
         } catch (EmptyResultDataAccessException e) {
             return null;
         } catch (DataAccessException e) {
-            throw new DaoException("Не получить данные." + e.toString());
+            throw new DaoException("Не удалось получить данные." + e.toString());
+        }
+    }
+
+    @Override
+    public void delete(long formDataId) {
+        try{
+            getJdbcTemplate().update("DELETE FROM blob_data WHERE form_data_id = ?",
+                    new Object[]{formDataId},
+                    new int[]{Types.INTEGER});
+        } catch (DataAccessException e){
+            throw new DaoException(String.format("Не удалось удалить записи с form_data_id = %d", formDataId), e);
         }
     }
 }

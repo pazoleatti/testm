@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
 import com.aplana.sbrf.taxaccounting.async.manager.AsyncManager;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
+import com.aplana.sbrf.taxaccounting.model.LockData;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.service.ReportService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.TimerReportAction;
@@ -38,9 +40,10 @@ public class TimerReportHandler extends AbstractActionHandler<TimerReportAction,
     @Override
     public TimerReportResult execute(TimerReportAction action, ExecutionContext executionContext) throws ActionException {
         TimerReportResult result = new TimerReportResult();
-        String key = action.getFormDataId() + "_isShowChecked_" + action.isShowChecked() + "_manual_" + action.isManual();
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        String key = LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + action.getType().getName() + "_" + action.getFormDataId() + "_isShowChecked_" + action.isShowChecked() + "_manual_" + action.isManual();
         if (!lockDataService.checkLock(key)) {
-            String uuid = reportService.get(action.getFormDataId(), action.getType(), action.isShowChecked(), action.isManual(), false);
+            String uuid = reportService.get(userInfo, action.getFormDataId(), action.getType(), action.isShowChecked(), action.isManual(), false);
             if (uuid == null) {
                 result.setExistReport(TimerReportResult.StatusReport.NOT_EXIST);
             } else {

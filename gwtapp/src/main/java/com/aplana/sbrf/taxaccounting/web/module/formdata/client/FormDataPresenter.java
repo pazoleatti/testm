@@ -253,6 +253,8 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                 .defaultCallback(new AbstractCallback<CreateReportResult>() {
                     @Override
                     public void onSuccess(CreateReportResult result) {
+                        LogCleanEvent.fire(FormDataPresenter.this);
+                        LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
                         if (result.isExistReport()) {
                             getView().updatePrintExcelButtonName(true);
                             Window.open(

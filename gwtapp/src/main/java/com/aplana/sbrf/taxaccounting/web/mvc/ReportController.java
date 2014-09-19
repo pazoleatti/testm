@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.ReportService;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -36,6 +37,9 @@ public class ReportController {
     @Autowired
     ReportService reportService;
 
+    @Autowired
+    SecurityService securityService;
+
     /**
      * Обработка запроса для формирования отчета по журналу аудита
      * @param uuid
@@ -60,7 +64,7 @@ public class ReportController {
     @RequestMapping(value = "/{formDataId}/{isShowChecked}/{manual}",method = RequestMethod.GET)
     public void processFormDataDownload(@PathVariable long formDataId, @PathVariable boolean isShowChecked , @PathVariable boolean manual, HttpServletRequest request, HttpServletResponse resp)
             throws IOException, AsyncTaskException {
-        String uuid = reportService.get(formDataId, ReportType.EXCEL, isShowChecked, manual, false);
+        String uuid = reportService.get(securityService.currentUserInfo(), formDataId, ReportType.EXCEL, isShowChecked, manual, false);
         if (uuid != null) {
             BlobData blobData = blobDataService.get(uuid);
             createResponse(resp, blobData);

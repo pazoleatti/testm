@@ -12,13 +12,31 @@ import java.util.List;
  *
  */
 public interface ReportService {
-	/**
-	 * Создание записи
-	 */
+    /**
+     * Создание записи
+     * @param formDataId
+     * @param blobDataId
+     * @param type
+     * @param checking
+     * @param manual
+     * @param absolute
+     */
     void create(long formDataId, String blobDataId, ReportType type, boolean checking, boolean manual, boolean absolute);
 
-	/**
-	 * Получение записи
-	 */
-	String get(long formDataId, ReportType type, boolean checking, boolean manual, boolean absolute);
+    /**
+     * Получение записи
+     * @param formDataId
+     * @param type
+     * @param checking
+     * @param manual
+     * @param absolute
+     * @return uuid
+     */
+	String get(TAUserInfo userInfo, long formDataId, ReportType type, boolean checking, boolean manual, boolean absolute);
+
+    /**
+     * Удаление всех отчетов по id НФ
+     * @param formDataId
+     */
+    void delete(long formDataId);
 }
