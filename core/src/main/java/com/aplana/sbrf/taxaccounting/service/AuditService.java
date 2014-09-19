@@ -19,6 +19,15 @@ public interface AuditService {
 
 	/**
 	 * Добавить информацию об логировании
+     * @param event событие {@link FormDataEvent} (обязательное)
+     * @param userInfo информация о пользователе, который совершает событие (обязательное)
+     * @param departmentId подразделение НФ/декларации (необязательное)
+     * @param reportPeriodId отчетный период (необязательное)
+     * @param declarationType наименование типа декларации (необязательное)
+     * @param formType наименование типа НФ (необязательное)
+     * @param formKindId вид НФ (необязательное)
+     * @param note пояснение (необязательное)
+     * @param blobDataId сыылка на сериализованные данные из лог панели, хранящие набор сообщений к данному событию (необязательное)
 	 */
 	void add(FormDataEvent event, TAUserInfo userInfo, Integer departmentId, Integer reportPeriodId,
              String declarationType, String formType, Integer formKindId, String note, String blobDataId);

@@ -201,7 +201,6 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                             @Override
                             public void onSuccess(GetRefBookRecordResult result) {
                                 getView().fillVersionData(result.getVersionData(), currentRefBookId, refBookRecordId);
-                                Map<String, RefBookValueSerializable> fields = result.getRecord();
                                 getView().fillInputFields(result.getRecord());
                                 currentUniqueRecordId = refBookRecordId;
                                 updateMode();

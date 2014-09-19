@@ -123,9 +123,11 @@ public class GetFormDataHandler extends
 
 		FormData formData = formDataService.getFormData(userInfo, action.getFormDataId(), action.isManual(), logger);
 
-        checkManualMode(formData, action.isManual());
+        if (action.isManual() != null) {
+            checkManualMode(formData, action.isManual());
+        }
 
-		FormTemplate formTemplate = formTemplateService.getFullFormTemplate(formData.getFormTemplateId());
+        FormTemplate formTemplate = formTemplateService.getFullFormTemplate(formData.getFormTemplateId());
 
 		ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
         // http://jira.aplana.com/browse/SBRFACCTAX-6399
@@ -141,7 +143,7 @@ public class GetFormDataHandler extends
         result.setBalancePeriod(reportPeriodService.isBalancePeriod(formData.getReportPeriodId(), formData.getDepartmentId()));
 		result.setReportPeriod(reportPeriod);
 		result.setDepartmenName(departmentService.getDepartment(
-				formData.getDepartmentId()).getName());
+                formData.getDepartmentId()).getName());
         result.setDepartmenFullName(departmentService.getParentsHierarchy(
                 formData.getDepartmentId()));
 		result.setAllStyles(formTemplate.getStyles());
