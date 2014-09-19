@@ -319,7 +319,7 @@ def getPrevMonthTotalRow() {
     if (formData.periodOrder == null || formData.periodOrder == 1) {
         return null
     }
-    def prevFormData = formDataService.getFormDataPrev(formData, formData.departmentId)
+    def prevFormData = formDataService.getFormDataPrev(formData)
     if (prevFormData != null) {
         def prevDataRows = formDataService.getDataRowHelper(prevFormData)?.allCached
         return getDataRow(prevDataRows, 'total')

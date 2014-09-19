@@ -153,7 +153,7 @@ void calc() {
 def getDataRowsPrev() {
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
     if (!isBalancePeriod() && formData.kind == FormDataKind.PRIMARY && reportPeriod.order != 1) {
-        def formDataPrev = formDataService.getFormDataPrev(formData, formData.departmentId)
+        def formDataPrev = formDataService.getFormDataPrev(formData)
         formDataPrev = (formDataPrev?.state == WorkflowState.ACCEPTED ? formDataPrev : null)
         if (formDataPrev != null) {
             return formDataService.getDataRowHelper(formDataPrev)?.allCached

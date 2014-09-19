@@ -170,9 +170,9 @@ def isBalancePeriod() {
 }
 
 // Получение формы предыдущего месяца
-FormData getFormDataPrev() {
+def getFormDataPrev() {
     if (formDataPrev == null) {
-        formDataPrev = formDataService.getFormDataPrev(formData, formDataDepartment.id)
+        formDataPrev = formDataService.getFormDataPrev(formData)
     }
     return formDataPrev
 }

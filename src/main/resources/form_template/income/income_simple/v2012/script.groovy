@@ -373,7 +373,7 @@ def consolidationSummary(def dataRows) {
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
 
     // Предыдущий отчётный период
-    def formDataOld = formDataService.getFormDataPrev(formData, formData.departmentId)
+    def formDataOld = formDataService.getFormDataPrev(formData)
     if (formDataOld != null && reportPeriod.order != 1) {
         def dataRowsOld = formDataService.getDataRowHelper(formDataOld)?.getAll()
         rows567.each { rowNum ->

@@ -427,7 +427,7 @@ def DataRow getRowPrev(def dataRowsPrev, def DataRow row) {
 }
 
 def getDataRowsPrev() {
-    def formDataPrev = formDataService.getFormDataPrev(formData, formData.departmentId)
+    def formDataPrev = formDataService.getFormDataPrev(formData)
     formDataPrev = formDataPrev?.state == WorkflowState.ACCEPTED ? formDataPrev : null
     if (formDataPrev == null) {
         logger.error("Не найдены экземпляры РНУ-62 за прошлый отчетный период!")

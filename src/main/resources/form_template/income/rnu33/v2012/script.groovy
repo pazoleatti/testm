@@ -497,7 +497,7 @@ def getPrevTotalRow() {
     if (formData.periodOrder == 1) {
         return null
     }
-    def formDataOld = formDataService.getFormDataPrev(formData, formDataDepartment.id)
+    def formDataOld = formDataService.getFormDataPrev(formData)
     if (formDataOld != null) {
         def dataRowsOld = formDataService.getDataRowHelper(formDataOld)?.allCached
         return (dataRowsOld ? getDataRow(dataRowsOld, 'total') : null)

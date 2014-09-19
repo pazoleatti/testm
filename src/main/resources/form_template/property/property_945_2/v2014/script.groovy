@@ -159,7 +159,7 @@ void addPrevDataRows() {
     if (isBalancePeriod()) {
         return
     }
-    def prevFormData = formDataService.getFormDataPrev(formData, formDataDepartment.id)
+    def prevFormData = formDataService.getFormDataPrev(formData)
     def prevDataRows = (prevFormData != null ? formDataService.getDataRowHelper(prevFormData)?.allCached : null)
 
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
@@ -290,7 +290,7 @@ void logicCheck() {
                 loggerError(row, errorMsg + "Необлагаемая налогом кадастровая стоимость не может быть больше общей кадастровой стоимости!")
             }
             // Проверка наличия формы предыдущего периода
-            if (!isBalancePeriod() && formDataService.getFormDataPrev(formData, formDataDepartment.id) == null) {
+            if (!isBalancePeriod() && formDataService.getFormDataPrev(formData) == null) {
                 logger.warn("Данные о кадастровой стоимости из предыдущего отчетного периода не были скопированы. В Системе не создавалась первичная налоговая форма «${formData.formType.name}» за предыдущий отчетный период!")
             }
 

@@ -152,9 +152,9 @@ def getRecordImport(def Long refBookId, def String alias, def String value, def 
 }
 
 // Получение формы предыдущего месяца
-FormData getFormDataPrev() {
+def getFormDataPrev() {
     if (formDataPrev == null) {
-        formDataPrev = formDataService.getFormDataPrev(formData, formDataDepartment.id)
+        formDataPrev = formDataService.getFormDataPrev(formData)
     }
     return formDataPrev
 }

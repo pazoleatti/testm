@@ -944,7 +944,7 @@ def getPrevDataRows() {
         return null
     }
     if (prevDataRows == null) {
-        def prevFormData = formDataService.getFormDataPrev(formData, formDataDepartment.id)
+        def prevFormData = formDataService.getFormDataPrev(formData)
         prevDataRows = (prevFormData != null ? formDataService.getDataRowHelper(prevFormData)?.allCached : null)
     }
     return prevDataRows

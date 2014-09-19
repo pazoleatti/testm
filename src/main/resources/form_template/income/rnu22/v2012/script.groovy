@@ -348,7 +348,7 @@ def getPrevDataRows() {
     if (isBalancePeriod() || isConsolidated) {
         return null
     }
-    def prevFormData = formDataService.getFormDataPrev(formData, formDataDepartment.id)
+    def prevFormData = formDataService.getFormDataPrev(formData)
     return (prevFormData != null ? formDataService.getDataRowHelper(prevFormData)?.allCached : null)
 }
 

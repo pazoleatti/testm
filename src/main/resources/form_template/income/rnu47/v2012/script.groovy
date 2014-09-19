@@ -229,7 +229,7 @@ void logicCheck() {
 
         def groupRowsAliases = ['R0', 'R1', 'R2', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8', 'R9', 'R10']
         //вынес сюда проверку на первый месяц
-        def formDataOld = formData.periodOrder != 1 ? formDataService.getFormDataPrev(formData, formDataDepartment.id) : null
+        def formDataOld = formData.periodOrder != 1 ? formDataService.getFormDataPrev(formData) : null
         def dataRowsOld = formDataOld != null ? formDataService.getDataRowHelper(formDataOld)?.allCached : null
         // значения для первых 11 строк
         def row1_11 = calcRows1_11()

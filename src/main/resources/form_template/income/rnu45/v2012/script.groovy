@@ -153,7 +153,7 @@ def dataRowHelperPrev = null // DataRowHelper формы предыдущего 
 // Получение формы предыдущего месяца
 def getFormDataPrev() {
     if (formDataPrev == null) {
-        formDataPrev = formDataService.getFormDataPrev(formData, formDataDepartment.id)
+        formDataPrev = formDataService.getFormDataPrev(formData)
     }
     return formDataPrev
 }

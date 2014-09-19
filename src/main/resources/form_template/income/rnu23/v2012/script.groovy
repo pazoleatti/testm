@@ -463,7 +463,7 @@ def calc20(def row) {
 
 /** Получить данные за предыдущий отчетный период. */
 def getPrevDataRows() {
-    def prevFormData = formDataService.getFormDataPrev(formData, formDataDepartment.id)
+    def prevFormData = formDataService.getFormDataPrev(formData)
     if (prevFormData != null) {
         return formDataService.getDataRowHelper(prevFormData)?.allCached
     }

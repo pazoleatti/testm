@@ -341,7 +341,7 @@ def getRowPrev(def dataRowsPrev, def row) {
 
 def getDataRowsPrev() {
     if (dataRowsOld == null) {
-        def formDataPrev = formDataService.getFormDataPrev(formData, formData.departmentId)
+        def formDataPrev = formDataService.getFormDataPrev(formData)
         dataRowsOld = (formDataPrev ? formDataService.getDataRowHelper(formDataPrev)?.allCached : null)
     }
     return dataRowsOld
