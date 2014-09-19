@@ -185,8 +185,9 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
         try {
             return getJdbcTemplate().queryForObject(QUERY_TEMPLATE_SIMPLE +
                     " where department_id = ? and report_period_id = ? " +
+                    (isSupportOver() ? "and rownum = 1 " : "") +
                     "order by correction_date desc nulls last " +
-                    (isSupportOver() ? "and rownum = 1" : "limit 1"),
+                    (isSupportOver() ? "" : "limit 1"),
                     new Object[]{departmentId, reportPeriodId}, mapper);
         } catch (EmptyResultDataAccessException e) {
             return null;
