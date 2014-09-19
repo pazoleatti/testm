@@ -188,4 +188,12 @@ public class DepartmentReportPeriodDaoTest {
         Assert.assertEquals(1, departmentReportPeriodDao.getCorrectionNumber(302).intValue());
         Assert.assertEquals(2, departmentReportPeriodDao.getCorrectionNumber(303).intValue());
     }
+
+    @Test
+    public void getLastTest() {
+        Assert.assertEquals(303, departmentReportPeriodDao.getLast(1, 20).getId().intValue());
+        Assert.assertEquals(603, departmentReportPeriodDao.getLast(6, 1).getId().intValue());
+        Assert.assertEquals(101, departmentReportPeriodDao.getLast(1, 1).getId().intValue());
+        Assert.assertNull(departmentReportPeriodDao.getLast(-1, -1));
+    }
 }

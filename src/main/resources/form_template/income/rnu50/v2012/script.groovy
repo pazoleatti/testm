@@ -220,7 +220,7 @@ def getCalcDataRows() {
 /** Получить данные формы РНУ-49 (id = 312) */
 def getFormDataSource() {
     if (sourceFormData == null) {
-        sourceFormData = formDataService.find(312, formData.kind, formDataDepartment.id, formData.reportPeriodId)
+        sourceFormData = formDataService.getLast(312, formData.kind, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder)
     }
     return sourceFormData
 }

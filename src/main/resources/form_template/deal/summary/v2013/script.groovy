@@ -123,9 +123,9 @@ def Long getRecordId(def Long refBookId, def String alias, def String value) {
 
 // Проверка при создании формы
 void checkCreation() {
-    def findForm = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
+    def findForm = formDataService.getLast(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId, formData.periodOrder)
     if (findForm != null) {
-        logger.error('Формирование содного отчета невозможно, т.к. отчет с указанными параметрами уже сформирован!')
+        logger.error('Формирование сводного отчета невозможно, т.к. отчет с указанными параметрами уже сформирован!')
     }
 }
 
@@ -178,7 +178,7 @@ void consolidation() {
     // мапа идентификаторов для группировки
     def groupStr = [:]
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
-        def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+        def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
         if (source != null && source.state == WorkflowState.ACCEPTED && source.formType.taxType == TaxType.DEAL) {
             formDataService.getDataRowHelper(source).allCached.each { srcRow ->
                 if (srcRow.getAlias() == null) {

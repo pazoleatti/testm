@@ -112,10 +112,11 @@ def endDate = null
 @Field
 def isBalancePeriod
 
-// Признак периода ввода остатков. Отчетный период является периодом ввода остатков.
+// Признак периода ввода остатков для отчетного периода подразделения
 def isBalancePeriod() {
     if (isBalancePeriod == null) {
-        isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
+        def departmentReportPeriod = departmentReportPeriodService.get(formData.departmentReportPeriodId)
+        isBalancePeriod = departmentReportPeriod.isBalance()
     }
     return isBalancePeriod
 }
@@ -159,7 +160,7 @@ void addPrevDataRows() {
     if (isBalancePeriod()) {
         return
     }
-    def prevFormData = formDataService.getFormDataPrev(formData, formDataDepartment.id)
+    def prevFormData = formDataService.getFormDataPrev(formData)
     def prevDataRows = (prevFormData != null ? formDataService.getDataRowHelper(prevFormData)?.allCached : null)
 
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
@@ -290,7 +291,7 @@ void logicCheck() {
                 loggerError(row, errorMsg + "Необлагаемая налогом кадастровая стоимость не может быть больше общей кадастровой стоимости!")
             }
             // Проверка наличия формы предыдущего периода
-            if (!isBalancePeriod() && formDataService.getFormDataPrev(formData, formDataDepartment.id) == null) {
+            if (!isBalancePeriod() && formDataService.getFormDataPrev(formData) == null) {
                 logger.warn("Данные о кадастровой стоимости из предыдущего отчетного периода не были скопированы. В Системе не создавалась первичная налоговая форма «${formData.formType.name}» за предыдущий отчетный период!")
             }
 

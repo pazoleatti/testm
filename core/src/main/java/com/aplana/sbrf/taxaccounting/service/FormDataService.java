@@ -158,12 +158,6 @@ public interface FormDataService {
 	void deleteRow(Logger logger, TAUserInfo userInfo, FormData formData, DataRow<Cell> currentDataRow);
 
     /**
-     * Поиск формы в отчетном периоде
-     * При наличии нескольких отчетных периодов подразделений будет использован последний
-    */
-    FormData findFormData(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder);
-
-    /**
      * Поиск НФ в отчетном периоде подразделений
      */
     FormData findFormData(int formTypeId, FormDataKind kind, int departmentReportPeriodId, Integer periodOrder);

@@ -48,6 +48,7 @@ public class FormDataServiceImpl implements FormDataService {
     final static String LOCK_MESSAGE = "Форма заблокирована и не может быть изменена. Попробуйте выполнить операцию позже.";
     final static String LOCK_REFBOOK_MESSAGE = "Справочник %s заблокирован и не может быть использован для заполнения атрибутов формы. Попробуйте выполнить операцию позже.";
     final static String REF_BOOK_RECORDS_ERROR =  "Строка %s, атрибут \"%s\": период актуальности значения не пересекается с отчетным периодом формы";
+    final static String DEPARTMENT_REPORT_PERIOD_NOT_FOUND_ERROR = "Не найден отчетный период подразделения с id = %d.";
 
     @Autowired
 	private FormDataDao formDataDao;
@@ -149,7 +150,6 @@ public class FormDataServiceImpl implements FormDataService {
         InputStream dataFileInputStream = null;
 
         try {
-
             dataFile = File.createTempFile("dataFile", ".original");
             dataFileOutputStream = new BufferedOutputStream(new FileOutputStream(dataFile));
             IOUtils.copy(inputStream, dataFileOutputStream);
@@ -222,9 +222,6 @@ public class FormDataServiceImpl implements FormDataService {
         return filename.substring(dotPos);
     }
 
-    private void fillFromPrevFormData() {
-
-    }
 
     @Override
 	public long createFormDataWithoutCheck(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentReportPeriodId,
@@ -232,8 +229,15 @@ public class FormDataServiceImpl implements FormDataService {
 		FormTemplate formTemplate = formTemplateService.getFullFormTemplate(formTemplateId);
         FormData formData = new FormData(formTemplate);
 
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(departmentReportPeriodId);
+        if (departmentReportPeriod == null) {
+            throw new ServiceException(DEPARTMENT_REPORT_PERIOD_NOT_FOUND_ERROR, departmentReportPeriodId);
+        }
+
         formData.setState(WorkflowState.CREATED);
+        formData.setReportPeriodId(departmentReportPeriod.getReportPeriod().getId());
         formData.setDepartmentReportPeriodId(departmentReportPeriodId);
+        formData.setDepartmentId(departmentReportPeriod.getDepartmentId());
         formData.setKind(kind);
         formData.setPeriodOrder(periodOrder);
         formData.setManual(false);
@@ -280,8 +284,8 @@ public class FormDataServiceImpl implements FormDataService {
 
 		logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.CREATE, null);
 		auditService.add(FormDataEvent.CREATE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-
 				null, formData.getFormType().getName(), formData.getKind().getId(), null, null);
+
 		// Заполняем начальные строки (но не сохраняем)
 		dataRowDao.saveRows(formData, formTemplate.getRows());
 
@@ -599,16 +603,8 @@ public class FormDataServiceImpl implements FormDataService {
             return rownum;
         }
 
-        private void setRownum(int rownum) {
-            this.rownum = rownum;
-        }
-
         private String getColumnName() {
             return columnName;
-        }
-
-        private void setColumnName(String columnName) {
-            this.columnName = columnName;
         }
     }
 
@@ -767,8 +763,17 @@ public class FormDataServiceImpl implements FormDataService {
 
             // Проход по типам приемников
             for (DepartmentFormType destinationDFT : departmentFormTypes) {
+                // Последний отчетный период подразделения
+                DepartmentReportPeriod destinationDepartmentReportPeriod =
+                        departmentReportPeriodDao.getLast(destinationDFT.getDepartmentId(), formData.getReportPeriodId());
+
+                if (destinationDepartmentReportPeriod == null) {
+                    continue;
+                }
+
                 // Экземпляр формы-приемника
-                FormData destinationForm = findFormData(destinationDFT.getFormTypeId(), destinationDFT.getKind(), destinationDFT.getDepartmentId(), formData.getReportPeriodId(), formData.getPeriodOrder());
+                FormData destinationForm = findFormData(destinationDFT.getFormTypeId(), destinationDFT.getKind(),
+                        destinationDepartmentReportPeriod.getId(), formData.getPeriodOrder());
                 // Если форма распринимается при отсутствии экземпляра формы-приемника, то такую форму не обрабатываем.
                 if (destinationForm == null && workflowMove.getFromState() == WorkflowState.ACCEPTED) {
                     continue;
@@ -780,7 +785,8 @@ public class FormDataServiceImpl implements FormDataService {
                 // Признак наличия принятых экземпляров источников
                 boolean existAcceptedSources = false;
                 for (DepartmentFormType sourceDFT : sourceFormTypes) {
-                    FormData sourceForm = findFormData(sourceDFT.getFormTypeId(), sourceDFT.getKind(), sourceDFT.getDepartmentId(), formData.getReportPeriodId(), formData.getPeriodOrder());
+                    FormData sourceForm = getLast(sourceDFT.getFormTypeId(), sourceDFT.getKind(),
+                            sourceDFT.getDepartmentId(), formData.getReportPeriodId(), formData.getPeriodOrder());
                     if (sourceForm != null && sourceForm.getState().equals(WorkflowState.ACCEPTED)) {
                         existAcceptedSources = true;
                         break;
@@ -809,15 +815,6 @@ public class FormDataServiceImpl implements FormDataService {
                 lockService.unlock(lockKey, userInfo.getUser().getId());
             }
         }
-    }
-
-    @Override
-    public FormData findFormData(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder) {
-        if (periodOrder == null || kind != FormDataKind.PRIMARY && kind != FormDataKind.CONSOLIDATED) {
-            // Если форма-источник квартальная или форма-приемник не является первичной или консолидированной, то ищем квартальный экземпляр
-            periodOrder = null;
-        }
-        return formDataDao.getLast(formTypeId, kind, departmentId, reportPeriodId, periodOrder);
     }
 
     @Override

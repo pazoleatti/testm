@@ -427,7 +427,7 @@ def DataRow getRowPrev(def dataRowsPrev, def DataRow row) {
 }
 
 def getDataRowsPrev() {
-    def formDataPrev = formDataService.getFormDataPrev(formData, formData.departmentId)
+    def formDataPrev = formDataService.getFormDataPrev(formData)
     formDataPrev = formDataPrev?.state == WorkflowState.ACCEPTED ? formDataPrev : null
     if (formDataPrev == null) {
         logger.error("Не найдены экземпляры РНУ-62 за прошлый отчетный период!")
@@ -441,10 +441,11 @@ BigDecimal round(BigDecimal value, int newScale = 2) {
     return value?.setScale(newScale, RoundingMode.HALF_UP)
 }
 
-// Признак периода ввода остатков. Отчетный период является периодом ввода остатков.
+// Признак периода ввода остатков для отчетного периода подразделения
 def isBalancePeriod() {
     if (isBalancePeriod == null) {
-        isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
+        def departmentReportPeriod = departmentReportPeriodService.get(formData.departmentReportPeriodId)
+        isBalancePeriod = departmentReportPeriod.isBalance()
     }
     return isBalancePeriod
 }

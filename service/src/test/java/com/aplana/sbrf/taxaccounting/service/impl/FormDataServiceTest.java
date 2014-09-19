@@ -121,7 +121,7 @@ public class FormDataServiceTest {
         formData1.setFormType(formType);
         formData1.setKind(FormDataKind.CONSOLIDATED);
         formData1.setDepartmentId(1);
-        when(formDataDao.find(departmentFormType.getFormTypeId(), departmentFormType.getKind(), departmentFormType.getDepartmentId(), formData.getReportPeriodId())).thenReturn(formData1);
+        when(formDataDao.find(departmentFormType.getFormTypeId(), departmentFormType.getKind(), 1, null)).thenReturn(formData1);
         when(formDataDao.get(formData1.getId(), false)).thenReturn(formData);
         when(departmentDao.getDepartment(formData1.getDepartmentId())).thenReturn(department);
 
@@ -149,6 +149,7 @@ public class FormDataServiceTest {
         formData.setDepartmentReportPeriodId(departmentReportPeriod.getId());
 
         DepartmentReportPeriodDao departmentReportPeriodDao = mock(DepartmentReportPeriodDao.class);
+        when(departmentReportPeriodDao.getLast(anyInt(), anyInt())).thenReturn(departmentReportPeriod);
         when(departmentReportPeriodDao.get(anyInt())).thenReturn(departmentReportPeriod);
         ReflectionTestUtils.setField(formDataService, "departmentReportPeriodDao", departmentReportPeriodDao);
 

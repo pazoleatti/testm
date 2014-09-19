@@ -154,6 +154,18 @@
             <version>${project.version}</version>
         </dependency>
 
+        <!-- Общий функционал -->
+        <dependency>
+            <groupId>com.aplana.taxaccounting</groupId>
+            <artifactId>common-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.aplana.taxaccounting</groupId>
+            <artifactId>common-service</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <!-- Tester component -->
 		<dependency>
 			<groupId>com.gwtplatform</groupId>
@@ -305,7 +317,7 @@
                     <artifactId>async-mock</artifactId>
                     <version>${project.version}</version>
                 </dependency>
-			</dependencies>
+            </dependencies>
 		</profile>
 		<profile>
 			<id>production</id>

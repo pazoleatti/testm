@@ -361,7 +361,7 @@ void logicCheck() {
         if (row.buyDate != null) {
             def reportPeriods = reportPeriodService.getReportPeriodsByDate(TaxType.INCOME, row.buyDate, startDate - 1)
             for (reportPeriod in reportPeriods) {
-                findFormData = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, reportPeriod.id)
+                findFormData = formDataService.getLast(formData.formType.id, formData.kind, formData.departmentId, reportPeriod.id, null)
                 if (findFormData != null) {
                     isFind = false
                     for (findRow in formDataService.getDataRowHelper(findFormData).getAllCached()) {
@@ -436,8 +436,8 @@ def BigDecimal getCalcPrevColumn(def row, def sumColumnName, def startDate) {
     if (row.buyDate != null && row.bill != null) {
         def reportPeriods = reportPeriodService.getReportPeriodsByDate(TaxType.INCOME, row.buyDate, startDate - 1)
         for (reportPeriod in reportPeriods) {
-            findFormData = formDataService.find(formData.formType.id, formData.kind, formData.departmentId,
-                    reportPeriod.id)
+            findFormData = formDataService.getLast(formData.formType.id, formData.kind, formData.departmentId,
+                    reportPeriod.id, null)
             if (findFormData != null) {
                 isFind = false
                 for (findRow in formDataService.getDataRowHelper(findFormData).getAllCached()) {
@@ -615,9 +615,11 @@ def getEndDate() {
     return endDate
 }
 
+// Признак периода ввода остатков для отчетного периода подразделения
 def isBalancePeriod() {
     if (isBalancePeriod == null) {
-        isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
+        def departmentReportPeriod = departmentReportPeriodService.get(formData.departmentReportPeriodId)
+        isBalancePeriod = departmentReportPeriod.isBalance()
     }
     return isBalancePeriod
 }

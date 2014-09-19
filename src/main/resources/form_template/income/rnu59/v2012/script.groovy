@@ -2,6 +2,7 @@ package form_template.income.rnu59.v2012
 
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import groovy.transform.Field
 
 import java.text.SimpleDateFormat
@@ -46,7 +47,7 @@ switch (formDataEvent){
 // Инициирование Пользователем создания формы
     case FormDataEvent.CREATE:
         //1.    Проверка наличия и статуса формы, консолидирующей данные текущей налоговой формы, при создании формы.
-        checkCreation()
+        formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
@@ -253,18 +254,6 @@ def calc(){
         // строка для Итого
         def totalRow = getCalcTotalRow()
         insert(data, totalRow)
-    }
-}
-
-/**
- * Проверка при создании формы.
- */
-void checkCreation() {
-    def findForm = formDataService.find(formData.formType.id,
-            formData.kind, formData.departmentId, formData.reportPeriodId)
-
-    if (findForm != null) {
-        logger.error('Налоговая форма с заданными параметрами уже существует.')
     }
 }
 
@@ -523,7 +512,7 @@ void consolidation() {
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind(),
             getReportPeriodStartDate(), getReportPeriodEndDate()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
-            def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.perioOrder)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 getData(source).getAllCached().each { row->
                     if (row.getAlias() == null || row.getAlias() == '') {

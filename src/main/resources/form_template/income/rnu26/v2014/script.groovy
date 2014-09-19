@@ -49,7 +49,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
-        def columns = (getBalancePeriod() ? allColumns - ['rowNumber']: editableColumns)
+        def columns = (isBalancePeriod() ? allColumns - ['rowNumber']: editableColumns)
         formDataService.addRow(formData, currentDataRow, columns, allColumns - columns)
         break
     case FormDataEvent.DELETE_ROW:
@@ -190,7 +190,7 @@ void calc() {
     def totalGroups = []
 
     for (row in dataRows) {
-        if (!getBalancePeriod() && !isConsolidated) {
+        if (!isBalancePeriod() && !isConsolidated) {
             // строка из предыдущего периода
             def prevRow = getPrevRowByColumn4(prevDataRows, row.tradeNumber)
             // графа 6
@@ -267,7 +267,7 @@ void logicCheck() {
         def errorMsg = "Строка $index: "
 
         // 1. Проверка на заполнение поля
-        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !getBalancePeriod())
+        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !isBalancePeriod())
 
         // 4. Проверка при нулевом значении размера лота на текущую отчётную дату (графа 7, 8, 17)
         if (row.lotSizeCurrent == 0 && row.reserveCalcValuePrev != row.reserveRecovery) {
@@ -318,7 +318,7 @@ void logicCheck() {
         }
 
         def prevRow = null
-        if (!getBalancePeriod() && !isConsolidated) {
+        if (!isBalancePeriod() && !isConsolidated) {
             prevRow = getPrevRowByColumn4(prevDataRows, row.tradeNumber)
 
             // 13. Проверка корректности заполнения РНУ (графа 4, 4 (за предыдущий период), 6, 7 (за предыдущий период) )
@@ -339,7 +339,7 @@ void logicCheck() {
         // 15, 16 проверки идут после проверки 18
 
         // 17. Арифметическая проверка графы 8, 13..17
-        if (!getBalancePeriod()) {
+        if (!isBalancePeriod()) {
             // для хранения правильных значении и сравнения с имеющимися при арифметических проверках
             def needValue = [:]
             def arithmeticCheckAlias = ['marketQuotationInRub', 'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'reserveRecovery']
@@ -424,7 +424,7 @@ void logicCheck() {
 
     // 19. Проверка итогового значений по всей форме
     if (totalRow != null) {
-        checkTotalSum(dataRows, totalColumns, logger, !getBalancePeriod())
+        checkTotalSum(dataRows, totalColumns, logger, !isBalancePeriod())
     }
 
     // 3. Проверка на полноту отражения данных предыдущих отчетных периодов (графа 15) в текущем отчетном периоде
@@ -459,11 +459,11 @@ void logicCheck() {
 
 /** Получить данные за предыдущий отчетный период. */
 def getPrevDataRows() {
-    if (getBalancePeriod() || isConsolidated) {
+    if (isBalancePeriod() || isConsolidated) {
         return null
     }
 
-    def formDataOld = formDataService.getFormDataPrev(formData, formDataDepartment.id)
+    def formDataOld = formDataService.getFormDataPrev(formData)
     return formDataOld != null ? formDataService.getDataRowHelper(formDataOld).allCached : null
 }
 
@@ -562,7 +562,7 @@ def roundValue(def value, def int precision) {
 
 /** Вывести сообщение. В периоде ввода остатков сообщения должны быть только НЕфатальными. */
 void loggerError(def row, def msg) {
-    if (getBalancePeriod()) {
+    if (isBalancePeriod()) {
         rowWarning(logger, row, msg)
     } else {
         rowError(logger, row, msg)
@@ -571,7 +571,7 @@ void loggerError(def row, def msg) {
 
 /** Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период. */
 void prevPeriodCheck() {
-    if (!isConsolidated && !getBalancePeriod()) {
+    if (!isConsolidated && !isBalancePeriod()) {
         formDataService.checkFormExistAndAccepted(formData.formType.id, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, true, logger, true)
     }
 }
@@ -590,9 +590,11 @@ def getReportPeriodEndDate() {
     return endDate
 }
 
-def getBalancePeriod() {
+// Признак периода ввода остатков для отчетного периода подразделения
+def isBalancePeriod() {
     if (isBalancePeriod == null) {
-        isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
+        def departmentReportPeriod = departmentReportPeriodService.get(formData.departmentReportPeriodId)
+        isBalancePeriod = departmentReportPeriod.isBalance()
     }
     return isBalancePeriod
 }
@@ -664,11 +666,11 @@ void addData(def xml, int headRowCount) {
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
         newRow.setImportIndex(xlsIndexRow)
-        (getBalancePeriod() ? (allColumns - ['rowNumber', 'currency']) : editableColumns).each {
+        (isBalancePeriod() ? (allColumns - ['rowNumber', 'currency']) : editableColumns).each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
         }
-        (getBalancePeriod() ? ['rowNumber', 'currency'] : autoFillColumns).each {
+        (isBalancePeriod() ? ['rowNumber', 'currency'] : autoFillColumns).each {
             newRow.getCell(it).setStyleAlias('Автозаполняемая')
         }
 
@@ -761,11 +763,11 @@ void addTransportData(def xml) {
 
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
-        (getBalancePeriod() ? (allColumns - ['rowNumber', 'currency']) : editableColumns).each {
+        (isBalancePeriod() ? (allColumns - ['rowNumber', 'currency']) : editableColumns).each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
         }
-        (getBalancePeriod() ? ['rowNumber', 'currency'] : autoFillColumns).each {
+        (isBalancePeriod() ? ['rowNumber', 'currency'] : autoFillColumns).each {
             newRow.getCell(it).setStyleAlias('Автозаполняемая')
         }
 

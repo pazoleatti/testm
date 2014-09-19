@@ -29,7 +29,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -46,7 +45,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     private ScriptComponentContext scriptComponentContext;
 
     private static final String FIND_ERROR = "FormData не сохранена, id = null.";
-    private static final String CHECK_UNIQ_ERROR = "Налоговая форма с заданными параметрами уже существует!";
+    private static final String CHECK_UNIQUE_ERROR = "Налоговая форма с заданными параметрами уже существует!";
     private static final String REF_BOOK_ROW_NOT_FOUND_ERROR = "Строка %d, графа «%s» содержит значение, отсутствующее в справочнике «%s»!";
     private static final String REF_BOOK_NOT_FOUND_ERROR = "В справочнике «%s» не найдено значение «%s», соответствующее атрибуту «%s»!";
     private static final String WRONG_FORM_IS_NOT_ACCEPTED = "Не найдены экземпляры «%s» за %s в статусе «Принята». Расчеты не могут быть выполнены.";
@@ -85,6 +84,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
 
     // Объект-маркер для ускорения работы кэша с отсутствующими значениями
     private static final Long NULL_VALUE_MARKER = -1L;
+
     // Объект-маркер для ускорения работы кэша с дублированными значениями
     private static final Long TOO_MANY_VALUE_MARKER = -2L;
 
@@ -483,83 +483,52 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
         return refBookCache.get(recordId);
     }
 
-    @Override
-    public FormData getFormDataPrev(FormData formData, int departmentId) {
-        if (formData == null) {
-            return null;
-        }
-        if (formData.getPeriodOrder() == null) {
-            // Квартальная форма
-            ReportPeriod prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.getReportPeriodId());
+    // Поиск предыдущей НФ относительно формы с заданными параметрами
+    private FormData getFormDataPrev(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId,
+                                     Integer periodOrder) {
+        if (periodOrder == null) {
+            // Квартальная форма, берем предыдущий отчетный период
+            ReportPeriod prevReportPeriod = reportPeriodService.getPrevReportPeriod(reportPeriodId);
             if (prevReportPeriod != null) {
-                return find(formData.getFormType().getId(), formData.getKind(), departmentId, prevReportPeriod.getId());
+                // Последний экземпляр
+                return getLast(formTypeId, kind, departmentId, prevReportPeriod.getId(), null);
             }
         } else {
             // Ежемесячная форма
-            int month;
-            ReportPeriod currentPeriod = reportPeriodService.get(formData.getReportPeriodId());
-            TaxPeriod taxPeriod = currentPeriod.getTaxPeriod();
+            // Текущий отчетный период
+            ReportPeriod currentPeriod = reportPeriodService.get(reportPeriodId);
+            int prevMonth = periodOrder == 1 ? 12 : periodOrder - 1;
 
-            if (formData.getPeriodOrder() == 1) {
-                // Переход через год
-                month = 12;
-                List<TaxPeriod> taxPeriodList = taxPeriodService.listByTaxType(currentPeriod.getTaxPeriod().getTaxType());
-                int currentIndex = -1;
-                for (int i = 0; i < taxPeriodList.size(); i++) {
-                    if (taxPeriodList.get(i).getId().equals(taxPeriod.getId())) {
-                        currentIndex = i;
-                        break;
-                    }
-                }
-                if (currentIndex == 0 || currentIndex == -1) {
-                    return null;
-                }
-                taxPeriod = taxPeriodList.get(currentIndex - 1);
+            Date periodStartDate = currentPeriod.getCalendarStartDate();
+            Date monthStartDate = reportPeriodService.getMonthStartDate(reportPeriodId,
+                    periodOrder).getTime();
+
+            // Признак перехода через отчетный период — дата отчетного периода и дата месяца отличаются
+            boolean overReportPeriod = periodStartDate.equals(monthStartDate);
+
+            if (!overReportPeriod) {
+                // Последний экземпляр в том же отчетном периоде, но предыдущем месяце
+                return getLast(formTypeId, kind, departmentId,
+                        reportPeriodId, prevMonth);
             } else {
-                month = formData.getPeriodOrder() - 1;
+                // Предыдущий отчетный период
+                ReportPeriod prevReportPeriod = reportPeriodService.getPrevReportPeriod(reportPeriodId);
+                if (prevReportPeriod != null) {
+                    // Последний экземпляр
+                    return getLast(formTypeId, kind, departmentId, prevReportPeriod.getId(), prevMonth);
+                }
             }
-            return findMonth(formData.getFormType().getId(), formData.getKind(), departmentId, taxPeriod.getId(), month);
         }
         return null;
     }
 
     @Override
-    public BigDecimal getPrevRowNumber(FormData formData, int departmentId, String alias) {
-        ReportPeriod reportPeriod = reportPeriodService.get(formData.getReportPeriodId());
-        if (reportPeriod != null) {
-            Calendar rpCalendar = Calendar.getInstance();
-            rpCalendar.setTime(reportPeriod.getCalendarStartDate());
-            if (rpCalendar.get(Calendar.DAY_OF_MONTH) == 1 && rpCalendar.get(Calendar.MONTH) == Calendar.JANUARY) {
-                return BigDecimal.ZERO;
-            }
+    public FormData getFormDataPrev(FormData formData) {
+        if (formData == null) {
+            return null;
         }
-        BigDecimal rowNumber = BigDecimal.ZERO;
-        FormData prevFormData = getFormDataPrev(formData, departmentId);
-        List<DataRow<Cell>> prevDataRows = (prevFormData != null ? getDataRowHelper(prevFormData).getAllCached() : null);
-        if (prevDataRows != null && !prevDataRows.isEmpty()) {
-            for (int i = prevDataRows.size() - 1; i >= 0; i--) {
-                DataRow<Cell> row = prevDataRows.get(i);
-                if (row.getAlias() == null) {
-                    Object value = row.getCell(alias).getValue();
-                    if (value instanceof BigDecimal) {
-                        rowNumber = (BigDecimal) value;
-                    }
-                    break;
-                }
-            }
-        }
-        return rowNumber == null ? BigDecimal.ZERO : rowNumber;
-    }
-
-    @Override
-    public boolean existAcceptedFormDataPrev(FormData formData, int departmentId) {
-        FormData prevFormData = getFormDataPrev(formData, departmentId);
-        if (prevFormData != null && prevFormData.getState() == WorkflowState.ACCEPTED) {
-            DataRowHelper dataRowHelper = getDataRowHelper(prevFormData);
-            List<DataRow<Cell>> prevDataRows = dataRowHelper.getAllCached();
-            return !CollectionUtils.isEmpty(prevDataRows);
-        }
-        return false;
+        return getFormDataPrev(formData.getFormType().getId(), formData.getKind(), formData.getDepartmentId(),
+                formData.getReportPeriodId(), formData.getPeriodOrder());
     }
 
     @Override
@@ -593,7 +562,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
         }
 
         // получение данных формы
-        FormData formData = find(formTypeId, kind, departmentId, reportPeriod.getId());
+        FormData formData = getLast(formTypeId, kind, departmentId, reportPeriod.getId(), null);
 
         // проверка существования, принятости и наличия данных
         boolean accepted = false;
@@ -617,41 +586,19 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     }
 
     @Override
-    public void checkMonthlyFormExistAndAccepted(int formTypeId, FormDataKind kind, int departmentId,
-                                                 int currentReportPeriodId, Integer currentPeriodOrder, Boolean prevPeriod,
+    public void checkMonthlyFormExistAndAccepted(final int formTypeId, FormDataKind kind, int departmentId,
+                                                 int currentReportPeriodId, int currentPeriodOrder, boolean prevPeriod,
                                                  Logger logger, boolean required) {
-        // определение периода формы
-        ReportPeriod reportPeriod = reportPeriodService.get(currentReportPeriodId);
-        int month = currentPeriodOrder;
-        int taxPeriodId;
-        if (prevPeriod) {
-            TaxPeriod taxPeriod = reportPeriod.getTaxPeriod();
-            if (currentPeriodOrder == 1) {
-                // Переход через год
-                month = 12;
-                List<TaxPeriod> taxPeriodList = taxPeriodService.listByTaxType(taxPeriod.getTaxType());
-                int currentIndex = -1;
-                for (int i = 0; i < taxPeriodList.size(); i++) {
-                    if (taxPeriodList.get(i).getId().equals(taxPeriod.getId())) {
-                        currentIndex = i;
-                        break;
-                    }
-                }
-                if (currentIndex == 0 || currentIndex == -1) {
-                    return;
-                }
-                taxPeriod = taxPeriodList.get(currentIndex - 1);
-                reportPeriod = reportPeriodService.getPrevReportPeriod(currentReportPeriodId);
-            } else {
-                month = currentPeriodOrder - 1;
-            }
-            taxPeriodId = taxPeriod.getId();
-        } else {
-            taxPeriodId = reportPeriod.getTaxPeriod().getId();
-        }
 
-        // получение данных формы
-        FormData formData = findMonth(formTypeId, kind, departmentId, taxPeriodId, month);
+        FormData formData = prevPeriod ? getFormDataPrev(formTypeId, kind, departmentId,
+                currentReportPeriodId, currentPeriodOrder) : getLast(formTypeId, kind, departmentId,
+                currentReportPeriodId, currentPeriodOrder);
+
+        ReportPeriod reportPeriod = prevPeriod ? reportPeriodService.getPrevReportPeriod(currentReportPeriodId) :
+                reportPeriodService.get(currentReportPeriodId);
+
+        int month = prevPeriod ? currentPeriodOrder - 1 : currentPeriodOrder;
+        month = month == 0 ? 12 : month;
 
         // проверка существования, принятости и наличия данных
         boolean accepted = false;
@@ -682,7 +629,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
 
         // форма найдена
         if (existingFormData != null) {
-            logger.error(CHECK_UNIQ_ERROR);
+            logger.error(CHECK_UNIQUE_ERROR);
             return false;
         }
         return true;

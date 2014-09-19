@@ -152,9 +152,9 @@ def getRecordImport(def Long refBookId, def String alias, def String value, def 
 }
 
 // Получение формы предыдущего месяца
-FormData getFormDataPrev() {
+def getFormDataPrev() {
     if (formDataPrev == null) {
-        formDataPrev = formDataService.getFormDataPrev(formData, formDataDepartment.id)
+        formDataPrev = formDataService.getFormDataPrev(formData)
     }
     return formDataPrev
 }
@@ -172,15 +172,15 @@ def getDataRowHelperPrev() {
 
 // Признак периода ввода остатков. Отчетный период является периодом ввода остатков и месяц первый в периоде.
 def isMonthBalance() {
-    if (isBalance == null) {
-        // Отчётный период
-        if (!reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId) || formData.periodOrder == null) {
-            isBalance = false
+    if (isBalancePeriod == null) {
+        def departmentReportPeriod = departmentReportPeriodService.get(formData.departmentReportPeriodId)
+        if (!departmentReportPeriod.isBalance() || formData.periodOrder == null) {
+            isBalancePeriod = false
         } else {
-            isBalance = (formData.periodOrder - 1) % 3 == 0
+            isBalancePeriod = formData.periodOrder - 1 % 3 == 0
         }
     }
-    return isBalance
+    return isBalancePeriod
 }
 
 // Алгоритмы заполнения полей формы
@@ -488,9 +488,6 @@ def getYearSum(def aliases, def rowCurrent) {
         retVal[alias] = 0
     }
 
-    // Налоговый период
-    def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
-
     // Сумма в текущей форме
     for (def alias : aliases) {
         def val = rowCurrent.get(alias)
@@ -498,8 +495,8 @@ def getYearSum(def aliases, def rowCurrent) {
     }
     // Сумма в предыдущих формах
     for (def month = formData.periodOrder - 1; month >= 1; month--) {
-        def prevFormData = formDataService.findMonth(formData.formType.id, formData.kind, formData.departmentId,
-                taxPeriod.id, month)
+        def prevFormData = formDataService.getLast(formData.formType.id, formData.kind, formData.departmentId,
+                formData.reportPeriodId, month)
         if (prevFormData != null && prevFormData.state == WorkflowState.ACCEPTED) {
             def row = getPrevRow(formDataService.getDataRowHelper(prevFormData), rowCurrent)
             if (row) {

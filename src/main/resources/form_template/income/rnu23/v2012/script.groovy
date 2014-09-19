@@ -46,7 +46,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
-        def cols = (getBalancePeriod() ? balanceEditableColumns : editableColumns)
+        def cols = (isBalancePeriod() ? balanceEditableColumns : editableColumns)
         formDataService.addRow(formData, currentDataRow, cols, null)
         break
     case FormDataEvent.DELETE_ROW:
@@ -278,7 +278,7 @@ void logicCheck() {
         }
 
         // 7. Обязательность заполнения полей
-        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !getBalancePeriod())
+        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !isBalancePeriod())
 
         // 8. Проверка на заполнение поля «<Наименование поля>»
         // При заполнении граф 9 и 10, графы 11 и 12 должны быть пустыми.
@@ -301,7 +301,7 @@ void logicCheck() {
             needValue['preChargeRuble'] = calc18(prevTotalRow)
             needValue['taxPeriodCurrency'] = calc19(row, row.preAccrualsStartDate, row.preAccrualsEndDate)
             needValue['taxPeriodRuble'] = calc20(row)
-            checkCalc(row, arithmeticCheckAlias, needValue, logger, !getBalancePeriod())
+            checkCalc(row, arithmeticCheckAlias, needValue, logger, !isBalancePeriod())
         }
     }
 
@@ -463,7 +463,7 @@ def calc20(def row) {
 
 /** Получить данные за предыдущий отчетный период. */
 def getPrevDataRows() {
-    def prevFormData = formDataService.getFormDataPrev(formData, formDataDepartment.id)
+    def prevFormData = formDataService.getFormDataPrev(formData)
     if (prevFormData != null) {
         return formDataService.getDataRowHelper(prevFormData)?.allCached
     }
@@ -568,7 +568,7 @@ def roundValue(def value, int precision) {
 
 /** Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период. */
 void prevPeriodCheck() {
-    if (formData.kind == FormDataKind.PRIMARY && !getBalancePeriod()) {
+    if (formData.kind == FormDataKind.PRIMARY && !isBalancePeriod()) {
         formDataService.checkFormExistAndAccepted(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId, true, logger, true)
     }
 }
@@ -580,16 +580,18 @@ def getReportPeriodEndDate() {
     return endDate
 }
 
-def getBalancePeriod() {
-    if (isBalancePeriod == null){
-        isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
+// Признак периода ввода остатков для отчетного периода подразделения
+def isBalancePeriod() {
+    if (isBalancePeriod == null) {
+        def departmentReportPeriod = departmentReportPeriodService.get(formData.departmentReportPeriodId)
+        isBalancePeriod = departmentReportPeriod.isBalance()
     }
     return isBalancePeriod
 }
 
 /** Вывести сообщение. В периоде ввода остатков сообщения должны быть только НЕфатальными. */
 void loggerError(def row, def msg) {
-    if (getBalancePeriod()) {
+    if (isBalancePeriod()) {
         rowWarning(logger, row, msg)
     } else {
         rowError(logger, row, msg)
@@ -769,7 +771,7 @@ def getNewRow() {
     autoFillColumns.each {
         newRow.getCell(it).setStyleAlias('Автозаполняемая')
     }
-    def cols = (getBalancePeriod() ? balanceEditableColumns : editableColumns)
+    def cols = (isBalancePeriod() ? balanceEditableColumns : editableColumns)
     cols.each {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')

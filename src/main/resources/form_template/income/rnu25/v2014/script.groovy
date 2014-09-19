@@ -139,10 +139,11 @@ def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache);
 }
 
-// Признак периода ввода остатков.
+// Признак периода ввода остатков для отчетного периода подразделения
 def isBalancePeriod() {
     if (isBalancePeriod == null) {
-        isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
+        def departmentReportPeriod = departmentReportPeriodService.get(formData.departmentReportPeriodId)
+        isBalancePeriod = departmentReportPeriod.isBalance()
     }
     return isBalancePeriod
 }
@@ -445,7 +446,7 @@ def getPrevDataRows() {
     if (isBalancePeriod() || isConsolidated) {
         return null
     }
-    def prevFormData = formDataService.getFormDataPrev(formData, formDataDepartment.id)
+    def prevFormData = formDataService.getFormDataPrev(formData)
     return (prevFormData != null ? formDataService.getDataRowHelper(prevFormData)?.allCached : null)
 }
 

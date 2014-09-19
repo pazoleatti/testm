@@ -2,6 +2,8 @@ package form_template.income.rnu51.v2008
 
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormData
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
@@ -117,14 +119,6 @@ def totalColumns = ['amountBonds', 'acquisitionPrice', 'costOfAcquisition', 'mar
         'redemptionValue', 'priceInFactRub', 'marketPriceInRub1', 'salePriceTax', 'expensesOnSale', 'expensesTotal',
         'profit', 'excessSalePriceTax']
 
-// Текущая дата
-@Field
-def currentDate = new Date()
-
-// Дата окончания отчетного периода
-@Field
-def endDate = null
-
 // Признак периода ввода остатков
 @Field
 def isBalancePeriod = null
@@ -136,6 +130,26 @@ def formDataPrev = null
 // DataRowHelper формы предыдущего периода
 @Field
 def dataRowHelperPrev = null
+
+@Field
+def startDate = null
+
+@Field
+def endDate = null
+
+def getReportPeriodStartDate() {
+    if (startDate == null) {
+        startDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
+    }
+    return startDate
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
+}
 
 //// Обертки методов
 
@@ -161,18 +175,19 @@ def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache);
 }
 
-// Признак периода ввода остатков
+// Признак периода ввода остатков для отчетного периода подразделения
 def isBalancePeriod() {
     if (isBalancePeriod == null) {
-        isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
+        def departmentReportPeriod = departmentReportPeriodService.get(formData.departmentReportPeriodId)
+        isBalancePeriod = departmentReportPeriod.isBalance()
     }
     return isBalancePeriod
 }
 
 // Получение формы предыдущего месяца
-FormData getFormDataPrev() {
+def getFormDataPrev() {
     if (formDataPrev == null) {
-        formDataPrev = formDataService.getFormDataPrev(formData, formDataDepartment.id)
+        formDataPrev = formDataService.getFormDataPrev(formData)
     }
     return formDataPrev
 }
@@ -284,10 +299,9 @@ def calcTotalTwo(def totalOneSum) {
             result[it] = totalOneSum[it] ?: 0 + (prevTotal == null ? 0 : prevTotal[it])
         }
     } else if (formData.kind == FormDataKind.CONSOLIDATED) {
-        // TODO (Ramil Timerbaev) в метод departmentFormTypeService.getFormSources добавить периоды
-        departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
+        departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind, getReportPeriodStartDate(), getReportPeriodEndDate()).each {
             if (it.formTypeId == formData.getFormType().getId()) {
-                def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+                def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
                 if (source != null && source.state == WorkflowState.ACCEPTED) {
                     formDataService.getDataRowHelper(source).getAllCached().each { row ->
                         if (row.getAlias() == 'itogoKvartal') {
@@ -709,13 +723,6 @@ String getCellValue(def row, int index, def type, boolean isTextXml = false) {
     return row.cell[index + 1].text()
 }
 
-def getReportPeriodEndDate() {
-    if (endDate == null) {
-        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
-    }
-    return endDate
-}
-
 // Получение импортируемых данных
 void importDataXLS() {
     def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null)
@@ -759,7 +766,6 @@ void importDataXLS() {
 
 // Заполнить форму данными
 void addData(def xml, int headRowCount) {
-    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
 
