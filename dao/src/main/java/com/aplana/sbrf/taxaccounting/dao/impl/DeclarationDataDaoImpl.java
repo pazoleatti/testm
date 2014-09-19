@@ -275,7 +275,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         if (filter.getDepartmentIds() != null && !filter.getDepartmentIds().isEmpty()) {
             sql
                     .append(" AND ")
-                    .append(transformToSqlInStatement("dec.department_id", filter.getDepartmentIds()));
+                    .append(transformToSqlInStatement("drp.department_id", filter.getDepartmentIds()));
         }
 
         if (filter.getDeclarationTypeId() != null) {
