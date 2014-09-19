@@ -28,18 +28,6 @@
                     <version>${project.version}</version>
                     <type>ejb</type>
                 </dependency>
-                <dependency>
-                    <groupId>com.aplana.taxaccounting</groupId>
-                    <artifactId>async-task</artifactId>
-                    <version>${project.version}</version>
-                    <type>ejb</type>
-                </dependency>
-                <dependency>
-                    <groupId>com.aplana.taxaccounting</groupId>
-                    <artifactId>scheduler-task</artifactId>
-                    <version>${project.version}</version>
-                    <type>ejb</type>
-                </dependency>
             </dependencies>
             <build>
                 <plugins>
@@ -59,36 +47,6 @@
                                     <bundleFileName>gwtapp.war</bundleFileName>
                                     <contextRoot>/${releaseName}/gwtapp</contextRoot>
                                 </webModule>
-                                <ejbModule>
-                                    <groupId>${project.groupId}</groupId>
-                                    <artifactId>migration-ejb</artifactId>
-                                    <bundleFileName>migration-ejb.jar</bundleFileName>
-                                </ejbModule>
-                                <ejbModule>
-                                    <groupId>${project.groupId}</groupId>
-                                    <artifactId>mdb</artifactId>
-                                    <bundleFileName>mdb.jar</bundleFileName>
-                                </ejbModule>
-                                <ejbModule>
-                                    <groupId>${project.groupId}</groupId>
-                                    <artifactId>scheduler-task</artifactId>
-                                    <bundleFileName>scheduler-task.jar</bundleFileName>
-                                </ejbModule>
-                                <ejbModule>
-                                    <groupId>${project.groupId}</groupId>
-                                    <artifactId>scheduler-core</artifactId>
-                                    <bundleFileName>scheduler-core.jar</bundleFileName>
-                                </ejbModule>
-                                <ejbModule>
-                                    <groupId>${project.groupId}</groupId>
-                                    <artifactId>async-core</artifactId>
-                                    <bundleFileName>async-core.jar</bundleFileName>
-                                </ejbModule>
-                                <ejbModule>
-                                    <groupId>${project.groupId}</groupId>
-                                    <artifactId>async-task</artifactId>
-                                    <bundleFileName>async-task.jar</bundleFileName>
-                                </ejbModule>
                             </modules>
                         </configuration>
                     </plugin>
@@ -182,6 +140,19 @@
                         </exclusion>
                     </exclusions>
                 </dependency>
+                <dependency>
+                    <groupId>com.aplana.taxaccounting</groupId>
+                    <artifactId>common-core</artifactId>
+                    <version>${project.version}</version>
+                    <type>ejb</type>
+                    <classifier>jar-with-dependencies</classifier>
+                    <exclusions>
+                        <exclusion>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>service</artifactId>
+                        </exclusion>
+                    </exclusions>
+                </dependency>
             </dependencies>
             <build>
                 <plugins>
@@ -234,6 +205,11 @@
                                     <groupId>${project.groupId}</groupId>
                                     <artifactId>async-task</artifactId>
                                     <bundleFileName>async-task.jar</bundleFileName>
+                                </ejbModule>
+                                <ejbModule>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>common-core</artifactId>
+                                    <bundleFileName>common-core.jar</bundleFileName>
                                 </ejbModule>
                             </modules>
                         </configuration>
