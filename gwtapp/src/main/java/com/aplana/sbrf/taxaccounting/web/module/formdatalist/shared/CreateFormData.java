@@ -5,29 +5,54 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
 public class CreateFormData extends UnsecuredActionImpl<CreateFormDataResult> implements ActionName {
 
-	private Integer formDataTypeId;
+    private Integer formDataTypeId;
 
-	private Integer formDataKindId;
+    private Integer reportPeriodId;
+
+    private Integer departmentId;
+
+    private Integer formDataKindId;
 
     private Integer monthId;
 
-    private Integer departmentReportPeriodId;
+    public Integer getFormDataTypeId() {
+        return formDataTypeId;
+    }
 
-	public Integer getFormDataTypeId() {
-		return formDataTypeId;
-	}
 
-	public void setFormDataTypeId(Integer formDataTypeId) {
-		this.formDataTypeId = formDataTypeId;
-	}
+    public void setFormDataTypeId(Integer formDataTypeId) {
+        this.formDataTypeId = formDataTypeId;
+    }
 
-	public Integer getFormDataKindId() {
-		return formDataKindId;
-	}
 
-	public void setFormDataKindId(Integer formDataKindId) {
-		this.formDataKindId = formDataKindId;
-	}
+    public Integer getReportPeriodId() {
+        return reportPeriodId;
+    }
+
+
+    public void setReportPeriodId(Integer reportPeriodId) {
+        this.reportPeriodId = reportPeriodId;
+    }
+
+
+    public Integer getDepartmentId() {
+        return departmentId;
+    }
+
+
+    public void setDepartmentId(Integer departmentId) {
+        this.departmentId = departmentId;
+    }
+
+
+    public Integer getFormDataKindId() {
+        return formDataKindId;
+    }
+
+
+    public void setFormDataKindId(Integer formDataKindId) {
+        this.formDataKindId = formDataKindId;
+    }
 
     public Integer getMonthId() {
         return monthId;
@@ -37,16 +62,8 @@ public class CreateFormData extends UnsecuredActionImpl<CreateFormDataResult> im
         this.monthId = monthId;
     }
 
-    public Integer getDepartmentReportPeriodId() {
-        return departmentReportPeriodId;
-    }
-
-    public void setDepartmentReportPeriodId(Integer departmentReportPeriodId) {
-        this.departmentReportPeriodId = departmentReportPeriodId;
-    }
-
     @Override
-	public String getName() {
-		return "Создание налоговой формы";
-	}
+    public String getName() {
+        return "Создание налоговой формы";
+    }
 }

@@ -66,10 +66,10 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
         LogCleanEvent.fire(this);
         LogShowEvent.fire(this, false);
         CreateFormData action = new CreateFormData();
-        // TODO Передать отчетный период подразделения http://jira.aplana.com/browse/SBRFACCTAX-8840
-        action.setDepartmentReportPeriodId(-1);
+        action.setDepartmentId(filterFormData.getDepartmentIds().iterator().next());
         action.setFormDataKindId(filterFormData.getFormDataKind().get(0).intValue());
         action.setFormDataTypeId(filterFormData.getFormTypeId().get(0).intValue());
+        action.setReportPeriodId(filterFormData.getReportPeriodIds().iterator().next());
         if (filterFormData.getFormMonth() != null) {
             action.setMonthId(filterFormData.getFormMonth().getId());
         }
