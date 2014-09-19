@@ -53,4 +53,12 @@
         </plugins>
     </build>
 
+    <distributionManagement>
+        <repository>
+            <id>deployment</id>
+            <name>Internal Releases</name>
+            <url>http://172.16.127.19:8081/nexus/content/repositories/SBRFACCTAX/</url>
+        </repository>
+    </distributionManagement>
+
 </project>
