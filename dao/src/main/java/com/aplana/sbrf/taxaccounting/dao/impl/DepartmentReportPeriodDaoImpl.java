@@ -4,14 +4,18 @@ import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -110,8 +114,13 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
 
     @Override
     public List<DepartmentReportPeriod> getListByFilter(DepartmentReportPeriodFilter departmentReportPeriodFilter) {
-        return getNamedParameterJdbcTemplate().query(QUERY_TEMPLATE_COMPOSITE +
-                getFilterString(departmentReportPeriodFilter), (Map) null, mapper);
+        try {
+            return getNamedParameterJdbcTemplate().query(QUERY_TEMPLATE_COMPOSITE +
+                    getFilterString(departmentReportPeriodFilter), (Map) null, mapper);
+        } catch (DataAccessException e){
+            logger.error("", e);
+            throw new DaoException("", e);
+        }
     }
 
     @Override
@@ -138,9 +147,30 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     public void updateActive(int id, boolean active) {
         getJdbcTemplate().update(
                 "update department_report_period set is_active = ? where id = ?",
-                new Object[]{active, id},
-                new int[]{Types.BOOLEAN, Types.NUMERIC}
+                new Object[]{active ? 1 : 0, id},
+                new int[]{Types.NUMERIC, Types.NUMERIC}
         );
+    }
+
+    @Override
+    public void updateActive(final List<Integer> ids, final boolean active) {
+        try {
+            getJdbcTemplate().batchUpdate("update department_report_period set is_active = ? where id = ?", new BatchPreparedStatementSetter() {
+                @Override
+                public void setValues(PreparedStatement ps, int i) throws SQLException {
+                    ps.setInt(1, active ? 1 : 0);
+                    ps.setInt(2, ids.get(i));
+                }
+
+                @Override
+                public int getBatchSize() {
+                    return ids.size();
+                }
+            });
+        } catch (DataAccessException e){
+            logger.error("", e);
+            throw new DaoException("", e);
+        }
     }
 
     @Override

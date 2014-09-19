@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service;
 
 
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 
 import java.util.Date;
@@ -27,6 +28,11 @@ public interface DepartmentReportPeriodService {
      * Открытие/закрытие отчетного периода подразделения
      */
     void updateActive(int id, boolean active);
+
+    /**
+     * Открытие/закрытие отчетного периода подразделения
+     */
+    void updateActive(List<DepartmentReportPeriod> drps, boolean active, List<LogEntry> logs);
 
     /**
      * Изменить дату корректировки

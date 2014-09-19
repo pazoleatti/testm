@@ -32,6 +32,11 @@ public interface DepartmentReportPeriodDao {
     void updateActive(int id, boolean active);
 
     /**
+     * Открытие/закрытие отчетного периода подразделения (batch)
+     */
+    void updateActive(List<Integer> ids, boolean active);
+
+    /**
      * Изменить дату корректировки
      */
     void updateCorrectionDate(int id, Date correctionDate);

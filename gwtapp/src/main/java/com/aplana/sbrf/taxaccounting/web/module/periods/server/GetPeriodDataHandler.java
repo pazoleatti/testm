@@ -46,32 +46,33 @@ public class GetPeriodDataHandler extends AbstractActionHandler<GetPeriodDataAct
         filter.setDepartmentIdList(Arrays.asList(action.getDepartmentId()));
         filter.setTaxTypeList(Arrays.asList(action.getTaxType()));
 
-		List<DepartmentReportPeriod> drp = departmentReportPeriodService.getListByFilter(filter);
+		List<DepartmentReportPeriod> drpList = departmentReportPeriodService.getListByFilter(filter);
 		List<Integer> depIds = new ArrayList<Integer>();
-		for (DepartmentReportPeriod d : drp) {
-			depIds.add(d.getDepartmentId().intValue());
+		for (DepartmentReportPeriod d : drpList) {
+			depIds.add(d.getDepartmentId());
 		}
 		Map<Integer, Department> departmentMap = departmentService.getDepartments(depIds);
 
-		for (DepartmentReportPeriod period : drp) {
-			int year = period.getReportPeriod().getTaxPeriod().getYear();
+		for (DepartmentReportPeriod drp : drpList) {
+			int year = drp.getReportPeriod().getTaxPeriod().getYear();
 			if ((action.getFrom() <= year) && (year <= action.getTo())) {
 				if (per.get(year) == null) {
 					per.put(year, new ArrayList<TableRow>());
 				}
 				TableRow row = new TableRow();
-				row.setPeriodName(period.getReportPeriod().getName());
-				row.setReportPeriodId(period.getReportPeriod().getId());
-                row.setDictTaxPeriodId(period.getReportPeriod().getDictTaxPeriodId());
-				row.setDepartmentId(period.getDepartmentId());
-				row.setPeriodCondition(period.isActive());
-				row.setBalance(period.isBalance());
+				row.setPeriodName(drp.getReportPeriod().getName());
+				row.setReportPeriodId(drp.getReportPeriod().getId());
+                row.setDictTaxPeriodId(drp.getReportPeriod().getDictTaxPeriodId());
+				row.setDepartmentId(drp.getDepartmentId());
+				row.setPeriodCondition(drp.isActive());
+				row.setBalance(drp.isBalance());
 				row.setYear(year);
-                row.setOrd(period.getReportPeriod().getOrder());
-				row.setCorrectPeriod(period.getCorrectionDate());
-				Department dep = departmentMap.get(period.getDepartmentId().intValue());
-				Notification notification = notificationService.get(period.getReportPeriod().getId(), dep.getId(), dep.getParentId());
+                row.setOrd(drp.getReportPeriod().getOrder());
+				row.setCorrectPeriod(drp.getCorrectionDate());
+				Department dep = departmentMap.get(drp.getDepartmentId());
+				Notification notification = notificationService.get(drp.getReportPeriod().getId(), dep.getId(), dep.getParentId());
 				row.setDeadline(notification != null ? notification.getDeadline() : null);
+                row.setDepartmentReportPeriodId(drp.getId());
 				per.get(year).add(row);
 			}
 		}

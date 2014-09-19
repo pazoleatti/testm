@@ -37,7 +37,7 @@ public class ClosePeriodHandler extends AbstractActionHandler<ClosePeriodAction,
 	@Override
 	public ClosePeriodResult execute(ClosePeriodAction action, ExecutionContext executionContext) throws ActionException {
 		List<LogEntry> logs = new ArrayList<LogEntry>();
-		reportPeriodService.close(action.getTaxType(), action.getReportPeriodId(), action.getDepartmentId(), action.getCorrectionDate(), logs, securityService.currentUserInfo());
+		reportPeriodService.close(action.getTaxType(), action.getDepartmentReportPeriodId(), logs, securityService.currentUserInfo());
 		ClosePeriodResult result = new ClosePeriodResult();
         if (!logs.isEmpty() && logs.get(0).getLevel().equals(LogLevel.WARNING)) {
             result.setErrorBeforeClose(true);

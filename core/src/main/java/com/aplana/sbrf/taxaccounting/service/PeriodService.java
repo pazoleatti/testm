@@ -44,12 +44,11 @@ public interface PeriodService {
 	/**
 	 * Закрыть период
 	 * @param taxType тип налога
-	 * @param reportPeriodId идентификатор отчетного периода
-	 * @param departmentId идентификатор подразделения, для которого закрывается период
+	 * @param departmentReportPeriod идентификатор отчетного периода
 	 * @param logs логер, при необходимости
 	 * @param user пользователь, который выполняет действие
 	 */
-	void close(TaxType taxType, int reportPeriodId, int departmentId, Date correctionDate, List<LogEntry> logs, TAUserInfo user);
+	void close(TaxType taxType, int departmentReportPeriod, List<LogEntry> logs, TAUserInfo user);
 
 	/**
 	 * Получает список отчетных периодов по отчетному периоду.

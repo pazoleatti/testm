@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.*;
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
@@ -49,8 +48,6 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
     private ReportPeriodDao reportPeriodDao;
     @Autowired
     private TaxPeriodDao taxPeriodDao;
-    @Autowired
-    private DepartmentReportPeriodDao departmentReportPeriodDao;
 
     // Общий маппер
     private void mapCommon(FormData formData, ResultSet rs) throws SQLException {
@@ -293,11 +290,14 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         paramMap.put("rp", reportPeriodId);
         return getNamedParameterJdbcTemplate().query("select fd.id, fd.form_template_id, fd.state, fd.kind, " +
                 "fd.return_sign, fd.period_order, fd.number_previous_row, fd.department_report_period_id, " +
-                "drp.report_period_id, drp.department_id " +
-                "from form_data fd, department_report_period drp " +
+                "drp.report_period_id, drp.department_id, ft.type_id as type_id " +
+                "from form_data fd " +
+                "left join department_report_period drp on drp.id = fd.department_report_period_id " +
+                "left join form_template ft on ft.id = fd.form_template_id " +
+                "left join form_type t on t.id = ft.type_id " +
                 "where drp.id = fd.department_report_period_id " +
-                "and " + SqlUtils.transformToSqlInStatement("drp.department_id", departmentIds) +
-                "and drp.report_period_id = :rp order by drp.id", paramMap, new FormDataWithoutRowMapper());
+                (!departmentIds.isEmpty() ? "and " + SqlUtils.transformToSqlInStatement("drp.department_id", departmentIds) : "") +
+                "and drp.report_period_id = :rp order by drp.id", paramMap, new FormDataWithoutRowMapperWithType());
     }
 
     @Override
@@ -475,12 +475,12 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
     }
 
     private static final String GET_MANUAL_UNPUTS_FORMS = "select fd.*, ft.type_id from form_data fd " +
+            "join department_form_type dft on dft.kind = fd.kind " +
             "join form_template ft on ft.id = fd.form_template_id and ft.type_id = dft.form_type_id " +
             "join form_type t on t.id = ft.type_id " +
             "join declaration_source ds on ds.src_department_form_type_id = dft.id " +
-            "join department_report_period drp on drp.id = ft.department_report_period_id " +
-            "join department_form_type dft on dft.department_id = drp.department_id and dft.kind = fd.kind " +
-            "where %s and drp.report_period_id = :reportPeriodId and t.tax_type = :taxType and dft.kind = :kind and exists (select 1 from data_row where form_data_id = fd.id and manual = 1) " +
+            "join department_report_period drp on ds.src_department_form_type_id = dft.id " +
+            "where %s and fd.department_report_period_id = :reportPeriodId and t.tax_type = :taxType and dft.kind = :kind and exists (select 1 from data_row where form_data_id = fd.id and manual = 1) " +
             "and (:periodStart is null or ((ds.period_end >= :periodStart or ds.period_end is null) and (:periodEnd is null or ds.period_start <= :periodEnd)))";
 
     @Override

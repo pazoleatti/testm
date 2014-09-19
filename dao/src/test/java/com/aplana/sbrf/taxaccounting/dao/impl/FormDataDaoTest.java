@@ -19,11 +19,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -434,5 +432,11 @@ public class FormDataDaoTest {
         formData = formDataDao.getLast(typeId, primary, departmentId, reportPeriodId, null);
         Assert.assertNotNull(formData);
         Assert.assertEquals(fd3, formData.getId().longValue());
+    }
+
+    @Test
+    public void testGetManualInputForms() throws ParseException {
+        assertEquals(0, formDataDao.getManualInputForms(Arrays.asList(1), 1, TaxType.INCOME, FormDataKind.PRIMARY,
+                SIMPLE_DATE_FORMAT.parse("03.01.2013"), SIMPLE_DATE_FORMAT.parse("03.01.2014")).size());
     }
 }

@@ -16,8 +16,17 @@ public class TableRow implements Serializable {
 	int year; //TODO Возможно не  нужно хранить дату в каждом экземпляре
     private long dictTaxPeriodId;
     private int ord; // Порядок следования в налоговом периоде
+    private int departmentReportPeriodId;
 
-	public int getYear() {
+    public int getDepartmentReportPeriodId() {
+        return departmentReportPeriodId;
+    }
+
+    public void setDepartmentReportPeriodId(int departmentReportPeriodId) {
+        this.departmentReportPeriodId = departmentReportPeriodId;
+    }
+
+    public int getYear() {
 		return year;
 	}
 
