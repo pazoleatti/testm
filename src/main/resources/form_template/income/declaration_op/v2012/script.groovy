@@ -241,7 +241,7 @@ void generateXML(def xmlBankData) {
                 Период : period,
                 ОтчетГод : (taxPeriod != null ? taxPeriod.year : empty),
                 КодНО : taxOrganCode,
-                НомКорр : reportPeriodService.getCorrectionPeriodNumber(declarationData.reportPeriodId, declarationData.departmentId),
+                НомКорр : reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId),
                 ПоМесту : taxPlaceTypeCode) {
 
             СвНП(
