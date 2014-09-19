@@ -396,12 +396,11 @@ def logicalCheck() {
 void logicalCheckBeforeCalc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    def Department department = departmentService.get(formData.departmentId)
 
     def departmentParamsDate = getReportPeriodEndDate() - 1
     def sumTaxRecords = getRefBookRecord(33, "DEPARTMENT_ID", formData.departmentId.toString(), departmentParamsDate, -1, null, false)
     if (sumTaxRecords == null || sumTaxRecords.isEmpty() || getValue(sumTaxRecords, 'SUM_TAX') == null) {
-        logger.error("Для подразделения «${department.name}» на форме настроек подразделений отсутствует атрибут «Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде»!")
+        logger.error("Для подразделения «${formDataDepartment.name}» на форме настроек подразделений отсутствует атрибут «Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде»!")
     }
 
     def sumTaxUnpRecords = getRefBookRecord(33, "DEPARTMENT_ID", "1", departmentParamsDate, -1, null, false)
@@ -475,9 +474,9 @@ void logicalCheckBeforeCalc() {
         summaryMap.each { key, value ->
             def formDataSummary = getFormDataSummary(key)
             if (formDataSummary == null) {
-                logger.error("Сводная налоговая форма «$value» в подразделении «${department.name}» не создана!")
+                logger.error("Сводная налоговая форма «$value» в подразделении «${formDataDepartment.name}» не создана!")
             } else if (getData(formDataSummary) == null) {
-                logger.error("Сводная налоговая форма «$value» в подразделении «${department.name}» не находится в статусе «Принята»!")
+                logger.error("Сводная налоговая форма «$value» в подразделении «${formDataDepartment.name}» не находится в статусе «Принята»!")
             }
         }
     }

@@ -267,7 +267,6 @@ void logicCheck() {
     }
     // мапа индексов строк "идентичных" текущей
     def Map<Integer, List<Integer>> foundEqualsMap = [:]
-    def Department department = departmentService.get(formData.departmentId)
     for (def row : dataRows) {
         def index = row.getIndex()
         def errorMsg = "Строка $index: "
@@ -319,8 +318,8 @@ void logicCheck() {
                 rowsToCompare.removeAll { e -> e.getIndex() in foundEqualsMap[index] }
             }
             // Проверка допустимых значений «Графы 14»
-            if (department.regionId && row.subject && row.taxBenefitCode) {
-                String filter = "DECLARATION_REGION_ID = " + department.regionId?.toString() + " and REGION_ID = " + row.subject?.toString() + " and RECORD_ID = " + row.taxBenefitCode + " and PARAM_DESTINATION = 2"
+            if (formDataDepartment.regionId && row.subject && row.taxBenefitCode) {
+                String filter = "DECLARATION_REGION_ID = " + formDataDepartment.regionId?.toString() + " and REGION_ID = " + row.subject?.toString() + " and RECORD_ID = " + row.taxBenefitCode + " and PARAM_DESTINATION = 2"
                 def records = refBookFactory.getDataProvider(203).getRecords(getReportPeriodEndDate(), null, filter, null)
                 if (records.size() == 0 || !(getBenefitCode(row.taxBenefitCode)?.toString() in ["2012000", "2012400", "2012500"])) {
                     loggerError(row, errorMsg + "Графа «${getColumnName(row, 'taxBenefitCode')}» заполнена неверно!")
@@ -340,7 +339,7 @@ void logicCheck() {
             }
             // Проверка существования выбранных параметров декларации
             if (row.subject && row.taxAuthority && row.kpp && row.oktmo) {
-                filter = "DECLARATION_REGION_ID = " + department.regionId?.toString() + " and REGION_ID = " + row.subject?.toString() + " and LOWER(TAX_ORGAN_CODE) = LOWER('" + row.taxAuthority + "') and LOWER(KPP) = LOWER('" + row.kpp + "') and OKTMO = " + row.oktmo?.toString()
+                filter = "DECLARATION_REGION_ID = " + formDataDepartment.regionId?.toString() + " and REGION_ID = " + row.subject?.toString() + " and LOWER(TAX_ORGAN_CODE) = LOWER('" + row.taxAuthority + "') and LOWER(KPP) = LOWER('" + row.kpp + "') and OKTMO = " + row.oktmo?.toString()
                 records = refBookFactory.getDataProvider(200).getRecords(getReportPeriodEndDate(), null, filter, null)
                 if (records.size() == 0) {
                     rowWarning(logger, row, errorMsg + "Текущие параметры представления декларации (Код субъекта, Код НО, КПП, Код ОКТМО) не предусмотрены (в справочнике «Параметры представления деклараций по налогу на имущество» отсутствует такая запись)!")
@@ -412,7 +411,6 @@ void addData(def xml, int headRowCount) {
 
     def totalRow = getDataRow(dataRows, 'total')
 
-    def Department department = departmentService.get(formData.departmentId)
     for (def row : xml.row) {
         xmlIndexRow++
         def int xlsIndexRow = xmlIndexRow + rowOffset
@@ -472,7 +470,7 @@ void addData(def xml, int headRowCount) {
         String filter = "CODE = '" + row.cell[14].text() + "'"
         def records202 = refBookFactory.getDataProvider(202).getRecords(getReportPeriodEndDate(), null, filter, null)
         for (def record202 : records202) {
-            filter = "DECLARATION_REGION_ID = " + department.regionId?.toString() + " and REGION_ID = " + newRow.subject?.toString() + " and TAX_BENEFIT_ID = " + record202.record_id.value + " and PARAM_DESTINATION = 2"
+            filter = "DECLARATION_REGION_ID = " + formDataDepartment.regionId?.toString() + " and REGION_ID = " + newRow.subject?.toString() + " and TAX_BENEFIT_ID = " + record202.record_id.value + " and PARAM_DESTINATION = 2"
             def records = refBookFactory.getDataProvider(203).getRecords(getReportPeriodEndDate(), null, filter, null)
             def taxRecordId = records.find { calcBasis(it?.record_id?.value) == newRow.benefitBasis }?.record_id?.value
             if (taxRecordId) {
