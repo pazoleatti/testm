@@ -297,7 +297,7 @@ void logicCheck() {
         if (row.buyDate != null) {
             def reportPeriods = reportPeriodService.getReportPeriodsByDate(TaxType.INCOME, row.buyDate, startDate - 1)
             for (reportPeriod in reportPeriods) {
-                findFormData = formDataService.find(formData.formType.id, formData.kind, formData.departmentId,
+                findFormData = formDataService.getLast(formData.formType.id, formData.kind, formData.departmentId,
                         reportPeriod.id)
                 if (findFormData != null) {
                     isFind = false
@@ -358,8 +358,8 @@ def BigDecimal getCalcPrevColumn10(def row, def sumColumnName, def startDate) {
     if (row.buyDate != null && row.bill != null) {
         def reportPeriods = reportPeriodService.getReportPeriodsByDate(TaxType.INCOME, row.buyDate, startDate - 1)
         for (reportPeriod in reportPeriods) {
-            findFormData = formDataService.find(formData.formType.id, formData.kind, formData.departmentId,
-                    reportPeriod.id)
+            findFormData = formDataService.getLast(formData.formType.id, formData.kind, formData.departmentId,
+                    reportPeriod.id, null)
             if (findFormData != null) {
                 isFind = false
                 for (findRow in formDataService.getDataRowHelper(findFormData).getAllCached()) {

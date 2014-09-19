@@ -393,7 +393,7 @@ void calcTotalRow(def currentMonthRow, def currentTotalRow) {
 
         departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
             if (it.formTypeId == formData.formType.id) {
-                def source = formDataService.findMonth(it.formTypeId, it.kind, it.departmentId, taxPeriod.id, formData.periodOrder)
+                def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
                 if (source != null && source.state == WorkflowState.ACCEPTED) {
                     formDataService.getDataRowHelper(source).allCached.each { row ->
                         if (row.getAlias() == 'total') {
@@ -507,7 +507,7 @@ def getPrevTotalRow() {
 
 // Получить строки из нф по заданному идентификатору нф
 def getRnuRowsById(def id) {
-    def formDataRNU = formDataService.find(id, formData.kind, formDataDepartment.id, formData.reportPeriodId)
+    def formDataRNU = formDataService.getLast(id, formData.kind, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder)
     if (formDataRNU != null) {
         return formDataService.getDataRowHelper(formDataRNU)?.allCached
     }

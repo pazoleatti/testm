@@ -189,7 +189,7 @@ def consolidationGroupRowsMap = [:]
 
 // форма 945.1
 @Field
-def sourceFormTypeId = 610
+def int sourceFormTypeId = 610
 
 // Мапа для хранения названий периода и года по id формы источника (id формы -> периода и год)
 @Field
@@ -883,7 +883,7 @@ def getFormDataSources() {
         def periodsMap = getSourcesPeriodMap()
         periodsMap.each { period, monthOrders ->
             monthOrders.each { monthOrder ->
-                FormData source = formDataService.findMonth(sourceFormTypeId, FormDataKind.PRIMARY, formDataDepartment.id, period.taxPeriod.id, monthOrder)
+                FormData source = formDataService.getLast(sourceFormTypeId, FormDataKind.PRIMARY, formDataDepartment.id, period.id, monthOrder)
                 if (source != null && source.getState() == WorkflowState.ACCEPTED) {
                     def alias = 'cost' + monthOrder
                     // если форма за январь следующего года, то заполняется графа 17 (cost13)

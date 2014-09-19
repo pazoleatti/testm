@@ -533,7 +533,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
                             (isSupportOver() ? "where rownum = 1" : "limit 1"),
                     new Object[]{departmentId, reportPeriodId, formTypeId, kind.getId(), periodOrder, periodOrder},
                     new int[]{Types.NUMERIC, Types.NUMERIC, Types.NUMERIC, Types.NUMERIC, Types.NUMERIC, Types.NUMERIC},
-                    new FormDataWithoutRowMapper());
+                    new FormDataRowMapper());
         } catch (EmptyResultDataAccessException e) {
             return null;
         }

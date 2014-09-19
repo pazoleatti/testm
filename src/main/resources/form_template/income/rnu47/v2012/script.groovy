@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import groovy.transform.Field
 
 import java.math.RoundingMode
@@ -123,8 +124,7 @@ def isMonthBalance() {
 
 // Получить данные из формы РНУ-46
 def getRnu46DataRowHelper() {
-    def taxPeriodId = reportPeriodService.get(formData.reportPeriodId)?.taxPeriod?.id
-    def formData46 = formDataService.findMonth(342, formData.kind, formDataDepartment.id, taxPeriodId, formData.periodOrder)
+    def formData46 = formDataService.getLast(342, formData.kind, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder)
     if (formData46 != null) {
         return formDataService.getDataRowHelper(formData46)
     }
@@ -342,9 +342,9 @@ void logicCheck() {
 }
 
 /** Получить данные за определенный месяц */
-def FormData getFormDataPeriod(def taxPeriod, def periodOrder) {
+def FormData getFormDataPeriod(def reportPeriodId, def periodOrder) {
     if (taxPeriod != null && periodOrder != null) {
-        return formDataService.findMonth(formData.formType.id, formData.kind, formDataDepartment.id, taxPeriod.id, periodOrder)
+        return formDataService.getLast(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriodId, periodOrder)
     }
 }
 
@@ -361,11 +361,9 @@ def getFieldFromPreviousMonth(def dataRows, def alias, def field) {
 
 /** Возвращает сумму значений графы (3 или 5) за все месяцы текущего года, включая текущий отчетный период */
 def getFieldSumForAllPeriods(def alias, def field) {
-    def ReportPeriod reportPeriod = reportPeriodService.get(formData.reportPeriodId)
-    def TaxPeriod taxPeriod = reportPeriod.taxPeriod
     def sum = 0
     for (def periodOrder = 1; periodOrder <= formData.periodOrder; periodOrder++) {
-        def formDataPeriod = getFormDataPeriod(taxPeriod, periodOrder)
+        def formDataPeriod = getFormDataPeriod(formData.reportPeriodId, periodOrder)
         def dataRows = formDataPeriod != null ? formDataService.getDataRowHelper(formDataPeriod)?.allCached : null
         def DataRow row = dataRows != null ? getDataRow(dataRows, alias) : null
         def value = row?.getCell(field)?.getValue()
@@ -378,11 +376,9 @@ def getFieldSumForAllPeriods(def alias, def field) {
 
 /** Возвращает периоды с некорректными данными для расчета графы 4 или 6. field - графа 3 или 5*/
 def getFieldInvalidPeriods(def alias, def field) {
-    def ReportPeriod reportPeriod = reportPeriodService.get(formData.reportPeriodId)
-    def TaxPeriod taxPeriod = reportPeriod.taxPeriod
     def periods = []
     for (def periodOrder = 1; periodOrder <= formData.periodOrder; periodOrder++) {
-        def formDataPeriod = getFormDataPeriod(taxPeriod, periodOrder)
+        def formDataPeriod = getFormDataPeriod(formData.reportPeriodId, periodOrder)
         def dataRows = formDataPeriod != null ? formDataService.getDataRowHelper(formDataPeriod)?.allCached : null
         def DataRow row = dataRows != null ? getDataRow(dataRows, alias) : null
         if (row?.getCell(field)?.getValue() == null) {
@@ -401,11 +397,10 @@ void consolidation() {
             row[column] = null
         }
     }
-    def taxPeriodId = reportPeriodService.get(formData.reportPeriodId)?.taxPeriod?.id
     for (formDataSource in departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind(),
             getReportPeriodStartDate(), getReportPeriodEndDate())) {
         if (formDataSource.formTypeId == formData.getFormType().getId()) {
-            def source = formDataService.findMonth(formDataSource.formTypeId, formDataSource.kind, formDataSource.departmentId, taxPeriodId, formData.periodOrder)
+            def source = formDataService.getLast(formDataSource.formTypeId, formDataSource.kind, formDataSource.departmentId, formData.reportPeriodId, formData.periodOrder)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 sourceForm = formDataService.getDataRowHelper(source)
                 addRowsToRows(dataRows, sourceForm.allCached)

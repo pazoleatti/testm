@@ -355,7 +355,7 @@ def getSourceRowsGroups() {
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
             getReportPeriodStartDate(), getReportPeriodEndDate()).each {
         if (it.formTypeId == sourceFormTypeId){
-            def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 sourceRows = formDataService.getDataRowHelper(source).allCached
             }
@@ -385,7 +385,7 @@ def getPrevRowsMap() {
         def List<ReportPeriod> errorPeriods = []
         periodList.each{ period ->
             if (period.order != 4) {
-                def fd = formDataService.find(formData.formTypeId, formData.kind, formData.departmentId, formData.reportPeriodId)
+                def fd = formDataService.getLast(formData.formTypeId, formData.kind, formData.departmentId, formData.reportPeriodId, formData.periodOrder)
                 if (fd != null && fd.state == WorkflowState.ACCEPTED) {
                     prevRowsMap.put(period.order, formDataService.getDataRowHelper(fd).allCached)
                 } else {

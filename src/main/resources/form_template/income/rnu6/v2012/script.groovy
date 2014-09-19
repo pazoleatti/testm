@@ -367,7 +367,7 @@ void logicCheck() {
             def periods = []
 
             for (reportPeriod in reportPeriods) {
-                def findFormData = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, reportPeriod.id)
+                def findFormData = formDataService.getLast(formData.formType.id, formData.kind, formData.departmentId, reportPeriod.id, formData.periodOrder)
                 if (findFormData != null) {
                     for (findRow in formDataService.getDataRowHelper(findFormData).getAllCached()) {
                         // SBRFACCTAX-3531 исключать строку из той же самой формы не надо

@@ -488,9 +488,6 @@ def getYearSum(def aliases, def rowCurrent) {
         retVal[alias] = 0
     }
 
-    // Налоговый период
-    def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
-
     // Сумма в текущей форме
     for (def alias : aliases) {
         def val = rowCurrent.get(alias)
@@ -498,8 +495,8 @@ def getYearSum(def aliases, def rowCurrent) {
     }
     // Сумма в предыдущих формах
     for (def month = formData.periodOrder - 1; month >= 1; month--) {
-        def prevFormData = formDataService.findMonth(formData.formType.id, formData.kind, formData.departmentId,
-                taxPeriod.id, month)
+        def prevFormData = formDataService.getLast(formData.formType.id, formData.kind, formData.departmentId,
+                formData.reportPeriodId, month)
         if (prevFormData != null && prevFormData.state == WorkflowState.ACCEPTED) {
             def row = getPrevRow(formDataService.getDataRowHelper(prevFormData), rowCurrent)
             if (row) {

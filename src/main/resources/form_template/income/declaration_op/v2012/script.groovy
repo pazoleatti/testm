@@ -91,7 +91,7 @@ def checkDeclarationBank() {
 
     /** Идентификатор подразделения Банка. */
     def departmentBankId = 1
-    def bankDeclarationData = declarationService.find(declarationTypeId, departmentBankId, reportPeriod.id)
+    def bankDeclarationData = declarationService.getLast(declarationTypeId, departmentBankId, reportPeriod.id)
     if (bankDeclarationData == null || !bankDeclarationData.accepted) {
         logger.error('Декларация Банка по прибыли за указанный период не сформирована или не находится в статусе "Принята".')
         return
