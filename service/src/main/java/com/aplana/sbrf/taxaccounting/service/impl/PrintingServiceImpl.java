@@ -64,9 +64,9 @@ public class PrintingServiceImpl implements PrintingService {
     private static final String REF_BOOK_VALUE_NAME = "CODE";
 
 	@Override
-	public String generateExcel(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked) {
+	public byte[] generateExcel(TAUser userInfo, long formDataId, boolean manual, boolean isShowChecked) {
         try {
-            formDataAccessService.canRead(userInfo, formDataId);
+            //formDataAccessService.canRead(userInfo, formDataId);
             FormDataReport data = new FormDataReport();
             FormData formData = formDataDao.get(formDataId, manual);
             FormTemplate formTemplate = formTemplateDao.get(formData.getFormTemplateId());
@@ -92,7 +92,7 @@ public class PrintingServiceImpl implements PrintingService {
                 getRecordData((long) reportPeriod.getDictTaxPeriodId()).get(REF_BOOK_VALUE_NAME);
 
             FormDataXlsmReportBuilder builder = new FormDataXlsmReportBuilder(data, isShowChecked, dataRows, refBookValue);
-            return builder.createReport();
+            return builder.createBlobData();
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
             throw new ServiceException("Ошибка при создании печатной формы.");

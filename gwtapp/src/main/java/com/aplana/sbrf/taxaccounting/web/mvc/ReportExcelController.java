@@ -1,8 +1,11 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
-import com.aplana.sbrf.taxaccounting.service.AuditService;
-import com.aplana.sbrf.taxaccounting.service.PrintingService;
-import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
+import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
+import com.aplana.sbrf.taxaccounting.async.manager.AsyncManager;
+import com.aplana.sbrf.taxaccounting.async.task.AsyncTask;
+import com.aplana.sbrf.taxaccounting.model.BlobData;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +18,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLEncoder;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Контроллер для формирования отчетов в формате Excel АС Учет налогов
@@ -38,21 +43,6 @@ public class ReportExcelController {
     AuditService auditService;
 
     private static final String ENCODING = "UTF-8";
-
-    /**
-     * Обработка запроса на формирование отчета для налоговых форм
-     * @param formDataId
-     * @param isShowChecked
-     * @param req
-     * @param resp
-     * @throws IOException
-     */
-	@RequestMapping(value = "/{formDataId}/{isShowChecked}/{manual}",method = RequestMethod.GET)
-	public void processFormDataDownload(@PathVariable int formDataId,@PathVariable boolean isShowChecked , @PathVariable boolean manual, HttpServletRequest req, HttpServletResponse resp)
-			throws IOException {
-        String filePath = printingService.generateExcel(securityService.currentUserInfo(), formDataId, manual, isShowChecked);
-		createResponse(req, resp, filePath);
-	}
 
     @RequestMapping(value = "CSV/{formDataId}/{isShowChecked}/{manual}",method = RequestMethod.GET)
     public void processCSVFormDataDownload(@PathVariable int formDataId,@PathVariable boolean isShowChecked , @PathVariable boolean manual, HttpServletRequest req, HttpServletResponse resp)

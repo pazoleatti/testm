@@ -41,6 +41,7 @@ import java.util.Set;
 public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.MyProxy> implements
         FormDataUiHandlers, SetFocus.SetFocusHandler {
 
+    private boolean isLoadExcel = false;
     /**
 	 * {@link com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenterBase}
 	 * 's proxy.
@@ -243,12 +244,58 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 
 	@Override
 	public void onPrintExcelClicked() {
-		Window.open(
-                GWT.getHostPageBaseURL() + "download/downloadController/"
-                        + formData.getId() + "/"
-                        + getView().getCheckedColumnsClicked() + "/"
-                        + formData.isManual(), "", "");
+        CreateReportAction action = new CreateReportAction();
+        action.setFormDataId(formData.getId());
+        action.setType(ReportType.EXCEL);
+        action.setShowChecked(getView().getCheckedColumnsClicked());
+        action.setManual(formData.isManual());
+        dispatcher.execute(action, CallbackUtils
+                .defaultCallback(new AbstractCallback<CreateReportResult>() {
+                    @Override
+                    public void onSuccess(CreateReportResult result) {
+                        if (result.isExistReport()) {
+                            getView().updatePrintExcelButtonName(true);
+                            Window.open(
+                                    GWT.getHostPageBaseURL() + "download/downloadBlobController/"
+                                            + formData.getId() + "/"
+                                            + getView().getCheckedColumnsClicked() + "/"
+                                            + formData.isManual(), "", "");
+                        } else {
+                            getView().updatePrintExcelButtonName(false);
+                            getView().startTimerExcel();
+                        }
+                    }
+                }, this));
 	}
+
+    @Override
+    public void onTimerExcel(final boolean isTimer) {
+        TimerReportAction action = new TimerReportAction();
+        action.setFormDataId(formData.getId());
+        action.setType(ReportType.EXCEL);
+        action.setShowChecked(getView().getCheckedColumnsClicked());
+        action.setManual(formData.isManual());
+        dispatcher.execute(action, CallbackUtils
+                .defaultCallback(new AbstractCallback<TimerReportResult>() {
+                    @Override
+                    public void onSuccess(TimerReportResult result) {
+                        if (result.getExistReport().equals(TimerReportResult.StatusReport.EXIST)) {
+                            isLoadExcel = true;
+                            getView().updatePrintExcelButtonName(true);
+                        } else if (result.getExistReport().equals(TimerReportResult.StatusReport.NOT_EXIST)) { // если файл не файл существует и блокировки нет(т.е. задачу отменили или ошибка при формировании)
+                            isLoadExcel = false;
+                            getView().stopTimerExcel();
+                            if (!isTimer) {
+                                getView().updatePrintExcelButtonName(false);
+                            }
+                        } else if (!isTimer) {
+                            isLoadExcel = false;
+                            getView().updatePrintExcelButtonName(false);
+                            getView().startTimerExcel();
+                        }
+                    }
+                }, this));
+    }
 
     @Override
     public void onPrintCSVClicked() {
@@ -614,6 +661,8 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                 innerLogUuid = result.getUuid();
 
                                 getView().updatePageSize(result.getFormData().getFormType().getTaxType());
+
+                                onTimerExcel(false);
                             }
                         }, this).addCallback(
                         TaManualRevealCallback.create(this, placeManager)));

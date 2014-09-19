@@ -111,6 +111,12 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         void setFocus(Long rowIndex);
 
         void setupSelectionModel(boolean fixedRows);
+
+        void startTimerExcel();
+
+        void stopTimerExcel();
+
+        void updatePrintExcelButtonName(boolean isLoad);
     }
 
 	public static final String NAME_TOKEN = "!formData";

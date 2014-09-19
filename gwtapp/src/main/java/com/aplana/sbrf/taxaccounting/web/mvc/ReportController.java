@@ -1,7 +1,11 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
+import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
+import com.aplana.sbrf.taxaccounting.async.manager.AsyncManager;
 import com.aplana.sbrf.taxaccounting.model.BlobData;
+import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
+import com.aplana.sbrf.taxaccounting.service.ReportService;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -26,6 +30,12 @@ public class ReportController {
     @Autowired
     BlobDataService blobDataService;
 
+    @Autowired
+    AsyncManager asyncManager;
+
+    @Autowired
+    ReportService reportService;
+
     /**
      * Обработка запроса для формирования отчета по журналу аудита
      * @param uuid
@@ -38,6 +48,23 @@ public class ReportController {
         BlobData blobData = blobDataService.get(uuid);
         createResponse(response, blobData);
         blobDataService.delete(uuid);
+    }
+
+    /**
+     * Обработка запроса на формирование отчета для налоговых форм
+     * @param formDataId
+     * @param isShowChecked
+     * @param resp
+     * @throws IOException
+     */
+    @RequestMapping(value = "/{formDataId}/{isShowChecked}/{manual}",method = RequestMethod.GET)
+    public void processFormDataDownload(@PathVariable long formDataId, @PathVariable boolean isShowChecked , @PathVariable boolean manual, HttpServletRequest request, HttpServletResponse resp)
+            throws IOException, AsyncTaskException {
+        String uuid = reportService.get(formDataId, ReportType.EXCEL, isShowChecked, manual, false);
+        if (uuid != null) {
+            BlobData blobData = blobDataService.get(uuid);
+            createResponse(resp, blobData);
+        }
     }
 
     private void createResponse(final HttpServletResponse response, final BlobData blobData) throws IOException {

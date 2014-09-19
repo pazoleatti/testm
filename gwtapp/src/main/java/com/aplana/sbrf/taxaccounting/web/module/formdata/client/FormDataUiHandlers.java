@@ -31,6 +31,8 @@ public interface FormDataUiHandlers extends UiHandlers{
 
 	void onPrintExcelClicked();
 
+    void onTimerExcel(final boolean isTimer);
+
     void onPrintCSVClicked();
 
 	void onSignersClicked();

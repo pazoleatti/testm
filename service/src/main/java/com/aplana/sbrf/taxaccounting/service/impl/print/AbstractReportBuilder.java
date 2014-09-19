@@ -5,10 +5,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -53,6 +50,19 @@ public abstract class AbstractReportBuilder {
         fillFooter();
         setPrintSetup();
         return flush();
+    }
+
+    public final byte[] createBlobData() throws IOException  {
+        fillHeader();
+        createTableHeaders();
+        createDataForTable();
+        cellAlignment();
+        fillFooter();
+        setPrintSetup();
+        ByteArrayOutputStream data = new ByteArrayOutputStream();
+        workBook.write(data);
+
+        return data.toByteArray();
     }
 
     protected void cellAlignment() {

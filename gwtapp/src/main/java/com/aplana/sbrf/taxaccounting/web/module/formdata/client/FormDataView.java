@@ -24,12 +24,14 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.http.client.RequestException;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiFactory;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.*;
@@ -176,6 +178,9 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     @UiField
     LinkButton sources;
 
+    private Timer timerExcel;
+    private LinkButton printToExcel;
+
     private final static int DEFAULT_TABLE_TOP_POSITION = 104;
     private final static int DEFAULT_REPORT_PERIOD_LABEL_WIDTH = 150;
     private final static int LOCK_INFO_BLOCK_HEIGHT = 25;
@@ -233,7 +238,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
             }
         });
 
-        LinkButton printToExcel = new LinkButton("Excel");
+        printToExcel = new LinkButton("Excel");
         printToExcel.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -254,6 +259,35 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
         });
         printAnchor.addItem(printToExcel);
         printAnchor.addItem(printToCSV);
+
+        timerExcel = new Timer() {
+            @Override
+            public void run() {
+                try {
+                    getUiHandlers().onTimerExcel(true);
+                } catch (Exception e) {
+                }
+            }
+        };
+        timerExcel.cancel();
+    }
+
+    public void updatePrintExcelButtonName(boolean isLoad) {
+        if (isLoad) {
+            printToExcel.setText("Выгрузить в XLSM");
+            timerExcel.cancel();
+        } else {
+            printToExcel.setText("Сформировать XLSM");
+        }
+    }
+
+    public void startTimerExcel() {
+        timerExcel.scheduleRepeating(3000);
+        timerExcel.run();
+    }
+
+    public void stopTimerExcel() {
+        timerExcel.cancel();
     }
 
 	@Override
