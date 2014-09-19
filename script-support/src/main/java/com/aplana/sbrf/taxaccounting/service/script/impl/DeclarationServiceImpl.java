@@ -143,9 +143,8 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
                 reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
 		List<FormData> records = new ArrayList<FormData>();
 		for (DepartmentFormType dft : sourcesInfo) {
-			// В будущем возможны ситуации, когда по заданному сочетанию параметров будет несколько
-			// FormData, в этом случае данный код нужно будет зарефакторить
-			FormData formData = formDataDao.find(dft.getFormTypeId(), dft.getKind(), dft.getDepartmentId(), reportPeriodId);
+            // Ежемесячные формы не являются источниками для декларация, поэтому periodOrder = null
+			FormData formData = formDataDao.getLast(dft.getFormTypeId(), dft.getKind(), dft.getDepartmentId(), reportPeriodId, null);
 			if (formData != null) {
 				if (formData.getState() != WorkflowState.ACCEPTED) {
 					Department department = departmentDao.getDepartment(dft.getDepartmentId());
