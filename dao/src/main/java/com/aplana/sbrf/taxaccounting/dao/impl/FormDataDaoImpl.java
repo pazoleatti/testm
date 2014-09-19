@@ -520,8 +520,9 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
             return getJdbcTemplate().queryForObject(
                     "select * from " +
                             "(select fd.id, fd.form_template_id, fd.state, fd.kind, fd.return_sign, fd.period_order, " +
-                            "fd.number_previous_row, fd.department_report_period_id, drp.report_period_id, drp.department_id " +
-                            "from form_data fd, department_report_period drp, form_template ft " +
+                            "fd.number_previous_row, fd.department_report_period_id, drp.report_period_id, drp.department_id, r.manual " +
+                            "from form_data fd left join (select max(manual) as manual, form_data_id from data_row group by form_data_id) r " +
+                            "on r.form_data_id = fd.id, department_report_period drp, form_template ft " +
                             "where drp.id = fd.department_report_period_id " +
                             "and ft.id = fd.form_template_id " +
                             "and drp.department_id = ? " +
