@@ -601,7 +601,7 @@ public class PeriodServiceImpl implements PeriodService {
         List<Months> monthsList = new ArrayList<Months>();
         monthsList.add(null);
 
-        Map<String, RefBookValue> refBookValueMap = dataProvider.getRecordData((long) reportPeriod.getDictTaxPeriodId());
+        Map<String, RefBookValue> refBookValueMap = dataProvider.getRecordData(reportPeriod.getDictTaxPeriodId());
         // Код налогового периода
         String code = refBookValueMap.get("CODE").getStringValue();
 
