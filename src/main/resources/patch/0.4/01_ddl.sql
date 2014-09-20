@@ -123,5 +123,21 @@ ALTER TABLE report ADD CONSTRAINT report_chk_checking CHECK (checking IN (0,1));
 ALTER TABLE report ADD CONSTRAINT report_chk_absolute CHECK (absolute IN (0,1));
 
 ---------------------------------------------------------------------------------------------------
+-- http://jira.aplana.com/browse/SBRFACCTAX-8879 - Функционал оповещения
+ALTER TABLE notification MODIFY report_period_id NULL;
+ALTER TABLE notification MODIFY sender_department_id NULL;
+ALTER TABLE notification MODIFY deadline NULL;
+ALTER TABLE notification ADD user_id number(9);
+COMMENT ON COLUMN notification.user_id IS 'Идентификатор пользователя, который получит оповещение';
+ALTER TABLE notification ADD CONSTRAINT notification_fk_notify_user FOREIGN KEY (user_id) REFERENCES sec_user(id);
+
+CREATE TABLE lock_data_notification (lock_key varchar2(1000 byte) NOT NULL, user_id number(9) NOT NULL);
+COMMENT ON TABLE lock_data_notification IS 'Заявки на оповещения, после завершения операций над заблокированными объектами';
+COMMENT ON COLUMN lock_data_notification.lock_key IS 'Ключ блокировки объекта, после завершения операции над которым, будет выполнено оповещение';
+COMMENT ON COLUMN lock_data_notification.user_id IS 'Идентификатор пользователя, который получит оповещение';
+ALTER TABLE lock_data_notification ADD CONSTRAINT lock_data_notif_fk_lock_data FOREIGN KEY (lock_key) REFERENCES lock_data(KEY) ON DELETE CASCADE;
+ALTER TABLE lock_data_notification ADD CONSTRAINT lock_data_notif_fk_user_id FOREIGN KEY (user_id) REFERENCES sec_user(id);
+
+---------------------------------------------------------------------------------------------------
 COMMIT;
 EXIT;
