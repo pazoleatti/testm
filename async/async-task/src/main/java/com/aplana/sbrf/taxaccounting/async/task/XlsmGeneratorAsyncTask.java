@@ -23,4 +23,10 @@ public class XlsmGeneratorAsyncTask extends AbstractAsyncTask {
     protected String getAsyncTaskName() {
         return "Генерация xlsm-файла";
     }
+
+    @Override
+    protected String getNotificationMsg() {
+        //TODO
+        return null;
+    }
 }

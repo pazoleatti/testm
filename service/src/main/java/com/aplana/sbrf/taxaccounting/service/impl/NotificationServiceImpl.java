@@ -1,10 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.NotificationDao;
-import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
-import com.aplana.sbrf.taxaccounting.model.Notification;
-import com.aplana.sbrf.taxaccounting.model.NotificationsFilterData;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -42,7 +39,10 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public Map<Integer, Notification> mapByDepartments(int senderDepartmentId, Integer receiverDepartmentId) {
         Map<Integer, Notification> notificationMap = new HashMap<Integer, Notification>();
-        List<Notification> list = notificationDao.listByDepartments(senderDepartmentId, receiverDepartmentId);
+        NotificationsFilterData filter = new NotificationsFilterData();
+        filter.setSenderDepartmentId(senderDepartmentId);
+        filter.setReceiverDepartmentId(receiverDepartmentId);
+        List<Notification> list = notificationDao.getByFilter(filter);
         for (Notification notification : list) {
             notificationMap.put(notification.getReportPeriodId(), notification);
         }
@@ -50,28 +50,13 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
 	@Override
-	public List<Notification> notificationsForDepartment(int departmentId) {
-		List<Notification> notifications = new ArrayList<Notification>();
-		for (Integer id : notificationDao.listForDepartment(departmentId)) {
-			notifications.add(notificationDao.get(id));
-		}
-		return notifications;
-	}
-
-	@Override
 	public PagingResult<Notification> getByFilter(NotificationsFilterData filter) {
-		List<Notification> notifications = new LinkedList<Notification>();
-		for (Integer id : notificationDao.getByFilter(filter)) {
-			notifications.add(notificationDao.get(id));
-		}
-		int totalCount = notificationDao.getCountByFilter(filter);
-		return new PagingResult<Notification>(notifications, totalCount);
+		List<Notification> notifications = notificationDao.getByFilter(filter);
+		return new PagingResult<Notification>(notifications, notifications.size());
 	}
 
 	@Override
-	public int getCount(int receiverDepartmentId) {
-		NotificationsFilterData filter = new NotificationsFilterData();
-		filter.setSenderDepartmentId(receiverDepartmentId);
+	public int getCountByFilter(NotificationsFilterData filter) {
 		return notificationDao.getCountByFilter(filter);
 	}
 

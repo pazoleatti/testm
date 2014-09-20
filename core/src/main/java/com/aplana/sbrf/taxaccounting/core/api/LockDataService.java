@@ -3,6 +3,8 @@ package com.aplana.sbrf.taxaccounting.core.api;
 import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 
+import java.util.List;
+
 /**
  <h1>Сервис блокировок</h1>
  <p>Порядок работы с блокировками:</p>
@@ -94,5 +96,19 @@ public interface LockDataService {
      * @return блокировка установлена?
      */
     boolean checkLock(String key);
+
+    /**
+     * Добавляет пользователя в список ожидающих выполнения операций над объектом блокировки
+     * @param key ключ блокировки
+     * @param userId идентификатор пользователя
+     */
+    void addUserWaitingForLock(String key, int userId);
+
+    /**
+     * Возвращает список идентификаторов пользователей, которые ожидают разблокировки указанного объекта
+     * @param key ключ заблокированного объекта
+     * @return список идентификаторов пользователей
+     */
+    List<Integer> getUsersWaitingForLock(String key);
 
 }

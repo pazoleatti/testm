@@ -43,4 +43,9 @@ public class TestAsyncTask extends AbstractAsyncTask {
     protected String getAsyncTaskName() {
         return "Тестовая задача";
     }
+
+    @Override
+    protected String getNotificationMsg() {
+        return "Тест тест тест!";
+    }
 }

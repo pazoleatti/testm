@@ -18,6 +18,26 @@ public class Notification implements Serializable {
     private String text;
     private Date createDate;
     private Date deadline;
+    /** Идентификатор пользователя, который получит оповещение */
+    private Integer userId;
+    /** Идентификатор роли пользователя, который получит оповещение */
+    private Integer roleId;
+
+    public Integer getRoleId() {
+        return roleId;
+    }
+
+    public void setRoleId(Integer roleId) {
+        this.roleId = roleId;
+    }
+
+    public Integer getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Integer userId) {
+        this.userId = userId;
+    }
 
     public int getId() {
         return id;

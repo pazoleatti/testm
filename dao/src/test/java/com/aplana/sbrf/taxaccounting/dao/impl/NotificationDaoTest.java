@@ -56,12 +56,6 @@ public class NotificationDaoTest {
     }
 
     @Test
-    public void listByDepartmentsTest() {
-        List<Notification> list = notificationDao.listByDepartments(2, 1);
-        assertEquals(list.size(), 2);
-    }
-
-    @Test
     public void saveListTest() {
         List<Notification> list = new ArrayList<Notification>();
         Notification n1 = new Notification();
@@ -85,17 +79,11 @@ public class NotificationDaoTest {
         list.add(n2);
 
         notificationDao.saveList(list);
-        List<Notification> list2 = notificationDao.listByDepartments(2, 1);
+        NotificationsFilterData filter = new NotificationsFilterData();
+        filter.setReceiverDepartmentId(1);
+        filter.setSenderDepartmentId(2);
+        List<Notification> list2 = notificationDao.getByFilter(filter);
         assertEquals(list2.size(), 2);
-    }
-
-    @Test
-    public void deleteTest() {
-        Notification result = notificationDao.get(1, 2, 1);
-        notNull(result);
-        notificationDao.delete(1, 2, 1);
-        result = notificationDao.get(1, 2, 1);
-        isNull(result);
     }
 
     @Test
@@ -114,10 +102,6 @@ public class NotificationDaoTest {
         isNull(result);
     }
 
-	@Test
-	public void listForDepartmentTest() {
-		assertEquals(3, notificationDao.listForDepartment(1).size());
-	}
 
 	@Test
 	public void getForReceiverTest() {
