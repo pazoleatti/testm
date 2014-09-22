@@ -6,7 +6,6 @@ import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -63,6 +62,8 @@ public class DeclarationDataAccessServiceImplTest {
 
     private final static String LOCAL_IP = "127.0.0.1";
 
+    private static DepartmentReportPeriodDao departmentReportPeriodDao;
+
     private boolean canAccept(TAUserInfo userInfo, int declarationDataId) {
         try {
             service.checkEvents(userInfo, Long.valueOf(declarationDataId), FormDataEvent.MOVE_CREATED_TO_ACCEPTED);
@@ -108,7 +109,7 @@ public class DeclarationDataAccessServiceImplTest {
         return true;
     }
 
-    private boolean canCreate(TAUserInfo userInfo, int declarationTemplateId, int departmentReportPeriod) {
+    private boolean canCreate(TAUserInfo userInfo, int declarationTemplateId, DepartmentReportPeriod departmentReportPeriod) {
         return service.getPermittedEvents(userInfo, declarationTemplateId, departmentReportPeriod).contains(
                 FormDataEvent.CREATE);
     }
@@ -192,7 +193,7 @@ public class DeclarationDataAccessServiceImplTest {
         when(declarationDataDao.get(DECLARATION_ACCEPTED_TB2_ID)).thenReturn(declarationAcceptedTB2);
         ReflectionTestUtils.setField(service, "declarationDataDao", declarationDataDao);
 
-        DepartmentReportPeriodDao departmentReportPeriodDao = mock(DepartmentReportPeriodDao.class);
+        departmentReportPeriodDao = mock(DepartmentReportPeriodDao.class);
         doAnswer(new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) {
@@ -201,10 +202,6 @@ public class DeclarationDataAccessServiceImplTest {
             }
         }).when(departmentReportPeriodDao).get(anyInt());
         ReflectionTestUtils.setField(service, "departmentReportPeriodDao", departmentReportPeriodDao);
-
-        PeriodService reportPeriodService = mock(PeriodService.class);
-        when(reportPeriodService.getReportPeriod(REPORT_PERIOD_ID)).thenReturn(reportPeriod);
-        ReflectionTestUtils.setField(service, "reportPeriodService", reportPeriodService);
 
         SourceService sourceService = mock(SourceService.class);
         List<DepartmentDeclarationType> bankDeclarationTypes = Collections.singletonList(mockDepartmentDeclarationType(ROOT_BANK_ID, DECLARATION_TYPE_1_ID));
@@ -363,18 +360,18 @@ public class DeclarationDataAccessServiceImplTest {
 
         // Контролёр УНП может создавать декларации в любом подразделении, если они там разрешены
         userInfo.setUser(mockUser(USER_CONTROL_UNP_ID, DEPARTMENT_TB1_ID, TARole.ROLE_CONTROL_UNP));
-        assertTrue(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, BANK_REPORT_PERIOD_ID));
-        assertTrue(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, TB1_REPORT_PERIOD_ID));
-        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_2_ID, TB1_REPORT_PERIOD_ID));
-        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, TB2_REPORT_PERIOD_ID));
-        assertTrue(canCreate(userInfo, DECLARATION_TEMPLATE_2_ID, TB2_REPORT_PERIOD_ID));
+        assertTrue(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, departmentReportPeriodDao.get(BANK_REPORT_PERIOD_ID)));
+        assertTrue(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, departmentReportPeriodDao.get(TB1_REPORT_PERIOD_ID)));
+        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_2_ID, departmentReportPeriodDao.get(TB1_REPORT_PERIOD_ID)));
+        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, departmentReportPeriodDao.get(TB2_REPORT_PERIOD_ID)));
+        assertTrue(canCreate(userInfo, DECLARATION_TEMPLATE_2_ID, departmentReportPeriodDao.get(TB2_REPORT_PERIOD_ID)));
 
         // Оператор не может создавать декларации
         userInfo.setUser(mockUser(USER_OPERATOR_ID, DEPARTMENT_TB1_ID, TARole.ROLE_OPER));
-        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, BANK_REPORT_PERIOD_ID));
-        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, TB1_REPORT_PERIOD_ID));
-        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_2_ID, TB1_REPORT_PERIOD_ID));
-        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, TB2_REPORT_PERIOD_ID));
-        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_2_ID, TB2_REPORT_PERIOD_ID));
+        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, departmentReportPeriodDao.get(BANK_REPORT_PERIOD_ID)));
+        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, departmentReportPeriodDao.get(TB1_REPORT_PERIOD_ID)));
+        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_2_ID, departmentReportPeriodDao.get(TB1_REPORT_PERIOD_ID)));
+        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, departmentReportPeriodDao.get(TB2_REPORT_PERIOD_ID)));
+        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_2_ID, departmentReportPeriodDao.get(TB2_REPORT_PERIOD_ID)));
     }
 }

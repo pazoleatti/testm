@@ -113,11 +113,15 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     @Transactional(readOnly = false)
-    public long create(Logger logger, int declarationTemplateId, TAUserInfo userInfo, int departmentReportPeriodId, String taxOrganCode, String taxOrganKpp) {
-        declarationDataAccessService.checkEvents(userInfo, declarationTemplateId, departmentReportPeriodId, FormDataEvent.CREATE);
+    public long create(Logger logger, int declarationTemplateId, TAUserInfo userInfo,
+                       DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp) {
+        declarationDataAccessService.checkEvents(userInfo, declarationTemplateId, departmentReportPeriod,
+                FormDataEvent.CREATE);
 
         DeclarationData newDeclaration = new DeclarationData();
-        newDeclaration.setDepartmentReportPeriodId(departmentReportPeriodId);
+        newDeclaration.setDepartmentReportPeriodId(departmentReportPeriod.getId());
+        newDeclaration.setReportPeriodId(departmentReportPeriod.getReportPeriod().getId());
+        newDeclaration.setDepartmentId(departmentReportPeriod.getDepartmentId());
         newDeclaration.setAccepted(false);
         newDeclaration.setDeclarationTemplateId(declarationTemplateId);
         newDeclaration.setTaxOrganCode(taxOrganCode);
