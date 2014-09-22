@@ -124,6 +124,17 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     }
 
     @Override
+    public List<Integer> getListIdsByFilter(DepartmentReportPeriodFilter departmentReportPeriodFilter) {
+        try {
+            return getNamedParameterJdbcTemplate().queryForList("select drp.id from department_report_period drp " +
+                    getFilterString(departmentReportPeriodFilter), (Map) null, Integer.class);
+        } catch (DataAccessException e){
+            logger.error("", e);
+            throw new DaoException("", e);
+        }
+    }
+
+    @Override
     @Transactional(readOnly = false)
     public int save(DepartmentReportPeriod departmentReportPeriod) {
         Integer id = departmentReportPeriod.getId();
@@ -184,20 +195,72 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
 
     @Override
     public void updateBalance(int id, boolean isBalance) {
-        getJdbcTemplate().update(
-                "update department_report_period set is_balance_period = ? where id = ?",
-                new Object[]{isBalance, id},
-                new int[]{Types.BOOLEAN, Types.NUMERIC}
-        );
+        try {
+            getJdbcTemplate().update(
+                    "update department_report_period set is_balance_period = ? where id = ?",
+                    new Object[]{isBalance ? 1: 0, id},
+                    new int[]{Types.NUMERIC, Types.NUMERIC}
+            );
+        } catch (DataAccessException e){
+            logger.error("", e);
+            throw new DaoException("", e);
+        }
+    }
+
+    @Override
+    public void updateBalance(final List<Integer> ids, final boolean isBalance) {
+        try {
+            getJdbcTemplate().batchUpdate("update department_report_period set is_balance_period = ? where id = ?",
+                    new BatchPreparedStatementSetter() {
+                        @Override
+                        public void setValues(PreparedStatement ps, int i) throws SQLException {
+                            ps.setInt(1, isBalance ? 1: 0);
+                            ps.setInt(2, ids.get(i));
+                        }
+
+                        @Override
+                        public int getBatchSize() {
+                            return ids.size();
+                        }
+                    });
+        } catch (DataAccessException e){
+            logger.error("", e);
+            throw new DaoException("", e);
+        }
     }
 
     @Override
     public void delete(int id) {
-        getJdbcTemplate().update(
-                "delete from department_report_period where id = ?",
-                new Object[]{id},
-                new int[]{Types.NUMERIC}
-        );
+        try {
+            getJdbcTemplate().update(
+                    "delete from department_report_period where id = ?",
+                    new Object[]{id},
+                    new int[]{Types.NUMERIC}
+            );
+        } catch (DataAccessException e){
+            logger.error("", e);
+        }
+    }
+
+    @Override
+    public void delete(final List<Integer> ids) {
+        try {
+            getJdbcTemplate().batchUpdate("delete from department_report_period where id = ?",
+                    new BatchPreparedStatementSetter() {
+                        @Override
+                        public void setValues(PreparedStatement ps, int i) throws SQLException {
+                            //To change body of implemented methods use File | Settings | File Templates.
+                        }
+
+                        @Override
+                        public int getBatchSize() {
+                            return ids.size();
+                        }
+                    }
+            );
+        } catch (DataAccessException e){
+            logger.error("", e);
+        }
     }
 
     @Override

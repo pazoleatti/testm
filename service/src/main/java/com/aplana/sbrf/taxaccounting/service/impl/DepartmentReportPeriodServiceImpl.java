@@ -3,8 +3,6 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
@@ -12,13 +10,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 @Service
 @Transactional
 public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriodService {
+
+    private final static String ERROR_BATCH_MESSAGE = "Пустой список отчетных периодов";
 
     @Autowired
     DepartmentReportPeriodDao departmentReportPeriodDao;
@@ -37,6 +36,11 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
     }
 
     @Override
+    public List<Integer> getListIdsByFilter(DepartmentReportPeriodFilter departmentReportPeriodFilter) {
+        return departmentReportPeriodDao.getListIdsByFilter(departmentReportPeriodFilter);
+    }
+
+    @Override
     public int save(DepartmentReportPeriod departmentReportPeriod) {
         return departmentReportPeriodDao.save(departmentReportPeriod);
     }
@@ -47,23 +51,10 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
     }
 
     @Override
-    public void updateActive(List<DepartmentReportPeriod> drps, boolean active, List<LogEntry> logs) {
-        if (drps == null || drps.isEmpty())
-            throw new ServiceException("Пустой список отчетных периодов.");
-        ArrayList<Integer> ids = new ArrayList<Integer>(drps.size());
-        if (logs != null){
-            for (DepartmentReportPeriod drp : drps){
-                if (drp.isActive())
-                    continue;
-                int year = drp.getReportPeriod().getTaxPeriod().getYear();
-                logs.add(new LogEntry(LogLevel.INFO, "Период" + " \"" + drp.getReportPeriod().getName() + "\" " +
-                        year + " " +
-                        "закрыт для \"" +
-                        departmentService.getDepartment(drp.getDepartmentId()).getName() +
-                        "\""));
+    public void updateActive(List<Integer> ids, boolean active) {
+        if (ids == null || ids.isEmpty())
+            throw new ServiceException(ERROR_BATCH_MESSAGE);
 
-            }
-        }
         departmentReportPeriodDao.updateActive(ids, active);
     }
 
@@ -78,8 +69,20 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
     }
 
     @Override
+    public void updateBalance(List<Integer> ids, boolean isBalance) {
+        if (ids == null || ids.isEmpty())
+            throw new ServiceException(ERROR_BATCH_MESSAGE);
+        departmentReportPeriodDao.updateActive(ids, isBalance);
+    }
+
+    @Override
     public void delete(int id) {
         departmentReportPeriodDao.delete(id);
+    }
+
+    @Override
+    public void delete(List<Integer> ids) {
+        departmentReportPeriodDao.delete(ids);
     }
 
     @Override

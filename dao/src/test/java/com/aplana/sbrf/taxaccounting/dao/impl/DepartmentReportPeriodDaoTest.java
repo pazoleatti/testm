@@ -135,6 +135,15 @@ public class DepartmentReportPeriodDaoTest {
     }
 
     @Test
+    public void getListIdsByFilterTest() throws ParseException {
+        DepartmentReportPeriodFilter departmentReportPeriodFilter = new DepartmentReportPeriodFilter();
+        // Пустой фильтр
+        List<Integer> departmentReportPeriodList =
+                departmentReportPeriodDao.getListIdsByFilter(departmentReportPeriodFilter);
+        Assert.assertEquals(37, departmentReportPeriodList.size());
+    }
+
+    @Test
     public void saveTest() {
         DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
         Date date = new Date();
@@ -163,12 +172,22 @@ public class DepartmentReportPeriodDaoTest {
     }
 
     @Test
+    public void batchUpdateActiveTest() {
+        departmentReportPeriodDao.updateActive(Arrays.asList(1, 2, 3), true);
+    }
+
+    @Test
     public void updateBalanceTest() {
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(101);
         Assert.assertFalse(departmentReportPeriod.isBalance());
         departmentReportPeriodDao.updateBalance(101, true);
         departmentReportPeriod = departmentReportPeriodDao.get(101);
         Assert.assertTrue(departmentReportPeriod.isBalance());
+    }
+
+    @Test
+    public void batchUpdateBalanceTest() {
+        departmentReportPeriodDao.updateBalance(Arrays.asList(101), true);
     }
 
     @Test

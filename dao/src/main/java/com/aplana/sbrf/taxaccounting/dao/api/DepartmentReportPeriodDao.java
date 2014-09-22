@@ -21,6 +21,8 @@ public interface DepartmentReportPeriodDao {
      */
     List<DepartmentReportPeriod> getListByFilter(DepartmentReportPeriodFilter departmentReportPeriodFilter);
 
+    List<Integer> getListIdsByFilter(DepartmentReportPeriodFilter departmentReportPeriodFilter);
+
 	/**
 	 * Сохранение отчетноего периода подразделения
 	 */
@@ -46,10 +48,17 @@ public interface DepartmentReportPeriodDao {
      */
     void updateBalance(int id, boolean isBalance);
 
+    void updateBalance(List<Integer> ids, boolean isBalance);
+
     /**
      * Удаление отчетного периода подразделения
      */
     void delete(int id);
+
+    /**
+     * Удаление отчетных периода подразделения
+     */
+    void delete(List<Integer> ids);
 
 	/**
 	 * Проверяет существование периода для подразделения

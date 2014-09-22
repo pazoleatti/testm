@@ -38,6 +38,10 @@ public class DepartmentReportPeriodFilter implements Serializable {
         return isCorrection;
     }
 
+    /**
+     *
+     * @param isCorrection false - если требуется найти обычные(не корректирующие) периоды
+     */
     public void setIsCorrection(Boolean isCorrection) {
         this.isCorrection = isCorrection;
     }
