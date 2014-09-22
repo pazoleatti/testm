@@ -6,12 +6,14 @@ import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,10 +22,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Repository
 @Transactional(readOnly = true)
@@ -311,6 +310,42 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
             );
         } catch (EmptyResultDataAccessException e) {
             return null;
+        }
+    }
+
+    private class CorrectionDateRowMapper implements RowMapper<Pair<Integer, Date>> {
+        @Override
+        public Pair<Integer, Date> mapRow(ResultSet rs, int rowNum) throws SQLException {
+            int reportPeriodId = rs.getInt("report_period_id");
+            Date correctionDate = rs.getDate("correction_date");
+            return new Pair<Integer, Date>(reportPeriodId, correctionDate);
+        }
+    }
+
+    @Override
+    public Map<Integer, List<Date>> getCorrectionDateListByReportPeriod(final Collection<Integer> reportPeriodIdList) {
+        Map<Integer, List<Date>> retVal = new HashMap<Integer, List<Date>>();
+        if (reportPeriodIdList == null) {
+            return retVal;
+        }
+        try {
+            MapSqlParameterSource source = new MapSqlParameterSource();
+            source.addValue("rps", reportPeriodIdList);
+            List<Pair<Integer, Date>> list = getNamedParameterJdbcTemplate().query("select distinct report_period_id, " +
+                    "correction_date " +
+                    "from department_report_period where report_period_id in (:rps) and correction_date is not null",
+                    source, new CorrectionDateRowMapper());
+
+            for (Pair<Integer, Date> pair : list) {
+                if (!retVal.containsKey(pair.getFirst())) {
+                    retVal.put(pair.getFirst(), new LinkedList<Date>());
+                }
+                retVal.get(pair.getFirst()).add(pair.getSecond());
+            }
+            return retVal;
+
+        } catch (EmptyResultDataAccessException e) {
+            return retVal;
         }
     }
 }

@@ -3,8 +3,10 @@ package com.aplana.sbrf.taxaccounting.dao.api;
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Отчетные периоды подразделений DEPARTMENT_REPORT_PERIOD
@@ -74,4 +76,9 @@ public interface DepartmentReportPeriodDao {
      * Номер корректирующего периода
      */
     Integer getCorrectionNumber(int id);
+
+    /**
+     * Получение списков дат корректирующих периодов по отчетным периодам
+     */
+    Map<Integer, List<Date>> getCorrectionDateListByReportPeriod(Collection<Integer> reportPeriodIdList);
 }
