@@ -401,12 +401,33 @@ public class PeriodServiceImpl implements PeriodService {
 		}
 	}
 
+    //http://conf.aplana.com/pages/viewpage.action?pageId=11389882#id-Формаспискапериодов-Удалениепериода
 	@Override
-	public void removeReportPeriod(TaxType taxType, int reportPeriodId, Date correctionDate, int departmentId, List<LogEntry> logs, TAUserInfo user) {
-		List<Integer> departments = getAvailableDepartments(taxType, user.getUser(), Operation.DELETE, departmentId);
+	public void removeReportPeriod(TaxType taxType, int drpId, List<LogEntry> logs, TAUserInfo user) {
+        DepartmentReportPeriod drp = departmentReportPeriodService.get(drpId);
+        int reportPeriodId = drp.getReportPeriod().getId();
+        //2 Проверка вида периода
+        if (drp.getCorrectionDate() != null && departmentReportPeriodService.isExistLargeCorrection(drp.getCorrectionDate())){
+            logs.add(new LogEntry(LogLevel.ERROR,
+                    "Удаление периода невозможно, т.к. существует более поздний корректирующий период!"));
+            return;
+        } else if (drp.getCorrectionDate() == null){
+            //3 Существуют ли корректирующий период
+            DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
+            filter.setIsCorrection(true);
+            filter.setReportPeriodIdList(Arrays.asList(reportPeriodId));
+            filter.setDepartmentIdList(Arrays.asList(drp.getDepartmentId()));
+            List<Integer> corrIds = departmentReportPeriodService.getListIdsByFilter(filter);
+            if (!corrIds.isEmpty()){
+                logs.add(new LogEntry(LogLevel.ERROR,
+                        "Удаление периода невозможно, т.к. для него существует корректирующий период!"));
+                return;
+            }
+        }
+		List<Integer> departments = getAvailableDepartments(taxType, user.getUser(), Operation.DELETE, drp.getDepartmentId());
 
-		if (checkBeforeRemove(departments, reportPeriodId, logs)) {
-			removePeriodWithLog(reportPeriodId, correctionDate, departments, taxType, logs);
+		if (checkBeforeRemove(departments, drp.getReportPeriod().getId(), logs)) {
+			removePeriodWithLog(drp.getReportPeriod().getId(), drp.getCorrectionDate(), departments, taxType, logs);
 		}
 	}
 

@@ -75,7 +75,7 @@ public class DepartmentReportPeriodDaoTest {
         departmentReportPeriodFilter.setReportPeriodIdList(Arrays.asList(1, 2));
         departmentReportPeriodList = departmentReportPeriodDao.getListByFilter(departmentReportPeriodFilter);
         for (DepartmentReportPeriod departmentReportPeriod : departmentReportPeriodList) {
-            int reportPeriodId = departmentReportPeriod.getReportPeriod().getId().intValue();
+            int reportPeriodId = departmentReportPeriod.getReportPeriod().getId();
             Assert.assertTrue(reportPeriodId == 1 || reportPeriodId == 2);
         }
         // Фильтр по виду налога
@@ -170,7 +170,8 @@ public class DepartmentReportPeriodDaoTest {
 
     @Test
     public void batchUpdateActiveTest() {
-        departmentReportPeriodDao.updateActive(Arrays.asList(1, 2, 3), true);
+        departmentReportPeriodDao.updateActive(Arrays.asList(101, 102, 103), true);
+        Assert.assertTrue(departmentReportPeriodDao.get(101).isActive());
     }
 
     @Test
@@ -184,7 +185,8 @@ public class DepartmentReportPeriodDaoTest {
 
     @Test
     public void batchUpdateBalanceTest() {
-        departmentReportPeriodDao.updateBalance(Arrays.asList(101), true);
+        departmentReportPeriodDao.updateBalance(Arrays.asList(101, 102, 103), true);
+        Assert.assertTrue(departmentReportPeriodDao.get(101).isBalance());
     }
 
     @Test
@@ -211,6 +213,17 @@ public class DepartmentReportPeriodDaoTest {
         Assert.assertEquals(603, departmentReportPeriodDao.getLast(6, 1).getId().intValue());
         Assert.assertEquals(101, departmentReportPeriodDao.getLast(1, 1).getId().intValue());
         Assert.assertNull(departmentReportPeriodDao.getLast(-1, -1));
+    }
+
+    @Test
+    public void isExistTest() throws ParseException {
+        Assert.assertTrue(departmentReportPeriodDao.isExistLargeCorrection(SIMPLE_DATE_FORMAT.parse("01.01.2011")));
+    }
+
+    @Test
+    public void deleteTest() throws ParseException {
+        departmentReportPeriodDao.delete(Arrays.asList(101));
+        Assert.assertNull(departmentReportPeriodDao.get(101));
     }
 
     @Test
