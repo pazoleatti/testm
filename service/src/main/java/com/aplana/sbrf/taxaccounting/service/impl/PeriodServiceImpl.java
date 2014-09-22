@@ -151,7 +151,7 @@ public class PeriodServiceImpl implements PeriodService {
 		} else {
 			newReportPeriod = reportPeriods.get(0);
 		}
-		for (Integer depId : getAvailableDepartments(taxType, user.getUser(), Operation.OPEN, (int)departmentId)) {
+		for (Integer depId : getAvailableDepartments(taxType, user.getUser(), Operation.OPEN, departmentId)) {
 			DepartmentReportPeriod depRP = new DepartmentReportPeriod();
 			depRP.setReportPeriod(newReportPeriod);
 			depRP.setDepartmentId(depId);
@@ -238,11 +238,11 @@ public class PeriodServiceImpl implements PeriodService {
                         "Период " + "\"" + departmentReportPeriod.getReportPeriod().getName() + "\" "
                         + departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + " "
                         + (departmentReportPeriod.isBalance() ? "\"ввод остатков\"" : "") + " "
-                        + " открыт для \"" + departmentService.getDepartment(departmentReportPeriod.getDepartmentId().intValue()).getName() + "\""
+                        + " открыт для \"" + departmentService.getDepartment(departmentReportPeriod.getDepartmentId()).getName() + "\""
                 ));
             } else {
                 logs.add(new LogEntry(LogLevel.INFO, "Корректирующий период: " + departmentReportPeriod.getReportPeriod().getName()
-                        + " " + year + " открыт для " + departmentService.getDepartment(departmentReportPeriod.getDepartmentId().intValue()).getName()));
+                        + " " + year + " открыт для " + departmentService.getDepartment(departmentReportPeriod.getDepartmentId()).getName()));
             }
 		}
 	}
@@ -779,38 +779,41 @@ public class PeriodServiceImpl implements PeriodService {
     @Override
     public void editCorrectionPeriod(int reportPeriodId, int newReportPeriodId, int oldDepartmentId, int newDepartmentId, TaxType taxType,
                                      Date correctionDate, Date newCorrectionDate, TAUserInfo user, List<LogEntry> logs) {
-//        if ((reportPeriodId == newReportPeriodId) && (oldDepartmentId == newDepartmentId)) { // изменилась только дата корректировки
-//            ReportPeriod rp = getReportPeriod(reportPeriodId);
-//            ReportPeriod newRp = getReportPeriod(newReportPeriodId);
-//            PeriodStatusBeforeOpen status = checkPeriodStatusBeforeOpen(rp, newDepartmentId, newCorrectionDate);
-//            if (status == PeriodStatusBeforeOpen.NOT_EXIST) {
-//                List<Department> deps = getAvailableDepartments(taxType, user.getUser(), Operation.EDIT, newDepartmentId);
-//                for (Department dep : deps) {
-//                    DepartmentReportPeriod drp = departmentReportPeriodService.get(reportPeriodId, dep.getId(), correctionDate);
-//                    departmentReportPeriodService.updateCorrectionDate(drp.getId(), newCorrectionDate);
-//                    logs.add(new LogEntry(LogLevel.INFO,
-//                            "Корректирующий период с " + rp.getName() + " " + rp.getTaxPeriod().getYear() + " был изменён на " + newRp.getName() + " для " + dep.getName()));//<соответствующий календарный год>** + <"ввод остатков" *>**  для <Наименование подразделения>"));
-//
-//                }
-//            }
-//        } else {
-//            ReportPeriod rp = getReportPeriod(newReportPeriodId);
-//            PeriodStatusBeforeOpen status = checkPeriodStatusBeforeOpen(rp, newDepartmentId, newCorrectionDate);
-//            if (status == PeriodStatusBeforeOpen.NOT_EXIST) {
-//                List<Department> deps = getAvailableDepartments(taxType, user.getUser(), Operation.EDIT, (int) oldDepartmentId);
-//                List<Integer> depIds = new ArrayList<Integer>();
-//                for (Department dep : deps) {
-//                    depIds.add(dep.getId());
-//                }
-//                removePeriodWithLog(reportPeriodId, correctionDate, depIds, taxType, null);
-//                ReportPeriod newRp = getReportPeriod(newReportPeriodId);
-//                openCorrectionPeriod(taxType, newRp, newDepartmentId, newCorrectionDate, user, null);
-//                for (Department dep : deps) {
-//                    logs.add(new LogEntry(LogLevel.INFO,
-//                            "Корректирующий период с " + rp.getName() + " " + rp.getTaxPeriod().getYear() + " был изменён на " + newRp.getName() + " для " + dep.getName()));//<соответствующий календарный год>** + <"ввод остатков" *>**  для <Наименование подразделения>"));
-//                }
-//            }
-//        }
+        if ((reportPeriodId == newReportPeriodId) && (oldDepartmentId == newDepartmentId)) { // изменилась только дата корректировки
+            ReportPeriod rp = getReportPeriod(reportPeriodId);
+            ReportPeriod newRp = getReportPeriod(newReportPeriodId);
+            PeriodStatusBeforeOpen status = checkPeriodStatusBeforeOpen(rp, newDepartmentId, newCorrectionDate);
+            if (status == PeriodStatusBeforeOpen.NOT_EXIST) {
+                List<Integer> depIds = getAvailableDepartments(taxType, user.getUser(), Operation.EDIT, newDepartmentId);
+                DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
+                filter.setCorrectionDate(correctionDate);
+                filter.setReportPeriodIdList(Arrays.asList(reportPeriodId));
+                filter.setDepartmentIdList(depIds);
+                List<Integer> drpIds = departmentReportPeriodService.getListIdsByFilter(filter);
+                for (Integer drpId : drpIds) {
+                    departmentReportPeriodService.updateCorrectionDate(drpId, newCorrectionDate);
+                    logs.add(new LogEntry(LogLevel.INFO,
+                            "Корректирующий период с " + rp.getName() + " " + rp.getTaxPeriod().getYear()
+                                    + " был изменён на " + newRp.getName() + " для " +
+                                    departmentService.getDepartment(departmentReportPeriodService.get(drpId).getDepartmentId()).getName()));//<соответствующий календарный год>** + <"ввод остатков" *>**  для <Наименование подразделения>"));
+
+                }
+            }
+        } else {
+            ReportPeriod rp = getReportPeriod(newReportPeriodId);
+            PeriodStatusBeforeOpen status = checkPeriodStatusBeforeOpen(rp, newDepartmentId, newCorrectionDate);
+            if (status == PeriodStatusBeforeOpen.NOT_EXIST) {
+                List<Integer> depIds = getAvailableDepartments(taxType, user.getUser(), Operation.EDIT, oldDepartmentId);
+                removePeriodWithLog(reportPeriodId, correctionDate, depIds, taxType, null);
+                ReportPeriod newRp = getReportPeriod(newReportPeriodId);
+                openCorrectionPeriod(taxType, newRp, newDepartmentId, newCorrectionDate, user, null);
+                for (Integer depId : depIds) {
+                    logs.add(new LogEntry(LogLevel.INFO,
+                            "Корректирующий период с " + rp.getName() + " " + rp.getTaxPeriod().getYear() +
+                                    " был изменён на " + newRp.getName() + " для " + departmentService.getDepartment(depId).getName()));//<соответствующий календарный год>** + <"ввод остатков" *>**  для <Наименование подразделения>"));
+                }
+            }
+        }
     }
 
     @Override
