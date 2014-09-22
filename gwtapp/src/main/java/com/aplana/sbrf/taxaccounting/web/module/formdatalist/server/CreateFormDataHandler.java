@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.server;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -39,8 +40,10 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
     LogEntryService logEntryService;
 
     private static final String ERROR_SELECT_REPORT_PERIOD = "Период подразделения не выбран!";
+    private static final String ERROR_SELECT_DEPARTMENT = "Подразделение не выбрано!";
     private static final String ERROR_SELECT_FORM_DATA_KIND = "Тип налоговой формы не выбран!";
     private static final String ERROR_SELECT_FORM_DATA_TYPE = "Вид налоговой формы не выбран!";
+    private static final String ERROR_DEPARTMENT_REPORT_PERIOD_NOT_FOUND = "Не определен отчетный период подразделения!";
 
     public CreateFormDataHandler() {
 		super(CreateFormData.class);
@@ -54,10 +57,17 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
 		CreateFormDataResult result = new CreateFormDataResult();
 		Logger logger = new Logger();
 
+        // Подставляется последний отчетный период подразделения
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.getLast(action.getDepartmentId(),
+                action.getReportPeriodId());
+
+        if (departmentReportPeriod == null) {
+            throw new ServiceException(ERROR_DEPARTMENT_REPORT_PERIOD_NOT_FOUND);
+        }
+
         /**
          *  Проверка существования назначений источников-приемников
          */
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(action.getDepartmentReportPeriodId());
 
         // 1. Если форма является приемником данных в указанном периоде, то Система выводит сообщение в панель уведомления предупреждение: "Форма является приемником данных."
         FormDataKind kind = FormDataKind.fromId(action.getFormDataKindId());
@@ -78,8 +88,8 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
         }
 
         int templateId = formTemplateService.getActiveFormTemplateId(formDataTypeId, departmentReportPeriod.getReportPeriod().getId());
-        long formDataId = formDataService.createFormData(logger, userInfo, templateId,
-                action.getDepartmentReportPeriodId(), kind, action.getMonthId());
+        long formDataId = formDataService.createFormData(logger, userInfo, templateId, departmentReportPeriod.getId(),
+                kind, action.getMonthId());
 
         result.setFormDataId(formDataId);
 
@@ -92,9 +102,19 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
 
 	private void checkAction(CreateFormData action) throws ActionException {
         // Проверки заполнения полей (частичное дублирование клиентского кода)
-        if (action.getDepartmentReportPeriodId() == null) {
+        // Проверки заполнения полей (частичное дублирование клиентского кода)
+        if (action.getReportPeriodId() == null) {
             throw new TaActionException(ERROR_SELECT_REPORT_PERIOD);
-		}
+        }
+        if (action.getDepartmentId() == null) {
+            throw new TaActionException(ERROR_SELECT_DEPARTMENT);
+        }
+        if (action.getFormDataKindId() == null) {
+            throw new TaActionException(ERROR_SELECT_FORM_DATA_KIND);
+        }
+        if (action.getFormDataTypeId() == null) {
+            throw new TaActionException(ERROR_SELECT_FORM_DATA_TYPE);
+        }
         if (action.getFormDataKindId() == null) {
             throw new TaActionException(ERROR_SELECT_FORM_DATA_KIND);
         }

@@ -121,7 +121,7 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
                     Период: 34,
                     ОтчетГод: reportPeriod.taxPeriod.year,
                     КодНО: departmentParamTransport.TAX_ORGAN_CODE,
-                    НомКорр: reportPeriodService.getCorrectionPeriodNumber(declarationData.getReportPeriodId(), departmentId),
+                    НомКорр: reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId),
                     ПоМесту: taxPlaceTypeCode
             ) {
                 def svnp = [ОКВЭД: okvedCode]
