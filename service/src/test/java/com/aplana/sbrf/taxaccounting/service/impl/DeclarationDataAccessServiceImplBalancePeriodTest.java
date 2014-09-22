@@ -124,8 +124,8 @@ public class DeclarationDataAccessServiceImplBalancePeriodTest {
     }
 
     private boolean canCreate(TAUserInfo userInfo, int declarationTemplateId,
-                              int departmentReportPeriodId) {
-        return service.getPermittedEvents(userInfo, declarationTemplateId, departmentReportPeriodId).contains(FormDataEvent.CREATE);
+                              DepartmentReportPeriod departmentReportPeriod) {
+        return service.getPermittedEvents(userInfo, declarationTemplateId, departmentReportPeriod).contains(FormDataEvent.CREATE);
     }
 
     @BeforeClass
@@ -393,29 +393,42 @@ public class DeclarationDataAccessServiceImplBalancePeriodTest {
     @Test
     public void testCanCreate() {
         TAUserInfo userInfo = new TAUserInfo();
+        DepartmentReportPeriod departmentReportPeriod1 = new DepartmentReportPeriod();
+        DepartmentReportPeriod departmentReportPeriod2 = new DepartmentReportPeriod();
+        DepartmentReportPeriod departmentReportPeriod3 = new DepartmentReportPeriod();
+        departmentReportPeriod1.setDepartmentId(ROOT_BANK_ID);
+        departmentReportPeriod2.setDepartmentId(DEPARTMENT_TB1_ID);
+        departmentReportPeriod3.setDepartmentId(DEPARTMENT_TB2_ID);
+        departmentReportPeriod1.setId(BANK_REPORT_PERIOD_ID);
+        departmentReportPeriod2.setId(TB1_REPORT_PERIOD_ID);
+        departmentReportPeriod3.setId(TB2_REPORT_PERIOD_ID);
+        departmentReportPeriod1.setReportPeriod(new ReportPeriod(){{setId(BANK_REPORT_PERIOD_ID);}});
+        departmentReportPeriod1.setReportPeriod(new ReportPeriod(){{setId(TB1_REPORT_PERIOD_ID);}});
+        departmentReportPeriod1.setReportPeriod(new ReportPeriod(){{setId(TB2_REPORT_PERIOD_ID);}});
+
         // Контролёр УНП может создавать декларации в любом подразделении, если они там разрешены
         userInfo.setUser(mockUser(USER_CONTROL_UNP_ID, DEPARTMENT_TB1_ID, TARole.ROLE_CONTROL_UNP));
-        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, BANK_REPORT_PERIOD_ID));
-        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, TB1_REPORT_PERIOD_ID));
-        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_2_ID, TB1_REPORT_PERIOD_ID));
-        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, TB2_REPORT_PERIOD_ID));
-        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_2_ID, TB2_REPORT_PERIOD_ID));
+        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, departmentReportPeriod1));
+        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, departmentReportPeriod2));
+        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_2_ID, departmentReportPeriod2));
+        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, departmentReportPeriod3));
+        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_2_ID, departmentReportPeriod3));
 
         // Контролёр может создавать декларации в своём обособленном подразделении, если они там разрешены
         userInfo.setUser(mockUser(USER_CONTROL_BANK_ID, ROOT_BANK_ID, TARole.ROLE_CONTROL));
-        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, BANK_REPORT_PERIOD_ID));
+        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, departmentReportPeriod1));
         userInfo.setUser(mockUser(USER_CONTROL_TB1_ID, DEPARTMENT_TB1_ID, TARole.ROLE_CONTROL));
-        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, TB1_REPORT_PERIOD_ID));
-        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_2_ID, TB1_REPORT_PERIOD_ID));
-        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, TB2_REPORT_PERIOD_ID));
-        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_2_ID, TB2_REPORT_PERIOD_ID));
+        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, departmentReportPeriod2));
+        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_2_ID, departmentReportPeriod2));
+        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, departmentReportPeriod3));
+        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_2_ID, departmentReportPeriod3));
 
         // Оператор не может создавать декларации
         userInfo.setUser(mockUser(USER_OPERATOR_ID, DEPARTMENT_TB1_ID, TARole.ROLE_OPER));
-        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, BANK_REPORT_PERIOD_ID));
-        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, TB1_REPORT_PERIOD_ID));
-        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_2_ID, TB1_REPORT_PERIOD_ID));
-        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, TB2_REPORT_PERIOD_ID));
-        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_2_ID, TB2_REPORT_PERIOD_ID));
+        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, departmentReportPeriod1));
+        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, departmentReportPeriod2));
+        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_2_ID, departmentReportPeriod2));
+        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, departmentReportPeriod3));
+        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_2_ID, departmentReportPeriod3));
     }
 }

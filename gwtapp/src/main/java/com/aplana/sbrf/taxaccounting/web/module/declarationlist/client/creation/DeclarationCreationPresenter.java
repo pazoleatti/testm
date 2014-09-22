@@ -96,9 +96,8 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
                             } else {
 								CreateDeclaration command = new CreateDeclaration();
 								command.setDeclarationTypeId(filter.getDeclarationTypeId());
-                                // TODO Передать отчетный период подразделения http://jira.aplana.com/browse/SBRFACCTAX-8840
-                                command.setDepartmentReportPeriodId(-1);
-
+                                command.setDepartmentId(filter.getDepartmentIds().iterator().next());
+                                command.setReportPeriodId(filter.getReportPeriodIds().iterator().next());
                                 command.setTaxOrganCode(filter.getTaxOrganCode());
                                 command.setTaxOrganKpp(filter.getTaxOrganKpp());
                                 command.setTaxType(taxType);

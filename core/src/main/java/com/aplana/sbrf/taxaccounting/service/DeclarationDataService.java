@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
@@ -19,12 +20,13 @@ public interface DeclarationDataService {
      * @param logger - объект журнала
      * @param declarationTemplateId идентификатор шаблона декларации
      * @param userInfo информация о пользователе, выполняющего действие
-     * @param departmentReportPeriodId отчетный период подразделения
+     * @param departmentReportPeriod отчетный период подразделения
      * @param taxOrganCode налоговый орган (для налога на имущество)
      * @param taxOrganKpp КПП (для налога на имущество)
      * @return идентификатор созданной декларации
      */
-    long create(Logger logger, int declarationTemplateId, TAUserInfo userInfo, int departmentReportPeriodId, String taxOrganCode, String taxOrganKpp);
+    long create(Logger logger, int declarationTemplateId, TAUserInfo userInfo,
+                DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp);
 
 	/**
 	 * Рассчитать декларацию
