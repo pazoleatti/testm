@@ -32,11 +32,7 @@ public class TestAsyncTask extends AbstractAsyncTask {
 
     @Override
     protected void executeBusinessLogic(Map<String, Object> params) {
-        Logger logger = new Logger();
-        TAUserInfo userInfo = (TAUserInfo) params.get("userInfo");
-        System.out.println("userInfo: "+ userInfo);
-        logger.setTaUserInfo(userInfo);
-        //refBookFactory.getDataProvider(13L).deleteRecordVersions(logger, Arrays.asList(274873099L));
+        System.out.println("TestAsyncTask started!");
     }
 
     @Override

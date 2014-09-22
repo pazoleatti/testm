@@ -740,7 +740,8 @@ first_reader_id number(9) null,
 text varchar2(2000) not null, 
 create_date date not null, 
 deadline date null,
-user_id number(9) null
+user_id number(9) null,
+role_id number(9) null
 );
 
 comment on table notification is 'Оповещения';
@@ -753,6 +754,7 @@ comment on column notification.text is 'текст оповещения';
 comment on column notification.create_date is 'дата создания оповещения';
 comment on column notification.deadline is 'дата сдачи отчетности';
 comment on column notification.user_id is 'Идентификатор пользователя, который получит оповещение';
+comment on column notification.role_id is 'Роль пользователя, который получит оповещение';
 
 create sequence seq_notification start with 10000;
 

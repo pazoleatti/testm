@@ -163,7 +163,7 @@ public class LockDataServiceImpl implements LockDataService {
     }
 
     @Override
-    public boolean checkLock(final String key) {
+    public boolean isLockExists(final String key) {
         synchronized(LockDataServiceImpl.class) {
             return validateLock(dao.get(key)) != null;
         }

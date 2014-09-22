@@ -15,6 +15,7 @@ import org.springframework.util.Assert;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -28,6 +29,39 @@ public class NotificationDaoTest {
 
     @Autowired
     NotificationDao notificationDao;
+
+    @Test
+    public void getByFilterTest() {
+        NotificationsFilterData filter = new NotificationsFilterData();
+        filter.setReceiverDepartmentId(1);
+        assertEquals(3, notificationDao.getByFilter(filter).size());
+        filter.setStartIndex(0);
+        filter.setCountOfRecords(2);
+        assertEquals(2, notificationDao.getByFilter(filter).size());
+
+        NotificationsFilterData userIdFilter = new NotificationsFilterData();
+        userIdFilter.setUserId(1);
+        assertEquals(1, notificationDao.getByFilter(userIdFilter).size());
+
+        NotificationsFilterData userRoleFilter = new NotificationsFilterData();
+        userRoleFilter.setUserRoleIds(Arrays.asList(2,3));
+        assertEquals(3, notificationDao.getByFilter(userRoleFilter).size());
+    }
+
+    @Test
+    public void getCountByFilterTest() {
+        NotificationsFilterData filter = new NotificationsFilterData();
+        filter.setReceiverDepartmentId(1);
+        assertEquals(3, notificationDao.getCountByFilter(filter));
+
+        NotificationsFilterData userIdFilter = new NotificationsFilterData();
+        userIdFilter.setUserId(1);
+        assertEquals(1, notificationDao.getCountByFilter(userIdFilter));
+
+        NotificationsFilterData userRoleFilter = new NotificationsFilterData();
+        userRoleFilter.setUserRoleIds(Arrays.asList(2,3));
+        assertEquals(3, notificationDao.getCountByFilter(userRoleFilter));
+    }
 
     @Test
     public void saveTest() {
@@ -83,7 +117,7 @@ public class NotificationDaoTest {
         filter.setReceiverDepartmentId(1);
         filter.setSenderDepartmentId(2);
         List<Notification> list2 = notificationDao.getByFilter(filter);
-        assertEquals(list2.size(), 2);
+        assertEquals(5, list2.size());
     }
 
     @Test
@@ -109,22 +143,5 @@ public class NotificationDaoTest {
 		assertEquals(1, notification.getId());
 		assertEquals(1, notification.getReceiverDepartmentId().intValue());
 		assertEquals(2, notification.getSenderDepartmentId().intValue());
-	}
-
-	@Test
-	public void getByFilterTest() {
-		NotificationsFilterData filter = new NotificationsFilterData();
-		filter.setReceiverDepartmentId(1);
-		assertEquals(3, notificationDao.getByFilter(filter).size());
-		filter.setStartIndex(0);
-		filter.setCountOfRecords(2);
-		assertEquals(2, notificationDao.getByFilter(filter).size());
-	}
-
-	@Test
-	public void getCountByFilterTest() {
-		NotificationsFilterData filter = new NotificationsFilterData();
-		filter.setReceiverDepartmentId(1);
-		assertEquals(3, notificationDao.getCountByFilter(filter));
 	}
 }

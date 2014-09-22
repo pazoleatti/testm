@@ -28,12 +28,13 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
 	@Override
 	public LockData get(String key) {
 		try {
-			return getJdbcTemplate().queryForObject(
+            LockData lockData = getJdbcTemplate().queryForObject(
 					"SELECT key, user_id, date_before FROM lock_data WHERE key = ?",
 					new Object[] {key},
 					new int[] {Types.VARCHAR},
 					new LockDataMapper()
 			);
+            return lockData;
 		} catch (EmptyResultDataAccessException e) {
 			return null;
 		} catch (Exception e) {
@@ -130,7 +131,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     @Override
     public void addUserWaitingForLock(String key, int userId) {
         try {
-            getJdbcTemplate().update("INSERT INTO lock_data_subscribers (key, user_id) VALUES (?,?)",
+            getJdbcTemplate().update("INSERT INTO lock_data_subscribers (lock_key, user_id) VALUES (?,?)",
                     new Object[] {key, userId},
                     new int[] {Types.VARCHAR, Types.NUMERIC});
         } catch (DataAccessException e) {

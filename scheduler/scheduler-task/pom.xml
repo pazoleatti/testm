@@ -33,6 +33,7 @@
             <artifactId>scheduler-api</artifactId>
             <version>${project.version}</version>
         </dependency>
+
         <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-api</artifactId>

@@ -95,7 +95,7 @@ public interface LockDataService {
      * @param key код блокировки
      * @return блокировка установлена?
      */
-    boolean checkLock(String key);
+    boolean isLockExists(String key);
 
     /**
      * Добавляет пользователя в список ожидающих выполнения операций над объектом блокировки

@@ -46,33 +46,38 @@ public abstract class AbstractAsyncTask implements AsyncTask {
 
     @Override
     public void execute(Map<String, Object> params) {
-        String lock = (String) params.get(LOCKED_OBJECT.name());
-        if (lockService.checkLock(lock)) {
-            //Если блокировка на объект задачи все еще существует, значит на нем можно выполнять бизнес-логику
-            executeBusinessLogic(params);
-            if (!lockService.checkLock(lock)) {
-                //Если после выполнения бизнес логики, оказывается, что блокировки уже нет
-                //Значит результаты нам уже не нужны - откатываем транзакцию и все изменения
-                throw new RuntimeException("Результат выполнения задачи \"" + getAsyncTaskName() + "\" больше не актуален. Выполняется откат транзакции");
-            }
-            //Получаем список пользователей, для которых надо сформировать оповещение
-            String msg = getNotificationMsg();
-            if (msg != null && !msg.isEmpty()) {
-                List<Integer> waitingUsers = lockService.getUsersWaitingForLock(lock);
-                if (!waitingUsers.isEmpty()) {
-                    List<Notification> notifications = new ArrayList<Notification>();
-                    for (Integer userId : waitingUsers) {
-                        Notification notification = new Notification();
-                        notification.setUserId(userId);
-                        notification.setCreateDate(new Date());
-                        notification.setText(msg);
-                    }
-                    //Создаем оповещение для каждого пользователя из списка
-                    notificationService.saveList(notifications);
+        try {
+            String lock = (String) params.get(LOCKED_OBJECT.name());
+            if (lockService.isLockExists(lock)) {
+                //Если блокировка на объект задачи все еще существует, значит на нем можно выполнять бизнес-логику
+                executeBusinessLogic(params);
+                if (!lockService.isLockExists(lock)) {
+                    //Если после выполнения бизнес логики, оказывается, что блокировки уже нет
+                    //Значит результаты нам уже не нужны - откатываем транзакцию и все изменения
+                    throw new RuntimeException("Результат выполнения задачи \"" + getAsyncTaskName() + "\" больше не актуален. Выполняется откат транзакции");
                 }
+                //Получаем список пользователей, для которых надо сформировать оповещение
+                String msg = getNotificationMsg();
+                if (msg != null && !msg.isEmpty()) {
+                    List<Integer> waitingUsers = lockService.getUsersWaitingForLock(lock);
+                    if (!waitingUsers.isEmpty()) {
+                        List<Notification> notifications = new ArrayList<Notification>();
+                        for (Integer userId : waitingUsers) {
+                            Notification notification = new Notification();
+                            notification.setUserId(userId);
+                            notification.setCreateDate(new Date());
+                            notification.setText(msg);
+                            notifications.add(notification);
+                        }
+                        //Создаем оповещение для каждого пользователя из списка
+                        notificationService.saveList(notifications);
+                    }
+                }
+                //Снимаем блокировку
+                lockService.unlock(lock, (Integer) params.get(USER_ID.name()));
             }
-            //Снимаем блокировку
-            lockService.unlock(lock, (Integer) params.get(USER_ID.name()));
+        } catch (Exception e) {
+            log.error("Не удалось выполнить асинхронную задачу", e);
         }
     }
 }

@@ -23,11 +23,14 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void saveList(List<Notification> notifications) {
-        List<DepartmentPair> departments = new ArrayList<DepartmentPair>();
-        for (Notification item : notifications) {
-            departments.add(new DepartmentPair(item.getSenderDepartmentId(), item.getReceiverDepartmentId()));
+        if (notifications.get(0).getReportPeriodId() != null) {
+            //Выполняется сохранение уведомлений по сроку сдачи отчетности
+            List<DepartmentPair> departments = new ArrayList<DepartmentPair>();
+            for (Notification item : notifications) {
+                departments.add(new DepartmentPair(item.getSenderDepartmentId(), item.getReceiverDepartmentId()));
+            }
+            notificationDao.deleteList(notifications.get(0).getReportPeriodId(), departments);
         }
-        notificationDao.deleteList(notifications.get(0).getReportPeriodId(), departments);
         notificationDao.saveList(notifications);
     }
 
