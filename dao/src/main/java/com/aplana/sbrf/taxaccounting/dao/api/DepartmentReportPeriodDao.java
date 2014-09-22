@@ -48,6 +48,10 @@ public interface DepartmentReportPeriodDao {
      */
     void updateBalance(int id, boolean isBalance);
 
+    /**
+     * Изменить признак периода ввода остатков(батчем)
+     * @param ids список периодов
+     */
     void updateBalance(List<Integer> ids, boolean isBalance);
 
     /**

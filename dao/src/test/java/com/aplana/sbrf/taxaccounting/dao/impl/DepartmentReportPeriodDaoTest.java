@@ -78,7 +78,7 @@ public class DepartmentReportPeriodDaoTest {
         departmentReportPeriodFilter.setReportPeriodIdList(Arrays.asList(1, 2));
         departmentReportPeriodList = departmentReportPeriodDao.getListByFilter(departmentReportPeriodFilter);
         for (DepartmentReportPeriod departmentReportPeriod : departmentReportPeriodList) {
-            int reportPeriodId = departmentReportPeriod.getReportPeriod().getId().intValue();
+            int reportPeriodId = departmentReportPeriod.getReportPeriod().getId();
             Assert.assertTrue(reportPeriodId == 1 || reportPeriodId == 2);
         }
         // Фильтр по виду налога
@@ -173,7 +173,8 @@ public class DepartmentReportPeriodDaoTest {
 
     @Test
     public void batchUpdateActiveTest() {
-        departmentReportPeriodDao.updateActive(Arrays.asList(1, 2, 3), true);
+        departmentReportPeriodDao.updateActive(Arrays.asList(101, 102, 103), true);
+        Assert.assertTrue(departmentReportPeriodDao.get(101).isActive());
     }
 
     @Test
@@ -187,7 +188,8 @@ public class DepartmentReportPeriodDaoTest {
 
     @Test
     public void batchUpdateBalanceTest() {
-        departmentReportPeriodDao.updateBalance(Arrays.asList(101), true);
+        departmentReportPeriodDao.updateBalance(Arrays.asList(101, 102, 103), true);
+        Assert.assertTrue(departmentReportPeriodDao.get(101).isBalance());
     }
 
     @Test
