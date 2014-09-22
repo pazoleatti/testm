@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.sendquerydia
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.SendQueryAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.SendQueryResult;
@@ -44,13 +45,18 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
         } else {
             SendQueryAction action = new SendQueryAction();
             action.setMessage(getView().getComment());
-            dispatchAsync.execute(action, new AbstractCallback<SendQueryResult>() {
-                @Override
-                public void onSuccess(SendQueryResult result) {
-                    LogAddEvent.fire(DialogPresenter.this, result.getUuid());
-                    getView().hide();
-                }
-            });
+            dispatchAsync.execute(action, CallbackUtils
+                    .defaultCallback(new AbstractCallback<SendQueryResult>() {
+                        @Override
+                        public void onSuccess(SendQueryResult result) {
+                            if (result != null) {
+                                LogAddEvent.fire(DialogPresenter.this, result.getUuid());
+                            } else {
+                                getView().hide();
+                            }
+
+                        }
+                    }, DialogPresenter.this));
         }
     }
 }
