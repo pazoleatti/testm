@@ -305,10 +305,8 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 
 	private void removeReportPeriod() {
 		RemovePeriodAction requestData = new RemovePeriodAction();
-		requestData.setReportPeriodId((int)getView().getSelectedRow().getReportPeriodId());
-        requestData.setCorrectionDate(getView().getSelectedRow().getCorrectPeriod());
+        requestData.setDepartmentReportPeriodId(getView().getSelectedRow().getDepartmentReportPeriodId());
 		requestData.setTaxType(taxType);
-		requestData.setDepartmentId(getView().getSelectedRow().getDepartmentId());
 		dispatcher.execute(requestData, CallbackUtils
 				.defaultCallback(new AbstractCallback<RemovePeriodResult>() {
 					@Override

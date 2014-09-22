@@ -249,7 +249,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
                     new BatchPreparedStatementSetter() {
                         @Override
                         public void setValues(PreparedStatement ps, int i) throws SQLException {
-                            //To change body of implemented methods use File | Settings | File Templates.
+                            ps.setInt(1, ids.get(i));
                         }
 
                         @Override
@@ -310,6 +310,19 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
             );
         } catch (EmptyResultDataAccessException e) {
             return null;
+        }
+    }
+
+    @Override
+    public boolean isExistLargeCorrection(Date correctionDate) {
+        try {
+            return getJdbcTemplate().
+                    queryForInt(
+                            "select count(*) from department_report_period drp where drp.CORRECTION_DATE > ?",
+                            correctionDate) > 0;
+        } catch (DataAccessException e){
+            logger.error("", e);
+            throw new DaoException("", e);
         }
     }
 }

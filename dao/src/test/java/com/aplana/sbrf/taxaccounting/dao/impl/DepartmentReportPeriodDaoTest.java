@@ -217,4 +217,15 @@ public class DepartmentReportPeriodDaoTest {
         Assert.assertEquals(101, departmentReportPeriodDao.getLast(1, 1).getId().intValue());
         Assert.assertNull(departmentReportPeriodDao.getLast(-1, -1));
     }
+
+    @Test
+    public void isExistTest() throws ParseException {
+        Assert.assertTrue(departmentReportPeriodDao.isExistLargeCorrection(SIMPLE_DATE_FORMAT.parse("01.01.2011")));
+    }
+
+    @Test
+    public void deleteTest() throws ParseException {
+        departmentReportPeriodDao.delete(Arrays.asList(101));
+        Assert.assertNull(departmentReportPeriodDao.get(101));
+    }
 }

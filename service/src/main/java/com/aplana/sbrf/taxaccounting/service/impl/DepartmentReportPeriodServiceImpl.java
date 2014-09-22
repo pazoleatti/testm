@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,9 +20,6 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
 
     @Autowired
     DepartmentReportPeriodDao departmentReportPeriodDao;
-
-    @Autowired
-    private DepartmentService departmentService;
 
     @Override
     public DepartmentReportPeriod get(int id) {
@@ -98,5 +94,10 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
     @Override
     public DepartmentReportPeriod getLast(int departmentId, int reportPeriodId) {
         return departmentReportPeriodDao.getLast(departmentId, reportPeriodId);
+    }
+
+    @Override
+    public boolean isExistLargeCorrection(Date correctionDate) {
+        return departmentReportPeriodDao.isExistLargeCorrection(correctionDate);
     }
 }

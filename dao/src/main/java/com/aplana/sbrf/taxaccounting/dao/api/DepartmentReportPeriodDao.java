@@ -78,4 +78,6 @@ public interface DepartmentReportPeriodDao {
      * Номер корректирующего периода
      */
     Integer getCorrectionNumber(int id);
+
+    boolean isExistLargeCorrection(Date correctionDate);
 }

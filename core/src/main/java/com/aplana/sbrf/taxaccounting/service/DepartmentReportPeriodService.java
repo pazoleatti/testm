@@ -68,4 +68,11 @@ public interface DepartmentReportPeriodService {
      * Последний отчетный период подразделения для комбинации отчетный период-подразделение
      */
     DepartmentReportPeriod getLast(int departmentId, int reportPeriodId);
+
+    /**
+     * Проверяет существует ли корректирующий период, атрибут "Период сдачи корректировки" которого содержит большее значение
+     * @param correctionDate дата выбранного периода
+     * @return true - если существует
+     */
+    boolean isExistLargeCorrection(Date correctionDate);
 }
