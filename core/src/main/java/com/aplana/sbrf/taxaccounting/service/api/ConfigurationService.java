@@ -27,4 +27,9 @@ public interface ConfigurationService {
      * Проверка доступности путей в указанных конфигурационных параметрах (табл. CONFIGURATION)
      */
     void checkReadWriteAccess(TAUserInfo userInfo, ConfigurationParamModel model, Logger logger);
+
+    /**
+     * Проверка параметров электронной почты
+     */
+    public void checkEmailParam(ConfigurationParamModel model, Logger logger);
 }

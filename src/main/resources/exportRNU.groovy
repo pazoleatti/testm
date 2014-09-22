@@ -136,7 +136,9 @@ def formTemplatesExcludeRowMap = [
         606 : Exclude.NO, // Итоговые данные книги покупок
         607 : Exclude.TOTAL, // Расшифровка графы 13 "Расхождение" формы 937.1
         608 : Exclude.NO, // Итоговые данные книги продаж
-        609 : Exclude.TOTAL // Расшифровка графы 13 "Расхождение" формы 937.2
+        609 : Exclude.TOTAL, // Расшифровка графы 13 "Расхождение" формы 937.2
+        // имущество
+        610 : Exclude.NO
 ]
 
 // для этих макетов нумерация разделов буквами
@@ -485,7 +487,7 @@ def loadRefBookAttributes(Statement statement) {
         attribute.setPrecision(resultSet.getInt("PRECISION"))
         attribute.setWidth(resultSet.getInt("WIDTH"))
         attribute.setRequired(resultSet.getBoolean("REQUIRED"))
-        attribute.setUnique(resultSet.getBoolean("IS_UNIQUE"))
+        attribute.setUnique(resultSet.getBoolean("IS_UNIQUE") ? 1 : 0)
         attribute.setSortOrder(resultSet.getInt("SORT_ORDER"))
         attribute.setFormat(Formats.getById(resultSet.getInt("FORMAT")))
         attribute.setReadOnly(resultSet.getBoolean("READ_ONLY"))
