@@ -114,6 +114,9 @@ public class SourceServiceImpl implements SourceService {
     @Autowired
     RefBookFactory rbFactory;
 
+    @Autowired
+    DepartmentReportPeriodDao departmentReportPeriodDao;
+
     @Override
     public List<DepartmentFormType> getDFTSourcesByDFT(int departmentId, int formTypeId, FormDataKind kind, Date periodStart,
                                                        Date periodEnd) {
@@ -1199,7 +1202,9 @@ public class SourceServiceImpl implements SourceService {
      * @param includeUncreatedForms флаг включения не созданных нф в список
      * @return
      */
-    private List<FormToFormRelation> createFormToFormRelationModel(List<DepartmentFormType> departmentFormTypes, int reportPeriodId, Integer periodOrder, boolean isSource, boolean includeUncreatedForms){
+    private List<FormToFormRelation> createFormToFormRelationModel(List<DepartmentFormType> departmentFormTypes,
+                                                                   int reportPeriodId, Integer periodOrder,
+                                                                   boolean isSource, boolean includeUncreatedForms){
         List<FormToFormRelation> formToFormRelations = new ArrayList<FormToFormRelation>(departmentFormTypes.size());
         for (DepartmentFormType departmentFormType : departmentFormTypes) {
             FormToFormRelation formToFormRelation = new FormToFormRelation();
@@ -1213,9 +1218,16 @@ public class SourceServiceImpl implements SourceService {
             ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
             int formTypeId = departmentFormType.getFormTypeId();
             FormDataKind kind = departmentFormType.getKind();
-            FormData formData = (periodOrder == null) ?
-                    formDataDao.find(formTypeId, kind, departmentId, reportPeriod.getId()) :
-                    formDataDao.findMonth(formTypeId, kind, departmentId, reportPeriod.getTaxPeriod().getId(), periodOrder);
+            FormData formData;
+
+            if (isSource) {
+                formData = formDataDao.getLast(formTypeId, kind, departmentId, reportPeriod.getId(), periodOrder);
+            } else {
+                DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.getLast(departmentId,
+                        reportPeriod.getId());
+                formData = formDataDao.find(formTypeId, kind, departmentReportPeriod.getId().intValue(), periodOrder);
+            }
+
             if (formData != null){
                 /** Форма существует */
                 formToFormRelation.setCreated(true);
