@@ -29,6 +29,8 @@ print '--------------------------------------------'
 SIBusName                   	= 'TAX JMS Bus'+ settings.suffixForResources
 SIBDestinationName          	= 'transportQueue'+ settings.suffixForResources
 SIBDummyDestinationName	    	= 'transportQueueDummy'+ settings.suffixForResources
+SIBShortAsyncDestinationName   	= 'shortAsyncQueue'+ settings.suffixForResources
+SIBLongAsyncDestinationName    	= 'longAsyncQueue'+ settings.suffixForResources
 
 # Connection factories
 SIBJMSConnectionFactoryName 			= 'TAX Connection factories'+ settings.suffixForResources
@@ -102,6 +104,44 @@ if SIBDestinationsId[0] != '':
 if SIBDestinationNotFound:
 	print 'Initiated the creation of an service integration bus destinations'
 	print 'id='+ AdminTask.createSIBDestination('[-bus "'+ SIBusName +'" -name "'+ SIBDestinationName +'" -type Queue -node "'+ nodeName +'" -server "'+ settings.serverName +'"]')
+	AdminConfig.save()
+	print 'Configuration is saved.'
+	
+print ''
+print '____________________________________________'
+SIBDestinationsId = AdminTask.listSIBDestinations('-bus "'+ SIBusName +'" -type Queue').split(lineSeparator)
+SIBDestinationNotFound = 1
+if SIBDestinationsId[0] != '':
+	for SIBDestinationId in SIBDestinationsId:
+		SIBDestinationIdentifier = AdminConfig.showAttribute(SIBDestinationId, 'identifier')
+		if SIBDestinationIdentifier[-len(SIBShortAsyncDestinationName):] == SIBShortAsyncDestinationName:
+			SIBDestinationNotFound = 0
+			print 'Found existing service integration bus destinations:'
+			print 'SIBDestinationIdentifier='+ SIBDestinationIdentifier
+			print 'SIBDestinationId='+ SIBDestinationId
+			break
+if SIBDestinationNotFound:
+	print 'Initiated the creation of an service integration bus destinations'
+	print 'id='+ AdminTask.createSIBDestination('[-bus "'+ SIBusName +'" -name "'+ SIBShortAsyncDestinationName +'" -type Queue -node "'+ nodeName +'" -server "'+ settings.serverName +'"]')
+	AdminConfig.save()
+	print 'Configuration is saved.'
+	
+print ''
+print '____________________________________________'
+SIBDestinationsId = AdminTask.listSIBDestinations('-bus "'+ SIBusName +'" -type Queue').split(lineSeparator)
+SIBDestinationNotFound = 1
+if SIBDestinationsId[0] != '':
+	for SIBDestinationId in SIBDestinationsId:
+		SIBDestinationIdentifier = AdminConfig.showAttribute(SIBDestinationId, 'identifier')
+		if SIBDestinationIdentifier[-len(SIBLongAsyncDestinationName):] == SIBLongAsyncDestinationName:
+			SIBDestinationNotFound = 0
+			print 'Found existing service integration bus destinations:'
+			print 'SIBDestinationIdentifier='+ SIBDestinationIdentifier
+			print 'SIBDestinationId='+ SIBDestinationId
+			break
+if SIBDestinationNotFound:
+	print 'Initiated the creation of an service integration bus destinations'
+	print 'id='+ AdminTask.createSIBDestination('[-bus "'+ SIBusName +'" -name "'+ SIBLongAsyncDestinationName +'" -type Queue -node "'+ nodeName +'" -server "'+ settings.serverName +'"]')
 	AdminConfig.save()
 	print 'Configuration is saved.'
 	
