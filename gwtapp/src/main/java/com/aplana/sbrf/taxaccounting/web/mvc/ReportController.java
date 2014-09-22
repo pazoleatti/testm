@@ -16,9 +16,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.URLEncoder;
 
 /**
@@ -29,16 +27,15 @@ import java.net.URLEncoder;
 public class ReportController {
 
     @Autowired
-    BlobDataService blobDataService;
+    private BlobDataService blobDataService;
 
     @Autowired
-    AsyncManager asyncManager;
+    private ReportService reportService;
 
     @Autowired
-    ReportService reportService;
+    private SecurityService securityService;
 
-    @Autowired
-    SecurityService securityService;
+    private static final String ENCODING = "UTF-8";
 
     /**
      * Обработка запроса для формирования отчета по журналу аудита
@@ -50,7 +47,7 @@ public class ReportController {
     @RequestMapping(value = "/processLogDownload/{uuid}", method = RequestMethod.GET)
     public void processDownload(@PathVariable String uuid, HttpServletRequest request, HttpServletResponse response) throws IOException {
         BlobData blobData = blobDataService.get(uuid);
-        createResponse(response, blobData);
+        createResponse(request, response, blobData);
         blobDataService.delete(uuid);
     }
 
@@ -58,23 +55,22 @@ public class ReportController {
      * Обработка запроса на формирование отчета для налоговых форм
      * @param formDataId
      * @param isShowChecked
-     * @param resp
+     * @param response
      * @throws IOException
      */
     @RequestMapping(value = "/{formDataId}/{isShowChecked}/{manual}",method = RequestMethod.GET)
-    public void processFormDataDownload(@PathVariable long formDataId, @PathVariable boolean isShowChecked , @PathVariable boolean manual, HttpServletRequest request, HttpServletResponse resp)
+    public void processFormDataDownload(@PathVariable long formDataId, @PathVariable boolean isShowChecked , @PathVariable boolean manual, HttpServletRequest request, HttpServletResponse response)
             throws IOException, AsyncTaskException {
         String uuid = reportService.get(securityService.currentUserInfo(), formDataId, ReportType.EXCEL, isShowChecked, manual, false);
         if (uuid != null) {
             BlobData blobData = blobDataService.get(uuid);
-            createResponse(resp, blobData);
+            createResponse(request, response, blobData);
         }
     }
 
-    private void createResponse(final HttpServletResponse response, final BlobData blobData) throws IOException {
-
-        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; charset=UTF-8");
-        response.setHeader("Content-Disposition", "attachment; filename=\"" + URLEncoder.encode(blobData.getName(), "UTF-8") + "\"");
+    private void createResponse(final HttpServletRequest req, final HttpServletResponse response, final BlobData blobData) throws IOException{
+        String fileName = blobData.getName();
+        setCorrectFileName(req, response, fileName);
 
         DataInputStream in = new DataInputStream(blobData.getInputStream());
         OutputStream out = response.getOutputStream();
@@ -86,6 +82,17 @@ public class ReportController {
             out.close();
         }
         response.setContentLength(count);
+    }
 
+    private void setCorrectFileName(HttpServletRequest request, HttpServletResponse response, String originalFileName) throws UnsupportedEncodingException {
+        String userAgent = request.getHeader("User-Agent").toLowerCase();
+        String fileName = URLEncoder.encode(originalFileName, ENCODING).replaceAll("\\+", "%20");
+        String fileNameAttr = "filename=";
+        if (userAgent.contains("msie") || userAgent.contains("webkit")) {
+            fileName = "\"" + fileName + "\"";
+        } else {
+            fileNameAttr = fileNameAttr.replace("=", "*=") + ENCODING + "''";
+        }
+        response.setHeader("Content-Disposition", "attachment;" + fileNameAttr + fileName);
     }
 }

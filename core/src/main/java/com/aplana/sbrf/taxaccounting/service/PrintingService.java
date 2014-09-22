@@ -9,8 +9,8 @@ import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import java.util.List;
 
 public interface PrintingService {
-    byte[] generateExcel(TAUser userInfo, long formDataId, boolean manual, boolean isShowChecked);
-    String generateCSV(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked);;
+    String generateExcel(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked);
+    String generateCSV(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked);
 	String generateExcelLogEntry(List<LogEntry> listLogEntries);
     String generateExcelUsers(List<TAUserView> taUserViewList);
     String generateExcelLogSystem(List<LogSearchResultItem> resultItems);

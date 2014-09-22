@@ -1,10 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
-import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
-import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
-import com.aplana.sbrf.taxaccounting.async.manager.AsyncManager;
-import com.aplana.sbrf.taxaccounting.async.task.AsyncTask;
-import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import org.apache.commons.io.IOUtils;
@@ -18,8 +13,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Контроллер для формирования отчетов в формате Excel АС Учет налогов
@@ -31,16 +24,10 @@ import java.util.Map;
 public class ReportExcelController {
 
 	@Autowired
-    PrintingService printingService;
+    private PrintingService printingService;
 	
 	@Autowired
-	SecurityService securityService;
-
-    @Autowired
-    TAUserService taUserService;
-
-    @Autowired
-    AuditService auditService;
+    private SecurityService securityService;
 
     private static final String ENCODING = "UTF-8";
 

@@ -52,6 +52,13 @@ public abstract class AbstractReportBuilder {
         return flush();
     }
 
+    /**
+     * Формирование отчета. Условно разбит на шесть частей.
+     * Порядок формирования заголовка и шапки таблицы в такой последовательности не случайно,
+     * а по причине наличия нулевых столбцов в налоговых отчетах, чтобы потом некоторые значения не пропали.
+     * @return массив byte[]
+     * @throws IOException
+     */
     public final byte[] createBlobData() throws IOException  {
         fillHeader();
         createTableHeaders();
@@ -59,10 +66,7 @@ public abstract class AbstractReportBuilder {
         cellAlignment();
         fillFooter();
         setPrintSetup();
-        ByteArrayOutputStream data = new ByteArrayOutputStream();
-        workBook.write(data);
-
-        return data.toByteArray();
+        return flushBlobData();
     }
 
     protected void cellAlignment() {
@@ -105,6 +109,13 @@ public abstract class AbstractReportBuilder {
         workBook.write(out);
 
         return file.getAbsolutePath();
+    }
+
+    protected byte[] flushBlobData() throws IOException {
+        ByteArrayOutputStream data = new ByteArrayOutputStream();
+        workBook.write(data);
+
+        return data.toByteArray();
     }
 
     /**

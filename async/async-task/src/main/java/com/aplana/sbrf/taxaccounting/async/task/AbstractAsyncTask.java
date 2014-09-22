@@ -37,7 +37,12 @@ public abstract class AbstractAsyncTask implements AsyncTask {
         int userId = (Integer) params.get(USER_ID.name());
         if (lockService.checkLock(lock)) {
             //Если блокировка на объект задачи все еще существует, значит на нем можно выполнять бизнес-логику
-            executeBusinessLogic(params);
+            try {
+                executeBusinessLogic(params);
+            } catch (Exception e) {
+                lockService.unlock(lock, userId);
+                throw new RuntimeException("Не удалось выполнить задачу \"" + getAsyncTaskName() + "\". Выполняется откат транзакции. Произошла ошибка: " + e.getMessage(), e);
+            }
             if (!lockService.checkLock(lock)) {
                 //Если после выполнения бизнес логики, оказывается, что блокировки уже нет
                 //Значит результаты нам уже не нужны - откатываем транзакцию и все изменения

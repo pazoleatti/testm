@@ -188,6 +188,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 	@Override
 	public void onShowCheckedColumns() {
 		getView().setColumnsData(formData.getFormColumns(), readOnlyMode, forceEditMode);
+        onTimerExcel(false);
 	}
 
     private void manageDeleteRowButtonEnabled() {
