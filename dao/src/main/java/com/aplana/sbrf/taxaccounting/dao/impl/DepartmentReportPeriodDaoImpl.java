@@ -286,7 +286,8 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
                     "group by department_id, report_period_id) m " +
                     "where drp.department_id = m.department_id " +
                     "and drp.report_period_id = m.report_period_id " +
-                    "and (drp.correction_date = m.correction_date or m.correction_date is null)",
+                    "and (drp.correction_date = m.correction_date or (m.correction_date is null " +
+                    "and drp.correction_date is null))",
                     new Object[]{departmentId, reportPeriodId}, mapper);
         } catch (EmptyResultDataAccessException e) {
             return null;

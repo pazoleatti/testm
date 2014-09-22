@@ -17,7 +17,7 @@ public interface DepartmentReportPeriodDao {
     DepartmentReportPeriod get(int id);
 
     /**
-     * Отчетные периоды подразделений (корректирующий) по параметрам фильтрации (null допустим)
+     * Отчетные периоды подразделений по параметрам фильтрации (null допустим)
      */
     List<DepartmentReportPeriod> getListByFilter(DepartmentReportPeriodFilter departmentReportPeriodFilter);
 

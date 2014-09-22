@@ -292,7 +292,6 @@ void logicCheck() {
     def expectedOKTMOIndex = null
     def actualOKTMOList = new ArrayList<String>()
 
-    def Department department = departmentService.get(formData.departmentId)
     dataRows.each { row ->
         def index = row.getIndex()
         def errorMsg = "Строка $index: "
@@ -363,7 +362,7 @@ void logicCheck() {
         // Проверка существования параметров налоговых льгот для категорий имущества субъекта
         if (titleAlias == getTitle(27)) {
             if (subjectId != null && propertyCategory != null){
-                String filter = "DECLARATION_REGION_ID = " + department.regionId?.toString() + " and REGION_ID = " + subjectId.toString() + " and LOWER(ASSETS_CATEGORY) = '" + propertyCategory + "' and PARAM_DESTINATION = 1"
+                String filter = "DECLARATION_REGION_ID = " + formDataDepartment.regionId?.toString() + " and REGION_ID = " + subjectId.toString() + " and LOWER(ASSETS_CATEGORY) = '" + propertyCategory + "' and PARAM_DESTINATION = 1"
                 def records = refBookFactory.getDataProvider(203).getRecords(getReportPeriodEndDate(), null, filter, null)
                 if (records.size() == 0) {
                     loggerError(row, errorMsg + "Для текущего субъекта и категории имущества не предусмотрена налоговая льгота (в справочнике «Параметры налоговых льгот налога на имущество» отсутствует необходимая запись)!")
@@ -380,7 +379,7 @@ void logicCheck() {
                 }
             }
             if (!isZero) {
-                String filter = "DECLARATION_REGION_ID = " + department.regionId?.toString() + " and REGION_ID = " + subjectId.toString() + " and LOWER(ASSETS_CATEGORY) = '" + propertyCategory + "' and PARAM_DESTINATION = 0"
+                String filter = "DECLARATION_REGION_ID = " + formDataDepartment.regionId?.toString() + " and REGION_ID = " + subjectId.toString() + " and LOWER(ASSETS_CATEGORY) = '" + propertyCategory + "' and PARAM_DESTINATION = 0"
                 def records = refBookFactory.getDataProvider(203).getRecords(getReportPeriodEndDate(), null, filter, null)
                 if (records.size() == 0) {
                     loggerError(row, errorMsg + "Для текущего субъекта не предусмотрена налоговая льгота (в справочнике «Параметры налоговых льгот налога на имущество» отсутствует необходимая запись)!")
@@ -390,7 +389,7 @@ void logicCheck() {
         // Проверка существования параметров декларации для субъекта-ОКТМО
         if (titleAlias == getTitle(12)) {
             if (subjectId != null && oktmoId != null) {
-                String filter = "DECLARATION_REGION_ID = " + department.regionId?.toString() + " and REGION_ID = " + subjectId.toString() + " and OKTMO = " + oktmoId.toString()
+                String filter = "DECLARATION_REGION_ID = " + formDataDepartment.regionId?.toString() + " and REGION_ID = " + subjectId.toString() + " and OKTMO = " + oktmoId.toString()
                 def records = refBookFactory.getDataProvider(200).getRecords(getReportPeriodEndDate(), null, filter, null)
                 if (records.size() == 0) {
                     loggerError(row, errorMsg + "Текущие параметры представления декларации (Код субъекта, Код ОКТМО) не предусмотрены (в справочнике «Параметры представления деклараций по налогу на имущество» отсутствует такая запись)!")

@@ -388,10 +388,8 @@ void calcTotalRow(def currentMonthRow, def currentTotalRow) {
             currentTotalRow.getCell(alias).setValue(0, null)
         }
 
-        // Налоговый период
-        def taxPeriod = getTaxPeriod()
-
-        departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
+        departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
+                getReportPeriodStartDate(), getReportPeriodEndDate()).each {
             if (it.formTypeId == formData.formType.id) {
                 def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
                 if (source != null && source.state == WorkflowState.ACCEPTED) {
