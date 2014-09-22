@@ -39,6 +39,9 @@ public class RateMDBTest {
     private final String ERROR_MESSAGE = "Test error";
     private final String EXCEPTION_MESSAGE = "Test Exception";
     private final String LOGGER_EXCEPTION_MESSAGE = "Test ServiceLoggerException";
+    private final String SUCCESS_IMPORT = String.format(RateMDB.SUCCESS_IMPORT, StringUtils.getNumberString(1, "Загружен", "Загружено", "Загружено"),
+            1, StringUtils.getNumberString(1, "курс", "курса", "курсов"), "%s");
+
     private RateMDB rmdb;
 
     private List<String> logList;
@@ -322,11 +325,7 @@ public class RateMDBTest {
         IOUtils.copy(getCurrencyRateStream(), output);
         rmdb.onMessage(new TextMessageImpl(output.toString()));
         Assert.assertEquals(1, logList.size());
-        Assert.assertEquals(logList.get(0), String.format(RateMDB.SUCCESS_IMPORT,
-                StringUtils.getNumberString(1, "Загружен", "Загружено", "Загружено"),
-                1,
-                StringUtils.getNumberString(1, "курс", "курса", "курсов"),
-                "Курсы Валют"));
+        Assert.assertEquals(String.format(SUCCESS_IMPORT, "Курсы Валют"), logList.get(0));
     }
 
     // Успешный импорт к. драг. мет.
@@ -336,11 +335,7 @@ public class RateMDBTest {
         IOUtils.copy(getMetalRateStream(), output);
         rmdb.onMessage(new TextMessageImpl(output.toString()));
         Assert.assertEquals(1, logList.size());
-        Assert.assertEquals(logList.get(0), String.format(RateMDB.SUCCESS_IMPORT,
-                StringUtils.getNumberString(1, "Загружен", "Загружено", "Загружено"),
-                1,
-                StringUtils.getNumberString(1, "курс", "курса", "курсов"),
-                "Курсы драгоценных металлов"));
+        Assert.assertEquals(String.format(SUCCESS_IMPORT, "Курсы драгоценных металлов"), logList.get(0));
     }
 
     // Сообщение null — неправильный формат

@@ -729,13 +729,14 @@ create sequence seq_task_context start with 100;
 ------------------------------------------------------------------------------------------------------
 create table notification(
 id number(9) primary key,
-report_period_id number(9) not null, 
-sender_department_id number(9) not null, 
+report_period_id number(9) null, 
+sender_department_id number(9) null, 
 receiver_department_id number(9) null, 
 first_reader_id number(9) null, 
 text varchar2(2000) not null, 
 create_date date not null, 
-deadline date not null
+deadline date null,
+user_id number(9) null
 );
 
 comment on table notification is 'Оповещения';
@@ -747,6 +748,7 @@ comment on column notification.first_reader_id is 'идентификатор п
 comment on column notification.text is 'текст оповещения';
 comment on column notification.create_date is 'дата создания оповещения';
 comment on column notification.deadline is 'дата сдачи отчетности';
+comment on column notification.user_id is 'Идентификатор пользователя, который получит оповещение';
 
 create sequence seq_notification start with 10000;
 
@@ -835,5 +837,16 @@ comment on column report.type is 'Тип отчета (0 - Excel, 1 - CSV, 2 - P
 comment on column report.manual is 'Режим ввода данных (0 - обычная версия; 1 - версия ручного ввода)'; 
 comment on column report.checking is 'Типы столбцов (0 - только обычные, 1 - вместе с контрольными)';
 comment on column report.absolute is 'Режим вывода данных (0 - только дельты, 1 - абсолютные значения)';
+
+--------------------------------------------------------------------------------------------------------
+create table lock_data_notification
+(
+lock_key varchar2(1000 byte) not null,
+user_id number(9) not null 
+);
+
+comment on table lock_data_notification is 'Заявки на оповещения, после завершения операций над заблокированными объектами';
+comment on column lock_data_notification.lock_key is 'Ключ блокировки объекта, после завершения операции над которым, будет выполнено оповещение';
+comment on column lock_data_notification.user_id is 'Идентификатор пользователя, который получит оповещение';
 
 --------------------------------------------------------------------------------------------------------

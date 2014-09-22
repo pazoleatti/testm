@@ -190,8 +190,7 @@ void calc() {
         if (row.taxBenefitCodeReduction && getBenefitCode(row.taxBenefitCodeReduction) == '2012400') {
             row.taxRate = getRefBookValue(203, row.taxBenefitCodeReduction).RATE.value
         } else {// Иначе «Графа 13» = Значение поля «Ставка, %» справочника «Ставки налога на имущество»
-            def Department department = departmentService.get(formData.departmentId)
-            String filter = "DECLARATION_REGION_ID = " + department.regionId?.toString() + " and REGION_ID = " + row.subject?.toString()
+            String filter = "DECLARATION_REGION_ID = " + formDataDepartment.regionId?.toString() + " and REGION_ID = " + row.subject?.toString()
             def records = refBookFactory.getDataProvider(201).getRecords(getReportPeriodEndDate(), null, filter, null)
             if (records.size() == 1) {
                 row.taxRate = records.get(0).RATE.value
@@ -407,7 +406,6 @@ def getPrevRowsMap() {
  * @param prevRowsMap
  */
 void unite(def dataRows, def sourceRowsGroups, def prevRowsMap) {
-    def Department department = departmentService.get(formData.departmentId)
     // проходим по группам строк 945.5
     for (def groupRows : sourceRowsGroups) {
         // строка "Признаваемых объектом налогообложения"
@@ -419,7 +417,7 @@ void unite(def dataRows, def sourceRowsGroups, def prevRowsMap) {
             // если "Без категории"/"Категория"
             if (! (row.title in [TAX_AUTHORITY_APPROVED, BENEFIT_PRICE])) {
                 def categoryFilter = (row.title == WITHOUT_CATEGORY)? " and PARAM_DESTINATION = 0" : " and PARAM_DESTINATION = 1 and LOWER(ASSETS_CATEGORY) = LOWER('${row.title}')"
-                String filter = "DECLARATION_REGION_ID = " + department.regionId?.toString() + " and REGION_ID = " + row.subject?.toString() + categoryFilter
+                String filter = "DECLARATION_REGION_ID = " + formDataDepartment.regionId?.toString() + " and REGION_ID = " + row.subject?.toString() + categoryFilter
                 def records = refBookFactory.getDataProvider(203).getRecords(getReportPeriodEndDate(), null, filter, null)
                 if (records.size() == 0) {
                     benefitError(row)
@@ -546,10 +544,9 @@ void updateRowFromPrev(def newRow, def row, def prevRowsMap, List<String> benefi
 
 def getBenefitRecordId(DataRow row, List<String> benefitCodes, String benefitCode, def recordDate) {
     if (row && benefitCodes && benefitCodes.contains(benefitCode)) {
-        def Department department = departmentService.get(formData.departmentId)
         def benefitId = getRefBookRecordId(202, 'CODE', benefitCode, recordDate)
         def categoryFilter = (row.title == WITHOUT_CATEGORY)? " and PARAM_DESTINATION = 0" : " and PARAM_DESTINATION = 1 and LOWER(ASSETS_CATEGORY) = LOWER('${row.title}')"
-        String filter = "DECLARATION_REGION_ID = " + department.regionId?.toString() + " and REGION_ID = " + row.subject?.toString() + categoryFilter + " and TAX_BENEFIT_ID = " + benefitId.toString()
+        String filter = "DECLARATION_REGION_ID = " + formDataDepartment.regionId?.toString() + " and REGION_ID = " + row.subject?.toString() + categoryFilter + " and TAX_BENEFIT_ID = " + benefitId.toString()
         def records = refBookFactory.getDataProvider(203).getRecords(recordDate, null, filter, null)
         if (records.size() == 1) {
             return records.get(0).record_id.value

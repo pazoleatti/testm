@@ -147,13 +147,23 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                 }
             }
         }
+
+        checkEmailParam(model, logger);
+
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            configurationDao.save(model);
+        }
+    }
+
+    @Override
+    public void checkEmailParam(ConfigurationParamModel model, Logger logger) {
         // Проверки параметров электронной почты
         for (ConfigurationParam configurationParam : ConfigurationParam.values()) {
             if (configurationParam.getGroup().equals(ConfigurationParamGroup.EMAIL)) {
                 List<String> valuesList = model.get(configurationParam, 0);
                 if (valuesList == null || valuesList.isEmpty()) {
                     // Обязательность
-                    // logger.error(NOT_SET_ERROR, configurationParam.getCaption());
+                    logger.error(NOT_SET_ERROR, configurationParam.getCaption());
                     model.remove(configurationParam);
                 } else {
                     if (configurationParam.isUnique() && valuesList.size() != 1) {
@@ -162,9 +172,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                     }
                 }
             }
-        }
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            configurationDao.save(model);
         }
     }
 
