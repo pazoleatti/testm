@@ -132,4 +132,8 @@ public class TableRow implements Serializable {
     public void setOrd(int ord) {
         this.ord = ord;
     }
+
+    public boolean isCorrection(){
+        return correctPeriod != null;
+    }
 }
