@@ -45,6 +45,7 @@ alter table ref_book_attribute add constraint ref_book_attr_chk_precision check 
 alter table ref_book_attribute add constraint ref_book_attr_chk_number_type check ((type <> 2 and precision is null) or (type = 2 and not (precision is null)));
 alter table ref_book_attribute add constraint ref_book_attr_chk_ref check ((type <> 4 and reference_id is null) or (type = 4 and not (reference_id is null)));
 alter table ref_book_attribute add constraint ref_book_attr_chk_ref_attr check ((type <> 4 and attribute_id is null) or (type = 4 and not (attribute_id is null)));
+alter table ref_book_attribute add constraint ref_book_attr_chk_istable check (is_table in (0, 1));
 alter table ref_book_attribute add constraint ref_book_attribute_uniq_ord unique (ref_book_id, ord);
 alter table ref_book_attribute add constraint ref_book_attribute_uniq_alias unique (ref_book_id, alias);
 alter table ref_book_attribute add constraint ref_book_attr_fk_ref_book_id foreign key (ref_book_id) references ref_book(id);
