@@ -79,6 +79,14 @@ switch (formDataEvent) {
     case FormDataEvent.CHECK:
         logicCheck()
         break
+    case FormDataEvent.ADD_ROW:
+        // В ручном режиме строки добавлять нельзя
+        logger.warn("Добавление строк запрещено!")
+        break
+    case FormDataEvent.DELETE_ROW:
+        // В ручном режиме строки удалять нельзя
+        logger.warn("Удаление строк запрещено!")
+        break
 // После принятия из Утверждено
     case FormDataEvent.AFTER_MOVE_CREATED_TO_ACCEPTED:
         logicCheck()
@@ -92,6 +100,9 @@ switch (formDataEvent) {
         consolidation()
         calc()
         logicCheck()
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            logger.info('Формирование сводной формы прошло успешно.')
+        }
         break
     case FormDataEvent.IMPORT:
         importData()
