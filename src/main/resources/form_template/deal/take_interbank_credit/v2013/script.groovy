@@ -158,8 +158,7 @@ void logicCheck() {
         }
         def rowNum = row.getIndex()
 
-        checkNonEmptyColumns(row, rowNum, ['docNum', 'docDate'], logger, true)
-        checkNonEmptyColumns(row, rowNum, nonEmptyColumns - ['docNum', 'docDate'], logger, false)
+        checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
 
         def sumCell = row.getCell('sum')
         def priceCell = row.getCell('price')
@@ -172,20 +171,20 @@ void logicCheck() {
         // Проверка цены
         if (priceCell.value != sumCell.value) {
             def msg = priceCell.column.name
-            rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg» должно быть равно значению графы «$msgSum»!")
+            rowError(logger, row, "Строка $rowNum: Значение графы «$msg» должно быть равно значению графы «$msgSum»!")
         }
 
         // Проверка стоимости
         if (totalCell.value != sumCell.value) {
             def msg = totalCell.column.name
-            rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg» должно быть равно значению графы «$msgSum»!")
+            rowError(logger, row, "Строка $rowNum: Значение графы «$msg» должно быть равно значению графы «$msgSum»!")
         }
 
         // Корректность даты заключения сделки относительно даты договора
         if (docDateCell.value > dealDateCell.value) {
             def msg1 = dealDateCell.column.name
             def msg2 = docDateCell.column.name
-            rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
+            rowError(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
         }
 
         // Корректность даты совершения сделки относительно даты заключения сделки
@@ -198,7 +197,7 @@ void logicCheck() {
         // Проверка количества
         if (row.count == 0) {
             def countName = getColumnName(row, 'count')
-            rowWarning(logger, row, "Строка $rowNum: Значение графы «$countName» не может содержать значение 0.")
+            rowError(logger, row, "Строка $rowNum: Значение графы «$countName» не может содержать значение 0.")
         }
     }
 }
