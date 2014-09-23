@@ -561,9 +561,9 @@ void addTransportData(def xml) {
         xmlIndexCol++
 
         // графа 3
-        if (record != null) {
-            formDataService.checkReferenceValue(96, row.cell[xmlIndexCol].text(), record?.NAME?.value, rnuIndexRow, xmlIndexCol + colOffset, logger, true)
-        }
+//        if (record != null) {
+//            formDataService.checkReferenceValue(96, row.cell[xmlIndexCol].text(), record?.NAME?.value, rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+//        }
         xmlIndexCol++
 
         // графа 4
@@ -572,9 +572,9 @@ void addTransportData(def xml) {
         xmlIndexCol++
 
         // графа 5
-        if (record != null) {
-            formDataService.checkReferenceValue(42, row.cell[xmlIndexCol].text(), record?.NAME?.value, rnuIndexRow, xmlIndexCol + colOffset, logger, true)
-        }
+//        if (record != null) {
+//            formDataService.checkReferenceValue(42, row.cell[xmlIndexCol].text(), record?.NAME?.value, rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+//        }
         xmlIndexCol++
 
         // графа 6
