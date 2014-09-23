@@ -225,6 +225,7 @@ alter table notification add constraint notification_fk_report_period foreign ke
 alter table notification add constraint notification_fk_sender foreign key (sender_department_id) references department(id);
 alter table notification add constraint notification_fk_receiver foreign key (receiver_department_id) references department(id);
 alter table notification add constraint notification_fk_sec_user foreign key (first_reader_id) references sec_user(id);
+alter table notification add constraint notification_fk_notify_user foreign key (user_id) references sec_user(id);
 
 alter table event add constraint event_pk primary key (id);
 
@@ -243,6 +244,9 @@ alter table log_system add constraint log_system_fk_blob_data foreign key (blob_
 
 alter table lock_data add constraint lock_data_pk primary key (key);
 alter table lock_data add constraint lock_data_fk_user_id foreign key (user_id) references sec_user(id) on delete cascade;
+
+alter table lock_data_notification add constraint lock_data_notif_fk_lock_data foreign key (lock_key) references lock_data(key) on delete cascade;
+alter table lock_data_notification add constraint lock_data_notif_fk_sec_user foreign key (user_id) references sec_user(id);
 
 alter table async_task_type add constraint async_task_type_pk primary key (id);
 
