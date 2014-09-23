@@ -16,7 +16,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -187,8 +186,8 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
             "  select distinct ID, REPORT_PERIOD_ID, SENDER_DEPARTMENT_ID, RECEIVER_DEPARTMENT_ID, FIRST_READER_ID, TEXT, CREATE_DATE, DEADLINE, USER_ID, ROLE_ID, \n" +
             " row_number() %s as rn \n" +
             "  from notification \n" +
-            "where ((:receiverDepartmentId is not null and RECEIVER_DEPARTMENT_ID = :receiverDepartmentId) or (:senderDepartmentId is not null and SENDER_DEPARTMENT_ID = :senderDepartmentId)) or \n" +
-            "(:userId is not null and USER_ID = :userId) %s \n" +
+            "where (((:receiverDepartmentId is not null and RECEIVER_DEPARTMENT_ID = :receiverDepartmentId) or (:senderDepartmentId is not null and SENDER_DEPARTMENT_ID = :senderDepartmentId)) or \n" +
+            "(:userId is not null and USER_ID = :userId) %s) and (:onlyNew != 1 or FIRST_READER_ID is null) \n" +
             ")";
 
 	@Override
@@ -214,9 +213,15 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
                     filter.getUserRoleIds() == null || filter.getUserRoleIds().isEmpty() ? ""
                             : "\n or (" + SqlUtils.transformToSqlInStatement("ROLE_ID", filter.getUserRoleIds()) + ")"));
 
+            //Фильтры по типу оповещения
             params.addValue("receiverDepartmentId", filter.getReceiverDepartmentId());
             params.addValue("senderDepartmentId", filter.getSenderDepartmentId());
             params.addValue("userId", filter.getUserId());
+
+            //Дополнительные фильтры
+            params.addValue("onlyNew", filter.isOnlyNew() ? 1 : 0);
+
+            //Пэйджинг
 			if ((filter.getStartIndex() != null) && (filter.getCountOfRecords() != null)) {
 				params.addValue("start", filter.getStartIndex() + 1);
 				params.addValue("end", filter.getStartIndex() + filter.getCountOfRecords());
@@ -230,8 +235,8 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
 	}
 
     private static final String GET_COUNT_BY_FILTER = "select distinct count(*) from notification \n" +
-            "where ((:receiverDepartmentId is not null and RECEIVER_DEPARTMENT_ID = :receiverDepartmentId) or (:senderDepartmentId is not null and SENDER_DEPARTMENT_ID = :senderDepartmentId)) or \n" +
-            "(:userId is not null and USER_ID = :userId) %s";
+            "where (((:receiverDepartmentId is not null and RECEIVER_DEPARTMENT_ID = :receiverDepartmentId) or (:senderDepartmentId is not null and SENDER_DEPARTMENT_ID = :senderDepartmentId)) or \n" +
+            "(:userId is not null and USER_ID = :userId) %s) and (:onlyNew != 1 or FIRST_READER_ID is null)";
 
 	@Override
 	public int getCountByFilter(NotificationsFilterData filter) {
@@ -240,9 +245,13 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
                     filter.getUserRoleIds() == null || filter.getUserRoleIds().isEmpty() ? ""
                             : "\n or (" + SqlUtils.transformToSqlInStatement("ROLE_ID", filter.getUserRoleIds()) + ")");
 			MapSqlParameterSource params = new MapSqlParameterSource();
+            //Фильтры по типу оповещения
             params.addValue("receiverDepartmentId", filter.getReceiverDepartmentId());
             params.addValue("senderDepartmentId", filter.getSenderDepartmentId());
             params.addValue("userId", filter.getUserId());
+
+            //Дополнительные фильтры
+            params.addValue("onlyNew", filter.isOnlyNew() ? 1 : 0);
 			return getNamedParameterJdbcTemplate().queryForInt(sql, params);
 		} catch (EmptyResultDataAccessException e) {
 			return 0;
@@ -254,5 +263,24 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
         getJdbcTemplate().update("delete from notification where REPORT_PERIOD_ID = ?",
                 new Object[]{reportPeriodId},
                 new int[]{Types.NUMERIC});
+    }
+
+    private static final String UPDATE_USER_NOTIFICATIONS_STATUS = "update notification set FIRST_READER_ID = :firstReaderId \n" +
+            "where (((:receiverDepartmentId is not null and RECEIVER_DEPARTMENT_ID = :receiverDepartmentId) or (:senderDepartmentId is not null and SENDER_DEPARTMENT_ID = :senderDepartmentId)) or \n" +
+            "(:userId is not null and USER_ID = :userId) %s) and FIRST_READER_ID is null";
+
+    @Override
+    public void updateUserNotificationsStatus(NotificationsFilterData filter, int userId) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        StringBuilder sql = new StringBuilder(String.format(UPDATE_USER_NOTIFICATIONS_STATUS,
+                filter.getUserRoleIds() == null || filter.getUserRoleIds().isEmpty() ? ""
+                        : "\n or (" + SqlUtils.transformToSqlInStatement("ROLE_ID", filter.getUserRoleIds()) + ")"));
+
+        //Фильтры по типу оповещения
+        params.addValue("receiverDepartmentId", filter.getReceiverDepartmentId());
+        params.addValue("senderDepartmentId", filter.getSenderDepartmentId());
+        params.addValue("userId", filter.getUserId());
+        params.addValue("firstReaderId", userId);
+        getNamedParameterJdbcTemplate().update(sql.toString(), params);
     }
 }

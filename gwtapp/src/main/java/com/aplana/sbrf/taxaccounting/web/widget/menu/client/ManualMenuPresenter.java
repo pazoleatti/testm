@@ -2,8 +2,10 @@ package com.aplana.sbrf.taxaccounting.web.widget.menu.client;
 
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
-import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.GetManualMenuAction;
-import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.GetManualMenuResult;
+import com.aplana.sbrf.taxaccounting.web.widget.menu.client.notificationswindow.DialogPresenter;
+import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.*;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.user.client.Timer;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -15,9 +17,15 @@ import com.gwtplatform.dispatch.shared.DispatchAsync;
  */
 public class ManualMenuPresenter extends AbstractMenuPresenter<ManualMenuPresenter.MyView> {
 
+    private static final int NOTIFICATION_UPDATE_TIME = 1000; //5min
+    private DialogPresenter dialogPresenter;
+
+    private Timer refreshTimer;
+
     @Inject
-    public ManualMenuPresenter(EventBus eventBus, ManualMenuView view, DispatchAsync dispatchAsync) {
+    public ManualMenuPresenter(EventBus eventBus, ManualMenuView view, DialogPresenter dialogPresenter, DispatchAsync dispatchAsync) {
         super(eventBus, view, dispatchAsync);
+        this.dialogPresenter = dialogPresenter;
     }
 
     @Override
@@ -27,12 +35,61 @@ public class ManualMenuPresenter extends AbstractMenuPresenter<ManualMenuPresent
                 .defaultCallback(new AbstractCallback<GetManualMenuResult>() {
                     @Override
                     public void onSuccess(GetManualMenuResult result) {
+                        getView().clearMenu();
+                        if (result.canShowNotification()) {
+                            NotificationMenuItem notificationMenuItem = new NotificationMenuItem();
+                            notificationMenuItem.setScheduledCommand(new Scheduler.ScheduledCommand() {
+                                @Override
+                                public void execute() {
+                                    showNotificationDialog();
+                                }
+                            });
+                            getView().setNotificationMenuItem(notificationMenuItem);
+                            updateNotificationCount();
+
+                            refreshTimer = new Timer() {
+                                @Override
+                                public void run() {
+                                    updateNotificationCount();
+                                }
+                            };
+                            refreshTimer.scheduleRepeating(NOTIFICATION_UPDATE_TIME);
+                        }
                         getView().setMenuItems(result.getMenuItems());
                     }
                 }, this));
         super.onReveal();
     }
 
+    public void showNotificationDialog() {
+        dispatchAsync.execute(new UpdateNotificationStatusAction(), CallbackUtils
+                .defaultCallbackNoLock(new AbstractCallback<UpdateNotificationStatusResult>() {
+                    @Override
+                    public void onSuccess(UpdateNotificationStatusResult result) {
+                        getView().updateNotificationCount(0);
+                        getView().selectNotificationMenuItem();
+                        addToPopupSlot(dialogPresenter);
+                    }
+                }, ManualMenuPresenter.this));
+    }
+
+    public void updateNotificationCount() {
+        dispatchAsync.execute(new GetNotificationCountAction(), CallbackUtils
+                .defaultCallbackNoLock(new AbstractCallback<GetNotificationCountResult>() {
+                    @Override
+                    public void onSuccess(GetNotificationCountResult result) {
+                        getView().updateNotificationCount(result.getNotificationCount());
+                    }
+                }, ManualMenuPresenter.this));
+    }
+
     public interface MyView extends AbstractMenuPresenter.MyView {
+        void setNotificationMenuItem(NotificationMenuItem item);
+
+        void updateNotificationCount(int count);
+
+        void selectNotificationMenuItem();
+
+        void clearMenu();
     }
 }
