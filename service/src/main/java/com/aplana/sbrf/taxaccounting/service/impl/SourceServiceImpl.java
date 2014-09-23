@@ -1220,6 +1220,7 @@ public class SourceServiceImpl implements SourceService {
             FormDataKind kind = departmentFormType.getKind();
             FormData formData;
 
+            // TODO 0.4 Левыкин: постановка будет изменена http://conf.aplana.com/pages/viewpage.action?pageId=11401106
             if (isSource) {
                 formData = formDataDao.getLast(formTypeId, kind, departmentId, reportPeriod.getId(), periodOrder);
             } else {
