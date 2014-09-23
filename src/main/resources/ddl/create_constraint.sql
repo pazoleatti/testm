@@ -226,6 +226,7 @@ alter table notification add constraint notification_fk_sender foreign key (send
 alter table notification add constraint notification_fk_receiver foreign key (receiver_department_id) references department(id);
 alter table notification add constraint notification_fk_sec_user foreign key (first_reader_id) references sec_user(id);
 alter table notification add constraint notification_fk_notify_user foreign key (user_id) references sec_user(id);
+alter table notification add constraint notification_fk_notify_role foreign key (role_id) references sec_role(id);
 
 alter table event add constraint event_pk primary key (id);
 
