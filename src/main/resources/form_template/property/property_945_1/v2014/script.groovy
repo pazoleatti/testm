@@ -52,6 +52,9 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
+        break
 }
 
 // Все атрибуты
@@ -838,6 +841,57 @@ void addData(def xml, int headRowCount) {
         newRow.taxBase5 = parseNumber(row.cell[5].text(), xlsIndexRow, 5 + colOffset, logger, true)
         // графа 7
         newRow.taxBaseSum = parseNumber(row.cell[6].text(), xlsIndexRow, 6 + colOffset, logger, true)
+
+        rows.add(newRow)
+    }
+    dataRowHelper.save(rows)
+}
+
+void importTransportData() {
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName, 7, 0)
+
+    addTransportData(xml)
+}
+
+void addTransportData(def xml) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def int rnuIndexRow = 2
+    def int colOffset = 1
+    def rows = []
+    def int rowIndex = 1
+
+    for (def row : xml.row) {
+        rnuIndexRow++
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
+
+        editableColumns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
+        autoFillColumns.each {
+            newRow.getCell(it).setStyleAlias('Автозаполняемая')
+        }
+
+        // графа 1
+        newRow.name = row.cell[1].text()
+        // графа 2
+        newRow.taxBase1 = parseNumber(row.cell[2].text(), rnuIndexRow, 2 + colOffset, logger, true)
+        // графа 3
+        newRow.taxBase2 = parseNumber(row.cell[3].text(), rnuIndexRow, 3 + colOffset, logger, true)
+        // графа 4
+        newRow.taxBase3 = parseNumber(row.cell[4].text(), rnuIndexRow, 4 + colOffset, logger, true)
+        // графа 5
+        newRow.taxBase4 = parseNumber(row.cell[5].text(), rnuIndexRow, 5 + colOffset, logger, true)
+        // графа 6
+        newRow.taxBase5 = parseNumber(row.cell[6].text(), rnuIndexRow, 6 + colOffset, logger, true)
+        // графа 7
+        newRow.taxBaseSum = parseNumber(row.cell[7].text(), rnuIndexRow, 7 + colOffset, logger, true)
 
         rows.add(newRow)
     }
