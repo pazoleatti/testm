@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.Notification;
 import com.aplana.sbrf.taxaccounting.model.NotificationsFilterData;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 
 import java.util.List;
@@ -45,25 +46,18 @@ public interface NotificationService {
     Map<Integer, Notification> mapByDepartments(int senderDepartmentId, Integer receiverDepartmentId);
 
 	/**
-	 * Получить список оповещений для подразделения - получателя
-	 * @param departmentId подразделение - получатель
-	 * @return список оповещений
-	 */
-	List<Notification> notificationsForDepartment(int departmentId);
-
-	/**
-	 * Получить страницу с оповещениями
+	 * Получить оповещения по фильтру
 	 * @param filter фильтр
 	 * @return страница с оповещениями
 	 */
 	PagingResult<Notification> getByFilter(NotificationsFilterData filter);
 
 	/**
-	 * Получить количество оповещений для подразделения - получателя
-	 * @param receiverDepartmentId идентификатор подразделения - получателя
-	 * @return количество оповещений
+	 * Получить количество оповещений по фильтру
+     * @param filter фильтр
+     * @return количество оповещений
 	 */
-	int getCount(int receiverDepartmentId);
+	int getCountByFilter(NotificationsFilterData filter);
 
     /**
      * Удалить оповещения для отчетного периода

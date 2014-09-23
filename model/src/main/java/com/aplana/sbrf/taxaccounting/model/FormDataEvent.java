@@ -61,6 +61,8 @@ public enum FormDataEvent implements Serializable {
 
 	LOG_SYSTEM_BACKUP(601, "Архивирование журнала событий"),
 
+    SEND_EMAIL(650, "Отправка email"),
+
     TEMPLATE_CREATED(701, "Версия создана"),
     TEMPLATE_MODIFIED(702, "Версия изменена"),
     TEMPLATE_ACTIVATED(703, "Версия введена в действие"),
@@ -73,7 +75,7 @@ public enum FormDataEvent implements Serializable {
     UPLOAD_CONTRACTS(810, "Загрузка данных о договорах обеспечения"),
     UPLOAD_CUSTOMER_DATA(811, "Загрузка данных о клиентах"),
     UPLOAD_PAYMENTS_DATA(812, "Загрузка данных о платежах"),
-    UPLOAD_REFBOOK(812, "Загрузка справочника"),
+    UPLOAD_REFBOOK(813, "Загрузка справочника"),
 
     CREATE_CLIENT_PROFILES(820, "Создание анкеты клиента"),
     EDIT_CLIENT_PROFILES(821, "Редактирование анкеты клиента"),

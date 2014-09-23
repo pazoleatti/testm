@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao;
 import com.aplana.sbrf.taxaccounting.model.LockData;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author <a href="mailto:Marat.Fayzullin@aplana.com">Файзуллин Марат</a>
@@ -49,4 +50,17 @@ public interface LockDataDao {
      */
     void unlockIfOlderThan(int sec);
 
+    /**
+     * Возвращает список идентификаторов пользователей, которые ожидают разблокировки указанного объекта
+     * @param key ключ заблокированного объекта
+     * @return список идентификаторов пользователей
+     */
+    List<Integer> getUsersWaitingForLock(String key);
+
+    /**
+     * Добавляет пользователя в список ожидающих выполнения операций над объектом блокировки
+     * @param key ключ блокировки
+     * @param userId идентификатор пользователя
+     */
+    void addUserWaitingForLock(String key, int userId);
 }
