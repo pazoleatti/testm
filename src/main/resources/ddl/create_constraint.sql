@@ -245,8 +245,8 @@ alter table log_system add constraint log_system_fk_blob_data foreign key (blob_
 alter table lock_data add constraint lock_data_pk primary key (key);
 alter table lock_data add constraint lock_data_fk_user_id foreign key (user_id) references sec_user(id) on delete cascade;
 
-alter table lock_data_notification add constraint lock_data_notif_fk_lock_data foreign key (lock_key) references lock_data(key) on delete cascade;
-alter table lock_data_notification add constraint lock_data_notif_fk_sec_user foreign key (user_id) references sec_user(id);
+alter table lock_data_subscribers add constraint lock_data_subscr_fk_lock_data foreign key (lock_key) references lock_data(key) on delete cascade;
+alter table lock_data_subscribers add constraint lock_data_subscr_fk_sec_user foreign key (user_id) references sec_user(id);
 
 alter table async_task_type add constraint async_task_type_pk primary key (id);
 
