@@ -7,15 +7,19 @@ package com.aplana.sbrf.taxaccounting.model;
  */
 public class AutoNumerationColumn extends Column {
 
-    private int type;
-    private String typeName;
+    private int type; //TODO: (2014-09-23 MFayzullin) избавиться от дубликатов полей
+    private String typeName; //TODO: (2014-09-23 MFayzullin) избавиться от дубликатов полей
+	private AutoNumerationColumnType numerationType;
 
     public AutoNumerationColumn() {
+		setColumnType(ColumnType.AUTO);
     }
 
-    public AutoNumerationColumn(String name, Integer type) {
-        this.typeName = name;
-        this.type = type;
+    public AutoNumerationColumn(AutoNumerationColumnType numerationType) {
+		this();
+        this.numerationType = numerationType;
+		setType(numerationType.getType());
+        setTypeName(numerationType.getName());
     }
 
     public int getType() {

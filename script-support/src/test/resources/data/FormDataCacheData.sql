@@ -73,11 +73,11 @@ INSERT INTO department_type (id, name) VALUES (1, 'Банк');
 INSERT INTO department_type (id, name) VALUES (2, 'Территориальный банк');
 
 -- Подразделения
-INSERT INTO DEPARTMENT (id, name, parent_id, type, shortname, tb_index, sbrf_code, code)
+INSERT INTO department (id, name, parent_id, type, shortname, tb_index, sbrf_code, code)
   VALUES (1, 'Банк', NULL, 1, NULL, NULL, '12', 1);
-INSERT INTO DEPARTMENT (id, name, parent_id, type, shortname, tb_index, sbrf_code, code)
+INSERT INTO department (id, name, parent_id, type, shortname, tb_index, sbrf_code, code)
   VALUES (2, 'ТБ1', 1, 2, NULL, NULL, '23', 2);
-INSERT INTO DEPARTMENT (id, name, parent_id, type, shortname, tb_index, sbrf_code, code)
+INSERT INTO department (id, name, parent_id, type, shortname, tb_index, sbrf_code, code)
   VALUES (3, 'ТБ2', 1, 2, NULL, NULL, NULL, 3);
 
 -- FormType
@@ -126,22 +126,22 @@ INSERT INTO data_row(id, form_data_id, alias, ord, type) VALUES (3, 1, 'alias 3'
 INSERT INTO data_row(id, form_data_id, alias, ord, type) VALUES (4, 1, 'alias 4', 4, 0);
 
 -- Значения
-INSERT INTO string_value (row_id, column_id, value) VALUES (1, 1, 'string cell 1');
-INSERT INTO numeric_value (row_id, column_id, value) VALUES (1, 2, 111);
-INSERT INTO numeric_value (row_id, column_id, value) VALUES (1, 3, 1);
-INSERT INTO numeric_value (row_id, column_id, value) VALUES (1, 4, 2);
+INSERT INTO data_cell (row_id, column_id, svalue) VALUES (1, 1, 'string cell 1');
+INSERT INTO data_cell (row_id, column_id, nvalue) VALUES (1, 2, 111);
+INSERT INTO data_cell (row_id, column_id, nvalue) VALUES (1, 3, 1);
+INSERT INTO data_cell (row_id, column_id, nvalue) VALUES (1, 4, 2);
 
-INSERT INTO string_value (row_id, column_id, value) VALUES (2, 1, 'string cell 2');
-INSERT INTO numeric_value (row_id, column_id, value) VALUES (2, 2, 222);
-INSERT INTO numeric_value (row_id, column_id, value) VALUES (2, 3, 3);
-INSERT INTO numeric_value (row_id, column_id, value) VALUES (2, 4, 4);
+INSERT INTO data_cell (row_id, column_id, svalue) VALUES (2, 1, 'string cell 2');
+INSERT INTO data_cell (row_id, column_id, nvalue) VALUES (2, 2, 222);
+INSERT INTO data_cell (row_id, column_id, nvalue) VALUES (2, 3, 3);
+INSERT INTO data_cell (row_id, column_id, nvalue) VALUES (2, 4, 4);
 
-INSERT INTO string_value (row_id, column_id, value) VALUES (3, 1, 'string cell 3');
-INSERT INTO numeric_value (row_id, column_id, value) VALUES (3, 2, 333);
-INSERT INTO numeric_value (row_id, column_id, value) VALUES (3, 3, 5);
-INSERT INTO numeric_value (row_id, column_id, value) VALUES (3, 4, 6);
+INSERT INTO data_cell (row_id, column_id, svalue) VALUES (3, 1, 'string cell 3');
+INSERT INTO data_cell (row_id, column_id, nvalue) VALUES (3, 2, 333);
+INSERT INTO data_cell (row_id, column_id, nvalue) VALUES (3, 3, 5);
+INSERT INTO data_cell (row_id, column_id, nvalue) VALUES (3, 4, 6);
 
-INSERT INTO string_value (row_id, column_id, value) VALUES (4, 1, 'string cell 4');
-INSERT INTO numeric_value (row_id, column_id, value) VALUES (4, 2, 444);
-INSERT INTO numeric_value (row_id, column_id, value) VALUES (4, 3, 7);
-INSERT INTO numeric_value (row_id, column_id, value) VALUES (4, 4, 7);
+INSERT INTO data_cell (row_id, column_id, svalue) VALUES (4, 1, 'string cell 4');
+INSERT INTO data_cell (row_id, column_id, nvalue) VALUES (4, 2, 444);
+INSERT INTO data_cell (row_id, column_id, nvalue) VALUES (4, 3, 7);
+INSERT INTO data_cell (row_id, column_id, nvalue) VALUES (4, 4, 7);

@@ -353,12 +353,12 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    public List<Department> getDepartmentForSudir() {
-        ArrayList<Department> departments = new ArrayList<Department>();
-        departments.addAll(departmentDao.getDepartmentsByType(DepartmentType.CSKO_PCP.getCode()));
-        departments.addAll(departmentDao.getDepartmentsByType(DepartmentType.MANAGEMENT.getCode()));
-        return departments;
-    }
+		 public List<Department> getDepartmentForSudir() {
+		ArrayList<Department> departments = new ArrayList<Department>();
+		departments.addAll(departmentDao.getDepartmentsByType(DepartmentType.CSKO_PCP.getCode()));
+		departments.addAll(departmentDao.getDepartmentsByType(DepartmentType.MANAGEMENT.getCode()));
+		return departments;
+	}
 
     @Override
     public String getParentsHierarchy(Integer departmentId) {

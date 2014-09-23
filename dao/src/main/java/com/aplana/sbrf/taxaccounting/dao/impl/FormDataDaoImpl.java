@@ -464,11 +464,11 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 
     @Override
     public List<String> getStringList(Integer columnId, Integer formTemplateTypeId) {
-        return getJdbcTemplate().queryForList("SELECT sv.value FROM FORM_COLUMN FC\n" +
-                "LEFT JOIN FORM_DATA FD ON FC.FORM_TEMPLATE_ID = FD.FORM_TEMPLATE_ID\n" +
-                "LEFT JOIN DATA_ROW DR ON DR.FORM_DATA_ID = FD.ID\n" +
-                "LEFT JOIN STRING_VALUE SV ON SV.ROW_ID = DR.ID AND SV.COLUMN_ID = FC.ID\n" +
-                "WHERE FC.id = ? AND fd.form_template_id = ?",
+        return getJdbcTemplate().queryForList("SELECT sv.svalue FROM form_column fc\n" +
+                "LEFT JOIN form_data fd ON fc.form_template_id = fd.form_template_id\n" +
+                "LEFT JOIN data_row dr ON dr.form_data_id = fd.id\n" +
+                "LEFT JOIN data_cell sv ON sv.row_id = dr.id AND sv.column_id = fc.id\n" +
+                "WHERE fc.id = ? AND fd.form_template_id = ?",
                 new Object[]{columnId, formTemplateTypeId},
                 String.class);
     }

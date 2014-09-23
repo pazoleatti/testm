@@ -27,5 +27,5 @@ insert into form_style (id, alias, form_template_id, font_color, back_color, ita
 insert into form_style (id, alias, form_template_id, font_color, back_color, italic, bold) values (2, 'alias 2', 1, 2, 3, 0, 1);
 insert into form_style (id, alias, form_template_id, font_color, back_color, italic, bold) values (3, 'alias 3', 1, 1, 1, 1, 1);
 
-insert into cell_style (row_id, column_id, style_id) values (1, 1, 1);
-insert into cell_style (row_id, column_id, style_id) values (2, 1, 2);
+insert into data_cell (row_id, column_id, style_id) values (1, 1, 1);
+insert into data_cell (row_id, column_id, style_id) values (2, 1, 2);

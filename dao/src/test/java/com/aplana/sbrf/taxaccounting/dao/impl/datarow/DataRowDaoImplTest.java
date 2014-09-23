@@ -28,7 +28,7 @@ import java.util.*;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class DataRowDaoImplTest extends Assert {
 
-	static final long DEFAULT_ORDER_STEP_TEST = DataRowDaoImplUtils.DEFAULT_ORDER_STEP / 10;
+	static final long DEFAULT_ORDER_STEP_TEST = DataRowDaoImplUtils.DEFAULT_ORDER_STEP / 100;
 
 	@Autowired
 	FormDataDao formDataDao;

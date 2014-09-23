@@ -15,12 +15,6 @@ public final class DataRowDaoImplUtils {
     private DataRowDaoImplUtils() {}
 
 	/**
-	 * Массив содержит названия таблиц со значениями ячеек
-	 */
-	public static final String[] CELL_VALUE_TABLE_NAMES = { "NUMERIC_VALUE",
-			"STRING_VALUE", "DATE_VALUE" };
-
-	/**
 	 * Массив содержит функции извлечения значения для разных таблиц со
 	 * значениями ячеек
 	 */
@@ -55,10 +49,6 @@ public final class DataRowDaoImplUtils {
 		} else {
 			throw new IllegalArgumentException();
 		}
-	}
-
-	public static String getCellValueTableName(Column c) {
-		return getCellValueComponent(c, CELL_VALUE_TABLE_NAMES);
 	}
 
 	static CellValueExtractor getCellValueExtractor(Column c) {

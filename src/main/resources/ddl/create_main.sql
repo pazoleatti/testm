@@ -541,6 +541,24 @@ comment on column date_value.column_id is 'Идентификатор столб
 comment on column date_value.row_id is 'Идентификатор строки';
 comment on column date_value.value is 'Значение';
 ---------------------------------------------------------------------------------------------------
+create table data_cell (
+  row_id number(18) not null,
+  column_id number(9) not null,
+  svalue varchar2(2000 char),
+  nvalue decimal(27, 10),
+  dvalue date,
+  style_id number(9),
+  editable number(1) default 0,
+  colspan number(3),
+  rowspan number(3)
+);
+comment on table data_cell is 'Значения налоговых форм типа дата';
+comment on column data_cell.column_id is 'Идентификатор столбца';
+comment on column data_cell.row_id is 'Идентификатор строки';
+comment on column data_cell.svalue is 'Строковое значение';
+comment on column data_cell.nvalue is 'Числовое значение (в том числе и для ссылок)';
+comment on column data_cell.dvalue is 'Значение для даты-времени';
+---------------------------------------------------------------------------------------------------
 create table department_form_type (
   id      number(9) not null,
   department_id number(9) not null,

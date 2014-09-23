@@ -60,8 +60,8 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 			}
 		}
 
-        autoNumerationList.add(new AutoNumerationColumn(AutoNumerationColumnType.SERIAL.getName(), AutoNumerationColumnType.SERIAL.getType()));
-        autoNumerationList.add(new AutoNumerationColumn(AutoNumerationColumnType.CROSS.getName(), AutoNumerationColumnType.CROSS.getType()));
+        autoNumerationList.add(new AutoNumerationColumn(AutoNumerationColumnType.SERIAL));
+        autoNumerationList.add(new AutoNumerationColumn(AutoNumerationColumnType.CROSS));
     }
 
 	@UiField

@@ -195,7 +195,7 @@ public class FormTemplateServiceImplTest extends Assert {
 
         Column numericColumn = new NumericColumn();
         Column stringColumn = new StringColumn();
-        Column autoNumerationColumn = new AutoNumerationColumn(AutoNumerationColumnType.SERIAL.getName(), AutoNumerationColumnType.SERIAL.getType());
+        Column autoNumerationColumn = new AutoNumerationColumn(AutoNumerationColumnType.SERIAL);
 
         formTemplate.addColumn(numericColumn);
         formTemplate.addColumn(stringColumn);
@@ -216,7 +216,7 @@ public class FormTemplateServiceImplTest extends Assert {
 
         Column numericColumn = new NumericColumn();
         Column stringColumn = new StringColumn();
-        Column autoNumerationColumn = new AutoNumerationColumn(AutoNumerationColumnType.CROSS.getName(), AutoNumerationColumnType.CROSS.getType());
+        Column autoNumerationColumn = new AutoNumerationColumn(AutoNumerationColumnType.CROSS);
 
         formTemplate.addColumn(numericColumn);
         formTemplate.addColumn(stringColumn);
@@ -237,8 +237,8 @@ public class FormTemplateServiceImplTest extends Assert {
 
         Column numericColumn = new NumericColumn();
         Column stringColumn = new StringColumn();
-        Column crossAutoNumerationColumn = new AutoNumerationColumn(AutoNumerationColumnType.CROSS.getName(), AutoNumerationColumnType.CROSS.getType());
-        Column serialAutoNumerationColumn = new AutoNumerationColumn(AutoNumerationColumnType.SERIAL.getName(), AutoNumerationColumnType.SERIAL.getType());
+        Column crossAutoNumerationColumn = new AutoNumerationColumn(AutoNumerationColumnType.CROSS);
+        Column serialAutoNumerationColumn = new AutoNumerationColumn(AutoNumerationColumnType.SERIAL);
 
         formTemplate.addColumn(numericColumn);
         formTemplate.addColumn(crossAutoNumerationColumn);
