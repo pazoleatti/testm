@@ -172,15 +172,15 @@ def getDataRowHelperPrev() {
 
 // Признак периода ввода остатков. Отчетный период является периодом ввода остатков и месяц первый в периоде.
 def isMonthBalance() {
-    if (isBalancePeriod == null) {
+    if (isBalance == null) {
         def departmentReportPeriod = departmentReportPeriodService.get(formData.departmentReportPeriodId)
         if (!departmentReportPeriod.isBalance() || formData.periodOrder == null) {
-            isBalancePeriod = false
+            isBalance = false
         } else {
-            isBalancePeriod = formData.periodOrder - 1 % 3 == 0
+            isBalance = formData.periodOrder - 1 % 3 == 0
         }
     }
-    return isBalancePeriod
+    return isBalance
 }
 
 // Алгоритмы заполнения полей формы
