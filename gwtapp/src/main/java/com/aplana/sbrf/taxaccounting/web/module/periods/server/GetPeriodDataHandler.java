@@ -77,6 +77,7 @@ public class GetPeriodDataHandler extends AbstractActionHandler<GetPeriodDataAct
             per.get(year).add(row);
 		}
 		List<TableRow> rows = new ArrayList<TableRow>();
+        //TODO avanteev: Подумать, может имеет смысл перенести в запрос
 		for (Map.Entry<Integer, List<TableRow>> rec : per.entrySet()) {
 			TableRow header = new TableRow();
 			header.setPeriodName("Календарный год " + (rec.getKey()));
