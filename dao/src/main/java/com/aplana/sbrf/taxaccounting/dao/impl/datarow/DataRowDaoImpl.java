@@ -91,11 +91,13 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 				forCreateOrder.add(typeAndOrd.getSecond());
 			}
 		}
-
+		// удаляем старые ячейки
 		batchRemoveCells(forUpdate);
+		// создаем новые ячейки
 		batchInsertCells(forUpdate);
-
+		// помечаем старые строки на удаление, так как обновление = удаление(type=-1) + создание(type=1)
 		physicalUpdateRowsType(forCreate, TypeFlag.DEL);
+		// создает новые строки с указанием порядка forCreateOrder
 		physicalInsertRows(fd, forCreate, null, null, forCreateOrder);
 
 	}
@@ -187,12 +189,11 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		// Если строка помечена как ADD, то физическое удаление
 		// Если строка помесена как DELETE, то ничего не делаем
 		// Если строка помечена как SAME, то помечаем как DELETE
-
 		getJdbcTemplate().update(
-				"delete from DATA_ROW where FORM_DATA_ID=? and TYPE=? and MANUAL = ?",
+				"DELETE FROM data_row WHERE form_data_id=? AND type=? AND manual = ?",
 				new Object[] { formData.getId(), TypeFlag.ADD.getKey(), formData.isManual() ? 1 : 0 });
 		getJdbcTemplate().update(
-                "update DATA_ROW set TYPE=? where FORM_DATA_ID=? and TYPE=? and MANUAL = ?",
+                "UPDATE data_row SET type=? WHERE form_data_id=? AND type=? AND manual = ?",
                 new Object[]{TypeFlag.DEL.getKey(), formData.getId(),
                         TypeFlag.SAME.getKey(), formData.isManual() ? 1 : 0});
 	}
@@ -238,6 +239,13 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		physicalUpdateRowsType(formDataId, TypeFlag.DEL, TypeFlag.SAME);
 	}
 
+	/**
+	 * Создаем строки во временном срезе
+	 * @param formData
+	 * @param index
+	 * @param ordBegin
+	 * @param rows
+	 */
 	private void insertRows(FormData formData, int index, long ordBegin,
 			List<DataRow<Cell>> rows) {
 		Long ordEnd = getOrd(formData.getId(), index + 1);
@@ -263,14 +271,12 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
             map.put("dataEndRowIndex", (long) endIndex);
             String sql = "update DATA_ROW set ORD = ORD + :diff where ID in" +
                     "(select RR.ID from " +
-                    "(select row_number() over (order by DR.ORD) as IDX, DR.ID, DR.ORD from DATA_ROW DR where DR.TYPE in (:types) and FORM_DATA_ID=:formDataId) " +
+                    "(select row_number() OVER (ORDER BY dr.ord) as IDX, DR.ID, DR.ORD from DATA_ROW DR where DR.TYPE in (:types) and FORM_DATA_ID=:formDataId) " +
                     "RR where RR.IDX between (:dataStartRowIndex) and (:dataEndRowIndex))";
             if (!isSupportOver()){ // для юнит-тестов (hsql db)
-                sql = sql.replaceFirst("over \\(order by DR.ORD\\)", "over ()");
+                sql = sql.replaceFirst("OVER \\(ORDER BY dr.ord\\)", "over ()");
             }
-            getNamedParameterJdbcTemplate().update(
-                    sql, map
-            );
+            getNamedParameterJdbcTemplate().update(sql, map);
             ordEnd = getOrd(formData.getId(), index + 1);
             ordStep = DataRowDaoImplUtils
                     .calcOrdStep(ordBegin, ordEnd, rows.size());
@@ -374,7 +380,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
         // получение id'шников для вставки строк батчем
         final List<Long> ids = dbUtils.getNextDataRowIds(Integer.valueOf(dataRows.size()).longValue());
         getJdbcTemplate().batchUpdate(
-                "insert into DATA_ROW (ID, FORM_DATA_ID, ALIAS, ORD, TYPE, MANUAL) values (?, ?, ?, ?, ?, ?)",
+                "INSERT INTO data_row (id, form_data_id, alias, ord, type, manual) VALUES (?, ?, ?, ?, ?, ?)",
                 new BatchPreparedStatementSetter() {
 
                     @Override
@@ -480,31 +486,33 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 			Long dataRowId) {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("formDataId", formDataId);
-		params.put("types",
-				Arrays.asList(TypeFlag.ADD.getKey(), TypeFlag.SAME.getKey()));
+		params.put("types", Arrays.asList(TypeFlag.ADD.getKey(), TypeFlag.SAME.getKey()));
 		params.put("dataRowId", dataRowId);
-
 		try {
-			return DataAccessUtils
-					.requiredSingleResult(getNamedParameterJdbcTemplate()
-							.query("select TYPE, ORD, ID from DATA_ROW where TYPE in (:types) and FORM_DATA_ID=:formDataId and ID = :dataRowId",
-									params,
-									new RowMapper<Pair<Integer, Long>>() {
-
-										@Override
-										public Pair<Integer, Long> mapRow(
-												ResultSet rs, int rowNum)
-												throws SQLException {
-											return new Pair<Integer, Long>(SqlUtils
-                                                    .getInteger(rs,"TYPE"), SqlUtils
-                                                    .getLong(rs,"ORD"));
-										}
-									}));
+			return DataAccessUtils.requiredSingleResult(getNamedParameterJdbcTemplate()
+				.query("SELECT type, ord, id FROM data_row WHERE TYPE IN (:types) AND form_data_id = :formDataId AND id = :dataRowId",
+					params,
+					new RowMapper<Pair<Integer, Long>>() {
+						@Override
+						public Pair<Integer, Long> mapRow(ResultSet rs, int rowNum) throws SQLException {
+							return new Pair<Integer, Long>(
+								SqlUtils.getInteger(rs, "type"),
+								SqlUtils.getLong(rs, "ord"));
+						}
+					}));
 		} catch (EmptyResultDataAccessException e) {
 			throw new DaoException(ERROR_MSG_NO_ROWID, dataRowId, formDataId);
 		}
 	}
 
+	/**
+	 * Проверяем диапазон значений для индексов. Причем для индексов в режиме добавления новых записей диапазон
+	 * на единицу больше, так как может потребоваться вставка после последней строки.
+	 * @param formData экземпляр налоговой формы
+	 * @param saved выбор срезов. true - обычный, false - временный
+	 * @param forNew режим проверки
+	 * @param indexes проверяемые индексы
+	 */
 	private void checkIndexesRange(FormData formData, boolean saved, boolean forNew,
 			int... indexes) {
 		int size = saved ? getSavedSize(formData, null) : getSize(formData, null);
@@ -666,9 +674,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
     private void batchRemoveCells(final List<DataRow<Cell>> dataRows) {
 		if (!dataRows.isEmpty()) {
 			final List<Number> idList = new ArrayList<Number>(dataRows.size());
-			int index = 0;
 			for (DataRow row : dataRows) {
-				idList.set(index++, row.getId());
+				idList.add(row.getId());
 			}
 			Map<String, Object> paramMap = new HashMap<String, Object>() {{put("ids", idList);}};
 			getNamedParameterJdbcTemplate().update("DELETE FROM data_cell WHERE row_id IN (:ids)", paramMap);

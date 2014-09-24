@@ -28,7 +28,7 @@ import java.util.*;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class DataRowDaoImplTest extends Assert {
 
-	static final long DEFAULT_ORDER_STEP_TEST = DataRowDaoImplUtils.DEFAULT_ORDER_STEP / 100;
+	static final long DEFAULT_ORDER_STEP_TEST = DataRowDaoImplUtils.DEFAULT_ORDER_STEP / 10;
 
 	@Autowired
 	FormDataDao formDataDao;
@@ -191,6 +191,26 @@ public class DataRowDaoImplTest extends Assert {
 		
 
 		dataRowDao.updateRows(fd, dataRowsForUpdate);
+	}
+
+	/**
+	 * Добавляем к существующим строкам еще несколько и проверяем итоговое количество
+	 */
+	@Test
+	public void updateRowsTest() {
+		final int count = 10;
+		FormData fd = formDataDao.get(1000, false);
+		List<DataRow<Cell>> dataRowsOld = dataRowDao.getRows(fd, null, null);
+		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
+		for (int i = 0; i < count; i++) {
+			DataRow<Cell> dataRow = fd.createDataRow();
+			dataRows.add(dataRow);
+		}
+		dataRowDao.insertRows(fd, 1, dataRows);
+		dataRowDao.updateRows(fd, dataRows);
+		dataRowDao.commit(fd.getId());
+		dataRows = dataRowDao.getRows(fd, null, null);
+		Assert.assertEquals(dataRowsOld.size() + count, dataRows.size());
 	}
 
 	@Test(expected=IllegalArgumentException.class)
