@@ -14,7 +14,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.validation.ValidationException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -53,18 +52,6 @@ public class DepartmentDaoTest {
     @Test(expected = DaoException.class)
     public void testGetIncorrectId() {
         departmentDao.getDepartment(-1);
-    }
-
-    @Test
-    public void getParentTest() {
-        Department department;
-        department = departmentDao.getParent(2);
-        Assert.assertEquals(1, department.getId());
-        Assert.assertEquals("Банк", department.getName());
-
-        department = departmentDao.getParent(3);
-        Assert.assertEquals(1, department.getId());
-        Assert.assertEquals("Банк", department.getName());
     }
 
     @Test
@@ -110,39 +97,39 @@ public class DepartmentDaoTest {
     @Test
     public void getDepartmenTBTest() {
         Department result;
-        result = departmentDao.getDepartmenTB(0);
+        result = departmentDao.getDepartmentTB(0);
         Assert.assertNull(result);
-        result = departmentDao.getDepartmenTB(1);
+        result = departmentDao.getDepartmentTB(1);
         Assert.assertNull(result);
-        result = departmentDao.getDepartmenTB(2);
+        result = departmentDao.getDepartmentTB(2);
         Assert.assertEquals(result.getId(), 2);
-        result = departmentDao.getDepartmenTB(3);
+        result = departmentDao.getDepartmentTB(3);
         Assert.assertEquals(result.getId(), 3);
-        result = departmentDao.getDepartmenTB(4);
+        result = departmentDao.getDepartmentTB(4);
         Assert.assertEquals(result.getId(), 3);
-        result = departmentDao.getDepartmenTB(5);
+        result = departmentDao.getDepartmentTB(5);
         Assert.assertEquals(result.getId(), 3);
-        result = departmentDao.getDepartmenTB(6);
+        result = departmentDao.getDepartmentTB(6);
         Assert.assertEquals(result.getId(), 2);
     }
 
     @Test
     public void getDepartmenTBChildrenTest() {
         List<Department> result;
-        result = departmentDao.getDepartmenTBChildren(0);
+        result = departmentDao.getDepartmentTBChildren(0);
         Assert.assertEquals(0, result.size());
-        result = departmentDao.getDepartmenTBChildren(1);
+        result = departmentDao.getDepartmentTBChildren(1);
         Assert.assertEquals(0, result.size());
-        result = departmentDao.getDepartmenTBChildren(2);
+        result = departmentDao.getDepartmentTBChildren(2);
         Assert.assertEquals(2, result.size());
         Assert.assertTrue(getDepartmentIds(result).containsAll(asList(2, 6)));
-        result = departmentDao.getDepartmenTBChildren(3);
+        result = departmentDao.getDepartmentTBChildren(3);
         Assert.assertEquals(3, result.size());
         Assert.assertTrue(getDepartmentIds(result).containsAll(asList(3, 4, 5)));
-        result = departmentDao.getDepartmenTBChildren(4);
+        result = departmentDao.getDepartmentTBChildren(4);
         Assert.assertEquals(3, result.size());
         Assert.assertTrue(getDepartmentIds(result).containsAll(asList(3, 4, 5)));
-        result = departmentDao.getDepartmenTBChildren(5);
+        result = departmentDao.getDepartmentTBChildren(5);
         Assert.assertEquals(3, result.size());
         Assert.assertTrue(getDepartmentIds(result).containsAll(asList(3, 4, 5)));
     }
@@ -188,29 +175,17 @@ public class DepartmentDaoTest {
         Assert.assertTrue("Department(id=3) has 1 performer with id = 2", performers.get(0) == 2);
     }
 
-	@Test
-	public void getPerformers2(){
-            Department department2 = departmentDao.getDepartment(2);
-            List<Integer> performers = departmentDao.getPerformers(asList(department2.getId()), asList(TaxType.TRANSPORT));
-            Assert.assertTrue("Department(id=2) has 1 performer", performers.size() == 1);            Assert.assertTrue("Department(id=2) has 1 performer with id = 1", performers.get(0) == 1);
-    }
-
     @Test
     public void getDepartmentIdsByExcutorsTest() {
-        List<Integer> result = departmentDao.getDepartmentIdsByExcutors(asList(1, 2, 3, 4, 5, 6),
+        List<Integer> result = departmentDao.getDepartmentIdsByExecutors(asList(1, 2, 3, 4, 5, 6),
                 asList(TaxType.INCOME, TaxType.VAT, TaxType.TRANSPORT));
         Assert.assertEquals(result.size(), 2);
         Assert.assertTrue(result.containsAll(asList(2, 3)));
 
-        result = departmentDao.getDepartmentIdsByExcutors(asList(2),
+        result = departmentDao.getDepartmentIdsByExecutors(asList(2),
                 asList(TaxType.TRANSPORT));
         Assert.assertEquals(result.size(), 1);
         Assert.assertTrue(result.containsAll(asList(3)));
-    }
-
-    @Test
-    public void getDepartmentByNameTest() {
-        Assert.assertEquals(2, departmentDao.getDepartmentsByName("ТБ").size());
     }
 
     @Test
@@ -218,21 +193,6 @@ public class DepartmentDaoTest {
         Assert.assertEquals("ТБ2/ЦСКО 1", departmentDao.getReportDepartmentName(5));
         Assert.assertEquals("ТБ1/ЦСКО 1", departmentDao.getReportDepartmentName(6));
         Assert.assertEquals("ТБ1", departmentDao.getReportDepartmentName(2));
-    }
-
-    @Test
-    public void getDepartmentByCode1Test() {
-        Assert.assertEquals(1, departmentDao.getDepartmentByCode(1).getId());
-        Assert.assertEquals(2, departmentDao.getDepartmentByCode(2).getId());
-        Assert.assertEquals(3, departmentDao.getDepartmentByCode(3).getId());
-        Assert.assertEquals(4, departmentDao.getDepartmentByCode(4).getId());
-        Assert.assertEquals(5, departmentDao.getDepartmentByCode(5).getId());
-        Assert.assertEquals(6, departmentDao.getDepartmentByCode(6).getId());
-    }
-
-    @Test
-    public void getDepartmentByCode2Test() {
-        Assert.assertNull(departmentDao.getDepartmentByCode(-1));
     }
 
 //    @Test(expected = ValidationException.class)

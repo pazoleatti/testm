@@ -14,16 +14,6 @@ import java.util.Set;
  */
 public interface DepartmentService {
     /**
-     * Получаем подразделение UNP.
-     * (Корень дерева, а не "Управление налогового планирования")
-     *
-     * @deprecated Необходимо пользоваться getBankDepartment()
-     * @return
-     */
-    @Deprecated
-    Department getUNPDepartment();
-
-    /**
      * Получить департамент
      *
      * @param departmentId
@@ -54,30 +44,14 @@ public interface DepartmentService {
     List<Department> getChildren(int parentDepartmentId);
 
     /**
-     * Получить все дочерние подразделения
-     *
+     * 70 - Получить все дочерние подразделения
+     * <a href="http://conf.aplana.com/pages/viewpage.action?pageId=11381799">Аналитика</a>
      * @param parentDepartmentId
      * @return
      */
     List<Department> getAllChildren(int parentDepartmentId);
 
     List<Integer> getAllChildrenIds(int depId);
-
-    /**
-     * Получить все родительские подразделения
-     *
-     * @param depId подразделение от которого ищем
-     * @return список идентификаторов подразделений
-     */
-    List<Integer> getAllParentIds(int depId);
-
-    /**
-     * Получить родительское подразделения для департамента
-     *
-     * @param departmentId
-     * @return
-     */
-    Department getParent(int departmentId);
 
     /**
      * Данная функция в качестве аргумента принимает список идентификаторов доступных пользователю департаментов, а возвращает
@@ -104,31 +78,26 @@ public interface DepartmentService {
     Department getDepartmentBySbrfCode(String sbrfCode);
 
     /**
-     * Подразделения по значению атрибута «Код подразделения»
-     */
-    Department getDepartmentByCode(int code);
-
-    /**
-     * Выборка подразделений для бизнес-администрирования
-     *
+     * 10 - Выборка подразделений для бизнес-администрирования
+     * <a href="http://conf.aplana.com/pages/viewpage.action?pageId=11380675">Аналитика</a>
      * @param tAUser пользователь
      * @return
      */
     List<Department> getBADepartments(TAUser tAUser);
 
     /**
-     * Выборка идентификаторов подразделений для бизнес-администрирования
-     *
+     * 10 - Выборка идентификаторов подразделений для бизнес-администрирования
+     * <a href="http://conf.aplana.com/pages/viewpage.action?pageId=11380675">Аналитика</a>
      * @param tAUser пользователь
      * @return список идентификаторов
      */
     List<Integer> getBADepartmentIds(TAUser tAUser);
 
     /**
-     * Получение ТБ универсальное
-     * http://conf.aplana.com/pages/viewpage.action?pageId=11380723
+     * 20 - Получение ТБ универсальное
      * Для роли "Контролер УНП" может быть несколько подразделений
      * Для роли "Контролер НС" только одно подразделение
+     * <a href="http://conf.aplana.com/pages/viewpage.action?pageId=11380723">Аналитика</a>
      *
      * @param tAUser пользователь
      * @return список подразделений
@@ -136,34 +105,33 @@ public interface DepartmentService {
     List<Department> getTBDepartments(TAUser tAUser);
 
     /**
-     * Получение ТБ пользователя
-     * http://conf.aplana.com/pages/viewpage.action?pageId=11380666
-     * Может быть не более одного подразделения
+     * 25 - Получение ТБ пользователя. Может быть не более одного подразделения
+     * <a href="http://conf.aplana.com/pages/viewpage.action?pageId=11380666">Аналитика</a>
      * @param tAUser пользователь
      * @return список подразделений
      */
     List<Department> getTBUserDepartments(TAUser tAUser);
 
     /**
-     * Получение идентификаторов ТБ
-     * http://conf.aplana.com/pages/viewpage.action?pageId=11380723
+     * 20 - Получение идентификаторов ТБ
      * Для роли "Контролер УНП" может быть несколько подразделений
      * Для роли "Контролер НС" только одно подразделение
-     *
+     * <a href = "http://conf.aplana.com/pages/viewpage.action?pageId=11380723">Аналитика</a>
      * @param tAUser пользователь
      * @return список идентификаторов подразделений
      */
     List<Integer> getTBDepartmentIds(TAUser tAUser);
 
     /**
-     * Получение Банка
-     *
+     * 30 - Получение Банка
+     * <a href = "http://conf.aplana.com/pages/viewpage.action?pageId=11381063">Аналитика</a>
      * @return
      */
     Department getBankDepartment();
 
     /**
-     * Выборка id подразделений для доступа к экземплярам НФ/деклараций
+     * 40 - Выборка id подразделений для доступа к экземплярам НФ/деклараций
+     * <a href = "http://conf.aplana.com/pages/viewpage.action?pageId=11380670">Аналитика</a>
      * @param tAUser пользователь
      * @param taxTypes Типы
      * @param periodStart  начало периода, в котором действуют назначения
@@ -173,24 +141,33 @@ public interface DepartmentService {
     List<Integer> getTaxFormDepartments(TAUser tAUser, List<TaxType> taxTypes, Date periodStart, Date periodEnd);
 
     /**
-     * Выборка id подразделений для назначения подразделений-исполнителей
-     *
+     * 50 - Выборка id подразделений для назначения подразделений-исполнителей
+     * <a href = "http://conf.aplana.com/pages/viewpage.action?pageId=11380678">Аналитика</a>
      * @param tAUser пользователь
      * @return
      */
     List<Department> getDestinationDepartments(TAUser tAUser);
 
     /**
-     * Выборка id подразделений для параметров печатной формы
-     *
+     * 55 - Подразделения, доступные через назначение исполнителя
+     * Все подразделения, для форм которых подразделения <a href = "http://conf.aplana.com/pages/viewpage.action?pageId=11380675">10 - Выборка для бизнес-администрирования</a> назначены исполнителями
+     * <a href = "http://conf.aplana.com/pages/viewpage.action?pageId=14814963">Аналитика</a>
+     * @param tAUser пользователь
+     * @return
+     */
+    List<Integer> getAppointmentDepartments(TAUser tAUser);
+
+    /**
+     * 60 - Выборка id подразделений для параметров печатной формы
+     * <a href = "http://conf.aplana.com/pages/viewpage.action?pageId=11381089">Аналитика</a>
      * @param formData НФ
      * @return
      */
     List<Integer> getPrintFormDepartments(FormData formData);
 
     /**
-     * Выборка id подразделений по открытым периодам
-     *
+     * 80 - Выборка id подразделений по открытым периодам
+     * <a href = "http://conf.aplana.com/pages/viewpage.action?pageId=11383234">Аналитика</a>
      * @param tAUser пользователь
      * @param taxTypes Типы налога
      * @param reportPeriodId id периода
@@ -204,13 +181,6 @@ public interface DepartmentService {
 	 * @return набор сочетаний идентификатор-подразделение
 	 */
 	Map<Integer, Department> getDepartments(List<Integer> departmentId);
-
-    /**
-     * Получает набор идентификаторов по имени департамента
-     * @param departmentName наименование демартамента
-     * @return коллекция идентификаторов департаментов
-     */
-    List<Integer> getDepartmentsByName(String departmentName);
 
     /**
      * Список подразделений передаваемых в СУДИР
