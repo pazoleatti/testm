@@ -36,37 +36,37 @@ INSERT INTO ref_book_record(id, record_id, ref_book_id, version, status) VALUES
 INSERT INTO ref_book_record(id, record_id, ref_book_id, version, status) VALUES
   (7, 2, 2, to_date('01.04.2013', 'DD.MM.YYYY'), 0);
 
-INSERT INTO ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) VALUES
-  (1, 1, 'Алиса в стране чудес', NULL, NULL, NULL);
-INSERT INTO ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) VALUES
-  (1, 2, NULL, 1113, NULL, NULL);
-INSERT INTO ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) VALUES
-  (1, 3, NULL, NULL, NULL, 5);
-INSERT INTO ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) VALUES
-  (1, 5, NULL, 0.25, NULL, NULL);
-INSERT INTO ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) VALUES
-  (2, 1, 'Алиса в стране', NULL, NULL, NULL);
-INSERT INTO ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) VALUES
-  (2, 2, NULL, 1213, NULL, NULL);
-INSERT INTO ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) VALUES
-  (2, 3, NULL, NULL, NULL, 7);
-INSERT INTO ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) VALUES
-  (2, 5, NULL, 0.1, NULL, NULL);
-INSERT INTO ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) VALUES
-  (4, 1, 'Вий', NULL, NULL, NULL);
-INSERT INTO ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) VALUES
-  (4, 2, NULL, 425, NULL, NULL);
-INSERT INTO ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) VALUES
-  (4, 3, NULL, NULL, NULL, 6);
-INSERT INTO ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) VALUES
-  (4, 5, NULL, 2.399, NULL, NULL);
+INSERT INTO ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value, row_num) VALUES
+  (1, 1, 'Алиса в стране чудес', NULL, NULL, NULL, NULL);
+INSERT INTO ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value, row_num) VALUES
+  (1, 2, NULL, 1113, NULL, NULL, NULL);
+INSERT INTO ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value, row_num) VALUES
+  (1, 3, NULL, NULL, NULL, 5, NULL);
+INSERT INTO ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value, row_num) VALUES
+  (1, 5, NULL, 0.25, NULL, NULL, NULL);
+INSERT INTO ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value, row_num) VALUES
+  (2, 1, 'Алиса в стране', NULL, NULL, NULL, NULL);
+INSERT INTO ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value, row_num) VALUES
+  (2, 2, NULL, 1213, NULL, NULL, NULL);
+INSERT INTO ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value, row_num) VALUES
+  (2, 3, NULL, NULL, NULL, 7, NULL);
+INSERT INTO ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value, row_num) VALUES
+  (2, 5, NULL, 0.1, NULL, NULL, NULL);
+INSERT INTO ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value, row_num) VALUES
+  (4, 1, 'Вий', NULL, NULL, NULL, NULL);
+INSERT INTO ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value, row_num) VALUES
+  (4, 2, NULL, 425, NULL, NULL, NULL);
+INSERT INTO ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value, row_num) VALUES
+  (4, 3, NULL, NULL, NULL, 6, NULL);
+INSERT INTO ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value, row_num) VALUES
+  (4, 5, NULL, 2.399, NULL, NULL, NULL);
 
-INSERT INTO ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) VALUES
-  (5, 4, 'Иванов И.И.', NULL, NULL, NULL);
-INSERT INTO ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) VALUES
-  (6, 4, 'Петров П.П.', NULL, NULL, NULL);
-INSERT INTO ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) VALUES
-  (7, 4, 'Петренко П.П.', NULL, NULL, NULL);
+INSERT INTO ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value, row_num) VALUES
+  (5, 4, 'Иванов И.И.', NULL, NULL, NULL, NULL);
+INSERT INTO ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value, row_num) VALUES
+  (6, 4, 'Петров П.П.', NULL, NULL, NULL, NULL);
+INSERT INTO ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value, row_num) VALUES
+  (7, 4, 'Петренко П.П.', NULL, NULL, NULL, NULL);
 
 
 INSERT INTO department_type (id, name) VALUES (1, 'Банк');

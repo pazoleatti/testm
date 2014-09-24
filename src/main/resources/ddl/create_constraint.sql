@@ -45,6 +45,7 @@ alter table ref_book_attribute add constraint ref_book_attr_chk_precision check 
 alter table ref_book_attribute add constraint ref_book_attr_chk_number_type check ((type <> 2 and precision is null) or (type = 2 and not (precision is null)));
 alter table ref_book_attribute add constraint ref_book_attr_chk_ref check ((type <> 4 and reference_id is null) or (type = 4 and not (reference_id is null)));
 alter table ref_book_attribute add constraint ref_book_attr_chk_ref_attr check ((type <> 4 and attribute_id is null) or (type = 4 and not (attribute_id is null)));
+alter table ref_book_attribute add constraint ref_book_attr_chk_istable check (is_table in (0, 1));
 alter table ref_book_attribute add constraint ref_book_attribute_uniq_ord unique (ref_book_id, ord);
 alter table ref_book_attribute add constraint ref_book_attribute_uniq_alias unique (ref_book_id, alias);
 alter table ref_book_attribute add constraint ref_book_attr_fk_ref_book_id foreign key (ref_book_id) references ref_book(id);
@@ -224,6 +225,7 @@ alter table notification add constraint notification_fk_sender foreign key (send
 alter table notification add constraint notification_fk_receiver foreign key (receiver_department_id) references department(id);
 alter table notification add constraint notification_fk_sec_user foreign key (first_reader_id) references sec_user(id);
 alter table notification add constraint notification_fk_notify_user foreign key (user_id) references sec_user(id);
+alter table notification add constraint notification_fk_notify_role foreign key (role_id) references sec_role(id);
 
 alter table event add constraint event_pk primary key (id);
 
@@ -243,8 +245,8 @@ alter table log_system add constraint log_system_fk_blob_data foreign key (blob_
 alter table lock_data add constraint lock_data_pk primary key (key);
 alter table lock_data add constraint lock_data_fk_user_id foreign key (user_id) references sec_user(id) on delete cascade;
 
-alter table lock_data_notification add constraint lock_data_notif_fk_lock_data foreign key (lock_key) references lock_data(key) on delete cascade;
-alter table lock_data_notification add constraint lock_data_notif_fk_sec_user foreign key (user_id) references sec_user(id);
+alter table lock_data_subscribers add constraint lock_data_subscr_fk_lock_data foreign key (lock_key) references lock_data(key) on delete cascade;
+alter table lock_data_subscribers add constraint lock_data_subscr_fk_sec_user foreign key (user_id) references sec_user(id) on delete cascade;
 
 alter table async_task_type add constraint async_task_type_pk primary key (id);
 

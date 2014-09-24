@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.menu.client;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.MenuItem;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -24,6 +25,8 @@ public class ManualMenuView extends AbstractMenuView implements ManualMenuPresen
 
     private static final LocalHtmlTemplates template = GWT.create(LocalHtmlTemplates.class);
 
+    private NotificationMenuItem notificationMenuItem;
+
     @Inject
     public ManualMenuView(final Binder binder) {
         initWidget(binder.createAndBindUi(this));
@@ -31,7 +34,6 @@ public class ManualMenuView extends AbstractMenuView implements ManualMenuPresen
 
     @Override
     public void setMenuItems(List<MenuItem> menuItems) {
-        menu.clearItems();
         com.google.gwt.user.client.ui.MenuItem aboutItem =
                 new com.google.gwt.user.client.ui.MenuItem(template.link("#!about", SafeHtmlUtils.EMPTY_SAFE_HTML));
         Image mark = new Image("resources/img/exclamation_mark.png");
@@ -81,5 +83,28 @@ public class ManualMenuView extends AbstractMenuView implements ManualMenuPresen
 
         @Template("<div>{0}</div>")
         SafeHtml div(String name);
+    }
+
+    @Override
+    public void setNotificationMenuItem(NotificationMenuItem item) {
+        notificationMenuItem = item;
+        menu.addSeparator().getElement().getStyle().setBorderStyle(Style.BorderStyle.NONE);
+        menu.addItem(item);
+        menu.addSeparator().getElement().getStyle().setBorderStyle(Style.BorderStyle.NONE);
+    }
+
+    @Override
+    public void updateNotificationCount(int count) {
+        notificationMenuItem.setCount(count);
+    }
+
+    @Override
+    public void selectNotificationMenuItem() {
+        menu.selectItem(notificationMenuItem);
+    }
+
+    @Override
+    public void clearMenu() {
+        menu.clearItems();
     }
 }

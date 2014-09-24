@@ -44,6 +44,7 @@ public class GetNotificationCountHandler extends AbstractActionHandler<GetNotifi
         filter.setUserId(user.getId());
         filter.setReceiverDepartmentId(user.getDepartmentId());
         filter.setUserRoleIds(userRoles);
+        filter.setOnlyNew(true);
 		result.setNotificationCount(notificationService.getCountByFilter(filter));
 		return result;
 	}

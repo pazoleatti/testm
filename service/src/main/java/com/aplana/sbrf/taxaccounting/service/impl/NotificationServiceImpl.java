@@ -67,4 +67,9 @@ public class NotificationServiceImpl implements NotificationService {
     public void deleteByReportPeriod(int reportPeriodId) {
         notificationDao.deleteByReportPeriod(reportPeriodId);
     }
+
+    @Override
+    public void updateUserNotificationsStatus(NotificationsFilterData filter, int userId) {
+        notificationDao.updateUserNotificationsStatus(filter, userId);
+    }
 }

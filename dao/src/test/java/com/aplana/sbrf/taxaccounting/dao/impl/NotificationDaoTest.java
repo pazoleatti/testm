@@ -46,6 +46,11 @@ public class NotificationDaoTest {
         NotificationsFilterData userRoleFilter = new NotificationsFilterData();
         userRoleFilter.setUserRoleIds(Arrays.asList(2,3));
         assertEquals(3, notificationDao.getByFilter(userRoleFilter).size());
+
+        NotificationsFilterData userAndRoleFilter = new NotificationsFilterData();
+        userAndRoleFilter.setUserRoleIds(Arrays.asList(2,3));
+        userAndRoleFilter.setUserId(3);
+        assertEquals(4, notificationDao.getByFilter(userAndRoleFilter).size());
     }
 
     @Test
@@ -61,6 +66,11 @@ public class NotificationDaoTest {
         NotificationsFilterData userRoleFilter = new NotificationsFilterData();
         userRoleFilter.setUserRoleIds(Arrays.asList(2,3));
         assertEquals(3, notificationDao.getCountByFilter(userRoleFilter));
+
+        NotificationsFilterData userAndRoleFilter = new NotificationsFilterData();
+        userAndRoleFilter.setUserRoleIds(Arrays.asList(2,3));
+        userAndRoleFilter.setUserId(3);
+        assertEquals(4, notificationDao.getCountByFilter(userAndRoleFilter));
     }
 
     @Test
