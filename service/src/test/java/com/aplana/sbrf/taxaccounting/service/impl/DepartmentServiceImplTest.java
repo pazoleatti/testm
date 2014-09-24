@@ -16,7 +16,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.*;
 
-import static com.aplana.sbrf.taxaccounting.test.ReportPeriodMockUtils.mockReportPeriod;
 import static java.util.Arrays.asList;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.*;
@@ -89,10 +88,10 @@ public class DepartmentServiceImplTest {
         when(departmentDao.getDepartment(departmentGOSB31.getId())).thenReturn(departmentGOSB31);
         when(departmentDao.getDepartment(departmentOSB311.getId())).thenReturn(departmentOSB311);
         // Иерархия подразделений (вверх)
-        when(departmentDao.getParent(departmentTB2.getId())).thenReturn(root);
-        when(departmentDao.getParent(departmentTB3.getId())).thenReturn(root);
-        when(departmentDao.getParent(departmentGOSB31.getId())).thenReturn(departmentTB3);
-        when(departmentDao.getParent(departmentOSB311.getId())).thenReturn(departmentGOSB31);
+//        when(departmentDao.getParent(departmentTB2.getId())).thenReturn(root);
+//        when(departmentDao.getParent(departmentTB3.getId())).thenReturn(root);
+//        when(departmentDao.getParent(departmentGOSB31.getId())).thenReturn(departmentTB3);
+//        when(departmentDao.getParent(departmentOSB311.getId())).thenReturn(departmentGOSB31);
         // Иерархия подразделений (вниз)
         when(departmentDao.getAllChildren(root.getId())).thenReturn(asList(root, departmentTB2, departmentTB3, departmentGOSB31, departmentOSB311));
         when(departmentDao.getAllChildren(departmentTB2.getId())).thenReturn(asList(departmentTB2));
@@ -110,24 +109,24 @@ public class DepartmentServiceImplTest {
         when(departmentDao.getDepartmentIdsByType(DepartmentType.CSKO_PCP.getCode())).thenReturn(asList(departmentGOSB31.getId()));
         when(departmentDao.getDepartmentIdsByType(DepartmentType.MANAGEMENT.getCode())).thenReturn(asList(departmentOSB311.getId()));
         // ТБ для подразделения
-        when(departmentDao.getDepartmenTB(root.getId())).thenReturn(null);
-        when(departmentDao.getDepartmenTB(departmentTB2.getId())).thenReturn(departmentTB2);
-        when(departmentDao.getDepartmenTB(departmentTB3.getId())).thenReturn(departmentTB3);
-        when(departmentDao.getDepartmenTB(departmentGOSB31.getId())).thenReturn(departmentTB3);
-        when(departmentDao.getDepartmenTB(departmentOSB311.getId())).thenReturn(departmentTB3);
-        when(departmentDao.getDepartmenTBChildren(root.getId())).thenReturn(new ArrayList<Department>(0));
-        when(departmentDao.getDepartmenTBChildren(departmentTB2.getId())).thenReturn(asList(departmentTB2));
-        when(departmentDao.getDepartmenTBChildren(departmentTB3.getId())).thenReturn(asList(departmentTB3, departmentGOSB31, departmentOSB311));
-        when(departmentDao.getDepartmenTBChildren(departmentGOSB31.getId())).thenReturn(asList(departmentTB3, departmentGOSB31, departmentOSB311));
-        when(departmentDao.getDepartmenTBChildren(departmentOSB311.getId())).thenReturn(asList(departmentTB3, departmentGOSB31, departmentOSB311));
+        when(departmentDao.getDepartmentTB(root.getId())).thenReturn(null);
+        when(departmentDao.getDepartmentTB(departmentTB2.getId())).thenReturn(departmentTB2);
+        when(departmentDao.getDepartmentTB(departmentTB3.getId())).thenReturn(departmentTB3);
+        when(departmentDao.getDepartmentTB(departmentGOSB31.getId())).thenReturn(departmentTB3);
+        when(departmentDao.getDepartmentTB(departmentOSB311.getId())).thenReturn(departmentTB3);
+        when(departmentDao.getDepartmentTBChildren(root.getId())).thenReturn(new ArrayList<Department>(0));
+        when(departmentDao.getDepartmentTBChildren(departmentTB2.getId())).thenReturn(asList(departmentTB2));
+        when(departmentDao.getDepartmentTBChildren(departmentTB3.getId())).thenReturn(asList(departmentTB3, departmentGOSB31, departmentOSB311));
+        when(departmentDao.getDepartmentTBChildren(departmentGOSB31.getId())).thenReturn(asList(departmentTB3, departmentGOSB31, departmentOSB311));
+        when(departmentDao.getDepartmentTBChildren(departmentOSB311.getId())).thenReturn(asList(departmentTB3, departmentGOSB31, departmentOSB311));
 
         when(periodService.getReportPeriod(any(Integer.class))).thenReturn(mock(ReportPeriod.class));
 
-        when(departmentDao.getDepartmenTBChildrenId(root.getId())).thenReturn(new ArrayList<Integer>(0));
-        when(departmentDao.getDepartmenTBChildrenId(departmentTB2.getId())).thenReturn(asList(departmentTB2.getId()));
-        when(departmentDao.getDepartmenTBChildrenId(departmentTB3.getId())).thenReturn(asList(departmentTB3.getId(), departmentGOSB31.getId(), departmentOSB311.getId()));
-        when(departmentDao.getDepartmenTBChildrenId(departmentGOSB31.getId())).thenReturn(asList(departmentTB3.getId(), departmentGOSB31.getId(), departmentOSB311.getId()));
-        when(departmentDao.getDepartmenTBChildrenId(departmentOSB311.getId())).thenReturn(asList(departmentTB3.getId(), departmentGOSB31.getId(), departmentOSB311.getId()));
+        when(departmentDao.getDepartmentTBChildrenId(root.getId())).thenReturn(new ArrayList<Integer>(0));
+        when(departmentDao.getDepartmentTBChildrenId(departmentTB2.getId())).thenReturn(asList(departmentTB2.getId()));
+        when(departmentDao.getDepartmentTBChildrenId(departmentTB3.getId())).thenReturn(asList(departmentTB3.getId(), departmentGOSB31.getId(), departmentOSB311.getId()));
+        when(departmentDao.getDepartmentTBChildrenId(departmentGOSB31.getId())).thenReturn(asList(departmentTB3.getId(), departmentGOSB31.getId(), departmentOSB311.getId()));
+        when(departmentDao.getDepartmentTBChildrenId(departmentOSB311.getId())).thenReturn(asList(departmentTB3.getId(), departmentGOSB31.getId(), departmentOSB311.getId()));
 
         // Роли
         taRoles = new ArrayList<TARole>();
@@ -228,17 +227,6 @@ public class DepartmentServiceImplTest {
     public void listIdAllTest() {
         departmentService.listIdAll();
         verify(departmentDao, times(1)).listDepartmentIds();
-    }
-
-    @Test
-    public void getParentTest() {
-        DepartmentDao departmentDao = mock(DepartmentDao.class);
-        ReflectionTestUtils.setField(departmentService, "departmentDao", departmentDao);
-        Integer departmentId = anyInt();
-        when(departmentDao.getParent(departmentId)).thenReturn(new Department());
-
-        departmentService.getParent(departmentId);
-        verify(departmentDao, times(1)).getParent(departmentId);
     }
 
     @Test

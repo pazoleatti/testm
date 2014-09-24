@@ -64,4 +64,11 @@ public interface NotificationService {
      * @param reportPeriodId отчетный период
      */
     void deleteByReportPeriod(int reportPeriodId);
+
+    /**
+     * Обновляет статус уведомлений пользователя на "Просмотрен"
+     * @param filter фильтр оповещений
+     * @param userId идентификатор пользователя, который будет установлен первым прочитавшим оповещения
+     */
+    void updateUserNotificationsStatus(NotificationsFilterData filter, int userId);
 }
