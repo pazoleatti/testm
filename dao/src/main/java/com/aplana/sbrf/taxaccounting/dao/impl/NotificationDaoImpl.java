@@ -234,7 +234,7 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
 		}
 	}
 
-    private static final String GET_COUNT_BY_FILTER = "select distinct count(*) from notification \n" +
+    private static final String GET_COUNT_BY_FILTER = "select count(distinct id) from notification \n" +
             "where (((:receiverDepartmentId is not null and RECEIVER_DEPARTMENT_ID = :receiverDepartmentId) or (:senderDepartmentId is not null and SENDER_DEPARTMENT_ID = :senderDepartmentId)) or \n" +
             "(:userId is not null and USER_ID = :userId) %s) and (:onlyNew != 1 or FIRST_READER_ID is null)";
 
