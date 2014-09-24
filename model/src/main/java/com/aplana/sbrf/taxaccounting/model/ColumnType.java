@@ -9,21 +9,27 @@ package com.aplana.sbrf.taxaccounting.model;
 
 public enum ColumnType {
 
-	AUTO ('A'),
-	DATE ('D'),
-	NUMBER ('N'),
-	REFBOOK ('R'),
-	REFERENCE ('R'),
-	STRING ('S');
+	AUTO ('A', "Автонумеруемая графа"),
+	DATE ('D', "Дата"),
+	NUMBER ('N', "Число"),
+	REFBOOK ('R', "Справочник"),
+	REFERENCE ('R', "Зависимая графа"),
+	STRING ('S', "Строка");
 
 	private char code;
+	private String title;
 
-	ColumnType(char code) {
+	ColumnType(char code, String title) {
 		this.code = code;
+		this.title = title;
 	}
 
 	public char getCode() {
 		return code;
+	}
+
+	public String getTitle() {
+		return title;
 	}
 
 }

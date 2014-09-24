@@ -26,20 +26,18 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-
 public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColumnUiHandlers>
 		implements FormTemplateColumnPresenter.MyView {
-
 
     public interface Binder extends UiBinder<Widget, FormTemplateColumnView> { }
 
     // Типы графы
-    private static final String STRING_TYPE = "Строка";
-    private static final String NUMERIC_TYPE = "Число";
-    private static final String DATE_TYPE = "Дата";
-    private static final String REFBOOK_TYPE = "Справочник";
-    private static final String REFERENCE_TYPE = "Зависимая графа";
-    private static final String AUTONUMERATION_TYPE = "Автонумеруемая графа";
+    private static final String STRING_TYPE = ColumnType.STRING.getTitle();
+    private static final String NUMERIC_TYPE = ColumnType.NUMBER.getTitle();
+    private static final String DATE_TYPE = ColumnType.DATE.getTitle();
+    private static final String REFBOOK_TYPE = ColumnType.REFBOOK.getTitle();
+    private static final String REFERENCE_TYPE = ColumnType.REFERENCE.getTitle();
+    private static final String AUTONUMERATION_TYPE = ColumnType.AUTO.getTitle();
 
 	private List<Column> columns;
 
