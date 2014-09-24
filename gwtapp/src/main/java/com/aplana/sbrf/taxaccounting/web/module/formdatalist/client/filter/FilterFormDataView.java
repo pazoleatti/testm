@@ -110,11 +110,11 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
             @Override
             public String render(Boolean object) {
                 if (object == Boolean.TRUE) {
-                    return "Корректирующий";
+                    return "Только корректирующие";
                 } else if (object == Boolean.FALSE) {
-                    return "Не корректирующий";
+                    return "Только не корректирующие";
                 } else {
-                    return "";
+                    return "Все периоды";
                 }
             }
         });

@@ -17,6 +17,8 @@ public class DeclarationDataFilter implements Serializable {
 
     private WorkflowState formState;
 
+    private Boolean correctionTag;
+
     /*Стартовый индекс списка записей */
 	private int startIndex;
 
@@ -128,5 +130,13 @@ public class DeclarationDataFilter implements Serializable {
 
     public void setTaxOrganKpp(String taxOrganKpp) {
         this.taxOrganKpp = taxOrganKpp;
+    }
+
+    public Boolean getCorrectionTag() {
+        return correctionTag;
+    }
+
+    public void setCorrectionTag(Boolean correctionTag) {
+        this.correctionTag = correctionTag;
     }
 }

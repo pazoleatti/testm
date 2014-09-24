@@ -289,6 +289,12 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 sql.append(" AND dec.is_accepted = 1");
             }
         }
+
+        if (filter.getCorrectionTag() != null) {
+            sql.append(" and drp.correction_date is " +
+                    (Boolean.TRUE.equals(filter.getCorrectionTag()) ? "not " : "") + "null");
+        }
+
         if (filter.getTaxType() == TaxType.PROPERTY) {
             if (filter.getTaxOrganCode() != null && !filter.getTaxOrganCode().isEmpty()) {
                 String[] codes = filter.getTaxOrganCode().split("; ");
