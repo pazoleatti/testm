@@ -164,7 +164,8 @@ create table ref_book_attribute (
   sort_order number(9),
   format number(2),
   read_only number(1) default 0 not null,
-  max_length number(4)
+  max_length number(4),
+  is_table number(1) default 0 not null
 );
 comment on table ref_book_attribute is 'Атрибут справочника';
 comment on column ref_book_attribute.id is 'Уникальный идентификатор';
@@ -184,6 +185,7 @@ comment on column ref_book_attribute.sort_order is 'Определяет пор�
 comment on column ref_book_attribute.format is 'Формат. (Для дат: 0 - "", 1 - "dd.MM.yyyy", 2 - "MM.yyyy", 3 - "MMMM yyyy", 4 - "yyyy", 5 - "dd.MM"; Для чисел: 6 - чекбокс)';
 comment on column ref_book_attribute.read_only is 'Только для чтения (0 - редактирование доступно пользователю; 1 - редактирование недоступно пользователю)';
 comment on column ref_book_attribute.max_length is 'Максимальная длина строки/Максимальное количество цифр без учета знака и десятичного разделителя';
+comment on column ref_book_attribute.is_table is 'Признак табличного атрибута';
 ------------------------------------------------------------------------------------------------------
 create table ref_book_record (
   id number(18) not null,
@@ -208,7 +210,8 @@ create table ref_book_value (
   string_value varchar2(4000),
   number_value number(27,10),
   date_value date,
-  reference_value number(18)
+  reference_value number(18), 
+  row_num number(9)
 );
 comment on table ref_book_value is 'Значение записи справочника';
 comment on column ref_book_value.record_id is 'Ссылка на запись справочника';
@@ -217,6 +220,7 @@ comment on column ref_book_value.string_value is 'Строковое значе�
 comment on column ref_book_value.number_value is 'Численное значение';
 comment on column ref_book_value.date_value is 'Значение даты';
 comment on column ref_book_value.reference_value is 'Значение ссылки';
+comment on column ref_book_value.row_num is 'Номер строки в табличной части справочника';
 ------------------------------------------------------------------------------------------------------
 create table form_column (
   id number(9) not null,
@@ -740,7 +744,8 @@ first_reader_id number(9) null,
 text varchar2(2000) not null, 
 create_date date not null, 
 deadline date null,
-user_id number(9) null
+user_id number(9) null,
+role_id number(9) null
 );
 
 comment on table notification is 'Оповещения';
@@ -753,6 +758,7 @@ comment on column notification.text is 'текст оповещения';
 comment on column notification.create_date is 'дата создания оповещения';
 comment on column notification.deadline is 'дата сдачи отчетности';
 comment on column notification.user_id is 'Идентификатор пользователя, который получит оповещение';
+comment on column notification.role_id is 'Роль пользователя, который получит оповещение';
 
 create sequence seq_notification start with 10000;
 
@@ -843,14 +849,14 @@ comment on column report.checking is 'Типы столбцов (0 - тольк�
 comment on column report.absolute is 'Режим вывода данных (0 - только дельты, 1 - абсолютные значения)';
 
 --------------------------------------------------------------------------------------------------------
-create table lock_data_notification
+create table lock_data_subscribers
 (
 lock_key varchar2(1000 byte) not null,
 user_id number(9) not null 
 );
 
-comment on table lock_data_notification is 'Заявки на оповещения, после завершения операций над заблокированными объектами';
-comment on column lock_data_notification.lock_key is 'Ключ блокировки объекта, после завершения операции над которым, будет выполнено оповещение';
-comment on column lock_data_notification.user_id is 'Идентификатор пользователя, который получит оповещение';
+comment on table lock_data_subscribers is 'Cписок пользователей, ожидающих выполнения операций над объектом блокировки';
+comment on column lock_data_subscribers.lock_key is 'Ключ блокировки объекта, после завершения операции над которым, будет выполнено оповещение';
+comment on column lock_data_subscribers.user_id is 'Идентификатор пользователя, который получит оповещение';
 
 --------------------------------------------------------------------------------------------------------

@@ -23,4 +23,10 @@ public class XmlGeneratorAsyncTask extends AbstractAsyncTask {
     protected String getAsyncTaskName() {
         return "Генерация xml-файла";
     }
+
+    @Override
+    protected String getNotificationMsg() {
+        //TODO
+        return null;
+    }
 }

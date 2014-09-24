@@ -42,15 +42,15 @@ public class AsyncManagerBean implements AsyncManager {
         ConnectionFactory connectionFactory;
         Queue queue;
         Connection connection = null;
-        if (balancingVariant == BalancingVariants.SHORT) {
-            connectionFactory = shortAsyncConnectionFactory;
-            queue = shortAsyncQueue;
-        } else {
-            connectionFactory = longAsyncConnectionFactory;
-            queue = longAsyncQueue;
-        }
 
         try {
+            if (balancingVariant == BalancingVariants.SHORT) {
+                connectionFactory = shortAsyncConnectionFactory;
+                queue = shortAsyncQueue;
+            } else {
+                connectionFactory = longAsyncConnectionFactory;
+                queue = longAsyncQueue;
+            }
             checkParams(params);
             AsyncMdbObject asyncMdbObject = new AsyncMdbObject();
             asyncMdbObject.setTaskTypeId(taskTypeId);

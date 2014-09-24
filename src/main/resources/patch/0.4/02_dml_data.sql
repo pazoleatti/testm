@@ -44,5 +44,59 @@ WHERE rbr.ref_book_id = 14 AND EXISTS (SELECT 1 FROM ref_book_value rbv WHERE rb
 DELETE FROM ref_book_record rbr WHERE rbr.ref_book_id = 14 AND STATUS = -1 AND EXISTS (SELECT 1 FROM ref_book_value rbv WHERE rbv.record_id = rbr.id AND rbv.attribute_id = 62 AND rbv.number_value = 1);
 
 ---------------------------------------------------------------------------------------------------
+-- http://jira.aplana.com/browse/SBRFACCTAX-8416: Изменения в стилях для граф "Наименование подразделения в декларации"
+
+-- (Приложение 5) Сведения для расчета налога на прибыль
+MERGE INTO cell_style USING (WITH set_style AS
+                              (SELECT fty.id AS form_type_id,
+                                      fs1.id AS control_sum,
+                                      fs2.id AS auto_fill
+                               FROM form_type fty
+                               JOIN form_template fte ON fte.type_id = fty.id AND fty.id IN (372)
+                               JOIN form_style fs1 ON fs1.form_template_id = fte.id AND fs1.alias = 'Контрольные суммы'
+                               JOIN form_style fs2 ON fs2.form_template_id = fte.id
+                               AND fs2.alias = 'Автозаполняемая')
+                             SELECT dr.id AS row_id,
+                                    fc.id AS column_id,
+                                    CASE
+                                        WHEN dr.alias IS NULL THEN ss.auto_fill
+                                        ELSE ss.control_sum
+                                    END AS style_id
+                             FROM form_type fty
+                             JOIN form_template fte ON fte.type_id = fty.id AND fty.id IN (372) AND fte.status = 0
+                             JOIN form_column fc ON fc.form_template_id = fte.id AND fc.alias = 'divisionName'
+                             JOIN form_data fd ON fd.form_template_id = fte.id
+                             JOIN data_row dr ON dr.form_data_id = fd.id
+                             JOIN set_style ss ON ss.form_type_id = fty.id) new_styles 
+ON (cell_style.row_id = new_styles.row_id AND cell_style.column_id = new_styles.column_id) 
+WHEN MATCHED THEN UPDATE SET cell_style.style_id = new_styles.style_id 
+WHEN NOT MATCHED THEN INSERT (cell_style.row_id, cell_style.column_id, cell_style.style_id) VALUES (new_styles.row_id, new_styles.column_id, new_styles.style_id); 
+
+-- Расчёт распределения авансовых платежей и налога на прибыль по обособленным подразделениям организации
+MERGE INTO cell_style USING (WITH set_style AS
+                              (SELECT fty.id AS form_type_id,
+                                      fs1.id AS total,
+                                      fs2.id AS auto_fill
+                               FROM form_type fty
+                               JOIN form_template fte ON fte.type_id = fty.id AND fty.id IN (500)
+                               JOIN form_style fs1 ON fs1.form_template_id = fte.id AND fs1.alias = 'Итоговая'
+                               JOIN form_style fs2 ON fs2.form_template_id = fte.id AND fs2.alias = 'Автозаполняемая')
+                             SELECT dr.id AS row_id,
+                                    fc.id AS column_id,
+                                    CASE
+                                        WHEN dr.alias IS NULL THEN ss.auto_fill
+                                        ELSE ss.total
+                                    END AS style_id
+                             FROM form_type fty
+                             JOIN form_template fte ON fte.type_id = fty.id AND fty.id IN (500) AND fte.status = 0
+                             JOIN form_column fc ON fc.form_template_id = fte.id AND fc.alias = 'divisionName'
+                             JOIN form_data fd ON fd.form_template_id = fte.id
+                             JOIN data_row dr ON dr.form_data_id = fd.id
+                             JOIN set_style ss ON ss.form_type_id = fty.id) new_styles 
+ON (cell_style.row_id = new_styles.row_id AND cell_style.column_id = new_styles.column_id) 
+WHEN MATCHED THEN UPDATE SET cell_style.style_id = new_styles.style_id 
+WHEN NOT MATCHED THEN INSERT (cell_style.row_id, cell_style.column_id, cell_style.style_id) VALUES (new_styles.row_id, new_styles.column_id, new_styles.style_id);
+
+----------------------------------------------------------------------------------------------------------------------------
 COMMIT;
 EXIT;

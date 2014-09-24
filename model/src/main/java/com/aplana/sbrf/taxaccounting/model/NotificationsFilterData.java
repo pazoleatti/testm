@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class NotificationsFilterData implements Serializable {
     private static final long serialVersionUID = -2957561387544546546L;
@@ -11,8 +12,17 @@ public class NotificationsFilterData implements Serializable {
         TEXT
     }
 
+    /** Фильтр по подразделению-отправителю */
 	private Integer senderDepartmentId;
+    /** Фильтр по подразделению-получателю */
 	private Integer receiverDepartmentId;
+    /** Фильтр по конкретному пользователю, ожидающему уведомлений */
+    private Integer userId;
+    /** Фильтр по ролям пользователя */
+    private List<Integer> userRoleIds;
+    /** Фильтр только не прочитанных оповещений */
+    private boolean onlyNew;
+
 
 	private Integer countOfRecords;
 	private Integer startIndex;
@@ -20,7 +30,23 @@ public class NotificationsFilterData implements Serializable {
     private SortColumn sortColumn = SortColumn.DATE;
     private boolean isAsc = false;
 
-	public Integer getSenderDepartmentId() {
+    public List<Integer> getUserRoleIds() {
+        return userRoleIds;
+    }
+
+    public void setUserRoleIds(List<Integer> userRoleIds) {
+        this.userRoleIds = userRoleIds;
+    }
+
+    public Integer getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Integer userId) {
+        this.userId = userId;
+    }
+
+    public Integer getSenderDepartmentId() {
 		return senderDepartmentId;
 	}
 
@@ -66,5 +92,13 @@ public class NotificationsFilterData implements Serializable {
 
     public void setAsc(boolean isAsc) {
         this.isAsc = isAsc;
+    }
+
+    public boolean isOnlyNew() {
+        return onlyNew;
+    }
+
+    public void setOnlyNew(boolean onlyNew) {
+        this.onlyNew = onlyNew;
     }
 }
