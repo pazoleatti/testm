@@ -8,7 +8,6 @@ import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.junit.After;
 import org.junit.Assert;
@@ -31,6 +30,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.*;
 
 /**
@@ -43,7 +43,7 @@ public class LoadFormDataServiceTest {
     @Autowired
     private LoadFormDataService loadFormDataService;
     @Autowired
-    private  DepartmentService departmentService;
+    private DepartmentService departmentService;
     @Autowired
     private ConfigurationDao configurationDao;
     @Autowired
@@ -99,7 +99,6 @@ public class LoadFormDataServiceTest {
     public void init() throws IOException {
         mockDepartmentService();
         mockDepartmentDao();
-        mockAuditService();
         temporaryFolder.create();
         uploadFolder = temporaryFolder.newFolder(ConfigurationParam.FORM_UPLOAD_DIRECTORY.name());
         archiveFolder = temporaryFolder.newFolder(ConfigurationParam.FORM_ARCHIVE_DIRECTORY.name());
@@ -135,18 +134,6 @@ public class LoadFormDataServiceTest {
     private void mockDepartmentDao() {
         when(departmentDao.getDepartmentIdsByType(DepartmentType.TERR_BANK.getCode())).thenReturn(DEPARTMENT_LIST);
         when(departmentDao.getDepartment(department147.getId())).thenReturn(department147);
-    }
-
-    private void mockAuditService() {
-//        doAnswer(new Answer() {
-//            @Override
-//            public Object answer(InvocationOnMock invocation) throws Throwable {
-//                System.out.println(invocation);
-//                return null;
-//            }
-//        }).when(auditService).add(any(FormDataEvent.class), any(TAUserInfo.class), any(Integer.class), any(Integer.class),
-//                anyString(), anyString(), any(Integer.class), anyString());
-        //ReflectionTestUtils.setField(loadFormDataService, "auditService", auditService);
     }
 
     private void mockFormTypeService() {
@@ -188,7 +175,8 @@ public class LoadFormDataServiceTest {
         departmentReportPeriod.setId(1);
         departmentReportPeriod.setReportPeriod(reportPeriod);
         departmentReportPeriod.setDepartmentId(department147.getId());
-        when(departmentReportPeriodDao.getListByFilter(any(DepartmentReportPeriodFilter.class))).thenReturn(Arrays.asList(departmentReportPeriod));
+        when(departmentReportPeriodDao.getLast(anyInt(), anyInt())).thenReturn(departmentReportPeriod);
+
         ReflectionTestUtils.setField(loadFormDataService, "departmentReportPeriodDao", departmentReportPeriodDao);
      }
 
