@@ -180,7 +180,7 @@ public final class ScriptUtils {
         Rect rect = range.getRangeRect(formData, dataRows);
         for (int j = rect.x1; j <= rect.x2; j++) {
             Column col = cols.get(j);
-            if (!(col instanceof NumericColumn))
+            if (!(ColumnType.NUMBER.equals(col.getColumnType())))
                 throw new IllegalArgumentException(String.format(WRONG_COLUMN_TYPE,
                         cols.get(rect.x1).getName(),
                         cols.get(rect.x2).getName(),

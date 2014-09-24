@@ -47,18 +47,13 @@ public class Cell extends AbstractCell {
         if (hasValueOwner()) {
             return getValueOwner().getValue();
         }
-
         if (stringValue != null) {
             return stringValue;
         } else if (dateValue != null) {
             return dateValue;
         } else if (numericValue != null) {
-            if (getColumn() instanceof RefBookColumn) {
-                // Возвращаем Long если это ссылка на значение справочника
-                return numericValue.longValueExact();
-            } else {
-                return numericValue;
-            }
+			// Возвращаем Long если это ссылка на значение справочника
+            return ColumnType.REFBOOK.equals(getColumn().getColumnType()) ? numericValue.longValueExact() : numericValue;
         }
         return null;
     }
@@ -77,9 +72,9 @@ public class Cell extends AbstractCell {
             msg = "Строка " + rowNumber + ": " + msg;
             msgValue = "Строка " + rowNumber + ": " + msgValue;
         }
-
+		ColumnType columnType = getColumn().getColumnType();
         // Проверяем на предмет столбца - справочник
-        if (getColumn() instanceof RefBookColumn) {
+        if (ColumnType.REFBOOK.equals(columnType)) {
             if ((value != null) && (value instanceof BigDecimal) && ((BigDecimal) value).scale() == 0) {
                 numericValue = (BigDecimal) value;
                 return numericValue.longValueExact();
@@ -97,9 +92,10 @@ public class Cell extends AbstractCell {
             }
         }
 
-        if ((value != null) && !(value instanceof Number && (getColumn() instanceof NumericColumn  || getColumn() instanceof ReferenceColumn || getColumn() instanceof AutoNumerationColumn)
-                || value instanceof String && getColumn() instanceof StringColumn
-                || value instanceof Date && getColumn() instanceof DateColumn)) {
+        if ((value != null) && !(value instanceof Number && (ColumnType.NUMBER.equals(columnType) ||
+				ColumnType.REFERENCE.equals(columnType) || ColumnType.AUTO.equals(columnType))
+                || value instanceof String && ColumnType.STRING.equals(columnType)
+                || value instanceof Date && ColumnType.DATE.equals(columnType))) {
             throw new IllegalArgumentException(msg + "Несовместимые типы колонки и значения");
         }
         if (value instanceof Integer) {
@@ -109,7 +105,7 @@ public class Cell extends AbstractCell {
         } else if (value instanceof Long) {
             value = new BigDecimal((Long) value);
         }
-        if (getColumn() instanceof NumericColumn && value != null) {
+        if (value != null && ColumnType.NUMBER.equals(columnType)) {
             int precision = ((NumericColumn) getColumn()).getPrecision();
             value = ((BigDecimal) value).setScale(precision,
                     RoundingMode.HALF_UP);
@@ -118,7 +114,7 @@ public class Cell extends AbstractCell {
                         (((NumericColumn) getColumn()).getMaxLength() - ((NumericColumn) getColumn()).getPrecision()) +
                         " знаков)!");
             }
-        } else if (getColumn() instanceof StringColumn) {
+        } else if (ColumnType.STRING.equals(columnType)) {
             if (!getColumn().getValidationStrategy().matches((String) value)) {
                 throw new IllegalArgumentException(msg + "содержит значение '" +
                         ((String) value) + "' длиннее " + ((StringColumn) getColumn()).getMaxLength());

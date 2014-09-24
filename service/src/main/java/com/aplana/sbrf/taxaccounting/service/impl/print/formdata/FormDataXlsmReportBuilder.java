@@ -328,29 +328,29 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                 }
                 Object obj = dataRow.get(column.getAlias());
                 Cell cell = mergedDataCells(dataRow.getCell(column.getAlias()), row, i, false);
-                if (column instanceof StringColumn) {
+                if (ColumnType.STRING.equals(column.getColumnType())) {
                     String str = (String) obj;
                     CellStyle cellStyle = cellStyleBuilder.createCellStyle(CellType.STRING, column.getAlias());
                     cell.setCellStyle(cellStyle);
                     cell.setCellValue(str);
-                } else if (column instanceof DateColumn) {
+                } else if (ColumnType.DATE.equals(column.getColumnType())) {
                     Date date = (Date) obj;
                     if (date != null)
                         cell.setCellValue(date);
                     else
                         cell.setCellValue("");
                     cell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.DATE, column.getAlias()));
-                } else if (column instanceof NumericColumn) {
+                } else if (ColumnType.NUMBER.equals(column.getColumnType())) {
                     BigDecimal bd = (BigDecimal) obj;
                     cell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.BIGDECIMAL, column.getAlias()));
 
                     cell.setCellValue(bd != null ? String.valueOf(bd) : "");
-                } else if (column instanceof AutoNumerationColumn) {
+                } else if (ColumnType.AUTO.equals(column.getColumnType())) {
                     BigDecimal bd = (BigDecimal) obj;
                     cell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.NUMERATION, column.getAlias()));
 
                     cell.setCellValue(bd != null ? String.valueOf(bd) : "");
-                } else if (column instanceof RefBookColumn || column instanceof ReferenceColumn) {
+                } else if (ColumnType.REFBOOK.equals(column.getColumnType()) || ColumnType.REFERENCE.equals(column.getColumnType())) {
                     CellStyle cellStyle = cellStyleBuilder.createCellStyle(CellType.STRING, column.getAlias());
                     cell.setCellStyle(cellStyle);
                     cell.setCellValue(dataRow.getCell(column.getAlias()).getRefBookDereference());

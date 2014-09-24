@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -80,10 +81,15 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		List<DataRow<Cell>> forUpdate = new ArrayList<DataRow<Cell>>();
 		List<DataRow<Cell>> forCreate = new ArrayList<DataRow<Cell>>();
 		List<Long> forCreateOrder = new ArrayList<Long>();
-        //TODO Заменить цикл на вызов ДАО
+
+		List<Long> dataRowIds = new ArrayList<Long>(rows.size());
 		for (DataRow<Cell> dataRow : rows) {
-			Long id = dataRow.getId();
-			Pair<Integer, Long> typeAndOrd = getTypeAndOrdById(fd.getId(), id);
+			dataRowIds.add(dataRow.getId());
+		}
+		Map<Long, Pair<Integer, Long>> typeAndOrds = getTypeAndOrdById(fd.getId(), dataRowIds);
+
+		for (DataRow<Cell> dataRow : rows) {
+			Pair<Integer, Long> typeAndOrd = typeAndOrds.get(dataRow.getId());
 			if (TypeFlag.ADD.getKey() == typeAndOrd.getFirst()) {
 				forUpdate.add(dataRow);
 			} else {
@@ -478,31 +484,30 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	/**
 	 * Метод получает пару: TYPE и ORD. Метод работает со временным срезом формы
 	 * 
-	 * @param formDataId
-	 * @param dataRowId
-	 * @return
 	 */
-	private Pair<Integer, Long> getTypeAndOrdById(long formDataId,
-			Long dataRowId) {
+	private Map<Long, Pair<Integer, Long>> getTypeAndOrdById(long formDataId, List<Long> dataRowIds) {
+		final Map<Long, Pair<Integer, Long>> result = new HashMap<Long, Pair<Integer, Long>>();
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("formDataId", formDataId);
 		params.put("types", Arrays.asList(TypeFlag.ADD.getKey(), TypeFlag.SAME.getKey()));
-		params.put("dataRowId", dataRowId);
-		try {
-			return DataAccessUtils.requiredSingleResult(getNamedParameterJdbcTemplate()
-				.query("SELECT type, ord, id FROM data_row WHERE TYPE IN (:types) AND form_data_id = :formDataId AND id = :dataRowId",
+		params.put("dataRowIds", dataRowIds);
+		getNamedParameterJdbcTemplate()
+			.query("SELECT type, ord, id FROM data_row WHERE TYPE IN (:types) AND form_data_id = :formDataId AND id IN (:dataRowIds)",
 					params,
-					new RowMapper<Pair<Integer, Long>>() {
+					new RowCallbackHandler() {
 						@Override
-						public Pair<Integer, Long> mapRow(ResultSet rs, int rowNum) throws SQLException {
-							return new Pair<Integer, Long>(
-								SqlUtils.getInteger(rs, "type"),
-								SqlUtils.getLong(rs, "ord"));
+						public void processRow(ResultSet rs) throws SQLException {
+							Integer type = SqlUtils.getInteger(rs, "type");
+							Long ord = SqlUtils.getLong(rs, "ord");
+							Long id = SqlUtils.getLong(rs, "id");
+							result.put(id, new Pair<Integer, Long>(type, ord));
 						}
-					}));
-		} catch (EmptyResultDataAccessException e) {
-			throw new DaoException(ERROR_MSG_NO_ROWID, dataRowId, formDataId);
+					}
+			);
+		if (result.size() != dataRowIds.size()) {
+			throw new DaoException(ERROR_MSG_NO_ROWID);
 		}
+		return result;
 	}
 
 	/**

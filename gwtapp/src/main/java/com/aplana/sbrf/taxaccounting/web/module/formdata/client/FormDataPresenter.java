@@ -102,7 +102,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                     for (DataRow<Cell> row : result.getDataRows()) {
                                         for (String alias : aliases) {
                                             Cell cell = row.getCell(alias);
-                                            if (!(cell.getColumn() instanceof ReferenceColumn)) {
+                                            if (!(ColumnType.REFERENCE.equals(cell.getColumn().getColumnType()))) {
                                                 cell.setEditable(true);
                                                 if (cell.getStyle() == null) {
                                                     cell.setClientStyle("manual_editable_cell", Color.BLACK, Color.LIGHT_BLUE);

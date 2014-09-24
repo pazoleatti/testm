@@ -39,15 +39,14 @@ public final class DataRowDaoImplUtils {
 				}
 			} };
 
-	static <T> T getCellValueComponent(Column c, T[] objects) {
-		if (c instanceof StringColumn) {
-			return objects[1];
-		} else if (c instanceof NumericColumn || c instanceof RefBookColumn || c instanceof ReferenceColumn || c instanceof AutoNumerationColumn) {
-			return objects[0];
-		} else if (c instanceof DateColumn) {
-			return objects[2];
-		} else {
-			throw new IllegalArgumentException();
+	static <T> T getCellValueComponent(Column column, T[] objects) {
+		switch (column.getColumnType()) {
+			case STRING:
+				return objects[1];
+			case DATE:
+				return objects[2];
+			default:
+				return objects[0];
 		}
 	}
 

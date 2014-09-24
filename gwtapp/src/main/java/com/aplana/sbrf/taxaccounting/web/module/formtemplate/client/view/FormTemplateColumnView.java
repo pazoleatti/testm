@@ -60,8 +60,8 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 			}
 		}
 
-        autoNumerationList.add(new AutoNumerationColumn(AutoNumerationColumnType.SERIAL));
-        autoNumerationList.add(new AutoNumerationColumn(AutoNumerationColumnType.CROSS));
+        autoNumerationList.add(new AutoNumerationColumn(NumerationType.SERIAL));
+        autoNumerationList.add(new AutoNumerationColumn(NumerationType.CROSS));
     }
 
 	@UiField
@@ -241,7 +241,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
         autoNumerationBox = new ValueListBox<AutoNumerationColumn>(new AbstractRenderer<AutoNumerationColumn>() {
             @Override
             public String render(AutoNumerationColumn object) {
-                return object.getTypeName();
+                return object.getNumerationType().getTitle();
             }
         });
     }
@@ -371,9 +371,9 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
     @UiHandler("refBookBox")
 	public void onRefBookBox(ValueChangeEvent<RefBook> event) {
         Column currentColumn = columns.get(columnListBox.getSelectedIndex());
-        if (currentColumn instanceof RefBookColumn) {
+        if (ColumnType.REFBOOK.equals(currentColumn.getColumnType())) {
             ((RefBookColumn) currentColumn).setRefBookAttributeId(event.getValue().getAttributes().get(0).getId());
-        } else if (currentColumn instanceof ReferenceColumn) {
+        } else if (ColumnType.REFERENCE.equals(currentColumn.getColumnType())) {
             ((ReferenceColumn) currentColumn).setRefBookAttributeId(event.getValue().getAttributes().get(0).getId());
         }
         refBookAttrBox.setValue(event.getValue().getAttributes().get(0));
@@ -383,9 +383,9 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
     @UiHandler("refBookAttrBox")
     public void onRefBookAttrBox(ValueChangeEvent<RefBookAttribute> event) {
         Column currentColumn = columns.get(columnListBox.getSelectedIndex());
-        if (currentColumn instanceof RefBookColumn) {
+        if (ColumnType.REFBOOK.equals(currentColumn.getColumnType())) {
             ((RefBookColumn) currentColumn).setRefBookAttributeId(event.getValue().getId());
-        } else if (currentColumn instanceof ReferenceColumn) {
+        } else if (ColumnType.REFERENCE.equals(currentColumn.getColumnType())) {
             ((ReferenceColumn) currentColumn).setRefBookAttributeId(event.getValue().getId());
         }
 
@@ -405,9 +405,9 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
     @UiHandler("refBookAttrRefBox")
     public void onRefBookAttrRefBox(ValueChangeEvent<RefBookAttribute> event) {
         Column currentColumn = columns.get(columnListBox.getSelectedIndex());
-        if (currentColumn instanceof ReferenceColumn) {
+        if (ColumnType.REFERENCE.equals(currentColumn.getColumnType())) {
             ((ReferenceColumn) currentColumn).setRefBookAttributeId2(event.getValue().getId());
-        } else if (currentColumn instanceof  RefBookColumn) {
+        } else if (ColumnType.REFBOOK.equals(currentColumn.getColumnType())) {
             ((RefBookColumn) currentColumn).setRefBookAttributeId2(event.getValue().getId());
         }
     }
@@ -434,8 +434,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 
     @UiHandler("autoNumerationBox")
     public void onAutoNumerationBox(ValueChangeEvent<AutoNumerationColumn> event) {
-        ((AutoNumerationColumn) columns.get(columnListBox.getSelectedIndex())).setType(event.getValue().getType());
-        ((AutoNumerationColumn) columns.get(columnListBox.getSelectedIndex())).setTypeName(event.getValue().getTypeName());
+        ((AutoNumerationColumn) columns.get(columnListBox.getSelectedIndex())).setNumerationType(event.getValue().getNumerationType());
     }
 
 	@Override
@@ -474,20 +473,27 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 
 	private void setUniqueParameters() {
 		Column column = columns.get(columnListBox.getSelectedIndex());
-		if (column instanceof StringColumn) {
-			typeColumnDropBox.setValue(STRING_TYPE);
-		} else if (column instanceof NumericColumn) {
-			typeColumnDropBox.setValue(NUMERIC_TYPE);
-		} else if (column instanceof DateColumn) {
-			typeColumnDropBox.setValue(DATE_TYPE);
-		} else if (column instanceof RefBookColumn) {
-			typeColumnDropBox.setValue(REFBOOK_TYPE);
-		} else if (column instanceof ReferenceColumn) {
-            typeColumnDropBox.setValue(REFERENCE_TYPE);
-        } else if (column instanceof AutoNumerationColumn) {
-            typeColumnDropBox.setValue(AUTONUMERATION_TYPE);
-        } else {
-			throw new IllegalStateException();
+		switch (column.getColumnType()) {
+			case STRING:
+				typeColumnDropBox.setValue(STRING_TYPE);
+				break;
+			case NUMBER:
+				typeColumnDropBox.setValue(NUMERIC_TYPE);
+				break;
+			case DATE:
+				typeColumnDropBox.setValue(DATE_TYPE);
+				break;
+			case REFBOOK:
+				typeColumnDropBox.setValue(REFBOOK_TYPE);
+				break;
+			case REFERENCE:
+				typeColumnDropBox.setValue(REFERENCE_TYPE);
+				break;
+			case AUTO:
+				typeColumnDropBox.setValue(AUTONUMERATION_TYPE);
+				break;
+			default:
+				throw new IllegalStateException();
 		}
 		populateUniqueParameters();
 		typeColumnDropBox.setAcceptableValues(columnTypeNameList);
@@ -614,7 +620,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
         } else if (AUTONUMERATION_TYPE.equals(typeColumnDropBox.getValue())) {
             autoNumerationPanel.setVisible(true);
             autoNumerationBox.setVisible(true);
-            autoNumerationBox.setValue(autoNumerationList.get(((AutoNumerationColumn) column).getType()), false);
+            autoNumerationBox.setValue(autoNumerationList.get(((AutoNumerationColumn) column).getNumerationType().getId()), false);
             autoNumerationBox.setAcceptableValues(autoNumerationList);
         }
     }

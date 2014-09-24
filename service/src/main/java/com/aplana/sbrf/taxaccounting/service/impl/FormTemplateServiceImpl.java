@@ -353,7 +353,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
                         + ", максимальное: " + FORM_COLUMN_ALIAS_MAX_VALUE + ")");
             }
 
-            if (column instanceof StringColumn && ((StringColumn) column).getMaxLength() < ((StringColumn) column).getPrevLength()) {
+            if (ColumnType.STRING.equals(column.getColumnType()) && ((StringColumn) column).getMaxLength() < ((StringColumn) column).getPrevLength()) {
                 List<String> formDataList = formDataDao.getStringList(column.getId(), formTemplateTypeId);
                 for (String string : formDataList) {
                     if (string != null && string.length() > ((StringColumn) column).getMaxLength()) {
@@ -415,11 +415,11 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     @Override
     public void validateFormAutoNumerationColumn(FormTemplate formTemplate, Logger logger) {
         // Если есть хоть одна автонумеруемая графа
-        if (isAnyAutoNumerationColumn(formTemplate, AutoNumerationColumnType.CROSS)) {
+        if (isAnyAutoNumerationColumn(formTemplate, NumerationType.CROSS)) {
             Integer formTemplateId = formTemplate.getId();
             // Проверяем наличие в версии макета до редактирования хотя бы одной автонумеруемой графы, у которой "Тип нумерации строк" != "Сквозная".
             FormTemplate fullFormTemplate = getFullFormTemplate(formTemplateId);
-            if (isAnyAutoNumerationColumn(fullFormTemplate, AutoNumerationColumnType.SERIAL)) {
+            if (isAnyAutoNumerationColumn(fullFormTemplate, NumerationType.SERIAL)) {
                 List<ReportPeriod> reportPeriodList = reportPeriodDao.getClosedPeriodsForFormTemplate(formTemplateId);
 
                 if (reportPeriodList.size() != 0) {
@@ -442,14 +442,10 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     }
 
     @Override
-    public boolean isAnyAutoNumerationColumn(FormTemplate formTemplate, AutoNumerationColumnType type) {
-        List<Column> columns = formTemplate.getColumns();
-        for (Column column : columns) {
-            if (column instanceof AutoNumerationColumn) {
-                boolean isAutoNumerationColumn = (((AutoNumerationColumn) column).getType() == (type.getType()));
-                if (isAutoNumerationColumn) {
+    public boolean isAnyAutoNumerationColumn(FormTemplate formTemplate, NumerationType type) {
+        for (Column column : formTemplate.getColumns()) {
+            if (ColumnType.AUTO.equals(column.getColumnType()) && ((AutoNumerationColumn) column).getNumerationType().equals(type)) {
                     return true;
-                }
             }
         }
         return false;

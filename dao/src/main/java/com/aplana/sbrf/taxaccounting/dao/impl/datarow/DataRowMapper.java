@@ -69,17 +69,17 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 			String columnSId =  String.format("column%sId", columnId);
 			params.put(columnSId, columnId);
 
-			char valuePrefix = 's';
-			if (column instanceof StringColumn) {
-				valuePrefix = 's';
-			} else if (column instanceof NumericColumn || column instanceof RefBookColumn || column instanceof ReferenceColumn || column instanceof AutoNumerationColumn) {
-				valuePrefix = 'n';
-			} else if (column instanceof DateColumn) {
-				valuePrefix = 'd';
-			} else {
-				throw new IllegalArgumentException();
+			char valuePrefix;
+			switch (column.getColumnType()) {
+				case STRING:
+					valuePrefix = 's';
+					break;
+				case DATE:
+					valuePrefix = 'd';
+					break;
+				default:
+					valuePrefix = 'n';
 			}
-
 			select.append(",\n CASE WHEN c.column_id = :").append(columnSId).append(" THEN c.").append(valuePrefix).append("value ELSE NULL END v").append(columnId).append(",\n")
 					.append(" CASE WHEN c.column_id = :").append(columnSId).append(" THEN c.style_id ELSE NULL END s").append(columnId).append(",\n")
 					.append(" CASE WHEN c.column_id = :").append(columnSId).append(" THEN c.edit ELSE 0 END e").append(columnId).append(",\n")
@@ -120,8 +120,8 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 		Integer previousRowNumber = fd.getPreviousRowNumber() != null ? fd.getPreviousRowNumber() : 0;
 		for (Cell cell : cells) {
 			// Values
-			if (cell.getColumn() instanceof AutoNumerationColumn && rs.getString("A") == null) {
-				if (((AutoNumerationColumn) cell.getColumn()).getType() == 1) {
+			if (ColumnType.AUTO.equals(cell.getColumn().getColumnType()) && rs.getString("A") == null) {
+				if (NumerationType.CROSS.equals(((AutoNumerationColumn) cell.getColumn()).getNumerationType())) {
 					cell.setValue(SqlUtils.getInteger(rs, "IDX2") + previousRowNumber, rowNum);
 				} else {
 					cell.setValue(SqlUtils.getInteger(rs, "IDX2"), rowNum);

@@ -9,11 +9,21 @@ package com.aplana.sbrf.taxaccounting.model;
 
 public enum ColumnType {
 
-	AUTO,
-	DATE,
-	NUMBER,
-	REFBOOK,
-	REFERENCE,
-	STRING
+	AUTO ('A'),
+	DATE ('D'),
+	NUMBER ('N'),
+	REFBOOK ('R'),
+	REFERENCE ('R'),
+	STRING ('S');
+
+	private char code;
+
+	ColumnType(char code) {
+		this.code = code;
+	}
+
+	public char getCode() {
+		return code;
+	}
 
 }
