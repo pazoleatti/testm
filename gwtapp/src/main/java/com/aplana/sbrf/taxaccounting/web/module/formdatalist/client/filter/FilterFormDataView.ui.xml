@@ -13,70 +13,80 @@
             border-right: 1px solid #aeaeac;
         }
 
-        .btnFind {
-            margin-left: 6px;
+        .right15 {
             margin-right: 15px;
         }
-
-        .labelBlockMargin {
-            margin-left: 20px;
+        @external .gwt-Label;
+        .pnl .gwt-Label {
             margin-right: 5px;
+            margin-left: 10px;
         }
 
     </ui:style>
 
     <g:HorizontalPanel width="100%">
-        <g:HorizontalPanel>
-            <g:cell>
-                <g:VerticalPanel horizontalAlignment="right" addStyleNames="{style.labelBlockMargin}">
-                    <g:Label text="Тип налоговой формы:" ui:field="formDataKindLbl" wordWrap="false"/>
-                    <g:Label text="Вид налоговой формы:" ui:field="formTypeIdLbl" wordWrap="false"/>
-                </g:VerticalPanel>
-            </g:cell>
-            <g:cell width="33%">
-                <g:VerticalPanel width="100%">
-                    <r:RefBookPickerWidget ui:field="formDataKind" width="100%" searchEnabled="false" versionEnabled="false"
-                                           attributeIdInt="837" isHierarchical="false" multiSelect="true" title="Выбор типа налоговой формы"/>
-                    <r:RefBookPickerWidget ui:field="formTypeId" width="100%" versionEnabled="false"
-                                           attributeIdInt="835" isHierarchical="false" multiSelect="true" title="Выбор вида налоговой формы"/>
-                </g:VerticalPanel>
-            </g:cell>
-
-            <g:cell>
-                <g:VerticalPanel horizontalAlignment="right" addStyleNames="{style.labelBlockMargin}">
-                    <g:Label text="Подразделение:" ui:field="departmentPickerLbl" wordWrap="false"/>
-                    <g:Label text="Период:" ui:field="reportPeriodIdsLbl" wordWrap="false"/>
-                </g:VerticalPanel>
-            </g:cell>
-            <g:cell width="33%">
-                <g:VerticalPanel width="100%">
-                    <dep:DepartmentPickerPopupWidget ui:field="departmentPicker" multiselection="true" width="100%" />
-                    <per:PeriodPickerPopupWidget ui:field="reportPeriodIds" multiselect="true" width="100%"/>
-                </g:VerticalPanel>
-            </g:cell>
-
-            <g:cell>
-                <g:VerticalPanel horizontalAlignment="right" addStyleNames="{style.labelBlockMargin}">
-                    <g:Label text="Состояние:" ui:field="formStateLbl" wordWrap="false"/>
-                    <g:Label text="Признак возврата:" ui:field="returnStateLbl" wordWrap="false"/>
-                </g:VerticalPanel>
-            </g:cell>
-            <g:cell width="33%">
-                <g:VerticalPanel width="100%">
-                    <g:ValueListBox width="100%" ui:field="formState"/>
-                    <g:ValueListBox width="100%" ui:field="returnState"/>
-                </g:VerticalPanel>
-            </g:cell>
-        </g:HorizontalPanel>
-
-
+        <g:cell width="100%">
+            <g:HorizontalPanel width="100%" addStyleNames="{style.pnl}">
+                <g:cell>
+                    <g:VerticalPanel>
+                        <g:Label text="Подразделение:" ui:field="departmentPickerLbl" wordWrap="false"/>
+                        <g:Label text="Период:" ui:field="reportPeriodIdsLbl" wordWrap="false"/>
+                    </g:VerticalPanel>
+                </g:cell>
+                <g:cell width="25%">
+                    <g:VerticalPanel width="100%">
+                        <dep:DepartmentPickerPopupWidget ui:field="departmentPicker" multiselection="true"
+                                                         width="100%"/>
+                        <per:PeriodPickerPopupWidget ui:field="reportPeriodIds" multiselect="true" width="100%"/>
+                    </g:VerticalPanel>
+                </g:cell>
+                <g:cell>
+                    <g:VerticalPanel>
+                        <g:Label text="Тип налоговой формы:" ui:field="formDataKindLbl" wordWrap="false"/>
+                        <g:Label text="Вид налоговой формы:" ui:field="formTypeIdLbl" wordWrap="false"/>
+                    </g:VerticalPanel>
+                </g:cell>
+                <g:cell width="25%">
+                    <g:VerticalPanel width="100%">
+                        <r:RefBookPickerWidget ui:field="formDataKind" width="100%" searchEnabled="false"
+                                               versionEnabled="false"
+                                               attributeIdInt="837" isHierarchical="false" multiSelect="true"
+                                               title="Выбор типа налоговой формы"/>
+                        <r:RefBookPickerWidget ui:field="formTypeId" width="100%" versionEnabled="false"
+                                               attributeIdInt="835" isHierarchical="false" multiSelect="true"
+                                               title="Выбор вида налоговой формы"/>
+                    </g:VerticalPanel>
+                </g:cell>
+                <g:cell>
+                    <g:VerticalPanel>
+                        <g:Label text="Состояние:" ui:field="formStateLbl" wordWrap="false"/>
+                        <g:Label text="Признак возврата:" ui:field="returnStateLbl" wordWrap="false"/>
+                    </g:VerticalPanel>
+                </g:cell>
+                <g:cell width="25%">
+                    <g:VerticalPanel width="100%">
+                        <g:ValueListBox width="100%" ui:field="formState"/>
+                        <g:ValueListBox width="100%" ui:field="returnState"/>
+                    </g:VerticalPanel>
+                </g:cell>
+                <g:cell>
+                    <g:VerticalPanel width="100%">
+                        <g:Label text="Признак корректировки:" wordWrap="false"/>
+                    </g:VerticalPanel>
+                </g:cell>
+                <g:cell width="25%">
+                    <g:VerticalPanel width="100%">
+                        <g:ValueListBox width="100%" ui:field="correctionTag"/>
+                    </g:VerticalPanel>
+                </g:cell>
+            </g:HorizontalPanel>
+        </g:cell>
         <g:cell verticalAlignment="middle" horizontalAlignment="right">
-            <g:HTML addStyleNames="{style.separator}"/>
+            <g:HTML ui:field="separator" addStyleNames="{style.separator}"/>
         </g:cell>
         <g:cell verticalAlignment="middle">
-            <g:Button ui:field="apply" text="Найти" addStyleNames="{style.btnFind}"/>
+            <g:Button ui:field="apply" text="Найти" addStyleNames="{style.right15}"/>
         </g:cell>
     </g:HorizontalPanel>
-
 
 </ui:UiBinder>

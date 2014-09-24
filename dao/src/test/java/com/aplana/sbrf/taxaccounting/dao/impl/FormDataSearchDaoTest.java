@@ -83,6 +83,12 @@ public class FormDataSearchDaoTest {
 		filter.setReportPeriodIds(reportPeriods);
 		res = formDataSearchDao.findByFilter(filter);
 		assertEquals(2, res.size());
+
+        // Признак корректирующего периода
+        reportPeriods.add(1);
+        filter.setCorrectionTag(true);
+        res = formDataSearchDao.findByFilter(filter);
+        assertEquals(0, res.size());
 	}
 	
 	@Test

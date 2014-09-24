@@ -8,8 +8,8 @@ import java.util.List;
 	Объект, представляющий условие фильтрации списка данных по налоговым формам.
  */
 public class FormDataDaoFilter implements Serializable {
-	
-	/**
+
+    /**
 	 * Способ фильтрации по правам доступа 
 	 * (используется, чтобы предотвратить попадание в поиск результатов, на которые у пользователя нет прав)
 	 */
@@ -49,6 +49,8 @@ public class FormDataDaoFilter implements Serializable {
 	private AccessFilterType accessFilterType;
 
 	private Boolean returnState;
+
+    private Boolean correctionTag;
 
 	public List<Integer> getReportPeriodIds() {
 		return reportPeriodIds;
@@ -149,5 +151,19 @@ public class FormDataDaoFilter implements Serializable {
      */
     public void setAvailableFormDataKinds(List<FormDataKind> availableFormDataKinds) {
         this.availableFormDataKinds = availableFormDataKinds;
+    }
+
+    /**
+     * Признак корректирующего периода
+     */
+    public Boolean getCorrectionTag() {
+        return correctionTag;
+    }
+
+    /**
+     * Признак корректирующего периода
+     */
+    public void setCorrectionTag(Boolean correctionTag) {
+        this.correctionTag = correctionTag;
     }
 }

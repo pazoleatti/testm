@@ -45,6 +45,9 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
 	@UiField(provided = true)
 	ValueListBox<Boolean> returnState;
 
+    @UiField(provided = true)
+    ValueListBox<Boolean> correctionTag;
+
 	@UiField
 	PeriodPickerPopupWidget reportPeriodIds;
 
@@ -103,6 +106,18 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
 		    }
 	    });
 
+        correctionTag = new ListBoxWithTooltip<Boolean>(new AbstractRenderer<Boolean>() {
+            @Override
+            public String render(Boolean object) {
+                if (object == Boolean.TRUE) {
+                    return "Корректирующий";
+                } else if (object == Boolean.FALSE) {
+                    return "Не корректирующий";
+                } else {
+                    return "";
+                }
+            }
+        });
 
 		initWidget(binder.createAndBindUi(this));
         this.driver = driver;
@@ -136,6 +151,12 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
 		returnState.setValue(null);
 		returnState.setAcceptableValues(list);
 	}
+
+    @Override
+    public void setCorrectionTagList(List<Boolean> list) {
+        correctionTag.setValue(null);
+        correctionTag.setAcceptableValues(list);
+    }
 
 	@Override
 	public void setReportPeriods(List<ReportPeriod> reportPeriods) {
@@ -185,7 +206,7 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
 	}
 
 	@UiHandler("apply")
-	void onAppyButtonClicked(ClickEvent event) {
+	void onApplyButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
 			getUiHandlers().onApplyClicked();
 		}
@@ -209,5 +230,6 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
         returnState.setValue(null);
         reportPeriodIds.setValue(null);
         departmentPicker.setValue(null);
+        correctionTag.setValue(null);
     }
 }

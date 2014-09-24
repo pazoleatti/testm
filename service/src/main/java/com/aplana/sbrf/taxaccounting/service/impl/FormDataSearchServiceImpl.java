@@ -73,6 +73,8 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
         }
         // Признак возврата
         formDataDaoFilter.setReturnState(formDataFilter.getReturnState());
+        // Признак корректирующего периорда
+        formDataDaoFilter.setCorrectionTag(formDataFilter.getCorrectionTag());
         // Вид налога
         if (formDataFilter.getTaxType() != null) {
             formDataDaoFilter.setTaxTypes(asList(formDataFilter.getTaxType()));
@@ -223,6 +225,8 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
         if (formDataFilter.getTaxType() != null) {
             formDataDaoFilter.setTaxTypes(asList(formDataFilter.getTaxType()));
         }
+        // Признак корректирующего периода
+        formDataDaoFilter.setCorrectionTag(formDataFilter.getCorrectionTag());
 
         // ПРИНУДИТЕЛЬНАЯ ФИЛЬТРАЦИЯ
 
