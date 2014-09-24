@@ -97,7 +97,7 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
     }
 
     @Override
-    public boolean isExistLargeCorrection(Date correctionDate) {
-        return departmentReportPeriodDao.isExistLargeCorrection(correctionDate);
+    public boolean existLargeCorrection(int departmentId, int reportPeriodId, Date correctionDate) {
+        return departmentReportPeriodDao.existLargeCorrection(departmentId, reportPeriodId, correctionDate);
     }
 }

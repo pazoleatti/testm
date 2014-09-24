@@ -71,8 +71,10 @@ public interface DepartmentReportPeriodService {
 
     /**
      * Проверяет существует ли корректирующий период, атрибут "Период сдачи корректировки" которого содержит большее значение
+     * @param departmentId пара определяющая период
+     * @param reportPeriodId  пара определяющая период
      * @param correctionDate дата выбранного периода
      * @return true - если существует
      */
-    boolean isExistLargeCorrection(Date correctionDate);
+    boolean existLargeCorrection(int departmentId, int reportPeriodId, Date correctionDate);
 }

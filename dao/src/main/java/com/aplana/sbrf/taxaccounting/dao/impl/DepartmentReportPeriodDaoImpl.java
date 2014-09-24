@@ -50,56 +50,59 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     private static final String QUERY_TEMPLATE_SIMPLE = "select id, department_id, report_period_id, is_active, " +
             "is_balance_period, correction_date from department_report_period";
 
-    private static final String QUERY_TEMPLATE_COMPOSITE = "select drp.id, drp.department_id, drp.report_period_id, " +
-            "drp.is_active, drp.is_balance_period, drp.correction_date from department_report_period drp " +
-            "join report_period rp on drp.report_period_id = rp.id " +
-            "join tax_period tp on rp.tax_period_id = tp.id";
+    private static final String QUERY_TEMPLATE_COMPOSITE_SORT = "select drp.id, drp.department_id, drp.report_period_id, drp.is_active, drp.is_balance_period, drp.correction_date \n" +
+            "          from \n" +
+            "          department_report_period drp \n" +
+            "          join report_period rp on drp.report_period_id = rp.id \n" +
+            "          join tax_period tp on rp.tax_period_id = tp.id \n" +
+            "            where %s (:yearStart is null or tp.year >= :yearStart) and (:yearEnd is null or tp.year <= :yearEnd) \n" +
+            "            order by tp.year, drp.CORRECTION_DATE NULLS FIRST";
 
-    private String getFilterString(DepartmentReportPeriodFilter departmentReportPeriodFilter) {
-        if (departmentReportPeriodFilter == null) {
+    private String getFilterString(DepartmentReportPeriodFilter filter) {
+        if (filter == null) {
             return "";
         }
 
         List<String> causeList = new LinkedList<String>();
 
-        if (departmentReportPeriodFilter.isCorrection() != null) {
-            causeList.add("drp.correction_date is " + (departmentReportPeriodFilter.isCorrection() ? " not " : "") + " null");
+        if (filter.isCorrection() != null) {
+            causeList.add("drp.correction_date is " + (filter.isCorrection() ? " not " : "") + " null");
         }
 
-        if (departmentReportPeriodFilter.isBalance() != null) {
-            causeList.add("drp.is_balance_period " + (departmentReportPeriodFilter.isBalance() ? "<>" : "=") + " 0");
+        if (filter.isBalance() != null) {
+            causeList.add("drp.is_balance_period " + (filter.isBalance() ? "<>" : "=") + " 0");
         }
 
-        if (departmentReportPeriodFilter.isActive() != null) {
-            causeList.add("drp.is_active " + (departmentReportPeriodFilter.isActive() ? "<>" : "=") + " 0");
+        if (filter.isActive() != null) {
+            causeList.add("drp.is_active " + (filter.isActive() ? "<>" : "=") + " 0");
         }
 
-        if (departmentReportPeriodFilter.getCorrectionDate() != null) {
+        if (filter.getCorrectionDate() != null) {
             causeList.add("drp.correction_date = to_date('" +
-                    SIMPLE_DATE_FORMAT.format(departmentReportPeriodFilter.getCorrectionDate()) +
+                    SIMPLE_DATE_FORMAT.format(filter.getCorrectionDate()) +
                     "', 'DD.MM.YYYY')");
         }
 
-        if (departmentReportPeriodFilter.getDepartmentIdList() != null) {
+        if (filter.getDepartmentIdList() != null) {
             causeList.add(SqlUtils.transformToSqlInStatement("drp.department_id",
-                    departmentReportPeriodFilter.getDepartmentIdList()));
+                    filter.getDepartmentIdList()));
         }
 
-        if (departmentReportPeriodFilter.getReportPeriodIdList() != null) {
+        if (filter.getReportPeriodIdList() != null) {
             causeList.add(SqlUtils.transformToSqlInStatement("drp.report_period_id",
-                    departmentReportPeriodFilter.getReportPeriodIdList()));
+                    filter.getReportPeriodIdList()));
         }
 
-        if (departmentReportPeriodFilter.getTaxTypeList() != null) {
+        if (filter.getTaxTypeList() != null) {
             causeList.add("tp.tax_type in " +
-                    SqlUtils.transformTaxTypeToSqlInStatement(departmentReportPeriodFilter.getTaxTypeList()));
+                    SqlUtils.transformTaxTypeToSqlInStatement(filter.getTaxTypeList()));
         }
 
         if (causeList.isEmpty()) {
             return "";
         }
 
-        return " where " + StringUtils.join(causeList, " and ");
+        return StringUtils.join(causeList, " and ") + " and";
     }
 
     @Override
@@ -112,11 +115,14 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     }
 
     @Override
-    public List<DepartmentReportPeriod> getListByFilter(DepartmentReportPeriodFilter departmentReportPeriodFilter) {
+    public List<DepartmentReportPeriod> getListByFilter(final DepartmentReportPeriodFilter filter) {
         try {
-            return getNamedParameterJdbcTemplate().query(QUERY_TEMPLATE_COMPOSITE +
-                    getFilterString(departmentReportPeriodFilter), (Map) null, mapper);
-        } catch (DataAccessException e){
+            return getNamedParameterJdbcTemplate().query(String.format(QUERY_TEMPLATE_COMPOSITE_SORT, getFilterString(filter)),
+                    new HashMap<String, Object>(2) {{
+                        put("yearStart", filter.getYearStart());
+                        put("yearEnd", filter.getYearEnd());
+                    }}, mapper);
+        } catch (DataAccessException e) {
             logger.error("", e);
             throw new DaoException("", e);
         }
@@ -314,12 +320,13 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     }
 
     @Override
-    public boolean isExistLargeCorrection(Date correctionDate) {
+    public boolean existLargeCorrection(int departmentId, int reportPeriodId, Date correctionDate) {
         try {
             return getJdbcTemplate().
                     queryForInt(
-                            "select count(*) from department_report_period drp where drp.CORRECTION_DATE > ?",
-                            correctionDate) > 0;
+                            "select count(*) from department_report_period drp where " +
+                                    "drp.DEPARTMENT_ID = ? and drp.report_period_id = ? and drp.CORRECTION_DATE > ?",
+                            departmentId, reportPeriodId, correctionDate) > 0;
         } catch (DataAccessException e){
             logger.error("", e);
             throw new DaoException("", e);

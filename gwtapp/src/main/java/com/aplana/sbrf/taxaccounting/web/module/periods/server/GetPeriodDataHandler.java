@@ -45,6 +45,8 @@ public class GetPeriodDataHandler extends AbstractActionHandler<GetPeriodDataAct
         DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
         filter.setDepartmentIdList(Arrays.asList(action.getDepartmentId()));
         filter.setTaxTypeList(Arrays.asList(action.getTaxType()));
+        filter.setYearStart(action.getFrom());
+        filter.setYearEnd(action.getTo());
 
 		List<DepartmentReportPeriod> drpList = departmentReportPeriodService.getListByFilter(filter);
 		List<Integer> depIds = new ArrayList<Integer>();
@@ -55,28 +57,27 @@ public class GetPeriodDataHandler extends AbstractActionHandler<GetPeriodDataAct
 
 		for (DepartmentReportPeriod drp : drpList) {
 			int year = drp.getReportPeriod().getTaxPeriod().getYear();
-			if ((action.getFrom() <= year) && (year <= action.getTo())) {
-				if (per.get(year) == null) {
-					per.put(year, new ArrayList<TableRow>());
-				}
-				TableRow row = new TableRow();
-				row.setPeriodName(drp.getReportPeriod().getName());
-				row.setReportPeriodId(drp.getReportPeriod().getId());
-                row.setDictTaxPeriodId(drp.getReportPeriod().getDictTaxPeriodId());
-				row.setDepartmentId(drp.getDepartmentId());
-				row.setPeriodCondition(drp.isActive());
-				row.setBalance(drp.isBalance());
-				row.setYear(year);
-                row.setOrd(drp.getReportPeriod().getOrder());
-				row.setCorrectPeriod(drp.getCorrectionDate());
-				Department dep = departmentMap.get(drp.getDepartmentId());
-				Notification notification = notificationService.get(drp.getReportPeriod().getId(), dep.getId(), dep.getParentId());
-				row.setDeadline(notification != null ? notification.getDeadline() : null);
-                row.setDepartmentReportPeriodId(drp.getId());
-				per.get(year).add(row);
-			}
+            if (per.get(year) == null) {
+                per.put(year, new ArrayList<TableRow>());
+            }
+            TableRow row = new TableRow();
+            row.setPeriodName(drp.getReportPeriod().getName());
+            row.setReportPeriodId(drp.getReportPeriod().getId());
+            row.setDictTaxPeriodId(drp.getReportPeriod().getDictTaxPeriodId());
+            row.setDepartmentId(drp.getDepartmentId());
+            row.setPeriodCondition(drp.isActive());
+            row.setBalance(drp.isBalance());
+            row.setYear(year);
+            row.setOrd(drp.getReportPeriod().getOrder());
+            row.setCorrectPeriod(drp.getCorrectionDate());
+            Department dep = departmentMap.get(drp.getDepartmentId());
+            Notification notification = notificationService.get(drp.getReportPeriod().getId(), dep.getId(), dep.getParentId());
+            row.setDeadline(notification != null ? notification.getDeadline() : null);
+            row.setDepartmentReportPeriodId(drp.getId());
+            per.get(year).add(row);
 		}
 		List<TableRow> rows = new ArrayList<TableRow>();
+        //TODO avanteev: Подумать, может имеет смысл перенести в запрос
 		for (Map.Entry<Integer, List<TableRow>> rec : per.entrySet()) {
 			TableRow header = new TableRow();
 			header.setPeriodName("Календарный год " + (rec.getKey()));

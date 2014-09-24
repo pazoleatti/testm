@@ -366,19 +366,18 @@ public class PeriodServiceImpl implements PeriodService {
                         if (drp.isActive()) {
                             return PeriodStatusBeforeOpen.OPEN;
                         } else {
+                            filter = new DepartmentReportPeriodFilter();
+                            filter.setReportPeriodIdList(Arrays.asList(reportPeriods.get(0).getId()));
+                            filter.setDepartmentIdList(Arrays.asList(departmentId));
+                            filter.setIsCorrection(true);
+                            departmentReportPeriodList = departmentReportPeriodService.getListByFilter(filter);
+                            if (!departmentReportPeriodList.isEmpty()){
+                                return PeriodStatusBeforeOpen.CORRECTION_PERIOD_ALREADY_EXIST;
+                            }
                             return PeriodStatusBeforeOpen.CLOSE;
                         }
                     } else {
                         return PeriodStatusBeforeOpen.BALANCE_STATUS_CHANGED;
-                    }
-                } else {
-                    filter = new DepartmentReportPeriodFilter();
-                    filter.setReportPeriodIdList(Arrays.asList(reportPeriods.get(0).getId()));
-                    filter.setDepartmentIdList(Arrays.asList(departmentId));
-                    filter.setIsCorrection(true);
-                    departmentReportPeriodList = departmentReportPeriodService.getListByFilter(filter);
-                    if (!departmentReportPeriodList.isEmpty()){
-                        return PeriodStatusBeforeOpen.CORRECTION_PERIOD_ALREADY_EXIST;
                     }
                 }
 			}
@@ -407,7 +406,8 @@ public class PeriodServiceImpl implements PeriodService {
         DepartmentReportPeriod drp = departmentReportPeriodService.get(drpId);
         int reportPeriodId = drp.getReportPeriod().getId();
         //2 Проверка вида периода
-        if (drp.getCorrectionDate() != null && departmentReportPeriodService.isExistLargeCorrection(drp.getCorrectionDate())){
+        if (drp.getCorrectionDate() != null &&
+                departmentReportPeriodService.existLargeCorrection(drp.getDepartmentId(), reportPeriodId, drp.getCorrectionDate())){
             logs.add(new LogEntry(LogLevel.ERROR,
                     "Удаление периода невозможно, т.к. существует более поздний корректирующий период!"));
             return;
@@ -742,8 +742,8 @@ public class PeriodServiceImpl implements PeriodService {
         filter.setDepartmentIdList(Arrays.asList(departmentId));
         filter.setReportPeriodIdList(Arrays.asList(reportPeriod.getId()));
         filter.setIsCorrection(true);
-        List<DepartmentReportPeriod> drp = departmentReportPeriodService.getListByFilter(filter);
-        for (DepartmentReportPeriod period : drp) {
+        List<DepartmentReportPeriod> drpList = departmentReportPeriodService.getListByFilter(filter);
+        for (DepartmentReportPeriod period : drpList) {
             if (period.getCorrectionDate().equals(term)) {
                 if (!period.isActive()) {
                     return PeriodStatusBeforeOpen.CLOSE;
@@ -755,6 +755,27 @@ public class PeriodServiceImpl implements PeriodService {
 
             }
         }
+        if (!drpList.isEmpty()){
+            //проверяет статус последнего по порядку корректирующего периода (сортировка в дао)
+            DepartmentReportPeriod drpLast = drpList.get(drpList.size()-1);
+            if (drpLast.isActive())
+                return PeriodStatusBeforeOpen.CORRECTION_PERIOD_LAST_OPEN;
+        }
+
+        //Система проверяет статус периода корректировки (конкретный период ищем, т.е. д.б. одно значение)
+        filter = new DepartmentReportPeriodFilter();
+        filter.setIsCorrection(false);
+        filter.setDepartmentIdList(Arrays.asList(departmentId));
+        filter.setReportPeriodIdList(Arrays.asList(reportPeriod.getId()));
+        List<DepartmentReportPeriod> onePeriod = departmentReportPeriodService.getListByFilter(filter);
+        if (!onePeriod.isEmpty() && onePeriod.size()!=1){
+            throw new ServiceException("Найдено больше одного периода корректировки с заданной датой корректировки.");
+        } else if (onePeriod.isEmpty()){
+            throw new ServiceException("Не найден корректирующий период.");
+        } else if (onePeriod.size() == 1 && onePeriod.get(0).isActive()){
+            return PeriodStatusBeforeOpen.CORRECTION_PERIOD_NOT_CLOSE;
+        }
+
         return PeriodStatusBeforeOpen.NOT_EXIST;
     }
 

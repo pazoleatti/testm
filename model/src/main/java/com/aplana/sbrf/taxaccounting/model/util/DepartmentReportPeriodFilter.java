@@ -17,6 +17,24 @@ public class DepartmentReportPeriodFilter implements Serializable {
     private List<Integer> departmentIdList;
     private List<Integer> reportPeriodIdList;
     private List<TaxType> taxTypeList;
+    private Integer yearStart;
+    private Integer yearEnd;
+
+    public Integer getYearStart() {
+        return yearStart;
+    }
+
+    public void setYearStart(Integer yearStart) {
+        this.yearStart = yearStart;
+    }
+
+    public Integer getYearEnd() {
+        return yearEnd;
+    }
+
+    public void setYearEnd(Integer yearEnd) {
+        this.yearEnd = yearEnd;
+    }
 
     public Boolean isActive() {
         return isActive;
