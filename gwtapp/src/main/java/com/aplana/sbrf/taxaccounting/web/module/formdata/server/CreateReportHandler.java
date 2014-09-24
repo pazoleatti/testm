@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.async.task.AsyncTask;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.ReportService;
@@ -60,7 +61,8 @@ public class CreateReportHandler extends AbstractActionHandler<CreateReportActio
         params.put(AsyncTask.RequiredParams.USER_ID.name(), userInfo.getUser().getId());
         params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), key);
         Logger logger = new Logger();
-        if (lockDataService.lock(key, userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME * 4) == null) {
+        LockData lockData;
+        if ((lockData = lockDataService.lock(key, userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME * 4)) == null) {
             try {
                 String uuid = reportService.get(userInfo, action.getFormDataId(), action.getType(), action.isShowChecked(), action.isManual(), false);
                 if (uuid == null) {
@@ -73,11 +75,16 @@ public class CreateReportHandler extends AbstractActionHandler<CreateReportActio
                 }
             } catch (Exception e) {
                 lockDataService.unlock(key, userInfo.getUser().getId());
-                throw new ActionException("Ошибка запуска асинхронной задачи", e);
+                throw new ActionException("Ошибка при постановке в очередь асинхронной задачи", e);
             }
         } else {
-            lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
-            logger.info(String.format("%s отчет текущей налоговой формы(%s) поставлен в очередь на формирование.", action.getType().getName(), action.isManual()?"версия ручного ввода":"автоматическая версия"));
+            if (lockData.getUserId() != userInfo.getUser().getId()) {
+                try {
+                    lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
+                } catch(ServiceException e) {
+                }
+            }
+            logger.info(String.format("%s отчет текущей налоговой формы(%s) поставлен в очередь на формирование.", action.getType().getName(), action.isManual() ? "версия ручного ввода" : "автоматическая версия"));
         }
         result.setUuid(logEntryService.save(logger.getEntries()));
         return result;
