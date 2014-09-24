@@ -1,16 +1,23 @@
 --справочники
-INSERT INTO ref_book (id, name) VALUES (4,'Коды субъектов Российской Федерации');
-INSERT INTO ref_book (id, name) VALUES (200,'Параметры представления деклараций по налогу на имущество');
-INSERT INTO ref_book (id, name) VALUES (204,'Коды налоговых органов');
-INSERT INTO ref_book (id, name) VALUES (205,'КПП налоговых органов');
+insert into REF_BOOK (ID, NAME) values (4,'Коды субъектов Российской Федерации');
+insert into REF_BOOK (ID, NAME) values (200,'Параметры представления деклараций по налогу на имущество');
+insert into REF_BOOK (ID, NAME) values (204,'Коды налоговых органов');
+insert into REF_BOOK (ID, NAME) values (205,'КПП налоговых органов');
 
 --атрибуты справочников
-INSERT INTO "REF_BOOK_ATTRIBUTE" VALUES (10, 4, 'Наименование', 'NAME', 1, 1, NULL, NULL, 1, NULL, 50, 1, 0, NULL, NULL, 0, 255, 0);
-INSERT INTO "REF_BOOK_ATTRIBUTE" VALUES (2001, 200, 'Код субъекта РФ представителя декларации', 'DECLARATION_REGION_ID', 4, 1, 4, 10, 1, NULL, 10, 1, 0, NULL, NULL, 0, NULL, 0);
-INSERT INTO "REF_BOOK_ATTRIBUTE" VALUES (2003, 200, 'Код налогового органа', 'TAX_ORGAN_CODE', 1, 3, NULL, NULL, 1, NULL, 10, 0, 0, NULL, NULL, 0, 4, 0);
-INSERT INTO "REF_BOOK_ATTRIBUTE" VALUES (2004, 200, 'КПП', 'KPP', 1, 4, NULL, NULL, 1, NULL, 10, 0, 0, NULL, NULL, 0, 9, 0);
-INSERT INTO "REF_BOOK_ATTRIBUTE" VALUES (2041, 204, 'Код налогового органа', 'TAX_ORGAN_CODE', 1, 3, NULL, NULL, 1, NULL, 10, 0, 0, NULL, NULL, 0, 4, 0);
-INSERT INTO "REF_BOOK_ATTRIBUTE" VALUES (2051, 205, 'КПП', 'KPP', 1, 4, NULL, NULL, 1, NULL, 10, 0, 0, NULL, NULL, 0, 9, 0);
+insert into REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH, REQUIRED, IS_UNIQUE, SORT_ORDER, FORMAT, READ_ONLY, MAX_LENGTH)
+    values (10, 4, 'Наименование', 'NAME', 1, 1, NULL, NULL, 1, NULL, 50, 1, 0, NULL, NULL, 0, 255);
+insert into REF_BOOK_ATTRIBUTE (ID ,REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH, REQUIRED, IS_UNIQUE, SORT_ORDER, FORMAT, READ_ONLY, MAX_LENGTH)
+    values (2001, 200, 'Код субъекта РФ представителя декларации', 'DECLARATION_REGION_ID', 4, 1, 4, 10, 1, NULL, 10, 1, 0, NULL, NULL, 0, NULL);
+insert into REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH, REQUIRED, IS_UNIQUE, SORT_ORDER, FORMAT, READ_ONLY, MAX_LENGTH)
+    values (2003, 200, 'Код налогового органа', 'TAX_ORGAN_CODE', 1, 3, NULL, NULL, 1, NULL, 10, 0, 0, NULL, NULL, 0, 4);
+insert into REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH, REQUIRED, IS_UNIQUE, SORT_ORDER, FORMAT, READ_ONLY, MAX_LENGTH)
+    values (2004, 200, 'КПП', 'KPP', 1, 4, NULL, NULL, 1, NULL, 10, 0, 0, NULL, NULL, 0, 9);
+insert into REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH, REQUIRED, IS_UNIQUE, SORT_ORDER, FORMAT, READ_ONLY, MAX_LENGTH)
+    values (2041, 204, 'Код налогового органа', 'TAX_ORGAN_CODE', 1, 3, NULL, NULL, 1, NULL, 10, 0, 0, NULL, NULL, 0, 4);
+insert into REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH, REQUIRED, IS_UNIQUE, SORT_ORDER, FORMAT, READ_ONLY, MAX_LENGTH)
+    values (2051, 205, 'КПП', 'KPP', 1, 4, NULL, NULL, 1, NULL, 10, 0, 0, NULL, NULL, 0, 9);
+
 
 --данные справочника 200
 insert into REF_BOOK_RECORD(ID, RECORD_ID, REF_BOOK_ID, VERSION, STATUS) values (1,1,200,to_date('01.01.2012','DD.MM.YYYY'),0);
