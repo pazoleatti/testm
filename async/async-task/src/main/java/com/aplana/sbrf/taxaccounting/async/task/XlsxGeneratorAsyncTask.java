@@ -23,4 +23,10 @@ public class XlsxGeneratorAsyncTask extends AbstractAsyncTask {
     protected String getAsyncTaskName() {
         return "Генерация xlsx-файла";
     }
+
+    @Override
+    protected String getNotificationMsg() {
+        //TODO
+        return null;
+    }
 }

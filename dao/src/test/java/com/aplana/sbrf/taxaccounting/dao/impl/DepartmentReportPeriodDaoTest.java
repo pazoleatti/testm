@@ -17,10 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"DepartmentReportPeriodDaoTest.xml"})
@@ -227,5 +224,35 @@ public class DepartmentReportPeriodDaoTest {
     public void deleteTest() throws ParseException {
         departmentReportPeriodDao.delete(Arrays.asList(101));
         Assert.assertNull(departmentReportPeriodDao.get(101));
+    }
+
+    @Test
+    public void getCorrectionDateListByReportPeriodTest() throws ParseException {
+        // Не задан параметр — пустая мапа
+        Assert.assertNotNull(departmentReportPeriodDao.getCorrectionDateListByReportPeriod(null));
+
+        // Отчетный период с id = 1
+        int reportPeriodId = 1;
+        List<Integer> reportPeriodIdList = Arrays.asList(reportPeriodId);
+        Map<Integer, List<Date>> map = departmentReportPeriodDao.getCorrectionDateListByReportPeriod(reportPeriodIdList);
+        Assert.assertEquals(reportPeriodIdList.size(), map.size());
+        List<Date> dateList = map.get(reportPeriodId);
+        Assert.assertEquals(2, dateList.size());
+        Assert.assertTrue(dateList.contains(SIMPLE_DATE_FORMAT.parse("01.01.2014")));
+        Assert.assertTrue(dateList.contains(SIMPLE_DATE_FORMAT.parse("01.02.2014")));
+
+        // Отчетные периоды с id = 2, 20, 22
+        reportPeriodIdList = Arrays.asList(2, 20, 22);
+        map = departmentReportPeriodDao.getCorrectionDateListByReportPeriod(reportPeriodIdList);
+        Assert.assertEquals(2, map.size());
+        Assert.assertNull(map.get(2));
+        dateList = map.get(20);
+        Assert.assertEquals(2, dateList.size());
+        Assert.assertTrue(dateList.contains(SIMPLE_DATE_FORMAT.parse("01.01.2014")));
+        Assert.assertTrue(dateList.contains(SIMPLE_DATE_FORMAT.parse("02.01.2014")));
+        dateList = map.get(22);
+        Assert.assertEquals(2, dateList.size());
+        Assert.assertTrue(dateList.contains(SIMPLE_DATE_FORMAT.parse("01.01.2014")));
+        Assert.assertTrue(dateList.contains(SIMPLE_DATE_FORMAT.parse("02.01.2014")));
     }
 }

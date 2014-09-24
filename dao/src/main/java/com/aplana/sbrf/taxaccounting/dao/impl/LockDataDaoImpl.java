@@ -11,8 +11,10 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Реализация дао блокировок
@@ -26,12 +28,13 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
 	@Override
 	public LockData get(String key) {
 		try {
-			return getJdbcTemplate().queryForObject(
+            LockData lockData = getJdbcTemplate().queryForObject(
 					"SELECT key, user_id, date_before FROM lock_data WHERE key = ?",
 					new Object[] {key},
 					new int[] {Types.VARCHAR},
 					new LockDataMapper()
 			);
+            return lockData;
 		} catch (EmptyResultDataAccessException e) {
 			return null;
 		} catch (Exception e) {
@@ -104,6 +107,37 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
             logger.error("", e);
             throw new LockException("Ошибка при удалении блокировок. %s", e.getMessage());
         }
+    }
+
+    @Override
+    public List<Integer> getUsersWaitingForLock(String key) {
+        try {
+            return getJdbcTemplate().query(
+                    "select user_id from lock_data_subscribers where lock_key = ?",
+                    new Object[]{key},
+                    new int[]{Types.VARCHAR},
+                    new RowMapper<Integer>() {
+                        @Override
+                        public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
+                            return rs.getInt("user_id");
+                        }
+                    }
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<Integer>();
+        }
+    }
+
+    @Override
+    public void addUserWaitingForLock(String key, int userId) {
+        try {
+            getJdbcTemplate().update("INSERT INTO lock_data_subscribers (lock_key, user_id) VALUES (?,?)",
+                    new Object[] {key, userId},
+                    new int[] {Types.VARCHAR, Types.NUMERIC});
+        } catch (DataAccessException e) {
+            throw new LockException("Ошибка при добавлении пользователя в список ожидающих объект блокировки (%s, %s). %s", key, userId, e.getMessage());
+        }
+
     }
 
     private static final class LockDataMapper implements RowMapper<LockData> {

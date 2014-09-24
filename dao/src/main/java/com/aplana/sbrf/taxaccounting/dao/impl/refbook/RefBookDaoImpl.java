@@ -777,7 +777,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     private static final String INSERT_REF_BOOK_RECORD_SQL = "insert into ref_book_record (id, record_id, ref_book_id, version," +
             "status) values (?, ?, ?, ?, ?)";
     private static final String INSERT_REF_BOOK_VALUE = "insert into ref_book_value (record_id, attribute_id," +
-            "string_value, number_value, date_value, reference_value) values (?, ?, ?, ?, ?, ?)";
+            "string_value, number_value, date_value, reference_value, row_num) values (?, ?, ?, ?, ?, ?, null)";
 
     @Override
     public List<Long> createRecordVersion(final Long refBookId, final Date version, final VersionedObjectStatus status,
@@ -1804,7 +1804,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     private static final String INSERT_REF_BOOK_RECORD_SQL_OLD = "insert into ref_book_record (id, ref_book_id, version," +
             "status, record_id) values (?, %d, to_date('%s', 'DD.MM.YYYY'), 0, seq_ref_book_record_row_id.nextval)";
     private static final String INSERT_REF_BOOK_VALUE_OLD = "insert into ref_book_value (record_id, attribute_id," +
-            "string_value, number_value, date_value, reference_value) values (?, ?, ?, ?, ?, ?)";
+            "string_value, number_value, date_value, reference_value, row_num) values (?, ?, ?, ?, ?, ?, null)";
 
     @Override
     public void createRecords(Long refBookId, Date version, List<Map<String, RefBookValue>> records) {

@@ -11,7 +11,6 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
 import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
@@ -206,17 +205,11 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 continue;
             }
 
-            // Открытость периода
-            DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
-            filter.setIsActive(true);
-            filter.setDepartmentIdList(Arrays.asList(formDepartment.getId()));
-            filter.setReportPeriodIdList(Arrays.asList(reportPeriod.getId()));
-            List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodDao.getListByFilter(filter);
-            DepartmentReportPeriod departmentReportPeriod = null;
-            if (departmentReportPeriodList.size() == 1) {
-                departmentReportPeriod = departmentReportPeriodList.get(0);
-            }
+            // Последний отчетный период подразделения для указанного отчетного периода
+            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.getLast(formDepartment.getId(),
+                    reportPeriod.getId());
 
+            // Открытость периода
             if (departmentReportPeriod == null || !departmentReportPeriod.isActive()) {
                 String reportPeriodName = reportPeriod.getTaxPeriod().getYear() + " - " + reportPeriod.getName();
                 log(userInfo, LogData.L9, logger, formType.getName(), reportPeriodName);
@@ -225,11 +218,6 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                                 formType.getName(), reportPeriodName))), logger);
                 fail++;
                 continue;
-            }
-
-            if (departmentReportPeriod.getCorrectionDate() != null) {
-                // Период корректирующий
-                // TODO Логика загрузки в коррерктирующий период реализуется в версии 0.4
             }
 
             FormDataKind formDataKind = FormDataKind.PRIMARY; // ТФ только для первичных НФ

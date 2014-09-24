@@ -23,4 +23,10 @@ public class CsvGeneratorAsyncTask extends AbstractAsyncTask {
     protected String getAsyncTaskName() {
         return "Генерация csv-файла";
     }
+
+    @Override
+    protected String getNotificationMsg() {
+        //TODO
+        return null;
+    }
 }

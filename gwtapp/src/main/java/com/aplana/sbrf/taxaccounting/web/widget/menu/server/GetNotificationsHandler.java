@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.menu.server;
 import com.aplana.sbrf.taxaccounting.model.Notification;
 import com.aplana.sbrf.taxaccounting.model.NotificationsFilterData;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.service.NotificationService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.GetNotificationsAction;
@@ -34,7 +35,9 @@ public class GetNotificationsHandler extends AbstractActionHandler<GetNotificati
 	@Override
 	public GetNotificationsResult execute(GetNotificationsAction action, ExecutionContext executionContext) throws ActionException {
 		NotificationsFilterData filter = action.getFilter();
-		filter.setSenderDepartmentId(securityService.currentUserInfo().getUser().getDepartmentId());
+        TAUser user = securityService.currentUserInfo().getUser();
+		filter.setSenderDepartmentId(user.getDepartmentId());
+        filter.setUserId(user.getId());
 		List<NotificationTableRow> rows = new ArrayList<NotificationTableRow>();
 		PagingResult<Notification> result = notificationService.getByFilter(filter);
 		for (Notification notification : result) {

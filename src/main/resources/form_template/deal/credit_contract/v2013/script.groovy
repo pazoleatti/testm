@@ -141,8 +141,7 @@ void logicCheck() {
         }
         def rowNum = row.getIndex()
 
-        checkNonEmptyColumns(row, rowNum, ['contractNum', 'contractDate'], logger, true)
-        checkNonEmptyColumns(row, rowNum, nonEmptyColumns - ['contractNum', 'contractDate'], logger, false)
+        checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
 
         def transactionDate = row.transactionDate
         def contractDate = row.contractDate
@@ -152,27 +151,27 @@ void logicCheck() {
         // Проверка выбранной единицы измерения        
         if (getRefBookValue(12, row.okeiCode)?.CODE?.stringValue != '796') {
             def msg = row.getCell('okeiCode').column.name
-            rowWarning(logger, row, "Строка $rowNum: В графе «$msg» могут быть указаны только следующие элементы: шт.!")
+            rowError(logger, row, "Строка $rowNum: В графе «$msg» могут быть указаны только следующие элементы: шт.!")
         }
 
         // Проверка количества
         if (row.count != 1) {
             def msg = row.getCell('transactionDate').column.name
-            rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg» может быть только «1»!")
+            rowError(logger, row, "Строка $rowNum: Значение графы «$msg» может быть только «1»!")
         }
 
         // Корректность даты совершения сделки
         if (transactionDate < contractDate) {
             def msg1 = row.getCell('transactionDate').column.name
             def msg2 = row.getCell('contractDate').column.name
-            rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
+            rowError(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
         }
 
         // Проверка заполнения стоимости сделки
         if (totalCost != price) {
             def msg1 = row.getCell('totalCost').column.name
             def msg2 = row.getCell('price').column.name
-            rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
+            rowError(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
         }
     }
 }
@@ -259,13 +258,13 @@ void addData(def xml, int headRowCount) {
         newRow.rowNum = xmlIndexRow - headRowCount
 
         // графа 2
-        newRow.name = getRecordIdImport(9, 'NAME', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        newRow.name = getRecordIdImport(9, 'NAME', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, true)
         def map = getRefBookValue(9, newRow.name)
         xmlIndexCol++
 
         // графа 3
         if (map != null) {
-            formDataService.checkReferenceValue(9, row.cell[xmlIndexCol].text(), map.INN_KIO?.stringValue, xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+            formDataService.checkReferenceValue(9, row.cell[xmlIndexCol].text(), map.INN_KIO?.stringValue, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         }
         xmlIndexCol++
 
@@ -273,7 +272,7 @@ void addData(def xml, int headRowCount) {
         if (map != null) {
             map = refBookService.getRecordData(10, map.COUNTRY?.referenceValue)
             if (map != null) {
-                formDataService.checkReferenceValue(10, row.cell[xmlIndexCol].text(), map.NAME?.stringValue, xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+                formDataService.checkReferenceValue(10, row.cell[xmlIndexCol].text(), map.NAME?.stringValue, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
             }
         }
         xmlIndexCol++
@@ -283,25 +282,25 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol++
 
         // графа 6
-        newRow.contractDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.contractDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
         // графа 7
-        newRow.okeiCode = getRecordIdImport(12, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        newRow.okeiCode = getRecordIdImport(12, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, true)
         xmlIndexCol++
 
         // графа 8
         xmlIndexCol++
 
         // графа 9
-        newRow.price = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.price = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
         // графа 10
         xmlIndexCol++
 
         // графа 11
-        newRow.transactionDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.transactionDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
 
         rows.add(newRow)
     }

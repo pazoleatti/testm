@@ -17,8 +17,6 @@ import java.util.List;
  */
 public class MainMenuView extends AbstractMenuView implements MainMenuPresenter.MyView {
 
-    private NotificationMenuItem notificationMenuItem;
-
     @Inject
     public MainMenuView(final Binder binder) {
         initWidget(binder.createAndBindUi(this));
@@ -46,19 +44,8 @@ public class MainMenuView extends AbstractMenuView implements MainMenuPresenter.
     }
 
     @Override
-    public void setNotificationMenuItem(NotificationMenuItem item) {
-        notificationMenuItem = item;
-        menu.addItem(item);
-    }
-
-    @Override
-    public void updateNotificationCount(int count) {
-        notificationMenuItem.setCount(count);
-    }
-
-    @Override
-    public void selectNotificationMenuItem() {
-        menu.selectItem(notificationMenuItem);
+    public MenuBar getMenu() {
+        return menu;
     }
 
     @Override

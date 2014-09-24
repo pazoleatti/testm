@@ -11,7 +11,7 @@ import java.util.Map;
  * @author dloshkarev
  */
 @Component("TestAsyncTaskSpring")
-public class TestAsyncTaskSpring implements AsyncTask {
+public class TestAsyncTaskSpring extends AbstractAsyncTask {
 
     // private final Log log = LogFactory.getLog(getClass());
 
@@ -19,9 +19,19 @@ public class TestAsyncTaskSpring implements AsyncTask {
     TAUserService userService;
 
     @Override
-    public void execute(Map<String, Object> params) {
+    protected void executeBusinessLogic(Map<String, Object> params) {
         System.out.println("TestAsyncTaskSpring has been started!");
         System.out.println("params: " + params);
         System.out.println("admin: " + userService.getUser("admin").getName());
+    }
+
+    @Override
+    protected String getAsyncTaskName() {
+        return "Тестовая асинхронная задача для dev-mode";
+    }
+
+    @Override
+    protected String getNotificationMsg() {
+        return "Тест тест тест dev-mode";
     }
 }
