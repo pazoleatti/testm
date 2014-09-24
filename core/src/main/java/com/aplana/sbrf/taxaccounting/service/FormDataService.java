@@ -323,4 +323,10 @@ public interface FormDataService {
      * @param formTemplate макет НФ
      */
     void batchUpdatePreviousNumberRow(FormTemplate formTemplate);
+
+    /**
+     * Удаление отчетов и блокировок на задачи формирования отчетов связанных с НФ
+     * @param formDataId
+     */
+    void deleteReport(long formDataId);
 }

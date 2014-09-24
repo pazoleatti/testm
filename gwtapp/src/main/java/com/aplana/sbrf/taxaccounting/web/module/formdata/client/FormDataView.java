@@ -177,9 +177,10 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     HorizontalPanel versionBlock;
     @UiField
     LinkButton sources;
+    @UiField
+    LinkButton printToExcel;
 
     private Timer timerExcel;
-    private LinkButton printToExcel;
 
     private final static int DEFAULT_TABLE_TOP_POSITION = 104;
     private final static int DEFAULT_REPORT_PERIOD_LABEL_WIDTH = 150;
@@ -238,7 +239,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
             }
         });
 
-        printToExcel = new LinkButton("Excel");
+        //printToExcel = new LinkButton("Excel");
         printToExcel.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -257,7 +258,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
                 }
             }
         });
-        printAnchor.addItem(printToExcel);
+        //printAnchor.addItem(printToExcel);
         printAnchor.addItem(printToCSV);
 
         timerExcel = new Timer() {
@@ -610,6 +611,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@Override
 	public void showPrintAnchor(boolean show) {
 		printAnchor.setVisible(show);
+        printToExcel.setVisible(show);
 	}
 
     @Override

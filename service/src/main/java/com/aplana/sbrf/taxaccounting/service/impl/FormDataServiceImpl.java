@@ -1137,6 +1137,7 @@ public class FormDataServiceImpl implements FormDataService {
         }
     }
 
+    @Override
     public void deleteReport(long formDataId) {
         boolean[] b = {false, true};
         for(ReportType reportType: ReportType.values()) {

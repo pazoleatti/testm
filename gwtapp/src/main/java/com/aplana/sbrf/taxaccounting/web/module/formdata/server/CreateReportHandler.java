@@ -73,9 +73,10 @@ public class CreateReportHandler extends AbstractActionHandler<CreateReportActio
                 }
             } catch (Exception e) {
                 lockDataService.unlock(key, userInfo.getUser().getId());
-                throw new ActionException(e);
+                throw new ActionException("Ошибка запуска асинхронной задачи", e);
             }
         } else {
+            lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
             logger.info(String.format("%s отчет текущей налоговой формы(%s) поставлен в очередь на формирование.", action.getType().getName(), action.isManual()?"версия ручного ввода":"автоматическая версия"));
         }
         result.setUuid(logEntryService.save(logger.getEntries()));

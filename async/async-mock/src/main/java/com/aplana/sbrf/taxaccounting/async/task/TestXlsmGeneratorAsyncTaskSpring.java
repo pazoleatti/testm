@@ -47,8 +47,8 @@ public class TestXlsmGeneratorAsyncTaskSpring implements AsyncTask {
 
     @Override
     public void execute(Map<String, Object> params) {
+        String lock = (String) params.get(LOCKED_OBJECT.name());
         try {
-            String lock = (String) params.get(LOCKED_OBJECT.name());
             if (lockService.isLockExists(lock)) {
                 //Если блокировка на объект задачи все еще существует, значит на нем можно выполнять бизнес-логику
                 executeBusinessLogic(params);
@@ -74,11 +74,12 @@ public class TestXlsmGeneratorAsyncTaskSpring implements AsyncTask {
                         notificationService.saveList(notifications);
                     }
                 }
-                //Снимаем блокировку
-                lockService.unlock(lock, (Integer) params.get(USER_ID.name()));
             }
         } catch (Exception e) {
             log.error("Не удалось выполнить асинхронную задачу", e);
+        } finally {
+            //Снимаем блокировку
+            lockService.unlock(lock, (Integer) params.get(USER_ID.name()));
         }
     }
 
