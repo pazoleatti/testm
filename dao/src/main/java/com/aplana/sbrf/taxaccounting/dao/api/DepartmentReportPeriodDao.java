@@ -79,5 +79,5 @@ public interface DepartmentReportPeriodDao {
      */
     Integer getCorrectionNumber(int id);
 
-    boolean isExistLargeCorrection(Date correctionDate);
+    boolean existLargeCorrection(int departmentId, int reportPeriodId, Date correctionDate);
 }

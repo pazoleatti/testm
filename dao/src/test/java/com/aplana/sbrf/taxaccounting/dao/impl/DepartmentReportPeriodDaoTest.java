@@ -219,8 +219,8 @@ public class DepartmentReportPeriodDaoTest {
     }
 
     @Test
-    public void isExistTest() throws ParseException {
-        Assert.assertTrue(departmentReportPeriodDao.isExistLargeCorrection(SIMPLE_DATE_FORMAT.parse("01.01.2011")));
+    public void existLargeCorrectionTest() throws ParseException {
+        Assert.assertTrue(departmentReportPeriodDao.existLargeCorrection(1, 20, SIMPLE_DATE_FORMAT.parse("01.01.2011")));
     }
 
     @Test
