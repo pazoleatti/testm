@@ -5,11 +5,15 @@ import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.*;
@@ -21,6 +25,7 @@ import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.
 @Component("TestXlsmGeneratorAsyncTaskSpring")
 @Transactional
 public class TestXlsmGeneratorAsyncTaskSpring implements AsyncTask {
+    protected final Log log = LogFactory.getLog(getClass());
 
     @Autowired
     private TAUserService userService;
@@ -32,7 +37,7 @@ public class TestXlsmGeneratorAsyncTaskSpring implements AsyncTask {
     private NotificationService notificationService;
 
     @Autowired
-    private FormDataService formDataService;
+    private FormDataAccessService formDataAccessService;
 
     @Autowired
     private ReportService reportService;
@@ -42,22 +47,38 @@ public class TestXlsmGeneratorAsyncTaskSpring implements AsyncTask {
 
     @Override
     public void execute(Map<String, Object> params) {
-        String lock = (String) params.get(LOCKED_OBJECT.name());
-        int userId = (Integer) params.get(USER_ID.name());
-        if (lockService.checkLock(lock)) {
-            //Если блокировка на объект задачи все еще существует, значит на нем можно выполнять бизнес-логику
-            try {
+        try {
+            String lock = (String) params.get(LOCKED_OBJECT.name());
+            if (lockService.isLockExists(lock)) {
+                //Если блокировка на объект задачи все еще существует, значит на нем можно выполнять бизнес-логику
                 executeBusinessLogic(params);
-            } catch (Exception e) {
-                lockService.unlock(lock, userId);
-                throw new RuntimeException("Не удалось выполнить задачу \"" + getAsyncTaskName() + "\". Выполняется откат транзакции. Произошла ошибка: " + e.getMessage(), e);
+                if (!lockService.isLockExists(lock)) {
+                    //Если после выполнения бизнес логики, оказывается, что блокировки уже нет
+                    //Значит результаты нам уже не нужны - откатываем транзакцию и все изменения
+                    throw new RuntimeException("Результат выполнения задачи \"" + getAsyncTaskName() + "\" больше не актуален. Выполняется откат транзакции");
+                }
+                //Получаем список пользователей, для которых надо сформировать оповещение
+                String msg = getNotificationMsg();
+                if (msg != null && !msg.isEmpty()) {
+                    List<Integer> waitingUsers = lockService.getUsersWaitingForLock(lock);
+                    if (!waitingUsers.isEmpty()) {
+                        List<Notification> notifications = new ArrayList<Notification>();
+                        for (Integer userId : waitingUsers) {
+                            Notification notification = new Notification();
+                            notification.setUserId(userId);
+                            notification.setCreateDate(new Date());
+                            notification.setText(msg);
+                            notifications.add(notification);
+                        }
+                        //Создаем оповещение для каждого пользователя из списка
+                        notificationService.saveList(notifications);
+                    }
+                }
+                //Снимаем блокировку
+                lockService.unlock(lock, (Integer) params.get(USER_ID.name()));
             }
-            if (!lockService.checkLock(lock)) {
-                //Если после выполнения бизнес логики, оказывается, что блокировки уже нет
-                //Значит результаты нам уже не нужны - откатываем транзакцию и все изменения
-                throw new RuntimeException("Результат выполнения задачи \"" + getAsyncTaskName() + "\" больше не актуален. Выполняется откат транзакции");
-            }
-            lockService.unlock(lock, userId);
+        } catch (Exception e) {
+            log.error("Не удалось выполнить асинхронную задачу", e);
         }
     }
 
@@ -69,23 +90,17 @@ public class TestXlsmGeneratorAsyncTaskSpring implements AsyncTask {
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
 
-        Logger logger = new Logger();
-        FormData formData = formDataService.getFormData(userInfo, formDataId, manual, logger);
-
+        formDataAccessService.canRead(userInfo, formDataId);
         String uuid = printingService.generateExcel(userInfo, formDataId, manual, isShowChecked);
-
-        Notification notification = new Notification();
-        notification.setCreateDate(new Date());
-        notification.setDeadline(new Date(115, 1, 1));
-        notification.setReportPeriodId(formData.getReportPeriodId());
-        notification.setReceiverDepartmentId(formData.getDepartmentId());
-        notification.setSenderDepartmentId(userService.getUser(userId).getDepartmentId());
-        notification.setText(""+params.toString());
         reportService.create(formDataId, uuid, ReportType.EXCEL, isShowChecked, manual, false);
-        //notificationService.save(notification);
     }
 
     protected String getAsyncTaskName() {
+        return "Генерация xlsm-файла";
+    }
+
+    protected String getNotificationMsg() {
+        //TODO
         return "Генерация xlsm-файла";
     }
 }

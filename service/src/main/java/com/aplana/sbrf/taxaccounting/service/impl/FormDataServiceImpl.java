@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.FormPerformerDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
@@ -95,7 +96,11 @@ public class FormDataServiceImpl implements FormDataService {
     @Autowired
     private RefBookDao refBookDao;
     @Autowired
-    RefBookFactory refBookFactory;
+    private RefBookFactory refBookFactory;
+    @Autowired
+    private ReportService reportService;
+    @Autowired
+    private FormPerformerDao formPerformerDao;
 
     // Время блокировки при консолидации (3 часа)
     private static final int BLOCK_TIME =  3 * 60 * 60 * 1000;
@@ -481,6 +486,8 @@ public class FormDataServiceImpl implements FormDataService {
 		
 		dataRowDao.commit(formData.getId());
 
+        deleteReport(formData.getId());
+
 		logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.SAVE, null);
 		auditService.add(FormDataEvent.SAVE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
 				null, formData.getFormType().getName(), formData.getKind().getId(), null, null);
@@ -543,6 +550,7 @@ public class FormDataServiceImpl implements FormDataService {
             auditService.add(FormDataEvent.DELETE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
                     null, formData.getFormType().getName(), formData.getKind().getId(), null, null);
             formDataDao.delete(formDataId);
+            deleteReport(formDataId);
         }
 	}
 
@@ -722,6 +730,8 @@ public class FormDataServiceImpl implements FormDataService {
         dataRowDao.commit(formData.getId());
 
         logger.info("Форма \"" + formData.getFormType().getName() + "\" переведена в статус \"" + workflowMove.getToState().getName() + "\"");
+
+        deleteReport(formData.getId());
 
         logBusinessService.add(formData.getId(), null, userInfo, workflowMove.getEvent(), note);
         auditService.add(workflowMove.getEvent(), userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
@@ -962,6 +972,9 @@ public class FormDataServiceImpl implements FormDataService {
         if (dateFrom == null)
             throw new ServiceException("Должна быть установлена хотя бы \"Дата от\"");
         try {
+            List<Long> formDataIds = formPerformerDao.getFormDataId(depTBId, dateFrom, dateTo);
+            for(Long formDataId: formDataIds)
+                deleteReport(formDataId);
             formDataDao.updateFDPerformerTBDepartmentNames(depTBId, depName, dateFrom, dateTo);
         } catch (ServiceException e){
             throw new ServiceException("Ошибка при обновлении имени ТБ", e);
@@ -973,6 +986,9 @@ public class FormDataServiceImpl implements FormDataService {
         if (dateFrom == null)
             throw new ServiceException("Должна быть установлена хотя бы \"Дата от\"");
         try {
+            List<Long> formDataIds = formPerformerDao.getFormDataId(depTBId, dateFrom, dateTo);
+            for(Long formDataId: formDataIds)
+                deleteReport(formDataId);
             formDataDao.updateFDPerformerDepartmentNames(depTBId, depName, dateFrom, dateTo);
         } catch (ServiceException e){
             throw new ServiceException("Ошибка при обновлении имени ТБ", e);
@@ -1119,5 +1135,17 @@ public class FormDataServiceImpl implements FormDataService {
         if (lockData.getUserId() != user.getId()) {
             throw new ServiceException("Объект не заблокирован текущим пользователем");
         }
+    }
+
+    public void deleteReport(long formDataId) {
+        boolean[] b = {false, true};
+        for(ReportType reportType: ReportType.values()) {
+            for(boolean manual : b) {
+                for(boolean showChecked : b) {
+                    lockService.unlock(String.format("%s_%s_%s_isShowChecked_%s_manual_%s", LockData.LOCK_OBJECTS.FORM_DATA.name(), formDataId, reportType.getName(), showChecked, manual), 0, true);
+                }
+            }
+        }
+        reportService.delete(formDataId);
     }
 }

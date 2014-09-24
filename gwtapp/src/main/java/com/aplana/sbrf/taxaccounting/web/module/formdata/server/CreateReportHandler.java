@@ -30,16 +30,16 @@ import java.util.Map;
 public class CreateReportHandler extends AbstractActionHandler<CreateReportAction, CreateReportResult> {
 
     @Autowired
-    SecurityService securityService;
+    private SecurityService securityService;
 
     @Autowired
-    AsyncManager asyncManager;
+    private AsyncManager asyncManager;
 
     @Autowired
-    ReportService reportService;
+    private ReportService reportService;
 
     @Autowired
-    LockDataService lockDataService;
+    private LockDataService lockDataService;
 
     @Autowired
     private LogEntryService logEntryService;
@@ -52,7 +52,7 @@ public class CreateReportHandler extends AbstractActionHandler<CreateReportActio
     public CreateReportResult execute(CreateReportAction action, ExecutionContext executionContext) throws ActionException {
         CreateReportResult result = new CreateReportResult();
         Map<String, Object> params = new HashMap<String, Object>();
-        String key = LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + action.getType().getName() + "_" + action.getFormDataId() + "_isShowChecked_" + action.isShowChecked() + "_manual_" + action.isManual();
+        String key = LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + action.getFormDataId() + "_" + action.getType().getName() + "_isShowChecked_" + action.isShowChecked() + "_manual_" + action.isManual();
         TAUserInfo userInfo = securityService.currentUserInfo();
         params.put("formDataId", action.getFormDataId());
         params.put("isShowChecked", action.isShowChecked());
@@ -64,6 +64,7 @@ public class CreateReportHandler extends AbstractActionHandler<CreateReportActio
             try {
                 String uuid = reportService.get(userInfo, action.getFormDataId(), action.getType(), action.isShowChecked(), action.isManual(), false);
                 if (uuid == null) {
+                    lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
                     asyncManager.executeAsync(3L, params, BalancingVariants.SHORT);
                     logger.info(String.format("%s отчет текущей налоговой формы(%s) поставлен в очередь на формирование.", action.getType().getName(), action.isManual()?"версия ручного ввода":"автоматическая версия"));
                 } else {
@@ -75,7 +76,7 @@ public class CreateReportHandler extends AbstractActionHandler<CreateReportActio
                 throw new ActionException(e);
             }
         } else {
-            logger.warn(String.format("%s отчет текущей налоговой формы(%s) уже находится в очереди на формирование.", action.getType().getName(), action.isManual() ? "версия ручного ввода" : "автоматическая версия"));
+            logger.info(String.format("%s отчет текущей налоговой формы(%s) поставлен в очередь на формирование.", action.getType().getName(), action.isManual()?"версия ручного ввода":"автоматическая версия"));
         }
         result.setUuid(logEntryService.save(logger.getEntries()));
         return result;

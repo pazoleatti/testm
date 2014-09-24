@@ -3,10 +3,7 @@ package com.aplana.sbrf.taxaccounting.async.task;
 import com.aplana.sbrf.taxaccounting.async.service.AsyncTaskInterceptor;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.FormDataService;
-import com.aplana.sbrf.taxaccounting.service.PrintingService;
-import com.aplana.sbrf.taxaccounting.service.ReportService;
-import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.ejb.*;
@@ -32,7 +29,7 @@ public class XlsmGeneratorAsyncTask extends AbstractAsyncTask {
     private PrintingService printingService;
 
     @Autowired
-    private FormDataService formDataService;
+    private FormDataAccessService formDataAccessService;
 
     @Autowired
     private ReportService reportService;
@@ -46,20 +43,9 @@ public class XlsmGeneratorAsyncTask extends AbstractAsyncTask {
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
 
-        Logger logger = new Logger();
-        FormData formData = formDataService.getFormData(userInfo, formDataId, manual, logger);
-
+        formDataAccessService.canRead(userInfo, formDataId);
         String uuid = printingService.generateExcel(userInfo, formDataId, manual, isShowChecked);
-
-        Notification notification = new Notification();
-        notification.setCreateDate(new Date());
-        notification.setDeadline(new Date(115, 1, 1));
-        notification.setReportPeriodId(formData.getReportPeriodId());
-        notification.setReceiverDepartmentId(formData.getDepartmentId());
-        notification.setSenderDepartmentId(userService.getUser(userId).getDepartmentId());
-        notification.setText(params.toString());
         reportService.create(formDataId, uuid, ReportType.EXCEL, isShowChecked, manual, false);
-        //notificationService.save(notification);
     }
 
     @Override

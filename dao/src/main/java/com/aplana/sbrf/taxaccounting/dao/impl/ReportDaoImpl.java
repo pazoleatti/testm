@@ -64,7 +64,7 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
     @Override
     public void delete(long formDataId) {
         try{
-            getJdbcTemplate().update("DELETE FROM blob_data WHERE form_data_id = ?",
+            getJdbcTemplate().update("DELETE FROM REPORT WHERE form_data_id = ?",
                     new Object[]{formDataId},
                     new int[]{Types.INTEGER});
         } catch (DataAccessException e){

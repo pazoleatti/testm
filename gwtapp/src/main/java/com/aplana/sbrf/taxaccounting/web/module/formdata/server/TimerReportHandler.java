@@ -22,16 +22,13 @@ import org.springframework.stereotype.Service;
 public class TimerReportHandler extends AbstractActionHandler<TimerReportAction, TimerReportResult> {
 
     @Autowired
-    SecurityService securityService;
+    private SecurityService securityService;
 
     @Autowired
-    AsyncManager asyncManager;
+    private ReportService reportService;
 
     @Autowired
-    ReportService reportService;
-
-    @Autowired
-    LockDataService lockDataService;
+    private LockDataService lockDataService;
 
     public TimerReportHandler() {
         super(TimerReportAction.class);
@@ -41,8 +38,8 @@ public class TimerReportHandler extends AbstractActionHandler<TimerReportAction,
     public TimerReportResult execute(TimerReportAction action, ExecutionContext executionContext) throws ActionException {
         TimerReportResult result = new TimerReportResult();
         TAUserInfo userInfo = securityService.currentUserInfo();
-        String key = LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + action.getType().getName() + "_" + action.getFormDataId() + "_isShowChecked_" + action.isShowChecked() + "_manual_" + action.isManual();
-        if (!lockDataService.checkLock(key)) {
+        String key = LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + action.getFormDataId() + "_" + action.getType().getName() + "_isShowChecked_" + action.isShowChecked() + "_manual_" + action.isManual();
+        if (!lockDataService.isLockExists(key)) {
             String uuid = reportService.get(userInfo, action.getFormDataId(), action.getType(), action.isShowChecked(), action.isManual(), false);
             if (uuid == null) {
                 result.setExistReport(TimerReportResult.StatusReport.NOT_EXIST);
