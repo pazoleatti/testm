@@ -20,6 +20,9 @@ public class NotificationsFilterData implements Serializable {
     private Integer userId;
     /** Фильтр по ролям пользователя */
     private List<Integer> userRoleIds;
+    /** Фильтр только не прочитанных оповещений */
+    private boolean onlyNew;
+
 
 	private Integer countOfRecords;
 	private Integer startIndex;
@@ -89,5 +92,13 @@ public class NotificationsFilterData implements Serializable {
 
     public void setAsc(boolean isAsc) {
         this.isAsc = isAsc;
+    }
+
+    public boolean isOnlyNew() {
+        return onlyNew;
+    }
+
+    public void setOnlyNew(boolean onlyNew) {
+        this.onlyNew = onlyNew;
     }
 }

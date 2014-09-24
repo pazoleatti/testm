@@ -445,9 +445,9 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol++
 
         // графа 3
-        if (record != null) {
-            formDataService.checkReferenceValue(96, row.cell[xmlIndexCol].text(), record?.NAME?.value, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        }
+//        if (record != null) {
+//            formDataService.checkReferenceValue(96, row.cell[xmlIndexCol].text(), record?.NAME?.value, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+//        }
         xmlIndexCol++
 
         // графа 4
@@ -561,9 +561,9 @@ void addTransportData(def xml) {
         xmlIndexCol++
 
         // графа 3
-        if (record != null) {
-            formDataService.checkReferenceValue(96, row.cell[xmlIndexCol].text(), record?.NAME?.value, rnuIndexRow, xmlIndexCol + colOffset, logger, true)
-        }
+//        if (record != null) {
+//            formDataService.checkReferenceValue(96, row.cell[xmlIndexCol].text(), record?.NAME?.value, rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+//        }
         xmlIndexCol++
 
         // графа 4
@@ -572,9 +572,9 @@ void addTransportData(def xml) {
         xmlIndexCol++
 
         // графа 5
-        if (record != null) {
-            formDataService.checkReferenceValue(42, row.cell[xmlIndexCol].text(), record?.NAME?.value, rnuIndexRow, xmlIndexCol + colOffset, logger, true)
-        }
+//        if (record != null) {
+//            formDataService.checkReferenceValue(42, row.cell[xmlIndexCol].text(), record?.NAME?.value, rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+//        }
         xmlIndexCol++
 
         // графа 6
@@ -605,9 +605,9 @@ void addTransportData(def xml) {
         def yearStr = row.cell[xmlIndexCol].text()
         if (yearStr != null) {
             if (yearStr.contains(".")) {
-                newRow.year = parseDate(yearStr, "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+                newRow.year = parseDate(yearStr, "dd.MM.yyyy", rnuIndexRow, xmlIndexCol + colOffset, logger, true)
             } else {
-                def yearNum = parseNumber(yearStr, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+                def yearNum = parseNumber(yearStr, rnuIndexRow, xmlIndexCol + colOffset, logger, true)
                 if (yearNum != null && yearNum != 0) {
                     newRow.year = new GregorianCalendar(yearNum as Integer, Calendar.JANUARY, 1).getTime()
                 }
