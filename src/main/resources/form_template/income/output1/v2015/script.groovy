@@ -16,7 +16,7 @@ import groovy.transform.Field
  1. 	financialYear                   Отчетный год
  2.     taxPeriod                       Налоговый (отчетный) период
  3.     emitent                         Эмитент
- 4.     decreeNumder                    Номер решения о распределении доходов от долевого участия
+ 4.     decreeNumber                    Номер решения о распределении доходов от долевого участия
  5.     dividendType                    Вид дивидендов
  6. 	dividendSumRaspredPeriod        Сумма дивидендов, подлежащих распределению между акционерами (участниками) в текущем налоговом периоде. Всего
  7.     dividendSumNalogAgent           Сумма дивидендов, подлежащих распределению между акционерами (участниками) в текущем налоговом периоде. По которым выступает в качестве налогового агента
@@ -56,7 +56,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
-        formDataService.addRow(formData, currentDataRow, editableColumns, null)
+        formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
         break
     case FormDataEvent.DELETE_ROW:
         formDataService.getDataRowHelper(formData).delete(currentDataRow)
@@ -70,7 +70,9 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.IMPORT:
-        noImport(logger)
+        importData()
+        calc()
+        logicCheck()
         break
 }
 
@@ -79,15 +81,19 @@ switch (formDataEvent) {
 def refBookCache = [:]
 
 @Field
-def editableColumns = ['financialYear', 'taxPeriod', 'emitent', 'decreeNumder', 'dividendType', 'dividendSumRaspredPeriod',
+def editableColumns = ['financialYear', 'taxPeriod', 'emitent', 'decreeNumber', 'dividendType', 'dividendSumRaspredPeriod',
                        'dividendSumNalogAgent', 'dividendForgeinOrgAll',
                        'dividendForgeinPersonalAll', 'dividendStavka0', 'dividendStavkaLess5', 'dividendStavkaMore5',
                        'dividendStavkaMore10', 'dividendRussianMembersAll', 'dividendRussianOrgStavka9',
                        'dividendRussianOrgStavka0', 'dividendPersonRussia', 'dividendMembersNotRussianTax',
                        'dividendAgentAll', 'dividendAgentWithStavka0', 'taxSumFromPeriod', 'taxSumFromPeriodAll']
 
+// Автозаполняемые атрибуты
 @Field
-def nonEmptyColumns = ['financialYear', 'taxPeriod','dividendType', 'dividendSumRaspredPeriod', 'dividendSumNalogAgent',
+def autoFillColumns = ['dividendSumForTaxAll', 'dividendSumForTaxStavka9', 'dividendSumForTaxStavka0', 'taxSum']
+
+@Field
+def nonEmptyColumns = ['financialYear', 'taxPeriod', 'dividendType', 'dividendSumRaspredPeriod', 'dividendSumNalogAgent',
                        'dividendForgeinOrgAll', 'dividendForgeinPersonalAll', 'dividendStavka0', 'dividendStavkaLess5',
                        'dividendStavkaMore5', 'dividendStavkaMore10', 'dividendRussianOrgStavka9',
                        'dividendRussianOrgStavka0', 'dividendPersonRussia', 'dividendMembersNotRussianTax',
@@ -162,8 +168,7 @@ def logicCheck() {
 
         // 1. Проверка на заполнение поля
         checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
-        checkNonEmptyColumns(row, row.getIndex(), ['emitent', 'decreeNumder'], logger, false)
-
+        checkNonEmptyColumns(row, row.getIndex(), ['emitent', 'decreeNumber'], logger, false)
 
         // Арифметические проверки расчета граф 21-24, 26
         needValue['dividendSumForTaxAll'] = calc21(row)
@@ -171,15 +176,15 @@ def logicCheck() {
         needValue['dividendSumForTaxStavka0'] = calc23(row)
         needValue['taxSum'] = calc24(row)
         checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
+    }
 
-        // 2. Проверка наличия формы за предыдущий отчётный период
-        if (formDataService.getFormDataPrev(formData, formData.departmentId) == null) {
-            logger.warn('Форма за предыдущий отчётный период не создавалась!')
-        }
+    // 2. Проверка наличия формы за предыдущий отчётный период
+    if (formDataService.getFormDataPrev(formData, formData.departmentId) == null) {
+        logger.warn('Форма за предыдущий отчётный период не создавалась!')
     }
 }
 
-def roundValue(BigDecimal value, def precision) {
+def roundValue(BigDecimal value, def int precision) {
     value?.setScale(precision, BigDecimal.ROUND_HALF_UP)
 }
 
@@ -201,4 +206,150 @@ def checkOverpower(def value, def row, def alias) {
                 "разрядность (15 знаков). «Графа ${aliasMap[alias]}» рассчитывается как «${checksMap[alias]}»!")
     }
     return value
+}
+
+void importData() {
+    def xml = getXML(ImportInputStream, importService, UploadFileName, 'Отчетный год', null, 26, 5)
+
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 26, 5)
+
+    def headerMapping = [
+            (xml.row[0].cell[0]) : 'Отчетный год',
+            (xml.row[0].cell[1]) : 'Налоговый (отчетный) период',
+            (xml.row[0].cell[2]) : 'Эмитент',
+            (xml.row[0].cell[3]) : 'Номер решения о распределении доходов от долевого участия',
+            (xml.row[0].cell[4]) : 'Вид дивидендов',
+            (xml.row[0].cell[5]) : 'Сумма дивидендов, подлежащих распределению между акционерами (участниками) в текущем налоговом периоде',
+            (xml.row[0].cell[18]): 'Дивиденды, полученные',
+            (xml.row[0].cell[20]): 'Сумма дивидендов, используемых для исчисления налога по российским организациям:',
+            (xml.row[0].cell[23]): 'Исчисленная сумма налога, подлежащая уплате в бюджет',
+            (xml.row[0].cell[24]): 'Сумма налога, начисленная с дивидендов, выплаченных в предыдущие отчетные (налоговые) периоды',
+            (xml.row[0].cell[25]): 'Сумма налога, начисленная с дивидендов, выплаченных в отчетном квартале',
+            (xml.row[1].cell[5]) : 'Всего',
+            (xml.row[1].cell[6]) : 'по которым выступает в качестве налогового агента',
+            (xml.row[1].cell[7]) : 'Дивиденды, начисленные иностранным организациям и физическим лицам, не являющимся резидентами России:',
+            (xml.row[1].cell[13]): 'Дивиденды, подлежащие распределению российским акционерам (участникам):',
+            (xml.row[1].cell[18]): 'Всего',
+            (xml.row[1].cell[19]): 'В т. ч. без учета полученных дивидендов, налог с которых исчислен по ставке 0%',
+            (xml.row[1].cell[20]): 'Всего',
+            (xml.row[1].cell[21]): 'налоговая ставка 9%',
+            (xml.row[1].cell[22]): 'налоговая ставка 0%',
+            (xml.row[2].cell[7]) : 'организациям',
+            (xml.row[2].cell[8]) : 'физическим лицам',
+            (xml.row[2].cell[9]) : 'из них налоги с которых исчислены по ставке:',
+            (xml.row[2].cell[13]): 'Всего',
+            (xml.row[2].cell[14]): 'организациям',
+            (xml.row[2].cell[16]): 'физическим лицам',
+            (xml.row[2].cell[17]): 'не являющихся налогоплательщиками',
+            (xml.row[3].cell[9]) : '0%',
+            (xml.row[3].cell[10]): 'до 5% включительно',
+            (xml.row[3].cell[11]): 'свыше 5% и до 10% включительно',
+            (xml.row[3].cell[12]): 'свыше 10%',
+            (xml.row[3].cell[14]): 'налоговая ставка - 9%',
+            (xml.row[3].cell[15]): 'налоговая ставка - 0%'
+    ]
+    (0..25).each { index ->
+        headerMapping.put((xml.row[4].cell[index]), (index + 1).toString())
+    }
+
+    checkHeaderEquals(headerMapping)
+
+    // добавить данные в форму
+    addData(xml, 5)
+}
+
+void addData(def xml, headRowCount) {
+    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+
+    def xmlIndexRow = -1 // Строки xml, от 0
+    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
+
+    // количество графов в таблице
+    def columnCount = 26
+    def rows = []
+    def int rowIndex = 1
+
+    for (def row : xml.row) {
+        xmlIndexRow++
+        def int xlsIndexRow = xmlIndexRow + rowOffset
+
+        // Пропуск строк шапки
+        if (xmlIndexRow <= headRowCount - 1) {
+            continue
+        }
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        if (row.cell.size() >= columnCount) {
+            def newRow = formData.createDataRow()
+            newRow.setIndex(rowIndex++)
+            editableColumns.each {
+                newRow.getCell(it).editable = true
+                newRow.getCell(it).setStyleAlias('Редактируемая')
+            }
+            autoFillColumns.each {
+                newRow.getCell(it).setStyleAlias('Автозаполняемая')
+            }
+
+            def xmlIndexCol = 0
+            newRow.financialYear = parseDate(row.cell[xmlIndexCol].text(), "yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+            xmlIndexCol = 1
+            newRow.taxPeriod = row.cell[xmlIndexCol].text()
+            xmlIndexCol = 2
+            newRow.emitent = row.cell[xmlIndexCol].text()
+            xmlIndexCol = 3
+            newRow.decreeNumber = row.cell[xmlIndexCol].text()
+            xmlIndexCol = 4
+            newRow.dividendType = row.cell[xmlIndexCol].text()
+            xmlIndexCol = 5
+            newRow.dividendSumRaspredPeriod = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+            xmlIndexCol = 6
+            newRow.dividendSumNalogAgent = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+            xmlIndexCol = 7
+            newRow.dividendForgeinOrgAll = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+            xmlIndexCol = 8
+            newRow.dividendForgeinPersonalAll = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+            xmlIndexCol = 9
+            newRow.dividendStavka0 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+            xmlIndexCol = 10
+            newRow.dividendStavkaLess5 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+            xmlIndexCol = 11
+            newRow.dividendStavkaMore5 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+            xmlIndexCol = 12
+            newRow.dividendStavkaMore10 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+            xmlIndexCol = 13
+            newRow.dividendRussianMembersAll = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+            xmlIndexCol = 14
+            newRow.dividendRussianOrgStavka9 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+            xmlIndexCol = 15
+            newRow.dividendRussianOrgStavka0 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+            xmlIndexCol = 16
+            newRow.dividendPersonRussia = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+            xmlIndexCol = 17
+            newRow.dividendMembersNotRussianTax = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+            xmlIndexCol = 18
+            newRow.dividendAgentAll = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+            xmlIndexCol = 19
+            newRow.dividendAgentWithStavka0 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+            xmlIndexCol = 20
+            newRow.dividendSumForTaxAll = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+            xmlIndexCol = 21
+            newRow.dividendSumForTaxStavka9 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+            xmlIndexCol = 22
+            newRow.dividendSumForTaxStavka0 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+            xmlIndexCol = 23
+            newRow.taxSum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+            xmlIndexCol = 24
+            newRow.taxSumFromPeriod = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+            xmlIndexCol = 25
+            newRow.taxSumFromPeriodAll = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+
+            rows.add(newRow)
+        }
+    }
+    dataRowHelper.save(rows)
 }

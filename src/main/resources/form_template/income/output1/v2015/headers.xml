@@ -4,7 +4,7 @@
         <cell alias="financialYear" colSpan="1" rowSpan="4" value="Отчетный год"/>
         <cell alias="taxPeriod" colSpan="1" rowSpan="4" value="Налоговый (отчетный) период"/>
         <cell alias="emitent" colSpan="1" rowSpan="4" value="Эмитент"/>
-        <cell alias="decreeNumder" colSpan="1" rowSpan="4"
+        <cell alias="decreeNumber" colSpan="1" rowSpan="4"
               value="Номер решения о распределении доходов от долевого участия"/>
         <cell alias="dividendType" colSpan="1" rowSpan="4" value="Вид дивидендов"/>
         <cell alias="dividendSumRaspredPeriod" colSpan="13" rowSpan="1"
@@ -51,11 +51,11 @@
         <cell alias="financialYear" colSpan="1" rowSpan="1" value="Отчетный год"/>
         <cell alias="taxPeriod" colSpan="1" rowSpan="1" value="Налоговый (отчетный) период"/>
         <cell alias="emitent" colSpan="1" rowSpan="1" value="Эмитент"/>
-        <cell alias="decreeNumder" colSpan="1" rowSpan="1"
+        <cell alias="decreeNumber" colSpan="1" rowSpan="1"
               value="Номер решения о распределении доходов от долевого участия"/>
         <cell alias="dividendType" colSpan="1" rowSpan="1" value="Вид дивидендов"/>
         <cell alias="dividendSumRaspredPeriod" colSpan="1" rowSpan="3" value="Всего"/>
-        <cell alias="dividendSumNalogAgent" colSpan="1" rowSpan="1"
+        <cell alias="dividendSumNalogAgent" colSpan="1" rowSpan="3"
               value="по которым выступает в качестве налогового агента"/>
         <cell alias="dividendForgeinOrgAll" colSpan="6" rowSpan="1"
               value="Дивиденды, начисленные иностранным организациям и физическим лицам, не являющимся резидентами России:"/>
@@ -95,11 +95,12 @@
         <cell alias="financialYear" colSpan="1" rowSpan="1" value="Отчетный год"/>
         <cell alias="taxPeriod" colSpan="1" rowSpan="1" value="Налоговый (отчетный) период"/>
         <cell alias="emitent" colSpan="1" rowSpan="1" value="Эмитент"/>
-        <cell alias="decreeNumder" colSpan="1" rowSpan="1"
+        <cell alias="decreeNumber" colSpan="1" rowSpan="1"
               value="Номер решения о распределении доходов от долевого участия"/>
         <cell alias="dividendType" colSpan="1" rowSpan="1" value="Вид дивидендов"/>
         <cell alias="dividendSumRaspredPeriod" colSpan="1" rowSpan="1" value="Всего"/>
-        <cell alias="dividendSumNalogAgent" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="dividendSumNalogAgent" colSpan="1" rowSpan="1"
+              value="по которым выступает в качестве налогового агента"/>
         <cell alias="dividendForgeinOrgAll" colSpan="1" rowSpan="2" value="организациям"/>
         <cell alias="dividendForgeinPersonalAll" colSpan="1" rowSpan="2" value="физическим лицам"/>
         <cell alias="dividendStavka0" colSpan="4" rowSpan="1" value="из них налоги с которых исчислены по ставке:"/>
@@ -107,11 +108,11 @@
         <cell alias="dividendStavkaMore5" colSpan="1" rowSpan="1" value="из них налоги с которых исчислены по ставке:"/>
         <cell alias="dividendStavkaMore10" colSpan="1" rowSpan="1"
               value="из них налоги с которых исчислены по ставке:"/>
-        <cell alias="dividendRussianMembersAll" colSpan="1" rowSpan="1" value="Всего"/>
+        <cell alias="dividendRussianMembersAll" colSpan="1" rowSpan="2" value="Всего"/>
         <cell alias="dividendRussianOrgStavka9" colSpan="2" rowSpan="1" value="организациям"/>
         <cell alias="dividendRussianOrgStavka0" colSpan="1" rowSpan="1" value="организациям"/>
-        <cell alias="dividendPersonRussia" colSpan="1" rowSpan="1" value="физическим лицам"/>
-        <cell alias="dividendMembersNotRussianTax" colSpan="1" rowSpan="1" value="не являющихся налогоплательщиками"/>
+        <cell alias="dividendPersonRussia" colSpan="1" rowSpan="2" value="физическим лицам"/>
+        <cell alias="dividendMembersNotRussianTax" colSpan="1" rowSpan="2" value="не являющихся налогоплательщиками"/>
         <cell alias="dividendAgentAll" colSpan="1" rowSpan="1" value="Всего"/>
         <cell alias="dividendAgentWithStavka0" colSpan="1" rowSpan="1"
               value="В т. ч. без учета полученных дивидендов, налог с которых исчислен по ставке 0%"/>
@@ -128,22 +129,23 @@
         <cell alias="financialYear" colSpan="1" rowSpan="1" value="Отчетный год"/>
         <cell alias="taxPeriod" colSpan="1" rowSpan="1" value="Налоговый (отчетный) период"/>
         <cell alias="emitent" colSpan="1" rowSpan="1" value="Эмитент"/>
-        <cell alias="decreeNumder" colSpan="1" rowSpan="1"
+        <cell alias="decreeNumber" colSpan="1" rowSpan="1"
               value="Номер решения о распределении доходов от долевого участия"/>
         <cell alias="dividendType" colSpan="1" rowSpan="1" value="Вид дивидендов"/>
         <cell alias="dividendSumRaspredPeriod" colSpan="1" rowSpan="1" value="Всего"/>
-        <cell alias="dividendSumNalogAgent" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="dividendSumNalogAgent" colSpan="1" rowSpan="1"
+              value="по которым выступает в качестве налогового агента"/>
         <cell alias="dividendForgeinOrgAll" colSpan="1" rowSpan="1" value="организациям"/>
         <cell alias="dividendForgeinPersonalAll" colSpan="1" rowSpan="1" value="физическим лицам"/>
         <cell alias="dividendStavka0" colSpan="1" rowSpan="1" value="0%"/>
         <cell alias="dividendStavkaLess5" colSpan="1" rowSpan="1" value="до 5% включительно"/>
         <cell alias="dividendStavkaMore5" colSpan="1" rowSpan="1" value="свыше 5% и до 10% включительно"/>
         <cell alias="dividendStavkaMore10" colSpan="1" rowSpan="1" value="свыше 10%"/>
-        <cell alias="dividendRussianMembersAll" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="dividendRussianMembersAll" colSpan="1" rowSpan="1" value="Всего"/>
         <cell alias="dividendRussianOrgStavka9" colSpan="1" rowSpan="1" value="налоговая ставка - 9%"/>
         <cell alias="dividendRussianOrgStavka0" colSpan="1" rowSpan="1" value="налоговая ставка - 0%"/>
-        <cell alias="dividendPersonRussia" colSpan="1" rowSpan="1" value=""/>
-        <cell alias="dividendMembersNotRussianTax" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="dividendPersonRussia" colSpan="1" rowSpan="1" value="физическим лицам"/>
+        <cell alias="dividendMembersNotRussianTax" colSpan="1" rowSpan="1" value="не являющихся налогоплательщиками"/>
         <cell alias="dividendAgentAll" colSpan="1" rowSpan="1" value="Всего"/>
         <cell alias="dividendAgentWithStavka0" colSpan="1" rowSpan="1"
               value="В т. ч. без учета полученных дивидендов, налог с которых исчислен по ставке 0%"/>
@@ -160,7 +162,7 @@
         <cell alias="financialYear" colSpan="1" rowSpan="1" value="1"/>
         <cell alias="taxPeriod" colSpan="1" rowSpan="1" value="2"/>
         <cell alias="emitent" colSpan="1" rowSpan="1" value="3"/>
-        <cell alias="decreeNumder" colSpan="1" rowSpan="1" value="4"/>
+        <cell alias="decreeNumber" colSpan="1" rowSpan="1" value="4"/>
         <cell alias="dividendType" colSpan="1" rowSpan="1" value="5"/>
         <cell alias="dividendSumRaspredPeriod" colSpan="1" rowSpan="1" value="6"/>
         <cell alias="dividendSumNalogAgent" colSpan="1" rowSpan="1" value="7"/>
