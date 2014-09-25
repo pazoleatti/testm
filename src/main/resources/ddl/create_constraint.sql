@@ -286,4 +286,4 @@ create index i_numeric_value_column_id on numeric_value(column_id);
 create index i_cell_style_column_id on cell_style(column_id);
 create index i_cell_editable_column_id on cell_editable(column_id);
 create index i_cell_span_info_column_id on cell_span_info(column_id);
-create index i_decl_data_dep_rep_period_id on declaration_data (department_report_period_id);
+create index i_decl_data_dep_rep_per_id on declaration_data (department_report_period_id);
