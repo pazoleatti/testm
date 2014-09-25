@@ -81,7 +81,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.COMPOSE:
-        formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
+        formDataService.consolidationSimple(formData, logger)
         calc()
         logicCheck()
         break
@@ -817,7 +817,7 @@ FormData getFormPrev() {
     def reportPeriodPrev = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
     FormData formPrev = null
     if (reportPeriodPrev != null) {
-        formPrev = formDataService.find(formData.formType.id, FormDataKind.PRIMARY, formData.departmentId, reportPeriodPrev.id)
+        formPrev = formDataService.getLast(formData.formType.id, FormDataKind.PRIMARY, formData.departmentId, reportPeriodPrev.id, null)
     }
     return formPrev
 }
@@ -894,10 +894,11 @@ def getReportPeriodEndDate() {
     return endDate
 }
 
-// Признак периода ввода остатков.
+// Признак периода ввода остатков для отчетного периода подразделения
 def isBalancePeriod() {
     if (isBalancePeriod == null) {
-        isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
+        def departmentReportPeriod = departmentReportPeriodService.get(formData.departmentReportPeriodId)
+        isBalancePeriod = departmentReportPeriod.isBalance()
     }
     return isBalancePeriod
 }

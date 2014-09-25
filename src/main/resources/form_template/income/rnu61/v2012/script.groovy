@@ -64,7 +64,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.COMPOSE:
-        formDataService.consolidationTotal(formData, formDataDepartment.id, logger, ['total'])
+        formDataService.consolidationTotal(formData, logger, ['total'])
         calc()
         logicCheck()
         break
@@ -497,9 +497,11 @@ void loggerError(def row, def msg) {
     }
 }
 
+// Признак периода ввода остатков для отчетного периода подразделения
 def isBalancePeriod() {
     if (isBalancePeriod == null) {
-        isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
+        def departmentReportPeriod = departmentReportPeriodService.get(formData.departmentReportPeriodId)
+        isBalancePeriod = departmentReportPeriod.isBalance()
     }
     return isBalancePeriod
 }

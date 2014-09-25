@@ -46,7 +46,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.COMPOSE:
-        formDataService.consolidationTotal(formData, formDataDepartment.id, logger, ['total'])
+        formDataService.consolidationTotal(formData, logger, ['total'])
         checkRNU()
         calc()
         logicCheck()
@@ -171,7 +171,7 @@ void calc() {
 }
 
 def getRNU(def id) {
-    def sourceFormData = formDataService.find(id, formData.kind, formDataDepartment.id, formData.reportPeriodId)
+    def sourceFormData = formDataService.getLast(id, formData.kind, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder)
     if (sourceFormData == null)
         return null
     return formDataService.getDataRowHelper(sourceFormData).getAllCached()

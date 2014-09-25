@@ -182,8 +182,7 @@ void consolidation() {
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
             getReportPeriodStartDate(), getReportPeriodEndDate()).each {
         if (it.formTypeId == formData.formType.id) {
-            def taxPeriodId = reportPeriodService.get(formData.reportPeriodId)?.taxPeriod?.id
-            def sourceFormData = formDataService.findMonth(it.formTypeId, it.kind, it.departmentId, taxPeriodId, formData.periodOrder)
+            def sourceFormData = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
             if (sourceFormData != null && sourceFormData.state == WorkflowState.ACCEPTED) {
                 def sourceDataRows = formDataService.getDataRowHelper(sourceFormData)?.allCached
                 def sourceRow = getDataRow(sourceDataRows, 'total')
@@ -320,7 +319,7 @@ def getPrevMonthTotalRow() {
     if (formData.periodOrder == null || formData.periodOrder == 1) {
         return null
     }
-    def prevFormData = formDataService.getFormDataPrev(formData, formData.departmentId)
+    def prevFormData = formDataService.getFormDataPrev(formData)
     if (prevFormData != null) {
         def prevDataRows = formDataService.getDataRowHelper(prevFormData)?.allCached
         return getDataRow(prevDataRows, 'total')

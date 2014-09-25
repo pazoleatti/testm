@@ -6,31 +6,31 @@ import java.util.Date;
 public class DepartmentReportPeriod implements Serializable{
 	private static final long serialVersionUID = 5623552659772659276L;
 
-    private Long id;
+    private Integer id;
 
 	private ReportPeriod reportPeriod;
 	
-	private Long departmentId;
+	private Integer departmentId;
 	
 	private boolean balance;
 	
 	private boolean active;
 
-    private Date correctPeriod;
+    private Date correctionDate;
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
-    public Long getDepartmentId() {
+    public Integer getDepartmentId() {
 		return departmentId;
 	}
 
-	public void setDepartmentId(Long departmentId) {
+	public void setDepartmentId(Integer departmentId) {
 		this.departmentId = departmentId;
 	}
 
@@ -58,11 +58,11 @@ public class DepartmentReportPeriod implements Serializable{
 		this.reportPeriod = reportPeriod;
 	}
 
-    public Date getCorrectPeriod() {
-        return correctPeriod;
+    public Date getCorrectionDate() {
+        return correctionDate;
     }
 
-    public void setCorrectPeriod(Date correctPeriod) {
-        this.correctPeriod = correctPeriod;
+    public void setCorrectionDate(Date correctionDate) {
+        this.correctionDate = correctionDate;
     }
 }

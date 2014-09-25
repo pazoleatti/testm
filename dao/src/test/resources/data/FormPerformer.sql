@@ -23,7 +23,10 @@ INSERT INTO ref_book_record(id, record_id, ref_book_id, version, status) VALUES 
 INSERT INTO report_period (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date) VALUES (1, '1 - период', 1, 21, date '2013-01-01', date '2013-03-31', date '2013-01-01');
 INSERT INTO report_period (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date) VALUES (2, '2 - период', 1, 22, date '2013-04-01', date '2013-06-30', date '2013-04-01');
 
-INSERT INTO form_data (id, form_template_id, department_id, state, kind, report_period_id, return_sign) VALUES (1, 1, 1, 1, 2, 1, 0);
-INSERT INTO form_data (id, form_template_id, department_id, state, kind, report_period_id, return_sign) VALUES (2, 2, 2, 2, 3, 2, 0);
+insert into department_report_period(id, department_id, report_period_id, is_active, is_balance_period) values (1, 1, 1, 1, 0);
+insert into department_report_period(id, department_id, report_period_id, is_active, is_balance_period) values (2, 2, 2, 1, 0);
+
+INSERT INTO form_data (id, form_template_id, department_report_period_id, state, kind, return_sign) VALUES (1, 1, 1, 1, 2, 0);
+INSERT INTO form_data (id, form_template_id, department_report_period_id, state, kind, return_sign) VALUES (2, 2, 2, 2, 3, 0);
 
 INSERT INTO form_data_performer (form_data_id, name, phone, print_department_id) VALUES (1, 'name1', 'phone1', 2);

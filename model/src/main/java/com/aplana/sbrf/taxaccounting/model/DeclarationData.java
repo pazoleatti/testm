@@ -13,6 +13,8 @@ public class DeclarationData extends IdentityObject<Long> {
 	private int declarationTemplateId;	
 	private int reportPeriodId;
 	private int departmentId;
+    private Integer departmentReportPeriodId;
+
 	private boolean accepted;
     private String taxOrganCode;
     private String kpp;
@@ -104,7 +106,15 @@ public class DeclarationData extends IdentityObject<Long> {
 	public void setDepartmentId(int departmentId) {
 		this.departmentId = departmentId;
 	}
-	
+
+    public Integer getDepartmentReportPeriodId() {
+        return departmentReportPeriodId;
+    }
+
+    public void setDepartmentReportPeriodId(Integer departmentReportPeriodId) {
+        this.departmentReportPeriodId = departmentReportPeriodId;
+    }
+
 	/**
 	 * Возвращает признак того, что декларация принята
 	 * @return true - декларация принята, false - не принята

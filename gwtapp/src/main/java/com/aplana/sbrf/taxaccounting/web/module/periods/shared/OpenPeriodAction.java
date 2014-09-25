@@ -9,7 +9,7 @@ public class OpenPeriodAction extends UnsecuredActionImpl<OpenPeriodResult> {
 	TaxType taxType;
 	int year;
 	boolean balancePeriod;
-	long departmentId;
+	int departmentId;
 	long dictionaryTaxPeriodId;
 	Date endDate;
     Date correctPeriod;
@@ -38,11 +38,11 @@ public class OpenPeriodAction extends UnsecuredActionImpl<OpenPeriodResult> {
 		this.balancePeriod = balancePeriod;
 	}
 
-	public long getDepartmentId() {
+	public int getDepartmentId() {
 		return departmentId;
 	}
 
-	public void setDepartmentId(long departmentId) {
+	public void setDepartmentId(int departmentId) {
 		this.departmentId = departmentId;
 	}
 

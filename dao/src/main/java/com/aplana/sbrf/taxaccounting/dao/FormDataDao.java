@@ -9,24 +9,11 @@ import java.util.List;
  * DAO для работы с данными по налоговым формам
  */
 public interface FormDataDao {
-    /**
-     * Получить данные по налоговой формы
-     *
-     *
-     * @param formDataId идентификатор заполненной налоговой формы
-     * @return данные по налоговой форме
-     * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException,
-     *          если данных с таким id нет (также может возникнуть из-за других ошибок в слое Dao)
-     */
-    @Deprecated
-    FormData get(long formDataId);
-
 	/**
 	 * Получить данные по налоговой формы
 	 *
-	 *
      * @param formDataId идентификатор заполненной налоговой формы
-     * @param manual признак версии ручного ввода
+     * @param manual признак версии ручного ввода (возможно значение null)
      * @return данные по налоговой форме
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException,
 	 *          если данных с таким id нет (также может возникнуть из-за других ошибок в слое Dao)
@@ -66,59 +53,50 @@ public interface FormDataDao {
 	void delete(long formDataId);
 
 	/**
-	 * Ищет налоговую форму по заданным параметрам.
-	 * Предполагается, что для большинства налоговых форм такое условие будет определять не более одной формы.
-	 * Единственное возможное исключение - налог на имущество (для него использовать данный метод нельзя). 
-	 * @param formTypeId   идентификатор {@link com.aplana.sbrf.taxaccounting.model.FormType вида формы}.
-	 * @param kind         тип формы
-	 * @param departmentId идентификатор {@link com.aplana.sbrf.taxaccounting.model.Department подразделения}
-	 * @param reportPeriodId идентификатор {@link com.aplana.sbrf.taxaccounting.model.ReportPeriod отчетного периода}
-	 * @return форма или null, если такой формы не найдено
-	 * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если будет найдено несколько записей, удовлетворяющих условию поиска
+	 * Ищет налоговую форму по заданным параметрам (формы в корректирующем периоде не найдутся)
+     * @deprecated Неактуально с появлением корректирующих периодов
 	 */
+    @Deprecated
 	FormData find(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId);
 
+    /**
+     * Список Id экземпляров НФ по Id шаблона
+     */
     List<Long> findFormDataByFormTemplate(int formTemplateId);
 
-    List<Long> findFormDataByDepartment(int departmentId);
-
-	/**
-	 * Поиск налоговой формы
-	 * @param departmentIds подразделения
-	 * @param reportPeriodId отчетный период
-	 * @return список налоговых форм, удовлетворяющих критерию
-	 */
-	List<FormData> find(List<Integer> departmentIds, int reportPeriodId);
+    /**
+     * Поиск ежемесячной налоговой формы (формы в корректирующем периоде не найдутся)
+     * @deprecated Неактуально с появлением корректирующих периодов
+     */
+    @Deprecated
+    FormData findMonth(int formTypeId, FormDataKind kind, int departmentId, int taxPeriodId, int periodOrder);
 
     /**
-     * Поиск ежемесячной налоговой формы
-     * @param formTypeId Вид формы
-     * @param kind Тип формы
-     * @param departmentId Подразделение
-     * @param taxPeriodId Налоговый период
-     * @param periodOrder Порядковый номер (равен номеру месяца, при нумерации с 1)
-     * @return Форма или null, если такой формы не найдено
-     * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если будет найдено несколько записей, удовлетворяющих условию поиска
+     * Поиск НФ по отчетному периоду подразделения (и месяцу)
+     * @param formTypeId Вид НФ
+     * @param kind Тип НФ
+     * @param departmentReportPeriodId Отчетный период подразделения
+     * @param periodOrder Порядковый номер (равен номеру месяца, при нумерации с 1) для ежемесячных форм
      */
-    FormData findMonth(int formTypeId, FormDataKind kind, int departmentId, int taxPeriodId, int periodOrder);
+    FormData find(int formTypeId, FormDataKind kind, int departmentReportPeriodId, Integer periodOrder);
+
+    /**
+     * Поиск НФ. Не учитывает корректирующий период, т.е. результатом могут быть как id экземпляров
+     * корректирующих и/или некорректирующих периодов.
+     * @param departmentIds подразделения
+     * @param reportPeriodId отчетный период
+     */
+    List<FormData> find(List<Integer> departmentIds, int reportPeriodId);
 
 	/**
 	 * Обновление признака возврата
-	 * 
-	 * @param id
-	 * @param returnSign
 	 */
 	void updateReturnSign(long id, boolean returnSign);
 	
 	/**
 	 * Обновление статуса
-	 * 
-	 * @param id
-	 * @param workflowState
 	 */
 	void updateState(long id, WorkflowState workflowState);
-
-    void updatePeriodOrder(long id, int periodOrder);
 
     List<Long> getFormDataListInActualPeriodByTemplate(int templateId, Date startDate);
 
@@ -214,7 +192,8 @@ public interface FormDataDao {
      * @param periodEnd    окончание периода, в котором действуют назначения
      * @return список налоговых форм
      */
-    List<FormData> getManualInputForms(List<Integer> departments, int reportPeriodId, TaxType taxType, FormDataKind kind, Date periodStart, Date periodEnd);
+    List<FormData> getManualInputForms(List<Integer> departments, int reportPeriodId, TaxType taxType, FormDataKind kind,
+                                       Date periodStart, Date periodEnd);
 
     /**
      * Получить все существующие экземпляры НФ указанного макета НФ
@@ -223,4 +202,10 @@ public interface FormDataDao {
      * @return список экземпляров НФ
      */
     List<FormData> getFormDataListByTemplateId(Integer formTemplateId);
+
+    /**
+     * НФ созданная в последнем отчетном периоде подразделения, если в нем нет формы, то берется форма из предудущего
+     * отчетного периода подразделения и т.д. в рамках отчетного периода
+     */
+    FormData getLast(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder);
 }

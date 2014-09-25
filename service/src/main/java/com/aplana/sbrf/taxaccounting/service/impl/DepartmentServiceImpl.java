@@ -5,9 +5,10 @@ import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -290,9 +291,18 @@ public class DepartmentServiceImpl implements DepartmentService {
         // Подразделения согласно выборке 40 - Выборка для доступа к экземплярам НФ/деклараций
         List<Integer> list = getTaxFormDepartments(tAUser, taxTypes, reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
         for (Integer departmentId : list) {
-            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(reportPeriodId,
-                    departmentId.longValue());
-            if ((departmentReportPeriod != null) && departmentReportPeriod.isActive()) {
+            // Открытый период подразделения для пары «Подразделение — Отчетный период» может быть только один
+            DepartmentReportPeriodFilter departmentReportPeriodFilter = new DepartmentReportPeriodFilter();
+            departmentReportPeriodFilter.setIsActive(true);
+            departmentReportPeriodFilter.setDepartmentIdList(Arrays.asList(departmentId));
+            departmentReportPeriodFilter.setReportPeriodIdList(Arrays.asList(reportPeriodId));
+            List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodDao.getListByFilter(departmentReportPeriodFilter);
+
+            DepartmentReportPeriod departmentReportPeriod = null;
+            if (departmentReportPeriodList.size() == 1) {
+                departmentReportPeriod = departmentReportPeriodList.get(0);
+            }
+            if (departmentReportPeriod != null) {
                 // Подразделения, для которых открыт указанный период
                 retList.add(departmentId);
             }

@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.ReportPeriodMappingDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -12,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.model.migration.enums.DepartmentRnuMapping;
 import com.aplana.sbrf.taxaccounting.model.migration.enums.DepartmentXmlMapping;
 import com.aplana.sbrf.taxaccounting.model.migration.enums.NalogFormType;
 import com.aplana.sbrf.taxaccounting.model.migration.enums.PeriodMapping;
+import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -23,6 +25,8 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.List;
 
 @Service
 @Transactional
@@ -54,6 +58,9 @@ public class MappingServiceImpl implements MappingService {
     @Autowired
     private LogEntryService logEntryService;
 
+    @Autowired
+    private DepartmentReportPeriodDao departmentReportPeriodDao;
+
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
     private static final SimpleDateFormat YEAR_FORMAT = new SimpleDateFormat("yyyy");
     private static final String CHARSET = "cp866";
@@ -75,7 +82,7 @@ public class MappingServiceImpl implements MappingService {
         Integer formTemplateId = null;
         Integer periodOrder = null;
 
-        Boolean isAllreadyCreated = false;
+        Boolean isAlreadyCreated = false;
 
         try {
             InputStream inputStream = new ByteArrayInputStream(fileContent);
@@ -105,22 +112,34 @@ public class MappingServiceImpl implements MappingService {
                 reportPeriod = periodDao.get(reportPeriodId);
             }
 
+            // Отчетный период подразделения
+            DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
+            filter.setDepartmentIdList(Arrays.asList(departmentId));
+            filter.setReportPeriodIdList(Arrays.asList(reportPeriod.getId()));
+            filter.setIsActive(true);
+            // Открытый отчетный период подразделения может быть только один или отсутствовать
+            List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodDao.getListByFilter(filter);
+            DepartmentReportPeriod departmentReportPeriod = null;
+            if (departmentReportPeriodList.size() == 1) {
+                departmentReportPeriod = departmentReportPeriodList.get(0);
+            } else {
+                throw new ServiceException("Не определен отчетный период подразделения");
+            }
+
             Logger logger = new Logger();
 
-            FormData formData = null;
-            // Если ежемесячная форма
-            if (periodOrder != null) {
-                formData = formDataDao.findMonth(formTemplateId, FormDataKind.PRIMARY, departmentId, restoreExemplar.getTaxPeriod(), periodOrder);
-            } else {
-                formData = formDataDao.find(formTemplateId, FormDataKind.PRIMARY, departmentId, reportPeriod.getId());
-            }
+            FormData formData;
+            formData = formDataDao.find(formTemplateId.intValue(), FormDataKind.PRIMARY,
+                    departmentReportPeriod.getId().intValue(),
+                    periodOrder == null ? null : Integer.valueOf(periodOrder));
+
             if (formData == null) {
                 long formDataId = formDataService.createFormData(logger,
                         userInfo,
                         formTemplateId,
-                        departmentId,
+                        departmentReportPeriod.getId(),
                         FormDataKind.PRIMARY,
-                        reportPeriod, periodOrder);
+                        periodOrder);
 
                 // Вызов скрипта
                 formDataService.lock(formDataId, userInfo);
@@ -131,7 +150,7 @@ public class MappingServiceImpl implements MappingService {
                 formDataDao.updateState(formDataId, WorkflowState.ACCEPTED);
                 formDataService.unlock(formDataId, userInfo);
             } else {
-                isAllreadyCreated = true;
+                isAlreadyCreated = true;
             }
         } catch (Exception e) {
             if (e instanceof ServiceLoggerException) {
@@ -147,7 +166,7 @@ public class MappingServiceImpl implements MappingService {
             return;
         }
 
-        if(isAllreadyCreated){
+        if(isAlreadyCreated){
             // Форма уже была создана
             log.info("Уже был создан экземпляр формы с такими параметрами как в " + filename + " departmentId = " + departmentId + " reportPeriodId = "
                     + reportPeriodId );

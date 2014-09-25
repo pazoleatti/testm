@@ -44,8 +44,8 @@ public class BookerStatementsServiceImplTest {
         // По мокаем зависимости сервиса
         PeriodService periodService = mock(PeriodService.class);
         ReflectionTestUtils.setField(service, "reportPeriodService", periodService);
-        when(periodService.isActivePeriod(REPORT_PERIOD_ID_OPEN, DEPARTMENT_ID)).thenReturn(true);
-        when(periodService.isActivePeriod(REPORT_PERIOD_ID_CLOSED, DEPARTMENT_ID)).thenReturn(false);
+//        when(periodService.isActivePeriod(REPORT_PERIOD_ID_OPEN, DEPARTMENT_ID)).thenReturn(true);
+//        when(periodService.isActivePeriod(REPORT_PERIOD_ID_CLOSED, DEPARTMENT_ID)).thenReturn(false);
 
         RefBookFactory refBookFactory = mock(RefBookFactory.class);
         RefBookDataProvider provider101 = mock(RefBookDataProvider.class);

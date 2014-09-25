@@ -3,21 +3,17 @@ package com.aplana.sbrf.taxaccounting.web.module.periods.shared;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
-import java.util.Date;
-
 public class RemovePeriodAction extends UnsecuredActionImpl<RemovePeriodResult> {
-	Integer reportPeriodId;
 	TaxType taxType;
-	long departmentId;
-    Date correctionDate;
+    int departmentReportPeriodId;
 
-	public Integer getReportPeriodId() {
-		return reportPeriodId;
-	}
+    public int getDepartmentReportPeriodId() {
+        return departmentReportPeriodId;
+    }
 
-	public void setReportPeriodId(Integer reportPeriodId) {
-		this.reportPeriodId = reportPeriodId;
-	}
+    public void setDepartmentReportPeriodId(int departmentReportPeriodId) {
+        this.departmentReportPeriodId = departmentReportPeriodId;
+    }
 
 	public TaxType getTaxType() {
 		return taxType;
@@ -26,20 +22,4 @@ public class RemovePeriodAction extends UnsecuredActionImpl<RemovePeriodResult> 
 	public void setTaxType(TaxType taxType) {
 		this.taxType = taxType;
 	}
-
-	public long getDepartmentId() {
-		return departmentId;
-	}
-
-	public void setDepartmentId(long departmentId) {
-		this.departmentId = departmentId;
-	}
-
-    public Date getCorrectionDate() {
-        return correctionDate;
-    }
-
-    public void setCorrectionDate(Date correctionDate) {
-        this.correctionDate = correctionDate;
-    }
 }

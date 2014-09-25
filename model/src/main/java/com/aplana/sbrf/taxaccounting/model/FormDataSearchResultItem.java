@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * DTO-Класс, содержащий информацию о параметрах налоговых форм и связанных с ним объектов в "плоском" виде
@@ -36,10 +37,14 @@ public class FormDataSearchResultItem implements Serializable {
 	private DepartmentType departmentType;
 	// Идентификатор отчётного периода
 	private Integer reportPeriodId;
+    // Отчетный период подразделения
+    private Integer departmentReportPeriodId;
 	// Название отчётного периода
 	private String reportPeriodName;
     // Год отчётного периода
     private Integer reportPeriodYear;
+    // Срок сдачи корректировки
+    private Date correctionDate;
     // Очередность отчетного периода для ежемесячных НФ
     private Integer reportPeriodMonth;
     // Признак возврата
@@ -154,5 +159,21 @@ public class FormDataSearchResultItem implements Serializable {
     }
     public void setReturnSign(Boolean returnSign) {
         this.returnSign = returnSign;
+    }
+
+    public Integer getDepartmentReportPeriodId() {
+        return departmentReportPeriodId;
+    }
+
+    public void setDepartmentReportPeriodId(Integer departmentReportPeriodId) {
+        this.departmentReportPeriodId = departmentReportPeriodId;
+    }
+
+    public Date getCorrectionDate() {
+        return correctionDate;
+    }
+
+    public void setCorrectionDate(Date correctionDate) {
+        this.correctionDate = correctionDate;
     }
 }

@@ -68,7 +68,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.COMPOSE:
-        formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
+        formDataService.consolidationSimple(formData, logger)
         calc()
         logicCheck()
         break
@@ -341,16 +341,17 @@ def getRowPrev(def dataRowsPrev, def row) {
 
 def getDataRowsPrev() {
     if (dataRowsOld == null) {
-        def formDataPrev = formDataService.getFormDataPrev(formData, formData.departmentId)
+        def formDataPrev = formDataService.getFormDataPrev(formData)
         dataRowsOld = (formDataPrev ? formDataService.getDataRowHelper(formDataPrev)?.allCached : null)
     }
     return dataRowsOld
 }
 
-// Признак периода ввода остатков. Отчетный период является периодом ввода остатков.
+// Признак периода ввода остатков для отчетного периода подразделения
 def isBalancePeriod() {
     if (isBalancePeriod == null) {
-        isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
+        def departmentReportPeriod = departmentReportPeriodService.get(formData.departmentReportPeriodId)
+        isBalancePeriod = departmentReportPeriod.isBalance()
     }
     return isBalancePeriod
 }

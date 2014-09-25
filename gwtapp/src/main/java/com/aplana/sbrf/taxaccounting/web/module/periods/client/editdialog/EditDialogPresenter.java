@@ -163,7 +163,7 @@ public class EditDialogPresenter extends PresenterWidget<EditDialogPresenter.MyV
         action.setYear(data.getYear());
         action.setBalance(data.isBalance());
         action.setNewDictTaxPeriodId(data.getDictTaxPeriodId().intValue());
-        action.setReportPeriodId(initData.getReportPeriodId().intValue());
+        action.setReportPeriodId(initData.getReportPeriodId());
         dispatcher.execute(action, CallbackUtils
                         .defaultCallback(new AbstractCallback<EditPeriodResult>() {
                             @Override

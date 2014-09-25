@@ -37,7 +37,7 @@
 					<Put name="url">
 						jdbc:oracle:thin:@//172.16.127.16:1521/ORCL.APLANA.LOCAL
 					</Put>
-					<Put name="user">TAX_0_4</Put>
+					<Put name="user">TAX_0_4_CLONE</Put>
 					<Put name="password">TAX</Put>
 				</Get>
 				<Call name="init" />
@@ -116,25 +116,6 @@
         <Arg>java:comp/env/services/cache/aplana/taxaccounting/DataBlobsCache</Arg>
         <Arg>
             <New class="java.util.concurrent.ConcurrentHashMap" />
-        </Arg>
-    </New>
-
-    <!-- Подмена JMS-factory в WebSphere на ApacheMQ для теста -->
-    <New class="org.mortbay.jetty.plus.naming.Resource">
-        <Arg>jms/transportConnectionFactory</Arg>
-        <Arg>
-            <New class="org.apache.activemq.ActiveMQConnectionFactory"/>
-        </Arg>
-    </New>
-
-    <!-- Тестовая очередь миграции -->
-    <New class="org.mortbay.jetty.plus.naming.Resource">
-        <Arg>jms/transportQueue</Arg>
-        <Arg>
-            <New class="org.apache.activemq.command.ActiveMQQueue">
-                <!-- Имя очереди -->
-                <Arg>Files</Arg>
-            </New>
         </Arg>
     </New>
 

@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import groovy.transform.Field
 
@@ -207,9 +208,9 @@ def formDataPrev = null // Форма предыдущего месяца
 def dataRowHelperPrev = null // DataRowHelper формы предыдущего месяца
 
 // Получение формы предыдущего месяца
-FormData getFormDataPrev() {
+def getFormDataPrev() {
     if (formDataPrev == null) {
-        formDataPrev = formDataService.getFormDataPrev(formData, formDataDepartment.id)
+        formDataPrev = formDataService.getFormDataPrev(formData)
     }
     return formDataPrev
 }
@@ -315,14 +316,11 @@ void consolidation() {
     // удалить нефиксированные строки
     deleteNotFixedRows(dataRows)
 
-    // Налоговый период
-    def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
-
     // собрать из источников строки и разместить соответствующим разделам
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind(),
             getReportPeriodStartDate(), getReportPeriodEndDate()).each {
-        if (it.formTypeId == formData.getFormType().getId()) {
-            def source = formDataService.findMonth(it.formTypeId, it.kind, it.departmentId, taxPeriod.id, formData.periodOrder)
+        if (it.formTypeId == formData.formType.getId()) {
+            def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 def sourceRows = formDataService.getDataRowHelper(source).getAll()
                 // подразделы

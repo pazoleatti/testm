@@ -60,7 +60,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.COMPOSE: // Консолидация
-        formDataService.consolidationTotal(formData, formDataDepartment.id, logger, ['total'])
+        formDataService.consolidationTotal(formData, logger, ['total'])
         calc()
         logicCheck()
         break
@@ -133,11 +133,11 @@ void prevPeriodCheck() {
 // Признак периода ввода остатков. Отчетный период является периодом ввода остатков и месяц первый в периоде.
 def isMonthBalance() {
     if (isBalance == null) {
-        // Отчётный период
-        if (!reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId) || formData.periodOrder == null) {
+        def departmentReportPeriod = departmentReportPeriodService.get(formData.departmentReportPeriodId)
+        if (!departmentReportPeriod.isBalance() || formData.periodOrder == null) {
             isBalance = false
         } else {
-            isBalance = (formData.periodOrder - 1) % 3 == 0
+            isBalance = formData.periodOrder - 1 % 3 == 0
         }
     }
     return isBalance
@@ -153,7 +153,7 @@ def dataRowHelperPrev = null // DataRowHelper формы предыдущего 
 // Получение формы предыдущего месяца
 def getFormDataPrev() {
     if (formDataPrev == null) {
-        formDataPrev = formDataService.getFormDataPrev(formData, formDataDepartment.id)
+        formDataPrev = formDataService.getFormDataPrev(formData)
     }
     return formDataPrev
 }
