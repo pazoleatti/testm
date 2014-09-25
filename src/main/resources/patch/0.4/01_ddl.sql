@@ -134,6 +134,11 @@ ALTER TABLE notification ADD role_id number(9);
 COMMENT ON COLUMN notification.role_id IS 'Идентификатор роли пользователя, который получит оповещение';
 ALTER TABLE notification ADD CONSTRAINT notification_fk_notify_role FOREIGN KEY (role_id) REFERENCES sec_role(id);
 
+ALTER TABLE notification DROP COLUMN first_reader_id;
+ALTER TABLE notification ADD is_read number(1) default 0 not null;
+COMMENT ON COLUMN notification.is_read IS 'Признак прочтения';
+ALTER TABLE notification ADD CONSTRAINT notification_chk_isread CHECK (is_read in (0, 1));
+
 CREATE TABLE lock_data_subscribers (lock_key varchar2(1000 byte) NOT NULL, user_id number(9) NOT NULL);
 COMMENT ON TABLE lock_data_subscribers IS 'Cписок пользователей, ожидающих выполнения операций над объектом блокировки';
 COMMENT ON COLUMN lock_data_subscribers.lock_key IS 'Ключ блокировки объекта, после завершения операции над которым, будет выполнено оповещение';
@@ -147,7 +152,10 @@ ALTER TABLE ref_book_attribute ADD is_table NUMBER(1) DEFAULT 0 NOT NULL;
 ALTER TABLE ref_book_attribute ADD CONSTRAINT ref_book_attr_chk_istable CHECK (is_table IN (0,1));
 COMMENT ON COLUMN ref_book_attribute.is_table IS 'Признак табличного атрибута';
 
-ALTER TABLE ref_book_value ADD row_num NUMBER(9);
+ALTER TABLE ref_book_value ADD row_num NUMBER(9) DEFAULT 0 NOT NULL;
+ALTER TABLE ref_book_value DROP CONSTRAINT REF_BOOK_VALUE_PK;
+DROP INDEX REF_BOOK_VALUE_PK;
+ALTER TABLE ref_book_value ADD CONSTRAINT REF_BOOK_VALUE_PK primary key (record_id, attribute_id, row_num);
 COMMENT ON COLUMN ref_book_value.row_num IS 'Номер строки в табличной части справочника';
 
 ---------------------------------------------------------------------------------------------------
