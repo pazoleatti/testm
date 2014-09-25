@@ -739,8 +739,6 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
             for (DepartmentDeclarationType departmentDeclarationType : departmentDeclarationTypes) {
                 DeclarationData declaration = declarationDataDao.getLast(departmentDeclarationType.getDeclarationTypeId(),
                         departmentDeclarationType.getDepartmentId(), reportPeriod.getId());
-//                DeclarationData declaration = declarationDataDao.find(departmentDeclarationType.getDeclarationTypeId(),
-//                        departmentDeclarationType.getDepartmentId(), formData.getReportPeriodId());
                 // Если декларация существует и статус "Принята"
                 if (declaration != null && declaration.isAccepted()) {
                     String str = formData.getFormType().getTaxType() == TaxType.DEAL ? "принято уведомление" :
