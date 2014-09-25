@@ -3,10 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formdatalist.server;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
-import com.aplana.sbrf.taxaccounting.service.FormDataSearchService;
-import com.aplana.sbrf.taxaccounting.service.PeriodService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.FillFormFieldsAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.FillFormFieldsResult;
@@ -50,6 +47,9 @@ public class FillFormFieldsHandler extends AbstractActionHandler<FillFormFieldsA
     @Autowired
     FormDataAccessService dataAccessService;
 
+    @Autowired
+    DepartmentReportPeriodService departmentReportPeriodService;
+
     @Override
     public FillFormFieldsResult execute(FillFormFieldsAction action, ExecutionContext executionContext) throws ActionException {
         FillFormFieldsResult result = new FillFormFieldsResult();
@@ -76,6 +76,7 @@ public class FillFormFieldsHandler extends AbstractActionHandler<FillFormFieldsA
                 List<FormDataKind> kinds = new ArrayList<FormDataKind>();
                 kinds.addAll(dataAccessService.getAvailableFormDataKind(securityService.currentUserInfo(), asList(action.getTaxType())));
                 result.setDataKinds(kinds);
+                result.setCorrectionDate(departmentReportPeriodService.getLast(action.getDepartmentId().intValue(), action.getReportPeriodId()).getCorrectionDate());
                 break;
             case FORTH:
                 result.setFormTypes(formDataSearchService.getActiveFormTypeInReportPeriod(action.getDepartmentId().intValue(), action.getFieldId(), action.getTaxType(), securityService.currentUserInfo(), action.getKinds()));

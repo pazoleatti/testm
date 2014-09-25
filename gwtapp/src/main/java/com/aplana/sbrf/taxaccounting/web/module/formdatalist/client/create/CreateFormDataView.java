@@ -18,18 +18,12 @@ import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.PopupViewWithUiHandlers;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUiHandlers> implements CreateFormDataPresenter.MyView,
         Editor<FormDataFilter> {
@@ -40,6 +34,7 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
     public static final String FORM_DATA_TYPE_TITLE_D = "Вид формы";
     public static final String FORM_DATA_TITLE = "Создание налоговой формы";
     public static final String FORM_DATA_TITLE_D = "Создание формы";
+    public static final String FORM_DATA_CORRECTION = "Форма будет создана в корректирующем периоде, дата сдачи корректировки: ";
 
     public interface Binder extends UiBinder<PopupPanel, CreateFormDataView> {
     }
@@ -79,6 +74,13 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
     @UiField
     HorizontalPanel monthPanel;
 
+    @UiField
+    HorizontalPanel correctionPanel;
+
+    @UiField
+    @Ignore
+    Label correctionDate;
+
     @UiField(provided = true)
     ValueListBox<Months> formMonth;
 
@@ -113,6 +115,7 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
     @Override
     public void init() {
         monthPanel.setVisible(false);
+        correctionPanel.setVisible(false);
         updateEnabled();
     }
 
@@ -125,6 +128,11 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
         formTypeId.setEnabled(formDataKind.getValue() != null && !formDataKind.getValue().isEmpty());
         // "Месяц" недоступен если не выбран "Вид налоговой формы"
         formMonth.setEnabled(formTypeId.getValue() != null && !formTypeId.getValue().isEmpty() && isMonthly);
+        // "Месяц" только для ежемесячных форм
+        monthPanel.setVisible(formTypeId.getValue() != null && !formTypeId.getValue().isEmpty() && isMonthly);
+        // дата корректировки
+        correctionPanel.setVisible(departmentPicker.getValue() != null && !departmentPicker.getValue().isEmpty() &&
+                correctionDate.getText() != null && !correctionDate.getText().isEmpty());
         // Кнопка "Создать" недоступна пока все не заполнено
         continueButton.setEnabled(formMonth.getValue() != null);
     }
@@ -233,6 +241,12 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
 		str.delete(str.length()-3, str.length()-1);
 		formTypeId.setFilter(str.toString());
 
+    }
+
+    @Override
+    public void setCorrectionDate(String correctionDate) {
+        correctionPanel.setVisible(correctionDate != null);
+        this.correctionDate.setText((correctionDate != null) ? (FORM_DATA_CORRECTION + correctionDate) : "");
     }
 
     @Override
