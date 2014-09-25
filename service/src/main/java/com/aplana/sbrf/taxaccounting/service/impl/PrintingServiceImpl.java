@@ -139,7 +139,7 @@ public class PrintingServiceImpl implements PrintingService {
             RefBookValue refBookValue = refBookFactory.getDataProvider(REF_BOOK_ID).
                     getRecordData((long) reportPeriod.getDictTaxPeriodId()).get(REF_BOOK_VALUE_NAME);
             FormDataCSVReportBuilder builder = new FormDataCSVReportBuilder(data, isShowChecked, dataRows, refBookValue);
-            return builder.createReport();
+            return blobDataService.create(new ByteArrayInputStream(builder.createBlobData()), FILE_NAME + ".csv");
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
             throw new ServiceException("Ошибка при создании печатной формы.");

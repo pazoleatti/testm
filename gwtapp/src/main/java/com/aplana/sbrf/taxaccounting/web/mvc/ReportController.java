@@ -68,6 +68,24 @@ public class ReportController {
         }
     }
 
+
+    /**
+     * Обработка запроса на формирование отчета для налоговых форм
+     * @param formDataId
+     * @param isShowChecked
+     * @param response
+     * @throws IOException
+     */
+    @RequestMapping(value = "CSV/{formDataId}/{isShowChecked}/{manual}",method = RequestMethod.GET)
+    public void processCSVFormDataDownload(@PathVariable int formDataId,@PathVariable boolean isShowChecked , @PathVariable boolean manual, HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        String uuid = reportService.get(securityService.currentUserInfo(), formDataId, ReportType.CSV, isShowChecked, manual, false);
+        if (uuid != null) {
+            BlobData blobData = blobDataService.get(uuid);
+            createResponse(request, response, blobData);
+        }
+    }
+
     private void createResponse(final HttpServletRequest req, final HttpServletResponse response, final BlobData blobData) throws IOException{
         String fileName = blobData.getName();
         setCorrectFileName(req, response, fileName);

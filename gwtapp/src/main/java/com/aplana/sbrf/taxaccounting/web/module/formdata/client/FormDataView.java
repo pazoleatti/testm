@@ -180,7 +180,9 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     @UiField
     LinkButton printToExcel;
 
-    private Timer timerExcel;
+    private LinkButton printToCSV;
+
+    private Timer timerExcel, timerCSV;
 
     private final static int DEFAULT_TABLE_TOP_POSITION = 104;
     private final static int DEFAULT_REPORT_PERIOD_LABEL_WIDTH = 150;
@@ -249,7 +251,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
             }
         });
 
-        LinkButton printToCSV = new LinkButton("CSV");
+        printToCSV = new LinkButton("CSV");
         printToCSV.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -265,30 +267,63 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
             @Override
             public void run() {
                 try {
-                    getUiHandlers().onTimerExcel(true);
+                    getUiHandlers().onTimerReport(ReportType.EXCEL, true);
                 } catch (Exception e) {
                 }
             }
         };
+
+        timerCSV = new Timer() {
+            @Override
+            public void run() {
+                try {
+                    getUiHandlers().onTimerReport(ReportType.CSV, true);
+                } catch (Exception e) {
+                }
+            }
+        };
+
         timerExcel.cancel();
+        timerCSV.cancel();
     }
 
-    public void updatePrintExcelButtonName(boolean isLoad) {
-        if (isLoad) {
-            printToExcel.setText("Выгрузить в XLSM");
-            timerExcel.cancel();
+    @Override
+    public void updatePrintReportButtonName(ReportType reportType, boolean isLoad) {
+        if (ReportType.EXCEL.equals(reportType)) {
+            if (isLoad) {
+                printToExcel.setText("Выгрузить в XLSM");
+                timerExcel.cancel();
+            } else {
+                printToExcel.setText("Сформировать XLSM");
+            }
         } else {
-            printToExcel.setText("Сформировать XLSM");
+            if (isLoad) {
+                printToCSV.setText("Выгрузить в CSV");
+                timerCSV.cancel();
+            } else {
+                printToCSV.setText("Сформировать CSV");
+            }
         }
     }
 
-    public void startTimerExcel() {
-        timerExcel.scheduleRepeating(3000);
-        timerExcel.run();
+    @Override
+    public void startTimerReport(ReportType reportType) {
+        if (ReportType.EXCEL.equals(reportType)) {
+            timerExcel.scheduleRepeating(3000);
+            timerExcel.run();
+        } else {
+            timerCSV.scheduleRepeating(3000);
+            timerCSV.run();
+        }
     }
 
-    public void stopTimerExcel() {
-        timerExcel.cancel();
+    @Override
+    public void stopTimerReport(ReportType reportType) {
+        if (ReportType.EXCEL.equals(reportType)) {
+            timerExcel.cancel();
+        } else {
+            timerCSV.cancel();
+        }
     }
 
 	@Override

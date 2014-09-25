@@ -112,11 +112,11 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
         void setupSelectionModel(boolean fixedRows);
 
-        void startTimerExcel();
+        void startTimerReport(ReportType reportType);
 
-        void stopTimerExcel();
+        void stopTimerReport(ReportType reportType);
 
-        void updatePrintExcelButtonName(boolean isLoad);
+        void updatePrintReportButtonName(ReportType reportType, boolean isLoad);
     }
 
 	public static final String NAME_TOKEN = "!formData";

@@ -80,7 +80,7 @@ public interface LockDataService {
      *
      * @param key код блокировки
      * @param userId код установившего блокировку пользователя
-     * @param force при force = true снимать блокировку принудительно
+     * @param force при force = true блокировка снимается принудительно, без вывода ошибки при отсутсвии блокировки
      * @throws com.aplana.sbrf.taxaccounting.model.exception.ServiceException если блокировка была установлена другим пользователем, либо блокировки не было в бд
      */
     void unlock(String key, int userId, boolean force);

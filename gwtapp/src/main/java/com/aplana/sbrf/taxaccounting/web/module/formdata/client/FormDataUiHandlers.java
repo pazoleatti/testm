@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.gwtplatform.mvp.client.UiHandlers;
 
@@ -31,7 +32,7 @@ public interface FormDataUiHandlers extends UiHandlers{
 
 	void onPrintExcelClicked();
 
-    void onTimerExcel(final boolean isTimer);
+    void onTimerReport(ReportType reportType, final boolean isTimer);
 
     void onPrintCSVClicked();
 
