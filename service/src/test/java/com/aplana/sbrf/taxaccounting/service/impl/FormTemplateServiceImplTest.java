@@ -55,8 +55,7 @@ public class FormTemplateServiceImplTest extends Assert {
 
         AutoNumerationColumn autoNumerationColumn = new AutoNumerationColumn();
         autoNumerationColumn.setId(COLUMN_ID);
-        autoNumerationColumn.setTypeName(AutoNumerationColumnType.SERIAL.getName());
-        autoNumerationColumn.setType(AutoNumerationColumnType.SERIAL.getType());
+        autoNumerationColumn.setNumerationType(NumerationType.SERIAL);
         formTemplateFromDB.addColumn(autoNumerationColumn);
 
         // Закрытые отчетные периоды
@@ -108,8 +107,7 @@ public class FormTemplateServiceImplTest extends Assert {
     @Test
     public void validateFormAutoNumerationColumn_cross1() {
         AutoNumerationColumn autoNumerationColumn = (AutoNumerationColumn) formTemplateEdited.getColumn(1);
-        autoNumerationColumn.setTypeName(AutoNumerationColumnType.CROSS.getName());
-        autoNumerationColumn.setType(AutoNumerationColumnType.CROSS.getType());
+        autoNumerationColumn.setNumerationType(NumerationType.CROSS);
 
         when(reportPeriodDao.getClosedPeriodsForFormTemplate(FORM_TEMPLATE_ID)).thenReturn(new ArrayList<ReportPeriod>());
         ReflectionTestUtils.setField(formTemplateService, "reportPeriodDao", reportPeriodDao);
@@ -129,8 +127,7 @@ public class FormTemplateServiceImplTest extends Assert {
     public void validateFormAutoNumerationColumn_cross2() {
         // Редактируемый макет
         AutoNumerationColumn autoNumerationColumn = (AutoNumerationColumn) formTemplateEdited.getColumn(1);
-        autoNumerationColumn.setTypeName(AutoNumerationColumnType.CROSS.getName());
-        autoNumerationColumn.setType(AutoNumerationColumnType.CROSS.getType());
+		autoNumerationColumn.setNumerationType(NumerationType.CROSS);
 
         when(reportPeriodDao.getClosedPeriodsForFormTemplate(FORM_TEMPLATE_ID)).thenReturn(reportPeriodList);
 
@@ -155,8 +152,7 @@ public class FormTemplateServiceImplTest extends Assert {
 
         AutoNumerationColumn autoNumerationColumn = new AutoNumerationColumn();
         autoNumerationColumn.setId(COLUMN_ID);
-        autoNumerationColumn.setTypeName(AutoNumerationColumnType.CROSS.getName());
-        autoNumerationColumn.setType(AutoNumerationColumnType.CROSS.getType());
+		autoNumerationColumn.setNumerationType(NumerationType.CROSS);
         formTemplateFromDB.addColumn(autoNumerationColumn);
 
         when(formTemplateDao.get(FORM_TEMPLATE_ID)).thenReturn(formTemplateFromDB);
@@ -180,8 +176,8 @@ public class FormTemplateServiceImplTest extends Assert {
         formTemplate.addColumn(numericColumn);
         formTemplate.addColumn(stringColumn);
 
-        boolean anyCrossAutoNumerationColumn = formTemplateService.isAnyAutoNumerationColumn(formTemplate, AutoNumerationColumnType.CROSS);
-        boolean anySerialAutoNumerationColumn = formTemplateService.isAnyAutoNumerationColumn(formTemplate, AutoNumerationColumnType.SERIAL);
+        boolean anyCrossAutoNumerationColumn = formTemplateService.isAnyAutoNumerationColumn(formTemplate, NumerationType.CROSS);
+        boolean anySerialAutoNumerationColumn = formTemplateService.isAnyAutoNumerationColumn(formTemplate, NumerationType.SERIAL);
         assertFalse("Не должно быть ни одной сквозной автонумеруемой графы", anyCrossAutoNumerationColumn);
         assertFalse("Не должно быть ни одной последовательной автонумеруемой графы", anySerialAutoNumerationColumn);
     }
@@ -195,14 +191,14 @@ public class FormTemplateServiceImplTest extends Assert {
 
         Column numericColumn = new NumericColumn();
         Column stringColumn = new StringColumn();
-        Column autoNumerationColumn = new AutoNumerationColumn(AutoNumerationColumnType.SERIAL.getName(), AutoNumerationColumnType.SERIAL.getType());
+        Column autoNumerationColumn = new AutoNumerationColumn(NumerationType.SERIAL);
 
         formTemplate.addColumn(numericColumn);
         formTemplate.addColumn(stringColumn);
         formTemplate.addColumn(autoNumerationColumn);
 
-        boolean anyCrossAutoNumerationColumn = formTemplateService.isAnyAutoNumerationColumn(formTemplate, AutoNumerationColumnType.CROSS);
-        boolean anySerialAutoNumerationColumn = formTemplateService.isAnyAutoNumerationColumn(formTemplate, AutoNumerationColumnType.SERIAL);
+        boolean anyCrossAutoNumerationColumn = formTemplateService.isAnyAutoNumerationColumn(formTemplate, NumerationType.CROSS);
+        boolean anySerialAutoNumerationColumn = formTemplateService.isAnyAutoNumerationColumn(formTemplate, NumerationType.SERIAL);
         assertFalse("Не должно быть ни одной сквозной автонумеруемой графы", anyCrossAutoNumerationColumn);
         assertTrue("Должна быть хотя бы одна последовательная автонумеруемая графа", anySerialAutoNumerationColumn);
     }
@@ -216,14 +212,14 @@ public class FormTemplateServiceImplTest extends Assert {
 
         Column numericColumn = new NumericColumn();
         Column stringColumn = new StringColumn();
-        Column autoNumerationColumn = new AutoNumerationColumn(AutoNumerationColumnType.CROSS.getName(), AutoNumerationColumnType.CROSS.getType());
+        Column autoNumerationColumn = new AutoNumerationColumn(NumerationType.CROSS);
 
         formTemplate.addColumn(numericColumn);
         formTemplate.addColumn(stringColumn);
         formTemplate.addColumn(autoNumerationColumn);
 
-        boolean anyCrossAutoNumerationColumn = formTemplateService.isAnyAutoNumerationColumn(formTemplate, AutoNumerationColumnType.CROSS);
-        boolean anySerialAutoNumerationColumn = formTemplateService.isAnyAutoNumerationColumn(formTemplate, AutoNumerationColumnType.SERIAL);
+        boolean anyCrossAutoNumerationColumn = formTemplateService.isAnyAutoNumerationColumn(formTemplate, NumerationType.CROSS);
+        boolean anySerialAutoNumerationColumn = formTemplateService.isAnyAutoNumerationColumn(formTemplate, NumerationType.SERIAL);
         assertTrue("Должна быть хотя бы одна сквозная автонумеруемая графа", anyCrossAutoNumerationColumn);
         assertFalse("Не должно быть ни одной последовательной автонумеруемой графы", anySerialAutoNumerationColumn);
     }
@@ -237,8 +233,8 @@ public class FormTemplateServiceImplTest extends Assert {
 
         Column numericColumn = new NumericColumn();
         Column stringColumn = new StringColumn();
-        Column crossAutoNumerationColumn = new AutoNumerationColumn(AutoNumerationColumnType.CROSS.getName(), AutoNumerationColumnType.CROSS.getType());
-        Column serialAutoNumerationColumn = new AutoNumerationColumn(AutoNumerationColumnType.SERIAL.getName(), AutoNumerationColumnType.SERIAL.getType());
+        Column crossAutoNumerationColumn = new AutoNumerationColumn(NumerationType.CROSS);
+        Column serialAutoNumerationColumn = new AutoNumerationColumn(NumerationType.SERIAL);
 
         formTemplate.addColumn(numericColumn);
         formTemplate.addColumn(crossAutoNumerationColumn);
@@ -250,8 +246,8 @@ public class FormTemplateServiceImplTest extends Assert {
         formTemplate.addColumn(serialAutoNumerationColumn);
         formTemplate.addColumn(stringColumn);
 
-        boolean anyCrossAutoNumerationColumn = formTemplateService.isAnyAutoNumerationColumn(formTemplate, AutoNumerationColumnType.CROSS);
-        boolean anySerialAutoNumerationColumn = formTemplateService.isAnyAutoNumerationColumn(formTemplate, AutoNumerationColumnType.SERIAL);
+        boolean anyCrossAutoNumerationColumn = formTemplateService.isAnyAutoNumerationColumn(formTemplate, NumerationType.CROSS);
+        boolean anySerialAutoNumerationColumn = formTemplateService.isAnyAutoNumerationColumn(formTemplate, NumerationType.SERIAL);
         assertTrue("Должна быть хотя бы одна сквозная автонумеруемая графа", anyCrossAutoNumerationColumn);
         assertTrue("Должна быть хотя бы одна последовательная автонумеруемая графа", anySerialAutoNumerationColumn);
     }

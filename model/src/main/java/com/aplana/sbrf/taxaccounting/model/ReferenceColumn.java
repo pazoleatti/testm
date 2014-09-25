@@ -26,6 +26,10 @@ public class ReferenceColumn extends Column {
         }
     };
 
+	public ReferenceColumn() {
+		setColumnType(ColumnType.REFERENCE);
+	}
+
     @XmlTransient
     public int getParentId() {
         return parentId;

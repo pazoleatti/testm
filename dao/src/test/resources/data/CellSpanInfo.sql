@@ -23,5 +23,5 @@ insert into form_column (id, name, form_template_id, ord, alias, type, width, pr
 insert into form_column (id, name, form_template_id, ord, alias, type, width, precision, max_length, checking)
 	values (4, 'Строковый столбец', 1, 1, 'alias 4', 'S', 10, null, 500, 1);
 
-insert into cell_span_info (row_id, column_id, colspan, rowspan) values (1, 1, 2, 3);
-insert into cell_span_info (row_id, column_id, colspan, rowspan) values (2, 1, 3, 2);
+insert into data_cell (row_id, column_id, colspan, rowspan) values (1, 1, 2, 3);
+insert into data_cell (row_id, column_id, colspan, rowspan) values (2, 1, 3, 2);

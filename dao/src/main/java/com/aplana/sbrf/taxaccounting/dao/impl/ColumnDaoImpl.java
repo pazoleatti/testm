@@ -78,7 +78,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
                 }
             } else if ("A".equals(type)) {
                 result = new AutoNumerationColumn();
-                ((AutoNumerationColumn) result).setType(SqlUtils.getInteger(rs, "numeration_row"));
+                ((AutoNumerationColumn) result).setNumerationType(NumerationType.getById(SqlUtils.getInteger(rs, "numeration_row")));
 			} else {
 				throw new IllegalArgumentException("Unknown column type: " + type);
 			}
@@ -188,7 +188,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
             }
             // Подмена ссылок
             for (Column column : columns) {
-                if (column instanceof ReferenceColumn) {
+                if (ColumnType.REFERENCE.equals(column.getColumnType())) {
                     ReferenceColumn referenceColumn = (ReferenceColumn)column;
                     // При экспорте parentId не сериализуется, а прописывается алиас для parentId, здесь в случии импорта подставляем нужный id
                     if(referenceColumn.getParentId()==0 && referenceColumn.getParentAlias()!=null){
@@ -215,10 +215,10 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 						ps.setString(2, col.getName());
 						ps.setInt(3, formTemplateId);
 						ps.setString(4, col.getAlias());
-						ps.setString(5, getTypeFromCode(col));
+						ps.setString(5, String.valueOf(col.getColumnType().getCode()));
 						ps.setInt(6, col.getWidth());
 
-						if (col instanceof NumericColumn) {
+						if (ColumnType.NUMBER.equals(col.getColumnType())) {
 							if (((NumericColumn) col).getPrecision() > NumericColumn.MAX_PRECISION){
 								log.warn("Превышена максимально допустимая точность числа в графе " + col.getName() +
 										"\". Будет установлено максимальное значение: " + NumericColumn.MAX_PRECISION);
@@ -231,21 +231,21 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
                         ps.setInt(8, col.getOrder());
                         ps.setBoolean(10, col.isChecking());
 
-						if (col instanceof StringColumn) {
+						if (ColumnType.STRING.equals(col.getColumnType())) {
 							if (((StringColumn) col).getMaxLength() > StringColumn.MAX_LENGTH){
 								log.warn("Превышена максимально допустимая длина строки в графе \"" + col.getName() +
 									"\". Будет установлено максимальное значение: " + StringColumn.MAX_LENGTH);
 							}
 							ps.setInt(9, Math.min(((StringColumn) col).getMaxLength(), StringColumn.MAX_LENGTH));
 							ps.setNull(11, Types.INTEGER);
-						} else if (col instanceof NumericColumn) {
+						} else if (ColumnType.NUMBER.equals(col.getColumnType())) {
 							if (((NumericColumn) col).getMaxLength() > NumericColumn.MAX_LENGTH){
 								log.warn("Превышена максимально допустимая длина числа в графе " + col.getName() +
 										"\". Будет установлено максимальное значение: " + NumericColumn.MAX_LENGTH);
 							}
 							ps.setInt(9, Math.min(((NumericColumn) col).getMaxLength(), NumericColumn.MAX_LENGTH));
 							ps.setNull(11, Types.INTEGER);
-						} else if (col instanceof DateColumn) {
+						} else if (ColumnType.DATE.equals(col.getColumnType())) {
 							ps.setInt(11, ((DateColumn)col).getFormatId());
 							ps.setNull(9, Types.INTEGER);
 						} else {
@@ -253,7 +253,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 							ps.setNull(11, Types.INTEGER);
 						}
 
-                        if (col instanceof RefBookColumn) {
+                        if (ColumnType.REFBOOK.equals(col.getColumnType())) {
                             ps.setLong(12, ((RefBookColumn) col).getRefBookAttributeId());
                             ps.setString(13, ((RefBookColumn) col).getFilter());
                             ps.setNull(14, Types.NUMERIC);
@@ -264,7 +264,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
                                 ps.setLong(15, ((RefBookColumn) col).getRefBookAttributeId2());
                             }
                             ps.setNull(16, Types.NUMERIC);
-                        } else if (col instanceof ReferenceColumn) {
+                        } else if (ColumnType.REFERENCE.equals(col.getColumnType())) {
                             ps.setLong(12, ((ReferenceColumn) col).getRefBookAttributeId());
                             ps.setNull(13, Types.CHAR);
                             ps.setLong(14, ((ReferenceColumn) col).getParentId());
@@ -275,12 +275,12 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
                                 ps.setLong(15, ((ReferenceColumn) col).getRefBookAttributeId2());
                             }
                             ps.setNull(16, Types.NUMERIC);
-                        } else if (col instanceof AutoNumerationColumn) {
+                        } else if (ColumnType.AUTO.equals(col.getColumnType())) {
                             ps.setNull(12, Types.NUMERIC);
                             ps.setNull(13, Types.CHAR);
                             ps.setNull(14, Types.NUMERIC);
                             ps.setNull(15, Types.NUMERIC);
-                            ps.setInt(16, ((AutoNumerationColumn) col).getType());
+                            ps.setInt(16, ((AutoNumerationColumn) col).getNumerationType().getId());
                         } else {
                             ps.setNull(12, Types.NUMERIC);
                             ps.setNull(13, Types.CHAR);
@@ -310,10 +310,10 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 							Column col = oldColumns.get(index);
 							ps.setString(1, col.getName());
 							ps.setString(2, col.getAlias());
-							ps.setString(3, getTypeFromCode(col));
+							ps.setString(3, String.valueOf(col.getColumnType().getCode()));
 							ps.setInt(4, col.getWidth());
 
-							if (col instanceof NumericColumn) {
+							if (ColumnType.NUMBER.equals(col.getColumnType())) {
 								ps.setInt(5, ((NumericColumn)col).getPrecision());
 							} else {
 								ps.setNull(5, Types.NUMERIC);
@@ -322,7 +322,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
                             ps.setInt(6, col.getOrder());
                             ps.setBoolean(8, col.isChecking());
 
-							if (col instanceof StringColumn) {
+							if (ColumnType.STRING.equals(col.getColumnType())) {
 								ps.setInt(7, ((StringColumn) col).getMaxLength());
 								ps.setNull(9, Types.INTEGER);
 								ps.setNull(10, Types.NUMERIC);
@@ -330,7 +330,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
                                 ps.setNull(12, Types.NUMERIC);
                                 ps.setNull(13, Types.NUMERIC);
                                 ps.setNull(14, Types.NUMERIC);
-							} else if(col instanceof NumericColumn){
+							} else if(ColumnType.NUMBER.equals(col.getColumnType())){
 								ps.setInt(7, ((NumericColumn) col).getMaxLength());
 								ps.setNull(9, Types.INTEGER);
 								ps.setNull(10, Types.NUMERIC);
@@ -338,7 +338,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
                                 ps.setNull(12, Types.NUMERIC);
                                 ps.setNull(13, Types.NUMERIC);
                                 ps.setNull(14, Types.NUMERIC);
-							} else if (col instanceof DateColumn) {
+							} else if (ColumnType.DATE.equals(col.getColumnType())) {
                                 if (((DateColumn)col).getFormatId() == null)
                                     ps.setNull(9, Types.INTEGER);
                                 else
@@ -349,7 +349,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
                                 ps.setNull(12, Types.NUMERIC);
                                 ps.setNull(13, Types.NUMERIC);
                                 ps.setNull(14, Types.NUMERIC);
-							} else if (col instanceof RefBookColumn) {
+							} else if (ColumnType.REFBOOK.equals(col.getColumnType())) {
 								ps.setNull(7, Types.INTEGER);
 								ps.setNull(9, Types.INTEGER);
 								ps.setLong(10, ((RefBookColumn) col).getRefBookAttributeId());
@@ -361,7 +361,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
                                     ps.setNull(13, Types.NULL);
                                 }
                                 ps.setNull(14, Types.NUMERIC);
-							} else if (col instanceof ReferenceColumn) {
+							} else if (ColumnType.REFERENCE.equals(col.getColumnType())) {
                                 ps.setNull(7, Types.INTEGER);
                                 ps.setNull(9, Types.INTEGER);
                                 ps.setLong(10, ((ReferenceColumn) col).getRefBookAttributeId());
@@ -376,14 +376,14 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
                                     ps.setNull(13, Types.NULL);
                                 }
                                 ps.setNull(14, Types.NUMERIC);
-                            } else if (col instanceof AutoNumerationColumn) {
+                            } else if (ColumnType.AUTO.equals(col.getColumnType())) {
                                 ps.setNull(7, Types.INTEGER);
                                 ps.setNull(9, Types.INTEGER);
                                 ps.setNull(10, Types.NUMERIC);
                                 ps.setNull(11, Types.CHAR);
                                 ps.setNull(12, Types.NUMERIC);
                                 ps.setNull(13, Types.NUMERIC);
-                                ps.setInt(14, ((AutoNumerationColumn) col).getType());
+                                ps.setInt(14, ((AutoNumerationColumn) col).getNumerationType().getId());
                             } else {
 								ps.setNull(7, Types.INTEGER);
 								ps.setNull(9, Types.INTEGER);
@@ -425,22 +425,6 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
             return null;
         }
         return result;
-    }
-
-    private String getTypeFromCode(Column col) {
-        if (col instanceof NumericColumn) {
-            return "N";
-        } else if (col instanceof StringColumn) {
-            return "S";
-        } else if (col instanceof DateColumn) {
-            return "D";
-        } else if (col instanceof RefBookColumn || col instanceof ReferenceColumn) {
-            return "R";
-        } else if (col instanceof AutoNumerationColumn) {
-            return "A";
-        } else {
-            throw new IllegalArgumentException("Unknown column type: " + col.getClass().getName());
-        }
     }
 
     @Override

@@ -9,9 +9,9 @@ import java.util.Set;
  * @author sgoryachkin
  */
 enum TypeFlag {
-	// Строка добавлена
-	DEL(-1),
 	// Строка удалена
+	DEL(-1),
+	// Строка добавлена
 	ADD(+1),
 	// Строка не изменялась
 	SAME(0);
