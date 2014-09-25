@@ -35,6 +35,7 @@ drop table string_value;
 drop table numeric_value;
 drop table cell_editable;
 drop table cell_style;
+drop table data_cell;
 drop sequence seq_data_row;
 drop table data_row;
 drop table form_data_performer;

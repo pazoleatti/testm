@@ -38,7 +38,6 @@ public class NotificationServiceImplTest {
         n1.setReportPeriodId(1);
         n1.setSenderDepartmentId(1);
         n1.setReceiverDepartmentId(1);
-        n1.setFirstReaderId(null);
         list.add(n1);
 
         Notification n2 = new Notification();
@@ -48,7 +47,6 @@ public class NotificationServiceImplTest {
         n2.setReportPeriodId(2);
         n2.setSenderDepartmentId(1);
         n2.setReceiverDepartmentId(1);
-        n2.setFirstReaderId(null);
         list.add(n2);
         when(notificationDao.getByFilter(any(NotificationsFilterData.class))).thenReturn(list);
 

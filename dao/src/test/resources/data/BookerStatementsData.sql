@@ -64,8 +64,8 @@ insert into ref_book_record(id, record_id, ref_book_id, version, status) values 
 insert into ref_book_record(id, record_id, ref_book_id, version, status) values (1, 1, 107, to_date('01.01.2013', 'DD.MM.YY'), 0);
 insert into ref_book_record(id, record_id, ref_book_id, version, status) values (2, 2, 107, to_date('01.01.2013', 'DD.MM.YY'), 0);
 
-insert into ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value, row_num) values
-  (1, 1073, null, null, null, 1, null);
+insert into ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) values
+  (1, 1073, null, null, null, 1);
 
 -- income101 data
 INSERT INTO income_101 (id, account, income_debet_remains, income_credit_remains, debet_rate, credit_rate,
