@@ -1,9 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.widget.menu.server;
 
-import com.aplana.sbrf.taxaccounting.model.NotificationsFilterData;
-import com.aplana.sbrf.taxaccounting.model.TARole;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.NotificationService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.GetNotificationCountAction;
@@ -17,7 +15,10 @@ import org.springframework.stereotype.Component;
 
 import javax.management.NotificationFilter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+
+import static java.util.Arrays.asList;
 
 @Component
 @PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS', 'ROLE_OPER')")
@@ -31,6 +32,8 @@ public class GetNotificationCountHandler extends AbstractActionHandler<GetNotifi
 	NotificationService notificationService;
 	@Autowired
 	SecurityService securityService;
+    @Autowired
+    DepartmentService departmentService;
 
 	@Override
 	public GetNotificationCountResult execute(GetNotificationCountAction getNotificationCountAction, ExecutionContext executionContext) throws ActionException {
@@ -42,9 +45,9 @@ public class GetNotificationCountHandler extends AbstractActionHandler<GetNotifi
         }
         NotificationsFilterData filter = new NotificationsFilterData();
         filter.setUserId(user.getId());
-        filter.setReceiverDepartmentId(user.getDepartmentId());
+        filter.setReceiverDepartmentIds(departmentService.getTaxFormDepartments(user, asList(TaxType.values()), null, null));
         filter.setUserRoleIds(userRoles);
-        filter.setOnlyNew(true);
+        filter.setRead(false);
 		result.setNotificationCount(notificationService.getCountByFilter(filter));
 		return result;
 	}

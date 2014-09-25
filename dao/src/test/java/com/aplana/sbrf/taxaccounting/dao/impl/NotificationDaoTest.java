@@ -33,8 +33,13 @@ public class NotificationDaoTest {
     @Test
     public void getByFilterTest() {
         NotificationsFilterData filter = new NotificationsFilterData();
-        filter.setReceiverDepartmentId(1);
+        filter.setReceiverDepartmentIds(Arrays.asList(1));
+        filter.setRead(true);
+        assertEquals(2, notificationDao.getByFilter(filter).size());
+        filter.setRead(null);
         assertEquals(3, notificationDao.getByFilter(filter).size());
+
+
         filter.setStartIndex(0);
         filter.setCountOfRecords(2);
         assertEquals(2, notificationDao.getByFilter(filter).size());
@@ -56,7 +61,10 @@ public class NotificationDaoTest {
     @Test
     public void getCountByFilterTest() {
         NotificationsFilterData filter = new NotificationsFilterData();
-        filter.setReceiverDepartmentId(1);
+        filter.setReceiverDepartmentIds(Arrays.asList(1));
+        filter.setRead(true);
+        assertEquals(2, notificationDao.getCountByFilter(filter));
+        filter.setRead(null);
         assertEquals(3, notificationDao.getCountByFilter(filter));
 
         NotificationsFilterData userIdFilter = new NotificationsFilterData();
@@ -82,7 +90,6 @@ public class NotificationDaoTest {
         n.setSenderDepartmentId(2);
         n.setReportPeriodId(1);
         n.setCreateDate(new Date());
-        n.setFirstReaderId(1);
         Integer id = notificationDao.save(n);
         notNull(id);
     }
@@ -109,7 +116,6 @@ public class NotificationDaoTest {
         n1.setReportPeriodId(3);
         n1.setSenderDepartmentId(3);
         n1.setReceiverDepartmentId(1);
-        n1.setFirstReaderId(null);
         list.add(n1);
 
         Notification n2 = new Notification();
@@ -119,12 +125,11 @@ public class NotificationDaoTest {
         n2.setReportPeriodId(4);
         n2.setSenderDepartmentId(3);
         n2.setReceiverDepartmentId(1);
-        n2.setFirstReaderId(null);
         list.add(n2);
 
         notificationDao.saveList(list);
         NotificationsFilterData filter = new NotificationsFilterData();
-        filter.setReceiverDepartmentId(1);
+        filter.setReceiverDepartmentIds(Arrays.asList(1));
         filter.setSenderDepartmentId(2);
         List<Notification> list2 = notificationDao.getByFilter(filter);
         assertEquals(5, list2.size());

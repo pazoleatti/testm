@@ -44,7 +44,7 @@ public class NotificationServiceImpl implements NotificationService {
         Map<Integer, Notification> notificationMap = new HashMap<Integer, Notification>();
         NotificationsFilterData filter = new NotificationsFilterData();
         filter.setSenderDepartmentId(senderDepartmentId);
-        filter.setReceiverDepartmentId(receiverDepartmentId);
+        filter.setReceiverDepartmentIds(Arrays.asList(receiverDepartmentId));
         List<Notification> list = notificationDao.getByFilter(filter);
         for (Notification notification : list) {
             notificationMap.put(notification.getReportPeriodId(), notification);
@@ -69,7 +69,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void updateUserNotificationsStatus(NotificationsFilterData filter, int userId) {
-        notificationDao.updateUserNotificationsStatus(filter, userId);
+    public void updateUserNotificationsStatus(NotificationsFilterData filter) {
+        notificationDao.updateUserNotificationsStatus(filter);
     }
 }

@@ -3,6 +3,8 @@ package com.aplana.sbrf.taxaccounting.web.widget.menu.server;
 import com.aplana.sbrf.taxaccounting.model.NotificationsFilterData;
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.NotificationService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.UpdateNotificationStatusAction;
@@ -17,6 +19,8 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Arrays.asList;
+
 @Component
 @PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS', 'ROLE_OPER')")
 public class UpdateNotificationStatusHandler extends AbstractActionHandler<UpdateNotificationStatusAction, UpdateNotificationStatusResult> {
@@ -29,6 +33,8 @@ public class UpdateNotificationStatusHandler extends AbstractActionHandler<Updat
     NotificationService notificationService;
     @Autowired
     SecurityService securityService;
+    @Autowired
+    DepartmentService departmentService;
 
     @Override
     public UpdateNotificationStatusResult execute(UpdateNotificationStatusAction action, ExecutionContext context) throws ActionException {
@@ -39,9 +45,9 @@ public class UpdateNotificationStatusHandler extends AbstractActionHandler<Updat
         }
         NotificationsFilterData filter = new NotificationsFilterData();
         filter.setUserId(user.getId());
-        filter.setReceiverDepartmentId(user.getDepartmentId());
+        filter.setReceiverDepartmentIds(departmentService.getTaxFormDepartments(user, asList(TaxType.values()), null, null));
         filter.setUserRoleIds(userRoles);
-        notificationService.updateUserNotificationsStatus(filter, user.getId());
+        notificationService.updateUserNotificationsStatus(filter);
         return new UpdateNotificationStatusResult();
     }
 

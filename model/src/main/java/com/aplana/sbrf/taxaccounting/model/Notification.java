@@ -14,7 +14,6 @@ public class Notification implements Serializable {
     private Integer reportPeriodId;
     private Integer senderDepartmentId;
     private Integer receiverDepartmentId;
-    private Integer firstReaderId;
     private String text;
     private Date createDate;
     private Date deadline;
@@ -22,6 +21,8 @@ public class Notification implements Serializable {
     private Integer userId;
     /** Идентификатор роли пользователя, который получит оповещение */
     private Integer roleId;
+    /** Признак прочтения */
+    private boolean read;
 
     public Integer getRoleId() {
         return roleId;
@@ -71,14 +72,6 @@ public class Notification implements Serializable {
         this.receiverDepartmentId = receiverDepartmentId;
     }
 
-    public Integer getFirstReaderId() {
-        return firstReaderId;
-    }
-
-    public void setFirstReaderId(Integer firstReaderId) {
-        this.firstReaderId = firstReaderId;
-    }
-
     public String getText() {
         return text;
     }
@@ -101,5 +94,13 @@ public class Notification implements Serializable {
 
     public void setDeadline(Date deadline) {
         this.deadline = deadline;
+    }
+
+    public boolean isRead() {
+        return read;
+    }
+
+    public void setRead(boolean read) {
+        this.read = read;
     }
 }
