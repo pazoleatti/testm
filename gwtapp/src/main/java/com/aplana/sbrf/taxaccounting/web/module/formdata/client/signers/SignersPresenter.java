@@ -58,8 +58,7 @@ public class SignersPresenter extends PresenterWidget<SignersPresenter.MyView> i
                         Integer department = formData.getPerformer() != null && formData.getPerformer().getPrintDepartmentId() != null ?
                                 formData.getPerformer().getPrintDepartmentId() : formData.getDepartmentId();
                         getView().setDepartment(department);
-                        String reportDepartmentName = formData.getPerformer() != null && formData.getPerformer().getReportDepartmentName() != null ?
-                                formData.getPerformer().getReportDepartmentName() : getReportDepartmentName(result.getDepartments(), department);
+                        String reportDepartmentName = getReportDepartmentName(result.getDepartments(), department);
                         getView().setReportDepartmentName(reportDepartmentName);
                     }
                 }, this));
