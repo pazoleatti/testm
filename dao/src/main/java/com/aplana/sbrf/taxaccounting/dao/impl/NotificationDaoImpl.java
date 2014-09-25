@@ -179,7 +179,7 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
 	}
 
     private static final String GET_BY_FILTER = "select * from (\n" +
-            "  select distinct ID, REPORT_PERIOD_ID, SENDER_DEPARTMENT_ID, RECEIVER_DEPARTMENT_ID, IS_READ, TEXT, CREATE_DATE, DEADLINE, USER_ID, ROLE_ID, \n" +
+            "  select ID, REPORT_PERIOD_ID, SENDER_DEPARTMENT_ID, RECEIVER_DEPARTMENT_ID, IS_READ, TEXT, CREATE_DATE, DEADLINE, USER_ID, ROLE_ID, \n" +
             " row_number() %s as rn \n" +
             "  from notification \n" +
             "where (\n" +
@@ -233,7 +233,7 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
 		}
 	}
 
-    private static final String GET_COUNT_BY_FILTER = "select count(distinct id) from notification \n" +
+    private static final String GET_COUNT_BY_FILTER = "select count(id) from notification \n" +
             "where (\n" +
             "(:senderDepartmentId is not null and SENDER_DEPARTMENT_ID = :senderDepartmentId) or \n" +
             "(:userId is not null and USER_ID = :userId)%s%s \n" +
