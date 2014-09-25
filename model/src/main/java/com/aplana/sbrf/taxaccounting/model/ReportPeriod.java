@@ -27,7 +27,7 @@ public class ReportPeriod implements Serializable {
 	/** Календарная дата начала отчетного периода (квартала) */
 	private Date calendarStartDate;
 	/** Ссылка на федеральный справочника для классификации отчетных периодов */
-	private int dictTaxPeriodId;
+	private long dictTaxPeriodId;
 
 	/**
 	 * Получить идентификатор отчётного периода
@@ -72,11 +72,11 @@ public class ReportPeriod implements Serializable {
         this.order = order;
 	}
 
-	public int getDictTaxPeriodId() {
+	public long getDictTaxPeriodId() {
 		return dictTaxPeriodId;
 	}
 
-	public void setDictTaxPeriodId(int dictTaxPeriodId) {
+	public void setDictTaxPeriodId(long dictTaxPeriodId) {
 		this.dictTaxPeriodId = dictTaxPeriodId;
 	}
 

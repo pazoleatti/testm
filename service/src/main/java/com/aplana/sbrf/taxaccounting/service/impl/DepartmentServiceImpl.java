@@ -5,9 +5,10 @@ import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,12 +20,6 @@ import java.util.*;
 @Service
 @Transactional
 public class DepartmentServiceImpl implements DepartmentService {
-
-    /**
-     * @deprecated См. getBankDepartment()
-     */
-    @Deprecated
-    public static final int UNP_ID = 1;
 
     @Autowired
     DepartmentDao departmentDao;
@@ -45,11 +40,6 @@ public class DepartmentServiceImpl implements DepartmentService {
     PeriodService periodService;
 
     @Override
-    public Department getUNPDepartment() {
-        return departmentDao.getDepartment(UNP_ID);
-    }
-
-    @Override
     public Department getDepartment(int departmentId) {
         return departmentDao.getDepartment(departmentId);
     }
@@ -67,11 +57,6 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public List<Department> getChildren(int parentDepartmentId) {
         return departmentDao.getChildren(parentDepartmentId);
-    }
-
-    @Override
-    public Department getParent(int departmentId) {
-        return departmentDao.getParent(departmentId);
     }
 
     @Override
@@ -99,11 +84,6 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    public Department getDepartmentByCode(int code) {
-        return departmentDao.getDepartmentByCode(code);
-    }
-
-    @Override
     public List<Department> getAllChildren(int parentDepartmentId) {
         return departmentDao.getAllChildren(parentDepartmentId);
     }
@@ -116,14 +96,6 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    public List<Integer> getAllParentIds(int depId) {
-        if (depId == 0)
-            return new ArrayList<Integer>(0);
-        return departmentDao.getAllParentIds(depId);
-    }
-
-    // http://conf.aplana.com/pages/viewpage.action?pageId=11380675
-    @Override
     public List<Department> getBADepartments(TAUser tAUser) {
         List<Department> retList = new ArrayList<Department>();
 
@@ -131,7 +103,7 @@ public class DepartmentServiceImpl implements DepartmentService {
             // все подразделения из справочника подразделений
             retList.addAll(departmentDao.listDepartments());
         } else if (tAUser.hasRole(TARole.ROLE_CONTROL_NS)) {
-            retList.addAll(departmentDao.getDepartmenTBChildren(tAUser.getDepartmentId()));
+            retList.addAll(departmentDao.getDepartmentTBChildren(tAUser.getDepartmentId()));
         }
 
         return retList;
@@ -145,13 +117,12 @@ public class DepartmentServiceImpl implements DepartmentService {
             // все подразделения из справочника подразделений
             retList.addAll(departmentDao.listDepartmentIds());
         } else if (tAUser.hasRole(TARole.ROLE_CONTROL_NS)) {
-            retList.addAll(departmentDao.getDepartmenTBChildrenId(tAUser.getDepartmentId()));
+            retList.addAll(departmentDao.getDepartmentTBChildrenId(tAUser.getDepartmentId()));
         }
 
         return retList;
     }
 
-    // http://conf.aplana.com/pages/viewpage.action?pageId=11380723
     @Override
     public List<Department> getTBDepartments(TAUser tAUser) {
         List<Department> retList = new ArrayList<Department>();
@@ -179,7 +150,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
             } else {
                 // подразделение с типом 2, являющееся родительским по отношению к подразделению пользователя
-                Department departmenTB = departmentDao.getDepartmenTB(tAUser.getDepartmentId());
+                Department departmenTB = departmentDao.getDepartmentTB(tAUser.getDepartmentId());
                 if (departmenTB != null) {
                     retList.add(departmenTB);
                 }
@@ -189,7 +160,6 @@ public class DepartmentServiceImpl implements DepartmentService {
         return retList;
     }
 
-    // http://conf.aplana.com/pages/viewpage.action?pageId=13112983
     @Override
     public List<Department> getTBUserDepartments(TAUser tAUser) {
         List<Department> retList = new ArrayList<Department>();
@@ -222,7 +192,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
             } else {
                 // подразделение с типом 2, являющееся родительским по отношению к подразделению пользователя
-                Department departmenTB = departmentDao.getDepartmenTB(tAUser.getDepartmentId());
+                Department departmenTB = departmentDao.getDepartmentTB(tAUser.getDepartmentId());
                 if (departmenTB != null) {
                     retList.add(departmenTB.getId());
                 }
@@ -232,14 +202,12 @@ public class DepartmentServiceImpl implements DepartmentService {
         return retList;
     }
 
-    // http://conf.aplana.com/pages/viewpage.action?pageId=11381063
     @Override
     public Department getBankDepartment() {
         // подразделение с типом 1
         return departmentDao.getDepartmentsByType(DepartmentType.ROOT_BANK.getCode()).get(0);
     }
 
-    // http://conf.aplana.com/pages/viewpage.action?pageId=11380670
     @Override
     public List<Integer> getTaxFormDepartments(TAUser tAUser, List<TaxType> taxTypes, Date periodStart, Date periodEnd) {
         List<Integer> retList = new ArrayList<Integer>();
@@ -252,19 +220,19 @@ public class DepartmentServiceImpl implements DepartmentService {
             // 1, 2
             retList.addAll(departmentDao.getDepartmentsBySourceControlNs(tAUser.getDepartmentId(), taxTypes, periodStart, periodEnd));
             // 3
-            retList.addAll(getDepartmentIdsByExcutors(retList, taxTypes));
+            retList.addAll(getDepartmentIdsByExecutors(retList, taxTypes));
         } else if (tAUser.hasRole(TARole.ROLE_CONTROL)) {
             // 1, 2
             retList.addAll(departmentDao.getDepartmentsBySourceControl(tAUser.getDepartmentId(), taxTypes, periodStart, periodEnd));
             // 3
-            retList.addAll(getDepartmentIdsByExcutors(retList, taxTypes));
+            retList.addAll(getDepartmentIdsByExecutors(retList, taxTypes));
         } else if (tAUser.hasRole(TARole.ROLE_OPER)) {
             // 1
             for (Department dep : departmentDao.getAllChildren(tAUser.getDepartmentId())) {
                 retList.add(dep.getId());
             }
             // 2
-            retList.addAll(getDepartmentIdsByExcutors(retList, taxTypes));
+            retList.addAll(getDepartmentIdsByExecutors(retList, taxTypes));
         }
 
         // Результат выборки должен содержать только уникальные подразделения
@@ -274,7 +242,6 @@ public class DepartmentServiceImpl implements DepartmentService {
         return retList;
     }
 
-    // http://conf.aplana.com/pages/viewpage.action?pageId=11380678
     @Override
     public List<Department> getDestinationDepartments(TAUser tAUser) {
         List<Department> retList = new ArrayList<Department>();
@@ -282,7 +249,7 @@ public class DepartmentServiceImpl implements DepartmentService {
             // все подразделения из справочника подразделений
             retList.addAll(departmentDao.listDepartments());
         } else if (tAUser.hasRole(TARole.ROLE_CONTROL_NS)) {
-            retList.addAll(departmentDao.getDepartmenTBChildren(tAUser.getDepartmentId()));
+            retList.addAll(departmentDao.getDepartmentTBChildren(tAUser.getDepartmentId()));
             if (retList.isEmpty()) {
                 // Если такого подразделения (с типом 2) не найдено, то включить в выборку только подразделение пользователя.
                 retList.add(departmentDao.getDepartment(tAUser.getDepartmentId()));
@@ -299,7 +266,14 @@ public class DepartmentServiceImpl implements DepartmentService {
         return retList;
     }
 
-    // http://conf.aplana.com/pages/viewpage.action?pageId=11381089
+    @Override
+    public List<Integer> getAppointmentDepartments(TAUser tAUser) {
+        // получить список id подразделений из выборки 10
+        List<Integer> departmentIds = getBADepartmentIds(tAUser);
+        // получить список id подразделений в формах которых 10-ые подразделения назначены исполнителями
+        return departmentDao.getDepartmentIdsByExecutors(departmentIds);
+    }
+
     @Override
     public List<Integer> getPrintFormDepartments(FormData formData) {
         List<Integer> retList = new ArrayList<Integer>();
@@ -310,7 +284,6 @@ public class DepartmentServiceImpl implements DepartmentService {
         return retList;
     }
 
-    // http://conf.aplana.com/pages/viewpage.action?pageId=11383234
     @Override
     public List<Integer> getOpenPeriodDepartments(TAUser tAUser, List<TaxType> taxTypes, int reportPeriodId) {
         ReportPeriod reportPeriod = periodService.getReportPeriod(reportPeriodId);
@@ -318,9 +291,18 @@ public class DepartmentServiceImpl implements DepartmentService {
         // Подразделения согласно выборке 40 - Выборка для доступа к экземплярам НФ/деклараций
         List<Integer> list = getTaxFormDepartments(tAUser, taxTypes, reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
         for (Integer departmentId : list) {
-            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(reportPeriodId,
-                    departmentId.longValue());
-            if ((departmentReportPeriod != null) && departmentReportPeriod.isActive()) {
+            // Открытый период подразделения для пары «Подразделение — Отчетный период» может быть только один
+            DepartmentReportPeriodFilter departmentReportPeriodFilter = new DepartmentReportPeriodFilter();
+            departmentReportPeriodFilter.setIsActive(true);
+            departmentReportPeriodFilter.setDepartmentIdList(Arrays.asList(departmentId));
+            departmentReportPeriodFilter.setReportPeriodIdList(Arrays.asList(reportPeriodId));
+            List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodDao.getListByFilter(departmentReportPeriodFilter);
+
+            DepartmentReportPeriod departmentReportPeriod = null;
+            if (departmentReportPeriodList.size() == 1) {
+                departmentReportPeriod = departmentReportPeriodList.get(0);
+            }
+            if (departmentReportPeriod != null) {
                 // Подразделения, для которых открыт указанный период
                 retList.add(departmentId);
             }
@@ -344,21 +326,12 @@ public class DepartmentServiceImpl implements DepartmentService {
 	}
 
     @Override
-    public List<Integer> getDepartmentsByName(String departmentName) {
-        try {
-            return departmentDao.getDepartmentsByName(departmentName);
-        } catch (DaoException e){
-            throw new ServiceException("Получение списка подразделений по имени.", e);
-        }
+    public List<Department> getDepartmentForSudir() {
+        ArrayList<Department> departments = new ArrayList<Department>();
+        departments.addAll(departmentDao.getDepartmentsByType(DepartmentType.CSKO_PCP.getCode()));
+        departments.addAll(departmentDao.getDepartmentsByType(DepartmentType.MANAGEMENT.getCode()));
+        return departments;
     }
-
-    @Override
-		 public List<Department> getDepartmentForSudir() {
-		ArrayList<Department> departments = new ArrayList<Department>();
-		departments.addAll(departmentDao.getDepartmentsByType(DepartmentType.CSKO_PCP.getCode()));
-		departments.addAll(departmentDao.getDepartmentsByType(DepartmentType.MANAGEMENT.getCode()));
-		return departments;
-	}
 
     @Override
     public String getParentsHierarchy(Integer departmentId) {
@@ -394,7 +367,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     /**
      * Все подразделения, для форм которых, подразделения departments назначены исполнителями
      */
-    private List<Integer> getDepartmentIdsByExcutors(List<Integer> departments, List<TaxType> taxTypes) {
-        return departmentDao.getDepartmentIdsByExcutors(departments, taxTypes);
+    private List<Integer> getDepartmentIdsByExecutors(List<Integer> departments, List<TaxType> taxTypes) {
+        return departmentDao.getDepartmentIdsByExecutors(departments, taxTypes);
     }
 }

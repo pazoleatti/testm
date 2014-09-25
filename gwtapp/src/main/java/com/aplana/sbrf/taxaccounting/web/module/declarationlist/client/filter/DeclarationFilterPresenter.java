@@ -41,6 +41,8 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 
         void updateFilter(TaxType taxType);
 
+        void setCorrectionTagList(List<Boolean> list);
+
         void clean();
 	}
 
@@ -79,6 +81,7 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 							getView().setReportPeriods(result.getPeriods());
 							getView().setDeclarationTypeMap(fillDeclarationTypesMap(filterValues));
                             getView().setFormStateList(asList(null, WorkflowState.CREATED, WorkflowState.ACCEPTED));
+                            getView().setCorrectionTagList(Arrays.asList(new Boolean[]{Boolean.TRUE, Boolean.FALSE}));
                             if (dataFilter != null){
                                 getView().setDataFilter(dataFilter);
                             } else {

@@ -25,8 +25,7 @@ import java.util.Map;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
-public class GetFormDataHandler extends
-		AbstractActionHandler<GetFormData, GetFormDataResult> {
+public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFormDataResult> {
 
 	@Autowired
 	private FormDataAccessService accessService;
@@ -36,9 +35,6 @@ public class GetFormDataHandler extends
 
 	@Autowired
 	private FormDataService formDataService;
-
-	@Autowired
-	private PeriodService reportPeriodService;
 
 	@Autowired
 	private DepartmentService departmentService;
@@ -60,6 +56,9 @@ public class GetFormDataHandler extends
 
     @Autowired
     private DataRowService dataRowService;
+
+    @Autowired
+    private DepartmentReportPeriodService departmentReportPeriodService;
 
     private static final long REF_BOOK_ID = 8L;
     private static final String REF_BOOK_VALUE_NAME = "CODE";
@@ -129,45 +128,37 @@ public class GetFormDataHandler extends
 
         FormTemplate formTemplate = formTemplateService.getFullFormTemplate(formData.getFormTemplateId());
 
-		ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(
+                formData.getDepartmentReportPeriodId());
+
         // http://jira.aplana.com/browse/SBRFACCTAX-6399
         if ((formData.getKind() == FormDataKind.PRIMARY || formData.getKind() == FormDataKind.CONSOLIDATED)
-                && reportPeriod.getTaxPeriod().getTaxType() == TaxType.INCOME) {
-
+                && departmentReportPeriod.getReportPeriod().getTaxPeriod().getTaxType() == TaxType.INCOME) {
             RefBookDataProvider dataProvider = refBookFactory.getDataProvider(REF_BOOK_ID);
-            Map<String, RefBookValue> refBookValueMap = dataProvider.getRecordData((long) reportPeriod.getDictTaxPeriodId());
+            Map<String, RefBookValue> refBookValueMap = dataProvider.getRecordData(
+                    departmentReportPeriod.getReportPeriod().getDictTaxPeriodId());
             Integer code = Integer.parseInt(refBookValueMap.get(REF_BOOK_VALUE_NAME).getStringValue());
-            reportPeriod.setName(ReportPeriodSpecificName.fromId(code).getName());
-
+            departmentReportPeriod.getReportPeriod().setName(ReportPeriodSpecificName.fromId(code).getName());
         }
-        result.setBalancePeriod(reportPeriodService.isBalancePeriod(formData.getReportPeriodId(), formData.getDepartmentId()));
-		result.setReportPeriod(reportPeriod);
-		result.setDepartmenName(departmentService.getDepartment(
-                formData.getDepartmentId()).getName());
-        result.setDepartmenFullName(departmentService.getParentsHierarchy(
-                formData.getDepartmentId()));
+        result.setDepartmentReportPeriod(departmentReportPeriod);
+		result.setDepartmentName(departmentService.getDepartment(formData.getDepartmentId()).getName());
+        result.setDepartmentFullName(departmentService.getParentsHierarchy(formData.getDepartmentId()));
 		result.setAllStyles(formTemplate.getStyles());
 		result.setFixedRows(formTemplate.isFixedRows());
 		result.setTemplateFormName(formTemplate.getName());
 		result.setFormData(formData);
-		result.setReportPeriodStartDate(reportPeriod.getCalendarStartDate());
-		result.setReportPeriodEndDate(reportPeriod.getEndDate());
+        result.setBankSummaryForm(true);
 
-		result.setFormInClosedPeriod(!reportPeriodService.isActivePeriod(result.getReportPeriod().getId(), formData.getDepartmentId()));
-
-        result.setReportPeriodYear(reportPeriod.getTaxPeriod().getYear());
-        boolean isBankSummaryForm = formDataService.isBankSummaryForm(action.getFormDataId());
-        result.setBankSummaryForm(isBankSummaryForm);
-        if (isBankSummaryForm) {
-            result.setExistManual(formDataService.existManual(action.getFormDataId()));
-        } else {
-            //Если это не сводная банка, то нет смысла проверять наличие версии ручного ввода
-            result.setExistManual(false);
-        }
+        result.setExistManual(formDataService.existManual(action.getFormDataId()));
 
         //Является ли форма последней перед декларацией
-        List<DepartmentDeclarationType> declarationDestinations = sourceService.getDeclarationDestinations(formData.getDepartmentId(), formData.getFormType().getId(), formData.getKind(), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
-        result.setCanCreatedManual(formData.getState() == WorkflowState.ACCEPTED && (formData.getKind().equals(FormDataKind.CONSOLIDATED) || formData.getKind().equals(FormDataKind.SUMMARY)) && !declarationDestinations.isEmpty());
+        List<DepartmentDeclarationType> declarationDestinations = sourceService.getDeclarationDestinations(
+                formData.getDepartmentId(), formData.getFormType().getId(), formData.getKind(),
+                departmentReportPeriod.getReportPeriod().getCalendarStartDate(),
+                departmentReportPeriod.getReportPeriod().getEndDate());
+        result.setCanCreatedManual(formData.getState() == WorkflowState.ACCEPTED
+                && (formData.getKind().equals(FormDataKind.CONSOLIDATED) || formData.getKind().equals(FormDataKind.SUMMARY))
+                && !declarationDestinations.isEmpty());
 	}
 
 	/**

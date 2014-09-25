@@ -24,6 +24,7 @@ public class FormDataSearchResultItemMapper implements RowMapper<FormDataSearchR
 		result.setReportPeriodName(rs.getString("report_period_name"));
 		result.setState(WorkflowState.fromId(SqlUtils.getInteger(rs,"state")));
 		result.setTaxType(TaxType.fromCode(rs.getString("tax_type").charAt(0)));
+        result.setCorrectionDate(rs.getDate("correction_date"));
         result.setReportPeriodYear(SqlUtils.getInteger(rs,"year"));
         Integer reportPeriodMonth = SqlUtils.getInteger(rs,"period_order");
         result.setReportPeriodMonth(rs.wasNull() ? null : reportPeriodMonth);

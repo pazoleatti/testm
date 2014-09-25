@@ -153,7 +153,7 @@ void calc() {
 def getDataRowsPrev() {
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
     if (!isBalancePeriod() && formData.kind == FormDataKind.PRIMARY && reportPeriod.order != 1) {
-        def formDataPrev = formDataService.getFormDataPrev(formData, formData.departmentId)
+        def formDataPrev = formDataService.getFormDataPrev(formData)
         formDataPrev = (formDataPrev?.state == WorkflowState.ACCEPTED ? formDataPrev : null)
         if (formDataPrev != null) {
             return formDataService.getDataRowHelper(formDataPrev)?.allCached
@@ -320,10 +320,11 @@ def loggerError(def row, def msg) {
     }
 }
 
-// Признак периода ввода остатков. Отчетный период является периодом ввода остатков.
+// Признак периода ввода остатков для отчетного периода подразделения
 def isBalancePeriod() {
     if (isBalancePeriod == null) {
-        isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
+        def departmentReportPeriod = departmentReportPeriodService.get(formData.departmentReportPeriodId)
+        isBalancePeriod = departmentReportPeriod.isBalance()
     }
     return isBalancePeriod
 }
@@ -334,7 +335,7 @@ void consolidation() {
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind(),
             getReportPeriodStartDate(), getReportPeriodEndDate()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
-            def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 formDataService.getDataRowHelper(source).getAllCached().each { row ->
                     if (row.getAlias() == null) {

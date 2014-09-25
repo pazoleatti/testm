@@ -226,5 +226,4 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
     public boolean getShowUncreated() {
         return uncreated.getValue();
     }
-
 }

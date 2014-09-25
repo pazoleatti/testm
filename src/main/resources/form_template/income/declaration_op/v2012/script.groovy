@@ -77,7 +77,9 @@ void checkDeparmentParams(LogLevel logLevel) {
     }
     errorList = getErrorVersion(departmentParam)
     for (String error : errorList) {
-        logger.log(logLevel, String.format("Неверно указано значение атрибута %s на форме настроек подразделений для %s", error, departmentParam.NAME.stringValue))
+        def name = departmentParam.NAME.stringValue
+        name = name == null ? "!" : " для $name!"
+        logger.log(logLevel, String.format("Неверно указано значение атрибута %s на форме настроек подразделений%s", error, name))
     }
 }
 
@@ -91,7 +93,7 @@ def checkDeclarationBank() {
 
     /** Идентификатор подразделения Банка. */
     def departmentBankId = 1
-    def bankDeclarationData = declarationService.find(declarationTypeId, departmentBankId, reportPeriod.id)
+    def bankDeclarationData = declarationService.getLast(declarationTypeId, departmentBankId, reportPeriod.id)
     if (bankDeclarationData == null || !bankDeclarationData.accepted) {
         logger.error('Декларация Банка по прибыли за указанный период не сформирована или не находится в статусе "Принята".')
         return
@@ -102,8 +104,8 @@ def checkDeclarationBank() {
 
     if (bankDeclarationData.id != null) {
         def xmlString = declarationService.getXmlData(bankDeclarationData.id)
-        xmlString = xmlString.replace('<?xml version="1.0" encoding="windows-1251"?>', '')
-        if (xmlString == null) {
+        xmlString = xmlString?.replace('<?xml version="1.0" encoding="windows-1251"?>', '')
+        if (!xmlString) {
             logger.error('Данные декларации Банка не заполнены.')
             return
         }
@@ -241,7 +243,7 @@ void generateXML(def xmlBankData) {
                 Период : period,
                 ОтчетГод : (taxPeriod != null ? taxPeriod.year : empty),
                 КодНО : taxOrganCode,
-                НомКорр : reportPeriodService.getCorrectionPeriodNumber(declarationData.reportPeriodId, declarationData.departmentId),
+                НомКорр : reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId),
                 ПоМесту : taxPlaceTypeCode) {
 
             СвНП(

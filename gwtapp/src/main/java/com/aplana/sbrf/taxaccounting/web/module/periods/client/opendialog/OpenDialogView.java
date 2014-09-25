@@ -1,10 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.client.opendialog;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-
 import com.aplana.gwt.client.Spinner;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
@@ -22,6 +17,11 @@ import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.PopupViewWithUiHandlers;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 
 public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers>
@@ -97,7 +97,7 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
 		OpenFilterData openFilterData = new OpenFilterData();
 		openFilterData.setYear(yearBox.getValue());
 		openFilterData.setBalancePeriod(balancePeriod.getValue());
-		openFilterData.setDepartmentId(Long.valueOf(departmentPicker.getValue().iterator().next()));
+		openFilterData.setDepartmentId(departmentPicker.getValue().iterator().next());
 	    openFilterData.setDictionaryTaxPeriodId(period.getSingleValue());
         if (correctPeriod.getValue()) {
             openFilterData.setCorrectPeriod(term.getValue());

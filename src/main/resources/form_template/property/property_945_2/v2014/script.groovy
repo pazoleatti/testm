@@ -112,10 +112,11 @@ def endDate = null
 @Field
 def isBalancePeriod
 
-// Признак периода ввода остатков. Отчетный период является периодом ввода остатков.
+// Признак периода ввода остатков для отчетного периода подразделения
 def isBalancePeriod() {
     if (isBalancePeriod == null) {
-        isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
+        def departmentReportPeriod = departmentReportPeriodService.get(formData.departmentReportPeriodId)
+        isBalancePeriod = departmentReportPeriod.isBalance()
     }
     return isBalancePeriod
 }
@@ -159,7 +160,7 @@ void addPrevDataRows() {
     if (isBalancePeriod()) {
         return
     }
-    def prevFormData = formDataService.getFormDataPrev(formData, formDataDepartment.id)
+    def prevFormData = formDataService.getFormDataPrev(formData)
     def prevDataRows = (prevFormData != null ? formDataService.getDataRowHelper(prevFormData)?.allCached : null)
 
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
@@ -267,7 +268,6 @@ void logicCheck() {
     }
     // мапа индексов строк "идентичных" текущей
     def Map<Integer, List<Integer>> foundEqualsMap = [:]
-    def Department department = departmentService.get(formData.departmentId)
     for (def row : dataRows) {
         def index = row.getIndex()
         def errorMsg = "Строка $index: "
@@ -290,7 +290,7 @@ void logicCheck() {
                 loggerError(row, errorMsg + "Необлагаемая налогом кадастровая стоимость не может быть больше общей кадастровой стоимости!")
             }
             // Проверка наличия формы предыдущего периода
-            if (!isBalancePeriod() && formDataService.getFormDataPrev(formData, formDataDepartment.id) == null) {
+            if (!isBalancePeriod() && formDataService.getFormDataPrev(formData) == null) {
                 logger.warn("Данные о кадастровой стоимости из предыдущего отчетного периода не были скопированы. В Системе не создавалась первичная налоговая форма «${formData.formType.name}» за предыдущий отчетный период!")
             }
 
@@ -319,8 +319,8 @@ void logicCheck() {
                 rowsToCompare.removeAll { e -> e.getIndex() in foundEqualsMap[index] }
             }
             // Проверка допустимых значений «Графы 14»
-            if (department.regionId && row.subject && row.taxBenefitCode) {
-                String filter = "DECLARATION_REGION_ID = " + department.regionId?.toString() + " and REGION_ID = " + row.subject?.toString() + " and RECORD_ID = " + row.taxBenefitCode + " and PARAM_DESTINATION = 2"
+            if (formDataDepartment.regionId && row.subject && row.taxBenefitCode) {
+                String filter = "DECLARATION_REGION_ID = " + formDataDepartment.regionId?.toString() + " and REGION_ID = " + row.subject?.toString() + " and RECORD_ID = " + row.taxBenefitCode + " and PARAM_DESTINATION = 2"
                 def records = refBookFactory.getDataProvider(203).getRecords(getReportPeriodEndDate(), null, filter, null)
                 if (records.size() == 0 || !(getBenefitCode(row.taxBenefitCode)?.toString() in ["2012000", "2012400", "2012500"])) {
                     loggerError(row, errorMsg + "Графа «${getColumnName(row, 'taxBenefitCode')}» заполнена неверно!")
@@ -340,7 +340,7 @@ void logicCheck() {
             }
             // Проверка существования выбранных параметров декларации
             if (row.subject && row.taxAuthority && row.kpp && row.oktmo) {
-                filter = "DECLARATION_REGION_ID = " + department.regionId?.toString() + " and REGION_ID = " + row.subject?.toString() + " and LOWER(TAX_ORGAN_CODE) = LOWER('" + row.taxAuthority + "') and LOWER(KPP) = LOWER('" + row.kpp + "') and OKTMO = " + row.oktmo?.toString()
+                filter = "DECLARATION_REGION_ID = " + formDataDepartment.regionId?.toString() + " and REGION_ID = " + row.subject?.toString() + " and LOWER(TAX_ORGAN_CODE) = LOWER('" + row.taxAuthority + "') and LOWER(KPP) = LOWER('" + row.kpp + "') and OKTMO = " + row.oktmo?.toString()
                 records = refBookFactory.getDataProvider(200).getRecords(getReportPeriodEndDate(), null, filter, null)
                 if (records.size() == 0) {
                     rowWarning(logger, row, errorMsg + "Текущие параметры представления декларации (Код субъекта, Код НО, КПП, Код ОКТМО) не предусмотрены (в справочнике «Параметры представления деклараций по налогу на имущество» отсутствует такая запись)!")
@@ -412,7 +412,6 @@ void addData(def xml, int headRowCount) {
 
     def totalRow = getDataRow(dataRows, 'total')
 
-    def Department department = departmentService.get(formData.departmentId)
     for (def row : xml.row) {
         xmlIndexRow++
         def int xlsIndexRow = xmlIndexRow + rowOffset
@@ -472,7 +471,7 @@ void addData(def xml, int headRowCount) {
         String filter = "CODE = '" + row.cell[14].text() + "'"
         def records202 = refBookFactory.getDataProvider(202).getRecords(getReportPeriodEndDate(), null, filter, null)
         for (def record202 : records202) {
-            filter = "DECLARATION_REGION_ID = " + department.regionId?.toString() + " and REGION_ID = " + newRow.subject?.toString() + " and TAX_BENEFIT_ID = " + record202.record_id.value + " and PARAM_DESTINATION = 2"
+            filter = "DECLARATION_REGION_ID = " + formDataDepartment.regionId?.toString() + " and REGION_ID = " + newRow.subject?.toString() + " and TAX_BENEFIT_ID = " + record202.record_id.value + " and PARAM_DESTINATION = 2"
             def records = refBookFactory.getDataProvider(203).getRecords(getReportPeriodEndDate(), null, filter, null)
             def taxRecordId = records.find { calcBasis(it?.record_id?.value) == newRow.benefitBasis }?.record_id?.value
             if (taxRecordId) {

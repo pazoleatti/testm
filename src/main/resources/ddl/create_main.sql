@@ -164,7 +164,8 @@ create table ref_book_attribute (
   sort_order number(9),
   format number(2),
   read_only number(1) default 0 not null,
-  max_length number(4)
+  max_length number(4),
+  is_table number(1) default 0 not null
 );
 comment on table ref_book_attribute is 'Атрибут справочника';
 comment on column ref_book_attribute.id is 'Уникальный идентификатор';
@@ -184,6 +185,7 @@ comment on column ref_book_attribute.sort_order is 'Определяет пор�
 comment on column ref_book_attribute.format is 'Формат. (Для дат: 0 - "", 1 - "dd.MM.yyyy", 2 - "MM.yyyy", 3 - "MMMM yyyy", 4 - "yyyy", 5 - "dd.MM"; Для чисел: 6 - чекбокс)';
 comment on column ref_book_attribute.read_only is 'Только для чтения (0 - редактирование доступно пользователю; 1 - редактирование недоступно пользователю)';
 comment on column ref_book_attribute.max_length is 'Максимальная длина строки/Максимальное количество цифр без учета знака и десятичного разделителя';
+comment on column ref_book_attribute.is_table is 'Признак табличного атрибута';
 ------------------------------------------------------------------------------------------------------
 create table ref_book_record (
   id number(18) not null,
@@ -208,7 +210,8 @@ create table ref_book_value (
   string_value varchar2(4000),
   number_value number(27,10),
   date_value date,
-  reference_value number(18)
+  reference_value number(18), 
+  row_num number(9)
 );
 comment on table ref_book_value is 'Значение записи справочника';
 comment on column ref_book_value.record_id is 'Ссылка на запись справочника';
@@ -217,6 +220,7 @@ comment on column ref_book_value.string_value is 'Строковое значе�
 comment on column ref_book_value.number_value is 'Численное значение';
 comment on column ref_book_value.date_value is 'Значение даты';
 comment on column ref_book_value.reference_value is 'Значение ссылки';
+comment on column ref_book_value.row_num is 'Номер строки в табличной части справочника';
 ------------------------------------------------------------------------------------------------------
 create table form_column (
   id number(9) not null,
@@ -395,22 +399,19 @@ create sequence seq_declaration_template start with 10000;
 create table declaration_data (
   id number(18) not null,
   declaration_template_id number(9) not null,
-  report_period_id        number(9) not null,
-  department_id           number(9) not null,
   tax_organ_code          varchar2(4),
   kpp                     varchar2(9),
   data                    varchar2(36),
   is_accepted             number(1) not null,
   data_pdf                varchar2(36),
   data_xlsx               varchar2(36),
-  jasper_print            varchar2(36) 
+  jasper_print            varchar2(36),
+  department_report_period_id number(18) not null
 );
 
 comment on table declaration_data is 'Налоговые декларации';
 comment on column declaration_data.id is 'Идентификатор (первичный ключ)';
 comment on column declaration_data.declaration_template_id is 'Ссылка на шаблон декларации';
-comment on column declaration_data.report_period_id is 'Отчётный период';
-comment on column declaration_data.department_id is 'Подразделение';
 comment on column declaration_data.tax_organ_code is 'Налоговый орган';
 comment on column declaration_data.kpp is 'КПП';
 comment on column declaration_data.data is 'Данные декларации в формате законодателя (XML)';
@@ -418,30 +419,29 @@ comment on column declaration_data.is_accepted is 'Признак того, чт
 comment on column declaration_data.data_pdf is 'Данные декларации в формате PDF';
 comment on column declaration_data.data_xlsx is 'Данные декларации в формате XLSX';
 comment on column declaration_data.jasper_print is 'Сформированный отчет во внутреннем формате Jasper Reports';
+comment on column declaration_data.department_report_period_id is 'Отчётный период подразделения';
 
 create sequence seq_declaration_data start with 10000;
 ------------------------------------------------------------------------------------------------------------------------------------------
 create table form_data (
   id number(18) not null,
   form_template_id number(9) not null,
-  department_id number(9) not null,
   state number(9) not null,
   kind number(9) not null,
-  report_period_id number(9) not null,
   return_sign number(1) not null,
   period_order number(2),
-  number_previous_row number (9)
+  number_previous_row number (9),
+  department_report_period_id number(18) not null
 );
 comment on table form_data is 'Данные по налоговым формам';
 comment on column form_data.id is 'Первичный ключ';
 comment on column form_data.form_template_id is 'Идентификатор шаблона формы';
-comment on column form_data.department_id is 'Идентификатор подраздения';
 comment on column form_data.state is 'Код состояния (1 - Создана, 2 - Подготовлена; 3 - Утверждена; 4 - Принята)';
 comment on column form_data.kind is 'Тип налоговой формы (1 - Первичная, 2 - Консолидированная, 3 - Сводная, 4 - Форма УНП, 5 - Выходная)';
-comment on column form_data.report_period_id is 'Идентификатор отчетного периода';
 comment on column form_data.return_sign is 'Флаг возврата (0 - обычный режим; 1 - форма возвращена из вышестоящего статуса)';
 comment on column form_data.period_order is 'Указывает на очередность налоговой формы в рамках налогового периода. Необходимо для, например, месячных форм в рамках квартального отчетного периода';
 comment on column form_data.number_previous_row is 'Номер последней строки предыдущей НФ';
+comment on column form_data.department_report_period_id is 'Отчетный период подразделения';
 
 create sequence seq_form_data start with 10000;
 ---------------------------------------------------------------------------------------------------
@@ -710,7 +710,7 @@ comment on column log_system.blob_data_id is 'Ссылка на логи';
 create sequence seq_log_system start with 10000;
 ------------------------------------------------------------------------------------------------------
 create table department_report_period (
-  id                  number(18, 0)  not null,
+  id                  number(18, 0) not null,
   department_id       number(9) not null,
   report_period_id    number(9) not null,
   is_active           number(1) not null,
@@ -751,13 +751,15 @@ create sequence seq_task_context start with 100;
 ------------------------------------------------------------------------------------------------------
 create table notification(
 id number(9) primary key,
-report_period_id number(9) not null, 
-sender_department_id number(9) not null, 
+report_period_id number(9) null, 
+sender_department_id number(9) null, 
 receiver_department_id number(9) null, 
 first_reader_id number(9) null, 
 text varchar2(2000) not null, 
 create_date date not null, 
-deadline date not null
+deadline date null,
+user_id number(9) null,
+role_id number(9) null
 );
 
 comment on table notification is 'Оповещения';
@@ -769,6 +771,8 @@ comment on column notification.first_reader_id is 'идентификатор п
 comment on column notification.text is 'текст оповещения';
 comment on column notification.create_date is 'дата создания оповещения';
 comment on column notification.deadline is 'дата сдачи отчетности';
+comment on column notification.user_id is 'Идентификатор пользователя, который получит оповещение';
+comment on column notification.role_id is 'Роль пользователя, который получит оповещение';
 
 create sequence seq_notification start with 10000;
 
@@ -857,5 +861,16 @@ comment on column report.type is 'Тип отчета (0 - Excel, 1 - CSV, 2 - P
 comment on column report.manual is 'Режим ввода данных (0 - обычная версия; 1 - версия ручного ввода)'; 
 comment on column report.checking is 'Типы столбцов (0 - только обычные, 1 - вместе с контрольными)';
 comment on column report.absolute is 'Режим вывода данных (0 - только дельты, 1 - абсолютные значения)';
+
+--------------------------------------------------------------------------------------------------------
+create table lock_data_subscribers
+(
+lock_key varchar2(1000 byte) not null,
+user_id number(9) not null 
+);
+
+comment on table lock_data_subscribers is 'Cписок пользователей, ожидающих выполнения операций над объектом блокировки';
+comment on column lock_data_subscribers.lock_key is 'Ключ блокировки объекта, после завершения операции над которым, будет выполнено оповещение';
+comment on column lock_data_subscribers.user_id is 'Идентификатор пользователя, который получит оповещение';
 
 --------------------------------------------------------------------------------------------------------

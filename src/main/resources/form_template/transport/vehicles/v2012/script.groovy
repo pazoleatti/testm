@@ -44,7 +44,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.COMPOSE:
-        formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
+        formDataService.consolidationSimple(formData, logger)
         calc()
         logicCheck()
         break
@@ -246,7 +246,7 @@ def logicCheck() {
 
 def String checkPrevPeriod(def reportPeriod) {
     if (reportPeriod != null) {
-        if (formDataService.find(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriod.id) == null) {
+        if (formDataService.getLast(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriod.id, formData.periodOrder) == null) {
             return reportPeriod.name + " " + reportPeriod.taxPeriod.year + ", "
         }
     }
@@ -298,7 +298,7 @@ def getPrevRowsForCopy(def reportPeriod, def rowsOldE) {
     def rowsOld = []
     rowsOld.addAll(rowsOldE)
     if (reportPeriod != null) {
-        formDataOld = formDataService.find(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriod.id)
+        formDataOld = formDataService.getLast(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriod.id, formData.periodOrder)
         def dataRowsOld = (formDataOld != null ? formDataService.getDataRowHelper(formDataOld)?.allCached : null)
         if (dataRowsOld != null && !dataRowsOld.isEmpty()) {
             def dFrom = getReportPeriodStartDate()
@@ -445,9 +445,9 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol++
 
         // графа 3
-        if (record != null) {
-            formDataService.checkReferenceValue(96, row.cell[xmlIndexCol].text(), record?.NAME?.value, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        }
+//        if (record != null) {
+//            formDataService.checkReferenceValue(96, row.cell[xmlIndexCol].text(), record?.NAME?.value, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+//        }
         xmlIndexCol++
 
         // графа 4
@@ -561,9 +561,9 @@ void addTransportData(def xml) {
         xmlIndexCol++
 
         // графа 3
-        if (record != null) {
-            formDataService.checkReferenceValue(96, row.cell[xmlIndexCol].text(), record?.NAME?.value, rnuIndexRow, xmlIndexCol + colOffset, logger, true)
-        }
+//        if (record != null) {
+//            formDataService.checkReferenceValue(96, row.cell[xmlIndexCol].text(), record?.NAME?.value, rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+//        }
         xmlIndexCol++
 
         // графа 4
@@ -572,9 +572,9 @@ void addTransportData(def xml) {
         xmlIndexCol++
 
         // графа 5
-        if (record != null) {
-            formDataService.checkReferenceValue(42, row.cell[xmlIndexCol].text(), record?.NAME?.value, rnuIndexRow, xmlIndexCol + colOffset, logger, true)
-        }
+//        if (record != null) {
+//            formDataService.checkReferenceValue(42, row.cell[xmlIndexCol].text(), record?.NAME?.value, rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+//        }
         xmlIndexCol++
 
         // графа 6
@@ -605,9 +605,9 @@ void addTransportData(def xml) {
         def yearStr = row.cell[xmlIndexCol].text()
         if (yearStr != null) {
             if (yearStr.contains(".")) {
-                newRow.year = parseDate(yearStr, "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+                newRow.year = parseDate(yearStr, "dd.MM.yyyy", rnuIndexRow, xmlIndexCol + colOffset, logger, true)
             } else {
-                def yearNum = parseNumber(yearStr, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+                def yearNum = parseNumber(yearStr, rnuIndexRow, xmlIndexCol + colOffset, logger, true)
                 if (yearNum != null && yearNum != 0) {
                     newRow.year = new GregorianCalendar(yearNum as Integer, Calendar.JANUARY, 1).getTime()
                 }

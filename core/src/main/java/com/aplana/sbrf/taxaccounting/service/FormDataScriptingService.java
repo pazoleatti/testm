@@ -26,6 +26,4 @@ public interface FormDataScriptingService {
 	 *                             скрипты. Параметр может иметь значение null
 	 */
 	void executeScript(TAUserInfo userInfo, FormData formData, FormDataEvent event, Logger logger,  Map<String, Object> additionalParameters);
-		
-
 }

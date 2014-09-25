@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server;
 
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
@@ -7,8 +8,10 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.DepartmentCombined;
@@ -44,12 +47,15 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
     @Autowired
     private RefBookFactory rbFactory;
 
+    @Autowired
+    private LogEntryService logEntryService;
+
+    @Autowired
+    private DepartmentReportPeriodService departmentReportPeriodService;
+
     public GetDepartmentCombinedHandler() {
         super(GetDepartmentCombinedAction.class);
     }
-
-    @Autowired
-    private LogEntryService logEntryService;
 
     @Override
     public GetDepartmentCombinedResult execute(GetDepartmentCombinedAction action, ExecutionContext executionContext)
@@ -169,7 +175,16 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
         }
 
         // Признак открытости
-        result.setReportPeriodActive(reportService.isActivePeriod(action.getReportPeriodId(), action.getDepartmentId()));
+        DepartmentReportPeriodFilter departmentReportPeriodFilter = new DepartmentReportPeriodFilter();
+        departmentReportPeriodFilter.setDepartmentIdList(Arrays.asList(action.getDepartmentId()));
+        departmentReportPeriodFilter.setReportPeriodIdList(Arrays.asList(action.getReportPeriodId()));
+        departmentReportPeriodFilter.setIsActive(true);
+        List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodService.getListByFilter(departmentReportPeriodFilter);
+        DepartmentReportPeriod departmentReportPeriod = null;
+        if (departmentReportPeriodList.size() == 1) {
+            departmentReportPeriod = departmentReportPeriodList.get(0);
+        }
+        result.setReportPeriodActive(departmentReportPeriod != null && departmentReportPeriod.isActive());
 
         // Получение текстовых значений справочника
         Map<Long, String> rbTextValues = new HashMap<Long, String>();

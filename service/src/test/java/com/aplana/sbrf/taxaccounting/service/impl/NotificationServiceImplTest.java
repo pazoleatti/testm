@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.NotificationDao;
 import com.aplana.sbrf.taxaccounting.model.Notification;
+import com.aplana.sbrf.taxaccounting.model.NotificationsFilterData;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -12,6 +13,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -48,7 +50,7 @@ public class NotificationServiceImplTest {
         n2.setReceiverDepartmentId(1);
         n2.setFirstReaderId(null);
         list.add(n2);
-        when(notificationDao.listByDepartments(1, 1)).thenReturn(list);
+        when(notificationDao.getByFilter(any(NotificationsFilterData.class))).thenReturn(list);
 
         Map<Integer, Notification> map = service.mapByDepartments(1, 1);
         Assert.assertEquals(2, map.size());

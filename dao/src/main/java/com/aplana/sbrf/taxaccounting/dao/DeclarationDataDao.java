@@ -51,7 +51,7 @@ public interface DeclarationDataDao {
 	 */
 	void delete(long declarationDataId);
 
-    Long getRowNumByFilter(DeclarationDataFilter filter, DeclarationDataSearchOrdering ordering, boolean ascSorting, Long declarationDataId);
+    Long getRowNumByFilter(DeclarationDataFilter filter, DeclarationDataSearchOrdering ordering, boolean ascSorting, long declarationDataId);
 
     /**
 	 * Данный метод основывая на параметрах фильтра делает поиск в базе и возвращает список идентификаторов данных
@@ -68,14 +68,16 @@ public interface DeclarationDataDao {
     List<Long> findIdsByFilter(DeclarationDataFilter declarationDataFilter, DeclarationDataSearchOrdering ordering, boolean ascSorting);
 
 	/**
-	 * Ищет декларацию по заданным параметрам.
-	 * @param declarationTypeId идентификатор типа декларации
-	 * @param departmentId идентификатор {@link com.aplana.sbrf.taxaccounting.model.Department подразделения}
-	 * @param reportPeriodId идентификатор {@link com.aplana.sbrf.taxaccounting.model.ReportPeriod отчетного периода}
-	 * @return декларацию или null, если такой декларации не найдено
-	 * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если будет найдено несколько записей, удовлетворяющих условию поиска
+	 * Ищет декларацию по заданным параметрам (декларации в корректирующем периоде не найдутся)
+     * @deprecated Не актуально с появлением корректирующих периодов
 	 */
+    @Deprecated
 	DeclarationData find(int declarationTypeId, int departmentId, int reportPeriodId);
+
+    /**
+     * Декларация по типу и отчетному периоду подразделения
+     */
+    DeclarationData find(int declarationTypeId, int departmentReportPeriodId);
 
 	/**
 	 * Получить количество записей, удовлетворяющих запросу
@@ -86,7 +88,6 @@ public interface DeclarationDataDao {
 
     /**
      * Обновление данных декларации(как правило только ссылки на blob_data)
-     * @param declarationData
      */
     void update(DeclarationData declarationData);
 
@@ -99,4 +100,9 @@ public interface DeclarationDataDao {
      * @return список id деклараций
      */
     List<Long> getDeclarationIds(int declarationTypeId, int departmentId);
+
+    /**
+     * Декларация созданная в последнем отчетном периоде подразделения
+     */
+    DeclarationData getLast(int declarationTypeId, int departmentId, int reportPeriodId);
 }

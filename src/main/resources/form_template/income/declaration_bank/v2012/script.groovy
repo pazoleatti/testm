@@ -596,7 +596,7 @@ void generateXML() {
                 Период : period,
                 ОтчетГод : (taxPeriod != null ? taxPeriod.year : empty),
                 КодНО : taxOrganCode,
-                НомКорр : reportPeriodService.getCorrectionPeriodNumber(reportPeriodId, departmentId),
+                НомКорр : reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId),
                 ПоМесту : taxPlaceTypeCode) {
 
             СвНП(
@@ -1776,7 +1776,7 @@ def getXmlData(def reportPeriodId, def departmentId) {
     if (reportPeriodId != null) {
         // вид декларации 2 - декларация по налогу на прибыль уровня банка
         def declarationTypeId = 2
-        def declarationData = declarationService.find(declarationTypeId, departmentId, reportPeriodId)
+        def declarationData = declarationService.getLast(declarationTypeId, departmentId, reportPeriodId)
         if (declarationData != null && declarationData.id != null) {
             def xmlString = declarationService.getXmlData(declarationData.id)
             if(xmlString == null){

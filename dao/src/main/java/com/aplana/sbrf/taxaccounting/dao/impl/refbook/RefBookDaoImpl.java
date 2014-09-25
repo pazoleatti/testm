@@ -777,7 +777,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     private static final String INSERT_REF_BOOK_RECORD_SQL = "insert into ref_book_record (id, record_id, ref_book_id, version," +
             "status) values (?, ?, ?, ?, ?)";
     private static final String INSERT_REF_BOOK_VALUE = "insert into ref_book_value (record_id, attribute_id," +
-            "string_value, number_value, date_value, reference_value) values (?, ?, ?, ?, ?, ?)";
+            "string_value, number_value, date_value, reference_value, row_num) values (?, ?, ?, ?, ?, ?, null)";
 
     @Override
     public List<Long> createRecordVersion(final Long refBookId, final Date version, final VersionedObjectStatus status,
@@ -1453,17 +1453,18 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     public boolean isVersionUsed(Long refBookId, Long uniqueRecordId, Date versionFrom) {
         //Проверка использования в справочниках и настройках подразделений
         boolean hasUsages = getJdbcTemplate().queryForInt("select count(r.id) from ref_book_record r, ref_book_value v " +
-                "where r.id=v.record_id and v.attribute_id in (select id from ref_book_attribute where reference_id=?) and r.version >= ? and v.REFERENCE_VALUE=?",
+                "where r.id=v.record_id and v.attribute_id in (select id from ref_book_attribute where reference_id=?) " +
+                "and r.version >= ? and v.REFERENCE_VALUE=?",
                 refBookId, versionFrom, uniqueRecordId) != 0;
         if (!hasUsages) {
             //Проверка использования в налоговых формах
-            return getJdbcTemplate().queryForInt(
-					"select count(*) from report_period where id in " +
-                    "(select report_period_id from form_data where id in " +
+            return getJdbcTemplate().queryForInt("select count(*) from report_period where id in " +
+                    "(select report_period_id from department_report_period where id in " +
+                    "(select department_report_period_id from form_data where id in " +
                     "(select form_data_id from data_row where id in " +
                     "(select row_id from data_cell where column_id in " +
                     "(select id from form_column where attribute_id in " +
-                    "(select id from ref_book_attribute where ref_book_id = ?)) and nvalue = ?))) and start_date > ?",
+                    "(select id from ref_book_attribute where ref_book_id = ?)) and nvalue = ?)))) and start_date > ?",
                     refBookId, uniqueRecordId, versionFrom) != 0;
         } else {
             return hasUsages;
@@ -1803,7 +1804,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     private static final String INSERT_REF_BOOK_RECORD_SQL_OLD = "insert into ref_book_record (id, ref_book_id, version," +
             "status, record_id) values (?, %d, to_date('%s', 'DD.MM.YYYY'), 0, seq_ref_book_record_row_id.nextval)";
     private static final String INSERT_REF_BOOK_VALUE_OLD = "insert into ref_book_value (record_id, attribute_id," +
-            "string_value, number_value, date_value, reference_value) values (?, ?, ?, ?, ?, ?)";
+            "string_value, number_value, date_value, reference_value, row_num) values (?, ?, ?, ?, ?, ?, null)";
 
     @Override
     public void createRecords(Long refBookId, Date version, List<Map<String, RefBookValue>> records) {

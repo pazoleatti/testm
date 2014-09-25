@@ -98,7 +98,7 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
 		    ad.add(dep.getId());
 	    }
 	    res.setAvalDepartments(ad);
-
+        // TODO Левыкин: указанный метод всегда возвращает null!
 	    DepartmentReportPeriod rp = reportPeriodService.getLastReportPeriod(taxType, action.getDepartmentId());
 	    Calendar current = Calendar.getInstance();
 	    if (rp != null) {

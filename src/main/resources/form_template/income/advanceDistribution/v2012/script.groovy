@@ -396,12 +396,11 @@ def logicalCheck() {
 void logicalCheckBeforeCalc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    def Department department = departmentService.get(formData.departmentId)
 
     def departmentParamsDate = getReportPeriodEndDate() - 1
     def sumTaxRecords = getRefBookRecord(33, "DEPARTMENT_ID", formData.departmentId.toString(), departmentParamsDate, -1, null, false)
     if (sumTaxRecords == null || sumTaxRecords.isEmpty() || getValue(sumTaxRecords, 'SUM_TAX') == null) {
-        logger.error("Для подразделения «${department.name}» на форме настроек подразделений отсутствует атрибут «Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде»!")
+        logger.error("Для подразделения «${formDataDepartment.name}» на форме настроек подразделений отсутствует атрибут «Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде»!")
     }
 
     def sumTaxUnpRecords = getRefBookRecord(33, "DEPARTMENT_ID", "1", departmentParamsDate, -1, null, false)
@@ -475,9 +474,9 @@ void logicalCheckBeforeCalc() {
         summaryMap.each { key, value ->
             def formDataSummary = getFormDataSummary(key)
             if (formDataSummary == null) {
-                logger.error("Сводная налоговая форма «$value» в подразделении «${department.name}» не создана!")
+                logger.error("Сводная налоговая форма «$value» в подразделении «${formDataDepartment.name}» не создана!")
             } else if (getData(formDataSummary) == null) {
-                logger.error("Сводная налоговая форма «$value» в подразделении «${department.name}» не находится в статусе «Принята»!")
+                logger.error("Сводная налоговая форма «$value» в подразделении «${formDataDepartment.name}» не находится в статусе «Принята»!")
             }
         }
     }
@@ -509,10 +508,10 @@ void consolidation() {
     def id = 372
     def newRow
 
-    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind(),
+    departmentFormTypeService.getFormSources(formData.departmentId, formData.formType.id, formData.kind,
             getReportPeriodStartDate(), getReportPeriodEndDate()).each {
         if (it.formTypeId == id) {
-            def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 def sourceDataRows = formDataService.getDataRowHelper(source).allCached
                 sourceDataRows.each { row ->
@@ -562,7 +561,7 @@ void consolidation() {
  */
 void checkDeclaration() {
     declarationType = 2    // Тип декларации которую проверяем (Налог на прибыль)
-    declaration = declarationService.find(declarationType, formData.getDepartmentId(), formData.getReportPeriodId())
+    declaration = declarationService.getLast(declarationType, formData.getDepartmentId(), formData.getReportPeriodId())
     if (declaration != null && declaration.isAccepted()) {
         logger.error("Декларация банка находиться в статусе принята")
     }
@@ -619,7 +618,7 @@ def getSumAll(def dataRows, def columnAlias) {
 // Получить данные сводной
 def getFormDataSummary(def id) {
     if (!formDataCache[id]) {
-        formDataCache[id] = formDataService.find(id, FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId)
+        formDataCache[id] = formDataService.getLast(id, FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder)
     }
     return formDataCache[id]
 }

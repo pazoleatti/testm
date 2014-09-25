@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
@@ -53,6 +54,8 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
     private DepartmentDao departmentDao;
     @Autowired
     private LockDataService lockDataService;
+    @Autowired
+    private DepartmentReportPeriodDao departmentReportPeriodDao;
 
     @Override
     public ImportCounter importFormData(TAUserInfo userInfo, List<Integer> departmentIdList,
@@ -202,9 +205,12 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 continue;
             }
 
+            // Последний отчетный период подразделения для указанного отчетного периода
+            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.getLast(formDepartment.getId(),
+                    reportPeriod.getId());
+
             // Открытость периода
-            boolean active = periodService.isActivePeriod(reportPeriod.getId(), formDepartment.getId());
-            if (!active) {
+            if (departmentReportPeriod == null || !departmentReportPeriod.isActive()) {
                 String reportPeriodName = reportPeriod.getTaxPeriod().getYear() + " - " + reportPeriod.getName();
                 log(userInfo, LogData.L9, logger, formType.getName(), reportPeriodName);
                 moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
@@ -213,8 +219,6 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 fail++;
                 continue;
             }
-
-            // TODO Логика загрузки в коррерктирующий период реализуется в версии 0.4
 
             FormDataKind formDataKind = FormDataKind.PRIMARY; // ТФ только для первичных НФ
 
@@ -265,12 +269,8 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 monthly = formTemplate.isMonthly();
             }
 
-            if (!monthly) {
-                formData = formDataDao.find(formType.getId(), formDataKind, formDepartment.getId(), reportPeriod.getId());
-            } else {
-                formData = formDataDao.findMonth(formType.getId(), formDataKind, formDepartment.getId(),
-                        reportPeriod.getTaxPeriod().getId(), transportDataParam.getMonth());
-            }
+            formData = formDataDao.find(formType.getId(), formDataKind, departmentReportPeriod.getId().intValue(),
+                    monthly ? transportDataParam.getMonth() : null);
 
             // Экземпляр уже есть и не в статусе «Создана»
             if (formData != null && formData.getState() != WorkflowState.CREATED) {
@@ -278,7 +278,8 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 Logger localLogger = new Logger();
                 localLogger.error(LogData.L17.getText());
                 log(userInfo, LogData.L17, logger, formType.getName(), formDepartment.getName());
-                moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile, localLogger.getEntries(), logger);
+                moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
+                        localLogger.getEntries(), logger);
                 fail++;
                 continue;
             }
@@ -293,7 +294,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             try {
                 // Загрузка
                 result = importFormData(userInfo, departmentId, currentFile, formData, formType, formTemplate,
-                        formDepartment, reportPeriod, formDataKind, transportDataParam, localLogger);
+                        departmentReportPeriod, formDataKind, transportDataParam, localLogger);
 
                 // Вывод скрипта в область уведомлений
                 logger.getEntries().addAll(localLogger.getEntries());
@@ -303,7 +304,8 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 // Вывод в область уведомленеий и ЖА
                 log(userInfo, LogData.L21, logger, e.getMessage());
                 // Перемещение в каталог ошибок
-                moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile, localLogger.getEntries(), logger);
+                moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
+                        localLogger.getEntries(), logger);
                 fail++;
                 continue;
             }
@@ -322,11 +324,13 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
      * Загрузка ТФ конкретной НФ. Только этот метод в сервисе транзакционный.
      */
     @Transactional
-    private boolean importFormData(TAUserInfo userInfo, int departmentId, FileWrapper currentFile, FormData formData, FormType formType,
-                                FormTemplate formTemplate, Department formDepartment, ReportPeriod reportPeriod,
-                                FormDataKind formDataKind, TransportDataParam transportDataParam,
-                                Logger localLogger) {
-        String reportPeriodName = reportPeriod.getTaxPeriod().getYear() + " - " + reportPeriod.getName();
+    private boolean importFormData(TAUserInfo userInfo, int departmentId, FileWrapper currentFile, FormData formData,
+                                   FormType formType,
+                                   FormTemplate formTemplate, DepartmentReportPeriod departmentReportPeriod,
+                                   FormDataKind formDataKind, TransportDataParam transportDataParam,
+                                   Logger localLogger) {
+        String reportPeriodName = departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + " - "
+                + departmentReportPeriod.getReportPeriod().getName();
 
         boolean formCreated = false;
         boolean success = false;
@@ -337,9 +341,10 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             if (formTemplate != null && !formTemplate.isMonthly()) {
                 month = null;
             }
-            int formTeplateId = formTemplateService.getActiveFormTemplateId(formType.getId(), reportPeriod.getId());
-            long formDataId = formDataService.createFormData(localLogger, userInfo, formTeplateId, formDepartment.getId(),
-                    formDataKind, reportPeriod, month);
+            int formTemplateId = formTemplateService.getActiveFormTemplateId(formType.getId(),
+                    departmentReportPeriod.getReportPeriod().getId());
+            long formDataId = formDataService.createFormData(localLogger, userInfo, formTemplateId,
+                    departmentReportPeriod.getId(), formDataKind, month);
             formData = formDataDao.get(formDataId, false);
             formCreated = true;
         }
@@ -348,14 +353,15 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
         LockData lockData = lockDataService.lock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formData.getId(),
                 userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME);
         if (lockData!=null)
-            throw new ServiceException(String.format(LockDataService.LOCK_DATA, userInfo.getUser().getName(), userInfo.getUser().getId()));
+            throw new ServiceException(String.format(LockDataService.LOCK_DATA, userInfo.getUser().getName(),
+                    userInfo.getUser().getId()));
 
         try {
             // Скрипт
             InputStream inputStream = currentFile.getInputStream();
             try {
-                formDataService.importFormData(localLogger, userInfo, formData.getId(), formData.isManual(), inputStream, currentFile.getName(),
-                        FormDataEvent.IMPORT_TRANSPORT_FILE);
+                formDataService.importFormData(localLogger, userInfo, formData.getId(), formData.isManual(), inputStream,
+                        currentFile.getName(), FormDataEvent.IMPORT_TRANSPORT_FILE);
             } finally {
                 IOUtils.closeQuietly(inputStream);
             }
@@ -365,6 +371,8 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 // Исключение для отката транзакции сознания и заполнения НФ
                 throw new ServiceException("При выполнении загрузки произошли ошибки");
             }
+
+            Department formDepartment = departmentDao.getDepartment(departmentReportPeriod.getDepartmentId());
 
             // Перенос в архив
             if (moveToArchiveDirectory(userInfo, getFormDataArchivePath(userInfo, departmentId, localLogger), currentFile, localLogger)) {

@@ -282,7 +282,7 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
                         getView().setAttributeId(attrId);
                         editFormPresenter.init(refBookDataId, result.isReadOnly());
                         if (recordId == null) {
-                            getView().reload();
+                            getView().load();
                             getView().loadAndSelect();
                         } else {
                             checkRecord();

@@ -1,12 +1,11 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.shared;
 
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataAccessParams;
 import com.aplana.sbrf.taxaccounting.model.FormStyle;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.gwtplatform.dispatch.shared.Result;
 
-import java.util.Date;
 import java.util.List;
 /**
  * 
@@ -23,6 +22,8 @@ public class GetFormDataResult implements Result {
 		READ_LOCKED, // Открыта для чтения и заблокирована другим пользователем
 		EDIT // Открыта для редактирования
 	}
+
+    DepartmentReportPeriod departmentReportPeriod;
 	
 	private FormData formData;
 	
@@ -30,19 +31,14 @@ public class GetFormDataResult implements Result {
 	
 	private String uuid;
 	
-	private String departmenName;
+	private String departmentName;
 
-    private String departmenFullName;
-	
-	private ReportPeriod reportPeriod;
-	
+    private String departmentFullName;
+
 	private FormDataAccessParams formDataAccessParams;
 
 	private List<FormStyle> allStyles;
-	
-	private boolean balancePeriod;
 
-	private boolean isFormInClosedPeriod;
     private boolean existManual;
     private boolean isBankSummaryForm;
     private boolean canCreatedManual;
@@ -56,12 +52,6 @@ public class GetFormDataResult implements Result {
 	private FormMode formMode;
 	
 	private boolean fixedRows;
-
-	private Date reportPeriodStartDate;
-
-	private Date reportPeriodEndDate;
-
-    private Integer reportPeriodYear;
 
     public boolean canCreatedManual() {
         return canCreatedManual;
@@ -87,29 +77,21 @@ public class GetFormDataResult implements Result {
 		this.templateFormName = templateFormName;
 	}
 
-	public String getDepartmenName() {
-		return departmenName;
+	public String getDepartmentName() {
+		return departmentName;
 	}
 
-	public void setDepartmenName(String departmenName) {
-		this.departmenName = departmenName;
+	public void setDepartmentName(String departmentName) {
+		this.departmentName = departmentName;
 	}
 
-    public String getDepartmenFullName() {
-        return departmenFullName;
+    public String getDepartmentFullName() {
+        return departmentFullName;
     }
 
-    public void setDepartmenFullName(String departmenFullName) {
-        this.departmenFullName = departmenFullName;
+    public void setDepartmentFullName(String departmentFullName) {
+        this.departmentFullName = departmentFullName;
     }
-
-    public ReportPeriod getReportPeriod() {
-		return reportPeriod;
-	}
-
-	public void setReportPeriod(ReportPeriod reportPeriod) {
-		this.reportPeriod = reportPeriod;
-	}
 
 	public FormDataAccessParams getFormDataAccessParams() {
 		return formDataAccessParams;
@@ -167,46 +149,6 @@ public class GetFormDataResult implements Result {
 		this.fixedRows = fixedRows;
 	}
 
-	public Date getReportPeriodStartDate() {
-		return reportPeriodStartDate;
-	}
-
-	public void setReportPeriodStartDate(Date reportPeriodStartDate) {
-		this.reportPeriodStartDate = reportPeriodStartDate;
-	}
-
-	public Date getReportPeriodEndDate() {
-		return reportPeriodEndDate;
-	}
-
-	public void setReportPeriodEndDate(Date reportPeriodEndDate) {
-		this.reportPeriodEndDate = reportPeriodEndDate;
-	}
-
-	public boolean isBalancePeriod() {
-		return balancePeriod;
-	}
-
-	public void setBalancePeriod(boolean balancePeriod) {
-		this.balancePeriod = balancePeriod;
-	}
-
-    public Integer getReportPeriodYear() {
-        return reportPeriodYear;
-    }
-
-    public void setReportPeriodYear(Integer reportPeriodYear) {
-        this.reportPeriodYear = reportPeriodYear;
-    }
-
-	public boolean isFormInClosedPeriod() {
-		return isFormInClosedPeriod;
-	}
-
-	public void setFormInClosedPeriod(boolean formInClosedPeriod) {
-		isFormInClosedPeriod = formInClosedPeriod;
-	}
-
     public boolean existManual() {
         return existManual;
     }
@@ -223,25 +165,11 @@ public class GetFormDataResult implements Result {
         isBankSummaryForm = bankSummaryForm;
     }
 
-	@Override
-    public String toString() {
-        return "GetFormDataResult{" +
-                "formData=" + formData +
-                ", templateFormName='" + templateFormName + '\'' +
-                ", uuid='" + uuid + '\'' +
-                ", departmenName='" + departmenName + '\'' +
-                ", departmenFullName='" + departmenFullName + '\'' +
-                ", reportPeriod=" + reportPeriod +
-                ", formDataAccessParams=" + formDataAccessParams +
-                ", allStyles=" + allStyles +
-                ", balancePeriod=" + balancePeriod +
-                ", lockDate='" + lockDate + '\'' +
-                ", lockedByUser='" + lockedByUser + '\'' +
-                ", formMode=" + formMode +
-                ", fixedRows=" + fixedRows +
-                ", reportPeriodStartDate=" + reportPeriodStartDate +
-                ", reportPeriodEndDate=" + reportPeriodEndDate +
-                ", reportPeriodYear=" + reportPeriodYear +
-                '}';
+    public DepartmentReportPeriod getDepartmentReportPeriod() {
+        return departmentReportPeriod;
+    }
+
+    public void setDepartmentReportPeriod(DepartmentReportPeriod departmentReportPeriod) {
+        this.departmentReportPeriod = departmentReportPeriod;
     }
 }

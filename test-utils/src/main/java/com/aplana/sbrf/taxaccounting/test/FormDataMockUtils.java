@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.test;
 
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormType;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
+import com.aplana.sbrf.taxaccounting.model.*;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -36,4 +33,11 @@ public final class FormDataMockUtils {
 		when(formData.getFormType()).thenReturn(formType);
 		return formData;
 	}
+
+    public static FormData mockFormData(long id, WorkflowState state, FormDataKind kind, FormType formType, DepartmentReportPeriod departmentReportPeriod) {
+        FormData formData = mockFormData(id, departmentReportPeriod.getDepartmentId(), state, kind, departmentReportPeriod.getReportPeriod().getId(), formType);
+        Integer departmentReportPeriodId = departmentReportPeriod.getId();
+        when(formData.getDepartmentReportPeriodId()).thenReturn(departmentReportPeriodId);
+        return formData;
+    }
 }

@@ -39,6 +39,8 @@ public class FormDataFilter implements Serializable{
 
 	private Boolean returnState;
 
+    private Boolean correctionTag;
+
     // месяцы
     private Months formMonth;
 
@@ -144,5 +146,13 @@ public class FormDataFilter implements Serializable{
 
     public void setFormMonth(Months formMonth) {
         this.formMonth = formMonth;
+    }
+
+    public Boolean getCorrectionTag() {
+        return correctionTag;
+    }
+
+    public void setCorrectionTag(Boolean correctionTag) {
+        this.correctionTag = correctionTag;
     }
 }

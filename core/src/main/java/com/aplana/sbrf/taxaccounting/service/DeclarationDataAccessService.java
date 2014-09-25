@@ -1,9 +1,10 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import java.util.Set;
-
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+
+import java.util.Set;
 
 /**
  * Интерфейс для проверки прав пользователя на работу с {@link com.aplana.sbrf.taxaccounting.model.DeclarationData декларациями}
@@ -27,24 +28,20 @@ public interface DeclarationDataAccessService {
 	 * 
 	 * @param userInfo - информация о пользователе
 	 * @param declarationTemplateId - id шаблона декларации
-	 * @param departmentId - id депортимента декларации (не пользователя)
-	 * @param reportPeriodId - id отчетного периода
+	 * @param departmentReportPeriod Отчетный период подразделения
 	 * @param scriptEvent - событие (действие)
 	 */
-	void checkEvents(TAUserInfo userInfo, Integer declarationTemplateId, Integer departmentId, Integer reportPeriodId,
+	void checkEvents(TAUserInfo userInfo, int declarationTemplateId, DepartmentReportPeriod departmentReportPeriod,
                      FormDataEvent scriptEvent);
 	
 	/**
 	 * Получить все разрешенные действия над существующим объектом
-	 * 
-	 * @return
 	 */
 	Set<FormDataEvent> getPermittedEvents(TAUserInfo userInfo, Long declarationDataId);
 
 	/**
 	 * Получить все разрешенные действия над не существующим объектом
-	 * 
-	 * @return
 	 */
-	Set<FormDataEvent> getPermittedEvents(TAUserInfo userInfo, Integer declarationTemplateId, Integer departmentId, Integer reportPeriodId);
+	Set<FormDataEvent> getPermittedEvents(TAUserInfo userInfo, int declarationTemplateId,
+                                          DepartmentReportPeriod departmentReportPeriod);
 }

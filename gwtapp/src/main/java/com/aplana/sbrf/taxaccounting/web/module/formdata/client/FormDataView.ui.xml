@@ -46,7 +46,6 @@
         .reportPeriodLabel {
             font-size: 12px;
             font-weight: bold;
-            overflow: hidden;
             white-space: nowrap;
             text-overflow: ellipsis;
             -ms-text-overflow: ellipsis;

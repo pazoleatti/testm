@@ -5,7 +5,7 @@ import java.util.Date;
 public class OpenFilterData {
 	Integer year;
 	boolean balancePeriod;
-	Long departmentId;
+	Integer departmentId;
 	Long dictionaryTaxPeriodId;
 	Date endDate;
     Date correctPeriod;
@@ -26,11 +26,11 @@ public class OpenFilterData {
 		this.balancePeriod = balancePeriod;
 	}
 
-	public Long getDepartmentId() {
+	public Integer getDepartmentId() {
 		return departmentId;
 	}
 
-	public void setDepartmentId(Long departmentId) {
+	public void setDepartmentId(Integer departmentId) {
 		this.departmentId = departmentId;
 	}
 

@@ -123,5 +123,33 @@ ALTER TABLE report ADD CONSTRAINT report_chk_checking CHECK (checking IN (0,1));
 ALTER TABLE report ADD CONSTRAINT report_chk_absolute CHECK (absolute IN (0,1));
 
 ---------------------------------------------------------------------------------------------------
+-- http://jira.aplana.com/browse/SBRFACCTAX-8879 - Функционал оповещения
+ALTER TABLE notification MODIFY report_period_id NULL;
+ALTER TABLE notification MODIFY sender_department_id NULL;
+ALTER TABLE notification MODIFY deadline NULL;
+ALTER TABLE notification ADD user_id number(9);
+COMMENT ON COLUMN notification.user_id IS 'Идентификатор пользователя, который получит оповещение';
+ALTER TABLE notification ADD CONSTRAINT notification_fk_notify_user FOREIGN KEY (user_id) REFERENCES sec_user(id);
+ALTER TABLE notification ADD role_id number(9);
+COMMENT ON COLUMN notification.role_id IS 'Идентификатор роли пользователя, который получит оповещение';
+ALTER TABLE notification ADD CONSTRAINT notification_fk_notify_role FOREIGN KEY (role_id) REFERENCES sec_role(id);
+
+CREATE TABLE lock_data_subscribers (lock_key varchar2(1000 byte) NOT NULL, user_id number(9) NOT NULL);
+COMMENT ON TABLE lock_data_subscribers IS 'Cписок пользователей, ожидающих выполнения операций над объектом блокировки';
+COMMENT ON COLUMN lock_data_subscribers.lock_key IS 'Ключ блокировки объекта, после завершения операции над которым, будет выполнено оповещение';
+COMMENT ON COLUMN lock_data_subscribers.user_id IS 'Идентификатор пользователя, который получит оповещение';
+ALTER TABLE lock_data_subscribers ADD CONSTRAINT lock_data_subscr_fk_lock_data FOREIGN KEY (lock_key) REFERENCES lock_data(KEY) ON DELETE CASCADE;
+ALTER TABLE lock_data_subscribers ADD CONSTRAINT lock_data_subscr_fk_sec_user FOREIGN KEY (user_id) REFERENCES sec_user(id) ON DELETE CASCADE;
+
+---------------------------------------------------------------------------------------------------
+-- http://jira.aplana.com/browse/SBRFACCTAX-8895 - Изменения в структуре REF_BOOK_ATTRIBUTE/REF_BOOK_VALUE
+ALTER TABLE ref_book_attribute ADD is_table NUMBER(1) DEFAULT 0 NOT NULL;
+ALTER TABLE ref_book_attribute ADD CONSTRAINT ref_book_attr_chk_istable CHECK (is_table IN (0,1));
+COMMENT ON COLUMN ref_book_attribute.is_table IS 'Признак табличного атрибута';
+
+ALTER TABLE ref_book_value ADD row_num NUMBER(9);
+COMMENT ON COLUMN ref_book_value.row_num IS 'Номер строки в табличной части справочника';
+
+---------------------------------------------------------------------------------------------------
 COMMIT;
 EXIT;

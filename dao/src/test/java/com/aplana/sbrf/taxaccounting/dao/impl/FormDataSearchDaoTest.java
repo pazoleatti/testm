@@ -18,9 +18,8 @@ import java.util.Collections;
 import java.util.List;
 
 import static java.util.Arrays.asList;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
+
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"FormDataSearchDaoTest.xml"})
@@ -84,6 +83,12 @@ public class FormDataSearchDaoTest {
 		filter.setReportPeriodIds(reportPeriods);
 		res = formDataSearchDao.findByFilter(filter);
 		assertEquals(2, res.size());
+
+        // Признак корректирующего периода
+        reportPeriods.add(1);
+        filter.setCorrectionTag(true);
+        res = formDataSearchDao.findByFilter(filter);
+        assertEquals(0, res.size());
 	}
 	
 	@Test

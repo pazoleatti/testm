@@ -51,6 +51,13 @@ public class DepartmentDaoSourceTest {
     }
 
     @Test
+    public void getEmptyDepartmentsBySourceControl() {
+        List<Integer> departmentIds = departmentDao.getDepartmentsBySourceControl(-1, asList(TaxType.VAT), null, null);
+        Assert.assertNotNull(departmentIds);
+        Assert.assertTrue(departmentIds.isEmpty());
+    }
+
+    @Test
     public void getDepartmentsBySourceControlNs() {
         List<Integer> departmentIds;
         // Контролер НС
@@ -74,5 +81,12 @@ public class DepartmentDaoSourceTest {
         departmentIds = departmentDao.getDepartmentsBySourceControlNs(6, asList(TaxType.INCOME, TaxType.VAT), null, null);
         Assert.assertEquals(8, departmentIds.size());
         Assert.assertTrue(departmentIds.containsAll(asList(2, 6, 7, 8, 9, 10, 11, 12)));
+    }
+
+    @Test
+    public void getEmptyDepartmentsBySourceControlNs() {
+        List<Integer> departmentIds = departmentDao.getDepartmentsBySourceControlNs(-1, asList(TaxType.VAT), null, null);
+        Assert.assertNotNull(departmentIds);
+        Assert.assertTrue(departmentIds.isEmpty());
     }
 }

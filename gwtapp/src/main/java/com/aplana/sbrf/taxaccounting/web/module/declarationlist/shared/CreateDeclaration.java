@@ -6,14 +6,14 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
 public class CreateDeclaration extends UnsecuredActionImpl<CreateDeclarationResult> implements ActionName {
 
-	public CreateDeclaration() {
-	}
+    public CreateDeclaration() {
+    }
 
-	private Integer declarationTypeId;
+    private Integer declarationTypeId;
 
-	private Integer reportPeriodId;
+    private Integer reportPeriodId;
 
-	private Integer departmentId;
+    private Integer departmentId;
 
     private TaxType taxType;
 
@@ -21,29 +21,29 @@ public class CreateDeclaration extends UnsecuredActionImpl<CreateDeclarationResu
 
     private String taxOrganKpp;
 
-	public Integer getDeclarationTypeId() {
-		return declarationTypeId;
-	}
+    public Integer getDeclarationTypeId() {
+        return declarationTypeId;
+    }
 
-	public void setDeclarationTypeId(Integer declarationTypeId) {
-		this.declarationTypeId = declarationTypeId;
-	}
+    public void setDeclarationTypeId(Integer declarationTypeId) {
+        this.declarationTypeId = declarationTypeId;
+    }
 
-	public Integer getReportPeriodId() {
-		return reportPeriodId;
-	}
+    public Integer getReportPeriodId() {
+        return reportPeriodId;
+    }
 
-	public void setReportPeriodId(Integer reportPeriodId) {
-		this.reportPeriodId = reportPeriodId;
-	}
+    public void setReportPeriodId(Integer reportPeriodId) {
+        this.reportPeriodId = reportPeriodId;
+    }
 
-	public Integer getDepartmentId() {
-		return departmentId;
-	}
+    public Integer getDepartmentId() {
+        return departmentId;
+    }
 
-	public void setDepartmentId(Integer departmentId) {
-		this.departmentId = departmentId;
-	}
+    public void setDepartmentId(Integer departmentId) {
+        this.departmentId = departmentId;
+    }
 
     public TaxType getTaxType() {
         return taxType;
@@ -70,7 +70,7 @@ public class CreateDeclaration extends UnsecuredActionImpl<CreateDeclarationResu
     }
 
     @Override
-	public String getName() {
-		return "Создание декларации";
-	}
+    public String getName() {
+        return "Создание декларации";
+    }
 }

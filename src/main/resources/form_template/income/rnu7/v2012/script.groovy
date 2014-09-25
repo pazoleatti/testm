@@ -46,7 +46,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
-        def cols = (getBalancePeriod() ? balanceEditableColumns : editableColumns)
+        def cols = (isBalancePeriod() ? balanceEditableColumns : editableColumns)
         formDataService.addRow(formData, currentDataRow, cols, null)
         break
     case FormDataEvent.DELETE_ROW:
@@ -63,7 +63,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.COMPOSE: // Консолидация
-        formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
+        formDataService.consolidationSimple(formData, logger)
         calc()
         logicCheck()
         break
@@ -142,7 +142,7 @@ void calc() {
             row.setIndex(index + 1)
         }
 
-        if (!getBalancePeriod()) {
+        if (!isBalancePeriod()) {
             for (row in dataRows) {
                 row.rateOfTheBankOfRussia = calc8(row)
                 row.taxAccountingRuble = calc10(row)
@@ -297,7 +297,7 @@ void logicCheck() {
         def errorMsg = "Строка $index: "
 
         // 1. Проверка на заполнение поля
-        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !getBalancePeriod())
+        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !isBalancePeriod())
 
         // 3. Проверка на нулевые значения
         if (!(row.taxAccountingCurrency) && !(row.taxAccountingRuble) &&
@@ -356,7 +356,7 @@ void logicCheck() {
         needValue['rateOfTheBankOfRussia'] = calc8(row)
         needValue['taxAccountingRuble'] = calc10(row)
         needValue['ruble'] = calc12(row)
-        checkCalc(row, arithmeticCheckAlias, needValue, logger, !getBalancePeriod())
+        checkCalc(row, arithmeticCheckAlias, needValue, logger, !isBalancePeriod())
 
         // 10. Арифметические проверки расчета итоговых строк «Итого по КНУ»
         def String code = getKnu(row.code)
@@ -383,8 +383,8 @@ void logicCheck() {
             def periods = []
 
             for (reportPeriod in reportPeriods) {
-                def findFormData = formDataService.find(formData.formType.id, formData.kind, formData.departmentId,
-                        reportPeriod.id)
+                def findFormData = formDataService.getLast(formData.formType.id, formData.kind, formData.departmentId,
+                        reportPeriod.id, formData.periodOrder)
                 if (findFormData != null) {
                     for (findRow in formDataService.getDataRowHelper(findFormData).getAllCached()) {
                         // SBRFACCTAX-3531 исключать строку из той же самой формы не надо
@@ -433,7 +433,7 @@ void logicCheck() {
     }
 
     // 11. Арифметические проверки расчета строки общих итогов
-    checkTotalSum(dataRows, totalColumns, logger, !getBalancePeriod())
+    checkTotalSum(dataRows, totalColumns, logger, !isBalancePeriod())
 }
 
 def String getKnu(def code) {
@@ -447,16 +447,18 @@ def getStartDate() {
     return start
 }
 
-def getBalancePeriod() {
+// Признак периода ввода остатков для отчетного периода подразделения
+def isBalancePeriod() {
     if (isBalancePeriod == null) {
-        isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
+        def departmentReportPeriod = departmentReportPeriodService.get(formData.departmentReportPeriodId)
+        isBalancePeriod = departmentReportPeriod.isBalance()
     }
     return isBalancePeriod
 }
 
 /** Вывести сообщение. В периоде ввода остатков сообщения должны быть только НЕфатальными. */
 void loggerError(def row, def msg) {
-    if (getBalancePeriod()) {
+    if (isBalancePeriod()) {
         rowWarning(logger, row, msg)
     } else {
         rowError(logger, row, msg)
@@ -534,7 +536,7 @@ void addData(def xml, int headRowCount) {
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
         newRow.setImportIndex(xlsIndexRow)
-        def cols = (getBalancePeriod() ? balanceEditableColumns : editableColumns)
+        def cols = (isBalancePeriod() ? balanceEditableColumns : editableColumns)
         cols.each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
@@ -615,7 +617,7 @@ void addTransportData(def xml) {
 
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
-        def cols = (getBalancePeriod() ? balanceEditableColumns : editableColumns)
+        def cols = (isBalancePeriod() ? balanceEditableColumns : editableColumns)
         cols.each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')

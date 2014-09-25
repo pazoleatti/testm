@@ -38,7 +38,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.COMPOSE: // Консолидация
-        formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
+        formDataService.consolidationSimple(formData, logger)
         calc()
         logicCheck()
         break
@@ -170,14 +170,14 @@ void logicCheck() {
         if (incomeBankSum != null && outcomeBankSum != null) {
             def msg1 = row.getCell('incomeBankSum').column.name
             def msg2 = row.getCell('outcomeBankSum').column.name
-            rowWarning(logger, row, "Строка $rowNum: Графа «$msg1» не может быть заполнена одновременно с графой «$msg2»!")
+            rowError(logger, row, "Строка $rowNum: Графа «$msg1» не может быть заполнена одновременно с графой «$msg2»!")
         }
 
         // Проверка заполнения графы 5 или 6
         if (incomeBankSum == null && outcomeBankSum == null) {
             def msg1 = row.getCell('incomeBankSum').column.name
             def msg2 = row.getCell('outcomeBankSum').column.name
-            rowWarning(logger, row, "Строка $rowNum: Графа «$msg1» должна быть заполнена если не заполнена графа «$msg2»!")
+            rowError(logger, row, "Строка $rowNum: Графа «$msg1» должна быть заполнена если не заполнена графа «$msg2»!")
         }
 
         // Проверка стоимости по графе 5
@@ -185,19 +185,19 @@ void logicCheck() {
         // Проверка стоимости по графе 6
         if ((incomeBankSum != null && outcomeBankSum == null || incomeBankSum == null && outcomeBankSum != null)
                 && cost != bankSum) {
-            rowWarning(logger, row, "Строка $rowNum: Значение графы «$costName» должно быть равно значению графы «$msgBankSum»!")
+            rowError(logger, row, "Строка $rowNum: Значение графы «$costName» должно быть равно значению графы «$msgBankSum»!")
         }
 
         // Корректность даты совершения сделки
         if (transactionDate < contractDate) {
-            rowWarning(logger, row, "Строка $rowNum: Значение графы «$transactionDateName» должно быть не меньше значения графы «$contractDateName»!")
+            rowError(logger, row, "Строка $rowNum: Значение графы «$transactionDateName» должно быть не меньше значения графы «$contractDateName»!")
         }
 
         // Проверка заполненности одного из атрибутов
         if (row.city != null && !row.city.toString().isEmpty() && row.settlement != null && !row.settlement.toString().isEmpty()) {
             def cityName = row.getCell('city').column.name
             def settleName = row.getCell('settlement').column.name
-            rowWarning(logger, row, "Строка $rowNum: Графа «$cityName» не может быть заполнена одновременно с графой «$settleName»!")
+            rowError(logger, row, "Строка $rowNum: Графа «$cityName» не может быть заполнена одновременно с графой «$settleName»!")
         }
 
         // Проверка заполнения региона
@@ -215,7 +215,7 @@ void logicCheck() {
         // Проверка количества
         if (row.count == 0) {
             def countName = row.getCell('count').column.name
-            rowWarning(logger, row, "Строка $rowNum: Графа «$countName» не может содержать значение 0!")
+            rowError(logger, row, "Строка $rowNum: Графа «$countName» не может содержать значение 0!")
         }
     }
 }
@@ -332,13 +332,13 @@ void addData(def xml, int headRowCount) {
         def int xmlIndexCol = 0
 
         // графа 2
-        newRow.jurName = getRecordIdImport(9, 'NAME', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        newRow.jurName = getRecordIdImport(9, 'NAME', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, true)
         def map = getRefBookValue(9, newRow.jurName)
         xmlIndexCol++
 
         // графа 3
         if (map != null) {
-            formDataService.checkReferenceValue(9, row.cell[xmlIndexCol].text(), map.INN_KIO?.stringValue, xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+            formDataService.checkReferenceValue(9, row.cell[xmlIndexCol].text(), map.INN_KIO?.stringValue, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         }
         xmlIndexCol++
 
@@ -346,17 +346,17 @@ void addData(def xml, int headRowCount) {
         if (map != null) {
             map = getRefBookValue(10, map.COUNTRY?.referenceValue)
             if (map != null) {
-                formDataService.checkReferenceValue(10, row.cell[xmlIndexCol].text(), map.CODE?.stringValue, xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+                formDataService.checkReferenceValue(10, row.cell[xmlIndexCol].text(), map.CODE?.stringValue, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
             }
         }
         xmlIndexCol++
 
         // графа 5.1
-        newRow.incomeBankSum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.incomeBankSum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
         // графа 5.2
-        newRow.outcomeBankSum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.outcomeBankSum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
         // графа 6
@@ -364,15 +364,15 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol++
 
         // графа 7
-        newRow.contractDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.contractDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
         // графа 8
-        newRow.country = getRecordIdImport(10, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        newRow.country = getRecordIdImport(10, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, true)
         xmlIndexCol++
 
         // графа 9
-        newRow.region = getRecordIdImport(4, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        newRow.region = getRecordIdImport(4, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, true)
         xmlIndexCol++
 
         // графа 10
@@ -384,18 +384,18 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol++
 
         // графа 12
-        newRow.count = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.count = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
         // графа 13
-        newRow.price = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.price = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
         // графа 14
         xmlIndexCol++
 
         // графа 15
-        newRow.transactionDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.transactionDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
 
         rows.add(newRow)
     }
