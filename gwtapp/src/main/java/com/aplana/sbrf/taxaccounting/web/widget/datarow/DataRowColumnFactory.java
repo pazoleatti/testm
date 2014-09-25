@@ -27,34 +27,41 @@ public class DataRowColumnFactory {
 		}
         columnContext.setFormDataId(formDataId);
 		columnContext.setDateRange(startDate, endDate);
-		Column<DataRow<Cell>, ?> uiColumn = null;
-		if (col instanceof StringColumn) {
-			StringColumn stringColumn = (StringColumn)col;
-			columnContext.setColumn(stringColumn);
-			uiColumn = new EditTextColumn((StringColumn)col, columnContext);
-		} else if (col instanceof NumericColumn) {
-			NumericColumn numericColumn = (NumericColumn) col;
-			columnContext.setColumn(numericColumn);
-			uiColumn = new EditNumericColumn(numericColumn, columnContext);
-		} else if (col instanceof DateColumn) {
-			DateColumn dateColumn = (DateColumn) col;
-			columnContext.setColumn(dateColumn);
-	        uiColumn = new EditDateColumn(dateColumn, columnContext);
-		} else if (col instanceof RefBookColumn){
-			RefBookColumn refBookColumn = (RefBookColumn) col;
-			columnContext.setColumn(refBookColumn);
-			uiColumn = new RefBookUiColumn(refBookColumn, columnContext);
-        } else if (col instanceof ReferenceColumn) {
-            ReferenceColumn referenceColumn = (ReferenceColumn) col;
-            columnContext.setColumn(referenceColumn);
-            uiColumn = new ReferenceUiColumn(referenceColumn, columnContext);
-        } else if (col instanceof AutoNumerationColumn) {
-            AutoNumerationColumn autoNumerationColumn = (AutoNumerationColumn) col;
-            columnContext.setColumn(autoNumerationColumn);
-            uiColumn = new AutoNumerationUiColumn(autoNumerationColumn);
-        } else {
-            throw new IllegalArgumentException();
-        }
+		Column<DataRow<Cell>, ?> uiColumn;
+		switch (col.getColumnType()) {
+			case STRING:
+				StringColumn stringColumn = (StringColumn)col;
+				columnContext.setColumn(stringColumn);
+				uiColumn = new EditTextColumn((StringColumn)col, columnContext);
+				break;
+			case NUMBER:
+				NumericColumn numericColumn = (NumericColumn) col;
+				columnContext.setColumn(numericColumn);
+				uiColumn = new EditNumericColumn(numericColumn, columnContext);
+				break;
+			case DATE:
+				DateColumn dateColumn = (DateColumn) col;
+				columnContext.setColumn(dateColumn);
+				uiColumn = new EditDateColumn(dateColumn, columnContext);
+				break;
+			case REFBOOK:
+				RefBookColumn refBookColumn = (RefBookColumn) col;
+				columnContext.setColumn(refBookColumn);
+				uiColumn = new RefBookUiColumn(refBookColumn, columnContext);
+				break;
+			case REFERENCE:
+				ReferenceColumn referenceColumn = (ReferenceColumn) col;
+				columnContext.setColumn(referenceColumn);
+				uiColumn = new ReferenceUiColumn(referenceColumn, columnContext);
+				break;
+			case AUTO:
+				AutoNumerationColumn autoNumerationColumn = (AutoNumerationColumn) col;
+				columnContext.setColumn(autoNumerationColumn);
+				uiColumn = new AutoNumerationUiColumn(autoNumerationColumn);
+				break;
+			default:
+				throw new IllegalArgumentException();
+		}
         return uiColumn;
 	}
 

@@ -15,12 +15,6 @@ public final class DataRowDaoImplUtils {
     private DataRowDaoImplUtils() {}
 
 	/**
-	 * Массив содержит названия таблиц со значениями ячеек
-	 */
-	public static final String[] CELL_VALUE_TABLE_NAMES = { "NUMERIC_VALUE",
-			"STRING_VALUE", "DATE_VALUE" };
-
-	/**
 	 * Массив содержит функции извлечения значения для разных таблиц со
 	 * значениями ячеек
 	 */
@@ -45,20 +39,15 @@ public final class DataRowDaoImplUtils {
 				}
 			} };
 
-	static <T> T getCellValueComponent(Column c, T[] objects) {
-		if (c instanceof StringColumn) {
-			return objects[1];
-		} else if (c instanceof NumericColumn || c instanceof RefBookColumn || c instanceof ReferenceColumn || c instanceof AutoNumerationColumn) {
-			return objects[0];
-		} else if (c instanceof DateColumn) {
-			return objects[2];
-		} else {
-			throw new IllegalArgumentException();
+	static <T> T getCellValueComponent(Column column, T[] objects) {
+		switch (column.getColumnType()) {
+			case STRING:
+				return objects[1];
+			case DATE:
+				return objects[2];
+			default:
+				return objects[0];
 		}
-	}
-
-	public static String getCellValueTableName(Column c) {
-		return getCellValueComponent(c, CELL_VALUE_TABLE_NAMES);
 	}
 
 	static CellValueExtractor getCellValueExtractor(Column c) {

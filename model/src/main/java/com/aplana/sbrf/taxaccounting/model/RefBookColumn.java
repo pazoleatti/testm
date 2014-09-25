@@ -37,6 +37,7 @@ public class RefBookColumn extends Column {
 	};
 
     public RefBookColumn() {
+		setColumnType(ColumnType.REFBOOK);
         searchEnabled = true;
     }
 

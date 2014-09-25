@@ -25,7 +25,7 @@ public class FormDataCacheDaoImpl extends AbstractDao implements FormDataCacheDa
 
     private static final String REF_BOOK_VALUE_FOR_FORM_DATA = "select v.record_id, v.number_value, v.string_value, " +
             "v.date_value, v.reference_value, a.type, a.precision, a.alias from ref_book_value v, ref_book_attribute a " +
-            "where record_id in (select distinct value from numeric_value where row_id in (select id from data_row " +
+            "where record_id in (select distinct nvalue from data_cell where row_id in (select id from data_row " +
             "where form_data_id = ? and type = 0) and column_id in (select id from form_column where form_template_id = " +
             "(select form_template_id from form_data where id = ?) and type = 'R')) and a.id = v.attribute_id";
 

@@ -35,6 +35,10 @@ public class NumericColumn extends Column implements Serializable {
 
 	private static Formatter formatter;
 
+	public NumericColumn() {
+		setColumnType(ColumnType.NUMBER);
+	}
+
 	/**
 	 * Задает точность столбца, т.е. колличество знаков справа от запятой. Аналогично положительным {@link BigDecimal}
 	 * 

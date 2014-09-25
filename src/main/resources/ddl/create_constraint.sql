@@ -177,6 +177,11 @@ alter table date_value add constraint date_value_pk primary key (row_id, column_
 alter table date_value add constraint date_value_fk_column_id foreign key (column_id) references form_column(id);
 alter table date_value add constraint date_value_fk_row_id foreign key (row_id) references data_row(id) on delete cascade;
 
+alter table data_cell add constraint data_cell_pk primary key (row_id, column_id);
+alter table data_cell add constraint data_cell_fk_column_id foreign key (column_id) references form_column(id);
+alter table data_cell add constraint data_cell_fk_data_row foreign key (row_id) references data_row(id) on delete cascade;
+alter table data_cell add constraint data_cell_chk_editable check (editable in (0, 1));
+
 alter table department_form_type add constraint dept_form_type_fk_dep_id foreign key (department_id) references department(id);
 alter table department_form_type add constraint dept_form_type_fk_perf_dep_id foreign key (performer_dep_id) references department(id);
 alter table department_form_type add constraint dept_form_type_fk_type_id foreign key (form_type_id) references form_type(id);

@@ -25,8 +25,8 @@ insert into form_column (id, name, form_template_id, ord, alias, type, width, pr
 insert into form_column (id, name, form_template_id, ord, alias, type, width, precision, max_length, checking)
 	values (4, 'Строковый столбец', 1, 1, 'alias 4', 'S', 10, null, 500, 1);
 
-insert into cell_editable (row_id, column_id) values (1, 1);
-insert into cell_editable (row_id, column_id) values (2, 1);
-insert into cell_editable (row_id, column_id) values (2, 2);
+insert into data_cell (row_id, column_id, editable) values (1, 1, 1);
+insert into data_cell (row_id, column_id, editable) values (2, 1, 1);
+insert into data_cell (row_id, column_id, editable) values (2, 2, 1);
 
 

@@ -24,6 +24,6 @@ insert into form_column (id, name, form_template_id, ord, alias, type, width, pr
 insert into form_column (id, name, form_template_id, ord, alias, type, width, precision, max_length, checking)
 	values (4, 'Строковый столбец', 1, 1, 'alias 4', 'S', 10, null, 500, 1);
 
-insert into string_value (row_id, column_id, value) values (1, 1, 'string cell');
-insert into numeric_value (row_id, column_id, value) values (2, 2, 123);
-insert into date_value (row_id, column_id, value) values (1, 3, date '2013-12-31');
+INSERT INTO data_cell (row_id, column_id, svalue) VALUES (1, 1, 'string cell');
+INSERT INTO data_cell (row_id, column_id, nvalue) VALUES (2, 2, 123);
+INSERT INTO data_cell (row_id, column_id, dvalue) VALUES (1, 3, date '2013-12-31');

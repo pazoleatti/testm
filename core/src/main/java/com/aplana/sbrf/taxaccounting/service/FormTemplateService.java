@@ -217,5 +217,5 @@ public interface FormTemplateService {
      * @param type         тип нумерации
      * @return true - есть, false - нет
      */
-    boolean isAnyAutoNumerationColumn(FormTemplate formTemplate, AutoNumerationColumnType type);
+    boolean isAnyAutoNumerationColumn(FormTemplate formTemplate, NumerationType type);
 }

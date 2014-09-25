@@ -182,7 +182,7 @@ public class DataRow<C extends AbstractCell> extends IdentityObject<Long> implem
     public List<C> getLinkedCells(int columnId) {
         List<C> retVal = new LinkedList<C>();
         for (C cell : data) {
-            if (cell.getColumn() instanceof ReferenceColumn
+            if (ColumnType.REFERENCE.equals(cell.getColumn().getColumnType())
                     && ((ReferenceColumn)cell.getColumn()).getParentId() == columnId) {
                     retVal.add(cell);
             }
