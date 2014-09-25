@@ -31,7 +31,7 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
             notification.setReportPeriodId(SqlUtils.getInteger(rs, "REPORT_PERIOD_ID"));
             notification.setSenderDepartmentId(SqlUtils.getInteger(rs, "SENDER_DEPARTMENT_ID"));
             notification.setReceiverDepartmentId(SqlUtils.getInteger(rs, "RECEIVER_DEPARTMENT_ID"));
-            notification.setFirstReaderId(SqlUtils.getInteger(rs, "FIRST_READER_ID"));
+            notification.setRead(rs.getBoolean("IS_READ"));
             notification.setText(rs.getString("TEXT"));
             notification.setCreateDate(new Date(rs.getTimestamp("CREATE_DATE").getTime()));
             notification.setDeadline(rs.getDate("DEADLINE"));
@@ -52,13 +52,13 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
 
         jt.update(
                 "insert into notification (ID, REPORT_PERIOD_ID, SENDER_DEPARTMENT_ID, RECEIVER_DEPARTMENT_ID, " +
-                        "FIRST_READER_ID, TEXT, CREATE_DATE, DEADLINE)" +
+                        "IS_READ, TEXT, CREATE_DATE, DEADLINE)" +
                         " values (?, ?, ?, ?, ?, ?, ?, ?)",
                 id,
                 notification.getReportPeriodId(),
                 notification.getSenderDepartmentId(),
                 notification.getReceiverDepartmentId(),
-                notification.getFirstReaderId(),
+                notification.isRead() ? 1 : 0,
                 notification.getText(),
                 notification.getCreateDate(),
                 notification.getDeadline()
@@ -90,7 +90,7 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
     @Override
     public void saveList(final List<Notification> notifications) {
         getJdbcTemplate().batchUpdate("insert into notification (ID, REPORT_PERIOD_ID, SENDER_DEPARTMENT_ID, RECEIVER_DEPARTMENT_ID, " +
-                "FIRST_READER_ID, TEXT, CREATE_DATE, DEADLINE, USER_ID, ROLE_ID)" +
+                "IS_READ, TEXT, CREATE_DATE, DEADLINE, USER_ID, ROLE_ID)" +
                 " values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", new BatchPreparedStatementSetter() {
 
             @Override
@@ -115,12 +115,8 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
                 } else {
                     ps.setNull(4, Types.NUMERIC);
                 }
-                //Первый читатель сообщени
-                if (elem.getFirstReaderId() != null) {
-                    ps.setInt(5, elem.getFirstReaderId());
-                } else {
-                    ps.setNull(5, Types.NUMERIC);
-                }
+                //Признак прочтения
+                ps.setInt(5, elem.isRead() ? 1 : 0);
                 //Текст
                 ps.setString(6, elem.getText());
                 //Дата создания
@@ -183,11 +179,13 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
 	}
 
     private static final String GET_BY_FILTER = "select * from (\n" +
-            "  select distinct ID, REPORT_PERIOD_ID, SENDER_DEPARTMENT_ID, RECEIVER_DEPARTMENT_ID, FIRST_READER_ID, TEXT, CREATE_DATE, DEADLINE, USER_ID, ROLE_ID, \n" +
+            "  select distinct ID, REPORT_PERIOD_ID, SENDER_DEPARTMENT_ID, RECEIVER_DEPARTMENT_ID, IS_READ, TEXT, CREATE_DATE, DEADLINE, USER_ID, ROLE_ID, \n" +
             " row_number() %s as rn \n" +
             "  from notification \n" +
-            "where (((:receiverDepartmentId is not null and RECEIVER_DEPARTMENT_ID = :receiverDepartmentId) or (:senderDepartmentId is not null and SENDER_DEPARTMENT_ID = :senderDepartmentId)) or \n" +
-            "(:userId is not null and USER_ID = :userId) %s) and (:onlyNew != 1 or FIRST_READER_ID is null) \n" +
+            "where (\n" +
+            "(:senderDepartmentId is not null and SENDER_DEPARTMENT_ID = :senderDepartmentId) or \n" +
+            "(:userId is not null and USER_ID = :userId)%s%s \n" +
+            ") and (:read is null or IS_READ = :read) \n" +
             ")";
 
 	@Override
@@ -210,16 +208,17 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
 
             StringBuilder sql = new StringBuilder(String.format(GET_BY_FILTER,
                     isSupportOver() ? "over (order by " + sort.toString() + ")" : "over()",
+                    filter.getReceiverDepartmentIds() == null || filter.getReceiverDepartmentIds().isEmpty() ? ""
+                            : " or \n" + SqlUtils.transformToSqlInStatement("RECEIVER_DEPARTMENT_ID", filter.getReceiverDepartmentIds()),
                     filter.getUserRoleIds() == null || filter.getUserRoleIds().isEmpty() ? ""
-                            : "\n or (" + SqlUtils.transformToSqlInStatement("ROLE_ID", filter.getUserRoleIds()) + ")"));
+                            : " or \n" + SqlUtils.transformToSqlInStatement("ROLE_ID", filter.getUserRoleIds())));
 
             //Фильтры по типу оповещения
-            params.addValue("receiverDepartmentId", filter.getReceiverDepartmentId());
             params.addValue("senderDepartmentId", filter.getSenderDepartmentId());
             params.addValue("userId", filter.getUserId());
 
             //Дополнительные фильтры
-            params.addValue("onlyNew", filter.isOnlyNew() ? 1 : 0);
+            params.addValue("read", filter.isRead() == null ? null : filter.isRead());
 
             //Пэйджинг
 			if ((filter.getStartIndex() != null) && (filter.getCountOfRecords() != null)) {
@@ -235,23 +234,26 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
 	}
 
     private static final String GET_COUNT_BY_FILTER = "select count(distinct id) from notification \n" +
-            "where (((:receiverDepartmentId is not null and RECEIVER_DEPARTMENT_ID = :receiverDepartmentId) or (:senderDepartmentId is not null and SENDER_DEPARTMENT_ID = :senderDepartmentId)) or \n" +
-            "(:userId is not null and USER_ID = :userId) %s) and (:onlyNew != 1 or FIRST_READER_ID is null)";
+            "where (\n" +
+            "(:senderDepartmentId is not null and SENDER_DEPARTMENT_ID = :senderDepartmentId) or \n" +
+            "(:userId is not null and USER_ID = :userId)%s%s \n" +
+            ") and (:read is null or IS_READ = :read)";
 
 	@Override
 	public int getCountByFilter(NotificationsFilterData filter) {
 		try {
             String sql = String.format(GET_COUNT_BY_FILTER,
+                    filter.getReceiverDepartmentIds() == null || filter.getReceiverDepartmentIds().isEmpty() ? ""
+                            : " or \n" + SqlUtils.transformToSqlInStatement("RECEIVER_DEPARTMENT_ID", filter.getReceiverDepartmentIds()),
                     filter.getUserRoleIds() == null || filter.getUserRoleIds().isEmpty() ? ""
-                            : "\n or (" + SqlUtils.transformToSqlInStatement("ROLE_ID", filter.getUserRoleIds()) + ")");
+                            : " or \n" + SqlUtils.transformToSqlInStatement("ROLE_ID", filter.getUserRoleIds()));
 			MapSqlParameterSource params = new MapSqlParameterSource();
             //Фильтры по типу оповещения
-            params.addValue("receiverDepartmentId", filter.getReceiverDepartmentId());
             params.addValue("senderDepartmentId", filter.getSenderDepartmentId());
             params.addValue("userId", filter.getUserId());
 
             //Дополнительные фильтры
-            params.addValue("onlyNew", filter.isOnlyNew() ? 1 : 0);
+            params.addValue("read", filter.isRead() == null ? null : filter.isRead());
 			return getNamedParameterJdbcTemplate().queryForInt(sql, params);
 		} catch (EmptyResultDataAccessException e) {
 			return 0;
@@ -265,22 +267,24 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
                 new int[]{Types.NUMERIC});
     }
 
-    private static final String UPDATE_USER_NOTIFICATIONS_STATUS = "update notification set FIRST_READER_ID = :firstReaderId \n" +
-            "where (((:receiverDepartmentId is not null and RECEIVER_DEPARTMENT_ID = :receiverDepartmentId) or (:senderDepartmentId is not null and SENDER_DEPARTMENT_ID = :senderDepartmentId)) or \n" +
-            "(:userId is not null and USER_ID = :userId) %s) and FIRST_READER_ID is null";
+    private static final String UPDATE_USER_NOTIFICATIONS_STATUS = "update notification set IS_READ = 1 \n" +
+            "where (\n" +
+            "(:senderDepartmentId is not null and SENDER_DEPARTMENT_ID = :senderDepartmentId) or \n" +
+            "(:userId is not null and USER_ID = :userId)%s%s \n" +
+            ") and IS_READ = 0";
 
     @Override
-    public void updateUserNotificationsStatus(NotificationsFilterData filter, int userId) {
+    public void updateUserNotificationsStatus(NotificationsFilterData filter) {
         MapSqlParameterSource params = new MapSqlParameterSource();
-        StringBuilder sql = new StringBuilder(String.format(UPDATE_USER_NOTIFICATIONS_STATUS,
+        String sql = String.format(UPDATE_USER_NOTIFICATIONS_STATUS,
+                filter.getReceiverDepartmentIds() == null || filter.getReceiverDepartmentIds().isEmpty() ? ""
+                        : " or \n" + SqlUtils.transformToSqlInStatement("RECEIVER_DEPARTMENT_ID", filter.getReceiverDepartmentIds()),
                 filter.getUserRoleIds() == null || filter.getUserRoleIds().isEmpty() ? ""
-                        : "\n or (" + SqlUtils.transformToSqlInStatement("ROLE_ID", filter.getUserRoleIds()) + ")"));
+                        : " or \n" + SqlUtils.transformToSqlInStatement("ROLE_ID", filter.getUserRoleIds()));
 
         //Фильтры по типу оповещения
-        params.addValue("receiverDepartmentId", filter.getReceiverDepartmentId());
         params.addValue("senderDepartmentId", filter.getSenderDepartmentId());
         params.addValue("userId", filter.getUserId());
-        params.addValue("firstReaderId", userId);
-        getNamedParameterJdbcTemplate().update(sql.toString(), params);
+        getNamedParameterJdbcTemplate().update(sql, params);
     }
 }

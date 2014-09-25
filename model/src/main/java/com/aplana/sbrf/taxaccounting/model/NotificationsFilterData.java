@@ -15,13 +15,13 @@ public class NotificationsFilterData implements Serializable {
     /** Фильтр по подразделению-отправителю */
 	private Integer senderDepartmentId;
     /** Фильтр по подразделению-получателю */
-	private Integer receiverDepartmentId;
+	private List<Integer> receiverDepartmentIds;
     /** Фильтр по конкретному пользователю, ожидающему уведомлений */
     private Integer userId;
     /** Фильтр по ролям пользователя */
     private List<Integer> userRoleIds;
-    /** Фильтр только не прочитанных оповещений */
-    private boolean onlyNew;
+    /** Признак прочтения. Если null - то не учитывается */
+    private Boolean read;
 
 
 	private Integer countOfRecords;
@@ -52,14 +52,6 @@ public class NotificationsFilterData implements Serializable {
 
 	public void setSenderDepartmentId(Integer senderDepartmentId) {
 		this.senderDepartmentId = senderDepartmentId;
-	}
-
-	public Integer getReceiverDepartmentId() {
-		return receiverDepartmentId;
-	}
-
-	public void setReceiverDepartmentId(Integer receiverDepartmentId) {
-		this.receiverDepartmentId = receiverDepartmentId;
 	}
 
 	public Integer getCountOfRecords() {
@@ -94,11 +86,19 @@ public class NotificationsFilterData implements Serializable {
         this.isAsc = isAsc;
     }
 
-    public boolean isOnlyNew() {
-        return onlyNew;
+    public Boolean isRead() {
+        return read;
     }
 
-    public void setOnlyNew(boolean onlyNew) {
-        this.onlyNew = onlyNew;
+    public void setRead(Boolean read) {
+        this.read = read;
+    }
+
+    public List<Integer> getReceiverDepartmentIds() {
+        return receiverDepartmentIds;
+    }
+
+    public void setReceiverDepartmentIds(List<Integer> receiverDepartmentIds) {
+        this.receiverDepartmentIds = receiverDepartmentIds;
     }
 }
