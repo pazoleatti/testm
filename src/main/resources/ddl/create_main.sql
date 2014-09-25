@@ -211,7 +211,7 @@ create table ref_book_value (
   number_value number(27,10),
   date_value date,
   reference_value number(18), 
-  row_num number(9)
+  row_num number(9) default 0 not null
 );
 comment on table ref_book_value is 'Значение записи справочника';
 comment on column ref_book_value.record_id is 'Ссылка на запись справочника';
@@ -419,7 +419,7 @@ comment on column declaration_data.is_accepted is 'Признак того, чт
 comment on column declaration_data.data_pdf is 'Данные декларации в формате PDF';
 comment on column declaration_data.data_xlsx is 'Данные декларации в формате XLSX';
 comment on column declaration_data.jasper_print is 'Сформированный отчет во внутреннем формате Jasper Reports';
-comment on column declaration_data.department_report_period_id is 'Отчётный период подразделения';
+comment on column declaration_data.department_report_period_id is 'Идентификатор отчетного периода подразделения';
 
 create sequence seq_declaration_data start with 10000;
 ------------------------------------------------------------------------------------------------------------------------------------------
@@ -441,7 +441,8 @@ comment on column form_data.kind is 'Тип налоговой формы (1 - �
 comment on column form_data.return_sign is 'Флаг возврата (0 - обычный режим; 1 - форма возвращена из вышестоящего статуса)';
 comment on column form_data.period_order is 'Указывает на очередность налоговой формы в рамках налогового периода. Необходимо для, например, месячных форм в рамках квартального отчетного периода';
 comment on column form_data.number_previous_row is 'Номер последней строки предыдущей НФ';
-comment on column form_data.department_report_period_id is 'Отчетный период подразделения';
+comment on column form_data.department_report_period_id is 'Идентификатор отчетного периода подразделения';
+
 
 create sequence seq_form_data start with 10000;
 ---------------------------------------------------------------------------------------------------
@@ -754,12 +755,12 @@ id number(9) primary key,
 report_period_id number(9) null, 
 sender_department_id number(9) null, 
 receiver_department_id number(9) null, 
-first_reader_id number(9) null, 
 text varchar2(2000) not null, 
 create_date date not null, 
 deadline date null,
 user_id number(9) null,
-role_id number(9) null
+role_id number(9) null,
+is_read number(1) default 0 not null
 );
 
 comment on table notification is 'Оповещения';
@@ -767,12 +768,12 @@ comment on column notification.id is 'Уникальный идентифика�
 comment on column notification.report_period_id is 'идентификатор отчетного периода'; 
 comment on column notification.sender_department_id is 'идентификатор подразделения-отправителя'; 
 comment on column notification.receiver_department_id is 'идентификатор подразделения-получателя'; 
-comment on column notification.first_reader_id is 'идентификатор первого пользователя, прочитавшего оповещение'; 
 comment on column notification.text is 'текст оповещения';
 comment on column notification.create_date is 'дата создания оповещения';
 comment on column notification.deadline is 'дата сдачи отчетности';
 comment on column notification.user_id is 'Идентификатор пользователя, который получит оповещение';
 comment on column notification.role_id is 'Роль пользователя, который получит оповещение';
+comment on column notification.is_read is 'Признак прочтения';
 
 create sequence seq_notification start with 10000;
 
