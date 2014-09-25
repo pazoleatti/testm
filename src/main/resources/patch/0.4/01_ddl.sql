@@ -39,6 +39,7 @@ DROP INDEX department_uniq_code;
 ---------------------------------------------------------------------------------------------------
 -- http://jira.aplana.com/browse/SBRFACCTAX-7074 - Реализовать хранение в ЖА ссылок на LogEntry-сущности в BLOB_DATA с возможностью просмотра
 ALTER TABLE log_system ADD blob_data_id VARCHAR2(36);
+ALTER TABLE log_system ADD CONSTRAINT log_system_fk_blob_data FOREIGN KEY (blob_data_id) REFERENCES blob_data(id) ON DELETE SET NULL;
 COMMENT ON COLUMN log_system.blob_data_id IS 'Ссылка на логи';
 
 ---------------------------------------------------------------------------------------------------
@@ -149,7 +150,7 @@ ALTER TABLE lock_data_subscribers ADD CONSTRAINT lock_data_subscr_fk_sec_user FO
 ---------------------------------------------------------------------------------------------------
 -- http://jira.aplana.com/browse/SBRFACCTAX-8895 - Изменения в структуре REF_BOOK_ATTRIBUTE/REF_BOOK_VALUE
 ALTER TABLE ref_book_attribute ADD is_table NUMBER(1) DEFAULT 0 NOT NULL;
-ALTER TABLE ref_book_attribute ADD CONSTRAINT ref_book_attr_chk_istable CHECK (is_table IN (0,1));
+ALTER TABLE ref_book_attribute ADD CONSTRAINT ref_book_attr_chk_istable CHECK (is_table IN (0, 1));
 COMMENT ON COLUMN ref_book_attribute.is_table IS 'Признак табличного атрибута';
 
 ALTER TABLE ref_book_value ADD row_num NUMBER(9) DEFAULT 0 NOT NULL;
@@ -157,6 +158,51 @@ ALTER TABLE ref_book_value DROP CONSTRAINT REF_BOOK_VALUE_PK;
 DROP INDEX REF_BOOK_VALUE_PK;
 ALTER TABLE ref_book_value ADD CONSTRAINT REF_BOOK_VALUE_PK primary key (record_id, attribute_id, row_num);
 COMMENT ON COLUMN ref_book_value.row_num IS 'Номер строки в табличной части справочника';
+
+---------------------------------------------------------------------------------------------------
+-- http://jira.aplana.com/browse/SBRFACCTAX-8809: Новые связи для form_data и declaration_data с department_report_period
+
+ALTER TABLE form_data ADD department_report_period_id number(18);
+ALTER TABLE declaration_data ADD department_report_period_id number(18);
+
+COMMENT ON COLUMN form_data.department_report_period_id IS 'Идентификатор отчетного периода подразделения';
+COMMENT ON COLUMN declaration_data.department_report_period_id IS 'Идентификатор отчетного периода подразделения';
+
+MERGE INTO form_data tgt USING
+  (SELECT fd.id,
+          drp.id AS department_period_id
+   FROM form_data fd
+   LEFT JOIN department_report_period drp ON drp.department_id = fd.department_id
+   AND fd.report_period_id = drp.report_period_id
+   AND drp.correction_date IS NULL) src ON (tgt.id = src.id) WHEN matched THEN
+UPDATE
+SET tgt.department_report_period_id = src.department_period_id;
+
+MERGE INTO declaration_data tgt USING
+  (SELECT fd.id,
+          drp.id AS department_period_id
+   FROM declaration_data fd
+   LEFT JOIN department_report_period drp ON drp.department_id = fd.department_id
+   AND fd.report_period_id = drp.report_period_id
+   AND drp.correction_date IS NULL) src ON (tgt.id = src.id) WHEN matched THEN
+UPDATE
+SET tgt.department_report_period_id = src.department_period_id;
+
+ALTER TABLE form_data MODIFY department_report_period_id NOT NULL;
+ALTER TABLE declaration_data MODIFY department_report_period_id NOT NULL;
+
+ALTER TABLE form_data ADD CONSTRAINT FORM_DATA_FK_DEP_REP_PER_ID FOREIGN KEY (department_report_period_id) REFERENCES department_report_period(id);
+ALTER TABLE declaration_data ADD CONSTRAINT DECL_DATA_FK_DEP_REP_PER_ID FOREIGN KEY (department_report_period_id) REFERENCES department_report_period(id);
+
+CREATE INDEX i_form_data_dep_rep_per_id ON form_data (department_report_period_id);
+CREATE INDEX i_decl_data_dep_rep_per_id ON declaration_data (department_report_period_id);
+
+ALTER TABLE declaration_data DROP CONSTRAINT declaration_data_uniq_template;
+ALTER TABLE form_data DROP COLUMN department_id;
+ALTER TABLE form_data DROP COLUMN report_period_id;
+ALTER TABLE declaration_data DROP COLUMN department_id;
+ALTER TABLE declaration_data DROP COLUMN report_period_id;
+ALTER TABLE declaration_data ADD CONSTRAINT declaration_data_uniq_template UNIQUE(department_report_period_id, declaration_template_id);
 
 ---------------------------------------------------------------------------------------------------
 COMMIT;

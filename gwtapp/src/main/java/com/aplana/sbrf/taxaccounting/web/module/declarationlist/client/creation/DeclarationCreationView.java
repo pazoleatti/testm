@@ -38,6 +38,8 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
     public static final String DECLARATION_TITLE_D = "Создание уведомления";
     public static final String DECLARATION_TYPE_TITLE = "Вид декларации:";
     public static final String DECLARATION_TYPE_TITLE_D = "Вид:";
+    public static final String DECLARATION_CORRECTION = "Форма будет создана в корректирующем периоде, дата сдачи корректировки: ";
+    public static final String NOTIFICATION_CORRECTION = "Уведомление будет создано в корректирующем периоде, дата сдачи корректировки: ";
 
     @UiField
     ModalWindow modalWindowTitle;
@@ -62,6 +64,10 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
     HorizontalPanel codePanel;
     @UiField
     HorizontalPanel kppPanel;
+    @UiField
+    HorizontalPanel correctionPanel;
+    @UiField
+    Label correctionDate;
 
     @UiField
     Button continueButton;
@@ -105,6 +111,7 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
         declarationTypeBox.setEnabled(false);
         taxOrganCode.setEnabled(false);
         taxOrganKpp.setEnabled(false);
+        correctionPanel.setVisible(false);
     }
 
     private void updateEnabled() {
@@ -113,6 +120,9 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
         declarationTypeBox.setEnabled(departmentPicker.getValue() != null && !departmentPicker.getValue().isEmpty());
         taxOrganCode.setEnabled(departmentPicker.getValue() != null && !departmentPicker.getValue().isEmpty());
         taxOrganKpp.setEnabled(taxOrganCode.getValue() != null && !taxOrganCode.getValue().isEmpty());
+        // дата корректировки
+        correctionPanel.setVisible(departmentPicker.getValue() != null && !departmentPicker.getValue().isEmpty() &&
+                correctionDate.getText() != null && !correctionDate.getText().isEmpty());
     }
 
 
@@ -124,6 +134,12 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
         }
         declarationTypeBox.setValue(null);
         declarationTypeBox.setAcceptableValues(declarationTypesMap.keySet());
+    }
+
+    @Override
+    public void setCorrectionDate(String correctionDate, TaxType taxType) {
+        correctionPanel.setVisible(correctionDate != null);
+        this.correctionDate.setText((correctionDate != null) ? ((taxType == TaxType.DEAL ? NOTIFICATION_CORRECTION : DECLARATION_CORRECTION) + correctionDate) : "");
     }
 
     @Override

@@ -25,7 +25,7 @@ public class FillFormFieldsAction extends UnsecuredActionImpl<FillFormFieldsResu
     private TaxType taxType;
     private FieldsNum fieldsNum;
 	private Long departmentId;
-	private List<Integer> reportPeriodId;
+	private Integer reportPeriodId;
     private List<FormDataKind> kinds;
 
     public FieldsNum getFieldsNum() {
@@ -60,11 +60,11 @@ public class FillFormFieldsAction extends UnsecuredActionImpl<FillFormFieldsResu
 		this.departmentId = departmentId;
 	}
 
-	public List<Integer> getReportPeriodId() {
+	public Integer getReportPeriodId() {
 		return reportPeriodId;
 	}
 
-	public void setReportPeriodId(List<Integer> reportPeriodId) {
+	public void setReportPeriodId(Integer reportPeriodId) {
 		this.reportPeriodId = reportPeriodId;
 	}
 

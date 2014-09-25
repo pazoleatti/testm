@@ -772,7 +772,7 @@ comment on column notification.text is 'текст оповещения';
 comment on column notification.create_date is 'дата создания оповещения';
 comment on column notification.deadline is 'дата сдачи отчетности';
 comment on column notification.user_id is 'Идентификатор пользователя, который получит оповещение';
-comment on column notification.role_id is 'Роль пользователя, который получит оповещение';
+comment on column notification.role_id is 'Идентификатор роли пользователя, который получит оповещение';
 comment on column notification.is_read is 'Признак прочтения';
 
 create sequence seq_notification start with 10000;
