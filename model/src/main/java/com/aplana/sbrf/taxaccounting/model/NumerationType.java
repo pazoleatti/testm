@@ -29,6 +29,6 @@ public enum NumerationType {
 				return numType;
 			}
 		}
-		throw new IllegalArgumentException(String.format("Doesn't exist numeration type with id = %s", id));
+		throw new IllegalArgumentException("Doesn't exist numeration type with id = " + id);
 	}
 }
