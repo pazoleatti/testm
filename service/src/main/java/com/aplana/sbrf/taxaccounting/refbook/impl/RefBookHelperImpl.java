@@ -44,12 +44,12 @@ public class RefBookHelperImpl implements RefBookHelper {
                 for (Map.Entry<String, Object> entry : dataRow.entrySet()) {
                     Cell cell = ((DataRow.MapEntry<Cell>) entry).getCell();
                     Object value = cell.getValue();
-                    if ((cell.getColumn() instanceof RefBookColumn) && value != null) {
+                    if (ColumnType.REFBOOK.equals(cell.getColumn().getColumnType()) && value != null) {
                         // Разыменование справочных ячеек
                         RefBookColumn column = (RefBookColumn) cell.getColumn();
                         Long refAttributeId = column.getRefBookAttributeId();
                         checkRefBookValue(providers, refAttributeId, value);
-                    } else if ((cell.getColumn() instanceof ReferenceColumn)) {
+                    } else if (ColumnType.REFERENCE.equals(cell.getColumn().getColumnType())) {
                         // Разыменование ссылочных ячеек
                         ReferenceColumn column = (ReferenceColumn) cell.getColumn();
                         Cell parentCell = dataRow.getCellByColumnId(column.getParentId());
@@ -111,11 +111,11 @@ public class RefBookHelperImpl implements RefBookHelper {
 			for (Map.Entry<String, Object> entry : dataRow.entrySet()) {
 				Cell cell = ((DataRow.MapEntry<Cell>) entry).getCell();
 				Object value = cell.getValue();
-				if ((cell.getColumn() instanceof RefBookColumn) && value != null) {
+				if (ColumnType.REFBOOK.equals(cell.getColumn().getColumnType()) && value != null) {
                     // Разыменование справочных ячеек
                     RefBookColumn column = (RefBookColumn) cell.getColumn();
                     dereferenceRefBookValue(logger, providers, column, cell, value);
-                } else if ((cell.getColumn() instanceof ReferenceColumn)) {
+                } else if (ColumnType.REFERENCE.equals(cell.getColumn().getColumnType())) {
                     // Разыменование ссылочных ячеек
                     ReferenceColumn column = (ReferenceColumn) cell.getColumn();
                     Cell parentCell = dataRow.getCellByColumnId(column.getParentId());

@@ -19,7 +19,7 @@ import static com.aplana.sbrf.taxaccounting.dao.impl.datarow.DataRowDaoImplUtils
 
 /**
  * @author sgoryachkin
- * 
+ *
  *         <a>http://conf.aplana.com/pages/viewpage.action?pageId=9588773&
  *         focusedCommentId=9591393#comment-9591393</a>
  */
@@ -30,146 +30,123 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 	private TypeFlag[] types;
 
 	public DataRowMapper(FormData fd, TypeFlag[] types, DataRowFilter filter,
-			DataRowRange range) {
+						 DataRowRange range) {
 		this.fd = fd;
 		this.types = types;
 		this.range = range;
 	}
 
-    /**
-     * improved createSql function
-     * @return
-     */
-    public Pair<String, Map<String, Object>> createSql() {
+	/**
+	 * improved createSql function
+	 * @return
+	 */
+	public Pair<String, Map<String, Object>> createSql() {
+		String[] prefixes = new String[]{"v", "s", "e", "csi", "rsi"};
+		StringBuilder select = new StringBuilder("SELECT ROW_NUMBER() OVER (ORDER BY sub.ord) as idx, sub.id, sub.a \n");
+		// генерация max(X) X
+		for (Column c : fd.getFormColumns()){
+			for (String prefix : prefixes){
+				select
+						.append(" , MAX(")
+						.append(prefix)
+						.append(c.getId())
+						.append(") ")
+						.append(prefix)
+						.append(c.getId());
+			}
+			select.append('\n');
+		}
+		select.append(" FROM (SELECT d.id, d.alias AS a, d.ord");
 
-        String[] prefixs = new String[]{"V", "S", "E", "CSI", "RSI"};
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("formDataId", fd.getId());
+		params.put("manual", fd.isManual() ? 1 : 0);
+		params.put("types", TypeFlag.rtsToKeys(types));
 
-        StringBuilder select = new StringBuilder("select row_number() over (order by sub.ORD) as IDX, sub.id, sub.a");
+		// генерация "case when C.COLUMN_ID=18740 then C.STYLE_ID else null end S18740,"
+		for (Column column : fd.getFormColumns()){
+			int columnId = column.getId();
+			String columnSId =  String.format("column%sId", columnId);
+			params.put(columnSId, columnId);
 
-        // генерация max(X) X
-        for (Column c : fd.getFormColumns()){
-            for (String prefix : prefixs){
-                select
-                    .append(", max(")
-                    .append(prefix)
-                    .append(c.getId())
-                    .append(") ")
-                    .append(prefix)
-                    .append(c.getId())
-                    .append("\n");
-            }
-        }
+			char valuePrefix;
+			switch (column.getColumnType()) {
+				case STRING:
+					valuePrefix = 's';
+					break;
+				case DATE:
+					valuePrefix = 'd';
+					break;
+				default:
+					valuePrefix = 'n';
+			}
+			select.append(",\n CASE WHEN c.column_id = :").append(columnSId).append(" THEN c.").append(valuePrefix).append("value ELSE NULL END v").append(columnId).append(",\n")
+					.append(" CASE WHEN c.column_id = :").append(columnSId).append(" THEN c.style_id ELSE NULL END s").append(columnId).append(",\n")
+					.append(" CASE WHEN c.column_id = :").append(columnSId).append(" THEN c.edit ELSE 0 END e").append(columnId).append(",\n")
+					.append(" CASE WHEN c.column_id = :").append(columnSId).append(" THEN c.colspan ELSE NULL END csi").append(columnId).append(",\n")
+					.append(" CASE WHEN c.column_id = :").append(columnSId).append(" THEN c.rowspan ELSE NULL END rsi").append(columnId);
+		}
 
-        select.append(" from (with C as");
-        select.append("     (select COLUMN_ID, ROW_ID, max(STYLE_ID) STYLE_ID, max(EDIT) EDIT, max(COLSPAN) COLSPAN, max(ROWSPAN) ROWSPAN, max(NV) nVALUE, max(DV) dVALUE, max(SV) sVALUE from \n");
-        select.append("         (select COLUMN_ID, ROW_ID, STYLE_ID, null as EDIT, null as COLSPAN, null as ROWSPAN, null as NV, null as DV, null as SV \n");
-        select.append("             from CELL_STYLE N join DATA_ROW RR on RR.ID = N.ROW_ID and RR.FORM_DATA_ID = :formDataId \n");
-        select.append("             union all \n");
-        select.append("             select COLUMN_ID, ROW_ID,null, 1 as EDIT, null, null, null, null, null from CELL_EDITABLE N join DATA_ROW RR on RR.ID = N.ROW_ID and RR.FORM_DATA_ID = :formDataId \n");
-        select.append("             union all \n");
-        select.append("             select COLUMN_ID, ROW_ID, null, null, COLSPAN, ROWSPAN, null, null, null from CELL_SPAN_INFO N join DATA_ROW RR on RR.ID = N.ROW_ID and RR.FORM_DATA_ID = :formDataId \n");
-        select.append("             union all \n");
-        select.append("             select COLUMN_ID, ROW_ID, null, null, null, null, VALUE, null, null from NUMERIC_VALUE N join DATA_ROW RR on RR.ID = N.ROW_ID and RR.FORM_DATA_ID = :formDataId \n");
-        select.append("             union all \n");
-        select.append("             select COLUMN_ID, ROW_ID,null, null, null, null,null, VALUE, null from DATE_VALUE N join DATA_ROW RR on RR.ID = N.ROW_ID and RR.FORM_DATA_ID = :formDataId \n");
-        select.append("             union all \n");
-        select.append("             select COLUMN_ID, ROW_ID,null, null, null, null, null, null, VALUE from STRING_VALUE N join DATA_ROW RR on RR.ID = N.ROW_ID and RR.FORM_DATA_ID = :formDataId) \n");
-        select.append("     group by COLUMN_ID, ROW_ID) \n");
+		select.append("\n FROM data_row d LEFT JOIN \n");
+		select.append(" (SELECT column_id, row_id, style_id, editable edit, colspan, rowspan, nvalue, dvalue, svalue FROM data_cell) c ON d.id = c.row_id \n");
+		select.append(" WHERE d.form_data_id = :formDataId AND manual = :manual AND d.type IN (:types)) sub \n");
+		select.append(" GROUP BY sub.id, sub.ord, sub.a ORDER BY sub.ord");
 
-        select.append(" select \n" +
-                            " d.ID as ID,\n" +
-                            " d.ALIAS as A,\n" +
-                            " d.ord as ord");
+		StringBuilder sql = new StringBuilder();
+		sql.append(select);
+		// Генерация нумерации строк
+		sql.insert(0, "SELECT * FROM (\n");
+		sql.append(") table1\nLEFT JOIN \n(");
+		sql.append("SELECT ROW_NUMBER() OVER (ORDER BY sub.ord) AS idx2, sub.id AS id2\n");
+		sql.append(" FROM (SELECT d.id, d.alias AS a, d.ord FROM data_row d\n");
+		sql.append(" WHERE d.form_data_id = :formDataId AND manual = :manual AND d.type IN (:types) AND d.alias IS NULL) sub\n");
+		sql.append(" GROUP BY sub.id, sub.ord, sub.a ORDER BY sub.ord");
+		sql.append(") table2\nON table1.id = table2.id2");
 
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put("formDataId", fd.getId());
-        params.put("manual", fd.isManual() ? 1 : 0);
-        params.put("types", TypeFlag.rtsToKeys(types));
+		if (range != null) {
+			sql.insert(0, "select * from( ");
+			sql.append(") where IDX between :from and :to");
+			params.put("from", range.getOffset());
+			params.put("to", range.getOffset() + range.getLimit() - 1);
+		}
 
-        // генерация "case when C.COLUMN_ID=18740 then C.STYLE_ID else null end S18740,"
-        for (Column c : fd.getFormColumns()){
-            params.put(String.format("column%sId", c.getId()), c.getId());
-            String columnId =  String.format(":column%sId", c.getId());
-
-            char valuePrefix = 's';
-            if (c instanceof StringColumn) {
-                valuePrefix = 's';
-            } else if (c instanceof NumericColumn || c instanceof RefBookColumn || c instanceof ReferenceColumn || c instanceof AutoNumerationColumn) {
-                valuePrefix = 'n';
-            } else if (c instanceof DateColumn) {
-                valuePrefix = 'd';
-            } else {
-                throw new IllegalArgumentException();
-            }
-
-            select.append(",case when C.COLUMN_ID=").append(columnId).append(" then C.").append(valuePrefix).append("VALUE else null end V").append(c.getId()).append(",\n")
-                    .append(" case when C.COLUMN_ID=").append(columnId).append(" then C.STYLE_ID else null end S").append(c.getId()).append(",\n")
-                    .append(" case when C.COLUMN_ID=").append(columnId).append(" then C.EDIT else 0 end E").append(c.getId()).append(",\n")
-                    .append(" case when C.COLUMN_ID=").append(columnId).append(" then C.COLSPAN else null end CSI").append(c.getId()).append(",\n")
-                    .append(" case when C.COLUMN_ID=").append(columnId).append(" then C.ROWSPAN else null end RSI").append(c.getId()).append("");
-        }
-
-        select.append(" FROM data_row d left join c on d.id = c.row_id \n"+
-                "where d.FORM_DATA_ID = :formDataId and manual = :manual and d.TYPE IN (:types)) sub \n"+
-                "group by sub.id, sub.ord, sub.a \n " +
-                "order by sub.ord");
-
-        StringBuilder sql = new StringBuilder();
-        sql.append(select);
-        // Генерация нумерации строк
-        sql.insert(0, "SELECT * FROM (\n");
-        sql.append(") table1 LEFT OUTER JOIN (\n");
-        sql.append("SELECT row_number() over (order by sub.ORD) AS IDX2, sub.id AS ID2\n");
-        sql.append("FROM (SELECT d.ID AS ID, d.ALIAS AS A, d.ord AS ord\n");
-        sql.append("FROM data_row d\n");
-        sql.append("WHERE d.FORM_DATA_ID = :formDataId AND manual = :manual AND d.TYPE IN (:types) AND d.ALIAS IS NULL) sub\n");
-        sql.append("GROUP BY sub.id, sub.ord, sub.a ORDER BY sub.ord");
-        sql.append(") table2 ON table1.id = table2.id2");
-
-        if (range != null) {
-            sql.insert(0, "select * from( ");
-            sql.append(") where IDX between :from and :to");
-            params.put("from", range.getOffset());
-            params.put("to", range.getOffset() + range.getLimit() - 1);
-        }
-
-        return new Pair<String, Map<String, Object>>(sql.toString(), params);
-    }
+		return new Pair<String, Map<String, Object>>(sql.toString(), params);
+	}
 
 	@Override
 	public DataRow<Cell> mapRow(ResultSet rs, int rowNum) throws SQLException {
 		List<Cell> cells = FormDataUtils.createCells(fd.getFormColumns(),
 				fd.getFormStyles());
-        Integer previousRowNumber = fd.getPreviousRowNumber() != null ? fd.getPreviousRowNumber() : 0;
-        for (Cell cell : cells) {
-            // Values
-            if (cell.getColumn() instanceof AutoNumerationColumn && rs.getString("A") == null) {
-                if (((AutoNumerationColumn) cell.getColumn()).getType() == 1) {
-                    cell.setValue(SqlUtils.getInteger(rs, "IDX2") + previousRowNumber, rowNum);
-                } else {
-                    cell.setValue(SqlUtils.getInteger(rs, "IDX2"), rowNum);
-                }
-            } else {
-                DataRowDaoImplUtils.CellValueExtractor extr = getCellValueExtractor(cell.getColumn());
-                cell.setValue(extr.getValue(rs,
-                        String.format("V%s", cell.getColumn().getId())), rowNum);
-            }
-            // Styles
-            BigDecimal styleId = rs.getBigDecimal(String.format("S%s", cell
-                    .getColumn().getId()));
-            cell.setStyleId(styleId != null ? styleId.intValueExact() : null);
-            // Editable
-            cell.setEditable(rs.getBoolean(String.format("E%s", cell
-                    .getColumn().getId())));
-            // Span Info
-            Integer rowSpan = SqlUtils.getInteger(rs, String.format("RSI%s", cell.getColumn()
-                    .getId()));
-            cell.setRowSpan(((rowSpan == null) || (rowSpan == 0)) ? 1 : rowSpan);
-            Integer colSpan = SqlUtils.getInteger(rs, String.format("CSI%s", cell.getColumn()
-                    .getId()));
-            cell.setColSpan(((colSpan == null) || (colSpan == 0)) ? 1 : colSpan);
-        }
-        DataRow<Cell> dataRow = new DataRow<Cell>(rs.getString("A"), cells);
+		Integer previousRowNumber = fd.getPreviousRowNumber() != null ? fd.getPreviousRowNumber() : 0;
+		for (Cell cell : cells) {
+			// Values
+			if (ColumnType.AUTO.equals(cell.getColumn().getColumnType()) && rs.getString("A") == null) {
+				if (NumerationType.CROSS.equals(((AutoNumerationColumn) cell.getColumn()).getNumerationType())) {
+					cell.setValue(SqlUtils.getInteger(rs, "IDX2") + previousRowNumber, rowNum);
+				} else {
+					cell.setValue(SqlUtils.getInteger(rs, "IDX2"), rowNum);
+				}
+			} else {
+				DataRowDaoImplUtils.CellValueExtractor extr = getCellValueExtractor(cell.getColumn());
+				cell.setValue(extr.getValue(rs,
+						String.format("V%s", cell.getColumn().getId())), rowNum);
+			}
+			// Styles
+			BigDecimal styleId = rs.getBigDecimal(String.format("S%s", cell
+					.getColumn().getId()));
+			cell.setStyleId(styleId != null ? styleId.intValueExact() : null);
+			// Editable
+			cell.setEditable(rs.getBoolean(String.format("E%s", cell
+					.getColumn().getId())));
+			// Span Info
+			Integer rowSpan = SqlUtils.getInteger(rs, String.format("RSI%s", cell.getColumn()
+					.getId()));
+			cell.setRowSpan(((rowSpan == null) || (rowSpan == 0)) ? 1 : rowSpan);
+			Integer colSpan = SqlUtils.getInteger(rs, String.format("CSI%s", cell.getColumn()
+					.getId()));
+			cell.setColSpan(((colSpan == null) || (colSpan == 0)) ? 1 : colSpan);
+		}
+		DataRow<Cell> dataRow = new DataRow<Cell>(rs.getString("A"), cells);
 		dataRow.setId(SqlUtils.getLong(rs,"ID"));
 		dataRow.setIndex(SqlUtils.getInteger(rs,"IDX"));
 		return dataRow;

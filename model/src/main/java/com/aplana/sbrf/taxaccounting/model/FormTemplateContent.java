@@ -24,18 +24,16 @@ public class FormTemplateContent {
 	public void fillFormTemplateContent(FormTemplate formTemplate) {
         // Для правильного назначения Parent_id при импорте, проставляем алиас.
         for (Column col : formTemplate.getColumns()){
-            if(col instanceof ReferenceColumn){
-                ((ReferenceColumn) col).setParentAlias(
-                        formTemplate.getColumn(
-                                ((ReferenceColumn) col).getParentId()).getAlias());
+            if(ColumnType.REFERENCE.equals(col.getColumnType())){
+                ((ReferenceColumn) col).setParentAlias(formTemplate.getColumn(((ReferenceColumn) col).getParentId()).getAlias());
             }
         }
-		this.fixedRows = formTemplate.isFixedRows();
-		this.name = formTemplate.getName();
-		this.fullName = formTemplate.getFullName();
-		this.header = formTemplate.getHeader();
-		this.columns = formTemplate.getColumns();
-		this.styles = formTemplate.getStyles();
+		fixedRows = formTemplate.isFixedRows();
+		name = formTemplate.getName();
+		fullName = formTemplate.getFullName();
+		header = formTemplate.getHeader();
+		columns = formTemplate.getColumns();
+		styles = formTemplate.getStyles();
 	}
 
 	public void fillFormTemplate(FormTemplate formTemplate) {
