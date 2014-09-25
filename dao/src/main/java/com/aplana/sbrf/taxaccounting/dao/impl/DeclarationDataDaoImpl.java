@@ -322,7 +322,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         sql.append("SELECT dec.ID as declaration_data_id, dec.declaration_template_id, dec.is_accepted, dec.tax_organ_code, dec.kpp,")
                 .append(" dectype.ID as declaration_type_id, dectype.NAME as declaration_type_name,")
                 .append(" dp.ID as department_id, dp.NAME as department_name, dp.TYPE as department_type,")
-                .append(" rp.ID as report_period_id, rp.NAME as report_period_name, dectype.TAX_TYPE, tp.year");
+                .append(" rp.ID as report_period_id, rp.NAME as report_period_name, dectype.TAX_TYPE, tp.year, drp.correction_date");
     }
 
     public void appendOrderByClause(StringBuilder sql, DeclarationDataSearchOrdering ordering, boolean ascSorting) {

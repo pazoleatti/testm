@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -49,6 +50,8 @@ public class FormDataListView extends ViewWithUiHandlers<FormDataListUiHandlers>
 
     @UiField
     LinkButton create;
+
+    private final static DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getFormat("dd.MM.yyyy");
 
     private GenericDataGrid.DataGridResizableHeader formKindHeader, formTypeHeader, periodMonthHeader;
     private TextColumn<FormDataSearchResultItem> periodMonthColumn;
@@ -107,7 +110,11 @@ public class FormDataListView extends ViewWithUiHandlers<FormDataListUiHandlers>
 		TextColumn<FormDataSearchResultItem> reportPeriodColumn = new TextColumn<FormDataSearchResultItem>() {
 			@Override
 			public String getValue(FormDataSearchResultItem object) {
-				return object.getReportPeriodName();
+                String str = object.getReportPeriodName();
+                if (object.getCorrectionDate() != null) {
+                    str += ", корр. (" + DATE_TIME_FORMAT.format(object.getCorrectionDate()) + ")";
+                }
+				return str;
 			}
 		};
 
@@ -199,7 +206,6 @@ public class FormDataListView extends ViewWithUiHandlers<FormDataListUiHandlers>
         periodMonthColumn.setDataStoreName(FormDataSearchOrdering.REPORT_PERIOD_MONTH_NAME.name());
         stateColumn.setDataStoreName(FormDataSearchOrdering.STATE.name());
         returnColumn.setDataStoreName(FormDataSearchOrdering.RETURN.name());
-
 
         formKindColumn.setSortable(true);
         linkColumn.setSortable(true);

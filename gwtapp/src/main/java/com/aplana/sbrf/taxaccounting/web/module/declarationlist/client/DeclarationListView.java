@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -62,8 +63,9 @@ public class DeclarationListView extends
 
     private Map<Integer, String> departmentFullNames;
 
-
     private SingleSelectionModel<DeclarationDataSearchResultItem> selectionModel;
+
+    private final static DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getFormat("dd.MM.yyyy");
 
     @UiField
     Label declarationHeader;
@@ -130,7 +132,7 @@ public class DeclarationListView extends
             }
         };
         
-        Column reportPeriodYearColumn = null;
+        Column reportPeriodYearColumn;
         if (taxType == TaxType.DEAL) {
             reportPeriodYearColumn = new Column<DeclarationDataSearchResultItem, DeclarationDataSearchResultItem>(
                     new AbstractCell<DeclarationDataSearchResultItem>() {
@@ -174,11 +176,16 @@ public class DeclarationListView extends
                         if (declaration == null) {
                             return;
                         }
+                        String str = declaration.getReportPeriodYear() + ": " + declaration.getReportPeriodName();
+                        if (declaration.getCorrectionDate() != null) {
+                            str += ", корр. (" + DATE_TIME_FORMAT.format(declaration.getCorrectionDate()) + ")";
+                        }
+
                         sb.appendHtmlConstant("<a href=\"#"
                                 + DeclarationDataTokens.declarationData + ";"
                                 + DeclarationDataTokens.declarationId + "="
                                 + declaration.getDeclarationDataId() + "\">"
-                                + declaration.getReportPeriodYear() + ": " + declaration.getReportPeriodName() + "</a>");
+                                + str + "</a>");
                     }
                 }) {
             @Override

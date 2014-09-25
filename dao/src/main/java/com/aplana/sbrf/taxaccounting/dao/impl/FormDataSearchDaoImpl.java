@@ -95,7 +95,7 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
                 "fd.KIND as form_data_kind_id, fd.STATE, fd.PERIOD_ORDER as period_order, tp.year,")
 			.append(" ft.ID as form_type_id, ft.NAME as form_type_name, ft.TAX_TYPE,")
 			.append(" dp.ID as department_id, dp.NAME as department_name, dp.TYPE as department_type,")
-			.append(" rp.ID as report_period_id, rp.NAME as report_period_name");
+			.append(" rp.ID as report_period_id, rp.NAME as report_period_name, drp.correction_date ");
 	}
 
 	@Override
@@ -208,7 +208,7 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
             "fd.department_report_period_id, fd.STATE, " +
             "fd.PERIOD_ORDER as period_order, tp.year, ft.ID as form_type_id, ft.NAME as form_type_name, ft.TAX_TYPE, " +
             "dp.ID as department_id, dp.NAME as department_name, dp.TYPE as department_type, rp.ID as report_period_id, " +
-            "rp.NAME as report_period_name %s " +
+            "rp.NAME as report_period_name %s, drp.correction_date " +
             "FROM form_data fd " +
             "join department_report_period drp on drp.id = fd.department_report_period_id " +
             "JOIN FORM_TEMPLATE t on t.id = fd.form_template_id " +
@@ -263,6 +263,7 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
                         result.setReportPeriodName(rs.getString("report_period_name"));
                         result.setState(WorkflowState.fromId(SqlUtils.getInteger(rs,"state")));
                         result.setTaxType(TaxType.fromCode(rs.getString("tax_type").charAt(0)));
+                        result.setCorrectionDate(rs.getDate("correction_date"));
                         result.setReportPeriodYear(SqlUtils.getInteger(rs,"year"));
                         Integer reportPeriodMonth = SqlUtils.getInteger(rs,"period_order");
                         result.setReportPeriodMonth(rs.wasNull() ? null : reportPeriodMonth);

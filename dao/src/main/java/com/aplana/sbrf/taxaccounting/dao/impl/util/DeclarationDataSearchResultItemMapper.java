@@ -25,6 +25,7 @@ public class DeclarationDataSearchResultItemMapper implements RowMapper<Declarat
 		result.setAccepted(rs.getBoolean("is_accepted"));
         result.setReportPeriodYear(SqlUtils.getInteger(rs,"year"));
 		result.setDeclarationType(rs.getString("declaration_type_name"));
+        result.setCorrectionDate(rs.getDate("correction_date"));
         result.setTaxOrganCode(rs.getString("tax_organ_code"));
         result.setTaxOrganKpp(rs.getString("kpp"));
 		return result;
