@@ -63,7 +63,7 @@ alter table ref_book_record add constraint ref_book_record_chk_status check (sta
 alter table ref_book_record add constraint ref_book_record_fk_ref_book_id foreign key (ref_book_id) references ref_book(id);
 create unique index i_ref_book_record_refbookid on ref_book_record(ref_book_id, record_id, version);
 
-alter table ref_book_value add constraint ref_book_value_pk primary key (record_id, attribute_id);
+alter table ref_book_value add constraint ref_book_value_pk primary key (record_id, attribute_id, row_num);
 alter table ref_book_value add constraint ref_book_value_fk_record_id foreign key (record_id) references ref_book_record(id) on delete cascade;
 alter table ref_book_value add constraint ref_book_value_fk_attribute_id foreign key (attribute_id) references ref_book_attribute(id);
 

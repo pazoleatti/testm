@@ -147,7 +147,10 @@ ALTER TABLE ref_book_attribute ADD is_table NUMBER(1) DEFAULT 0 NOT NULL;
 ALTER TABLE ref_book_attribute ADD CONSTRAINT ref_book_attr_chk_istable CHECK (is_table IN (0,1));
 COMMENT ON COLUMN ref_book_attribute.is_table IS 'Признак табличного атрибута';
 
-ALTER TABLE ref_book_value ADD row_num NUMBER(9);
+ALTER TABLE ref_book_value ADD row_num NUMBER(9) DEFAULT 0 NOT NULL;
+ALTER TABLE ref_book_value DROP CONSTRAINT REF_BOOK_VALUE_PK;
+DROP INDEX REF_BOOK_VALUE_PK;
+ALTER TABLE ref_book_value ADD CONSTRAINT REF_BOOK_VALUE_PK primary key (record_id, attribute_id, row_num);
 COMMENT ON COLUMN ref_book_value.row_num IS 'Номер строки в табличной части справочника';
 
 ---------------------------------------------------------------------------------------------------

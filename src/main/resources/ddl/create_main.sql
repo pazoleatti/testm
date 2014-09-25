@@ -211,7 +211,7 @@ create table ref_book_value (
   number_value number(27,10),
   date_value date,
   reference_value number(18), 
-  row_num number(9)
+  row_num number(9) default 0 not null
 );
 comment on table ref_book_value is 'Значение записи справочника';
 comment on column ref_book_value.record_id is 'Ссылка на запись справочника';
