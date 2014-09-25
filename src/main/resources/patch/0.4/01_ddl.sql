@@ -102,5 +102,54 @@ ALTER TABLE log_system ADD CONSTRAINT log_system_chk_rp CHECK (event_id IN (7, 1
 DROP TABLE object_lock;
 
 ---------------------------------------------------------------------------------------------------
+-- http://jira.aplana.com/browse/SBRFACCTAX-8861 - Связь НФ с таблицей BLOB_DATA
+CREATE TABLE report (form_data_id number(18) NOT NULL, blob_data_id varchar2(36) NOT NULL, type number(1) NOT NULL, checking number(1) NOT NULL, manual number(1) NOT NULL, absolute number(1) NOT NULL);
+
+COMMENT ON TABLE report IS 'Отчет';
+COMMENT ON COLUMN report.form_data_id IS 'Идентификатор налоговой формы';
+COMMENT ON COLUMN report.blob_data_id IS 'Идентификатор отчета';
+COMMENT ON COLUMN report.TYPE IS 'Тип отчета (0 - Excel, 1 - CSV, 2 - PDF, 3 - Jasper)';
+COMMENT ON COLUMN report.manual IS 'Режим ввода данных (0 - обычная версия; 1 - версия ручного ввода)';
+COMMENT ON COLUMN report.checking IS 'Типы столбцов (0 - только обычные, 1 - вместе с контрольными)';
+COMMENT ON COLUMN report.ABSOLUTE IS 'Режим вывода данных (0 - только дельты, 1 - абсолютные значения)';
+
+ALTER TABLE report ADD CONSTRAINT report_pk PRIMARY KEY (form_data_id,type, manual,checking,absolute);
+
+ALTER TABLE report ADD CONSTRAINT report_fk_form_data_id FOREIGN KEY (form_data_id) REFERENCES form_data(id);
+ALTER TABLE report ADD CONSTRAINT report_fk_blob_data_id FOREIGN KEY (blob_data_id) REFERENCES blob_data(id);
+ALTER TABLE report ADD CONSTRAINT report_chk_type CHECK (type IN (0,1,2,3));
+ALTER TABLE report ADD CONSTRAINT report_chk_manual CHECK (manual IN (0,1));
+ALTER TABLE report ADD CONSTRAINT report_chk_checking CHECK (checking IN (0,1));
+ALTER TABLE report ADD CONSTRAINT report_chk_absolute CHECK (absolute IN (0,1));
+
+---------------------------------------------------------------------------------------------------
+-- http://jira.aplana.com/browse/SBRFACCTAX-8879 - Функционал оповещения
+ALTER TABLE notification MODIFY report_period_id NULL;
+ALTER TABLE notification MODIFY sender_department_id NULL;
+ALTER TABLE notification MODIFY deadline NULL;
+ALTER TABLE notification ADD user_id number(9);
+COMMENT ON COLUMN notification.user_id IS 'Идентификатор пользователя, который получит оповещение';
+ALTER TABLE notification ADD CONSTRAINT notification_fk_notify_user FOREIGN KEY (user_id) REFERENCES sec_user(id);
+ALTER TABLE notification ADD role_id number(9);
+COMMENT ON COLUMN notification.role_id IS 'Идентификатор роли пользователя, который получит оповещение';
+ALTER TABLE notification ADD CONSTRAINT notification_fk_notify_role FOREIGN KEY (role_id) REFERENCES sec_role(id);
+
+CREATE TABLE lock_data_subscribers (lock_key varchar2(1000 byte) NOT NULL, user_id number(9) NOT NULL);
+COMMENT ON TABLE lock_data_subscribers IS 'Cписок пользователей, ожидающих выполнения операций над объектом блокировки';
+COMMENT ON COLUMN lock_data_subscribers.lock_key IS 'Ключ блокировки объекта, после завершения операции над которым, будет выполнено оповещение';
+COMMENT ON COLUMN lock_data_subscribers.user_id IS 'Идентификатор пользователя, который получит оповещение';
+ALTER TABLE lock_data_subscribers ADD CONSTRAINT lock_data_subscr_fk_lock_data FOREIGN KEY (lock_key) REFERENCES lock_data(KEY) ON DELETE CASCADE;
+ALTER TABLE lock_data_subscribers ADD CONSTRAINT lock_data_subscr_fk_sec_user FOREIGN KEY (user_id) REFERENCES sec_user(id) ON DELETE CASCADE;
+
+---------------------------------------------------------------------------------------------------
+-- http://jira.aplana.com/browse/SBRFACCTAX-8895 - Изменения в структуре REF_BOOK_ATTRIBUTE/REF_BOOK_VALUE
+ALTER TABLE ref_book_attribute ADD is_table NUMBER(1) DEFAULT 0 NOT NULL;
+ALTER TABLE ref_book_attribute ADD CONSTRAINT ref_book_attr_chk_istable CHECK (is_table IN (0,1));
+COMMENT ON COLUMN ref_book_attribute.is_table IS 'Признак табличного атрибута';
+
+ALTER TABLE ref_book_value ADD row_num NUMBER(9);
+COMMENT ON COLUMN ref_book_value.row_num IS 'Номер строки в табличной части справочника';
+
+---------------------------------------------------------------------------------------------------
 COMMIT;
 EXIT;

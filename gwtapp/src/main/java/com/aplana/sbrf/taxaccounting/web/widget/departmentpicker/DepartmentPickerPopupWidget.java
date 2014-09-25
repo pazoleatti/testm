@@ -190,12 +190,10 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
     }
 
     private void find(){
-        String text = filter.getText().trim();
-        List<DepartmentTreeItem> items = tree.getItems();
-        if (tree.countOnFilter(text, items) >= 100) {
+        tree.filter(filter.getText().trim());
+        if (tree.getValue().size() >= 100) {
             Dialog.warningMessage("Уточните параметры поиска: найдено слишком много значений");
         } else {
-            tree.filter(filter.getText().trim(), items);
             tree.setShowDisabledDepartment(showDisabled.getValue());
         }
     }

@@ -37,7 +37,6 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 	FlexiblePager pager;
 
 	private DateTimeFormat formatter = DateTimeFormat.getFormat("dd.MM.yyyy HH:mm:ss");
-    private ColumnSortEvent.AsyncHandler sortHandler;
     private boolean isAsc = false;
     private NotificationsFilterData.SortColumn sortColumn = NotificationsFilterData.SortColumn.DATE;
 
@@ -95,7 +94,7 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 
         notificationTable.getColumnSortList().setLimit(1);
 
-        sortHandler = new ColumnSortEvent.AsyncHandler(notificationTable);
+        ColumnSortEvent.AsyncHandler sortHandler = new ColumnSortEvent.AsyncHandler(notificationTable);
         notificationTable.addColumnSortHandler(sortHandler);
 
         dataProvider.addDataDisplay(notificationTable);

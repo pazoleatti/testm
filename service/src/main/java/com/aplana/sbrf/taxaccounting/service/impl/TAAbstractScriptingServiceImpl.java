@@ -61,7 +61,7 @@ public abstract class TAAbstractScriptingServiceImpl implements ApplicationConte
 	
 
 	@Override
-	public void setApplicationContext(ApplicationContext context) throws BeansException {
+	public void setApplicationContext(ApplicationContext context) {
 		this.applicationContext = context;
 	}
 	

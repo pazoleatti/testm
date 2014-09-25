@@ -27,6 +27,9 @@
     <module>
         <ejb>async-task.jar</ejb>
     </module>
+    <module>
+        <ejb>common-core.jar</ejb>
+    </module>
     <security-role>
         <description>Все аутентифицированные пользователи</description>
         <role-name>taxaccountingUsers</role-name>

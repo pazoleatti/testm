@@ -79,7 +79,7 @@ public class GetBSOpenListHandler extends AbstractActionHandler<GetBSOpenListAct
             TaxPeriod taxPeriod = new TaxPeriod();
             taxPeriod.setYear(year);
             ReportPeriod reportPeriod = new ReportPeriod();
-            reportPeriod.setName(record.get("PERIOD_NAME").getStringValue().replaceFirst("^" + String.valueOf(year) + ".*:",""));
+            reportPeriod.setName(record.get("PERIOD_NAME").getStringValue().replaceFirst("^" + year + ".*:",""));
             reportPeriod.setId(record.get("record_id").getNumberValue().intValue());
             reportPeriod.setEndDate(null);
             reportPeriod.setStartDate(null);

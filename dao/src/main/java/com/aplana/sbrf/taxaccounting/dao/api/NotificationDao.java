@@ -28,26 +28,10 @@ public interface NotificationDao {
     Notification get(int reportPeriodId, int senderDepartmentId, Integer receiverDepartmentId);
 
     /**
-     * Получает список оповещений от отправителя получателю
-     * @param senderDepartmentId подразделение-отправитель
-     * @param receiverDepartmentId подразделение-получатель
-     * @return оповещение
-     */
-    List<Notification> listByDepartments(int senderDepartmentId, Integer receiverDepartmentId);
-
-    /**
      * Сохраняет список уведомлений с помощью batch-запроса
      * @param notifications список уведомлений
      */
     void saveList(List<Notification> notifications);
-
-    /**
-     * Удаляет оповещение
-     * @param reportPeriodId отчетный период
-     * @param senderDepartmentId подразделение-отправитель
-     * @param receiverDepartmentId подразделение-получатель
-     */
-    void delete(int reportPeriodId, int senderDepartmentId, Integer receiverDepartmentId);
 
     /**
      * Удаляет все оповещения для группы подразделений за указанный отчетный период
@@ -55,13 +39,6 @@ public interface NotificationDao {
      * @param departments группа подразделений, связки подразделение-родительское подразделение
      */
     void deleteList(int reportPeriodId, List<DepartmentPair> departments);
-
-	/**
-	 * Получить список идентификаторов оповещений для подразделения - получателя
-	 * @param departmentId подразделение - получатель
-	 * @return список идентификаторов оповещений
-	 */
-	List<Integer> listForDepartment(int departmentId);
 
 	/**
 	 * Получить оповещение по его идентификатору
@@ -75,7 +52,7 @@ public interface NotificationDao {
 	 * @param filter фильтр
 	 * @return список идентификаторов оповещений
 	 */
-	List<Integer> getByFilter(NotificationsFilterData filter);
+	List<Notification> getByFilter(NotificationsFilterData filter);
 
 	/**
 	 * Получить количество оповещений по фильтру
@@ -89,4 +66,11 @@ public interface NotificationDao {
      * @param reportPeriodId отчетный период
      */
     void deleteByReportPeriod(int reportPeriodId);
+
+    /**
+     * Обновляет статус уведомлений пользователя на "Просмотрен"
+     * @param filter фильтр оповещений
+     * @param userId идентификатор пользователя, который будет установлен первым прочитавшим оповещения
+     */
+    void updateUserNotificationsStatus(NotificationsFilterData filter, int userId);
 }

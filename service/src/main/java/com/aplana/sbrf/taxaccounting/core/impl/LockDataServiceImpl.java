@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author <a href="mailto:Marat.Fayzullin@aplana.com">Файзуллин Марат</a>
@@ -162,9 +163,48 @@ public class LockDataServiceImpl implements LockDataService {
     }
 
     @Override
-    public boolean checkLock(final String key) {
+    public boolean isLockExists(final String key) {
         synchronized(LockDataServiceImpl.class) {
             return validateLock(dao.get(key)) != null;
+        }
+    }
+
+    @Override
+    public void addUserWaitingForLock(final String key, final int userId) {
+        tx.executeInNewTransaction(new TransactionLogic() {
+            @Override
+            public void execute() {
+                try {
+                    synchronized(LockDataServiceImpl.class) {
+                        LockData lock = validateLock(dao.get(key));
+                        if (lock != null) {
+                            dao.addUserWaitingForLock(key, userId);
+                        } else {
+                            throw new ServiceException(String.format("Нельзя ожидать несуществующий объект блокировки. key = \"%s\"", key));
+                        }
+                    }
+                } catch (ServiceException e) {
+                    throw e;
+                } catch (Exception e) {
+                    throw new ServiceException("Не удалось добавить пользователя в список ожидающих объект блокировки", e);
+                }
+            }
+
+            @Override
+            public Object executeWithReturn() {
+                return null;
+            }
+        });
+    }
+
+    @Override
+    public List<Integer> getUsersWaitingForLock(String key) {
+        synchronized(LockDataServiceImpl.class) {
+            try {
+                return dao.getUsersWaitingForLock(key);
+            } catch (Exception e) {
+                throw new ServiceException("Не удалось получить список пользователей ожидающих объект блокировки", e);
+            }
         }
     }
 

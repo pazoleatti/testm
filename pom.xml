@@ -25,6 +25,7 @@
 		<module>scheduler</module>
         <module>gwt-widget</module>
         <module>async</module>
+        <module>common</module>
     </modules>
 
 	<properties>
@@ -582,5 +583,13 @@
 		<url>http://172.16.127.19:8080/job/SBRF-NK-build</url>
 		<system>Jenkins</system>
 	</ciManagement>
+
+    <distributionManagement>
+        <repository>
+            <id>deployment</id>
+            <name>Internal Releases</name>
+            <url>http://172.16.127.19:8081/nexus/content/repositories/SBRFACCTAX/</url>
+        </repository>
+    </distributionManagement>
 
 </project>

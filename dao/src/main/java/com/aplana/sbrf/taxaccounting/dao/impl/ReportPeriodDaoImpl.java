@@ -148,7 +148,7 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
                         "(select distinct report_period_id from department_report_period " +
                         "where correction_date is null and "+ SqlUtils.transformToSqlInStatement("department_id", departmentList)+") " +
                         "and rp.tax_period_id = tp.id " +
-                        "and tp.tax_type = \'" + String.valueOf(taxType.getCode()) + "\' " +
+                        "and tp.tax_type = \'" + taxType.getCode() + "\' " +
                         "order by tp.year desc, rp.calendar_start_date",
                 new ReportPeriodMapper());
     }

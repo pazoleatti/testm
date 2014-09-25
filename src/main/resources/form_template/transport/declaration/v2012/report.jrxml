@@ -32,11 +32,11 @@
 		</field>
 		<variable name="ОКТМО" class="java.lang.String">
 			<variableExpression><![CDATA[$F{ОКТМО}.length() < 11 ?
-($F{ОКТМО}+"00000000000").substring(0,11)
+($F{ОКТМО}+"-----------").substring(0,11)
 :
 $F{ОКТМО}]]></variableExpression>
 			<initialValueExpression><![CDATA[$F{ОКТМО}.length() < 11 ?
-($F{ОКТМО}+"00000000000").substring(0,11)
+($F{ОКТМО}+"-----------").substring(0,11)
 :
 $F{ОКТМО}]]></initialValueExpression>
 		</variable>
@@ -178,11 +178,11 @@ $F{ОКТМО}]]></initialValueExpression>
 			<variableExpression><![CDATA[$F{ОКТМО} == null ?
 "-----------"
 :
-($F{ОКТМО}+"00000000000").substring(0,11)]]></variableExpression>
+($F{ОКТМО}+"-----------").substring(0,11)]]></variableExpression>
 			<initialValueExpression><![CDATA[$F{ОКТМО} == null ?
 "-----------"
 :
-($F{ОКТМО}+"00000000000").substring(0,11)]]></initialValueExpression>
+($F{ОКТМО}+"-----------").substring(0,11)]]></initialValueExpression>
 		</variable>
 		<variable name="KodVidTS" class="java.lang.String">
 			<variableExpression><![CDATA[$F{КодВидТС} == null ?

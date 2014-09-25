@@ -201,7 +201,6 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                             @Override
                             public void onSuccess(GetRefBookRecordResult result) {
                                 getView().fillVersionData(result.getVersionData(), currentRefBookId, refBookRecordId);
-                                Map<String, RefBookValueSerializable> fields = result.getRecord();
                                 getView().fillInputFields(result.getRecord());
                                 currentUniqueRecordId = refBookRecordId;
                                 updateMode();
@@ -219,13 +218,10 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
             }
             Map<String, RefBookValueSerializable> map = getView().getFieldsValues();
             //TODO : Специфические для справочника подразделений проверки. Подумать над возможностью избавиться
-            if (currentRefBookId == 30) {
-                if (modifiedFields.containsKey("TYPE")){
-                    if (map.get("TYPE").getReferenceValue().intValue() != 1 &&  map.get("PARENT_ID").getReferenceValue() == null){
-                        Dialog.errorMessage("Родительское подразделение должно быть заполнено!");
-                        return;
-                    }
-                }
+            if (currentRefBookId == 30 && modifiedFields.containsKey("TYPE") &&
+                    map.get("TYPE").getReferenceValue().intValue() != 1 &&  map.get("PARENT_ID").getReferenceValue() == null){
+                Dialog.errorMessage("Родительское подразделение должно быть заполнено!");
+                return;
             }
 			if (currentUniqueRecordId == null) {
                 //Создание новой версии

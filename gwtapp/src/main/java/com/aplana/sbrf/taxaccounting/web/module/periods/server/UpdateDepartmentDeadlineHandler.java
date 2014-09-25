@@ -42,7 +42,13 @@ public class UpdateDepartmentDeadlineHandler extends AbstractActionHandler<Updat
         TAUserInfo userInfo = securityService.currentUserInfo();
         String text = "%s назначил подразделению %s новый срок сдачи отчетности для %s в периоде %s %s года: %s";
         List<Notification> notifications = new ArrayList<Notification>();
+        if (action.getDeadline() == null) {
+            throw new ActionException("Дата сдачи отчетности должна быть указана!");
+        }
 	    for (DepartmentPair pair : action.getDepartments()) {
+            if (pair.getDepartmentId() == null) {
+                throw new ActionException("Отправитель должен быть указан!");
+            }
             action.getTaxType().getName();
             char taxType = action.getTaxType().getCode();
             Notification notification = new Notification();

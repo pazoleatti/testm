@@ -23,4 +23,10 @@ public class PdfGeneratorAsyncTask extends AbstractAsyncTask {
     protected String getAsyncTaskName() {
         return "Генерация pdf-файла";
     }
+
+    @Override
+    protected String getNotificationMsg() {
+        //TODO
+        return null;
+    }
 }

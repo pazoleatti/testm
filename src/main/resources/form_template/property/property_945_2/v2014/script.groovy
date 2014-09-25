@@ -135,6 +135,11 @@ def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache);
 }
 
+def getBenefitCode(def parentRecordId) {
+    def recordId = getRefBookValue(203, parentRecordId).TAX_BENEFIT_ID.value
+    return  getRefBookValue(202, recordId).CODE.value
+}
+
 def getReportPeriodStartDate() {
     if (startDate == null) {
         startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
@@ -204,21 +209,15 @@ void calc() {
     dataRowHelper.save(dataRows)
 }
 
-def calcBasis(def code) {
-    if (code == null) {
+def calcBasis(def recordId) {
+    if (recordId == null) {
         return null
     }
-    String filter = "TAX_BENEFIT_ID = " + code
-    def records = refBookFactory.getDataProvider(203).getRecords(getReportPeriodEndDate(), null, filter, null)
-    if (records.size() != 1) {
-        return null
-    } else {
-        def record = records.get(0)
-        def section = record.SECTION.value ?: ''
-        def item = record.ITEM.value ?: ''
-        def subitem = record.SUBITEM.value ?: ''
-        return String.format("%s%s%s", section.padLeft(4, '0'), item.padLeft(4, '0'), subitem.padLeft(4, '0'))
-    }
+    def record = getRefBookValue(203, recordId)
+    def section = record.SECTION.value ?: ''
+    def item = record.ITEM.value ?: ''
+    def subItem = record.SUBITEM.value ?: ''
+    return String.format("%s%s%s", section.padLeft(4, '0'), item.padLeft(4, '0'), subItem.padLeft(4, '0'))
 }
 
 void addFixedRows(def dataRows, totalRow) {
@@ -268,7 +267,6 @@ void logicCheck() {
     }
     // мапа индексов строк "идентичных" текущей
     def Map<Integer, List<Integer>> foundEqualsMap = [:]
-    def Department department = departmentService.get(formData.departmentId)
     for (def row : dataRows) {
         def index = row.getIndex()
         def errorMsg = "Строка $index: "
@@ -320,10 +318,10 @@ void logicCheck() {
                 rowsToCompare.removeAll { e -> e.getIndex() in foundEqualsMap[index] }
             }
             // Проверка допустимых значений «Графы 14»
-            if (department.regionId && row.subject && row.taxBenefitCode) {
-                String filter = "DECLARATION_REGION_ID = " + department.regionId?.toString() + " and REGION_ID = " + row.subject?.toString() + " and TAX_BENEFIT_ID = " + row.taxBenefitCode + " and PARAM_DESTINATION = 2"
+            if (formDataDepartment.regionId && row.subject && row.taxBenefitCode) {
+                String filter = "DECLARATION_REGION_ID = " + formDataDepartment.regionId?.toString() + " and REGION_ID = " + row.subject?.toString() + " and RECORD_ID = " + row.taxBenefitCode + " and PARAM_DESTINATION = 2"
                 def records = refBookFactory.getDataProvider(203).getRecords(getReportPeriodEndDate(), null, filter, null)
-                if (records.size() == 0) {
+                if (records.size() == 0 || !(getBenefitCode(row.taxBenefitCode)?.toString() in ["2012000", "2012400", "2012500"])) {
                     loggerError(row, errorMsg + "Графа «${getColumnName(row, 'taxBenefitCode')}» заполнена неверно!")
                 }
             }
@@ -341,7 +339,7 @@ void logicCheck() {
             }
             // Проверка существования выбранных параметров декларации
             if (row.subject && row.taxAuthority && row.kpp && row.oktmo) {
-                filter = "DECLARATION_REGION_ID = " + department.regionId?.toString() + " and REGION_ID = " + row.subject?.toString() + " and LOWER(TAX_ORGAN_CODE) = LOWER('" + row.taxAuthority + "') and LOWER(KPP) = LOWER('" + row.kpp + "') and OKTMO = " + row.oktmo?.toString()
+                filter = "DECLARATION_REGION_ID = " + formDataDepartment.regionId?.toString() + " and REGION_ID = " + row.subject?.toString() + " and LOWER(TAX_ORGAN_CODE) = LOWER('" + row.taxAuthority + "') and LOWER(KPP) = LOWER('" + row.kpp + "') and OKTMO = " + row.oktmo?.toString()
                 records = refBookFactory.getDataProvider(200).getRecords(getReportPeriodEndDate(), null, filter, null)
                 if (records.size() == 0) {
                     rowWarning(logger, row, errorMsg + "Текущие параметры представления декларации (Код субъекта, Код НО, КПП, Код ОКТМО) не предусмотрены (в справочнике «Параметры представления деклараций по налогу на имущество» отсутствует такая запись)!")
@@ -369,7 +367,7 @@ void importData() {
     def tempRow = formData.createDataRow()
     def xml = getXML(ImportInputStream, importService, UploadFileName, getColumnName(tempRow, 'rowNum'), null)
 
-    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 13, 2)
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 15, 3)
 
     def headerMapping = [
             (xml.row[0].cell[0]): getColumnName(tempRow, 'rowNum'),
@@ -465,10 +463,20 @@ void addData(def xml, int headRowCount) {
         newRow.propertyRightBeginDate = parseDate(row.cell[12].text(), 'dd.MM.yyyy', xlsIndexRow, 12 + colOffset, logger, true)
         // графа 13
         newRow.propertyRightEndDate = parseDate(row.cell[13].text(), 'dd.MM.yyyy', xlsIndexRow, 13 + colOffset, logger, true)
-        // графа 14
-        newRow.taxBenefitCode = parseNumber(row.cell[14].text(), xlsIndexRow, 14 + colOffset, logger, true)
         // графа 15
         newRow.benefitBasis = row.cell[15].text()
+        // графа 14
+        // TODO может как-то попроще
+        String filter = "CODE = '" + row.cell[14].text() + "'"
+        def records202 = refBookFactory.getDataProvider(202).getRecords(getReportPeriodEndDate(), null, filter, null)
+        for (def record202 : records202) {
+            filter = "DECLARATION_REGION_ID = " + formDataDepartment.regionId?.toString() + " and REGION_ID = " + newRow.subject?.toString() + " and TAX_BENEFIT_ID = " + record202.record_id.value + " and PARAM_DESTINATION = 2"
+            def records = refBookFactory.getDataProvider(203).getRecords(getReportPeriodEndDate(), null, filter, null)
+            def taxRecordId = records.find { calcBasis(it?.record_id?.value) == newRow.benefitBasis }?.record_id?.value
+            if (taxRecordId) {
+                newRow.taxBenefitCode = taxRecordId
+            }
+        }
 
         rows.add(newRow)
     }

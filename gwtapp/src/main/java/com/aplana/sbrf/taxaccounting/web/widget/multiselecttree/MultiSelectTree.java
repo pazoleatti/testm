@@ -446,15 +446,16 @@ public abstract class MultiSelectTree<H extends List, T extends MultiSelectTreeI
      *
      * @param filter строка для фильтра
      */
-    public void filter(String filter, List<T> list) {
+    public void filter(String filter) {
         String lowerFilter = filter.toLowerCase();
         if (filter == null || "".equals(filter)) {
-            for (T item : list) {
+            for (T item : getItems()) {
                 item.setVisible(true);
             }
             return;
         }
-        for (T item : list) {
+        for (T item : getItems()) {
+            item.highLightText(filter);
             String itemValue = item.getName().toLowerCase();
             if (itemValue.contains(lowerFilter)) {
                 item.setVisible(true);
@@ -473,23 +474,4 @@ public abstract class MultiSelectTree<H extends List, T extends MultiSelectTreeI
         ValueChangeEvent.fire(this, getValue());
     }
 
-    public int countOnFilter(String filter, List<T> list) {
-        String lowerFilter = filter.toLowerCase();
-        int count = 0;
-        if (filter == null || "".equals(filter)) {
-            return -1;
-        }
-        for (T item : list) {
-            String itemValue = item.getName().toLowerCase();
-            if (itemValue.contains(lowerFilter)) {
-                count++;
-                T parent = (T) item.getParentItem();
-                while (parent != null) {
-                    count++;
-                    parent = (T) parent.getParentItem();
-                }
-            }
-        }
-        return count;
-    }
 }

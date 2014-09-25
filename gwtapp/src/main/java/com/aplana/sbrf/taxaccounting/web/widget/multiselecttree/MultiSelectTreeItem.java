@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.multiselecttree;
 
+import com.aplana.sbrf.taxaccounting.web.widget.ui.HasHighlighting;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -15,7 +16,7 @@ import com.google.gwt.user.client.ui.*;
  * @author rtimerbaev
  */
 public class MultiSelectTreeItem extends TreeItem implements HasClickHandlers,
-        HasDoubleClickHandlers, HasMouseDownHandlers, HasValue<Boolean> {
+        HasDoubleClickHandlers, HasMouseDownHandlers, HasValue<Boolean>, HasHighlighting {
 
     protected Integer id;
     /** Тип узла дерева: true - с чекбоксом, false - с радиокнопкой, null - только с текстом*/
@@ -94,6 +95,7 @@ public class MultiSelectTreeItem extends TreeItem implements HasClickHandlers,
         });
     }
 
+    @Override
     public void highLightText(String textToHighLight) {
         if(textToHighLight!= null && !textToHighLight.isEmpty()) {
             String highLightedString = RegExp.compile(textToHighLight, "gi").replace(getName(), "<span style=\"color: #ff0000;\">$&</span>");
