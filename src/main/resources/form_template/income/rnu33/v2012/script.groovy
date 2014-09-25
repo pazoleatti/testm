@@ -73,7 +73,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.COMPOSE:
-        formDataService.consolidationTotal(formData, formDataDepartment.id, logger, ['month', 'total'])
+        formDataService.consolidationTotal(formData, logger, ['month', 'total'])
         calc()
         logicCheck()
         break
@@ -132,7 +132,7 @@ def totalSumColumns = ['bondsCount', 'purchaseCost', 'costs', 'redemptionVal', '
 
 // Признак периода ввода остатков
 @Field
-def isBalancePeriod
+def isBalance
 
 // Налоговый период
 @Field
@@ -388,12 +388,10 @@ void calcTotalRow(def currentMonthRow, def currentTotalRow) {
             currentTotalRow.getCell(alias).setValue(0, null)
         }
 
-        // Налоговый период
-        def taxPeriod = getTaxPeriod()
-
-        departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
+        departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
+                getReportPeriodStartDate(), getReportPeriodEndDate()).each {
             if (it.formTypeId == formData.formType.id) {
-                def source = formDataService.findMonth(it.formTypeId, it.kind, it.departmentId, taxPeriod.id, formData.periodOrder)
+                def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
                 if (source != null && source.state == WorkflowState.ACCEPTED) {
                     formDataService.getDataRowHelper(source).allCached.each { row ->
                         if (row.getAlias() == 'total') {
@@ -497,7 +495,7 @@ def getPrevTotalRow() {
     if (formData.periodOrder == 1) {
         return null
     }
-    def formDataOld = formDataService.getFormDataPrev(formData, formDataDepartment.id)
+    def formDataOld = formDataService.getFormDataPrev(formData)
     if (formDataOld != null) {
         def dataRowsOld = formDataService.getDataRowHelper(formDataOld)?.allCached
         return (dataRowsOld ? getDataRow(dataRowsOld, 'total') : null)
@@ -507,7 +505,7 @@ def getPrevTotalRow() {
 
 // Получить строки из нф по заданному идентификатору нф
 def getRnuRowsById(def id) {
-    def formDataRNU = formDataService.find(id, formData.kind, formDataDepartment.id, formData.reportPeriodId)
+    def formDataRNU = formDataService.getLast(id, formData.kind, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder)
     if (formDataRNU != null) {
         return formDataService.getDataRowHelper(formDataRNU)?.allCached
     }
@@ -516,14 +514,15 @@ def getRnuRowsById(def id) {
 
 // Признак периода ввода остатков. Отчетный период является периодом ввода остатков и месяц первый в периоде.
 def isMonthBalance() {
-    if (isBalancePeriod == null) {
-        if (!reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId) || formData.periodOrder == null) {
-            isBalancePeriod = false
+    if (isBalance == null) {
+        def departmentReportPeriod = departmentReportPeriodService.get(formData.departmentReportPeriodId)
+        if (!departmentReportPeriod.isBalance() || formData.periodOrder == null) {
+            isBalance = false
         } else {
-            isBalancePeriod = formData.periodOrder - 1 % 3 == 0
+            isBalance = formData.periodOrder - 1 % 3 == 0
         }
     }
-    return isBalancePeriod
+    return isBalance
 }
 
 void prevPeriodCheck() {

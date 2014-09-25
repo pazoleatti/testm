@@ -315,12 +315,6 @@
 				<version>1.1-rev-1</version>
 			</dependency>
 			<dependency>
-				<groupId>org.apache.activemq</groupId>
-				<artifactId>activemq-core</artifactId>
-				<version>5.7.0</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-jms</artifactId>
 				<version>3.2.4.RELEASE</version>
@@ -583,5 +577,13 @@
 		<url>http://172.16.127.19:8080/job/SBRF-NK-build</url>
 		<system>Jenkins</system>
 	</ciManagement>
+
+    <distributionManagement>
+        <repository>
+            <id>deployment</id>
+            <name>Internal Releases</name>
+            <url>http://172.16.127.19:8081/nexus/content/repositories/SBRFACCTAX/</url>
+        </repository>
+    </distributionManagement>
 
 </project>

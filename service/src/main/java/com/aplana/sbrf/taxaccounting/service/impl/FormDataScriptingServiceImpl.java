@@ -51,7 +51,7 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
         // Биндим параметры для выполнения скрипта
         Bindings b = scriptEngine.createBindings();
 
-        Map<String, ?> scriptComponents =  getScriptExposedBeans(formData.getFormType().getTaxType(), event);
+        Map<String, ?> scriptComponents = getScriptExposedBeans(formData.getFormType().getTaxType(), event);
         for (Object component : scriptComponents.values()) {
             ScriptComponentContextImpl scriptComponentContext = new ScriptComponentContextImpl();
             scriptComponentContext.setUserInfo(userInfo);

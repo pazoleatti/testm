@@ -33,7 +33,6 @@ import java.util.*;
 /*
  * author auldanov
  */
-
 @Service("declarationService")
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class DeclarationServiceImpl implements DeclarationService, ScriptComponentContextHolder{
@@ -87,7 +86,17 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 		return declarationDataDao.find(declarationTypeId, departmentId, reportPeriodId);
 	}
 
-	@Override
+    @Override
+    public DeclarationData find(int declarationTypeId, int departmentReportPeriodId) {
+        return declarationDataDao.find(declarationTypeId, departmentReportPeriodId);
+    }
+
+    @Override
+    public DeclarationData getLast(int declarationTypeId, int departmentId, int reportPeriodId) {
+        return declarationDataDao.getLast(declarationTypeId, departmentId, reportPeriodId);
+    }
+
+    @Override
 	public String generateXmlFileId(int declarationTypeId, int departmentId, int reportPeriodId) {
 
         DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
@@ -134,9 +143,8 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
                 reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
 		List<FormData> records = new ArrayList<FormData>();
 		for (DepartmentFormType dft : sourcesInfo) {
-			// В будущем возможны ситуации, когда по заданному сочетанию параметров будет несколько
-			// FormData, в этом случае данный код нужно будет зарефакторить
-			FormData formData = formDataDao.find(dft.getFormTypeId(), dft.getKind(), dft.getDepartmentId(), reportPeriodId);
+            // Ежемесячные формы не являются источниками для декларация, поэтому periodOrder = null
+			FormData formData = formDataDao.getLast(dft.getFormTypeId(), dft.getKind(), dft.getDepartmentId(), reportPeriodId, null);
 			if (formData != null) {
 				if (formData.getState() != WorkflowState.ACCEPTED) {
 					Department department = departmentDao.getDepartment(dft.getDepartmentId());
@@ -184,5 +192,4 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
         c.add(Calendar.DATE, days);
         return c.getTime();
     }
-
 }

@@ -1,7 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.client;
 
-import java.util.List;
-
 import com.aplana.gwt.client.Spinner;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
@@ -24,6 +22,8 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
+
+import java.util.List;
 
 
 public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
@@ -276,6 +276,7 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
     @Override
     public void setCanEditPeriod(boolean canEditPeriod) {
         editPeriod.setVisible(canEditPeriod);
+        editPeriod.setEnabled(!selectionModel.getSelectedObject().isCorrection());
     }
 
     @Override

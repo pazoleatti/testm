@@ -189,7 +189,7 @@ def consolidationGroupRowsMap = [:]
 
 // форма 945.1
 @Field
-def sourceFormTypeId = 610
+def int sourceFormTypeId = 610
 
 // Мапа для хранения названий периода и года по id формы источника (id формы -> периода и год)
 @Field
@@ -883,7 +883,7 @@ def getFormDataSources() {
         def periodsMap = getSourcesPeriodMap()
         periodsMap.each { period, monthOrders ->
             monthOrders.each { monthOrder ->
-                FormData source = formDataService.findMonth(sourceFormTypeId, FormDataKind.PRIMARY, formDataDepartment.id, period.taxPeriod.id, monthOrder)
+                FormData source = formDataService.getLast(sourceFormTypeId, FormDataKind.PRIMARY, formDataDepartment.id, period.id, monthOrder)
                 if (source != null && source.getState() == WorkflowState.ACCEPTED) {
                     def alias = 'cost' + monthOrder
                     // если форма за январь следующего года, то заполняется графа 17 (cost13)
@@ -944,16 +944,17 @@ def getPrevDataRows() {
         return null
     }
     if (prevDataRows == null) {
-        def prevFormData = formDataService.getFormDataPrev(formData, formDataDepartment.id)
+        def prevFormData = formDataService.getFormDataPrev(formData)
         prevDataRows = (prevFormData != null ? formDataService.getDataRowHelper(prevFormData)?.allCached : null)
     }
     return prevDataRows
 }
 
-// Признак периода ввода остатков.
+// Признак периода ввода остатков для отчетного периода подразделения
 def isBalancePeriod() {
     if (isBalancePeriod == null) {
-        isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
+        def departmentReportPeriod = departmentReportPeriodService.get(formData.departmentReportPeriodId)
+        isBalancePeriod = departmentReportPeriod.isBalance()
     }
     return isBalancePeriod
 }

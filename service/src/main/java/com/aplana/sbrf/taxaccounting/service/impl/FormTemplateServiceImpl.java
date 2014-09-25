@@ -150,6 +150,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
         formData.setState(WorkflowState.CREATED);
         formData.setDepartmentId(userInfo.getUser().getDepartmentId());
         formData.setKind(FormDataKind.PRIMARY);
+        formData.setDepartmentReportPeriodId(1);
         formData.setReportPeriodId(1);
 
         Logger log = new Logger();

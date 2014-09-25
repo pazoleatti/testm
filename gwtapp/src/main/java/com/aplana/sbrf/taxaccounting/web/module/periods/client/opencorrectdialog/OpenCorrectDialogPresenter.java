@@ -10,17 +10,13 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallba
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.event.PeriodCreated;
-import com.aplana.sbrf.taxaccounting.web.module.periods.shared.CheckCorrectionPeriodStatusAction;
-import com.aplana.sbrf.taxaccounting.web.module.periods.shared.CheckCorrectionPeriodStatusResult;
-import com.aplana.sbrf.taxaccounting.web.module.periods.shared.OpenCorrectPeriodAction;
-import com.aplana.sbrf.taxaccounting.web.module.periods.shared.OpenCorrectPeriodResult;
+import com.aplana.sbrf.taxaccounting.web.module.periods.shared.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.PopupView;
 import com.gwtplatform.mvp.client.PresenterWidget;
-import com.gwtplatform.mvp.client.proxy.PlaceManager;
 
 import java.util.*;
 
@@ -46,10 +42,11 @@ public class OpenCorrectDialogPresenter extends PresenterWidget<OpenCorrectDialo
 
 	private DispatchAsync dispatcher;
 	private TaxType taxType;
+    private Boolean balance;
 
 	@Inject
 	public OpenCorrectDialogPresenter(final EventBus eventBus, final MyView view,
-	                           DispatchAsync dispatcher, PlaceManager placeManager) {
+                                      DispatchAsync dispatcher) {
 		super(eventBus, view);
 		this.dispatcher = dispatcher;
 		getView().setUiHandlers(this);
@@ -99,6 +96,10 @@ public class OpenCorrectDialogPresenter extends PresenterWidget<OpenCorrectDialo
 
 	@Override
 	public void onContinue() {
+        if(balance != null && balance){
+            Dialog.errorMessage("Ошибка", "Корректирующий период не может быть открыт для периода ввода остатков!");
+            return;
+        }
         StringBuilder missedFields = new StringBuilder();
         if (getView().getSelectedDepartments().isEmpty()) {
             missedFields.append(" \"Подразделение\"");
@@ -124,7 +125,7 @@ public class OpenCorrectDialogPresenter extends PresenterWidget<OpenCorrectDialo
 
         if (missedFields.length() != 0) {
             missedFields.insert(0, "Не заполнены следующие обязательные к заполнению поля:");
-            Dialog.errorMessage(missedFields.toString());
+            Dialog.errorMessage("Ошибка", missedFields.toString());
             return;
         }
 
@@ -169,6 +170,9 @@ public class OpenCorrectDialogPresenter extends PresenterWidget<OpenCorrectDialo
                                         Dialog.errorMessage("Указанный период корректировки должен быть больше " +
                                                 "последнего корректирующего периода для указанного отчётного периода!");
                                         break;
+                                    case CORRECTION_PERIOD_LAST_OPEN:
+                                        Dialog.errorMessage("Корректирующий период не может быть открыт, т.к. открыт предыдущий корректирующий период!");
+                                        break;
                                 }
                             }
                         }, OpenCorrectDialogPresenter.this)
@@ -199,10 +203,15 @@ public class OpenCorrectDialogPresenter extends PresenterWidget<OpenCorrectDialo
 		getView().setTaxType(taxType);
 	}
 
-    public void setSelectedDepartment(Integer departmentId){
+    private void setSelectedDepartment(Integer departmentId){
         if (departmentId != 0 && getView().canChangeDepartment()) {
             getView().setSelectedDepartment(departmentId);
         }
+    }
+
+    public void init(TableRow data){
+        setSelectedDepartment(data.getDepartmentId());
+        balance = data.isBalance();
     }
 
 	public void resetToDefault() {

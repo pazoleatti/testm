@@ -1,12 +1,12 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -50,20 +50,6 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<Department>(0);
         }
-	}
-
-	@Override
-	public Department getParent(int departmentId){
-		Department department = getDepartment(departmentId);
-		try {
-			return getJdbcTemplate().queryForObject(
-					"SELECT * FROM department dp WHERE dp.id = ?",
-					new Object[]{department.getParentId()},
-					new DepartmentJdbcMapper()
-			);
-		} catch (EmptyResultDataAccessException e) {
-			return null;
-		}
 	}
 
     @Override
@@ -185,19 +171,6 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
         }
     }
 
-    @Override
-    public Department getDepartmentByCode(int code) {
-        try {
-            return getJdbcTemplate().queryForObject(
-                    "SELECT * FROM department dp WHERE dp.code = ?",
-                    new Object[]{code},
-                    new DepartmentJdbcMapper()
-            );
-        } catch (EmptyResultDataAccessException e) {
-            return null;
-        }
-    }
-
 	@Override
 	public Department getDepartmentByName(String name) {
 		return getJdbcTemplate().queryForObject(
@@ -234,17 +207,17 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     }
 
     @Override
-    public Department getDepartmenTB(int departmentId) {
+    public Department getDepartmentTB(int departmentId) {
         return getParentDepartmentByType(departmentId, 2);
     }
 
     @Override
-    public List<Department> getDepartmenTBChildren(int departmentId) {
+    public List<Department> getDepartmentTBChildren(int departmentId) {
         return getParentDepartmentChildByType(departmentId, 2);
     }
 
     @Override
-    public List<Integer> getDepartmenTBChildrenId(int departmentId) {
+    public List<Integer> getDepartmentTBChildrenId(int departmentId) {
         return getParentDepartmentChildIdByType(departmentId, 2);
     }
 
@@ -365,18 +338,6 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     }
 
     @Override
-    public List<Integer> getAllParentIds(int depId) {
-        try {
-            return getJdbcTemplate().queryForList(
-                    "SELECT id FROM department START WITH id = ? CONNECT BY  id = prior parent_id",
-                    new Object[]{depId},
-                    Integer.class);
-        } catch (DataAccessException e){
-            throw new DaoException("Ошибка получения родительских подразделений.", e);
-        }
-    }
-
-    @Override
     public List<Integer> getDepartmentsBySourceControl(int userDepartmentId, List<TaxType> taxTypes, Date periodStart, Date periodEnd) {
         return getDepartmentsBySource(userDepartmentId, taxTypes, periodStart, periodEnd, false);
     }
@@ -398,24 +359,6 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 
         return  getNamedParameterJdbcTemplate().queryForList(sql, parameterMap, Integer.class);
     }
-
-	@Override
-	public List<Integer> getPerformers(List<Integer> departments, List<TaxType> taxTypes) {
-		String sql = String.format("SELECT performer_dep_id " +
-				"FROM department_form_type dft " +
-				"LEFT JOIN form_type ft on dft.FORM_TYPE_ID=ft.ID " +
-				"WHERE %s AND ft.tax_type in (:tt) AND performer_dep_id IS NOT null " +
-				"GROUP BY performer_dep_id", SqlUtils.transformToSqlInStatement("department_id", departments));
-
-		MapSqlParameterSource parameterMap = new MapSqlParameterSource();
-		List<String> types = new ArrayList<String>();
-		for (TaxType type : taxTypes) {
-			types.add(String.valueOf(type.getCode()));
-		}
-		parameterMap.addValue("tt", types);
-
-		return  getNamedParameterJdbcTemplate().queryForList(sql, parameterMap, Integer.class);
-	}
 
     /**
      * Поиск подразделений, доступных по иерархии и подразделений доступных по связи приемник-источник для этих подразделений
@@ -457,30 +400,25 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
                 ") av_dep left join ( " +
                 "select distinct ddt.department_id parent_id, dft.department_id id " +
                 "from declaration_source ds, department_form_type dft, department_declaration_type ddt, declaration_type dt " +
-                "where ds.department_declaration_type_id = ddt.id and ds.src_department_form_type_id = dft.id \n" +
+                "where ds.department_declaration_type_id = ddt.id and ds.src_department_form_type_id = dft.id " +
                 "and (:periodStart is null or ((ds.period_end >= :periodStart or ds.period_end is null) and (:periodEnd is null or ds.period_start <= :periodEnd))) " +
                 "and dt.id = ddt.declaration_type_id and dt.tax_type in " + SqlUtils.transformTaxTypeToSqlInStatement(taxTypes) + " " +
                 "union " +
                 "select distinct dft.department_id parent_id, dfts.department_id id " +
                 "from form_data_source fds, department_form_type dft, department_form_type dfts, form_type ft " +
                 "where fds.department_form_type_id = dft.id and fds.src_department_form_type_id = dfts.id " +
-                "and (:periodStart is null or ((fds.period_end >= :periodStart or fds.period_end is null) and (:periodEnd is null or fds.period_start <= :periodEnd)))" +
+                "and (:periodStart is null or ((fds.period_end >= :periodStart or fds.period_end is null) and (:periodEnd is null or fds.period_start <= :periodEnd))) " +
                 "and ft.id = dft.form_type_id and ft.tax_type in " + SqlUtils.transformTaxTypeToSqlInStatement(taxTypes) + ") link_dep " +
                 "on av_dep.id = link_dep.parent_id, (select 0 as c from dual union all select 1 as c from dual) t3) " +
                 "where id is not null";
         params.put("periodStart", periodStart);
         params.put("periodEnd", periodEnd);
 
-        try {
-            return getNamedParameterJdbcTemplate().queryForList(allSql,
-                    params, Integer.class);
-        } catch (EmptyResultDataAccessException e) {
-            return new ArrayList<Integer>(0);
-        }
+        return getNamedParameterJdbcTemplate().queryForList(allSql, params, Integer.class);
     }
 
     @Override
-    public List<Integer> getDepartmentIdsByExcutors(List<Integer> departments, List<TaxType> taxTypes) {
+    public List<Integer> getDepartmentIdsByExecutors(List<Integer> departments, List<TaxType> taxTypes) {
         String sql = String.format("select distinct department_id from department_form_type dft " +
                 "left join form_type ft on dft.form_type_id = ft.id " +
                 "where " +
@@ -503,22 +441,6 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
                 "where %s ", SqlUtils.transformToSqlInStatement("performer_dep_id", departments));
 
         return getJdbcTemplate().queryForList(sql, Integer.class);
-    }
-
-    @Override
-    public List<Integer> getDepartmentsByName(String departmentName) {
-        try {
-            MapSqlParameterSource names = new MapSqlParameterSource();
-            names.addValue("depName", "%" + departmentName.toLowerCase() + "%");
-            return getNamedParameterJdbcTemplate().queryForList(
-                    "select id from department where lower(name) like :depName",
-                    names,
-                    Integer.class
-            );
-        } catch (DataAccessException e){
-            logger.error("Ошибка при поиске подразделений по имени.", e);
-            throw new DaoException("Ошибка при поиске подразделений по имени.", e);
-        }
     }
 
     @Override

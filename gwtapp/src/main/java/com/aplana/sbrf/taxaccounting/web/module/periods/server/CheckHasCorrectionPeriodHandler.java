@@ -1,7 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.server;
 
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
-import com.aplana.sbrf.taxaccounting.service.PeriodService;
+import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
+import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.CheckHasCorrectionPeriodAction;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.CheckHasCorrectionPeriodResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 
 @PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
@@ -18,7 +20,7 @@ import java.util.List;
 public class CheckHasCorrectionPeriodHandler extends AbstractActionHandler<CheckHasCorrectionPeriodAction, CheckHasCorrectionPeriodResult> {
 
     @Autowired
-    private PeriodService periodService;
+    private DepartmentReportPeriodService departmentReportPeriodService;
 
     public CheckHasCorrectionPeriodHandler() {
         super(CheckHasCorrectionPeriodAction.class);
@@ -27,19 +29,19 @@ public class CheckHasCorrectionPeriodHandler extends AbstractActionHandler<Check
     @Override
     public CheckHasCorrectionPeriodResult execute(CheckHasCorrectionPeriodAction action, ExecutionContext executionContext) throws ActionException {
         CheckHasCorrectionPeriodResult result = new CheckHasCorrectionPeriodResult();
-        List<DepartmentReportPeriod> drp = periodService.listByDepartmentIdAndTaxType((long)action.getDepartmentId(), action.getTaxType());
-        result.setHasCorrectionPeriods(false);
-        for (DepartmentReportPeriod rp : drp) {
-            if ((rp.getReportPeriod().getId() == action.getReportPeriodId())
-                    &&(rp.getCorrectPeriod() != null)) {
-                result.setHasCorrectionPeriods(true);
-            }
-        }
+        DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
+        filter.setIsCorrection(true);
+        filter.setDepartmentIdList(Arrays.asList(action.getDepartmentId()));
+        filter.setTaxTypeList(Arrays.asList(action.getTaxType()));
+        filter.setReportPeriodIdList(Arrays.asList(action.getReportPeriodId()));
+        List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodService.getListByFilter(filter);
+        result.setHasCorrectionPeriods(!departmentReportPeriodList.isEmpty());
         return result;
     }
 
     @Override
-    public void undo(CheckHasCorrectionPeriodAction checkHasCorrectionPeriodAction, CheckHasCorrectionPeriodResult checkHasCorrectionPeriodResult, ExecutionContext executionContext) throws ActionException {
-
+    public void undo(CheckHasCorrectionPeriodAction checkHasCorrectionPeriodAction,
+                     CheckHasCorrectionPeriodResult checkHasCorrectionPeriodResult,
+                     ExecutionContext executionContext) throws ActionException {
     }
 }

@@ -100,6 +100,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Autowired
     private TransactionHelper tx;
+
     @Autowired
     private LockDataService lockDataService;
 
@@ -110,14 +111,17 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	private static final SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
     private static final String VALIDATION_ERR_MSG = "Обнаружены фатальные ошибки!";
 
-	@Override
-	@Transactional(readOnly = false)
-	public long create(Logger logger, int declarationTemplateId, int departmentId, TAUserInfo userInfo, int reportPeriodId, String taxOrganCode, String taxOrganKpp) {
-		declarationDataAccessService.checkEvents(userInfo, declarationTemplateId, departmentId, reportPeriodId, FormDataEvent.CREATE);
+    @Override
+    @Transactional(readOnly = false)
+    public long create(Logger logger, int declarationTemplateId, TAUserInfo userInfo,
+                       DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp) {
+        declarationDataAccessService.checkEvents(userInfo, declarationTemplateId, departmentReportPeriod,
+                FormDataEvent.CREATE);
 
         DeclarationData newDeclaration = new DeclarationData();
-        newDeclaration.setDepartmentId(departmentId);
-        newDeclaration.setReportPeriodId(reportPeriodId);
+        newDeclaration.setDepartmentReportPeriodId(departmentReportPeriod.getId());
+        newDeclaration.setReportPeriodId(departmentReportPeriod.getReportPeriod().getId());
+        newDeclaration.setDepartmentId(departmentReportPeriod.getDepartmentId());
         newDeclaration.setAccepted(false);
         newDeclaration.setDeclarationTemplateId(declarationTemplateId);
         newDeclaration.setTaxOrganCode(taxOrganCode);
@@ -139,17 +143,17 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     logEntryService.save(logger.getEntries()));
         }
 
-		long id = declarationDataDao.saveNew(newDeclaration);
+        long id = declarationDataDao.saveNew(newDeclaration);
 
-		logBusinessService.add(null, id, userInfo, FormDataEvent.CREATE, null);
-		auditService.add(FormDataEvent.CREATE , userInfo, newDeclaration.getDepartmentId(),
-				newDeclaration.getReportPeriodId(),
-				declarationTemplateDao.get(newDeclaration.getDeclarationTemplateId()).getType().getName(),
-				null, null, null, null);
-		return id;
-	}
+        logBusinessService.add(null, id, userInfo, FormDataEvent.CREATE, null);
+        auditService.add(FormDataEvent.CREATE , userInfo, newDeclaration.getDepartmentId(),
+                newDeclaration.getReportPeriodId(),
+                declarationTemplateDao.get(newDeclaration.getDeclarationTemplateId()).getType().getName(),
+                null, null, null, null);
+        return id;
+    }
 
-	@Override
+    @Override
 	@Transactional(readOnly = false)
 	public void calculate(Logger logger, long id, TAUserInfo userInfo, Date docDate) {
 		declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.CALCULATE);
@@ -514,6 +518,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	public DeclarationData find(int declarationTypeId, int departmentId, int reportPeriodId) {
 		return declarationDataDao.find(declarationTypeId, departmentId, reportPeriodId);
 	}
+
+    @Override
+    public DeclarationData find(int declarationTypeId, int departmentReportPeriod) {
+        return null;
+    }
 
     @Override
     public List<Long> getFormDataListInActualPeriodByTemplate(int declarationTemplateId, Date startDate) {

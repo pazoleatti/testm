@@ -3,6 +3,8 @@ package form_template.vat.vat_937_1_13.v2014
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.TaxType
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
@@ -118,7 +120,7 @@ void logicCheck() {
         logger.error(WRONG_TOTAL, getColumnName(itog, 'sum'))
     }
     // Проверка наличия экземпляра налоговой формы 937.1 по соответствующему подразделению за соответствующий налоговый период; проверка итоговой суммы
-    def formData937_1 = formDataService.find(606, formData.kind, formData.departmentId, formData.reportPeriodId)
+    def formData937_1 = formDataService.getLast(606, formData.kind, formData.departmentId, formData.reportPeriodId, formData.periodOrder)
     if (formData937_1 == null) {
         logger.warn("Экземпляр налоговой формы 937.1 «Итоговые данные книги покупок» за период %s — %s не существует (отсутствуют первичные данные для проверки)!",
                 getReportPeriodStartDate().format(dateFormat), getReportPeriodEndDate().format(dateFormat))
@@ -193,10 +195,10 @@ void consolidation() {
         }
     }
     dataRows = tmp
-    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind(),
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
             getCalendarStartDate(), getReportPeriodEndDate()).each {
-        def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
-        if (source != null && source.state == WorkflowState.ACCEPTED && source.getFormType().getTaxType() == TaxType.VAT) {
+        def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
+        if (source != null && source.state == WorkflowState.ACCEPTED && source.formType.taxType == TaxType.VAT) {
             formDataService.getDataRowHelper(source).getAllCached().each { srcRow ->
                 def srcAlias = srcRow.getAlias()
                 if (srcAlias == null) {

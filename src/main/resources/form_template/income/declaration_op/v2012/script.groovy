@@ -93,7 +93,7 @@ def checkDeclarationBank() {
 
     /** Идентификатор подразделения Банка. */
     def departmentBankId = 1
-    def bankDeclarationData = declarationService.find(declarationTypeId, departmentBankId, reportPeriod.id)
+    def bankDeclarationData = declarationService.getLast(declarationTypeId, departmentBankId, reportPeriod.id)
     if (bankDeclarationData == null || !bankDeclarationData.accepted) {
         logger.error('Декларация Банка по прибыли за указанный период не сформирована или не находится в статусе "Принята".')
         return
@@ -243,7 +243,7 @@ void generateXML(def xmlBankData) {
                 Период : period,
                 ОтчетГод : (taxPeriod != null ? taxPeriod.year : empty),
                 КодНО : taxOrganCode,
-                НомКорр : reportPeriodService.getCorrectionPeriodNumber(declarationData.reportPeriodId, declarationData.departmentId),
+                НомКорр : reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId),
                 ПоМесту : taxPlaceTypeCode) {
 
             СвНП(

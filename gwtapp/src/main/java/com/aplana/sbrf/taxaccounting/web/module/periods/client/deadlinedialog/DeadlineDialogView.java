@@ -69,7 +69,7 @@ public class DeadlineDialogView extends PopupViewWithUiHandlers<DeadlineDialogUi
         //Обработка нажатия закрытия окна
         deadlineDialog.setOnHideHandler(new OnHideHandler<CanHide>() {
             @Override
-            public void OnHide(CanHide modalWindow) {
+            public void onHide(CanHide modalWindow) {
                 if (saveButton.isEnabled()) {
                     Dialog.confirmMessage("Отмена установки срока сдачи отчетности", "Вы уверены, что хотите отменить изменения?", new DialogHandler() {
                         @Override

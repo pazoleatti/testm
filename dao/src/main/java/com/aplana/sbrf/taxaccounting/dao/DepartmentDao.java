@@ -38,22 +38,6 @@ public interface DepartmentDao {
     List<Integer> getAllChildrenIds(int depId);
 
     /**
-     * Получить список ВСЕХ дочерних подразделений по коду подзаделения
-     * @param depId идентификатор родительского подразделения
-     * @return список объектов, представляющих текущее и родительские подразделения
-     */
-    List<Integer> getAllParentIds(int depId);
-
-	/**
-	 * Получить родительское подразделение по коду подзаделения
-	 * * Внимание: объект, возвращаемый данным методом инициализируется не полностью (в частности в ним не заполняется
-	 * {@link Department#getFormTypeIds() информация по налоговым формам, с которыми работает данное подразделение}).
-	 * @param departmentId идентификатор подразделения для которого нужно найти родительское подразделение
-	 * @return
-	 */
-	Department getParent(int departmentId);
-
-    /**
      * Возвращает путь в иерархии до указанного подразделения до корневого (не включительно),
      * если в параметр departmentId передается id корневого подразделения, то возвращается его наименование
      * @param departmentId подразделение до которого строится иерархия
@@ -89,11 +73,6 @@ public interface DepartmentDao {
     Department getDepartmentBySbrfCode(String sbrfCode);
 
     /**
-     * Подразделения по значению атрибута «Код подразделения»
-     */
-    Department getDepartmentByCode(int code);
-    
-    /**
      * Получение обособленного подразделения по значению 
      * «Наименование подразделения»»
      */
@@ -118,21 +97,21 @@ public interface DepartmentDao {
      * @param departmentId Подразделение пользователя
      * @return ТБ
      */
-    Department getDepartmenTB(int departmentId);
+    Department getDepartmentTB(int departmentId);
 
     /**
      * Получение ТБ для подразделения (тип = 2) + все дочерние подразделения
      * @param departmentId Подразделение пользователя
      * @return Список подразделений
      */
-    List<Department> getDepartmenTBChildren(int departmentId);
+    List<Department> getDepartmentTBChildren(int departmentId);
 
     /**
      * Получение ТБ для подразделения (тип = 2) + все дочерние подразделения
      * @param departmentId Подразделение пользователя
      * @return Список идентификаторов подразделений
      */
-    List<Integer> getDepartmenTBChildrenId(int departmentId);
+    List<Integer> getDepartmentTBChildrenId(int departmentId);
 
     /**
      * Получение списка подразделений, необходимых для построения неразрывного дерева подразделений
@@ -173,25 +152,15 @@ public interface DepartmentDao {
      */
     List<Integer> getPerformers(List<Integer> departments, int formType);
 
-	/**
-	 * Получение списка исполнителей по списку идентификаторов подразделений и типам налога
-	 * @param departments список id'шников подразделений
-	 * @param taxTypes типы налогов
-	 * @return писок id'шников подразделений (исполнителей)
-	 */
-	List<Integer> getPerformers(List<Integer> departments, List<TaxType> taxTypes);
-
     /**
      * Все подразделения, для форм которых, подразделения departments назначены исполнителями
      */
-    List<Integer> getDepartmentIdsByExcutors(List<Integer> departments, List<TaxType> taxTypes);
+    List<Integer> getDepartmentIdsByExecutors(List<Integer> departments, List<TaxType> taxTypes);
 
     /**
      * Все подразделения, для форм которых, подразделения departments назначены исполнителями
      */
     List<Integer> getDepartmentIdsByExecutors(List<Integer> departments);
-
-    List<Integer> getDepartmentsByName(String departmentName);
 
     /**
      * Используемое наименование подразделения для печати

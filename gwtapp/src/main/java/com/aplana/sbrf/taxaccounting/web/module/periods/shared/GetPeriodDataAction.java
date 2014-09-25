@@ -7,7 +7,7 @@ public class GetPeriodDataAction extends UnsecuredActionImpl<GetPeriodDataResult
 	private TaxType taxType;
 	private int from;
 	private int to;
-	private long departmentId;
+	private int departmentId;
 
 	public TaxType getTaxType() {
 		return taxType;
@@ -33,11 +33,11 @@ public class GetPeriodDataAction extends UnsecuredActionImpl<GetPeriodDataResult
 		this.to = to;
 	}
 
-	public long getDepartmentId() {
+	public int getDepartmentId() {
 		return departmentId;
 	}
 
-	public void setDepartmentId(long departmentId) {
+	public void setDepartmentId(int departmentId) {
 		this.departmentId = departmentId;
 	}
 }

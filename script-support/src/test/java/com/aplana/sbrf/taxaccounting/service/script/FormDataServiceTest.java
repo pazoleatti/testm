@@ -1,8 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.script;
 
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -12,23 +11,23 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -57,43 +56,43 @@ public class FormDataServiceTest {
 
     @Before
     public void init() {
-            RefBookFactory refBookFactory = mock(RefBookFactory.class);
+        RefBookFactory refBookFactory = mock(RefBookFactory.class);
 
-            RefBookDataProvider refBookDataProvider = mock(RefBookDataProvider.class);
+        RefBookDataProvider refBookDataProvider = mock(RefBookDataProvider.class);
 
-            PagingResult<Map<String, RefBookValue>> records1 = new PagingResult<Map<String, RefBookValue>>();
-            Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
-            RefBookValue refBookValue = new RefBookValue(RefBookAttributeType.NUMBER, REF_BOOK_RECORD_ID);
-            map.put(RefBook.RECORD_ID_ALIAS, refBookValue);
-            records1.add(map);
-            PagingResult<Map<String, RefBookValue>> records2 = new PagingResult<Map<String, RefBookValue>>();
-            records2.add(new HashMap<String, RefBookValue>());
-            records2.add(new HashMap<String, RefBookValue>());
+        PagingResult<Map<String, RefBookValue>> records1 = new PagingResult<Map<String, RefBookValue>>();
+        Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
+        RefBookValue refBookValue = new RefBookValue(RefBookAttributeType.NUMBER, REF_BOOK_RECORD_ID);
+        map.put(RefBook.RECORD_ID_ALIAS, refBookValue);
+        records1.add(map);
+        PagingResult<Map<String, RefBookValue>> records2 = new PagingResult<Map<String, RefBookValue>>();
+        records2.add(new HashMap<String, RefBookValue>());
+        records2.add(new HashMap<String, RefBookValue>());
 
-            when(refBookDataProvider.getRecords(any(Date.class), any(PagingParams.class),
-                    eq("LOWER(alias) = LOWER('oneResult')"), any(RefBookAttribute.class)))
-                    .thenReturn(records1);
-            when(refBookDataProvider.getRecords(any(Date.class), any(PagingParams.class),
-                    eq("LOWER(alias) = LOWER('twoResult')"), any(RefBookAttribute.class)))
-                    .thenReturn(records2);
+        when(refBookDataProvider.getRecords(any(Date.class), any(PagingParams.class),
+                eq("LOWER(alias) = LOWER('oneResult')"), any(RefBookAttribute.class)))
+                .thenReturn(records1);
+        when(refBookDataProvider.getRecords(any(Date.class), any(PagingParams.class),
+                eq("LOWER(alias) = LOWER('twoResult')"), any(RefBookAttribute.class)))
+                .thenReturn(records2);
 
-            RefBookAttribute refBookAttribute = new RefBookAttribute();
-            refBookAttribute.setAlias(REF_BOOK_ALIAS);
-            refBookAttribute.setAttributeType(RefBookAttributeType.STRING);
+        RefBookAttribute refBookAttribute = new RefBookAttribute();
+        refBookAttribute.setAlias(REF_BOOK_ALIAS);
+        refBookAttribute.setAttributeType(RefBookAttributeType.STRING);
 
 
-            RefBook refBook = new RefBook();
-            refBook.setAttributes(asList(refBookAttribute));
-            when(refBookFactory.get(REF_BOOK_ID)).thenReturn(refBook);
+        RefBook refBook = new RefBook();
+        refBook.setAttributes(asList(refBookAttribute));
+        when(refBookFactory.get(REF_BOOK_ID)).thenReturn(refBook);
 
-            recordCache = new HashMap<Long, Map<String, Long>>();
+        recordCache = new HashMap<Long, Map<String, Long>>();
 
-            providerCache = new HashMap<Long, RefBookDataProvider>();
-            providerCache.put(REF_BOOK_ID, refBookDataProvider);
+        providerCache = new HashMap<Long, RefBookDataProvider>();
+        providerCache.put(REF_BOOK_ID, refBookDataProvider);
 
-            refBookCache = new HashMap<Long, Map<String, RefBookValue>>();
+        refBookCache = new HashMap<Long, Map<String, RefBookValue>>();
 
-            ReflectionTestUtils.setField(formDataService, "refBookFactory", refBookFactory);
+        ReflectionTestUtils.setField(formDataService, "refBookFactory", refBookFactory);
     }
 
     @Test
@@ -277,5 +276,78 @@ public class FormDataServiceTest {
     @Test(expected = ServiceException.class)
     public void testException() {
         formDataService.getDataRowHelper(new FormData());
+    }
+
+    @Test
+    public void getFormDataPrevTest() {
+        // Mock
+        ReportPeriodService reportPeriodService = mock(ReportPeriodService.class);
+        // Отчетный период формы
+        ReportPeriod reportPeriod = new ReportPeriod();
+        reportPeriod.setId(1);
+        when(reportPeriodService.get(1)).thenReturn(reportPeriod);
+        when(reportPeriodService.getMonthStartDate(anyInt(), anyInt())).thenAnswer(new Answer<Calendar>() {
+            @Override
+            public Calendar answer(InvocationOnMock invocation) throws Throwable {
+                Integer periodOrder = (Integer) invocation.getArguments()[1];
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTime(new GregorianCalendar(2013, periodOrder - 1, 1).getTime());
+                return calendar;
+            }
+        });
+        when(reportPeriodService.getPrevReportPeriod(anyInt())).thenAnswer(new Answer<ReportPeriod>() {
+            @Override
+            public ReportPeriod answer(InvocationOnMock invocation) throws Throwable {
+
+                // Предыдущий отчетный период
+                ReportPeriod prevReportPeriod = new ReportPeriod();
+                prevReportPeriod.setId(2);
+                return prevReportPeriod;
+            }
+        });
+
+        ReflectionTestUtils.setField(formDataService, "reportPeriodService", reportPeriodService);
+
+        FormDataDao formDataDao = mock(FormDataDao.class);
+        when(formDataDao.getLast(anyInt(), any(FormDataKind.class), anyInt(), anyInt(), any(Integer.class))).thenAnswer(
+                new Answer<FormData>() {
+                    @Override
+                    public FormData answer(InvocationOnMock invocation) throws Throwable {
+                        FormData prevFormData = new FormData();
+                        prevFormData.setId(2L);
+                        return prevFormData;
+                    }
+                });
+        ReflectionTestUtils.setField(formDataService, "dao", formDataDao);
+
+        // Квартальная
+        FormData prevFormData = formDataService.getFormDataPrev(mockFomDataPrev(null));
+        Assert.assertNotNull(prevFormData);
+        Assert.assertEquals(2, prevFormData.getId().intValue());
+
+        // Ежемесячная не в начале отчетного периода
+        reportPeriod.setCalendarStartDate(new GregorianCalendar(2013, 0, 1).getTime());
+        prevFormData = formDataService.getFormDataPrev(mockFomDataPrev(1));
+        Assert.assertNotNull(prevFormData);
+        Assert.assertEquals(2, prevFormData.getId().intValue());
+
+        // Ежемесячнаяв конце отчетного периода
+        reportPeriod.setCalendarStartDate(new GregorianCalendar(2013, 0, 1).getTime());
+        prevFormData = formDataService.getFormDataPrev(mockFomDataPrev(2));
+        Assert.assertNotNull(prevFormData);
+        Assert.assertEquals(2, prevFormData.getId().intValue());
+    }
+
+    private FormData mockFomDataPrev(Integer periodOrder) {
+        FormData formData = new FormData();
+        formData.setId(1L);
+        formData.setKind(FormDataKind.PRIMARY);
+        formData.setPeriodOrder(periodOrder);
+        formData.setDepartmentId(1);
+        formData.setReportPeriodId(1);
+        formData.setFormType(new FormType() {{
+            setId(1);
+        }});
+        return formData;
     }
 }

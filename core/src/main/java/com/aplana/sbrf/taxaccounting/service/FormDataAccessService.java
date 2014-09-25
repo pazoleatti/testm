@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
 import java.util.List;
 
-
 /**
  * Интерфейс, реализующий логику по проверке прав доступа
  * @author dsultanbekov
@@ -26,20 +25,15 @@ public interface FormDataAccessService {
      * @param manual признак версии ручного ввода
 	 */	
 	void canEdit(TAUserInfo userInfo, long formDataId, boolean manual);
-	
-	/**
-	 * Проверка того, что у пользователя есть права на создание карточек налоговых форм
-	 * Данный метод просто проверяет, что пользователь имеет подходящую роль 
-	 * и его подразделение может работать с данными налоговыми формами.
-	 * Проверки, связанные с бизнес-логикой (например то, что за один период в подразделении должна существовать
-	 * только одна форма заданного типа и т.п. должны проверяться отдельно).
-	 * @param userInfo информация о пользователе
-	 * @param formTemplateId идентификатор налоговой формы (шаблона)
-	 * @param kind тип налоговой формы, который создаётся
-	 * @param departmentId идентификатор подразделения, в котором создаётся форма
-	 * @param reportPeriodId идентификатор отчетного периода в котором создается форма
-	 */
-	void canCreate(TAUserInfo userInfo, int formTemplateId, FormDataKind kind, int departmentId, int reportPeriodId);
+
+    /**
+     * Проверка разрешения пользователю создавать заданную НФ
+     * @param userInfo Пользователь
+     * @param formTemplateId Макет НФ
+     * @param kind Тип НЫ
+     * @param departmentReportPeriodId Отчетный период подразделения
+     */
+    void canCreate(TAUserInfo userInfo, int formTemplateId, FormDataKind kind, int departmentReportPeriodId);
 
     /**
      * Проверка того, что у пользователя есть права на создание версии ручного ввода

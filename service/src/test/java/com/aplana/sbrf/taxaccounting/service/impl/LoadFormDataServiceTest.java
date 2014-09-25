@@ -1,9 +1,11 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
@@ -28,8 +30,8 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.when;
 
 /**
  * @author Dmitriy Levykin
@@ -41,7 +43,7 @@ public class LoadFormDataServiceTest {
     @Autowired
     private LoadFormDataService loadFormDataService;
     @Autowired
-    private  DepartmentService departmentService;
+    private DepartmentService departmentService;
     @Autowired
     private ConfigurationDao configurationDao;
     @Autowired
@@ -60,6 +62,8 @@ public class LoadFormDataServiceTest {
     private SignService signService;
     @Autowired
     private DepartmentDao departmentDao;
+    @Autowired
+    private LockDataService lockDataService;
 
     private static final List<Integer> DEPARTMENT_LIST = Arrays.asList(1, 2, 3, 4, 5);
     private static String FILE_NAME_1 = "____852-4______________147212014__.rnu";
@@ -73,6 +77,10 @@ public class LoadFormDataServiceTest {
     private File uploadFolder;
     private File archiveFolder;
     private File errorFolder;
+
+    DepartmentReportPeriod departmentReportPeriod;
+    Department department147;
+    ReportPeriod reportPeriod;
 
     static {
         // Пользователь
@@ -91,7 +99,6 @@ public class LoadFormDataServiceTest {
     public void init() throws IOException {
         mockDepartmentService();
         mockDepartmentDao();
-        mockAuditService();
         temporaryFolder.create();
         uploadFolder = temporaryFolder.newFolder(ConfigurationParam.FORM_UPLOAD_DIRECTORY.name());
         archiveFolder = temporaryFolder.newFolder(ConfigurationParam.FORM_ARCHIVE_DIRECTORY.name());
@@ -102,9 +109,10 @@ public class LoadFormDataServiceTest {
         mockDepartmentFormTypeDao();
         mockFormTemplateService();
         mockFormDataDao();
-        mockLockCoreService();
+        mockLockDataService();
         mockFormDataService();
         mockSignService();
+        mockDepartmentReportPeriodDao();
     }
 
     @After
@@ -116,7 +124,7 @@ public class LoadFormDataServiceTest {
     }
 
     private void mockDepartmentService() {
-        Department department147 = new Department();
+        department147 = new Department();
         department147.setId(147);
         department147.setName("147");
         when(departmentService.getDepartmentBySbrfCode("147")).thenReturn(department147);
@@ -125,18 +133,7 @@ public class LoadFormDataServiceTest {
 
     private void mockDepartmentDao() {
         when(departmentDao.getDepartmentIdsByType(DepartmentType.TERR_BANK.getCode())).thenReturn(DEPARTMENT_LIST);
-    }
-
-    private void mockAuditService() {
-//        doAnswer(new Answer() {
-//            @Override
-//            public Object answer(InvocationOnMock invocation) throws Throwable {
-//                System.out.println(invocation);
-//                return null;
-//            }
-//        }).when(auditService).add(any(FormDataEvent.class), any(TAUserInfo.class), any(Integer.class), any(Integer.class),
-//                anyString(), anyString(), any(Integer.class), anyString());
-        //ReflectionTestUtils.setField(loadFormDataService, "auditService", auditService);
+        when(departmentDao.getDepartment(department147.getId())).thenReturn(department147);
     }
 
     private void mockFormTypeService() {
@@ -159,7 +156,7 @@ public class LoadFormDataServiceTest {
     }
 
     private void mockPeriodService() {
-        ReportPeriod reportPeriod = new ReportPeriod();
+        reportPeriod = new ReportPeriod();
         reportPeriod.setName("period");
         reportPeriod.setId(1);
         TaxPeriod taxPeriod = new TaxPeriod();
@@ -169,8 +166,19 @@ public class LoadFormDataServiceTest {
         taxPeriod.setYear(2014);
         reportPeriod.setTaxPeriod(taxPeriod);
         when(periodService.getByTaxTypedCodeYear(TaxType.INCOME, "21", 2014)).thenReturn(reportPeriod);
-        when(periodService.isActivePeriod(1, 147)).thenReturn(true);
     }
+
+    private void mockDepartmentReportPeriodDao(){
+        DepartmentReportPeriodDao departmentReportPeriodDao = mock(DepartmentReportPeriodDao.class);
+        departmentReportPeriod = new DepartmentReportPeriod();
+        departmentReportPeriod.setActive(true);
+        departmentReportPeriod.setId(1);
+        departmentReportPeriod.setReportPeriod(reportPeriod);
+        departmentReportPeriod.setDepartmentId(department147.getId());
+        when(departmentReportPeriodDao.getLast(anyInt(), anyInt())).thenReturn(departmentReportPeriod);
+
+        ReflectionTestUtils.setField(loadFormDataService, "departmentReportPeriodDao", departmentReportPeriodDao);
+     }
 
     private void mockDepartmentFormTypeDao() {
         when(departmentFormTypeDao.existAssignedForm(147, 1, FormDataKind.PRIMARY)).thenReturn(true);
@@ -189,17 +197,18 @@ public class LoadFormDataServiceTest {
         FormData formData = new FormData();
         formData.setState(WorkflowState.CREATED);
         formData.setId(1L);
-        when(formDataDao.find(1, FormDataKind.PRIMARY, 147, 1)).thenReturn(null);
         when(formDataDao.get(1L, false)).thenReturn(formData);
+        when(formDataDao.find(1, FormDataKind.PRIMARY, 1, null)).thenReturn(formData);
     }
 
-    private void mockLockCoreService() {
-
+    private void mockLockDataService() {
+        when(lockDataService.lock(anyString(), anyInt(), anyLong())).thenReturn(null);
+        ReflectionTestUtils.setField(loadFormDataService, "lockDataService", lockDataService);
     }
 
     private void mockFormDataService() {
         when(formDataService.createFormData(any(Logger.class), any(TAUserInfo.class), eq(1), eq(147),
-                eq(FormDataKind.PRIMARY), any(ReportPeriod.class), any(Integer.class))).thenReturn(1L);
+                eq(FormDataKind.PRIMARY), any(Integer.class))).thenReturn(1L);
     }
 
     private void mockSignService() {
@@ -318,7 +327,7 @@ public class LoadFormDataServiceTest {
         taxPeriod.setYear(2014);
         reportPeriod.setTaxPeriod(taxPeriod);
         when(periodService.getByTaxTypedCodeYear(TaxType.INCOME, "21", 2014)).thenReturn(reportPeriod);
-        when(periodService.isActivePeriod(1, 147)).thenReturn(false);
+        departmentReportPeriod.setActive(false);
         ReflectionTestUtils.setField(loadFormDataService, "periodService", periodService);
 
         ImportCounter importCounter = loadFormDataService.importFormData(USER_INFO, new Logger());
@@ -329,6 +338,8 @@ public class LoadFormDataServiceTest {
         Assert.assertEquals(0, archiveFolder.list().length);
         // Ошибки
         Assert.assertEquals(1, errorFolder.list().length);
+
+        departmentReportPeriod.setActive(true);
     }
 
     // Ошибка в скрипте
@@ -339,7 +350,7 @@ public class LoadFormDataServiceTest {
 
         FormDataService formDataService = mock(FormDataService.class);
         when(formDataService.createFormData(any(Logger.class), any(TAUserInfo.class), eq(1), eq(147),
-                eq(FormDataKind.PRIMARY), any(ReportPeriod.class), any(Integer.class))).thenReturn(1L);
+                eq(FormDataKind.PRIMARY), any(Integer.class))).thenReturn(1L);
 
         doThrow(new RuntimeException("Test RuntimeException")).when(formDataService).importFormData(any(Logger.class), any(TAUserInfo.class),
                 any(Long.class), any(Boolean.class), any(InputStream.class), anyString(), any(FormDataEvent.class));

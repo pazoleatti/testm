@@ -229,7 +229,7 @@ void consolidation() {
     // собрать из источников строки и разместить соответствующим разделам
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
             getReportPeriodStartDate(), getReportPeriodEndDate()).each {
-        def source = formDataService.findMonth(it.formTypeId, it.kind, it.departmentId, getTaxPeriod()?.id, formData.periodOrder)
+        def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
         if (source != null && source.state == WorkflowState.ACCEPTED) {
             def sourceDataRows = formDataService.getDataRowHelper(source).allCached
             if (it.formTypeId == formData.formType.id) {
@@ -411,7 +411,7 @@ def getTaxPeriod() {
 /** Получить данные формы РНУ-40.1 (id = 338) */
 def getFormDataSource() {
     if (sourceFormData == null) {
-        sourceFormData = formDataService.findMonth(338, formData.kind, formDataDepartment.id, getTaxPeriod()?.id, formData.periodOrder)
+        sourceFormData = formDataService.getLast(338, formData.kind, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder)
     }
     return sourceFormData
 }

@@ -260,7 +260,7 @@ def consolidation() {
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
             getReportPeriodStartDate(), getReportPeriodEndDate()).each {
         if (it.formTypeId == sourceFormTypeId) {
-            def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 def sourceRows = formDataService.getDataRowHelper(source).getAll()
                 for (def sourceRow : sourceRows) {
@@ -442,7 +442,7 @@ def getPrevForms() {
         def reportPeriods = getPrevReportPeriods()
         for (def reportPeriod : reportPeriods) {
             // получить формы за 1 кв, полгода, 9 месяцев
-            def form = formDataService.find(formData.formType.id, FormDataKind.SUMMARY, formDataDepartment.id, reportPeriod.id)
+            def form = formDataService.getLast(formData.formType.id, FormDataKind.SUMMARY, formDataDepartment.id, reportPeriod.id, null)
             if (form) {
                 prevForms.add(form)
             }
