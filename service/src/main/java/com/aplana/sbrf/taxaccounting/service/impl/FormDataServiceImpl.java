@@ -564,7 +564,7 @@ public class FormDataServiceImpl implements FormDataService {
                     lockedObjects.add(lockKey);
                     //Блокируем связанные справочники
                     for (Column column : formData.getFormColumns()) {
-                        if (column instanceof RefBookColumn) {
+                        if (ColumnType.REFBOOK.equals(column.getColumnType())) {
                             Long attributeId = ((RefBookColumn) column).getRefBookAttributeId();
                             if (attributeId != null) {
                                 RefBook refBook = refBookDao.getByAttribute(attributeId);
@@ -622,7 +622,7 @@ public class FormDataServiceImpl implements FormDataService {
         Map<Long, ReferenceInfo> referenceInfoMap = new HashMap<Long, ReferenceInfo>();
         List<DataRow<Cell>> rows = dataRowDao.getSavedRows(formData, null, null);
         for (Column column : formData.getFormColumns()) {
-            if (column instanceof RefBookColumn) {
+            if (ColumnType.REFBOOK.equals(column.getColumnType())) {
                 Long attributeId = ((RefBookColumn) column).getRefBookAttributeId();
                 if (attributeId != null) {
                     RefBook refBook = refBookDao.getByAttribute(attributeId);
@@ -1014,7 +1014,7 @@ public class FormDataServiceImpl implements FormDataService {
     public void updatePreviousRowNumber(FormData formData, FormTemplate formTemplate, Logger logger) {
         String msg = null;
 
-        if (formTemplateService.isAnyAutoNumerationColumn(formTemplate, AutoNumerationColumnType.CROSS)) {
+        if (formTemplateService.isAnyAutoNumerationColumn(formTemplate, NumerationType.CROSS)) {
             // Получить налоговый период
             TaxPeriod taxPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId()).getTaxPeriod();
             // Получить список экземпляров НФ следующих периодов

@@ -21,6 +21,10 @@ public class StringColumn extends Column  implements Serializable {
 
     private int prevLength;
 
+	public StringColumn() {
+		setColumnType(ColumnType.STRING);
+	}
+
 	/**
 	 * Получить максимально допустимую длину строки в этом столбце
 	 * По умолчанию значение равно {@link #MAX_LENGTH} 

@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -80,10 +81,15 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		List<DataRow<Cell>> forUpdate = new ArrayList<DataRow<Cell>>();
 		List<DataRow<Cell>> forCreate = new ArrayList<DataRow<Cell>>();
 		List<Long> forCreateOrder = new ArrayList<Long>();
-        //TODO Заменить цикл на вызов ДАО
+
+		List<Long> dataRowIds = new ArrayList<Long>(rows.size());
 		for (DataRow<Cell> dataRow : rows) {
-			Long id = dataRow.getId();
-			Pair<Integer, Long> typeAndOrd = getTypeAndOrdById(fd.getId(), id);
+			dataRowIds.add(dataRow.getId());
+		}
+		Map<Long, Pair<Integer, Long>> typeAndOrds = getTypeAndOrdById(fd.getId(), dataRowIds);
+
+		for (DataRow<Cell> dataRow : rows) {
+			Pair<Integer, Long> typeAndOrd = typeAndOrds.get(dataRow.getId());
 			if (TypeFlag.ADD.getKey() == typeAndOrd.getFirst()) {
 				forUpdate.add(dataRow);
 			} else {
@@ -91,11 +97,13 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 				forCreateOrder.add(typeAndOrd.getSecond());
 			}
 		}
-
+		// удаляем старые ячейки
 		batchRemoveCells(forUpdate);
+		// создаем новые ячейки
 		batchInsertCells(forUpdate);
-
+		// помечаем старые строки на удаление, так как обновление = удаление(type=-1) + создание(type=1)
 		physicalUpdateRowsType(forCreate, TypeFlag.DEL);
+		// создает новые строки с указанием порядка forCreateOrder
 		physicalInsertRows(fd, forCreate, null, null, forCreateOrder);
 
 	}
@@ -187,12 +195,11 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		// Если строка помечена как ADD, то физическое удаление
 		// Если строка помесена как DELETE, то ничего не делаем
 		// Если строка помечена как SAME, то помечаем как DELETE
-
 		getJdbcTemplate().update(
-				"delete from DATA_ROW where FORM_DATA_ID=? and TYPE=? and MANUAL = ?",
+				"DELETE FROM data_row WHERE form_data_id=? AND type=? AND manual = ?",
 				new Object[] { formData.getId(), TypeFlag.ADD.getKey(), formData.isManual() ? 1 : 0 });
 		getJdbcTemplate().update(
-                "update DATA_ROW set TYPE=? where FORM_DATA_ID=? and TYPE=? and MANUAL = ?",
+                "UPDATE data_row SET type=? WHERE form_data_id=? AND type=? AND manual = ?",
                 new Object[]{TypeFlag.DEL.getKey(), formData.getId(),
                         TypeFlag.SAME.getKey(), formData.isManual() ? 1 : 0});
 	}
@@ -238,6 +245,13 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		physicalUpdateRowsType(formDataId, TypeFlag.DEL, TypeFlag.SAME);
 	}
 
+	/**
+	 * Создаем строки во временном срезе
+	 * @param formData
+	 * @param index
+	 * @param ordBegin
+	 * @param rows
+	 */
 	private void insertRows(FormData formData, int index, long ordBegin,
 			List<DataRow<Cell>> rows) {
 		Long ordEnd = getOrd(formData.getId(), index + 1);
@@ -263,14 +277,12 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
             map.put("dataEndRowIndex", (long) endIndex);
             String sql = "update DATA_ROW set ORD = ORD + :diff where ID in" +
                     "(select RR.ID from " +
-                    "(select row_number() over (order by DR.ORD) as IDX, DR.ID, DR.ORD from DATA_ROW DR where DR.TYPE in (:types) and FORM_DATA_ID=:formDataId) " +
+                    "(select row_number() OVER (ORDER BY dr.ord) as IDX, DR.ID, DR.ORD from DATA_ROW DR where DR.TYPE in (:types) and FORM_DATA_ID=:formDataId) " +
                     "RR where RR.IDX between (:dataStartRowIndex) and (:dataEndRowIndex))";
             if (!isSupportOver()){ // для юнит-тестов (hsql db)
-                sql = sql.replaceFirst("over \\(order by DR.ORD\\)", "over ()");
+                sql = sql.replaceFirst("OVER \\(ORDER BY dr.ord\\)", "over ()");
             }
-            getNamedParameterJdbcTemplate().update(
-                    sql, map
-            );
+            getNamedParameterJdbcTemplate().update(sql, map);
             ordEnd = getOrd(formData.getId(), index + 1);
             ordStep = DataRowDaoImplUtils
                     .calcOrdStep(ordBegin, ordEnd, rows.size());
@@ -321,7 +333,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		Pair<String, Map<String, Object>> sql = dataRowMapper.createSql();
 
         if(!isSupportOver()){
-            sql.first = sql.getFirst().replaceAll("over \\(order by sub.ORD\\)", "over ()");
+            sql.first = sql.getFirst().replaceAll("OVER \\(ORDER BY sub.ord\\)", "OVER ()");
         }
 
 		List<DataRow<Cell>> dataRows = getNamedParameterJdbcTemplate().query(
@@ -338,7 +350,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
         params.put("manual", formData.isManual() ? 1 : 0);
 		return getNamedParameterJdbcTemplate()
 				.queryForInt(
-						"select count(ID) from DATA_ROW where FORM_DATA_ID = :formDataId and TYPE in (:types) and manual = :manual",
+						"SELECT COUNT(id) FROM data_row WHERE form_data_id = :formDataId AND type IN (:types) AND manual = :manual",
 						params);
 	}
 
@@ -374,7 +386,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
         // получение id'шников для вставки строк батчем
         final List<Long> ids = dbUtils.getNextDataRowIds(Integer.valueOf(dataRows.size()).longValue());
         getJdbcTemplate().batchUpdate(
-                "insert into DATA_ROW (ID, FORM_DATA_ID, ALIAS, ORD, TYPE, MANUAL) values (?, ?, ?, ?, ?, ?)",
+                "INSERT INTO data_row (id, form_data_id, alias, ord, type, manual) VALUES (?, ?, ?, ?, ?, ?)",
                 new BatchPreparedStatementSetter() {
 
                     @Override
@@ -472,39 +484,40 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	/**
 	 * Метод получает пару: TYPE и ORD. Метод работает со временным срезом формы
 	 * 
-	 * @param formDataId
-	 * @param dataRowId
-	 * @return
 	 */
-	private Pair<Integer, Long> getTypeAndOrdById(long formDataId,
-			Long dataRowId) {
+	private Map<Long, Pair<Integer, Long>> getTypeAndOrdById(long formDataId, List<Long> dataRowIds) {
+		final Map<Long, Pair<Integer, Long>> result = new HashMap<Long, Pair<Integer, Long>>();
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("formDataId", formDataId);
-		params.put("types",
-				Arrays.asList(TypeFlag.ADD.getKey(), TypeFlag.SAME.getKey()));
-		params.put("dataRowId", dataRowId);
-
-		try {
-			return DataAccessUtils
-					.requiredSingleResult(getNamedParameterJdbcTemplate()
-							.query("select TYPE, ORD, ID from DATA_ROW where TYPE in (:types) and FORM_DATA_ID=:formDataId and ID = :dataRowId",
-									params,
-									new RowMapper<Pair<Integer, Long>>() {
-
-										@Override
-										public Pair<Integer, Long> mapRow(
-												ResultSet rs, int rowNum)
-												throws SQLException {
-											return new Pair<Integer, Long>(SqlUtils
-                                                    .getInteger(rs,"TYPE"), SqlUtils
-                                                    .getLong(rs,"ORD"));
-										}
-									}));
-		} catch (EmptyResultDataAccessException e) {
-			throw new DaoException(ERROR_MSG_NO_ROWID, dataRowId, formDataId);
+		params.put("types", Arrays.asList(TypeFlag.ADD.getKey(), TypeFlag.SAME.getKey()));
+		params.put("dataRowIds", dataRowIds);
+		getNamedParameterJdbcTemplate()
+			.query("SELECT type, ord, id FROM data_row WHERE TYPE IN (:types) AND form_data_id = :formDataId AND id IN (:dataRowIds)",
+					params,
+					new RowCallbackHandler() {
+						@Override
+						public void processRow(ResultSet rs) throws SQLException {
+							Integer type = SqlUtils.getInteger(rs, "type");
+							Long ord = SqlUtils.getLong(rs, "ord");
+							Long id = SqlUtils.getLong(rs, "id");
+							result.put(id, new Pair<Integer, Long>(type, ord));
+						}
+					}
+			);
+		if (result.size() != dataRowIds.size()) {
+			throw new DaoException(ERROR_MSG_NO_ROWID);
 		}
+		return result;
 	}
 
+	/**
+	 * Проверяем диапазон значений для индексов. Причем для индексов в режиме добавления новых записей диапазон
+	 * на единицу больше, так как может потребоваться вставка после последней строки.
+	 * @param formData экземпляр налоговой формы
+	 * @param saved выбор срезов. true - обычный, false - временный
+	 * @param forNew режим проверки
+	 * @param indexes проверяемые индексы
+	 */
 	private void checkIndexesRange(FormData formData, boolean saved, boolean forNew,
 			int... indexes) {
 		int size = saved ? getSavedSize(formData, null) : getSize(formData, null);
@@ -523,86 +536,39 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	 * @param dataRows
 	 */
 	private void batchInsertCells(List<DataRow<Cell>> dataRows) {
-
-		// Values
-		Map<String, List<Object[]>> valueParamsMap = new HashMap<String, List<Object[]>>();
-		for (String tableName : DataRowDaoImplUtils.CELL_VALUE_TABLE_NAMES) {
-			valueParamsMap.put(tableName, new ArrayList<Object[]>());
-		}
-		// SpanInfo
-		List<Object[]> spanInfoParams = new ArrayList<Object[]>();
-		// Editable
-		List<Object[]> editableParams = new ArrayList<Object[]>();
-		// Styles
-		List<Object[]> stylesParams = new ArrayList<Object[]>();
-
+		List<Object[]> batchList = new ArrayList<Object[]>();
 		for (DataRow<Cell> dataRow : dataRows) {
 			for (String alias : dataRow.keySet()) {
 				Cell cell = dataRow.getCell(alias);
-				Column c = cell.getColumn();
+				Column column = cell.getColumn();
+
+				Object svalue = null, dvalue = null, nvalue = null;
 				Object val = cell.getValue();
-				// Values
-				if (val != null) {
-					String tableName = DataRowDaoImplUtils
-							.getCellValueTableName(c);
-					List<Object[]> batchList = valueParamsMap.get(tableName);
-					batchList.add(new Object[] { dataRow.getId(), c.getId(),
-							val });
+				if (val != null && column.getColumnType() != null) {
+					switch(column.getColumnType()) {
+						case STRING:
+							svalue = val;
+							break;
+						case DATE:
+							dvalue = val;
+							break;
+						default:
+							nvalue = val;
+					}
 				}
-				// Span Info
-				if (cell.getColSpan() > 1 || cell.getRowSpan() > 1) {
-					spanInfoParams.add(new Object[] { dataRow.getId(),
-							c.getId(), cell.getColSpan(), cell.getRowSpan() });
-				}
-				// Editable
-				if (cell.isEditable()) {
-					editableParams.add(new Object[] { dataRow.getId(),
-							c.getId() });
-				}
-				// Styles
 				FormStyle style = cell.getStyle();
-				if (style != null) {
-					stylesParams.add(new Object[] { dataRow.getId(), c.getId(),
-							style.getId() });
-				}
-
+				batchList.add(new Object[] {dataRow.getId(), column.getId(), svalue, nvalue, dvalue,
+						style == null ? null : style.getId(),
+						cell.isEditable() ? 1 : null,
+						cell.getColSpan() == 1 ? null : cell.getColSpan(),
+						cell.getRowSpan() == 1 ? null : cell.getRowSpan()});
 			}
 		}
-
-		// Values
-		for (String tableName : DataRowDaoImplUtils.CELL_VALUE_TABLE_NAMES) {
-			List<Object[]> batchList = valueParamsMap.get(tableName);
-			if (!batchList.isEmpty()) {
-				getJdbcTemplate()
-						.batchUpdate(
-								"insert into "
-										+ tableName
-										+ " (row_id, column_id, value) values (?, ?, ?)",
-								valueParamsMap.get(tableName));
-			}
+		if (!batchList.isEmpty()) {
+			getJdbcTemplate().batchUpdate(
+				" INSERT INTO data_cell (row_id, column_id, svalue, nvalue, dvalue, style_id, editable, colspan, rowspan) " +
+				" VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", batchList);
 		}
-		// Span Info
-		if (!spanInfoParams.isEmpty()) {
-			getJdbcTemplate()
-					.batchUpdate(
-							"insert into cell_span_info (row_id, column_id, colspan, rowspan) values (?, ?, ?, ?)",
-							spanInfoParams);
-		}
-		// Editable
-		if (!editableParams.isEmpty()) {
-			getJdbcTemplate()
-					.batchUpdate(
-							"insert into cell_editable (row_id, column_id) values (?, ?)",
-							editableParams);
-		}
-		// Styles
-		if (!stylesParams.isEmpty()) {
-			getJdbcTemplate()
-					.batchUpdate(
-							"insert into cell_style (row_id, column_id, style_id) values (?, ?, ?)",
-							stylesParams);
-		}
-
 	}
 
     @Override
@@ -616,7 +582,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
         String countQuery = "select count(*) from ("+query+")";
         int count = getNamedParameterJdbcTemplate().queryForInt(countQuery, params);
 
-        String dataQuery = "select * from ("+query+") WHERE IDX between :from and :to";
+        String dataQuery = "SELECT * FROM ("+query+") WHERE IDX BETWEEN :from AND :to";
         params.put("from", range.getOffset());
         params.put("to", range.getLimit() + range.getLimit() - 1);
 
@@ -652,8 +618,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
      */
     private Pair<String, Map<String, Object>> getSearchQuery(Long formDataId, Integer formTemplateId, String key, boolean isCaseSensitive){
 
-        StringBuffer sql = new StringBuffer();
-        sql.append(
+        String sql =
+				"WITH dcell AS (SELECT row_id, column_id, nvalue, svalue, dvalue FROM data_cell WHERE row_id IN (SELECT id FROM data_row WHERE form_data_id=:fdId)) \n" +
                 "SELECT row_number() over (order by row_index, column_index) as IDX, row_index, column_index, true_val \n" +
                 "from (SELECT dense_rank()over(order by dr.ord) row_index, dc.ord as column_index, dc.type, val, dc.attribute_id, dc.attribute_id2, \n" +
                 "       case when dc.type='R' and (select ref_book_id from ref_book_attribute where id=dc.attribute_id)=30 then \n"+
@@ -667,21 +633,19 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
                 "               when (select alias from ref_book_attribute where id=dc.attribute_id)='TYPE' then (select to_char(type) from department where id=val) \n"+
                 "           else null end ) \n"+
                 "       when dc.type='R' then (select coalesce(string_value, TO_CHAR(number_value), TO_CHAR(date_value)) from ref_book_value where record_id=val and attribute_id=coalesce(dc.attribute_id2, dc.attribute_id)) else val end true_val \n"+
-                "   from(   SELECT row_id, column_id, TO_CHAR(value) as val \n"+
-                "           FROM DATE_VALUE WHERE row_id in (select id from data_row where form_data_id=:fdId) \n"+
-                "           UNION all SELECT row_id, column_id, TO_CHAR(value) as val FROM STRING_VALUE WHERE row_id in (select id from data_row where form_data_id=:fdId) \n"+
-                "           UNION all SELECT nv.row_id, nv.column_id, \n" +
+                "   from(   SELECT row_id, column_id, TO_CHAR(dvalue) as val FROM dcell \n"+
+                "           UNION ALL SELECT row_id, column_id, svalue FROM dcell \n"+
+                "           UNION ALL SELECT dcell.row_id, dcell.column_id, \n" +
                 "                case when fc.precision is null or fc.precision = 0 then \n" +
-                "                    TO_CHAR(nv.value) \n" +
+                "                    TO_CHAR(dcell.nvalue) \n" +
                 "                else \n" +
-                "                    ltrim(TO_CHAR(nv.value,substr('99999999999999999D0000000000',1,18+fc.precision))) \n" +
+                "                    ltrim(TO_CHAR(dcell.nvalue,substr('99999999999999999D0000000000',1,18+fc.precision))) \n" +
                 "                end as val \n" +
-                "            FROM NUMERIC_VALUE nv join form_column fc on fc.id = nv.column_id WHERE row_id in (select id from data_row where form_data_id=:fdId) \n" +
-                "           UNION all SELECT row_id, rfc.id as column_id, rsq.val \n" +
-                "           from (  SELECT row_id, column_id, TO_CHAR(value) as val \n" +
-                "                   FROM NUMERIC_VALUE WHERE row_id in (select id from data_row where form_data_id=:fdId) ) rsq \n" +
-                "                       join FORM_COLUMN rfc on rsq.column_id = rfc.parent_column_id \n" +
-                "                   where rfc.form_template_id = :ftId and rfc.type = 'R' and rfc.parent_column_id is not null \n" +
+                "            FROM dcell JOIN form_column fc ON fc.id = dcell.column_id \n" +
+                "           UNION ALL SELECT row_id, rfc.id as column_id, rsq.val \n" +
+                "           FROM (SELECT row_id, column_id, TO_CHAR(nvalue) AS val FROM dcell ) rsq \n" +
+                "                 JOIN form_column rfc ON rsq.column_id = rfc.parent_column_id \n" +
+                "                   WHERE rfc.form_template_id = :ftId and rfc.type = 'R' and rfc.parent_column_id is not null \n" +
                 "           UNION all SELECT data_row.id as row_id, rfc.id as column_id, TO_CHAR( (row_number() over(order by data_row.ord)) + \n" +
                 "              case when rfc.NUMERATION_ROW=0 then \n" +
                 "                0 \n" +
@@ -702,9 +666,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
                     "            WHERE true_val like :key \n":
                     "            WHERE LOWER(true_val) like LOWER(:key) \n"
                     )+
-
-                    "            ORDER BY row_index, column_index "
-        );
+                    "            ORDER BY row_index, column_index ";
 
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("fdId", formDataId);
@@ -716,30 +678,12 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
     private void batchRemoveCells(final List<DataRow<Cell>> dataRows) {
 		if (!dataRows.isEmpty()) {
-			BatchPreparedStatementSetter bpss = new BatchPreparedStatementSetter() {
-
-				@Override
-				public void setValues(PreparedStatement ps, int i)
-						throws SQLException {
-					ps.setLong(1, dataRows.get(i).getId());
-				}
-
-				@Override
-				public int getBatchSize() {
-					return dataRows.size();
-				}
-			};
-
-			for (String tableName : DataRowDaoImplUtils.CELL_VALUE_TABLE_NAMES) {
-				getJdbcTemplate().batchUpdate(
-						"delete from " + tableName + " where row_id = ?", bpss);
+			final List<Number> idList = new ArrayList<Number>(dataRows.size());
+			for (DataRow row : dataRows) {
+				idList.add(row.getId());
 			}
-			getJdbcTemplate().batchUpdate(
-					"delete from cell_span_info where row_id = ?", bpss);
-			getJdbcTemplate().batchUpdate(
-					"delete from cell_editable where row_id = ?", bpss);
-			getJdbcTemplate().batchUpdate(
-					"delete from cell_style where row_id = ?", bpss);
+			Map<String, Object> paramMap = new HashMap<String, Object>() {{put("ids", idList);}};
+			getNamedParameterJdbcTemplate().update("DELETE FROM data_cell WHERE row_id IN (:ids)", paramMap);
 		}
 	}
 
@@ -749,8 +693,6 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
             return;
         }
         Map<String, Object> paramMap = new HashMap<String, Object>() {{put("ids", columnIdList);}};
-        getNamedParameterJdbcTemplate().update("delete from string_value where column_id in (:ids)", paramMap);
-        getNamedParameterJdbcTemplate().update("delete from numeric_value where column_id in (:ids)", paramMap);
-        getNamedParameterJdbcTemplate().update("delete from date_value where column_id in (:ids)", paramMap);
+        getNamedParameterJdbcTemplate().update("DELETE FROM data_cell WHERE column_id IN (:ids)", paramMap);
     }
 }

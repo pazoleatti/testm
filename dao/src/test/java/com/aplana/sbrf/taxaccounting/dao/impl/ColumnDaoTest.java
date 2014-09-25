@@ -71,8 +71,8 @@ public class ColumnDaoTest {
         Assert.assertEquals(4, listOfColumnsInDb.get(FOURTH_COLUMN).getOrder());
         Assert.assertEquals("autoNumerationColumn", listOfColumnsInDb.get(FOURTH_COLUMN).getAlias());
         Assert.assertEquals(false, listOfColumnsInDb.get(FOURTH_COLUMN).isChecking());
-        if (listOfColumnsInDb.get(FOURTH_COLUMN) instanceof AutoNumerationColumn) {
-            Assert.assertEquals(1, ((AutoNumerationColumn)listOfColumnsInDb.get(FOURTH_COLUMN)).getType());
+        if (ColumnType.AUTO.equals(listOfColumnsInDb.get(FOURTH_COLUMN).getColumnType())) {
+            Assert.assertEquals(1, ((AutoNumerationColumn)listOfColumnsInDb.get(FOURTH_COLUMN)).getNumerationType().getId());
         }
     }
 

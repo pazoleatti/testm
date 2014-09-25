@@ -1462,9 +1462,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                     "(select report_period_id from department_report_period where id in " +
                     "(select department_report_period_id from form_data where id in " +
                     "(select form_data_id from data_row where id in " +
-                    "(select row_id from numeric_value where column_id in " +
+                    "(select row_id from data_cell where column_id in " +
                     "(select id from form_column where attribute_id in " +
-                    "(select id from ref_book_attribute where ref_book_id = ?)) and value = ?)))) and start_date > ?",
+                    "(select id from ref_book_attribute where ref_book_id = ?)) and nvalue = ?)))) and start_date > ?",
                     refBookId, uniqueRecordId, versionFrom) != 0;
         } else {
             return hasUsages;
@@ -1474,10 +1474,10 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     private static final String CHECK_USAGES_IN_FORMS = "with forms as (\n" +
             "  select fd.* from form_data fd \n" +
             "  join data_row dr on dr.form_data_id = fd.id\n" +
-            "  join numeric_value nv on nv.row_id = dr.id\n" +
+            "  join data_cell nv on nv.row_id = dr.id\n" +
             "  join form_column fc on fc.id = nv.column_id\n" +
             "  join ref_book_attribute a on a.id = fc.attribute_id\n" +
-            "  join ref_book_record r on r.id = nv.value\n" +
+            "  join ref_book_record r on r.id = nv.nvalue\n" +
             "  where %s\n" +
             ")" +
             "select distinct f.kind as formKind, t.name as formType, d.path as departmentPath, d.type as departmentType, rp.name as reportPeriodName, tp.year as year from forms f \n" +

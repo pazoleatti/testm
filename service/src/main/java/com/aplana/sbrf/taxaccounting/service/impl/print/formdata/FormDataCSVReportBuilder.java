@@ -61,10 +61,11 @@ public class FormDataCSVReportBuilder extends AbstractReportBuilder {
         for (DataRow<Cell> row : dataRows) {
             List<String> oneRow = new ArrayList<String>();
             for (Column column : formTemplate.getColumns()) {
-                if (column instanceof RefBookColumn || column instanceof ReferenceColumn) {
-                    oneRow.add(row.getCell(column.getAlias()).getRefBookDereference());
+				String alias = column.getAlias();
+                if (ColumnType.REFBOOK.equals(column.getColumnType()) || ColumnType.REFERENCE.equals(column.getColumnType())) {
+                    oneRow.add(row.getCell(alias).getRefBookDereference());
                 } else {
-                    oneRow.add(row.getCell(column.getAlias()).getValue() == null ? "" : row.getCell(column.getAlias()).getValue().toString());
+                    oneRow.add(row.getCell(alias).getValue() == null ? "" : row.getCell(alias).getValue().toString());
                 }
             }
             csvWriter.writeNext(oneRow.toArray(new String[oneRow.size()]));

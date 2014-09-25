@@ -25,7 +25,6 @@ import java.util.*;
 
 /**
  * Реализация DAO для работы с данными налоговых форм
- *
  * @author dsultanbekov
  */
 @Repository("formDataDao")
@@ -170,7 +169,6 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         int[] types = {Types.NUMERIC};
         getJdbcTemplate().update("delete from form_data where id = ?", params, types);
     }
-
     @Override
     public FormData find(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId) {
         try {
@@ -206,8 +204,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
             );
         }
     }
-
-    @Override
+     @Override
     public List<Long> findFormDataByFormTemplate(int formTemplateId) {
         try {
             return getJdbcTemplate().queryForList(
@@ -411,16 +408,16 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         getJdbcTemplate().update("delete from data_row where manual = 1 and form_data_id = ?", formDataId);
     }
 
-    @Override
-    public List<String> getStringList(Integer columnId, Integer formTemplateTypeId) {
-        return getJdbcTemplate().queryForList("SELECT sv.value FROM FORM_COLUMN FC " +
-                "JOIN FORM_DATA FD ON FC.FORM_TEMPLATE_ID = FD.FORM_TEMPLATE_ID " +
-                "JOIN DATA_ROW DR ON DR.FORM_DATA_ID = FD.ID " +
-                "LEFT JOIN STRING_VALUE SV ON SV.ROW_ID = DR.ID AND SV.COLUMN_ID = FC.ID " +
-                "WHERE FC.id = ? AND fd.form_template_id = ?",
-                new Object[]{columnId, formTemplateTypeId},
-                String.class);
-    }
+	@Override
+	public List<String> getStringList(Integer columnId, Integer formTemplateTypeId) {
+		return getJdbcTemplate().queryForList("SELECT sv.svalue FROM form_column fc\n" +
+				"LEFT JOIN form_data fd ON fc.form_template_id = fd.form_template_id\n" +
+				"LEFT JOIN data_row dr ON dr.form_data_id = fd.id\n" +
+				"LEFT JOIN data_cell sv ON sv.row_id = dr.id AND sv.column_id = fc.id\n" +
+				"WHERE fc.id = ? AND fd.form_template_id = ?",
+				new Object[]{columnId, formTemplateTypeId},
+				String.class);
+	}
 
     private static final String GET_FORM_DATA_LIST_QUERY = "WITH list AS (SELECT ROWNUM as row_number, sorted.* from " +
             "(SELECT fd.id, drp.department_id, fd.state, fd.return_sign, fd.kind, drp.report_period_id, fd.period_order, fd.number_previous_row, fd.form_template_id, manual, " +

@@ -26,7 +26,7 @@ public abstract class Column implements Ordered, Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private Integer id;
-
+	private ColumnType columnType;
 	private String name;
 	private String alias;
 	private int width;
@@ -157,4 +157,11 @@ public abstract class Column implements Ordered, Serializable {
 		};
 	}
 
+	public ColumnType getColumnType() {
+		return columnType;
+	}
+
+	public void setColumnType(ColumnType columnType) {
+		this.columnType = columnType;
+	}
 }
