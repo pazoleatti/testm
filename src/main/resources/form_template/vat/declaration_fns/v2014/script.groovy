@@ -335,7 +335,7 @@ void generateXML() {
                 // Код налогового органа
                 КодНО: taxOrganCode,
                 // Номер корректировки
-                НомКорр: reportPeriodService.getCorrectionPeriodNumber(reportPeriodId, departmentId),
+                НомКорр: reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId),
                 // Код места, по которому представляется документ
                 ПоМесту: taxPlaceTypeCode
         ) {
@@ -621,7 +621,7 @@ def getSumOutcomeSimple(def knuCodes) {
  * Получить данные формы "расходы простые" (id = 304)
  */
 def getFormDataSimple(def reportPeriodId) {
-    return formDataService.find(304, FormDataKind.SUMMARY, declarationData.departmentId, reportPeriodId)
+    return formDataService.getLast(304, FormDataKind.SUMMARY, declarationData.departmentId, reportPeriodId, null)
 }
 
 // Получение данных из справочника «Отчет о прибылях и убытках» для текужего подразделения и отчетного периода

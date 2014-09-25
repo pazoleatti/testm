@@ -62,7 +62,7 @@ public class ModalWindow extends DialogBox implements CanHide {
 
     private OnHideHandler<CanHide> hideHandler = new OnHideHandler<CanHide>() {
         @Override
-        public void OnHide(CanHide modalWindow) {
+        public void onHide(CanHide modalWindow) {
             modalWindow.hide();
         }
     };
@@ -183,7 +183,7 @@ public class ModalWindow extends DialogBox implements CanHide {
                 && (event.getTypeInt() == Event.ONCLICK)
                 && isCloseEvent(nativeEvent))
                 || (Event.ONKEYUP == event.getTypeInt() && event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ESCAPE)) {
-            hideHandler.OnHide(this);
+            hideHandler.onHide(this);
         }
         super.onPreviewNativeEvent(event);
     }

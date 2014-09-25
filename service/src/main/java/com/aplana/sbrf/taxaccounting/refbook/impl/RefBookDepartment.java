@@ -668,13 +668,13 @@ public class RefBookDepartment implements RefBookDataProvider {
     }
 
     //http://conf.aplana.com/pages/viewpage.action?pageId=11402881
-    private void createPeriods(long depId, DepartmentType newDepartmentType, int terrBankId){
+    private void createPeriods(int depId, DepartmentType newDepartmentType, int terrBankId){
         //1
         if (newDepartmentType != DepartmentType.TERR_BANK){
             if (departmentService.getParentTB((int) depId) != null){
                 //1А.1.1
                 List<DepartmentReportPeriod> listDRP =
-                        periodService.getDRPByDepartmentIds(null, Arrays.asList((long) terrBankId));
+                        periodService.getDRPByDepartmentIds(null, Arrays.asList(terrBankId));
                 if (!listDRP.isEmpty()){
                     for (DepartmentReportPeriod drp : listDRP)
                         //1А.1.1.1
@@ -686,9 +686,9 @@ public class RefBookDepartment implements RefBookDataProvider {
                         drpCopy.setReportPeriod(drp.getReportPeriod());
                         drpCopy.setDepartmentId(depId);
                         drpCopy.setActive(drp.isActive());
-                        drpCopy.setCorrectPeriod(drp.getCorrectPeriod());
+                        drpCopy.setCorrectionDate(drp.getCorrectionDate());
                         drpCopy.setBalance(drp.isBalance());
-                        periodService.saveOrUpdate(drpCopy, null, null);
+                        periodService.saveOrOpen(drpCopy, null);
                     }
                     return;
                 }
@@ -697,7 +697,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         }
         //2
         List<DepartmentReportPeriod> listDRP =
-                periodService.getDRPByDepartmentIds(Arrays.asList(TaxType.INCOME, TaxType.DEAL, TaxType.VAT), Arrays.asList(0l));
+                periodService.getDRPByDepartmentIds(Arrays.asList(TaxType.INCOME, TaxType.DEAL, TaxType.VAT), Arrays.asList(0));
         if (!listDRP.isEmpty()){
             for (DepartmentReportPeriod drp : listDRP)
                 //1А.1.1.1
@@ -708,9 +708,9 @@ public class RefBookDepartment implements RefBookDataProvider {
                 drpCopy.setReportPeriod(drp.getReportPeriod());
                 drpCopy.setDepartmentId(depId);
                 drpCopy.setActive(drp.isActive());
-                drpCopy.setCorrectPeriod(null);
+                drpCopy.setCorrectionDate(null);
                 drpCopy.setBalance(drp.isBalance());
-                periodService.saveOrUpdate(drpCopy, null, null);
+                periodService.saveOrOpen(drpCopy, null);
             }
         }
     }

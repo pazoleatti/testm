@@ -73,7 +73,7 @@ public class CreateBookerStatementsView extends PopupViewWithUiHandlers<CreateBo
 
         title.setOnHideHandler(new OnHideHandler<CanHide>() {
             @Override
-            public void OnHide(CanHide modalWindow) {
+            public void onHide(CanHide modalWindow) {
                 showOnHideDialog();
             }
         });

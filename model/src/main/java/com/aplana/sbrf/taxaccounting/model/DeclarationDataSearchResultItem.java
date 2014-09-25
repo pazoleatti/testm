@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * DTO-Класс, содержащий информацию о параметрах декларации и связанных с ним объектов в "плоском" виде
@@ -32,6 +33,8 @@ public class DeclarationDataSearchResultItem implements Serializable {
 	private Integer reportPeriodId;
 	// Название отчётного периода
 	private String reportPeriodName;
+    // Срок сдачи корректировки
+    private Date correctionDate;
     // Год отчетного периода
     private Integer reportPeriodYear;
 	// Идентификатор вида декларации
@@ -143,5 +146,13 @@ public class DeclarationDataSearchResultItem implements Serializable {
 
     public void setTaxOrganKpp(String taxOrganKpp) {
         this.taxOrganKpp = taxOrganKpp;
+    }
+
+    public Date getCorrectionDate() {
+        return correctionDate;
+    }
+
+    public void setCorrectionDate(Date correctionDate) {
+        this.correctionDate = correctionDate;
     }
 }

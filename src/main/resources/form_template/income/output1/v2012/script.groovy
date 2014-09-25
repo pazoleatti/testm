@@ -182,7 +182,7 @@ def BigDecimal calc24(def row) {
     // [15:10:58] Sariya Mustafina: спрошу
     def result = 0
     // --
-    formPrev = formDataService.getFormDataPrev(formData, formData.departmentId)
+    formPrev = formDataService.getFormDataPrev(formData)
     if (formPrev != null) {
         for (rowPrev in formDataService.getDataRowHelper(formPrev).getAll()) {
             if (rowPrev.financialYear.format('yyyy') == row.financialYear.format('yyyy')) {
@@ -220,7 +220,7 @@ def logicCheck() {
         checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
 
         // 2. Проверка наличия формы за предыдущий отчётный период
-        if (formDataService.getFormDataPrev(formData, formData.departmentId) == null) {
+        if (formDataService.getFormDataPrev(formData) == null) {
             logger.warn('Форма за предыдущий отчётный период не создавалась!')
         }
     }

@@ -2,6 +2,7 @@ package form_template.transport.declaration
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute
@@ -120,7 +121,7 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
                     Период: 34,
                     ОтчетГод: reportPeriod.taxPeriod.year,
                     КодНО: departmentParamTransport.TAX_ORGAN_CODE,
-                    НомКорр: reportPeriodService.getCorrectionPeriodNumber(declarationData.getReportPeriodId(), departmentId),
+                    НомКорр: reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId),
                     ПоМесту: taxPlaceTypeCode
             ) {
                 def svnp = [ОКВЭД: okvedCode]
@@ -183,7 +184,7 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
                             if (reportPeriod.order > 1) {
                                 ((reportPeriod.order - 1)..1).each { order ->
                                     reportPeriodMap[order] = reportPeriodService.getPrevReportPeriod(reportPeriodMap[order + 1].id)
-                                    formDataMap[order] = formDataService.find(formDataMap[reportPeriod.order].formType.id, formDataMap[reportPeriod.order].kind, formDataMap[reportPeriod.order].departmentId, reportPeriodMap[order].id)
+                                    formDataMap[order] = formDataService.getLast(formDataMap[reportPeriod.order].formType.id, formDataMap[reportPeriod.order].kind, formDataMap[reportPeriod.order].departmentId, reportPeriodMap[order].id, formDataMap[reportPeriod.order].periodOrder)
                                     if (formDataMap[order] != null && formDataMap[order].state == WorkflowState.ACCEPTED) {
                                         rowsDataMap[order] = formDataService.getDataRowHelper(formDataMap[order]).getAllCached()
                                     }

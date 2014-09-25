@@ -83,7 +83,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.COMPOSE:
-        formDataService.consolidationTotal(formData, formDataDepartment.id, logger, ['total'])
+        formDataService.consolidationTotal(formData, logger, ['total'])
         calc()
         logicCheck()
         break
@@ -180,7 +180,7 @@ def calc() {
  * Получить данные за формы "(РНУ-49) Регистр налогового учёта «ведомость определения результатов от реализации (выбытия) имущества»"
  */
 def getRnu49FormData() {
-    def formData49 = formDataService.find(312, formData.kind, formDataDepartment.id, formData.reportPeriodId)
+    def formData49 = formDataService.getLast(312, formData.kind, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder)
     if (formData49 != null && formData49.id != null) {
         return formDataService.getDataRowHelper(formData49)
     }

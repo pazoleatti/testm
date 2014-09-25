@@ -223,17 +223,17 @@ def getTotalRowFromRNU(def knu, def dataRowsOutcome) {
 
 // Получить данные формы "расходы простые" (id = 304)
 def getFormDataOutcomeSimple() {
-    return formDataService.find(304, FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId)
+    return formDataService.getLast(304, FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder)
 }
 
 // Получить данные формы "доходы сложные" (id = 302)
 def getFormDataComplex() {
-    return formDataService.find(302, FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId)
+    return formDataService.getLast(302, FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder)
 }
 
 // Получить данные формы "доходы простые" (id = 301)
 def getFormDataSimple() {
-    return formDataService.find(301, FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId)
+    return formDataService.getLast(301, FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder)
 }
 
 // Получение импортируемых данных

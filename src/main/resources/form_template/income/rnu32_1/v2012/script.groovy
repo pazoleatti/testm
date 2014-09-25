@@ -288,7 +288,7 @@ void consolidation() {
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
             getReportPeriodStartDate(), getReportPeriodEndDate()).each {
         if (it.formTypeId == formData.formType.id) {
-            def source = formDataService.findMonth(it.formTypeId, it.kind, it.departmentId, getTaxPeriod()?.id, formData.periodOrder)
+            def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 def sourceDataRows = formDataService.getDataRowHelper(source).allCached
                 // копирование данных по разделам

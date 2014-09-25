@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -98,13 +99,6 @@ public class FormDataServiceTest {
         userInfo.setIp("127.0.0.1");
         Logger logger = new Logger();
 
-        // мок для сервиса который возвращает баллансовый ли это период
-        // период с id = 1 для подразделения с id=1 будет баллансовым
-        when(periodService.isBalancePeriod(1, 1)).thenReturn(true);
-        // период с id = 2 для подразделения с id=1 Не будет баллансовым
-        when(periodService.isBalancePeriod(2, 1)).thenReturn(false);
-        // подменяем reportPeriodService у тестируемого объекта
-
         // имеем 3 формы, 2 источника и 1 приемник
         // готовим тип формы для
         DepartmentFormType departmentFormType = new DepartmentFormType();
@@ -127,7 +121,7 @@ public class FormDataServiceTest {
         formData1.setFormType(formType);
         formData1.setKind(FormDataKind.CONSOLIDATED);
         formData1.setDepartmentId(1);
-        when(formDataDao.find(departmentFormType.getFormTypeId(), departmentFormType.getKind(), departmentFormType.getDepartmentId(), formData.getReportPeriodId())).thenReturn(formData1);
+        when(formDataDao.find(departmentFormType.getFormTypeId(), departmentFormType.getKind(), 1, null)).thenReturn(formData1);
         when(formDataDao.get(formData1.getId(), false)).thenReturn(formData);
         when(departmentDao.getDepartment(formData1.getDepartmentId())).thenReturn(department);
 
@@ -144,8 +138,24 @@ public class FormDataServiceTest {
             }
         }).when(formDataDao).delete(formData1.getId());
 
-        FormDataCompositionService formDataCompositionService = mock(FormDataCompositionService.class);
+        ReportPeriod reportPeriod = new ReportPeriod();
+        reportPeriod.setId(2);
 
+        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
+        departmentReportPeriod.setId(1);
+        departmentReportPeriod.setReportPeriod(reportPeriod);
+        departmentReportPeriod.setDepartmentId(1);
+        departmentReportPeriod.setBalance(false);
+        formData.setDepartmentReportPeriodId(departmentReportPeriod.getId());
+
+        DepartmentReportPeriodDao departmentReportPeriodDao = mock(DepartmentReportPeriodDao.class);
+        when(departmentReportPeriodDao.getLast(anyInt(), anyInt())).thenReturn(departmentReportPeriod);
+        when(departmentReportPeriodDao.get(anyInt())).thenReturn(departmentReportPeriod);
+        ReflectionTestUtils.setField(formDataService, "departmentReportPeriodDao", departmentReportPeriodDao);
+
+        when(formDataDao.getLast(anyInt(), any(FormDataKind.class), anyInt(), anyInt(), anyInt())).thenReturn(formData1);
+
+        FormDataCompositionService formDataCompositionService = mock(FormDataCompositionService.class);
         ApplicationContext applicationContext = mock(ApplicationContext.class);
         when(applicationContext.getBean(FormDataCompositionService.class)).thenReturn(formDataCompositionService);
         ReflectionTestUtils.setField(formDataService, "applicationContext", applicationContext);
@@ -169,7 +179,7 @@ public class FormDataServiceTest {
                 map.remove(invocation.getArguments()[0]);
                 return null;
             }
-        }).when(lockDataService).unlock(anyString(),anyInt());
+        }).when(lockDataService).unlock(anyString(), anyInt());
 
         formDataService.compose(WorkflowMove.APPROVED_TO_ACCEPTED, formData, userInfo, logger);
         // проверяем что источник удален

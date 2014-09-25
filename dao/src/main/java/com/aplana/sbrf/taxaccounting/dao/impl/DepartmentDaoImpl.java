@@ -1,12 +1,12 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -400,26 +400,21 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
                 ") av_dep left join ( " +
                 "select distinct ddt.department_id parent_id, dft.department_id id " +
                 "from declaration_source ds, department_form_type dft, department_declaration_type ddt, declaration_type dt " +
-                "where ds.department_declaration_type_id = ddt.id and ds.src_department_form_type_id = dft.id \n" +
+                "where ds.department_declaration_type_id = ddt.id and ds.src_department_form_type_id = dft.id " +
                 "and (:periodStart is null or ((ds.period_end >= :periodStart or ds.period_end is null) and (:periodEnd is null or ds.period_start <= :periodEnd))) " +
                 "and dt.id = ddt.declaration_type_id and dt.tax_type in " + SqlUtils.transformTaxTypeToSqlInStatement(taxTypes) + " " +
                 "union " +
                 "select distinct dft.department_id parent_id, dfts.department_id id " +
                 "from form_data_source fds, department_form_type dft, department_form_type dfts, form_type ft " +
                 "where fds.department_form_type_id = dft.id and fds.src_department_form_type_id = dfts.id " +
-                "and (:periodStart is null or ((fds.period_end >= :periodStart or fds.period_end is null) and (:periodEnd is null or fds.period_start <= :periodEnd)))" +
+                "and (:periodStart is null or ((fds.period_end >= :periodStart or fds.period_end is null) and (:periodEnd is null or fds.period_start <= :periodEnd))) " +
                 "and ft.id = dft.form_type_id and ft.tax_type in " + SqlUtils.transformTaxTypeToSqlInStatement(taxTypes) + ") link_dep " +
                 "on av_dep.id = link_dep.parent_id, (select 0 as c from dual union all select 1 as c from dual) t3) " +
                 "where id is not null";
         params.put("periodStart", periodStart);
         params.put("periodEnd", periodEnd);
 
-        try {
-            return getNamedParameterJdbcTemplate().queryForList(allSql,
-                    params, Integer.class);
-        } catch (EmptyResultDataAccessException e) {
-            return new ArrayList<Integer>(0);
-        }
+        return getNamedParameterJdbcTemplate().queryForList(allSql, params, Integer.class);
     }
 
     @Override

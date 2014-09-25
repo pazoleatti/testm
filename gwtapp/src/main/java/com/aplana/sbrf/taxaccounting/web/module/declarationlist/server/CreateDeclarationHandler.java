@@ -1,15 +1,16 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.server;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.*;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.CreateDeclaration;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.CreateDeclarationResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -40,18 +41,22 @@ public class CreateDeclarationHandler extends AbstractActionHandler<CreateDeclar
     private LogEntryService logEntryService;
 
     @Autowired
-    private PeriodService periodService;
+    private DepartmentReportPeriodService departmentReportPeriodService;
 
 	@Override
 	public CreateDeclarationResult execute(CreateDeclaration command, ExecutionContext executionContext) throws ActionException {
         Integer declarationTypeId = command.getDeclarationTypeId();
-        try {
-            periodService.getTaxPeriod(periodService.getReportPeriod(command.getReportPeriodId()).getTaxPeriod().getId());
-        } catch (Exception e) {
-            throw new ActionException("Не удалось определить налоговый период.", e);
+
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.getLast(command.getDepartmentId(),
+                command.getReportPeriodId());
+
+        if (departmentReportPeriod == null) {
+            throw new ActionException("Не удалось определить налоговый период.");
         }
+
         if (command.getTaxType().equals(TaxType.DEAL)) {
-            List<DeclarationType> declarationTypeList = declarationTypeService.getTypes(command.getDepartmentId(), command.getReportPeriodId(), TaxType.DEAL);
+            List<DeclarationType> declarationTypeList = declarationTypeService.getTypes(departmentReportPeriod.getDepartmentId(),
+                    departmentReportPeriod.getReportPeriod().getId(), TaxType.DEAL);
             if (declarationTypeList.size() == 1) {
                 declarationTypeId = declarationTypeList.get(0).getId();
             } else {
@@ -61,9 +66,15 @@ public class CreateDeclarationHandler extends AbstractActionHandler<CreateDeclar
         CreateDeclarationResult result = new CreateDeclarationResult();
         Logger logger = new Logger();
 
-		result.setDeclarationId(declarationDataService.create(logger, declarationTemplateService
-				.getActiveDeclarationTemplateId(declarationTypeId, command.getReportPeriodId()), command.getDepartmentId(),
-				securityService.currentUserInfo(), command.getReportPeriodId(), command.getTaxOrganCode(), command.getTaxOrganKpp()));
+        int activeDeclarationTemplateId = declarationTemplateService.getActiveDeclarationTemplateId(declarationTypeId,
+                departmentReportPeriod.getReportPeriod().getId());
+
+        long declarationId = declarationDataService.create(logger, activeDeclarationTemplateId,
+                securityService.currentUserInfo(), departmentReportPeriod, command.getTaxOrganCode(),
+                command.getTaxOrganKpp());
+
+        result.setDeclarationId(declarationId);
+
         result.setUuid(logEntryService.save(logger.getEntries()));
 		return result;
 	}

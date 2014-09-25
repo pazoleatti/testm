@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import groovy.transform.Field
 
 import java.math.RoundingMode
@@ -82,7 +83,7 @@ def dateFormat = 'dd.MM.yyyy'
 
 /** Признак периода ввода остатков. */
 @Field
-def isBalancePeriod = null
+def isBalance = null
 
 @Field
 def startDate = null
@@ -111,20 +112,20 @@ def getNumber(def value, def indexRow, def indexCol) {
 
 // Признак периода ввода остатков. Отчетный период является периодом ввода остатков и месяц первый в периоде.
 def isMonthBalance() {
-    if (isBalancePeriod == null) {
-        if (!reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId) || formData.periodOrder == null) {
-            isBalancePeriod = false
+    if (isBalance == null) {
+        def departmentReportPeriod = departmentReportPeriodService.get(formData.departmentReportPeriodId)
+        if (!departmentReportPeriod.isBalance() || formData.periodOrder == null) {
+            isBalance = false
         } else {
-            isBalancePeriod = formData.periodOrder - 1 % 3 == 0
+            isBalance = formData.periodOrder - 1 % 3 == 0
         }
     }
-    return isBalancePeriod
+    return isBalance
 }
 
 // Получить данные из формы РНУ-46
 def getRnu46DataRowHelper() {
-    def taxPeriodId = reportPeriodService.get(formData.reportPeriodId)?.taxPeriod?.id
-    def formData46 = formDataService.findMonth(342, formData.kind, formDataDepartment.id, taxPeriodId, formData.periodOrder)
+    def formData46 = formDataService.getLast(342, formData.kind, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder)
     if (formData46 != null) {
         return formDataService.getDataRowHelper(formData46)
     }
@@ -229,7 +230,7 @@ void logicCheck() {
 
         def groupRowsAliases = ['R0', 'R1', 'R2', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8', 'R9', 'R10']
         //вынес сюда проверку на первый месяц
-        def formDataOld = formData.periodOrder != 1 ? formDataService.getFormDataPrev(formData, formDataDepartment.id) : null
+        def formDataOld = formData.periodOrder != 1 ? formDataService.getFormDataPrev(formData) : null
         def dataRowsOld = formDataOld != null ? formDataService.getDataRowHelper(formDataOld)?.allCached : null
         // значения для первых 11 строк
         def row1_11 = calcRows1_11()
@@ -342,9 +343,9 @@ void logicCheck() {
 }
 
 /** Получить данные за определенный месяц */
-def FormData getFormDataPeriod(def taxPeriod, def periodOrder) {
+def FormData getFormDataPeriod(def reportPeriodId, def periodOrder) {
     if (taxPeriod != null && periodOrder != null) {
-        return formDataService.findMonth(formData.formType.id, formData.kind, formDataDepartment.id, taxPeriod.id, periodOrder)
+        return formDataService.getLast(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriodId, periodOrder)
     }
 }
 
@@ -361,11 +362,9 @@ def getFieldFromPreviousMonth(def dataRows, def alias, def field) {
 
 /** Возвращает сумму значений графы (3 или 5) за все месяцы текущего года, включая текущий отчетный период */
 def getFieldSumForAllPeriods(def alias, def field) {
-    def ReportPeriod reportPeriod = reportPeriodService.get(formData.reportPeriodId)
-    def TaxPeriod taxPeriod = reportPeriod.taxPeriod
     def sum = 0
     for (def periodOrder = 1; periodOrder <= formData.periodOrder; periodOrder++) {
-        def formDataPeriod = getFormDataPeriod(taxPeriod, periodOrder)
+        def formDataPeriod = getFormDataPeriod(formData.reportPeriodId, periodOrder)
         def dataRows = formDataPeriod != null ? formDataService.getDataRowHelper(formDataPeriod)?.allCached : null
         def DataRow row = dataRows != null ? getDataRow(dataRows, alias) : null
         def value = row?.getCell(field)?.getValue()
@@ -378,11 +377,9 @@ def getFieldSumForAllPeriods(def alias, def field) {
 
 /** Возвращает периоды с некорректными данными для расчета графы 4 или 6. field - графа 3 или 5*/
 def getFieldInvalidPeriods(def alias, def field) {
-    def ReportPeriod reportPeriod = reportPeriodService.get(formData.reportPeriodId)
-    def TaxPeriod taxPeriod = reportPeriod.taxPeriod
     def periods = []
     for (def periodOrder = 1; periodOrder <= formData.periodOrder; periodOrder++) {
-        def formDataPeriod = getFormDataPeriod(taxPeriod, periodOrder)
+        def formDataPeriod = getFormDataPeriod(formData.reportPeriodId, periodOrder)
         def dataRows = formDataPeriod != null ? formDataService.getDataRowHelper(formDataPeriod)?.allCached : null
         def DataRow row = dataRows != null ? getDataRow(dataRows, alias) : null
         if (row?.getCell(field)?.getValue() == null) {
@@ -401,11 +398,10 @@ void consolidation() {
             row[column] = null
         }
     }
-    def taxPeriodId = reportPeriodService.get(formData.reportPeriodId)?.taxPeriod?.id
     for (formDataSource in departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind(),
             getReportPeriodStartDate(), getReportPeriodEndDate())) {
         if (formDataSource.formTypeId == formData.getFormType().getId()) {
-            def source = formDataService.findMonth(formDataSource.formTypeId, formDataSource.kind, formDataSource.departmentId, taxPeriodId, formData.periodOrder)
+            def source = formDataService.getLast(formDataSource.formTypeId, formDataSource.kind, formDataSource.departmentId, formData.reportPeriodId, formData.periodOrder)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 sourceForm = formDataService.getDataRowHelper(source)
                 addRowsToRows(dataRows, sourceForm.allCached)

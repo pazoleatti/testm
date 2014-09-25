@@ -32,6 +32,8 @@ public class FilterFormDataPresenter extends PresenterWidget<FilterFormDataPrese
 
 		void setReturnStateList(List<Boolean> list);
 
+        void setCorrectionTagList(List<Boolean> list);
+
         void setFilter(String filter);
 
 		void setDepartments(List<Department> list, Set<Integer> availableValues);
@@ -59,10 +61,6 @@ public class FilterFormDataPresenter extends PresenterWidget<FilterFormDataPrese
 		return getView().getDataFilter();
 	}
 
-	public void updateSavedFilterData(FormDataFilter formDataFilter){
-		getView().setDataFilter(formDataFilter);
-	}
-
 	public void initFilter(final TaxType taxType, final FormDataFilter filter, final GetKindListResult kindListResult) {
 		GetFilterData action = new GetFilterData();
 		action.setTaxType(taxType);
@@ -77,6 +75,7 @@ public class FilterFormDataPresenter extends PresenterWidget<FilterFormDataPrese
 						getView().setReportPeriods(result.getReportPeriods());
 						getView().setFormStateList(Arrays.asList(WorkflowState.values()));
 						getView().setReturnStateList(Arrays.asList(new Boolean[]{ Boolean.TRUE, Boolean.FALSE }));
+                        getView().setCorrectionTagList(Arrays.asList(new Boolean[]{ Boolean.TRUE, Boolean.FALSE }));
 						// Если при инициализации фильтра клиент устанавливает фильтр, то берем его.
 						// Иначе устанавливаем фильтр по умолчанию.
 						if (filter != null){

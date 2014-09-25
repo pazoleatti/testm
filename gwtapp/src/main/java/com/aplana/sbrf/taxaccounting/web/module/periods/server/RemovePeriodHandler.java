@@ -34,8 +34,7 @@ public class RemovePeriodHandler extends AbstractActionHandler<RemovePeriodActio
 	@Override
 	public RemovePeriodResult execute(RemovePeriodAction removePeriodAction, ExecutionContext executionContext) throws ActionException {
 		List<LogEntry> logs = new ArrayList<LogEntry>();
-		periodService.removeReportPeriod(removePeriodAction.getTaxType(), removePeriodAction.getReportPeriodId(),
-				removePeriodAction.getCorrectionDate(), removePeriodAction.getDepartmentId(), logs, securityService.currentUserInfo());
+		periodService.removeReportPeriod(removePeriodAction.getTaxType(), removePeriodAction.getDepartmentReportPeriodId(), logs, securityService.currentUserInfo());
 		RemovePeriodResult result = new RemovePeriodResult();
 		result.setUuid(logEntryService.save(logs));
 		return result;
@@ -43,6 +42,6 @@ public class RemovePeriodHandler extends AbstractActionHandler<RemovePeriodActio
 
 	@Override
 	public void undo(RemovePeriodAction removePeriodAction, RemovePeriodResult removePeriodResult, ExecutionContext executionContext) throws ActionException {
-		//To change body of implemented methods use File | Settings | File Templates.
+
 	}
 }

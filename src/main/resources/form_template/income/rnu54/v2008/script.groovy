@@ -22,7 +22,7 @@ import java.text.SimpleDateFormat
  */
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
-        checkCreation()
+        formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CHECK:
         logicalCheck() && checkNSI()
@@ -86,14 +86,31 @@ switch (formDataEvent) {
 // графа 13 - outcomeTax
 
 @Field
-def endDate = null
-
-@Field
 def providerCache = [:]
 @Field
 def recordCache = [:]
 @Field
 def refBookCache = [:]
+
+@Field
+def startDate = null
+
+@Field
+def endDate = null
+
+def getReportPeriodStartDate() {
+    if (startDate == null) {
+        startDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
+    }
+    return startDate
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
+}
 
 /**
  * Добавить новую строку.
@@ -452,10 +469,9 @@ void consolidation() {
     data.clear()
     def newRows = []
 
-    // TODO (Ramil Timerbaev) в метод departmentFormTypeService.getFormSources добавить периоды
-    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind(), getReportPeriodStartDate(), getReportPeriodEndDate()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
-            def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 getRows(getData(source)).each { row ->
                     if (row.getAlias() == null || row.getAlias() == '') {
@@ -468,18 +484,6 @@ void consolidation() {
     if (!newRows.isEmpty()) {
         data.insert(newRows, 1)
         sort(data)
-    }
-}
-
-/**
- * Проверка при создании формы.
- */
-void checkCreation() {
-    def findForm = formDataService.find(formData.formType.id,
-            formData.kind, formData.departmentId, formData.reportPeriodId)
-
-    if (findForm != null) {
-        logger.error('Налоговая форма с заданными параметрами уже существует.')
     }
 }
 
@@ -1183,11 +1187,4 @@ void loggerError(def msg) {
     //TODO вернуть error
     //logger.error(msg)
     logger.warn(msg)
-}
-
-def getReportPeriodEndDate() {
-    if (endDate == null) {
-        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
-    }
-    return endDate
 }

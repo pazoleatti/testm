@@ -189,7 +189,7 @@ void logicCheck() {
     // Иначе если «Графа 13» (форма 937.1) <> 0 и экземпляр налоговой формы 937.1.13,
     // чье подразделение и  налоговый период, соответствуют подразделению и налоговому периоду формы 937.1,
     // не существует, то выдается сообщение об ошибке №1
-    def appFormData = formDataService.find(607, formData.kind, formData.departmentId, formData.reportPeriodId)
+    def appFormData = formDataService.getLast(607, formData.kind, formData.departmentId, formData.reportPeriodId, formData.periodOrder)
     if (appFormData) {
         def appDataRows = formDataService.getDataRowHelper(appFormData)?.allCached
         if (appDataRows) {
@@ -234,7 +234,7 @@ void consolidation() {
     for (formDataSource in departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind(),
             getCalendarStartDate(), getReportPeriodEndDate())) {
         if (formDataSource.formTypeId == formData.getFormType().getId()) {
-            def source = formDataService.find(formDataSource.formTypeId, formDataSource.kind, formDataSource.departmentId, formData.reportPeriodId)
+            def source = formDataService.getLast(formDataSource.formTypeId, formDataSource.kind, formDataSource.departmentId, formData.reportPeriodId, formData.periodOrder)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 sourceForm = formDataService.getDataRowHelper(source)
                 addRowsToRows(dataRows, sourceForm.allCached)

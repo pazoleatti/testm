@@ -1,11 +1,11 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,27 +25,27 @@ public class FormTypeDaoTest {
 
     @Test
 	public void testGet() {
-		FormType t = formTypeDao.get(Constants.TRANSPORT_FORM_TYPE_ID);
+		FormType t = formTypeDao.get(DaoTestConstants.TRANSPORT_FORM_TYPE_ID);
 		Assert.assertEquals("FormType - Transport", t.getName());
-		Assert.assertEquals(Constants.TRANSPORT_FORM_TYPE_ID, t.getId());
+		Assert.assertEquals(DaoTestConstants.TRANSPORT_FORM_TYPE_ID, t.getId());
         Assert.assertEquals(TaxType.TRANSPORT, t.getTaxType());
         Assert.assertEquals("code_1", t.getCode());
 		
-		t = formTypeDao.get(Constants.INCOME_FORM_TYPE_ID);
+		t = formTypeDao.get(DaoTestConstants.INCOME_FORM_TYPE_ID);
 		Assert.assertEquals("FormType - Income", t.getName());
-		Assert.assertEquals(Constants.INCOME_FORM_TYPE_ID, t.getId());
+		Assert.assertEquals(DaoTestConstants.INCOME_FORM_TYPE_ID, t.getId());
 		Assert.assertEquals(TaxType.INCOME, t.getTaxType());
         Assert.assertEquals("code_2", t.getCode());
 
-        t = formTypeDao.get(Constants.VAT_FORM_TYPE_ID);
+        t = formTypeDao.get(DaoTestConstants.VAT_FORM_TYPE_ID);
 		Assert.assertEquals("FormType - VAT", t.getName());
-		Assert.assertEquals(Constants.VAT_FORM_TYPE_ID, t.getId());
+		Assert.assertEquals(DaoTestConstants.VAT_FORM_TYPE_ID, t.getId());
 		Assert.assertEquals(TaxType.VAT, t.getTaxType());
         Assert.assertEquals("code_3", t.getCode());
 
-        t = formTypeDao.get(Constants.PROPERTY_FORM_TYPE_ID);
+        t = formTypeDao.get(DaoTestConstants.PROPERTY_FORM_TYPE_ID);
 		Assert.assertEquals("FormType - Property", t.getName());
-		Assert.assertEquals(Constants.PROPERTY_FORM_TYPE_ID, t.getId());
+		Assert.assertEquals(DaoTestConstants.PROPERTY_FORM_TYPE_ID, t.getId());
 		Assert.assertEquals(TaxType.PROPERTY, t.getTaxType());
         Assert.assertEquals("code_4", t.getCode());
     }

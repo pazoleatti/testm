@@ -5,54 +5,54 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
 public class CreateFormData extends UnsecuredActionImpl<CreateFormDataResult> implements ActionName {
 
-	private Integer formDataTypeId;
+    private Integer formDataTypeId;
 
-	private Integer reportPeriodId;
+    private Integer reportPeriodId;
 
-	private Integer departmentId;
-	
-	private Integer formDataKindId;
+    private Integer departmentId;
+
+    private Integer formDataKindId;
 
     private Integer monthId;
 
-	public Integer getFormDataTypeId() {
-		return formDataTypeId;
-	}
+    public Integer getFormDataTypeId() {
+        return formDataTypeId;
+    }
 
 
-	public void setFormDataTypeId(Integer formDataTypeId) {
-		this.formDataTypeId = formDataTypeId;
-	}
+    public void setFormDataTypeId(Integer formDataTypeId) {
+        this.formDataTypeId = formDataTypeId;
+    }
 
 
-	public Integer getReportPeriodId() {
-		return reportPeriodId;
-	}
+    public Integer getReportPeriodId() {
+        return reportPeriodId;
+    }
 
 
-	public void setReportPeriodId(Integer reportPeriodId) {
-		this.reportPeriodId = reportPeriodId;
-	}
+    public void setReportPeriodId(Integer reportPeriodId) {
+        this.reportPeriodId = reportPeriodId;
+    }
 
 
-	public Integer getDepartmentId() {
-		return departmentId;
-	}
+    public Integer getDepartmentId() {
+        return departmentId;
+    }
 
 
-	public void setDepartmentId(Integer departmentId) {
-		this.departmentId = departmentId;
-	}
+    public void setDepartmentId(Integer departmentId) {
+        this.departmentId = departmentId;
+    }
 
 
-	public Integer getFormDataKindId() {
-		return formDataKindId;
-	}
+    public Integer getFormDataKindId() {
+        return formDataKindId;
+    }
 
 
-	public void setFormDataKindId(Integer formDataKindId) {
-		this.formDataKindId = formDataKindId;
-	}
+    public void setFormDataKindId(Integer formDataKindId) {
+        this.formDataKindId = formDataKindId;
+    }
 
     public Integer getMonthId() {
         return monthId;
@@ -63,7 +63,7 @@ public class CreateFormData extends UnsecuredActionImpl<CreateFormDataResult> im
     }
 
     @Override
-	public String getName() {
-		return "Создание налоговой формы";
-	}
+    public String getName() {
+        return "Создание налоговой формы";
+    }
 }

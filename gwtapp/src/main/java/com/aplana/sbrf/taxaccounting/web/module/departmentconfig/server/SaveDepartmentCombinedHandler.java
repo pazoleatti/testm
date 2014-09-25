@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
+import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
@@ -73,6 +74,9 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
     @Autowired
     private SecurityService securityService;
 
+    @Autowired
+    private DepartmentReportPeriodService departmentReportPeriodService;
+
     public SaveDepartmentCombinedHandler() {
         super(SaveDepartmentCombinedAction.class);
     }
@@ -89,7 +93,18 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
                 && !depCombined.getDepartmentId().isEmpty()
                 && action.getTaxType() != null
                 && action.getReportPeriodId() != null) {
-            if (!reportService.isActivePeriod(action.getReportPeriodId(), depCombined.getDepartmentId().get(0))) {
+
+            DepartmentReportPeriodFilter departmentReportPeriodFilter = new DepartmentReportPeriodFilter();
+            departmentReportPeriodFilter.setDepartmentIdList(Arrays.asList(depCombined.getDepartmentId().get(0).intValue()));
+            departmentReportPeriodFilter.setReportPeriodIdList(Arrays.asList(action.getReportPeriodId()));
+            departmentReportPeriodFilter.setIsActive(true);
+            List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodService.getListByFilter(departmentReportPeriodFilter);
+            DepartmentReportPeriod departmentReportPeriod = null;
+            if (departmentReportPeriodList.size() == 1) {
+                departmentReportPeriod = departmentReportPeriodList.get(0);
+            }
+            // Нет ни одного открытого отчетного периода подразделений включая корректирующие
+            if (departmentReportPeriod == null || !departmentReportPeriod.isActive()) {
                 throw new ActionException("Выбранный отчетный период закрыт!");
             }
 
