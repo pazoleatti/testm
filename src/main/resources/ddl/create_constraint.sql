@@ -127,7 +127,7 @@ alter table department_report_period add constraint dep_rep_per_fk_rep_period_id
 
 alter table declaration_data add constraint declaration_data_pk primary key (id);
 alter table declaration_data add constraint declaration_data_fk_decl_t_id foreign key (declaration_template_id) references declaration_template(id);
-alter table declaration_data add constraint declaration_data_fk_dep_rep_per_id foreign key (department_report_period_id) references department_report_period (id);
+alter table declaration_data add constraint decl_data_fk_dep_rep_per_id foreign key (department_report_period_id) references department_report_period (id);
 alter table declaration_data add constraint declaration_data_fk_j_print foreign key (jasper_print) references blob_data(id);
 alter table declaration_data add constraint declaration_data_fk_data foreign key (data) references blob_data(id);
 alter table declaration_data add constraint declaration_data_fk_data_pdf foreign key (data_pdf) references blob_data(id);
@@ -223,7 +223,6 @@ alter table task_context add constraint task_context_fk_user_id foreign key (use
 alter table notification add constraint notification_fk_report_period foreign key (report_period_id) references report_period (id) on delete cascade;
 alter table notification add constraint notification_fk_sender foreign key (sender_department_id) references department(id);
 alter table notification add constraint notification_fk_receiver foreign key (receiver_department_id) references department(id);
-alter table notification add constraint notification_fk_sec_user foreign key (first_reader_id) references sec_user(id);
 alter table notification add constraint notification_fk_notify_user foreign key (user_id) references sec_user(id);
 alter table notification add constraint notification_fk_notify_role foreign key (role_id) references sec_role(id);
 alter table notification add constraint notification_chk_isread check (is_read in (0, 1));
@@ -262,7 +261,7 @@ alter table report add constraint report_chk_absolute check (absolute in (0,1));
 ------------------------------------------------------------------------------------------------------
 create index i_department_parent_id on department(parent_id);
 create index i_data_row_form_data_id on data_row(form_data_id);
-create index i_form_data_department_report_period_id on form_data(department_report_period_id);
+create index i_form_data_dep_rep_per_id on form_data(department_report_period_id);
 create index i_form_data_form_template_id on form_data(form_template_id);
 create index i_form_data_kind on form_data(kind);
 create index i_form_data_signer_formdataid on form_data_signer(form_data_id);
@@ -282,3 +281,4 @@ create index i_numeric_value_column_id on numeric_value(column_id);
 create index i_cell_style_column_id on cell_style(column_id);
 create index i_cell_editable_column_id on cell_editable(column_id);
 create index i_cell_span_info_column_id on cell_span_info(column_id);
+create index i_decl_data_dep_rep_period_id on declaration_data (department_report_period_id);

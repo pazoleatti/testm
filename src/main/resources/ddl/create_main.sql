@@ -419,7 +419,7 @@ comment on column declaration_data.is_accepted is 'Признак того, чт
 comment on column declaration_data.data_pdf is 'Данные декларации в формате PDF';
 comment on column declaration_data.data_xlsx is 'Данные декларации в формате XLSX';
 comment on column declaration_data.jasper_print is 'Сформированный отчет во внутреннем формате Jasper Reports';
-comment on column declaration_data.department_report_period_id is 'Отчётный период подразделения';
+comment on column declaration_data.department_report_period_id is 'Идентификатор отчетного периода подразделения';
 
 create sequence seq_declaration_data start with 10000;
 ------------------------------------------------------------------------------------------------------------------------------------------
@@ -441,7 +441,8 @@ comment on column form_data.kind is 'Тип налоговой формы (1 - �
 comment on column form_data.return_sign is 'Флаг возврата (0 - обычный режим; 1 - форма возвращена из вышестоящего статуса)';
 comment on column form_data.period_order is 'Указывает на очередность налоговой формы в рамках налогового периода. Необходимо для, например, месячных форм в рамках квартального отчетного периода';
 comment on column form_data.number_previous_row is 'Номер последней строки предыдущей НФ';
-comment on column form_data.department_report_period_id is 'Отчетный период подразделения';
+comment on column form_data.department_report_period_id is 'Идентификатор отчетного периода подразделения';
+
 
 create sequence seq_form_data start with 10000;
 ---------------------------------------------------------------------------------------------------
