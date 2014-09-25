@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.*;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -19,6 +20,7 @@ import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest.Builder;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -34,6 +36,7 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
         void setAcceptableMonthList(List<Months> monthList);
         void setAcceptableKinds(List<FormDataKind> dataKinds);
         void setAcceptableTypes(List<FormType> types);
+        void setCorrectionDate(String correctionDate);
         FormDataFilter getFilterData();
         void setFilterData(FormDataFilter filter);
         void setFilter(String filter);
@@ -121,13 +124,18 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
 			return;
 		action.setFieldId(reportIds.get(0));
 		action.setDepartmentId(getView().getFilterData().getDepartmentIds().get(0).longValue());
-		action.setReportPeriodId(getView().getFilterData().getReportPeriodIds());
+		action.setReportPeriodId(getView().getFilterData().getReportPeriodIds().get(0));
 		dispatchAsync.execute(action, CallbackUtils
 				.wrongStateCallback(new AbstractCallback<FillFormFieldsResult>() {
 					@Override
 					public void onSuccess(FillFormFieldsResult result) {
 						getView().setAcceptableKinds(result.getDataKinds());
-					}
+                        if (result.getCorrectionDate() != null) {
+                            getView().setCorrectionDate(DateTimeFormat.getFormat("dd.MM.yyyy").format(result.getCorrectionDate()));
+                        } else {
+                            getView().setCorrectionDate(null);
+                        }
+                    }
 				}, this));
 	}
 
@@ -144,7 +152,7 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
 		action.setFieldId(reportIds.get(0));
 		action.setTaxType(taxType);
 		action.setDepartmentId(getView().getFilterData().getDepartmentIds().get(0).longValue());
-		action.setReportPeriodId(reportIds);
+		action.setReportPeriodId(reportIds.get(0));
         List<FormDataKind> kinds = new ArrayList<FormDataKind>();
         for (Long kindId : getView().getFilterData().getFormDataKind()) {
             kinds.add(FormDataKind.fromId(kindId.intValue()));

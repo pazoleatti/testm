@@ -77,6 +77,12 @@
                 </g:cell>
             </g:HorizontalPanel>
 
+            <g:HorizontalPanel spacing="6" verticalAlignment="middle" addStyleNames="{style.content}" ui:field="correctionPanel">
+                <g:cell horizontalAlignment="left">
+                    <g:Label width="100%" ui:field="correctionDate"/>
+                </g:cell>
+            </g:HorizontalPanel>
+
             <g:HorizontalPanel addStyleNames="{style.footerPanel}" horizontalAlignment="right">
                 <g:cell width="100%">
                     <g:Label/>

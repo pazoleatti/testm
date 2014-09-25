@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.DeclarationDataTokens;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.*;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -37,6 +38,7 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
 		void setSelectedDepartment(List<Integer> departmentIds);
 		void setSelectedTaxOrganCode(List<Long> taxOrganCode);
 		void setSelectedTaxOrganKpp(List<Long> taxOrganKpp);
+        void setCorrectionDate(String correctionDate, TaxType taxType);
 
 		Integer getSelectedDeclarationType();
 		List<Integer> getSelectedReportPeriod();
@@ -135,6 +137,11 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
 			public void onSuccess(GetDeclarationTypeResult result) {
 				getView().setAcceptableDeclarationTypes(result.getDeclarationTypes());
                 getView().setTaxOrganFilter(result.getFilter());
+                if (result.getCorrectionDate() != null) {
+                    getView().setCorrectionDate(DateTimeFormat.getFormat("dd.MM.yyyy").format(result.getCorrectionDate()), result.getTaxType());
+                } else {
+                    getView().setCorrectionDate(null, null);
+                }
 			}
 		}, this) );
 	}
