@@ -736,12 +736,12 @@ id number(9) primary key,
 report_period_id number(9) null, 
 sender_department_id number(9) null, 
 receiver_department_id number(9) null, 
-first_reader_id number(9) null, 
 text varchar2(2000) not null, 
 create_date date not null, 
 deadline date null,
 user_id number(9) null,
-role_id number(9) null
+role_id number(9) null,
+is_read number(1) default 0 not null
 );
 
 comment on table notification is 'Оповещения';
@@ -749,12 +749,12 @@ comment on column notification.id is 'Уникальный идентифика�
 comment on column notification.report_period_id is 'идентификатор отчетного периода'; 
 comment on column notification.sender_department_id is 'идентификатор подразделения-отправителя'; 
 comment on column notification.receiver_department_id is 'идентификатор подразделения-получателя'; 
-comment on column notification.first_reader_id is 'идентификатор первого пользователя, прочитавшего оповещение'; 
 comment on column notification.text is 'текст оповещения';
 comment on column notification.create_date is 'дата создания оповещения';
 comment on column notification.deadline is 'дата сдачи отчетности';
 comment on column notification.user_id is 'Идентификатор пользователя, который получит оповещение';
 comment on column notification.role_id is 'Роль пользователя, который получит оповещение';
+comment on column notification.is_read is 'Признак прочтения';
 
 create sequence seq_notification start with 10000;
 
