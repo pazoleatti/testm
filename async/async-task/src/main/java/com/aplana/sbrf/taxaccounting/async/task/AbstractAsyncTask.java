@@ -42,7 +42,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
      * Возвращает текст оповещения, которое будет создано для пользователей, ожидающих выполнение этой задачи
      * @return текст сообщения
      */
-    protected abstract String getNotificationMsg();
+    protected abstract String getNotificationMsg(Map<String, Object> params);
 
     @Override
     public void execute(Map<String, Object> params) {
@@ -57,7 +57,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                     throw new RuntimeException("Результат выполнения задачи \"" + getAsyncTaskName() + "\" больше не актуален. Выполняется откат транзакции");
                 }
                 //Получаем список пользователей, для которых надо сформировать оповещение
-                String msg = getNotificationMsg();
+                String msg = getNotificationMsg(params);
                 if (msg != null && !msg.isEmpty()) {
                     List<Integer> waitingUsers = lockService.getUsersWaitingForLock(lock);
                     if (!waitingUsers.isEmpty()) {

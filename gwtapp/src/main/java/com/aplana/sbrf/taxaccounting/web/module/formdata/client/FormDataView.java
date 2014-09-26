@@ -106,8 +106,8 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@UiField
 	Button deleteFormButton;
 
-	@UiField
-    DropdownButton printAnchor;
+//	@UiField
+//    DropdownButton printAnchor;
 	@UiField
 	Anchor returnAnchor;
 
@@ -179,8 +179,8 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     LinkButton sources;
     @UiField
     LinkButton printToExcel;
-
-    private LinkButton printToCSV;
+    @UiField
+    LinkButton printToCSV;
 
     private Timer timerExcel, timerCSV;
 
@@ -240,17 +240,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
                 recalcReportPeriodLabelWidth();
             }
         });
-
-        //printToExcel = new LinkButton("Excel");
-        printToExcel.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                if (getUiHandlers() != null) {
-                    getUiHandlers().onPrintExcelClicked();
-                }
-            }
-        });
-
+/*
         printToCSV = new LinkButton("CSV");
         printToCSV.addClickHandler(new ClickHandler() {
             @Override
@@ -260,8 +250,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
                 }
             }
         });
-        //printAnchor.addItem(printToExcel);
-        printAnchor.addItem(printToCSV);
+        printAnchor.addItem(printToCSV);*/
 
         timerExcel = new Timer() {
             @Override
@@ -426,6 +415,19 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		formDataTable.setTableBuilder(builder);
 	}
 
+    @UiHandler("printToExcel")
+    void onPrintExcelClicked(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().onPrintExcelClicked();
+        }
+    }
+
+    @UiHandler("printToCSV")
+    void onPrintCSVClicked(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().onPrintCSVClicked();
+        }
+    }
 
 	@UiHandler("cancelButton")
 	void onCancelButtonClicked(ClickEvent event) {
@@ -645,8 +647,9 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
 	@Override
 	public void showPrintAnchor(boolean show) {
-		printAnchor.setVisible(show);
+		//printAnchor.setVisible(show);
         printToExcel.setVisible(show);
+        printToCSV.setVisible(show);
 	}
 
     @Override

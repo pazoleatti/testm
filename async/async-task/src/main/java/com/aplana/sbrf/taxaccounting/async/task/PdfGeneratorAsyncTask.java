@@ -25,7 +25,7 @@ public class PdfGeneratorAsyncTask extends AbstractAsyncTask {
     }
 
     @Override
-    protected String getNotificationMsg() {
+    protected String getNotificationMsg(Map<String, Object> params) {
         //TODO
         return null;
     }

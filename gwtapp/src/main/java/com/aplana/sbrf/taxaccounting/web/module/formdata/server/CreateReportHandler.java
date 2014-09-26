@@ -10,10 +10,12 @@ import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.PropertyLoader;
 import com.aplana.sbrf.taxaccounting.service.ReportService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.CreateReportAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.CreateReportResult;
+import com.google.gwt.core.shared.GWT;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
@@ -67,7 +69,7 @@ public class CreateReportHandler extends AbstractActionHandler<CreateReportActio
                 String uuid = reportService.get(userInfo, action.getFormDataId(), action.getType(), action.isShowChecked(), action.isManual(), false);
                 if (uuid == null) {
                     lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
-                    asyncManager.executeAsync(action.getType().getAsyncTaskTypeId(), params, BalancingVariants.SHORT);
+                    asyncManager.executeAsync(action.getType().getAsyncTaskTypeId(isDevelopmentMode()), params, BalancingVariants.SHORT);
                     logger.info(String.format("%s отчет текущей налоговой формы(%s) поставлен в очередь на формирование.", action.getType().getName(), action.isManual()?"версия ручного ввода":"автоматическая версия"));
                 } else {
                     result.setExistReport(true);
@@ -93,6 +95,10 @@ public class CreateReportHandler extends AbstractActionHandler<CreateReportActio
     @Override
     public void undo(CreateReportAction searchAction, CreateReportResult searchResult, ExecutionContext executionContext) throws ActionException {
 
+    }
+
+    boolean isDevelopmentMode() {
+        return !GWT.isProdMode();
     }
 
 }

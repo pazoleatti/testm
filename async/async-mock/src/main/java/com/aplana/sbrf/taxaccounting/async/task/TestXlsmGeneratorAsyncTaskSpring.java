@@ -40,7 +40,16 @@ public class TestXlsmGeneratorAsyncTaskSpring implements AsyncTask {
     private FormDataAccessService formDataAccessService;
 
     @Autowired
+    private FormDataService formDataService;
+
+    @Autowired
+    private DepartmentService departmentService;
+
+    @Autowired
     private ReportService reportService;
+
+    @Autowired
+    private DepartmentReportPeriodService departmentReportPeriodService;
 
     @Autowired
     private LockDataService lockService;
@@ -58,7 +67,7 @@ public class TestXlsmGeneratorAsyncTaskSpring implements AsyncTask {
                     throw new RuntimeException("Результат выполнения задачи \"" + getAsyncTaskName() + "\" больше не актуален. Выполняется откат транзакции");
                 }
                 //Получаем список пользователей, для которых надо сформировать оповещение
-                String msg = getNotificationMsg();
+                String msg = getNotificationMsg(params);
                 if (msg != null && !msg.isEmpty()) {
                     List<Integer> waitingUsers = lockService.getUsersWaitingForLock(lock);
                     if (!waitingUsers.isEmpty()) {
@@ -100,8 +109,22 @@ public class TestXlsmGeneratorAsyncTaskSpring implements AsyncTask {
         return "Генерация xlsm-файла";
     }
 
-    protected String getNotificationMsg() {
-        //TODO
-        return "Генерация xlsm-файла";
+    protected String getNotificationMsg(Map<String, Object> params) {
+        int userId = (Integer)params.get(USER_ID.name());
+        long formDataId = (Long)params.get("formDataId");
+        boolean manual = (Boolean)params.get("manual");
+        TAUserInfo userInfo = new TAUserInfo();
+        userInfo.setUser(userService.getUser(userId));
+
+        Logger logger = new Logger();
+        FormData formData = formDataService.getFormData(userInfo, formDataId, manual, logger);
+        Department department = departmentService.getDepartment(formData.getDepartmentId());
+        DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
+        Integer periodOrder = formData.getPeriodOrder();
+        if (periodOrder == null){
+            return String.format("Сформирован %s отчет налоговой формы: Период: \"%s, %s\", Подразделение: \"%s\", Тип: \"%s\", Вид: \"%s\", Версия: \"%s\".", ReportType.EXCEL.getName(), reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), department.getName(), formData.getKind().getName(), formData.getFormType().getName(), manual ? "ручного ввода" : "автоматическая");
+        } else {
+            return String.format("Сформирован %s отчет налоговой формы: Период: \"%s, %s\", Месяц: \"%s\", Подразделение: \"%s\", Тип: \"%s\", Вид: \"%s\", Версия: \"%s\".", ReportType.EXCEL.getName(), reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), Formats.getRussianMonthNameWithTier(formData.getPeriodOrder()), department.getName(), formData.getKind().getName(), formData.getFormType().getName(), manual ? "ручного ввода" : "автоматическая");
+        }
     }
 }
