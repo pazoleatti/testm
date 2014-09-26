@@ -120,12 +120,12 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
-    public void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, Boolean isManual, InputStream inputStream, String fileName, FormDataEvent formDataEvent) {
+    public void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, boolean isManual, InputStream inputStream, String fileName, FormDataEvent formDataEvent) {
         loadFormData(logger, userInfo, formDataId, isManual, inputStream, fileName, formDataEvent);
     }
 
     @Override
-    public void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, Boolean isManual, InputStream inputStream, String fileName) {
+    public void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, boolean isManual, InputStream inputStream, String fileName) {
         loadFormData(logger, userInfo, formDataId, isManual, inputStream, fileName, FormDataEvent.IMPORT);
     }
 
@@ -135,7 +135,7 @@ public class FormDataServiceImpl implements FormDataService {
         loadFormData(logger, userInfo, formDataId, false, inputStream, fileName, FormDataEvent.MIGRATION);
     }
 
-    private void loadFormData(Logger logger, TAUserInfo userInfo, long formDataId, Boolean isManual, InputStream inputStream, String fileName, FormDataEvent formDataEvent) {
+    private void loadFormData(Logger logger, TAUserInfo userInfo, long formDataId, boolean isManual, InputStream inputStream, String fileName, FormDataEvent formDataEvent) {
 		// Поскольку импорт используется как часть редактирования НФ, т.е. иморт только строк (форма уже существует) то все проверки должны 
     	// соответствовать редактированию (добавление, удаление, пересчет)
     	// Форма должна быть заблокирована текущим пользователем для редактирования
@@ -473,7 +473,7 @@ public class FormDataServiceImpl implements FormDataService {
 	 */
 	@Override
 	@Transactional
-	public FormData getFormData(TAUserInfo userInfo, long formDataId, Boolean manual, Logger logger) {
+	public FormData getFormData(TAUserInfo userInfo, long formDataId, boolean manual, Logger logger) {
 		formDataAccessService.canRead(userInfo, formDataId);
 
 		FormData formData = formDataDao.get(formDataId, manual);

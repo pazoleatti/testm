@@ -41,18 +41,20 @@ public class NotificationMenuItem extends MenuItem {
      * @return правильное склонение слова
      */
     private String decline(int num, String nominative, String singular, String plural) {
-        if (num > 10 && ((num % 100) / 10) == 1) return plural;
+        String text;
+        if (num > 10 && ((num % 100) / 10) == 1) text = plural;
 
         switch (num % 10)
         {
             case 1:
-                return num + " " + nominative;
+                text = nominative;
             case 2:
             case 3:
             case 4:
-                return num + " " + singular;
+                text = singular;
             default: // case 0, 5-9
-                return num + " " + plural;
+                text = plural;
         }
+        return num + " " + text;
     }
 }

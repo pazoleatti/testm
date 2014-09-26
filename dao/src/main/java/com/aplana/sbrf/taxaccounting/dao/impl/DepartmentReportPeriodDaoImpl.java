@@ -55,7 +55,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
             "          department_report_period drp \n" +
             "          join report_period rp on drp.report_period_id = rp.id \n" +
             "          join tax_period tp on rp.tax_period_id = tp.id \n" +
-            "            where %s (:yearStart is null or tp.year >= :yearStart) and (:yearEnd is null or tp.year <= :yearEnd) \n" +
+            "            %s \n" +
             "            order by tp.year, drp.CORRECTION_DATE NULLS FIRST";
 
     private String getFilterString(DepartmentReportPeriodFilter filter) {
@@ -97,12 +97,15 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
             causeList.add("tp.tax_type in " +
                     SqlUtils.transformTaxTypeToSqlInStatement(filter.getTaxTypeList()));
         }
+        if (filter.getYearStart() != null || filter.getYearEnd() != null){
+            causeList.add("(:yearStart is null or tp.year >= :yearStart) and (:yearEnd is null or tp.year <= :yearEnd)");
+        }
 
         if (causeList.isEmpty()) {
             return "";
         }
 
-        return StringUtils.join(causeList, " and ") + " and";
+        return " where " + StringUtils.join(causeList, " and ");
     }
 
     @Override
@@ -128,11 +131,21 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
         }
     }
 
+    private static final String QUERY_TEMPLATE_COMPOSITE_SORT_ID =
+            "select drp.id from department_report_period drp " +
+                    "join report_period rp on drp.report_period_id = rp.id \n" +
+                    "join tax_period tp on rp.tax_period_id = tp.id " +
+                    " %s ";
+
     @Override
-    public List<Integer> getListIdsByFilter(DepartmentReportPeriodFilter departmentReportPeriodFilter) {
+    public List<Integer> getListIdsByFilter(final DepartmentReportPeriodFilter filter) {
         try {
-            return getNamedParameterJdbcTemplate().queryForList("select drp.id from department_report_period drp " +
-                    getFilterString(departmentReportPeriodFilter), (Map) null, Integer.class);
+            return getNamedParameterJdbcTemplate().queryForList(
+                    String.format(QUERY_TEMPLATE_COMPOSITE_SORT_ID, getFilterString(filter)),
+                    new HashMap<String, Object>(2) {{
+                        put("yearStart", filter.getYearStart());
+                        put("yearEnd", filter.getYearEnd());
+                    }}, Integer.class);
         } catch (DataAccessException e){
             logger.error("", e);
             throw new DaoException("", e);
