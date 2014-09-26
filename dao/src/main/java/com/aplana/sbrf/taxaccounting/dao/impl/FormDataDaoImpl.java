@@ -469,13 +469,13 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         getJdbcTemplate().update("UPDATE form_data SET number_previous_row =? WHERE id=?", previousRowNumber, formDataId);
     }
 
-    private static final String GET_MANUAL_UNPUTS_FORMS = "select fd.*, ft.type_id from form_data fd " +
+    private static final String GET_MANUAL_UNPUTS_FORMS = "select fd.*, drp.report_period_id, drp.department_id, ft.type_id from form_data fd " +
             "join department_form_type dft on dft.kind = fd.kind " +
             "join form_template ft on ft.id = fd.form_template_id and ft.type_id = dft.form_type_id " +
             "join form_type t on t.id = ft.type_id " +
             "join declaration_source ds on ds.src_department_form_type_id = dft.id " +
             "join department_report_period drp on ds.src_department_form_type_id = dft.id " +
-            "where %s and fd.department_report_period_id = :reportPeriodId and t.tax_type = :taxType and dft.kind = :kind and exists (select 1 from data_row where form_data_id = fd.id and manual = 1) " +
+            "where %s and drp.report_period_id = :reportPeriodId and t.tax_type = :taxType and dft.kind = :kind and exists (select 1 from data_row where form_data_id = fd.id and manual = 1) " +
             "and (:periodStart is null or ((ds.period_end >= :periodStart or ds.period_end is null) and (:periodEnd is null or ds.period_start <= :periodEnd)))";
 
     @Override
