@@ -182,7 +182,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
             }
             if (formTemplate.getHeaders().isEmpty()){
                 formTemplate.getHeaders().addAll(formTemplateDao.getHeaderCells(formTemplate));
-                FormDataUtils.setValueOners(formTemplate.getHeaders());
+                FormDataUtils.setValueOwners(formTemplate.getHeaders());
             }
             return formTemplate;
         } catch (DaoException e){
@@ -205,7 +205,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
         if (formTemplate.getHeaders().isEmpty()){
             try {
                 formTemplate.getHeaders().addAll(formTemplateDao.getHeaderCells(formTemplate));
-                FormDataUtils.setValueOners(formTemplate.getHeaders());
+                FormDataUtils.setValueOwners(formTemplate.getHeaders());
             } catch (DaoException e){
                 this.logger.error("Ошибка при получении заголовков шаблона НФ.", e);
                 logger.error("Ошибка при получении графы \"Заголовки\" шаблона НФ. %s", e.getMessage());
