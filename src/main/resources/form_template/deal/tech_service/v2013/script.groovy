@@ -179,10 +179,13 @@ void logicCheck() {
                 rowError(logger, row, "Строка $rowNum: Значение графы «$priceName» должно быть равно отношению значений граф «$bankSumName» и «$countName»!")
             }
         } else {
-            // Проверка стоимости
             if (price != bankSum) {
                 rowError(logger, row, "Строка $rowNum: Значение графы «$priceName» должно быть равно значению графы «$bankSumName»!")
             }
+        }
+        // Проверка стоимости
+        if (cost != bankSum) {
+            rowError(logger, row, "Строка $rowNum: Значение графы «$costName» должно быть равно значению графы «$bankSumName»!")
         }
 
         // Проверка заполнения региона
