@@ -78,7 +78,7 @@
         <name>Сумма сделки (с учетом НКД), в валюте расчетов.</name>
         <order>8</order>
         <width>8</width>
-        <maxLength>15</maxLength>
+        <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
