@@ -20,7 +20,7 @@ class Main {
     def static DB_PASSWORD = 'TAX'
 
     // Схема для сравнения макетов, null если сравнение не требуется
-    def static DB_USER_COMPARE = 'TAX_NEXT'
+    def static DB_USER_COMPARE = 'TAX_0_3_9'
 
     // Путь к папке с шаблонами
     def static SRC_FOLDER_PATH = '../src/main/resources/form_template'
@@ -241,6 +241,7 @@ class Main {
         }
 
         // Построение отчета сравнения Git и БД
+        // checkOnly, true — только сравнение, false — сравнение и обновление Git → БД
         GitReport.updateScripts(GitReport.getDBVersions(), true)
         println("See $REPORT_GIT_NAME for details")
 
