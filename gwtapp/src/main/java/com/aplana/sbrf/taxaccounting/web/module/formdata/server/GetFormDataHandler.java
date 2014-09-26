@@ -122,9 +122,7 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 
 		FormData formData = formDataService.getFormData(userInfo, action.getFormDataId(), action.isManual(), logger);
 
-        if (action.isManual() != null) {
-            checkManualMode(formData, action.isManual());
-        }
+        checkManualMode(formData, action.isManual());
 
         FormTemplate formTemplate = formTemplateService.getFullFormTemplate(formData.getFormTemplateId());
 
