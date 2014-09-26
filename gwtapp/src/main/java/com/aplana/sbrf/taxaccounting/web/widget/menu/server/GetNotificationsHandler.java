@@ -41,10 +41,11 @@ public class GetNotificationsHandler extends AbstractActionHandler<GetNotificati
         for (TARole role : user.getRoles()) {
             userRoles.add(role.getId());
         }
-        NotificationsFilterData filter = new NotificationsFilterData();
+        NotificationsFilterData filter = action.getFilter();
         filter.setUserId(user.getId());
         filter.setReceiverDepartmentIds(departmentService.getTaxFormDepartments(user, asList(TaxType.values()), null, null));
         filter.setUserRoleIds(userRoles);
+
 
 		List<NotificationTableRow> rows = new ArrayList<NotificationTableRow>();
 		PagingResult<Notification> result = notificationService.getByFilter(filter);
