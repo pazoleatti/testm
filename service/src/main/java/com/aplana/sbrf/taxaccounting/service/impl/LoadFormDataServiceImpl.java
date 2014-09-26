@@ -262,11 +262,13 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 continue;
             }
 
-            FormTemplate formTemplate = null;
-            if (formTemplateId != null) {
-                formTemplate = formTemplateService.get(formTemplateId);
-                // Уточнение из шаблона
-                monthly = formTemplate.isMonthly();
+            FormTemplate formTemplate = formTemplateService.get(formTemplateId);
+            if (monthly != formTemplate.isMonthly()) {
+                log(userInfo, LogData.L4, logger, fileName, path);
+                moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
+                        Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L4.getText(), fileName, path))), logger);
+                fail++;
+                continue;
             }
 
             formData = formDataDao.find(formType.getId(), formDataKind, departmentReportPeriod.getId().intValue(),

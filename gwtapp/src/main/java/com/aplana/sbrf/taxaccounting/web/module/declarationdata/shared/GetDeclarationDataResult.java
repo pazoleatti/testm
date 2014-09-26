@@ -10,6 +10,7 @@ public class GetDeclarationDataResult implements Result {
 	private TaxType taxType;
 	private String department;
 	private String reportPeriod;
+    private Date correctionDate;
     private Integer reportPeriodYear;
 	private String declarationType;
 	private Date docDate;
@@ -128,5 +129,13 @@ public class GetDeclarationDataResult implements Result {
 
     public void setKpp(String kpp) {
         this.kpp = kpp;
+    }
+
+    public Date getCorrectionDate() {
+        return correctionDate;
+    }
+
+    public void setCorrectionDate(Date correctionDate) {
+        this.correctionDate = correctionDate;
     }
 }

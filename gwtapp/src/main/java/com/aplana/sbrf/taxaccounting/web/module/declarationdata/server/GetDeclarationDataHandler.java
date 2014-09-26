@@ -41,10 +41,9 @@ public class GetDeclarationDataHandler
 
 	@Autowired
 	private SecurityService securityService;
-	
-	
-	@Autowired
-	private PeriodService reportPeriodService;
+
+    @Autowired
+    private DepartmentReportPeriodService departmentReportPeriodService;
 
 	public GetDeclarationDataHandler() {
 		super(GetDeclarationDataAction.class);
@@ -77,11 +76,14 @@ public class GetDeclarationDataHandler
 				.getType().getName());
 		result.setDepartment(departmentService.getParentsHierarchy(
 				declaration.getDepartmentId()));
-        ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(
-                declaration.getReportPeriodId());
-		result.setReportPeriod(reportPeriod.getName());
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(
+                declaration.getDepartmentReportPeriodId());
 
-        result.setReportPeriodYear(reportPeriod.getTaxPeriod().getYear());
+		result.setReportPeriod(departmentReportPeriod.getReportPeriod().getName());
+
+        result.setReportPeriodYear(departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear());
+
+        result.setCorrectionDate(departmentReportPeriod.getCorrectionDate());
 
 		result.setPdf(generatePdfViewerModel(action, userInfo, taxType));
 

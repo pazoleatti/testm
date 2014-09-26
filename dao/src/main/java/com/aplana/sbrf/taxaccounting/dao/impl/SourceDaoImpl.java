@@ -335,8 +335,9 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
 
     private static final String FIND_ACCEPTED_INSTANCES = "select rp.name, tp.year from report_period rp\n" +
             "join tax_period tp on tp.id = rp.tax_period_id\n" +
-            "join form_data fd on fd.report_period_id = rp.id\n" +
-            "join department_form_type dft on (dft.kind = fd.kind and dft.department_id = fd.department_id)\n" +
+            "join department_report_period drp on drp.report_period_id = rp.id\n" +
+            "join form_data fd on fd.department_report_period_id = drp.id\n" +
+            "join department_form_type dft on (dft.kind = fd.kind and dft.department_id = drp.department_id)\n" +
             "join form_template ft on (ft.id = fd.form_template_id and ft.type_id = dft.form_type_id)\n" +
             "where dft.id = :source and fd.state = 4 and (\n" +
             "  (:periodStart <= rp.calendar_start_date and (:periodEnd is null or :periodEnd >= rp.calendar_start_date)) or\n" +

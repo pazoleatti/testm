@@ -25,6 +25,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.history.client.HistoryPresenter;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
@@ -40,6 +41,8 @@ import java.util.Set;
 
 public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.MyProxy> implements
         FormDataUiHandlers, SetFocus.SetFocusHandler {
+
+    private static final DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getFormat("dd.MM.yyyy");
 
     /**
 	 * {@link com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenterBase}
@@ -69,7 +72,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 		}
 		action.setFormDataId(Long.parseLong(request.getParameter(FORM_DATA_ID, null)));
 		action.setReadOnly(Boolean.parseBoolean(request.getParameter(READ_ONLY, "true")));
-        action.setManual(request.getParameter(MANUAL, null) != null ? Boolean.parseBoolean(request.getParameter(MANUAL, null)) : null);
+        action.setManual(Boolean.parseBoolean(request.getParameter(MANUAL, "false")));
         action.setUuid(request.getParameter(UUID, null));
         executeAction(action);
 	}
@@ -626,6 +629,11 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         Integer periodOrder = retFormDataResult.getFormData().getPeriodOrder();
         if (periodOrder != null) {
             builder.append(", ").append(Formats.getRussianMonthNameWithTier(retFormDataResult.getFormData().getPeriodOrder()));
+        }
+        if (retFormDataResult.getDepartmentReportPeriod().getCorrectionDate() != null) {
+            builder.append(", корр. (" +
+                    DATE_TIME_FORMAT.format(retFormDataResult.getDepartmentReportPeriod().getCorrectionDate())
+                    + ")");
         }
         return builder.toString();
     }
