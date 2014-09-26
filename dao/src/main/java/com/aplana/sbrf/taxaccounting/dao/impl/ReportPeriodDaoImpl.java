@@ -216,8 +216,8 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
                             "rp.id, rp.name, rp.tax_period_id, rp.dict_tax_period_id, rp.start_date, rp.end_date, " +
                             "rp.calendar_start_date " +
                             "FROM report_period rp " +
-                            "LEFT JOIN form_data fd ON fd.report_period_id = rp.id " +
-                            "LEFT JOIN department_report_period drp ON fd.report_period_id = drp.report_period_id " +
+                            "LEFT JOIN department_report_period drp ON drp.report_period_id =rp.id " +
+                            "LEFT JOIN form_data fd ON fd.department_report_period_id = drp.id " +
                             "AND drp.department_id = fd.department_id " +
                             "AND drp.correction_date IS NULL " +
                             "WHERE drp.is_active = 0 AND fd.form_template_id = ?",

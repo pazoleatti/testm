@@ -22,7 +22,7 @@ public class FormData extends IdentityObject<Long> {
     private Integer departmentReportPeriodId;
     private Integer periodOrder;
     /** Признак формы ручного ввода */
-    private Boolean manual;
+    private boolean manual;
 	
 	/**
 	 * Признак возврата
@@ -245,11 +245,11 @@ public class FormData extends IdentityObject<Long> {
         this.periodOrder = periodOrder;
     }
 
-    public Boolean isManual() {
+    public boolean isManual() {
         return manual;
     }
 
-    public void setManual(Boolean manual) {
+    public void setManual(boolean manual) {
         this.manual = manual;
     }
 
@@ -313,7 +313,7 @@ public class FormData extends IdentityObject<Long> {
         if (formType != null ? !formType.equals(formData.formType) : formData.formType != null) return false;
         if (headers != null ? !headers.equals(formData.headers) : formData.headers != null) return false;
         if (kind != formData.kind) return false;
-        if (manual != null ? !manual.equals(formData.manual) : formData.manual != null) return false;
+        if (manual != formData.manual) return false;
         if (performer != null ? !performer.equals(formData.performer) : formData.performer != null) return false;
         if (periodOrder != null ? !periodOrder.equals(formData.periodOrder) : formData.periodOrder != null)
             return false;
@@ -332,7 +332,7 @@ public class FormData extends IdentityObject<Long> {
         result = 31 * result + (departmentId != null ? departmentId.hashCode() : 0);
         result = 31 * result + (reportPeriodId != null ? reportPeriodId.hashCode() : 0);
         result = 31 * result + (periodOrder != null ? periodOrder.hashCode() : 0);
-        result = 31 * result + (manual != null ? manual.hashCode() : 0);
+        result = 31 * result + (manual ? 1 : 0);
         result = 31 * result + (returnSign ? 1 : 0);
         result = 31 * result + formTemplateId;
         result = 31 * result + (formColumns != null ? formColumns.hashCode() : 0);

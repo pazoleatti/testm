@@ -36,7 +36,7 @@ public interface FormDataService {
     /**
      * Импорт ТФ НФ
      */
-    void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, Boolean isManual, InputStream is,
+    void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, boolean isManual, InputStream is,
                         String fileName, FormDataEvent formDataEvent);
 
     /**
@@ -50,7 +50,7 @@ public interface FormDataService {
      * 
      * TODO (sgoryachkin) заменить параметры is и fileName на uid блоба
      */
-    void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, Boolean isManual, InputStream is, String fileName);
+    void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, boolean isManual, InputStream is, String fileName);
 
     /**
      * Метод для импорта данных из модуля миграции
@@ -100,7 +100,7 @@ public interface FormDataService {
      * @return объект с данными по налоговой форме
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException если у пользователя нет прав просматривать налоговую форму с такими параметрами
 	 */
-	FormData getFormData(TAUserInfo userInfo, long formDataId, Boolean manual, Logger logger);
+	FormData getFormData(TAUserInfo userInfo, long formDataId, boolean manual, Logger logger);
 
 	/**
 	 * Удалить данные по налоговой форме

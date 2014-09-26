@@ -251,7 +251,7 @@ def String getTitleAlias(def row) {
 
 def getTitlePattern(def row) {
     for (def key : patternMap.keySet()){
-        if (row.name.toLowerCase() ==~ key.toLowerCase()) {
+        if (row.name?.toLowerCase() ==~ key.toLowerCase()) {
             return key
         }
     }
@@ -316,7 +316,7 @@ void logicCheck() {
 
         if (titleAlias == getTitle(1)) {
             // если новый субъект(после сущ-го), то проверяем ОКТМО в 2 и 12-х строках
-            if (subjectId) {
+            if (subjectId && expectedOKTMOIndex) {
                 if (!actualOKTMOList.contains(expectedOKTMO)) {
                     loggerError(null, "Строка $expectedOKTMOIndex: " + "Строки вида «${getEmptyPattern(getTitle(2))}», «${getEmptyPattern(getTitle(12))}» данной группы строк содержат разные значения параметров «Код ОКТМО»!")
                 }
@@ -406,7 +406,7 @@ void logicCheck() {
         }
     }
 
-    if (!actualOKTMOList.contains(expectedOKTMO)) {
+    if (expectedOKTMO && !actualOKTMOList.contains(expectedOKTMO)) {
         loggerError(null, "Строка $expectedOKTMOIndex: " + "Строки вида «${getEmptyPattern(getTitle(2))}», «${getEmptyPattern(getTitle(12))}» данной группы строк содержат разные значения параметров «Код ОКТМО»!")
     }
 

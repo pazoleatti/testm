@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
-    <fixedRows>false</fixedRows>
+    <fixedRows>true</fixedRows>
     <name>Расчёт налога на имущество по средней/среднегодовой стоимости</name>
     <fullName>Расчёт налога на имущество по средней/среднегодовой стоимости</fullName>
     <header>945.3</header>

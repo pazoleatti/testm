@@ -46,14 +46,6 @@ switch (formDataEvent) {
     case FormDataEvent.CHECK:
         logicCheck()
         break
-    case FormDataEvent.ADD_ROW:
-        formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
-        break
-    case FormDataEvent.DELETE_ROW:
-        if (currentDataRow != null && currentDataRow.getAlias() == null) {
-            formDataService.getDataRowHelper(formData).delete(currentDataRow)
-        }
-        break
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
     case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
@@ -177,7 +169,7 @@ void calc() {
             row.benefitBasis = calcBasis(row.taxBenefitCode)
         }
 
-        if (isTaxPeriod) {
+        if (isTaxPeriod && row.priceAverage && row.priceAverageTaxFree) {
             // графа 10
             row.taxBase = row.priceAverage - row.priceAverageTaxFree
         }
@@ -189,7 +181,7 @@ void calc() {
         // Если «Графа 11» = «2012400», то «Графа 13» = Значение поля «Льготная ставка, %» справочника «Параметры налоговых льгот налога на имущество»
         if (row.taxBenefitCodeReduction && getBenefitCode(row.taxBenefitCodeReduction) == '2012400') {
             row.taxRate = getRefBookValue(203, row.taxBenefitCodeReduction).RATE.value
-        } else {// Иначе «Графа 13» = Значение поля «Ставка, %» справочника «Ставки налога на имущество»
+        } else if (row.subject) {// Иначе «Графа 13» = Значение поля «Ставка, %» справочника «Ставки налога на имущество»
             String filter = "DECLARATION_REGION_ID = " + formDataDepartment.regionId?.toString() + " and REGION_ID = " + row.subject?.toString()
             def records = refBookFactory.getDataProvider(201).getRecords(getReportPeriodEndDate(), null, filter, null)
             if (records.size() == 1) {
@@ -200,9 +192,9 @@ void calc() {
         }
         // графа 14
         if (row.taxRate) {
-            if (isTaxPeriod) {
+            if (isTaxPeriod && row.taxBase) {
                 row.taxSum = row.taxBase * row.taxRate / 100
-            } else {
+            } else if (row.priceAverage && row.priceAverageTaxFree) {
                 row.taxSum = ((row.priceAverage - row.priceAverageTaxFree) * (row.taxRate / 100))/4
             }
         }

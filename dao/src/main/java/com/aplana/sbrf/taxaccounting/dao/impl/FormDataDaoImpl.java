@@ -58,6 +58,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         formData.setReportPeriodId(SqlUtils.getInteger(rs, "report_period_id"));
         formData.setDepartmentReportPeriodId(rs.getInt("department_report_period_id"));
         formData.setPeriodOrder(rs.wasNull() ? null : SqlUtils.getInteger(rs, "period_order"));
+        formData.setManual(rs.getBoolean("manual"));
     }
 
     // Маппер экземпляра НФ с фиксированными строками из шаблона
@@ -71,7 +72,6 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
             mapCommon(formData, rs);
             formData.setSigners(formDataSignerDao.getSigners(formData.getId()));
             formData.setPerformer(formPerformerDao.get(formData.getId()));
-            formData.setManual(rs.getBoolean("manual"));
             formData.setPreviousRowNumber(rs.getInt("number_previous_row"));
             return formData;
         }
@@ -263,10 +263,12 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
     public FormData find(int formTypeId, FormDataKind kind, int departmentReportPeriodId, Integer periodOrder) {
         try {
             return getJdbcTemplate().queryForObject("select fd.id, fd.form_template_id, fd.state, fd.kind, " +
-                    "fd.return_sign, fd.period_order, fd.number_previous_row, fd.department_report_period_id, " +
+                    "fd.return_sign, fd.period_order, r.manual, fd.number_previous_row, fd.department_report_period_id, " +
                     "drp.report_period_id, drp.department_id, " +
                     "(SELECT type_id FROM form_template ft WHERE ft.id = fd.form_template_id) type_id " +
-                    "from form_data fd, department_report_period drp " +
+                    "from department_report_period drp, form_data fd " +
+                    "left join (select max(manual) as manual, form_data_id from data_row group by form_data_id) r " +
+                    "on r.form_data_id = fd.id " +
                     "where drp.id = fd.department_report_period_id " +
                     "and exists (select 1 from form_template ft where fd.form_template_id = ft.id and ft.type_id = ?) " +
                     "and fd.kind = ? and drp.id = ? and (? is null or fd.period_order = ?) ",
@@ -287,9 +289,11 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         Map paramMap = new HashMap();
         paramMap.put("rp", reportPeriodId);
         return getNamedParameterJdbcTemplate().query("select fd.id, fd.form_template_id, fd.state, fd.kind, " +
-                "fd.return_sign, fd.period_order, fd.number_previous_row, fd.department_report_period_id, " +
+                "fd.return_sign, fd.period_order, r.manual, fd.number_previous_row, fd.department_report_period_id, " +
                 "drp.report_period_id, drp.department_id, ft.type_id as type_id " +
                 "from form_data fd, department_report_period drp, form_template ft, form_type t " +
+                "left join (select max(manual) as manual, form_data_id from data_row group by form_data_id) r " +
+                "on r.form_data_id = fd.id " +
                 "where drp.id = fd.department_report_period_id and ft.id = fd.form_template_id and t.id = ft.type_id " +
                 (!departmentIds.isEmpty() ? "and " + SqlUtils.transformToSqlInStatement("drp.department_id", departmentIds) : "") +
                 "and drp.report_period_id = :rp order by drp.id", paramMap, new FormDataWithoutRowMapperWithType());
@@ -469,13 +473,13 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         getJdbcTemplate().update("UPDATE form_data SET number_previous_row =? WHERE id=?", previousRowNumber, formDataId);
     }
 
-    private static final String GET_MANUAL_UNPUTS_FORMS = "select fd.*, ft.type_id from form_data fd " +
+    private static final String GET_MANUAL_UNPUTS_FORMS = "select fd.*, drp.report_period_id, drp.department_id, ft.type_id from form_data fd " +
             "join department_form_type dft on dft.kind = fd.kind " +
             "join form_template ft on ft.id = fd.form_template_id and ft.type_id = dft.form_type_id " +
             "join form_type t on t.id = ft.type_id " +
             "join declaration_source ds on ds.src_department_form_type_id = dft.id " +
             "join department_report_period drp on ds.src_department_form_type_id = dft.id " +
-            "where %s and fd.department_report_period_id = :reportPeriodId and t.tax_type = :taxType and dft.kind = :kind and exists (select 1 from data_row where form_data_id = fd.id and manual = 1) " +
+            "where %s and drp.report_period_id = :reportPeriodId and t.tax_type = :taxType and dft.kind = :kind and exists (select 1 from data_row where form_data_id = fd.id and manual = 1) " +
             "and (:periodStart is null or ((ds.period_end >= :periodStart or ds.period_end is null) and (:periodEnd is null or ds.period_start <= :periodEnd)))";
 
     @Override

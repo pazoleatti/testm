@@ -25,6 +25,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.history.client.HistoryPresenter;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
@@ -41,7 +42,8 @@ import java.util.Set;
 public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.MyProxy> implements
         FormDataUiHandlers, SetFocus.SetFocusHandler {
 
-    private boolean isLoadExcel = false;
+    private static final DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getFormat("dd.MM.yyyy");
+
     /**
 	 * {@link com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenterBase}
 	 * 's proxy.
@@ -188,8 +190,6 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 	@Override
 	public void onShowCheckedColumns() {
 		getView().setColumnsData(formData.getFormColumns(), readOnlyMode, forceEditMode);
-        onTimerReport(ReportType.EXCEL, false);
-        onTimerReport(ReportType.CSV, false);
 	}
 
     private void manageDeleteRowButtonEnabled() {
@@ -246,89 +246,20 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 
 	@Override
 	public void onPrintExcelClicked() {
-        final ReportType reportType = ReportType.EXCEL;
-        CreateReportAction action = new CreateReportAction();
-        action.setFormDataId(formData.getId());
-        action.setType(reportType);
-        action.setShowChecked(getView().getCheckedColumnsClicked());
-        action.setManual(formData.isManual());
-        dispatcher.execute(action, CallbackUtils
-                .defaultCallback(new AbstractCallback<CreateReportResult>() {
-                    @Override
-                    public void onSuccess(CreateReportResult result) {
-                        LogCleanEvent.fire(FormDataPresenter.this);
-                        LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
-                        if (result.isExistReport()) {
-                            getView().updatePrintReportButtonName(reportType, true);
-                            Window.open(
-                                    GWT.getHostPageBaseURL() + "download/downloadBlobController/"
-                                            + formData.getId() + "/"
-                                            + getView().getCheckedColumnsClicked() + "/"
-                                            + formData.isManual(), "", "");
-                        } else {
-                            getView().updatePrintReportButtonName(reportType, false);
-                            getView().startTimerReport(reportType);
-                        }
-                    }
-                }, this));
+		Window.open(
+                GWT.getHostPageBaseURL() + "download/downloadController/"
+                        + formData.getId() + "/"
+                        + getView().getCheckedColumnsClicked() + "/"
+                        + formData.isManual(), "", "");
 	}
 
     @Override
-    public void onTimerReport(final ReportType reportType, final boolean isTimer) {
-        TimerReportAction action = new TimerReportAction();
-        action.setFormDataId(formData.getId());
-        action.setType(reportType);
-        action.setShowChecked(getView().getCheckedColumnsClicked());
-        action.setManual(formData.isManual());
-        dispatcher.execute(action, CallbackUtils
-                .defaultCallback(new AbstractCallback<TimerReportResult>() {
-                    @Override
-                    public void onSuccess(TimerReportResult result) {
-                        if (result.getExistReport().equals(TimerReportResult.StatusReport.EXIST)) {
-                            isLoadExcel = true;
-                            getView().updatePrintReportButtonName(reportType, true);
-                        } else if (result.getExistReport().equals(TimerReportResult.StatusReport.NOT_EXIST)) { // если файл не файл существует и блокировки нет(т.е. задачу отменили или ошибка при формировании)
-                            isLoadExcel = false;
-                            getView().stopTimerReport(reportType);
-                            if (!isTimer) {
-                                getView().updatePrintReportButtonName(reportType, false);
-                            }
-                        } else if (!isTimer) {
-                            isLoadExcel = false;
-                            getView().updatePrintReportButtonName(reportType, false);
-                            getView().startTimerReport(reportType);
-                        }
-                    }
-                }, this));
-    }
-
-    @Override
     public void onPrintCSVClicked() {
-        final ReportType reportType = ReportType.CSV;
-        CreateReportAction action = new CreateReportAction();
-        action.setFormDataId(formData.getId());
-        action.setType(reportType);
-        action.setShowChecked(getView().getCheckedColumnsClicked());
-        action.setManual(formData.isManual());
-        dispatcher.execute(action, CallbackUtils
-                .defaultCallback(new AbstractCallback<CreateReportResult>() {
-                    @Override
-                    public void onSuccess(CreateReportResult result) {
-                        LogCleanEvent.fire(FormDataPresenter.this);
-                        LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
-                        if (result.isExistReport()) {
-                            getView().updatePrintReportButtonName(reportType, true);
-                            Window.open(
-                                    GWT.getHostPageBaseURL() + "download/downloadBlobController/CSV/"
-                                            + formData.getId() + "/"
-                                            + getView().getCheckedColumnsClicked() + "/"
-                                            + formData.isManual(), "", "");
-                        } else {
-                            getView().updatePrintReportButtonName(reportType, false);
-                            getView().startTimerReport(reportType);
-                        }
-                    }
-                }, this));
+        Window.open(
+                GWT.getHostPageBaseURL() + "download/downloadController/CSV/"
+                        + formData.getId() + "/"
+                        + getView().getCheckedColumnsClicked() + "/"
+                        + formData.isManual(), "", "");
     }
 
 	@Override
@@ -701,6 +632,11 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         Integer periodOrder = retFormDataResult.getFormData().getPeriodOrder();
         if (periodOrder != null) {
             builder.append(", ").append(Formats.getRussianMonthNameWithTier(retFormDataResult.getFormData().getPeriodOrder()));
+        }
+        if (retFormDataResult.getDepartmentReportPeriod().getCorrectionDate() != null) {
+            builder.append(", корр. (" +
+                    DATE_TIME_FORMAT.format(retFormDataResult.getDepartmentReportPeriod().getCorrectionDate())
+                    + ")");
         }
         return builder.toString();
     }

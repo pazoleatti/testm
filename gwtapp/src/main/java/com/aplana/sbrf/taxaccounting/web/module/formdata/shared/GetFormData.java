@@ -13,7 +13,7 @@ public class GetFormData extends UnsecuredActionImpl<GetFormDataResult> implemen
 	private Long formDataId;
 
 	private boolean readOnly;
-    private Boolean manual;
+    private boolean manual;
 
     private String uuid;
 
@@ -40,19 +40,17 @@ public class GetFormData extends UnsecuredActionImpl<GetFormDataResult> implemen
 	public void setOldFormDataId(Long oldFormDataId) {
 		this.oldFormDataId = oldFormDataId;
 	}
-	
 
 	@Override
 	public String getName() {
 		return "Получение налоговой формы";
 	}
 
-
-    public Boolean isManual() {
+    public boolean isManual() {
         return manual;
     }
 
-    public void setManual(Boolean manual) {
+    public void setManual(boolean manual) {
         this.manual = manual;
     }
 
