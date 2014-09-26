@@ -184,6 +184,15 @@ void logicCheck() {
             }
         }
 
+        // Проверка стоимости
+        def costCell = row.getCell('cost')
+        if (incomeSumCell.value != null && outcomeSumCell.value == null && costCell.value != incomeSumCell.value) {
+            rowError(logger, row, "Строка $rowNum: Значение ${costCell.column.name} должно быть равно значению $msgIn!")
+        }
+        if (incomeSumCell.value == null && outcomeSumCell.value != null && costCell.value != outcomeSumCell.value) {
+            rowError(logger, row, "Строка $rowNum: Значение ${costCell.column.name} должно быть равно значению $msgOut!")
+        }
+
         // Корректность даты совершения сделки
         def dealDateCell = row.getCell('dealDate')
         if (docDateCell.value > dealDateCell.value) {

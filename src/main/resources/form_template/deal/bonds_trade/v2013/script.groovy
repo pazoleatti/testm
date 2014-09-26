@@ -9,7 +9,7 @@ import java.math.RoundingMode
 /**
  * 384 - Реализация и приобретение ценных бумаг (9)
  *
- * formTemplateId=384
+ * formTemplateId=2384
  *
  * @author Dmitriy Levykin
  */
@@ -88,7 +88,7 @@ def currentDate = new Date()
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
                       def boolean required = false) {
-    if (value == null || (refBookId != 14 && value.trim().isEmpty())) {
+    if (value == null || value.trim().isEmpty()) {
         return null
     }
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
@@ -323,7 +323,7 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol++
 
         // графа 9
-        newRow.currency = getRecordIdImport(15, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, true)
+        newRow.currency = getRecordIdImport(15, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
 
         // графа 10
