@@ -266,7 +266,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
                     "fd.return_sign, fd.period_order, r.manual, fd.number_previous_row, fd.department_report_period_id, " +
                     "drp.report_period_id, drp.department_id, " +
                     "(SELECT type_id FROM form_template ft WHERE ft.id = fd.form_template_id) type_id " +
-                    "from form_data fd, department_report_period drp " +
+                    "from department_report_period drp, form_data fd " +
                     "left join (select max(manual) as manual, form_data_id from data_row group by form_data_id) r " +
                     "on r.form_data_id = fd.id " +
                     "where drp.id = fd.department_report_period_id " +

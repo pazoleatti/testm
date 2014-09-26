@@ -19,6 +19,7 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.Declarati
 import com.aplana.sbrf.taxaccounting.web.widget.history.client.HistoryPresenter;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.shared.Pdf;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -42,9 +43,7 @@ public class DeclarationDataPresenter
 
 	@ProxyCodeSplit
 	@NameToken(DeclarationDataTokens.declarationData)
-	public interface MyProxy extends ProxyPlace<DeclarationDataPresenter>,
-			Place {
-	}
+    public interface MyProxy extends ProxyPlace<DeclarationDataPresenter>, Place {}
 
     public static final String DECLARATION_UPDATE_MSG = "Декларация рассчитана";
     public static final String DECLARATION_UPDATE_MSG_D = "Уведомление рассчитано";
@@ -53,6 +52,8 @@ public class DeclarationDataPresenter
     public static final String DECLARATION_DELETE_Q_D = "Вы уверены, что хотите удалить уведомление?";
     public static final String DECLARATION_DELETE_MSG = "Декларация удалена";
     public static final String DECLARATION_DELETE_MSG_D = "Уведомление удалено";
+
+    private static final DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getFormat("dd.MM.yyyy");
 
 	public interface MyView extends View,
 			HasUiHandlers<DeclarationDataUiHandlers> {
@@ -137,8 +138,11 @@ public class DeclarationDataPresenter
                                 } else {
                                     getView().setType("Уведомление");
                                 }
-								getView().setReportPeriod(
-										result.getReportPeriodYear() + ", " + result.getReportPeriod());
+                                String periodStr = result.getReportPeriodYear() + ", " + result.getReportPeriod();
+                                if (result.getCorrectionDate() != null) {
+                                    periodStr += ", корр. (" + DATE_TIME_FORMAT.format(result.getCorrectionDate()) + ")";
+                                }
+								getView().setReportPeriod(periodStr);
 								getView().setDocDate(result.getDocDate());
                                 getView().setDepartment(result.getDepartment());
                                 if(taxType.equals(TaxType.PROPERTY)){
