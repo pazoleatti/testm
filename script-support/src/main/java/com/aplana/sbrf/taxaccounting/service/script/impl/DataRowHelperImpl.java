@@ -49,7 +49,7 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
 	@Override
 	public List<DataRow<Cell>> getAllSaved() {
 		List<DataRow<Cell>> rows = dataRowDao.getSavedRows(fd, null, null);
-		FormDataUtils.setValueOners(rows);
+		FormDataUtils.setValueOwners(rows);
 		return  rows;
 	}
 
@@ -61,7 +61,7 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
 	@Override
 	public List<DataRow<Cell>> getAll() {
 		List<DataRow<Cell>> rows = dataRowDao.getRows(fd, null, null);
-		FormDataUtils.setValueOners(rows);
+		FormDataUtils.setValueOwners(rows);
 		return rows;
 	}
 
@@ -105,7 +105,7 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
 	public void update(List<DataRow<Cell>> dataRows) {
         FormDataUtils.cleanValueOners(dataRows);
         dataRowDao.updateRows(fd, dataRows);
-        FormDataUtils.setValueOners(dataRows);
+        FormDataUtils.setValueOwners(dataRows);
 	}
 
 	@Override
@@ -137,7 +137,7 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
         updateIndexes(dataRows);
         FormDataUtils.cleanValueOners(dataRows);
 		dataRowDao.saveRows(fd, dataRows);
-        FormDataUtils.setValueOners(dataRows);
+        FormDataUtils.setValueOwners(dataRows);
         this.dataRows = dataRows;
     }
 

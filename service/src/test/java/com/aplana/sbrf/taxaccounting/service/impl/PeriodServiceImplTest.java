@@ -41,7 +41,7 @@ public class PeriodServiceImplTest {
 
         TaxPeriod taxPeriod2 = new TaxPeriod();
         taxPeriod2.setId(2);
-		taxPeriod2.setYear(2012);
+		taxPeriod2.setYear(2013);
         taxPeriod2.setTaxType(TaxType.TRANSPORT);
 
         TaxPeriod taxPeriod3 = new TaxPeriod();
@@ -70,6 +70,7 @@ public class PeriodServiceImplTest {
         ReportPeriod reportPeriod11 = new ReportPeriod();
         reportPeriod11.setId(1);
         reportPeriod11.setTaxPeriod(taxPeriod1);
+        reportPeriod11.setOrder(1);
         reportPeriod11.setName("Первый отчетный период в 1 налоговом периоде");
 		reportPeriod11.setStartDate(new GregorianCalendar(2012, Calendar.JANUARY, 1).getTime());
 		reportPeriod11.setEndDate(new GregorianCalendar(2012, Calendar.MARCH, 31).getTime());
@@ -78,6 +79,7 @@ public class PeriodServiceImplTest {
         ReportPeriod reportPeriod12 = new ReportPeriod();
         reportPeriod12.setId(2);
         reportPeriod12.setTaxPeriod(taxPeriod1);
+        reportPeriod12.setOrder(2);
         reportPeriod12.setName("Второй отчетный период в 1 налоговом периоде");
 		reportPeriod12.setStartDate(new GregorianCalendar(2012, Calendar.APRIL, 1).getTime());
 		reportPeriod12.setEndDate(new GregorianCalendar(2012, Calendar.JUNE, 30).getTime());
@@ -86,6 +88,7 @@ public class PeriodServiceImplTest {
         ReportPeriod reportPeriod13 = new ReportPeriod();
         reportPeriod13.setId(3);
         reportPeriod13.setTaxPeriod(taxPeriod1);
+        reportPeriod13.setOrder(3);
         reportPeriod13.setName("Третий отчетный период в 1 налоговом периоде");
 		reportPeriod13.setStartDate(new GregorianCalendar(2012, Calendar.JULY, 1).getTime());
 		reportPeriod13.setEndDate(new GregorianCalendar(2012, Calendar.SEPTEMBER, 30).getTime());
@@ -94,6 +97,7 @@ public class PeriodServiceImplTest {
         ReportPeriod reportPeriod14 = new ReportPeriod();
         reportPeriod14.setId(4);
         reportPeriod14.setTaxPeriod(taxPeriod1);
+        reportPeriod14.setOrder(4);
         reportPeriod14.setName("Четвертый отчетный период в 1 налоговом периоде");
 		reportPeriod14.setStartDate(new GregorianCalendar(2012, Calendar.OCTOBER, 1).getTime());
 		reportPeriod14.setEndDate(new GregorianCalendar(2012, Calendar.DECEMBER, 31).getTime());
@@ -105,18 +109,20 @@ public class PeriodServiceImplTest {
         ReportPeriod reportPeriod21 = new ReportPeriod();
         reportPeriod21.setId(5);
         reportPeriod21.setTaxPeriod(taxPeriod2);
+        reportPeriod21.setOrder(1);
         reportPeriod21.setName("Первый отчетный период в 2 налоговом периоде");
-		reportPeriod21.setStartDate(new GregorianCalendar(2012, Calendar.JANUARY, 1).getTime());
-		reportPeriod21.setEndDate(new GregorianCalendar(2012, Calendar.MARCH, 31).getTime());
-		reportPeriod21.setCalendarStartDate(new GregorianCalendar(2012, Calendar.JANUARY, 1).getTime());
+		reportPeriod21.setStartDate(new GregorianCalendar(2013, Calendar.JANUARY, 1).getTime());
+		reportPeriod21.setEndDate(new GregorianCalendar(2013, Calendar.MARCH, 31).getTime());
+		reportPeriod21.setCalendarStartDate(new GregorianCalendar(2013, Calendar.JANUARY, 1).getTime());
 
         ReportPeriod reportPeriod22 = new ReportPeriod();
         reportPeriod22.setId(6);
         reportPeriod22.setTaxPeriod(taxPeriod2);
+        reportPeriod22.setOrder(2);
         reportPeriod22.setName("Второй отчетный период в 2 налоговом периоде");
-		reportPeriod22.setStartDate(new GregorianCalendar(2012, Calendar.APRIL, 1).getTime());
-		reportPeriod22.setEndDate(new GregorianCalendar(2012, Calendar.JUNE, 30).getTime());
-		reportPeriod22.setCalendarStartDate(new GregorianCalendar(2012, Calendar.APRIL, 1).getTime());
+		reportPeriod22.setStartDate(new GregorianCalendar(2013, Calendar.APRIL, 1).getTime());
+		reportPeriod22.setEndDate(new GregorianCalendar(2013, Calendar.JUNE, 30).getTime());
+		reportPeriod22.setCalendarStartDate(new GregorianCalendar(2013, Calendar.APRIL, 1).getTime());
 
         /**
          * подготовим отчетные периоды для 3 налогового
@@ -124,6 +130,7 @@ public class PeriodServiceImplTest {
         ReportPeriod reportPeriod31 = new ReportPeriod();
         reportPeriod31.setId(7);
         reportPeriod31.setTaxPeriod(taxPeriod3);
+        reportPeriod31.setOrder(1);
         reportPeriod31.setName("Первый отчетный период в 3 налоговом периоде");
 		reportPeriod31.setStartDate(new GregorianCalendar(2012, Calendar.JANUARY, 1).getTime());
 		reportPeriod31.setEndDate(new GregorianCalendar(2012, Calendar.MARCH, 31).getTime());
@@ -132,6 +139,7 @@ public class PeriodServiceImplTest {
         ReportPeriod reportPeriod32 = new ReportPeriod();
         reportPeriod32.setId(8);
         reportPeriod32.setTaxPeriod(taxPeriod3);
+        reportPeriod32.setOrder(2);
         reportPeriod32.setName("Второй отчетный период в 3 налоговом периоде");
 		reportPeriod32.setStartDate(new GregorianCalendar(2012, Calendar.JANUARY, 1).getTime());
 		reportPeriod32.setEndDate(new GregorianCalendar(2012, Calendar.JUNE, 30).getTime());

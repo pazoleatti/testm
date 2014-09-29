@@ -83,7 +83,7 @@ public class FormTemplateRowPresenter
 	}
 
 	private void setViewData() {
-		FormDataUtils.setValueOners(formTemplate.getHeaders());
+		FormDataUtils.setValueOwners(formTemplate.getHeaders());
 		getView().setStylesData(formTemplate.getStyles());
 		getView().setColumnsData(formTemplate.getColumns());
 		getView().setRowsData(formTemplate.getRows());
