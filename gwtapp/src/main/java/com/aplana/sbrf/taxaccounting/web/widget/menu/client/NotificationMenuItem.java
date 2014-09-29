@@ -14,10 +14,11 @@ public class NotificationMenuItem extends MenuItem {
     public interface MyTemplate extends SafeHtmlTemplates {
         @Template("<img src=\"{0}\" /><span style=\"vertical-align: top; margin-left: 5px;\">{1}</span>")
         SafeHtml notifyMsg(String iconUrl, String msg);
+        @Template("<span>{0}</span>")
+        SafeHtml noMsg(String msg);
     }
 
     private static final String NEW_MSG_ICON = "resources/img/attention_on_20.png";
-    private static final String NO_MSG_ICON = "resources/img//attention_off_20.png";
 
     public NotificationMenuItem() {
         super(TEMPLATES.notifyMsg(NEW_MSG_ICON, "0 уведомлений"));
@@ -26,9 +27,9 @@ public class NotificationMenuItem extends MenuItem {
     public void setCount(int count) {
         if (count > 0) {
             setHTML(TEMPLATES.notifyMsg(NEW_MSG_ICON,
-                    decline(count, "уведомление", "уведомление", "уведомлений")));
+                    decline(count, "уведомление", "уведомления", "уведомлений")));
         } else {
-            setHTML(TEMPLATES.notifyMsg(NO_MSG_ICON, "0 уведомлений"));
+            setHTML(TEMPLATES.noMsg("Нет уведомлений"));
         }
     }
 
@@ -42,16 +43,18 @@ public class NotificationMenuItem extends MenuItem {
      */
     private String decline(int num, String nominative, String singular, String plural) {
         String text;
-        if (num > 10 && ((num % 100) / 10) == 1) text = plural;
+        if (num > 10 && ((num % 100) / 10) == 1) return num + " " + plural;
 
         switch (num % 10)
         {
             case 1:
                 text = nominative;
+                break;
             case 2:
             case 3:
             case 4:
                 text = singular;
+                break;
             default: // case 0, 5-9
                 text = plural;
         }
