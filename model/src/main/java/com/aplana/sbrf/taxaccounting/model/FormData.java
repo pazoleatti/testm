@@ -162,6 +162,10 @@ public class FormData extends IdentityObject<Long> {
 		return formTemplateId;
 	}
 
+    public void setFormTemplateId(int formTemplateId) {
+        this.formTemplateId = formTemplateId;
+    }
+
 	public FormType getFormType() {
 		return formType;
 	}
