@@ -41,25 +41,25 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 
 	private List<Column> columns;
 
-	private static final List<String> columnTypeNameList = Arrays.asList(STRING_TYPE, NUMERIC_TYPE, DATE_TYPE,
+	private static final List<String> COLUMN_TYPE_NAME_LIST = Arrays.asList(STRING_TYPE, NUMERIC_TYPE, DATE_TYPE,
             REFBOOK_TYPE, REFERENCE_TYPE, AUTONUMERATION_TYPE);
-	private static final List<Integer> precisionList = new ArrayList<Integer>();
-	private static final List<Formats> dateFormatList = new ArrayList<Formats>();
-    private static final List<AutoNumerationColumn> autoNumerationList = new ArrayList<AutoNumerationColumn>();
+	private static final List<Integer> PRECISION_LIST = new ArrayList<Integer>();
+	private static final List<Formats> DATE_FORMAT_LIST = new ArrayList<Formats>();
+    private static final List<AutoNumerationColumn> AUTO_NUMERATION_LIST = new ArrayList<AutoNumerationColumn>();
 
 	static {
 		for(int i = 0; i <= NumericColumn.MAX_PRECISION; i++) {
-			precisionList.add(i);
+			PRECISION_LIST.add(i);
 		}
 
 		for (Formats f : Formats.values()) {
 			if ((f != Formats.NONE) && (f != null)) {
-				dateFormatList.add(f);
+				DATE_FORMAT_LIST.add(f);
 			}
 		}
 
-        autoNumerationList.add(new AutoNumerationColumn(NumerationType.SERIAL));
-        autoNumerationList.add(new AutoNumerationColumn(NumerationType.CROSS));
+        AUTO_NUMERATION_LIST.add(new AutoNumerationColumn(NumerationType.SERIAL));
+        AUTO_NUMERATION_LIST.add(new AutoNumerationColumn(NumerationType.CROSS));
     }
 
 	@UiField
@@ -494,7 +494,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 				throw new IllegalStateException();
 		}
 		populateUniqueParameters();
-		typeColumnDropBox.setAcceptableValues(columnTypeNameList);
+		typeColumnDropBox.setAcceptableValues(COLUMN_TYPE_NAME_LIST);
 	}
 
 	private void populateUniqueParameters() {
@@ -527,10 +527,10 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 			numericMaxLengthBox.setVisible(true);
 			precisionPanel.setVisible(true);
 			precisionBox.setValue(((NumericColumn) column).getPrecision());
-			precisionBox.setAcceptableValues(precisionList);
+			precisionBox.setAcceptableValues(PRECISION_LIST);
 		} else if (typeColumnDropBox.getValue().equals(DATE_TYPE)) {
             // Дата
-			dateFormat.setAcceptableValues(dateFormatList);
+			dateFormat.setAcceptableValues(DATE_FORMAT_LIST);
 			// Если формата нет, то выставляем по умолчанию DD_MM_YYYY
 			dateFormat.setValue(Formats.getById(((DateColumn) column).getFormatId() == Formats.NONE.getId() ?
 					Formats.DD_MM_YYYY.getId() :
@@ -618,8 +618,8 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
         } else if (AUTONUMERATION_TYPE.equals(typeColumnDropBox.getValue())) {
             autoNumerationPanel.setVisible(true);
             autoNumerationBox.setVisible(true);
-            autoNumerationBox.setValue(autoNumerationList.get(((AutoNumerationColumn) column).getNumerationType().getId()), false);
-            autoNumerationBox.setAcceptableValues(autoNumerationList);
+            autoNumerationBox.setValue(AUTO_NUMERATION_LIST.get(((AutoNumerationColumn) column).getNumerationType().getId()), false);
+            autoNumerationBox.setAcceptableValues(AUTO_NUMERATION_LIST);
         }
     }
 

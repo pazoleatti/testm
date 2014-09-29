@@ -32,7 +32,7 @@ public final class FormDataUtils {
 	 * 
 	 * @param dataRows список строк
 	 */
-	public static <T extends AbstractCell> void setValueOners(List<DataRow<T>> dataRows) {
+	public static <T extends AbstractCell> void setValueOwners(List<DataRow<T>> dataRows) {
 		
 		Map<Pair<Integer, Integer>, AbstractCell> valueOwners = new HashMap<Pair<Integer, Integer>, AbstractCell>();
 

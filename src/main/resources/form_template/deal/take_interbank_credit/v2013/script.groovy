@@ -90,10 +90,6 @@ def nonEmptyColumns = ['fullNamePerson', 'docNum', 'docDate', 'dealNumber', 'dea
 @Field
 def reportPeriodEndDate = null
 
-// Текущая дата
-@Field
-def currentDate = new Date()
-
 //// Обертки методов
 
 // Поиск записи в справочнике по значению (для импорта)
@@ -104,13 +100,6 @@ def getRecordIdImport(def Long refBookId, def String alias, def String value, de
     }
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
             reportPeriodEndDate, rowIndex, colIndex, logger, required)
-}
-
-// Поиск записи в справочнике по значению (для расчетов)
-def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
-                boolean required = true) {
-    return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value,
-            currentDate, rowIndex, cellName, logger, required)
 }
 
 // Разыменование записи справочника
