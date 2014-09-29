@@ -53,7 +53,7 @@ public class CsvGeneratorAsyncTask extends AbstractAsyncTask {
 
         formDataAccessService.canRead(userInfo, formDataId);
         String uuid = printingService.generateCSV(userInfo, formDataId, manual, isShowChecked);
-        reportService.create(formDataId, uuid, ReportType.EXCEL, isShowChecked, manual, false);
+        reportService.create(formDataId, uuid, ReportType.CSV, isShowChecked, manual, false);
     }
 
     @Override
