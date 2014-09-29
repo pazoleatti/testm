@@ -255,13 +255,18 @@ alter table lock_data_subscribers add constraint lock_data_subscr_fk_sec_user fo
 
 alter table async_task_type add constraint async_task_type_pk primary key (id);
 
-alter table report add constraint report_pk primary key (form_data_id, type, manual, checking, absolute);
-alter table report add constraint report_fk_form_data_id foreign key (form_data_id) references form_data(id);
-alter table report add constraint report_fk_blob_data_id foreign key (blob_data_id) references blob_data(id);
-alter table report add constraint report_chk_type check (type in (0,1,2,3));
-alter table report add constraint report_chk_manual check (manual in (0,1));
-alter table report add constraint report_chk_checking check (checking in (0,1));
-alter table report add constraint report_chk_absolute check (absolute in (0,1));
+alter table form_data_report add constraint form_data_rep_pk primary key (form_data_id,type, manual,checking,absolute);
+alter table form_data_report add constraint form_data_rep_fk_form_data_id foreign key (form_data_id) references form_data(id) on delete cascade;
+alter table form_data_report add constraint form_data_rep_fk_blob_data_id foreign key (blob_data_id) references blob_data(id);
+alter table form_data_report add constraint form_data_rep_chk_type check (type in (0,1,2,3));
+alter table form_data_report add constraint form_data_rep_chk_manual check (manual in (0,1));
+alter table form_data_report add constraint form_data_rep_chk_checking check (checking in (0,1));
+alter table form_data_report add constraint form_data_rep_chk_absolute check (absolute in (0,1));
+
+alter table declaration_report add constraint decl_report_pk primary key (declaration_data_id, type);
+alter table declaration_report add constraint decl_report_fk_decl_data foreign key(declaration_data_id) references declaration_data(id) on delete cascade;
+alter table declaration_report add constraint decl_report_fk_blob_data foreign key(blob_data_id) references blob_data(id);
+alter table declaration_report add constraint decl_report_chk_type check (type in (0, 1, 2, 3));
 
 ------------------------------------------------------------------------------------------------------
 create index i_department_parent_id on department(parent_id);
