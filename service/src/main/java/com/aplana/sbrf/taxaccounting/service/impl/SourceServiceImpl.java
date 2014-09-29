@@ -38,7 +38,7 @@ public class SourceServiceImpl implements SourceService {
     private static final String INTERSECTION_MSG_BEGIN = "Найдены существующие назначения:";
     private static final String INTERSECTION_MSG_END = "Новое назначение создано путем слияния с найденными назначениями, новое назначение действует в периоде %s.";
     private static final String SAVE_SUCCESS_MSG = "\"%s\" назначен %s формы \"%s\" в периоде %s.";
-    private static final String DELETE_SUCCESS_MSG = "Удалено назначение \"%s\" в роли %s %s %s в периоде %s.";
+    private static final String DELETE_SUCCESS_MSG = "Удалено назначение \"%s\" в роли %s %s \"%s\" в периоде %s.";
     private static final String UPDATE_SUCCESS_MSG = "\"%s\" назначен %s формы \"%s\" в периоде %s.";
     private static final String CIRCLE_MSG = "\"%s\" уже назначен как приёмник \"%s\"";
     private static final String FORM_INSTANCES_MSG = "Для корректной передачи данных в форму-приёмник необходимо выполнить повторный перевод в статус \"Принята\" формы \"%s\" для подразделения \"%s\" в периодах: %s";
@@ -675,7 +675,7 @@ public class SourceServiceImpl implements SourceService {
             for (SourceObject sourceObject : sourceObjects) {
                 sourceIds.add(sourceObject.getSourcePair().getSource());
             }
-            Map<Long, String> sourceDepartmentNames = sourceDao.getSourceNames(sourceIds);
+            Map<Long, String> sourceDepartmentNames = sourceDao.getDepartmentNamesBySource(sourceIds);
 
             /** Получаем источники, имеющие принятые экземпляры в удаляемых периодах */
             Map<SourcePair, List<String>> acceptedSources = new HashMap<SourcePair, List<String>>();
