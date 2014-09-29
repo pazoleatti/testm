@@ -360,7 +360,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
 
     private static final String GET_DEPARTMENT_NAMES = "select dft.id, d.name from department d \n" +
             "join department_form_type dft on dft.department_id = d.id \n" +
-            "where dft.id %s";
+            "where %s";
 
     @Override
     public Map<Long, String> getDepartmentNamesBySource(List<Long> sources) {

@@ -667,30 +667,35 @@ public class PeriodServiceImpl implements PeriodService {
         // текущий налоговый период
         TaxPeriod thisTaxPeriod = thisReportPeriod.getTaxPeriod();
         // список отчетных периодов в текущем налоговом периоде
-        List<ReportPeriod> reportPeriodlist = reportPeriodDao.listByTaxPeriod(thisReportPeriod.getTaxPeriod().getId());
+        List<ReportPeriod> reportPeriodList = reportPeriodDao.listByTaxPeriod(thisReportPeriod.getTaxPeriod().getId());
 
         /**
          *  если это первый отчетный период в данном налоговом периоде
-         *  то возвращать последний отчетный период с предыдущего налогово периода
+         *  то возвращать последний отчетный период с предыдущего налогового периода
          */
-        if (reportPeriodlist.size() > 0 && reportPeriodlist.get(0).getId() == reportPeriodId){
-            List<TaxPeriod> taxPeriodlist = taxPeriodDao.listByTaxType(thisTaxPeriod.getTaxType());
-            for (int i = 0; i < taxPeriodlist.size(); i++){
-                if (taxPeriodlist.get(i).getId().equals(thisTaxPeriod.getId())){
+        if (thisReportPeriod.getOrder() == 1 && reportPeriodList.size() > 0 && reportPeriodList.get(0).getId() == reportPeriodId){
+            List<TaxPeriod> taxPeriodList = taxPeriodDao.listByTaxType(thisTaxPeriod.getTaxType());
+            for (int i = 0; i < taxPeriodList.size(); i++){
+                if (taxPeriodList.get(i).getId().equals(thisTaxPeriod.getId())){
                     if (i == 0) {
                         return null;
                     }
                     // получим список отчетных периодов для данного налогового периода
-                    reportPeriodlist = reportPeriodDao.listByTaxPeriod(taxPeriodlist.get(i - 1).getId());
+                    TaxPeriod prevTaxPeriod = taxPeriodList.get(i - 1);
+                    // проверим что налоговые периоды по порядку
+                    if (prevTaxPeriod.getYear() + 1 != thisTaxPeriod.getYear()) {
+                        return null;
+                    }
+                    reportPeriodList = reportPeriodDao.listByTaxPeriod(prevTaxPeriod.getId());
                     // вернем последний отчетный период
-                    return reportPeriodlist.size() > 0 ? reportPeriodlist.get(reportPeriodlist.size() - 1) : null;
+                    return reportPeriodList.size() > 0 ? reportPeriodList.get(reportPeriodList.size() - 1) : null;
                 }
             }
         } else {
             // не первый отчетный период в данном налоговом
-            for (int i = 0; i < reportPeriodlist.size(); i++){
-                if (reportPeriodlist.get(i).getId().equals(reportPeriodId)) {
-                    return reportPeriodlist.get(i - 1);
+            for (int i = 1; i < reportPeriodList.size(); i++){
+                if (reportPeriodList.get(i).getId().equals(reportPeriodId)) {
+                    return reportPeriodList.get(i - 1);
                 }
             }
         }

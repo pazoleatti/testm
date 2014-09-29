@@ -224,7 +224,7 @@ public class DataRowTest {
 		Assert.assertNotEquals(testValue,
 				dataRows.get(1).get(NUMBER_ALIAS));
 
-		FormDataUtils.setValueOners(dataRows);
+		FormDataUtils.setValueOwners(dataRows);
 
 		// Все ячейки диапазона должны возвращать значение главной ячейки
 		Assert.assertEquals(testValue,
@@ -256,7 +256,7 @@ public class DataRowTest {
 		dataRows.get(1).getCell(NUMBER_ALIAS).setColSpan(2);
 		dataRows.get(1).getCell(NUMBER_ALIAS).setRowSpan(2);
 
-		FormDataUtils.setValueOners(dataRows);
+		FormDataUtils.setValueOwners(dataRows);
 
 		// Проверяем, сбросились ли спаны для внутреннего (не используемого)
 		// диапазона

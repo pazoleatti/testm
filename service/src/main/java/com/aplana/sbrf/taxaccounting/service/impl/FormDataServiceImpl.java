@@ -45,9 +45,9 @@ public class FormDataServiceImpl implements FormDataService {
     private static final String XLSX_EXT = "xlsx";
     private static final String XLS_EXT = "xls";
     private static final String XLSM_EXT = "xlsm";
-    public static final String MSG_IS_EXIST_FORM = "Существует экземпляр налоговой формы %s типа %s в подразделении %s периоде %s";
+    public static final String MSG_IS_EXIST_FORM = "Существует экземпляр налоговой формы \"%s\" типа \"%s\" в подразделении \"%s\" периоде \"%s\"";
     final static String LOCK_MESSAGE = "Форма заблокирована и не может быть изменена. Попробуйте выполнить операцию позже.";
-    final static String LOCK_REFBOOK_MESSAGE = "Справочник %s заблокирован и не может быть использован для заполнения атрибутов формы. Попробуйте выполнить операцию позже.";
+    final static String LOCK_REFBOOK_MESSAGE = "Справочник \"%s\" заблокирован и не может быть использован для заполнения атрибутов формы. Попробуйте выполнить операцию позже.";
     final static String REF_BOOK_RECORDS_ERROR =  "Строка %s, атрибут \"%s\": период актуальности значения не пересекается с отчетным периодом формы";
     final static String DEPARTMENT_REPORT_PERIOD_NOT_FOUND_ERROR = "Не найден отчетный период подразделения с id = %d.";
 
@@ -569,13 +569,15 @@ public class FormDataServiceImpl implements FormDataService {
                             if (attributeId != null) {
                                 RefBook refBook = refBookDao.getByAttribute(attributeId);
                                 String referenceLockKey = LockData.LOCK_OBJECTS.REF_BOOK.name() + "_" + refBook.getId();
-                                LockData referenceLockData = lockService.lock(referenceLockKey, userId, LockData.STANDARD_LIFE_TIME);
-                                if (referenceLockData == null) {
-                                    //Блокировка установлена
-                                    lockedObjects.add(referenceLockKey);
-                                } else {
-                                    throw new ServiceLoggerException(String.format(LOCK_REFBOOK_MESSAGE, refBook.getName()),
-                                            logEntryService.save(logger.getEntries()));
+                                if (!lockedObjects.contains(referenceLockKey)) {
+                                    LockData referenceLockData = lockService.lock(referenceLockKey, userId, LockData.STANDARD_LIFE_TIME);
+                                    if (referenceLockData == null) {
+                                        //Блокировка установлена
+                                        lockedObjects.add(referenceLockKey);
+                                    } else {
+                                        throw new ServiceLoggerException(String.format(LOCK_REFBOOK_MESSAGE, refBook.getName()),
+                                                logEntryService.save(logger.getEntries()));
+                                    }
                                 }
                             }
                         }
