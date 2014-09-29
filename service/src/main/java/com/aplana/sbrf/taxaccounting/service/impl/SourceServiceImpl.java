@@ -403,10 +403,16 @@ public class SourceServiceImpl implements SourceService {
             List<SourceObject> emptyPeriods = sourceDao.getEmptyPeriods(sourcePair,
                     newPeriodStart, newPeriodEnd);
             List<String> acceptedSources = new ArrayList<String>();
-            for (SourceObject empty : emptyPeriods) {
-                /** Получаем источники, имеющие принятые экземпляры в промежуточных периодах */
-                acceptedSources.addAll(sourceDao.findAcceptedInstances(empty.getSourcePair().getSource(),
-                        empty.getPeriodStart(), empty.getPeriodEnd()));
+            if (!emptyPeriods.isEmpty()) {
+                for (SourceObject empty : emptyPeriods) {
+                    /** Получаем источники, имеющие принятые экземпляры в промежуточных периодах */
+                    acceptedSources.addAll(sourceDao.findAcceptedInstances(empty.getSourcePair().getSource(),
+                            empty.getPeriodStart(), empty.getPeriodEnd()));
+                }
+            } else {
+                /** Получаем источники, имеющие принятые экземпляры в создаваемом новом периоде */
+                acceptedSources.addAll(sourceDao.findAcceptedInstances(sourcePair.getSource(),
+                        newPeriodStart, newPeriodEnd));
             }
             if (!acceptedSources.isEmpty()) {
                 if (declaration) {
