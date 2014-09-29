@@ -6,7 +6,6 @@ import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
@@ -89,8 +88,8 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    public List<Integer> getAllChildrenIds(int depId) {
-        if (depId == 0)
+    public List<Integer> getAllChildrenIds(Integer depId) {
+        if (depId == null)
             return new ArrayList<Integer>(0);
         return departmentDao.getAllChildrenIds(depId);
     }
