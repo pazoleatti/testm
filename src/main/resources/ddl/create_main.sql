@@ -845,23 +845,37 @@ comment on column async_task_type.name is 'Название типа задач�
 comment on column async_task_type.handler_jndi is 'JNDI имя класса-обработчика';
 
 --------------------------------------------------------------------------------------------------------
-create table report
+create table form_data_report 
 (
-form_data_id number(18) not null,
-blob_data_id varchar2(36) not null,
-type number(1) not null,
-checking number(1) not null,
-manual number(1) not null,
+form_data_id number(18) not null, 
+blob_data_id varchar2(36) not null, 
+type number(1) not null, 
+checking number(1) not null, 
+manual number(1) not null, 
 absolute number(1) not null
 );
 
-comment on table report is 'Отчет';
-comment on column report.form_data_id is 'Идентификатор налоговой формы';
-comment on column report.blob_data_id is 'Идентификатор отчета';
-comment on column report.type is 'Тип отчета (0 - Excel, 1 - CSV, 2 - PDF, 3 - Jasper)';
-comment on column report.manual is 'Режим ввода данных (0 - обычная версия; 1 - версия ручного ввода)'; 
-comment on column report.checking is 'Типы столбцов (0 - только обычные, 1 - вместе с контрольными)';
-comment on column report.absolute is 'Режим вывода данных (0 - только дельты, 1 - абсолютные значения)';
+comment on table form_data_report is 'Отчет';
+comment on column form_data_report.form_data_id is 'Идентификатор налоговой формы';
+comment on column form_data_report.blob_data_id is 'Идентификатор отчета';
+comment on column form_data_report.type is 'Тип отчета (0 - Excel, 1 - CSV, 2 - PDF, 3 - Jasper)';
+comment on column form_data_report.manual is 'Режим ввода данных (0 - обычная версия; 1 - версия ручного ввода)';
+comment on column form_data_report.checking is 'Типы столбцов (0 - только обычные, 1 - вместе с контрольными)';
+comment on column form_data_report.absolute is 'Режим вывода данных (0 - только дельты, 1 - абсолютные значения)';
+
+--------------------------------------------------------------------------------------------------------
+
+create table declaration_report
+(
+declaration_data_id number(18) not null,
+blob_data_id varchar2(36),
+type number(1) not null
+);
+
+comment on table declaration_report is 'Отчеты по декларациям';
+comment on column declaration_report.declaration_data_id is 'Идентификатор декларации';
+comment on column declaration_report.blob_data_id is 'Идентификатор отчета';
+comment on column declaration_report.type is 'Тип отчета (0 - Excel, 1 - XML, 2 - PDF, 3 - Jasper)';
 
 --------------------------------------------------------------------------------------------------------
 create table lock_data_subscribers
