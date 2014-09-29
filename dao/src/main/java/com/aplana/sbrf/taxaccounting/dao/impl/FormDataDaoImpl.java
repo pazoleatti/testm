@@ -51,6 +51,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
     // Общий маппер
     private void mapCommon(FormData formData, ResultSet rs) throws SQLException {
         formData.setId(SqlUtils.getLong(rs, "id"));
+        formData.setFormTemplateId(SqlUtils.getInteger(rs, "form_template_id"));
         formData.setDepartmentId(SqlUtils.getInteger(rs, "department_id"));
         formData.setState(WorkflowState.fromId(SqlUtils.getInteger(rs, "state")));
         formData.setReturnSign(rs.getBoolean("return_sign"));
@@ -73,16 +74,6 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
             formData.setSigners(formDataSignerDao.getSigners(formData.getId()));
             formData.setPerformer(formPerformerDao.get(formData.getId()));
             formData.setPreviousRowNumber(rs.getInt("number_previous_row"));
-            return formData;
-        }
-    }
-
-    // Маппер экземпляра НФ без фиксированных строк из шаблона
-    private class FormDataWithoutRowMapper implements RowMapper<FormData> {
-        @Override
-        public FormData mapRow(ResultSet rs, int index) throws SQLException {
-            FormData formData = new FormData();
-            mapCommon(formData, rs);
             return formData;
         }
     }
@@ -288,7 +279,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
     public List<FormData> find(List<Integer> departmentIds, int reportPeriodId) {
         Map paramMap = new HashMap();
         paramMap.put("rp", reportPeriodId);
-        return getNamedParameterJdbcTemplate().query("select fd.id, fd.form_template_id, fd.state, fd.kind, " +
+        return getNamedParameterJdbcTemplate().query("select fd.id, fd.form_template_id, fd.state, fd.kind, fd.form_template_id, " +
                 "fd.return_sign, fd.period_order, r.manual, fd.number_previous_row, fd.department_report_period_id, " +
                 "drp.report_period_id, drp.department_id, ft.type_id as type_id " +
                 "from form_data fd, department_report_period drp, form_template ft, form_type t " +
@@ -303,7 +294,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
     public FormData getWithoutRows(long id) {
         try {
             return getJdbcTemplate().queryForObject(
-                    "SELECT fd.id, drp.department_id, fd.state, fd.kind, drp.report_period_id, fd.return_sign, " +
+                    "SELECT fd.id, drp.department_id, fd.state, fd.kind, drp.report_period_id, fd.return_sign, fd.form_template_id, " +
                             "fd.period_order, r.manual, fd.department_report_period_id, " +
                             "(SELECT type_id FROM form_template ft WHERE ft.id = fd.form_template_id) type_id " +
                             "FROM form_data fd " +
