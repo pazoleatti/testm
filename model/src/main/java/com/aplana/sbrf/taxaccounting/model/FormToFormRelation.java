@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * Моделька для хранения данных по источникам/приемникам
@@ -29,6 +30,8 @@ public class FormToFormRelation implements Serializable {
 
     /** Идентификатор созданной формы */
     Long formDataId;
+
+    Date correctionDate;
 
     public String getFullDepartmentName() {
         return fullDepartmentName;
@@ -94,34 +97,11 @@ public class FormToFormRelation implements Serializable {
         this.formDataId = formDataId;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof FormToFormRelation)) return false;
-
-        FormToFormRelation that = (FormToFormRelation) o;
-
-        if (created != that.created) return false;
-        if (source != that.source) return false;
-        if (formDataKind != that.formDataKind) return false;
-        if (formType != null ? !formType.equals(that.formType) : that.formType != null) return false;
-        if (fullDepartmentName != null ? !fullDepartmentName.equals(that.fullDepartmentName) : that.fullDepartmentName != null)
-            return false;
-        if (performer != null ? !performer.equals(that.performer) : that.performer != null) return false;
-        if (state != that.state) return false;
-
-        return true;
+    public Date getCorrectionDate() {
+        return correctionDate;
     }
 
-    @Override
-    public int hashCode() {
-        int result = fullDepartmentName != null ? fullDepartmentName.hashCode() : 0;
-        result = 31 * result + (formType != null ? formType.hashCode() : 0);
-        result = 31 * result + (formDataKind != null ? formDataKind.hashCode() : 0);
-        result = 31 * result + (state != null ? state.hashCode() : 0);
-        result = 31 * result + (performer != null ? performer.hashCode() : 0);
-        result = 31 * result + (source ? 1 : 0);
-        result = 31 * result + (created ? 1 : 0);
-        return result;
+    public void setCorrectionDate(Date correctionDate) {
+        this.correctionDate = correctionDate;
     }
 }

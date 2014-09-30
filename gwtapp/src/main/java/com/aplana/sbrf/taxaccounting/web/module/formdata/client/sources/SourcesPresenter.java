@@ -37,6 +37,7 @@ public class SourcesPresenter extends PresenterWidget<SourcesPresenter.MyView> i
     }
 
     private void reloadData() {
+        getView().setTableData(null);
         SourcesAction action = new SourcesAction();
         action.setFormData(formData);
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<SourcesResult>() {

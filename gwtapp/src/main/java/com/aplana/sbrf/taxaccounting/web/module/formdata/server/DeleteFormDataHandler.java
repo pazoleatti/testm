@@ -36,7 +36,7 @@ public class DeleteFormDataHandler extends AbstractActionHandler<DeleteFormDataA
 	private SecurityService securityService;
 
     @Autowired
-    SourceService sourceService;
+    private SourceService sourceService;
 
     @Autowired
     private LogEntryService logEntryService;
@@ -59,8 +59,9 @@ public class DeleteFormDataHandler extends AbstractActionHandler<DeleteFormDataA
                     formData.getDepartmentReportPeriodId(),
                     formData.getPeriodOrder());
             Logger logger = new Logger();
+            // TODO Левыкин: можно оптимизировать, если добавить специализированный метод в сервис
             for (FormToFormRelation item : formDataList) {
-                if (item.getState().equals(WorkflowState.ACCEPTED)) {
+                if (item.isSource() && item.isCreated() && item.getState().equals(WorkflowState.ACCEPTED)) {
                     logger.error("Найдена форма-источник «%s», «%s» которая имеет статус \"Принята\"!",
                             item.getFormType().getName(), item.getFullDepartmentName());
                 }

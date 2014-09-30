@@ -54,10 +54,12 @@ public class SourceServiceImpl implements SourceService {
         INFO, WARN, ERROR
     }
 
+    private final static SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
+
     private static final ThreadLocal<SimpleDateFormat> formatter = new ThreadLocal<SimpleDateFormat>() {
         @Override
         protected SimpleDateFormat initialValue() {
-            return new SimpleDateFormat("dd.MM.yyyy");
+            return SIMPLE_DATE_FORMAT;
         }
     };
 
@@ -1209,7 +1211,6 @@ public class SourceServiceImpl implements SourceService {
                                                                    DepartmentReportPeriod departmentReportPeriod,
                                                                    Integer periodOrder,
                                                                    boolean isSource){
-        //List<FormToFormRelation> formToFormRelations = new ArrayList<FormToFormRelation>(departmentFormTypes.size());
         List<FormToFormRelation> formToFormRelations = new LinkedList<FormToFormRelation>();
 
         // По назначениям
@@ -1222,71 +1223,22 @@ public class SourceServiceImpl implements SourceService {
                         periodOrder));
             }
         }
-
-//            FormToFormRelation formToFormRelation = new FormToFormRelation();
-//            /** источник/приемник */
-//            formToFormRelation.setSource(isSource);
-//            /** исполнитель */
-//            formToFormRelation.setPerformer(departmentDao.getDepartment(departmentFormType.getPerformerId()));
-//            /** Полное название подразделения */
-//            int departmentId = departmentFormType.getDepartmentId();
-//            formToFormRelation.setFullDepartmentName(departmentService.getParentsHierarchy(departmentId));
-//            ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
-//            int formTypeId = departmentFormType.getFormTypeId();
-//            FormDataKind kind = departmentFormType.getKind();
-//            List<FormToFormRelation> formDataList;
-//
-//            if (isSource) {
-//                formDataList = getSourceList(formTypeId, kind, departmentId, reportPeriodId, periodOrder);
-//            } else {
-//                formDataList = getDestinationList(formTypeId, kind, departmentId, reportPeriodId, periodOrder);
-//            }
-//
-//            if (formDataList != null && !formDataList.isEmpty()) {
-//                for (FormData formData : formDataList) {
-//                    /** Форма существует */
-//                    formToFormRelation.setCreated(true);
-//                    /** Установить статус */
-//                    formToFormRelation.setState(formData.getState());
-//                    /** вид формы */
-//                    formToFormRelation.setFormType(formData.getFormType());
-//                    /** тип нф */
-//                    formToFormRelation.setFormDataKind(kind);
-//                    /** установить id */
-//                    formToFormRelation.setFormDataId(formData.getId());
-//
-//                    formToFormRelations.add(formToFormRelation);
-//                }
-//
-//                /**
-//                 * 0.3.9: Назначение источников-приёмников пересекается с отчетным периодом текущего экземпляра
-//                 * Уточнения Насти: Период текущей формы пересекается с периодом действия макета,
-//                 * для которой нет созданной нф
-//                 */
-//            } else if (includeUncreatedForms && formTemplateDao.existFormTemplate(formTypeId, reportPeriodId)) {
-//                /** Формы не существует */
-//                formToFormRelation.setCreated(false);
-//                /** вид формы */
-//                formToFormRelation.setFormType(formTypeDao.get(formTypeId));
-//                /** тип нф */
-//                formToFormRelation.setFormDataKind(kind);
-//
-//                formToFormRelations.add(formToFormRelation);
-//            }
-//        }
-
         return formToFormRelations;
     }
 
     /**
      * Подготовка общей модели для сущестувющих и не существующих экземпляров
      */
-    private FormToFormRelation getRelationCommon(boolean isSource, DepartmentFormType departmentFormType) {
+    private FormToFormRelation getRelationCommon(boolean isSource, DepartmentFormType departmentFormType,
+                                                 DepartmentReportPeriod departmentreportPeriod) {
         FormToFormRelation formToFormRelation = new FormToFormRelation();
         formToFormRelation.setSource(isSource);
         formToFormRelation.setFormDataKind(departmentFormType.getKind());
         formToFormRelation.setPerformer(departmentDao.getDepartment(departmentFormType.getPerformerId()));
         formToFormRelation.setFullDepartmentName(departmentService.getParentsHierarchy(departmentFormType.getDepartmentId()));
+        if (departmentreportPeriod != null && departmentreportPeriod.getCorrectionDate() != null) {
+            formToFormRelation.setCorrectionDate(departmentreportPeriod.getCorrectionDate());
+        }
         return formToFormRelation;
     }
 
@@ -1337,8 +1289,13 @@ public class SourceServiceImpl implements SourceService {
                 departmentFormType.getDepartmentId(), departmentReportPeriod.getReportPeriod().getId(),
                 periodOrder, departmentReportPeriod.getCorrectionDate());
 
+        DepartmentReportPeriod formDepartmentReportPeriod = null;
+        if (formData != null) {
+            formDepartmentReportPeriod = departmentReportPeriodDao.get(formData.getDepartmentReportPeriodId());
+        }
+
         FormToFormRelation formToFormRelation = performFormDataRelation(formData,
-                getRelationCommon(true, departmentFormType), departmentFormType,
+                getRelationCommon(true, departmentFormType, formDepartmentReportPeriod), departmentFormType,
                 departmentReportPeriod);
 
         return formToFormRelation == null ? new ArrayList<FormToFormRelation>(0) : Arrays.asList(formToFormRelation);
@@ -1366,7 +1323,7 @@ public class SourceServiceImpl implements SourceService {
                     periodOrder);
 
             FormToFormRelation formToFormRelation = performFormDataRelation(formData,
-                    getRelationCommon(false, departmentFormType), departmentFormType,
+                    getRelationCommon(false, departmentFormType, destinationReportPeriod), departmentFormType,
                     departmentReportPeriod);
 
              if (formToFormRelation != null) {

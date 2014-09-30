@@ -50,14 +50,26 @@ public class SourcesHandler extends AbstractActionHandler<SourcesAction, Sources
                     if (type != 0){
                         return type;
                     } else{
+                        // Сотируем дате корректировки
+                        if (o1.getCorrectionDate() != null || o2.getCorrectionDate() != null) {
+                            if (o1.getCorrectionDate() == null) {
+                                return -1;
+                            }
+                            if (o2.getCorrectionDate() == null) {
+                                return 1;
+                            }
+                            int dateCompare = o1.getCorrectionDate().compareTo(o2.getCorrectionDate());
+                            if (dateCompare != 0) {
+                                return dateCompare;
+                            }
+                        }
                         // Сотируем по состоянию формы
                         if (!o1.isCreated()){
                             return 1;
                         } else if (!o2.isCreated()){
                             return -1;
-                        } else{
-                            return o1.getState().getName().compareTo(o2.getState().getName());
                         }
+                        return o1.getState().getName().compareTo(o2.getState().getName());
                     }
                 } else{
                     return o1.isSource() ? 1:-1;

@@ -7,6 +7,7 @@ import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.ClickableTextCell;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -14,10 +15,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.PopupViewWithUiHandlers;
@@ -39,6 +37,8 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
     private List<FormToFormRelation> tableData = null;
 
     private final PopupPanel widget;
+
+    private static final DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getFormat("dd.MM.yyyy");
 
     @UiField
     Button close;
@@ -115,6 +115,17 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
             }
         };
 
+        TextColumn<FormToFormRelation> correctionDateColumn = new TextColumn<FormToFormRelation>() {
+            @Override
+            public String getValue(FormToFormRelation object) {
+                if (object.getCorrectionDate() == null) {
+                    return null;
+                }
+                return DATE_TIME_FORMAT.format(object.getCorrectionDate());
+            }
+        };
+        correctionDateColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+
         TextColumn<FormToFormRelation> performerColumn = new TextColumn<FormToFormRelation>() {
             @Override
             public String getValue(FormToFormRelation object) {
@@ -164,17 +175,16 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
         table.addColumn(counterColumn, "№");
         table.setColumnWidth(counterColumn, 50, Style.Unit.PX);
         table.addColumn(sourceColumn, "Источник / Приёмник");
-        table.setColumnWidth(sourceColumn, 100, Style.Unit.PX);
+        table.setColumnWidth(sourceColumn, 80, Style.Unit.PX);
         table.addColumn(departmentColumn, "Подразделение");
-        table.setColumnWidth(departmentColumn, 100, Style.Unit.PX);
+        table.addColumn(correctionDateColumn, "Дата сдачи корректировки");
+        table.setColumnWidth(correctionDateColumn, 85, Style.Unit.PX);
         table.addColumn(formKindColumn, "Тип формы");
-        table.setColumnWidth(formKindColumn, 200, Style.Unit.PX);
+        table.setColumnWidth(formKindColumn, 150, Style.Unit.PX);
         table.addColumn(formTypeColumn, "Вид формы");
-        table.setColumnWidth(formTypeColumn, 250, Style.Unit.PX);
         table.addColumn(performerColumn, "Исполнитель");
-        table.setColumnWidth(performerColumn, 150, Style.Unit.PX);
         table.addColumn(stateColumn, "Состояние формы");
-        table.setColumnWidth(stateColumn, 100, Style.Unit.PCT);
+        table.setColumnWidth(stateColumn, 120, Style.Unit.PX);
         table.setRowCount(0);
     }
 
