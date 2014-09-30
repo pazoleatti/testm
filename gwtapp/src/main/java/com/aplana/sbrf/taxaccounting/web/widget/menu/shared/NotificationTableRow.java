@@ -6,8 +6,9 @@ import java.util.Date;
 public class NotificationTableRow implements Serializable {
 	private static final long serialVersionUID = 4077680439794472365L;
 
-	Date date;
-	String msg;
+    private Long id;
+    private Date date;
+    private String msg;
 
 	public Date getDate() {
 		return date;
@@ -24,4 +25,12 @@ public class NotificationTableRow implements Serializable {
 	public void setMsg(String msg) {
 		this.msg = msg;
 	}
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 }

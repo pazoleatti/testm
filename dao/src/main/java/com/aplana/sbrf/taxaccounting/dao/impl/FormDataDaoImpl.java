@@ -505,6 +505,11 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 
     @Override
     public FormData getLast(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder) {
+        return getLastByDate(formTypeId, kind, departmentId, reportPeriodId, periodOrder, null);
+    }
+
+    @Override
+    public FormData getLastByDate(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder, Date correctionDate) {
         try {
             return getJdbcTemplate().queryForObject(
                     "select * from " +
@@ -519,10 +524,13 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
                             "and ft.type_id = ? " +
                             "and fd.kind = ? " +
                             "and (? is null or fd.period_order = ?) " +
+                            "and (? is null or drp.correction_date is null or drp.correction_date <= ?) " +
                             "order by drp.correction_date desc nulls last) " +
                             (isSupportOver() ? "where rownum = 1" : "limit 1"),
-                    new Object[]{departmentId, reportPeriodId, formTypeId, kind.getId(), periodOrder, periodOrder},
-                    new int[]{Types.NUMERIC, Types.NUMERIC, Types.NUMERIC, Types.NUMERIC, Types.NUMERIC, Types.NUMERIC},
+                    new Object[]{departmentId, reportPeriodId, formTypeId, kind.getId(), periodOrder, periodOrder,
+                            correctionDate, correctionDate},
+                    new int[]{Types.NUMERIC, Types.NUMERIC, Types.NUMERIC, Types.NUMERIC, Types.NUMERIC, Types.NUMERIC,
+                            Types.DATE, Types.DATE},
                     new FormDataRowMapper());
         } catch (EmptyResultDataAccessException e) {
             return null;

@@ -26,7 +26,7 @@
             left: 10px;
             right: 10px;
             bottom: 70px;
-            top: 10px;
+            top: 40px;
         }
 
         .pager {
@@ -53,10 +53,23 @@
             bottom: 0;
             top: 27px;
         }
+
+        .headerPanel {
+            position: absolute;
+            left: 10px;
+            right: 10px;
+            top: 10px;
+            width: 100%;
+            height: 20px;
+        }
     </ui:style>
 
     <dw:ModalWindow resizable="true" title="Список оповещений" width="800px" height="400px" minWidth="500px">
         <g:HTMLPanel width="100%" addStyleNames="aplana-ModalWindow-contentBackWhite {style.wrapper}">
+            <g:HorizontalPanel addStyleNames="{style.headerPanel}">
+                <style:LinkButton ui:field="deleteButton" text="Удалить оповещение"
+                                  img="resources/img/row-delete.png"/>
+            </g:HorizontalPanel>
             <g:ScrollPanel addStyleNames="{style.table}">
                 <style:GenericCellTable ui:field="notificationTable" width="100%" height="100%"/>
             </g:ScrollPanel>

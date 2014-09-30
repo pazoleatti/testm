@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.client.sources;
 import com.aplana.gwt.client.ModalWindow;
 import com.aplana.sbrf.taxaccounting.model.FormToFormRelation;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
-import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.ClickableTextCell;
 import com.google.gwt.dom.client.Style;
@@ -19,13 +18,11 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.AsyncDataProvider;
-import com.google.gwt.view.client.HasData;
-import com.google.gwt.view.client.Range;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.PopupViewWithUiHandlers;
 
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -39,15 +36,7 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
     public interface Binder extends UiBinder<PopupPanel, SourcesView> {
     }
 
-    private AsyncDataProvider<FormToFormRelation> dataProvider = new AsyncDataProvider<FormToFormRelation>() {
-        @Override
-        protected void onRangeChanged(HasData<FormToFormRelation> display) {
-        if (getUiHandlers() != null) {
-            Range range = display.getVisibleRange();
-            getUiHandlers().onRangeChange(range.getStart());
-        }
-        }
-    };
+    private List<FormToFormRelation> tableData = null;
 
     private final PopupPanel widget;
 
@@ -55,8 +44,6 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
     Button close;
     @UiField
     ModalWindow modalWindow;
-    @UiField
-    FlexiblePager pager;
     @UiField
     DataGrid<FormToFormRelation> table;
     @UiField
@@ -72,6 +59,7 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
         widget = uiBinder.createAndBindUi(this);
         widget.setAnimationEnabled(true);
         init();
+        initCheckboxes();
     }
 
     @Override
@@ -86,24 +74,20 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
 
     @UiHandler("source")
     public void onSourceClicked(ClickEvent event){
-        getUiHandlers().onRangeChange(0);
+        updateTableData();
     }
 
     @UiHandler("destination")
     public void onDestinationClicked(ClickEvent event){
-        getUiHandlers().onRangeChange(0);
+        updateTableData();
     }
 
     @UiHandler("uncreated")
     public void onUncreatedClicked(ClickEvent event){
-        getUiHandlers().onRangeChange(0);
+        updateTableData();
     }
 
     private void init(){
-        pager.setDisplay(table);
-        table.setPageSize(pager.getPageSize());
-        dataProvider.addDataDisplay(table);
-
         Column<FormToFormRelation, String> counterColumn = new Column<FormToFormRelation, String>(new ClickableTextCell()){
 
             @Override
@@ -194,36 +178,35 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
         table.setRowCount(0);
     }
 
-    @Override
-    public void initCheckboxes() {
+    private void initCheckboxes() {
         source.setValue(true);
         destination.setValue(true);
         uncreated.setValue(false);
     }
 
     @Override
-    public void setTableData(int start, List<FormToFormRelation> result, int size) {
-        table.setRowData(start, result);
-        table.setRowCount(size, true);
+    public void setTableData(List<FormToFormRelation> result) {
+        tableData = result;
+        initCheckboxes();
+        updateTableData();
     }
 
-    @Override
-    public void updateTableData() {
-        getUiHandlers().onRangeChange(0);
-    }
+    private void updateTableData() {
+        List<FormToFormRelation> filteredData = new LinkedList<FormToFormRelation>();
+        if (tableData != null) {
+            boolean src = source.getValue();
+            boolean dst = destination.getValue();
+            boolean uncr = uncreated.getValue();
 
-    @Override
-    public boolean getShowDestinations() {
-        return destination.getValue();
-    }
-
-    @Override
-    public boolean getShowSources() {
-        return source.getValue();
-    }
-
-    @Override
-    public boolean getShowUncreated() {
-        return uncreated.getValue();
+            for (FormToFormRelation formToFormRelation : tableData) {
+                boolean fSrc = formToFormRelation.isSource();
+                boolean fCr = formToFormRelation.isCreated();
+                if ((src && fSrc || dst && !fSrc) && (uncr || fCr)) {
+                    filteredData.add(formToFormRelation);
+                }
+            }
+        }
+        table.setRowCount(filteredData.size());
+        table.setRowData(0, filteredData);
     }
 }

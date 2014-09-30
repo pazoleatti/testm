@@ -10,7 +10,7 @@ import java.util.Date;
 public class Notification implements Serializable {
     private static final long serialVersionUID = -5255606476850599691L;
 
-    private int id;
+    private Long id;
     private Integer reportPeriodId;
     private Integer senderDepartmentId;
     private Integer receiverDepartmentId;
@@ -40,11 +40,11 @@ public class Notification implements Serializable {
         this.userId = userId;
     }
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

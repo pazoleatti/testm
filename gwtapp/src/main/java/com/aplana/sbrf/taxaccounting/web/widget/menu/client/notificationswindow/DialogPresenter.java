@@ -1,12 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.widget.menu.client.notificationswindow;
 
+import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.NotificationsFilterData;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
-import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.GetNotificationsAction;
-import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.GetNotificationsResult;
-import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.NotificationTableRow;
+import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -14,6 +14,10 @@ import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.PopupView;
 import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> implements DialogUiHandlers {
 
@@ -56,4 +60,50 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 					}
 				}, DialogPresenter.this));
 	}
+
+    @Override
+    public void deleteNotifications(Set<NotificationTableRow> selectedSet) {
+        final List<Long> notificationIds = new ArrayList<Long>();
+        for (NotificationTableRow notification : selectedSet) {
+            notificationIds.add(notification.getId());
+        }
+        final DeleteNotificationAction action = new DeleteNotificationAction();
+        action.setDeleteWithoutCheck(false);
+        action.setNotificationIds(notificationIds);
+
+        dispatchAsync.execute(action, CallbackUtils
+                .defaultCallback(new AbstractCallback<DeleteNotificationResult>() {
+                    @Override
+                    public void onSuccess(final DeleteNotificationResult result) {
+                        if (result.getAllowedNotifications().size() == notificationIds.size()) {
+                            Dialog.confirmMessage("Удаление оповещений", "Вы действительно хотите удалить выбранные оповещения?", new DialogHandler() {
+                                @Override
+                                public void yes() {
+                                    deleteNotificationWithoutCheck(action);
+                                }
+                            });
+                        } else {
+                            Dialog.confirmMessage("Удаление назначений", "Вы действительно хотите удалить выбранные оповещения? В случае подтверждения будет удалена только часть оповещений, так как не все оповещения доступны для удаления", new DialogHandler() {
+                                @Override
+                                public void yes() {
+                                    action.setNotificationIds(result.getAllowedNotifications());
+                                    deleteNotificationWithoutCheck(action);
+                                }
+                            });
+                        }
+                    }
+                }, DialogPresenter.this));
+    }
+
+    private void deleteNotificationWithoutCheck(DeleteNotificationAction action) {
+        action.setDeleteWithoutCheck(true);
+        dispatchAsync.execute(action, CallbackUtils
+                .defaultCallback(new AbstractCallback<DeleteNotificationResult>() {
+                    @Override
+                    public void onSuccess(DeleteNotificationResult result) {
+                        getView().updateData();
+                    }
+                }, DialogPresenter.this));
+
+    }
 }

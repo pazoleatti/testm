@@ -10,9 +10,6 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
  */
 public class SourcesAction extends UnsecuredActionImpl<SourcesResult> implements ActionName {
     private FormData formData;
-    private boolean showSources;
-    private boolean showDestinations;
-    private boolean showUncreated;
 
     public FormData getFormData() {
         return formData;
@@ -20,30 +17,6 @@ public class SourcesAction extends UnsecuredActionImpl<SourcesResult> implements
 
     public void setFormData(FormData formData) {
         this.formData = formData;
-    }
-
-    public boolean isShowSources() {
-        return showSources;
-    }
-
-    public void setShowSources(boolean showSources) {
-        this.showSources = showSources;
-    }
-
-    public boolean isShowDestinations() {
-        return showDestinations;
-    }
-
-    public void setShowDestinations(boolean showDestinations) {
-        this.showDestinations = showDestinations;
-    }
-
-    public boolean isShowUncreated() {
-        return showUncreated;
-    }
-
-    public void setShowUncreated(boolean showUncreated) {
-        this.showUncreated = showUncreated;
     }
 
     @Override
