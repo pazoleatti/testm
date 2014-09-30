@@ -6,7 +6,4 @@ import com.gwtplatform.mvp.client.UiHandlers;
  * @author auldanov
  */
 public interface SourcesUiHandlers extends UiHandlers{
-    void open();
-
-    void onRangeChange(int start);
 }

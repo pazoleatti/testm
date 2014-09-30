@@ -446,7 +446,6 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
     @Override
     public void onOpenSourcesDialog() {
         sourcesPresenter.setFormData(formData);
-        sourcesPresenter.open();
         addToPopupSlot(sourcesPresenter);
     }
 

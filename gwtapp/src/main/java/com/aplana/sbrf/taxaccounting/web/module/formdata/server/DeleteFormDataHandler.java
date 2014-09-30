@@ -5,19 +5,18 @@ import com.aplana.sbrf.taxaccounting.model.FormToFormRelation;
 import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-
-import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormDataResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -57,9 +56,8 @@ public class DeleteFormDataHandler extends AbstractActionHandler<DeleteFormDataA
                     formData.getDepartmentId(),
                     formData.getFormType().getId(),
                     formData.getKind(),
-                    formData.getReportPeriodId(),
-                    formData.getPeriodOrder(),
-                    false, true, false);
+                    formData.getDepartmentReportPeriodId(),
+                    formData.getPeriodOrder());
             Logger logger = new Logger();
             for (FormToFormRelation item : formDataList) {
                 if (item.getState().equals(WorkflowState.ACCEPTED)) {

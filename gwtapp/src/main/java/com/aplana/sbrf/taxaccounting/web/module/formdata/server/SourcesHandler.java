@@ -36,11 +36,8 @@ public class SourcesHandler extends AbstractActionHandler<SourcesAction, Sources
                 formData.getDepartmentId(),
                 formData.getFormType().getId(),
                 formData.getKind(),
-                formData.getReportPeriodId(),
-                formData.getPeriodOrder(),
-                action.isShowDestinations(),
-                action.isShowSources(),
-                action.isShowUncreated()
+                formData.getDepartmentReportPeriodId(),
+                formData.getPeriodOrder()
         );
 
         Collections.sort(relationList, new Comparator<FormToFormRelation>() {
