@@ -561,13 +561,15 @@ public class FormDataServiceImpl implements FormDataService {
                             if (attributeId != null) {
                                 RefBook refBook = refBookDao.getByAttribute(attributeId);
                                 String referenceLockKey = LockData.LOCK_OBJECTS.REF_BOOK.name() + "_" + refBook.getId();
-                                LockData referenceLockData = lockService.lock(referenceLockKey, userId, LockData.STANDARD_LIFE_TIME);
-                                if (referenceLockData == null) {
-                                    //Блокировка установлена
-                                    lockedObjects.add(referenceLockKey);
-                                } else {
-                                    throw new ServiceLoggerException(String.format(LOCK_REFBOOK_MESSAGE, refBook.getName()),
-                                            logEntryService.save(logger.getEntries()));
+                                if (!lockedObjects.contains(referenceLockKey)) {
+                                    LockData referenceLockData = lockService.lock(referenceLockKey, userId, LockData.STANDARD_LIFE_TIME);
+                                    if (referenceLockData == null) {
+                                        //Блокировка установлена
+                                        lockedObjects.add(referenceLockKey);
+                                    } else {
+                                        throw new ServiceLoggerException(String.format(LOCK_REFBOOK_MESSAGE, refBook.getName()),
+                                                logEntryService.save(logger.getEntries()));
+                                    }
                                 }
                             }
                         }

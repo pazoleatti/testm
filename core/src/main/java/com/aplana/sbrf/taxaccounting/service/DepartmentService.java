@@ -51,7 +51,7 @@ public interface DepartmentService {
      */
     List<Department> getAllChildren(int parentDepartmentId);
 
-    List<Integer> getAllChildrenIds(int depId);
+    List<Integer> getAllChildrenIds(Integer depId);
 
     /**
      * Данная функция в качестве аргумента принимает список идентификаторов доступных пользователю департаментов, а возвращает
