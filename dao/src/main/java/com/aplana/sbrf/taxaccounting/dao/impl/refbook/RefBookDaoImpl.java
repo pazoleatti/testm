@@ -1472,7 +1472,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     private static final String CHECK_USAGES_IN_FORMS = "with forms as (\n" +
-            "  select fd.*, dpr.report_period_id as report_period_id, drp.department_id as department_id from form_data fd \n" +
+            "  select fd.*, drp.report_period_id as report_period_id, drp.department_id as department_id from form_data fd \n" +
             "  join department_report_period drp on drp.id = fd.department_report_period_id\n" +
             "  join data_row dr on dr.form_data_id = fd.id\n" +
             "  join data_cell nv on nv.row_id = dr.id\n" +
