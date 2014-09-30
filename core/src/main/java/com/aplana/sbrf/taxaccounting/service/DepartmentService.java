@@ -141,6 +141,16 @@ public interface DepartmentService {
     List<Integer> getTaxFormDepartments(TAUser tAUser, List<TaxType> taxTypes, Date periodStart, Date periodEnd);
 
     /**
+     * 45 - Подразделения, доступные через назначение источников-приёмников
+     * <a href = "http://conf.aplana.com/pages/viewpage.action?pageId=14816445">Аналитика</a>
+     * @param tAUser       пользователь
+     * @param periodStart  дата начала периода
+     * @param periodEnd    дата окончания периода
+     * @return
+     */
+    List<Department> getSourcesDepartments(TAUser tAUser, Date periodStart, Date periodEnd);
+
+    /**
      * 50 - Выборка id подразделений для назначения подразделений-исполнителей
      * <a href = "http://conf.aplana.com/pages/viewpage.action?pageId=11380678">Аналитика</a>
      * @param tAUser пользователь
