@@ -16,7 +16,7 @@ public interface NotificationDao {
      * @param notification оповещение
      * @return идентификатор нового оповещения
      */
-    int save(Notification notification);
+    long save(Notification notification);
 
     /**
      * Получает оповещение
@@ -72,4 +72,18 @@ public interface NotificationDao {
      * @param filter фильтр оповещений
      */
     void updateUserNotificationsStatus(NotificationsFilterData filter);
+
+    /**
+     * Удаляет все оповещения из списка
+     * @param notificationIds идентификаторы оповещений
+     */
+    void deleteAll(List<Long> notificationIds);
+
+    /**
+     * Проверяет на какие оповещения из списка у пользователя есть полные права
+     * @param notificationIds идентификаторы оповещений
+     * @param userId идентификатор пользователя
+     * @return список оповещений, на которые у пользователя есть полные права
+     */
+    List<Long> getAllowedNotifications(List<Long> notificationIds, int userId);
 }

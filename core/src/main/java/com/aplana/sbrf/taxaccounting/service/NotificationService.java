@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import com.aplana.sbrf.taxaccounting.model.Notification;
-import com.aplana.sbrf.taxaccounting.model.NotificationsFilterData;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.*;
 
 import java.util.List;
 import java.util.Map;
@@ -19,7 +16,7 @@ public interface NotificationService {
      * @param notification оповещение
      * @return идентификатор нового оповещения
      */
-    int save(Notification notification);
+    long save(Notification notification);
 
     /**
      * Создает список оповещений. В основном выполняется при назначении срока сдачи на подразделение + дочерние подразделения
@@ -70,4 +67,18 @@ public interface NotificationService {
      * @param filter фильтр оповещений
      */
     void updateUserNotificationsStatus(NotificationsFilterData filter);
+
+    /**
+     * Удаляет все оповещения из списка
+     * @param notificationIds идентификаторы оповещений
+     */
+    void deleteAll(List<Long> notificationIds);
+
+    /**
+     * Проверяет на какие оповещения из списка у пользователя есть полные права
+     * @param user пользователь
+     * @param notificationIds идентификаторы оповещений
+     * @return список оповещений, на которые у пользователя есть полные права
+     */
+    List<Long> getAllowedNotifications(TAUser user, List<Long> notificationIds);
 }
