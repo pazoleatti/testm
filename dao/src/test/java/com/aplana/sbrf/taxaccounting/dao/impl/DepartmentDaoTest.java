@@ -14,8 +14,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 import static java.util.Arrays.asList;
 
@@ -193,5 +192,28 @@ public class DepartmentDaoTest {
         Assert.assertEquals("ТБ2/ЦСКО 1", departmentDao.getReportDepartmentName(5));
         Assert.assertEquals("ТБ1/ЦСКО 1", departmentDao.getReportDepartmentName(6));
         Assert.assertEquals("ТБ1", departmentDao.getReportDepartmentName(2));
+    }
+
+    @Test
+    public void getDepartmentsByDestinationSourceTest() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(2013, Calendar.JANUARY, 1);
+        Date dateStart = calendar.getTime();
+        calendar.set(2014, Calendar.DECEMBER, 31);
+        Date dateEnd = calendar.getTime();
+        ArrayList<Integer> departments = new ArrayList<Integer>();
+        departments.add(4);
+        departments.add(5);
+        departments.add(6);
+        Assert.assertEquals(0, departmentDao.getDepartmentsByDestinationSource(departments, dateStart, dateEnd).size());
+        departments.add(1);
+        Assert.assertEquals(1, departmentDao.getDepartmentsByDestinationSource(departments, null, null).size());
+        Assert.assertEquals(2, departmentDao.getDepartmentsByDestinationSource(departments, dateStart, null).get(0).getId());
+        departments.add(2);
+        departments.add(3);
+        Assert.assertEquals(1, departmentDao.getDepartmentsByDestinationSource(departments, dateStart, dateEnd).size());
+        calendar.set(2012, Calendar.DECEMBER, 31);
+        dateEnd = calendar.getTime();
+        Assert.assertEquals(0, departmentDao.getDepartmentsByDestinationSource(departments, dateStart, dateEnd).size());
     }
 }
