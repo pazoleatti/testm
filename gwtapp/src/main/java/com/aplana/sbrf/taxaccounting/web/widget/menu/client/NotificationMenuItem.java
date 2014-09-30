@@ -21,7 +21,7 @@ public class NotificationMenuItem extends MenuItem {
     private static final String NEW_MSG_ICON = "resources/img/attention_on_20.png";
 
     public NotificationMenuItem() {
-        super(TEMPLATES.notifyMsg(NEW_MSG_ICON, "0 уведомлений"));
+        super(TEMPLATES.noMsg("Нет уведомлений"));
     }
 
     public void setCount(int count) {
