@@ -1,14 +1,14 @@
-package form_template.income.output2.v2015
+package form_template.income.output2_1.v2014
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import groovy.transform.Field
 
 /**
- * Сведения о дивидендах (доходах от долевого участия в других организациях,
- * созданных на территории Российской Федерации), выплаченных в отчетном квартале
+ * Сведения о дивидендах, выплаченных в отчетном квартале
+ * formTemplateId=10144
  *
- * formTemplateId=2307
+ * http://conf.aplana.com/pages/viewpage.action?pageId=8784122
  */
 
 // графа 1  - rowNumber

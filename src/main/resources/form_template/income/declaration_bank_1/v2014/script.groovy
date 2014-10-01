@@ -1,4 +1,4 @@
-package form_template.income.declaration_bank.v2012
+package form_template.income.declaration_bank_1.v2014
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
@@ -10,14 +10,14 @@ import groovy.xml.MarkupBuilder
  * Декларация по налогу на прибыль (Банк)
  * Формирование XML для декларации налога на прибыль.
  *
- * declarationTemplateId=2020
+ * declarationTemplateId=21047
  *
  * @author rtimerbaev
  */
 
 // Признак новой декларации (http://jira.aplana.com/browse/SBRFACCTAX-8910)
 @Field
-def boolean newDeclaration = false;
+def boolean newDeclaration = true;
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE : // создать / обновить

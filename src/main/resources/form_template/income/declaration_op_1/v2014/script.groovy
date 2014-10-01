@@ -1,4 +1,4 @@
-package form_template.income.declaration_op.v2012
+package form_template.income.declaration_op_1.v2014
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
@@ -9,14 +9,14 @@ import groovy.xml.MarkupBuilder
  * Декларация по налогу на прибыль (ОП)
  * Формирование XML для декларации налога на прибыль уровня обособленного подразделения.
  *
- * declarationTemplateId=2021
+ * declarationTemplateId=21048
  *
  * @author rtimerbaev
  */
 
 // Признак новой декларации (http://jira.aplana.com/browse/SBRFACCTAX-8910)
 @Field
-def boolean newDeclaration = false;
+def boolean newDeclaration = true;
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE : // создать / обновить
