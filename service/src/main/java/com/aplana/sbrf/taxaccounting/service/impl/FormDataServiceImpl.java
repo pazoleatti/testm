@@ -1102,9 +1102,10 @@ public class FormDataServiceImpl implements FormDataService {
     @Override
     public void deleteReport(long formDataId) {
         boolean[] b = {false, true};
-        for(ReportType reportType: ReportType.values()) {
-            for(boolean manual : b) {
-                for(boolean showChecked : b) {
+        ReportType[] reportTypes = {ReportType.CSV, ReportType.EXCEL};
+        for(ReportType reportType: reportTypes) {
+            for(boolean manual: b) {
+                for(boolean showChecked: b) {
                     lockService.unlock(String.format("%s_%s_%s_isShowChecked_%s_manual_%s", LockData.LOCK_OBJECTS.FORM_DATA.name(), formDataId, reportType.getName(), showChecked, manual), 0, true);
                 }
             }

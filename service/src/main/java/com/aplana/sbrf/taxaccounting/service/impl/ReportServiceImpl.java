@@ -1,8 +1,10 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.ReportDao;
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.ReportService;
@@ -13,10 +15,13 @@ import org.springframework.stereotype.Service;
 public class ReportServiceImpl implements ReportService {
 
     @Autowired
-    ReportDao reportDao;
+    private ReportDao reportDao;
 
     @Autowired
-    FormDataAccessService formDataAccessService;
+    private FormDataAccessService formDataAccessService;
+
+    @Autowired
+    private DeclarationDataAccessService declarationDataAccessService;
 
     @Override
     public void create(long formDataId, String blobDataId, ReportType type, boolean checking, boolean manual, boolean absolute) {
@@ -32,5 +37,21 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public void delete(long formDataId) {
         reportDao.delete(formDataId);
+    }
+
+    @Override
+    public void createDec(long declarationDataId, String blobDataId, ReportType type) {
+        reportDao.createDec(declarationDataId, blobDataId, type);
+    }
+
+    @Override
+    public String getDec(TAUserInfo userInfo, long declarationDataId, ReportType type) {
+        declarationDataAccessService.checkEvents(userInfo, declarationDataId, FormDataEvent.GET_LEVEL1);
+        return reportDao.getDec(declarationDataId, type);
+    }
+
+    @Override
+    public void deleteDec(long formDataId) {
+        reportDao.deleteDec(formDataId);
     }
 }

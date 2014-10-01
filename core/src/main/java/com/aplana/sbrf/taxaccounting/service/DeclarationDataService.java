@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
@@ -113,7 +114,16 @@ public interface DeclarationDataService {
 	 * @throws AccessDeniedException - если у пользователя нет прав на просмотр данной декларации
 	 */
 	Date getXmlDataDocDate(long declarationDataId, TAUserInfo userInfo);
-	
+
+    /**
+     * Проверка валидности xml декларации
+     * @param declarationData идентификатор данных декларации
+     * @param logger логгер лог панели
+     * @param isErrorFatal признак того, что операция не может быть продолжена с невалидным xml
+     * @param operation Событие (для сообщения об ошибке)
+     */
+    void validateDeclaration(DeclarationData declarationData, final Logger logger, final boolean isErrorFatal,
+                             FormDataEvent operation);
 	/**
 	 * @deprecated Неактуально с появлением корректирующих периодов
 	 */
@@ -159,4 +169,10 @@ public interface DeclarationDataService {
      * @param userInfo - информация о пользователе
      */
     void checkLockedMe(Long declarationDataId, TAUserInfo userInfo);
+
+    /**
+     * Удаление отчетов и блокировок на задачи формирования отчетов связанных с декларациями
+     * @param declarationDataId
+     */
+    void deleteReport(long declarationDataId);
 }

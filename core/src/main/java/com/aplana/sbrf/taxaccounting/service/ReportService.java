@@ -13,7 +13,7 @@ import java.util.List;
  */
 public interface ReportService {
     /**
-     * Создание записи
+     * Создание записи об отчете НФ
      * @param formDataId
      * @param blobDataId
      * @param type
@@ -24,7 +24,15 @@ public interface ReportService {
     void create(long formDataId, String blobDataId, ReportType type, boolean checking, boolean manual, boolean absolute);
 
     /**
-     * Получение записи
+     * Создание записи об отчете декларации
+     * @param declarationDataId
+     * @param blobDataId
+     * @param type
+     */
+    void createDec(long declarationDataId, String blobDataId, ReportType type);
+
+    /**
+     * Получение записи об отчете НФ
      * @param formDataId
      * @param type
      * @param checking
@@ -35,8 +43,23 @@ public interface ReportService {
 	String get(TAUserInfo userInfo, long formDataId, ReportType type, boolean checking, boolean manual, boolean absolute);
 
     /**
+     * Получение записи об отчете декларации
+     * @param userInfo
+     * @param declarationDataId
+     * @param type
+     * @return uuid
+     */
+    String getDec(TAUserInfo userInfo, long declarationDataId, ReportType type);
+
+    /**
      * Удаление всех отчетов по id НФ
      * @param formDataId
      */
     void delete(long formDataId);
+
+    /**
+     * Удаление всех отчетов по id декларации
+     * @param declarationDataId
+     */
+    void deleteDec(long declarationDataId);
 }

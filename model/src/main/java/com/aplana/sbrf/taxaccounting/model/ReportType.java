@@ -9,8 +9,10 @@ public enum ReportType {
 
     EXCEL(0, "Excel", 3L, 103L),
     CSV(1, "CSV", 4L, 104L),
-    PDF(2, "PDF", 5L, 105L),
-    JASPER(3, "JASPER", 6L, 106L);
+    EXCEL_DEC(0, "Excel", 5L, 105L),
+    XML_DEC(1, "XML", 6L, 106L),
+    PDF_DEC(2, "PDF", 7L, 107L),
+    JASPER_DEC(3, "JASPER", 8L, 108L);
 
     private int id;
     private String name;
