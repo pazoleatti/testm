@@ -22,7 +22,6 @@ def boolean newDeclaration = true;
 switch (formDataEvent) {
     case FormDataEvent.CREATE : // создать / обновить
         checkDeparmentParams(LogLevel.WARNING)
-        generateXML()
         break
     case FormDataEvent.CHECK : // проверить
         checkDeparmentParams(LogLevel.ERROR)
@@ -32,6 +31,10 @@ switch (formDataEvent) {
         checkDeparmentParams(LogLevel.ERROR)
         logicCheck()
         break
+    case FormDataEvent.CALCULATE:
+        checkDeparmentParams(LogLevel.WARNING)
+        generateXML()
+        break
     default:
         return
 }
@@ -39,6 +42,7 @@ switch (formDataEvent) {
 // Кэш провайдеров
 @Field
 def providerCache = [:]
+
 // Кэш значений справочника
 @Field
 def refBookCache = [:]
@@ -86,6 +90,9 @@ void checkDeparmentParams(LogLevel logLevel) {
 void logicCheck() {
     // получение данных из xml'ки
     def xmlData = getXmlData(declarationData.reportPeriodId, declarationData.departmentId)
+    if(xmlData == null){
+        return
+    }
     def empty = 0
 
     // Проверки Листа 02 - Превышение суммы налога, выплаченного за пределами РФ (всего)
@@ -220,7 +227,7 @@ void generateXML() {
     def kpp = incomeParams?.KPP?.value
     def reorgInn = incomeParams?.REORG_INN?.value
     def reorgKpp = incomeParams?.REORG_KPP?.value
-    def oktmo = getRefBookValue(96, incomeParams?.OKTMO?.value)?.CODE?.value
+    def oktmo = getOkato(incomeParams?.OKTMO?.value)
     def signatoryId = getRefBookValue(35, incomeParams?.SIGNATORY_ID?.value)?.CODE?.value
     def taxRate = incomeParams?.TAX_RATE?.value
     def sumTax = incomeParams?.SUM_TAX?.value // вместо departmentParamIncome.externalTaxSum
@@ -268,30 +275,30 @@ void generateXML() {
     def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData)
 
     /** Доходы сложные уровня Банка "Сводная форма начисленных доходов". */
-    def dataRowsComplexIncome = getDataRows(formDataCollection, departmentId, 302, FormDataKind.SUMMARY)
+    def dataRowsComplexIncome = getDataRows(formDataCollection, 302, FormDataKind.SUMMARY)
 
     /** Доходы простые уровня Банка "Расшифровка видов доходов, учитываемых в простых РНУ". */
-    def dataRowsSimpleIncome = getDataRows(formDataCollection, departmentId, 301, FormDataKind.SUMMARY)
+    def dataRowsSimpleIncome = getDataRows(formDataCollection, 301, FormDataKind.SUMMARY)
 
     /** Расходы сложные уровня Банка "Сводная форма начисленных расходов". */
-    def dataRowsComplexConsumption = getDataRows(formDataCollection, departmentId, 303, FormDataKind.SUMMARY)
+    def dataRowsComplexConsumption = getDataRows(formDataCollection, 303, FormDataKind.SUMMARY)
 
     /** Расходы простые уровня Банка "Расшифровка видов расходов, учитываемых в простых РНУ". */
-    def dataRowsSimpleConsumption = getDataRows(formDataCollection, departmentId, 304, FormDataKind.SUMMARY)
+    def dataRowsSimpleConsumption = getDataRows(formDataCollection, 304, FormDataKind.SUMMARY)
 
     /** Сводная налоговая формы Банка «Расчёт распределения авансовых платежей и налога на прибыль по обособленным подразделениям организации». */
-    def dataRowsAdvance = getDataRows(formDataCollection, departmentId, 500, FormDataKind.SUMMARY)
+    def dataRowsAdvance = getDataRows(formDataCollection, 500, FormDataKind.SUMMARY)
 
     /** Сведения для расчёта налога с доходов в виде дивидендов. */
-    def dataRowsDividend = getDataRows(formDataCollection, departmentId, newDeclaration ? 10102 : 306, FormDataKind.ADDITIONAL)
+    def dataRowsDividend = getDataRows(formDataCollection, newDeclaration ? 10102 : 306, FormDataKind.ADDITIONAL)
 
     /** Расчет налога на прибыль с доходов, удерживаемого налоговым агентом. */
     /** либо */
     /** Сведения о дивидендах, выплаченных в отчетном квартале. */
-    def dataRowsTaxAgent = getDataRows(formDataCollection, departmentId,  newDeclaration ? 10105 : 307, FormDataKind.ADDITIONAL)
+    def dataRowsTaxAgent = getDataRows(formDataCollection, newDeclaration ? 10105 : 307, FormDataKind.ADDITIONAL)
 
     /** Сумма налога, подлежащая уплате в бюджет, по данным налогоплательщика. */
-    def dataRowsTaxSum = getDataRows(formDataCollection, departmentId,  newDeclaration ? 10103 : 308, FormDataKind.ADDITIONAL)
+    def dataRowsTaxSum = getDataRows(formDataCollection, newDeclaration ? 10103 : 308, FormDataKind.ADDITIONAL)
 
     /*
      * Получение значении декларации за предыдущий период.
@@ -1034,6 +1041,7 @@ void generateXML() {
                                     НалИсчисл : getLong(row.taxSum),
                                     НалДивПред : getLong(row.taxSumFromPeriod),
                                     НалДивПосл : getLong(row.taxSumFromPeriodAll)) {
+
                                 // 0..1
                                 ДивИОФЛНеРез(
                                         ДивИнОрг : getLong(row.dividendForgeinOrgAll),
@@ -1777,6 +1785,9 @@ def getXmlData(def reportPeriodId, def departmentId) {
         def declarationData = declarationService.find(declarationTypeId, departmentId, reportPeriodId)
         if (declarationData != null && declarationData.id != null) {
             def xmlString = declarationService.getXmlData(declarationData.id)
+            if(xmlString == null){
+                return null
+            }
             xmlString = xmlString.replace('<?xml version="1.0" encoding="windows-1251"?>', '')
             return new XmlSlurper().parseText(xmlString)
         }
@@ -1882,9 +1893,19 @@ def getXmlValue(def value) {
 }
 
 /** Получить строки формы. */
-def getDataRows(def formDataCollection, def departmentId, def formTemplateId, def kind) {
-    def form = formDataCollection?.find(departmentId, formTemplateId, kind)
-    if (form) {
-        formDataService.getDataRowHelper(form)?.getAll()
+def getDataRows(def formDataCollection, def formTemplateId, def kind) {
+    def formList = formDataCollection?.findAllByFormTypeAndKind(formTemplateId, kind)
+    def dataRows = []
+    for (def form : formList) {
+        dataRows += (formDataService.getDataRowHelper(form)?.getAll()?:[])
     }
+    return dataRows.isEmpty() ? null : dataRows
+}
+
+def getOkato(def id) {
+    def String okato = null
+    if(id != null){
+        okato = getRefBookValue(96, id)?.CODE?.stringValue
+    }
+    return okato
 }
