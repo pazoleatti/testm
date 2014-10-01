@@ -21,13 +21,18 @@ def boolean newDeclaration = true;
 switch (formDataEvent) {
     case FormDataEvent.CREATE : // создать / обновить
         checkDeparmentParams(LogLevel.WARNING)
-        generateXML()
+        checkDeclarationBank()
         break
     case FormDataEvent.CHECK : // проверить
         checkDeparmentParams(LogLevel.ERROR)
         break
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED : // принять из создана
         checkDeparmentParams(LogLevel.ERROR)
+        break
+    case FormDataEvent.CALCULATE:
+        checkDeparmentParams(LogLevel.WARNING)
+        def xmlBankData = checkDeclarationBank()
+        generateXML(xmlBankData)
         break
     default:
         return
@@ -115,7 +120,7 @@ def checkDeclarationBank() {
 }
 
 /** Запуск генерации XML. */
-void generateXML() {
+void generateXML(def xmlBankData) {
     /*
      * Константы.
      */
@@ -140,7 +145,7 @@ void generateXML() {
     def kpp = incomeParams?.KPP?.value
     def reorgInn = incomeParams?.REORG_INN?.value
     def reorgKpp = incomeParams?.REORG_KPP?.value
-    def oktmo = getRefBookValue(96, incomeParams?.OKTMO?.value)?.CODE?.value
+    def oktmo = getOkato(incomeParams?.OKTMO?.value)
     def signatoryId = getRefBookValue(35, incomeParams?.SIGNATORY_ID?.value)?.CODE?.value
     def appVersion = incomeParams?.APP_VERSION?.value
     def formatVersion = incomeParams?.FORMAT_VERSION?.value
@@ -450,4 +455,12 @@ def getProvider(def long providerId) {
         providerCache.put(providerId, refBookFactory.getDataProvider(providerId))
     }
     return providerCache.get(providerId)
+}
+
+def getOkato(def id) {
+    def String okato = null
+    if(id != null){
+        okato = getRefBookValue(96, id)?.CODE?.stringValue
+    }
+    return okato
 }

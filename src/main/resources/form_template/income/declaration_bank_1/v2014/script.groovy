@@ -1041,7 +1041,6 @@ void generateXML() {
                                     НалИсчисл : getLong(row.taxSum),
                                     НалДивПред : getLong(row.taxSumFromPeriod),
                                     НалДивПосл : getLong(row.taxSumFromPeriodAll)) {
-
                                 // 0..1
                                 ДивИОФЛНеРез(
                                         ДивИнОрг : getLong(row.dividendForgeinOrgAll),
