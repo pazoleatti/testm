@@ -1,4 +1,4 @@
-package form_template.income.declaration_op.v2012
+package form_template.income.declaration_op_1.v2014
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
@@ -9,30 +9,25 @@ import groovy.xml.MarkupBuilder
  * Декларация по налогу на прибыль (ОП)
  * Формирование XML для декларации налога на прибыль уровня обособленного подразделения.
  *
- * declarationTemplateId=2021
+ * declarationTemplateId=21048
  *
  * @author rtimerbaev
  */
 
 // Признак новой декларации (http://jira.aplana.com/browse/SBRFACCTAX-8910)
 @Field
-def boolean newDeclaration = false;
+def boolean newDeclaration = true;
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE : // создать / обновить
         checkDeparmentParams(LogLevel.WARNING)
-        checkDeclarationBank()
+        generateXML()
         break
     case FormDataEvent.CHECK : // проверить
         checkDeparmentParams(LogLevel.ERROR)
         break
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED : // принять из создана
         checkDeparmentParams(LogLevel.ERROR)
-        break
-    case FormDataEvent.CALCULATE:
-        checkDeparmentParams(LogLevel.WARNING)
-        def xmlBankData = checkDeclarationBank()
-        generateXML(xmlBankData)
         break
     default:
         return
@@ -85,42 +80,8 @@ void checkDeparmentParams(LogLevel logLevel) {
     }
 }
 
-// Провека декларации банка.
-def checkDeclarationBank() {
-    /** Отчётный период. */
-    def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
-
-    /** вид декларации 2 - декларация по налогу на прибыль уровня банка, 10080 - новая декларация банка */
-    def declarationTypeId = ((newDeclaration) ? 10080 : 2)
-
-    /** Идентификатор подразделения Банка. */
-    def departmentBankId = 1
-    def bankDeclarationData = declarationService.find(declarationTypeId, departmentBankId, reportPeriod.id)
-    if (bankDeclarationData == null || !bankDeclarationData.accepted) {
-        logger.error('Декларация Банка по прибыли за указанный период не сформирована или не находится в статусе "Принята".')
-        return
-    }
-
-    /** XML декларации за предыдущий отчетный период. */
-    def xmlBankData = null
-
-    if (bankDeclarationData.id != null) {
-        def xmlString = declarationService.getXmlData(bankDeclarationData.id)
-        xmlString = xmlString.replace('<?xml version="1.0" encoding="windows-1251"?>', '')
-        if (xmlString == null) {
-            logger.error('Данные декларации Банка не заполнены.')
-            return
-        }
-        xmlBankData = new XmlSlurper().parseText(xmlString)
-    }
-    if (xmlBankData == null) {
-        logger.error('Не удалось получить данные декларации Банка.')
-    }
-    return xmlBankData
-}
-
 /** Запуск генерации XML. */
-void generateXML(def xmlBankData) {
+void generateXML() {
     /*
      * Константы.
      */
@@ -145,7 +106,7 @@ void generateXML(def xmlBankData) {
     def kpp = incomeParams?.KPP?.value
     def reorgInn = incomeParams?.REORG_INN?.value
     def reorgKpp = incomeParams?.REORG_KPP?.value
-    def oktmo = getOkato(incomeParams?.OKTMO?.value)
+    def oktmo = getRefBookValue(96, incomeParams?.OKTMO?.value)?.CODE?.value
     def signatoryId = getRefBookValue(35, incomeParams?.SIGNATORY_ID?.value)?.CODE?.value
     def appVersion = incomeParams?.APP_VERSION?.value
     def formatVersion = incomeParams?.FORMAT_VERSION?.value
@@ -170,8 +131,8 @@ void generateXML(def xmlBankData) {
      * Провека декларации банка.
      */
 
-    /** вид декларации 2 - декларация по налогу на прибыль уровня банка. */
-    def declarationTypeId = 2
+    /** вид декларации 2 - декларация по налогу на прибыль уровня банка, 10080 - новая декларация банка */
+    def declarationTypeId = ((newDeclaration) ? 10080 : 2)
 
     /** Идентификатор подразделения Банка. */
     def departmentBankId = 1

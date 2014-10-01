@@ -1,4 +1,4 @@
-package form_template.income.output1.v2015
+package form_template.income.output1_1.v2014
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
@@ -6,13 +6,13 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
- * Сведения для расчёта налога с доходов в виде дивидендов (доходов от долевого участия в других организациях,
- * созданных на территории Российской Федерации)
- * formTemplateId=2306
+ * Сведения для расчёта налога с доходов в виде дивидендов
+ * formTemplateId=10141
  *
  * http://conf.aplana.com/pages/viewpage.action?pageId=8784122
  *
  * @author Stanislav Yasinskiy
+ *
  1. 	financialYear                   Отчетный год
  2.     taxPeriod                       Налоговый (отчетный) период
  3.     emitent                         Эмитент
