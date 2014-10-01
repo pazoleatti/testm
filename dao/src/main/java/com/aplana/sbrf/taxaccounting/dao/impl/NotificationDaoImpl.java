@@ -27,7 +27,7 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
         @Override
         public Notification mapRow(ResultSet rs, int index) throws SQLException {
             Notification notification = new Notification();
-            notification.setId(SqlUtils.getInteger(rs, "ID"));
+            notification.setId(SqlUtils.getLong(rs, "ID"));
             notification.setReportPeriodId(SqlUtils.getInteger(rs, "REPORT_PERIOD_ID"));
             notification.setSenderDepartmentId(SqlUtils.getInteger(rs, "SENDER_DEPARTMENT_ID"));
             notification.setReceiverDepartmentId(SqlUtils.getInteger(rs, "RECEIVER_DEPARTMENT_ID"));
@@ -42,12 +42,12 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
     }
 
     @Override
-    public int save(Notification notification) {
+    public long save(Notification notification) {
         JdbcTemplate jt = getJdbcTemplate();
 
-        Integer id = notification.getId();
+        Long id = notification.getId();
         if (id == null) {
-            id = generateId("seq_notification", Integer.class);
+            id = generateId("seq_notification", Long.class);
         }
 
         jt.update(
@@ -286,5 +286,27 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
         params.addValue("senderDepartmentId", filter.getSenderDepartmentId());
         params.addValue("userId", filter.getUserId());
         getNamedParameterJdbcTemplate().update(sql, params);
+    }
+
+    @Override
+    public void deleteAll(List<Long> notificationIds) {
+        getJdbcTemplate().update("delete from notification where " + SqlUtils.transformToSqlInStatement("id", notificationIds));
+    }
+
+    private static final String GET_ALLOWED_NOTIFICATIONS = "select n.id from NOTIFICATION n \n" +
+            "join DEPARTMENT d on d.ID = n.RECEIVER_DEPARTMENT_ID \n" +
+            "join SEC_USER u on u.DEPARTMENT_ID = d.ID\n" +
+            "where %s and u.id = ?";
+
+    @Override
+    public List<Long> getAllowedNotifications(List<Long> notificationIds, int userId) {
+        String sql = String.format(GET_ALLOWED_NOTIFICATIONS,
+                SqlUtils.transformToSqlInStatement("n.id", notificationIds));
+        return getJdbcTemplate().query(sql, new RowMapper<Long>() {
+            @Override
+            public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+                return rs.getLong("id");
+            }
+        }, userId);
     }
 }

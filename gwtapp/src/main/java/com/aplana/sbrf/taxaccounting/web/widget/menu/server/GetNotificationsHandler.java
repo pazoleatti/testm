@@ -51,6 +51,7 @@ public class GetNotificationsHandler extends AbstractActionHandler<GetNotificati
 		PagingResult<Notification> result = notificationService.getByFilter(filter);
 		for (Notification notification : result) {
 			NotificationTableRow row = new NotificationTableRow();
+            row.setId(notification.getId());
 			row.setDate(notification.getCreateDate());
 			row.setMsg(notification.getText());
 			rows.add(row);

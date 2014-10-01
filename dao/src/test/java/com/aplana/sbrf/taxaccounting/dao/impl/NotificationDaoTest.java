@@ -90,7 +90,7 @@ public class NotificationDaoTest {
         n.setSenderDepartmentId(2);
         n.setReportPeriodId(1);
         n.setCreateDate(new Date());
-        Integer id = notificationDao.save(n);
+        Long id = notificationDao.save(n);
         notNull(id);
     }
 
@@ -155,7 +155,7 @@ public class NotificationDaoTest {
 	@Test
 	public void getForReceiverTest() {
 		Notification notification = notificationDao.get(1);
-		assertEquals(1, notification.getId());
+		assertEquals(1L, notification.getId().longValue());
 		assertEquals(1, notification.getReceiverDepartmentId().intValue());
 		assertEquals(2, notification.getSenderDepartmentId().intValue());
 	}

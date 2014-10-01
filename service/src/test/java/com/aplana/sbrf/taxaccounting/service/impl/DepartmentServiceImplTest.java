@@ -194,6 +194,10 @@ public class DepartmentServiceImplTest {
                 return new ArrayList<Department>(retVal);
             }
         });
+
+        ArrayList<Department> departments = new ArrayList<Department>();
+        departments.add(root);
+        when(departmentDao.getDepartmentsByDestinationSource(anyListOf(Integer.class), any(Date.class), any(Date.class))).thenReturn(departments);
     }
 
     @Test
@@ -498,5 +502,46 @@ public class DepartmentServiceImplTest {
         // test for ROLE_CONTROL
         taUser.getRoles().remove(0);
         // test for ROLE_OPER
+    }
+
+    @Test
+    public void getSourcesDepartmentsTest(){
+        TAUser taUser = new TAUser();
+        taUser.setRoles(taRoles);
+        // test for ROLE_CONTROL_UNP
+        Assert.assertEquals(5, departmentService.getSourcesDepartments(taUser, null, null).size());
+        // test for ROLE_CONTROL_NS
+        taUser.getRoles().remove(0);
+        Assert.assertEquals(0, departmentService.getSourcesDepartments(taUser, null, null).size());
+        taUser.setDepartmentId(2);
+        Assert.assertEquals(1, departmentService.getSourcesDepartments(taUser, null, null).size());
+        // test for ROLE_CONTROL
+        taUser.getRoles().remove(0);
+        taUser.setDepartmentId(311);
+        Assert.assertEquals(1, departmentService.getSourcesDepartments(taUser, null, null).size());
+        // test for other
+        taUser.getRoles().remove(0);
+        Assert.assertEquals(0, departmentService.getSourcesDepartments(taUser, null, null).size());
+    }
+
+    @Test
+    public void getAppointmentDepartmentsTest(){
+        TAUser taUser = new TAUser();
+        taUser.setRoles(taRoles);
+        // test for ROLE_CONTROL_UNP
+        Assert.assertEquals(5, departmentService.getAppointmentDepartments(taUser).size());
+        // test for ROLE_CONTROL_NS
+        taUser.getRoles().remove(0);
+        Assert.assertEquals(0, departmentService.getAppointmentDepartments(taUser).size());
+        taUser.setDepartmentId(2);
+        Assert.assertEquals(1, departmentService.getAppointmentDepartments(taUser).size());
+        Assert.assertEquals(0, departmentService.getAppointmentDepartments(taUser).get(0).intValue());
+        // test for ROLE_CONTROL
+        taUser.getRoles().remove(0);
+        taUser.setDepartmentId(311);
+        Assert.assertEquals(1, departmentService.getAppointmentDepartments(taUser).size());
+        // test for other
+        taUser.getRoles().remove(0);
+        Assert.assertEquals(0, departmentService.getAppointmentDepartments(taUser).size());
     }
 }

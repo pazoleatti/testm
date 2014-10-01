@@ -204,8 +204,15 @@ public interface FormDataDao {
     List<FormData> getFormDataListByTemplateId(Integer formTemplateId);
 
     /**
-     * НФ созданная в последнем отчетном периоде подразделения, если в нем нет формы, то берется форма из предудущего
+     * НФ созданная в последнем отчетном периоде подразделения, если в нем нет формы, то берется форма из предыдущего
      * отчетного периода подразделения и т.д. в рамках отчетного периода
      */
     FormData getLast(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder);
+
+    /**
+     * НФ созданная в последнем отчетном периоде подразделения с отсутствующей датой корректировки или меньшей или
+     * равной заданной, если в нем нет формы, то берется форма из предыдущего отчетного периода подразделения
+     * и т.д. в рамках отчетного периода
+     */
+    FormData getLastByDate(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder, Date correctionDate);
 }

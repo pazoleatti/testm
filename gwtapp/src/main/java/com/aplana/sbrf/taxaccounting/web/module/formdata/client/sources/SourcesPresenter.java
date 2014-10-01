@@ -23,16 +23,7 @@ import java.util.List;
  */
 public class SourcesPresenter extends PresenterWidget<SourcesPresenter.MyView> implements SourcesUiHandlers {
     public interface MyView extends PopupView, HasUiHandlers<SourcesUiHandlers> {
-
-        void initCheckboxes();
-        void setTableData(int start, List<FormToFormRelation> result, int size);
-        void updateTableData();
-
-        boolean getShowDestinations();
-
-        boolean getShowSources();
-
-        boolean getShowUncreated();
+        void setTableData(List<FormToFormRelation> tableData);
     }
 
     private final DispatchAsync dispatcher;
@@ -45,29 +36,21 @@ public class SourcesPresenter extends PresenterWidget<SourcesPresenter.MyView> i
         getView().setUiHandlers(this);
     }
 
-    @Override
-    public void open() {
-        getView().initCheckboxes();
-        getView().updateTableData();
-    }
-
-    @Override
-    public void onRangeChange(final int start) {
+    private void reloadData() {
+        getView().setTableData(null);
         SourcesAction action = new SourcesAction();
         action.setFormData(formData);
-        action.setShowDestinations(getView().getShowDestinations());
-        action.setShowSources(getView().getShowSources());
-        action.setShowUncreated(getView().getShowUncreated());
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<SourcesResult>() {
             @Override
             public void onSuccess(SourcesResult result) {
-                getView().setTableData(start, result.getData(), result.getData().size());
+                getView().setTableData(result.getData());
             }
         }, this));
     }
 
     public void setFormData(FormData formData) {
         this.formData = formData;
+        reloadData();
     }
 }
 

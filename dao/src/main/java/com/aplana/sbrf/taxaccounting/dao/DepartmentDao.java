@@ -168,4 +168,10 @@ public interface DepartmentDao {
      * @return строка наименования
      */
     String getReportDepartmentName(int departmentId);
+
+    /**
+     * Все подразделения, которым назначены формы, которые являются источниками данных для форм,
+     * назначенных подразделениям departments
+     */
+    List<Department> getDepartmentsByDestinationSource(List<Integer> departments, Date periodStart, Date periodEnd);
 }

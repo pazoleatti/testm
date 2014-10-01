@@ -17,7 +17,7 @@ public class NotificationServiceImpl implements NotificationService {
     private NotificationDao notificationDao;
 
     @Override
-    public int save(Notification notification) {
+    public long save(Notification notification) {
         return notificationDao.save(notification);
     }
 
@@ -71,5 +71,19 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void updateUserNotificationsStatus(NotificationsFilterData filter) {
         notificationDao.updateUserNotificationsStatus(filter);
+    }
+
+    @Override
+    public void deleteAll(List<Long> notificationIds) {
+        notificationDao.deleteAll(notificationIds);
+    }
+
+    @Override
+    public List<Long> getAllowedNotifications(TAUser user, List<Long> notificationIds) {
+        if (user.hasRole(TARole.ROLE_CONTROL_NS)) {
+            return notificationDao.getAllowedNotifications(notificationIds, user.getId());
+        } else {
+            return notificationIds;
+        }
     }
 }

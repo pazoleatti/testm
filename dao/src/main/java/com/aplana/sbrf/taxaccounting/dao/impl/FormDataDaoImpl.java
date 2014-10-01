@@ -282,11 +282,12 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         return getNamedParameterJdbcTemplate().query("select fd.id, fd.form_template_id, fd.state, fd.kind, fd.form_template_id, " +
                 "fd.return_sign, fd.period_order, r.manual, fd.number_previous_row, fd.department_report_period_id, " +
                 "drp.report_period_id, drp.department_id, ft.type_id as type_id " +
-                "from form_data fd, department_report_period drp, form_template ft, form_type t " +
-                "left join (select max(manual) as manual, form_data_id from data_row group by form_data_id) r " +
-                "on r.form_data_id = fd.id " +
-                "where drp.id = fd.department_report_period_id and ft.id = fd.form_template_id and t.id = ft.type_id " +
-                (!departmentIds.isEmpty() ? "and " + SqlUtils.transformToSqlInStatement("drp.department_id", departmentIds) : "") +
+                "from form_data fd \n" +
+                "left join (select max(manual) as manual, form_data_id from data_row group by form_data_id) r on r.form_data_id = fd.id \n" +
+                "join department_report_period drp on drp.id = fd.department_report_period_id \n" +
+                "join form_template ft on ft.id = fd.form_template_id \n" +
+                "join form_type t on t.id = ft.type_id \n" +
+                "where " + (!departmentIds.isEmpty() ? SqlUtils.transformToSqlInStatement("drp.department_id", departmentIds) : "") +
                 "and drp.report_period_id = :rp order by drp.id", paramMap, new FormDataWithoutRowMapperWithType());
     }
 
@@ -505,6 +506,11 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 
     @Override
     public FormData getLast(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder) {
+        return getLastByDate(formTypeId, kind, departmentId, reportPeriodId, periodOrder, null);
+    }
+
+    @Override
+    public FormData getLastByDate(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder, Date correctionDate) {
         try {
             return getJdbcTemplate().queryForObject(
                     "select * from " +
@@ -519,10 +525,13 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
                             "and ft.type_id = ? " +
                             "and fd.kind = ? " +
                             "and (? is null or fd.period_order = ?) " +
+                            "and (? is null or drp.correction_date is null or drp.correction_date <= ?) " +
                             "order by drp.correction_date desc nulls last) " +
                             (isSupportOver() ? "where rownum = 1" : "limit 1"),
-                    new Object[]{departmentId, reportPeriodId, formTypeId, kind.getId(), periodOrder, periodOrder},
-                    new int[]{Types.NUMERIC, Types.NUMERIC, Types.NUMERIC, Types.NUMERIC, Types.NUMERIC, Types.NUMERIC},
+                    new Object[]{departmentId, reportPeriodId, formTypeId, kind.getId(), periodOrder, periodOrder,
+                            correctionDate, correctionDate},
+                    new int[]{Types.NUMERIC, Types.NUMERIC, Types.NUMERIC, Types.NUMERIC, Types.NUMERIC, Types.NUMERIC,
+                            Types.DATE, Types.DATE},
                     new FormDataRowMapper());
         } catch (EmptyResultDataAccessException e) {
             return null;

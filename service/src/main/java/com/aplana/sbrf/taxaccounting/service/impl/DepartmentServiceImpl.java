@@ -242,6 +242,28 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
+    public List<Department> getSourcesDepartments(TAUser tAUser, Date periodStart, Date periodEnd) {
+        List<Department> retList = new ArrayList<Department>();
+        if (tAUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+            // все подразделения из справочника подразделений
+            retList.addAll(departmentDao.listDepartments());
+        } else if (tAUser.hasRole(TARole.ROLE_CONTROL_NS) || tAUser.hasRole(TARole.ROLE_CONTROL)) {
+            // подразделения, которым назначены формы, которые являются источниками данных для форм, назначенных подразделениям из 10 - Выборка для бизнес-администрирования.
+            List<Integer> baDepartmentIds = getBADepartmentIds(tAUser);
+            if (baDepartmentIds.size() > 0) {
+                retList.addAll(departmentDao.getDepartmentsByDestinationSource(baDepartmentIds, periodStart, periodEnd));
+            }
+        }
+
+        // Результат выборки должен содержать только уникальные подразделения
+        Set setItems = new HashSet(retList);
+        retList.clear();
+        retList.addAll(setItems);
+
+        return retList;
+    }
+
+    @Override
     public List<Department> getDestinationDepartments(TAUser tAUser) {
         List<Department> retList = new ArrayList<Department>();
         if (tAUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
@@ -267,10 +289,27 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public List<Integer> getAppointmentDepartments(TAUser tAUser) {
-        // получить список id подразделений из выборки 10
-        List<Integer> departmentIds = getBADepartmentIds(tAUser);
-        // получить список id подразделений в формах которых 10-ые подразделения назначены исполнителями
-        return departmentDao.getDepartmentIdsByExecutors(departmentIds);
+        List<Integer> retList = new ArrayList<Integer>();
+        if (tAUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+            // все подразделения из справочника подразделений
+            for (Department dep : departmentDao.listDepartments()) {
+                retList.add(dep.getId());
+            }
+        } else if (tAUser.hasRole(TARole.ROLE_CONTROL_NS) || tAUser.hasRole(TARole.ROLE_CONTROL)) {
+            // 1. подразделения, для форм которых подразделения из выборки 10 - Выборка для бизнес-администрирования назначены исполнителями.
+            retList.addAll(departmentDao.getDepartmentIdsByExecutors(getBADepartmentIds(tAUser)));
+            // 2. подразделения, для форм которых подразделения из выборки 45 - Подразделения, доступные через назначение источников-приёмников назначены исполнителями.
+            for (Department dep : getSourcesDepartments(tAUser, null, null)) {
+                retList.add(dep.getId());
+            }
+        }
+
+        // Результат выборки должен содержать только уникальные подразделения
+        Set setItems = new HashSet(retList);
+        retList.clear();
+        retList.addAll(setItems);
+
+        return retList;
     }
 
     @Override

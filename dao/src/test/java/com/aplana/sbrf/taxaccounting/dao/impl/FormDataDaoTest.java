@@ -19,7 +19,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -433,6 +436,21 @@ public class FormDataDaoTest {
         formData = formDataDao.getLast(typeId, primary, departmentId, reportPeriodId, null);
         Assert.assertNotNull(formData);
         Assert.assertEquals(fd3, formData.getId().longValue());
+    }
+
+    @Test
+    public void getLastByDateTest() throws ParseException {
+        FormData formData = formDataDao.getLastByDate(1, FormDataKind.PRIMARY, 1, 20, null, null);
+        Assert.assertNotNull(formData);
+        Assert.assertEquals(303, formData.getId().intValue());
+
+        formData = formDataDao.getLastByDate(1, FormDataKind.PRIMARY, 1, 20, null, SIMPLE_DATE_FORMAT.parse("02.01.2014"));
+        Assert.assertNotNull(formData);
+        Assert.assertEquals(303, formData.getId().intValue());
+
+        formData = formDataDao.getLastByDate(1, FormDataKind.PRIMARY, 1, 20, null, SIMPLE_DATE_FORMAT.parse("01.01.2014"));
+        Assert.assertNotNull(formData);
+        Assert.assertEquals(302, formData.getId().intValue());
     }
 
     @Test

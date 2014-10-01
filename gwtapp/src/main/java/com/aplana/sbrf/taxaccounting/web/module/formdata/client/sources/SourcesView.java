@@ -3,11 +3,11 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.client.sources;
 import com.aplana.gwt.client.ModalWindow;
 import com.aplana.sbrf.taxaccounting.model.FormToFormRelation;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
-import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.ClickableTextCell;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -15,17 +15,12 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.AsyncDataProvider;
-import com.google.gwt.view.client.HasData;
-import com.google.gwt.view.client.Range;
+import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.PopupViewWithUiHandlers;
 
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -39,24 +34,16 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
     public interface Binder extends UiBinder<PopupPanel, SourcesView> {
     }
 
-    private AsyncDataProvider<FormToFormRelation> dataProvider = new AsyncDataProvider<FormToFormRelation>() {
-        @Override
-        protected void onRangeChanged(HasData<FormToFormRelation> display) {
-        if (getUiHandlers() != null) {
-            Range range = display.getVisibleRange();
-            getUiHandlers().onRangeChange(range.getStart());
-        }
-        }
-    };
+    private List<FormToFormRelation> tableData = null;
 
     private final PopupPanel widget;
+
+    private static final DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getFormat("dd.MM.yyyy");
 
     @UiField
     Button close;
     @UiField
     ModalWindow modalWindow;
-    @UiField
-    FlexiblePager pager;
     @UiField
     DataGrid<FormToFormRelation> table;
     @UiField
@@ -72,6 +59,7 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
         widget = uiBinder.createAndBindUi(this);
         widget.setAnimationEnabled(true);
         init();
+        initCheckboxes();
     }
 
     @Override
@@ -86,24 +74,20 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
 
     @UiHandler("source")
     public void onSourceClicked(ClickEvent event){
-        getUiHandlers().onRangeChange(0);
+        updateTableData();
     }
 
     @UiHandler("destination")
     public void onDestinationClicked(ClickEvent event){
-        getUiHandlers().onRangeChange(0);
+        updateTableData();
     }
 
     @UiHandler("uncreated")
     public void onUncreatedClicked(ClickEvent event){
-        getUiHandlers().onRangeChange(0);
+        updateTableData();
     }
 
     private void init(){
-        pager.setDisplay(table);
-        table.setPageSize(pager.getPageSize());
-        dataProvider.addDataDisplay(table);
-
         Column<FormToFormRelation, String> counterColumn = new Column<FormToFormRelation, String>(new ClickableTextCell()){
 
             @Override
@@ -130,6 +114,17 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
                 return object.getFullDepartmentName();
             }
         };
+
+        TextColumn<FormToFormRelation> correctionDateColumn = new TextColumn<FormToFormRelation>() {
+            @Override
+            public String getValue(FormToFormRelation object) {
+                if (object.getCorrectionDate() == null) {
+                    return null;
+                }
+                return DATE_TIME_FORMAT.format(object.getCorrectionDate());
+            }
+        };
+        correctionDateColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
         TextColumn<FormToFormRelation> performerColumn = new TextColumn<FormToFormRelation>() {
             @Override
@@ -180,50 +175,48 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
         table.addColumn(counterColumn, "№");
         table.setColumnWidth(counterColumn, 50, Style.Unit.PX);
         table.addColumn(sourceColumn, "Источник / Приёмник");
-        table.setColumnWidth(sourceColumn, 100, Style.Unit.PX);
+        table.setColumnWidth(sourceColumn, 80, Style.Unit.PX);
         table.addColumn(departmentColumn, "Подразделение");
-        table.setColumnWidth(departmentColumn, 100, Style.Unit.PX);
+        table.addColumn(correctionDateColumn, "Дата сдачи корректировки");
+        table.setColumnWidth(correctionDateColumn, 85, Style.Unit.PX);
         table.addColumn(formKindColumn, "Тип формы");
-        table.setColumnWidth(formKindColumn, 200, Style.Unit.PX);
+        table.setColumnWidth(formKindColumn, 150, Style.Unit.PX);
         table.addColumn(formTypeColumn, "Вид формы");
-        table.setColumnWidth(formTypeColumn, 250, Style.Unit.PX);
         table.addColumn(performerColumn, "Исполнитель");
-        table.setColumnWidth(performerColumn, 150, Style.Unit.PX);
         table.addColumn(stateColumn, "Состояние формы");
-        table.setColumnWidth(stateColumn, 100, Style.Unit.PCT);
+        table.setColumnWidth(stateColumn, 120, Style.Unit.PX);
         table.setRowCount(0);
     }
 
-    @Override
-    public void initCheckboxes() {
+    private void initCheckboxes() {
         source.setValue(true);
         destination.setValue(true);
         uncreated.setValue(false);
     }
 
     @Override
-    public void setTableData(int start, List<FormToFormRelation> result, int size) {
-        table.setRowData(start, result);
-        table.setRowCount(size, true);
+    public void setTableData(List<FormToFormRelation> result) {
+        tableData = result;
+        initCheckboxes();
+        updateTableData();
     }
 
-    @Override
-    public void updateTableData() {
-        getUiHandlers().onRangeChange(0);
-    }
+    private void updateTableData() {
+        List<FormToFormRelation> filteredData = new LinkedList<FormToFormRelation>();
+        if (tableData != null) {
+            boolean src = source.getValue();
+            boolean dst = destination.getValue();
+            boolean uncr = uncreated.getValue();
 
-    @Override
-    public boolean getShowDestinations() {
-        return destination.getValue();
-    }
-
-    @Override
-    public boolean getShowSources() {
-        return source.getValue();
-    }
-
-    @Override
-    public boolean getShowUncreated() {
-        return uncreated.getValue();
+            for (FormToFormRelation formToFormRelation : tableData) {
+                boolean fSrc = formToFormRelation.isSource();
+                boolean fCr = formToFormRelation.isCreated();
+                if ((src && fSrc || dst && !fSrc) && (uncr || fCr)) {
+                    filteredData.add(formToFormRelation);
+                }
+            }
+        }
+        table.setRowCount(filteredData.size());
+        table.setRowData(0, filteredData);
     }
 }

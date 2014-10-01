@@ -5,19 +5,18 @@ import com.aplana.sbrf.taxaccounting.model.FormToFormRelation;
 import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-
-import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormDataResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -37,7 +36,7 @@ public class DeleteFormDataHandler extends AbstractActionHandler<DeleteFormDataA
 	private SecurityService securityService;
 
     @Autowired
-    SourceService sourceService;
+    private SourceService sourceService;
 
     @Autowired
     private LogEntryService logEntryService;
@@ -57,12 +56,12 @@ public class DeleteFormDataHandler extends AbstractActionHandler<DeleteFormDataA
                     formData.getDepartmentId(),
                     formData.getFormType().getId(),
                     formData.getKind(),
-                    formData.getReportPeriodId(),
-                    formData.getPeriodOrder(),
-                    false, true, false);
+                    formData.getDepartmentReportPeriodId(),
+                    formData.getPeriodOrder());
             Logger logger = new Logger();
+            // TODO Левыкин: можно оптимизировать, если добавить специализированный метод в сервис
             for (FormToFormRelation item : formDataList) {
-                if (item.getState().equals(WorkflowState.ACCEPTED)) {
+                if (item.isSource() && item.isCreated() && item.getState().equals(WorkflowState.ACCEPTED)) {
                     logger.error("Найдена форма-источник «%s», «%s» которая имеет статус \"Принята\"!",
                             item.getFormType().getName(), item.getFullDepartmentName());
                 }
