@@ -19,6 +19,14 @@ public interface LockDataDao {
 	 */
 	LockData get(String key);
 
+    /**
+     * Возвращает информацию о блокировке
+     * @param key код блокировки
+     * @param dateBefore срок жизни блокировки
+     * @return возвращает null, если блокировка по данному коду не найдена
+     */
+    LockData get(String key, Date dateBefore);
+
 	/**
 	 * Создает новую блокировку
 	 * @param key код блокировки

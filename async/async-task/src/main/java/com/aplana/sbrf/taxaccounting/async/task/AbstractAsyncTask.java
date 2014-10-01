@@ -47,11 +47,12 @@ public abstract class AbstractAsyncTask implements AsyncTask {
     @Override
     public void execute(Map<String, Object> params) {
         String lock = (String) params.get(LOCKED_OBJECT.name());
+        Date lockDateEnd = (Date) params.get(LOCK_DATE_END.name());
         try {
-            if (lockService.isLockExists(lock)) {
+            if (lockService.isLockExists(lock, lockDateEnd)) {
                 //Если блокировка на объект задачи все еще существует, значит на нем можно выполнять бизнес-логику
                 executeBusinessLogic(params);
-                if (!lockService.isLockExists(lock)) {
+                if (!lockService.isLockExists(lock, lockDateEnd)) {
                     //Если после выполнения бизнес логики, оказывается, что блокировки уже нет
                     //Значит результаты нам уже не нужны - откатываем транзакцию и все изменения
                     throw new RuntimeException("Результат выполнения задачи \"" + getAsyncTaskName() + "\" больше не актуален. Выполняется откат транзакции");

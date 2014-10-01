@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.core.api;
 import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -108,6 +109,14 @@ public interface LockDataService {
     boolean isLockExists(String key);
 
     /**
+     * Проверяет, установлена ли блокировка на указанном объекте с определенной датой окончания действия блокировки
+     * @param key код блокировки
+     * @param lockDateEnd дата окончания действия блокировки
+     * @return блокировка установлена?
+     */
+    boolean isLockExists(String key, Date lockDateEnd);
+
+    /**
      * Добавляет пользователя в список ожидающих выполнения операций над объектом блокировки
      * @param key ключ блокировки
      * @param userId идентификатор пользователя
@@ -120,5 +129,4 @@ public interface LockDataService {
      * @return список идентификаторов пользователей
      */
     List<Integer> getUsersWaitingForLock(String key);
-
 }
