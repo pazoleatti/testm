@@ -1,23 +1,21 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URLEncoder;
-
-import javax.servlet.http.HttpServletResponse;
-
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.server.GetDeclarationDataHandler;
+import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.server.PDFImageUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
-import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import com.aplana.sbrf.taxaccounting.web.module.declarationdata.server.GetDeclarationDataHandler;
-import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.server.PDFImageUtils;
+import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URLEncoder;
 
 @Controller
 @RequestMapping(value = "declarationData")
@@ -36,9 +34,13 @@ public class DeclarationDataController {
 	public void xlsx(@PathVariable long id, HttpServletResponse response)
 			throws IOException {
 		TAUserInfo userInfo = securityService.currentUserInfo();
-
-		byte[] xlsxData = declarationService.getXlsxData(id, userInfo);
-		String fileName = URLEncoder.encode(getFileName(id, userInfo, "xlsx"), ENCODING);
+        System.out.println("com.aplana.sbrf.taxaccounting.web.mvc.DeclarationDataController.xlsx");
+        long start = System.currentTimeMillis();
+        System.out.println("XLSX begin "+ start +" for "+id);
+        byte[] xlsxData = declarationService.getXlsxData(id, userInfo);
+        long end = System.currentTimeMillis();
+        System.out.println("XLSX end " + end + " (" + (end - start) + ") for " + id);
+        String fileName = URLEncoder.encode(getFileName(id, userInfo, "xlsx"), ENCODING);
 
 		response.setContentType("application/octet-stream");
 		response.setHeader("Content-Disposition", "attachment; filename=\""
@@ -47,7 +49,7 @@ public class DeclarationDataController {
 
 	}
 
-	
+
 	@RequestMapping(value = "/pageImage/{id}/{pageId}/*", method = RequestMethod.GET)
 	public void pageImage(@PathVariable int id, @PathVariable int pageId,
 			HttpServletResponse response) throws IOException {
