@@ -63,7 +63,6 @@ public class DeclarationServiceTest {
         sourcesInfo.add(new DepartmentFormType());
         sourcesInfo.add(new DepartmentFormType());
 
-        when(declarationDataDao.find(2, 1, 101)).thenReturn(new DeclarationData());
         when(declarationTypeDao.get(2)).thenReturn(declarationType);
         when(declarationTemplateDao.get(1)).thenReturn(declarationTemplate);
         when(departmentFormTypeDao.getDeclarationSources(eq(1), eq(1), any(Date.class), any(Date.class))).thenReturn(sourcesInfo);
@@ -76,11 +75,6 @@ public class DeclarationServiceTest {
         PeriodService periodService = mock(PeriodService.class);
         when(periodService.getReportPeriod(any(Integer.class))).thenReturn(mock(ReportPeriod.class));
         ReflectionTestUtils.setField(service, "periodService", periodService);
-    }
-
-    @Test
-    public void find() {
-        assertTrue(service.find(2, 1, 101) != null);
     }
 
     @Test

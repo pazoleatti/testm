@@ -113,12 +113,6 @@ public interface DeclarationDataService {
 	 * @throws AccessDeniedException - если у пользователя нет прав на просмотр данной декларации
 	 */
 	Date getXmlDataDocDate(long declarationDataId, TAUserInfo userInfo);
-	
-	/**
-	 * @deprecated Неактуально с появлением корректирующих периодов
-	 */
-    @Deprecated
-	DeclarationData find(int declarationTypeId, int departmentId, int reportPeriodId);
 
     /**
      * Поиск декларации

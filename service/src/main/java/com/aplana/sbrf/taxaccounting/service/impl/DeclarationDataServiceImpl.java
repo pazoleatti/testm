@@ -515,11 +515,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public DeclarationData find(int declarationTypeId, int departmentId, int reportPeriodId) {
-        return declarationDataDao.find(declarationTypeId, departmentId, reportPeriodId);
-    }
-
-    @Override
     public DeclarationData find(int declarationTypeId, int departmentReportPeriod) {
         return null;
     }

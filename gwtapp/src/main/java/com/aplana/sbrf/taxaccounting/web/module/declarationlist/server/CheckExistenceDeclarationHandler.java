@@ -2,21 +2,18 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationlist.server;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationTypeService;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.CheckExistenceDeclaration;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.CheckExistenceDeclarationResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -32,19 +29,24 @@ public class CheckExistenceDeclarationHandler extends AbstractActionHandler<Chec
 	}
 
 	@Autowired
-	DeclarationDataService declarationService;
+    private DeclarationDataService declarationService;
 
     @Autowired
-    DeclarationTypeService declarationTypeService;
+    private DeclarationTypeService declarationTypeService;
 
     @Autowired
     private RefBookFactory rbFactory;
 
     @Autowired
-    DepartmentService departmentService;
+    private DepartmentService departmentService;
 
     @Autowired
     private LogEntryService logEntryService;
+
+    @Autowired
+    private DepartmentReportPeriodService departmentReportPeriodService;
+
+    private static final String ERROR_DEPARTMENT_REPORT_PERIOD_NOT_FOUND = "Не определен отчетный период подразделения!";
 
 	@Override
 	public CheckExistenceDeclarationResult execute(CheckExistenceDeclaration command, ExecutionContext executionContext) throws ActionException {
@@ -57,7 +59,14 @@ public class CheckExistenceDeclarationHandler extends AbstractActionHandler<Chec
                 throw new ActionException("Не удалось определить шаблон для уведомления.");
             }
         }
-        DeclarationData declarationData = declarationService.find(declarationTypeId, command.getDepartmentId(), command.getReportPeriodId());
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.getLast(command.getDepartmentId(),
+                command.getReportPeriodId());
+
+        if (departmentReportPeriod == null) {
+            throw new ActionException(ERROR_DEPARTMENT_REPORT_PERIOD_NOT_FOUND);
+        }
+
+        DeclarationData declarationData = declarationService.find(declarationTypeId, departmentReportPeriod.getId());
 		CheckExistenceDeclarationResult result = new CheckExistenceDeclarationResult();
         Logger logger = new Logger();
 		if ((declarationData != null)) {
