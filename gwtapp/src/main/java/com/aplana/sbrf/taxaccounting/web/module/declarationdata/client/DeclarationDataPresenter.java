@@ -86,6 +86,8 @@ public class DeclarationDataPresenter
         void setKpp(String kpp);
 
         void setPropertyBlockVisible(boolean isVisible);
+
+        void setPdfPage(int page);
     }
 
 	private final DispatchAsync dispatcher;
@@ -160,6 +162,7 @@ public class DeclarationDataPresenter
 								getView().setTitle(result.getDeclarationType(), result.getTaxType().equals(TaxType.DEAL));
 								updateTitle(result.getDeclarationType());
 
+                                getView().setPdfPage(0);
 								getView().showAccept(result.isCanAccept());
 								getView().showReject(result.isCanReject());
 								getView().showDelete(result.isCanDelete());
