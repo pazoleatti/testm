@@ -1,4 +1,4 @@
-package form_template.income.declaration_op.v2012
+package form_template.income.declaration_op_1.v2014
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
@@ -9,14 +9,14 @@ import groovy.xml.MarkupBuilder
  * Декларация по налогу на прибыль (ОП)
  * Формирование XML для декларации налога на прибыль уровня обособленного подразделения.
  *
- * declarationTemplateId=2021
+ * declarationTemplateId=21048
  *
  * @author rtimerbaev
  */
 
 // Признак новой декларации (http://jira.aplana.com/browse/SBRFACCTAX-8910)
 @Field
-def boolean newDeclaration = false;
+def boolean newDeclaration = true;
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE : // создать / обновить
@@ -81,9 +81,7 @@ void checkDeparmentParams(LogLevel logLevel) {
     }
     errorList = getErrorVersion(departmentParam)
     for (String error : errorList) {
-        def name = departmentParam.NAME.stringValue
-        name = name == null ? "!" : " для $name!"
-        logger.log(logLevel, String.format("Неверно указано значение атрибута %s на форме настроек подразделений%s", error, name))
+        logger.log(logLevel, String.format("Неверно указано значение атрибута %s на форме настроек подразделений для %s", error, departmentParam.NAME.stringValue))
     }
 }
 
@@ -97,7 +95,7 @@ def checkDeclarationBank() {
 
     /** Идентификатор подразделения Банка. */
     def departmentBankId = 1
-    def bankDeclarationData = declarationService.getLast(declarationTypeId, departmentBankId, reportPeriod.id)
+    def bankDeclarationData = declarationService.find(declarationTypeId, departmentBankId, reportPeriod.id)
     if (bankDeclarationData == null || !bankDeclarationData.accepted) {
         logger.error('Декларация Банка по прибыли за указанный период не сформирована или не находится в статусе "Принята".')
         return
@@ -108,8 +106,8 @@ def checkDeclarationBank() {
 
     if (bankDeclarationData.id != null) {
         def xmlString = declarationService.getXmlData(bankDeclarationData.id)
-        xmlString = xmlString?.replace('<?xml version="1.0" encoding="windows-1251"?>', '')
-        if (!xmlString) {
+        xmlString = xmlString.replace('<?xml version="1.0" encoding="windows-1251"?>', '')
+        if (xmlString == null) {
             logger.error('Данные декларации Банка не заполнены.')
             return
         }
@@ -138,8 +136,6 @@ void generateXML(def xmlBankData) {
     if (incomeParams == null) {
         throw new Exception('Ошибка при получении настроек обособленного подразделения')
     }
-    if (!xmlBankData)
-        return
     def reorgFormCode = getRefBookValue(5, incomeParams?.REORG_FORM_CODE?.value)?.CODE?.value
     def taxOrganCode = incomeParams?.TAX_ORGAN_CODE?.value
     def okvedCode = getRefBookValue(34, incomeParams?.OKVED_CODE?.value)?.CODE?.value
@@ -151,6 +147,7 @@ void generateXML(def xmlBankData) {
     def reorgKpp = incomeParams?.REORG_KPP?.value
     def oktmo = getOkato(incomeParams?.OKTMO?.value)
     def signatoryId = getRefBookValue(35, incomeParams?.SIGNATORY_ID?.value)?.CODE?.value
+    def appVersion = incomeParams?.APP_VERSION?.value
     def formatVersion = incomeParams?.FORMAT_VERSION?.value
     def taxPlaceTypeCode = getRefBookValue(2, incomeParams?.TAX_PLACE_TYPE_CODE?.value)?.CODE?.value
     def signatorySurname = incomeParams?.SIGNATORY_SURNAME?.value
@@ -237,7 +234,7 @@ void generateXML(def xmlBankData) {
     def xmlbuilder = new MarkupBuilder(xml)
     xmlbuilder.Файл(
             ИдФайл : declarationService.generateXmlFileId(5, declarationData.departmentId, declarationData.reportPeriodId),
-            ВерсПрог : applicationVersion,
+            ВерсПрог : appVersion,
             ВерсФорм : formatVersion) {
 
         // Титульный лист
@@ -247,7 +244,7 @@ void generateXML(def xmlBankData) {
                 Период : period,
                 ОтчетГод : (taxPeriod != null ? taxPeriod.year : empty),
                 КодНО : taxOrganCode,
-                НомКорр : reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId),
+                НомКорр : reportPeriodService.getCorrectionPeriodNumber(declarationData.reportPeriodId, declarationData.departmentId),
                 ПоМесту : taxPlaceTypeCode) {
 
             СвНП(
@@ -441,6 +438,9 @@ List<String> getErrorVersion(record) {
     List<String> errorList = new ArrayList<String>()
     if (record.FORMAT_VERSION == null || record.FORMAT_VERSION.stringValue == null || !record.FORMAT_VERSION.stringValue.equals('5.05')) {
         errorList.add("«Версия формата»")
+    }
+    if (record.APP_VERSION == null || record.APP_VERSION.stringValue == null || !record.APP_VERSION.stringValue.equals('XLR_FNP_TAXCOM_5_05')) {
+        errorList.add("«Версия программы, с помощью которой сформирован файл»")
     }
     errorList
 }
