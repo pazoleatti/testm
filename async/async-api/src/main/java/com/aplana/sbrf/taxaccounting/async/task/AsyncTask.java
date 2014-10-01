@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
+import java.util.Date;
 import java.util.Map;
 
 /**
@@ -15,6 +16,8 @@ public interface AsyncTask {
     enum RequiredParams {
         /** Название параметра для передачи идентификатора объекта, заблокированного для выполнения над ним бизнес-логики */
         LOCKED_OBJECT(String.class),
+        /** Дата окончания действия блокировки объекта */
+        LOCK_DATE_END(Date.class),
         /** Идентификатор текущего пользователя */
         USER_ID(Integer.class);
 
