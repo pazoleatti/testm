@@ -21,18 +21,13 @@ def boolean newDeclaration = true;
 switch (formDataEvent) {
     case FormDataEvent.CREATE : // создать / обновить
         checkDeparmentParams(LogLevel.WARNING)
-        checkDeclarationBank()
+        generateXML()
         break
     case FormDataEvent.CHECK : // проверить
         checkDeparmentParams(LogLevel.ERROR)
         break
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED : // принять из создана
         checkDeparmentParams(LogLevel.ERROR)
-        break
-    case FormDataEvent.CALCULATE:
-        checkDeparmentParams(LogLevel.WARNING)
-        def xmlBankData = checkDeclarationBank()
-        generateXML(xmlBankData)
         break
     default:
         return
@@ -90,8 +85,8 @@ def checkDeclarationBank() {
     /** Отчётный период. */
     def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
 
-    /** вид декларации 2 - декларация по налогу на прибыль уровня банка, 10080 - новая декларация банка */
-    def declarationTypeId = ((newDeclaration) ? 10080 : 2)
+    /** вид декларации 2 - декларация по налогу на прибыль уровня банка, 7 - новая декларация банка */
+    def declarationTypeId = ((newDeclaration) ? 7 : 2)
 
     /** Идентификатор подразделения Банка. */
     def departmentBankId = 1
@@ -120,7 +115,7 @@ def checkDeclarationBank() {
 }
 
 /** Запуск генерации XML. */
-void generateXML(def xmlBankData) {
+void generateXML() {
     /*
      * Константы.
      */
@@ -145,7 +140,7 @@ void generateXML(def xmlBankData) {
     def kpp = incomeParams?.KPP?.value
     def reorgInn = incomeParams?.REORG_INN?.value
     def reorgKpp = incomeParams?.REORG_KPP?.value
-    def oktmo = getOkato(incomeParams?.OKTMO?.value)
+    def oktmo = getRefBookValue(96, incomeParams?.OKTMO?.value)?.CODE?.value
     def signatoryId = getRefBookValue(35, incomeParams?.SIGNATORY_ID?.value)?.CODE?.value
     def appVersion = incomeParams?.APP_VERSION?.value
     def formatVersion = incomeParams?.FORMAT_VERSION?.value
