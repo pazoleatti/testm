@@ -283,15 +283,15 @@ void generateXML() {
     def dataRowsAdvance = getDataRows(formDataCollection, departmentId, 500, FormDataKind.SUMMARY)
 
     /** Сведения для расчёта налога с доходов в виде дивидендов. */
-    def dataRowsDividend = getDataRows(formDataCollection, departmentId, newDeclaration ? 10102 : 306, FormDataKind.ADDITIONAL)
+    def dataRowsDividend = getDataRows(formDataCollection, departmentId, newDeclaration ? 411 : 306, FormDataKind.ADDITIONAL)
 
     /** Расчет налога на прибыль с доходов, удерживаемого налоговым агентом. */
     /** либо */
     /** Сведения о дивидендах, выплаченных в отчетном квартале. */
-    def dataRowsTaxAgent = getDataRows(formDataCollection, departmentId,  newDeclaration ? 10105 : 307, FormDataKind.ADDITIONAL)
+    def dataRowsTaxAgent = getDataRows(formDataCollection, departmentId,  newDeclaration ? 413 : 307, FormDataKind.ADDITIONAL)
 
     /** Сумма налога, подлежащая уплате в бюджет, по данным налогоплательщика. */
-    def dataRowsTaxSum = getDataRows(formDataCollection, departmentId,  newDeclaration ? 10103 : 308, FormDataKind.ADDITIONAL)
+    def dataRowsTaxSum = getDataRows(formDataCollection, departmentId,  newDeclaration ? 412 : 308, FormDataKind.ADDITIONAL)
 
     /*
      * Получение значении декларации за предыдущий период.
