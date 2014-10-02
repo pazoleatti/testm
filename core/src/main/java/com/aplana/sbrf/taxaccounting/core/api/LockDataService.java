@@ -117,6 +117,13 @@ public interface LockDataService {
     boolean isLockExists(String key, Date lockDateEnd);
 
     /**
+     * Возвращает блокировку на указанного объекта
+     * @param key код блокировки
+     * @return блокировка
+     */
+    LockData getLock(final String key);
+
+    /**
      * Добавляет пользователя в список ожидающих выполнения операций над объектом блокировки
      * @param key ключ блокировки
      * @param userId идентификатор пользователя

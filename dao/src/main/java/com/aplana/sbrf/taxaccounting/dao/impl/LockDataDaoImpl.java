@@ -47,7 +47,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
             return getJdbcTemplate().queryForObject(
                     "SELECT key, user_id, date_before FROM lock_data WHERE key = ? and date_before = ?",
                     new Object[] {key, dateBefore},
-                    new int[] {Types.VARCHAR, Types.DATE},
+                    new int[] {Types.VARCHAR, Types.TIMESTAMP},
                     new LockDataMapper()
             );
         } catch (EmptyResultDataAccessException e) {

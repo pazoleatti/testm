@@ -24,6 +24,7 @@ import java.io.*;
 import java.util.*;
 
 import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.LOCKED_OBJECT;
+import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.LOCK_DATE_END;
 import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.USER_ID;
 
 /**
@@ -70,38 +71,48 @@ public class TestXmlGeneratorAsyncTaskSpring implements AsyncTask {
     @Override
     public void execute(Map<String, Object> params) {
         String lock = (String) params.get(LOCKED_OBJECT.name());
+        Date lockDateEnd = (Date) params.get(LOCK_DATE_END.name());
         try {
-            if (lockService.isLockExists(lock)) {
+            if (lockService.isLockExists(lock, lockDateEnd)) {
                 //Если блокировка на объект задачи все еще существует, значит на нем можно выполнять бизнес-логику
-                executeBusinessLogic(params);
-                if (!lockService.isLockExists(lock)) {
+                try {
+                    executeBusinessLogic(params);
+                } catch (Exception e) {
+                    if (lockService.isLockExists(lock, lockDateEnd)) {
+                        lockService.unlock(lock, (Integer) params.get(USER_ID.name()), true);
+                    }
+                    throw e; // TODO с каким сообщением???
+                }
+                if (!lockService.isLockExists(lock, lockDateEnd)) {
                     //Если после выполнения бизнес логики, оказывается, что блокировки уже нет
                     //Значит результаты нам уже не нужны - откатываем транзакцию и все изменения
                     throw new RuntimeException("Результат выполнения задачи \"" + getAsyncTaskName() + "\" больше не актуален. Выполняется откат транзакции");
                 }
+
                 //Получаем список пользователей, для которых надо сформировать оповещение
-                String msg = getNotificationMsg(params);
-                if (msg != null && !msg.isEmpty()) {
-                    List<Integer> waitingUsers = lockService.getUsersWaitingForLock(lock);
-                    if (!waitingUsers.isEmpty()) {
-                        List<Notification> notifications = new ArrayList<Notification>();
-                        for (Integer userId : waitingUsers) {
-                            Notification notification = new Notification();
-                            notification.setUserId(userId);
-                            notification.setCreateDate(new Date());
-                            notification.setText(msg);
-                            notifications.add(notification);
+                try {
+                    String msg = getNotificationMsg(params);
+                    if (msg != null && !msg.isEmpty()) {
+                        List<Integer> waitingUsers = lockService.getUsersWaitingForLock(lock);
+                        if (!waitingUsers.isEmpty()) {
+                            List<Notification> notifications = new ArrayList<Notification>();
+                            for (Integer userId : waitingUsers) {
+                                Notification notification = new Notification();
+                                notification.setUserId(userId);
+                                notification.setCreateDate(new Date());
+                                notification.setText(msg);
+                                notifications.add(notification);
+                            }
+                            //Создаем оповещение для каждого пользователя из списка
+                            notificationService.saveList(notifications);
                         }
-                        //Создаем оповещение для каждого пользователя из списка
-                        notificationService.saveList(notifications);
                     }
+                } finally {
+                    lockService.unlock(lock, (Integer) params.get(USER_ID.name()), true);
                 }
             }
         } catch (Exception e) {
             log.error("Не удалось выполнить асинхронную задачу", e);
-        } finally {
-            //Снимаем блокировку
-            lockService.unlock(lock, (Integer) params.get(USER_ID.name()));
         }
     }
 

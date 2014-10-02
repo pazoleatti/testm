@@ -200,10 +200,12 @@ public class DeclarationDataPresenter
                             getView().updatePrintReportButtonName(reportType, true);
                         } else if (result.getExistReport().equals(TimerReportResult.StatusReport.NOT_EXIST)) { // если файл не файл существует и блокировки нет(т.е. задачу отменили или ошибка при формировании)
                             getView().stopTimerReport(reportType);
+                            if (ReportType.XML_DEC.equals(reportType)) getView().setPdf(new Pdf());
                             if (!isTimer) {
                                 getView().updatePrintReportButtonName(reportType, false);
                             }
                         } else if (!isTimer) {
+                            if (ReportType.XML_DEC.equals(reportType)) getView().setPdf(new Pdf());
                             getView().updatePrintReportButtonName(reportType, false);
                             getView().startTimerReport(reportType);
                         }

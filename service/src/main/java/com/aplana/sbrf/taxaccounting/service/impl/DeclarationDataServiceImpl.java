@@ -186,7 +186,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
         //setDeclarationBlobs(logger, declarationData, docDate, userInfo);
 
-		if (!oldBlobDataIds.isEmpty()) blobDataService.delete(oldBlobDataIds);
+		//if (!oldBlobDataIds.isEmpty()) blobDataService.delete(oldBlobDataIds);
 
         long check2 = System.currentTimeMillis();
         logger.info("Удалены старые BLOB'ы: " + check2 + " (" + (check2 - check1) + ")");
@@ -537,9 +537,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     @Transactional
-    public void lock(long declarationDataId, TAUserInfo userInfo) {
-        checkLock(lockDataService.lock(LockData.LOCK_OBJECTS.DECLARATION_DATA.name() + "_" + declarationDataId, userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME),
-                userInfo.getUser());
+    public LockData lock(long declarationDataId, TAUserInfo userInfo) {
+        LockData lockData = lockDataService.lock(LockData.LOCK_OBJECTS.DECLARATION_DATA.name() + "_" + declarationDataId, userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME);
+        checkLock(lockData, userInfo.getUser());
+        return lockData;
     }
 
     @Override
@@ -574,10 +575,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
      * @param declarationDataId
      */
     @Override
-    public void deleteReport(long declarationDataId) {
-        ReportType[] reportTypes = {ReportType.CSV, ReportType.EXCEL};
-        for(ReportType reportType: reportTypes) {
-            lockDataService.unlock(String.format("%s_%s_%s", LockData.LOCK_OBJECTS.DECLARATION_DATA.name(), declarationDataId, reportType.getName()), 0, true);
+    public void deleteReport(long declarationDataId, boolean isLock) {
+        if (isLock) {
+            ReportType[] reportTypes = {ReportType.XML_DEC, ReportType.EXCEL_DEC};
+            for (ReportType reportType : reportTypes) {
+                lockDataService.unlock(String.format("%s_%s_%s", LockData.LOCK_OBJECTS.DECLARATION_DATA.name(), declarationDataId, reportType.getName()), 0, true);
+            }
         }
         reportService.deleteDec(declarationDataId);
     }
