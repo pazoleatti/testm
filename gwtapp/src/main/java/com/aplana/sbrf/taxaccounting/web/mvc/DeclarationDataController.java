@@ -21,20 +21,20 @@ import java.net.URLEncoder;
 @RequestMapping(value = "declarationData")
 public class DeclarationDataController {
 
-	@Autowired
-	private DeclarationDataService declarationService;
+    @Autowired
+    private DeclarationDataService declarationService;
 
-	@Autowired
-	private SecurityService securityService;
+    @Autowired
+    private SecurityService securityService;
 
     private static final String ENCODING = "UTF-8";
 
-	
-	@RequestMapping(value = "/xlsx/{id}", method = RequestMethod.GET)
-	public void xlsx(@PathVariable long id, HttpServletResponse response)
-			throws IOException {
-		TAUserInfo userInfo = securityService.currentUserInfo();
-        System.out.println("com.aplana.sbrf.taxaccounting.web.mvc.DeclarationDataController.xlsx");
+
+    @RequestMapping(value = "/xlsx/{id}", method = RequestMethod.GET)
+    public void xlsx(@PathVariable long id, HttpServletResponse response)
+            throws IOException {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+
         long start = System.currentTimeMillis();
         System.out.println("XLSX begin "+ start +" for "+id);
         byte[] xlsxData = declarationService.getXlsxData(id, userInfo);
@@ -42,42 +42,42 @@ public class DeclarationDataController {
         System.out.println("XLSX end " + end + " (" + (end - start) + ") for " + id);
         String fileName = URLEncoder.encode(getFileName(id, userInfo, "xlsx"), ENCODING);
 
-		response.setContentType("application/octet-stream");
-		response.setHeader("Content-Disposition", "attachment; filename=\""
-				+ fileName + "\"");
-		response.getOutputStream().write(xlsxData);
+        response.setContentType("application/octet-stream");
+        response.setHeader("Content-Disposition", "attachment; filename=\""
+                + fileName + "\"");
+        response.getOutputStream().write(xlsxData);
 
-	}
+    }
 
 
-	@RequestMapping(value = "/pageImage/{id}/{pageId}/*", method = RequestMethod.GET)
-	public void pageImage(@PathVariable int id, @PathVariable int pageId,
-			HttpServletResponse response) throws IOException {
+    @RequestMapping(value = "/pageImage/{id}/{pageId}/*", method = RequestMethod.GET)
+    public void pageImage(@PathVariable int id, @PathVariable int pageId,
+                          HttpServletResponse response) throws IOException {
 
-		InputStream pdfData = new ByteArrayInputStream(
-				declarationService.getPdfData(id, securityService.currentUserInfo()));
-		PDFImageUtils.pDFPageToImage(pdfData, response.getOutputStream(),
-				pageId, "png", GetDeclarationDataHandler.DEFAULT_IMAGE_RESOLUTION);
-		response.setContentType("image/png");
-		pdfData.close();
-	}
+        InputStream pdfData = new ByteArrayInputStream(
+                declarationService.getPdfData(id, securityService.currentUserInfo()));
+        PDFImageUtils.pDFPageToImage(pdfData, response.getOutputStream(),
+                pageId, "png", GetDeclarationDataHandler.DEFAULT_IMAGE_RESOLUTION);
+        response.setContentType("image/png");
+        pdfData.close();
+    }
 
-	
-	@RequestMapping(value = "/xml/{id}", method = RequestMethod.GET)
-	public void xml(@PathVariable int id, HttpServletResponse response)
-			throws IOException {
 
-		String xmlData = declarationService.getXmlData(id, securityService.currentUserInfo());
-		String fileName = URLEncoder.encode(getFileName(id, securityService.currentUserInfo(), "xml"), ENCODING);
+    @RequestMapping(value = "/xml/{id}", method = RequestMethod.GET)
+    public void xml(@PathVariable int id, HttpServletResponse response)
+            throws IOException {
 
-		response.setContentType("application/octet-stream");
-		response.setHeader("Content-Disposition", "attachment; filename=\""
-				+ fileName + "\"");
-		response.getOutputStream().write(xmlData.getBytes("windows-1251"));
-	}
+        String xmlData = declarationService.getXmlData(id, securityService.currentUserInfo());
+        String fileName = URLEncoder.encode(getFileName(id, securityService.currentUserInfo(), "xml"), ENCODING);
 
-	private String getFileName(long id, TAUserInfo userInfo, String fileExtension) {
-		return declarationService.getXmlDataFileName(id, userInfo) + '.'
-				+ fileExtension;
-	}
+        response.setContentType("application/octet-stream");
+        response.setHeader("Content-Disposition", "attachment; filename=\""
+                + fileName + "\"");
+        response.getOutputStream().write(xmlData.getBytes("windows-1251"));
+    }
+
+    private String getFileName(long id, TAUserInfo userInfo, String fileExtension) {
+        return declarationService.getXmlDataFileName(id, userInfo) + '.'
+                + fileExtension;
+    }
 }

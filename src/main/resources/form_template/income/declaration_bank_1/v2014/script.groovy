@@ -1,4 +1,4 @@
-package form_template.income.declaration_bank.v2012
+package form_template.income.declaration_bank_1.v2014
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
@@ -10,14 +10,14 @@ import groovy.xml.MarkupBuilder
  * Декларация по налогу на прибыль (Банк)
  * Формирование XML для декларации налога на прибыль.
  *
- * declarationTemplateId=2020
+ * declarationTemplateId=21047
  *
  * @author rtimerbaev
  */
 
 // Признак новой декларации (http://jira.aplana.com/browse/SBRFACCTAX-8910)
 @Field
-def boolean newDeclaration = false;
+def boolean newDeclaration = true;
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE : // создать / обновить
@@ -592,7 +592,7 @@ void generateXML() {
     def builder = new MarkupBuilder(xml)
     builder.Файл(
             ИдФайл : declarationService.generateXmlFileId(2, departmentId, reportPeriodId),
-            ВерсПрог : applicationVersion,
+            ВерсПрог : appVersion,
             ВерсФорм : formatVersion) {
 
         // Титульный лист
@@ -602,7 +602,7 @@ void generateXML() {
                 Период : period,
                 ОтчетГод : (taxPeriod != null ? taxPeriod.year : empty),
                 КодНО : taxOrganCode,
-                НомКорр : reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId),
+                НомКорр : reportPeriodService.getCorrectionPeriodNumber(reportPeriodId, departmentId),
                 ПоМесту : taxPlaceTypeCode) {
 
             СвНП(
@@ -1783,7 +1783,7 @@ def getXmlData(def reportPeriodId, def departmentId) {
     if (reportPeriodId != null) {
         // вид декларации 2 - декларация по налогу на прибыль уровня банка
         def declarationTypeId = 2
-        def declarationData = declarationService.getLast(declarationTypeId, departmentId, reportPeriodId)
+        def declarationData = declarationService.find(declarationTypeId, departmentId, reportPeriodId)
         if (declarationData != null && declarationData.id != null) {
             def xmlString = declarationService.getXmlData(declarationData.id)
             if(xmlString == null){
@@ -1865,6 +1865,9 @@ List<String> getErrorVersion(record) {
     List<String> errorList = new ArrayList<String>()
     if (record.FORMAT_VERSION == null || record.FORMAT_VERSION.value == null || !record.FORMAT_VERSION.value.equals('5.05')) {
         errorList.add("«Версия формата»")
+    }
+    if (record.APP_VERSION == null || record.APP_VERSION.value == null || !record.APP_VERSION.value.equals('XLR_FNP_TAXCOM_5_05')) {
+        errorList.add("«Версия программы, с помощью которой сформирован файл»")
     }
     errorList
 }

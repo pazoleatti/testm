@@ -465,13 +465,13 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         getJdbcTemplate().update("UPDATE form_data SET number_previous_row =? WHERE id=?", previousRowNumber, formDataId);
     }
 
-    private static final String GET_MANUAL_UNPUTS_FORMS = "select fd.*, drp.report_period_id, drp.department_id, ft.type_id from form_data fd " +
-            "join department_form_type dft on dft.kind = fd.kind " +
-            "join form_template ft on ft.id = fd.form_template_id and ft.type_id = dft.form_type_id " +
-            "join form_type t on t.id = ft.type_id " +
-            "join declaration_source ds on ds.src_department_form_type_id = dft.id " +
-            "join department_report_period drp on ds.src_department_form_type_id = dft.id " +
-            "where %s and drp.report_period_id = :reportPeriodId and t.tax_type = :taxType and dft.kind = :kind and exists (select 1 from data_row where form_data_id = fd.id and manual = 1) " +
+    private static final String GET_MANUAL_UNPUTS_FORMS = "select fd.*, drp.report_period_id, drp.department_id, ft.type_id, 1 as manual from form_data fd \n" +
+            "join department_form_type dft on dft.kind = fd.kind \n" +
+            "join form_template ft on ft.id = fd.form_template_id and ft.type_id = dft.form_type_id \n" +
+            "join form_type t on t.id = ft.type_id \n" +
+            "join declaration_source ds on ds.src_department_form_type_id = dft.id \n" +
+            "join department_report_period drp on ds.src_department_form_type_id = dft.id \n" +
+            "where %s and drp.report_period_id = :reportPeriodId and t.tax_type = :taxType and dft.kind = :kind and exists (select 1 from data_row where form_data_id = fd.id and manual = 1) \n" +
             "and (:periodStart is null or ((ds.period_end >= :periodStart or ds.period_end is null) and (:periodEnd is null or ds.period_start <= :periodEnd)))";
 
     @Override
@@ -482,10 +482,8 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         params.put("kind", kind.getId());
         params.put("periodStart", periodStart);
         params.put("periodEnd", periodEnd);
-        return getNamedParameterJdbcTemplate().query(
-                String.format(GET_MANUAL_UNPUTS_FORMS, SqlUtils.transformToSqlInStatement("drp.department_id", departments)),
-                params,
-                new FormDataWithoutRowMapperWithType());
+        String sql = String.format(GET_MANUAL_UNPUTS_FORMS, SqlUtils.transformToSqlInStatement("drp.department_id", departments));
+        return getNamedParameterJdbcTemplate().query(sql, params, new FormDataWithoutRowMapperWithType());
     }
 
     @Override
