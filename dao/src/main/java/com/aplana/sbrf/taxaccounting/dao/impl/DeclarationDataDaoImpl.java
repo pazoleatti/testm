@@ -47,10 +47,10 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             d.setReportPeriodId(SqlUtils.getInteger(rs, "report_period_id"));
             d.setDepartmentReportPeriodId(SqlUtils.getInteger(rs, "department_report_period_id"));
             d.setAccepted(rs.getBoolean("is_accepted"));
-            d.setPdfDataUuid(rs.getString("data_pdf"));
+           /* d.setPdfDataUuid(rs.getString("data_pdf"));
             d.setXlsxDataUuid(rs.getString("data_xlsx"));
             d.setXmlDataUuid(rs.getString("data"));
-            d.setJasperPrintUuid(rs.getString("jasper_print"));
+            d.setJasperPrintUuid(rs.getString("jasper_print"));*/
             return d;
         }
     }

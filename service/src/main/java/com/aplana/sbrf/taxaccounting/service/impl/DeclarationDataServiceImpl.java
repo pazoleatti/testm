@@ -107,6 +107,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Autowired
     private ReportService reportService;
 
+    @Autowired
+    private TAUserService userService;
+
 	public static final String TAG_FILE = "Файл";
 	public static final String TAG_DOCUMENT = "Документ";
 	public static final String ATTR_FILE_ID = "ИдФайл";
@@ -168,7 +171,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         DeclarationData declarationData = declarationDataDao.get(id);
 
         List<String> oldBlobDataIds = new ArrayList<String>(); // список UUID блоб для удаления
-        if (declarationData.getJasperPrintUuid() != null){
+/*        if (declarationData.getJasperPrintUuid() != null){
             oldBlobDataIds.add(declarationData.getJasperPrintUuid());
             declarationData.setJasperPrintUuid(null);
         }
@@ -183,7 +186,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         if (declarationData.getXmlDataUuid() != null){
             oldBlobDataIds.add(declarationData.getXmlDataUuid());
             declarationData.setXmlDataUuid(null);
-        }
+        }*/
         setDeclarationBlobs(logger, declarationData, docDate, userInfo);
 
         // удаляем только после успешного формирования новых данных
@@ -200,7 +203,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public void check(Logger logger, long id, TAUserInfo userInfo) {
         declarationDataScriptingService.executeScript(userInfo,
                 declarationDataDao.get(id), FormDataEvent.CHECK, logger, null);
-        validateDeclaration(declarationDataDao.get(id), logger, true, FormDataEvent.CHECK);
+        validateDeclaration(userInfo, declarationDataDao.get(id), logger, true, FormDataEvent.CHECK);
         // Проверяем ошибки при пересчете
         if (logger.containsLevel(LogLevel.ERROR)) {
             throw new ServiceLoggerException(
@@ -244,7 +247,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             Map<String, Object> exchangeParams = new HashMap<String, Object>();
             declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, logger, exchangeParams);
 
-            validateDeclaration(declarationDataDao.get(id), logger, true, FormDataEvent.MOVE_CREATED_TO_ACCEPTED);
+            validateDeclaration(userInfo, declarationDataDao.get(id), logger, true, FormDataEvent.MOVE_CREATED_TO_ACCEPTED);
             declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_CREATED_TO_ACCEPTED);
 
             declarationData.setAccepted(true);
@@ -303,16 +306,15 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.GET_LEVEL0);
         try {
             DeclarationData declarationData = declarationDataDao.get(id);
-            if (declarationData.getXlsxDataUuid() != null && !declarationData.getXlsxDataUuid().isEmpty()){
-                return getBytesFromInputstream(declarationData.getXlsxDataUuid());
-            }else {
-                ObjectInputStream objectInputStream = new ObjectInputStream(blobDataService.get(declarationData.getJasperPrintUuid()).getInputStream());
-                JasperPrint jasperPrint = (JasperPrint)objectInputStream.readObject();
-                byte[] xlsxBytes = exportXLSX(jasperPrint);
-                declarationData.setXlsxDataUuid(blobDataService.create(new ByteArrayInputStream(xlsxBytes), ""));
-                declarationDataDao.update(declarationData);
-                return xlsxBytes;
-            }
+//            if (declarationData.getXlsxDataUuid() != null && !declarationData.getXlsxDataUuid().isEmpty()){
+//                return getBytesFromInputstream(declarationData.getXlsxDataUuid());
+//            }else {
+            ObjectInputStream objectInputStream = new ObjectInputStream(blobDataService.get(reportService.getDec(userInfo, declarationData.getId(), ReportType.JASPER_DEC)).getInputStream());
+            JasperPrint jasperPrint = (JasperPrint)objectInputStream.readObject();
+            byte[] xlsxBytes = exportXLSX(jasperPrint);
+            //declarationData.setXlsxDataUuid(blobDataService.create(new ByteArrayInputStream(xlsxBytes), ""));
+            //declarationDataDao.update(declarationData);
+            return xlsxBytes;
         } catch (Exception e) {
             throw new ServiceException("Не удалось извлечь объект для печати.", e);
         }
@@ -336,10 +338,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.CALCULATE, logger, exchangeParams);
 
         String xml = XML_HEADER.concat(writer.toString());
-        declarationData.setXmlDataUuid(blobDataService.create(new ByteArrayInputStream(xml.getBytes()), ""));
+        //declarationData.setXmlDataUuid(blobDataService.create(new ByteArrayInputStream(xml.getBytes()), ""));
         reportService.createDec(declarationData.getId(), blobDataService.create(new ByteArrayInputStream(xml.getBytes()), ""), ReportType.XML_DEC);
 
-        validateDeclaration(declarationData, logger, false, FormDataEvent.CALCULATE);
+        validateDeclaration(userInfo, declarationData, logger, false, FormDataEvent.CALCULATE);
         // Заполнение отчета и экспорт в формате PDF
         JasperPrint jasperPrint = fillReport(xml,
                 declarationTemplateService.getJasper(declarationData.getDeclarationTemplateId()));
@@ -352,11 +354,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
     }
 
-    public void validateDeclaration(DeclarationData declarationData, final Logger logger, final boolean isErrorFatal,
+    public void validateDeclaration(TAUserInfo userInfo, DeclarationData declarationData, final Logger logger, final boolean isErrorFatal,
                                      FormDataEvent operation) {
         Locale oldLocale = Locale.getDefault();
         Locale.setDefault(new Locale("ru", "RU"));
-        String xmlUuid = declarationData.getXmlDataUuid();
+        String xmlUuid = reportService.getDec(userInfo, declarationData.getId(), ReportType.XML_DEC);
         if (xmlUuid == null) { // не проверяем пустые XML
             return;
         }
@@ -437,7 +439,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     private Document getDocument(long declarationDataId) {
         try {
-            String xmlUuid = declarationDataDao.get(declarationDataId).getXmlDataUuid();
+            String xmlUuid = getXmlData(declarationDataId, userService.getSystemUserInfo());// declarationDataDao.get(declarationDataId).getXmlDataUuid();
             if (xmlUuid == null) return null;
             String xml = new String(getBytesFromInputstream(xmlUuid));
             InputSource inputSource = new InputSource(new StringReader(xml));

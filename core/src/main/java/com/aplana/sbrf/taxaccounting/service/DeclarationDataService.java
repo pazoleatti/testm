@@ -119,7 +119,7 @@ public interface DeclarationDataService {
      * @param isErrorFatal признак того, что операция не может быть продолжена с невалидным xml
      * @param operation Событие (для сообщения об ошибке)
      */
-    void validateDeclaration(DeclarationData declarationData, final Logger logger, final boolean isErrorFatal,
+    void validateDeclaration(TAUserInfo userInfo, DeclarationData declarationData, final Logger logger, final boolean isErrorFatal,
                              FormDataEvent operation);
 
     /**
