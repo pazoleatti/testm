@@ -226,20 +226,16 @@ void logicCheck() {
                 }
             }
             // 2fg
-            def msg1 = row.getCell('city1').column.name
-            def msg2 = row.getCell('settlement1').column.name
             if (row.city1 == null && row.settlement1 == null) {
+                def msg1 = row.getCell('city1').column.name
+                def msg2 = row.getCell('settlement1').column.name
                 rowError(logger, row, "Строка $rowNum: Графа «$msg1» должна быть заполнена, если не заполнена графа «$msg2»!")
-            } else if (row.city1 != null && row.settlement1 != null){
-                rowError(logger, row, "Строка $rowNum: Графа «$msg1» не может быть заполнена одновременно с графой «$msg2»!")
             }
             // 2hi
-            msg1 = row.getCell('city2').column.name
-            msg2 = row.getCell('settlement2').column.name
             if (row.city2 == null && row.settlement2 == null) {
+                msg1 = row.getCell('city2').column.name
+                msg2 = row.getCell('settlement2').column.name
                 rowError(logger, row, "Строка $rowNum: Графа «$msg1» должна быть заполнена, если не заполнена графа «$msg2»!")
-            } else if (row.city2 != null && row.settlement2 != null){
-                rowError(logger, row, "Строка $rowNum: Графа «$msg1» не может быть заполнена одновременно с графой «$msg2»!")
             }
         }
 
