@@ -331,7 +331,7 @@ public class DeclarationDataPresenter
 
 	@Override
 	public void downloadExcel() {
-        final ReportType reportType = ReportType.EXCEL;
+        final ReportType reportType = ReportType.EXCEL_DEC;
         CreateReportAction action = new CreateReportAction();
         action.setDeclarationDataId(declarationId);
         action.setType(reportType);

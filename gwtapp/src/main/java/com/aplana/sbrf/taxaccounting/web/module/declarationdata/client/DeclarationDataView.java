@@ -86,7 +86,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
             @Override
             public void run() {
                 try {
-                    getUiHandlers().onTimerReport(ReportType.EXCEL, true);
+                    getUiHandlers().onTimerReport(ReportType.EXCEL_DEC, true);
                 } catch (Exception e) {
                 }
             }
@@ -96,7 +96,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
             @Override
             public void run() {
                 try {
-                    getUiHandlers().onTimerReport(ReportType.CSV, true);
+                    getUiHandlers().onTimerReport(ReportType.XML_DEC, true);
                 } catch (Exception e) {
                 }
             }
@@ -265,10 +265,13 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
             if (isLoad) {
                 downloadXmlButton.setVisible(true);
                 downloadXmlButton.setText("Выгрузить в XML");
+                downloadExcelButton.setVisible(true);
+                getUiHandlers().onTimerReport(ReportType.EXCEL_DEC, false);
                 timerXML.cancel();
             } else {
                 downloadXmlButton.setVisible(false);
                 downloadXmlButton.setText("Сформировать XML");
+                downloadExcelButton.setVisible(false);
             }
         }
     }
