@@ -65,9 +65,11 @@ public class XmlGeneratorAsyncTask extends AbstractAsyncTask {
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
 
-        DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
+
+        //DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
         Logger logger = new Logger();
 
+        declarationDataService.calculate(logger, declarationDataId, userInfo, docDate);/*
         Map<String, Object> exchangeParams = new HashMap<String, Object>();
         exchangeParams.put(DeclarationDataScriptParams.DOC_DATE, docDate);
         StringWriter writer = new StringWriter();
@@ -89,7 +91,7 @@ public class XmlGeneratorAsyncTask extends AbstractAsyncTask {
             reportService.createDec(declarationDataId, blobDataService.create(new ByteArrayInputStream(exportJPBlobData(jasperPrint)), ""), ReportType.JASPER_DEC);
         } catch (IOException e) {
             throw new ServiceException(e.getLocalizedMessage(), e);
-        }
+        }*/
     }
 
     private JasperPrint fillReport(String xml, InputStream jasperTemplate) {

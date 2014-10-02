@@ -117,15 +117,18 @@ public class TestXmlGeneratorAsyncTaskSpring implements AsyncTask {
     }
 
     private void executeBusinessLogic(Map<String, Object> params) {
+        System.out.println("XmlGeneratorAsyncTask.params: " + params.toString());
         Date docDate = (Date)params.get("docDate");
         long declarationDataId = (Long)params.get("declarationDataId");
         int userId = (Integer)params.get(USER_ID.name());
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
 
-        DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
+
+        //DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
         Logger logger = new Logger();
 
+        declarationDataService.calculate(logger, declarationDataId, userInfo, docDate);/*
         Map<String, Object> exchangeParams = new HashMap<String, Object>();
         exchangeParams.put(DeclarationDataScriptParams.DOC_DATE, docDate);
         StringWriter writer = new StringWriter();
@@ -147,7 +150,7 @@ public class TestXmlGeneratorAsyncTaskSpring implements AsyncTask {
             reportService.createDec(declarationDataId, blobDataService.create(new ByteArrayInputStream(exportJPBlobData(jasperPrint)), ""), ReportType.JASPER_DEC);
         } catch (IOException e) {
             throw new ServiceException(e.getLocalizedMessage(), e);
-        }
+        }*/
     }
 
 

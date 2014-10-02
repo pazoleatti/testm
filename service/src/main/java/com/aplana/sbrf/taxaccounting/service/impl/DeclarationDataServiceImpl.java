@@ -182,7 +182,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         setDeclarationBlobs(logger, declarationData, docDate, userInfo);
 
         // удаляем только после успешного формирования новых данных
-        if (!oldBlobDataIds.isEmpty()) blobDataService.delete(oldBlobDataIds);
+        //if (!oldBlobDataIds.isEmpty()) blobDataService.delete(oldBlobDataIds);
 
         logBusinessService.add(null, id, userInfo, FormDataEvent.SAVE, null);
         auditService.add(FormDataEvent.SAVE , userInfo, declarationData.getDepartmentId(),
@@ -332,18 +332,19 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
         String xml = XML_HEADER.concat(writer.toString());
         declarationData.setXmlDataUuid(blobDataService.create(new ByteArrayInputStream(xml.getBytes()), ""));
+        reportService.createDec(declarationData.getId(), blobDataService.create(new ByteArrayInputStream(xml.getBytes()), ""), ReportType.XML_DEC);
 
         validateDeclaration(declarationData, logger, false, FormDataEvent.CALCULATE);
         // Заполнение отчета и экспорт в формате PDF
         JasperPrint jasperPrint = fillReport(xml,
                 declarationTemplateService.getJasper(declarationData.getDeclarationTemplateId()));
-        declarationData.setPdfDataUuid(blobDataService.create(new ByteArrayInputStream(exportPDF(jasperPrint)), ""));
+
+        reportService.createDec(declarationData.getId(), blobDataService.create(new ByteArrayInputStream(exportPDF(jasperPrint)), ""), ReportType.PDF_DEC);
         try {
-            declarationData.setJasperPrintUuid(saveJPBlobData(jasperPrint));
+            reportService.createDec(declarationData.getId(), saveJPBlobData(jasperPrint), ReportType.JASPER_DEC);
         } catch (IOException e) {
             throw new ServiceException(e.getLocalizedMessage(), e);
         }
-        declarationDataDao.update(declarationData);
     }
 
     public void validateDeclaration(DeclarationData declarationData, final Logger logger, final boolean isErrorFatal,

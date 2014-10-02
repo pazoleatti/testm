@@ -61,7 +61,7 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
         if ((lockData = declarationDataService.lock(action.getDeclarationId(), userInfo)) == null) {
             try {
                 Logger logger = new Logger();
-                declarationDataService.calculate(logger, action.getDeclarationId(), userInfo, action.getDocDate());
+                //declarationDataService.calculate(logger, action.getDeclarationId(), userInfo, action.getDocDate());
                 String key = LockData.LOCK_OBJECTS.DECLARATION_DATA.name() + "_" + action.getDeclarationId() + "_" + ReportType.XML_DEC.getName();
                 Map<String, Object> params = new HashMap<String, Object>();
                 params.put("declarationDataId", action.getDeclarationId());

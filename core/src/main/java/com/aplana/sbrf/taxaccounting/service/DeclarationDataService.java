@@ -121,11 +121,6 @@ public interface DeclarationDataService {
      */
     void validateDeclaration(DeclarationData declarationData, final Logger logger, final boolean isErrorFatal,
                              FormDataEvent operation);
-	/**
-	 * @deprecated Неактуально с появлением корректирующих периодов
-	 */
-    @Deprecated
-	DeclarationData find(int declarationTypeId, int departmentId, int reportPeriodId);
 
     /**
      * Поиск декларации
