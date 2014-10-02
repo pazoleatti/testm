@@ -1,4 +1,4 @@
-package form_template.income.output3.v2015
+package form_template.income.output3_1.v2014
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
@@ -6,7 +6,7 @@ import groovy.transform.Field
 
 /**
  * Сумма налога, подлежащая уплате в бюджет, по данным налогоплательщика
- * formTemplateId=2308
+ * formTemplateId=10142
  *
  * http://conf.aplana.com/pages/viewpage.action?pageId=8784122
  *

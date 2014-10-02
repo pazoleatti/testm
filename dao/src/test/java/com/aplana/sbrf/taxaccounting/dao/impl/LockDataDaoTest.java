@@ -37,6 +37,12 @@ public class LockDataDaoTest {
 		cal.clear();
 		cal.set(2013, 0, 1, 0, 5, 0);
 		Assert.assertEquals(cal.getTime().getTime(), data.getDateBefore().getTime());
+
+        data = dao.get("a", cal.getTime());
+        Assert.assertNotNull(data);
+        cal.set(Calendar.YEAR, 2014);
+        data = dao.get("a", cal.getTime());
+        Assert.assertNull(data);
 	}
 
 	@Test
@@ -65,6 +71,12 @@ public class LockDataDaoTest {
 		Assert.assertEquals("c", data.getKey());
 		Assert.assertEquals(0, data.getUserId());
 		Assert.assertEquals(dateBefore, data.getDateBefore());
+
+
+        Date before = new Date();
+        dao.createLock("abc", 0, before);
+        data = dao.get("abc", before);
+        Assert.assertNotNull(data);
 	}
 
 	@Test

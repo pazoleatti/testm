@@ -81,11 +81,6 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     @Autowired
     BlobDataService blobDataService;
 
-	@Override
-	public DeclarationData find(int declarationTypeId, int departmentId, int reportPeriodId) {
-		return declarationDataDao.find(declarationTypeId, departmentId, reportPeriodId);
-	}
-
     @Override
     public DeclarationData find(int declarationTypeId, int departmentReportPeriodId) {
         return declarationDataDao.find(declarationTypeId, departmentReportPeriodId);

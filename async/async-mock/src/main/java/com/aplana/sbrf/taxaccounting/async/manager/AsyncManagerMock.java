@@ -51,16 +51,33 @@ public class AsyncManagerMock implements AsyncManager {
                 throw new AsyncTaskException("Некорректный формат JNDI-имени для класса-исполнителя. В дев-моде это имя должно ссылаться на спринговый бин!");
             }
 
-            for (Map.Entry<String, Object> param : params.entrySet()) {
-                //Все параметры должны быть сериализуемы
-                if (!Serializable.class.isAssignableFrom(param.getValue().getClass())) {
-                    throw new AsyncTaskSerializationException("Все параметры должны поддерживать сериализацию!");
-                }
-            }
+            checkParams(params);
             AsyncTask task = applicationContext.getBean(asyncTaskType.getHandlerJndi(), AsyncTask.class);
             task.execute(params);
         } catch (EmptyResultDataAccessException e) {
             throw new AsyncTaskPersistenceException("Не найден тип задачи с идентификатором = " + taskTypeId);
+        }
+    }
+
+    /**
+     * Проверяем обязательные параметры. Они должны быть заполнены и содержать значение правильного типа
+     * @param params параметры
+     */
+    private void checkParams(Map<String, Object> params) throws AsyncTaskSerializationException {
+        for (AsyncTask.RequiredParams key : AsyncTask.RequiredParams.values()) {
+            if (!params.containsKey(key.name())) {
+                throw new IllegalArgumentException("Не указан обязательный параметр \"" + key.name() + "\"!");
+            }
+            if (!key.getClazz().isInstance(params.get(key.name()))) {
+                throw new IllegalArgumentException("Обязательный параметр \"" + key.name() + "\" имеет неправильный тип " + params.get(key.name()).getClass().getName() + "! Должен быть: " + key.getClazz().getName());
+            }
+        }
+
+        for (Map.Entry<String, Object> param : params.entrySet()) {
+            //Все параметры должны быть сериализуемы
+            if (!Serializable.class.isAssignableFrom(param.getValue().getClass())) {
+                throw new AsyncTaskSerializationException("Параметр \"" + param.getKey() + "\" не поддерживает сериализацию!");
+            }
         }
     }
 

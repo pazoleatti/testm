@@ -170,6 +170,13 @@ public class LockDataServiceImpl implements LockDataService {
     }
 
     @Override
+    public boolean isLockExists(String key, Date lockDateEnd) {
+        synchronized(LockDataServiceImpl.class) {
+            return validateLock(dao.get(key, lockDateEnd)) != null;
+        }
+    }
+
+    @Override
     public void addUserWaitingForLock(final String key, final int userId) {
         tx.executeInNewTransaction(new TransactionLogic() {
             @Override
