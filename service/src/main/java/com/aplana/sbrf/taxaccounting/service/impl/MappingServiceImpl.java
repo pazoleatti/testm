@@ -131,7 +131,7 @@ public class MappingServiceImpl implements MappingService {
             FormData formData;
             formData = formDataDao.find(formTemplateId.intValue(), FormDataKind.PRIMARY,
                     departmentReportPeriod.getId().intValue(),
-                    periodOrder == null ? null : Integer.valueOf(periodOrder));
+                    periodOrder == null ? null : periodOrder);
 
             if (formData == null) {
                 long formDataId = formDataService.createFormData(logger,
@@ -194,7 +194,7 @@ public class MappingServiceImpl implements MappingService {
         try {
             // Ошибка записи в журнал аудита не должна откатывать импорт
             auditService.add(FormDataEvent.MIGRATION, userInfo, departmentId, reportPeriodId, null, formTypeName,
-                    FormDataKind.PRIMARY.getId(), msg, null);
+                    FormDataKind.PRIMARY.getId(), msg, null, null);
         } catch (Exception e) {
             log.error("Ошибка записи в журнал аудита", e);
         }

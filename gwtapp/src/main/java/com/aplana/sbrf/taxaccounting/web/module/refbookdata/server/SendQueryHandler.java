@@ -62,18 +62,18 @@ public class SendQueryHandler extends AbstractActionHandler<SendQueryAction, Sen
         int count = emails.size();
         if (count == 0) {
             logger.info(SEND_LOGGER);
-            auditService.add(FormDataEvent.EXTERNAL_INTERACTION, principal.getUserInfo(), 0, null, null, null, null,
-                    SEND_LOGGER, null);
+            auditService.add(FormDataEvent.EXTERNAL_INTERACTION, principal.getUserInfo(), principal.getUserInfo().getUser().getDepartmentId(),
+                    null, null, null, null, SEND_LOGGER, null, null);
         } else {
             try {
                 emailService.send(emails, TITLE, getMessage(action.getMessage()));
                 logger.info(SEND_SUCCESS);
                 auditService.add(FormDataEvent.SEND_EMAIL, principal.getUserInfo(), 0, null, null, null, null,
-                        count == 1 ? String.format(SEND_MAIL, emails.get(0)) : String.format(SEND_MAILS, StringUtils.join(emails.toArray(), ',')), null);
+                        count == 1 ? String.format(SEND_MAIL, emails.get(0)) : String.format(SEND_MAILS, StringUtils.join(emails.toArray(), ',')), null, null);
             } catch (Exception e) {
                 logger.error(e.getMessage());
                 auditService.add(FormDataEvent.SEND_EMAIL, principal.getUserInfo(), 0, null, null, null, null,
-                        e.getMessage(), null);
+                        e.getMessage(), null, null);
                 throw new ActionException(e.getMessage());
             }
         }

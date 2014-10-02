@@ -27,6 +27,15 @@ public class LogSystem implements Serializable {
     private Integer formDepartmentId;
     private Integer departmentTBId;
     private String blobDataId;
+    private Integer formTypeId;
+
+    public Integer getFormTypeId() {
+        return formTypeId;
+    }
+
+    public void setFormTypeId(Integer formTypeId) {
+        this.formTypeId = formTypeId;
+    }
 
     public String getUserLogin() {
         return userLogin;

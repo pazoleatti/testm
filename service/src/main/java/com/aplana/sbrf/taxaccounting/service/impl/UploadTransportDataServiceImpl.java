@@ -29,6 +29,10 @@ import java.util.List;
 @Transactional
 public class UploadTransportDataServiceImpl implements UploadTransportDataService {
 
+    //Добавил исключительно для записи в лог
+    private Integer formTypeId = null;
+    private String formTypeName = null;
+
     @Autowired
     private ConfigurationDao configurationDao;
     @Autowired
@@ -322,6 +326,8 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
         checkResult.setDepartmentTbId(departmentTbId);
         checkResult.setPath(getUploadPath(userInfo, fileName, ConfigurationParam.FORM_UPLOAD_DIRECTORY, departmentTbId,
                 LogData.L34_2, logger));
+        formTypeId = formType.getId();
+        formTypeName = formType.getName();
 
         return checkResult;
     }
@@ -369,7 +375,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                 }
             }
             auditService.add(FormDataEvent.UPLOAD_TRANSPORT_FILE, userInfo, departmentId, null,
-                    null, null, null, prefix + String.format(logData.getText(), args), null);
+                    null, formTypeName, null, prefix + String.format(logData.getText(), args), null, formTypeId);
         }
     }
 

@@ -24,8 +24,8 @@ public class CommonServiceBean implements CommonService {
 
     @Override
     public void addAuditLog(FormDataEvent event, TAUserInfo userInfo, Integer departmentId, Integer reportPeriodId,
-                            String declarationType, String formType, Integer formKindId, String note, String blobDataId) {
+                            String declarationType, String formType, Integer formKindId, String note, String blobDataId, Integer formTypeId) {
         commonService.addAuditLog(event, userInfo, departmentId, reportPeriodId,
-                declarationType, formType, formKindId, note, blobDataId);
+                declarationType, formType, formKindId, note, blobDataId, formTypeId);
     }
 }

@@ -162,7 +162,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
         }
 
         String msg = String.format("Импорт бухгалтерской отчётности: %s", realFileName);
-        auditService.add(FormDataEvent.IMPORT, userInfo, departmentId, null, null, null, null, msg, null);
+        auditService.add(FormDataEvent.IMPORT, userInfo, departmentId, null, null, null, null, msg, null, typeId);
     }
 
     // Проверка расширения Булата Кинзибулатова из com.aplana.sbrf.taxaccounting.web.mvc.BookerStatementsController.getFileExtention()

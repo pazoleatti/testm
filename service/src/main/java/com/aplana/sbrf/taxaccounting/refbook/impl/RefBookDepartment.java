@@ -262,7 +262,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                         null, null, null, null,
                         String.format("Создано подразделение %s, значения атрибутов: %s",
                                 refBookValueMap.get(DEPARTMENT_NAME_ATTRIBUTE).toString(),
-                                assembleMessage(refBookValueMap)), null);
+                                assembleMessage(refBookValueMap)), null, depId);
                 return Arrays.asList((long)depId);
             } finally {
                 for (String lock : lockedObjects) {
@@ -416,7 +416,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                         null, null, null, null,
                         String.format("Изменены значения атрибутов подразделения %s, новые значения атрибутов: %s",
                                 departmentService.getDepartment(uniqueRecordId.intValue()).getName(),
-                                assembleMessage(records)), null);
+                                assembleMessage(records)), null, dep.getId());
             } finally {
                 for (String lock : lockedObjects) {
                     lockService.unlock(lock, userId);
@@ -541,7 +541,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                 deletePeriods(depId);
 
                 auditService.add(FormDataEvent.DELETE_DEPARTMENT, logger.getTaUserInfo(), 0, null, null, null, null,
-                        String.format("Удалено подразделение %s", departmentService.getParentsHierarchy(depId)), null);
+                        String.format("Удалено подразделение %s", departmentService.getParentsHierarchy(depId)), null, depId);
                 refBookDepartmentDao.remove(depId);
             } finally {
                 for (String lock : lockedObjects) {
