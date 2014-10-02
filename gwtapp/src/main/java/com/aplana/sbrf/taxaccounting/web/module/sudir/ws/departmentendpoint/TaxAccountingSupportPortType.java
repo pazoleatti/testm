@@ -34,8 +34,8 @@ public class TaxAccountingSupportPortType extends SpringBeanAutowiringSupport{
 	public List<TaxAccDepartment> getDepartments() {
         List<TaxAccDepartment> taxAccDepartmentList = gais.desassembleDepartments(departmentService.getDepartmentForSudir());
         TAUserInfo userInfo = userService.getSystemUserInfo();
-        auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(), null, null, null, null,
-                "Успешный обмен данными с вебсервисом СУДИР.", null);
+        auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(),
+                null, null, null, null, "Успешный обмен данными с вебсервисом СУДИР.", null, null);
 		return taxAccDepartmentList;
 	}
 

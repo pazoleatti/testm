@@ -77,7 +77,7 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
         if (formData.getState() != WorkflowState.ACCEPTED) {
             auditService.add(FormDataEvent.COMPOSE, scriptComponentContext.getUserInfo(),
 					formData.getDepartmentId(), formData.getReportPeriodId(),
-					null, formData.getFormType().getName(), formData.getKind().getId(), "Событие инициировано Системой", null);
+					null, formData.getFormType().getName(), formData.getKind().getId(), "Событие инициировано Системой", null, formTypeId);
 			
 			// Execute composition scripts
 			formDataScriptingService.executeScript(scriptComponentContext.getUserInfo(), formData,

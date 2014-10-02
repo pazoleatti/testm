@@ -34,6 +34,7 @@ public abstract class AbstractLoadTransportDataService {
     final static SimpleDateFormat dateFormat = new SimpleDateFormat("(yyyy.MM.dd HH.mm.ss)");
 
     protected Integer formDepartmentId = null;
+    protected Integer formTypeId = null;
 
     // Сообщения при загрузке из каталогов http://conf.aplana.com/pages/viewpage.action?pageId=12324125
     protected static enum LogData {
@@ -132,7 +133,7 @@ public abstract class AbstractLoadTransportDataService {
                 prefix = "Событие инициировано Системой. ";
             }
             auditService.add(FormDataEvent.IMPORT_TRANSPORT_FILE, userInfo, departmentId, null,
-                    null, null, null, prefix + String.format(logData.getText(), args), null);
+                    null, null, null, prefix + String.format(logData.getText(), args), null, formTypeId);
         }
     }
 

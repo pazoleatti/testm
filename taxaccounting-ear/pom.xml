@@ -153,6 +153,18 @@
                         </exclusion>
                     </exclusions>
                 </dependency>
+
+                <!-- Дополнительные ависимости исключенные вместе с другими -->
+                <dependency>
+                    <groupId>net.sf.jasperreports</groupId>
+                    <artifactId>jasperreports</artifactId>
+                    <exclusions>
+                        <exclusion>
+                            <groupId>*</groupId>
+                            <artifactId>*</artifactId>
+                        </exclusion>
+                    </exclusions>
+                </dependency>
             </dependencies>
             <build>
                 <plugins>

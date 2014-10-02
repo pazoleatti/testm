@@ -139,6 +139,11 @@
             <artifactId>dumbster</artifactId>
             <scope>test</scope>
         </dependency>
+        <!--Diff-->
+        <dependency>
+            <groupId>com.googlecode.java-diff-utils</groupId>
+            <artifactId>diffutils</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

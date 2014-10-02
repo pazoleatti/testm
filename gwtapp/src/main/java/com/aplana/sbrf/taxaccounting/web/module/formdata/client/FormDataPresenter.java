@@ -66,6 +66,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 	@Override
 	public void prepareFromRequest(PlaceRequest request) {
 		super.prepareFromRequest(request);
+        LogCleanEvent.fire(FormDataPresenter.this);
 		GetFormData action = new GetFormData();
 		if ( formData!=null ){
 			action.setOldFormDataId(formData.getId());

@@ -160,15 +160,19 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         auditService.add(FormDataEvent.CREATE , userInfo, newDeclaration.getDepartmentId(),
                 newDeclaration.getReportPeriodId(),
                 declarationTemplateDao.get(newDeclaration.getDeclarationTemplateId()).getType().getName(),
-                null, null, null, null);
+                null, null, null, null, null);
         return id;
     }
 
     @Override
     @Transactional(readOnly = false)
     public void calculate(Logger logger, long id, TAUserInfo userInfo, Date docDate) {
+        long start = System.currentTimeMillis();
+        logger.info("Начало рассчета: " + start);
         declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.CALCULATE);
         DeclarationData declarationData = declarationDataDao.get(id);
+        long check1 = System.currentTimeMillis();
+        logger.info("Проверены права: " + check1 + " (" + (check1 - start) + ")");
 
         List<String> oldBlobDataIds = new ArrayList<String>(); // список UUID блоб для удаления
 /*        if (declarationData.getJasperPrintUuid() != null){
@@ -192,12 +196,14 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         // удаляем только после успешного формирования новых данных
         //if (!oldBlobDataIds.isEmpty()) blobDataService.delete(oldBlobDataIds);
 
-        logBusinessService.add(null, id, userInfo, FormDataEvent.SAVE, null);
-        auditService.add(FormDataEvent.SAVE , userInfo, declarationData.getDepartmentId(),
-                declarationData.getReportPeriodId(),
-                declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getType().getName(),
-                null, null, null, null);
-    }
+        long check2 = System.currentTimeMillis();
+        logger.info("Удалены старые BLOB'ы: " + check2 + " (" + (check2 - check1) + ")");
+		logBusinessService.add(null, id, userInfo, FormDataEvent.SAVE, null);
+		auditService.add(FormDataEvent.SAVE , userInfo, declarationData.getDepartmentId(),
+				declarationData.getReportPeriodId(),
+				declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getType().getName(),
+				null, null, null, null, null);
+	}
 
     @Override
     public void check(Logger logger, long id, TAUserInfo userInfo) {
@@ -229,10 +235,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
         declarationDataDao.delete(id);
 
-        auditService.add(FormDataEvent.DELETE , userInfo, declarationData.getDepartmentId(),
-                declarationData.getReportPeriodId(),
-                declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getType().getName(),
-                null, null, null, null);
+			auditService.add(FormDataEvent.DELETE , userInfo, declarationData.getDepartmentId(),
+					declarationData.getReportPeriodId(),
+					declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getType().getName(),
+					null, null, null, null, null);
 
     }
 
@@ -255,7 +261,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             String declarationTypeName = declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getType().getName();
             logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, null);
             auditService.add(FormDataEvent.MOVE_CREATED_TO_ACCEPTED , userInfo, declarationData.getDepartmentId(),
-                    declarationData.getReportPeriodId(), declarationTypeName, null, null, null, null);
+                    declarationData.getReportPeriodId(), declarationTypeName, null, null, null, null, null);
         } else {
             declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_ACCEPTED_TO_CREATED);
 
@@ -266,9 +272,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, logger, exchangeParams);
 
             String declarationTypeName = declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getType().getName();
-            logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, null);
-            auditService.add(FormDataEvent.MOVE_ACCEPTED_TO_CREATED , userInfo, declarationData.getDepartmentId(),
-                    declarationData.getReportPeriodId(), declarationTypeName, null, null, null, null);
+			logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, null);
+			auditService.add(FormDataEvent.MOVE_ACCEPTED_TO_CREATED , userInfo, declarationData.getDepartmentId(),
+					declarationData.getReportPeriodId(), declarationTypeName, null, null, null, null, null);
 
         }
         declarationDataDao.setAccepted(id, accepted);

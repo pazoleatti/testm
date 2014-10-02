@@ -91,7 +91,7 @@ public class RateMDBTest {
                 return null;
             }
         }).when(auditService).add(any(FormDataEvent.class), any(TAUserInfo.class), any(Integer.class),
-                any(Integer.class), any(String.class), any(String.class), any(Integer.class), any(String.class), anyString());
+                any(Integer.class), any(String.class), any(String.class), any(Integer.class), any(String.class), anyString(), any(Integer.class));
 
         // LogEntryService
         LogEntryService logEntryService = mock(LogEntryService.class);
