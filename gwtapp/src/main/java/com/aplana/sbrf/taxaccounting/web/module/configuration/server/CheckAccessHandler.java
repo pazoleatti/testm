@@ -66,7 +66,7 @@ public class CheckAccessHandler extends AbstractActionHandler<CheckAccessAction,
                     UserAuthenticationToken principal = ((UserAuthenticationToken) (SecurityContextHolder.getContext()
                             .getAuthentication().getPrincipal()));
                     auditService.add(FormDataEvent.SEND_EMAIL, principal.getUserInfo(), 0, null, null, null, null,
-                            logger.getEntries().get(0).getMessage(), uuid);
+                            logger.getEntries().get(0).getMessage(), uuid, null);
                 }
             }
         }

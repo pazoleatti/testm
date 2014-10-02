@@ -42,12 +42,12 @@ public class AuditServiceImpl implements AuditService {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED, readOnly = false)
 	public void add(final FormDataEvent event, final TAUserInfo userInfo, final Integer departmentId, final Integer reportPeriodId,
-                    final String declarationTypeName, final String formTypeName, final Integer formKindId, final String note, final String blobDataId) {
+                    final String declarationTypeName, final String formTypeName, final Integer formKindId, final String note, final String blobDataId, final Integer formTypeId) {
         tx.executeInNewTransaction(new TransactionLogic() {
             @Override
             public void execute() {
                 commonService.addAuditLog(event, userInfo, departmentId, reportPeriodId,
-                        declarationTypeName, formTypeName, formKindId, note, blobDataId);
+                        declarationTypeName, formTypeName, formKindId, note, blobDataId, formTypeId);
             }
 
             @Override
@@ -66,7 +66,7 @@ public class AuditServiceImpl implements AuditService {
                 listIds.add(item.getId());
             auditDao.removeRecords(listIds);
         }
-        add(FormDataEvent.LOG_SYSTEM_BACKUP, userInfo, userInfo.getUser().getDepartmentId(), null, null, null, null, "Архивация ЖА", null);
+        add(FormDataEvent.LOG_SYSTEM_BACKUP, userInfo, userInfo.getUser().getDepartmentId(), null, null, null, null, "Архивация ЖА", null, null);
     }
 
     @Override

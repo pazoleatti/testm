@@ -35,7 +35,11 @@ public class DeclarationDataController {
             throws IOException {
         TAUserInfo userInfo = securityService.currentUserInfo();
 
+        long start = System.currentTimeMillis();
+        System.out.println("XLSX begin "+ start +" for "+id);
         byte[] xlsxData = declarationService.getXlsxData(id, userInfo);
+        long end = System.currentTimeMillis();
+        System.out.println("XLSX end " + end + " (" + (end - start) + ") for " + id);
         String fileName = URLEncoder.encode(getFileName(id, userInfo, "xlsx"), ENCODING);
 
         response.setContentType("application/octet-stream");

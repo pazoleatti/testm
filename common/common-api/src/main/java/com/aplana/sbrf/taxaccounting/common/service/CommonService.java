@@ -27,5 +27,5 @@ public interface CommonService {
      * @param blobDataId сыылка на сериализованные данные из лог панели, хранящие набор сообщений к данному событию (необязательное)
      */
     void addAuditLog(FormDataEvent event, TAUserInfo userInfo, Integer departmentId, Integer reportPeriodId,
-             String declarationType, String formType, Integer formKindId, String note, String blobDataId);
+             String declarationType, String formType, Integer formKindId, String note, String blobDataId, Integer formTypeId);
 }

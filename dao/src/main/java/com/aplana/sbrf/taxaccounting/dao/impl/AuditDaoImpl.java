@@ -48,6 +48,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         ps.appendQuery("ls.declaration_type_name, ");
         ps.appendQuery("ls.form_type_name, ");
         ps.appendQuery("ls.form_kind_id, ");
+        ps.appendQuery("ls.form_type_id, ");
         ps.appendQuery("fk.name form_kind_name, ");
         ps.appendQuery("ls.note, ");
         if (filter.getSearchOrdering() == HistoryBusinessSearchOrdering.FORM_TYPE)
@@ -91,8 +92,8 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
             jt.update(
                     "insert into log_system (id, log_date, ip, event_id, user_login, roles, department_name, report_period_name, " +
                             "declaration_type_name, form_type_name, form_kind_id, note, user_department_name, form_department_id, " +
-                            "tb_department_id, blob_data_id)" +
-                            " values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                            "tb_department_id, blob_data_id, form_type_id)" +
+                            " values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     id,
                     logSystem.getLogDate(),
                     logSystem.getIp(),
@@ -108,7 +109,8 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                     logSystem.getUserDepartmentName(),
                     logSystem.getFormDepartmentId(),
                     logSystem.getDepartmentTBId(),
-                    logSystem.getBlobDataId()
+                    logSystem.getBlobDataId(),
+                    logSystem.getFormTypeId()
             );
         } catch (DataAccessException e){
             logger.error("Ошибки при логировании.", e);
@@ -256,6 +258,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 			log.setNote(rs.getString("note"));
 			log.setUserDepartmentName(rs.getString("user_department_name"));
 			log.setBlobDataId(rs.getString("blob_data_id"));
+            log.setFormTypeId(SqlUtils.getInteger(rs, "form_type_id"));
 			return log;
 		}
 	}
