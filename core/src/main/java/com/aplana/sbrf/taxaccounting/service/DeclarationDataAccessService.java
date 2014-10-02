@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service;
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
 import java.util.Set;
 
@@ -24,15 +25,17 @@ public interface DeclarationDataAccessService {
 	/**
 	 * Проверяет возможность выполнения действия пользователем, над ещё не существующей декларацией
 	 * (Теоретически это может быть только создание декларации)
-	 * Метод генерит AccessDenitedException если есть проблемы с выполнение действия
+	 * Метод генерит AccessDeniedException если есть проблемы с выполнением действия и логгер не задан,
+     * если логгер задан, то ошибка записывается в лог
 	 * 
 	 * @param userInfo - информация о пользователе
 	 * @param declarationTemplateId - id шаблона декларации
 	 * @param departmentReportPeriod Отчетный период подразделения
 	 * @param scriptEvent - событие (действие)
+     * @param logger логгер (может быть null, тогда будет выбрасываться исключение)
 	 */
 	void checkEvents(TAUserInfo userInfo, int declarationTemplateId, DepartmentReportPeriod departmentReportPeriod,
-                     FormDataEvent scriptEvent);
+                     FormDataEvent scriptEvent, Logger logger);
 	
 	/**
 	 * Получить все разрешенные действия над существующим объектом

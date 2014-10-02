@@ -116,7 +116,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public long create(Logger logger, int declarationTemplateId, TAUserInfo userInfo,
                        DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp) {
         declarationDataAccessService.checkEvents(userInfo, declarationTemplateId, departmentReportPeriod,
-                FormDataEvent.CREATE);
+                FormDataEvent.CREATE, logger);
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            throw new ServiceLoggerException(
+                    "Декларация не создана",
+                    logEntryService.save(logger.getEntries()));
+        }
 
         DeclarationData newDeclaration = new DeclarationData();
         newDeclaration.setDepartmentReportPeriodId(departmentReportPeriod.getId());
