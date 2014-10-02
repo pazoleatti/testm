@@ -222,20 +222,16 @@ void logicCheck() {
                 }
             }
             // 2fg
-            def msg1 = row.getCell('city').column.name
-            def msg2 = row.getCell('locality').column.name
             if (row.city == null && row.locality == null) {
+                def msg1 = row.getCell('city').column.name
+                def msg2 = row.getCell('locality').column.name
                 rowWarning(logger, row, "Строка $rowNum: Графа «$msg1» должна быть заполнена, если не заполнена графа «$msg2»!")
-            } else if (row.city != null && row.locality != null){
-                rowWarning(logger, row, "Строка $rowNum: Графа «$msg1» не может быть заполнена одновременно с графой «$msg2»!")
             }
             // 2hi
-            msg1 = row.getCell('city2').column.name
-            msg2 = row.getCell('locality2').column.name
             if (row.city2 == null && row.locality2 == null) {
+                msg1 = row.getCell('city2').column.name
+                msg2 = row.getCell('locality2').column.name
                 rowWarning(logger, row, "Строка $rowNum: Графа «$msg1» должна быть заполнена, если не заполнена графа «$msg2»!")
-            } else if (row.city2 != null && row.locality2 != null){
-                rowWarning(logger, row, "Строка $rowNum: Графа «$msg1» не может быть заполнена одновременно с графой «$msg2»!")
             }
         }
 
