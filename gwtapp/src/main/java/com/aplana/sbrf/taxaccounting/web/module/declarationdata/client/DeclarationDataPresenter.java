@@ -16,6 +16,8 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.workflowdialog.DialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.*;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CreateReportAction;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CreateReportResult;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.TimerReportAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.TimerReportResult;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListNameTokens;
@@ -329,8 +331,26 @@ public class DeclarationDataPresenter
 
 	@Override
 	public void downloadExcel() {
-		Window.open(GWT.getHostPageBaseURL() + "download/declarationData/xlsx/"
-				+ declarationId, null, null);
+        final ReportType reportType = ReportType.EXCEL;
+        CreateReportAction action = new CreateReportAction();
+        action.setDeclarationDataId(declarationId);
+        action.setType(reportType);
+        dispatcher.execute(action, CallbackUtils
+                .defaultCallback(new AbstractCallback<CreateReportResult>() {
+                    @Override
+                    public void onSuccess(CreateReportResult result) {
+                        LogCleanEvent.fire(DeclarationDataPresenter.this);
+                        LogAddEvent.fire(DeclarationDataPresenter.this, result.getUuid());
+                        if (result.isExistReport()) {
+                            getView().updatePrintReportButtonName(reportType, true);
+                            Window.open(GWT.getHostPageBaseURL() + "download/declarationData/xlsx/"
+                                    + declarationId, null, null);
+                        } else {
+                            getView().updatePrintReportButtonName(reportType, false);
+                            getView().startTimerReport(reportType);
+                        }
+                    }
+                }, this));
 	}
 
 	@Override

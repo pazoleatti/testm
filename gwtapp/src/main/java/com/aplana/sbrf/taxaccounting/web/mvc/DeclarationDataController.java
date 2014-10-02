@@ -1,10 +1,15 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
+import com.aplana.sbrf.taxaccounting.model.BlobData;
+import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
+import com.aplana.sbrf.taxaccounting.service.ReportService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.server.GetDeclarationDataHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.server.PDFImageUtils;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,9 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URLEncoder;
 
 @Controller
@@ -27,6 +30,12 @@ public class DeclarationDataController {
     @Autowired
     private SecurityService securityService;
 
+    @Autowired
+    private BlobDataService blobDataService;
+
+    @Autowired
+    private ReportService reportService;
+
     private static final String ENCODING = "UTF-8";
 
 
@@ -35,14 +44,26 @@ public class DeclarationDataController {
             throws IOException {
         TAUserInfo userInfo = securityService.currentUserInfo();
 
-        byte[] xlsxData = declarationService.getXlsxData(id, userInfo);
-        String fileName = URLEncoder.encode(getFileName(id, userInfo, "xlsx"), ENCODING);
+        BlobData xlsxData = blobDataService.get(reportService.getDec(userInfo, id, ReportType.EXCEL_DEC));//declarationService.getXlsxData(id, userInfo);
+        if (xlsxData != null) {
+            String fileName = URLEncoder.encode(getFileName(id, userInfo, "xlsx"), ENCODING);
 
-        response.setContentType("application/octet-stream");
-        response.setHeader("Content-Disposition", "attachment; filename=\""
-                + fileName + "\"");
-        response.getOutputStream().write(xlsxData);
+            response.setContentType("application/octet-stream");
+            response.setHeader("Content-Disposition", "attachment; filename=\""
+                    + fileName + "\"");
 
+            DataInputStream in = new DataInputStream(xlsxData.getInputStream());
+            OutputStream out = response.getOutputStream();
+            int count = 0;
+            try {
+                count = IOUtils.copy(in, out);
+            } finally {
+                in.close();
+                out.close();
+            }
+            response.setContentLength(count);
+        }
+        //response.getOutputStream().write(xlsxData.getInputStream());
     }
 
 

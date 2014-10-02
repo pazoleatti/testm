@@ -65,6 +65,7 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
                 String key = LockData.LOCK_OBJECTS.DECLARATION_DATA.name() + "_" + action.getDeclarationId() + "_" + ReportType.XML_DEC.getName();
                 Map<String, Object> params = new HashMap<String, Object>();
                 params.put("declarationDataId", action.getDeclarationId());
+                params.put("docDate", action.getDocDate());
                 params.put(AsyncTask.RequiredParams.USER_ID.name(), userInfo.getUser().getId());
                 params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), key);
                 if (lockDataService.lock(key, userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME * 12) != null) {
