@@ -161,8 +161,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @Transactional(readOnly = false)
     public void calculate(Logger logger, long id, TAUserInfo userInfo, Date docDate) {
+        long start = System.currentTimeMillis();
+        logger.info("Начало рассчета: " + start);
         declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.CALCULATE);
         DeclarationData declarationData = declarationDataDao.get(id);
+        long check1 = System.currentTimeMillis();
+        logger.info("Проверены права: " + check1 + " (" + (check1 - start) + ")");
 
         List<String> oldBlobDataIds = new ArrayList<String>(); // список UUID блоб для удаления
         if (declarationData.getJasperPrintUuid() != null){
@@ -186,6 +190,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         // удаляем только после успешного формирования новых данных
         if (!oldBlobDataIds.isEmpty()) blobDataService.delete(oldBlobDataIds);
 
+        long check2 = System.currentTimeMillis();
+        logger.info("Удалены старые BLOB'ы: " + check2 + " (" + (check2 - check1) + ")");
         logBusinessService.add(null, id, userInfo, FormDataEvent.SAVE, null);
         auditService.add(FormDataEvent.SAVE , userInfo, declarationData.getDepartmentId(),
                 declarationData.getReportPeriodId(),
@@ -302,8 +308,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         try {
             DeclarationData declarationData = declarationDataDao.get(id);
             if (declarationData.getXlsxDataUuid() != null && !declarationData.getXlsxDataUuid().isEmpty()){
+                System.out.println("Receive old " + id);
                 return getBytesFromInputstream(declarationData.getXlsxDataUuid());
             }else {
+                System.out.println("Generate new " + id);
                 ObjectInputStream objectInputStream = new ObjectInputStream(blobDataService.get(declarationData.getJasperPrintUuid()).getInputStream());
                 JasperPrint jasperPrint = (JasperPrint)objectInputStream.readObject();
                 byte[] xlsxBytes = exportXLSX(jasperPrint);
@@ -327,6 +335,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private void setDeclarationBlobs(Logger logger,
                                      DeclarationData declarationData, Date docDate, TAUserInfo userInfo) {
 
+        long start = System.currentTimeMillis();
+        logger.info("Начало заполнения BLOB: " + start);
         Map<String, Object> exchangeParams = new HashMap<String, Object>();
         exchangeParams.put(DeclarationDataScriptParams.DOC_DATE, docDate);
         StringWriter writer = new StringWriter();
@@ -334,20 +344,33 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
         declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.CALCULATE, logger, exchangeParams);
 
+        long check1 = System.currentTimeMillis();
+        logger.info("Выполнен скрипт подготовки XML: " + check1 + " (" + (check1 - start) + ")");
         String xml = XML_HEADER.concat(writer.toString());
         declarationData.setXmlDataUuid(blobDataService.create(new ByteArrayInputStream(xml.getBytes()), ""));
 
         validateDeclaration(declarationData, logger, false, FormDataEvent.CALCULATE);
+        long check2 = System.currentTimeMillis();
+        logger.info("Выполнена валидация XML: " + check2 + " (" + (check2 - check1) + ")");
         // Заполнение отчета и экспорт в формате PDF
         JasperPrint jasperPrint = fillReport(xml,
                 declarationTemplateService.getJasper(declarationData.getDeclarationTemplateId()));
+        long check3 = System.currentTimeMillis();
+        logger.info("Построен JasperPrint: " + check3 + " (" + (check3 - check2) + ")");
+
         declarationData.setPdfDataUuid(blobDataService.create(new ByteArrayInputStream(exportPDF(jasperPrint)), ""));
+        long check4 = System.currentTimeMillis();
+        logger.info("Построен и сохранен PDF: " + check4 + " (" + (check4 - check3) + ")");
         try {
             declarationData.setJasperPrintUuid(saveJPBlobData(jasperPrint));
         } catch (IOException e) {
             throw new ServiceException(e.getLocalizedMessage(), e);
         }
+        long check5 = System.currentTimeMillis();
+        logger.info("Сохранен JasperPrint: " + check5 + " (" + (check5 - check4) + ")");
         declarationDataDao.update(declarationData);
+        long check6 = System.currentTimeMillis();
+        logger.info("Обновлена декларация: " + check6 + " (" + (check6 - check5) + ")");
     }
 
     /**

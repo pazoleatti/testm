@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.service.DiffService;
 import difflib.Delta;
 import difflib.DiffUtils;
 import difflib.Patch;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -15,6 +16,7 @@ import java.util.List;
 /**
  * @author Levykin
  */
+@Service
 public class DiffServiceImpl implements DiffService {
     @Override
     public List<Diff> computeDiff(List<String> original, List<String> revised) {
