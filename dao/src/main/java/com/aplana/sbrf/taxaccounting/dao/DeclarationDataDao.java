@@ -67,13 +67,6 @@ public interface DeclarationDataDao {
 
     List<Long> findIdsByFilter(DeclarationDataFilter declarationDataFilter, DeclarationDataSearchOrdering ordering, boolean ascSorting);
 
-	/**
-	 * Ищет декларацию по заданным параметрам (декларации в корректирующем периоде не найдутся)
-     * @deprecated Не актуально с появлением корректирующих периодов
-	 */
-    @Deprecated
-	DeclarationData find(int declarationTypeId, int departmentId, int reportPeriodId);
-
     /**
      * Декларация по типу и отчетному периоду подразделения
      */

@@ -80,7 +80,12 @@ public class PdfViewerWidget extends Composite implements PdfViewerView, HasRows
         pager.setPageSize(1);
 	}
 
-	@UiHandler("scale")
+    @Override
+    public void setPage(int page) {
+        toPage(page);
+    }
+
+    @UiHandler("scale")
 	public void onChange(ChangeEvent event) {
 		int scaleValue = Integer.parseInt(scale.getItemText(scale.getSelectedIndex()).substring(0,
 				scale.getItemText(scale.getSelectedIndex()).length() - 1));

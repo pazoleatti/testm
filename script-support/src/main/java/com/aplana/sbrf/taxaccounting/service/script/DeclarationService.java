@@ -6,19 +6,6 @@ import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
 @ScriptExposed
 public interface DeclarationService {
-	
-	/**
-	 * Ищет декларацию по заданным параметрам.
-     * @deprecated Не учитывает корректирующие периоды
-	 * @param declarationTypeId идентификатор типа декларации
-	 * @param departmentId идентификатор {@link com.aplana.sbrf.taxaccounting.model.Department подразделения}
-	 * @param reportPeriodId идентификатор {@link com.aplana.sbrf.taxaccounting.model.ReportPeriod отчетного периода}
-	 * @return декларацию или null, если такой декларации не найдено
-	 * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если будет найдено несколько записей, удовлетворяющих условию поиска
-	 */
-    @Deprecated
-	DeclarationData find(int declarationTypeId, int departmentId, int reportPeriodId);
-
     /**
      * Поиск декларации в отчетном периоде подразделения
      */

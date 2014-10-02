@@ -202,26 +202,13 @@ public class DeclarationDataDaoTest {
         assertIdsEquals(new long[]{7, 5, 4, 2, 3}, res);
 	}
 
-	@Test
-	public void find1Test() {
-		DeclarationData declaration = declarationDataDao.find(1, 2, 4);
-		assertEquals(2, declaration.getId().intValue());
-	}
-
     @Test
-    public void find2Test() {
+    public void findTest() {
         DeclarationData declaration = declarationDataDao.find(1, 204);
         assertEquals(2, declaration.getId().intValue());
     }
-
-	@Test
-	public void findEmptyResult1Test() {
-		DeclarationData declaration = declarationDataDao.find(222, 222, 222);
-		assertNull(declaration);
-	}
-
     @Test
-    public void findEmptyResult2Test() {
+    public void findEmptyResultTest() {
         DeclarationData declaration = declarationDataDao.find(222, 222);
         assertNull(declaration);
     }

@@ -111,12 +111,13 @@ switch (formDataEvent) {
         break
 }
 
-// Кэш провайдеров
+//// Кэши и константы
 @Field
 def providerCache = [:]
-// Кэш id записей справочника
 @Field
 def recordCache = [:]
+@Field
+def refBookCache = [:]
 
 @Field
 def startDate = null
@@ -153,6 +154,11 @@ def getRecordIdImport(def Long refBookId, def String alias, def String value, de
     }
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
             reportPeriodEndDate, rowIndex, colIndex, logger, required)
+}
+
+// Разыменование записи справочника
+def getRefBookValue(def long refBookId, def Long recordId) {
+    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
 // Проверка при создании формы

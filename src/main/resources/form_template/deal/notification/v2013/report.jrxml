@@ -744,7 +744,8 @@ $F{ДатаДок}]]></variableExpression>
 :
 ($F{НаимОрг_Р2}.replace( " ", "-" )+"----------------------------------------------------------------------------------------------------------------------------------------------------------------").substring(0,160)]]></variableExpression>
 	</variable>
-	<filterExpression><![CDATA[Integer.parseInt($F{НомПорСд})<34]]></filterExpression>
+	<!-- 100 листов -->
+	<!--<filterExpression><![CDATA[Integer.parseInt($F{НомПорСд})<34]]></filterExpression>-->
 	<title>
 		<band height="842" splitType="Stretch">
 			<textField>

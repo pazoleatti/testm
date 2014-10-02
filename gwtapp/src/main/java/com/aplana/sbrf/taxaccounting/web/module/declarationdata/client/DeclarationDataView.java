@@ -179,6 +179,11 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     }
 
     @Override
+    public void setPdfPage(int page) {
+        pdfViewer.setPage(page);
+    }
+
+    @Override
 	public void setReportPeriod(String reportPeriod) {
 		this.reportPeriod.setText(reportPeriod);
 	}
