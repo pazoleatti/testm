@@ -87,37 +87,6 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     }
 
     @Override
-    public DeclarationData find(int declarationTypeId, int departmentId, int reportPeriodId) {
-        try {
-            return getJdbcTemplate().queryForObject(
-                    "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.is_accepted, " +
-                            "dd.data_pdf, dd.data_xlsx, dd.data, dd.jasper_print, dd.department_report_period_id, " +
-                            "drp.report_period_id, drp.department_id " +
-                            "from declaration_data dd, department_report_period drp " +
-                            "where drp.id = dd.department_report_period_id " +
-                            "and exists (select 1 from declaration_template dt where dd.declaration_template_id=dt.id " +
-                            "and dt.declaration_type_id = ?) and drp.correction_date is null "+
-                            "and drp.department_id = ? and drp.report_period_id = ?",
-                    new Object[]{
-                            declarationTypeId,
-                            departmentId,
-                            reportPeriodId
-                    },
-                    new DeclarationDataRowMapper()
-            );
-        } catch (EmptyResultDataAccessException e) {
-            return null;
-        } catch (IncorrectResultSizeDataAccessException e) {
-            throw new DaoException(
-                    "Для заданного сочетания параметров найдено несколько деклараций: declarationTypeId = %d, departmentId = %d, reportPeriodId = %d",
-                    declarationTypeId,
-                    departmentId,
-                    reportPeriodId
-            );
-        }
-    }
-
-    @Override
     public DeclarationData find(int declarationTypeId, int departmentReportPeriodId) {
         try {
             return getJdbcTemplate().queryForObject(
