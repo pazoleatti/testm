@@ -76,7 +76,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                 }
             }
         } catch (Exception e) {
-            log.error("Не удалось выполнить асинхронную задачу", e);
+            throw new RuntimeException("Не удалось выполнить асинхронную задачу", e);
         } finally {
             //Снимаем блокировку
             lockService.unlock(lock, (Integer) params.get(USER_ID.name()));
