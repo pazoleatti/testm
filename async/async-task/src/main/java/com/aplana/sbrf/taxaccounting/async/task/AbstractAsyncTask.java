@@ -3,6 +3,8 @@ package com.aplana.sbrf.taxaccounting.async.task;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.Notification;
 import com.aplana.sbrf.taxaccounting.service.NotificationService;
+import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
+import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,8 @@ public abstract class AbstractAsyncTask implements AsyncTask {
     private LockDataService lockService;
     @Autowired
     private NotificationService notificationService;
+    @Autowired
+    private TransactionHelper transactionHelper;
 
     /**
      * Выполнение бизнес логики задачи
@@ -44,9 +48,15 @@ public abstract class AbstractAsyncTask implements AsyncTask {
      */
     protected abstract String getNotificationMsg();
 
+    /**
+     * Возвращает текст оповещения, которое будет создано для пользователей в случае некорректного завершения задачи
+     * @return текст сообщения
+     */
+    protected abstract String getErrorMsg();
+
     @Override
-    public void execute(Map<String, Object> params) {
-        String lock = (String) params.get(LOCKED_OBJECT.name());
+    public void execute(final Map<String, Object> params) {
+        final String lock = (String) params.get(LOCKED_OBJECT.name());
         Date lockDateEnd = (Date) params.get(LOCK_DATE_END.name());
         try {
             if (lockService.isLockExists(lock, lockDateEnd)) {
@@ -57,29 +67,49 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                     //Значит результаты нам уже не нужны - откатываем транзакцию и все изменения
                     throw new RuntimeException("Результат выполнения задачи \"" + getAsyncTaskName() + "\" больше не актуален. Выполняется откат транзакции");
                 }
-                //Получаем список пользователей, для которых надо сформировать оповещение
-                String msg = getNotificationMsg();
-                if (msg != null && !msg.isEmpty()) {
-                    List<Integer> waitingUsers = lockService.getUsersWaitingForLock(lock);
-                    if (!waitingUsers.isEmpty()) {
-                        List<Notification> notifications = new ArrayList<Notification>();
-                        for (Integer userId : waitingUsers) {
-                            Notification notification = new Notification();
-                            notification.setUserId(userId);
-                            notification.setCreateDate(new Date());
-                            notification.setText(msg);
-                            notifications.add(notification);
-                        }
-                        //Создаем оповещение для каждого пользователя из списка
-                        notificationService.saveList(notifications);
-                    }
-                }
+                sendNotifications(lock, getNotificationMsg());
+                lockService.unlock(lock, (Integer) params.get(USER_ID.name()));
             }
         } catch (Exception e) {
+            log.error(e);
+            if (lockService.isLockExists(lock, lockDateEnd)) {
+                transactionHelper.executeInNewTransaction(new TransactionLogic() {
+                    @Override
+                    public void execute() {
+                        sendNotifications(lock, getErrorMsg());
+                        lockService.unlock(lock, (Integer) params.get(USER_ID.name()));
+                    }
+
+                    @Override
+                    public Object executeWithReturn() {
+                        return null;
+                    }
+                });
+            }
             throw new RuntimeException("Не удалось выполнить асинхронную задачу", e);
-        } finally {
-            //Снимаем блокировку
-            lockService.unlock(lock, (Integer) params.get(USER_ID.name()));
+        }
+    }
+
+    /**
+     * Отправка уведомлений подисчикам на указанную блокировку
+     * @param lock ключ блокировки
+     */
+    private void sendNotifications(String lock, String msg) {
+        if (msg != null && !msg.isEmpty()) {
+            //Получаем список пользователей-подписчиков, для которых надо сформировать оповещение
+            List<Integer> waitingUsers = lockService.getUsersWaitingForLock(lock);
+            if (!waitingUsers.isEmpty()) {
+                List<Notification> notifications = new ArrayList<Notification>();
+                for (Integer userId : waitingUsers) {
+                    Notification notification = new Notification();
+                    notification.setUserId(userId);
+                    notification.setCreateDate(new Date());
+                    notification.setText(msg);
+                    notifications.add(notification);
+                }
+                //Создаем оповещение для каждого пользователя из списка
+                notificationService.saveList(notifications);
+            }
         }
     }
 }

@@ -29,4 +29,9 @@ public class CsvGeneratorAsyncTask extends AbstractAsyncTask {
         //TODO
         return null;
     }
+
+    @Override
+    protected String getErrorMsg() {
+        return null;
+    }
 }

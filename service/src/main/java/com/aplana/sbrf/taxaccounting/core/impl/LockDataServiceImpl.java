@@ -61,6 +61,13 @@ public class LockDataServiceImpl implements LockDataService {
         });
 	}
 
+    @Override
+    public LockData getLock(String key) {
+        synchronized(LockDataServiceImpl.class) {
+            return validateLock(dao.get(key));
+        }
+    }
+
 	@Override
 	public void lockWait(final String key, final int userId, final long age, final long timeout) {
         tx.executeInNewTransaction(new TransactionLogic() {
