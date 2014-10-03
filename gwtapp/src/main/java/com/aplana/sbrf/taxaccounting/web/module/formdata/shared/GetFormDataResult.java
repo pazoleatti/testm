@@ -42,6 +42,7 @@ public class GetFormDataResult implements Result {
     private boolean existManual;
     private boolean isBankSummaryForm;
     private boolean canCreatedManual;
+    private boolean correctionDiff;
 
 	/* Т.к. на GWT уровне сложно преобразовать Date в дату формата dd.mm.yyyy hh:mm (из-за того что функции работы
 	с временем в Date - Deprecated, а Calendar не поддерживается), то клиенту мы будем посылать уже сформировнную в
@@ -171,5 +172,13 @@ public class GetFormDataResult implements Result {
 
     public void setDepartmentReportPeriod(DepartmentReportPeriod departmentReportPeriod) {
         this.departmentReportPeriod = departmentReportPeriod;
+    }
+
+    public boolean isCorrectionDiff() {
+        return correctionDiff;
+    }
+
+    public void setCorrectionDiff(boolean correctionDiff) {
+        this.correctionDiff = correctionDiff;
     }
 }

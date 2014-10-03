@@ -7,7 +7,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormData;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResult.FormMode;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -25,7 +25,7 @@ import java.util.Map;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
-public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFormDataResult> {
+public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction, GetFormDataResult> {
 
 	@Autowired
 	private FormDataAccessService accessService;
@@ -65,14 +65,16 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
     private TAUserInfo userInfo;
 
 	public GetFormDataHandler() {
-		super(GetFormData.class);
+		super(GetFormDataAction.class);
 	}
 
 	@Override
-	public GetFormDataResult execute(GetFormData action,
+	public GetFormDataResult execute(GetFormDataAction action,
 			ExecutionContext context) throws ActionException {
 
 		userInfo = securityService.currentUserInfo();
+
+        actionCheck(action);
 		
 		// UNLOCK: Попытка разблокировать ту форму которая была открыта ранее
 		try {
@@ -103,21 +105,25 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 		return result;
 	}
 
-	@Override
-	public void undo(GetFormData action, GetFormDataResult result,
+    /**
+     * Ппрверки правильности параметров запроса
+     */
+    private void actionCheck(GetFormDataAction action) throws ActionException {
+        if (!action.isReadOnly() && action.isCorrectionDiff()) {
+            throw new ActionException("Нельзя открыть налоговую форму в режиме редактирования для представления «Корректировка»!");
+        }
+    }
+
+    @Override
+	public void undo(GetFormDataAction action, GetFormDataResult result,
 			ExecutionContext context) throws ActionException {
 		// Ничего не делаем
 	}
 
 	/**
 	 * Получает/создает данные налоговой формы
-	 * 
-	 * @param action
-	 * @param userInfo
-	 * @param logger
-	 * @param result
 	 */
-	private void fillFormAndTemplateData(GetFormData action, TAUserInfo userInfo,
+	private void fillFormAndTemplateData(GetFormDataAction action, TAUserInfo userInfo,
 			Logger logger, GetFormDataResult result) {
 
 		FormData formData = formDataService.getFormData(userInfo, action.getFormDataId(), action.isManual(), logger);
@@ -146,6 +152,7 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 		result.setTemplateFormName(formTemplate.getName());
 		result.setFormData(formData);
         result.setBankSummaryForm(true);
+        result.setCorrectionDiff(action.isCorrectionDiff());
 
         result.setExistManual(formDataService.existManual(action.getFormDataId()));
 
@@ -161,12 +168,8 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 
 	/**
 	 * Заполняет параметры доступа для формы
-	 * 
-	 * @param action
-	 * @param userInfo
-	 * @param result
 	 */
-	private void fillFormDataAccessParams(GetFormData action, TAUserInfo userInfo,
+	private void fillFormDataAccessParams(GetFormDataAction action, TAUserInfo userInfo,
 			GetFormDataResult result) {
 		FormDataAccessParams accessParams;
 		if (action.getFormDataId() == Long.MAX_VALUE) {
@@ -191,7 +194,7 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 	 * @param userInfo
 	 * @param result
 	 */
-	private void fillLockData(GetFormData action, TAUserInfo userInfo,
+	private void fillLockData(GetFormDataAction action, TAUserInfo userInfo,
 			GetFormDataResult result) {
 		FormMode formMode = FormMode.READ_LOCKED;
 

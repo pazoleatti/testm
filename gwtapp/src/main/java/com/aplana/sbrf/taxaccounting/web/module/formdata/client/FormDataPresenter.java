@@ -67,7 +67,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 	public void prepareFromRequest(PlaceRequest request) {
 		super.prepareFromRequest(request);
         LogCleanEvent.fire(FormDataPresenter.this);
-		GetFormData action = new GetFormData();
+		GetFormDataAction action = new GetFormDataAction();
 		if ( formData!=null ){
 			action.setOldFormDataId(formData.getId());
 		}
@@ -75,7 +75,8 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 		action.setReadOnly(Boolean.parseBoolean(request.getParameter(READ_ONLY, "true")));
         action.setManual(Boolean.parseBoolean(request.getParameter(MANUAL, "false")));
         action.setUuid(request.getParameter(UUID, null));
-        executeAction(action);
+        action.setCorrectionDiff(Boolean.parseBoolean(request.getParameter(CORRECTION, "false")));
+        getFormData(action);
 	}
 
 	@Override
@@ -88,6 +89,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 			action.setReadOnly(readOnlyMode);
             action.setManual(formData.isManual());
 			action.setFormDataTemplateId(formData.getFormTemplateId());
+            action.setCorrectionDiff(!absoluteView);
             action.setInnerLogUuid(innerLogUuid);
             dispatcher.execute(action, CallbackUtils
 					.defaultCallback(new AbstractCallback<GetRowsDataResult>() {
@@ -163,7 +165,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                             .defaultCallback(new AbstractCallback<CreateManualFormDataResult>() {
                                 @Override
                                 public void onSuccess(CreateManualFormDataResult result) {
-                                    revealFormData(false, true, result.getUuid());
+                                    revealFormData(false, true, !absoluteView, result.getUuid());
                                 }
                             }, FormDataPresenter.this)
                     );
@@ -215,7 +217,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 
     @Override
     public void onModeChangeClicked() {
-        revealFormData(readOnlyMode, !formData.isManual(), null);
+        revealFormData(readOnlyMode, !formData.isManual(), !absoluteView, null);
     }
 
 	@Override
@@ -226,11 +228,11 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
             dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<CheckManualResult>() {
                 @Override
                 public void onSuccess(CheckManualResult result) {
-                    revealFormData(readOnlyMode, formData.isManual(), null);
+                    revealFormData(readOnlyMode, formData.isManual(), readOnlyMode && !absoluteView, null);
                 }
             }, this));
         } else {
-            revealFormData(readOnlyMode, formData.isManual(), null);
+            revealFormData(readOnlyMode, formData.isManual(), readOnlyMode && !absoluteView, null);
         }
 	}
 
@@ -277,7 +279,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 
 	@Override
 	public void onCancelClicked() {
-		revealFormData(true, formData.isManual(), null);
+		revealFormData(true, formData.isManual(), !absoluteView, null);
 	}
 	
 	private AsyncCallback<DataRowResult> createDataRowResultCallback(final boolean showMsg){
@@ -425,7 +427,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                             public void onSuccess(
                                                     DeleteFormDataResult result) {
                                                 setReadUnlockedMode();
-                                                revealFormData(true, false, null);
+                                                revealFormData(true, false, !absoluteView, null);
                                             }
 
                                         }, FormDataPresenter.this));
@@ -448,6 +450,12 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
     public void onOpenSourcesDialog() {
         sourcesPresenter.setFormData(formData);
         addToPopupSlot(sourcesPresenter);
+    }
+
+    @Override
+    public void onCorrectionSwitch() {
+        revealFormData(readOnlyMode || absoluteView, false, absoluteView, null);
+        absoluteView = !absoluteView;
     }
 
     @Override
@@ -525,12 +533,12 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 					@Override
 					public void onSuccess(GoMoveResult result) {
                         LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
-                        revealFormData(true, formData.isManual(), result.getUuid());
+                        revealFormData(true, formData.isManual(), !absoluteView, result.getUuid());
                     }
                 }, this));
 	}
 
-    private void executeAction(GetFormData action){
+    private void getFormData(GetFormDataAction action){
         dispatcher.execute(
                 action,
                 CallbackUtils.defaultCallback(
@@ -595,7 +603,8 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                         result.getFormData().getState().getName(),
 		                                result.getDepartmentReportPeriod().getReportPeriod().getCalendarStartDate(),
                                         result.getDepartmentReportPeriod().getReportPeriod().getEndDate(),
-                                        formData.getId());
+                                        formData.getId(), result.getDepartmentReportPeriod().getCorrectionDate() != null,
+                                        result.isCorrectionDiff());
 
                                 getView().setBackButton("#" + FormDataListNameTokens.FORM_DATA_LIST + ";nType="
                                         + result.getFormData().getFormType().getTaxType());

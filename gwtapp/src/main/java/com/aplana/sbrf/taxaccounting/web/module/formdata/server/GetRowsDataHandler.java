@@ -41,11 +41,9 @@ public class GetRowsDataHandler extends
 	}
 
 	@Override
-	public GetRowsDataResult execute(GetRowsDataAction action,
-			ExecutionContext context) throws ActionException {
+	public GetRowsDataResult execute(GetRowsDataAction action, ExecutionContext context) throws ActionException {
 		GetRowsDataResult result = new GetRowsDataResult();
-		FormTemplate formTemplate = formTemplateService.get(action
-				.getFormDataTemplateId());
+		FormTemplate formTemplate = formTemplateService.get(action.getFormDataTemplateId());
 		boolean fixedRows = formTemplate.isFixedRows();
 		TAUserInfo userInfo = securityService.currentUserInfo();
 		if (!action.getModifiedRows().isEmpty()) {
@@ -61,8 +59,16 @@ public class GetRowsDataHandler extends
 					action.getRange().getLimit());
 		}
 
-        PagingResult<DataRow<Cell>> rows = dataRowService.getDataRows(userInfo,
-                action.getFormDataId(), dataRowRange, action.isReadOnly(), action.isManual());
+        PagingResult<DataRow<Cell>> rows;
+
+        if (action.isCorrectionDiff()) {
+            // TODO Реализовать режим сравнения
+            rows = new PagingResult<DataRow<Cell>>();
+        } else {
+            rows = dataRowService.getDataRows(userInfo, action.getFormDataId(), dataRowRange, action.isReadOnly(),
+                    action.isManual());
+        }
+
         Collections.sort(rows, new Comparator<DataRow<Cell>>() {
             @Override
             public int compare(DataRow<Cell> o1, DataRow<Cell> o2) {
@@ -86,7 +92,5 @@ public class GetRowsDataHandler extends
 	@Override
 	public void undo(GetRowsDataAction action, GetRowsDataResult result,
 			ExecutionContext context) throws ActionException {
-		// To change body of implemented methods use File | Settings | File
-		// Templates.
 	}
 }
