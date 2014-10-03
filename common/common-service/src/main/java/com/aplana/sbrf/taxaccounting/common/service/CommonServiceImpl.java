@@ -29,7 +29,7 @@ public class CommonServiceImpl implements CommonService {
 
     @Override
     public void addAuditLog(FormDataEvent event, TAUserInfo userInfo, Integer departmentId, Integer reportPeriodId,
-                    String declarationTypeName, String formTypeName, Integer formKindId, String note, String blobDataId) {
+                    String declarationTypeName, String formTypeName, Integer formKindId, String note, String blobDataId, Integer formTypeId) {
         LogSystem log = new LogSystem();
         log.setLogDate(new Date());
         log.setIp(userInfo.getIp());
@@ -71,6 +71,7 @@ public class CommonServiceImpl implements CommonService {
         log.setUserDepartmentName(userDepartmentName.substring(0, Math.min(userDepartmentName.length(), 2000)));
 
         log.setBlobDataId(blobDataId);
+        log.setFormTypeId(formTypeId);
 
         auditDao.add(log);
     }

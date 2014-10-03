@@ -263,7 +263,7 @@ public class RateMDB implements MessageListener {
         try {
             // Ошибка записи в журнал аудита не должна откатывать импорт
             if (auditService != null) {
-                auditService.add(FormDataEvent.IMPORT, userInfo, 0, null, null, null, null, msg, uuid);
+                auditService.add(FormDataEvent.IMPORT, userInfo, 0, null, null, null, null, msg, uuid, null);
             }
         } catch (Exception e) {
             logger.error(ERROR_AUDIT, e);

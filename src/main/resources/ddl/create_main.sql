@@ -612,23 +612,24 @@ comment on column log_business.user_department_id is 'Код подраздел�
 
 create sequence seq_log_business;
 ------------------------------------------------------------------------------------------------------
-create table log_system (
-  id                  number(18,0) primary key,
-  log_date            date not null,
-  ip                  varchar2(39),
-  event_id            number(3,0) not null,
-  user_login          varchar2(255) not null,
-  roles               varchar2(200),
-  department_name     varchar2(4000 byte) not null,
-  report_period_name  varchar2(100),
-  form_kind_id        number(9,0),
-  note                varchar2(4000 byte),
-  user_department_name varchar2(4000 byte),
-  declaration_type_name varchar2(80),
-  form_type_name      varchar2(1000),
-  form_department_id  number(9),
-  tb_department_id number(9),
-  blob_data_id        varchar2(36)
+CREATE TABLE log_system (
+  id                    NUMBER(18, 0) PRIMARY KEY,
+  log_date              DATE                NOT NULL,
+  ip                    VARCHAR2(39),
+  event_id              NUMBER(3, 0)        NOT NULL,
+  user_login            VARCHAR2(255)       NOT NULL,
+  roles                 VARCHAR2(200),
+  department_name       VARCHAR2(4000 BYTE) NOT NULL,
+  report_period_name    VARCHAR2(100),
+  form_kind_id          NUMBER(9, 0),
+  note                  VARCHAR2(4000 BYTE),
+  user_department_name  VARCHAR2(4000 BYTE),
+  declaration_type_name VARCHAR2(80),
+  form_type_name        VARCHAR2(1000),
+  form_department_id    NUMBER(9),
+  tb_department_id      NUMBER(9),
+  blob_data_id          VARCHAR2(36),
+  form_type_id               NUMBER(9,0)
 );
 comment on table log_system is  'Системный журнал';
 comment on column log_system.id is 'Код записи';
@@ -637,7 +638,7 @@ comment on column log_system.ip is 'IP-адрес пользователя';
 comment on column log_system.event_id is 'Код события (1 - Создать,2 - Удалить,3 - Рассчитать,4 - Обобщить,5 - Проверить,6 - Сохранить,7 - Импорт данных,101 - Утвердить,102 - Вернуть из \Утверждена\ в \Создана\,103 - Принять из \Утверждена\,104 - Вернуть из \Принята\ в \Утверждена\,105 - Принять из \Создана\,106 - Вернуть из \Принята\ в \Создана\,107 - Подготовить,108 - Вернуть из \Подготовлена\ в \Создана\,109 - Принять из \Подготовлена\,110 - Вернуть из \Принята\ в \Подготовлена\,203 - После принять из \Утверждена\,204 - После вернуть из \Принята\ в \Утверждена\,205 - После принять из \Создана\,206 - После вернуть из \Принята\ в \Создана\,207 - После принять из \"Подготовлена\,301 - Добавить строку,303 - Удалить строку,302 - Загрузка)';
 comment on column log_system.user_login is 'Логин пользователя';
 comment on column log_system.roles is 'Список ролей пользователя';
-comment on column log_system.department_name is 'Наименование подразделения НФ\декларации';
+comment on column log_system.department_name is 'Наименование подразделения, к которому относится событие';
 comment on column log_system.report_period_name is 'Наименование отчетного периода';
 comment on column log_system.form_kind_id is 'Код типа налоговой формы (1,2,3,4,5)';
 comment on column log_system.note is 'Текст сообщения';
@@ -647,6 +648,7 @@ comment on column LOG_SYSTEM.FORM_TYPE_NAME is 'Вид налоговой фор
 comment on column LOG_SYSTEM.FORM_DEPARTMENT_ID is 'Идентификатор подразделения налоговой формы/декларации';
 comment on column log_system.tb_department_id is 'Идентификатор ТБ подразделения налоговой формы/декларации';
 comment on column log_system.blob_data_id is 'Ссылка на логи';
+comment on column log_system.form_type_id is 'Идентификатор вида НФ';
 
 create sequence seq_log_system start with 10000;
 ------------------------------------------------------------------------------------------------------

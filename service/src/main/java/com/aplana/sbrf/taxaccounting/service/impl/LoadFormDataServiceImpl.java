@@ -194,6 +194,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 fail++;
                 continue;
             }
+            formTypeId = formType.getId();
 
             // Назначение подразделению типа и вида НФ
             if (!departmentFormTypeDao.existAssignedForm(formDepartment.getId(), formType.getId(), FormDataKind.PRIMARY)) {

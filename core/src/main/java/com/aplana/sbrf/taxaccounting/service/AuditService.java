@@ -24,13 +24,14 @@ public interface AuditService {
      * @param departmentId подразделение НФ/декларации (необязательное)
      * @param reportPeriodId отчетный период (необязательное)
      * @param declarationType наименование типа декларации (необязательное)
-     * @param formType наименование типа НФ (необязательное)
+     * @param formType наименование типа НФ (необязательное) Хранится для информации о виде НФ, даже если она будет изменена
      * @param formKindId вид НФ (необязательное)
      * @param note пояснение (необязательное)
      * @param blobDataId сыылка на сериализованные данные из лог панели, хранящие набор сообщений к данному событию (необязательное)
+     * @param formTypeId идентификатор вид налоговой формы (в бд протсо как число, не ссылка на FORM_TYPE, заполнение согласно http://conf.aplana.com/pages/viewpage.action?pageId=9580637)
 	 */
 	void add(FormDataEvent event, TAUserInfo userInfo, Integer departmentId, Integer reportPeriodId,
-             String declarationType, String formType, Integer formKindId, String note, String blobDataId);
+             String declarationType, String formType, Integer formKindId, String note, String blobDataId, Integer formTypeId);
 
     /**
      * Удаляем набор записей из журнала и сразу создаем запись в ЖА об архивировании.

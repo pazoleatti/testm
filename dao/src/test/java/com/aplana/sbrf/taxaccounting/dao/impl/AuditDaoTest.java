@@ -73,6 +73,7 @@ public class AuditDaoTest {
         logSystem.setFormKindId(2);
         logSystem.setNote("the best note");
         logSystem.setUserDepartmentName("Подразделение");
+        logSystem.setFormTypeId(null);
 
         auditDao.add(logSystem);
 
@@ -100,6 +101,7 @@ public class AuditDaoTest {
         assertEquals("the best note", logSearchResultItem.getNote());
         assertEquals("Подразделение", logSearchResultItem.getUserDepartmentName());
         assertEquals(4, records.getTotalCount());
+        assertNull(logSearchResultItem.getFormTypeId());
     }
 
 	@Test
