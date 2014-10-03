@@ -334,30 +334,6 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     }
 
     @Override
-    public void update(DeclarationData declarationData) {
-        int count = getJdbcTemplate().update(
-                "update declaration_data set data = ?, data_pdf = ?, data_xlsx = ?, jasper_print = ? where id = ?",
-                new Object[]{
-                        declarationData.getXmlDataUuid(),
-                        declarationData.getPdfDataUuid(),
-                        declarationData.getXlsxDataUuid(),
-                        declarationData.getJasperPrintUuid(),
-                        declarationData.getId()
-                },
-                new int[]{
-                        Types.VARCHAR,
-                        Types.VARCHAR,
-                        Types.VARCHAR,
-                        Types.VARCHAR,
-                        Types.NUMERIC
-                }
-        );
-        if (count == 0) {
-            throw new DaoException("Не удалось обновить декларацию с id = %d, так как она не существует.");
-        }
-    }
-
-    @Override
     public List<Long> findDeclarationDataByFormTemplate(int templateId, Date startDate) {
         try {
             return getJdbcTemplate().queryForList(

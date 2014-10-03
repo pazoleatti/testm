@@ -24,17 +24,13 @@ import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.
  */
 @Component("TestCSVGeneratorAsyncTaskSpring")
 @Transactional
-public class TestCsvGeneratorAsyncTaskSpring implements AsyncTask {
-    protected final Log log = LogFactory.getLog(getClass());
+public class TestCsvGeneratorAsyncTaskSpring extends AbstractAsyncTask {
 
     @Autowired
     private TAUserService userService;
 
     @Autowired
     private PrintingService printingService;
-
-    @Autowired
-    private NotificationService notificationService;
 
     @Autowired
     private FormDataAccessService formDataAccessService;
@@ -51,48 +47,8 @@ public class TestCsvGeneratorAsyncTaskSpring implements AsyncTask {
     @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
 
-    @Autowired
-    private LockDataService lockService;
-
     @Override
-    public void execute(Map<String, Object> params) {
-        String lock = (String) params.get(LOCKED_OBJECT.name());
-        try {
-            if (lockService.isLockExists(lock)) {
-                //Если блокировка на объект задачи все еще существует, значит на нем можно выполнять бизнес-логику
-                executeBusinessLogic(params);
-                if (!lockService.isLockExists(lock)) {
-                    //Если после выполнения бизнес логики, оказывается, что блокировки уже нет
-                    //Значит результаты нам уже не нужны - откатываем транзакцию и все изменения
-                    throw new RuntimeException("Результат выполнения задачи \"" + getAsyncTaskName() + "\" больше не актуален. Выполняется откат транзакции");
-                }
-                //Получаем список пользователей, для которых надо сформировать оповещение
-                String msg = getNotificationMsg(params);
-                if (msg != null && !msg.isEmpty()) {
-                    List<Integer> waitingUsers = lockService.getUsersWaitingForLock(lock);
-                    if (!waitingUsers.isEmpty()) {
-                        List<Notification> notifications = new ArrayList<Notification>();
-                        for (Integer userId : waitingUsers) {
-                            Notification notification = new Notification();
-                            notification.setUserId(userId);
-                            notification.setCreateDate(new Date());
-                            notification.setText(msg);
-                            notifications.add(notification);
-                        }
-                        //Создаем оповещение для каждого пользователя из списка
-                        notificationService.saveList(notifications);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            log.error("Не удалось выполнить асинхронную задачу", e);
-        } finally {
-            //Снимаем блокировку
-            lockService.unlock(lock, (Integer) params.get(USER_ID.name()), true);
-        }
-    }
-
-    private void executeBusinessLogic(Map<String, Object> params) {
+    protected void executeBusinessLogic(Map<String, Object> params) {
         int userId = (Integer)params.get(USER_ID.name());
         long formDataId = (Long)params.get("formDataId");
         boolean manual = (Boolean)params.get("manual");

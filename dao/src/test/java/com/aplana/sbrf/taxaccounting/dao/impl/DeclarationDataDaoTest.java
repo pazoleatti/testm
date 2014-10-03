@@ -220,30 +220,6 @@ public class DeclarationDataDaoTest {
     }
 
     @Test
-    public void updateTest(){
-        DeclarationData declarationDataOld = declarationDataDao.get(1);
-        DeclarationData declarationDataNew = new DeclarationData();
-        declarationDataNew.setId(declarationDataOld.getId());
-
-        String xmlId = blobDataDao.create(blobData);
-        declarationDataNew.setXmlDataUuid(xmlId);
-
-        blobData.setUuid(UUID.randomUUID().toString().toLowerCase());
-        String pdfId = blobDataDao.create(blobData);
-        declarationDataNew.setPdfDataUuid(pdfId);
-
-        blobData.setUuid(UUID.randomUUID().toString().toLowerCase());
-        String xlsxId = blobDataDao.create(blobData);
-        declarationDataNew.setXlsxDataUuid(xlsxId);
-
-        declarationDataDao.update(declarationDataNew);
-        assertNotEquals(declarationDataOld.getXmlDataUuid(), declarationDataNew.getXmlDataUuid());
-        assertNotEquals(declarationDataOld.getPdfDataUuid(), declarationDataNew.getPdfDataUuid());
-        assertNotEquals(declarationDataOld.getXlsxDataUuid(), declarationDataNew.getXlsxDataUuid());
-        assertEquals(blobData.getUuid(), declarationDataDao.get(1).getXlsxDataUuid());
-    }
-
-    @Test
     public void testFindDeclarationDataByFormTemplate() throws ParseException {
         SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd");
         Assert.assertEquals(6, declarationDataDao.findDeclarationDataByFormTemplate(1, format.parse("2013.01.01")).size());

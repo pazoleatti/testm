@@ -30,11 +30,7 @@ import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.
  */
 @Component("TestXlsxGeneratorAsyncTaskSpring")
 @Transactional
-public class TestXlsxGeneratorAsyncTaskSpring implements AsyncTask {
-    protected final Log log = LogFactory.getLog(getClass());
-
-    @Autowired
-    private NotificationService notificationService;
+public class TestXlsxGeneratorAsyncTaskSpring extends AbstractAsyncTask {
 
     @Autowired
     private TAUserService userService;
@@ -54,58 +50,8 @@ public class TestXlsxGeneratorAsyncTaskSpring implements AsyncTask {
     @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
 
-    @Autowired
-    private LockDataService lockService;
-
     @Override
-    public void execute(Map<String, Object> params) {
-        String lock = (String) params.get(LOCKED_OBJECT.name());
-        Date lockDateEnd = (Date) params.get(LOCK_DATE_END.name());
-        try {
-            if (lockService.isLockExists(lock, lockDateEnd)) {
-                //Если блокировка на объект задачи все еще существует, значит на нем можно выполнять бизнес-логику
-                try {
-                    executeBusinessLogic(params);
-                } catch (Exception e) {
-                    if (lockService.isLockExists(lock, lockDateEnd)) {
-                        lockService.unlock(lock, (Integer) params.get(USER_ID.name()), true);
-                    }
-                    throw e; // TODO с каким сообщением???
-                }
-                if (!lockService.isLockExists(lock, lockDateEnd)) {
-                    //Если после выполнения бизнес логики, оказывается, что блокировки уже нет
-                    //Значит результаты нам уже не нужны - откатываем транзакцию и все изменения
-                    throw new RuntimeException("Результат выполнения задачи \"" + getAsyncTaskName() + "\" больше не актуален. Выполняется откат транзакции");
-                }
-
-                //Получаем список пользователей, для которых надо сформировать оповещение
-                try {
-                    String msg = getNotificationMsg(params);
-                    if (msg != null && !msg.isEmpty()) {
-                        List<Integer> waitingUsers = lockService.getUsersWaitingForLock(lock);
-                        if (!waitingUsers.isEmpty()) {
-                            List<Notification> notifications = new ArrayList<Notification>();
-                            for (Integer userId : waitingUsers) {
-                                Notification notification = new Notification();
-                                notification.setUserId(userId);
-                                notification.setCreateDate(new Date());
-                                notification.setText(msg);
-                                notifications.add(notification);
-                            }
-                            //Создаем оповещение для каждого пользователя из списка
-                            notificationService.saveList(notifications);
-                        }
-                    }
-                } finally {
-                    lockService.unlock(lock, (Integer) params.get(USER_ID.name()), true);
-                }
-            }
-        } catch (Exception e) {
-            log.error("Не удалось выполнить асинхронную задачу", e);
-        }
-    }
-
-    private void executeBusinessLogic(Map<String, Object> params) {
+    protected void executeBusinessLogic(Map<String, Object> params) {
         long declarationDataId = (Long)params.get("declarationDataId");
         int userId = (Integer)params.get(USER_ID.name());
         TAUserInfo userInfo = new TAUserInfo();

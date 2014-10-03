@@ -30,12 +30,6 @@ public class DeclarationDataController {
     @Autowired
     private SecurityService securityService;
 
-    @Autowired
-    private BlobDataService blobDataService;
-
-    @Autowired
-    private ReportService reportService;
-
     private static final String ENCODING = "UTF-8";
 
 
@@ -44,26 +38,13 @@ public class DeclarationDataController {
             throws IOException {
         TAUserInfo userInfo = securityService.currentUserInfo();
 
-        BlobData xlsxData = blobDataService.get(reportService.getDec(userInfo, id, ReportType.EXCEL_DEC));//declarationService.getXlsxData(id, userInfo);
-        if (xlsxData != null) {
-            String fileName = URLEncoder.encode(getFileName(id, userInfo, "xlsx"), ENCODING);
+        byte[] xlsxData = declarationService.getXlsxData(id, userInfo);
+        String fileName = URLEncoder.encode(getFileName(id, userInfo, "xlsx"), ENCODING);
 
-            response.setContentType("application/octet-stream");
-            response.setHeader("Content-Disposition", "attachment; filename=\""
-                    + fileName + "\"");
-
-            DataInputStream in = new DataInputStream(xlsxData.getInputStream());
-            OutputStream out = response.getOutputStream();
-            int count = 0;
-            try {
-                count = IOUtils.copy(in, out);
-            } finally {
-                in.close();
-                out.close();
-            }
-            response.setContentLength(count);
-        }
-        //response.getOutputStream().write(xlsxData.getInputStream());
+        response.setContentType("application/octet-stream");
+        response.setHeader("Content-Disposition", "attachment; filename=\""
+                + fileName + "\"");
+        response.getOutputStream().write(xlsxData);
     }
 
 
