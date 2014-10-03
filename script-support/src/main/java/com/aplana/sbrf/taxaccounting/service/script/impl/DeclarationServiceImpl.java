@@ -46,8 +46,12 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
             put(TaxType.TRANSPORT, RefBook.DEPARTMENT_CONFIG_TRANSPORT);
             put(TaxType.DEAL, RefBook.DEPARTMENT_CONFIG_DEAL);
             put(TaxType.VAT, RefBook.DEPARTMENT_CONFIG_VAT);
+            put(TaxType.PROPERTY, RefBook.DEPARTMENT_CONFIG_PROPERTY);
         }
     };
+
+    private static final int PROPERTY_DECLARATION_ID = 3;
+    private static final int PROPERTY_AVANS_ID = 8;
 
     private ScriptComponentContext context;
 
@@ -97,7 +101,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
         DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
 
         TaxType declarationTaxType = declarationTypeDao.get(declarationTypeId).getTaxType();
-        String declarationPrefix = declarationTaxType.getDeclarationPrefix();
+        String declarationPrefix = getDeclarationPrefix(declarationTypeId, declarationTaxType);
 		StringBuilder stringBuilder = new StringBuilder(declarationPrefix);
 
 		RefBookDataProvider tmp = factory.getDataProvider(TAX_TYPE_TO_REF_BOOK_MAP.get(declarationTaxType));
@@ -124,7 +128,18 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
         }
         return null;
 	}
-	
+
+    private String getDeclarationPrefix(int declarationTypeId, TaxType declarationTaxType) {
+        switch(declarationTypeId){
+            case PROPERTY_DECLARATION_ID :
+                return declarationTaxType.getDeclarationPrefix() + "UD";
+            case PROPERTY_AVANS_ID :
+                return declarationTaxType.getDeclarationPrefix() + "UR";
+            default:
+                return declarationTaxType.getDeclarationPrefix();
+        }
+    }
+
     @Override
 	public FormDataCollection getAcceptedFormDataSources(DeclarationData declarationData) {
 		int departmentId = declarationData.getDepartmentId();
