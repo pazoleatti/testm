@@ -31,6 +31,9 @@ switch (formDataEvent) {
         checkDeparmentParams(LogLevel.ERROR)
         logicCheck()
         break
+    case FormDataEvent.MOVE_ACCEPTED_TO_CREATED: // отменить принятие
+        сancelAccepted()
+        break
     case FormDataEvent.CALCULATE:
         checkDeparmentParams(LogLevel.WARNING)
         generateXML()
@@ -1909,4 +1912,14 @@ def getOkato(def id) {
         okato = getRefBookValue(96, id)?.CODE?.stringValue
     }
     return okato
+}
+
+/** Отменить принятие. Проверить наличие декларации ОП. */
+void сancelAccepted() {
+    // вид декларации 5 - декларация ОП
+    def declarationTypeId = 5
+
+    if (declarationService.checkExistDeclarationsInPeriod(declarationTypeId, declarationData.reportPeriodId)) {
+        throw new Exception('Отменить принятие данной декларации Банка невозможно. Так как в текущем периоде создана декларация ОП по прибыли!')
+    }
 }
