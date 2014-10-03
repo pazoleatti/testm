@@ -167,12 +167,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @Transactional(readOnly = false)
     public void calculate(Logger logger, long id, TAUserInfo userInfo, Date docDate) {
-        long start = System.currentTimeMillis();
-        logger.info("Начало рассчета: " + start);
         declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.CALCULATE);
         DeclarationData declarationData = declarationDataDao.get(id);
-        long check1 = System.currentTimeMillis();
-        logger.info("Проверены права: " + check1 + " (" + (check1 - start) + ")");
 
         List<String> oldBlobDataIds = new ArrayList<String>(); // список UUID блоб для удаления
 /*        if (declarationData.getJasperPrintUuid() != null){
@@ -196,14 +192,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         // удаляем только после успешного формирования новых данных
         //if (!oldBlobDataIds.isEmpty()) blobDataService.delete(oldBlobDataIds);
 
-        long check2 = System.currentTimeMillis();
-        logger.info("Удалены старые BLOB'ы: " + check2 + " (" + (check2 - check1) + ")");
-		logBusinessService.add(null, id, userInfo, FormDataEvent.SAVE, null);
-		auditService.add(FormDataEvent.SAVE , userInfo, declarationData.getDepartmentId(),
-				declarationData.getReportPeriodId(),
-				declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getType().getName(),
+        logBusinessService.add(null, id, userInfo, FormDataEvent.SAVE, null);
+        auditService.add(FormDataEvent.SAVE , userInfo, declarationData.getDepartmentId(),
+                declarationData.getReportPeriodId(),
+                declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getType().getName(),
 				null, null, null, null, null);
-	}
+    }
 
     @Override
     public void check(Logger logger, long id, TAUserInfo userInfo) {

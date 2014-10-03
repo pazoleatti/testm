@@ -64,7 +64,6 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                     //Значит результаты нам уже не нужны - откатываем транзакцию и все изменения
                     throw new RuntimeException("Результат выполнения задачи \"" + getAsyncTaskName() + "\" больше не актуален. Выполняется откат транзакции");
                 }
-
                 //Получаем список пользователей, для которых надо сформировать оповещение
                 try {
                     String msg = getNotificationMsg(params);
@@ -88,7 +87,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                 }
             }
         } catch (Exception e) {
-            log.error("Не удалось выполнить асинхронную задачу", e);
+            throw new RuntimeException("Не удалось выполнить асинхронную задачу", e);
         }
     }
 }

@@ -494,54 +494,6 @@ comment on column data_row.manual is 'Режим ввода данных (0 - о
 
 create sequence seq_data_row start with 10000;
 ---------------------------------------------------------------------------------------------------
-create table cell_style (
-  row_id  number(18) not null,
-  column_id number(9) not null,
-  style_id number(9) not null
-);
-comment on table cell_style is 'Привязка стилей к ячейкам налоговой формы';
-comment on column cell_style.row_id is 'Идентификатор строки';
-comment on column cell_style.column_id is 'Идентификатор столбца';
-comment on column cell_style.style_id is 'Идентификатор стиля';
----------------------------------------------------------------------------------------------------
-create table cell_editable(
-  row_id number(18) not null,
-  column_id number(9) not null
-);
-comment on table cell_editable is 'Информация о редактируемых ячейках налоговой формы';
-comment on column cell_editable.row_id is 'Идентификатор строки налоговой формы';
-comment on column cell_editable.column_id is 'Идентификатор столбца налоговой формы';
----------------------------------------------------------------------------------------------------
-create table numeric_value (
-  row_id number(18) not null,
-  column_id number(9) not null,
-  value     decimal(27, 10)
-);
-comment on table numeric_value is 'Числовые значения налоговых форм';
-comment on column numeric_value.column_id is 'Идентификатор столбца';
-comment on column numeric_value.row_id is 'Идентификатор строки';
-comment on column numeric_value.value is 'Значение';
----------------------------------------------------------------------------------------------------
-create table string_value (
-  row_id number(18) not null,
-  column_id number(9) not null,
-  value     varchar2(2000 char)
-);
-comment on table string_value is 'Строковые значения налоговых форм';
-comment on column string_value.column_id is 'Идентификатор столбца';
-comment on column string_value.row_id is 'Идентификатор строки';
-comment on column string_value.value is 'Значение';
----------------------------------------------------------------------------------------------------
-create table date_value (
-  row_id number(18) not null,
-  column_id number(9) not null,
-  value date
-);
-comment on table date_value is 'Значения налоговых форм типа дата';
-comment on column date_value.column_id is 'Идентификатор столбца';
-comment on column date_value.row_id is 'Идентификатор строки';
-comment on column date_value.value is 'Значение';
----------------------------------------------------------------------------------------------------
 create table data_cell (
   row_id number(18) not null,
   column_id number(9) not null,
@@ -635,18 +587,6 @@ create table sec_user_role (
 comment on table sec_user_role is 'Привязка ролей к пользователям';
 comment on column sec_user_role.user_id is 'Идентификатор пользователя';
 comment on column sec_user_role.role_id is 'Идентификатор роли';
-----------------------------------------------------------------------------------------------------
-create table cell_span_info (
-  row_id number(18) not null,
-  column_id number(9) not null,
-  colspan number(3),
-  rowspan number(3)
-);
-comment on table cell_span_info is 'Информация об объединении ячеек в налоговой форме';
-comment on column cell_span_info.row_id is 'Идентификатор строки';
-comment on column cell_span_info.column_id is 'Идентификатор столбца';
-comment on column cell_span_info.colspan is 'Число ячеек, которые должны быть объединены по горизонтали';
-comment on column cell_span_info.rowspan is 'Число ячеек, которые должны быть объединены по вертикали';
 ----------------------------------------------------------------------------------------------------
 create table log_business (
   id                  number(18,0) primary key,

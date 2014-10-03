@@ -156,27 +156,6 @@ alter table data_row add constraint data_row_uniq_form_data_order unique(form_da
 alter table data_row add constraint data_row_chk_type check (type in (-1, 0, 1));
 alter table data_row add constraint data_row_chk_manual check (manual in (0, 1));
 
-alter table cell_style add constraint cell_style_pk primary key (row_id, column_id);
-alter table cell_style add constraint cell_style_fk_column_id foreign key (column_id) references form_column(id);
-alter table cell_style add constraint cell_style_fk_data_row foreign key (row_id) references data_row(id) on delete cascade;
-alter table cell_style add constraint cell_style_fk_style_id foreign key (style_id) references form_style(id);
-
-alter table cell_editable add constraint cell_editable_pk primary key (row_id, column_id);
-alter table cell_editable add constraint cell_editable_fk_data_row foreign key (row_id) references data_row(id) on delete cascade;
-alter table cell_editable add constraint cell_editable_fk_form_column foreign key (column_id) references form_column(id);
-
-alter table numeric_value add constraint numeric_value_pk primary key (row_id, column_id);
-alter table numeric_value add constraint numeric_value_fk_column_id foreign key (column_id) references form_column(id);
-alter table numeric_value add constraint numeric_value_fk_row_id foreign key (row_id) references data_row(id) on delete cascade;
-
-alter table string_value add constraint string_value_pk primary key (row_id, column_id);
-alter table string_value add constraint string_value_fk_column_id foreign key (column_id) references form_column(id);
-alter table string_value add constraint string_value_fk_row_id foreign key (row_id) references data_row(id) on delete cascade;
-
-alter table date_value add constraint date_value_pk primary key (row_id, column_id);
-alter table date_value add constraint date_value_fk_column_id foreign key (column_id) references form_column(id);
-alter table date_value add constraint date_value_fk_row_id foreign key (row_id) references data_row(id) on delete cascade;
-
 alter table data_cell add constraint data_cell_pk primary key (row_id, column_id);
 alter table data_cell add constraint data_cell_fk_column_id foreign key (column_id) references form_column(id);
 alter table data_cell add constraint data_cell_fk_data_row foreign key (row_id) references data_row(id) on delete cascade;
@@ -208,11 +187,6 @@ alter table sec_role add constraint sec_role_uniq_alias unique (alias);
 alter table sec_user_role add constraint sec_user_role_pk primary key (user_id, role_id);
 alter table sec_user_role add constraint sec_user_role_fk_user_id foreign key (user_id) references sec_user(id);
 alter table sec_user_role add constraint sec_user_role_fk_role_id foreign key (role_id) references sec_role(id);
-
-alter table cell_span_info add constraint cell_span_pk primary key (row_id, column_id);
-alter table cell_span_info add constraint cell_span_info_fk_row_id foreign key (row_id) references data_row(id) on delete cascade;
-alter table cell_span_info add constraint cell_span_info_fk_column_id foreign key (column_id) references form_column(id);
-alter table cell_span_info add constraint cell_span_info_chk_span check (colspan is not null or rowspan is not null);
 
 alter table log_business add constraint log_business_fk_user_login foreign key (user_login) references sec_user(login);
 alter table log_business add constraint log_business_fk_declaration_id foreign key (declaration_data_id) references declaration_data(id) on delete cascade;
@@ -277,18 +251,6 @@ create index i_form_data_kind on form_data(kind);
 create index i_form_data_signer_formdataid on form_data_signer(form_data_id);
 create index i_ref_book_value_string on ref_book_value(string_value);
 create index i_ref_book_oktmo_code on ref_book_oktmo(code);
-create index i_date_value_row_id on date_value(row_id);
-create index i_string_value_row_id on string_value(row_id);
-create index i_numeric_value_row_id on numeric_value(row_id);
-create index i_cell_style_row_id on cell_style(row_id);
-create index i_cell_editable_row_id on cell_editable(row_id);
-create index i_cell_span_info_row_id on cell_span_info(row_id);
 create index i_form_style_form_template_id on form_style(form_template_id);
 create index i_form_column_form_template_id on form_column(form_template_id);
-create index i_date_value_column_id on date_value(column_id);
-create index i_string_value_column_id on string_value(column_id);
-create index i_numeric_value_column_id on numeric_value(column_id);
-create index i_cell_style_column_id on cell_style(column_id);
-create index i_cell_editable_column_id on cell_editable(column_id);
-create index i_cell_span_info_column_id on cell_span_info(column_id);
 create index i_decl_data_dep_rep_per_id on declaration_data (department_report_period_id);

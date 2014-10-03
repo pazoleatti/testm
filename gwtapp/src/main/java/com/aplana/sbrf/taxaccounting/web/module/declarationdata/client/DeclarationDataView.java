@@ -106,15 +106,25 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
         timerXML.cancel();
 	}
 
-	@Override
+    @Override
+    public void showState(boolean accepted) {
+        String status;
+        boolean isDeal = getUiHandlers().getTaxType().equals(TaxType.DEAL);
+        if (accepted) {
+            status = isDeal ? "Принято" : "Принята";
+        }else{
+            status =  isDeal ? "Создано" : "Создана";
+        }
+        stateLabel.setText(status);
+    }
+
+    @Override
 	public void showAccept(boolean show) {
-		stateLabel.setText(!getUiHandlers().getTaxType().equals(TaxType.DEAL) ? "Создана" : "Создано");
 		acceptButton.setVisible(show);
 	}
 
 	@Override
 	public void showReject(boolean show) {
-	    stateLabel.setText(!getUiHandlers().getTaxType().equals(TaxType.DEAL) ? "Принята" : "Принято");
 		cancelButton.setVisible(show);
 	}
 

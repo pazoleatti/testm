@@ -34,6 +34,6 @@ public class AcceptDeclarationDataAction extends UnsecuredActionImpl<AcceptDecla
 
     @Override
     public String getName() {
-        return "Принять";
+        return (accepted ? "Принять" : "Отменить принятие");
     }
 }

@@ -1529,7 +1529,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
         try {
             //Проверка использования в налоговых формах
-            in = SqlUtils.transformToSqlInStatement("nv.value", uniqueRecordIds);
+            in = SqlUtils.transformToSqlInStatement("nv.nvalue", uniqueRecordIds);
             sql = String.format(CHECK_USAGES_IN_FORMS, in);
             params.clear();
             params.put("refBookId", refBookId);
