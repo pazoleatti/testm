@@ -96,4 +96,9 @@ public class XmlGeneratorAsyncTask extends AbstractAsyncTask {
                 ReportType.XML_DEC.getName(), reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), department.getName(),
                 declarationTemplate.getType().getName());
     }
+
+    @Override
+    protected String getErrorMsg() {
+        return null;
+    }
 }

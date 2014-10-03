@@ -70,4 +70,9 @@ public class XlsxGeneratorAsyncTask extends AbstractAsyncTask {
         return String.format("Сформирован %s отчет декларации: Период: \"%s, %s\", Подразделение: \"%s\", Вид: \"%s\".", ReportType.EXCEL.getName(), reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), department.getName(),
                 declarationTemplate.getType().getName());
     }
+
+    @Override
+    protected String getErrorMsg() {
+        return null;
+    }
 }

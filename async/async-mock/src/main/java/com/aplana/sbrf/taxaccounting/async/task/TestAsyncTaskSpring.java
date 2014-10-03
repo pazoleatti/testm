@@ -1,9 +1,13 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -18,11 +22,16 @@ public class TestAsyncTaskSpring extends AbstractAsyncTask {
     @Autowired
     TAUserService userService;
 
+    @Autowired
+    RefBookFactory refBookFactory;
+
     @Override
     protected void executeBusinessLogic(Map<String, Object> params) {
         System.out.println("TestAsyncTaskSpring has been started!");
-        System.out.println("params: " + params);
-        System.out.println("admin: " + userService.getUser("admin").getName());
+        /*TAUserInfo userInfo = (TAUserInfo) params.get("userInfo");
+        Logger logger = new Logger();
+        logger.setTaUserInfo(userInfo);
+        refBookFactory.getDataProvider(13L).deleteRecordVersions(logger, Arrays.asList(274873099L));*/
     }
 
     @Override
@@ -33,5 +42,10 @@ public class TestAsyncTaskSpring extends AbstractAsyncTask {
     @Override
     protected String getNotificationMsg(Map<String, Object> params) {
         return "Тест тест тест dev-mode";
+    }
+
+    @Override
+    protected String getErrorMsg() {
+        return "Dev-мод ошибка";
     }
 }

@@ -33,6 +33,10 @@ public class TestAsyncTask extends AbstractAsyncTask {
     @Override
     protected void executeBusinessLogic(Map<String, Object> params) {
         System.out.println("TestAsyncTask started!");
+        /*TAUserInfo userInfo = (TAUserInfo) params.get("userInfo");
+        Logger logger = new Logger();
+        logger.setTaUserInfo(userInfo);
+        refBookFactory.getDataProvider(13L).deleteRecordVersions(logger, Arrays.asList(274873099L));*/
     }
 
     @Override
@@ -43,5 +47,10 @@ public class TestAsyncTask extends AbstractAsyncTask {
     @Override
     protected String getNotificationMsg(Map<String, Object> params) {
         return "Тест тест тест!";
+    }
+
+    @Override
+    protected String getErrorMsg() {
+        return "Ошибка в тестовой задаче";
     }
 }
