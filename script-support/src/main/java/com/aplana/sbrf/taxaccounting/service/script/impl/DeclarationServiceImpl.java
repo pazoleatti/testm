@@ -14,6 +14,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataSearchService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.service.script.DeclarationService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContext;
@@ -84,6 +85,9 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 
     @Autowired
     BlobDataService blobDataService;
+
+    @Autowired
+    DeclarationDataSearchService declarationDataSearchService;
 
     @Override
     public DeclarationData find(int declarationTypeId, int departmentReportPeriodId) {
@@ -189,6 +193,23 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
             throw new ServiceException("Не удалось извлечь xml для скрипта.", e);
         }
         return new String(byteArrayOutputStream.toByteArray());
+    }
+
+    @Override
+    public boolean checkExistDeclarationsInPeriod(int declarationTypeId, int reportPeriodId) {
+        DeclarationDataFilter declarationFilter = new DeclarationDataFilter();
+        // фильтр
+        declarationFilter.setDeclarationTypeId(declarationTypeId);
+        declarationFilter.setReportPeriodIds(Arrays.asList(reportPeriodId));
+        declarationFilter.setTaxType(TaxType.INCOME);
+
+        // пейджинг
+        declarationFilter.setSearchOrdering(DeclarationDataSearchOrdering.ID);
+        declarationFilter.setStartIndex(0);
+        declarationFilter.setCountOfRecords(1);
+
+        PagingResult<DeclarationDataSearchResultItem> result = declarationDataSearchService.search(declarationFilter);
+        return (result != null && result.size() > 0);
     }
 
     @Override
