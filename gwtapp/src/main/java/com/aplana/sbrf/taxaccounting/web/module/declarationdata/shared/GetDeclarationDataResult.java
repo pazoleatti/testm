@@ -17,6 +17,7 @@ public class GetDeclarationDataResult implements Result {
     private String taxOrganCode;
     private String kpp;
 
+	private boolean accepted;
 	private boolean canAccept;
 	private boolean canReject;
     private boolean canDelete;
@@ -33,6 +34,13 @@ public class GetDeclarationDataResult implements Result {
 
 	public void setCanAccept(boolean canAccept) {
 		this.canAccept = canAccept;
+	}
+	public boolean isAccepted() {
+		return accepted;
+	}
+
+	public void setAccepted(boolean accepted) {
+		this.accepted = accepted;
 	}
 
 	public boolean isCanReject() {

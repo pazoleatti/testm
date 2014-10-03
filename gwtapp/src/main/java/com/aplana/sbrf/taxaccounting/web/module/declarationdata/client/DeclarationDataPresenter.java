@@ -88,6 +88,8 @@ public class DeclarationDataPresenter
         void setPropertyBlockVisible(boolean isVisible);
 
         void setPdfPage(int page);
+
+        void showState(boolean accepted);
     }
 
 	private final DispatchAsync dispatcher;
@@ -163,6 +165,7 @@ public class DeclarationDataPresenter
 								updateTitle(result.getDeclarationType());
 
                                 getView().setPdfPage(0);
+                                getView().showState(result.isAccepted());
 								getView().showAccept(result.isCanAccept());
 								getView().showReject(result.isCanReject());
 								getView().showDelete(result.isCanDelete());
