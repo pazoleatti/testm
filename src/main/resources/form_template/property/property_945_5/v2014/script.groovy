@@ -364,7 +364,7 @@ void logicCheck() {
                 def list = []
                 (allColumns - first5Columns).each { alias ->
                     def index = newRows.indexOf(row)
-                    if (rows[index][alias] != newRows[index][alias]) {
+                    if (rows && newRows && rows[index] && newRows[index] && rows[index][alias] != newRows[index][alias]) {
                         def columnName = getColumnName(row, alias)
                         def value = row[alias]?:"''"
                         list.add("Графа «$columnName» = $value")

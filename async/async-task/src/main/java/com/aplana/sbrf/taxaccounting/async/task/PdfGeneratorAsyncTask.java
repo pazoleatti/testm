@@ -29,4 +29,9 @@ public class PdfGeneratorAsyncTask extends AbstractAsyncTask {
         //TODO
         return null;
     }
+
+    @Override
+    protected String getErrorMsg() {
+        return null;
+    }
 }

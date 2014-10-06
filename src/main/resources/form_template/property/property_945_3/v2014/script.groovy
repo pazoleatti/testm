@@ -169,19 +169,19 @@ void calc() {
             row.benefitBasis = calcBasis(row.taxBenefitCode)
         }
 
-        if (isTaxPeriod && row.priceAverage && row.priceAverageTaxFree) {
+        if (isTaxPeriod && row.priceAverage != null && row.priceAverageTaxFree != null) {
             // графа 10
             row.taxBase = row.priceAverage - row.priceAverageTaxFree
         }
-        if (row.taxBenefitCodeReduction) {
+        if (row.taxBenefitCodeReduction != null) {
             // графа 12
             row.benefitReductionBasis = calcBasis(row.taxBenefitCodeReduction)
         }
         // графа 13
         // Если «Графа 11» = «2012400», то «Графа 13» = Значение поля «Льготная ставка, %» справочника «Параметры налоговых льгот налога на имущество»
-        if (row.taxBenefitCodeReduction && getBenefitCode(row.taxBenefitCodeReduction) == '2012400') {
+        if (row.taxBenefitCodeReduction != null && getBenefitCode(row.taxBenefitCodeReduction) == '2012400') {
             row.taxRate = getRefBookValue(203, row.taxBenefitCodeReduction).RATE.value
-        } else if (row.subject) {// Иначе «Графа 13» = Значение поля «Ставка, %» справочника «Ставки налога на имущество»
+        } else if (row.subject != null) {// Иначе «Графа 13» = Значение поля «Ставка, %» справочника «Ставки налога на имущество»
             String filter = "DECLARATION_REGION_ID = " + formDataDepartment.regionId?.toString() + " and REGION_ID = " + row.subject?.toString()
             def records = refBookFactory.getDataProvider(201).getRecords(getReportPeriodEndDate(), null, filter, null)
             if (records.size() == 1) {
@@ -191,14 +191,14 @@ void calc() {
             }
         }
         // графа 14
-        if (row.taxRate) {
-            if (isTaxPeriod && row.taxBase) {
+        if (row.taxRate != null) {
+            if (isTaxPeriod && row.taxBase != null) {
                 row.taxSum = row.taxBase * row.taxRate / 100
-            } else if (row.priceAverage && row.priceAverageTaxFree) {
+            } else if (row.priceAverage != null && row.priceAverageTaxFree != null) {
                 row.taxSum = ((row.priceAverage - row.priceAverageTaxFree) * (row.taxRate / 100))/4
             }
         }
-        if (row.taxBenefitCodeDecrease) {
+        if (row.taxBenefitCodeDecrease != null) {
             // графа 17
             row.benefitDecreaseBasis = calcBasis(row.taxBenefitCodeDecrease)
             def record = getRefBookValue(203, row.taxBenefitCodeDecrease)
@@ -206,15 +206,15 @@ void calc() {
             def decreaseRub = record?.REDUCTION_SUM?.value
             // графа 18
             if (isTaxPeriod) {
-                if (decreaseProc) {
+                if (decreaseProc != null) {
                     row.sumDecrease = (row.taxSum - row.sumPayment) * decreaseProc / 100
-                } else if (decreaseRub) {
+                } else if (decreaseRub != null) {
                     row.sumDecrease = decreaseRub
                 }
             } else {
-                if (decreaseProc) {
+                if (decreaseProc != null) {
                     row.sumDecrease = (row.taxSum * decreaseProc / 100) / 4
-                } else if (decreaseRub) {
+                } else if (decreaseRub != null) {
                     row.sumDecrease = decreaseRub / 4
                 }
             }
@@ -318,7 +318,7 @@ void logicCheck() {
         }
     }
     // Проверка итоговых значений по всей форме
-    checkTotalSum(dataRows, totalColumns, logger, !isBalancePeriod())
+    checkTotalSum(dataRows, totalColumns, logger, true)
 }
 
 void consolidation() {

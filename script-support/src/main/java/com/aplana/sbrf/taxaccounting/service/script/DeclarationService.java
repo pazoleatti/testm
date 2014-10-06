@@ -40,4 +40,12 @@ public interface DeclarationService {
      */
     @SuppressWarnings("unused")
     String getXmlData(long declarationDataId);
+
+    /**
+     * Проверить существование декларации в отчетном периоде (без учета подразделения).
+     *
+     * @param declarationTypeId идентификатор типа декларации
+     * @param reportPeriodId идентификатор отчетного периода
+     */
+    boolean checkExistDeclarationsInPeriod(int declarationTypeId, int reportPeriodId);
 }

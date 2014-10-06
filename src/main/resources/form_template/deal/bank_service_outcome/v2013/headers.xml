@@ -2,16 +2,16 @@
 <rows>
     <row alias="">
         <cell alias="rowNum" colSpan="4" rowSpan="1" value="Общая информация"/>
-        <cell alias="jurName" colSpan="1" rowSpan="1" value="Полное наименование юридического лица с указанием ОПФ"/>
-        <cell alias="innKio" colSpan="1" rowSpan="1" value="ИНН/КИО"/>
-        <cell alias="countryCode" colSpan="1" rowSpan="1" value="Код страны по классификатору ОКСМ"/>
+        <cell alias="jurName" colSpan="1" rowSpan="1" value="Общая информация"/>
+        <cell alias="innKio" colSpan="1" rowSpan="1" value="Общая информация"/>
+        <cell alias="countryCode" colSpan="1" rowSpan="1" value="Общая информация"/>
         <cell alias="bankIncomeSum" colSpan="7" rowSpan="1" value="Сведения о сделке"/>
-        <cell alias="contractNum" colSpan="1" rowSpan="1" value="Номер договора"/>
-        <cell alias="contractDate" colSpan="1" rowSpan="1" value="Дата договора"/>
-        <cell alias="serviceName" colSpan="1" rowSpan="1" value="Вид услуг"/>
-        <cell alias="price" colSpan="1" rowSpan="1" value="Цена"/>
-        <cell alias="cost" colSpan="1" rowSpan="1" value="Стоимость"/>
-        <cell alias="transactionDate" colSpan="1" rowSpan="1" value="Дата совершения сделки"/>
+        <cell alias="contractNum" colSpan="1" rowSpan="1" value="Сведения о сделке"/>
+        <cell alias="contractDate" colSpan="1" rowSpan="1" value="Сведения о сделке"/>
+        <cell alias="serviceName" colSpan="1" rowSpan="1" value="Сведения о сделке"/>
+        <cell alias="price" colSpan="1" rowSpan="1" value="Сведения о сделке"/>
+        <cell alias="cost" colSpan="1" rowSpan="1" value="Сведения о сделке"/>
+        <cell alias="transactionDate" colSpan="1" rowSpan="1" value="Сведения о сделке"/>
     </row>
     <row alias="">
         <cell alias="rowNum" colSpan="1" rowSpan="1" value="№ п/п"/>
