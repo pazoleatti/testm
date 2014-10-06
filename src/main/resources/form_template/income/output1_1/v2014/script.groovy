@@ -296,7 +296,7 @@ void addData(def xml, headRowCount) {
             }
 
             def xmlIndexCol = 0
-            newRow.financialYear = parseDate(row.cell[xmlIndexCol].text(), "yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+            newRow.financialYear = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
             xmlIndexCol = 1
             newRow.taxPeriod = row.cell[xmlIndexCol].text()
             xmlIndexCol = 2
