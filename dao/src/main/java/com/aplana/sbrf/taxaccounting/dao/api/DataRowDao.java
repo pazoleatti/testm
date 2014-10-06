@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.api;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.datarow.DataRowFilter;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
 
 import java.util.Collection;
@@ -31,17 +30,12 @@ public interface DataRowDao {
 	 * Метод получает строки сохранненого среза строк НФ.
 	 * 
 	 */
-	List<DataRow<Cell>> getSavedRows(FormData formData, DataRowFilter filter,
-			DataRowRange range);
+	List<DataRow<Cell>> getSavedRows(FormData formData, DataRowRange range);
 	
 	/**
-	 * Метод получает количество строк сохранненого среза.
-	 * 
-	 * @param formData
-	 * @param filter
-	 * @return
+	 * Метод получает количество строк сохранненого среза
 	 */
-	int getSavedSize(FormData formData, DataRowFilter filter);
+	int getSavedSize(FormData formData);
 
 	/*
 	 * Методы для работы с редактируемым срезом формы
@@ -51,35 +45,21 @@ public interface DataRowDao {
 	 * Метод получает строки редактируемого в данный момент среза строк НФ.
 	 * 
 	 */
-	List<DataRow<Cell>> getRows(FormData formData, DataRowFilter filter,
-			DataRowRange range);
-	
+	List<DataRow<Cell>> getRows(FormData formData, DataRowRange range);
 
-	
 	/**
-	 * Метод получает количество строк редактируемого среза.
-	 * 
-	 * @param formData
-	 * @param filter
-	 * @return
+	 * Метод получает количество строк редактируемого среза
 	 */
-	int getSize(FormData formData, DataRowFilter filter);
+	int getSize(FormData formData);
 
     /**
-     * Метод получает количество строк редактируемого среза без учета итоговых.
-     *
-     * @param formData
-     * @param filter
-     * @return
+     * Метод получает количество строк редактируемого среза без учета итоговых
      */
-    int getSizeWithoutTotal(FormData formData, DataRowFilter filter);
+    int getSizeWithoutTotal(FormData formData);
 
 	/**
 	 * Обновляет строки НФ. Строки остаются приаттаченными к текущему срезу НФ
 	 * При этом поле id у DataRow может быть обновлено.
-	 * 
-	 * @param formData
-	 * @param rows
 	 */
 	void updateRows(FormData formData, Collection<DataRow<Cell>> rows);
 

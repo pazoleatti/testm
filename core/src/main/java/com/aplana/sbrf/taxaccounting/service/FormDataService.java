@@ -219,8 +219,6 @@ public interface FormDataService {
      */
     boolean existFormData(int formTypeId, FormDataKind kind, int departmentId, Logger logger);
 
-    boolean existFormDataByTaxAndDepartment(List<TaxType> taxTypes, List<Integer> departmentIds);
-
     /**
      * Обновляет имена тербанков в печатных формах(полях для печатных форм)
      * @param depTBId идентификатор редактируемого подразделения

@@ -1,6 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
@@ -42,32 +45,32 @@ public class GetRowsDataHandler extends
 
 	@Override
 	public GetRowsDataResult execute(GetRowsDataAction action, ExecutionContext context) throws ActionException {
+        // Режим «Корректировки» не работает с ручным вводом
+        if (action.isCorrectionDiff()) {
+            action.setManual(false);
+        }
 		GetRowsDataResult result = new GetRowsDataResult();
-		FormTemplate formTemplate = formTemplateService.get(action.getFormDataTemplateId());
-		boolean fixedRows = formTemplate.isFixedRows();
-		TAUserInfo userInfo = securityService.currentUserInfo();
+		// Фиксированные строки из шаблона
+        FormTemplate formTemplate = formTemplateService.get(action.getFormDataTemplateId());
+
+        // Обновление измененных строк во временном срезе
 		if (!action.getModifiedRows().isEmpty()) {
-			dataRowService.update(userInfo, action.getFormDataId(),
+			dataRowService.update(securityService.currentUserInfo(), action.getFormDataId(),
 					action.getModifiedRows(), action.isManual());
 		}
+        // Отображаемый диапазон строк
 		DataRowRange dataRowRange;
-		if (fixedRows) {
-			dataRowRange = new DataRowRange(1, dataRowService.getRowCount(
-					userInfo, action.getFormDataId(), action.isReadOnly(), action.isManual()));
+		if (formTemplate.isFixedRows()) {
+			dataRowRange = new DataRowRange(1, dataRowService.getRowCount(action.getFormDataId(),
+                    action.isReadOnly() || action.isCorrectionDiff(), action.isManual()));
 		} else {
-			dataRowRange = new DataRowRange(action.getRange().getOffset(),
-					action.getRange().getLimit());
+			dataRowRange = new DataRowRange(action.getRange().getOffset(), action.getRange().getLimit());
 		}
 
-        PagingResult<DataRow<Cell>> rows;
-
-        if (action.isCorrectionDiff()) {
-            // TODO Реализовать режим сравнения
-            rows = new PagingResult<DataRow<Cell>>();
-        } else {
-            rows = dataRowService.getDataRows(userInfo, action.getFormDataId(), dataRowRange, action.isReadOnly(),
-                    action.isManual());
-        }
+        // Порция строк, режим отображения различий для корр. периода также как и режим редактирования работат со
+        // временным срезом
+        PagingResult<DataRow<Cell>> rows = dataRowService.getDataRows(action.getFormDataId(), dataRowRange,
+                action.isReadOnly() && !action.isCorrectionDiff(), action.isManual());
 
         Collections.sort(rows, new Comparator<DataRow<Cell>>() {
             @Override

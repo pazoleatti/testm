@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.dao.impl.datarow;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.datarow.DataRowFilter;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
@@ -29,8 +28,7 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 	private DataRowRange range;
 	private TypeFlag[] types;
 
-	public DataRowMapper(FormData fd, TypeFlag[] types, DataRowFilter filter,
-						 DataRowRange range) {
+	public DataRowMapper(FormData fd, TypeFlag[] types, DataRowRange range) {
 		this.fd = fd;
 		this.types = types;
 		this.range = range;

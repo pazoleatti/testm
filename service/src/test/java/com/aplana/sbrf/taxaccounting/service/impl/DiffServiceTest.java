@@ -1,8 +1,9 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.model.Diff;
-import com.aplana.sbrf.taxaccounting.model.DiffType;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.service.DiffService;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -10,12 +11,20 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
 public class DiffServiceTest {
-    DiffServiceImpl diffService = new DiffServiceImpl();
+    private final DiffService diffService = new DiffServiceImpl();
+
+    private static final String ALIAS_1 = "column1";
+    private static final String ALIAS_2 = "column2";
+    private static final String ALIAS_3 = "column3";
+    private static final String ALIAS_4 = "column4";
+    private static final String ALIAS_5 = "column5";
 
     @Test
     public void computeDiffSimpleTest() throws IOException {
@@ -124,5 +133,72 @@ public class DiffServiceTest {
 
     private static InputStream getInputStream(String path) {
         return DiffServiceTest.class.getClassLoader().getResourceAsStream(path);
+    }
+
+    @Test
+    public void getRowAsStringTest() {
+        List<Column> columnList = getColumnList();
+        DataRow<Cell> dataRow = new DataRow<Cell>(FormDataUtils.createCells(columnList, null));
+
+        // Null-значения
+        String string = diffService.getRowAsString(dataRow);
+        Assert.assertEquals(";;;;;", string);
+        // Заполненные значения
+        Date date = new Date();
+        dataRow.getCell(ALIAS_1).setStringValue("str1");
+        dataRow.getCell(ALIAS_2).setNumericValue(BigDecimal.valueOf(1));
+        dataRow.getCell(ALIAS_3).setDateValue(date);
+        dataRow.getCell(ALIAS_4).setNumericValue(BigDecimal.valueOf(1));
+        dataRow.getCell(ALIAS_5).setNumericValue(BigDecimal.valueOf(1));
+        string = diffService.getRowAsString(dataRow);
+        Assert.assertEquals("str1;1;" + date + ";1;1;", string);
+    }
+
+    @Test
+    public void getDiffTest() {
+        List<FormStyle> formStyleList = new LinkedList<FormStyle>();
+        FormStyle formStyle = new FormStyle();
+        formStyle.setAlias("Корректировка");
+        formStyleList.add(formStyle);
+        List<Column> columnList = getColumnList();
+        DataRow<Cell> dataRow1 = new DataRow<Cell>(FormDataUtils.createCells(columnList, formStyleList));
+        DataRow<Cell> dataRow2 = new DataRow<Cell>(FormDataUtils.createCells(columnList, formStyleList));
+        Date date = new Date();
+        dataRow1.getCell(ALIAS_1).setStringValue("str1");
+        dataRow1.getCell(ALIAS_2).setNumericValue(BigDecimal.valueOf(1));
+        dataRow1.getCell(ALIAS_3).setDateValue(date);
+        dataRow1.getCell(ALIAS_4).setNumericValue(BigDecimal.valueOf(1));
+        dataRow1.getCell(ALIAS_5).setNumericValue(BigDecimal.valueOf(1));
+        dataRow2.getCell(ALIAS_1).setStringValue("str2");
+        dataRow2.getCell(ALIAS_2).setNumericValue(BigDecimal.valueOf(2));
+        dataRow2.getCell(ALIAS_4).setNumericValue(BigDecimal.valueOf(2));
+        dataRow2.getCell(ALIAS_5).setNumericValue(BigDecimal.valueOf(2));
+        List<DataRow<Cell>> diffList = diffService.getDiff(Arrays.asList(dataRow1), Arrays.asList(dataRow2));
+        Assert.assertEquals(1, diffList.size());
+        DataRow<Cell> dataRow = diffList.get(0);
+        Assert.assertEquals("str2", dataRow.get(ALIAS_1));
+        Assert.assertEquals(BigDecimal.valueOf(2), dataRow.get(ALIAS_2));
+        Assert.assertNull(dataRow.get(ALIAS_3));
+        Assert.assertEquals(BigDecimal.valueOf(2).longValue(), dataRow.get(ALIAS_4));
+        Assert.assertEquals(BigDecimal.valueOf(2), dataRow.get(ALIAS_5));
+
+        // TODO Левыкин: Проверка стилей. Добавить поле реализации в сервисе.
+    }
+
+    // Тестовые графы
+    private List<Column> getColumnList() {
+        List<Column> columnList = new LinkedList<Column>();
+        Column column1 = new StringColumn();
+        Column column2 = new NumericColumn();
+        Column column3 = new DateColumn();
+        Column column4 = new RefBookColumn();
+        Column column5 = new ReferenceColumn();
+        column1.setAlias(ALIAS_1);
+        column2.setAlias(ALIAS_2);
+        column3.setAlias(ALIAS_3);
+        column4.setAlias(ALIAS_4);
+        column5.setAlias(ALIAS_5);
+        columnList.addAll(Arrays.asList(column1, column2, column3, column4, column5));
+        return columnList;
     }
 }

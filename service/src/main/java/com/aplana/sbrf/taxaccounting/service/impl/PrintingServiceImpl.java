@@ -84,12 +84,12 @@ public class PrintingServiceImpl implements PrintingService {
             data.setReportPeriod(reportPeriod);
             data.setAcceptanceDate(logBusinessDao.getFormAcceptanceDate(formDataId));
             data.setCreationDate(logBusinessDao.getFormCreationDate(formDataId));
-            List<DataRow<Cell>> dataRows = dataRowDao.getSavedRows(formData, null, null);
+            List<DataRow<Cell>> dataRows = dataRowDao.getSavedRows(formData, null);
             Logger log = new Logger();
             refBookHelper.dataRowsDereference(log, dataRows, formTemplate.getColumns());
 
             RefBookValue refBookValue = refBookFactory.getDataProvider(REF_BOOK_ID).
-                getRecordData((long) reportPeriod.getDictTaxPeriodId()).get(REF_BOOK_VALUE_NAME);
+                getRecordData(reportPeriod.getDictTaxPeriodId()).get(REF_BOOK_VALUE_NAME);
 
             FormDataXlsmReportBuilder builder = new FormDataXlsmReportBuilder(data, isShowChecked, dataRows, refBookValue);
             return builder.createReport();
@@ -123,13 +123,13 @@ public class PrintingServiceImpl implements PrintingService {
             data.setReportPeriod(reportPeriod);
             data.setAcceptanceDate(logBusinessDao.getFormAcceptanceDate(formDataId));
             data.setCreationDate(logBusinessDao.getFormCreationDate(formDataId));
-            List<DataRow<Cell>> dataRows = dataRowDao.getSavedRows(formData, null, null);
+            List<DataRow<Cell>> dataRows = dataRowDao.getSavedRows(formData, null);
             Logger log = new Logger();
             refBookHelper.dataRowsDereference(log, dataRows, formTemplate.getColumns());
 
 
             RefBookValue refBookValue = refBookFactory.getDataProvider(REF_BOOK_ID).
-                    getRecordData((long) reportPeriod.getDictTaxPeriodId()).get(REF_BOOK_VALUE_NAME);
+                    getRecordData(reportPeriod.getDictTaxPeriodId()).get(REF_BOOK_VALUE_NAME);
             FormDataCSVReportBuilder builder = new FormDataCSVReportBuilder(data, isShowChecked, dataRows, refBookValue);
             return builder.createReport();
         } catch (IOException e) {

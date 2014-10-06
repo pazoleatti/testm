@@ -294,13 +294,19 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	}
 	
 	protected void revealFormData(boolean readOnly, boolean isManual, boolean correctionDiff, String uuid) {
-		placeManager.revealPlace(new PlaceRequest.Builder().nameToken(FormDataPresenterBase.NAME_TOKEN)
+        PlaceRequest.Builder builder = new PlaceRequest.Builder().nameToken(FormDataPresenterBase.NAME_TOKEN)
                 .with(FormDataPresenterBase.READ_ONLY, String.valueOf(readOnly))
-                .with(FormDataPresenterBase.MANUAL, String.valueOf(isManual))
-                .with(FormDataPresenterBase.FORM_DATA_ID, String.valueOf(formData.getId()))
-                .with(FormDataPresenterBase.CORRECTION, String.valueOf(correctionDiff))
-                .with(UUID, uuid).build()
-        );
+                .with(FormDataPresenterBase.FORM_DATA_ID, String.valueOf(formData.getId()));
+        if (isManual) {
+            builder.with(FormDataPresenterBase.MANUAL, String.valueOf(isManual));
+        }
+        if (correctionDiff) {
+            builder.with(FormDataPresenterBase.CORRECTION, String.valueOf(correctionDiff));
+        }
+        if (uuid != null) {
+            builder.with(UUID, uuid);
+        }
+        placeManager.revealPlace(builder.build());
 	}
 
 	@SuppressWarnings("unchecked")

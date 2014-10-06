@@ -68,8 +68,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         public FormData mapRow(ResultSet rs, int index) throws SQLException {
             int formTemplateId = SqlUtils.getInteger(rs, "form_template_id");
             FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
-            FormData formData = new FormData();
-            formData.initFormTemplateParams(formTemplate);
+            FormData formData = new FormData(formTemplate);
             mapCommon(formData, rs);
             formData.setSigners(formDataSignerDao.getSigners(formData.getId()));
             formData.setPerformer(formPerformerDao.get(formData.getId()));

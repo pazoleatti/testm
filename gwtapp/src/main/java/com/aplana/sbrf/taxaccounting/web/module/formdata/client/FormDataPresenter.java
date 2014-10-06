@@ -539,12 +539,14 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 	}
 
     private void getFormData(GetFormDataAction action){
+        LogCleanEvent.fire(FormDataPresenter.this);
         dispatcher.execute(
                 action,
                 CallbackUtils.defaultCallback(
                         new AbstractCallback<GetFormDataResult>() {
                             @Override
                             public void onSuccess(GetFormDataResult result) {
+                                LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
                     			// Очищаем возможные изменения на форме перед открытием.
                     			modifiedRows.clear();
 
@@ -594,6 +596,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 
                                 manageDeleteRowButtonEnabled();
 
+                                absoluteView = !result.isCorrectionDiff();
                                 getView().setAdditionalFormInfo(
                                         result.getTemplateFormName(),
                                         result.getFormData().getFormType().getTaxType(),

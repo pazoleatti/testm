@@ -9,8 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Service
 @Transactional
@@ -99,5 +98,33 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
     @Override
     public boolean existLargeCorrection(int departmentId, int reportPeriodId, Date correctionDate) {
         return departmentReportPeriodDao.existLargeCorrection(departmentId, reportPeriodId, correctionDate);
+    }
+
+    @Override
+    public DepartmentReportPeriod getPrevDepartmentReportPeriod(DepartmentReportPeriod departmentReportPeriod) {
+        // Предыдущий отчетный период подразделения
+        DepartmentReportPeriodFilter departmentReportPeriodFilter = new DepartmentReportPeriodFilter();
+        departmentReportPeriodFilter.setDepartmentIdList(Arrays.asList(departmentReportPeriod.getDepartmentId()));
+        departmentReportPeriodFilter.setReportPeriodIdList(Arrays.asList(departmentReportPeriod.getReportPeriod().getId()));
+        List<DepartmentReportPeriod> departmentReportPeriodList = getListByFilter(departmentReportPeriodFilter);
+
+        if (departmentReportPeriodList.size() < 2) {
+            return null;
+        }
+
+        Collections.sort(departmentReportPeriodList, new Comparator<DepartmentReportPeriod>() {
+            @Override
+            public int compare(DepartmentReportPeriod o1, DepartmentReportPeriod o2) {
+                if (o1.getCorrectionDate() == null) {
+                    return -1;
+                }
+                if (o2.getCorrectionDate() == null) {
+                    return 1;
+                }
+                return o1.getCorrectionDate().compareTo(o2.getCorrectionDate());
+            }
+        });
+
+        return departmentReportPeriodList.get(departmentReportPeriodList.size() - 2);
     }
 }

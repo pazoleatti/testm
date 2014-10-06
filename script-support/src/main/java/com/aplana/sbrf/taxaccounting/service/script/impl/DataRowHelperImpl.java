@@ -48,26 +48,26 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
 
 	@Override
 	public List<DataRow<Cell>> getAllSaved() {
-		List<DataRow<Cell>> rows = dataRowDao.getSavedRows(fd, null, null);
+		List<DataRow<Cell>> rows = dataRowDao.getSavedRows(fd, null);
 		FormDataUtils.setValueOwners(rows);
 		return  rows;
 	}
 
 	@Override
 	public int getSavedCount() {
-		return dataRowDao.getSavedSize(fd, null);
+		return dataRowDao.getSavedSize(fd);
 	}
 
 	@Override
 	public List<DataRow<Cell>> getAll() {
-		List<DataRow<Cell>> rows = dataRowDao.getRows(fd, null, null);
+		List<DataRow<Cell>> rows = dataRowDao.getRows(fd, null);
 		FormDataUtils.setValueOwners(rows);
 		return rows;
 	}
 
 	@Override
 	public int getCount() {
-		return dataRowDao.getSize(fd, null);
+		return dataRowDao.getSize(fd);
 	}
 
     /**
