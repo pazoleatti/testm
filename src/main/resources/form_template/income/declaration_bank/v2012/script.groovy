@@ -86,6 +86,9 @@ void checkDeparmentParams(LogLevel logLevel) {
 void logicCheck() {
     // получение данных из xml'ки
     def xmlData = getXmlData(declarationData.reportPeriodId, declarationData.departmentId)
+    if(xmlData == null){
+        return
+    }
     def empty = 0
 
     // Проверки Листа 02 - Превышение суммы налога, выплаченного за пределами РФ (всего)
