@@ -3,28 +3,32 @@
     <fixedRows>false</fixedRows>
     <name>Оказание услуг (расходы)</name>
     <fullName>Оказание услуг (расходы)</fullName>
-    <code></code>
+    <header>TODO</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>rowNum</alias>
         <checking>false</checking>
+        <columnType>AUTO</columnType>
         <name>№ п/п</name>
         <order>1</order>
         <width>4</width>
-        <type>0</type>
+        <numerationType>SERIAL</numerationType>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>jurName</alias>
         <checking>false</checking>
+        <columnType>REFBOOK</columnType>
         <name>Полное наименование юридического лица с указанием ОПФ</name>
         <order>2</order>
         <width>10</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>32</nameAttributeId>
         <refBookAttributeId>32</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>innKio</alias>
         <checking>false</checking>
+        <columnType>REFERENCE</columnType>
         <name>ИНН/КИО</name>
         <order>3</order>
         <width>7</width>
@@ -34,6 +38,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>countryCode</alias>
         <checking>false</checking>
+        <columnType>REFERENCE</columnType>
         <name>Код страны по классификатору ОКСМ</name>
         <order>4</order>
         <width>5</width>
@@ -44,6 +49,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>bankIncomeSum</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Сумма расходов Банка, руб.</name>
         <order>5</order>
         <width>9</width>
@@ -53,6 +59,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>contractNum</alias>
         <checking>false</checking>
+        <columnType>STRING</columnType>
         <name>Номер договора</name>
         <order>6</order>
         <width>5</width>
@@ -62,6 +69,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>contractDate</alias>
         <checking>false</checking>
+        <columnType>DATE</columnType>
         <name>Дата договора</name>
         <order>7</order>
         <width>7</width>
@@ -70,6 +78,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>serviceName</alias>
         <checking>false</checking>
+        <columnType>STRING</columnType>
         <name>Вид услуг</name>
         <order>8</order>
         <width>15</width>
@@ -79,6 +88,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>price</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Цена</name>
         <order>9</order>
         <width>9</width>
@@ -88,6 +98,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>cost</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Стоимость</name>
         <order>10</order>
         <width>9</width>
@@ -97,6 +108,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>transactionDate</alias>
         <checking>false</checking>
+        <columnType>DATE</columnType>
         <name>Дата совершения сделки</name>
         <order>11</order>
         <width>7</width>
@@ -105,7 +117,7 @@
     <styles>
         <alias>Автозаполняемая</alias>
         <backColor>WHITE</backColor>
-        <bold>false</bold>
+        <bold>true</bold>
         <fontColor>DARK_GREEN</fontColor>
         <italic>false</italic>
     </styles>
