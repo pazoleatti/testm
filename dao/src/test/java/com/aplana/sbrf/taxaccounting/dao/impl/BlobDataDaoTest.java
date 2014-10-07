@@ -19,7 +19,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.UUID;
 
 /**
@@ -84,16 +83,22 @@ public class BlobDataDaoTest {
         String uuid2 = "uuid_2";
         String uuid3 = "uuid_3";
         String uuid4 = "uuid_4";
+        String uuid5 = "uuid_5";
+        String uuid6 = "uuid_6";
 
         BlobData bd1 = blobDataDao.get(uuid1);
         BlobData bd2 = blobDataDao.get(uuid2);
         BlobData bd3 = blobDataDao.get(uuid3);
         BlobData bd4 = blobDataDao.get(uuid4);
+        BlobData bd5 = blobDataDao.get(uuid5);
+        BlobData bd6 = blobDataDao.get(uuid6);
 
         Assert.assertNotNull(bd1);
         Assert.assertNotNull(bd2);
         Assert.assertNotNull(bd3);
         Assert.assertNotNull(bd4);
+        Assert.assertNotNull(bd5);
+        Assert.assertNotNull(bd6);
 
         int deleted = blobDataDao.clean();
 
@@ -103,10 +108,14 @@ public class BlobDataDaoTest {
         bd2 = blobDataDao.get(uuid2);
         bd3 = blobDataDao.get(uuid3);
         bd4 = blobDataDao.get(uuid4);
+        bd5 = blobDataDao.get(uuid5);
+        bd6 = blobDataDao.get(uuid6);
 
         Assert.assertNotNull(bd1);
         Assert.assertNotNull(bd2);
         Assert.assertNull(bd3);
         Assert.assertNull(bd4);
+        Assert.assertNotNull(bd5);
+        Assert.assertNotNull(bd6);
     }
 }

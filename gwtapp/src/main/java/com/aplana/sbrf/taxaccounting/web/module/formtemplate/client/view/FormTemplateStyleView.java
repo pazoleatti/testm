@@ -75,6 +75,7 @@ public class FormTemplateStyleView extends ViewWithUiHandlers<FormTemplateStyleU
 				return color.getTitle();
 			}
 		});
+        fontColor.setValue(Color.WHITE);
 		fontColor.setAcceptableValues(colorTitles);
 
 		backColor = new ValueListBox<Color>(new AbstractRenderer<Color>() {
@@ -86,6 +87,7 @@ public class FormTemplateStyleView extends ViewWithUiHandlers<FormTemplateStyleU
 				return color.getTitle();
 			}
 		});
+        backColor.setValue(Color.WHITE);
 		backColor.setAcceptableValues(colorTitles);
 
 		initWidget(binder.createAndBindUi(this));
