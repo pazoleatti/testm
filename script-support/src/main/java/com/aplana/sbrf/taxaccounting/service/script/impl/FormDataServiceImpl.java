@@ -562,7 +562,10 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
         }
 
         // получение данных формы
-        FormData formData = getLast(formTypeId, kind, departmentId, reportPeriod.getId(), null);
+        FormData formData = null;
+        if (reportPeriod != null) {
+            formData = getLast(formTypeId, kind, departmentId, reportPeriod.getId(), null);
+        }
 
         // проверка существования, принятости и наличия данных
         boolean accepted = false;
@@ -575,7 +578,11 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
         // выводить ли сообщение
         if (!accepted) {
             String formName = (formData == null ? formTypeDao.get(formTypeId).getName() : formData.getFormType().getName());
-            String periodName = reportPeriod.getName() + " " + reportPeriod.getTaxPeriod().getYear();
+            // период может не найтись для предыдущего периода, потому что периода не существует
+            String periodName = "предыдущий период";
+            if (reportPeriod != null) {
+                periodName = reportPeriod.getName() + " " + reportPeriod.getTaxPeriod().getYear();
+            }
             String msg = String.format(WRONG_FORM_IS_NOT_ACCEPTED, formName, periodName);
             if (required) {
                 throw new ServiceException("%s", msg);
@@ -594,11 +601,11 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
                 currentReportPeriodId, currentPeriodOrder) : getLast(formTypeId, kind, departmentId,
                 currentReportPeriodId, currentPeriodOrder);
 
-        ReportPeriod reportPeriod = prevPeriod ? reportPeriodService.getPrevReportPeriod(currentReportPeriodId) :
-                reportPeriodService.get(currentReportPeriodId);
-
         int month = prevPeriod ? currentPeriodOrder - 1 : currentPeriodOrder;
         month = month == 0 ? 12 : month;
+
+        ReportPeriod reportPeriod = prevPeriod && month == 12 ? reportPeriodService.getPrevReportPeriod(currentReportPeriodId) :
+                reportPeriodService.get(currentReportPeriodId);
 
         // проверка существования, принятости и наличия данных
         boolean accepted = false;
@@ -611,7 +618,11 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
         // выводить ли сообщение
         if (!accepted) {
             String formName = (formData == null ? formTypeDao.get(formTypeId).getName() : formData.getFormType().getName());
-            String monthPeriod = Formats.getRussianMonthNameWithTier(month) + " " + reportPeriod.getTaxPeriod().getYear();
+            // период может не найтись для предыдущего периода, потому что периода не существует
+            String monthPeriod = "предыдущий месяц";
+            if (reportPeriod != null) {
+                monthPeriod = Formats.getRussianMonthNameWithTier(month) + " " + reportPeriod.getTaxPeriod().getYear();
+            }
             String msg = String.format(WRONG_FORM_IS_NOT_ACCEPTED, formName, monthPeriod);
             if (required) {
                 throw new ServiceException("%s", msg);
