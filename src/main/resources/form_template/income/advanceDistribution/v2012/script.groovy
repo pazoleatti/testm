@@ -18,6 +18,7 @@ import groovy.transform.Field
  * @author <a href="mailto:Ramil.Timerbaev@aplana.com">Тимербаев Рамиль</a>
  */
 // графа 1  - number
+// графа    - fix
 // графа 2  - regionBank
 // графа 3  - regionBankDivision
 // графа 4  - divisionName
@@ -289,7 +290,7 @@ void calc() {
     def caRow = findCA(dataRows)
     if (caRow != null) {
         // расчеты для строки ЦА (скорректированный)
-        ['number', 'regionBankDivision', 'kpp', 'propertyPrice', 'workersCount', 'subjectTaxCredit',
+        ['number', 'regionBankDivision', 'divisionName', 'kpp', 'propertyPrice', 'workersCount', 'subjectTaxCredit',
                 'calcFlag', 'obligationPayTax', 'baseTaxOf', 'subjectTaxStavka', 'taxSum', 'taxSumToPay',
                 'taxSumToReduction', 'everyMontherPaymentAfterPeriod', 'everyMonthForKvartalNextPeriod',
                 'everyMonthForSecondKvartalNextPeriod', 'everyMonthForThirdKvartalNextPeriod',
