@@ -512,6 +512,11 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
         correctionButton.setVisible(correctionPeriod);
         // Признак сравнения корректирующих значений
         getView().setCorrectionText(correctionDiff ? "Абсолютные значения" : "Корректировка");
+
+        if (correctionDiff) {
+            checkButton.setVisible(false);
+            workflowButtons.setVisible(false);
+        }
 	}
 
 	/**
