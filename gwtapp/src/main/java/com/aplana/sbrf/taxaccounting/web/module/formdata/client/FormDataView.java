@@ -88,15 +88,14 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
         }
     };
 
+    private Label noResultLabel = new Label();
+
 	@UiField
 	DataGrid<DataRow<Cell>> formDataTable;
-    Label noResultLabel = new Label();
 	@UiField
 	FlexiblePager pager;
 	@UiField
-    LinkButton addRowButton;
-	@UiField
-    LinkButton removeRowButton;
+    LinkButton addRowButton, removeRowButton, correctionButton;
 	@UiField
 	Button originalVersionButton;
 	@UiField
@@ -189,8 +188,8 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     private final static int LOCK_INFO_BLOCK_HEIGHT = 25;
 
     @Inject
-	public FormDataView(final Binder binder) {
-		initWidget(binder.createAndBindUi(this));
+    public FormDataView(final Binder binder) {
+        initWidget(binder.createAndBindUi(this));
 
         fileUploader.addStartLoadHandler(new StartLoadFileEvent.StartLoadFileHandler() {
             @Override
@@ -206,9 +205,9 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
             }
         });
 
-		formDataTable.addCellPreviewHandler(new CellPreviewEvent.Handler<DataRow<Cell>>() {
-			@Override
-			public void onCellPreview(CellPreviewEvent<DataRow<Cell>> event) {
+        formDataTable.addCellPreviewHandler(new CellPreviewEvent.Handler<DataRow<Cell>>() {
+            @Override
+            public void onCellPreview(CellPreviewEvent<DataRow<Cell>> event) {
                 if ("mouseover".equals(event.getNativeEvent().getType())) {
                     EventTarget eventTarget = event.getNativeEvent().getEventTarget();
                     if (Element.is(eventTarget)) {
@@ -224,7 +223,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
                     }
                 }
             }
-		});
+        });
 
         // хак для горизонтального скроллбара у пустой таблицы
         formDataTable.setEmptyTableWidget(noResultLabel);
@@ -415,6 +414,10 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		formDataTable.setTableBuilder(builder);
 	}
 
+    @UiHandler("correctionButton")
+    void onCorrectionLinkButtonClicked(ClickEvent event) {
+        getUiHandlers().onCorrectionSwitch();
+    }
     @UiHandler("printToExcel")
     void onPrintExcelClicked(ClickEvent event) {
         if (getUiHandlers() != null) {
@@ -559,9 +562,8 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
 	@Override
 	public void setAdditionalFormInfo(
-			String formType, TaxType taxType,
-			String formKind, String departmentId, String reportPeriod,
-			String state, Date startDate, Date endDate, Long formDataId) {
+			String formType, TaxType taxType, String formKind, String departmentId, String reportPeriod, String state,
+            Date startDate, Date endDate, Long formDataId, boolean correctionPeriod, boolean correctionDiff) {
         returnAnchor.setText(taxType.getName());
         title.setText(formType);
 		title.setTitle(formType);
@@ -577,8 +579,11 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
         } else {
             formKindTitle.setText(FORM_DATA_KIND_TITLE_D);
         }
-
         factory.setFormDataId(formDataId);
+        // Признак корректирующего периода
+        correctionButton.setVisible(correctionPeriod);
+        // Признак сравнения корректирующих значений
+        getView().setCorrectionText(correctionDiff ? "Абсолютные значения" : "Корректировка");
 	}
 
 	/**
@@ -647,7 +652,6 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
 	@Override
 	public void showPrintAnchor(boolean show) {
-		//printAnchor.setVisible(show);
         printToExcel.setVisible(show);
         printToCSV.setVisible(show);
 	}
@@ -881,5 +885,10 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
             formDataTable.setSelectionModel(singleSelectionModel);
         }
+    }
+
+    @Override
+    public void setCorrectionText(String text) {
+        correctionButton.setText(text);
     }
 }

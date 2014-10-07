@@ -4,8 +4,7 @@
              xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
              xmlns:pager="urn:import:com.aplana.sbrf.taxaccounting.web.widget.pager"
              xmlns:fileuplod="urn:import:com.aplana.sbrf.taxaccounting.web.widget.fileupload"
-             xmlns:fm="urn:import:com.aplana.gwt.client.form"
-        >
+             xmlns:fm="urn:import:com.aplana.gwt.client.form">
 
     <ui:style>
 
@@ -71,8 +70,12 @@
 
         .showCheckedColumns {
             font-size: 12px;
-            padding-right: 10px;
             white-space: nowrap;
+            margin-left: 20px;
+        }
+
+        .corr, .showCheckedColumns {
+            padding-right: 10px;
         }
 
         .table {
@@ -262,8 +265,12 @@
                         <style:LinkButton title="Поиск" ui:field="search" img="resources/img/search.png" width="70px" text="Поиск"/>
                     </g:cell>
 
+                    <g:cell>
+                        <style:LinkButton ui:field="correctionButton" text="Корректировка" disableImage="true" addStyleNames="{style.corr}"/>
+                    </g:cell>
+
                     <g:CheckBox ui:field="showCheckedColumns" addStyleNames="{style.showCheckedColumns}"
-                                value="true" text="Показывать контрольные поля" width="225px"/>
+                                value="true" text="Показывать контрольные поля"/>
 
                     <g:HorizontalPanel verticalAlignment="middle" ui:field="versionBlock">
                         <g:Label addStyleNames="{style.verSep}"/>

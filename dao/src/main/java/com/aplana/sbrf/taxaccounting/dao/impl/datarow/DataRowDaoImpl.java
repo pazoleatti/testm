@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.datarow.DataRowFilter;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
@@ -42,35 +41,29 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	public static final String ERROR_MSG_INDEX = "Индекс %s не входит в допустимый диапазон 1..%s";
 
 	@Override
-	public List<DataRow<Cell>> getSavedRows(FormData fd, DataRowFilter filter,
-			DataRowRange range) {
-		return physicalGetRows(fd,
-				new TypeFlag[] {TypeFlag.DEL, TypeFlag.SAME}, filter, range);
+	public List<DataRow<Cell>> getSavedRows(FormData fd, DataRowRange range) {
+		return physicalGetRows(fd, new TypeFlag[] {TypeFlag.DEL, TypeFlag.SAME}, range);
 	}
 
 	@Override
-	public int getSavedSize(FormData fd, DataRowFilter filter) {
-		return physicalGetSize(fd,
-                new TypeFlag[]{TypeFlag.DEL, TypeFlag.SAME}, filter);
+	public int getSavedSize(FormData fd) {
+		return physicalGetSize(fd, new TypeFlag[]{TypeFlag.DEL, TypeFlag.SAME});
 	}
 
 	@Override
-	public List<DataRow<Cell>> getRows(FormData fd, DataRowFilter filter,
-			DataRowRange range) {
-		return physicalGetRows(fd,
-				new TypeFlag[] {TypeFlag.ADD, TypeFlag.SAME}, filter, range);
+	public List<DataRow<Cell>> getRows(FormData fd, DataRowRange range) {
+		return physicalGetRows(fd, new TypeFlag[] {TypeFlag.ADD, TypeFlag.SAME}, range);
 	}
 
 	@Override
-	public int getSize(FormData fd, DataRowFilter filter) {
-		return physicalGetSize(fd,
-                new TypeFlag[]{TypeFlag.ADD, TypeFlag.SAME}, filter);
+	public int getSize(FormData fd) {
+		return physicalGetSize(fd, new TypeFlag[]{TypeFlag.ADD, TypeFlag.SAME});
 	}
 
     @Override
-    public int getSizeWithoutTotal(FormData formData, DataRowFilter filter) {
+    public int getSizeWithoutTotal(FormData formData) {
         return physicalGetSizeWithoutTotal(formData,
-                new TypeFlag[]{TypeFlag.ADD, TypeFlag.SAME}, filter);
+                new TypeFlag[]{TypeFlag.ADD, TypeFlag.SAME});
     }
 
     @Override
@@ -247,13 +240,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
 	/**
 	 * Создаем строки во временном срезе
-	 * @param formData
-	 * @param index
-	 * @param ordBegin
-	 * @param rows
 	 */
-	private void insertRows(FormData formData, int index, long ordBegin,
-			List<DataRow<Cell>> rows) {
+	private void insertRows(FormData formData, int index, long ordBegin, List<DataRow<Cell>> rows) {
 		Long ordEnd = getOrd(formData.getId(), index + 1);
 		long ordStep = ordEnd == null ? DataRowDaoImplUtils.DEFAULT_ORDER_STEP
 				: DataRowDaoImplUtils
@@ -262,8 +250,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 			/*Реализовация перепаковки поля ORD. Слишком маленькие значения ORD. В промежуток нельзя вставить
 			такое количество строк*/
             long diff = 5 * rows.size(); //minimal diff between rows
-            int endIndex = physicalGetSize(formData,
-                    new TypeFlag[]{TypeFlag.DEL, TypeFlag.ADD, TypeFlag.SAME}, null);
+            int endIndex = physicalGetSize(formData, new TypeFlag[]{TypeFlag.DEL, TypeFlag.ADD, TypeFlag.SAME});
 
             /* Делаем так чтобы пересортировать колонки в один запрос. Для этого сначала выбираем временную таблицу с индексами (RR)
              *  затем выбираем индексы начиная с того после которого надо вставить и до самого конца.
@@ -326,10 +313,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		}
 	}
 
-	private List<DataRow<Cell>> physicalGetRows(FormData formData, TypeFlag[] types,
-												DataRowFilter filter, DataRowRange range) {
-		DataRowMapper dataRowMapper = new DataRowMapper(formData, types, filter,
-				range);
+	private List<DataRow<Cell>> physicalGetRows(FormData formData, TypeFlag[] types, DataRowRange range) {
+		DataRowMapper dataRowMapper = new DataRowMapper(formData, types, range);
 		Pair<String, Map<String, Object>> sql = dataRowMapper.createSql();
 
         if(!isSupportOver()){
@@ -342,8 +327,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		return dataRows;
 	}
 
-	private int physicalGetSize(FormData formData, TypeFlag[] types,
-                                DataRowFilter filter) {
+	private int physicalGetSize(FormData formData, TypeFlag[] types) {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("formDataId", formData.getId());
 		params.put("types", TypeFlag.rtsToKeys(types));
@@ -356,13 +340,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
     /**
      * Получить количество строк без учета итоговых
-     * @param formData
-     * @param types
-     * @param filter
-     * @return
      */
-    private int physicalGetSizeWithoutTotal(FormData formData, TypeFlag[] types,
-                                DataRowFilter filter) {
+    private int physicalGetSizeWithoutTotal(FormData formData, TypeFlag[] types) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("formDataId", formData.getId());
         params.put("types", TypeFlag.rtsToKeys(types));
@@ -520,7 +499,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	 */
 	private void checkIndexesRange(FormData formData, boolean saved, boolean forNew,
 			int... indexes) {
-		int size = saved ? getSavedSize(formData, null) : getSize(formData, null);
+		int size = saved ? getSavedSize(formData) : getSize(formData);
 		int lastIndex = forNew ? size + 1 : size;
 		for (int index : indexes) {
 			if (index < 1 || index > lastIndex) {

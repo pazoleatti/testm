@@ -9,47 +9,28 @@ public interface DataRowService {
 	
 	/**
 	 * Получение страницы с набором строк НФ
-	 * 
-	 *
-     * @param userInfo
-     * @param formDataId
-     * @param range
-     * @param saved
-     * @param manual
-     * @return
 	 */
-	PagingResult<DataRow<Cell>> getDataRows(TAUserInfo userInfo, long formDataId, DataRowRange range, boolean saved, boolean manual);
+	PagingResult<DataRow<Cell>> getDataRows(long formDataId, DataRowRange range, boolean saved, boolean manual);
+
+    /**
+     * Получение сохраненных строк НФ
+     */
+    List<DataRow<Cell>> getSavedRows(FormData formData);
 	
 	/**
 	 * Получени количество строк НФ
-	 * 
-	 *
-     * @param userInfo
-     * @param formDataId
-     * @param saved
-     * @param manual
-     * @return
 	 */
-	int getRowCount(TAUserInfo userInfo, long formDataId, boolean saved, boolean manual);
+	int getRowCount(long formDataId, boolean saved, boolean manual);
 	
 	/**
 	 * Обновление набора строк во временном срезе НФ
-	 *
-     * @param userInfo
-     * @param formDataId
-     * @param dataRows
-     * @param manual
      */
 	void update(TAUserInfo userInfo, long formDataId, List<DataRow<Cell>> dataRows, boolean manual);
-	
-	
-	
-	/**
-	 * @param userInfo
-	 * @param formDataId
-	 */
-	void rollback(TAUserInfo userInfo, long formDataId);
 
+    /**
+     * Сохранение результата сравнения строк НФ в корр. периоде во временном срезе
+     */
+    void saveCorrectionDiffRows(FormData formData, List<DataRow<Cell>> dataRows);
 
     /**
      * Поиск по налоговой форме,
@@ -63,5 +44,4 @@ public interface DataRowService {
      * @return Set<FormDataSearchResult> - Набор из номера столбца, строки, и самой найденной подстроки
      */
     PagingResult<FormDataSearchResult> searchByKey(Long formDataId, Integer formTemplateId,DataRowRange range, String key, boolean isCaseSensitive);
-
 }

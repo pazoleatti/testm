@@ -7,7 +7,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormData;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResult.FormMode;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -25,7 +25,7 @@ import java.util.Map;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
-public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFormDataResult> {
+public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction, GetFormDataResult> {
 
 	@Autowired
 	private FormDataAccessService accessService;
@@ -60,19 +60,23 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
     @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
 
+    @Autowired
+    private DiffService diffService;
+
     private static final long REF_BOOK_ID = 8L;
     private static final String REF_BOOK_VALUE_NAME = "CODE";
     private TAUserInfo userInfo;
 
 	public GetFormDataHandler() {
-		super(GetFormData.class);
+		super(GetFormDataAction.class);
 	}
 
 	@Override
-	public GetFormDataResult execute(GetFormData action,
-			ExecutionContext context) throws ActionException {
+	public GetFormDataResult execute(GetFormDataAction action, ExecutionContext context) throws ActionException {
 
 		userInfo = securityService.currentUserInfo();
+
+        actionCheck(action);
 		
 		// UNLOCK: Попытка разблокировать ту форму которая была открыта ранее
 		try {
@@ -99,26 +103,31 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 		fillFormAndTemplateData(action, userInfo, logger, result);
 		fillFormDataAccessParams(action, userInfo, result);
         result.setUuid(logEntryService.update(logger.getEntries(), action.getUuid()));
+        result.setUuid(logEntryService.save(logger.getEntries()));
 
 		return result;
 	}
 
-	@Override
-	public void undo(GetFormData action, GetFormDataResult result,
+    /**
+     * Ппрверки правильности параметров запроса
+     */
+    private void actionCheck(GetFormDataAction action) throws ActionException {
+        if (!action.isReadOnly() && action.isCorrectionDiff()) {
+            throw new ActionException("Нельзя открыть налоговую форму в режиме редактирования для представления «Корректировка»!");
+        }
+    }
+
+    @Override
+	public void undo(GetFormDataAction action, GetFormDataResult result,
 			ExecutionContext context) throws ActionException {
 		// Ничего не делаем
 	}
 
 	/**
 	 * Получает/создает данные налоговой формы
-	 * 
-	 * @param action
-	 * @param userInfo
-	 * @param logger
-	 * @param result
 	 */
-	private void fillFormAndTemplateData(GetFormData action, TAUserInfo userInfo,
-			Logger logger, GetFormDataResult result) {
+	private void fillFormAndTemplateData(GetFormDataAction action, TAUserInfo userInfo, Logger logger,
+                                         GetFormDataResult result) throws ActionException {
 
 		FormData formData = formDataService.getFormData(userInfo, action.getFormDataId(), action.isManual(), logger);
 
@@ -146,8 +155,13 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 		result.setTemplateFormName(formTemplate.getName());
 		result.setFormData(formData);
         result.setBankSummaryForm(true);
-
+        result.setCorrectionDiff(action.isCorrectionDiff());
         result.setExistManual(formDataService.existManual(action.getFormDataId()));
+
+        // Если клиент запросил режим сравнения НФ, то нужно заполнить временный срез результатом сравнения
+        if (action.isCorrectionDiff()) {
+            fillDiffData(formData, departmentReportPeriod, logger);
+        }
 
         //Является ли форма последней перед декларацией
         List<DepartmentDeclarationType> declarationDestinations = sourceService.getDeclarationDestinations(
@@ -159,14 +173,54 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
                 && !declarationDestinations.isEmpty());
 	}
 
-	/**
+    /**
+     * Заполнение временного среза результатом сравнения
+     */
+    private void fillDiffData(FormData formData, DepartmentReportPeriod departmentReportPeriod, Logger logger) throws ActionException {
+        // Если период не является корректирующим
+        if (departmentReportPeriod.getCorrectionDate() == null) {
+            throw new ActionException("Нельзя открыть налоговую форму, созданную в периоде, " +
+                    "не являющемся корректирующим в режиме представления «Корректировка»!");
+
+        }
+
+        DepartmentReportPeriod prevDepartmentReportPeriod =
+                departmentReportPeriodService.getPrevDepartmentReportPeriod(departmentReportPeriod);
+
+        if (prevDepartmentReportPeriod == null)  {
+            logger.error("Не найден предыдущий отчетный период подразделения!");
+            dataRowService.saveCorrectionDiffRows(formData, new ArrayList<DataRow<Cell>>(0));
+            return;
+        }
+
+        // Экземпляр НФ в пред. отчетном периоде подразделения
+        FormData prevFormData = formDataService.findFormData(formData.getFormType().getId(), formData.getKind(),
+                prevDepartmentReportPeriod.getId(), formData.getPeriodOrder());
+
+        if (prevFormData == null) {
+            logger.error("Не найдена ранее созданная форма в текущем периоде. Данные о различиях не сформированы.");
+            dataRowService.saveCorrectionDiffRows(formData, new ArrayList<DataRow<Cell>>(0));
+            return;
+        }
+
+        // Шаблон НФ
+        FormTemplate formTemplate = formTemplateService.get(prevFormData.getFormTemplateId());
+        prevFormData.initFormTemplateParams(formTemplate);
+
+        logger.info("Корректировка отображена в результате сравнения с данными формы.");
+
+        List<DataRow<Cell>> original = dataRowService.getSavedRows(prevFormData);
+        List<DataRow<Cell>> revised = dataRowService.getSavedRows(formData);
+        List<DataRow<Cell>> diffRows = diffService.getDiff(original, revised);
+
+        // Сохранение результата сравнения во временном срезе
+        dataRowService.saveCorrectionDiffRows(formData, diffRows);
+    }
+
+    /**
 	 * Заполняет параметры доступа для формы
-	 * 
-	 * @param action
-	 * @param userInfo
-	 * @param result
 	 */
-	private void fillFormDataAccessParams(GetFormData action, TAUserInfo userInfo,
+	private void fillFormDataAccessParams(GetFormDataAction action, TAUserInfo userInfo,
 			GetFormDataResult result) {
 		FormDataAccessParams accessParams;
 		if (action.getFormDataId() == Long.MAX_VALUE) {
@@ -174,8 +228,7 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 			accessParams.setCanDelete(false);
 			accessParams.setCanEdit(true);
 			accessParams.setCanRead(true);
-			accessParams.setAvailableWorkflowMoves(new ArrayList<WorkflowMove>(
-					0));
+			accessParams.setAvailableWorkflowMoves(new ArrayList<WorkflowMove>(0));
 		} else {
 			accessParams = accessService.getFormDataAccessParams(userInfo, result
 					.getFormData().getId(),
@@ -186,19 +239,14 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 
 	/**
 	 * Блокирует форму при необходимости, заполняет состояние блокировки
-	 * 
-	 * @param action
-	 * @param userInfo
-	 * @param result
 	 */
-	private void fillLockData(GetFormData action, TAUserInfo userInfo,
-			GetFormDataResult result) {
+	private void fillLockData(GetFormDataAction action, TAUserInfo userInfo, GetFormDataResult result) {
 		FormMode formMode = FormMode.READ_LOCKED;
 
-		LockData lockInformation = formDataService.getObjectLock(action
-				.getFormDataId(), securityService.currentUserInfo());
+		LockData lockInformation = formDataService.getObjectLock(action.getFormDataId(),
+                securityService.currentUserInfo());
+
 		if (lockInformation != null) {
-			
 			// Если данная форма уже заблокирована другим пользотелем
 			result.setLockedByUser(taUserService.getUser(lockInformation.getUserId()).getName());
 			result.setLockDate(getFormedDate(lockInformation.getDateBefore()));
@@ -210,13 +258,11 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
 				}
 			}
 		} else {
-
 				if (action.isReadOnly()) {
 					formMode = FormMode.READ_UNLOCKED;
 				} else {
 					formMode = FormMode.EDIT;
 				}
-			
 		}
 		result.setFormMode(formMode);
 	}
@@ -236,7 +282,7 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormData, GetFo
      * @param isManual признак ручного ввода
      */
     private void checkManualMode(FormData formData, boolean isManual) {
-        int rowCount = dataRowService.getRowCount(userInfo, formData.getId(), true, true);
+        int rowCount = dataRowService.getRowCount(formData.getId(), true, true);
         if (isManual && rowCount == 0) {
             formData.setManual(true);
         }

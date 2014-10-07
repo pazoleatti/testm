@@ -61,4 +61,6 @@ public interface FormDataUiHandlers extends UiHandlers{
     void onDeleteManualClicked();
 
     void onOpenSourcesDialog();
+
+    void onCorrectionSwitch();
 }

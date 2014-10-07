@@ -301,8 +301,8 @@ public class FormDataServiceTest {
 
         when(formDataDao.getPrevFormDataList(any(FormData.class), any(TaxPeriod.class)))
                 .thenReturn(formDataList);
-        when(dataRowDao.getSizeWithoutTotal(formData, null)).thenReturn(3);
-        when(dataRowDao.getSizeWithoutTotal(formData1, null)).thenReturn(5);
+        when(dataRowDao.getSizeWithoutTotal(formData)).thenReturn(3);
+        when(dataRowDao.getSizeWithoutTotal(formData1)).thenReturn(5);
 
         when(periodService.getReportPeriod(3)).thenReturn(new ReportPeriod());
         Assert.assertTrue("\"Номер последней строки предыдущей НФ\" должен быть равен 8",
@@ -343,8 +343,8 @@ public class FormDataServiceTest {
 
         when(formDataDao.getPrevFormDataList(any(FormData.class), any(TaxPeriod.class)))
                 .thenReturn(formDataList);
-        when(dataRowDao.getSizeWithoutTotal(formData, null)).thenReturn(3);
-        when(dataRowDao.getSizeWithoutTotal(formData1, null)).thenReturn(5);
+        when(dataRowDao.getSizeWithoutTotal(formData)).thenReturn(3);
+        when(dataRowDao.getSizeWithoutTotal(formData1)).thenReturn(5);
 
         when(periodService.getReportPeriod(3)).thenReturn(new ReportPeriod());
         Assert.assertTrue("\"Номер последней строки предыдущей НФ\" должен быть равен 3",

@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
 import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.service.DataRowService;
 import org.junit.Assert;
 import org.junit.Before;
@@ -11,7 +10,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.mock;
@@ -33,7 +31,7 @@ public class GetFormDataHandlerTest extends Assert {
 
     @Test
     public void testFillFormAndTemplateDataFalse() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        when(dataRowService.getRowCount(any(TAUserInfo.class), anyLong(), anyBoolean(), anyBoolean())).thenReturn(1);
+        when(dataRowService.getRowCount(anyLong(), anyBoolean(), anyBoolean())).thenReturn(1);
         Method checkManualMode = getFormDataHandler.getClass().getDeclaredMethod("checkManualMode", FormData.class, boolean.class);
         checkManualMode.setAccessible(true);
         checkManualMode.invoke(getFormDataHandler, formData, false);
@@ -42,7 +40,7 @@ public class GetFormDataHandlerTest extends Assert {
 
     @Test
     public void testFillFormAndTemplateDataTrue() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        when(dataRowService.getRowCount(any(TAUserInfo.class), anyLong(), anyBoolean(), anyBoolean())).thenReturn(0);
+        when(dataRowService.getRowCount(anyLong(), anyBoolean(), anyBoolean())).thenReturn(0);
         Method checkManualMode = getFormDataHandler.getClass().getDeclaredMethod("checkManualMode", FormData.class, boolean.class);
         checkManualMode.setAccessible(true);
         checkManualMode.invoke(getFormDataHandler, formData, true);

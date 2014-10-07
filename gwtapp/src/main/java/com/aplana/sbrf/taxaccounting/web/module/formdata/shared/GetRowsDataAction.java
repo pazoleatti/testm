@@ -13,6 +13,7 @@ public class GetRowsDataAction extends UnsecuredActionImpl<GetRowsDataResult> im
 	DataRowRange range;
 	boolean readOnly;
     boolean manual;
+    boolean correctionDiff;
 	long formDataId;
 	int formDataTemplateId;
 	List<DataRow<Cell>> modifiedRows;
@@ -74,7 +75,15 @@ public class GetRowsDataAction extends UnsecuredActionImpl<GetRowsDataResult> im
 		this.modifiedRows = modifiedRows;
 	}
 
-	@Override
+    public boolean isCorrectionDiff() {
+        return correctionDiff;
+    }
+
+    public void setCorrectionDiff(boolean correctionDiff) {
+        this.correctionDiff = correctionDiff;
+    }
+
+    @Override
 	public String getName() {
 		return "Получить строки";
 	}

@@ -50,9 +50,9 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 		void addCustomTableStyles(List<FormStyle> allStyles);
 
-		void setAdditionalFormInfo(String formType, TaxType taxType,
-				String formKind, String departmentId, String reportPeriod,
-                String state, Date startDate, Date endDate, Long formDataId);
+		void setAdditionalFormInfo(String formType, TaxType taxType, String formKind, String departmentId,
+                                   String reportPeriod, String state, Date startDate, Date endDate, Long formDataId,
+                                   boolean correctionPeriod, boolean correctionDiff);
 
 		void setWorkflowButtons(List<WorkflowMove> moves);
 
@@ -112,6 +112,9 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
         void setupSelectionModel(boolean fixedRows);
 
+        /** Текст кнопки-ссылки для переключения видов «Абсолютные значения»/«Корректировка» */
+        void setCorrectionText(String text);
+
         void startTimerReport(ReportType reportType);
 
         void stopTimerReport(ReportType reportType);
@@ -124,6 +127,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	public static final String FORM_DATA_ID = "formDataId";
 	public static final String READ_ONLY = "readOnly";
     public static final String MANUAL = "manual";
+    public static final String CORRECTION = "correction";
     public static final String UUID = "uuid";
 
 	protected HandlerRegistration closeFormDataHandlerRegistration;
@@ -153,12 +157,13 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	protected boolean forceEditMode = false;
 	
 	protected boolean fixedRows;
+    // Признак отображения вида для форм в корректирующих периодах, true - обычный режим, false - режим отображения изенений
+    protected boolean absoluteView = true;
 
     /** Идентификатор сообщений в лог. Используется в случаях, когда не нужна перезагрузка страницы */
     protected String innerLogUuid;
 
 	protected Set<DataRow<Cell>> modifiedRows = new HashSet<DataRow<Cell>>();
-
 
 	public FormDataPresenterBase(EventBus eventBus,
 	                             MyView view,
@@ -286,9 +291,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 				unlockForm(formData.getId());
 			}
 		});
-
 	}
-
 
 	protected void revealFormDataList() {
 		placeManager.revealPlace(new PlaceRequest.Builder().nameToken(
@@ -296,13 +299,20 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 				String.valueOf(formData.getFormType().getTaxType())).build());
 	}
 	
-	protected void revealFormData(Boolean readOnly, boolean isManual, String uuid) {
-		placeManager.revealPlace(new PlaceRequest.Builder().nameToken(FormDataPresenterBase.NAME_TOKEN)
+	protected void revealFormData(boolean readOnly, boolean isManual, boolean correctionDiff, String uuid) {
+        PlaceRequest.Builder builder = new PlaceRequest.Builder().nameToken(FormDataPresenterBase.NAME_TOKEN)
                 .with(FormDataPresenterBase.READ_ONLY, String.valueOf(readOnly))
-                .with(FormDataPresenterBase.MANUAL, String.valueOf(isManual))
-                .with(FormDataPresenterBase.FORM_DATA_ID, String.valueOf(formData.getId())).build()
-                .with(UUID, uuid)
-        );
+                .with(FormDataPresenterBase.FORM_DATA_ID, String.valueOf(formData.getId()));
+        if (isManual) {
+            builder.with(FormDataPresenterBase.MANUAL, String.valueOf(isManual));
+        }
+        if (correctionDiff) {
+            builder.with(FormDataPresenterBase.CORRECTION, String.valueOf(correctionDiff));
+        }
+        if (uuid != null) {
+            builder.with(UUID, uuid);
+        }
+        placeManager.revealPlace(builder.build());
 	}
 
 	@SuppressWarnings("unchecked")

@@ -101,7 +101,7 @@ public class GetCheckDeclarationHandler extends AbstractActionHandler<GetCheckDe
         List<Long> formDataIds = formDataSearchService.findDataIdsByUserAndFilter(userInfo, formDataFilter);
         for(Long formDataId : formDataIds) {
             FormData formData = formDataService.getFormData(userInfo, formDataId, manual, logger);
-            PagingResult<DataRow<Cell>> resultDataRow = dataRowService.getDataRows(userInfo, formDataId, null, true, manual);
+            PagingResult<DataRow<Cell>> resultDataRow = dataRowService.getDataRows(formDataId, null, true, manual);
             for(DataRow<Cell> dataRow : resultDataRow) {
                 BigDecimal regionBankDivisionId = dataRow.getCell("regionBankDivision").getNumericValue();
                 if (regionBankDivisionId != null && regionBankDivisionId.intValue() == action.getDepartment()) {

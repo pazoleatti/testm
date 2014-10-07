@@ -18,7 +18,7 @@ import java.util.List;
 public class DataRowServiceImpl implements DataRowService {
 	
 	@Autowired
-    LockDataService lockDataService;
+    private LockDataService lockDataService;
 	
 	@Autowired
 	private DataRowDao dataRowDao;
@@ -27,20 +27,23 @@ public class DataRowServiceImpl implements DataRowService {
 	private FormDataDao formDataDao;
 
 	@Override
-	public PagingResult<DataRow<Cell>> getDataRows(
-            TAUserInfo userInfo, long formDataId, DataRowRange range,
-            boolean saved, boolean manual) {
+	public PagingResult<DataRow<Cell>> getDataRows(long formDataId, DataRowRange range, boolean saved, boolean manual) {
 		PagingResult<DataRow<Cell>> result = new PagingResult<DataRow<Cell>>();
-		FormData fd = formDataDao.get(formDataId, manual);
-		result.addAll(saved ? dataRowDao.getSavedRows(fd, null, range) : dataRowDao.getRows(fd, null, range));
-		result.setTotalCount(saved ? dataRowDao.getSavedSize(fd, null) : dataRowDao.getSize(fd, null));
+		FormData formData = formDataDao.get(formDataId, manual);
+        result.addAll(saved ? dataRowDao.getSavedRows(formData, range) : dataRowDao.getRows(formData, range));
+        result.setTotalCount(saved ? dataRowDao.getSavedSize(formData) : dataRowDao.getSize(formData));
 		return result;
 	}
 
-	@Override
-	public int getRowCount(TAUserInfo userInfo, long formDataId, boolean saved, boolean manual) {
+    @Override
+    public List<DataRow<Cell>> getSavedRows(FormData formData) {
+        return dataRowDao.getSavedRows(formData, null);
+    }
+
+    @Override
+	public int getRowCount(long formDataId, boolean saved, boolean manual) {
 		FormData fd = formDataDao.get(formDataId, manual);
-		return saved ? dataRowDao.getSavedSize(fd, null) : dataRowDao.getSize(fd, null);
+		return saved ? dataRowDao.getSavedSize(fd) : dataRowDao.getSize(fd);
 	}
 
 	@Override
@@ -54,12 +57,11 @@ public class DataRowServiceImpl implements DataRowService {
 		}
 	}
 
-	@Override
-	public void rollback(TAUserInfo userInfo, long formDataId) {
-        checkLockedMe(lockDataService.lock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formDataId,
-                userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME), userInfo.getUser());
-		dataRowDao.rollback(formDataId);
-	}
+    @Override
+    @Transactional(readOnly = false)
+    public void saveCorrectionDiffRows(FormData formData, List<DataRow<Cell>> dataRows) {
+        dataRowDao.saveRows(formData, dataRows);
+    }
 
     @Override
     public PagingResult<FormDataSearchResult> searchByKey(Long formDataId, Integer formTemplateId, DataRowRange range, String key, boolean isCaseSensitive) {

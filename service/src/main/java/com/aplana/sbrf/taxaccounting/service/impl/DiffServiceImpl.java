@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.Diff;
 import com.aplana.sbrf.taxaccounting.model.DiffType;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
@@ -9,9 +11,7 @@ import difflib.DiffUtils;
 import difflib.Patch;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Levykin
@@ -79,5 +79,80 @@ public class DiffServiceImpl implements DiffService {
             retVal.add(new Pair(x++, y++));
         }
         return retVal;
+    }
+
+    @Override
+    public List<DataRow<Cell>> getDiff(List<DataRow<Cell>> original, List<DataRow<Cell>> revised) {
+        // Перевод в списки строк
+        List<String> originalList = new ArrayList<String>(original.size());
+        List<String> revisedList = new ArrayList<String>(revised.size());
+
+        for (DataRow<Cell> dataRow : original) {
+            originalList.add(getRowAsString(dataRow));
+        }
+
+        for (DataRow<Cell> dataRow : revised) {
+            revisedList.add(getRowAsString(dataRow));
+        }
+        // Список изменений
+        List<Diff> diffList = computeDiff(originalList, revisedList);
+
+        Map<Integer, DiffType> originalDiffMap = new HashMap<Integer, DiffType>();
+        Map<Integer, DiffType> revisedDiffMap = new HashMap<Integer, DiffType>();
+        for (Diff diff : diffList) {
+            if (diff.getOriginalRowNumber() != null) {
+                originalDiffMap.put(diff.getOriginalRowNumber(), diff.getDiffType());
+            }
+            if (diff.getRevisedRowNumber() != null) {
+                revisedDiffMap.put(diff.getRevisedRowNumber(), diff.getDiffType());
+            }
+        }
+
+        // Пары строк для подстановок
+        List<Pair<Integer, Integer>> pairList = getMergedOrder(diffList, Math.max(original.size(), revisedList.size()));
+        List<DataRow<Cell>> retVal = new ArrayList<DataRow<Cell>>(pairList.size());
+        for (Pair<Integer, Integer> pair : pairList) {
+            DataRow<Cell> originalRow = null;
+            DataRow<Cell> revisedRow = null;
+            if (pair.getFirst() != null) {
+                originalRow = original.get(pair.getFirst());
+            }
+            if (pair.getSecond() != null) {
+                revisedRow = revised.get(pair.getSecond());
+            }
+            DataRow<Cell> dataRow = pair.getSecond() == null ? originalRow : revisedRow;
+            DiffType diffType = pair.getSecond() == null ? originalDiffMap.get(pair.getFirst()) :
+                    revisedDiffMap.get(pair.getSecond());
+
+            diffStyles(diffType, pair, dataRow, originalRow, revisedRow);
+            retVal.add(dataRow);
+        }
+
+        return retVal;
+    }
+
+    // Стили для отображения изменений
+    private void diffStyles(DiffType diffType, Pair<Integer, Integer> pair, DataRow<Cell> dataRow,
+                            DataRow<Cell> originalRow, DataRow<Cell> revisedRow) {
+        // TODO Левыкин: Очистить стили
+        if (diffType == null) {
+            // Строка не изменилась
+            return;
+        }
+        // TODO Левыкин: подсветка изменений по стилям и вычисление изменений
+        for (String key : dataRow.keySet()) {
+            Cell cell = dataRow.getCell(key);
+            cell.setStyleAlias("Корректировка");
+        }
+    }
+
+    @Override
+    public String getRowAsString(DataRow<Cell> dataRow) {
+        StringBuilder builder = new StringBuilder();
+        for (String key : dataRow.keySet()) {
+            Cell cell = dataRow.getCell(key);
+            builder.append((cell.getValue() == null ? "" : cell.getValue()) + ";");
+        }
+        return builder.toString();
     }
 }

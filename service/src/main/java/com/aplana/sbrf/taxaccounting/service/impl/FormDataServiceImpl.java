@@ -8,7 +8,6 @@ import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.*;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
@@ -116,7 +115,7 @@ public class FormDataServiceImpl implements FormDataService {
         FormData formData = formDataDao.get(formDataId, false);
         formDataAccessService.canCreateManual(logger, userInfo, formDataId);
 
-        List<DataRow<Cell>> rows = dataRowDao.getRows(formData, null, null);
+        List<DataRow<Cell>> rows = dataRowDao.getRows(formData, null);
         formData.setManual(true);
         dataRowDao.saveRows(formData, rows);
         dataRowDao.commit(formData.getId());
@@ -622,7 +621,7 @@ public class FormDataServiceImpl implements FormDataService {
     public void checkReferenceValues(Logger logger, FormData formData) {
         Map<Long, List<Long>> recordsToCheck = new HashMap<Long, List<Long>>();
         Map<Long, ReferenceInfo> referenceInfoMap = new HashMap<Long, ReferenceInfo>();
-        List<DataRow<Cell>> rows = dataRowDao.getSavedRows(formData, null, null);
+        List<DataRow<Cell>> rows = dataRowDao.getSavedRows(formData, null);
         for (Column column : formData.getFormColumns()) {
             if (ColumnType.REFBOOK.equals(column.getColumnType())) {
                 Long attributeId = ((RefBookColumn) column).getRefBookAttributeId();
@@ -913,17 +912,6 @@ public class FormDataServiceImpl implements FormDataService {
         return !formDataIds.isEmpty();
     }
 
-
-    @Override
-    public boolean existFormDataByTaxAndDepartment(List<TaxType> taxTypes, List<Integer> departmentIds) {
-       try {
-           List<Long> ids = formDataDao.getFormDataIds(taxTypes, departmentIds);
-           return !ids.isEmpty();
-       } catch (DaoException e){
-           throw new ServiceException("", e);
-       }
-    }
-
     @Override
     public void updateFDTBNames(int depTBId,  String depName, Date dateFrom, Date dateTo) {
         if (dateFrom == null)
@@ -965,7 +953,7 @@ public class FormDataServiceImpl implements FormDataService {
         if (formDataList.size() > 0) {
             for (FormData aFormData : formDataList) {
                 if (beInOnAutoNumeration(aFormData)) {
-                    previousRowNumber += dataRowDao.getSizeWithoutTotal(aFormData, null);
+                    previousRowNumber += dataRowDao.getSizeWithoutTotal(aFormData);
                 }
                 if (aFormData.getId().equals(formData.getId())) {
                     return previousRowNumber;
