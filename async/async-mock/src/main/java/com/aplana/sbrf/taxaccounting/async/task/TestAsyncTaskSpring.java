@@ -45,7 +45,7 @@ public class TestAsyncTaskSpring extends AbstractAsyncTask {
     }
 
     @Override
-    protected String getErrorMsg() {
+    protected String getErrorMsg(Map<String, Object> params) {
         return "Dev-мод ошибка";
     }
 }

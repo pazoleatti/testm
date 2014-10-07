@@ -52,7 +52,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
      * Возвращает текст оповещения, которое будет создано для пользователей в случае некорректного завершения задачи
      * @return текст сообщения
      */
-    protected abstract String getErrorMsg();
+    protected abstract String getErrorMsg(Map<String, Object> params);
 
     @Override
     public void execute(final Map<String, Object> params) {
@@ -76,7 +76,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                 transactionHelper.executeInNewTransaction(new TransactionLogic() {
                     @Override
                     public void execute() {
-                        sendNotifications(lock, getErrorMsg());
+                        sendNotifications(lock, getErrorMsg(params));
                         lockService.unlock(lock, (Integer) params.get(USER_ID.name()));
                     }
 

@@ -75,4 +75,9 @@ public class TestXlsxGeneratorAsyncTaskSpring extends AbstractAsyncTask {
     protected String getAsyncTaskName() {
         return "Генерация xlsx-файла";
     }
+
+    @Override
+    protected String getErrorMsg(Map<String, Object> params) {
+        return null;
+    }
 }

@@ -50,7 +50,6 @@ public class XmlGeneratorAsyncTask extends AbstractAsyncTask {
 
     @Override
     protected void executeBusinessLogic(Map<String, Object> params) {
-        System.out.println("XmlGeneratorAsyncTask.params: " + params.toString());
         Date docDate = (Date)params.get("docDate");
         long declarationDataId = (Long)params.get("declarationDataId");
         int userId = (Integer)params.get(USER_ID.name());
@@ -82,7 +81,8 @@ public class XmlGeneratorAsyncTask extends AbstractAsyncTask {
                 declarationTemplate.getType().getName());
     }
 
-    protected String getErrorNotificationMsg(Map<String, Object> params) {
+    @Override
+    protected String getErrorMsg(Map<String, Object> params) {
         int userId = (Integer)params.get(USER_ID.name());
         long declarationDataId = (Long)params.get("declarationDataId");
         TAUserInfo userInfo = new TAUserInfo();
@@ -95,10 +95,5 @@ public class XmlGeneratorAsyncTask extends AbstractAsyncTask {
         return String.format("Произошла непредвиденная ошибка при формировании %s отчета декларации: Период: \"%s, %s\", Подразделение: \"%s\", Вид: \"%s\". Для запуска процедуры формирования необходимо повторно инициировать формирование данного отчета",
                 ReportType.XML_DEC.getName(), reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), department.getName(),
                 declarationTemplate.getType().getName());
-    }
-
-    @Override
-    protected String getErrorMsg() {
-        return null;
     }
 }

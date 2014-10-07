@@ -72,7 +72,7 @@ public class XlsxGeneratorAsyncTask extends AbstractAsyncTask {
     }
 
     @Override
-    protected String getErrorMsg() {
+    protected String getErrorMsg(Map<String, Object> params) {
         return null;
     }
 }
