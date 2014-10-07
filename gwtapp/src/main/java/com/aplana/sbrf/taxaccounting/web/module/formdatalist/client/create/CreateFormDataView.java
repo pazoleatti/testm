@@ -28,10 +28,10 @@ import java.util.*;
 public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUiHandlers> implements CreateFormDataPresenter.MyView,
         Editor<FormDataFilter> {
 
-    public static final String FORM_DATA_KIND_TITLE = "Тип налоговой формы";
-    public static final String FORM_DATA_KIND_TITLE_D = "Тип формы";
-    public static final String FORM_DATA_TYPE_TITLE = "Вид налоговой формы";
-    public static final String FORM_DATA_TYPE_TITLE_D = "Вид формы";
+    public static final String FORM_DATA_KIND_TITLE = "Тип налоговой формы:";
+    public static final String FORM_DATA_KIND_TITLE_D = "Тип формы:";
+    public static final String FORM_DATA_TYPE_TITLE = "Вид налоговой формы:";
+    public static final String FORM_DATA_TYPE_TITLE_D = "Вид формы:";
     public static final String FORM_DATA_TITLE = "Создание налоговой формы";
     public static final String FORM_DATA_TITLE_D = "Создание формы";
     public static final String FORM_DATA_CORRECTION = "Форма будет создана в корректирующем периоде, дата сдачи корректировки: ";
