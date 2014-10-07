@@ -104,6 +104,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Autowired
     private LockDataService lockDataService;
 
+    @Autowired
+    private TAUserService taUserService;
+
     public static final String TAG_FILE = "Файл";
     public static final String TAG_DOCUMENT = "Документ";
     public static final String ATTR_FILE_ID = "ИдФайл";
@@ -588,7 +591,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     private void checkLock(LockData lockData, TAUser user){
-        if (lockData!= null && lockData.getUserId() != user.getId())
-            throw new ServiceException(String.format(LockDataService.LOCK_DATA, user.getName(), user.getId()));
+        if (lockData!= null && lockData.getUserId() != user.getId()) {
+            TAUser lockUser = taUserService.getUser(lockData.getUserId());
+            throw new ServiceException(String.format(LockDataService.LOCK_DATA, lockUser.getName(), lockUser.getId()));
+        }
     }
 }
