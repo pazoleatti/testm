@@ -77,7 +77,7 @@
         <checking>false</checking>
         <name>Сумма сделки (с учетом НКД), в валюте расчетов.</name>
         <order>8</order>
-        <width>8</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
