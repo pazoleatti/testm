@@ -158,7 +158,16 @@ public class DiffServiceTest {
     public void getDiffTest() {
         List<FormStyle> formStyleList = new LinkedList<FormStyle>();
         FormStyle formStyle = new FormStyle();
-        formStyle.setAlias("Корректировка");
+        formStyle.setAlias(DiffService.STYLE_CHANGE);
+        formStyleList.add(formStyle);
+        formStyle = new FormStyle();
+        formStyle.setAlias(DiffService.STYLE_NO_CHANGE);
+        formStyleList.add(formStyle);
+        formStyle = new FormStyle();
+        formStyle.setAlias(DiffService.STYLE_INSERT);
+        formStyleList.add(formStyle);
+        formStyle = new FormStyle();
+        formStyle.setAlias(DiffService.STYLE_DELETE);
         formStyleList.add(formStyle);
         List<Column> columnList = getColumnList();
         DataRow<Cell> dataRow1 = new DataRow<Cell>(FormDataUtils.createCells(columnList, formStyleList));
@@ -169,20 +178,29 @@ public class DiffServiceTest {
         dataRow1.getCell(ALIAS_3).setDateValue(date);
         dataRow1.getCell(ALIAS_4).setNumericValue(BigDecimal.valueOf(1));
         dataRow1.getCell(ALIAS_5).setNumericValue(BigDecimal.valueOf(1));
-        dataRow2.getCell(ALIAS_1).setStringValue("str2");
-        dataRow2.getCell(ALIAS_2).setNumericValue(BigDecimal.valueOf(2));
+        dataRow2.getCell(ALIAS_1).setStringValue("str1");
+        dataRow2.getCell(ALIAS_2).setNumericValue(null);
         dataRow2.getCell(ALIAS_4).setNumericValue(BigDecimal.valueOf(2));
         dataRow2.getCell(ALIAS_5).setNumericValue(BigDecimal.valueOf(2));
         List<DataRow<Cell>> diffList = diffService.getDiff(Arrays.asList(dataRow1), Arrays.asList(dataRow2));
         Assert.assertEquals(1, diffList.size());
         DataRow<Cell> dataRow = diffList.get(0);
-        Assert.assertEquals("str2", dataRow.get(ALIAS_1));
-        Assert.assertEquals(BigDecimal.valueOf(2), dataRow.get(ALIAS_2));
+        Assert.assertEquals("str1", dataRow.get(ALIAS_1));
+        Assert.assertEquals(BigDecimal.valueOf(-1), dataRow.get(ALIAS_2));
         Assert.assertNull(dataRow.get(ALIAS_3));
         Assert.assertEquals(BigDecimal.valueOf(2).longValue(), dataRow.get(ALIAS_4));
         Assert.assertEquals(BigDecimal.valueOf(2), dataRow.get(ALIAS_5));
-
-        // TODO Левыкин: Проверка стилей. Добавить поле реализации в сервисе.
+        // Проверка стилей
+        List<String> styleList = new LinkedList<String>();
+        for (String key : dataRow.keySet()) {
+            Cell cell = dataRow.getCell(key);
+            styleList.add(cell.getStyleAlias());
+        }
+        Assert.assertEquals(DiffService.STYLE_NO_CHANGE, styleList.get(0));
+        Assert.assertEquals(DiffService.STYLE_CHANGE, styleList.get(1));
+        Assert.assertEquals(DiffService.STYLE_CHANGE, styleList.get(2));
+        Assert.assertEquals(DiffService.STYLE_CHANGE, styleList.get(3));
+        Assert.assertEquals(DiffService.STYLE_CHANGE, styleList.get(4));
     }
 
     // Тестовые графы
