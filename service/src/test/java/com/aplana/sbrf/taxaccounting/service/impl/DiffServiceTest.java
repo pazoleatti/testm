@@ -77,40 +77,40 @@ public class DiffServiceTest {
         diffList = Arrays.asList(new Diff(0, 0, DiffType.CHANGE));
         pairList = diffService.getMergedOrder(diffList, 1);
         Assert.assertEquals(1, pairList.size());
-        Assert.assertEquals(0, pairList.get(0).first.intValue());
-        Assert.assertEquals(0, pairList.get(0).second.intValue());
+        Assert.assertEquals(0, pairList.get(0).getFirst().intValue());
+        Assert.assertEquals(0, pairList.get(0).getSecond().intValue());
 
         diffList = Arrays.asList(new Diff(1, 1, DiffType.CHANGE));
         pairList = diffService.getMergedOrder(diffList, 3);
         Assert.assertEquals(3, pairList.size());
-        Assert.assertEquals(0, pairList.get(0).first.intValue());
-        Assert.assertEquals(0, pairList.get(0).second.intValue());
-        Assert.assertEquals(1, pairList.get(1).first.intValue());
-        Assert.assertEquals(1, pairList.get(1).second.intValue());
-        Assert.assertEquals(2, pairList.get(2).first.intValue());
-        Assert.assertEquals(2, pairList.get(2).second.intValue());
+        Assert.assertEquals(0, pairList.get(0).getFirst().intValue());
+        Assert.assertEquals(0, pairList.get(0).getSecond().intValue());
+        Assert.assertEquals(1, pairList.get(1).getFirst().intValue());
+        Assert.assertEquals(1, pairList.get(1).getSecond().intValue());
+        Assert.assertEquals(2, pairList.get(2).getFirst().intValue());
+        Assert.assertEquals(2, pairList.get(2).getSecond().intValue());
 
         diffList = Arrays.asList(new Diff(null, 1, DiffType.INSERT));
         pairList = diffService.getMergedOrder(diffList, 3);
         Assert.assertEquals(3, pairList.size());
-        Assert.assertEquals(0, pairList.get(0).first.intValue());
-        Assert.assertEquals(0, pairList.get(0).second.intValue());
-        Assert.assertNull(pairList.get(1).first);
-        Assert.assertEquals(1, pairList.get(1).second.intValue());
-        Assert.assertEquals(1, pairList.get(2).first.intValue());
-        Assert.assertEquals(2, pairList.get(2).second.intValue());
+        Assert.assertEquals(0, pairList.get(0).getFirst().intValue());
+        Assert.assertEquals(0, pairList.get(0).getSecond().intValue());
+        Assert.assertNull(pairList.get(1).getFirst());
+        Assert.assertEquals(1, pairList.get(1).getSecond().intValue());
+        Assert.assertEquals(1, pairList.get(2).getFirst().intValue());
+        Assert.assertEquals(2, pairList.get(2).getSecond().intValue());
 
         diffList = Arrays.asList(new Diff(1, 1, DiffType.CHANGE), new Diff(null, 2, DiffType.INSERT),
                 new Diff(4, 5, DiffType.CHANGE), new Diff(5, 6, DiffType.CHANGE), new Diff(6, null, DiffType.DELETE),
                 new Diff(12, null, DiffType.DELETE), new Diff(null, 13, DiffType.INSERT), new Diff(null, 14, DiffType.INSERT));
         pairList = diffService.getMergedOrder(diffList, 14);
         Assert.assertEquals(17, pairList.size());
-        Assert.assertEquals(0, pairList.get(0).first.intValue());
-        Assert.assertEquals(0, pairList.get(0).second.intValue());
-        Assert.assertEquals(4, pairList.get(5).first.intValue());
-        Assert.assertEquals(5, pairList.get(5).second.intValue());
-        Assert.assertNull(pairList.get(16).first);
-        Assert.assertEquals(14, pairList.get(16).second.intValue());
+        Assert.assertEquals(0, pairList.get(0).getFirst().intValue());
+        Assert.assertEquals(0, pairList.get(0).getSecond().intValue());
+        Assert.assertEquals(4, pairList.get(5).getFirst().intValue());
+        Assert.assertEquals(5, pairList.get(5).getSecond().intValue());
+        Assert.assertNull(pairList.get(16).getFirst());
+        Assert.assertEquals(14, pairList.get(16).getSecond().intValue());
     }
 
     private static List<String> streamToLines(InputStream inputStream) throws IOException {

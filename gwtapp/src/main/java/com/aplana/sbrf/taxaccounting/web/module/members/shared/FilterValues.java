@@ -7,8 +7,9 @@ import com.gwtplatform.dispatch.shared.Result;
 import java.util.List;
 
 public class FilterValues implements Result {
-	List<TARole> roles;
-	List<Department> departments;
+
+	private List<TARole> roles;
+	private List<Department> departments;
 
 	public List<TARole> getRoles() {
 		return roles;

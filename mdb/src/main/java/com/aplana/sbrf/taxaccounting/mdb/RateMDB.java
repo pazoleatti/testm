@@ -131,20 +131,18 @@ public class RateMDB implements MessageListener {
 
         DefaultHandler handler = new DefaultHandler() {
 
-            boolean bSendRateRq = false;
-            boolean bOperName = false;
-            boolean bExRateBlock = false;
-            boolean bExRateType = false;
-            boolean bExRateDetails = false;
-            boolean bRateParamType = false;
-            boolean bCcy = false;
-            boolean bCode = false;
-
-            String operName = null;
+            private boolean bSendRateRq;
+			private boolean bOperName;
+			private boolean bExRateBlock;
+			private boolean bExRateType;
+			private boolean bExRateDetails;
+			private boolean bRateParamType;
+			private boolean bCcy;
+			private boolean bCode;
+			private String operName;
 
             @Override
-            public void startElement(String uri, String localName, String qName, Attributes attributes)
-                    throws SAXException {
+            public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
                 if (qName.equalsIgnoreCase("SendRateRq")) {
                     bSendRateRq = true;
                 } else if (qName.equalsIgnoreCase("OperName")) {

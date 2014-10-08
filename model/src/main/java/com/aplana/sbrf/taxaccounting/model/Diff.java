@@ -6,9 +6,9 @@ package com.aplana.sbrf.taxaccounting.model;
  * @author Levykin
  */
 public class Diff {
-    Integer originalRowNumber;
-    Integer revisedRowNumber;
-    DiffType diffType;
+    private Integer originalRowNumber;
+	private Integer revisedRowNumber;
+	private DiffType diffType;
 
     /**
      * Изменение
