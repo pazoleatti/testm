@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
 import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
-import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.async.manager.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.task.AsyncTask;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
@@ -14,7 +13,7 @@ import com.aplana.sbrf.taxaccounting.service.ReportService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.CreateReportAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.CreateReportResult;
-import com.google.gwt.core.shared.GWT;
+import com.aplana.sbrf.taxaccounting.web.service.PropertyLoader;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
@@ -65,10 +64,11 @@ public class CreateReportHandler extends AbstractActionHandler<CreateReportActio
         LockData lockData;
         if ((lockData = lockDataService.lock(key, userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME * 4)) == null) {
             try {
+                params.put(AsyncTask.RequiredParams.LOCK_DATE_END.name(), lockDataService.getLock(key).getDateBefore());
                 String uuid = reportService.get(userInfo, action.getFormDataId(), action.getType(), action.isShowChecked(), action.isManual(), false);
                 if (uuid == null) {
                     lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
-                    asyncManager.executeAsync(action.getType().getAsyncTaskTypeId(isDevelopmentMode()), params, BalancingVariants.SHORT);
+                    asyncManager.executeAsync(action.getType().getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params, BalancingVariants.SHORT);
                     logger.info(String.format("%s отчет текущей налоговой формы(%s) поставлен в очередь на формирование.", action.getType().getName(), action.isManual()?"версия ручного ввода":"автоматическая версия"));
                 } else {
                     result.setExistReport(true);
@@ -95,9 +95,4 @@ public class CreateReportHandler extends AbstractActionHandler<CreateReportActio
     public void undo(CreateReportAction searchAction, CreateReportResult searchResult, ExecutionContext executionContext) throws ActionException {
 
     }
-
-    boolean isDevelopmentMode() {
-        return !GWT.isProdMode();
-    }
-
 }

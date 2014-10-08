@@ -13,11 +13,13 @@ import com.aplana.sbrf.taxaccounting.service.ReportService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CreateReportAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CreateReportResult;
+import com.aplana.sbrf.taxaccounting.web.service.PropertyLoader;
 import com.google.gwt.core.shared.GWT;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -28,6 +30,7 @@ import java.util.Map;
  *
  */
 @Service
+@PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class CreateReportDeclarationHandler extends AbstractActionHandler<CreateReportAction, CreateReportResult> {
 
     @Autowired
@@ -66,7 +69,7 @@ public class CreateReportDeclarationHandler extends AbstractActionHandler<Create
                 if (uuid == null) {
                     params.put(AsyncTask.RequiredParams.LOCK_DATE_END.name(), lockDataService.getLock(key).getDateBefore());
                     lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
-                    asyncManager.executeAsync(action.getType().getAsyncTaskTypeId(isDevelopmentMode()), params, BalancingVariants.SHORT);
+                    asyncManager.executeAsync(action.getType().getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params, BalancingVariants.SHORT);
                     logger.info(String.format("%s отчет текущей декларации поставлен в очередь на формирование.", action.getType().getName()));
                 } else {
                     result.setExistReport(true);
@@ -93,9 +96,4 @@ public class CreateReportDeclarationHandler extends AbstractActionHandler<Create
     public void undo(CreateReportAction searchAction, CreateReportResult searchResult, ExecutionContext executionContext) throws ActionException {
 
     }
-
-    boolean isDevelopmentMode() {
-        return !GWT.isProdMode();
-    }
-
 }

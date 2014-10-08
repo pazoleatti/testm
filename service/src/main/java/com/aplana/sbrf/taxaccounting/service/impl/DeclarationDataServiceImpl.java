@@ -338,7 +338,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.CALCULATE, logger, exchangeParams);
 
         String xml = XML_HEADER.concat(writer.toString());
-        //declarationData.setXmlDataUuid(blobDataService.create(new ByteArrayInputStream(xml.getBytes()), ""));
+
         reportService.createDec(declarationData.getId(), blobDataService.create(new ByteArrayInputStream(xml.getBytes()), ""), ReportType.XML_DEC);
 
         validateDeclaration(userInfo, declarationData, logger, false, FormDataEvent.CALCULATE);

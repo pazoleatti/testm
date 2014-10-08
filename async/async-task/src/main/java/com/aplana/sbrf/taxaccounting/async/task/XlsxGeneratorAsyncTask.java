@@ -67,12 +67,35 @@ public class XlsxGeneratorAsyncTask extends AbstractAsyncTask {
         Department department = departmentService.getDepartment(declaration.getDepartmentId());
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(declaration.getDepartmentReportPeriodId());
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
-        return String.format("Сформирован %s отчет декларации: Период: \"%s, %s\", Подразделение: \"%s\", Вид: \"%s\".", ReportType.EXCEL.getName(), reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), department.getName(),
-                declarationTemplate.getType().getName());
+        String str;
+        if (TaxType.PROPERTY.equals(declarationTemplate.getType().getTaxType())) {
+            str = String.format(", Налоговый орган: \"%s\", КПП: \"%s\".", declaration.getTaxOrganCode(), declaration.getKpp());
+        } else {
+            str = ".";
+        }
+        return String.format("Сформирован %s отчет декларации: Период: \"%s, %s\", Подразделение: \"%s\", Вид: \"%s\"%s", ReportType.EXCEL_DEC.getName(), reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), department.getName(),
+                declarationTemplate.getType().getName(), str);
     }
 
     @Override
     protected String getErrorMsg(Map<String, Object> params) {
-        return null;
+        int userId = (Integer)params.get(USER_ID.name());
+        long declarationDataId = (Long)params.get("declarationDataId");
+        TAUserInfo userInfo = new TAUserInfo();
+        userInfo.setUser(userService.getUser(userId));
+
+        DeclarationData declaration = declarationDataService.get(declarationDataId, userInfo);
+        Department department = departmentService.getDepartment(declaration.getDepartmentId());
+        DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(declaration.getDepartmentReportPeriodId());
+        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
+        String str;
+        if (TaxType.PROPERTY.equals(declarationTemplate.getType().getTaxType())) {
+            str = String.format(", Налоговый орган: \"%s\", КПП: \"%s\".", declaration.getTaxOrganCode(), declaration.getKpp());
+        } else {
+            str = ".";
+        }
+        return String.format("Произошла непредвиденная ошибка при формировании %s отчета декларации: Период: \"%s, %s\", Подразделение: \"%s\", Вид: \"%s\"%s Для запуска процедуры формирования необходимо повторно инициировать формирование данного отчета",
+                ReportType.EXCEL_DEC.getName(), reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), department.getName(),
+                declarationTemplate.getType().getName(), str);
     }
 }

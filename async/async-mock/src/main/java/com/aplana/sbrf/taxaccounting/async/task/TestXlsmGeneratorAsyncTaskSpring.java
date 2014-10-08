@@ -1,19 +1,12 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
-import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
-import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
 import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.*;

@@ -13,9 +13,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.service.BlobDataService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationDataSearchService;
-import com.aplana.sbrf.taxaccounting.service.PeriodService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.script.DeclarationService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContext;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
@@ -88,6 +86,12 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 
     @Autowired
     DeclarationDataSearchService declarationDataSearchService;
+
+    @Autowired
+    private ReportService reportService;
+
+    @Autowired
+    private TAUserService taUserService;
 
     @Override
     public DeclarationData find(int declarationTypeId, int departmentReportPeriodId) {
@@ -181,7 +185,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 
     @Override
     public String getXmlData(long declarationDataId) {
-        BlobData blobData = blobDataService.get(declarationDataDao.get(declarationDataId).getXmlDataUuid());
+        BlobData blobData = blobDataService.get(reportService.getDec(taUserService.getSystemUserInfo(), declarationDataId, ReportType.XML_DEC));
         if(blobData == null){
             //если декларация еще не заполнена
             return null;

@@ -1,23 +1,10 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
-import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
-import net.sf.jasperreports.engine.JasperFillManager;
-import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.export.JRPdfExporter;
-import net.sf.jasperreports.engine.export.JRPdfExporterParameter;
-import net.sf.jasperreports.engine.query.JRXPathQueryExecuterFactory;
-import net.sf.jasperreports.engine.util.JRXmlUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
 
 import java.io.*;
 import java.util.*;
@@ -50,6 +37,9 @@ public class TestXlsxGeneratorAsyncTaskSpring extends AbstractAsyncTask {
     @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
 
+    @Autowired
+    private DeclarationTemplateService declarationTemplateService;
+
     @Override
     protected void executeBusinessLogic(Map<String, Object> params) {
         long declarationDataId = (Long)params.get("declarationDataId");
@@ -60,6 +50,12 @@ public class TestXlsxGeneratorAsyncTaskSpring extends AbstractAsyncTask {
         reportService.createDec(declarationDataId, blobDataService.create(new ByteArrayInputStream(declarationDataService.getXlsxData(declarationDataId, userInfo)), ""), ReportType.EXCEL_DEC);
     }
 
+
+    protected String getAsyncTaskName() {
+        return "Генерация xlsx-файла";
+    }
+
+    @Override
     protected String getNotificationMsg(Map<String, Object> params) {
         int userId = (Integer)params.get(USER_ID.name());
         long declarationDataId = (Long)params.get("declarationDataId");
@@ -69,15 +65,36 @@ public class TestXlsxGeneratorAsyncTaskSpring extends AbstractAsyncTask {
         DeclarationData declaration = declarationDataService.get(declarationDataId, userInfo);
         Department department = departmentService.getDepartment(declaration.getDepartmentId());
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(declaration.getDepartmentReportPeriodId());
-        return String.format("Сформирован %s отчет налоговой формы: Период: \"%s, %s\", Подразделение: \"%s\", Тип: \"%s\", Вид: \"%s\".", ReportType.EXCEL.getName(), reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), department.getName(), "''", "''");
-    }
-
-    protected String getAsyncTaskName() {
-        return "Генерация xlsx-файла";
+        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
+        String str;
+        if (TaxType.PROPERTY.equals(declarationTemplate.getType().getTaxType())) {
+            str = String.format(", Налоговый орган: \"%s\", КПП: \"%s\".", declaration.getTaxOrganCode(), declaration.getKpp());
+        } else {
+            str = ".";
+        }
+        return String.format("Сформирован %s отчет декларации: Период: \"%s, %s\", Подразделение: \"%s\", Вид: \"%s\"%s", ReportType.EXCEL_DEC.getName(), reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), department.getName(),
+                declarationTemplate.getType().getName(), str);
     }
 
     @Override
     protected String getErrorMsg(Map<String, Object> params) {
-        return null;
+        int userId = (Integer)params.get(USER_ID.name());
+        long declarationDataId = (Long)params.get("declarationDataId");
+        TAUserInfo userInfo = new TAUserInfo();
+        userInfo.setUser(userService.getUser(userId));
+
+        DeclarationData declaration = declarationDataService.get(declarationDataId, userInfo);
+        Department department = departmentService.getDepartment(declaration.getDepartmentId());
+        DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(declaration.getDepartmentReportPeriodId());
+        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
+        String str;
+        if (TaxType.PROPERTY.equals(declarationTemplate.getType().getTaxType())) {
+            str = String.format(", Налоговый орган: \"%s\", КПП: \"%s\".", declaration.getTaxOrganCode(), declaration.getKpp());
+        } else {
+            str = ".";
+        }
+        return String.format("Произошла непредвиденная ошибка при формировании %s отчета декларации: Период: \"%s, %s\", Подразделение: \"%s\", Вид: \"%s\"%s Для запуска процедуры формирования необходимо повторно инициировать формирование данного отчета",
+                ReportType.EXCEL_DEC.getName(), reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), department.getName(),
+                declarationTemplate.getType().getName(), str);
     }
 }

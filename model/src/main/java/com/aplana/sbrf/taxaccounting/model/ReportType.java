@@ -9,6 +9,7 @@ public enum ReportType {
 
     EXCEL(0, "Excel", 3L, 103L),
     CSV(1, "CSV", 4L, 104L),
+
     EXCEL_DEC(0, "Excel", 5L, 105L),
     XML_DEC(1, "XML", 6L, 106L),
     PDF_DEC(2, "PDF", 7L, 107L),
@@ -42,11 +43,11 @@ public enum ReportType {
         this.name = name;
     }
 
-    public Long getAsyncTaskTypeId(boolean isDevelopmentMode) {
-        if (isDevelopmentMode)
-            return devModeAsyncTaskTypeId;
-        else
+    public Long getAsyncTaskTypeId(boolean isProductionMode) {
+        if (isProductionMode)
             return asyncTaskTypeId;
+        else
+            return devModeAsyncTaskTypeId;
     }
 
     public void setAsyncTaskTypeId(Long asyncTaskTypeId) {

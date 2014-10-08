@@ -2,25 +2,13 @@ package com.aplana.sbrf.taxaccounting.async.task;
 
 import com.aplana.sbrf.taxaccounting.async.service.AsyncTaskInterceptor;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
-import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataScriptParams;
-import net.sf.jasperreports.engine.JasperFillManager;
-import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.export.JRPdfExporter;
-import net.sf.jasperreports.engine.export.JRPdfExporterParameter;
-import net.sf.jasperreports.engine.query.JRXPathQueryExecuterFactory;
-import net.sf.jasperreports.engine.util.JRXmlUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
 
 import javax.ejb.*;
 import javax.interceptor.Interceptors;
-import java.io.*;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 
 import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.USER_ID;
@@ -77,8 +65,14 @@ public class XmlGeneratorAsyncTask extends AbstractAsyncTask {
         Department department = departmentService.getDepartment(declaration.getDepartmentId());
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(declaration.getDepartmentReportPeriodId());
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
-        return String.format("Сформирован %s отчет декларации: Период: \"%s, %s\", Подразделение: \"%s\", Вид: \"%s\".", ReportType.XML_DEC.getName(), reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), department.getName(),
-                declarationTemplate.getType().getName());
+        String str;
+        if (TaxType.PROPERTY.equals(declarationTemplate.getType().getTaxType())) {
+            str = String.format(", Налоговый орган: \"%s\", КПП: \"%s\".", declaration.getTaxOrganCode(), declaration.getKpp());
+        } else {
+            str = ".";
+        }
+        return String.format("Сформирован %s отчет декларации: Период: \"%s, %s\", Подразделение: \"%s\", Вид: \"%s\"%s", ReportType.XML_DEC.getName(), reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), department.getName(),
+                declarationTemplate.getType().getName(), str);
     }
 
     @Override
@@ -92,8 +86,14 @@ public class XmlGeneratorAsyncTask extends AbstractAsyncTask {
         Department department = departmentService.getDepartment(declaration.getDepartmentId());
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(declaration.getDepartmentReportPeriodId());
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
-        return String.format("Произошла непредвиденная ошибка при формировании %s отчета декларации: Период: \"%s, %s\", Подразделение: \"%s\", Вид: \"%s\". Для запуска процедуры формирования необходимо повторно инициировать формирование данного отчета",
+        String str;
+        if (TaxType.PROPERTY.equals(declarationTemplate.getType().getTaxType())) {
+            str = String.format(", Налоговый орган: \"%s\", КПП: \"%s\".", declaration.getTaxOrganCode(), declaration.getKpp());
+        } else {
+            str = ".";
+        }
+        return String.format("Произошла непредвиденная ошибка при формировании %s отчета декларации: Период: \"%s, %s\", Подразделение: \"%s\", Вид: \"%s\"%s Для запуска процедуры формирования необходимо повторно инициировать формирование данного отчета",
                 ReportType.XML_DEC.getName(), reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), department.getName(),
-                declarationTemplate.getType().getName());
+                declarationTemplate.getType().getName(), str);
     }
 }

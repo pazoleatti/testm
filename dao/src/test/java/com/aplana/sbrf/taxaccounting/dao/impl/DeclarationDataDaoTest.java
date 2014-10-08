@@ -29,9 +29,6 @@ public class DeclarationDataDaoTest {
 	@Autowired
 	private DeclarationDataDao declarationDataDao;
 
-    @Autowired
-    private BlobDataDao blobDataDao;
-
     private BlobData blobData;
 
     @Before
@@ -74,7 +71,7 @@ public class DeclarationDataDaoTest {
         assertFalse(declarationDataDao.hasXmlData(1));
         assertFalse(declarationDataDao.hasXmlData(2));
     }
-
+/*
 	@Test
 	public void testGetData() {
 		String data = declarationDataDao.get(1).getXmlDataUuid();
@@ -86,7 +83,7 @@ public class DeclarationDataDaoTest {
 		String data = declarationDataDao.get(2).getXmlDataUuid();
 		assertNull(data);
 	}
-
+*/
 	@Test(expected=DaoException.class)
 	public void testGetDataNotExisted() {
 		declarationDataDao.get(1000l);

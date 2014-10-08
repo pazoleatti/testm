@@ -1,28 +1,21 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
-import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
-import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.LOCKED_OBJECT;
 import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.USER_ID;
 
 /**
  * Спринговая реализация таска "Генерация xlsm-файл" для вызова из дев-мода
  * @author Lhaziev
  */
-@Component("TestCSVGeneratorAsyncTaskSpring")
+@Component("TestCsvGeneratorAsyncTaskSpring")
 @Transactional
 public class TestCsvGeneratorAsyncTaskSpring extends AbstractAsyncTask {
 

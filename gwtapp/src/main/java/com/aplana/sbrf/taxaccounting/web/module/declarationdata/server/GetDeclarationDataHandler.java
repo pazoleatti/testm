@@ -89,8 +89,6 @@ public class GetDeclarationDataHandler
 
 		result.setPdf(generatePdfViewerModel(action, userInfo, taxType));
 
-        result.setCanDownload(declaration.getXmlDataUuid() != null);
-
         result.setTaxOrganCode(declaration.getTaxOrganCode());
         result.setKpp(declaration.getKpp());
 

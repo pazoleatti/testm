@@ -182,11 +182,9 @@ public class DeclarationDataPresenter
 								getView().showReject(result.isCanReject());
 								getView().showDelete(result.isCanDelete());
 								getView().showRecalculateButton(result.isCanDelete());
-								getView().showDownloadButtons(result.isCanDownload());
 
                                 onTimerReport(ReportType.XML_DEC, false);
                                 onTimerReport(ReportType.EXCEL_DEC, false);
-								//getView().setPdf(result.getPdf());
 							}
 						}, DeclarationDataPresenter.this).addCallback(
 						TaManualRevealCallback.create(
