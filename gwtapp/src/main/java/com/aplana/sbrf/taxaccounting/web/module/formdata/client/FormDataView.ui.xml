@@ -264,7 +264,11 @@
                     </g:cell>
 
                     <g:cell>
-                        <style:LinkButton ui:field="correctionButton" text="Корректировка" disableImage="true" addStyleNames="{style.corr}"/>
+                        <g:Button ui:field="fillPreviousButton" text="Заполнить предыдущими значениями" visible="false" addStyleNames="{style.btnMarginRight}"/>
+                    </g:cell>
+
+                    <g:cell>
+                        <style:LinkButton ui:field="correctionButton" text="Показать изменения" disableImage="true" addStyleNames="{style.corr}"/>
                     </g:cell>
 
                     <g:CheckBox ui:field="showCheckedColumns" addStyleNames="{style.showCheckedColumns}"

@@ -77,9 +77,4 @@ public interface DepartmentReportPeriodService {
      * @return true - если существует
      */
     boolean existLargeCorrection(int departmentId, int reportPeriodId, Date correctionDate);
-
-    /**
-     * Отчетный период подразделения, являющийся предудущим по отношению к указанному
-     */
-    DepartmentReportPeriod getPrevDepartmentReportPeriod(DepartmentReportPeriod departmentReportPeriod);
 }

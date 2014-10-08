@@ -95,7 +95,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@UiField
     LinkButton addRowButton, removeRowButton, correctionButton;
 	@UiField
-	Button originalVersionButton;
+	Button originalVersionButton, fillPreviousButton;
 	@UiField
 	Button recalculateButton;
 	@UiField
@@ -388,6 +388,11 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		}
 	}
 
+    @UiHandler("fillPreviousButton")
+    void onFillPreviousButtonClicked(ClickEvent event) {
+        getUiHandlers().onFillPreviousButtonClicked();
+    }
+
 	@Override
 	public DataRow<Cell> getSelectedRow() {
 		return fixedRows ? noSelectionModel.getLastSelectedObject() : singleSelectionModel.getSelectedObject();
@@ -491,7 +496,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@Override
 	public void setAdditionalFormInfo(
 			String formType, TaxType taxType, String formKind, String departmentId, String reportPeriod, String state,
-            Date startDate, Date endDate, Long formDataId, boolean correctionPeriod, boolean correctionDiff) {
+            Date startDate, Date endDate, Long formDataId, boolean correctionPeriod, boolean correctionDiff, boolean readOnly) {
         returnAnchor.setText(taxType.getName());
         title.setText(formType);
 		title.setTitle(formType);
@@ -511,7 +516,13 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
         // Признак корректирующего периода
         correctionButton.setVisible(correctionPeriod);
         // Признак сравнения корректирующих значений
-        getView().setCorrectionText(correctionDiff ? "Абсолютные значения" : "Корректировка");
+        getView().setCorrectionText(correctionDiff ? "Показать абсолютные значения" : "Показать изменения");
+
+        if (correctionDiff) {
+            checkButton.setVisible(false);
+            workflowButtons.setVisible(false);
+        }
+        fillPreviousButton.setVisible(correctionPeriod && !readOnly);
 	}
 
 	/**

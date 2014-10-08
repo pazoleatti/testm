@@ -59,7 +59,7 @@ public class DataRowServiceImpl implements DataRowService {
 
     @Override
     @Transactional(readOnly = false)
-    public void saveCorrectionDiffRows(FormData formData, List<DataRow<Cell>> dataRows) {
+    public void saveRows(FormData formData, List<DataRow<Cell>> dataRows) {
         dataRowDao.saveRows(formData, dataRows);
     }
 
