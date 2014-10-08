@@ -17,6 +17,8 @@ public interface FormDataUiHandlers extends UiHandlers{
 
 	void onRemoveRowClicked();
 
+    void onFillPreviousButtonClicked();
+
     void onModeChangeClicked();
 
 	void onEditClicked(boolean readOnlyMode);

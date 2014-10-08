@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
@@ -18,10 +19,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
@@ -65,6 +63,13 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
 
     private static final long REF_BOOK_ID = 8L;
     private static final String REF_BOOK_VALUE_NAME = "CODE";
+    private final static String RESTRICT_EDIT_MESSAGE = "Нет прав на редактирование налоговой формы!";
+    private final static String CLOSED_PERIOD_MESSAGE = "Отчетный период подразделения закрыт!";
+    private final static String CORRECTION_EDIT_MESSAGE = "Нельзя открыть налоговую форму в режиме редактирования для представления «Корректировка»!";
+    private final static String CORRECTION_ERROR_MESSAGE = "Нельзя открыть налоговую форму, созданную в периоде, не являющемся корректирующим в режиме представления «Корректировка»!";
+    private final static String PREVIOUS_FORM_NOT_FOUND_MESSAGE = "Не найдена ранее созданная форма в текущем периоде. Данные о различиях не сформированы.";
+    private final static String SUCCESS_CORRECTION_MESSAGE = "Корректировка отображена в результате сравнения с данными формы.";
+
     private TAUserInfo userInfo;
 
 	public GetFormDataHandler() {
@@ -102,8 +107,21 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
 		fillLockData(action, userInfo, result);
 		fillFormAndTemplateData(action, userInfo, logger, result);
 		fillFormDataAccessParams(action, userInfo, result);
-        result.setUuid(logEntryService.update(logger.getEntries(), action.getUuid()));
-        result.setUuid(logEntryService.save(logger.getEntries()));
+        // Форма открывается для чтения если так и запросили или нет прав или период закрыт
+        result.setReadOnly(action.isReadOnly() || !result.getFormDataAccessParams().isCanEdit()
+                || !result.getDepartmentReportPeriod().isActive());
+
+        if (result.isReadOnly() != action.isReadOnly()) {
+            // Запросили на редактирование, а вернули на чтение
+            String msg = result.getFormDataAccessParams().isCanEdit() ? CLOSED_PERIOD_MESSAGE : RESTRICT_EDIT_MESSAGE;
+            throw new ActionException("Нельзя открыть налоговую форму в режиме редактирования. " + msg);
+        }
+
+        if (action.getUuid() != null) {
+            result.setUuid(logEntryService.update(logger.getEntries(), action.getUuid()));
+        } else {
+            result.setUuid(logEntryService.save(logger.getEntries()));
+        }
 
 		return result;
 	}
@@ -113,7 +131,7 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
      */
     private void actionCheck(GetFormDataAction action) throws ActionException {
         if (!action.isReadOnly() && action.isCorrectionDiff()) {
-            throw new ActionException("Нельзя открыть налоговую форму в режиме редактирования для представления «Корректировка»!");
+            throw new ActionException(CORRECTION_EDIT_MESSAGE);
         }
     }
 
@@ -179,42 +197,49 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
     private void fillDiffData(FormData formData, DepartmentReportPeriod departmentReportPeriod, Logger logger) throws ActionException {
         // Если период не является корректирующим
         if (departmentReportPeriod.getCorrectionDate() == null) {
-            throw new ActionException("Нельзя открыть налоговую форму, созданную в периоде, " +
-                    "не являющемся корректирующим в режиме представления «Корректировка»!");
-
+            throw new ActionException(CORRECTION_ERROR_MESSAGE);
         }
 
-        DepartmentReportPeriod prevDepartmentReportPeriod =
-                departmentReportPeriodService.getPrevDepartmentReportPeriod(departmentReportPeriod);
+        DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
+        filter.setDepartmentIdList(Arrays.asList(departmentReportPeriod.getDepartmentId()));
+        filter.setReportPeriodIdList(Arrays.asList(departmentReportPeriod.getReportPeriod().getId()));
+        // Список всех отчетных периодов для пары отчетный период-подразделение
+        List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodService.getListByFilter(filter);
 
-        if (prevDepartmentReportPeriod == null)  {
-            logger.error("Не найден предыдущий отчетный период подразделения!");
-            dataRowService.saveCorrectionDiffRows(formData, new ArrayList<DataRow<Cell>>(0));
-            return;
-        }
+        Collections.sort(departmentReportPeriodList, new Comparator<DepartmentReportPeriod>() {
+            @Override
+            public int compare(DepartmentReportPeriod o1, DepartmentReportPeriod o2) {
+                if (o1.getCorrectionDate() == null) {
+                    return -1;
+                }
+                if (o2.getCorrectionDate() == null) {
+                    return 1;
+                }
+                return o1.getCorrectionDate().compareTo(o2.getCorrectionDate());
+            }
+        });
 
-        // Экземпляр НФ в пред. отчетном периоде подразделения
-        FormData prevFormData = formDataService.findFormData(formData.getFormType().getId(), formData.getKind(),
-                prevDepartmentReportPeriod.getId(), formData.getPeriodOrder());
+        FormData prevFormData = formDataService.getPreviousFormDataCorrection(formData,
+                departmentReportPeriodList, departmentReportPeriod);
 
         if (prevFormData == null) {
-            logger.error("Не найдена ранее созданная форма в текущем периоде. Данные о различиях не сформированы.");
-            dataRowService.saveCorrectionDiffRows(formData, new ArrayList<DataRow<Cell>>(0));
+            logger.error(PREVIOUS_FORM_NOT_FOUND_MESSAGE);
+            dataRowService.saveRows(formData, new ArrayList<DataRow<Cell>>(0));
             return;
         }
 
         // Шаблон НФ
         FormTemplate formTemplate = formTemplateService.get(prevFormData.getFormTemplateId());
         prevFormData.initFormTemplateParams(formTemplate);
-
-        logger.info("Корректировка отображена в результате сравнения с данными формы.");
+        // TODO Левыкин: дополнить сообщение после обновления постановки http://conf.aplana.com/pages/viewpage.action?pageId=14812380
+        logger.info(SUCCESS_CORRECTION_MESSAGE);
 
         List<DataRow<Cell>> original = dataRowService.getSavedRows(prevFormData);
         List<DataRow<Cell>> revised = dataRowService.getSavedRows(formData);
         List<DataRow<Cell>> diffRows = diffService.getDiff(original, revised);
 
         // Сохранение результата сравнения во временном срезе
-        dataRowService.saveCorrectionDiffRows(formData, diffRows);
+        dataRowService.saveRows(formData, diffRows);
     }
 
     /**

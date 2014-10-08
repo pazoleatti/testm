@@ -1037,6 +1037,44 @@ public class FormDataServiceImpl implements FormDataService {
         return formDataDao.getLast(formTypeId, kind, departmentId, reportPeriodId, periodOrder);
     }
 
+    @Override
+    public FormData getPreviousFormDataCorrection(FormData formData, List<DepartmentReportPeriod> departmentReportPeriodList, DepartmentReportPeriod departmentReportPeriod) {
+        // Предыдущий отчетный период
+        DepartmentReportPeriod prevDepartmentReportPeriod = getPreviousDepartmentReportPeriod(departmentReportPeriodList,
+                departmentReportPeriod);
+
+        if (prevDepartmentReportPeriod == null) {
+            // Если отчетный период не найден, то и экземпляра НФ нет
+            return null;
+        }
+
+        // Экземпляр НФ в пред. отчетном периоде подразделения
+        FormData prevFormData = findFormData(formData.getFormType().getId(), formData.getKind(),
+                prevDepartmentReportPeriod.getId(), formData.getPeriodOrder());
+
+        if (prevFormData != null && prevFormData.getState() == WorkflowState.ACCEPTED) {
+            return prevFormData;
+        }
+
+        return getPreviousFormDataCorrection(formData, departmentReportPeriodList, prevDepartmentReportPeriod);
+    }
+
+    /**
+     * Поиск предыдущего отчетного периода из списка
+     */
+    private DepartmentReportPeriod getPreviousDepartmentReportPeriod(List<DepartmentReportPeriod> departmentReportPeriodList,
+                                                                     DepartmentReportPeriod departmentReportPeriod) {
+        if (departmentReportPeriodList.size() < 2) {
+            return null;
+        }
+        for (int i = 0; i < departmentReportPeriodList.size() - 1; i++) {
+            if (departmentReportPeriodList.get(i + 1).getId().equals(departmentReportPeriod.getId())) {
+                return departmentReportPeriodList.get(i);
+            }
+        }
+        return null;
+    }
+
     /**
      * Экземпляры в статусе "Создана" не участвуют в сквозной нумерации
      * @param formData налоговая форма
