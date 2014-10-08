@@ -174,4 +174,10 @@ public interface DepartmentDao {
      * назначенных подразделениям departments
      */
     List<Department> getDepartmentsByDestinationSource(List<Integer> departments, Date periodStart, Date periodEnd);
+
+    /**
+     * Все подразделения, которым назначены формы, которые являются источниками данных для форм,
+     * назначенных подразделениям departments
+     */
+    List<Integer> getDepartmentIdsByDestinationSource(List<Integer> departments, Date periodStart, Date periodEnd);
 }

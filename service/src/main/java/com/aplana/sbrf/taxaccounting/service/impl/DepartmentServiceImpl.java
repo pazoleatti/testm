@@ -264,6 +264,24 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
+    public Collection<Integer> getSourcesDepartmentIds(TAUser tAUser, Date periodStart, Date periodEnd) {
+        // Результат выборки должен содержать только уникальные подразделения
+        HashSet<Integer> retList = new HashSet<Integer>();
+        if (tAUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+            // все подразделения из справочника подразделений
+            retList.addAll(departmentDao.listDepartmentIds());
+        } else if (tAUser.hasRole(TARole.ROLE_CONTROL_NS) || tAUser.hasRole(TARole.ROLE_CONTROL)) {
+            // подразделения, которым назначены формы, которые являются источниками данных для форм, назначенных подразделениям из 10 - Выборка для бизнес-администрирования.
+            List<Integer> baDepartmentIds = getBADepartmentIds(tAUser);
+            if (baDepartmentIds.size() > 0) {
+                retList.addAll(departmentDao.getDepartmentIdsByDestinationSource(baDepartmentIds, periodStart, periodEnd));
+            }
+        }
+
+        return retList;
+    }
+
+    @Override
     public List<Department> getDestinationDepartments(TAUser tAUser) {
         List<Department> retList = new ArrayList<Department>();
         if (tAUser.hasRole(TARole.ROLE_CONTROL_UNP)) {

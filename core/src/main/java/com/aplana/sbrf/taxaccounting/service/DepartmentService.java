@@ -1,11 +1,11 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Сервис содержит действия и проверки связанные с департаментом
@@ -149,6 +149,16 @@ public interface DepartmentService {
      * @return
      */
     List<Department> getSourcesDepartments(TAUser tAUser, Date periodStart, Date periodEnd);
+
+    /**
+     * 45 - Идентификаторы подразделений, доступные через назначение источников-приёмников
+     * <a href = "http://conf.aplana.com/pages/viewpage.action?pageId=14816445">Аналитика</a>
+     * @param tAUser       пользователь
+     * @param periodStart  дата начала периода
+     * @param periodEnd    дата окончания периода
+     * @return
+     */
+    Collection<Integer> getSourcesDepartmentIds(TAUser tAUser, Date periodStart, Date periodEnd);
 
     /**
      * 50 - Выборка id подразделений для назначения подразделений-исполнителей

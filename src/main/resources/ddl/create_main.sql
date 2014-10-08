@@ -623,7 +623,6 @@ CREATE TABLE log_system (
   declaration_type_name VARCHAR2(80),
   form_type_name        VARCHAR2(1000),
   form_department_id    NUMBER(9),
-  tb_department_id      NUMBER(9),
   blob_data_id          VARCHAR2(36),
   form_type_id               NUMBER(9,0)
 );
@@ -642,7 +641,6 @@ comment on column log_system.user_department_name is 'Наименование �
 comment on column LOG_SYSTEM.DECLARATION_TYPE_NAME is 'Вид декларации';
 comment on column LOG_SYSTEM.FORM_TYPE_NAME is 'Вид налоговой формы';
 comment on column LOG_SYSTEM.FORM_DEPARTMENT_ID is 'Идентификатор подразделения налоговой формы/декларации';
-comment on column log_system.tb_department_id is 'Идентификатор ТБ подразделения налоговой формы/декларации';
 comment on column log_system.blob_data_id is 'Ссылка на логи';
 comment on column log_system.form_type_id is 'Идентификатор вида НФ';
 

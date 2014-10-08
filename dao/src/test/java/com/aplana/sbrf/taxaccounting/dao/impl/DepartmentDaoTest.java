@@ -216,4 +216,21 @@ public class DepartmentDaoTest {
         dateEnd = calendar.getTime();
         Assert.assertEquals(0, departmentDao.getDepartmentsByDestinationSource(departments, dateStart, dateEnd).size());
     }
+
+    @Test
+    public void getDepartmentIdsByDestinationSourceTest() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(2013, Calendar.JANUARY, 1);
+        Date dateStart = calendar.getTime();
+        calendar.set(2014, Calendar.DECEMBER, 31);
+        Date dateEnd = calendar.getTime();
+        ArrayList<Integer> departments = new ArrayList<Integer>();
+        departments.add(4);
+        departments.add(5);
+        departments.add(6);
+        Assert.assertEquals(0, departmentDao.getDepartmentIdsByDestinationSource(departments, dateStart, dateEnd).size());
+        departments.add(1);
+        Assert.assertEquals(1, departmentDao.getDepartmentIdsByDestinationSource(departments, null, null).size());
+        Assert.assertEquals(2, (int)departmentDao.getDepartmentIdsByDestinationSource(departments, dateStart, null).get(0));
+    }
 }

@@ -489,4 +489,23 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
             return new ArrayList<Department>(0);
         }
     }
+
+    @Override
+    public List<Integer> getDepartmentIdsByDestinationSource(List<Integer> departments, Date periodStart, Date periodEnd) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("periodStart", periodStart);
+        params.put("periodEnd", periodEnd);
+        String sql = String.format("select id " +
+                " from department where id in " +
+                "   (select distinct dft.department_id from FORM_DATA_SOURCE fds " +
+                "   join DEPARTMENT_FORM_TYPE dft on dft.id = fds.department_form_type_id " +
+                "   where (:periodStart is null or ((fds.period_end >= :periodStart or fds.period_end is null) " +
+                "          and (:periodEnd is null or fds.period_start <= :periodEnd))) " +
+                "   and src_department_form_type_id in " +
+                "       (select distinct src_dft.id " +
+                "       from DEPARTMENT_FORM_TYPE src_dft " +
+                "       where %s)" +
+                "   )", SqlUtils.transformToSqlInStatement("department_id", departments));
+        return getNamedParameterJdbcTemplate().queryForList(sql, params, Integer.class);
+    }
 }

@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
-import static java.util.Arrays.asList;
+import static com.aplana.sbrf.taxaccounting.dao.AuditDao.SAMPLE_NUMBER;
 
 @Service
 @Transactional(readOnly = true)
@@ -36,7 +36,7 @@ public class AuditServiceImpl implements AuditService {
 
     @Override
 	public PagingResult<LogSearchResultItem> getLogsByFilter(LogSystemFilter filter) {
-		return auditDao.getLogs(filter);
+		return auditDao.getLogsForAdmin(filter);
 	}
 
 	@Override
@@ -80,17 +80,33 @@ public class AuditServiceImpl implements AuditService {
 
     @Override
     public PagingResult<LogSearchResultItem> getLogsBusiness(LogSystemFilter filter, TAUserInfo userInfo) {
-        List<Integer> departments = departmentService.getTaxFormDepartments(userInfo.getUser(), asList(TaxType.values()), null, null);
-        List<Department> BADepartments = departmentService.getBADepartments(userInfo.getUser());
-        List<Integer> BADepartmentIds = new ArrayList<Integer>();
-        for(Department department: BADepartments) {
-            BADepartmentIds.add(department.getId());
-        }
         try {
-            return auditDao.getLogsBusiness(filter, departments, BADepartmentIds);
-        } catch (DaoException e){
+            TAUser user = userInfo.getUser();
+            if (user.hasRole(TARole.ROLE_ADMIN)) {
+                return auditDao.getLogsForAdmin(filter);
+            } else if (user.hasRole(TARole.ROLE_CONTROL_NS) || user.hasRole(TARole.ROLE_CONTROL)) {
+                HashMap<SAMPLE_NUMBER, Collection<Integer>> sampleVal =
+                        new HashMap<SAMPLE_NUMBER, Collection<Integer>>(3);
+                sampleVal.put(SAMPLE_NUMBER.S_10, departmentService.getBADepartmentIds(userInfo.getUser()));
+                sampleVal.put(SAMPLE_NUMBER.S_45, departmentService.getSourcesDepartmentIds(userInfo.getUser(), null, null));
+                sampleVal.put(SAMPLE_NUMBER.S_55, departmentService.getAppointmentDepartments(user));
+
+                return auditDao.getLogsBusinessForControl(filter, sampleVal);
+            } else if (user.hasRole(TARole.ROLE_OPER)) {
+                HashMap<SAMPLE_NUMBER, Collection<Integer>> sampleVal =
+                        new HashMap<SAMPLE_NUMBER, Collection<Integer>>(2);
+                sampleVal.put(SAMPLE_NUMBER.S_10, departmentService.getBADepartmentIds(userInfo.getUser()));
+                sampleVal.put(SAMPLE_NUMBER.S_55, departmentService.getAppointmentDepartments(user));
+                return auditDao.getLogsBusinessForOper(filter, sampleVal);
+            } else if (user.hasRole(TARole.ROLE_CONTROL_UNP)){
+                return auditDao.getLogsBusinessForControlUnp(filter);
+            }
+        } catch (DaoException e) {
             throw new ServiceException("Поиск по НФ/декларациям.", e);
         }
+
+
+        return new PagingResult<LogSearchResultItem>(new ArrayList<LogSearchResultItem>(0));
     }
 
     @Override

@@ -1,23 +1,33 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.LogSearchResultItem;
+import com.aplana.sbrf.taxaccounting.model.LogSystem;
+import com.aplana.sbrf.taxaccounting.model.LogSystemFilter;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * DAO-Интерфейс для работы с журналом аудита
  */
 public interface AuditDao {
 
-    Integer[] AVAILABLE_CONTROL_EVENTS = {1,2,3,4,5,6,7,101,102,103,104,105,106,107,108,109,110,111,112,203,204,205,206,207,208,209,210, 301,302,303, 401,901,902,903};
+    //Номера выборок, списки которых передаем при выборе логов
+    public static enum SAMPLE_NUMBER {
+        S_10,
+        S_45,
+        S_55
+    }
 
 	/**
-	 * Получить информацию из журнала аудита по фильтру
+	 * Получить информацию из журнала аудита по фильтру (сейчас только для Админа)
 	 * @param logSystemFilter фильтр по которому происходит поиск необходимых данных
 	 * @return объект, представляющий искомую информацию из журанала аудита
 	 * */
-	PagingResult<LogSearchResultItem> getLogs(LogSystemFilter logSystemFilter);
+	PagingResult<LogSearchResultItem> getLogsForAdmin(LogSystemFilter logSystemFilter);
 
 	/**
 	 * Добавить информацию об логировании
@@ -36,5 +46,15 @@ public interface AuditDao {
      */
     Date lastArchiveDate();
 
-    PagingResult<LogSearchResultItem> getLogsBusiness(LogSystemFilter filter, List<Integer> departments, List<Integer> bADepartmentIds);
+    /**
+     * Возвращает записи ЖА для определенной роли{@link com.aplana.sbrf.taxaccounting.model.TARole}, подразделение которых является источником/приемником для соответствующей роли выборке
+     * http://conf.aplana.com/pages/viewpage.action?pageId=14813541
+     * @param availableDepIds параметры передающие список доступных подразделений
+     * @return данные
+     */
+    PagingResult<LogSearchResultItem> getLogsBusinessForControl(LogSystemFilter filter, Map<SAMPLE_NUMBER, Collection<Integer>> availableDepIds);
+
+    PagingResult<LogSearchResultItem> getLogsBusinessForOper(LogSystemFilter filter, Map<SAMPLE_NUMBER, Collection<Integer>> availableDepIds);
+
+    PagingResult<LogSearchResultItem> getLogsBusinessForControlUnp(LogSystemFilter filter);
 }

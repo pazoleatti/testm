@@ -403,9 +403,40 @@ public interface SourceService {
      */
     List<FormToFormRelation> getRelations(int departmentId, int formTypeId, FormDataKind kind, int departmentReportPeriodId, Integer periodOrder);
 
+    /**
+     * Находит назначенные виды налоговые форм, которые являются потребителями налоговой формы{@code typeId}
+     * @param typeId вид налоговой формы источника
+     * @param dateFrom дата начала действия
+     * @param dateTo дата окончания действия
+     * @return список назначений
+     */
     List<Pair<DepartmentFormType, Date>> findDestinationFTsForFormType(int typeId, Date dateFrom, Date dateTo);
+
+    /**
+     * Находит назначенные виды налоговые форм, которые являются источниками налоговой формы{@code typeId}
+     * @param typeId вид налоговой формы потребителя
+     * @param dateFrom дата начала действия
+     * @param dateTo дата окончания действия
+     * @return список назначений
+     */
     List<Pair<DepartmentFormType, Date>> findSourceFTsForFormType(int typeId, Date dateFrom, Date dateTo);
+
+    /**
+     * Находит назначенные виды налоговые форм, которые являются источниками для вида декларации{@code typeId}
+     * @param typeId вид декларации потребителя
+     * @param dateFrom дата начала действия
+     * @param dateTo дата окончания действия
+     * @return список назначений
+     */
     List<Pair<DepartmentFormType, Date>> findSourceFTsForDeclaration(int typeId, Date dateFrom, Date dateTo);
+
+    /**
+     * Находит назначенные виды деклараций, которые являются потребителями налоговой формы{@code typeId}
+     * @param typeId вид налоговой формы потребителя
+     * @param dateFrom дата начала действия
+     * @param dateTo дата окончания действия
+     * @return список назначений
+     */
     List<Pair<DepartmentDeclarationType, Date>> findDestinationDTsForFormType(int typeId, Date dateFrom, Date dateTo);
 
     /**
@@ -417,7 +448,7 @@ public interface SourceService {
 
     /**
      * ПОлучение назначений деклараций
-     * @param declarationTypeId идентификатор {@link FormType}
+     * @param declarationTypeId идентификатор {@link DeclarationType}
      * @return список
      */
     List<DepartmentDeclarationType> getDDTByDeclarationType(@NotNull Integer declarationTypeId);
