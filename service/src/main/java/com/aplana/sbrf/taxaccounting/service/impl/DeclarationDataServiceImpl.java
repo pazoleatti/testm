@@ -173,27 +173,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.CALCULATE);
         DeclarationData declarationData = declarationDataDao.get(id);
 
-        List<String> oldBlobDataIds = new ArrayList<String>(); // список UUID блоб для удаления
-/*        if (declarationData.getJasperPrintUuid() != null){
-            oldBlobDataIds.add(declarationData.getJasperPrintUuid());
-            declarationData.setJasperPrintUuid(null);
-        }
-        if (declarationData.getXlsxDataUuid() != null){
-            oldBlobDataIds.add(declarationData.getXlsxDataUuid());
-            declarationData.setXlsxDataUuid(null);
-        }
-        if (declarationData.getPdfDataUuid() != null){
-            oldBlobDataIds.add(declarationData.getPdfDataUuid());
-            declarationData.setPdfDataUuid(null);
-        }
-        if (declarationData.getXmlDataUuid() != null){
-            oldBlobDataIds.add(declarationData.getXmlDataUuid());
-            declarationData.setXmlDataUuid(null);
-        }*/
         setDeclarationBlobs(logger, declarationData, docDate, userInfo);
-
-        // удаляем только после успешного формирования новых данных
-        //if (!oldBlobDataIds.isEmpty()) blobDataService.delete(oldBlobDataIds);
 
         logBusinessService.add(null, id, userInfo, FormDataEvent.SAVE, null);
         auditService.add(FormDataEvent.SAVE , userInfo, declarationData.getDepartmentId(),
@@ -309,15 +289,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.GET_LEVEL0);
         try {
             DeclarationData declarationData = declarationDataDao.get(id);
-//            if (declarationData.getXlsxDataUuid() != null && !declarationData.getXlsxDataUuid().isEmpty()){
-//                return getBytesFromInputstream(declarationData.getXlsxDataUuid());
-//            }else {
-            ObjectInputStream objectInputStream = new ObjectInputStream(blobDataService.get(reportService.getDec(userInfo, declarationData.getId(), ReportType.JASPER_DEC)).getInputStream());
+            String uuid = reportService.getDec(userInfo, declarationData.getId(), ReportType.JASPER_DEC);
+            ObjectInputStream objectInputStream = new ObjectInputStream(blobDataService.get(uuid).getInputStream());
             JasperPrint jasperPrint = (JasperPrint)objectInputStream.readObject();
-            byte[] xlsxBytes = exportXLSX(jasperPrint);
-            //declarationData.setXlsxDataUuid(blobDataService.create(new ByteArrayInputStream(xlsxBytes), ""));
-            //declarationDataDao.update(declarationData);
-            return xlsxBytes;
+            return exportXLSX(jasperPrint);
         } catch (Exception e) {
             throw new ServiceException("Не удалось извлечь объект для печати.", e);
         }

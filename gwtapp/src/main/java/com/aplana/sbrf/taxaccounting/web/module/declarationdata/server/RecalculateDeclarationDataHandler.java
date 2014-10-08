@@ -57,7 +57,6 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
     public RecalculateDeclarationDataResult execute(RecalculateDeclarationDataAction action, ExecutionContext context) throws ActionException {
 		TAUserInfo userInfo = securityService.currentUserInfo();
         RecalculateDeclarationDataResult result = new RecalculateDeclarationDataResult();
-        //declarationDataService.checkLockedMe(action.getDeclarationId(), userInfo);
         LockData lockData;
         if ((lockData = declarationDataService.lock(action.getDeclarationId(), userInfo)) == null) {
             try {
