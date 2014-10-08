@@ -28,9 +28,9 @@ public interface DataRowService {
 	void update(TAUserInfo userInfo, long formDataId, List<DataRow<Cell>> dataRows, boolean manual);
 
     /**
-     * Сохранение результата сравнения строк НФ в корр. периоде во временном срезе
+     * Сохранение строк во временном срезе НФ
      */
-    void saveCorrectionDiffRows(FormData formData, List<DataRow<Cell>> dataRows);
+    void saveRows(FormData formData, List<DataRow<Cell>> dataRows);
 
     /**
      * Поиск по налоговой форме,

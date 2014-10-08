@@ -423,9 +423,16 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataUiHandlers#onRecalculateClicked()
-	 */
+    @Override
+    public void onFillPreviousButtonClicked() {
+        FillPreviousAction action = new FillPreviousAction();
+        action.setFormData(formData);
+        dispatcher.execute(action, createDataRowResultCallback(true));
+    }
+
+    /* (non-Javadoc)
+     * @see com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataUiHandlers#onRecalculateClicked()
+     */
 	@Override
 	public void onRecalculateClicked() {
 		RecalculateDataRowsAction action = new RecalculateDataRowsAction();
@@ -606,7 +613,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                 }, this));
 	}
 
-    private void getFormData(GetFormDataAction action){
+    private void getFormData(final GetFormDataAction action){
         LogCleanEvent.fire(FormDataPresenter.this);
         dispatcher.execute(
                 action,
@@ -675,7 +682,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 		                                result.getDepartmentReportPeriod().getReportPeriod().getCalendarStartDate(),
                                         result.getDepartmentReportPeriod().getReportPeriod().getEndDate(),
                                         formData.getId(), result.getDepartmentReportPeriod().getCorrectionDate() != null,
-                                        result.isCorrectionDiff());
+                                        result.isCorrectionDiff(), result.isReadOnly());
 
                                 getView().setBackButton("#" + FormDataListNameTokens.FORM_DATA_LIST + ";nType="
                                         + result.getFormData().getFormType().getTaxType());

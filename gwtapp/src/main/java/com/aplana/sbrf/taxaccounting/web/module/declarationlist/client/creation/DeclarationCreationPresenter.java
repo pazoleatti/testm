@@ -48,6 +48,8 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
         void setTaxOrganFilter(String filter);
         String getTaxOrganCode();
         String getTaxOrganKpp();
+
+        void init();
     }
 
 	private DispatchAsync dispatcher;
@@ -173,6 +175,7 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
         action.setTaxType(dataFilter.getTaxType());
 	    this.taxType = dataFilter.getTaxType();
         getView().setTaxType(this.taxType);
+        getView().init();
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetDeclarationFilterDataResult>() {
             @Override
             public void onSuccess(GetDeclarationFilterDataResult result) {
