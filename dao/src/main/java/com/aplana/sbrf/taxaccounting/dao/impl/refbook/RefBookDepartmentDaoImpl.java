@@ -204,7 +204,7 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
     @Override
     public void remove(long uniqueId) {
         try {
-            getJdbcTemplate().update("delete from department where id = ?", uniqueId);
+            getJdbcTemplate().update("DELETE FROM department WHERE id = ?", uniqueId);
         } catch (DataIntegrityViolationException e){
             throw new DaoException("Нарушение ограничения целостности. Возможно обнаружена порожденная запись.", e);
         } catch (DataAccessException e){
