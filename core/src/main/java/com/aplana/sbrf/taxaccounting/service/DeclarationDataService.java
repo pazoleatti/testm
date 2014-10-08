@@ -1,8 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -115,6 +113,16 @@ public interface DeclarationDataService {
 	Date getXmlDataDocDate(long declarationDataId, TAUserInfo userInfo);
 
     /**
+     * Проверка валидности xml декларации
+     * @param declarationData идентификатор данных декларации
+     * @param logger логгер лог панели
+     * @param isErrorFatal признак того, что операция не может быть продолжена с невалидным xml
+     * @param operation Событие (для сообщения об ошибке)
+     */
+    void validateDeclaration(TAUserInfo userInfo, DeclarationData declarationData, final Logger logger, final boolean isErrorFatal,
+                             FormDataEvent operation);
+
+    /**
      * Поиск декларации
      * @param declarationTypeId Тип декларации
      * @param departmentReportPeriod Отчетный период подразделения
@@ -138,7 +146,7 @@ public interface DeclarationDataService {
      * @param declarationDataId - идентификатор декларации
      * @param userInfo информация о пользователе
      */
-    void lock(long declarationDataId, TAUserInfo userInfo);
+    LockData lock(long declarationDataId, TAUserInfo userInfo);
 
     /**
      * Снять блокировку с DeclarationData.
@@ -153,4 +161,10 @@ public interface DeclarationDataService {
      * @param userInfo - информация о пользователе
      */
     void checkLockedMe(Long declarationDataId, TAUserInfo userInfo);
+
+    /**
+     * Удаление отчетов и блокировок на задачи формирования отчетов связанных с декларациями
+     * @param declarationDataId
+     */
+    void deleteReport(long declarationDataId, boolean isLock);
 }

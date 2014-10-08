@@ -1,9 +1,9 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import com.aplana.sbrf.taxaccounting.model.formdata.AbstractCell;
+
 import java.io.Serializable;
 import java.util.*;
-
-import com.aplana.sbrf.taxaccounting.model.formdata.AbstractCell;
 
 /**
  * Строка данных отчётной формы Для упрощения скриптинга, класс реализует
@@ -307,6 +307,7 @@ public class DataRow<C extends AbstractCell> extends IdentityObject<Long> implem
     /**
      * Номер строки файла импорта. Проставляется только при импорте. Не хранится в БД. Используется для вывода ошибок.
      */
+    @SuppressWarnings("unused")
     public void setImportIndex(Integer importIndex) {
         this.importIndex = importIndex;
     }

@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client;
 
 import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.client.PdfViewerView;
@@ -11,6 +12,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
@@ -74,10 +76,34 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	@UiField
     DateMaskBoxPicker dateBox;
 
+    private Timer timerExcel, timerXML;
+
 	@Inject
 	@UiConstructor
 	public DeclarationDataView(final Binder uiBinder) {
 		initWidget(uiBinder.createAndBindUi(this));
+        timerExcel = new Timer() {
+            @Override
+            public void run() {
+                try {
+                    getUiHandlers().onTimerReport(ReportType.EXCEL_DEC, true);
+                } catch (Exception e) {
+                }
+            }
+        };
+
+        timerXML = new Timer() {
+            @Override
+            public void run() {
+                try {
+                    getUiHandlers().onTimerReport(ReportType.XML_DEC, true);
+                } catch (Exception e) {
+                }
+            }
+        };
+
+        timerExcel.cancel();
+        timerXML.cancel();
 	}
 
     @Override
@@ -235,4 +261,49 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 			getUiHandlers().onInfoClicked();
 		}
 	}
+
+    @Override
+    public void updatePrintReportButtonName(ReportType reportType, boolean isLoad) {
+        if (ReportType.EXCEL_DEC.equals(reportType)) {
+            if (isLoad) {
+                downloadExcelButton.setText("Выгрузить в xlsx");
+                timerExcel.cancel();
+            } else {
+                downloadExcelButton.setText("Сформировать xlsx");
+            }
+        } else {
+            if (isLoad) {
+                downloadXmlButton.setVisible(true);
+                downloadXmlButton.setText("Выгрузить в XML");
+                downloadExcelButton.setVisible(true);
+                getUiHandlers().onTimerReport(ReportType.EXCEL_DEC, false);
+                timerXML.cancel();
+            } else {
+                downloadXmlButton.setVisible(false);
+                downloadXmlButton.setText("Сформировать XML");
+                downloadExcelButton.setVisible(false);
+            }
+        }
+    }
+
+    @Override
+    public void startTimerReport(ReportType reportType) {
+        if (ReportType.EXCEL_DEC.equals(reportType)) {
+            timerExcel.scheduleRepeating(10000);
+            timerExcel.run();
+        } else {
+            timerXML.scheduleRepeating(10000);
+            timerXML.run();
+        }
+    }
+
+    @Override
+    public void stopTimerReport(ReportType reportType) {
+        if (ReportType.EXCEL_DEC.equals(reportType)) {
+            timerExcel.cancel();
+        } else {
+            timerXML.cancel();
+        }
+    }
+
 }

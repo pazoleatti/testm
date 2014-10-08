@@ -21,7 +21,7 @@ public class DeclarationData extends IdentityObject<Long> {
 
     /**
      * Идентификаторы бинарных данных в таблице BLOB_DATA
-     */
+     *
     private String xmlDataUuid;
     private String pdfDataUuid;
     private String xlsxDataUuid;
@@ -57,7 +57,7 @@ public class DeclarationData extends IdentityObject<Long> {
 
     public void setXlsxDataUuid(String xlsxDataUuid) {
         this.xlsxDataUuid = xlsxDataUuid;
-    }
+    }*/
 
     /**
 	 * Получить идентификатор {@link DeclarationTemplate шаблона декларации}, по которому создана данная декларация

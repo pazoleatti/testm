@@ -1,8 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
-import com.aplana.sbrf.taxaccounting.service.AuditService;
-import com.aplana.sbrf.taxaccounting.service.PrintingService;
-import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,33 +24,12 @@ import java.net.URLEncoder;
 public class ReportExcelController {
 
 	@Autowired
-    PrintingService printingService;
+    private PrintingService printingService;
 	
 	@Autowired
-	SecurityService securityService;
-
-    @Autowired
-    TAUserService taUserService;
-
-    @Autowired
-    AuditService auditService;
+    private SecurityService securityService;
 
     private static final String ENCODING = "UTF-8";
-
-    /**
-     * Обработка запроса на формирование отчета для налоговых форм
-     * @param formDataId
-     * @param isShowChecked
-     * @param req
-     * @param resp
-     * @throws IOException
-     */
-	@RequestMapping(value = "/{formDataId}/{isShowChecked}/{manual}",method = RequestMethod.GET)
-	public void processFormDataDownload(@PathVariable int formDataId,@PathVariable boolean isShowChecked , @PathVariable boolean manual, HttpServletRequest req, HttpServletResponse resp)
-			throws IOException {
-        String filePath = printingService.generateExcel(securityService.currentUserInfo(), formDataId, manual, isShowChecked);
-		createResponse(req, resp, filePath);
-	}
 
     @RequestMapping(value = "CSV/{formDataId}/{isShowChecked}/{manual}",method = RequestMethod.GET)
     public void processCSVFormDataDownload(@PathVariable int formDataId,@PathVariable boolean isShowChecked , @PathVariable boolean manual, HttpServletRequest req, HttpServletResponse resp)

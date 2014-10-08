@@ -6,8 +6,9 @@ import com.gwtplatform.dispatch.shared.Result;
  * User: avanteev
  */
 public class AuditArchiveResult implements Result {
-    String uuid;
-    String fileUuid;
+
+	private String uuid;
+	private String fileUuid;
     private int countOfRemoveRecords;
     private boolean exception = false;
 

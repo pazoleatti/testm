@@ -106,7 +106,8 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
         taxOrganKpp.setPeriodDates(current, current);
     }
 
-    private void init() {
+    @Override
+    public void init() {
         departmentPicker.setEnabled(false);
         declarationTypeBox.setEnabled(false);
         taxOrganCode.setEnabled(false);

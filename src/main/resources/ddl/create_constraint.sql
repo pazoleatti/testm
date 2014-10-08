@@ -128,10 +128,6 @@ alter table department_report_period add constraint dep_rep_per_fk_rep_period_id
 alter table declaration_data add constraint declaration_data_pk primary key (id);
 alter table declaration_data add constraint declaration_data_fk_decl_t_id foreign key (declaration_template_id) references declaration_template(id);
 alter table declaration_data add constraint decl_data_fk_dep_rep_per_id foreign key (department_report_period_id) references department_report_period (id);
-alter table declaration_data add constraint declaration_data_fk_j_print foreign key (jasper_print) references blob_data(id);
-alter table declaration_data add constraint declaration_data_fk_data foreign key (data) references blob_data(id);
-alter table declaration_data add constraint declaration_data_fk_data_pdf foreign key (data_pdf) references blob_data(id);
-alter table declaration_data add constraint declaration_data_fk_data_xlsx foreign key (data_xlsx) references blob_data(id);
 alter table declaration_data add constraint declaration_data_chk_is_accptd check (is_accepted in (0,1));
 alter table declaration_data add constraint declaration_data_uniq_template unique(department_report_period_id, declaration_template_id);
 
@@ -194,7 +190,6 @@ alter table log_business add constraint log_business_fk_form_data_id foreign key
 alter table log_business add constraint log_business_chk_event_id check (event_id in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 203, 204, 205, 206, 207, 208, 209, 210, 301, 302, 303, 401));
 alter table log_business add constraint log_business_chk_frm_dcl_ev check (form_data_id is not null or declaration_data_id is not null);
 alter table log_business add constraint log_business_fk_usr_departm_id foreign key (user_department_id) references department(id);
-alter table log_business add constraint log_business_fk_event_id foreign key (event_id) references event(id);
 
 alter table task_context add constraint task_context_uniq_task_id unique (task_id);
 alter table task_context add constraint task_context_uniq_task_name unique (task_name);
@@ -208,6 +203,8 @@ alter table notification add constraint notification_fk_notify_role foreign key 
 alter table notification add constraint notification_chk_isread check (is_read in (0, 1));
 
 alter table event add constraint event_pk primary key (id);
+
+alter table log_business add constraint log_business_fk_event_id foreign key (event_id) references event(id);
 
 alter table role_event add constraint role_event_pk primary key (event_id, role_id);
 alter table role_event add constraint role_event_fk_event_id foreign key (event_id) references event(id);

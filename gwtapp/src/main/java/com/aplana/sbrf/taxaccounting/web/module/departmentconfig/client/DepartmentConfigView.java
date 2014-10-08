@@ -474,21 +474,21 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 			Pair<Date, Date> period = periodPickerPopup.getPeriodDates(periodPickerPopup.getValue().get(0));
 			// Заполнение текстовых значений справочников
 			dictRegionId.setDereferenceValue(rbTextValues.get(dictRegionId.getAttributeId()));
-			dictRegionId.setPeriodDates(period.first, period.second);
+			dictRegionId.setPeriodDates(period.getFirst(), period.getSecond());
 			reorgFormCode.setDereferenceValue(rbTextValues.get(reorgFormCode.getAttributeId()));
-			reorgFormCode.setPeriodDates(period.first, period.second);
+			reorgFormCode.setPeriodDates(period.getFirst(), period.getSecond());
 			signatoryId.setDereferenceValue(rbTextValues.get(signatoryId.getAttributeId()));
-			signatoryId.setPeriodDates(period.first, period.second);
+			signatoryId.setPeriodDates(period.getFirst(), period.getSecond());
 			taxPlaceTypeCode.setDereferenceValue(rbTextValues.get(taxPlaceTypeCode.getAttributeId()));
-			taxPlaceTypeCode.setPeriodDates(period.first, period.second);
+			taxPlaceTypeCode.setPeriodDates(period.getFirst(), period.getSecond());
 			obligation.setDereferenceValue(rbTextValues.get(obligation.getAttributeId()));
-			obligation.setPeriodDates(period.first, period.second);
+			obligation.setPeriodDates(period.getFirst(), period.getSecond());
 			oktmo.setDereferenceValue(rbTextValues.get(oktmo.getAttributeId()));
-			oktmo.setPeriodDates(period.first, period.second);
+			oktmo.setPeriodDates(period.getFirst(), period.getSecond());
 			okvedCode.setDereferenceValue(rbTextValues.get(okvedCode.getAttributeId()));
-			okvedCode.setPeriodDates(period.first, period.second);
+			okvedCode.setPeriodDates(period.getFirst(), period.getSecond());
 			type.setDereferenceValue(rbTextValues.get(type.getAttributeId()));
-			type.setPeriodDates(period.first, period.second);
+			type.setPeriodDates(period.getFirst(), period.getSecond());
 		}
 	}
 

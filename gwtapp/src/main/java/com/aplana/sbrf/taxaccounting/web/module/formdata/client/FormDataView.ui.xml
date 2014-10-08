@@ -160,8 +160,10 @@
                             <g:Label ui:field="editModeLabel" text="Режим редактирования"
                                      addStyleNames="{style.editMode}, {style.marginRight5}"/>
                             <fileuplod:FileUploadWidget ui:field="fileUploader" width="185px" uploadAsTemporal="true"/>
-                            <style:DropdownButton ui:field="printAnchor" text="Печать" img="resources/img/printer-16.png"
-                                              title="Отобразить печатное представление документа"/>
+                            <style:LinkButton text="Выгрузить в xlsm" ui:field="printToExcel" img="resources/img/download-xls-16.png"/>
+                            <style:LinkButton text="Выгрузить в CSV" ui:field="printToCSV" img="resources/img/printer-16.png"/>
+                            <!--style:DropdownButton ui:field="printAnchor" text="Печать" img="resources/img/printer-16.png"
+                                              title="Отобразить печатное представление документа"/-->
                         </style:LeftBar>
                     </fm:Right>
                 </fm:right>
@@ -264,7 +266,11 @@
                     </g:cell>
 
                     <g:cell>
-                        <style:LinkButton ui:field="correctionButton" text="Корректировка" disableImage="true" addStyleNames="{style.corr}"/>
+                        <g:Button ui:field="fillPreviousButton" text="Заполнить предыдущими значениями" visible="false" addStyleNames="{style.btnMarginRight}"/>
+                    </g:cell>
+
+                    <g:cell>
+                        <style:LinkButton ui:field="correctionButton" text="Показать изменения" disableImage="true" addStyleNames="{style.corr}"/>
                     </g:cell>
 
                     <g:CheckBox ui:field="showCheckedColumns" addStyleNames="{style.showCheckedColumns}"

@@ -3,9 +3,14 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
@@ -94,4 +99,35 @@ public class FormPerformerDaoImpl extends AbstractDao implements FormPerformerDa
 				formDataId
 		);
 	}
+
+    private static final String GET_FORM_DATA_IDS_BY_DEPARTMENT = "select fd.id\n"+
+            "from form_data fd\n"+
+            "join REPORT_PERIOD rp on rp.ID = fd.REPORT_PERIOD_ID\n"+
+            "where fd.id in (select form_data_id\n"+
+            "  from form_data_performer\n"+
+            "  where print_department_id = :departmentId or (SELECT CONNECT_BY_ROOT ID as ID_ROOT FROM DEPARTMENT where id = PRINT_DEPARTMENT_ID START WITH (type = 2) CONNECT BY PRIOR id = PARENT_ID) = :departmentId)\n"+
+            "and %s";
+
+    @Override
+    public List<Long> getFormDataId(final int departmentId, Date dateFrom, Date dateTo) {
+        try {
+            String dateTag = dateFrom != null && dateTo != null ? "(rp.CALENDAR_START_DATE between :dateFrom and :dateTo or rp.END_DATE between :dateFrom and :dateTo or :dateFrom between rp.CALENDAR_START_DATE and rp.END_DATE)"
+                    : dateFrom != null ? "(rp.END_DATE >= :dateFrom)"
+                    : null;
+            HashMap<String, Object> values = new HashMap<String, Object>();
+            values.put("dateFrom", dateFrom);
+            values.put("dateTo", dateTo);
+            values.put("departmentId", departmentId);
+
+            return getNamedParameterJdbcTemplate().queryForList(String.format(GET_FORM_DATA_IDS_BY_DEPARTMENT, dateTag),
+                    values,
+                    Long.class
+            );
+        } catch (EmptyResultDataAccessException e){
+            return new ArrayList<Long>(0);
+        } catch (DataAccessException e) {
+            logger.error("Ошибка при поиске налоговых форм с заданными параметрами: departmentId = %s, dateFrom = %s, dateTo = %s", e);
+            throw new DaoException("Ошибка при поиске налоговых форм с заданными параметрами", e);
+        }
+    }
 }

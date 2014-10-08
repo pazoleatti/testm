@@ -505,6 +505,79 @@ public class FormDataServiceTest {
         Assert.assertTrue("Должен участвовать в сквозной нумерации", formDataService.beInOnAutoNumeration(formData3));
     }
 
+    @Test
+    public void getPreviousFormDataCorrectionTest() {
+        // FormType
+        FormType formType = new FormType();
+        formType.setId(1);
+        // FormTemplate
+        FormTemplate formTemplate = new FormTemplate();
+        formTemplate.setId(1);
+        formTemplate.setType(formType);
+        // FormData
+        FormData formData1 = new FormData(formTemplate);
+        formData1.setId(1L);
+        formData1.setKind(FormDataKind.PRIMARY);
+        // ReportPeriod
+        ReportPeriod reportPeriod = new ReportPeriod();
+        reportPeriod.setId(1);
+
+        DepartmentReportPeriod departmentReportPeriod1 = new DepartmentReportPeriod();
+        DepartmentReportPeriod departmentReportPeriod2 = new DepartmentReportPeriod();
+        DepartmentReportPeriod departmentReportPeriod3 = new DepartmentReportPeriod();
+        departmentReportPeriod1.setId(1);
+        departmentReportPeriod2.setId(2);
+        departmentReportPeriod3.setId(3);
+        departmentReportPeriod1.setReportPeriod(reportPeriod);
+        departmentReportPeriod2.setReportPeriod(reportPeriod);
+        departmentReportPeriod3.setReportPeriod(reportPeriod);
+        departmentReportPeriod1.setDepartmentId(1);
+        departmentReportPeriod2.setDepartmentId(1);
+        departmentReportPeriod3.setDepartmentId(1);
+        departmentReportPeriod1.setCorrectionDate(new GregorianCalendar(2014, 3, 3).getTime());
+        departmentReportPeriod2.setCorrectionDate(new GregorianCalendar(2014, 2, 2).getTime());
+        departmentReportPeriod3.setCorrectionDate(new GregorianCalendar(2014, 1, 1).getTime());
+
+        FormData formData2 = new FormData();
+        formData2.setState(WorkflowState.ACCEPTED);
+        formData2.setId(2L);
+
+        FormData formData3 = new FormData();
+        formData3.setState(WorkflowState.ACCEPTED);
+        formData3.setId(3L);
+
+        when(formDataService.findFormData(1, FormDataKind.PRIMARY, 1, null)).thenReturn(formData1);
+        when(formDataService.findFormData(1, FormDataKind.PRIMARY, 2, null)).thenReturn(formData2);
+        when(formDataService.findFormData(1, FormDataKind.PRIMARY, 3, null)).thenReturn(formData3);
+
+        List<DepartmentReportPeriod> periodList = Arrays.asList(departmentReportPeriod1,
+                departmentReportPeriod2, departmentReportPeriod3);
+
+        Collections.sort(periodList, new Comparator<DepartmentReportPeriod>() {
+            @Override
+            public int compare(DepartmentReportPeriod o1, DepartmentReportPeriod o2) {
+                if (o1.getCorrectionDate() == null) {
+                    return -1;
+                }
+                if (o2.getCorrectionDate() == null) {
+                    return 1;
+                }
+                return o1.getCorrectionDate().compareTo(o2.getCorrectionDate());
+            }
+        });
+        // 1
+        FormData prevFormData = formDataService.getPreviousFormDataCorrection(formData1, periodList, departmentReportPeriod1);
+        Assert.assertNotNull(prevFormData);
+        Assert.assertEquals(2, prevFormData.getId().intValue());
+        // 2
+        prevFormData = formDataService.getPreviousFormDataCorrection(formData1, periodList, departmentReportPeriod2);
+        Assert.assertNotNull(prevFormData);
+        Assert.assertEquals(3, prevFormData.getId().intValue());
+        // 3
+        prevFormData = formDataService.getPreviousFormDataCorrection(formData1, periodList, departmentReportPeriod3);
+        Assert.assertNull(prevFormData);
+    }
+
     private FormData getFormData() {
         FormType formType = new FormType();
         formType.setId(1);
