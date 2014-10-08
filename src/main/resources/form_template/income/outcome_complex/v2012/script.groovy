@@ -59,6 +59,8 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
+        calc()
+        logicCheck()
         break
 }
 
@@ -73,18 +75,18 @@ def nonEmptyColumns = ['consumptionBuhSumAccepted', 'consumptionBuhSumPrevTaxPer
 //Аттрибуты, очищаемые перед импортом формы
 @Field
 def resetColumns = ['consumptionBuhSumAccepted', 'consumptionBuhSumPrevTaxPeriod', 'consumptionTaxSumS', 'logicalCheck',
-        'opuSumByEnclosure3', 'opuSumByTableP', 'opuSumTotal', 'difference']
+                    'opuSumByEnclosure3', 'opuSumByTableP', 'opuSumTotal', 'difference']
 
 @Field
 def totalColumn = 'consumptionTaxSumS'
 
 @Field
 def rowsCalc = ['R3', 'R4', 'R5', 'R6', 'R7', 'R8', 'R9', 'R10', 'R11', 'R12', 'R13', 'R14', 'R15', 'R16', 'R17', 'R1',
-        'R26', 'R27', 'R28', 'R29', 'R30', 'R31', 'R32', 'R70', 'R71']
+                'R26', 'R27', 'R28', 'R29', 'R30', 'R31', 'R32', 'R70', 'R71']
 
 @Field
 def notImportSum = ['R1', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8', 'R9', 'R12', 'R13', 'R15', 'R16', 'R17', 'R27', 'R29',
-        'R67', 'R68', 'R71']
+                    'R67', 'R68', 'R71']
 
 // Дата окончания отчетного периода
 @Field
@@ -840,11 +842,15 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol = 5
 
         // графа 6
-        curRow.consumptionBuhSumAccepted = parseNumber(row.cell[xmlIndexCol].text().trim(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        if (curRow.getCell('consumptionBuhSumAccepted').isEditable()) {
+            curRow.consumptionBuhSumAccepted = parseNumber(row.cell[xmlIndexCol].text().trim(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        }
         xmlIndexCol++
 
         // графа 7
-        curRow.consumptionBuhSumPrevTaxPeriod = parseNumber(row.cell[xmlIndexCol].text().trim(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        if (curRow.getCell('consumptionBuhSumPrevTaxPeriod').isEditable()) {
+            curRow.consumptionBuhSumPrevTaxPeriod = parseNumber(row.cell[xmlIndexCol].text().trim(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        }
         xmlIndexCol++
 
         // графа 8

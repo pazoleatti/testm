@@ -63,6 +63,8 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
+        calc()
+        logicCheck()
         break
 }
 
@@ -608,15 +610,21 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol = 4
 
         // графа 5
-        curRow.rnu6Field10Sum = parseNumber(normalize(row.cell[xmlIndexCol].text()), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        if (curRow.getCell('rnu6Field10Sum').isEditable()) {
+            curRow.rnu6Field10Sum = parseNumber(normalize(row.cell[xmlIndexCol].text()), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        }
         xmlIndexCol++
 
         // графа 6
-        curRow.rnu6Field12Accepted = parseNumber(normalize(row.cell[xmlIndexCol].text()), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        if (curRow.getCell('rnu6Field12Accepted').isEditable()) {
+            curRow.rnu6Field12Accepted = parseNumber(normalize(row.cell[xmlIndexCol].text()), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        }
         xmlIndexCol++
 
         // графа 7
-        curRow.rnu6Field12PrevTaxPeriod = parseNumber(normalize(row.cell[xmlIndexCol].text()), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        if (curRow.getCell('rnu6Field12PrevTaxPeriod').isEditable()) {
+            curRow.rnu6Field12PrevTaxPeriod = parseNumber(normalize(row.cell[xmlIndexCol].text()), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        }
         xmlIndexCol++
 
         // графа 8

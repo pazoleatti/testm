@@ -89,6 +89,8 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
+        calc()
+        logicCheck()
         break
 }
 
@@ -798,7 +800,7 @@ void addData(def xml, int headRowCount) {
 
         //если совпадают или хотя бы один из атрибутов не пустой и значения строк в файлах входят в значения строк в шаблоне,
         //то продолжаем обработку строки иначе пропускаем строку
-        if (!((knu == knuImport && group == groupImport && type == typeImport) ||
+        if ((!knu.isEmpty() && knuImport.isEmpty()) || !((knu == knuImport && group == groupImport && type == typeImport) ||
                 ((!knuImport.isEmpty() || !groupImport.isEmpty() || !typeImport.isEmpty()) &&
                         knu.contains(knuImport) && group.contains(groupImport) && type.contains(typeImport)))) {
             continue
@@ -808,18 +810,24 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol = 5
 
         // графа 6
-        curRow.incomeBuhSumAccepted = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        if (curRow.getCell('incomeBuhSumAccepted').isEditable()) {
+            curRow.incomeBuhSumAccepted = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        }
         xmlIndexCol++
 
         // графа 7
-        curRow.incomeBuhSumPrevTaxPeriod = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        if (curRow.getCell('incomeBuhSumPrevTaxPeriod').isEditable()) {
+            curRow.incomeBuhSumPrevTaxPeriod = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        }
         xmlIndexCol++
 
         // графа 8
         xmlIndexCol++
 
         // графа 9
-        curRow.incomeTaxSumS = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        if (curRow.getCell('incomeTaxSumS').isEditable()) {
+            curRow.incomeTaxSumS = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        }
 
     }
     if (rowIndex < maxRow) {
