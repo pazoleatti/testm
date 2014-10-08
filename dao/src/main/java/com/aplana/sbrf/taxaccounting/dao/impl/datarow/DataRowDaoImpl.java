@@ -469,13 +469,20 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	 * 
 	 */
 	private Map<Long, Pair<Integer, Long>> getTypeAndOrdById(long formDataId, List<Long> dataRowIds) {
+        String sql = "SELECT type, ord, id FROM data_row WHERE TYPE IN (:types) AND form_data_id = :formDataId AND ";
 		final Map<Long, Pair<Integer, Long>> result = new HashMap<Long, Pair<Integer, Long>>();
-		Map<String, Object> params = new HashMap<String, Object>();
-		params.put("formDataId", formDataId);
-		params.put("types", Arrays.asList(TypeFlag.ADD.getKey(), TypeFlag.SAME.getKey()));
-		params.put("dataRowIds", dataRowIds);
-		getNamedParameterJdbcTemplate()
-			.query("SELECT type, ord, id FROM data_row WHERE TYPE IN (:types) AND form_data_id = :formDataId AND id IN (:dataRowIds)",
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("formDataId", formDataId);
+        params.addValue("types", Arrays.asList(TypeFlag.ADD.getKey(), TypeFlag.SAME.getKey()));
+        if (dataRowIds.size() < 1000) {
+            params.addValue("dataRowIds", dataRowIds);
+            sql += "id IN (:dataRowIds)";
+        } else {
+            sql += SqlUtils.transformToSqlInStatement("id", dataRowIds);
+        }
+
+        getNamedParameterJdbcTemplate()
+			.query(sql,
 					params,
 					new RowCallbackHandler() {
 						@Override
@@ -665,8 +672,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 			for (DataRow row : dataRows) {
 				idList.add(row.getId());
 			}
-			Map<String, Object> paramMap = new HashMap<String, Object>() {{put("ids", idList);}};
-			getNamedParameterJdbcTemplate().update("DELETE FROM data_cell WHERE row_id IN (:ids)", paramMap);
+            String sql = "DELETE FROM data_cell WHERE " + SqlUtils.transformToSqlInStatement("row_id", idList);
+            getJdbcTemplate().update(sql);
 		}
 	}
 
