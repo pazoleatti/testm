@@ -68,7 +68,7 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
     private final static String CORRECTION_EDIT_MESSAGE = "Нельзя открыть налоговую форму в режиме редактирования для представления «Корректировка»!";
     private final static String CORRECTION_ERROR_MESSAGE = "Нельзя открыть налоговую форму, созданную в периоде, не являющемся корректирующим в режиме представления «Корректировка»!";
     private final static String PREVIOUS_FORM_NOT_FOUND_MESSAGE = "Не найдена ранее созданная форма в текущем периоде. Данные о различиях не сформированы.";
-    private final static String SUCCESS_CORRECTION_MESSAGE = "Корректировка отображена в результате сравнения с данными формы в %s %s.";
+    private final static String SUCCESS_CORRECTION_MESSAGE = "Корректировка отображена в результате сравнения с данными формы за %s %s%s.";
     private final static String MANUAL_USED_MESSAGE = "Для формирования декларации в корректируемом периоде используются данные версии ручного ввода, созданной в форме %s - %s - %s!";
 
     private TAUserInfo userInfo;
@@ -237,8 +237,13 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
         // Шаблон НФ
         FormTemplate formTemplate = formTemplateService.get(prevFormData.getFormTemplateId());
         prevFormData.initFormTemplateParams(formTemplate);
-        ReportPeriod prevReportPeriod = departmentReportPeriodService.get(prevFormData.getDepartmentReportPeriodId()).getReportPeriod();
-        logger.info(String.format(SUCCESS_CORRECTION_MESSAGE, prevReportPeriod.getName(), prevReportPeriod.getTaxPeriod().getYear()));
+        DepartmentReportPeriod prevDepartmentReportPeriod = departmentReportPeriodService.get(prevFormData.getDepartmentReportPeriodId());
+        ReportPeriod prevReportPeriod = prevDepartmentReportPeriod.getReportPeriod();
+        StringBuilder correctionString = new StringBuilder();
+        if (prevDepartmentReportPeriod.getCorrectionDate() != null) {
+            correctionString.append(", корр. (").append(new SimpleDateFormat("dd.MM.yyyy").format(departmentReportPeriod.getCorrectionDate())).append(")");
+        }
+        logger.info(String.format(SUCCESS_CORRECTION_MESSAGE, prevReportPeriod.getName(), prevReportPeriod.getTaxPeriod().getYear(), correctionString));
 
         List<DataRow<Cell>> original = dataRowService.getSavedRows(prevFormData);
         List<DataRow<Cell>> revised = dataRowService.getSavedRows(formData);
