@@ -73,7 +73,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 		}
 		action.setFormDataId(Long.parseLong(request.getParameter(FORM_DATA_ID, null)));
 		action.setReadOnly(Boolean.parseBoolean(request.getParameter(READ_ONLY, "true")));
-        action.setManual(request.getParameter(MANUAL, null) != null ? Boolean.parseBoolean(request.getParameter(MANUAL, null)) : null);
+        action.setManual(Boolean.parseBoolean(request.getParameter(MANUAL, "false")));
         action.setUuid(request.getParameter(UUID, null));
         action.setCorrectionDiff(Boolean.parseBoolean(request.getParameter(CORRECTION, "false")));
         getFormData(action);
