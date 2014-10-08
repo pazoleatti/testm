@@ -194,6 +194,7 @@ alter table log_business add constraint log_business_fk_form_data_id foreign key
 alter table log_business add constraint log_business_chk_event_id check (event_id in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 203, 204, 205, 206, 207, 208, 209, 210, 301, 302, 303, 401));
 alter table log_business add constraint log_business_chk_frm_dcl_ev check (form_data_id is not null or declaration_data_id is not null);
 alter table log_business add constraint log_business_fk_usr_departm_id foreign key (user_department_id) references department(id);
+alter table log_business add constraint log_business_fk_event_id foreign key (event_id) references event(id);
 
 alter table task_context add constraint task_context_uniq_task_id unique (task_id);
 alter table task_context add constraint task_context_uniq_task_name unique (task_name);
@@ -207,6 +208,10 @@ alter table notification add constraint notification_fk_notify_role foreign key 
 alter table notification add constraint notification_chk_isread check (is_read in (0, 1));
 
 alter table event add constraint event_pk primary key (id);
+
+alter table role_event add constraint role_event_pk primary key (event_id, role_id);
+alter table role_event add constraint role_event_fk_event_id foreign key (event_id) references event(id);
+alter table role_event add constraint role_event_fk_role_id foreign key (role_id) references sec_role(id);
 
 alter table template_changes add constraint template_changes_pk primary key (id);
 alter table template_changes add constraint template_changes_fk_user_id foreign key (author) references sec_user(id);
