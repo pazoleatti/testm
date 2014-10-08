@@ -22,6 +22,7 @@ drop table log_business;
 drop table cell_span_info;
 drop table sec_user_role;
 drop table notification;
+drop table role_event;
 drop table sec_role;
 drop sequence seq_sec_user;
 drop sequence seq_notification;

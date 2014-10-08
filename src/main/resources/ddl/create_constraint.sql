@@ -208,6 +208,12 @@ alter table notification add constraint notification_chk_isread check (is_read i
 
 alter table event add constraint event_pk primary key (id);
 
+alter table log_business add constraint log_business_fk_event_id foreign key (event_id) references event(id);
+
+alter table role_event add constraint role_event_pk primary key (event_id, role_id);
+alter table role_event add constraint role_event_fk_event_id foreign key (event_id) references event(id);
+alter table role_event add constraint role_event_fk_role_id foreign key (role_id) references sec_role(id);
+
 alter table template_changes add constraint template_changes_pk primary key (id);
 alter table template_changes add constraint template_changes_fk_user_id foreign key (author) references sec_user(id);
 alter table template_changes add constraint template_changes_chk_event check (event in (701, 702, 703, 704, 705));
