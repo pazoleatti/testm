@@ -221,8 +221,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	@Override
 	public void insertRows(FormData formData, DataRow<Cell> afterRow,
 			List<DataRow<Cell>> rows) {
-		Pair<Long, Integer> ordAndIndex = getOrdAndIndex(formData.getId(),
-				afterRow.getId());
+		Pair<Long, Integer> ordAndIndex = getOrdAndIndex(formData.getId(), afterRow.getId());
 		insertRows(formData, ordAndIndex.getSecond(), ordAndIndex.getFirst(), rows);
 	}
 
@@ -240,21 +239,24 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
 	/**
 	 * Создаем строки во временном срезе
+	 * @param formData
+	 * @param index
+	 * @param ordBegin
+	 * @param rows
 	 */
 	private void insertRows(FormData formData, int index, long ordBegin, List<DataRow<Cell>> rows) {
 		Long ordEnd = getOrd(formData.getId(), index + 1);
-		long ordStep = ordEnd == null ? DataRowDaoImplUtils.DEFAULT_ORDER_STEP
-				: DataRowDaoImplUtils
-						.calcOrdStep(ordBegin, ordEnd, rows.size());
+		long ordStep = ordEnd == null ?
+			DataRowDaoImplUtils.DEFAULT_ORDER_STEP :
+			DataRowDaoImplUtils.calcOrdStep(ordBegin, ordEnd, rows.size());
 		if (ordStep == 0) {
-			/*Реализовация перепаковки поля ORD. Слишком маленькие значения ORD. В промежуток нельзя вставить
+			/*Реализация перепаковки поля ORD. Слишком маленькие значения ORD. В промежуток нельзя вставить
 			такое количество строк*/
             long diff = 5 * rows.size(); //minimal diff between rows
             int endIndex = physicalGetSize(formData, new TypeFlag[]{TypeFlag.DEL, TypeFlag.ADD, TypeFlag.SAME});
-
-            /* Делаем так чтобы пересортировать колонки в один запрос. Для этого сначала выбираем временную таблицу с индексами (RR)
+            /* Делаем так, чтобы пересортировать строки в один запрос. Для этого сначала выбираем временную таблицу с индексами (RR)
              *  затем выбираем индексы начиная с того после которого надо вставить и до самого конца.
-             *  Прибавляем ровно ту разницу, котрая необходима для вставки строк.
+             *  Прибавляем ровно ту разницу, которая необходима для вставки строк.
              */
             Map<String, Object> map = new HashMap<String, Object>();
             map.put("diff", diff);
@@ -318,7 +320,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		Pair<String, Map<String, Object>> sql = dataRowMapper.createSql();
 
         if(!isSupportOver()){
-            sql.first = sql.getFirst().replaceAll("OVER \\(ORDER BY sub.ord\\)", "OVER ()");
+            sql.setFirst(sql.getFirst().replaceAll("OVER \\(ORDER BY sub.ord\\)", "OVER ()"));
         }
 
 		List<DataRow<Cell>> dataRows = getNamedParameterJdbcTemplate().query(
@@ -327,29 +329,36 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		return dataRows;
 	}
 
+	/**
+	 * Возвращает количество строк в налоговой форме, включая итоговые (alias != null)
+	 * @param formData
+	 * @param types
+	 * @return
+	 */
 	private int physicalGetSize(FormData formData, TypeFlag[] types) {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("formDataId", formData.getId());
 		params.put("types", TypeFlag.rtsToKeys(types));
         params.put("manual", formData.isManual() ? 1 : 0);
-		return getNamedParameterJdbcTemplate()
-				.queryForInt(
-						"SELECT COUNT(id) FROM data_row WHERE form_data_id = :formDataId AND type IN (:types) AND manual = :manual",
-						params);
+		return getNamedParameterJdbcTemplate().queryForInt(
+			"SELECT COUNT(id) FROM data_row WHERE form_data_id = :formDataId AND type IN (:types) AND manual = :manual",
+			params);
 	}
 
     /**
      * Получить количество строк без учета итоговых
+     * @param formData
+     * @param types
+     * @return
      */
     private int physicalGetSizeWithoutTotal(FormData formData, TypeFlag[] types) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("formDataId", formData.getId());
         params.put("types", TypeFlag.rtsToKeys(types));
         params.put("manual", formData.isManual() ? 1 : 0);
-        return getNamedParameterJdbcTemplate()
-                .queryForInt(
-                        "select count(ID) from DATA_ROW where FORM_DATA_ID = :formDataId and TYPE in (:types) and manual = :manual AND alias IS NULL ",
-                        params);
+        return getNamedParameterJdbcTemplate().queryForInt(
+			"SELECT COUNT(id) FROM data_row WHERE form_data_id = :formDataId AND type IN (:types) AND manual = :manual AND alias IS NULL ",
+			params);
     }
 
     private void physicalInsertRows(final FormData formData,
@@ -418,10 +427,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		params.put("formDataId", formDataId);
 		params.put("types", Arrays.asList(TypeFlag.ADD.getKey(), TypeFlag.SAME.getKey()));
 		params.put("dataRowIndex", dataRowIndex);
-		List<Long> list = getNamedParameterJdbcTemplate().queryForList(sql,
-				params, Long.class);
-		return list.isEmpty() ? null : DataAccessUtils
-				.requiredSingleResult(list);
+		List<Long> list = getNamedParameterJdbcTemplate().queryForList(sql, params, Long.class);
+		return list.isEmpty() ? null : DataAccessUtils.requiredSingleResult(list);
 	}
 
 	/**
@@ -432,9 +439,9 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	 * @return
 	 */
 	private Pair<Long, Integer> getOrdAndIndex(long formDataId, Long dataRowId) {
-		String sql = "select ORD, IDX from (select row_number() over (order by ORD) as IDX, ORD, ID from DATA_ROW where TYPE in (:types) and FORM_DATA_ID=:formDataId) RR where ID = :dataRowId";
+		String sql = "SELECT ord, idx FROM (SELECT ROW_NUMBER() OVER (ORDER BY ord) AS idx, ord, id FROM data_row WHERE type IN (:types) AND form_data_id=:formDataId) rr WHERE id = :dataRowId";
         if (!isSupportOver()){
-            sql = sql.replaceFirst("over \\(order by ORD\\)", "over ()");
+            sql = sql.replaceFirst("OVER \\(ORDER BY ord\\)", "OVER ()");
         }
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("formDataId", formDataId);
@@ -442,17 +449,14 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 				Arrays.asList(TypeFlag.ADD.getKey(), TypeFlag.SAME.getKey()));
 		params.put("dataRowId", dataRowId);
 		try {
-			return DataAccessUtils
-					.requiredSingleResult(getNamedParameterJdbcTemplate()
+			return DataAccessUtils.requiredSingleResult(getNamedParameterJdbcTemplate()
 							.query(sql, params,
 									new RowMapper<Pair<Long, Integer>>() {
 										@Override
-										public Pair<Long, Integer> mapRow(
-												ResultSet rs, int rowNum)
-												throws SQLException {
-											return new Pair<Long, Integer>(SqlUtils
-                                                    .getLong(rs,"ORD"), SqlUtils
-                                                    .getInteger(rs, "IDX"));
+										public Pair<Long, Integer> mapRow(ResultSet rs, int rowNum) throws SQLException {
+											return new Pair<Long, Integer>(
+													SqlUtils.getLong(rs,"ord"),
+													SqlUtils.getInteger(rs, "idx"));
 										}
 									}));
 		} catch (EmptyResultDataAccessException e) {
@@ -465,13 +469,20 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	 * 
 	 */
 	private Map<Long, Pair<Integer, Long>> getTypeAndOrdById(long formDataId, List<Long> dataRowIds) {
+        String sql = "SELECT type, ord, id FROM data_row WHERE TYPE IN (:types) AND form_data_id = :formDataId AND ";
 		final Map<Long, Pair<Integer, Long>> result = new HashMap<Long, Pair<Integer, Long>>();
-		Map<String, Object> params = new HashMap<String, Object>();
-		params.put("formDataId", formDataId);
-		params.put("types", Arrays.asList(TypeFlag.ADD.getKey(), TypeFlag.SAME.getKey()));
-		params.put("dataRowIds", dataRowIds);
-		getNamedParameterJdbcTemplate()
-			.query("SELECT type, ord, id FROM data_row WHERE TYPE IN (:types) AND form_data_id = :formDataId AND id IN (:dataRowIds)",
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("formDataId", formDataId);
+        params.addValue("types", Arrays.asList(TypeFlag.ADD.getKey(), TypeFlag.SAME.getKey()));
+        if (dataRowIds.size() < 1000) {
+            params.addValue("dataRowIds", dataRowIds);
+            sql += "id IN (:dataRowIds)";
+        } else {
+            sql += SqlUtils.transformToSqlInStatement("id", dataRowIds);
+        }
+
+        getNamedParameterJdbcTemplate()
+			.query(sql,
 					params,
 					new RowCallbackHandler() {
 						@Override
@@ -661,8 +672,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 			for (DataRow row : dataRows) {
 				idList.add(row.getId());
 			}
-			Map<String, Object> paramMap = new HashMap<String, Object>() {{put("ids", idList);}};
-			getNamedParameterJdbcTemplate().update("DELETE FROM data_cell WHERE row_id IN (:ids)", paramMap);
+            String sql = "DELETE FROM data_cell WHERE " + SqlUtils.transformToSqlInStatement("row_id", idList);
+            getJdbcTemplate().update(sql);
 		}
 	}
 

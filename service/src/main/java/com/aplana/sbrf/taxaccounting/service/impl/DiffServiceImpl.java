@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.Diff;
-import com.aplana.sbrf.taxaccounting.model.DiffType;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.DiffService;
 import difflib.Delta;
@@ -11,6 +8,7 @@ import difflib.DiffUtils;
 import difflib.Patch;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -124,25 +122,88 @@ public class DiffServiceImpl implements DiffService {
             DiffType diffType = pair.getSecond() == null ? originalDiffMap.get(pair.getFirst()) :
                     revisedDiffMap.get(pair.getSecond());
 
-            diffStyles(diffType, pair, dataRow, originalRow, revisedRow);
+            diffStyles(diffType, dataRow, originalRow, revisedRow);
             retVal.add(dataRow);
         }
 
         return retVal;
     }
 
-    // Стили для отображения изменений
-    private void diffStyles(DiffType diffType, Pair<Integer, Integer> pair, DataRow<Cell> dataRow,
-                            DataRow<Cell> originalRow, DataRow<Cell> revisedRow) {
-        // TODO Левыкин: Очистить стили
+    /**
+     * Стили для отображения изменений
+     */
+    private void diffStyles(DiffType diffType, DataRow<Cell> dataRow, DataRow<Cell> originalRow,
+                            DataRow<Cell> revisedRow) {
+        // Очистка всех стилей
+        rowStyle(dataRow, null);
+
         if (diffType == null) {
             // Строка не изменилась
+            rowStyle(dataRow, STYLE_NO_CHANGE);
             return;
         }
-        // TODO Левыкин: подсветка изменений по стилям и вычисление изменений
+
+        switch (diffType) {
+            case INSERT:
+                rowStyle(dataRow, STYLE_INSERT);
+                return;
+            case DELETE:
+                rowStyle(dataRow, STYLE_DELETE);
+                return;
+            case CHANGE:
+                for (String key : dataRow.keySet()) {
+                    Cell originalCell = originalRow.getCell(key);
+                    Cell revisedCell = revisedRow.getCell(key);
+                    Cell cell = dataRow.getCell(key);
+                    // Стиль
+                    if (isValueChanged(originalCell.getValue(), revisedCell.getValue())) {
+                        cell.setStyleAlias(STYLE_CHANGE);
+                    } else {
+                        cell.setStyleAlias(STYLE_NO_CHANGE);
+                    }
+                    // Значение
+                    if (cell.getColumn().getColumnType() == ColumnType.NUMBER) {
+                        cell.setNumericValue(calcDiff((BigDecimal)originalCell.getValue(),
+                                (BigDecimal)revisedCell.getValue()));
+                    }
+                }
+                return;
+        }
+    }
+
+    /**
+     * Признак изменения значения в ячейке
+     */
+    private boolean isValueChanged(Object original, Object revised) {
+        if (original == null && revised == null) {
+            return false;
+        }
+        if (original == null || revised == null) {
+            return true;
+        }
+        return !original.equals(revised);
+    }
+
+    /**
+     * Вычисление разницы для числовых значений
+     */
+    private BigDecimal calcDiff(BigDecimal original, BigDecimal revised) {
+        if (revised == null) {
+            revised = BigDecimal.ZERO;
+        }
+        if (original == null) {
+            original = BigDecimal.ZERO;
+        }
+        return revised.subtract(original);
+    }
+
+    /**
+     * Общий стиль для всей строки
+     */
+    private void rowStyle( DataRow<Cell> dataRow, String alias) {
         for (String key : dataRow.keySet()) {
             Cell cell = dataRow.getCell(key);
-            cell.setStyleAlias("Корректировка");
+            cell.setStyleAlias(alias);
         }
     }
 

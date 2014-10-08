@@ -77,40 +77,40 @@ public class DiffServiceTest {
         diffList = Arrays.asList(new Diff(0, 0, DiffType.CHANGE));
         pairList = diffService.getMergedOrder(diffList, 1);
         Assert.assertEquals(1, pairList.size());
-        Assert.assertEquals(0, pairList.get(0).first.intValue());
-        Assert.assertEquals(0, pairList.get(0).second.intValue());
+        Assert.assertEquals(0, pairList.get(0).getFirst().intValue());
+        Assert.assertEquals(0, pairList.get(0).getSecond().intValue());
 
         diffList = Arrays.asList(new Diff(1, 1, DiffType.CHANGE));
         pairList = diffService.getMergedOrder(diffList, 3);
         Assert.assertEquals(3, pairList.size());
-        Assert.assertEquals(0, pairList.get(0).first.intValue());
-        Assert.assertEquals(0, pairList.get(0).second.intValue());
-        Assert.assertEquals(1, pairList.get(1).first.intValue());
-        Assert.assertEquals(1, pairList.get(1).second.intValue());
-        Assert.assertEquals(2, pairList.get(2).first.intValue());
-        Assert.assertEquals(2, pairList.get(2).second.intValue());
+        Assert.assertEquals(0, pairList.get(0).getFirst().intValue());
+        Assert.assertEquals(0, pairList.get(0).getSecond().intValue());
+        Assert.assertEquals(1, pairList.get(1).getFirst().intValue());
+        Assert.assertEquals(1, pairList.get(1).getSecond().intValue());
+        Assert.assertEquals(2, pairList.get(2).getFirst().intValue());
+        Assert.assertEquals(2, pairList.get(2).getSecond().intValue());
 
         diffList = Arrays.asList(new Diff(null, 1, DiffType.INSERT));
         pairList = diffService.getMergedOrder(diffList, 3);
         Assert.assertEquals(3, pairList.size());
-        Assert.assertEquals(0, pairList.get(0).first.intValue());
-        Assert.assertEquals(0, pairList.get(0).second.intValue());
-        Assert.assertNull(pairList.get(1).first);
-        Assert.assertEquals(1, pairList.get(1).second.intValue());
-        Assert.assertEquals(1, pairList.get(2).first.intValue());
-        Assert.assertEquals(2, pairList.get(2).second.intValue());
+        Assert.assertEquals(0, pairList.get(0).getFirst().intValue());
+        Assert.assertEquals(0, pairList.get(0).getSecond().intValue());
+        Assert.assertNull(pairList.get(1).getFirst());
+        Assert.assertEquals(1, pairList.get(1).getSecond().intValue());
+        Assert.assertEquals(1, pairList.get(2).getFirst().intValue());
+        Assert.assertEquals(2, pairList.get(2).getSecond().intValue());
 
         diffList = Arrays.asList(new Diff(1, 1, DiffType.CHANGE), new Diff(null, 2, DiffType.INSERT),
                 new Diff(4, 5, DiffType.CHANGE), new Diff(5, 6, DiffType.CHANGE), new Diff(6, null, DiffType.DELETE),
                 new Diff(12, null, DiffType.DELETE), new Diff(null, 13, DiffType.INSERT), new Diff(null, 14, DiffType.INSERT));
         pairList = diffService.getMergedOrder(diffList, 14);
         Assert.assertEquals(17, pairList.size());
-        Assert.assertEquals(0, pairList.get(0).first.intValue());
-        Assert.assertEquals(0, pairList.get(0).second.intValue());
-        Assert.assertEquals(4, pairList.get(5).first.intValue());
-        Assert.assertEquals(5, pairList.get(5).second.intValue());
-        Assert.assertNull(pairList.get(16).first);
-        Assert.assertEquals(14, pairList.get(16).second.intValue());
+        Assert.assertEquals(0, pairList.get(0).getFirst().intValue());
+        Assert.assertEquals(0, pairList.get(0).getSecond().intValue());
+        Assert.assertEquals(4, pairList.get(5).getFirst().intValue());
+        Assert.assertEquals(5, pairList.get(5).getSecond().intValue());
+        Assert.assertNull(pairList.get(16).getFirst());
+        Assert.assertEquals(14, pairList.get(16).getSecond().intValue());
     }
 
     private static List<String> streamToLines(InputStream inputStream) throws IOException {
@@ -158,7 +158,16 @@ public class DiffServiceTest {
     public void getDiffTest() {
         List<FormStyle> formStyleList = new LinkedList<FormStyle>();
         FormStyle formStyle = new FormStyle();
-        formStyle.setAlias("Корректировка");
+        formStyle.setAlias(DiffService.STYLE_CHANGE);
+        formStyleList.add(formStyle);
+        formStyle = new FormStyle();
+        formStyle.setAlias(DiffService.STYLE_NO_CHANGE);
+        formStyleList.add(formStyle);
+        formStyle = new FormStyle();
+        formStyle.setAlias(DiffService.STYLE_INSERT);
+        formStyleList.add(formStyle);
+        formStyle = new FormStyle();
+        formStyle.setAlias(DiffService.STYLE_DELETE);
         formStyleList.add(formStyle);
         List<Column> columnList = getColumnList();
         DataRow<Cell> dataRow1 = new DataRow<Cell>(FormDataUtils.createCells(columnList, formStyleList));
@@ -169,20 +178,29 @@ public class DiffServiceTest {
         dataRow1.getCell(ALIAS_3).setDateValue(date);
         dataRow1.getCell(ALIAS_4).setNumericValue(BigDecimal.valueOf(1));
         dataRow1.getCell(ALIAS_5).setNumericValue(BigDecimal.valueOf(1));
-        dataRow2.getCell(ALIAS_1).setStringValue("str2");
-        dataRow2.getCell(ALIAS_2).setNumericValue(BigDecimal.valueOf(2));
+        dataRow2.getCell(ALIAS_1).setStringValue("str1");
+        dataRow2.getCell(ALIAS_2).setNumericValue(null);
         dataRow2.getCell(ALIAS_4).setNumericValue(BigDecimal.valueOf(2));
         dataRow2.getCell(ALIAS_5).setNumericValue(BigDecimal.valueOf(2));
         List<DataRow<Cell>> diffList = diffService.getDiff(Arrays.asList(dataRow1), Arrays.asList(dataRow2));
         Assert.assertEquals(1, diffList.size());
         DataRow<Cell> dataRow = diffList.get(0);
-        Assert.assertEquals("str2", dataRow.get(ALIAS_1));
-        Assert.assertEquals(BigDecimal.valueOf(2), dataRow.get(ALIAS_2));
+        Assert.assertEquals("str1", dataRow.get(ALIAS_1));
+        Assert.assertEquals(BigDecimal.valueOf(-1), dataRow.get(ALIAS_2));
         Assert.assertNull(dataRow.get(ALIAS_3));
         Assert.assertEquals(BigDecimal.valueOf(2).longValue(), dataRow.get(ALIAS_4));
         Assert.assertEquals(BigDecimal.valueOf(2), dataRow.get(ALIAS_5));
-
-        // TODO Левыкин: Проверка стилей. Добавить поле реализации в сервисе.
+        // Проверка стилей
+        List<String> styleList = new LinkedList<String>();
+        for (String key : dataRow.keySet()) {
+            Cell cell = dataRow.getCell(key);
+            styleList.add(cell.getStyleAlias());
+        }
+        Assert.assertEquals(DiffService.STYLE_NO_CHANGE, styleList.get(0));
+        Assert.assertEquals(DiffService.STYLE_CHANGE, styleList.get(1));
+        Assert.assertEquals(DiffService.STYLE_CHANGE, styleList.get(2));
+        Assert.assertEquals(DiffService.STYLE_CHANGE, styleList.get(3));
+        Assert.assertEquals(DiffService.STYLE_CHANGE, styleList.get(4));
     }
 
     // Тестовые графы

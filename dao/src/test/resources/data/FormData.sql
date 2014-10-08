@@ -33,10 +33,6 @@ insert into form_data(id, form_template_id, department_report_period_id, state, 
 
 -- Для проверки изменения количества строк в табличной части НФ
 insert into form_data(id, form_template_id, department_report_period_id, state, kind, return_sign) values (1000, 1, 101, 1, 3, 0);
-insert into data_row(id, form_data_id, alias, ord, type) values (1, 1000, null, 1, 0);
-insert into data_row(id, form_data_id, alias, ord, type) values (2, 1000, 'total1', 2, 0);
-insert into data_row(id, form_data_id, alias, ord, type) values (3, 1000, null, 3, 0);
-insert into data_row(id, form_data_id, alias, ord, type) values (4, 1000, 'total2', 4, 0);
 
 -- Для проверки метода getFormDataListByTemplateId
 insert into form_data(id, form_template_id, department_report_period_id, state, kind, return_sign, period_order) values (400, 4, 120, 2, 1, 0, 1);

@@ -7,8 +7,9 @@ package com.aplana.sbrf.taxaccounting.model.util;
  * @param <S>
  */
 public class Pair<F,S> {
-	public F first;
-	public S second;
+
+	private F first;
+	private S second;
 
 	public Pair(F first, S second) {
 		this.first = first;
@@ -23,11 +24,11 @@ public class Pair<F,S> {
 		return second;
 	}
 
-	void setFirst(F o) {
+	public void setFirst(F o) {
 		first = o;
 	}
 
-	void setSecond(S o) {
+	public void setSecond(S o) {
 		second = o;
 	}
 
@@ -65,9 +66,6 @@ public class Pair<F,S> {
 
     @Override
     public String toString() {
-        return "Pair{" +
-                "first=" + first +
-                ", second=" + second +
-                '}';
+        return new StringBuilder("Pair{first=").append(first).append(", second=").append(second).append('}').toString();
     }
 }
