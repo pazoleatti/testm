@@ -40,21 +40,21 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 	 */
 	public Pair<String, Map<String, Object>> createSql() {
 		String[] prefixes = new String[]{"v", "s", "e", "csi", "rsi"};
-		StringBuilder select = new StringBuilder("SELECT ROW_NUMBER() OVER (ORDER BY sub.ord) as idx, sub.id, sub.a \n");
+		StringBuilder select = new StringBuilder("SELECT ROW_NUMBER() OVER (ORDER BY sub.ord) AS idx, sub.id, sub.alias \n");
 		// генерация max(X) X
 		for (Column c : fd.getFormColumns()){
 			for (String prefix : prefixes){
 				select
-						.append(" , MAX(")
+						.append(", MAX(")
 						.append(prefix)
 						.append(c.getId())
 						.append(") ")
 						.append(prefix)
 						.append(c.getId());
 			}
-			select.append('\n');
+			select.append("\n ");
 		}
-		select.append(" FROM (SELECT d.id, d.alias AS a, d.ord");
+		select.append("FROM (SELECT d.id, d.alias, d.ord");
 
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("formDataId", fd.getId());
@@ -64,9 +64,6 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 		// генерация "case when C.COLUMN_ID=18740 then C.STYLE_ID else null end S18740,"
 		for (Column column : fd.getFormColumns()){
 			int columnId = column.getId();
-			String columnSId =  String.format("column%sId", columnId);
-			params.put(columnSId, columnId);
-
 			char valuePrefix;
 			switch (column.getColumnType()) {
 				case STRING:
@@ -78,17 +75,17 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 				default:
 					valuePrefix = 'n';
 			}
-			select.append(",\n CASE WHEN c.column_id = :").append(columnSId).append(" THEN c.").append(valuePrefix).append("value ELSE NULL END v").append(columnId).append(",\n")
-					.append(" CASE WHEN c.column_id = :").append(columnSId).append(" THEN c.style_id ELSE NULL END s").append(columnId).append(",\n")
-					.append(" CASE WHEN c.column_id = :").append(columnSId).append(" THEN c.edit ELSE 0 END e").append(columnId).append(",\n")
-					.append(" CASE WHEN c.column_id = :").append(columnSId).append(" THEN c.colspan ELSE NULL END csi").append(columnId).append(",\n")
-					.append(" CASE WHEN c.column_id = :").append(columnSId).append(" THEN c.rowspan ELSE NULL END rsi").append(columnId);
+			select.append(",\n CASE WHEN c.column_id = ").append(columnId).append(" THEN c.").append(valuePrefix).append("value ELSE NULL END v").append(columnId).append(", ")
+					.append(" CASE WHEN c.column_id = ").append(columnId).append(" THEN c.style_id ELSE NULL END s").append(columnId).append(", ")
+					.append(" CASE WHEN c.column_id = ").append(columnId).append(" THEN c.editable ELSE 0 END e").append(columnId).append(", ")
+					.append(" CASE WHEN c.column_id = ").append(columnId).append(" THEN c.colspan ELSE NULL END csi").append(columnId).append(", ")
+					.append(" CASE WHEN c.column_id = ").append(columnId).append(" THEN c.rowspan ELSE NULL END rsi").append(columnId);
 		}
 
-		select.append("\n FROM data_row d LEFT JOIN \n");
-		select.append(" (SELECT column_id, row_id, style_id, editable edit, colspan, rowspan, nvalue, dvalue, svalue FROM data_cell) c ON d.id = c.row_id \n");
-		select.append(" WHERE d.form_data_id = :formDataId AND manual = :manual AND d.type IN (:types)) sub \n");
-		select.append(" GROUP BY sub.id, sub.ord, sub.a ORDER BY sub.ord");
+		select.append("\nFROM data_row d LEFT JOIN \n");
+		select.append(" (SELECT column_id, row_id, style_id, editable, colspan, rowspan, nvalue, dvalue, svalue FROM data_cell) c ON d.id = c.row_id \n");
+		select.append(" WHERE d.form_data_id = :formDataId AND d.manual = :manual AND d.type IN (:types)) sub \n");
+		select.append(" GROUP BY sub.id, sub.ord, sub.alias ORDER BY sub.ord");
 
 		StringBuilder sql = new StringBuilder();
 		sql.append(select);
@@ -96,14 +93,14 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 		sql.insert(0, "SELECT * FROM (\n");
 		sql.append(") table1\nLEFT JOIN \n(");
 		sql.append("SELECT ROW_NUMBER() OVER (ORDER BY sub.ord) AS idx2, sub.id AS id2\n");
-		sql.append(" FROM (SELECT d.id, d.alias AS a, d.ord FROM data_row d\n");
-		sql.append(" WHERE d.form_data_id = :formDataId AND manual = :manual AND d.type IN (:types) AND d.alias IS NULL) sub\n");
-		sql.append(" GROUP BY sub.id, sub.ord, sub.a ORDER BY sub.ord");
+		sql.append(" FROM (SELECT d.id, d.alias, d.ord FROM data_row d\n");
+		sql.append(" WHERE d.form_data_id = :formDataId AND d.manual = :manual AND d.type IN (:types) AND d.alias IS NULL) sub\n");
+		sql.append(" GROUP BY sub.id, sub.ord, sub.alias ORDER BY sub.ord");
 		sql.append(") table2\nON table1.id = table2.id2");
 
 		if (range != null) {
-			sql.insert(0, "select * from( ");
-			sql.append(") where IDX between :from and :to");
+			sql.insert(0, "SELECT * FROM ( ");
+			sql.append(") WHERE idx BETWEEN :from AND :to");
 			params.put("from", range.getOffset());
 			params.put("to", range.getOffset() + range.getLimit() - 1);
 		}
@@ -118,7 +115,7 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 		Integer previousRowNumber = fd.getPreviousRowNumber() != null ? fd.getPreviousRowNumber() : 0;
 		for (Cell cell : cells) {
 			// Values
-			if (ColumnType.AUTO.equals(cell.getColumn().getColumnType()) && rs.getString("A") == null) {
+			if (ColumnType.AUTO.equals(cell.getColumn().getColumnType()) && rs.getString("alias") == null) {
 				if (NumerationType.CROSS.equals(((AutoNumerationColumn) cell.getColumn()).getNumerationType())) {
 					cell.setValue(SqlUtils.getInteger(rs, "IDX2") + previousRowNumber, rowNum);
 				} else {
@@ -144,7 +141,7 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 					.getId()));
 			cell.setColSpan(((colSpan == null) || (colSpan == 0)) ? 1 : colSpan);
 		}
-		DataRow<Cell> dataRow = new DataRow<Cell>(rs.getString("A"), cells);
+		DataRow<Cell> dataRow = new DataRow<Cell>(rs.getString("alias"), cells);
 		dataRow.setId(SqlUtils.getLong(rs,"ID"));
 		dataRow.setIndex(SqlUtils.getInteger(rs,"IDX"));
 		return dataRow;

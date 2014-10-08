@@ -750,6 +750,14 @@ COMMENT ON COLUMN event.name IS 'Наименование события';
 
 create sequence seq_template_changes start with 10000;
 --------------------------------------------------------------------------------------------------------
+create table role_event (
+event_id number(9) not null,
+role_id number(9) not null
+);
+comment on table role_event is 'Настройка прав доступа к событиям журнала аудита по ролям';
+comment on column role_event.event_id is 'Идентификатор события';
+comment on column role_event.role_id is 'Идентификатор роли';
+--------------------------------------------------------------------------------------------------------
 create table lock_data
 (
   key varchar2(1000) not null,

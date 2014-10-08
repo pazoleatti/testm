@@ -301,6 +301,12 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
             Dialog.infoMessage("Дата окончания не может быть меньше даты начала актуализации.");
             return;
         }
+        for (FormStyle formStyle : formTemplate.getStyles()) {
+            if (formStyle.getAlias() == null) {
+                Dialog.infoMessage("Не заполнено обязательное поле \"Имя\" стиля на вкладке \"Наборы стилей\"");
+                return;
+            }
+        }
         //Новый макет
         if (formTemplate.getId() == null && formTemplate.getType().getId() == 0){
             CreateNewTypeAction action = new CreateNewTypeAction();

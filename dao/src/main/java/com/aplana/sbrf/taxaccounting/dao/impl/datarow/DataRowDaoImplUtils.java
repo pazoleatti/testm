@@ -54,8 +54,15 @@ public final class DataRowDaoImplUtils {
 		return getCellValueComponent(c, CELL_VALUE_TABLE_EXTRACTORS);
 	}
 
-	static long calcOrdStep(Long ordBegin, Long ordEnd, int number) {
-		return (ordEnd - ordBegin) / (number + 1);
+	/**
+	 * Рассчитывает шаг с которым должны вставляться новые строки между сохраненными строками с номерами ordBegin и ordEnd.
+	 * @param ordBegin начальный индекс
+	 * @param ordEnd конечный индекс
+	 * @param count число строк для вставки
+	 * @return шаг, равномерно задает распределение на отрезке [ordBegin; ordEnd]
+	 */
+	static long calcOrdStep(Long ordBegin, Long ordEnd, int count) {
+		return (ordEnd - ordBegin) / (count + 1);
 	}
 
 	/**
