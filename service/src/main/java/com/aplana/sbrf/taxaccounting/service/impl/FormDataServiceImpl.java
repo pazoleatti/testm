@@ -288,7 +288,7 @@ public class FormDataServiceImpl implements FormDataService {
 
 		logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.CREATE, null);
 		auditService.add(FormDataEvent.CREATE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-				null, formData.getFormType().getName(), formData.getKind().getId(), null, null, formData.getFormType().getId());
+				null, formData.getFormType().getName(), formData.getKind().getId(), "Форма создана", null, formData.getFormType().getId());
 
 		// Заполняем начальные строки (но не сохраняем)
 		dataRowDao.saveRows(formData, formTemplate.getRows());
@@ -457,7 +457,7 @@ public class FormDataServiceImpl implements FormDataService {
 
 		logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.SAVE, null);
 		auditService.add(FormDataEvent.SAVE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-				null, formData.getFormType().getName(), formData.getKind().getId(), null, null, formData.getFormType().getId());
+				null, formData.getFormType().getName(), formData.getKind().getId(), "Форма сохранена", null, formData.getFormType().getId());
 
 		return formData.getId();
 	}
@@ -515,7 +515,7 @@ public class FormDataServiceImpl implements FormDataService {
 
             FormData formData = formDataDao.get(formDataId, manual);
             auditService.add(FormDataEvent.DELETE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-                    null, formData.getFormType().getName(), formData.getKind().getId(), null, null, formData.getFormType().getId());
+                    null, formData.getFormType().getName(), formData.getKind().getId(), "Форма удалена", null, formData.getFormType().getId());
             formDataDao.delete(formDataId);
             deleteReport(formDataId);
         }
@@ -584,7 +584,7 @@ public class FormDataServiceImpl implements FormDataService {
                     //Проверяем что записи справочников, на которые есть ссылки в нф все еще существуют в периоде формы
                     checkReferenceValues(logger, formData);
                     //Делаем переход
-                    moveProcess(formData, manual, userInfo, workflowMove, note, logger);
+                    moveProcess(formData, userInfo, workflowMove, note, logger);
                 } finally {
                     for (String lock : lockedObjects) {
                         lockService.unlock(lock, userId);
@@ -595,7 +595,7 @@ public class FormDataServiceImpl implements FormDataService {
                         logEntryService.save(logger.getEntries()));
             }
         } else {
-            moveProcess(formData, manual, userInfo, workflowMove, note, logger);
+            moveProcess(formData, userInfo, workflowMove, note, logger);
         }
     }
 
@@ -664,7 +664,7 @@ public class FormDataServiceImpl implements FormDataService {
         }
     }
 
-    public void moveProcess(FormData formData, boolean manual, TAUserInfo userInfo, WorkflowMove workflowMove, String note, Logger logger) {
+    private void moveProcess(FormData formData, TAUserInfo userInfo, WorkflowMove workflowMove, String note, Logger logger) {
         formDataScriptingService.executeScript(userInfo, formData, workflowMove.getEvent(), logger, null);
 
         if (logger.containsLevel(LogLevel.ERROR)) {
@@ -696,7 +696,7 @@ public class FormDataServiceImpl implements FormDataService {
 
         logBusinessService.add(formData.getId(), null, userInfo, workflowMove.getEvent(), note);
         auditService.add(workflowMove.getEvent(), userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-                null, formData.getFormType().getName(), formData.getKind().getId(), note, null, formData.getFormType().getId());
+                null, formData.getFormType().getName(), formData.getKind().getId(), workflowMove.getEvent().getTitle(), null, formData.getFormType().getId());
 
         updatePreviousRowNumberAttr(formData, workflowMove, logger);
     }
