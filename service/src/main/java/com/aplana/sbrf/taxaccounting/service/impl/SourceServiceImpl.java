@@ -1315,8 +1315,22 @@ public class SourceServiceImpl implements SourceService {
         DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
         filter.setReportPeriodIdList(Arrays.asList(departmentReportPeriod.getReportPeriod().getId()));
         filter.setDepartmentIdList(Arrays.asList(departmentReportPeriod.getDepartmentId()));
+        // Список всех отчетных периодов
+        List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodDao.getListByFilter(filter);
+        // Приемник может быть или в том же отчетном периоде подразделения или в следующем, поэтому предыдущие отчетные
+        // периоды удаляем из списка
+        if (departmentReportPeriod.getCorrectionDate() != null) {
+            List<DepartmentReportPeriod> delList = new LinkedList<DepartmentReportPeriod>();
+            for (DepartmentReportPeriod destinationReportPeriod : departmentReportPeriodList) {
+                if (destinationReportPeriod.getCorrectionDate() == null ||
+                        destinationReportPeriod.getCorrectionDate().before(departmentReportPeriod.getCorrectionDate())) {
+                        delList.add(destinationReportPeriod);
+                }
+            }
+            departmentReportPeriodList.removeAll(delList);
+        }
 
-        for (DepartmentReportPeriod destinationReportPeriod : departmentReportPeriodDao.getListByFilter(filter)) {
+        for (DepartmentReportPeriod destinationReportPeriod : departmentReportPeriodList) {
             // Поиск экземпляра НФ в каждом существующем отчетном периоде подразделения
             FormData formData = formDataDao.find(departmentFormType.getFormTypeId(), departmentFormType.getKind(),
                     destinationReportPeriod.getId().intValue(),
