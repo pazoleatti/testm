@@ -116,6 +116,7 @@ public class FillPreviousHandler extends AbstractActionHandler<FillPreviousActio
             // Копирование
             List<DataRow<Cell>> prevFormDataRows = dataRowService.getSavedRows(prevFormData);
 
+            // Строки почему-то не по порядку
             Collections.sort(prevFormDataRows, new Comparator<DataRow<Cell>>() {
                 @Override
                 public int compare(DataRow<Cell> o1, DataRow<Cell> o2) {

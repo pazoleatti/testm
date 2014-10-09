@@ -85,6 +85,16 @@ public class DiffServiceImpl implements DiffService {
         List<String> originalList = new ArrayList<String>(original.size());
         List<String> revisedList = new ArrayList<String>(revised.size());
 
+        // Строки почему-то не по порядку
+        Comparator<DataRow<Cell>> dataRowComparator = new Comparator<DataRow<Cell>>() {
+            @Override
+            public int compare(DataRow<Cell> o1, DataRow<Cell> o2) {
+                return o1.getIndex().compareTo(o2.getIndex());
+            }
+        };
+        Collections.sort(original, dataRowComparator);
+        Collections.sort(revised, dataRowComparator);
+
         for (DataRow<Cell> dataRow : original) {
             originalList.add(getRowAsString(dataRow));
         }
