@@ -79,11 +79,6 @@ public interface DeclarationDataDao {
 	 */
 	int getCount(DeclarationDataFilter filter);
 
-    /**
-     * Обновление данных декларации(как правило только ссылки на blob_data)
-     */
-    void update(DeclarationData declarationData);
-
     List<Long> findDeclarationDataByFormTemplate(int templateId, Date startDate);
 
     /**

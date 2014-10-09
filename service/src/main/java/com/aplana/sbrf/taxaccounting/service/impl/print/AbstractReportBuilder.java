@@ -5,10 +5,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -55,6 +52,23 @@ public abstract class AbstractReportBuilder {
         return flush();
     }
 
+    /**
+     * Формирование отчета. Условно разбит на шесть частей.
+     * Порядок формирования заголовка и шапки таблицы в такой последовательности не случайно,
+     * а по причине наличия нулевых столбцов в налоговых отчетах, чтобы потом некоторые значения не пропали.
+     * @return массив byte[]
+     * @throws IOException
+     */
+    public final byte[] createBlobData() throws IOException  {
+        fillHeader();
+        createTableHeaders();
+        createDataForTable();
+        cellAlignment();
+        fillFooter();
+        setPrintSetup();
+        return flushBlobData();
+    }
+
     protected void cellAlignment() {
         for (Map.Entry<Integer, Integer> width : widthCellsMap.entrySet()) {
             sheet.setColumnWidth(width.getKey(), width.getValue() *256 *2);
@@ -95,6 +109,13 @@ public abstract class AbstractReportBuilder {
         workBook.write(out);
 
         return file.getAbsolutePath();
+    }
+
+    protected byte[] flushBlobData() throws IOException {
+        ByteArrayOutputStream data = new ByteArrayOutputStream();
+        workBook.write(data);
+
+        return data.toByteArray();
     }
 
     /**

@@ -82,9 +82,13 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     @Transactional(readOnly = false)
 	@Override
 	public int save(FormTemplate formTemplate) {
-        if (formTemplate.getId() != null)
-		    return formTemplateDao.save(formTemplate);
-        else
+        if (formTemplate.getId() != null) {
+            int formTemplateId = formTemplateDao.save(formTemplate);
+            List<Long> formDataIds = formDataService.getFormDataListInActualPeriodByTemplate(formTemplateId, formTemplate.getVersion());
+            for(Long formDataId: formDataIds)
+                formDataService.deleteReport(formDataId);
+            return formTemplateId;
+        } else
             return formTemplateDao.saveNew(formTemplate);
 	}
 

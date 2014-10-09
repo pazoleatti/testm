@@ -114,6 +114,12 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
         /** Текст кнопки-ссылки для переключения видов «Абсолютные значения»/«Корректировка» */
         void setCorrectionText(String text);
+
+        void startTimerReport(ReportType reportType);
+
+        void stopTimerReport(ReportType reportType);
+
+        void updatePrintReportButtonName(ReportType reportType, boolean isLoad);
     }
 
 	public static final String NAME_TOKEN = "!formData";

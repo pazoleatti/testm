@@ -45,12 +45,12 @@ public class TestAsyncTask extends AbstractAsyncTask {
     }
 
     @Override
-    protected String getNotificationMsg() {
+    protected String getNotificationMsg(Map<String, Object> params) {
         return "Тест тест тест!";
     }
 
     @Override
-    protected String getErrorMsg() {
+    protected String getErrorMsg(Map<String, Object> params) {
         return "Ошибка в тестовой задаче";
     }
 }

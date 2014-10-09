@@ -46,13 +46,13 @@ public abstract class AbstractAsyncTask implements AsyncTask {
      * Возвращает текст оповещения, которое будет создано для пользователей, ожидающих выполнение этой задачи
      * @return текст сообщения
      */
-    protected abstract String getNotificationMsg();
+    protected abstract String getNotificationMsg(Map<String, Object> params);
 
     /**
      * Возвращает текст оповещения, которое будет создано для пользователей в случае некорректного завершения задачи
      * @return текст сообщения
      */
-    protected abstract String getErrorMsg();
+    protected abstract String getErrorMsg(Map<String, Object> params);
 
     @Override
     public void execute(final Map<String, Object> params) {
@@ -67,7 +67,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                     //Значит результаты нам уже не нужны - откатываем транзакцию и все изменения
                     throw new RuntimeException("Результат выполнения задачи \"" + getAsyncTaskName() + "\" больше не актуален. Выполняется откат транзакции");
                 }
-                sendNotifications(lock, getNotificationMsg());
+                sendNotifications(lock, getNotificationMsg(params));
                 lockService.unlock(lock, (Integer) params.get(USER_ID.name()));
             }
         } catch (Exception e) {
@@ -76,7 +76,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                 transactionHelper.executeInNewTransaction(new TransactionLogic() {
                     @Override
                     public void execute() {
-                        sendNotifications(lock, getErrorMsg());
+                        sendNotifications(lock, getErrorMsg(params));
                         lockService.unlock(lock, (Integer) params.get(USER_ID.name()));
                     }
 

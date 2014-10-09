@@ -47,10 +47,10 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             d.setReportPeriodId(SqlUtils.getInteger(rs, "report_period_id"));
             d.setDepartmentReportPeriodId(SqlUtils.getInteger(rs, "department_report_period_id"));
             d.setAccepted(rs.getBoolean("is_accepted"));
-            d.setPdfDataUuid(rs.getString("data_pdf"));
+           /* d.setPdfDataUuid(rs.getString("data_pdf"));
             d.setXlsxDataUuid(rs.getString("data_xlsx"));
             d.setXmlDataUuid(rs.getString("data"));
-            d.setJasperPrintUuid(rs.getString("jasper_print"));
+            d.setJasperPrintUuid(rs.getString("jasper_print"));*/
             return d;
         }
     }
@@ -330,30 +330,6 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         sql.append("dec.id");
         if (!ascSorting) {
             sql.append(" desc");
-        }
-    }
-
-    @Override
-    public void update(DeclarationData declarationData) {
-        int count = getJdbcTemplate().update(
-                "update declaration_data set data = ?, data_pdf = ?, data_xlsx = ?, jasper_print = ? where id = ?",
-                new Object[]{
-                        declarationData.getXmlDataUuid(),
-                        declarationData.getPdfDataUuid(),
-                        declarationData.getXlsxDataUuid(),
-                        declarationData.getJasperPrintUuid(),
-                        declarationData.getId()
-                },
-                new int[]{
-                        Types.VARCHAR,
-                        Types.VARCHAR,
-                        Types.VARCHAR,
-                        Types.VARCHAR,
-                        Types.NUMERIC
-                }
-        );
-        if (count == 0) {
-            throw new DaoException("Не удалось обновить декларацию с id = %d, так как она не существует.");
         }
     }
 

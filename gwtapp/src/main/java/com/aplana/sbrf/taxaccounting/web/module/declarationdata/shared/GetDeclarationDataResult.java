@@ -21,7 +21,7 @@ public class GetDeclarationDataResult implements Result {
 	private boolean canAccept;
 	private boolean canReject;
     private boolean canDelete;
-    private boolean canDownload;
+    //private boolean canDownload;
 	
 	/**
 	 * Данные для инициализации компонента PDFView
@@ -90,14 +90,6 @@ public class GetDeclarationDataResult implements Result {
 	public void setCanDelete(boolean canDelete) {
 		this.canDelete = canDelete;
 	}
-
-    public boolean isCanDownload() {
-        return canDownload;
-    }
-
-    public void setCanDownload(boolean canDownload) {
-        this.canDownload = canDownload;
-    }
 
 	public Pdf getPdf() {
 		return pdf;

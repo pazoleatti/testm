@@ -321,6 +321,9 @@
 		</profile>
 		<profile>
 			<id>production</id>
+            <properties>
+                <isProductionMode>true</isProductionMode>
+            </properties>
             <dependencies>
                 <dependency>
                     <groupId>com.aplana.taxaccounting</groupId>
@@ -335,6 +338,7 @@
                         <filtering>true</filtering>
                         <includes>
                             <include>spring/*.*</include>
+                            <include>**/*.properties</include>
                         </includes>
                     </resource>
                     <resource>

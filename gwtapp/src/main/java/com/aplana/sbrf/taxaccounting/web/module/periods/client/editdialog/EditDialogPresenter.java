@@ -137,9 +137,10 @@ public class EditDialogPresenter extends PresenterWidget<EditDialogPresenter.MyV
                         .defaultCallback(new AbstractCallback<CheckPeriodStatusResult>() {
                             @Override
                             public void onSuccess(CheckPeriodStatusResult result) {
-                                if ((result.getStatus() == PeriodStatusBeforeOpen.OPEN)
-                                        || (result.getStatus() == PeriodStatusBeforeOpen.CLOSE)) {
+                                if ((result.getStatus() == PeriodStatusBeforeOpen.OPEN)) {
                                     Dialog.errorMessage("Редактирование периода", "Указанный период уже заведён в Системе!");
+                                } else if (PeriodStatusBeforeOpen.CLOSE.equals(result.getStatus())) {
+                                    Dialog.errorMessage("Редактирование параметров", "Закрытый период не может быть отредактирован!");
                                 } else if (PeriodStatusBeforeOpen.BALANCE_STATUS_CHANGED.equals(result.getStatus())) {
                                     if (initData.getDictTaxPeriodId() == data.getReportPeriodId().longValue()) {
                                         edit(data);

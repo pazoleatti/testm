@@ -377,7 +377,11 @@ public class PeriodServiceImpl implements PeriodService {
                             return PeriodStatusBeforeOpen.CLOSE;
                         }
                     } else {
-                        return PeriodStatusBeforeOpen.BALANCE_STATUS_CHANGED;
+                        if (drp.isActive()) {
+                            return PeriodStatusBeforeOpen.BALANCE_STATUS_CHANGED;
+                        } else {
+                            return PeriodStatusBeforeOpen.CLOSE;
+                        }
                     }
                 }
 			}
