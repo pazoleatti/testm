@@ -118,6 +118,17 @@ public class DeclarationListView extends
         declarationTable.getColumnSortList().setLimit(1);       // сортировка только по одной колонке
     }
 
+    /**
+     * Наименование периода
+     */
+    private String getReportPeriodName(DeclarationDataSearchResultItem item) {
+        String str = item.getReportPeriodYear() + ": " + item.getReportPeriodName();
+        if (item.getCorrectionDate() != null) {
+            str += ", корр. (" + DATE_TIME_FORMAT.format(item.getCorrectionDate()) + ")";
+        }
+        return str;
+    }
+
     @Override
     public void initTable(TaxType taxType) {
         Style tableStyle = tableWrapper.getElement().getStyle();
@@ -144,11 +155,12 @@ public class DeclarationListView extends
                             if (declaration == null) {
                                 return;
                             }
+
                             sb.appendHtmlConstant("<a href=\"#"
                                     + DeclarationDataTokens.declarationData + ";"
                                     + DeclarationDataTokens.declarationId + "="
                                     + declaration.getDeclarationDataId() + "\">"
-                                    + declaration.getReportPeriodYear() + ": " + declaration.getReportPeriodName() + "</a>");
+                                    + getReportPeriodName(declaration) + "</a>");
                         }
                     }) {
                 @Override
@@ -176,16 +188,12 @@ public class DeclarationListView extends
                         if (declaration == null) {
                             return;
                         }
-                        String str = declaration.getReportPeriodYear() + ": " + declaration.getReportPeriodName();
-                        if (declaration.getCorrectionDate() != null) {
-                            str += ", корр. (" + DATE_TIME_FORMAT.format(declaration.getCorrectionDate()) + ")";
-                        }
 
                         sb.appendHtmlConstant("<a href=\"#"
                                 + DeclarationDataTokens.declarationData + ";"
                                 + DeclarationDataTokens.declarationId + "="
                                 + declaration.getDeclarationDataId() + "\">"
-                                + str + "</a>");
+                                + getReportPeriodName(declaration) + "</a>");
                     }
                 }) {
             @Override
