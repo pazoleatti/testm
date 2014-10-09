@@ -68,7 +68,7 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
                 params.put("docDate", action.getDocDate());
                 params.put(AsyncTask.RequiredParams.USER_ID.name(), userInfo.getUser().getId());
                 params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), key);
-                if (lockDataService.lock(key, userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME * 12) != null) {
+                if (lockDataService.lock(key, userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME * 24) != null) {
                     // отменяем заданичу на формирование XML
                     List<Integer> userIds = lockDataService.getUsersWaitingForLock(key);
                     lockDataService.unlock(key, 0, true);
