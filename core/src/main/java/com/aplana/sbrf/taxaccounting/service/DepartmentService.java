@@ -174,7 +174,7 @@ public interface DepartmentService {
      * @param tAUser пользователь
      * @return
      */
-    List<Integer> getAppointmentDepartments(TAUser tAUser);
+    Collection<Integer> getAppointmentDepartments(TAUser tAUser);
 
     /**
      * 60 - Выборка id подразделений для параметров печатной формы

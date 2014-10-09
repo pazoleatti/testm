@@ -117,6 +117,8 @@ public class DepartmentServiceImpl implements DepartmentService {
             retList.addAll(departmentDao.listDepartmentIds());
         } else if (tAUser.hasRole(TARole.ROLE_CONTROL_NS)) {
             retList.addAll(departmentDao.getDepartmentTBChildrenId(tAUser.getDepartmentId()));
+        } else if (tAUser.hasRole(TARole.ROLE_CONTROL) || tAUser.hasRole(TARole.ROLE_OPER)){
+            retList.addAll(departmentDao.getAllChildrenIds(tAUser.getDepartmentId()));
         }
 
         return retList;
@@ -306,14 +308,15 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    public List<Integer> getAppointmentDepartments(TAUser tAUser) {
-        List<Integer> retList = new ArrayList<Integer>();
+    public Collection<Integer> getAppointmentDepartments(TAUser tAUser) {
+        // Результат выборки должен содержать только уникальные подразделения
+        HashSet<Integer> retList = new HashSet<Integer>();
         if (tAUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
             // все подразделения из справочника подразделений
             for (Department dep : departmentDao.listDepartments()) {
                 retList.add(dep.getId());
             }
-        } else if (tAUser.hasRole(TARole.ROLE_CONTROL_NS) || tAUser.hasRole(TARole.ROLE_CONTROL)) {
+        } else if (tAUser.hasRole(TARole.ROLE_CONTROL_NS) || tAUser.hasRole(TARole.ROLE_CONTROL) || tAUser.hasRole(TARole.ROLE_OPER)) {
             // 1. подразделения, для форм которых подразделения из выборки 10 - Выборка для бизнес-администрирования назначены исполнителями.
             retList.addAll(departmentDao.getDepartmentIdsByExecutors(getBADepartmentIds(tAUser)));
             // 2. подразделения, для форм которых подразделения из выборки 45 - Подразделения, доступные через назначение источников-приёмников назначены исполнителями.
@@ -321,11 +324,6 @@ public class DepartmentServiceImpl implements DepartmentService {
                 retList.add(dep.getId());
             }
         }
-
-        // Результат выборки должен содержать только уникальные подразделения
-        Set setItems = new HashSet(retList);
-        retList.clear();
-        retList.addAll(setItems);
 
         return retList;
     }

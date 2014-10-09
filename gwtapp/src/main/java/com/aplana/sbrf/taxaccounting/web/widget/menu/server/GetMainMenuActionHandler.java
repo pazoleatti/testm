@@ -167,18 +167,22 @@ public class GetMainMenuActionHandler extends
         }
 
         // АДМИНИСТРИРОВАНИЕ
+        if (currentUser.hasRole(TARole.ROLE_OPER) ||currentUser.hasRole(TARole.ROLE_CONTROL)){
+            MenuItem adminMenuItem = new MenuItem("Администрирование");
+            adminMenuItem.getSubMenu().add(new MenuItem("Журнал аудита", NUMBER_SIGN + AuditToken.AUDIT));
+            menuItems.add(adminMenuItem);
+        }
+
         if (currentUser.hasRole(TARole.ROLE_ADMIN)
                 || currentUser.hasRole(TARole.ROLE_CONTROL_NS)
                 || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)
-                || currentUser.hasRole(TARole.ROLE_CONF)
-                || currentUser.hasRole(TARole.ROLE_OPER)) {
+                || currentUser.hasRole(TARole.ROLE_CONF)) {
 
             MenuItem adminMenuItem = new MenuItem("Администрирование");
 
             if (currentUser.hasRole(TARole.ROLE_ADMIN)
                     || currentUser.hasRole(TARole.ROLE_CONTROL_NS)
-                    || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)
-                    || currentUser.hasRole(TARole.ROLE_OPER)) {
+                    || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
                 // добавить "Журнал аудита"
                 if (currentUser.hasRole(TARole.ROLE_ADMIN)) {
                     adminMenuItem.getSubMenu().add(new MenuItem("Журнал аудита", NUMBER_SIGN + AuditToken.AUDIT));
@@ -189,8 +193,7 @@ public class GetMainMenuActionHandler extends
                 http://jira.aplana.com/browse/SBRFACCTAX-5687
                  */
                 if ((currentUser.hasRole(TARole.ROLE_CONTROL_NS)
-                        || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)
-                        || currentUser.hasRole(TARole.ROLE_OPER))
+                        || currentUser.hasRole(TARole.ROLE_CONTROL_UNP))
                         && !currentUser.hasRole(TARole.ROLE_ADMIN)){
                     adminMenuItem.getSubMenu().add(new MenuItem("Журнал аудита", NUMBER_SIGN + AuditToken.AUDIT));
                 }

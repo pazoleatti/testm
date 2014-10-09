@@ -535,7 +535,7 @@ public class DepartmentServiceImplTest {
         Assert.assertEquals(0, departmentService.getAppointmentDepartments(taUser).size());
         taUser.setDepartmentId(2);
         Assert.assertEquals(1, departmentService.getAppointmentDepartments(taUser).size());
-        Assert.assertEquals(0, departmentService.getAppointmentDepartments(taUser).get(0).intValue());
+        Assert.assertEquals(0, departmentService.getAppointmentDepartments(taUser).toArray()[0]);
         // test for ROLE_CONTROL
         taUser.getRoles().remove(0);
         taUser.setDepartmentId(311);

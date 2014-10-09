@@ -142,7 +142,6 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler>
 
     @Override
     public void setVisibleArchiveButton(boolean isVisible) {
-        archiveLbl.setVisible(isVisible);
         archive.setVisible(isVisible);
     }
 
