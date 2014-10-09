@@ -830,6 +830,7 @@ public class FormDataAccessServiceImplTest {
         formType.setId(1);
 
         FormData formData = new FormData();
+        formData.setId(1L);
         formData.setDepartmentId(1);
         formData.setFormType(formType);
         formData.setKind(FormDataKind.PRIMARY);
@@ -840,7 +841,8 @@ public class FormDataAccessServiceImplTest {
 
         when(departmentFormTypeDao.getFormDestinations(any(Integer.class), any(Integer.class), any(FormDataKind.class), any(Date.class), any(Date.class))).thenReturn(null);
 
-        assertFalse(service.checkForDestinations(formData, reportPeriod));
+        // Нет назначенных приемников
+        assertFalse(service.checkDestinations(formData.getId()));
     }
 
     @Test
@@ -855,6 +857,7 @@ public class FormDataAccessServiceImplTest {
         formType.setId(1);
         // Редактируемая НФ
         FormData editedFormData = new FormData();
+        editedFormData.setId(1L);
         editedFormData.setDepartmentId(1);
         editedFormData.setFormType(formType);
         editedFormData.setKind(FormDataKind.PRIMARY);
@@ -876,7 +879,7 @@ public class FormDataAccessServiceImplTest {
         when(departmentFormTypeDao.getFormDestinations(any(Integer.class), any(Integer.class), any(FormDataKind.class), any(Date.class), any(Date.class))).thenReturn(departmentFormTypes);
 //        when(formDataService.findFormData(anyInt(), any(FormDataKind.class), anyInt(), anyInt(), anyInt())).thenReturn(null);
 
-        assertFalse(service.checkForDestinations(editedFormData, reportPeriod));
+        assertTrue(service.checkDestinations(editedFormData.getId()));
     }
 
     @Test
@@ -891,6 +894,7 @@ public class FormDataAccessServiceImplTest {
         formType.setId(1);
         // Редактируемая НФ
         FormData editedFormData = new FormData();
+        editedFormData.setId(1L);
         editedFormData.setDepartmentId(1);
         editedFormData.setFormType(formType);
         editedFormData.setKind(FormDataKind.PRIMARY);
@@ -913,12 +917,11 @@ public class FormDataAccessServiceImplTest {
         departmentFormTypes.add(departmentFormType);
 
         when(departmentFormTypeDao.getFormDestinations(any(Integer.class), any(Integer.class), any(FormDataKind.class), any(Date.class), any(Date.class))).thenReturn(departmentFormTypes);
-//        when(formDataService.findFormData(anyInt(), any(FormDataKind.class), anyInt(), anyInt(), anyInt())).thenReturn(formData);
 
-        assertFalse(service.checkForDestinations(editedFormData, reportPeriod));
+        assertTrue(service.checkDestinations(editedFormData.getId()));
     }
 
-    @Test
+    @Test(expected = ServiceException.class)
     public void testCheckForDestinations4() {
         DepartmentFormTypeDao departmentFormTypeDao = mock(DepartmentFormTypeDao.class);
         ReflectionTestUtils.setField(service, "departmentFormTypeDao", departmentFormTypeDao);
@@ -930,6 +933,7 @@ public class FormDataAccessServiceImplTest {
         formType.setId(1);
         // Редактируемая НФ
         FormData editedFormData = new FormData();
+        editedFormData.setId(1L);
         editedFormData.setDepartmentId(1);
         editedFormData.setFormType(formType);
         editedFormData.setKind(FormDataKind.PRIMARY);
@@ -953,8 +957,8 @@ public class FormDataAccessServiceImplTest {
 
         when(departmentFormTypeDao.getFormDestinations(any(Integer.class), any(Integer.class), any(FormDataKind.class),
                 any(Date.class), any(Date.class))).thenReturn(departmentFormTypes);
-        when(formDataService.getLast(anyInt(), any(FormDataKind.class), anyInt(), anyInt(), anyInt())).thenReturn(formData);
+        when(formDataService.findFormData(anyInt(), any(FormDataKind.class), anyInt(), anyInt())).thenReturn(formData);
 
-        assertTrue(service.checkForDestinations(editedFormData, reportPeriod));
+        service.checkDestinations(editedFormData.getId());
     }
 }

@@ -57,7 +57,6 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
     private static final String FORM_DATA_DEPARTMENT_ACCESS_DENIED_LOG = "Selected department (%d) not available in report period (%d)!";
     private static final String FORM_DATA_DEPARTMENT_ACCESS_DENIED = "Выбранное подразделение недоступно для пользователя!";
     private static final String FORM_DATA_EDIT_ERROR = "Нельзя редактировать форму \"%s\" в состоянии \"%s\"";
-    private static final String ERROR_PERIOD = "Переход невозможен, т.к. у одного из приемников период подразделения не открыт.";
 
     @Autowired
     private FormDataDao formDataDao;
@@ -205,7 +204,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
         // Если период актуальности макета, выбранного в поле "Вид формы", не пересекается с выбранным отчетным
         // периодом ИЛИ пересекается, но его STATUS не равен 0, то система выводит сообщение в панель уведомления:
         // "Выбранный вид налоговой формы не существует в выбранном периоде"
-        boolean intersect = isTemplateIntesectReportPeriod(formTemplate, departmentReportPeriod.getReportPeriod().getId());
+        boolean intersect = isTemplateIntersectReportPeriod(formTemplate, departmentReportPeriod.getReportPeriod().getId());
         if (!intersect || formTemplate.getStatus() != VersionedObjectStatus.NORMAL) {
             logger.warn(String.format(FORM_TEMPLATE_WRONG_STATUS_LOG, formTemplate.getId(), departmentReportPeriod.getReportPeriod().getId()));
             throw new AccessDeniedException(FORM_TEMPLATE_WRONG_STATUS);
@@ -423,12 +422,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
     private List<WorkflowMove> getAvailableMovesWithoutCanRead(TAUserInfo userInfo, long formDataId) {
         List<WorkflowMove> result = new LinkedList<WorkflowMove>();
         FormData formData = formDataDao.getWithoutRows(formDataId);
-
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(formData.getDepartmentReportPeriodId());
-
-        if (checkForDestinations(formData, departmentReportPeriod.getReportPeriod())) return result;
-
-        ReportPeriod reportPeriod = departmentReportPeriod.getReportPeriod();
 
         // Проверка открытости периода
         if (!departmentReportPeriod.isActive()) {
@@ -450,35 +444,14 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                             formData.getKind().getName(), formData.getState()));
             }
         } else {
-            try {
-                checkDestinations(formDataId);
-            } catch (ServiceException e) {
-                return result;
-            }
-            // Связи НФ -> НФ
-            List<DepartmentFormType> formDestinations = departmentFormTypeDao.getFormDestinations(
-                    formData.getDepartmentId(), formData.getFormType().getId(), formData.getKind(),
-                    reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
             // Призрак передачи НФ на вышестоящий уровень
             boolean sendToNextLevel = false;
-            for (DepartmentFormType destination : formDestinations) {
-                if (formData.getDepartmentId() != destination.getDepartmentId()) {
-                    sendToNextLevel = true;
-                    break;
-                }
-            }
-            if (!sendToNextLevel) {
-                // Связи НФ -> Декларация
-                List<DepartmentDeclarationType> declarationDestinations =
-                        departmentFormTypeDao.getDeclarationDestinations(formData.getDepartmentId(),
-                                formData.getFormType().getId(), formData.getKind(),
-                                reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
-                for (DepartmentDeclarationType destination : declarationDestinations) {
-                    if (formData.getDepartmentId() != destination.getDepartmentId()) {
-                        sendToNextLevel = true;
-                        break;
-                    }
-                }
+            try {
+                // Проверки статуса приемников
+                sendToNextLevel = checkDestinations(formDataId);
+            } catch (ServiceException e) {
+                // Нет
+                return result;
             }
 
             // Признак контролера вышестоящего уровня
@@ -687,8 +660,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
      * Проверка пересечения периода актуальности макета и отчетного периода
      * @return true если есть пересечение
      */
-    private boolean isTemplateIntesectReportPeriod(FormTemplate formTemplate, Integer reportPeriodId) {
-        // TODO Таск http://jira.aplana.com/browse/SBRFACCTAX-5509
+    private boolean isTemplateIntersectReportPeriod(FormTemplate formTemplate, Integer reportPeriodId) {
         if (formTemplate.getStatus() != VersionedObjectStatus.NORMAL)
             return false;
         Date templateEndDate = formTemplateService.getFTEndDate(formTemplate.getId());
@@ -704,72 +676,50 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 
     @Override
     @Transactional(readOnly = true)
-    public void checkDestinations(long formDataId) {
-        FormData formData = formDataDao.getWithoutRows(formDataId);
+    public boolean checkDestinations(long formDataId) {
+        // Признак наличия хотя бы одного назначения-приемника
+        boolean retVal = false;
 
+        // НФ
+        FormData formData = formDataDao.getWithoutRows(formDataId);
+        // Отчетный период подразделения НФ
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(formData.getDepartmentReportPeriodId());
+        // Отчетный период
         ReportPeriod reportPeriod = departmentReportPeriod.getReportPeriod();
-        // Проверка вышестоящих налоговых форм
-        List<DepartmentFormType> departmentFormTypes =
-                departmentFormTypeDao.getFormDestinations(formData.getDepartmentId(),
-                        formData.getFormType().getId(), formData.getKind(), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
+        // Назначения НФ-приемников в периоде отчетного периода
+        List<DepartmentFormType> departmentFormTypes = departmentFormTypeDao.getFormDestinations(
+                formData.getDepartmentId(), formData.getFormType().getId(), formData.getKind(),
+                reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
         if (departmentFormTypes != null) {
             for (DepartmentFormType departmentFormType : departmentFormTypes) {
-                FormData form = formDataDao.getLast(departmentFormType.getFormTypeId(), departmentFormType.getKind(),
-                        departmentFormType.getDepartmentId(), reportPeriod.getId(), formData.getPeriodOrder());
-                if(form == null){
-                    continue;
-                }
-                // Если форма существует и статус отличен от "Создана"
+                // Экземпляр приемника в том же отчетном периоде подразделения
+                FormData form = formDataService.findFormData(departmentFormType.getFormTypeId(),
+                        departmentFormType.getKind(), formData.getDepartmentReportPeriodId(), formData.getPeriodOrder());
+                // Если форма существует и ее статус отличен от «Создана»
                 if (form != null && form.getState() != WorkflowState.CREATED) {
                     throw new ServiceException("Переход невозможен, т.к. уже подготовлена/утверждена/принята вышестоящая налоговая форма.");
                 }
-                DepartmentReportPeriod formDepartmentReportPeriod = departmentReportPeriodDao.get(form.getDepartmentReportPeriodId());
-
-                if (!formDepartmentReportPeriod.isActive()) {
-                    throw new ServiceException(ERROR_PERIOD);
-                }
+                retVal = true;
             }
         }
 
-        // Проверка вышестоящих деклараций
+        // Назначения деклараций-приемников в периоде отчетного периода
         List<DepartmentDeclarationType> departmentDeclarationTypes = sourceService.getDeclarationDestinations(
                 formData.getDepartmentId(), formData.getFormType().getId(), formData.getKind(), formData.getReportPeriodId());
         if (departmentDeclarationTypes != null) {
             for (DepartmentDeclarationType departmentDeclarationType : departmentDeclarationTypes) {
-                DeclarationData declaration = declarationDataDao.getLast(departmentDeclarationType.getDeclarationTypeId(),
-                        departmentDeclarationType.getDepartmentId(), reportPeriod.getId());
+                DeclarationData declaration = declarationDataDao.find(departmentDeclarationType.getDeclarationTypeId(),
+                        formData.getDepartmentReportPeriodId());
                 // Если декларация существует и статус "Принята"
                 if (declaration != null && declaration.isAccepted()) {
                     String str = formData.getFormType().getTaxType() == TaxType.DEAL ? "принято уведомление" :
                             "принята декларация";
-                    throw new ServiceException("Переход невозможен, т.к. уже " + str + ".");
+                    throw new ServiceException("Переход невозможен, т.к. уже %s.", str);
                 }
-                if (declaration != null) {
-                    DepartmentReportPeriod declarationDepartmentReportPeriod = departmentReportPeriodDao.get(declaration.getDepartmentReportPeriodId());
-                    if (!declarationDepartmentReportPeriod.isActive()) {
-                        throw new ServiceException(ERROR_PERIOD);
-                    }
-                }
+                retVal = true;
             }
         }
-    }
 
-    public boolean checkForDestinations(FormData formData, ReportPeriod reportPeriod) {
-        // Проверка вышестоящих налоговых форм
-        List<DepartmentFormType> departmentFormTypes =
-                departmentFormTypeDao.getFormDestinations(formData.getDepartmentId(),
-                        formData.getFormType().getId(), formData.getKind(), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
-        if (departmentFormTypes != null) {
-            for (DepartmentFormType departmentFormType : departmentFormTypes) {
-                FormData form = formDataService.getLast(departmentFormType.getFormTypeId(), departmentFormType.getKind(),
-                        departmentFormType.getDepartmentId(), formData.getReportPeriodId(), formData.getPeriodOrder());
-                // Если форма существует и статус отличен от "Создана"
-                if (form != null && form.getState() != WorkflowState.CREATED) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return retVal;
     }
 }
