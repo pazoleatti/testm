@@ -79,6 +79,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 				return declarationTypeMap.get(object);
 			}
 		});
+        declarationTypePicker.setShowTooltip(true);
         declarationTypePicker.setWidth("100%");
 
         correctionTag = new ListBoxWithTooltip<Boolean>(new AbstractRenderer<Boolean>() {
@@ -300,9 +301,9 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         horizontalPanel.add(verticalPanel6);
         horizontalPanel.add(verticalPanel7);
 
-        horizontalPanel.setCellWidth(verticalPanel2, "33%");
-        horizontalPanel.setCellWidth(verticalPanel5, "33%");
-        horizontalPanel.setCellWidth(verticalPanel7, "33%");
+        horizontalPanel.setCellWidth(verticalPanel2, "28%");
+        horizontalPanel.setCellWidth(verticalPanel5, "44%");
+        horizontalPanel.setCellWidth(verticalPanel7, "28%");
 
         Label label = new Label("Период:");
         label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
