@@ -132,7 +132,7 @@ public class DeclarationListView extends
     @Override
     public void initTable(TaxType taxType) {
         Style tableStyle = tableWrapper.getElement().getStyle();
-        tableStyle.setProperty("top", taxType != TaxType.PROPERTY ? TABLE_TOP1 : TABLE_TOP2 , Style.Unit.PX);
+        tableStyle.setProperty("top", taxType == TaxType.DEAL ? TABLE_TOP1 : TABLE_TOP2 , Style.Unit.PX);
 
         clearTable();
 
