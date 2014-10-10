@@ -15,6 +15,7 @@ public class CreateReportAction extends UnsecuredActionImpl<CreateReportResult> 
     private ReportType type;
     private boolean isShowChecked;
     private boolean manual;
+    private boolean saved;
 
     public long getFormDataId() {
         return formDataId;
@@ -46,6 +47,14 @@ public class CreateReportAction extends UnsecuredActionImpl<CreateReportResult> 
 
     public void setManual(boolean manual) {
         this.manual = manual;
+    }
+
+    public boolean isSaved() {
+        return saved;
+    }
+
+    public void setSaved(boolean saved) {
+        this.saved = saved;
     }
 
     @Override

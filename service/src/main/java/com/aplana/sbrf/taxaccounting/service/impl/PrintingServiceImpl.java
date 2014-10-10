@@ -72,7 +72,7 @@ public class PrintingServiceImpl implements PrintingService {
     private static final String REF_BOOK_VALUE_NAME = "CODE";
 
 	@Override
-	public String generateExcel(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked) {
+	public String generateExcel(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked, boolean saved) {
         try {
             formDataAccessService.canRead(userInfo, formDataId);
             FormDataReport data = new FormDataReport();
@@ -83,7 +83,7 @@ public class PrintingServiceImpl implements PrintingService {
             if ((formData.getKind() == FormDataKind.PRIMARY || formData.getKind() == FormDataKind.CONSOLIDATED)
                     && reportPeriod.getTaxPeriod().getTaxType() == TaxType.INCOME) {
                 RefBookDataProvider dataProvider = refBookFactory.getDataProvider(REF_BOOK_ID);
-                Map<String, RefBookValue> refBookValueMap = dataProvider.getRecordData((long) reportPeriod.getDictTaxPeriodId());
+                Map<String, RefBookValue> refBookValueMap = dataProvider.getRecordData(reportPeriod.getDictTaxPeriodId());
                 Integer code = Integer.parseInt(refBookValueMap.get(REF_BOOK_VALUE_NAME).getStringValue());
                 reportPeriod.setName(ReportPeriodSpecificName.fromId(code).getName());
             }
@@ -92,7 +92,7 @@ public class PrintingServiceImpl implements PrintingService {
             data.setReportPeriod(reportPeriod);
             data.setAcceptanceDate(logBusinessDao.getFormAcceptanceDate(formDataId));
             data.setCreationDate(logBusinessDao.getFormCreationDate(formDataId));
-            List<DataRow<Cell>> dataRows = dataRowDao.getSavedRows(formData, null);
+            List<DataRow<Cell>> dataRows = (saved ? dataRowDao.getSavedRows(formData, null) : dataRowDao.getRows(formData, null));
             Logger log = new Logger();
             refBookHelper.dataRowsDereference(log, dataRows, formTemplate.getColumns());
 
@@ -111,7 +111,7 @@ public class PrintingServiceImpl implements PrintingService {
 	}
 
     @Override
-    public String generateCSV(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked) {
+    public String generateCSV(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked, boolean saved) {
         try {
             formDataAccessService.canRead(userInfo, formDataId);
             FormDataReport data = new FormDataReport();
@@ -122,7 +122,7 @@ public class PrintingServiceImpl implements PrintingService {
             if ((formData.getKind() == FormDataKind.PRIMARY || formData.getKind() == FormDataKind.CONSOLIDATED)
                     && reportPeriod.getTaxPeriod().getTaxType() == TaxType.INCOME) {
                 RefBookDataProvider dataProvider = refBookFactory.getDataProvider(REF_BOOK_ID);
-                Map<String, RefBookValue> refBookValueMap = dataProvider.getRecordData((long) reportPeriod.getDictTaxPeriodId());
+                Map<String, RefBookValue> refBookValueMap = dataProvider.getRecordData(reportPeriod.getDictTaxPeriodId());
                 Integer code = Integer.parseInt(refBookValueMap.get(REF_BOOK_VALUE_NAME).getStringValue());
                 reportPeriod.setName(ReportPeriodSpecificName.fromId(code).getName());
             }
@@ -131,7 +131,7 @@ public class PrintingServiceImpl implements PrintingService {
             data.setReportPeriod(reportPeriod);
             data.setAcceptanceDate(logBusinessDao.getFormAcceptanceDate(formDataId));
             data.setCreationDate(logBusinessDao.getFormCreationDate(formDataId));
-            List<DataRow<Cell>> dataRows = dataRowDao.getSavedRows(formData, null);
+            List<DataRow<Cell>> dataRows = (saved ? dataRowDao.getSavedRows(formData, null) : dataRowDao.getRows(formData, null));
             Logger log = new Logger();
             refBookHelper.dataRowsDereference(log, dataRows, formTemplate.getColumns());
 

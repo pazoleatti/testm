@@ -53,11 +53,12 @@ public class CreateReportHandler extends AbstractActionHandler<CreateReportActio
     public CreateReportResult execute(CreateReportAction action, ExecutionContext executionContext) throws ActionException {
         CreateReportResult result = new CreateReportResult();
         Map<String, Object> params = new HashMap<String, Object>();
-        String key = LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + action.getFormDataId() + "_" + action.getType().getName() + "_isShowChecked_" + action.isShowChecked() + "_manual_" + action.isManual();
+        String key = LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + action.getFormDataId() + "_" + action.getType().getName() + "_isShowChecked_" + action.isShowChecked() + "_manual_" + action.isManual() + "_saved_" + action.isSaved();
         TAUserInfo userInfo = securityService.currentUserInfo();
         params.put("formDataId", action.getFormDataId());
         params.put("isShowChecked", action.isShowChecked());
         params.put("manual", action.isManual());
+        params.put("saved", action.isSaved());
         params.put(AsyncTask.RequiredParams.USER_ID.name(), userInfo.getUser().getId());
         params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), key);
         Logger logger = new Logger();
@@ -65,7 +66,7 @@ public class CreateReportHandler extends AbstractActionHandler<CreateReportActio
         if ((lockData = lockDataService.lock(key, userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME * 4)) == null) {
             try {
                 params.put(AsyncTask.RequiredParams.LOCK_DATE_END.name(), lockDataService.getLock(key).getDateBefore());
-                String uuid = reportService.get(userInfo, action.getFormDataId(), action.getType(), action.isShowChecked(), action.isManual(), false);
+                String uuid = reportService.get(userInfo, action.getFormDataId(), action.getType(), action.isShowChecked(), action.isManual(), action.isSaved());
                 if (uuid == null) {
                     lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
                     asyncManager.executeAsync(action.getType().getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params, BalancingVariants.SHORT);

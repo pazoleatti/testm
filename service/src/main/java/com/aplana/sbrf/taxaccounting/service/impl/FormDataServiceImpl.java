@@ -1132,7 +1132,9 @@ public class FormDataServiceImpl implements FormDataService {
         for(ReportType reportType: reportTypes) {
             for(boolean manual: b) {
                 for(boolean showChecked: b) {
-                    lockService.unlock(String.format("%s_%s_%s_isShowChecked_%s_manual_%s", LockData.LOCK_OBJECTS.FORM_DATA.name(), formDataId, reportType.getName(), showChecked, manual), 0, true);
+                    for(boolean saved: b) {
+                        lockService.unlock(String.format("%s_%s_%s_isShowChecked_%s_manual_%s_saved_%s", LockData.LOCK_OBJECTS.FORM_DATA.name(), formDataId, reportType.getName(), showChecked, manual, saved), 0, true);
+                    }
                 }
             }
         }

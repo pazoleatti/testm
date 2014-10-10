@@ -46,12 +46,13 @@ public class TestXlsmGeneratorAsyncTaskSpring extends AbstractAsyncTask {
         long formDataId = (Long)params.get("formDataId");
         boolean manual = (Boolean)params.get("manual");
         boolean isShowChecked = (Boolean)params.get("isShowChecked");
+        boolean saved = (Boolean)params.get("saved");
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
 
         formDataAccessService.canRead(userInfo, formDataId);
-        String uuid = printingService.generateExcel(userInfo, formDataId, manual, isShowChecked);
-        reportService.create(formDataId, uuid, ReportType.EXCEL, isShowChecked, manual, false);
+        String uuid = printingService.generateExcel(userInfo, formDataId, manual, isShowChecked, saved);
+        reportService.create(formDataId, uuid, ReportType.EXCEL, isShowChecked, manual, saved);
     }
 
     @Override

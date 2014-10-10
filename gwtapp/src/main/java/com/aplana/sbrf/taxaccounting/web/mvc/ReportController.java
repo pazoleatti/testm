@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
-import com.aplana.sbrf.taxaccounting.async.manager.AsyncManager;
 import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
@@ -58,10 +57,12 @@ public class ReportController {
      * @param response
      * @throws IOException
      */
-    @RequestMapping(value = "/{formDataId}/{isShowChecked}/{manual}",method = RequestMethod.GET)
-    public void processFormDataDownload(@PathVariable long formDataId, @PathVariable boolean isShowChecked , @PathVariable boolean manual, HttpServletRequest request, HttpServletResponse response)
+    @RequestMapping(value = "/{formDataId}/{isShowChecked}/{manual}/{saved}",method = RequestMethod.GET)
+    public void processFormDataDownload(@PathVariable long formDataId, @PathVariable boolean isShowChecked,
+                                        @PathVariable boolean manual, @PathVariable boolean saved,
+                                        HttpServletRequest request, HttpServletResponse response)
             throws IOException, AsyncTaskException {
-        String uuid = reportService.get(securityService.currentUserInfo(), formDataId, ReportType.EXCEL, isShowChecked, manual, false);
+        String uuid = reportService.get(securityService.currentUserInfo(), formDataId, ReportType.EXCEL, isShowChecked, manual, saved);
         if (uuid != null) {
             BlobData blobData = blobDataService.get(uuid);
             createResponse(request, response, blobData);
@@ -76,10 +77,12 @@ public class ReportController {
      * @param response
      * @throws IOException
      */
-    @RequestMapping(value = "CSV/{formDataId}/{isShowChecked}/{manual}",method = RequestMethod.GET)
-    public void processCSVFormDataDownload(@PathVariable int formDataId,@PathVariable boolean isShowChecked , @PathVariable boolean manual, HttpServletRequest request, HttpServletResponse response)
+    @RequestMapping(value = "CSV/{formDataId}/{isShowChecked}/{manual}/{saved}",method = RequestMethod.GET)
+    public void processCSVFormDataDownload(@PathVariable int formDataId,@PathVariable boolean isShowChecked,
+                                           @PathVariable boolean manual, @PathVariable boolean saved,
+                                           HttpServletRequest request, HttpServletResponse response)
             throws IOException {
-        String uuid = reportService.get(securityService.currentUserInfo(), formDataId, ReportType.CSV, isShowChecked, manual, false);
+        String uuid = reportService.get(securityService.currentUserInfo(), formDataId, ReportType.CSV, isShowChecked, manual, saved);
         if (uuid != null) {
             BlobData blobData = blobDataService.get(uuid);
             createResponse(request, response, blobData);

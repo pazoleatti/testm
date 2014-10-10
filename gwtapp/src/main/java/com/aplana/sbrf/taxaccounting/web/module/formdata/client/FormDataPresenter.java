@@ -257,6 +257,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         action.setType(reportType);
         action.setShowChecked(getView().getCheckedColumnsClicked());
         action.setManual(formData.isManual());
+        action.setSaved(absoluteView);
         dispatcher.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<CreateReportResult>() {
                     @Override
@@ -269,7 +270,8 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                     GWT.getHostPageBaseURL() + "download/downloadBlobController/"
                                             + formData.getId() + "/"
                                             + getView().getCheckedColumnsClicked() + "/"
-                                            + formData.isManual(), "", "");
+                                            + formData.isManual() + "/"
+                                            + absoluteView, "", "");
                         } else {
                             getView().updatePrintReportButtonName(reportType, false);
                             getView().startTimerReport(reportType);
@@ -285,6 +287,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         action.setType(reportType);
         action.setShowChecked(getView().getCheckedColumnsClicked());
         action.setManual(formData.isManual());
+        action.setSaved(absoluteView);
         dispatcher.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<TimerReportResult>() {
                     @Override
@@ -312,6 +315,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         action.setType(reportType);
         action.setShowChecked(getView().getCheckedColumnsClicked());
         action.setManual(formData.isManual());
+        action.setSaved(absoluteView);
         dispatcher.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<CreateReportResult>() {
                     @Override
@@ -324,7 +328,8 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                     GWT.getHostPageBaseURL() + "download/downloadBlobController/CSV/"
                                             + formData.getId() + "/"
                                             + getView().getCheckedColumnsClicked() + "/"
-                                            + formData.isManual(), "", "");
+                                            + formData.isManual() + "/"
+                                            + absoluteView, "", "");
                         } else {
                             getView().updatePrintReportButtonName(reportType, false);
                             getView().startTimerReport(reportType);

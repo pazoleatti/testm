@@ -15,18 +15,20 @@ public interface PrintingService {
      * @param formDataId
      * @param manual
      * @param isShowChecked
+     * @param saved
      * @return
      */
-    String generateExcel(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked);
+    String generateExcel(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked, boolean saved);
     /**
      * Формирует CSV-отчет НФ, сохраняет его в таблицы BLOB_DATA и возвращает uuid
      * @param userInfo
      * @param formDataId
      * @param manual
      * @param isShowChecked
+     * @param saved
      * @return
      */
-    String generateCSV(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked);
+    String generateCSV(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked, boolean saved);
 	String generateExcelLogEntry(List<LogEntry> listLogEntries);
     String generateExcelUsers(List<TAUserView> taUserViewList);
     String generateExcelLogSystem(List<LogSearchResultItem> resultItems);
