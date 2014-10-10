@@ -82,6 +82,8 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
                                     deleteNotificationWithoutCheck(action);
                                 }
                             });
+                        } else if (result.getAllowedNotifications().size() == 0) {
+                            Dialog.errorMessage("Ни одно из выбранных оповещений недоступно для удаления!");
                         } else {
                             Dialog.confirmMessage("Подтверждение удаления оповещений", "Вы действительно хотите удалить выбранные оповещения? В случае подтверждения будет удалена только часть оповещений, так как не все оповещения доступны для удаления", new DialogHandler() {
                                 @Override
