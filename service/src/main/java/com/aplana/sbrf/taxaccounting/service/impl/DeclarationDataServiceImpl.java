@@ -110,9 +110,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Autowired
     private ReportService reportService;
 
-    @Autowired
-    private TAUserService userService;
-
 	public static final String TAG_FILE = "Файл";
 	public static final String TAG_DOCUMENT = "Документ";
 	public static final String ATTR_FILE_ID = "ИдФайл";
@@ -206,55 +203,70 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @Transactional(readOnly = false)
     public void delete(long id, TAUserInfo userInfo) {
-        checkLockedMe(id, userInfo);
-        declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.DELETE);
-        DeclarationData declarationData = declarationDataDao.get(id);
+        LockData lockData = lock(id, userInfo);
+        if (lockData == null) {
+            try {
+                declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.DELETE);
+                DeclarationData declarationData = declarationDataDao.get(id);
 
-        declarationDataDao.delete(id);
+                declarationDataDao.delete(id);
 
-			auditService.add(FormDataEvent.DELETE , userInfo, declarationData.getDepartmentId(),
-					declarationData.getReportPeriodId(),
-					declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getType().getName(),
-					null, null, "Декларация удалена", null, null);
-
+                    auditService.add(FormDataEvent.DELETE , userInfo, declarationData.getDepartmentId(),
+                            declarationData.getReportPeriodId(),
+                            declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getType().getName(),
+                            null, null, "Декларация удалена", null, null);
+            } finally {
+                unlock(id, userInfo);
+            }
+        } else {
+            throw new ServiceException(String.format(LockDataService.LOCK_DATA, taUserService.getUser(lockData.getUserId()).getName(), lockData.getUserId()));
+        }
     }
 
     @Override
     @Transactional(readOnly = false)
     public void setAccepted(Logger logger, long id, boolean accepted, TAUserInfo userInfo) {
-        checkLockedMe(id, userInfo);
-        // TODO (sgoryachkin) Это 2 метода должо быть
-        if (accepted) {
-            DeclarationData declarationData  = declarationDataDao.get(id);
+        LockData lockData = lock(id, userInfo);
+        if (lockData == null) {
+            try {
+                // TODO (sgoryachkin) Это 2 метода должо быть
+                if (accepted) {
+                    DeclarationData declarationData = declarationDataDao.get(id);
 
-            Map<String, Object> exchangeParams = new HashMap<String, Object>();
-            declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, logger, exchangeParams);
+                    Map<String, Object> exchangeParams = new HashMap<String, Object>();
+                    declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, logger, exchangeParams);
 
-            validateDeclaration(userInfo, declarationDataDao.get(id), logger, true, FormDataEvent.MOVE_CREATED_TO_ACCEPTED);
-            declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_CREATED_TO_ACCEPTED);
+                    validateDeclaration(userInfo, declarationDataDao.get(id), logger, true, FormDataEvent.MOVE_CREATED_TO_ACCEPTED);
+                    declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_CREATED_TO_ACCEPTED);
 
-            declarationData.setAccepted(true);
+                    declarationData.setAccepted(true);
 
-            String declarationTypeName = declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getType().getName();
-            logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, null);
-            auditService.add(FormDataEvent.MOVE_CREATED_TO_ACCEPTED , userInfo, declarationData.getDepartmentId(),
-                    declarationData.getReportPeriodId(), declarationTypeName, null, null, FormDataEvent.MOVE_CREATED_TO_ACCEPTED.getTitle(), null, null);
+                    String declarationTypeName = declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getType().getName();
+                    logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, null);
+                    auditService.add(FormDataEvent.MOVE_CREATED_TO_ACCEPTED, userInfo, declarationData.getDepartmentId(),
+                            declarationData.getReportPeriodId(), declarationTypeName, null, null, FormDataEvent.MOVE_CREATED_TO_ACCEPTED.getTitle(), null, null);
+                } else {
+                    declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_ACCEPTED_TO_CREATED);
+
+                    DeclarationData declarationData = declarationDataDao.get(id);
+                    declarationData.setAccepted(false);
+
+                    Map<String, Object> exchangeParams = new HashMap<String, Object>();
+                    declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, logger, exchangeParams);
+
+                    String declarationTypeName = declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getType().getName();
+                    logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, null);
+                    auditService.add(FormDataEvent.MOVE_ACCEPTED_TO_CREATED, userInfo, declarationData.getDepartmentId(),
+                            declarationData.getReportPeriodId(), declarationTypeName, null, null, FormDataEvent.MOVE_ACCEPTED_TO_CREATED.getTitle(), null, null);
+
+                }
+                declarationDataDao.setAccepted(id, accepted);
+            } finally {
+                unlock(id, userInfo);
+            }
         } else {
-            declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_ACCEPTED_TO_CREATED);
-
-            DeclarationData declarationData  = declarationDataDao.get(id);
-            declarationData.setAccepted(false);
-
-            Map<String, Object> exchangeParams = new HashMap<String, Object>();
-            declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, logger, exchangeParams);
-
-            String declarationTypeName = declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getType().getName();
-			logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, null);
-			auditService.add(FormDataEvent.MOVE_ACCEPTED_TO_CREATED , userInfo, declarationData.getDepartmentId(),
-					declarationData.getReportPeriodId(), declarationTypeName, null, null, FormDataEvent.MOVE_ACCEPTED_TO_CREATED.getTitle(), null, null);
-
+            throw new ServiceException(String.format(LockDataService.LOCK_DATA, taUserService.getUser(lockData.getUserId()).getName(), lockData.getUserId()));
         }
-        declarationDataDao.setAccepted(id, accepted);
     }
 
 	@Override
@@ -332,7 +344,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
     }
 
-    public void validateDeclaration(TAUserInfo userInfo, DeclarationData declarationData, final Logger logger, final boolean isErrorFatal,
+    private void validateDeclaration(TAUserInfo userInfo, DeclarationData declarationData, final Logger logger, final boolean isErrorFatal,
                                      FormDataEvent operation) {
         Locale oldLocale = Locale.getDefault();
         Locale.setDefault(new Locale("ru", "RU"));
@@ -417,7 +429,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     private Document getDocument(long declarationDataId) {
         try {
-            String xmlUuid = getXmlData(declarationDataId, userService.getSystemUserInfo());// declarationDataDao.get(declarationDataId).getXmlDataUuid();
+            String xmlUuid = getXmlData(declarationDataId, taUserService.getSystemUserInfo());// declarationDataDao.get(declarationDataId).getXmlDataUuid();
             if (xmlUuid == null) return null;
             String xml = new String(getBytesFromInputstream(xmlUuid));
             InputSource inputSource = new InputSource(new StringReader(xml));
@@ -559,7 +571,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     public void checkLockedMe(Long declarationDataId, TAUserInfo userInfo) {
-        checkLock(lockDataService.lock(LockData.LOCK_OBJECTS.DECLARATION_DATA.name() + "_" + declarationDataId, userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME),
+        checkLock(lockDataService.getLock(LockData.LOCK_OBJECTS.DECLARATION_DATA.name() + "_" + declarationDataId),
                 userInfo.getUser());
     }
 

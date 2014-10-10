@@ -57,8 +57,8 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
     public RecalculateDeclarationDataResult execute(RecalculateDeclarationDataAction action, ExecutionContext context) throws ActionException {
 		TAUserInfo userInfo = securityService.currentUserInfo();
         RecalculateDeclarationDataResult result = new RecalculateDeclarationDataResult();
-        LockData lockData;
-        if ((lockData = declarationDataService.lock(action.getDeclarationId(), userInfo)) == null) {
+        LockData lockData = declarationDataService.lock(action.getDeclarationId(), userInfo);
+        if (lockData == null) {
             try {
                 Logger logger = new Logger();
                 //declarationDataService.calculate(logger, action.getDeclarationId(), userInfo, action.getDocDate());

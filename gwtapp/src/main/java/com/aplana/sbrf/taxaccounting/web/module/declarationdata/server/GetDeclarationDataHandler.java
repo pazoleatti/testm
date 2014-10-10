@@ -87,42 +87,10 @@ public class GetDeclarationDataHandler
 
         result.setCorrectionDate(departmentReportPeriod.getCorrectionDate());
 
-		result.setPdf(generatePdfViewerModel(action, userInfo, taxType));
-
         result.setTaxOrganCode(declaration.getTaxOrganCode());
         result.setKpp(declaration.getKpp());
 
 		return result;
-	}
-
-	/**
-	 * Формирует модель для PDFViewer
-	 * 
-	 * @param action
-	 * @param userInfo
-	 * @return
-	 */
-	private Pdf generatePdfViewerModel(GetDeclarationDataAction action,
-									   TAUserInfo userInfo, TaxType taxType) {
-		Pdf pdf = new Pdf();
-		pdf.setTitle(!taxType.equals(TaxType.DEAL) ? "Список листов декларации" : "Список листов уведомления");
-		List<PdfPage> pdfPages = new ArrayList<PdfPage>();
-        byte buf[] = declarationDataService.getPdfData(action.getId(), userInfo);
-        if (buf != null) {
-    		InputStream pdfData = new ByteArrayInputStream(buf);
-            int pageNumber = PDFImageUtils.getPageNumber(pdfData);
-            String randomUUID = UUID.randomUUID().toString().toLowerCase(); // добавлено чтобы браузер не кешировал данные
-            for (int i = 0; i < pageNumber; i++) {
-                PdfPage pdfPage = new PdfPage();
-                pdfPage.setTitle("Лист " + (i + 1));
-
-                pdfPage.setSrc(String.format("download/declarationData/pageImage/%d/%d/%s",
-                        action.getId(), i, randomUUID));
-                pdfPages.add(pdfPage);
-            }
-            pdf.setPdfPages(pdfPages);
-        }
-		return pdf;
 	}
 
 	@Override

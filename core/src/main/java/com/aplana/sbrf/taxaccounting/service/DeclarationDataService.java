@@ -113,16 +113,6 @@ public interface DeclarationDataService {
 	Date getXmlDataDocDate(long declarationDataId, TAUserInfo userInfo);
 
     /**
-     * Проверка валидности xml декларации
-     * @param declarationData идентификатор данных декларации
-     * @param logger логгер лог панели
-     * @param isErrorFatal признак того, что операция не может быть продолжена с невалидным xml
-     * @param operation Событие (для сообщения об ошибке)
-     */
-    void validateDeclaration(TAUserInfo userInfo, DeclarationData declarationData, final Logger logger, final boolean isErrorFatal,
-                             FormDataEvent operation);
-
-    /**
      * Поиск декларации
      * @param declarationTypeId Тип декларации
      * @param departmentReportPeriod Отчетный период подразделения

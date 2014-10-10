@@ -91,14 +91,6 @@ public class GetDeclarationDataResult implements Result {
 		this.canDelete = canDelete;
 	}
 
-	public Pdf getPdf() {
-		return pdf;
-	}
-
-	public void setPdf(Pdf pdf) {
-		this.pdf = pdf;
-	}
-
 	public Date getDocDate() {
 		return docDate;
 	}
