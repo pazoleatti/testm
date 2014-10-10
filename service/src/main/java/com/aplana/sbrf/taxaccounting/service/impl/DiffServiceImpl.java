@@ -18,7 +18,7 @@ import java.util.*;
 public class DiffServiceImpl implements DiffService {
     @Override
     public List<Diff> computeDiff(List<String> original, List<String> revised) {
-        // Патч по алгоритму Myers' Diff
+        // Патч по алгоритму Myer's Diff
         Patch<String> patch = DiffUtils.diff(original, revised);
         List<Diff> diffList = new LinkedList<Diff>();
         // По списку изменений (изменения блоками, нужно разделить на строки)

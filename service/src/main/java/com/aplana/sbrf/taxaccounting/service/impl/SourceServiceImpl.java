@@ -1097,19 +1097,6 @@ public class SourceServiceImpl implements SourceService {
         return departmentFormTypeDao.existAssignedForm(departmentId, typeId, kind);
     }
 
-    @Override
-    public Map<String, List> getSourcesDestinations(int departmentId, int terrBankId, List<TaxType> taxTypes) {
-        HashMap<String, List> map = new HashMap<String, List>();
-        List<Pair<DepartmentFormType, DepartmentFormType>> destinationFT = departmentFormTypeDao.getFormDestinationsWithDepId(departmentId, terrBankId,taxTypes);
-        map.put("destinationFTs", destinationFT);
-        List<Pair<DepartmentFormType, DepartmentFormType>> sourceFTs = departmentFormTypeDao.getFormSourcesWithDepId(departmentId, terrBankId,taxTypes);
-        map.put("sourceFTs", sourceFTs);
-        List<Pair<DepartmentFormType, DepartmentDeclarationType>> destinationDTs = departmentFormTypeDao.getDeclarationDestinationsWithDepId(departmentId, terrBankId,taxTypes);
-        map.put("destinationDTs", destinationDTs);
-        List<Pair<DepartmentFormType, DepartmentDeclarationType>> sourceDTs = departmentFormTypeDao.getDeclarationSourcesWithDepId(departmentId, terrBankId,taxTypes);
-        map.put("sourceDTs", sourceDTs);
-        return map;
-    }
 
     @Override
     public List<Pair<String, String>> existAcceptedDestinations(int sourceDepartmentId, int sourceFormTypeId,

@@ -9,7 +9,6 @@ import javax.validation.constraints.NotNull;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Интерфейс сервиса для работы с привязкой департаментов к подразделениям
@@ -359,17 +358,6 @@ public interface SourceService {
      */
     boolean existAssignedForm(int departmentId, int typeId, FormDataKind kind);
 
-    /**
-     * Получает формы назначения как приемники, так и источники, принадлежащих подразделениям терр.банка terrBankId
-     * которые будут источниками, либо приемниками форм назначений принадлежащих подразделению departmentId/
-     *
-     * @param departmentId департамент-источник
-     * @param terrBankId   департамент-приемник
-     * @param taxTypes     типы НФ
-     * @return список {@link Map<String, List<Pair>>} в которых первым параметром идет форма назначение источник, вторым приемник
-     *         с определенными ключами
-     */
-    Map<String, List> getSourcesDestinations(int departmentId, int terrBankId, List<TaxType> taxTypes);
 
     /**
      * Проверяет существование форм-приемников в статусе "Принята" в указанном отчетном периоде
