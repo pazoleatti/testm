@@ -74,8 +74,8 @@ public class GetRefBookAttributesHandler extends AbstractActionHandler<GetRefBoo
 
         TAUser currentUser = securityService.currentUserInfo().getUser();
         if (currentUser.hasRole(TARole.ROLE_CONTROL_UNP)){ // Контроллер УНП
-            // Контроллер УНП может редактировать все справочники
-            result.setReadOnly(refBook.isReadOnly());
+            // Контроллер УНП может редактировать все справочники (даже "ОУКС")
+            result.setReadOnly(refBook.isReadOnly() && !refBook.getId().equals(ORGANIZATION_REF_BOOL_ID));
         } else { // Оператор, Контролёр, Контролёр НС
             if (currentUser.hasRole(TARole.ROLE_CONTROL_NS) && refBook.getRegionAttribute() != null){
                 /*
