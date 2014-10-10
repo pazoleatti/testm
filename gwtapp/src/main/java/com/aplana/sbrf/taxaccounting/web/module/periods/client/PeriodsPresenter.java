@@ -328,7 +328,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
             getView().setCanChangeDeadline(false);
             return;
         }
-        getView().setCanChangeDeadline(!selectedRow.isSubHeader() && selectedRow.isOpen());
+        getView().setCanChangeDeadline(canEditDeadLine(selectedRow));
         getView().setCanEditPeriod(!selectedRow.isSubHeader() && selectedRow.isOpen() && canEdit);
         getView().setCanClosePeriod(!selectedRow.isSubHeader() && canEdit);
         getView().setCanDeletePeriod(!selectedRow.isSubHeader() && canEdit);
@@ -447,4 +447,14 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 	public void onUpdateFormHandler(UpdateForm event) {
 		find();
 	}
+
+    /**
+     * Можно ли редактировать срок сдачи отчетности
+     *
+     * @param tableRow выбранная строка в таблице
+     * @return true - можно, false - нельзя
+     */
+    public boolean canEditDeadLine(TableRow tableRow) {
+        return !tableRow.isSubHeader() && tableRow.isOpen() && !tableRow.isCorrection();
+    }
 }
