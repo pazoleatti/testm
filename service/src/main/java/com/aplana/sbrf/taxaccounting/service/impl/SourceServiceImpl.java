@@ -1301,7 +1301,7 @@ public class SourceServiceImpl implements SourceService {
 
         DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
         filter.setReportPeriodIdList(Arrays.asList(departmentReportPeriod.getReportPeriod().getId()));
-        filter.setDepartmentIdList(Arrays.asList(departmentReportPeriod.getDepartmentId()));
+        filter.setDepartmentIdList(Arrays.asList(departmentFormType.getDepartmentId()));
         // Список всех отчетных периодов
         List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodDao.getListByFilter(filter);
         // Приемник может быть или в том же отчетном периоде подразделения или в следующем, поэтому предыдущие отчетные
