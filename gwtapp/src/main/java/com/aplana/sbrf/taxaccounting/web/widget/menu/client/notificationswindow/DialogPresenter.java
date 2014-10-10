@@ -76,14 +76,14 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
                     @Override
                     public void onSuccess(final DeleteNotificationResult result) {
                         if (result.getAllowedNotifications().size() == notificationIds.size()) {
-                            Dialog.confirmMessage("Удаление оповещений", "Вы действительно хотите удалить выбранные оповещения?", new DialogHandler() {
+                            Dialog.confirmMessage("Подтверждение удаления оповещений", "Вы действительно хотите удалить выбранные оповещения?", new DialogHandler() {
                                 @Override
                                 public void yes() {
                                     deleteNotificationWithoutCheck(action);
                                 }
                             });
                         } else {
-                            Dialog.confirmMessage("Удаление назначений", "Вы действительно хотите удалить выбранные оповещения? В случае подтверждения будет удалена только часть оповещений, так как не все оповещения доступны для удаления", new DialogHandler() {
+                            Dialog.confirmMessage("Подтверждение удаления оповещений", "Вы действительно хотите удалить выбранные оповещения? В случае подтверждения будет удалена только часть оповещений, так как не все оповещения доступны для удаления", new DialogHandler() {
                                 @Override
                                 public void yes() {
                                     action.setNotificationIds(result.getAllowedNotifications());
