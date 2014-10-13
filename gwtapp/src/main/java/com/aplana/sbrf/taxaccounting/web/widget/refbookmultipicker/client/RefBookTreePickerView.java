@@ -354,11 +354,9 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
                     uiTreeItem.setName(name);
                 }
 
-                if ((newParentId == null && parent == null) ||
-                        (newParentId != null && parent != null && newParentId.equals(parent.getId()))) {
-                    // Если парент не изменился
-                } else {
-                    // иначе
+                if ((newParentId != null || parent != null) &&
+                        (newParentId == null || parent == null || !newParentId.equals(parent.getId()))) {
+                    // Если парент изменился
                     tree.removeItem(uiTreeItem);        // удаляем выделеный итем
                     if (newParentId == null) {
                         // если добавляется в корень

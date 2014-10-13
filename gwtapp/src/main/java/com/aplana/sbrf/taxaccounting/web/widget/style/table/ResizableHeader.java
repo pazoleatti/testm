@@ -1,16 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.widget.style.table;
 
-import static com.google.gwt.dom.client.Style.Unit.PX;
-
 import com.aplana.sbrf.taxaccounting.web.widget.cell.SortingHeaderCell;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.Cell.Context;
-import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.dom.client.Document;
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.dom.client.SpanElement;
-import com.google.gwt.dom.client.Style;
+import com.google.gwt.dom.client.*;
 import com.google.gwt.dom.client.Style.Cursor;
 import com.google.gwt.dom.client.Style.Position;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -22,6 +15,8 @@ import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.Event.NativePreviewHandler;
+
+import static com.google.gwt.dom.client.Style.Unit.PX;
 
 /**
  * Заголовок с возможностью резайза
@@ -177,9 +172,7 @@ public abstract class ResizableHeader<T> extends Header<String> {
             final Element element = natEvent.getEventTarget().cast();
             final String eventType = natEvent.getType();
             if (!(element == right)) {
-                if ("mousedown".equals(eventType)) {
-                    //No need to do anything, the event will be passed on to the column sort handler
-                } else if (!dragging && "mouseover".equals(eventType)) {
+                if (!dragging && "mouseover".equals(eventType)) {
                     cleanUp();
                 }
                 return;
