@@ -31,7 +31,7 @@ public interface FormDataCompositionService {
 	 * <p/>
 	 * Этот метод вызывается тогда, когда форма-источник переходит в статус «Принята».
      * @param formData Экземпляр формы-приемника (может отсутствовать)
-     * @param departmentReportPeriodId Отчетный период подразделения
+     * @param departmentReportPeriodId Отчетный период подразделения приемника
      * @param periodOrder Месяц для ежемесячных форм (для квартальных форм не задается)
 	 * @param formTypeId Вид формы-приемника
 	 * @param kind  Тип формы-приемника
