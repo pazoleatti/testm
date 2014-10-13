@@ -943,16 +943,17 @@ public class FormDataServiceImpl implements FormDataService {
     @Override
     public Integer getPreviousRowNumber(FormData formData) {
         int previousRowNumber = 0;
-        // Получить налоговый период
-        ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
-        TaxPeriod taxPeriod = reportPeriod.getTaxPeriod();
+        // Отчетный период подразделения
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(formData.getDepartmentReportPeriodId());
+        // Налоговый период
+        TaxPeriod taxPeriod = departmentReportPeriod.getReportPeriod().getTaxPeriod();
         // Получить упорядоченный список экземпляров НФ, которые участвуют в сквозной нумерации и находятся до указанного экземпляра НФ
         List<FormData> formDataList = formDataDao.getPrevFormDataList(formData, taxPeriod);
 
         // Если экземпляр НФ является не первым экземпляром в сквозной нумерации
         if (formDataList.size() > 0) {
             for (FormData aFormData : formDataList) {
-                if (beInOnAutoNumeration(aFormData)) {
+                if (beInOnAutoNumeration(aFormData.getState(), departmentReportPeriod)) {
                     previousRowNumber += dataRowDao.getSizeWithoutTotal(aFormData);
                 }
                 if (aFormData.getId().equals(formData.getId())) {
@@ -970,8 +971,10 @@ public class FormDataServiceImpl implements FormDataService {
      * @param logger   логгер для регистрации ошибок
      * @param formData редактируемый экземпляр НФ
      */
-    public void updatePreviousRowNumberAttr(FormData formData, Logger logger) {
-        if (beInOnAutoNumeration(formData) && dataRowDao.isDataRowsCountChanged(formData.getId())) {
+    void updatePreviousRowNumberAttr(FormData formData, Logger logger) {
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(formData.getDepartmentReportPeriodId());
+        if (beInOnAutoNumeration(formData.getState(), departmentReportPeriod)
+                && dataRowDao.isDataRowsCountChanged(formData.getId())) {
             updatePreviousRowNumber(formData, logger);
         }
     }
@@ -1093,11 +1096,12 @@ public class FormDataServiceImpl implements FormDataService {
 
     /**
      * Экземпляры в статусе "Создана" не участвуют в сквозной нумерации
-     * @param formData налоговая форма
+     * @param formState Состояние НФ
+     * @param departmentReportPeriod Отчетный период подразделения НФ
      * @return true - участвует, false - не участвует
      */
-    public boolean beInOnAutoNumeration(FormData formData) {
-        return formData.getState() != WorkflowState.CREATED;
+    public boolean beInOnAutoNumeration(WorkflowState formState, DepartmentReportPeriod departmentReportPeriod) {
+        return formState != WorkflowState.CREATED && departmentReportPeriod.getCorrectionDate() == null;
     }
 
     /**

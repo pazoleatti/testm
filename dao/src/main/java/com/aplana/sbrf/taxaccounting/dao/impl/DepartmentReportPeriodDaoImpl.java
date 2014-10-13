@@ -381,4 +381,21 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
             return retVal;
         }
     }
+
+    @Override
+    public List<DepartmentReportPeriod> getClosedForFormTemplate(final int formTemplateId) {
+        try {
+            return getNamedParameterJdbcTemplate().query("select drp.id, drp.department_id, drp.report_period_id, " +
+                    "drp.is_active, drp.is_balance_period, drp.correction_date " +
+                    "from department_report_period drp, form_data fd " +
+                    "where drp.id = fd.department_report_period_id " +
+                    "and drp.is_active = 0 and fd.form_template_id = :formTemplateId",
+                    new HashMap<String, Object>(2) {{
+                        put("formTemplateId", formTemplateId);
+                    }}, mapper);
+        } catch (DataAccessException e) {
+            logger.error("", e);
+            throw new DaoException("", e);
+        }
+    }
 }

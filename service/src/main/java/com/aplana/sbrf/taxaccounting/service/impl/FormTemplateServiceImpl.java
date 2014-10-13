@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
@@ -11,7 +12,9 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
-import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
+import com.aplana.sbrf.taxaccounting.service.FormDataService;
+import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
 import org.apache.commons.lang3.ArrayUtils;
@@ -23,14 +26,11 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
  * Реализация сервиса для работы с шаблонами налоговых форм
- * TODO: сейчас это просто тонкая обёртка над FormTemplateDao, нужно дополнить её 
- * 	- вызовом механизма блокировок
- *  - проверкой прав доступа пользователя
- *  - возможно, валидацией сохраняемых данных
  * @author dsultanbekov
  */
 @Service
@@ -40,6 +40,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 	private static final int FORM_COLUMN_NAME_MAX_VALUE = 1000;
 	private static final int FORM_COLUMN_ALIAS_MAX_VALUE = 100;
 	private static final int DATA_ROW_ALIAS_MAX_VALUE = 20;
+    private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
 
 	private Set<String> checkSet = new HashSet<String>();
 
@@ -50,20 +51,17 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     @Autowired
     private FormDataScriptingService scriptingService;
     @Autowired
-    TAUserService userService;
+    private FormDataDao formDataDao;
     @Autowired
-    FormDataDao formDataDao;
+    private ReportPeriodDao reportPeriodDao;
     @Autowired
-    LogEntryService logEntryService;
-
+    private TransactionHelper tx;
     @Autowired
-    ReportPeriodDao reportPeriodDao;
+    private FormDataService formDataService;
     @Autowired
-    TransactionHelper tx;
+    private LockDataService lockDataService;
     @Autowired
-    FormDataService formDataService;
-    @Autowired
-    LockDataService lockDataService;
+    private DepartmentReportPeriodDao departmentReportPeriodDao;
 
 	@Override
 	public List<FormTemplate> listAll() {
@@ -424,15 +422,21 @@ public class FormTemplateServiceImpl implements FormTemplateService {
             Integer formTemplateId = formTemplate.getId();
             // Проверяем наличие в версии макета до редактирования хотя бы одной автонумеруемой графы, у которой "Тип нумерации строк" != "Сквозная".
             FormTemplate fullFormTemplate = getFullFormTemplate(formTemplateId);
+            // TODO Левыкин: Возможно обратный переход тоже нужно запретить http://conf.aplana.com/pages/viewpage.action?pageId=11377661&focusedCommentId=14818097#comment-14818097
             if (isAnyAutoNumerationColumn(fullFormTemplate, NumerationType.SERIAL)) {
-                List<ReportPeriod> reportPeriodList = reportPeriodDao.getClosedPeriodsForFormTemplate(formTemplateId);
+                List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodDao.getClosedForFormTemplate(formTemplateId);
 
-                if (reportPeriodList.size() != 0) {
+                if (departmentReportPeriodList.size() != 0) {
                     StringBuilder stringBuilder = new StringBuilder();
-                    for (int i = 0; i < reportPeriodList.size(); i++) {
-                        stringBuilder.append(reportPeriodList.get(i).getName()).append(" ");
-                        stringBuilder.append(reportPeriodList.get(i).getTaxPeriod().getYear());
-                        if (i < reportPeriodList.size() - 1) {
+                    for (int i = 0; i < departmentReportPeriodList.size(); i++) {
+                        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodList.get(i);
+                        stringBuilder.append(departmentReportPeriod.getReportPeriod().getName()).append(" ");
+                        stringBuilder.append(departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear());
+                        if (departmentReportPeriod.getCorrectionDate() != null) {
+                            stringBuilder.append(", корр. (" +
+                                    SIMPLE_DATE_FORMAT.format(departmentReportPeriod.getCorrectionDate()) + ")");
+                        }
+                        if (i < departmentReportPeriodList.size() - 1) {
                             stringBuilder.append(", ");
                         }
                     }

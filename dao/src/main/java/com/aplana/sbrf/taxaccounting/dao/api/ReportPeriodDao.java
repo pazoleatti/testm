@@ -108,14 +108,6 @@ public interface ReportPeriodDao {
     List<ReportPeriod> getCorrectPeriods(TaxType taxType, int departmentId);
 
     /**
-     * Проверить существование экземпляров НФ данной версии макета, отчетный период которых закрыт.
-     *
-     * @param formTemplateId идентификатор макета НФ
-     * @return список закрытых периодов, где существует экземпляр НФ данной версии
-     */
-    List<ReportPeriod> getClosedPeriodsForFormTemplate(Integer formTemplateId);
-
-    /**
      * Отчетный период по коду и году
      */
     ReportPeriod getByTaxTypedCodeYear(TaxType taxType, String code, int year);

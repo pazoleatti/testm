@@ -44,6 +44,8 @@ public class FormDataServiceTest {
     ReportPeriodDao reportPeriodDao;
     @Autowired
     DepartmentDao departmentDao;
+    @Autowired
+    private DepartmentReportPeriodDao departmentReportPeriodDao;
 
     @Autowired
     private FormDataServiceImpl formDataService;
@@ -259,11 +261,19 @@ public class FormDataServiceTest {
         FormData newFormData = new FormData(formTemplate);
         newFormData.setId((long) 1);
         newFormData.setReportPeriodId(1);
+        newFormData.setDepartmentReportPeriodId(1);
         newFormData.setKind(FormDataKind.PRIMARY);
 
         when(formDataDao.getPrevFormDataList(any(FormData.class), any(TaxPeriod.class)))
                 .thenReturn(new ArrayList<FormData>());
         when(periodService.getReportPeriod(1)).thenReturn(new ReportPeriod());
+
+        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
+        ReportPeriod reportPeriod = new ReportPeriod();
+        reportPeriod.setTaxPeriod(new TaxPeriod());
+        departmentReportPeriod.setReportPeriod(reportPeriod);
+        when(departmentReportPeriodDao.get(1)).thenReturn(departmentReportPeriod);
+
         Assert.assertTrue("\"Номер последней строки предыдущей НФ\" должен быть равен 0",
                 formDataService.getPreviousRowNumber(newFormData).equals(0));
     }
@@ -274,18 +284,19 @@ public class FormDataServiceTest {
      */
     @Test
     public void getPreviousRowNumberSecondCase() {
-
         // Существующие формы
         FormData formData = new FormData(formTemplate);
         formData.setId((long) 1);
         formData.setReportPeriodId(1);
         formData.setKind(FormDataKind.PRIMARY);
+        formData.setDepartmentReportPeriodId(1);
         formData.setState(WorkflowState.ACCEPTED);
 
         FormData formData1 = new FormData(formTemplate);
         formData1.setId((long) 2);
         formData1.setReportPeriodId(2);
         formData1.setKind(FormDataKind.PRIMARY);
+        formData1.setDepartmentReportPeriodId(1);
         formData1.setState(WorkflowState.ACCEPTED);
 
         // Создаваемая форма
@@ -293,6 +304,7 @@ public class FormDataServiceTest {
         newFormData.setId((long) 3);
         newFormData.setReportPeriodId(3);
         newFormData.setKind(FormDataKind.PRIMARY);
+        newFormData.setDepartmentReportPeriodId(1);
         newFormData.setState(WorkflowState.CREATED);
 
         List<FormData> formDataList = new ArrayList<FormData>();
@@ -303,11 +315,14 @@ public class FormDataServiceTest {
                 .thenReturn(formDataList);
         when(dataRowDao.getSizeWithoutTotal(formData)).thenReturn(3);
         when(dataRowDao.getSizeWithoutTotal(formData1)).thenReturn(5);
-
+        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
+        ReportPeriod reportPeriod = new ReportPeriod();
+        reportPeriod.setTaxPeriod(new TaxPeriod());
+        departmentReportPeriod.setReportPeriod(reportPeriod);
+        when(departmentReportPeriodDao.get(1)).thenReturn(departmentReportPeriod);
         when(periodService.getReportPeriod(3)).thenReturn(new ReportPeriod());
         Assert.assertTrue("\"Номер последней строки предыдущей НФ\" должен быть равен 8",
                 formDataService.getPreviousRowNumber(newFormData).equals(8));
-
     }
 
     /**
@@ -322,12 +337,14 @@ public class FormDataServiceTest {
         formData.setId((long) 1);
         formData.setReportPeriodId(1);
         formData.setKind(FormDataKind.PRIMARY);
+        formData.setDepartmentReportPeriodId(1);
         formData.setState(WorkflowState.ACCEPTED);
 
         FormData formData1 = new FormData(formTemplate);
         formData1.setId((long) 2);
         formData1.setReportPeriodId(2);
         formData1.setKind(FormDataKind.PRIMARY);
+        formData1.setDepartmentReportPeriodId(1);
         formData1.setState(WorkflowState.CREATED);
 
         // Создаваемая форма
@@ -335,6 +352,7 @@ public class FormDataServiceTest {
         newFormData.setId((long) 3);
         newFormData.setReportPeriodId(3);
         newFormData.setKind(FormDataKind.PRIMARY);
+        newFormData.setDepartmentReportPeriodId(1);
         newFormData.setState(WorkflowState.CREATED);
 
         List<FormData> formDataList = new ArrayList<FormData>();
@@ -346,6 +364,11 @@ public class FormDataServiceTest {
         when(dataRowDao.getSizeWithoutTotal(formData)).thenReturn(3);
         when(dataRowDao.getSizeWithoutTotal(formData1)).thenReturn(5);
 
+        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
+        ReportPeriod reportPeriod = new ReportPeriod();
+        reportPeriod.setTaxPeriod(new TaxPeriod());
+        departmentReportPeriod.setReportPeriod(reportPeriod);
+        when(departmentReportPeriodDao.get(1)).thenReturn(departmentReportPeriod);
         when(periodService.getReportPeriod(3)).thenReturn(new ReportPeriod());
         Assert.assertTrue("\"Номер последней строки предыдущей НФ\" должен быть равен 3",
                 formDataService.getPreviousRowNumber(newFormData).equals(3));
@@ -361,7 +384,7 @@ public class FormDataServiceTest {
         FormData formData = mock(FormData.class);
         FormDataServiceImpl dataService = spy(formDataService);
 
-        doReturn(false).when(dataService).beInOnAutoNumeration(any(FormData.class));
+        doReturn(false).when(dataService).beInOnAutoNumeration(any(WorkflowState.class), any(DepartmentReportPeriod.class));
         doReturn(false).when(dataRowDao).isDataRowsCountChanged(anyLong());
 
         dataService.updatePreviousRowNumberAttr(formData, eq(any(Logger.class)));
@@ -378,7 +401,7 @@ public class FormDataServiceTest {
         FormData formData = mock(FormData.class);
         FormDataServiceImpl dataService = spy(formDataService);
 
-        doReturn(true).when(dataService).beInOnAutoNumeration(any(FormData.class));
+        doReturn(true).when(dataService).beInOnAutoNumeration(any(WorkflowState.class), any(DepartmentReportPeriod.class));
         doReturn(false).when(dataRowDao).isDataRowsCountChanged(anyLong());
         doReturn(1L).when(formData).getId();
 
@@ -395,8 +418,7 @@ public class FormDataServiceTest {
     public void testUpdatePreviousRowNumberAttrWhenSave3() {
         FormData formData = mock(FormData.class);
         FormDataServiceImpl dataService = spy(formDataService);
-
-        doReturn(true).when(dataService).beInOnAutoNumeration(formData);
+        doReturn(true).when(dataService).beInOnAutoNumeration(any(WorkflowState.class), any(DepartmentReportPeriod.class));
         doReturn(true).when(dataRowDao).isDataRowsCountChanged(anyLong());
         doReturn(1L).when(formData).getId();
         doReturn(WorkflowState.CREATED).when(formData).getState();
@@ -446,11 +468,19 @@ public class FormDataServiceTest {
         TAUserInfo userInfo = mock(TAUserInfo.class);
         when(userInfo.getUser()).thenReturn(user);
         FormData formData = getFormData();
+        formData.setDepartmentReportPeriodId(1);
         LockData lockData = new LockData();
         lockData.setUserId(user.getId());
 
         when(lockDataService.lock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formData.getId(), user.getId(), LockData.STANDARD_LIFE_TIME)).
                 thenReturn(lockData);
+
+        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
+        ReportPeriod reportPeriod = new ReportPeriod();
+        reportPeriod.setTaxPeriod(new TaxPeriod());
+        departmentReportPeriod.setReportPeriod(reportPeriod);
+        when(departmentReportPeriodDao.get(1)).thenReturn(departmentReportPeriod);
+
         FormDataServiceImpl dataService = spy(formDataService);
         dataService.saveFormData(logger, userInfo, formData);
 
@@ -488,21 +518,29 @@ public class FormDataServiceTest {
      */
     @Test
     public void testBeInOnAutoNumeration() {
+        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
+
         FormData formData = new FormData();
         formData.setState(WorkflowState.CREATED);
-        Assert.assertFalse("Не должен участвовать в сквозной нумерации", formDataService.beInOnAutoNumeration(formData));
+        Assert.assertFalse("Не должен участвовать в сквозной нумерации", formDataService.beInOnAutoNumeration(formData.getState(), departmentReportPeriod));
 
-        FormData formData1 = new FormData();
-        formData1.setState(WorkflowState.ACCEPTED);
-        Assert.assertTrue("Должен участвовать в сквозной нумерации", formDataService.beInOnAutoNumeration(formData1));
+        formData = new FormData();
+        departmentReportPeriod.setCorrectionDate(new Date());
+        formData.setState(WorkflowState.ACCEPTED);
+        Assert.assertFalse("Не должен участвовать в сквозной нумерации", formDataService.beInOnAutoNumeration(formData.getState(), departmentReportPeriod));
 
-        FormData formData2 = new FormData();
-        formData2.setState(WorkflowState.APPROVED);
-        Assert.assertTrue("Должен участвовать в сквозной нумерации", formDataService.beInOnAutoNumeration(formData2));
+        formData = new FormData();
+        departmentReportPeriod.setCorrectionDate(null);
+        formData.setState(WorkflowState.ACCEPTED);
+        Assert.assertTrue("Должен участвовать в сквозной нумерации", formDataService.beInOnAutoNumeration(formData.getState(), departmentReportPeriod));
 
-        FormData formData3 = new FormData();
-        formData3.setState(WorkflowState.PREPARED);
-        Assert.assertTrue("Должен участвовать в сквозной нумерации", formDataService.beInOnAutoNumeration(formData3));
+        formData = new FormData();
+        formData.setState(WorkflowState.APPROVED);
+        Assert.assertTrue("Должен участвовать в сквозной нумерации", formDataService.beInOnAutoNumeration(formData.getState(), departmentReportPeriod));
+
+        formData = new FormData();
+        formData.setState(WorkflowState.PREPARED);
+        Assert.assertTrue("Должен участвовать в сквозной нумерации", formDataService.beInOnAutoNumeration(formData.getState(), departmentReportPeriod));
     }
 
     @Test

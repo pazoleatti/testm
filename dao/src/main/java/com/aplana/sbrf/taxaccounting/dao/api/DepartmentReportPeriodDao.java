@@ -87,4 +87,9 @@ public interface DepartmentReportPeriodDao {
      * Получение списков дат корректирующих периодов по отчетным периодам
      */
     Map<Integer, List<Date>> getCorrectionDateListByReportPeriod(Collection<Integer> reportPeriodIdList);
+
+    /**
+     * Список закрытых отчетных периодов подразделений, в которых есть экремляры НФ узазанного шаблона
+     */
+    List<DepartmentReportPeriod> getClosedForFormTemplate(int formTemplateId);
 }

@@ -1,6 +1,9 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.*;
+import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
+import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.SourceDao;
 import com.aplana.sbrf.taxaccounting.dao.api.*;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -12,9 +15,7 @@ import com.aplana.sbrf.taxaccounting.model.source.SourceObject;
 import com.aplana.sbrf.taxaccounting.model.source.SourcePair;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.utils.SimpleDateUtils;
@@ -76,49 +77,40 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Autowired
-    DepartmentFormTypeDao departmentFormTypeDao;
+    private DepartmentFormTypeDao departmentFormTypeDao;
 
     @Autowired
-    DepartmentDeclarationTypeDao departmentDeclarationTypeDao;
+    private DepartmentDeclarationTypeDao departmentDeclarationTypeDao;
 
     @Autowired
-    FormTypeDao formTypeDao;
+    private FormTypeDao formTypeDao;
 
     @Autowired
-    DeclarationTypeDao declarationTypeDao;
+    private DeclarationTypeDao declarationTypeDao;
 
     @Autowired
-    FormDataService formDataService;
+    private DepartmentDao departmentDao;
 
     @Autowired
-    DepartmentDao departmentDao;
+    private DepartmentService departmentService;
 
     @Autowired
-    DepartmentService departmentService;
+    private SourceDao sourceDao;
 
     @Autowired
-    SourceDao sourceDao;
+    private FormDataDao formDataDao;
 
     @Autowired
-    FormDataDao formDataDao;
+    private ReportPeriodDao reportPeriodDao;
 
     @Autowired
-    DeclarationDataDao declarationDataDao;
+    private LogEntryService logEntryService;
 
     @Autowired
-    ReportPeriodDao reportPeriodDao;
+    private FormTemplateDao formTemplateDao;
 
     @Autowired
-    LogEntryService logEntryService;
-
-    @Autowired
-    FormTemplateDao formTemplateDao;
-
-    @Autowired
-    RefBookFactory rbFactory;
-
-    @Autowired
-    DepartmentReportPeriodDao departmentReportPeriodDao;
+    private DepartmentReportPeriodDao departmentReportPeriodDao;
 
     @Override
     public List<DepartmentFormType> getDFTSourcesByDFT(int departmentId, int formTypeId, FormDataKind kind, Date periodStart,

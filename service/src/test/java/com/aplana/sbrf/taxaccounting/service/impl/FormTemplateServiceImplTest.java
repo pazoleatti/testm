@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -33,9 +34,11 @@ public class FormTemplateServiceImplTest extends Assert {
 
     FormTemplate formTemplateFromDB;
 
-    List<ReportPeriod> reportPeriodList;
+    private List<DepartmentReportPeriod> departmentReportPeriodList;
 
     ReportPeriodDao reportPeriodDao;
+
+    private DepartmentReportPeriodDao departmentReportPeriodDao;
 
     FormTemplateDao formTemplateDao;
 
@@ -59,26 +62,31 @@ public class FormTemplateServiceImplTest extends Assert {
         formTemplateFromDB.addColumn(autoNumerationColumn);
 
         // Закрытые отчетные периоды
-        reportPeriodList = new ArrayList<ReportPeriod>();
+        departmentReportPeriodList = new ArrayList<DepartmentReportPeriod>();
 
         ReportPeriod reportPeriod1 = new ReportPeriod();
         reportPeriod1.setName("год");
         TaxPeriod taxPeriod1 = new TaxPeriod();
         taxPeriod1.setYear(2014);
         reportPeriod1.setTaxPeriod(taxPeriod1);
-        reportPeriodList.add(reportPeriod1);
+        DepartmentReportPeriod departmentReportPeriod1 = new DepartmentReportPeriod();
+        departmentReportPeriod1.setReportPeriod(reportPeriod1);
+        departmentReportPeriodList.add(departmentReportPeriod1);
 
         ReportPeriod reportPeriod2 = new ReportPeriod();
         reportPeriod2.setName("первый квартал");
         TaxPeriod taxPeriod2 = new TaxPeriod();
         taxPeriod2.setYear(2015);
         reportPeriod2.setTaxPeriod(taxPeriod2);
-        reportPeriodList.add(reportPeriod2);
+        DepartmentReportPeriod departmentReportPeriod2 = new DepartmentReportPeriod();
+        departmentReportPeriod2.setReportPeriod(reportPeriod2);
+        departmentReportPeriodList.add(departmentReportPeriod2);
 
         // Версия макета до редактирования
         formTemplateDao = mock(FormTemplateDao.class);
         when(formTemplateDao.get(FORM_TEMPLATE_ID)).thenReturn(formTemplateFromDB);
 
+        departmentReportPeriodDao = mock(DepartmentReportPeriodDao.class);
         reportPeriodDao = mock(ReportPeriodDao.class);
         formDataService = mock(FormDataService.class);
 
@@ -86,6 +94,7 @@ public class FormTemplateServiceImplTest extends Assert {
 
         ReflectionTestUtils.setField(formTemplateService, "formTemplateDao", formTemplateDao);
         ReflectionTestUtils.setField(formTemplateService, "formDataService", formDataService);
+        ReflectionTestUtils.setField(formTemplateService, "departmentReportPeriodDao", departmentReportPeriodDao);
     }
 
     /**
@@ -106,10 +115,10 @@ public class FormTemplateServiceImplTest extends Assert {
      */
     @Test
     public void validateFormAutoNumerationColumn_cross1() {
-        AutoNumerationColumn autoNumerationColumn = (AutoNumerationColumn) formTemplateEdited.getColumn(1);
+            AutoNumerationColumn autoNumerationColumn = (AutoNumerationColumn) formTemplateEdited.getColumn(1);
         autoNumerationColumn.setNumerationType(NumerationType.CROSS);
 
-        when(reportPeriodDao.getClosedPeriodsForFormTemplate(FORM_TEMPLATE_ID)).thenReturn(new ArrayList<ReportPeriod>());
+        when(departmentReportPeriodDao.getClosedForFormTemplate(FORM_TEMPLATE_ID)).thenReturn(new ArrayList<DepartmentReportPeriod>(0));
         ReflectionTestUtils.setField(formTemplateService, "reportPeriodDao", reportPeriodDao);
         formTemplateService.validateFormAutoNumerationColumn(formTemplateEdited, logger);
 
@@ -127,9 +136,9 @@ public class FormTemplateServiceImplTest extends Assert {
     public void validateFormAutoNumerationColumn_cross2() {
         // Редактируемый макет
         AutoNumerationColumn autoNumerationColumn = (AutoNumerationColumn) formTemplateEdited.getColumn(1);
-		autoNumerationColumn.setNumerationType(NumerationType.CROSS);
+        autoNumerationColumn.setNumerationType(NumerationType.CROSS);
 
-        when(reportPeriodDao.getClosedPeriodsForFormTemplate(FORM_TEMPLATE_ID)).thenReturn(reportPeriodList);
+        when(departmentReportPeriodDao.getClosedForFormTemplate(FORM_TEMPLATE_ID)).thenReturn(departmentReportPeriodList);
 
         ReflectionTestUtils.setField(formTemplateService, "reportPeriodDao", reportPeriodDao);
 
