@@ -71,8 +71,6 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
     private final static String SUCCESS_CORRECTION_MESSAGE = "Корректировка отображена в результате сравнения с данными формы в периоде %s %s%s.";
     private final static String MANUAL_USED_MESSAGE = "Для формирования декларации в корректируемом периоде используются данные версии ручного ввода, созданной в форме «%s», %s, «%s»!";
 
-    private TAUserInfo userInfo;
-
 	public GetFormDataHandler() {
 		super(GetFormDataAction.class);
 	}
@@ -80,7 +78,7 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
 	@Override
 	public GetFormDataResult execute(GetFormDataAction action, ExecutionContext context) throws ActionException {
 
-		userInfo = securityService.currentUserInfo();
+        TAUserInfo userInfo = securityService.currentUserInfo();
 
         actionCheck(action);
 		
