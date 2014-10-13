@@ -75,7 +75,7 @@ public class FilterTreeParser extends Parser {
 		}
 	}
 
-	public final QueryContext query() throws RecognitionException {
+	public final QueryContext query() {
 		QueryContext _localctx = new QueryContext(_ctx, getState());
 		enterRule(_localctx, 0, RULE_query);
 		int _la;
@@ -157,7 +157,7 @@ public class FilterTreeParser extends Parser {
 		}
 	}
 
-	public final ConditionContext condition() throws RecognitionException {
+	public final ConditionContext condition() {
 		ConditionContext _localctx = new ConditionContext(_ctx, getState());
 		enterRule(_localctx, 2, RULE_condition);
 		int _la;

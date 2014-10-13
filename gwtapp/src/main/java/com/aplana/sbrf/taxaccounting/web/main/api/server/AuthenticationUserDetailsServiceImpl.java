@@ -31,7 +31,7 @@ public class AuthenticationUserDetailsServiceImpl implements AuthenticationUserD
 	private AuditService auditService;
 
 	@Override
-	public UserDetails loadUserDetails(Authentication token) throws UsernameNotFoundException {
+	public UserDetails loadUserDetails(Authentication token) {
 		String userName = token.getName();
 
 		if (!userService.existsUser(userName)) {
