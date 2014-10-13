@@ -296,7 +296,18 @@ void addData(def xml, headRowCount) {
             }
 
             def xmlIndexCol = 0
-            newRow.financialYear = parseDate(row.cell[xmlIndexCol].text(), "yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+
+            def yearStr = row.cell[xmlIndexCol].text()
+            if (yearStr != null) {
+                if (yearStr.contains(".")) {
+                    newRow.financialYear = parseDate(yearStr, "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+                } else {
+                    def yearNum = parseNumber(yearStr, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+                    if (yearNum != null && yearNum != 0) {
+                        newRow.financialYear = new GregorianCalendar(yearNum as Integer, Calendar.JANUARY, 1).getTime()
+                    }
+                }
+            }
             xmlIndexCol = 1
             newRow.taxPeriod = row.cell[xmlIndexCol].text()
             xmlIndexCol = 2
