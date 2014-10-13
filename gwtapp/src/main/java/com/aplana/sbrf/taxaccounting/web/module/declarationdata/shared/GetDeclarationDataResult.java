@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared;
 
 import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.shared.Pdf;
 import com.gwtplatform.dispatch.shared.Result;
 
 import java.util.Date;
@@ -21,12 +20,6 @@ public class GetDeclarationDataResult implements Result {
 	private boolean canAccept;
 	private boolean canReject;
     private boolean canDelete;
-    //private boolean canDownload;
-	
-	/**
-	 * Данные для инициализации компонента PDFView
-	 */
-	private Pdf pdf;
 
 	public boolean isCanAccept() {
 		return canAccept;

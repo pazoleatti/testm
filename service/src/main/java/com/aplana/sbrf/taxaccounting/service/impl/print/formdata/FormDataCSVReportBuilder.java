@@ -6,16 +6,17 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.service.impl.print.AbstractReportBuilder;
 import org.apache.commons.io.IOUtils;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 public class FormDataCSVReportBuilder extends AbstractReportBuilder {
 
     public static final String FILE_NAME = "Налоговый_отчет_";
-    private static final String ENCODING = "windows-1251";
+
     List<DataRow<Cell>> dataRows;
     FormData data;
     FormTemplate formTemplate;
