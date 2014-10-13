@@ -71,7 +71,7 @@ def autoFillColumns = ['rowNum', 'innKio', 'contraCountry', 'contraCountryCode',
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['transactionDeliveryDate', 'contraName', 'transactionMode', 'transactionSumCurrency',
+def nonEmptyColumns = ['transactionDeliveryDate', 'contraName', 'transactionSumCurrency',
         'currency', 'courseCB', 'transactionSumRub', 'contractNum', 'contractDate', 'transactionDate', 'bondRegCode',
         'bondCount', 'priceOne', 'transactionType']
 
