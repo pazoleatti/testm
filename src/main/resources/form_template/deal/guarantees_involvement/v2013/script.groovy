@@ -403,7 +403,7 @@ void addData(def xml, int headRowCount) {
                         text = "0".concat(text)
                     }
                 }
-                formDataService.checkReferenceValue(10, text, map.NAME?.stringValue, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+                formDataService.checkReferenceValue(10, text, map.CODE?.stringValue, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
             }
         }
         xmlIndexCol++
