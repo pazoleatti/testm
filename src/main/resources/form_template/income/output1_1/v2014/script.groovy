@@ -179,7 +179,7 @@ def logicCheck() {
     }
 
     // 2. Проверка наличия формы за предыдущий отчётный период
-    if (formDataService.getFormDataPrev(formData, formData.departmentId) == null) {
+    if (formDataService.getFormDataPrev(formData) == null) {
         logger.warn('Форма за предыдущий отчётный период не создавалась!')
     }
 }
