@@ -2,7 +2,6 @@ package form_template.property.property_945_2.v2014
 
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
-import com.aplana.sbrf.taxaccounting.model.Department
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import groovy.transform.Field
 
@@ -343,7 +342,16 @@ void logicCheck() {
             }
             // Проверка существования выбранных параметров декларации
             if (row.subject && row.taxAuthority && row.kpp && row.oktmo) {
-                filter = "DECLARATION_REGION_ID = " + formDataDepartment.regionId?.toString() + " and REGION_ID = " + row.subject?.toString() + " and LOWER(TAX_ORGAN_CODE) = LOWER('" + row.taxAuthority + "') and LOWER(KPP) = LOWER('" + row.kpp + "') and OKTMO = " + row.oktmo?.toString()
+                def String filter = String.format("DECLARATION_REGION_ID %s " +
+                        "and REGION_ID = %s " +
+                        "and LOWER(TAX_ORGAN_CODE) = LOWER('%s') " +
+                        "and LOWER(KPP) = LOWER('%s') " +
+                        "and OKTMO = %s",
+                        formDataDepartment.regionId == null ? "is null" : "=" + formDataDepartment.regionId.toString(),
+                        row.subject?.toString(),
+                        row.taxAuthority,
+                        row.kpp,
+                        row.oktmo?.toString())
                 records = refBookFactory.getDataProvider(200).getRecords(getReportPeriodEndDate(), null, filter, null)
                 if (records.size() == 0) {
                     rowWarning(logger, row, errorMsg + "Текущие параметры представления декларации (Код субъекта, Код НО, КПП, Код ОКТМО) не предусмотрены (в справочнике «Параметры представления деклараций по налогу на имущество» отсутствует такая запись)!")
