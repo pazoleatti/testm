@@ -1,9 +1,9 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
@@ -128,7 +128,7 @@ public class RefBookHelperImpl implements RefBookHelper {
 		}
 	}
 
-    private void dereferenceReferenceValue (Logger logger, Map<Long, Pair<RefBookDataProvider, RefBookAttribute>> providers,
+    void dereferenceReferenceValue (Logger logger, Map<Long, Pair<RefBookDataProvider, RefBookAttribute>> providers,
                                             ReferenceColumn referenceColumn, Cell cell, Object value){
         Long refAttributeId = referenceColumn.getRefBookAttributeId();
         Pair<RefBookDataProvider, RefBookAttribute> pair = providers.get(refAttributeId);
@@ -204,38 +204,38 @@ public class RefBookHelperImpl implements RefBookHelper {
         cell.setRefBookDereference(String.valueOf(refBookValue));
     }
 
-    @Override
-	public Map<String, String> singleRecordDereference(RefBook refBook,	RefBookDataProvider provider,
-                                                       List<RefBookAttribute> attributes,	Map<String, RefBookValue> record) {
-
-        //кэшируем список провайдеров для атрибутов-ссылок, чтобы для каждой строки их заново не создавать
-        Map<String, RefBookDataProvider> refProviders = new HashMap<String, RefBookDataProvider>();
-        for (RefBookAttribute attribute : refBook.getAttributes()) {
-            if (RefBookAttributeType.REFERENCE.equals(attribute.getAttributeType()) && !refProviders.containsKey(attribute.getAlias())) {
-                refProviders.put(attribute.getAlias(), refBookFactory.getDataProvider(attribute.getRefBookId()));
-            }
-        }
-
-        Map<String, String> result = new HashMap<String, String>();
-		for (RefBookAttribute attribute : attributes) {
-			RefBookAttributeType type = attribute.getAttributeType();
-			String alias = attribute.getAlias();
-			RefBookValue value = null;
-			if (RefBookAttributeType.REFERENCE.equals(type)) {
-				Long refValue = record.get(alias).getReferenceValue();
-				if (refValue != null) {
-					// получаем провайдер данных для целевого справочника
-					RefBookDataProvider attrProvider = refProviders.get(alias);
-					// запрашиваем значение для разыменовывания
-					value = attrProvider.getValue(refValue, attribute.getRefBookAttributeId());
-				}
-			} else {
-				value = record.get(alias);
-			}
-			result.put(alias, value == null ? "" : String.valueOf(value));
-		}
-		return result;
-	}
+//    @Override
+//	public Map<String, String> singleRecordDereference(RefBook refBook,	RefBookDataProvider provider,
+//                                                       List<RefBookAttribute> attributes,	Map<String, RefBookValue> record) {
+//
+//        //кэшируем список провайдеров для атрибутов-ссылок, чтобы для каждой строки их заново не создавать
+//        Map<String, RefBookDataProvider> refProviders = new HashMap<String, RefBookDataProvider>();
+//        for (RefBookAttribute attribute : refBook.getAttributes()) {
+//            if (RefBookAttributeType.REFERENCE.equals(attribute.getAttributeType()) && !refProviders.containsKey(attribute.getAlias())) {
+//                refProviders.put(attribute.getAlias(), refBookFactory.getDataProvider(attribute.getRefBookId()));
+//            }
+//        }
+//
+//        Map<String, String> result = new HashMap<String, String>();
+//		for (RefBookAttribute attribute : attributes) {
+//			RefBookAttributeType type = attribute.getAttributeType();
+//			String alias = attribute.getAlias();
+//			RefBookValue value = null;
+//			if (RefBookAttributeType.REFERENCE.equals(type)) {
+//				Long refValue = record.get(alias).getReferenceValue();
+//				if (refValue != null) {
+//					// получаем провайдер данных для целевого справочника
+//					RefBookDataProvider attrProvider = refProviders.get(alias);
+//					// запрашиваем значение для разыменовывания
+//					value = attrProvider.getValue(refValue, attribute.getRefBookAttributeId());
+//				}
+//			} else {
+//				value = record.get(alias);
+//			}
+//			result.put(alias, value == null ? "" : String.valueOf(value));
+//		}
+//		return result;
+//	}
 
     @Override
     public Map<Long, List<Long>> getAttrToListAttrId2Map(List<RefBookAttribute> attributes){
@@ -270,45 +270,45 @@ public class RefBookHelperImpl implements RefBookHelper {
         return refProviders;
     }
 
-    @Override
-    public Map<Long, String> singleRecordDereferenceWithAttrId2(RefBook refBook, RefBookDataProvider provider,
-                                                                List<RefBookAttribute> attributes, Map<String, RefBookValue> record) {
-
-        // кэшируем список дополнительных атрибутов если есть для каждого аттрибута
-        Map<Long, List<Long>> attrId2Map = getAttrToListAttrId2Map(refBook.getAttributes());
-        //кэшируем список провайдеров для атрибутов-ссылок, чтобы для каждой строки их заново не создавать
-        Map<Long, RefBookDataProvider> refProviders = getHashedProviders(refBook.getAttributes(), attrId2Map );
-
-        Map<Long, String> result = new HashMap<Long, String>();
-        for (RefBookAttribute attribute : attributes) {
-            String alias = attribute.getAlias();
-            Long id = attribute.getId();
-            RefBookValue value = null;
-
-            if (RefBookAttributeType.REFERENCE.equals(attribute.getAttributeType())) {
-                Long refValue = record.get(alias).getReferenceValue();
-                if (refValue != null) {
-                    // получаем провайдер данных для целевого справочника
-                    RefBookDataProvider attrProvider = refProviders.get(id);
-                    // запрашиваем значение для разыменовывания
-                    value = attrProvider.getValue(refValue, attribute.getRefBookAttributeId());
-
-                    // для каждого найденного дополнительного аттрибута разименуем значение
-                    if (attrId2Map.get(id) != null) {
-                        for (Long id2 : attrId2Map.get(id)) {
-                            RefBookDataProvider attr2Provider = refProviders.get(id2);
-                            RefBookValue value2 = attr2Provider.getValue(refValue, id2);
-                            result.put(id2, value2 == null ? "" : String.valueOf(value2));
-                        }
-                    }
-                }
-            } else {
-                value = record.get(alias);
-            }
-            result.put(id, value == null ? "" : String.valueOf(value));
-        }
-        return result;
-    }
+//    @Override
+//    public Map<Long, String> singleRecordDereferenceWithAttrId2(RefBook refBook, RefBookDataProvider provider,
+//                                                                List<RefBookAttribute> attributes, Map<String, RefBookValue> record) {
+//
+//        // кэшируем список дополнительных атрибутов если есть для каждого аттрибута
+//        Map<Long, List<Long>> attrId2Map = getAttrToListAttrId2Map(refBook.getAttributes());
+//        //кэшируем список провайдеров для атрибутов-ссылок, чтобы для каждой строки их заново не создавать
+//        Map<Long, RefBookDataProvider> refProviders = getHashedProviders(refBook.getAttributes(), attrId2Map );
+//
+//        Map<Long, String> result = new HashMap<Long, String>();
+//        for (RefBookAttribute attribute : attributes) {
+//            String alias = attribute.getAlias();
+//            Long id = attribute.getId();
+//            RefBookValue value = null;
+//
+//            if (RefBookAttributeType.REFERENCE.equals(attribute.getAttributeType())) {
+//                Long refValue = record.get(alias).getReferenceValue();
+//                if (refValue != null) {
+//                    // получаем провайдер данных для целевого справочника
+//                    RefBookDataProvider attrProvider = refProviders.get(id);
+//                    // запрашиваем значение для разыменовывания
+//                    value = attrProvider.getValue(refValue, attribute.getRefBookAttributeId());
+//
+//                    // для каждого найденного дополнительного аттрибута разименуем значение
+//                    if (attrId2Map.get(id) != null) {
+//                        for (Long id2 : attrId2Map.get(id)) {
+//                            RefBookDataProvider attr2Provider = refProviders.get(id2);
+//                            RefBookValue value2 = attr2Provider.getValue(refValue, id2);
+//                            result.put(id2, value2 == null ? "" : String.valueOf(value2));
+//                        }
+//                    }
+//                }
+//            } else {
+//                value = record.get(alias);
+//            }
+//            result.put(id, value == null ? "" : String.valueOf(value));
+//        }
+//        return result;
+//    }
 
     @Override
     public RefBook getRefBookByAttributeId(Long attributeId) {

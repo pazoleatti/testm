@@ -246,7 +246,7 @@ public class DataRow<C extends AbstractCell> extends IdentityObject<Long> implem
 
 	@Override
 	public Object put(String key, Object value) {
-		C cellValue = getCell((String) key);
+		C cellValue = getCell(key);
 		return cellValue.setValue(value, getIndex());
 	}
 

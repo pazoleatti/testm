@@ -117,6 +117,11 @@ public class OpenCorrectDialogView extends PopupViewWithUiHandlers<OpenCorrectDi
     }
 
     @Override
+    public void setTerm(Date term) {
+        this.term.setValue(term);
+    }
+
+    @Override
     public ReportPeriod getSelectedPeriod() {
         if (periodList.getValue().size() == 1) {
             for(ReportPeriod reportPeriod : reportPeriods) {

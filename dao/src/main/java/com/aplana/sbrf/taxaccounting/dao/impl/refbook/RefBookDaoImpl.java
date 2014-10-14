@@ -17,6 +17,7 @@ import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.util.BDUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -1494,7 +1495,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     private static final String CHECK_USAGES_IN_DEPARTMENT_CONFIG = "select * from (with checkRecords as (select * from ref_book_record r where %s),\n" +
             "periodCodes as (select a.alias, v.* from ref_book_value v, ref_book_attribute a where v.attribute_id=a.id and a.ref_book_id=8),\n" +
             "usages as (select r.* from ref_book_value v, ref_book_record r, checkRecords cr " +
-            "where v.attribute_id in (select id from ref_book_attribute where ref_book_id in (31,33,37,98,99) and id not in (170,192,180)) and v.reference_value = cr.id and r.id=v.record_id)\n" +   //170,192,180 - ссылки на подразделения
+            "where v.attribute_id in (select id from ref_book_attribute where ref_book_id in (31,33,37,98,99) and id not in (170,192,180,206)) and v.reference_value = cr.id and r.id=v.record_id)\n" +   //170,192,180 - ссылки на подразделения
             "select distinct d.name as departmentName, concat(pn.string_value, to_char(u.version,' yyyy')) as periodName, nt.number_value as isT, ni.number_value as isI, nd.number_value as isD, nv.number_value as isV, np.number_value as isP,\n" +
             "to_date(concat(to_char(ps.date_value,'dd.mm'), to_char(u.version,'.yyyy')), 'DD.MM.YYYY') as periodStart, to_date(concat(to_char(pe.date_value,'dd.mm'), to_char(u.version,'.yyyy')), 'DD.MM.YYYY') as periodEnd,\n" +
             "case\n" +
@@ -1519,13 +1520,13 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     @Override
     public List<String> isVersionUsed(Long refBookId, List<Long> uniqueRecordIds, Date versionFrom, Date versionTo,
-                                      boolean isValuesChanged) {
+                                      boolean isValuesChanged, List<Long> excludedRefBooks) {
         Set<String> results = new HashSet<String>();
         String in;
         String sql;
         Map<String, Object> params = new HashMap<String, Object>();
         //Проверка использования в справочниках
-        results.addAll(isVersionUsedInRefBooks(refBookId, uniqueRecordIds, versionFrom, versionTo, isValuesChanged));
+        results.addAll(isVersionUsedInRefBooks(refBookId, uniqueRecordIds, versionFrom, versionTo, isValuesChanged, excludedRefBooks));
 
         try {
             //Проверка использования в налоговых формах
@@ -1596,7 +1597,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "      JOIN ref_book_value v ON v.record_id = r.id AND %s\n" +
             "      JOIN ref_book_attribute a ON r.ref_book_id = a.ref_book_id AND a.id = v.attribute_id AND a.reference_id = :refBookId)\n" +
             "  JOIN ref_book_attribute a ON a.ref_book_id = b.id\n" +
-            "  JOIN ref_book_value v ON r.id = v.record_id AND a.id = v.attribute_id";
+            "  JOIN ref_book_value v ON r.id = v.record_id AND a.id = v.attribute_id %s ";
 
     private static final String CHECK_USAGES_IN_REFBOOK_WITH_PERIOD_RESTRICTION =
             "SELECT * FROM (\n" +
@@ -1610,24 +1611,28 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "      JOIN ref_book_value v ON v.record_id = r.id AND %s\n" +
             "      JOIN ref_book_attribute a ON r.ref_book_id = a.ref_book_id AND a.id = v.attribute_id AND a.reference_id = :refBookId)\n" +
             "  JOIN ref_book_attribute a ON a.ref_book_id = b.id\n" +
-            "  JOIN ref_book_value v ON r.id = v.record_id AND a.id = v.attribute_id)\n" +
+            "  JOIN ref_book_value v ON r.id = v.record_id AND a.id = v.attribute_id %s)\n" +
             "WHERE (:versionTo IS NOT NULL AND :versionTo < versionStart) OR (versionEnd IS NOT NULL AND versionEnd < :versionFrom)";
 
     public List<String> isVersionUsedInRefBooks(Long refBookId, List<Long> uniqueRecordIds, Date versionFrom, Date versionTo,
-                                                boolean isValuesChanged) {
+                                                boolean isValuesChanged, List<Long> excludedRefBooks) {
 
         List<String> results = new ArrayList<String>();
         String in = SqlUtils.transformToSqlInStatement("v.reference_value", uniqueRecordIds);
+        String inExcludeRefBook = "";
+        if (excludedRefBooks != null && !excludedRefBooks.isEmpty()) {
+            inExcludeRefBook = "where " + SqlUtils.transformToSqlInStatement("b.id not ", excludedRefBooks);
+        }
         String sql;
         Map<String, Object> params = new HashMap<String, Object>();
         //Проверка использования в справочниках
         try {
             if (isValuesChanged) {
-                sql = String.format(CHECK_USAGES_IN_REFBOOK, in);
+                sql = String.format(CHECK_USAGES_IN_REFBOOK, in, inExcludeRefBook);
                 params.put("refBookId", refBookId);
             } else {
                 /** Если атрибуты не были изменены то дополнительно фильтруем по периоду актуальности */
-                sql = String.format(CHECK_USAGES_IN_REFBOOK_WITH_PERIOD_RESTRICTION, in);
+                sql = String.format(CHECK_USAGES_IN_REFBOOK_WITH_PERIOD_RESTRICTION, in, inExcludeRefBook);
                 params.put("refBookId", refBookId);
                 params.put("versionFrom", versionFrom);
                 params.put("versionTo", versionTo);
@@ -1687,7 +1692,10 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     @Override
     public List<String> isVersionUsedInRefBooks(Long refBookId, List<Long> uniqueRecordIds) {
-        return isVersionUsedInRefBooks(refBookId, uniqueRecordIds, null, null, true);
+        return isVersionUsedInRefBooks(refBookId, uniqueRecordIds, null, null, true,
+                RefBookTableRef.getTablesIdByRefBook(refBookId) == null ?
+                        Collections.<Long>emptyList() :
+                        Arrays.asList(ArrayUtils.toObject(RefBookTableRef.getTablesIdByRefBook(refBookId))));
     }
 
     /**

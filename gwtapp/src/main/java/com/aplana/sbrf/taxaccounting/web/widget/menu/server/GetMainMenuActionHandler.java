@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.web.module.configuration.client.Configurati
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListNameTokens;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.DeclarationTemplateTokens;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.client.DepartmentConfigTokens;
+import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.client.DepartmentConfigPropertyTokens;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListNameTokens;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.members.client.MembersTokens;
@@ -109,9 +110,12 @@ public class GetMainMenuActionHandler extends
                 if (currentUser.hasRole(TARole.ROLE_CONTROL)
                         || currentUser.hasRole(TARole.ROLE_CONTROL_NS)
                         || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
-                    if (!TaxType.PROPERTY.toString().equals(menu.getMeta())) { // Можно вернуть после реализации "Налог на имущество"
+                    if (!TaxType.PROPERTY.toString().equals(menu.getMeta())) {
                         menu.getSubMenu().add(new MenuItem("Настройки подразделений", NUMBER_SIGN
                                 + DepartmentConfigTokens.departamentConfig + ";" + TYPE + "=" + menu.getMeta()));
+                    } else {
+                        menu.getSubMenu().add(new MenuItem("Настройки подразделений", NUMBER_SIGN
+                                + DepartmentConfigPropertyTokens.departamentConfig + ";" + TYPE + "=" + menu.getMeta()));
                     }
                 }
 
