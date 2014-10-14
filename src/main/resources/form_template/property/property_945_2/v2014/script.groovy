@@ -215,6 +215,9 @@ def calcBasis(def recordId) {
         return null
     }
     def record = getRefBookValue(203, recordId)
+    if (record == null) {
+        return null
+    }
     def section = record.SECTION.value ?: ''
     def item = record.ITEM.value ?: ''
     def subItem = record.SUBITEM.value ?: ''
