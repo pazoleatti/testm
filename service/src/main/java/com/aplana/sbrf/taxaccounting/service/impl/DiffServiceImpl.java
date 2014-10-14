@@ -18,7 +18,7 @@ import java.util.*;
 public class DiffServiceImpl implements DiffService {
     @Override
     public List<Diff> computeDiff(List<String> original, List<String> revised) {
-        // Патч по алгоритму Myers' Diff
+        // Патч по алгоритму Myer's Diff
         Patch<String> patch = DiffUtils.diff(original, revised);
         List<Diff> diffList = new LinkedList<Diff>();
         // По списку изменений (изменения блоками, нужно разделить на строки)
@@ -84,6 +84,16 @@ public class DiffServiceImpl implements DiffService {
         // Перевод в списки строк
         List<String> originalList = new ArrayList<String>(original.size());
         List<String> revisedList = new ArrayList<String>(revised.size());
+
+        // Строки почему-то не по порядку
+        Comparator<DataRow<Cell>> dataRowComparator = new Comparator<DataRow<Cell>>() {
+            @Override
+            public int compare(DataRow<Cell> o1, DataRow<Cell> o2) {
+                return o1.getIndex().compareTo(o2.getIndex());
+            }
+        };
+        Collections.sort(original, dataRowComparator);
+        Collections.sort(revised, dataRowComparator);
 
         for (DataRow<Cell> dataRow : original) {
             originalList.add(getRowAsString(dataRow));

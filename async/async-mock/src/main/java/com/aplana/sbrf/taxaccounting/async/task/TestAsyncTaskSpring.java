@@ -40,12 +40,12 @@ public class TestAsyncTaskSpring extends AbstractAsyncTask {
     }
 
     @Override
-    protected String getNotificationMsg() {
+    protected String getNotificationMsg(Map<String, Object> params) {
         return "Тест тест тест dev-mode";
     }
 
     @Override
-    protected String getErrorMsg() {
+    protected String getErrorMsg(Map<String, Object> params) {
         return "Dev-мод ошибка";
     }
 }

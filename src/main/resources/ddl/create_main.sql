@@ -414,11 +414,7 @@ comment on column declaration_data.id is 'Идентификатор (перви
 comment on column declaration_data.declaration_template_id is 'Ссылка на шаблон декларации';
 comment on column declaration_data.tax_organ_code is 'Налоговый орган';
 comment on column declaration_data.kpp is 'КПП';
-comment on column declaration_data.data is 'Данные декларации в формате законодателя (XML)';
 comment on column declaration_data.is_accepted is 'Признак того, что декларация принята';
-comment on column declaration_data.data_pdf is 'Данные декларации в формате PDF';
-comment on column declaration_data.data_xlsx is 'Данные декларации в формате XLSX';
-comment on column declaration_data.jasper_print is 'Сформированный отчет во внутреннем формате Jasper Reports';
 comment on column declaration_data.department_report_period_id is 'Идентификатор отчетного периода подразделения';
 
 create sequence seq_declaration_data start with 10000;
@@ -627,7 +623,6 @@ CREATE TABLE log_system (
   declaration_type_name VARCHAR2(80),
   form_type_name        VARCHAR2(1000),
   form_department_id    NUMBER(9),
-  tb_department_id      NUMBER(9),
   blob_data_id          VARCHAR2(36),
   form_type_id               NUMBER(9,0)
 );
@@ -646,7 +641,6 @@ comment on column log_system.user_department_name is 'Наименование �
 comment on column LOG_SYSTEM.DECLARATION_TYPE_NAME is 'Вид декларации';
 comment on column LOG_SYSTEM.FORM_TYPE_NAME is 'Вид налоговой формы';
 comment on column LOG_SYSTEM.FORM_DEPARTMENT_ID is 'Идентификатор подразделения налоговой формы/декларации';
-comment on column log_system.tb_department_id is 'Идентификатор ТБ подразделения налоговой формы/декларации';
 comment on column log_system.blob_data_id is 'Ссылка на логи';
 comment on column log_system.form_type_id is 'Идентификатор вида НФ';
 

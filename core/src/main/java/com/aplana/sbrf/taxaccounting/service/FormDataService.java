@@ -304,4 +304,10 @@ public interface FormDataService {
      */
     FormData getPreviousFormDataCorrection(FormData formData, List<DepartmentReportPeriod> departmentReportPeriodList,
                                           DepartmentReportPeriod departmentReportPeriod);
+
+    /**
+     * Удаление отчетов и блокировок на задачи формирования отчетов связанных с НФ
+     * @param formDataId
+     */
+    void deleteReport(long formDataId);
 }

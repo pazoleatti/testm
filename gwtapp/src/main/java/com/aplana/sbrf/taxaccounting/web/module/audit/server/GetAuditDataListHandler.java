@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
  * User: avanteev
  */
 @Service
-@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS', 'ROLE_OPER')")
 public class GetAuditDataListHandler extends AbstractActionHandler<GetAuditDataListAction, GetAuditDataListResult> {
 
     @Autowired

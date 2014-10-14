@@ -12,5 +12,6 @@
         <jdbc:script location="classpath:data/TaxPeriod.sql" encoding="UTF-8"/>
         <jdbc:script location="classpath:data/ReportPeriod.sql" encoding="UTF-8"/>
         <jdbc:script location="classpath:data/DepartmentReportPeriod.sql" encoding="UTF-8"/>
+        <jdbc:script location="classpath:data/FormData.sql" encoding="UTF-8"/>
     </jdbc:initialize-database>
 </beans>

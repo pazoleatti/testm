@@ -72,6 +72,9 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
 			long dFormDataId = formDataService.createFormDataWithoutCheck(scriptComponentContext.getLogger(),
                     scriptComponentContext.getUserInfo(), formTemplateId, departmentReportPeriodId, kind, periodOrder, false);
 			formData = formDataDao.get(dFormDataId, false);
+        } else {
+            FormTemplate formTemplate = formTemplateDao.get(formData.getFormTemplateId());
+            formData.initFormTemplateParams(formTemplate);
         }
 
         if (formData.getState() != WorkflowState.ACCEPTED) {
@@ -98,6 +101,7 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
             formDataDao.save(formData);
 			// Коммитим строки после отработки скрипта. http://jira.aplana.com/browse/SBRFACCTAX-3637
 			dataRowDao.commit(formData.getId());
+            formDataService.deleteReport(formData.getId());
             logBusinessService.add(formData.getId(), null, scriptComponentContext.getUserInfo(), FormDataEvent.COMPOSE,
                     "Событие инициировано Системой");
 		}

@@ -9,7 +9,6 @@ import javax.validation.constraints.NotNull;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Интерфейс сервиса для работы с привязкой департаментов к подразделениям
@@ -359,17 +358,6 @@ public interface SourceService {
      */
     boolean existAssignedForm(int departmentId, int typeId, FormDataKind kind);
 
-    /**
-     * Получает формы назначения как приемники, так и источники, принадлежащих подразделениям терр.банка terrBankId
-     * которые будут источниками, либо приемниками форм назначений принадлежащих подразделению departmentId/
-     *
-     * @param departmentId департамент-источник
-     * @param terrBankId   департамент-приемник
-     * @param taxTypes     типы НФ
-     * @return список {@link Map<String, List<Pair>>} в которых первым параметром идет форма назначение источник, вторым приемник
-     *         с определенными ключами
-     */
-    Map<String, List> getSourcesDestinations(int departmentId, int terrBankId, List<TaxType> taxTypes);
 
     /**
      * Проверяет существование форм-приемников в статусе "Принята" в указанном отчетном периоде
@@ -403,9 +391,40 @@ public interface SourceService {
      */
     List<FormToFormRelation> getRelations(int departmentId, int formTypeId, FormDataKind kind, int departmentReportPeriodId, Integer periodOrder);
 
+    /**
+     * Находит назначенные виды налоговые форм, которые являются потребителями налоговой формы{@code typeId}
+     * @param typeId вид налоговой формы источника
+     * @param dateFrom дата начала действия
+     * @param dateTo дата окончания действия
+     * @return список назначений
+     */
     List<Pair<DepartmentFormType, Date>> findDestinationFTsForFormType(int typeId, Date dateFrom, Date dateTo);
+
+    /**
+     * Находит назначенные виды налоговые форм, которые являются источниками налоговой формы{@code typeId}
+     * @param typeId вид налоговой формы потребителя
+     * @param dateFrom дата начала действия
+     * @param dateTo дата окончания действия
+     * @return список назначений
+     */
     List<Pair<DepartmentFormType, Date>> findSourceFTsForFormType(int typeId, Date dateFrom, Date dateTo);
+
+    /**
+     * Находит назначенные виды налоговые форм, которые являются источниками для вида декларации{@code typeId}
+     * @param typeId вид декларации потребителя
+     * @param dateFrom дата начала действия
+     * @param dateTo дата окончания действия
+     * @return список назначений
+     */
     List<Pair<DepartmentFormType, Date>> findSourceFTsForDeclaration(int typeId, Date dateFrom, Date dateTo);
+
+    /**
+     * Находит назначенные виды деклараций, которые являются потребителями налоговой формы{@code typeId}
+     * @param typeId вид налоговой формы потребителя
+     * @param dateFrom дата начала действия
+     * @param dateTo дата окончания действия
+     * @return список назначений
+     */
     List<Pair<DepartmentDeclarationType, Date>> findDestinationDTsForFormType(int typeId, Date dateFrom, Date dateTo);
 
     /**
@@ -417,7 +436,7 @@ public interface SourceService {
 
     /**
      * ПОлучение назначений деклараций
-     * @param declarationTypeId идентификатор {@link FormType}
+     * @param declarationTypeId идентификатор {@link DeclarationType}
      * @return список
      */
     List<DepartmentDeclarationType> getDDTByDeclarationType(@NotNull Integer declarationTypeId);

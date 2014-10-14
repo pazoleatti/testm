@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.FormPerformerDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.*;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
@@ -93,6 +94,10 @@ public class FormDataServiceImpl implements FormDataService {
     private RefBookDao refBookDao;
     @Autowired
     private RefBookFactory refBookFactory;
+    @Autowired
+    private ReportService reportService;
+    @Autowired
+    private FormPerformerDao formPerformerDao;
     @Autowired
     private DepartmentReportPeriodDao departmentReportPeriodDao;
 
@@ -283,7 +288,7 @@ public class FormDataServiceImpl implements FormDataService {
 
 		logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.CREATE, null);
 		auditService.add(FormDataEvent.CREATE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-				null, formData.getFormType().getName(), formData.getKind().getId(), null, null, formData.getFormType().getId());
+				null, formData.getFormType().getName(), formData.getKind().getId(), "Форма создана", null, formData.getFormType().getId());
 
 		// Заполняем начальные строки (но не сохраняем)
 		dataRowDao.saveRows(formData, formTemplate.getRows());
@@ -448,9 +453,11 @@ public class FormDataServiceImpl implements FormDataService {
 		
 		dataRowDao.commit(formData.getId());
 
+        deleteReport(formData.getId());
+
 		logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.SAVE, null);
 		auditService.add(FormDataEvent.SAVE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-				null, formData.getFormType().getName(), formData.getKind().getId(), null, null, formData.getFormType().getId());
+				null, formData.getFormType().getName(), formData.getKind().getId(), "Форма сохранена", null, formData.getFormType().getId());
 
 		return formData.getId();
 	}
@@ -508,8 +515,9 @@ public class FormDataServiceImpl implements FormDataService {
 
             FormData formData = formDataDao.get(formDataId, manual);
             auditService.add(FormDataEvent.DELETE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-                    null, formData.getFormType().getName(), formData.getKind().getId(), null, null, formData.getFormType().getId());
+                    null, formData.getFormType().getName(), formData.getKind().getId(), "Форма удалена", null, formData.getFormType().getId());
             formDataDao.delete(formDataId);
+            deleteReport(formDataId);
         }
 	}
 
@@ -576,7 +584,7 @@ public class FormDataServiceImpl implements FormDataService {
                     //Проверяем что записи справочников, на которые есть ссылки в нф все еще существуют в периоде формы
                     checkReferenceValues(logger, formData);
                     //Делаем переход
-                    moveProcess(formData, manual, userInfo, workflowMove, note, logger);
+                    moveProcess(formData, userInfo, workflowMove, note, logger);
                 } finally {
                     for (String lock : lockedObjects) {
                         lockService.unlock(lock, userId);
@@ -587,7 +595,7 @@ public class FormDataServiceImpl implements FormDataService {
                         logEntryService.save(logger.getEntries()));
             }
         } else {
-            moveProcess(formData, manual, userInfo, workflowMove, note, logger);
+            moveProcess(formData, userInfo, workflowMove, note, logger);
         }
     }
 
@@ -656,7 +664,7 @@ public class FormDataServiceImpl implements FormDataService {
         }
     }
 
-    public void moveProcess(FormData formData, boolean manual, TAUserInfo userInfo, WorkflowMove workflowMove, String note, Logger logger) {
+    private void moveProcess(FormData formData, TAUserInfo userInfo, WorkflowMove workflowMove, String note, Logger logger) {
         formDataScriptingService.executeScript(userInfo, formData, workflowMove.getEvent(), logger, null);
 
         if (logger.containsLevel(LogLevel.ERROR)) {
@@ -684,9 +692,11 @@ public class FormDataServiceImpl implements FormDataService {
 
         logger.info("Форма \"" + formData.getFormType().getName() + "\" переведена в статус \"" + workflowMove.getToState().getName() + "\"");
 
+        deleteReport(formData.getId());
+
         logBusinessService.add(formData.getId(), null, userInfo, workflowMove.getEvent(), note);
         auditService.add(workflowMove.getEvent(), userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-                null, formData.getFormType().getName(), formData.getKind().getId(), note, null, formData.getFormType().getId());
+                null, formData.getFormType().getName(), formData.getKind().getId(), workflowMove.getEvent().getTitle(), null, formData.getFormType().getId());
 
         updatePreviousRowNumberAttr(formData, workflowMove, logger);
     }
@@ -801,7 +811,8 @@ public class FormDataServiceImpl implements FormDataService {
                     FormDataCompositionService formDataCompositionService = applicationContext.getBean(FormDataCompositionService.class);
                     ((ScriptComponentContextHolder) formDataCompositionService).setScriptComponentContext(scriptComponentContext);
                     Integer periodOrder = (destinationDFT.getKind() == FormDataKind.PRIMARY || destinationDFT.getKind() == FormDataKind.CONSOLIDATED) ? formData.getPeriodOrder() : null;
-                    formDataCompositionService.compose(destinationForm, formData.getDepartmentReportPeriodId(), periodOrder, destinationDFT.getFormTypeId(), destinationDFT.getKind());
+                    formDataCompositionService.compose(destinationForm, destinationDepartmentReportPeriod.getId(),
+                            periodOrder, destinationDFT.getFormTypeId(), destinationDFT.getKind());
                 } else if (destinationForm != null) {
                     String formName = destinationForm.getFormType().getName();
                     String kindName = destinationForm.getKind().getName();
@@ -907,6 +918,9 @@ public class FormDataServiceImpl implements FormDataService {
         if (dateFrom == null)
             throw new ServiceException("Должна быть установлена хотя бы \"Дата от\"");
         try {
+            List<Long> formDataIds = formPerformerDao.getFormDataId(depTBId, dateFrom, dateTo);
+            for(Long formDataId: formDataIds)
+                deleteReport(formDataId);
             formDataDao.updateFDPerformerTBDepartmentNames(depTBId, depName, dateFrom, dateTo);
         } catch (ServiceException e){
             throw new ServiceException("Ошибка при обновлении имени ТБ", e);
@@ -918,6 +932,9 @@ public class FormDataServiceImpl implements FormDataService {
         if (dateFrom == null)
             throw new ServiceException("Должна быть установлена хотя бы \"Дата от\"");
         try {
+            List<Long> formDataIds = formPerformerDao.getFormDataId(depTBId, dateFrom, dateTo);
+            for(Long formDataId: formDataIds)
+                deleteReport(formDataId);
             formDataDao.updateFDPerformerDepartmentNames(depTBId, depName, dateFrom, dateTo);
         } catch (ServiceException e){
             throw new ServiceException("Ошибка при обновлении имени ТБ", e);
@@ -927,16 +944,17 @@ public class FormDataServiceImpl implements FormDataService {
     @Override
     public Integer getPreviousRowNumber(FormData formData) {
         int previousRowNumber = 0;
-        // Получить налоговый период
-        ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
-        TaxPeriod taxPeriod = reportPeriod.getTaxPeriod();
+        // Отчетный период подразделения
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(formData.getDepartmentReportPeriodId());
+        // Налоговый период
+        TaxPeriod taxPeriod = departmentReportPeriod.getReportPeriod().getTaxPeriod();
         // Получить упорядоченный список экземпляров НФ, которые участвуют в сквозной нумерации и находятся до указанного экземпляра НФ
         List<FormData> formDataList = formDataDao.getPrevFormDataList(formData, taxPeriod);
 
         // Если экземпляр НФ является не первым экземпляром в сквозной нумерации
         if (formDataList.size() > 0) {
             for (FormData aFormData : formDataList) {
-                if (beInOnAutoNumeration(aFormData)) {
+                if (beInOnAutoNumeration(aFormData.getState(), departmentReportPeriod)) {
                     previousRowNumber += dataRowDao.getSizeWithoutTotal(aFormData);
                 }
                 if (aFormData.getId().equals(formData.getId())) {
@@ -954,8 +972,10 @@ public class FormDataServiceImpl implements FormDataService {
      * @param logger   логгер для регистрации ошибок
      * @param formData редактируемый экземпляр НФ
      */
-    public void updatePreviousRowNumberAttr(FormData formData, Logger logger) {
-        if (beInOnAutoNumeration(formData) && dataRowDao.isDataRowsCountChanged(formData.getId())) {
+    void updatePreviousRowNumberAttr(FormData formData, Logger logger) {
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(formData.getDepartmentReportPeriodId());
+        if (beInOnAutoNumeration(formData.getState(), departmentReportPeriod)
+                && dataRowDao.isDataRowsCountChanged(formData.getId())) {
             updatePreviousRowNumber(formData, logger);
         }
     }
@@ -1077,11 +1097,12 @@ public class FormDataServiceImpl implements FormDataService {
 
     /**
      * Экземпляры в статусе "Создана" не участвуют в сквозной нумерации
-     * @param formData налоговая форма
+     * @param formState Состояние НФ
+     * @param departmentReportPeriod Отчетный период подразделения НФ
      * @return true - участвует, false - не участвует
      */
-    public boolean beInOnAutoNumeration(FormData formData) {
-        return formData.getState() != WorkflowState.CREATED;
+    public boolean beInOnAutoNumeration(WorkflowState formState, DepartmentReportPeriod departmentReportPeriod) {
+        return formState != WorkflowState.CREATED && departmentReportPeriod.getCorrectionDate() == null;
     }
 
     /**
@@ -1107,5 +1128,21 @@ public class FormDataServiceImpl implements FormDataService {
         if (lockData.getUserId() != user.getId()) {
             throw new ServiceException("Объект не заблокирован текущим пользователем");
         }
+    }
+
+    @Override
+    public void deleteReport(long formDataId) {
+        boolean[] b = {false, true};
+        ReportType[] reportTypes = {ReportType.CSV, ReportType.EXCEL};
+        for(ReportType reportType: reportTypes) {
+            for(boolean manual: b) {
+                for(boolean showChecked: b) {
+                    for(boolean saved: b) {
+                        lockService.unlock(String.format("%s_%s_%s_isShowChecked_%s_manual_%s_saved_%s", LockData.LOCK_OBJECTS.FORM_DATA.name(), formDataId, reportType.getName(), showChecked, manual, saved), 0, true);
+                    }
+                }
+            }
+        }
+        reportService.delete(formDataId);
     }
 }

@@ -33,7 +33,7 @@ import java.util.*;
 public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
     @Autowired
-	BDUtils dbUtils;
+	private BDUtils dbUtils;
 
 	public static final String ERROR_MSG_NO_ROWID = "Невозможно сохранить изменения, так как данные устарели. " +
                                                     "Изменения будут отменены. Переоткройте форму заново.";

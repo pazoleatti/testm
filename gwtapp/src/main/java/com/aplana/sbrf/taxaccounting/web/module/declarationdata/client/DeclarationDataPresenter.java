@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
+import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.ParamUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
@@ -15,7 +16,12 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.workflowdialog.DialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.*;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CreateReportAction;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CreateReportResult;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.TimerReportAction;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.TimerReportResult;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListNameTokens;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.*;
 import com.aplana.sbrf.taxaccounting.web.widget.history.client.HistoryPresenter;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.shared.Pdf;
 import com.google.gwt.core.client.GWT;
@@ -86,6 +92,12 @@ public class DeclarationDataPresenter
         void setKpp(String kpp);
 
         void setPropertyBlockVisible(boolean isVisible);
+
+        void startTimerReport(ReportType reportType);
+
+        void stopTimerReport(ReportType reportType);
+
+        void updatePrintReportButtonName(ReportType reportType, boolean isLoad);
 
         void setPdfPage(int page);
 
@@ -170,14 +182,42 @@ public class DeclarationDataPresenter
 								getView().showReject(result.isCanReject());
 								getView().showDelete(result.isCanDelete());
 								getView().showRecalculateButton(result.isCanDelete());
-								getView().showDownloadButtons(result.isCanDownload());
-								getView().setPdf(result.getPdf());
+
+                                onTimerReport(ReportType.XML_DEC, false);
+                                onTimerReport(ReportType.EXCEL_DEC, false);
 							}
 						}, DeclarationDataPresenter.this).addCallback(
 						TaManualRevealCallback.create(
 								DeclarationDataPresenter.this, placeManager)));
 
 	}
+
+    @Override
+    public void onTimerReport(final ReportType reportType, final boolean isTimer) {
+        TimerReportAction action = new TimerReportAction();
+        action.setDeclarationDataId(declarationId);
+        action.setType(reportType);
+        dispatcher.execute(action, CallbackUtils
+                .defaultCallback(new AbstractCallback<TimerReportResult>() {
+                    @Override
+                    public void onSuccess(TimerReportResult result) {
+                        if (result.getExistReport().equals(TimerReportResult.StatusReport.EXIST)) {
+                            if (ReportType.XML_DEC.equals(reportType)) getView().setPdf(result.getPdf());
+                            getView().updatePrintReportButtonName(reportType, true);
+                        } else if (result.getExistReport().equals(TimerReportResult.StatusReport.NOT_EXIST)) { // если файл не файл существует и блокировки нет(т.е. задачу отменили или ошибка при формировании)
+                            getView().stopTimerReport(reportType);
+                            if (ReportType.XML_DEC.equals(reportType)) getView().setPdf(new Pdf());
+                            if (!isTimer) {
+                                getView().updatePrintReportButtonName(reportType, false);
+                            }
+                        } else if (!isTimer) {
+                            if (ReportType.XML_DEC.equals(reportType)) getView().setPdf(new Pdf());
+                            getView().updatePrintReportButtonName(reportType, false);
+                            getView().startTimerReport(reportType);
+                        }
+                    }
+                }, this));
+    }
 
 	@Override
 	public boolean useManualReveal() {
@@ -203,6 +243,7 @@ public class DeclarationDataPresenter
 												DeclarationDataPresenter.this,
                                                 !taxType.equals(TaxType.DEAL) ? DECLARATION_UPDATE_MSG : DECLARATION_UPDATE_MSG_D);
 										revealPlaceRequest();
+                                        getView().startTimerReport(ReportType.XML_DEC);
 									}
 								}, DeclarationDataPresenter.this));
 	}
@@ -291,8 +332,26 @@ public class DeclarationDataPresenter
 
 	@Override
 	public void downloadExcel() {
-		Window.open(GWT.getHostPageBaseURL() + "download/declarationData/xlsx/"
-				+ declarationId, null, null);
+        final ReportType reportType = ReportType.EXCEL_DEC;
+        CreateReportAction action = new CreateReportAction();
+        action.setDeclarationDataId(declarationId);
+        action.setType(reportType);
+        dispatcher.execute(action, CallbackUtils
+                .defaultCallback(new AbstractCallback<CreateReportResult>() {
+                    @Override
+                    public void onSuccess(CreateReportResult result) {
+                        LogCleanEvent.fire(DeclarationDataPresenter.this);
+                        LogAddEvent.fire(DeclarationDataPresenter.this, result.getUuid());
+                        if (result.isExistReport()) {
+                            getView().updatePrintReportButtonName(reportType, true);
+                            Window.open(GWT.getHostPageBaseURL() + "download/declarationData/xlsx/"
+                                    + declarationId, null, null);
+                        } else {
+                            getView().updatePrintReportButtonName(reportType, false);
+                            getView().startTimerReport(reportType);
+                        }
+                    }
+                }, this));
 	}
 
 	@Override

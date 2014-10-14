@@ -68,7 +68,7 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
     public void updateBalance(List<Integer> ids, boolean isBalance) {
         if (ids == null || ids.isEmpty())
             throw new ServiceException(ERROR_BATCH_MESSAGE);
-        departmentReportPeriodDao.updateActive(ids, isBalance);
+        departmentReportPeriodDao.updateBalance(ids, isBalance);
     }
 
     @Override

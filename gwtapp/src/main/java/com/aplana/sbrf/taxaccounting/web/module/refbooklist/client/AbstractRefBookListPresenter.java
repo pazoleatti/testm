@@ -27,7 +27,6 @@ public abstract class AbstractRefBookListPresenter<V extends AbstractRefBookList
         extends Presenter<V, Proxy_> implements RefBookListUiHandlers {
 
     private final DispatchAsync dispatchAsync;
-    private String filterText;
 
     public AbstractRefBookListPresenter(EventBus eventBus, V view, Proxy_ proxy, DispatchAsync dispatchAsync) {
         super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());

@@ -84,8 +84,9 @@ public interface FormDataAccessService {
 
     /**
      * Проверка наличия и статуса приемника при осуществлении перевода формы
-     * в статус "Подготовлена"/"Утверждена"/"Принята".
+     * в статус "Подготовлена"/"Утверждена"/"Принята". Если проверка не пройдена, то выкидывается ServiceException
      * @param formDataId
+     * @return true, если есть назначенная НФ-приемник или декларация-приемник
      */
-    void checkDestinations(long formDataId);
+    boolean checkDestinations(long formDataId);
 }

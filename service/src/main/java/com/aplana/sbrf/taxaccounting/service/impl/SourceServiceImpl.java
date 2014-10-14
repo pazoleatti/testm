@@ -1,6 +1,9 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.*;
+import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
+import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.SourceDao;
 import com.aplana.sbrf.taxaccounting.dao.api.*;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -12,9 +15,7 @@ import com.aplana.sbrf.taxaccounting.model.source.SourceObject;
 import com.aplana.sbrf.taxaccounting.model.source.SourcePair;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.utils.SimpleDateUtils;
@@ -76,49 +77,40 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Autowired
-    DepartmentFormTypeDao departmentFormTypeDao;
+    private DepartmentFormTypeDao departmentFormTypeDao;
 
     @Autowired
-    DepartmentDeclarationTypeDao departmentDeclarationTypeDao;
+    private DepartmentDeclarationTypeDao departmentDeclarationTypeDao;
 
     @Autowired
-    FormTypeDao formTypeDao;
+    private FormTypeDao formTypeDao;
 
     @Autowired
-    DeclarationTypeDao declarationTypeDao;
+    private DeclarationTypeDao declarationTypeDao;
 
     @Autowired
-    FormDataService formDataService;
+    private DepartmentDao departmentDao;
 
     @Autowired
-    DepartmentDao departmentDao;
+    private DepartmentService departmentService;
 
     @Autowired
-    DepartmentService departmentService;
+    private SourceDao sourceDao;
 
     @Autowired
-    SourceDao sourceDao;
+    private FormDataDao formDataDao;
 
     @Autowired
-    FormDataDao formDataDao;
+    private ReportPeriodDao reportPeriodDao;
 
     @Autowired
-    DeclarationDataDao declarationDataDao;
+    private LogEntryService logEntryService;
 
     @Autowired
-    ReportPeriodDao reportPeriodDao;
+    private FormTemplateDao formTemplateDao;
 
     @Autowired
-    LogEntryService logEntryService;
-
-    @Autowired
-    FormTemplateDao formTemplateDao;
-
-    @Autowired
-    RefBookFactory rbFactory;
-
-    @Autowired
-    DepartmentReportPeriodDao departmentReportPeriodDao;
+    private DepartmentReportPeriodDao departmentReportPeriodDao;
 
     @Override
     public List<DepartmentFormType> getDFTSourcesByDFT(int departmentId, int formTypeId, FormDataKind kind, Date periodStart,
@@ -1097,19 +1089,6 @@ public class SourceServiceImpl implements SourceService {
         return departmentFormTypeDao.existAssignedForm(departmentId, typeId, kind);
     }
 
-    @Override
-    public Map<String, List> getSourcesDestinations(int departmentId, int terrBankId, List<TaxType> taxTypes) {
-        HashMap<String, List> map = new HashMap<String, List>();
-        List<Pair<DepartmentFormType, DepartmentFormType>> destinationFT = departmentFormTypeDao.getFormDestinationsWithDepId(departmentId, terrBankId,taxTypes);
-        map.put("destinationFTs", destinationFT);
-        List<Pair<DepartmentFormType, DepartmentFormType>> sourceFTs = departmentFormTypeDao.getFormSourcesWithDepId(departmentId, terrBankId,taxTypes);
-        map.put("sourceFTs", sourceFTs);
-        List<Pair<DepartmentFormType, DepartmentDeclarationType>> destinationDTs = departmentFormTypeDao.getDeclarationDestinationsWithDepId(departmentId, terrBankId,taxTypes);
-        map.put("destinationDTs", destinationDTs);
-        List<Pair<DepartmentFormType, DepartmentDeclarationType>> sourceDTs = departmentFormTypeDao.getDeclarationSourcesWithDepId(departmentId, terrBankId,taxTypes);
-        map.put("sourceDTs", sourceDTs);
-        return map;
-    }
 
     @Override
     public List<Pair<String, String>> existAcceptedDestinations(int sourceDepartmentId, int sourceFormTypeId,
@@ -1314,9 +1293,23 @@ public class SourceServiceImpl implements SourceService {
 
         DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
         filter.setReportPeriodIdList(Arrays.asList(departmentReportPeriod.getReportPeriod().getId()));
-        filter.setDepartmentIdList(Arrays.asList(departmentReportPeriod.getDepartmentId()));
+        filter.setDepartmentIdList(Arrays.asList(departmentFormType.getDepartmentId()));
+        // Список всех отчетных периодов
+        List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodDao.getListByFilter(filter);
+        // Приемник может быть или в том же отчетном периоде подразделения или в следующем, поэтому предыдущие отчетные
+        // периоды удаляем из списка
+        if (departmentReportPeriod.getCorrectionDate() != null) {
+            List<DepartmentReportPeriod> delList = new LinkedList<DepartmentReportPeriod>();
+            for (DepartmentReportPeriod destinationReportPeriod : departmentReportPeriodList) {
+                if (destinationReportPeriod.getCorrectionDate() == null ||
+                        destinationReportPeriod.getCorrectionDate().before(departmentReportPeriod.getCorrectionDate())) {
+                        delList.add(destinationReportPeriod);
+                }
+            }
+            departmentReportPeriodList.removeAll(delList);
+        }
 
-        for (DepartmentReportPeriod destinationReportPeriod : departmentReportPeriodDao.getListByFilter(filter)) {
+        for (DepartmentReportPeriod destinationReportPeriod : departmentReportPeriodList) {
             // Поиск экземпляра НФ в каждом существующем отчетном периоде подразделения
             FormData formData = formDataDao.find(departmentFormType.getFormTypeId(), departmentFormType.getKind(),
                     destinationReportPeriod.getId().intValue(),

@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.main.entry.client;
 
+import com.aplana.gwt.client.dialog.Dialog;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
@@ -12,6 +14,15 @@ public class TaRootPresenter extends RootPresenter {
 	
 	private int lockCount;
 
+    static {
+        // Перехват ошибок, которые не были отловлены в клиентском коде
+        GWT.setUncaughtExceptionHandler(new GWT.UncaughtExceptionHandler() {
+            @Override
+            public void onUncaughtException(Throwable e) {
+                Dialog.errorMessage(e.getMessage());
+            }
+        });
+    }
 
 	public static class OurView extends RootPresenter.RootView {
 		private Element glass;

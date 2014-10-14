@@ -94,6 +94,11 @@ public class LockDataServiceImpl implements LockDataService {
 
 	@Override
 	public void unlock(final String key, final int userId) {
+        unlock(key, userId, false);
+    }
+
+    @Override
+    public void unlock(final String key, final int userId, final boolean force) {
         tx.executeInNewTransaction(new TransactionLogic() {
             @Override
             public void execute() {
@@ -101,13 +106,13 @@ public class LockDataServiceImpl implements LockDataService {
                     synchronized(LockDataServiceImpl.class) {
                         LockData lock = validateLock(dao.get(key));
                         if (lock != null) {
-                            if (lock.getUserId() != userId) {
+                            if (!force && lock.getUserId() != userId) {
                                 TAUser blocker = userDao.getUser(lock.getUserId());
                                 throw new ServiceException(String.format("Невозможно удалить блокировку, так как она установлена " +
                                         "пользователем \"%s\"(%s).", blocker.getLogin(), blocker.getId()));
                             }
                             dao.deleteLock(key);
-                        } else {
+                        } else if (!force) {
                             throw new ServiceException(String.format("Нельзя снять несуществующую блокировку. key = \"%s\"", key));
                         }
                     }

@@ -29,9 +29,6 @@ public class DeclarationDataDaoTest {
 	@Autowired
 	private DeclarationDataDao declarationDataDao;
 
-    @Autowired
-    private BlobDataDao blobDataDao;
-
     private BlobData blobData;
 
     @Before
@@ -74,7 +71,7 @@ public class DeclarationDataDaoTest {
         assertFalse(declarationDataDao.hasXmlData(1));
         assertFalse(declarationDataDao.hasXmlData(2));
     }
-
+/*
 	@Test
 	public void testGetData() {
 		String data = declarationDataDao.get(1).getXmlDataUuid();
@@ -86,7 +83,7 @@ public class DeclarationDataDaoTest {
 		String data = declarationDataDao.get(2).getXmlDataUuid();
 		assertNull(data);
 	}
-
+*/
 	@Test(expected=DaoException.class)
 	public void testGetDataNotExisted() {
 		declarationDataDao.get(1000l);
@@ -217,30 +214,6 @@ public class DeclarationDataDaoTest {
     public void getDeclarationIdsTest(){
         Assert.assertEquals(Arrays.asList(1L, 3L), declarationDataDao.getDeclarationIds(1, 1));
         Assert.assertEquals(new ArrayList<Long>(), declarationDataDao.getDeclarationIds(222, 222));
-    }
-
-    @Test
-    public void updateTest(){
-        DeclarationData declarationDataOld = declarationDataDao.get(1);
-        DeclarationData declarationDataNew = new DeclarationData();
-        declarationDataNew.setId(declarationDataOld.getId());
-
-        String xmlId = blobDataDao.create(blobData);
-        declarationDataNew.setXmlDataUuid(xmlId);
-
-        blobData.setUuid(UUID.randomUUID().toString().toLowerCase());
-        String pdfId = blobDataDao.create(blobData);
-        declarationDataNew.setPdfDataUuid(pdfId);
-
-        blobData.setUuid(UUID.randomUUID().toString().toLowerCase());
-        String xlsxId = blobDataDao.create(blobData);
-        declarationDataNew.setXlsxDataUuid(xlsxId);
-
-        declarationDataDao.update(declarationDataNew);
-        assertNotEquals(declarationDataOld.getXmlDataUuid(), declarationDataNew.getXmlDataUuid());
-        assertNotEquals(declarationDataOld.getPdfDataUuid(), declarationDataNew.getPdfDataUuid());
-        assertNotEquals(declarationDataOld.getXlsxDataUuid(), declarationDataNew.getXlsxDataUuid());
-        assertEquals(blobData.getUuid(), declarationDataDao.get(1).getXlsxDataUuid());
     }
 
     @Test

@@ -128,10 +128,6 @@ alter table department_report_period add constraint dep_rep_per_fk_rep_period_id
 alter table declaration_data add constraint declaration_data_pk primary key (id);
 alter table declaration_data add constraint declaration_data_fk_decl_t_id foreign key (declaration_template_id) references declaration_template(id);
 alter table declaration_data add constraint decl_data_fk_dep_rep_per_id foreign key (department_report_period_id) references department_report_period (id);
-alter table declaration_data add constraint declaration_data_fk_j_print foreign key (jasper_print) references blob_data(id);
-alter table declaration_data add constraint declaration_data_fk_data foreign key (data) references blob_data(id);
-alter table declaration_data add constraint declaration_data_fk_data_pdf foreign key (data_pdf) references blob_data(id);
-alter table declaration_data add constraint declaration_data_fk_data_xlsx foreign key (data_xlsx) references blob_data(id);
 alter table declaration_data add constraint declaration_data_chk_is_accptd check (is_accepted in (0,1));
 alter table declaration_data add constraint declaration_data_uniq_template unique(department_report_period_id, declaration_template_id);
 
@@ -222,7 +218,7 @@ alter table template_changes add constraint template_changes_chk_template check 
 
 alter table log_system add constraint log_system_fk_event_id foreign key (event_id) references event(id);
 alter table log_system add constraint log_system_chk_dcl_form check (event_id in (7, 11, 401, 402, 501, 502, 503, 601, 901, 902, 903, 801, 802, 810, 811, 812, 813, 820, 821, 830, 831, 832, 840, 841, 842, 850, 860) or declaration_type_name is not null or (form_type_name is not null and form_kind_id is not null));
-alter table log_system add constraint log_system_chk_rp check (event_id in (7, 11, 401, 402, 501, 502, 503, 601, 901, 902, 903, 801, 802, 810, 811, 812, 813, 820, 821, 830, 831, 832, 840, 841, 842, 850, 860) or report_period_name is not null);
+alter table log_system add constraint log_system_chk_rp check (event_id in (7, 11, 401, 402, 501, 502, 503, 601, 650, 901, 902, 903, 801, 802, 810, 811, 812, 813, 820, 821, 830, 831, 832, 840, 841, 842, 850, 860) or report_period_name is not null);
 alter table log_system add constraint log_system_fk_kind foreign key (form_kind_id) references form_kind(id);
 alter table log_system add constraint log_system_fk_user_login foreign key (user_login) references sec_user(login);
 alter table log_system add constraint log_system_fk_blob_data foreign key (blob_data_id) references blob_data(id) on delete set null;

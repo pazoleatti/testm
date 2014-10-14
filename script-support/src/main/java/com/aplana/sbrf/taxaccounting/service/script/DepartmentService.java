@@ -8,5 +8,5 @@ public interface DepartmentService {
     /**
      * Подразделение по Id
      */
-    Department get(Integer id) throws IllegalArgumentException;
+    Department get(Integer id);
 }

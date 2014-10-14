@@ -1,8 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -138,7 +136,7 @@ public interface DeclarationDataService {
      * @param declarationDataId - идентификатор декларации
      * @param userInfo информация о пользователе
      */
-    void lock(long declarationDataId, TAUserInfo userInfo);
+    LockData lock(long declarationDataId, TAUserInfo userInfo);
 
     /**
      * Снять блокировку с DeclarationData.
@@ -153,4 +151,10 @@ public interface DeclarationDataService {
      * @param userInfo - информация о пользователе
      */
     void checkLockedMe(Long declarationDataId, TAUserInfo userInfo);
+
+    /**
+     * Удаление отчетов и блокировок на задачи формирования отчетов связанных с декларациями
+     * @param declarationDataId
+     */
+    void deleteReport(long declarationDataId, boolean isLock);
 }

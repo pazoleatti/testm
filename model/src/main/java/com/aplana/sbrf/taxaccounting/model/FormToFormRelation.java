@@ -8,30 +8,30 @@ import java.util.Date;
  */
 public class FormToFormRelation implements Serializable {
     /** полное название подразделения */
-    String fullDepartmentName;
+    private String fullDepartmentName;
 
     /** Вид НФ */
-    FormType formType;
+    private FormType formType;
 
     /** Тип НФ */
-    FormDataKind formDataKind;
+    private FormDataKind formDataKind;
 
     /** Статус */
-    WorkflowState state;
+    private WorkflowState state;
 
     /** подразделение исполнитель*/
-    Department performer;
+    private Department performer;
 
     /** является ли форма источников, в противном случае приемник*/
-    boolean source;
+    private boolean source;
 
     /** форма создана/не создана */
-    boolean created;
+    private boolean created;
 
     /** Идентификатор созданной формы */
-    Long formDataId;
+    private Long formDataId;
 
-    Date correctionDate;
+    private Date correctionDate;
 
     public String getFullDepartmentName() {
         return fullDepartmentName;

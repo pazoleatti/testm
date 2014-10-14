@@ -184,7 +184,7 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 						"where "+ SqlUtils.transformToSqlInStatement("department_id", departmentList)+" and is_active=1 " +
 						(withoutBalance ? " and is_balance_period=0 " : "") + (withoutCorrect ? "and correction_date is null" : "") + " ) " +
 						"and rp.tax_period_id = tp.id " +
-						"and tp.tax_type = \'" + String.valueOf(taxType.getCode()) +"\' " +
+						"and tp.tax_type = \'" + taxType.getCode() +"\' " +
 						"order by tp.year desc, rp.calendar_start_date",
 				new ReportPeriodMapper());
 	}
@@ -205,27 +205,6 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
             );
         } catch (EmptyResultDataAccessException e) {
             return Collections.emptyList();
-        }
-    }
-
-    @Override
-    public List<ReportPeriod> getClosedPeriodsForFormTemplate(Integer formTemplateId) {
-        try {
-            return getJdbcTemplate().query(
-                    "SELECT DISTINCT " +
-                            "rp.id, rp.name, rp.tax_period_id, rp.dict_tax_period_id, rp.start_date, rp.end_date, " +
-                            "rp.calendar_start_date " +
-                            "FROM report_period rp " +
-                            "LEFT JOIN department_report_period drp ON drp.report_period_id =rp.id " +
-                            "LEFT JOIN form_data fd ON fd.department_report_period_id = drp.id " +
-                            "AND drp.department_id = fd.department_id " +
-                            "AND drp.correction_date IS NULL " +
-                            "WHERE drp.is_active = 0 AND fd.form_template_id = ?",
-                    new Object[]{formTemplateId},
-                    new ReportPeriodMapper()
-            );
-        } catch (EmptyResultDataAccessException e) {
-            throw new DaoException("Не существуют закрытые периоды для версии макета с id = " + formTemplateId);
         }
     }
 

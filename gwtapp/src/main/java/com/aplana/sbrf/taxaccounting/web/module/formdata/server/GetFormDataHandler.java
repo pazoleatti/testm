@@ -68,10 +68,8 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
     private final static String CORRECTION_EDIT_MESSAGE = "Нельзя открыть налоговую форму в режиме редактирования для представления «Корректировка»!";
     private final static String CORRECTION_ERROR_MESSAGE = "Нельзя открыть налоговую форму, созданную в периоде, не являющемся корректирующим в режиме представления «Корректировка»!";
     private final static String PREVIOUS_FORM_NOT_FOUND_MESSAGE = "Не найдена ранее созданная форма в текущем периоде. Данные о различиях не сформированы.";
-    private final static String SUCCESS_CORRECTION_MESSAGE = "Корректировка отображена в результате сравнения с данными формы за %s %s%s.";
-    private final static String MANUAL_USED_MESSAGE = "Для формирования декларации в корректируемом периоде используются данные версии ручного ввода, созданной в форме %s - %s - %s!";
-
-    private TAUserInfo userInfo;
+    private final static String SUCCESS_CORRECTION_MESSAGE = "Корректировка отображена в результате сравнения с данными формы в периоде %s %s%s.";
+    private final static String MANUAL_USED_MESSAGE = "Для формирования декларации в корректируемом периоде используются данные версии ручного ввода, созданной в форме «%s», %s, «%s»!";
 
 	public GetFormDataHandler() {
 		super(GetFormDataAction.class);
@@ -80,7 +78,7 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
 	@Override
 	public GetFormDataResult execute(GetFormDataAction action, ExecutionContext context) throws ActionException {
 
-		userInfo = securityService.currentUserInfo();
+        TAUserInfo userInfo = securityService.currentUserInfo();
 
         actionCheck(action);
 		

@@ -17,7 +17,7 @@ import java.util.Date;
  * User: avanteev
  */
 @Service
-@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS', 'ROLE_OPER')")
 public class GetLastArchiveDateHandler extends AbstractActionHandler<GetLastArchiveDateAction, GetLastArchiveDateResult> {
 
     private static SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH.mm.ss");

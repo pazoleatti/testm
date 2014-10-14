@@ -60,6 +60,7 @@ public class PdfViewerWidget extends Composite implements PdfViewerView, HasRows
 
     private void toPage(int pageNum) {
         if (pdf != null && pdf.getPdfPages() != null && !pdf.getPdfPages().isEmpty()) {
+            pdfPage.setVisible(true);
             if (pageNum >= pdf.getPdfPages().size() || pageNum < 0) {
                 return;
             }
@@ -69,6 +70,8 @@ public class PdfViewerWidget extends Composite implements PdfViewerView, HasRows
             }
             this.page = pageNum;
             pager.setPageNumber(pageNum + 1);
+        } else {
+            pdfPage.setVisible(false);
         }
     }
 

@@ -25,6 +25,15 @@ public class LogSearchResultItem implements Serializable {
     private String reportPeriodName;
     private String blobDataId;
     private Integer formTypeId;
+    private Integer cnt;
+
+    public Integer getCnt() {
+        return cnt;
+    }
+
+    public void setCnt(Integer cnt) {
+        this.cnt = cnt;
+    }
 
     public Integer getFormTypeId() {
         return formTypeId;
