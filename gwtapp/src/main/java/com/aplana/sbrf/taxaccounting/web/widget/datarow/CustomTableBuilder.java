@@ -136,8 +136,7 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 					if ((curColumn+colSpan <= columnCount) && (absRowIndex+rowSpan <= rowCount)) {
 						spanCells(td, absRowIndex, curColumn, rowSpan, colSpan);
 					} else {
-						//Exception
-						//TODO (Marat Fayzullin) забыли выкинуть исключение?
+						throw new RuntimeException("Ошибка построения таблицы, сolspan за пределами таблицы!");
 					}
 				}
 				// Добавляем стили. Они должны идти друг за другом

@@ -132,7 +132,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 									"insert into sec_user (id, name, login, department_id, is_active, email) values (seq_sec_user.nextval,?,?,?,?,?)",
 									new String[]{"ID"});
 					ps.setString(1, user.getName());
-					ps.setString(2, user.getLogin().toLowerCase());
+					ps.setString(2, user.getLogin());
 					ps.setInt(3, user.getDepartmentId());
 					ps.setBoolean(4, user.isActive());
 					ps.setString(5, user.getEmail());
@@ -250,22 +250,6 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 	@Override
 	public int checkUserRole(String role) {
 		return getJdbcTemplate().queryForInt("select count(*) from sec_role where alias=? ", role);
-	}
-
-	@Override
-	public int checkUserLogin(String login) {
-		 List<Integer> list = getJdbcTemplate().query("select id from sec_user where lower(login) = ?",
-				new Object[]{login},
-				new int[]{Types.CHAR},
-				new RowMapper<Integer>() {
-
-					@Override
-					public Integer mapRow(ResultSet rs, int arg1)
-							throws SQLException {
-						return SqlUtils.getInteger(rs,"id");
-					}
-				});
-		 return list.size()!=0 ? list.get(0) : 0;
 	}
 
 	@Override

@@ -58,13 +58,6 @@ public interface TAUserDao {
 	 * @return
 	 */
 	int checkUserRole(String role);
-	
-	/**
-	 * Неоходим только для валидации
-	 * @param login
-	 * @return
-	 */
-	int checkUserLogin(String login);
 
 	List<Integer> getByFilter(MembersFilterData filter);
 

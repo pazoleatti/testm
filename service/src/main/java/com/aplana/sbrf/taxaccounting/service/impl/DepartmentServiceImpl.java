@@ -44,6 +44,11 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
+    public boolean existDepartment(int departmentId) {
+        return departmentDao.existDepartment(departmentId);
+    }
+
+    @Override
     public List<Department> listAll() {
         return departmentDao.listDepartments();
     }

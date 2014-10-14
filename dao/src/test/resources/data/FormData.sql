@@ -31,7 +31,7 @@ insert into form_data(id, form_template_id, department_report_period_id, state, 
 insert into form_data(id, form_template_id, department_report_period_id, state, kind, return_sign, period_order) values (307, 1, 307, 1, 1, 0, 7);
 insert into form_data(id, form_template_id, department_report_period_id, state, kind, return_sign, period_order) values (308, 1, 307, 1, 2, 0, 7);
 
--- Для проверки изменения количества строк в табличной части НФ
+-- Для проверки изменения количества строк в табличной части НФ и автонумерации
 insert into form_data(id, form_template_id, department_report_period_id, state, kind, return_sign) values (1000, 1, 101, 1, 3, 0);
 
 -- Для проверки метода getFormDataListByTemplateId
