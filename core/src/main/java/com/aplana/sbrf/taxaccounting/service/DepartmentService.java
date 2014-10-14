@@ -21,6 +21,8 @@ public interface DepartmentService {
      */
     Department getDepartment(int departmentId);
 
+    boolean existDepartment(int departmentId);
+
     /**
      * Получить список всех департамент
      *

@@ -39,7 +39,12 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
         }
 	}
 
-	@Override
+    @Override
+    public boolean existDepartment(int id) {
+        return getJdbcTemplate().queryForInt("select count(id) from department where id = ?", id) == 1;
+    }
+
+    @Override
 	public List<Department> getChildren(int parentDepartmentId){
         try {
             return getJdbcTemplate().query(
