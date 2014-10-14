@@ -336,8 +336,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
         ITD.add(TaxType.INCOME);
         ITD.add(TaxType.TRANSPORT);
         ITD.add(TaxType.DEAL);
-        if (!selectedRow.isSubHeader() && !selectedRow.isOpen() && !selectedRow.isBalance() && selectedRow.getCorrectPeriod() == null
-                && (ITD.contains(taxType) && selectedRow.getPeriodName().equals("год") || !ITD.contains(taxType))) {
+        if (!selectedRow.isSubHeader() && !selectedRow.isOpen() && !selectedRow.isBalance() && selectedRow.getCorrectPeriod() == null) {
             getView().setCanOpenCorrectPeriod(true);
         } else {
             getView().setCanOpenCorrectPeriod(false);

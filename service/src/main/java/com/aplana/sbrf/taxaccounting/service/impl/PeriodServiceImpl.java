@@ -709,25 +709,6 @@ public class PeriodServiceImpl implements PeriodService {
     @Override
     public List<ReportPeriod> getCorrectPeriods(TaxType taxType, int departmentId) {
         List<ReportPeriod> correctPeriods = reportPeriodDao.getCorrectPeriods(taxType, departmentId);
-        String periodCode = "34";
-        switch (taxType) {
-            case DEAL:
-                periodCode = "46";
-            case INCOME:
-            case TRANSPORT:
-                RefBookDataProvider dataProvider = rbFactory.getDataProvider(8L);
-                for (Iterator<ReportPeriod> it = correctPeriods.iterator(); it.hasNext(); ) {
-                    ReportPeriod rp = it.next();
-
-                    Map<String, RefBookValue> refBookValueMap = dataProvider.getRecordData(rp.getDictTaxPeriodId());
-                    // Код налогового периода
-                    String code = refBookValueMap.get("CODE").getStringValue();
-                    if (!code.equals(periodCode)) {
-                        it.remove();
-                    }
-                }
-                break;
-        }
         return correctPeriods;
     }
 
