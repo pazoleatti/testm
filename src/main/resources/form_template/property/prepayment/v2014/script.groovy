@@ -55,7 +55,7 @@ def getEndDate() {
 }
 
 // Разыменование записи справочника
-def getRefBookValue(def long refBookId, def recordId) {
+def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
@@ -71,12 +71,18 @@ void checkDepartmentParams(LogLevel logLevel) {
 
     departmentParam = departmentParam.get(0)
 
+    def departmentParamAdd = getProvider(206).getRecords(getEndDate() - 1, null, "LINK = ${departmentParam.record_id.value} AND LOWER(TAX_ORGAN_CODE) = LOWER('${declarationData.taxOrganCode}') AND LOWER(KPP) = LOWER('${declarationData.kpp}')", null)?.get(0)
+
+    if (departmentParamAdd == null) {
+        throw new Exception("Ошибка при получении настроек обособленного подразделения!")
+    }
+
     // Проверки подразделения
-    def List<String> errorList = getErrorDepartment(departmentParam)
+    def List<String> errorList = getErrorDepartment(departmentParam, departmentParamAdd)
     for (String error : errorList) {
         logger.log(logLevel, String.format("Для параметров текущего экземпляра декларации на форме настроек подразделений отсутствует значение атрибута %s!", error))
     }
-    errorList = getErrorAcceptable(departmentParam)
+    errorList = getErrorAcceptable(departmentParam, departmentParamAdd)
     for (String error : errorList) {
         logger.log(logLevel, String.format("Для параметров текущего экземпляра декларации неверно указано значение атрибута %s на форме настроек подразделений", error))
     }
@@ -96,25 +102,28 @@ void generateXML() {
     if (incomeParams == null) {
         throw new Exception('Ошибка при получении настроек обособленного подразделения!')
     }
-    def formatVersion = incomeParams?.FORMAT_VERSION?.value
+
+    def incomeParamsAdd = getProvider(206).getRecords(getEndDate() - 1, null, "LINK = ${incomeParams.record_id.value} AND LOWER(TAX_ORGAN_CODE) = LOWER('${declarationData.taxOrganCode}') AND LOWER(KPP) = LOWER('${declarationData.kpp}')", null)?.get(0)
+
+    def formatVersion = incomeParamsAdd?.PREPAYMENT_VERSION?.value
 
     def inn = incomeParams?.INN?.value
     def kpp = declarationData.kpp
 
     def taxOrganCode = declarationData.taxOrganCode
-    def taxPlaceTypeCode = getRefBookValue(2, incomeParams?.TAX_PLACE_TYPE_CODE?.value)?.CODE?.value
-    def okvedCode = getRefBookValue(34, incomeParams?.OKVED_CODE?.value)?.CODE?.value
-    def reorgFormCode = getRefBookValue(5, incomeParams?.REORG_FORM_CODE?.value)?.CODE?.value
-    def reorgInn = incomeParams?.REORG_INN?.value
-    def reorgKpp = incomeParams?.REORG_KPP?.value
-    def phone = incomeParams?.PHONE?.value
-    def name = incomeParams?.NAME?.value
-    def signatoryId = getRefBookValue(35, incomeParams?.SIGNATORY_ID?.value)?.CODE?.value
-    def signatorySurname = incomeParams?.SIGNATORY_SURNAME?.value
-    def signatoryFirstName = incomeParams?.SIGNATORY_FIRSTNAME?.value
-    def signatoryLastName = incomeParams?.SIGNATORY_LASTNAME?.value
-    def approveOrgName = incomeParams?.APPROVE_ORG_NAME?.value
-    def approveDocName = incomeParams?.APPROVE_DOC_NAME?.value
+    def taxPlaceTypeCode = getRefBookValue(2, incomeParamsAdd?.TAX_PLACE_TYPE_CODE?.value)?.CODE?.value
+    def okvedCode = getRefBookValue(34, incomeParamsAdd?.OKVED_CODE?.value)?.CODE?.value
+    def reorgFormCode = getRefBookValue(5, incomeParamsAdd?.REORG_FORM_CODE?.value)?.CODE?.value
+    def reorgInn = incomeParamsAdd?.REORG_INN?.value
+    def reorgKpp = incomeParamsAdd?.REORG_KPP?.value
+    def phone = incomeParamsAdd?.PHONE?.value
+    def name = incomeParamsAdd?.NAME?.value
+    def signatoryId = getRefBookValue(35, incomeParamsAdd?.SIGNATORY_ID?.value)?.CODE?.value
+    def signatorySurname = incomeParamsAdd?.SIGNATORY_SURNAME?.value
+    def signatoryFirstName = incomeParamsAdd?.SIGNATORY_FIRSTNAME?.value
+    def signatoryLastName = incomeParamsAdd?.SIGNATORY_LASTNAME?.value
+    def approveOrgName = incomeParamsAdd?.APPROVE_ORG_NAME?.value
+    def approveDocName = incomeParamsAdd?.APPROVE_DOC_NAME?.value
 
     // Отчётный период.
     def reportPeriod = reportPeriodService.get(reportPeriodId)
@@ -323,49 +332,49 @@ void generateXML() {
     }
 }
 
-List<String> getErrorDepartment(record) {
+List<String> getErrorDepartment(def record, def recordAdd) {
     List<String> errorList = new ArrayList<String>()
-    if (record.NAME == null || record.NAME.value == null || record.NAME.value.isEmpty()) {
+    if (recordAdd.NAME == null || recordAdd.NAME.value == null || recordAdd.NAME.value.isEmpty()) {
         errorList.add("«Наименование подразделения»")
     }
     if (record.INN == null || record.INN.value == null || record.INN.value.isEmpty()) {
         errorList.add("«ИНН»")
     }
-    if (record.OKVED_CODE == null || record.OKVED_CODE.value == null) {
+    if (recordAdd.OKVED_CODE == null || recordAdd.OKVED_CODE.value == null) {
         errorList.add("«Код вида экономической деятельности и по классификатору ОКВЭД»")
     }
-    def reorgFormCode = getRefBookValue(5, record?.REORG_FORM_CODE?.value)?.CODE?.value
+    def reorgFormCode = getRefBookValue(5, recordAdd?.REORG_FORM_CODE?.value)?.CODE?.value
     if (reorgFormCode != null && reorgFormCode != '0') {
-        if (record.REORG_INN == null || record.REORG_INN.value == null || record.REORG_INN.value.isEmpty()) {
+        if (recordAdd.REORG_INN == null || recordAdd.REORG_INN.value == null || recordAdd.REORG_INN.value.isEmpty()) {
             errorList.add("«ИНН реорганизованного обособленного подразделения»")
         }
-        if (record.REORG_KPP == null || record.REORG_KPP.value == null || record.REORG_KPP.value.isEmpty()) {
+        if (recordAdd.REORG_KPP == null || recordAdd.REORG_KPP.value == null || recordAdd.REORG_KPP.value.isEmpty()) {
             errorList.add("«КПП реорганизованного обособленного подразделения»")
         }
     }
-    if (record.SIGNATORY_ID == null || record.SIGNATORY_ID.value == null) {
+    if (recordAdd.SIGNATORY_ID == null || recordAdd.SIGNATORY_ID.value == null) {
         errorList.add("«Признак лица подписавшего документ»")
     }
-    if (record.SIGNATORY_SURNAME == null || record.SIGNATORY_SURNAME.value == null || record.SIGNATORY_SURNAME.value.isEmpty()) {
+    if (recordAdd.SIGNATORY_SURNAME == null || recordAdd.SIGNATORY_SURNAME.value == null || recordAdd.SIGNATORY_SURNAME.value.isEmpty()) {
         errorList.add("«Фамилия подписанта»")
     }
-    if (record.SIGNATORY_FIRSTNAME == null || record.SIGNATORY_FIRSTNAME.value == null || record.SIGNATORY_FIRSTNAME.value.isEmpty()) {
+    if (recordAdd.SIGNATORY_FIRSTNAME == null || recordAdd.SIGNATORY_FIRSTNAME.value == null || recordAdd.SIGNATORY_FIRSTNAME.value.isEmpty()) {
         errorList.add("«Имя подписанта»")
     }
-    def signatoryId = getRefBookValue(35, record?.SIGNATORY_ID?.value)?.CODE?.value
-    if ((signatoryId != null && signatoryId != 1) && (record.APPROVE_DOC_NAME == null || record.APPROVE_DOC_NAME.value == null || record.APPROVE_DOC_NAME.value.isEmpty())) {
+    def signatoryId = getRefBookValue(35, recordAdd?.SIGNATORY_ID?.value)?.CODE?.value
+    if ((signatoryId != null && signatoryId != 1) && (recordAdd.APPROVE_DOC_NAME == null || recordAdd.APPROVE_DOC_NAME.value == null || recordAdd.APPROVE_DOC_NAME.value.isEmpty())) {
         errorList.add("«Наименование документа, подтверждающего полномочия представителя»")
     }
     errorList
 }
 
-List<String> getErrorAcceptable(record) {
+List<String> getErrorAcceptable(def record, def recordAdd) {
     List<String> errorList = new ArrayList<String>()
-    if (record.TAX_PLACE_TYPE_CODE != null && !getRefBookValue(2, record.TAX_PLACE_TYPE_CODE.value)?.CODE?.value in ['213', '214', '215', '216', '221', '245', '281']) {
+    if (recordAdd.TAX_PLACE_TYPE_CODE != null && !(getRefBookValue(2, recordAdd.TAX_PLACE_TYPE_CODE.value)?.CODE?.value in ['213', '214', '215', '216', '221', '245', '281'])) {
         errorList.add("«Код по месту нахождения (учета)»")
     }
-    if (record.FORMAT_VERSION == null || record.FORMAT_VERSION.value == null || !record.FORMAT_VERSION.value.equals('5.03')) {
-        errorList.add("«Версия формата»")
+    if (record.PREPAYMENT_VERSION == null || record.PREPAYMENT_VERSION.value == null || !record.PREPAYMENT_VERSION.value.equals('5.03')) {
+        errorList.add("«Версия формата расчета по авансовому платежу»")
     }
     errorList
 }
