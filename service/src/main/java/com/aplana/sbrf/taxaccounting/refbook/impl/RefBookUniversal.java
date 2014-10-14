@@ -207,14 +207,14 @@ public class RefBookUniversal implements RefBookDataProvider {
                     }
                 }
 
+                //Проверка корректности
+                checkCorrectness(logger, refBook, null, versionFrom, versionTo, attributes, records);
+
                 if (!refBookId.equals(RefBook.DEPARTMENT_CONFIG_TRANSPORT) &&
                         !refBookId.equals(RefBook.DEPARTMENT_CONFIG_INCOME) &&
                         !refBookId.equals(RefBook.DEPARTMENT_CONFIG_DEAL) &&
                         !refBookId.equals(RefBook.DEPARTMENT_CONFIG_VAT) &&
                         !refBookId.equals(RefBook.DEPARTMENT_CONFIG_PROPERTY)) {
-
-                    //Проверка корректности
-                    checkCorrectness(logger, refBook, null, versionFrom, versionTo, attributes, records);
 
                     for (RefBookRecord record : records) {
                         //Проверка пересечения версий
@@ -431,7 +431,7 @@ public class RefBookUniversal implements RefBookDataProvider {
         if (logger.getTaUserInfo() == null) {
             throw new ServiceException("Текущий пользователь не установлен!");
         }
-        //Устанавливаем блокировку на тевущий справочник
+        //Устанавливаем блокировку на текущий справочник
         List<String> lockedObjects = new ArrayList<String>();
         int userId = logger.getTaUserInfo().getUser().getId();
         String lockKey = LockData.LOCK_OBJECTS.REF_BOOK.name() + "_" + refBookId;
