@@ -36,6 +36,7 @@ public class OpenCorrectDialogPresenter extends PresenterWidget<OpenCorrectDialo
 
         List<Integer> getSelectedDepartments();
         Date getTerm();
+        void setTerm(Date term);
         ReportPeriod getSelectedPeriod();
         boolean canChangeDepartment();
 	}
@@ -212,6 +213,7 @@ public class OpenCorrectDialogPresenter extends PresenterWidget<OpenCorrectDialo
     public void init(TableRow data){
         setSelectedDepartment(data.getDepartmentId());
         balance = data.isBalance();
+        getView().setTerm(new Date());
     }
 
 	public void resetToDefault() {
