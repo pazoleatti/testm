@@ -1,9 +1,11 @@
 package com.aplana.sbrf.taxaccounting.service.impl.print.formdata;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.Color;
 import com.aplana.sbrf.taxaccounting.model.formdata.AbstractCell;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.service.DiffService;
 import com.aplana.sbrf.taxaccounting.service.impl.print.AbstractReportBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -13,8 +15,7 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.AreaReference;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.RegionUtil;
-import org.apache.poi.xssf.usermodel.XSSFFont;
-import org.apache.poi.xssf.usermodel.XSSFRichTextString;
+import org.apache.poi.xssf.usermodel.*;
 import org.springframework.util.ClassUtils;
 
 import java.io.IOException;
@@ -62,9 +63,27 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
             }
         }
 
-        public CellStyle createCellStyle(CellType value, String alias){
-            if (cellStyleMap.containsKey(alias))
-                return cellStyleMap.get(alias);
+        /**
+         * Получить стриль для ячейки excel'я.
+         *
+         * @param value тип ячейки (дата, число, строка, ...)
+         * @param alias алиас столбца
+         */
+        public CellStyle createCellStyle(CellType value, String alias) {
+            return createCellStyle(value, alias, null);
+        }
+
+        /**
+         * Получить стриль для ячейки excel'я.
+         *
+         * @param value тип ячейки (дата, число, строка, ...)
+         * @param alias алиас столбца
+         * @param subKey дополнительное значение для ключа (что бы получить стили дельт)
+         */
+        public CellStyle createCellStyle(CellType value, String alias, String subKey){
+            String key = alias + (subKey != null && !subKey.isEmpty() ? subKey : "");
+            if (cellStyleMap.containsKey(key))
+                return cellStyleMap.get(key);
             DataFormat dataFormat = workBook.createDataFormat();
             Column currColumn;
             CellStyle style = workBook.createCellStyle();
@@ -91,7 +110,6 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                     style.setDataFormat(dataFormat.getFormat(XlsxReportMetadata.Presision.getPresision(((NumericColumn)currColumn).getPrecision())));
                     break;
                 case NUMERATION:
-                    currColumn = formTemplate.getColumn(alias);
                     style.setAlignment(CellStyle.ALIGN_RIGHT);
                     style.setWrapText(true);
                     style.setAlignment(CellStyle.ALIGN_RIGHT);
@@ -116,7 +134,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                     break;
             }
 
-            cellStyleMap.put(alias, style);
+            cellStyleMap.put(key, style);
             return style;
         }
     }
@@ -128,6 +146,8 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
 	private ReportPeriod reportPeriod;
 	private Date acceptanceDate;
 	private Date creationDate;
+
+    private Map<String, XSSFFont> fontMap = new HashMap<String, XSSFFont>();
 
     public FormDataXlsmReportBuilder() throws IOException {
         super(FILE_NAME, POSTFIX);
@@ -303,12 +323,12 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         }
     }
 
-	@Override
-    protected void createDataForTable(){
-        rowNumber = (rowNumber > sheet.getLastRowNum()?sheet.getLastRowNum():rowNumber);//if we have empty strings
+    @Override
+    protected void createDataForTable() {
+        rowNumber = (rowNumber > sheet.getLastRowNum() ? sheet.getLastRowNum() : rowNumber);//if we have empty strings
         sheet.shiftRows(rowNumber, sheet.getLastRowNum(), dataRows.size() + 2);
         for (DataRow<com.aplana.sbrf.taxaccounting.model.Cell> dataRow : dataRows) {
-            Row row = sheet.getRow(rowNumber) != null?sheet.getRow(rowNumber++) : sheet.createRow(rowNumber++);
+            Row row = sheet.getRow(rowNumber) != null ? sheet.getRow(rowNumber++) : sheet.createRow(rowNumber++);
 
             for (int i = 0; i < formTemplate.getColumns().size(); i++) {
                 Column column = formTemplate.getColumns().get(i);
@@ -319,7 +339,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                     if (formTemplate.getColumns().size() == i + 1)
                         continue;
                     Cell cell = mergedDataCells(dataRow.getCell(column.getAlias()), row, i, false);
-                    CellStyle cellStyle = cellStyleBuilder.createCellStyle(CellType.STRING, column.getAlias());
+                    CellStyle cellStyle = getCellStyle(dataRow.getCell(column.getAlias()), CellType.STRING, column.getAlias());
                     cell.setCellStyle(cellStyle);
                     cell.setCellValue((String) dataRow.get(column.getAlias()));
                     if (dataRow.getCell(column.getAlias()).getColSpan() > 1)
@@ -328,9 +348,10 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                 }
                 Object obj = dataRow.get(column.getAlias());
                 Cell cell = mergedDataCells(dataRow.getCell(column.getAlias()), row, i, false);
+                CellStyle cellStyle;
                 if (ColumnType.STRING.equals(column.getColumnType())) {
                     String str = (String) obj;
-                    CellStyle cellStyle = cellStyleBuilder.createCellStyle(CellType.STRING, column.getAlias());
+                    cellStyle = getCellStyle(dataRow.getCell(column.getAlias()), CellType.STRING, column.getAlias());
                     cell.setCellStyle(cellStyle);
                     cell.setCellValue(str);
                 } else if (ColumnType.DATE.equals(column.getColumnType())) {
@@ -339,29 +360,97 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                         cell.setCellValue(date);
                     else
                         cell.setCellValue("");
-                    cell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.DATE, column.getAlias()));
+                    cellStyle = getCellStyle(dataRow.getCell(column.getAlias()), CellType.DATE, column.getAlias());
+                    cell.setCellStyle(cellStyle);
                 } else if (ColumnType.NUMBER.equals(column.getColumnType())) {
                     BigDecimal bd = (BigDecimal) obj;
-                    cell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.BIGDECIMAL, column.getAlias()));
+                    cellStyle = getCellStyle(dataRow.getCell(column.getAlias()), CellType.BIGDECIMAL, column.getAlias());
+                    cell.setCellStyle(cellStyle);
 
                     cell.setCellValue(bd != null ? String.valueOf(bd) : "");
                 } else if (ColumnType.AUTO.equals(column.getColumnType())) {
                     BigDecimal bd = (BigDecimal) obj;
-                    cell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.NUMERATION, column.getAlias()));
+                    cellStyle = getCellStyle(dataRow.getCell(column.getAlias()), CellType.NUMERATION, column.getAlias());
+                    cell.setCellStyle(cellStyle);
 
                     cell.setCellValue(bd != null ? String.valueOf(bd) : "");
                 } else if (ColumnType.REFBOOK.equals(column.getColumnType()) || ColumnType.REFERENCE.equals(column.getColumnType())) {
-                    CellStyle cellStyle = cellStyleBuilder.createCellStyle(CellType.STRING, column.getAlias());
+                    cellStyle = getCellStyle(dataRow.getCell(column.getAlias()), CellType.STRING, column.getAlias());
                     cell.setCellStyle(cellStyle);
                     cell.setCellValue(dataRow.getCell(column.getAlias()).getRefBookDereference());
                 } else if (obj == null) {
-                    cell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.EMPTY, column.getAlias()));
+                    cellStyle = getCellStyle(dataRow.getCell(column.getAlias()), CellType.EMPTY, column.getAlias());
+                    cell.setCellStyle(cellStyle);
                     cell.setCellValue("");
                 }
                 if (dataRow.getCell(column.getAlias()).getColSpan() > 1)
                     i = i + dataRow.getCell(column.getAlias()).getColSpan() - 1;
             }
         }
+    }
+
+    /**
+     * Получить стиль для ячейки excel'я по типу и стилю ячейки формы.
+     *
+     * @param dataRowCell ячека формы
+     * @param type тип ячейки
+     * @param alias стиль ячейки
+     * @return сти
+     */
+    private CellStyle getCellStyle(com.aplana.sbrf.taxaccounting.model.Cell dataRowCell, CellType type, String alias) {
+        if (!DiffService.STYLE_NO_CHANGE.equals(dataRowCell.getStyleAlias())
+                && !DiffService.STYLE_INSERT.equals(dataRowCell.getStyleAlias())
+                && !DiffService.STYLE_DELETE.equals(dataRowCell.getStyleAlias())
+                && !DiffService.STYLE_CHANGE.equals(dataRowCell.getStyleAlias())) {
+            // если стиль не относится к стилям дельт, то получить обычный стиль
+            return cellStyleBuilder.createCellStyle(type, alias);
+        }
+        XSSFCellStyle cellStyle = (XSSFCellStyle) cellStyleBuilder.createCellStyle(type, alias, dataRowCell.getStyleAlias());
+
+        // фон
+        XSSFColor bgColor = getColor(dataRowCell.getStyle().getBackColor());
+        if (bgColor != null) {
+            cellStyle.setFillForegroundColor(bgColor);
+            cellStyle.setFillBackgroundColor(bgColor);
+        }
+
+        // шрифт
+        Font font = getFont(dataRowCell.getStyleAlias(), dataRowCell);
+        cellStyle.setFont(font);
+
+        cellStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
+
+        return cellStyle;
+    }
+
+    /** Получить цвет по rgb. */
+    private XSSFColor getColor(Color color) {
+        // TODO (Ramil Timerbaev) если rgb = 0 0 0, то в excel'е цвет почему то задается белый (при 255 255 255 - черный)
+        if (!(color.getRed() == 0 && color.getGreen() == 0 && color.getBlue() == 0)) {
+            return new XSSFColor(new java.awt.Color(color.getRed(), color.getGreen(), color.getBlue()));
+        }
+        return null;
+    }
+
+    /** Получить шрифт по алиасу стиля. */
+    private XSSFFont getFont(String alias, com.aplana.sbrf.taxaccounting.model.Cell cell) {
+        if (!fontMap.containsKey(alias)) {
+            XSSFFont font = (XSSFFont) workBook.createFont();
+            // жирность
+            font.setBold(cell.getStyle().isBold());
+
+            // курсив
+            font.setItalic(cell.getStyle().isItalic());
+
+            // цвет шрифта
+            XSSFColor color = getColor(cell.getStyle().getFontColor());
+            if (color != null) {
+                font.setColor(color);
+            }
+
+            fontMap.put(alias, font);
+        }
+        return fontMap.get(alias);
     }
 
     @Override
