@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationlist.server.Declarati
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.server.DeclarationTemplateServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.server.DeclarationVersionListServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server.DepartmentConfigServerModule;
+import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.server.DepartmentConfigPropertyServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.server.FormDataServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.server.FormDataListServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.server.AdminServerModule;
@@ -43,7 +44,7 @@ import org.springframework.context.annotation.Import;
         TaxFormNominationServerModule.class, DeclarationServerModule.class, ProjectVersionControlServerModule.class,
         HistoryServerModule.class, TemplateVersionListServerModule.class, MembersServerModule.class, ConfigurationServerModule.class,
         AuditFormServerModule.class, PeriodsServerModule.class, LogAreaModule.class, SourcesServerModule.class,
-        DepartmentConfigServerModule.class, BookerStatementsServerModule.class, BookerStatementsDataServerModule.class,
+        DepartmentConfigServerModule.class, DepartmentConfigPropertyServerModule.class, BookerStatementsServerModule.class, BookerStatementsDataServerModule.class,
         RefBookListServerModule.class, RefBookDataServerModule.class, MigrationServerModule.class, SchedulerServerModule.class,
         TestPageServerModule.class, DeclarationVersionListServerModule.class, VersionHistoryServerModule.class,
         RefBookMultiPickerServerModule.class, ScriptExecutionServerModule.class, UploadTransportDataServerModule.class})

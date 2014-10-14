@@ -308,8 +308,9 @@ public interface RefBookDao {
      * @param versionFrom
      *@param versionTo
      * @param isValuesChanged признак того, что были изменены атрибуты  @return результаты проверки. Сообщения об ошибках
+     * @param excludeUseCheck идентификаторы справочников, которые игнорируются при проверке использования
      */
-    List<String> isVersionUsed(@NotNull Long refBookId, @NotNull List<Long> uniqueRecordIds, Date versionFrom, Date versionTo, boolean isValuesChanged);
+    List<String> isVersionUsed(@NotNull Long refBookId, @NotNull List<Long> uniqueRecordIds, Date versionFrom, Date versionTo, boolean isValuesChanged, List<Long> excludeUseCheck);
 
     /**
      * Проверка использования записи в справочниках
@@ -318,10 +319,11 @@ public interface RefBookDao {
      * @param versionFrom дата актуальности новой версии
      * @param versionTo дата конца актуальности новой версии
      * @param isValuesChanged признак того, что были изменены атрибуты
+     * @param excludeUseCheck идентификаторы справочников, которые игнорируются при проверке использования
      * @return результаты проверки. Сообщения об ошибках
      */
     List<String> isVersionUsedInRefBooks(Long refBookId, List<Long> uniqueRecordIds, Date versionFrom, Date versionTo,
-                                                boolean isValuesChanged);
+                                                boolean isValuesChanged, List<Long> excludeUseCheck);
 
     /**
      * Проверка использования записи в справочниках
