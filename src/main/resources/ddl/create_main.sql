@@ -619,7 +619,8 @@ CREATE TABLE log_system (
   form_type_name        VARCHAR2(1000),
   form_department_id    NUMBER(9),
   blob_data_id          VARCHAR2(36),
-  form_type_id               NUMBER(9,0)
+  form_type_id               NUMBER(9,0),
+  is_error NUMBER(1) DEFAULT 0 NOT NULL
 );
 comment on table log_system is  'Системный журнал';
 comment on column log_system.id is 'Код записи';
@@ -638,6 +639,7 @@ comment on column LOG_SYSTEM.FORM_TYPE_NAME is 'Вид налоговой фор
 comment on column LOG_SYSTEM.FORM_DEPARTMENT_ID is 'Идентификатор подразделения налоговой формы/декларации';
 comment on column log_system.blob_data_id is 'Ссылка на логи';
 comment on column log_system.form_type_id is 'Идентификатор вида НФ';
+comment on column log_system.is_error is 'Признак ошибки';
 
 create sequence seq_log_system start with 10000;
 ------------------------------------------------------------------------------------------------------
