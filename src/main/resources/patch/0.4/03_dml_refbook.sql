@@ -55,6 +55,23 @@ INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (2039, 203, 'Уменьшение суммы исчисленного налога, руб.', 'REDUCTION_SUM', 2, 10, null, null, 1, 2, 10, 0, 0, null, null, 0, 17);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (2040, 203, 'Уменьшение суммы исчисленного налога, %', 'REDUCTION_PCT', 2, 11, null, null, 1, 2, 10, 0, 0, null, null, 0, 3);
 
+-- -- http://jira.aplana.com/browse/SBRFACCTAX-8363: Удалить лишние значения из справочника "Коды налоговых льгот транспортного налога"
+UPDATE ref_book_record t
+SET t.status=-1
+WHERE t.ref_book_id=6
+ AND t.id IN
+  (SELECT v.record_id
+   FROM ref_book_value v
+   WHERE v.attribute_id=15
+    AND v.string_value IN ('2010221', '2010222', '2010223', '2010224',
+                           '2010225', '2010226', '2010227', '2010233',
+                           '2010234', '2010235', '2010236', '2010237',
+                           '2010238', '2010239', '2010252', '2010253',
+                           '2010254', '2010255', '2010291', '2010331',
+                           '2010332', '2010333', '2010335', '2010336',
+                           '2010337', '2010338', '2010401', '2010402',
+                           '2012000', '2012400', '2012500', '2014000'));
+
 ALTER TABLE ref_book ENABLE CONSTRAINT ref_book_fk_region;
 
 ---------------------------------------------------------------------------------------------------

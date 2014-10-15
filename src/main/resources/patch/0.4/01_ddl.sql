@@ -90,13 +90,14 @@ INTO event (id, name) VALUES(841,'Редактирование договора 
 INTO event (id, name) VALUES(842,'Закрытие договора обеспечения') 
 INTO event (id, name) VALUES(850,'Создание задачи формирования РНУ-23') 
 INTO event (id, name) VALUES(860,'Создание задачи формирования отчета')
+INTO event (id, name) VALUES(650,'Отправка email')
 SELECT * FROM dual;
 
 ALTER TABLE log_system DROP CONSTRAINT log_system_chk_dcl_form;
-ALTER TABLE log_system ADD CONSTRAINT log_system_chk_dcl_form CHECK (event_id IN (7, 11, 401, 402, 501, 502, 503, 601, 901, 902, 903, 801, 802, 810, 811, 812, 813, 820, 821, 830, 831, 832, 840, 841, 842, 850, 860) OR declaration_type_name IS NOT NULL OR (form_type_name IS NOT NULL AND form_kind_id IS NOT NULL));
+ALTER TABLE log_system ADD CONSTRAINT log_system_chk_dcl_form CHECK (event_id IN (7, 11, 401, 402, 501, 502, 503, 601, 650, 901, 902, 903, 801, 802, 810, 811, 812, 813, 820, 821, 830, 831, 832, 840, 841, 842, 850, 860) OR declaration_type_name IS NOT NULL OR (form_type_name IS NOT NULL AND form_kind_id IS NOT NULL));
 
 ALTER TABLE log_system DROP CONSTRAINT log_system_chk_rp;
-ALTER TABLE log_system ADD CONSTRAINT log_system_chk_rp CHECK (event_id IN (7, 11, 401, 402, 501, 502, 503, 601, 901, 902, 903, 801, 802, 810, 811, 812, 813, 820, 821, 830, 831, 832, 840, 841, 842, 850, 860) OR report_period_name IS NOT NULL);
+ALTER TABLE log_system ADD CONSTRAINT log_system_chk_rp CHECK (event_id IN (7, 11, 401, 402, 501, 502, 503, 601, 650, 901, 902, 903, 801, 802, 810, 811, 812, 813, 820, 821, 830, 831, 832, 840, 841, 842, 850, 860) OR report_period_name IS NOT NULL);
 
 ---------------------------------------------------------------------------------------------------
 -- http://jira.aplana.com/browse/SBRFACCTAX-8512 - Переход на новый механизм блокировок
