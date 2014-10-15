@@ -43,6 +43,12 @@ ALTER TABLE log_system ADD CONSTRAINT log_system_fk_blob_data FOREIGN KEY (blob_
 COMMENT ON COLUMN log_system.blob_data_id IS 'Ссылка на логи';
 
 ---------------------------------------------------------------------------------------------------
+-- http://jira.aplana.com/browse/SBRFACCTAX-8880 - Актуализация реализации журнала аудита
+ALTER TABLE log_system ADD form_type_id NUMBER(9);
+COMMENT ON COLUMN log_system.form_type_id is 'Идентификатор вида НФ';
+ALTER TABLE log_system DROP COLUMN tb_department_id;
+
+---------------------------------------------------------------------------------------------------
 -- http://jira.aplana.com/browse/SBRFACCTAX-8403 - Изменения таблицы DECLARATION_DATA для налога на имущество
 ALTER TABLE declaration_data ADD tax_organ_code VARCHAR2(4);
 ALTER TABLE declaration_data ADD kpp VARCHAR2(9);
