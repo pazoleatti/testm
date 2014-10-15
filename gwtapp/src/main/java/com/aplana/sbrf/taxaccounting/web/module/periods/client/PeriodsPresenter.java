@@ -234,7 +234,6 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 			Dialog.errorMessage("Указание параметров поиска","Интервал периода поиска указан неверно!");
 		} else {
 			find();
-            getView().clearSelection();
 		}
 	}
 
