@@ -109,7 +109,12 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
                     if (refBookPiker.isHierarchical()) {
                         cell.setRefBookDereference(refBookPiker.getOtherDereferenceValue(column.getRefBookAttributeId()));
                     } else {
-                        cell.setRefBookDereference(refBookPiker.getDereferenceValue());
+                        Long attrId2 = column.getRefBookAttributeId2();
+                        if (attrId2 != null && attrId2 != 0) {
+                            cell.setRefBookDereference(refBookPiker.getOtherDereferenceValue(attrId, attrId2));
+                        } else {
+                            cell.setRefBookDereference(refBookPiker.getDereferenceValue());
+                        }
                     }
 
 					setValue(context, parent, value);
