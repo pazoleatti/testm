@@ -45,7 +45,6 @@ alter table ref_book_attribute add constraint ref_book_attr_chk_precision check 
 alter table ref_book_attribute add constraint ref_book_attr_chk_number_type check ((type <> 2 and precision is null) or (type = 2 and not (precision is null)));
 alter table ref_book_attribute add constraint ref_book_attr_chk_ref check ((type <> 4 and reference_id is null) or (type = 4 and not (reference_id is null)));
 alter table ref_book_attribute add constraint ref_book_attr_chk_ref_attr check ((type <> 4 and attribute_id is null) or (type = 4 and not (attribute_id is null)));
-alter table ref_book_attribute add constraint ref_book_attr_chk_istable check (is_table in (0, 1));
 alter table ref_book_attribute add constraint ref_book_attribute_uniq_ord unique (ref_book_id, ord);
 alter table ref_book_attribute add constraint ref_book_attribute_uniq_alias unique (ref_book_id, alias);
 alter table ref_book_attribute add constraint ref_book_attr_fk_ref_book_id foreign key (ref_book_id) references ref_book(id);
@@ -63,7 +62,7 @@ alter table ref_book_record add constraint ref_book_record_chk_status check (sta
 alter table ref_book_record add constraint ref_book_record_fk_ref_book_id foreign key (ref_book_id) references ref_book(id);
 create unique index i_ref_book_record_refbookid on ref_book_record(ref_book_id, record_id, version);
 
-alter table ref_book_value add constraint ref_book_value_pk primary key (record_id, attribute_id, row_num);
+alter table ref_book_value add constraint ref_book_value_pk primary key (record_id, attribute_id);
 alter table ref_book_value add constraint ref_book_value_fk_record_id foreign key (record_id) references ref_book_record(id) on delete cascade;
 alter table ref_book_value add constraint ref_book_value_fk_attribute_id foreign key (attribute_id) references ref_book_attribute(id);
 

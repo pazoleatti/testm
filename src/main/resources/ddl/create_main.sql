@@ -164,8 +164,7 @@ create table ref_book_attribute (
   sort_order number(9),
   format number(2),
   read_only number(1) default 0 not null,
-  max_length number(4),
-  is_table number(1) default 0 not null
+  max_length number(4)
 );
 comment on table ref_book_attribute is 'Атрибут справочника';
 comment on column ref_book_attribute.id is 'Уникальный идентификатор';
@@ -185,7 +184,6 @@ comment on column ref_book_attribute.sort_order is 'Определяет пор�
 comment on column ref_book_attribute.format is 'Формат. (Для дат: 0 - "", 1 - "dd.MM.yyyy", 2 - "MM.yyyy", 3 - "MMMM yyyy", 4 - "yyyy", 5 - "dd.MM"; Для чисел: 6 - чекбокс)';
 comment on column ref_book_attribute.read_only is 'Только для чтения (0 - редактирование доступно пользователю; 1 - редактирование недоступно пользователю)';
 comment on column ref_book_attribute.max_length is 'Максимальная длина строки/Максимальное количество цифр без учета знака и десятичного разделителя';
-comment on column ref_book_attribute.is_table is 'Признак табличного атрибута';
 ------------------------------------------------------------------------------------------------------
 create table ref_book_record (
   id number(18) not null,
@@ -210,9 +208,7 @@ create table ref_book_value (
   string_value varchar2(4000),
   number_value number(27,10),
   date_value date,
-  reference_value number(18), 
-  row_num number(9) default 0 not null
-);
+  reference_value number(18));
 comment on table ref_book_value is 'Значение записи справочника';
 comment on column ref_book_value.record_id is 'Ссылка на запись справочника';
 comment on column ref_book_value.attribute_id is 'Ссылка на атрибут справочника';
@@ -220,7 +216,6 @@ comment on column ref_book_value.string_value is 'Строковое значе�
 comment on column ref_book_value.number_value is 'Численное значение';
 comment on column ref_book_value.date_value is 'Значение даты';
 comment on column ref_book_value.reference_value is 'Значение ссылки';
-comment on column ref_book_value.row_num is 'Номер строки в табличной части справочника';
 ------------------------------------------------------------------------------------------------------
 create table form_column (
   id number(9) not null,
