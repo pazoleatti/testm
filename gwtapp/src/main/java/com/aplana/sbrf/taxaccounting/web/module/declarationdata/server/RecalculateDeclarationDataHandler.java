@@ -80,7 +80,6 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
                         lockDataService.addUserWaitingForLock(key, userId);
                 }
                 try {
-                    declarationDataService.deleteReport(action.getDeclarationId(), false);
                     // отменяем задания на формирование XLSX
                     lockDataService.unlock(LockData.LOCK_OBJECTS.DECLARATION_DATA.name() + "_" + action.getDeclarationId() + "_" + ReportType.EXCEL_DEC.getName(), 0, true);
                     // ставим задачу в очередь

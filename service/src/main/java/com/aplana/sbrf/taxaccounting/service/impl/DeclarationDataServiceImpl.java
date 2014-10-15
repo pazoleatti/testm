@@ -229,6 +229,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         LockData lockData = lock(id, userInfo);
         if (lockData == null) {
             try {
+                if (lockDataService.getLock(LockData.LOCK_OBJECTS.DECLARATION_DATA.name() + "_" + id + "_" + ReportType.XML_DEC.getName()) != null) {
+                    throw new ServiceException("Дождитесь завершения пересчета для принятия формы");
+                }
+
                 // TODO (sgoryachkin) Это 2 метода должо быть
                 if (accepted) {
                     DeclarationData declarationData = declarationDataDao.get(id);
