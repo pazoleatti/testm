@@ -100,6 +100,44 @@ ALTER TABLE log_system DROP CONSTRAINT log_system_chk_rp;
 ALTER TABLE log_system ADD CONSTRAINT log_system_chk_rp CHECK (event_id IN (7, 11, 401, 402, 501, 502, 503, 601, 650, 901, 902, 903, 801, 802, 810, 811, 812, 813, 820, 821, 830, 831, 832, 840, 841, 842, 850, 860) OR report_period_name IS NOT NULL);
 
 ---------------------------------------------------------------------------------------------------
+-- http://jira.aplana.com/browse/SBRFACCTAX-9017 - Связь таблиц EVENT и SEC_ROLE
+CREATE TABLE role_event (event_id number(9) NOT NULL, role_id number(9) NOT NULL);
+
+COMMENT ON TABLE role_event IS 'Настройка прав доступа к событиям журнала аудита по ролям';
+COMMENT ON COLUMN role_event.event_id IS 'Идентификатор события';
+COMMENT ON COLUMN role_event.role_id IS 'Идентификатор роли';
+
+ALTER TABLE role_event ADD CONSTRAINT role_event_pk PRIMARY KEY (event_id, role_id);
+ALTER TABLE role_event ADD CONSTRAINT role_event_fk_event_id FOREIGN KEY (event_id) REFERENCES event(id);
+ALTER TABLE role_event ADD CONSTRAINT role_event_fk_role_id FOREIGN KEY (role_id) REFERENCES sec_role(id);
+
+INSERT INTO role_event(event_id, role_id) (SELECT id, 3 FROM event WHERE id NOT IN (501, 502, 601, 701));
+INSERT INTO role_event(event_id, role_id) (SELECT id, 5 FROM event);
+
+INSERT INTO role_event(event_id, role_id)
+ (SELECT id, 2 FROM event
+  WHERE id IN (1, 2, 3, 6, 7)
+   OR to_char(id) LIKE '10_'
+   OR to_char(id) LIKE '40_'
+   OR to_char(id) LIKE '90_');
+
+INSERT INTO role_event(event_id, role_id)
+ (SELECT id, 1 FROM event
+  WHERE id IN (1, 2, 3, 6, 7)
+   OR to_char(id) LIKE '10_'
+   OR to_char(id) LIKE '40_'
+   OR to_char(id) LIKE '90_');
+
+INSERT INTO role_event(event_id, role_id)
+ (SELECT id, 6 FROM event
+  WHERE id IN (1, 2, 3, 6, 7)
+   OR to_char(id) LIKE '10_'
+   OR to_char(id) LIKE '40_'
+   OR to_char(id) LIKE '90_');
+
+ALTER TABLE log_business ADD CONSTRAINT log_business_fk_event_id FOREIGN KEY (event_id) REFERENCES event(id);
+
+---------------------------------------------------------------------------------------------------
 -- http://jira.aplana.com/browse/SBRFACCTAX-8512 - Переход на новый механизм блокировок
 DROP TABLE object_lock;
 
