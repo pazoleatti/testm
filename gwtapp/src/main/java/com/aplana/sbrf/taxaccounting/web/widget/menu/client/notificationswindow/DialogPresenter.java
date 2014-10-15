@@ -29,6 +29,7 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 		void updateData();
         boolean isAsc();
         NotificationsFilterData.SortColumn getSortColumn();
+        void clearSelected();
     }
 
 	@Inject
@@ -63,46 +64,40 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 
     @Override
     public void deleteNotifications(Set<NotificationTableRow> selectedSet) {
-        final List<Long> notificationIds = new ArrayList<Long>();
+        List<Long> notificationIds = new ArrayList<Long>();
         for (NotificationTableRow notification : selectedSet) {
-            notificationIds.add(notification.getId());
+            if (notification.getCanDelete()) {
+                notificationIds.add(notification.getId());
+            }
         }
         final DeleteNotificationAction action = new DeleteNotificationAction();
-        action.setDeleteWithoutCheck(false);
         action.setNotificationIds(notificationIds);
 
-        dispatchAsync.execute(action, CallbackUtils
-                .defaultCallback(new AbstractCallback<DeleteNotificationResult>() {
-                    @Override
-                    public void onSuccess(final DeleteNotificationResult result) {
-                        if (result.getAllowedNotifications().size() == notificationIds.size()) {
-                            Dialog.confirmMessage("Подтверждение удаления оповещений", "Вы действительно хотите удалить выбранные оповещения?", new DialogHandler() {
-                                @Override
-                                public void yes() {
-                                    deleteNotificationWithoutCheck(action);
-                                }
-                            });
-                        } else if (result.getAllowedNotifications().size() == 0) {
-                            Dialog.errorMessage("Ни одно из выбранных оповещений недоступно для удаления!");
-                        } else {
-                            Dialog.confirmMessage("Подтверждение удаления оповещений", "Вы действительно хотите удалить выбранные оповещения? В случае подтверждения будет удалена только часть оповещений, так как не все оповещения доступны для удаления", new DialogHandler() {
-                                @Override
-                                public void yes() {
-                                    action.setNotificationIds(result.getAllowedNotifications());
-                                    deleteNotificationWithoutCheck(action);
-                                }
-                            });
-                        }
-                    }
-                }, DialogPresenter.this));
+        if (notificationIds.size() == selectedSet.size()) {
+            Dialog.confirmMessage("Подтверждение удаления оповещений", "Вы действительно хотите удалить выбранные оповещения?", new DialogHandler() {
+                @Override
+                public void yes() {
+                    deleteNotificationWithoutCheck(action);
+                }
+            });
+        } else if (notificationIds.size() == 0) {
+            Dialog.errorMessage("Ни одно из выбранных оповещений недоступно для удаления!");
+        } else {
+            Dialog.confirmMessage("Подтверждение удаления оповещений", "Вы действительно хотите удалить выбранные оповещения? В случае подтверждения будет удалена только часть оповещений, так как не все оповещения доступны для удаления", new DialogHandler() {
+                @Override
+                public void yes() {
+                    deleteNotificationWithoutCheck(action);
+                }
+            });
+        }
     }
 
     private void deleteNotificationWithoutCheck(DeleteNotificationAction action) {
-        action.setDeleteWithoutCheck(true);
         dispatchAsync.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<DeleteNotificationResult>() {
                     @Override
                     public void onSuccess(DeleteNotificationResult result) {
+                        getView().clearSelected();
                         getView().updateData();
                     }
                 }, DialogPresenter.this));

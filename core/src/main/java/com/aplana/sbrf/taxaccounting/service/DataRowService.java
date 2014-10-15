@@ -44,4 +44,14 @@ public interface DataRowService {
      * @return Set<FormDataSearchResult> - Набор из номера столбца, строки, и самой найденной подстроки
      */
     PagingResult<FormDataSearchResult> searchByKey(Long formDataId, Integer formTemplateId,DataRowRange range, String key, boolean isCaseSensitive);
+
+    /**
+     * Копирование строк из сохраненного среза НФ-источника во временный срез НФ-приемника.
+     * Временный срез приемника предварительно очищается.
+     * Не копирует версию ручного ввода!
+     *
+     * @param formDataSourceId НФ источник
+     * @param formDataDestinationId НФ приемник
+     */
+    void copyRows(long formDataSourceId, long formDataDestinationId);
 }

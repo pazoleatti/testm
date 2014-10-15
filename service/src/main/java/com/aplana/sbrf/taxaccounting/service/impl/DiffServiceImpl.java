@@ -1,11 +1,14 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.DiffService;
 import difflib.Delta;
 import difflib.DiffUtils;
 import difflib.Patch;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -16,6 +19,10 @@ import java.util.*;
  */
 @Service
 public class DiffServiceImpl implements DiffService {
+
+    @Autowired
+    private RefBookHelper refBookHelper;
+
     @Override
     public List<Diff> computeDiff(List<String> original, List<String> revised) {
         // Патч по алгоритму Myer's Diff
@@ -169,7 +176,40 @@ public class DiffServiceImpl implements DiffService {
                     if (isValueChanged(originalCell.getValue(), revisedCell.getValue())) {
                         cell.setStyleAlias(STYLE_CHANGE);
                     } else {
-                        cell.setStyleAlias(STYLE_NO_CHANGE);
+                        // Если ячейки являются зависимыми, то необходимо сравнить их родительские графы
+                        if (originalCell.getColumn().getColumnType() == ColumnType.REFERENCE
+                                && revisedCell.getColumn().getColumnType() == ColumnType.REFERENCE) {
+
+                            ReferenceColumn originalReferenceColumn = (ReferenceColumn) originalCell.getColumn();
+                            ReferenceColumn revisedReferenceColumn = (ReferenceColumn) revisedCell.getColumn();
+
+                            int originalParentId = originalReferenceColumn.getParentId();
+                            int revisedParentId = revisedReferenceColumn.getParentId();
+
+                            Cell originalParentCell = getCellById(originalParentId, originalRow);
+                            Cell revisedParentCell = getCellById(revisedParentId, revisedRow);
+
+                            if (!isValueChanged(originalParentCell.getValue(), revisedParentCell.getValue())) {
+                                // Если у зависимой графы не поменялось значение родительской графы, то зависимая графа
+                                // тоже считается не измененной
+                                cell.setStyleAlias(STYLE_NO_CHANGE);
+                            } else {
+                                // Родительская графа изменилась, нужно сравнить разыменованные значения
+                                DataRow<Cell> dataRow1 = new DataRow<Cell>(Arrays.asList(originalCell, originalParentCell));
+                                DataRow<Cell> dataRow2 = new DataRow<Cell>(Arrays.asList(revisedCell, revisedParentCell));
+                                refBookHelper.dataRowsDereference(new Logger(), Arrays.asList(dataRow1),
+                                        Arrays.asList(originalCell.getColumn(), originalParentCell.getColumn()));
+                                refBookHelper.dataRowsDereference(new Logger(), Arrays.asList(dataRow2),
+                                        Arrays.asList(revisedCell.getColumn(), revisedParentCell.getColumn()));
+                                if (isValueChanged(originalCell.getRefBookDereference(), revisedCell.getRefBookDereference())) {
+                                    cell.setStyleAlias(STYLE_CHANGE);
+                                } else {
+                                    cell.setStyleAlias(STYLE_NO_CHANGE);
+                                }
+                            }
+                        } else {
+                            cell.setStyleAlias(STYLE_NO_CHANGE);
+                        }
                     }
                     // Значение
                     if (cell.getColumn().getColumnType() == ColumnType.NUMBER) {
@@ -179,6 +219,19 @@ public class DiffServiceImpl implements DiffService {
                 }
                 return;
         }
+    }
+
+    /**
+     * Поиск ячейки по id графы
+     */
+    private Cell getCellById(int id, DataRow<Cell> dataRow) {
+        for (String key : dataRow.keySet()) {
+            Cell cell = dataRow.getCell(key);
+            if (cell.getColumn().getId().equals(id)) {
+                return cell;
+            }
+        }
+        return null;
     }
 
     /**

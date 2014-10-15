@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataAccessParams;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.service.*;
@@ -42,10 +44,7 @@ public class FillPreviousHandler extends AbstractActionHandler<FillPreviousActio
     @Autowired
     private SecurityService securityService;
 
-    @Autowired
-    private FormTemplateService formTemplateService;
-
-    private final static SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
+     private final static SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
     private final static String NOT_FOUND_MESSAGE = "В предыдущих корректирующих и в обычном (не корректирующем) периоде не найден экземпляр формы в статусе \"Принята\". Копирование данных не может быть выполнено.";
     private final static String FOUND_CORRECTION_MESSAGE = "Найден экземпляр формы предыдущего периода, дата сдачи корректировки: ";
     private final static String FOUND_SIMPLE_MESSAGE = "Найден экземпляр формы в основном (не корректирующем) периоде.";
@@ -107,24 +106,10 @@ public class FillPreviousHandler extends AbstractActionHandler<FillPreviousActio
             DepartmentReportPeriod prevFormDepartmentReportPeriod = departmentReportPeriodService.get(
                     prevFormData.getDepartmentReportPeriodId());
 
-            // Шаблон НФ
-            FormTemplate formTemplate = formTemplateService.get(prevFormData.getFormTemplateId());
-            prevFormData.initFormTemplateParams(formTemplate);
-
             logger.info(prevFormDepartmentReportPeriod.getCorrectionDate() != null ? FOUND_CORRECTION_MESSAGE +
                     SIMPLE_DATE_FORMAT.format(prevFormDepartmentReportPeriod.getCorrectionDate()) + "." : FOUND_SIMPLE_MESSAGE);
-            // Копирование
-            List<DataRow<Cell>> prevFormDataRows = dataRowService.getSavedRows(prevFormData);
 
-            // Строки почему-то не по порядку
-            Collections.sort(prevFormDataRows, new Comparator<DataRow<Cell>>() {
-                @Override
-                public int compare(DataRow<Cell> o1, DataRow<Cell> o2) {
-                    return o1.getIndex().compareTo(o2.getIndex());
-                }
-            });
-
-            dataRowService.saveRows(action.getFormData(), prevFormDataRows);
+            dataRowService.copyRows(prevFormData.getId(), action.getFormData().getId());
             logger.info(SUCCESS_MESSAGE);
         }
 

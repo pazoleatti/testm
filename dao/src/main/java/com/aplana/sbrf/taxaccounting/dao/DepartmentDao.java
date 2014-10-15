@@ -19,6 +19,13 @@ public interface DepartmentDao {
 	 */
 	Department getDepartment(int id);
 
+    /**
+     * Проверяет существует ли подразделение
+     * @param departmentId идентификатор подразделения
+     * @return true если существует
+     */
+    boolean existDepartment(int departmentId);
+
 	/**
 	 * Получить список дочерних подразделений по коду подзаделения
 	 * Внимание: объекты, возвращаемые данным методом инициализируются не полностью (в частности в них не заполняется  

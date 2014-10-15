@@ -234,7 +234,6 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 			Dialog.errorMessage("Указание параметров поиска","Интервал периода поиска указан неверно!");
 		} else {
 			find();
-            getView().clearSelection();
 		}
 	}
 
@@ -279,28 +278,10 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 				new DialogHandler() {
 					@Override
 					public void yes() {
-						checkAndRemovePeriod();
+                        removeReportPeriod();
 					}
 				}
 				);
-	}
-
-	private void checkAndRemovePeriod() {
-		CanRemovePeriodAction action = new CanRemovePeriodAction();
-		action.setReportPeriodId((int)getView().getSelectedRow().getReportPeriodId());
-        action.setTaxType(taxType);
-		dispatcher.execute(action, CallbackUtils
-				.defaultCallback(new AbstractCallback<CanRemovePeriodResult>() {
-					@Override
-					public void onSuccess(CanRemovePeriodResult result) {
-						if (result.isCanRemove()) {
-							removeReportPeriod();
-						} else {
-                            LogAddEvent.fire(PeriodsPresenter.this, result.getUuid());
-                            Dialog.errorMessage("Удаление периода", "Удаление периода невозможно!");
-						}
-					}
-				}, PeriodsPresenter.this));
 	}
 
 	private void removeReportPeriod() {
@@ -314,6 +295,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 						find();
 						LogAddEvent.fire(PeriodsPresenter.this, result.getUuid());
                         getView().clearSelection();
+                        Dialog.errorMessage("Удаление периода", "Удаление периода невозможно!");
 					}
 				}, PeriodsPresenter.this));
 	}
@@ -328,7 +310,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
             getView().setCanChangeDeadline(false);
             return;
         }
-        getView().setCanChangeDeadline(!selectedRow.isSubHeader() && selectedRow.isOpen());
+        getView().setCanChangeDeadline(canEditDeadLine(selectedRow));
         getView().setCanEditPeriod(!selectedRow.isSubHeader() && selectedRow.isOpen() && canEdit);
         getView().setCanClosePeriod(!selectedRow.isSubHeader() && canEdit);
         getView().setCanDeletePeriod(!selectedRow.isSubHeader() && canEdit);
@@ -336,8 +318,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
         ITD.add(TaxType.INCOME);
         ITD.add(TaxType.TRANSPORT);
         ITD.add(TaxType.DEAL);
-        if (!selectedRow.isSubHeader() && !selectedRow.isOpen() && !selectedRow.isBalance() && selectedRow.getCorrectPeriod() == null
-                && (ITD.contains(taxType) && selectedRow.getPeriodName().equals("год") || !ITD.contains(taxType))) {
+        if (!selectedRow.isSubHeader() && !selectedRow.isOpen() && !selectedRow.isBalance() && selectedRow.getCorrectPeriod() == null) {
             getView().setCanOpenCorrectPeriod(true);
         } else {
             getView().setCanOpenCorrectPeriod(false);
@@ -447,4 +428,14 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 	public void onUpdateFormHandler(UpdateForm event) {
 		find();
 	}
+
+    /**
+     * Можно ли редактировать срок сдачи отчетности
+     *
+     * @param tableRow выбранная строка в таблице
+     * @return true - можно, false - нельзя
+     */
+    public boolean canEditDeadLine(TableRow tableRow) {
+        return !tableRow.isSubHeader() && tableRow.isOpen() && !tableRow.isCorrection();
+    }
 }

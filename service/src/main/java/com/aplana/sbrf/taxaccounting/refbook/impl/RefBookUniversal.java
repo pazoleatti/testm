@@ -15,6 +15,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.util.BDUtils;
 import com.aplana.sbrf.taxaccounting.utils.SimpleDateUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -207,14 +208,14 @@ public class RefBookUniversal implements RefBookDataProvider {
                     }
                 }
 
+                //Проверка корректности
+                checkCorrectness(logger, refBook, null, versionFrom, versionTo, attributes, records);
+
                 if (!refBookId.equals(RefBook.DEPARTMENT_CONFIG_TRANSPORT) &&
                         !refBookId.equals(RefBook.DEPARTMENT_CONFIG_INCOME) &&
                         !refBookId.equals(RefBook.DEPARTMENT_CONFIG_DEAL) &&
                         !refBookId.equals(RefBook.DEPARTMENT_CONFIG_VAT) &&
                         !refBookId.equals(RefBook.DEPARTMENT_CONFIG_PROPERTY)) {
-
-                    //Проверка корректности
-                    checkCorrectness(logger, refBook, null, versionFrom, versionTo, attributes, records);
 
                     for (RefBookRecord record : records) {
                         //Проверка пересечения версий
@@ -431,7 +432,7 @@ public class RefBookUniversal implements RefBookDataProvider {
         if (logger.getTaUserInfo() == null) {
             throw new ServiceException("Текущий пользователь не установлен!");
         }
-        //Устанавливаем блокировку на тевущий справочник
+        //Устанавливаем блокировку на текущий справочник
         List<String> lockedObjects = new ArrayList<String>();
         int userId = logger.getTaUserInfo().getUser().getId();
         String lockKey = LockData.LOCK_OBJECTS.REF_BOOK.name() + "_" + refBookId;
@@ -519,7 +520,11 @@ public class RefBookUniversal implements RefBookDataProvider {
                 boolean isValuesChanged = checkValuesChanged(uniqueRecordId, records);
 
                 //Проверка использования
-                List<String> usagesResult = refBookDao.isVersionUsed(refBookId, Arrays.asList(uniqueRecordId), versionFrom, versionTo, isValuesChanged);
+
+                List<String> usagesResult = refBookDao.isVersionUsed(refBookId, Arrays.asList(uniqueRecordId), versionFrom, versionTo, isValuesChanged,
+                        RefBookTableRef.getTablesIdByRefBook(refBookId) == null ?
+                                Collections.<Long>emptyList() :
+                                Arrays.asList(ArrayUtils.toObject(RefBookTableRef.getTablesIdByRefBook(refBookId))));
                 if (usagesResult != null && !usagesResult.isEmpty()) {
                     for (String error: usagesResult) {
                         logger.error(error);
@@ -713,7 +718,10 @@ public class RefBookUniversal implements RefBookDataProvider {
                     }
                 }
                 //Проверка использования
-                List<String> usagesResult = refBookDao.isVersionUsed(refBookId, uniqueRecordIds, null, null, true);
+                List<String> usagesResult = refBookDao.isVersionUsed(refBookId, uniqueRecordIds, null, null, true,
+                        RefBookTableRef.getTablesIdByRefBook(refBookId) == null ?
+                                Collections.<Long>emptyList() :
+                                Arrays.asList(ArrayUtils.toObject(RefBookTableRef.getTablesIdByRefBook(refBookId))));
                 if (usagesResult != null && !usagesResult.isEmpty()) {
                     for (String error: usagesResult) {
                         logger.error(error);
@@ -784,7 +792,10 @@ public class RefBookUniversal implements RefBookDataProvider {
                     }
                 }
                 //Проверка использования
-                List<String> usagesResult = refBookDao.isVersionUsed(refBookId, uniqueRecordIds, null, null, true);
+                List<String> usagesResult = refBookDao.isVersionUsed(refBookId, uniqueRecordIds, null, null, true,
+                        RefBookTableRef.getTablesIdByRefBook(refBookId) == null ?
+                                Collections.<Long>emptyList() :
+                                Arrays.asList(ArrayUtils.toObject(RefBookTableRef.getTablesIdByRefBook(refBookId))));
                 if (usagesResult != null && !usagesResult.isEmpty()) {
                     for (String error: usagesResult) {
                         logger.error(error);

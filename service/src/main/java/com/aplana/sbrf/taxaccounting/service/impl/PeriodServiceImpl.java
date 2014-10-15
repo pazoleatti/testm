@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -49,7 +48,11 @@ public class PeriodServiceImpl implements PeriodService {
 	private DepartmentService departmentService;
 
 	@Autowired
-	private FormDataDao formDataDao;
+	private FormDataService formDataService;
+    @Autowired
+    private DeclarationDataService declarationDataService;
+    @Autowired
+    private DeclarationTemplateService declarationTemplateService;
 
 	@Autowired
 	private TAUserService userService;
@@ -195,7 +198,7 @@ public class PeriodServiceImpl implements PeriodService {
 
 	private boolean checkBeforeClose(List<Integer> departments, int reportPeriodId, List<LogEntry> logs, TAUser user) {
 		boolean allGood = true;
-        List<FormData> formDataList = formDataDao.find(departments, reportPeriodId);
+        List<FormData> formDataList = formDataService.find(departments, reportPeriodId);
         for (FormData fd : formDataList) {
             LockData lock = lockDataService.lock(LockData.LOCK_OBJECTS.FORM_TEMPLATE.name() + "_" + fd.getId(),
                     user.getId(), LockData.STANDARD_LIFE_TIME);
@@ -407,7 +410,30 @@ public class PeriodServiceImpl implements PeriodService {
     //http://conf.aplana.com/pages/viewpage.action?pageId=11389882#id-Формаспискапериодов-Удалениепериода
 	@Override
 	public void removeReportPeriod(TaxType taxType, int drpId, List<LogEntry> logs, TAUserInfo user) {
+        //Проверка форм не относится к этой постановке
+        List<Integer> departmentIds = departmentService.getBADepartmentIds(user.getUser());
         DepartmentReportPeriod drp = departmentReportPeriodService.get(drpId);
+
+        //Check forms
+        List<FormData> formDatas = formDataService.find(departmentIds, drp.getReportPeriod().getId());
+        for (FormData fd : formDatas) {
+            logs.add(new LogEntry(LogLevel.ERROR, "Форма " + fd.getFormType().getName() + " " + fd.getKind().getName() +
+                    " в подразделении " + departmentService.getDepartment(fd.getDepartmentId()).getName() +
+                    " находится в удаляемом периоде!"));
+        }
+
+        DeclarationDataFilter filter = new DeclarationDataFilter();
+        filter.setDepartmentIds(departmentIds);
+        filter.setReportPeriodIds(Collections.singletonList(drp.getReportPeriod().getId()));
+        List<Long> declarations = declarationDataSearchService.getDeclarationIds(filter, DeclarationDataSearchOrdering.ID, true);
+        for (Long id : declarations) {
+            DeclarationData dd = declarationDataService.get(id, user);
+            DeclarationTemplate dt = declarationTemplateService.get(dd.getDeclarationTemplateId());
+            logs.add(new LogEntry(LogLevel.ERROR, dt.getType().getName() + " в подразделении " +
+                    departmentService.getDepartment(dd.getDepartmentId()).getName() +
+                    " находится в удаляемом периоде!"));
+        }
+
         int reportPeriodId = drp.getReportPeriod().getId();
         //2 Проверка вида периода
         if (drp.getCorrectionDate() != null &&
@@ -417,11 +443,11 @@ public class PeriodServiceImpl implements PeriodService {
             return;
         } else if (drp.getCorrectionDate() == null){
             //3 Существуют ли корректирующий период
-            DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
-            filter.setIsCorrection(true);
-            filter.setReportPeriodIdList(Arrays.asList(reportPeriodId));
-            filter.setDepartmentIdList(Arrays.asList(drp.getDepartmentId()));
-            List<Integer> corrIds = departmentReportPeriodService.getListIdsByFilter(filter);
+            DepartmentReportPeriodFilter drpFilter = new DepartmentReportPeriodFilter();
+            drpFilter.setIsCorrection(true);
+            drpFilter.setReportPeriodIdList(Arrays.asList(reportPeriodId));
+            drpFilter.setDepartmentIdList(Arrays.asList(drp.getDepartmentId()));
+            List<Integer> corrIds = departmentReportPeriodService.getListIdsByFilter(drpFilter);
             if (!corrIds.isEmpty()){
                 logs.add(new LogEntry(LogLevel.ERROR,
                         "Удаление периода невозможно, т.к. для него существует корректирующий период!"));
@@ -438,7 +464,7 @@ public class PeriodServiceImpl implements PeriodService {
 	private boolean checkBeforeRemove(List<Integer> departments, int reportPeriodId, List<LogEntry> logs) {
 		boolean canRemove = true;
 		Set<Integer> blockedBy = new HashSet<Integer>();
-        List<FormData> formDataList = formDataDao.find(departments, reportPeriodId);
+        List<FormData> formDataList = formDataService.find(departments, reportPeriodId);
         if (!formDataList.isEmpty()) {
             for (FormData fd : formDataList) {
                 blockedBy.add(fd.getDepartmentId());
@@ -708,27 +734,7 @@ public class PeriodServiceImpl implements PeriodService {
 
     @Override
     public List<ReportPeriod> getCorrectPeriods(TaxType taxType, int departmentId) {
-        List<ReportPeriod> correctPeriods = reportPeriodDao.getCorrectPeriods(taxType, departmentId);
-        String periodCode = "34";
-        switch (taxType) {
-            case DEAL:
-                periodCode = "46";
-            case INCOME:
-            case TRANSPORT:
-                RefBookDataProvider dataProvider = rbFactory.getDataProvider(8L);
-                for (Iterator<ReportPeriod> it = correctPeriods.iterator(); it.hasNext(); ) {
-                    ReportPeriod rp = it.next();
-
-                    Map<String, RefBookValue> refBookValueMap = dataProvider.getRecordData(rp.getDictTaxPeriodId());
-                    // Код налогового периода
-                    String code = refBookValueMap.get("CODE").getStringValue();
-                    if (!code.equals(periodCode)) {
-                        it.remove();
-                    }
-                }
-                break;
-        }
-        return correctPeriods;
+        return reportPeriodDao.getCorrectPeriods(taxType, departmentId);
     }
 
     @Override

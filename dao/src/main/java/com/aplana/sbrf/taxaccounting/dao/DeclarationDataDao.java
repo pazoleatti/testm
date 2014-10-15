@@ -19,14 +19,6 @@ public interface DeclarationDataDao {
 	DeclarationData get(long declarationDataId);
 
 	/**
-	 * Проверяет, что декларация содержит данные (XML-файл не пуст)
-	 * @param declarationDataId идентификатор декларации
-	 * @return true если декларация содержит данные, false - в противном случае
-	 * В случае, если декларации с указанным id не существует, вернёт false
-	 */
-	boolean hasXmlData(long declarationDataId);
-	
-	/**
 	 * Сохраняет новую декларацию в БД. 
 	 * Этот метод позволяет сохранять только новые декларации (т.е. те, у которых id == null). 
 	 * При попытке сохранить уже существующий объект (с непустым id) будет выброшен DaoException

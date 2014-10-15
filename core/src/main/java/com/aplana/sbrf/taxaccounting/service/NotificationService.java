@@ -73,12 +73,4 @@ public interface NotificationService {
      * @param notificationIds идентификаторы оповещений
      */
     void deleteAll(List<Long> notificationIds);
-
-    /**
-     * Проверяет на какие оповещения из списка у пользователя есть полные права
-     * @param user пользователь
-     * @param notificationIds идентификаторы оповещений
-     * @return список оповещений, на которые у пользователя есть полные права
-     */
-    List<Long> getAllowedNotifications(TAUser user, List<Long> notificationIds);
 }

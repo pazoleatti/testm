@@ -6,8 +6,8 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
- * Сведения для расчёта налога с доходов в виде дивидендов
- * formTemplateId=10141
+ * Сведения для расчёта налога с доходов в виде дивидендов (03/А)
+ * formTemplateId=1411
  *
  * http://conf.aplana.com/pages/viewpage.action?pageId=8784122
  *
@@ -78,6 +78,10 @@ switch (formDataEvent) {
 
 //// Кэши и константы
 @Field
+def providerCache = [:]
+@Field
+def recordCache = [:]
+@Field
 def refBookCache = [:]
 
 @Field
@@ -99,7 +103,18 @@ def nonEmptyColumns = ['financialYear', 'taxPeriod', 'dividendType', 'dividendSu
                        'dividendRussianOrgStavka0', 'dividendPersonRussia', 'dividendMembersNotRussianTax',
                        'dividendAgentAll', 'dividendAgentWithStavka0', 'taxSumFromPeriod', 'taxSumFromPeriodAll']
 
+// Текущая дата
+@Field
+def currentDate = new Date()
+
 //// Обертки методов
+
+// Поиск записи в справочнике по значению (для расчетов)
+def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
+                boolean required = true) {
+    return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value,
+            currentDate, rowIndex, cellName, logger, required)
+}
 
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
@@ -165,10 +180,11 @@ def logicCheck() {
     def needValue = [:]
 
     for (def row in dataRows) {
+        def rowNum = row.getIndex()
 
         // 1. Проверка на заполнение поля
-        checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
-        checkNonEmptyColumns(row, row.getIndex(), ['emitent', 'decreeNumber'], logger, false)
+        checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
+        checkNonEmptyColumns(row, rowNum, ['emitent', 'decreeNumber'], logger, false)
 
         // Арифметические проверки расчета граф 21-24, 26
         needValue['dividendSumForTaxAll'] = calc21(row)
@@ -176,10 +192,14 @@ def logicCheck() {
         needValue['dividendSumForTaxStavka0'] = calc23(row)
         needValue['taxSum'] = calc24(row)
         checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
+
+        // Проверка наличия значения графы 2 в справочнике «Коды, определяющие налоговый (отчётный) период»
+        def cell = row.getCell('taxPeriod')
+        getRecordId(8, 'CODE', cell.value, rowNum, cell.column.name, true)
     }
 
     // 2. Проверка наличия формы за предыдущий отчётный период
-    if (formDataService.getFormDataPrev(formData, formData.departmentId) == null) {
+    if (formDataService.getFormDataPrev(formData) == null) {
         logger.warn('Форма за предыдущий отчётный период не создавалась!')
     }
 }

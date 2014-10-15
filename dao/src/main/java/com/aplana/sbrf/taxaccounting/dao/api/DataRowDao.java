@@ -152,4 +152,14 @@ public interface DataRowDao {
      * @param columnIdList Список Id измененных/удаленных граф
      */
     void cleanValue(Collection<Integer> columnIdList);
+
+    /**
+     * Копирование строк из сохраненного среза НФ-источника во временный срез НФ-приемника.
+     * Временный срез приемника предварительно очищается.
+     * Не копирует версию ручного ввода!
+     *
+     * @param formDataSourceId НФ источник
+     * @param formDataDestinationId НФ приемник
+     */
+    void copyRows(long formDataSourceId, long formDataDestinationId);
 }

@@ -1,25 +1,36 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.exception.WSException;
-import org.junit.BeforeClass;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import org.junit.Before;
 import org.junit.Test;
-import org.springframework.test.util.ReflectionTestUtils;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("TAUserServiceTest.xml")
 public class TAUserServiceTest {
-	
-	private static TAUserServiceImpl service;
+    
+    @Autowired
+    private TAUserService taUserService;
+
+    @Autowired
+    DepartmentService departmentService;
+    @Autowired
+    TAUserDao userDao;
 	
 	private final static int USER_OPERATOR_ID = 14;
 	
@@ -27,15 +38,13 @@ public class TAUserServiceTest {
 	
 	private final static String USER_ROLE = "ROLE_CONTROL_UNP";
 	
-	private final static String USER_LOGIN = "controlBank";
+	private final static String USER_LOGIN_CONTROL = "controlBank";
+    private final static String USER_LOGIN_OPER = "operTB";
 	
 	private static TAUser user;
-	
-	@BeforeClass
-	public static void init(){
-		service = new TAUserServiceImpl();
-		TAUserDao userDao = mock(TAUserDao.class);
-		DepartmentDao depDao = mock(DepartmentDao.class);
+
+    @Before
+	public void init(){
 		List<Integer> listUserIds = new ArrayList<Integer>();
 		listUserIds.add(1);
 		listUserIds.add(2);
@@ -48,7 +57,7 @@ public class TAUserServiceTest {
 		
 		user = new TAUser();
 		user.setId(USER_OPERATOR_ID);
-		user.setLogin(USER_LOGIN);
+		user.setLogin(USER_LOGIN_CONTROL);
 		user.setEmail("controlBank@bank.ru");
 		user.setDepartmentId(USER_DEPARTMENT_ID);
 		user.setRoles(listUserRoles);
@@ -61,41 +70,57 @@ public class TAUserServiceTest {
 		when(userDao.createUser(user)).thenReturn(user.getId());
 		when(userDao.getUserIds()).thenReturn(listUserIds);
 		when(userDao.checkUserRole(USER_ROLE)).thenReturn(1);
-		when(userDao.checkUserLogin(USER_LOGIN)).thenReturn(0);
+		when(taUserService.existsUser(USER_LOGIN_CONTROL)).thenReturn(false);
+        when(taUserService.existsUser(USER_LOGIN_OPER)).thenReturn(true);
 		
-		when(depDao.getDepartment(USER_DEPARTMENT_ID)).thenReturn(new Department());
-		ReflectionTestUtils.setField(service, "userDao", userDao);
-		ReflectionTestUtils.setField(service, "departmentDao", depDao);
+		when(departmentService.getDepartment(USER_DEPARTMENT_ID)).thenReturn(new Department());
+        when(departmentService.existDepartment(USER_DEPARTMENT_ID)).thenReturn(true);
 	}
 	
 	@Test
 	public void testServiceGetUser(){
-		assertEquals(user.getLogin(),service.getUser(USER_OPERATOR_ID).getLogin());
+		assertEquals(user.getLogin(), taUserService.getUser(USER_OPERATOR_ID).getLogin());
 	}
 	
 	@Test
 	public void testServiceSetUserIsActive(){
-		service.setUserIsActive(user.getLogin(), false);
+		taUserService.setUserIsActive(user.getLogin(), false);
 	}
 	
 	@Test(expected = WSException.class)
 	public void testServiceUpdateUserInfo(){
-		service.updateUser(user);
+		taUserService.updateUser(user);
 	}
 	
 	@Test
 	public void testServiceCreateUser(){
-		assertEquals(user.getId(),service.createUser(user));
+		assertEquals(user.getId(), taUserService.createUser(user));
 	}
 	
 	@Test
 	public void testListAllUsers(){
-		assertEquals(3, service.listAllUsers().size());
+		assertEquals(3, taUserService.listAllUsers().size());
 	}
 
     @Test
     public void testListAllFullUsers(){
-        assertEquals(3, service.listAllFullActiveUsers().size());
+        assertEquals(3, taUserService.listAllFullActiveUsers().size());
+    }
+
+    @Test(expected = WSException.class)
+    public void testCreateUser(){
+        TAUser user = new TAUser();
+        user.setId(USER_OPERATOR_ID);
+        user.setLogin(USER_LOGIN_OPER);
+        user.setEmail("controlBank@bank.ru");
+        user.setDepartmentId(USER_DEPARTMENT_ID);
+        TARole role = new TARole();
+        role.setAlias(USER_ROLE);
+        List<TARole> listUserRoles = new ArrayList<TARole>();
+        listUserRoles.add(role);
+        user.setRoles(listUserRoles);
+        user.setActive(true);
+        taUserService.createUser(user);
     }
 
 }

@@ -48,6 +48,11 @@ public class DepartmentDaoTest {
         Assert.assertEquals("ТБ2", d.getName());
     }
 
+    @Test
+    public void testExist() {
+        Assert.assertTrue(departmentDao.existDepartment(1));
+    }
+
     @Test(expected = DaoException.class)
     public void testGetIncorrectId() {
         departmentDao.getDepartment(-1);

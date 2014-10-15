@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
@@ -85,6 +86,15 @@ public class DeclarationServiceTest {
         when(declarationTypeDao.get(1)).thenReturn(declarationType);
         ReflectionTestUtils.setField(service, "declarationTypeDao", declarationTypeDao);
 
+        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
+        ReportPeriod reportPeriod = new ReportPeriod();
+        reportPeriod.setId(48);
+        departmentReportPeriod.setReportPeriod(reportPeriod);
+        departmentReportPeriod.setDepartmentId(2);
+        DepartmentReportPeriodDao departmentReportPeriodDao = mock(DepartmentReportPeriodDao.class);
+        when(departmentReportPeriodDao.get(1)).thenReturn(departmentReportPeriod);
+        ReflectionTestUtils.setField(service, "departmentReportPeriodDao", departmentReportPeriodDao);
+
         Map<String, RefBookValue> departmentParam = new HashMap<String, RefBookValue>();
         departmentParam.put("TAX_ORGAN_CODE", new RefBookValue(RefBookAttributeType.STRING, "тест"));
         departmentParam.put("INN", new RefBookValue(RefBookAttributeType.STRING, "тест"));
@@ -102,7 +112,7 @@ public class DeclarationServiceTest {
 
         ReflectionTestUtils.setField(service, "periodService", reportPeriodService);
         ReflectionTestUtils.setField(service, "factory", factory);
-        String fileId = service.generateXmlFileId(1, 2, 48);
+        String fileId = service.generateXmlFileId(1, 1, null, null);
         assertTrue(fileId != null);
     }
 

@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client;
 
 import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
@@ -14,6 +15,9 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.filte
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.filter.FilterDeclarationTemplatePresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.filter.FilterDeclarationTemplateReadyEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.*;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.user.client.History;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -28,6 +32,7 @@ import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -49,6 +54,8 @@ public class DeclarationTemplateListPresenter
 	@NameToken(DeclarationTemplateTokens.declarationTemplateList)
 	public interface MyProxy extends ProxyPlace<DeclarationTemplateListPresenter> {
 	}
+
+    private HashMap<Integer, String> lstHistory = new HashMap<Integer, String>();
 
 	/**
 	 * Интерфейс декларации, т.е. представления. Такой, каким видит его Presenter.
@@ -73,6 +80,13 @@ public class DeclarationTemplateListPresenter
         this.dispatcher = dispatcher;
         this.filterPresenter = filterPresenter;
         this.editFormPresenter = editFormPresenter;
+        History.addValueChangeHandler(new ValueChangeHandler<String>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<String> event) {
+                lstHistory.put(0, lstHistory.get(1));
+                lstHistory.put(1, event.getValue());
+            }
+        });
         getView().setUiHandlers(this);
 	}
 
@@ -83,12 +97,18 @@ public class DeclarationTemplateListPresenter
 	 *
 	 * @param request запрос
 	 */
+    private TemplateFilter previousFilter;
 	@Override
 	public void prepareFromRequest(PlaceRequest request) {
 		super.prepareFromRequest(request);
+        String url = DeclarationTemplateTokens.declarationVersionList + ";" + DeclarationTemplateTokens.declarationType;
+        if ((lstHistory.get(0) == null || !lstHistory.get(0).startsWith(url)) &&
+                (lstHistory.get(1) == null || !lstHistory.get(1).startsWith(url))) {
+            previousFilter = null;
+        }
         LogCleanEvent.fire(this);
         LogShowEvent.fire(this, false);
-        filterPresenter.initFilter();
+        filterPresenter.initFilter(previousFilter);
 	}
 
 	@Override
@@ -130,6 +150,7 @@ public class DeclarationTemplateListPresenter
     }
 
     public void updateDeclarationData() {
+        previousFilter =  filterPresenter.getFilterData();
         DeclarationListAction action = new DeclarationListAction();
         action.setFilter(filterPresenter.getFilterData());
         dispatcher.execute(action,	CallbackUtils.defaultCallback(

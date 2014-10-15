@@ -54,6 +54,7 @@ public class GetNotificationsHandler extends AbstractActionHandler<GetNotificati
             row.setId(notification.getId());
 			row.setDate(notification.getCreateDate());
 			row.setMsg(notification.getText());
+            row.setCanDelete(canDelete(notification, user));
 			rows.add(row);
 		}
 		PagingResult<NotificationTableRow> resultRows = new PagingResult<NotificationTableRow>(rows, result.getTotalCount());
@@ -63,7 +64,23 @@ public class GetNotificationsHandler extends AbstractActionHandler<GetNotificati
 		return actionResult;
 	}
 
-	@Override
+    /**
+     * Получить признак возможности удаления оповещения.
+     *
+     * @param notification оповещение
+     * @param user пользователь
+     */
+    private Boolean canDelete(Notification notification, TAUser user) {
+        // пользователь может удалить оповещение:
+        // если заполнен ID пользователя-получателя (для любой роли) или ID роли получателя (для любой роли)
+        // или ID подразделения-получателя (для роли Контролёр УНП или Контролёр НС)
+        return notification.getUserId() != null || notification.getRoleId() != null ||
+                (notification.getReceiverDepartmentId() != null
+                        && (user.hasRole(TARole.ROLE_CONTROL_UNP) || user.hasRole(TARole.ROLE_CONTROL_NS)));
+
+    }
+
+    @Override
 	public void undo(GetNotificationsAction getNotificationsAction, GetNotificationsResult getNotificationsResult, ExecutionContext executionContext) throws ActionException {
 	}
 }

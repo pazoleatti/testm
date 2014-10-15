@@ -68,6 +68,12 @@ public class DataRowServiceImpl implements DataRowService {
         return dataRowDao.searchByKey(formDataId, formTemplateId, range, key, isCaseSensitive);
     }
 
+    @Override
+    @Transactional(readOnly = false)
+    public void copyRows(long formDataSourceId, long formDataDestinationId) {
+        dataRowDao.copyRows(formDataSourceId, formDataDestinationId);
+    }
+
     private void checkLockedMe(LockData lockData, TAUser user){
         if (lockData.getUserId() != user.getId()) {
             throw new ServiceException("Объект не заблокирован текущим пользователем");
