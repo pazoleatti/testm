@@ -61,6 +61,8 @@ public class XmlGeneratorAsyncTask extends AbstractAsyncTask {
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
 
+        declarationDataService.deleteReport(declarationDataId, false);
+
         DeclarationData declaration = declarationDataService.get(declarationDataId, userInfo);
         Department department = departmentService.getDepartment(declaration.getDepartmentId());
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(declaration.getDepartmentReportPeriodId());
