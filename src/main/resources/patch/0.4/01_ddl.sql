@@ -43,6 +43,12 @@ ALTER TABLE log_system ADD CONSTRAINT log_system_fk_blob_data FOREIGN KEY (blob_
 COMMENT ON COLUMN log_system.blob_data_id IS 'Ссылка на логи';
 
 ---------------------------------------------------------------------------------------------------
+-- http://jira.aplana.com/browse/SBRFACCTAX-8880 - Актуализация реализации журнала аудита
+ALTER TABLE log_system ADD form_type_id NUMBER(9);
+COMMENT ON COLUMN log_system.form_type_id is 'Идентификатор вида НФ';
+ALTER TABLE log_system DROP COLUMN tb_department_id;
+
+---------------------------------------------------------------------------------------------------
 -- http://jira.aplana.com/browse/SBRFACCTAX-8403 - Изменения таблицы DECLARATION_DATA для налога на имущество
 ALTER TABLE declaration_data ADD tax_organ_code VARCHAR2(4);
 ALTER TABLE declaration_data ADD kpp VARCHAR2(9);
@@ -90,13 +96,52 @@ INTO event (id, name) VALUES(841,'Редактирование договора 
 INTO event (id, name) VALUES(842,'Закрытие договора обеспечения') 
 INTO event (id, name) VALUES(850,'Создание задачи формирования РНУ-23') 
 INTO event (id, name) VALUES(860,'Создание задачи формирования отчета')
+INTO event (id, name) VALUES(650,'Отправка email')
 SELECT * FROM dual;
 
 ALTER TABLE log_system DROP CONSTRAINT log_system_chk_dcl_form;
-ALTER TABLE log_system ADD CONSTRAINT log_system_chk_dcl_form CHECK (event_id IN (7, 11, 401, 402, 501, 502, 503, 601, 901, 902, 903, 801, 802, 810, 811, 812, 813, 820, 821, 830, 831, 832, 840, 841, 842, 850, 860) OR declaration_type_name IS NOT NULL OR (form_type_name IS NOT NULL AND form_kind_id IS NOT NULL));
+ALTER TABLE log_system ADD CONSTRAINT log_system_chk_dcl_form CHECK (event_id IN (7, 11, 401, 402, 501, 502, 503, 601, 650, 901, 902, 903, 801, 802, 810, 811, 812, 813, 820, 821, 830, 831, 832, 840, 841, 842, 850, 860) OR declaration_type_name IS NOT NULL OR (form_type_name IS NOT NULL AND form_kind_id IS NOT NULL));
 
 ALTER TABLE log_system DROP CONSTRAINT log_system_chk_rp;
-ALTER TABLE log_system ADD CONSTRAINT log_system_chk_rp CHECK (event_id IN (7, 11, 401, 402, 501, 502, 503, 601, 901, 902, 903, 801, 802, 810, 811, 812, 813, 820, 821, 830, 831, 832, 840, 841, 842, 850, 860) OR report_period_name IS NOT NULL);
+ALTER TABLE log_system ADD CONSTRAINT log_system_chk_rp CHECK (event_id IN (7, 11, 401, 402, 501, 502, 503, 601, 650, 901, 902, 903, 801, 802, 810, 811, 812, 813, 820, 821, 830, 831, 832, 840, 841, 842, 850, 860) OR report_period_name IS NOT NULL);
+
+---------------------------------------------------------------------------------------------------
+-- http://jira.aplana.com/browse/SBRFACCTAX-9017 - Связь таблиц EVENT и SEC_ROLE
+CREATE TABLE role_event (event_id number(9) NOT NULL, role_id number(9) NOT NULL);
+
+COMMENT ON TABLE role_event IS 'Настройка прав доступа к событиям журнала аудита по ролям';
+COMMENT ON COLUMN role_event.event_id IS 'Идентификатор события';
+COMMENT ON COLUMN role_event.role_id IS 'Идентификатор роли';
+
+ALTER TABLE role_event ADD CONSTRAINT role_event_pk PRIMARY KEY (event_id, role_id);
+ALTER TABLE role_event ADD CONSTRAINT role_event_fk_event_id FOREIGN KEY (event_id) REFERENCES event(id);
+ALTER TABLE role_event ADD CONSTRAINT role_event_fk_role_id FOREIGN KEY (role_id) REFERENCES sec_role(id);
+
+INSERT INTO role_event(event_id, role_id) (SELECT id, 3 FROM event WHERE id NOT IN (501, 502, 601, 701));
+INSERT INTO role_event(event_id, role_id) (SELECT id, 5 FROM event);
+
+INSERT INTO role_event(event_id, role_id)
+ (SELECT id, 2 FROM event
+  WHERE id IN (1, 2, 3, 6, 7)
+   OR to_char(id) LIKE '10_'
+   OR to_char(id) LIKE '40_'
+   OR to_char(id) LIKE '90_');
+
+INSERT INTO role_event(event_id, role_id)
+ (SELECT id, 1 FROM event
+  WHERE id IN (1, 2, 3, 6, 7)
+   OR to_char(id) LIKE '10_'
+   OR to_char(id) LIKE '40_'
+   OR to_char(id) LIKE '90_');
+
+INSERT INTO role_event(event_id, role_id)
+ (SELECT id, 6 FROM event
+  WHERE id IN (1, 2, 3, 6, 7)
+   OR to_char(id) LIKE '10_'
+   OR to_char(id) LIKE '40_'
+   OR to_char(id) LIKE '90_');
+
+ALTER TABLE log_business ADD CONSTRAINT log_business_fk_event_id FOREIGN KEY (event_id) REFERENCES event(id);
 
 ---------------------------------------------------------------------------------------------------
 -- http://jira.aplana.com/browse/SBRFACCTAX-8512 - Переход на новый механизм блокировок
@@ -179,18 +224,6 @@ COMMENT ON COLUMN lock_data_subscribers.lock_key IS 'Ключ блокировк
 COMMENT ON COLUMN lock_data_subscribers.user_id IS 'Идентификатор пользователя, который получит оповещение';
 ALTER TABLE lock_data_subscribers ADD CONSTRAINT lock_data_subscr_fk_lock_data FOREIGN KEY (lock_key) REFERENCES lock_data(KEY) ON DELETE CASCADE;
 ALTER TABLE lock_data_subscribers ADD CONSTRAINT lock_data_subscr_fk_sec_user FOREIGN KEY (user_id) REFERENCES sec_user(id) ON DELETE CASCADE;
-
----------------------------------------------------------------------------------------------------
--- http://jira.aplana.com/browse/SBRFACCTAX-8895 - Изменения в структуре REF_BOOK_ATTRIBUTE/REF_BOOK_VALUE
-ALTER TABLE ref_book_attribute ADD is_table NUMBER(1) DEFAULT 0 NOT NULL;
-ALTER TABLE ref_book_attribute ADD CONSTRAINT ref_book_attr_chk_istable CHECK (is_table IN (0, 1));
-COMMENT ON COLUMN ref_book_attribute.is_table IS 'Признак табличного атрибута';
-
-ALTER TABLE ref_book_value ADD row_num NUMBER(9) DEFAULT 0 NOT NULL;
-ALTER TABLE ref_book_value DROP CONSTRAINT REF_BOOK_VALUE_PK;
-DROP INDEX REF_BOOK_VALUE_PK;
-ALTER TABLE ref_book_value ADD CONSTRAINT REF_BOOK_VALUE_PK primary key (record_id, attribute_id, row_num);
-COMMENT ON COLUMN ref_book_value.row_num IS 'Номер строки в табличной части справочника';
 
 ---------------------------------------------------------------------------------------------------
 -- http://jira.aplana.com/browse/SBRFACCTAX-8809: Новые связи для form_data и declaration_data с department_report_period
