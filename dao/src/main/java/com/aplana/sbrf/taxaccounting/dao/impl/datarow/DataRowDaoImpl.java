@@ -21,6 +21,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.*;
 
 /**
@@ -684,5 +685,29 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
         }
         Map<String, Object> paramMap = new HashMap<String, Object>() {{put("ids", columnIdList);}};
         getNamedParameterJdbcTemplate().update("DELETE FROM data_cell WHERE column_id IN (:ids)", paramMap);
+    }
+
+    @Override
+    public void copyRows(long formDataSourceId, long formDataDestinationId) {
+        // Очистка временного среза НФ-приемника
+        getJdbcTemplate().update("delete from data_row where form_data_id = ? and type <> 0 and manual = 0",
+                new Object[]{formDataDestinationId}, new int[]{Types.NUMERIC});
+        // Добавление пустых строк во временный срез из НФ-источника
+        getJdbcTemplate().update("insert into data_row (id, form_data_id, alias, ord, type, manual) " +
+                "select seq_data_row.nextval, ?, alias, ord, 1, 0 " +
+                "from data_row " +
+                "where form_data_id = ? and manual = 0 and type = 0",
+                new Object[]{formDataDestinationId, formDataSourceId}, new int[]{Types.NUMERIC, Types.NUMERIC});
+        // Добавление значений ячеек
+        getJdbcTemplate().update("insert into data_cell " +
+                "(row_id, column_id, svalue, nvalue, dvalue, style_id, editable, colspan, rowspan) " +
+                "select rwd.id, dc.column_id, dc.svalue, dc.nvalue, dc.dvalue, " +
+                "dc.style_id, dc.editable, dc.colspan, dc.rowspan " +
+                "from data_row rws, data_row rwd, data_cell dc " +
+                "where rws.ord = rwd.ord " +
+                "and rws.form_data_id = ? " +
+                "and rwd.form_data_id = ? " +
+                "and dc.row_id = rws.id",
+                new Object[]{formDataSourceId, formDataDestinationId}, new int[]{Types.NUMERIC, Types.NUMERIC});
     }
 }

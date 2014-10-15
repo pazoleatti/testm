@@ -98,5 +98,27 @@ WHEN MATCHED THEN UPDATE SET cell_style.style_id = new_styles.style_id
 WHEN NOT MATCHED THEN INSERT (cell_style.row_id, cell_style.column_id, cell_style.style_id) VALUES (new_styles.row_id, new_styles.column_id, new_styles.style_id);
 
 ----------------------------------------------------------------------------------------------------------------------------
+--http://jira.aplana.com/browse/SBRFACCTAX-9014: Новые стили для корректировок для макетов НФ
+MERGE INTO form_style fs USING
+ (SELECT id form_template_id,'Корректировка-добавлено' ALIAS, 0 font_color, 12 back_color, 0 italic, 0 bold FROM form_template
+  UNION ALL 
+  SELECT id form_template_id,'Корректировка-удалено' ALIAS, 0 font_color, 8 back_color, 0 italic, 0 bold FROM form_template
+  UNION ALL 
+  SELECT id form_template_id, 'Корректировка-изменено' ALIAS, 10 font_color, 4 back_color, 0 italic, 1 bold FROM form_template
+  UNION ALL 
+  SELECT id form_template_id, 'Корректировка-без изменений' ALIAS, 0 font_color, 6 back_color, 0 italic, 0 bold FROM form_template) fs2 
+ON (fs.alias=fs2.alias AND fs.form_template_id=fs2.form_template_id) 
+WHEN MATCHED THEN
+	UPDATE
+	SET fs.font_color=fs2.font_color,
+		fs.back_color=fs2.back_color,
+		fs.italic=fs2.italic,
+		fs.bold=fs2.bold 
+WHEN NOT MATCHED THEN
+	INSERT (fs.id, fs.alias, fs.form_template_id, fs.font_color, fs.back_color, fs.italic, fs.bold)
+	VALUES (seq_form_style.nextval, fs2.alias, fs2.form_template_id, fs2.font_color, fs2.back_color, fs2.italic, fs2.bold);
+
+----------------------------------------------------------------------------------------------------------------------------
+
 COMMIT;
 EXIT;

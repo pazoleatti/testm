@@ -55,6 +55,23 @@ INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (2039, 203, 'Уменьшение суммы исчисленного налога, руб.', 'REDUCTION_SUM', 2, 10, null, null, 1, 2, 10, 0, 0, null, null, 0, 17);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (2040, 203, 'Уменьшение суммы исчисленного налога, %', 'REDUCTION_PCT', 2, 11, null, null, 1, 2, 10, 0, 0, null, null, 0, 3);
 
+-- -- http://jira.aplana.com/browse/SBRFACCTAX-8363: Удалить лишние значения из справочника "Коды налоговых льгот транспортного налога"
+UPDATE ref_book_record t
+SET t.status=-1
+WHERE t.ref_book_id=6
+ AND t.id IN
+  (SELECT v.record_id
+   FROM ref_book_value v
+   WHERE v.attribute_id=15
+    AND v.string_value IN ('2010221', '2010222', '2010223', '2010224',
+                           '2010225', '2010226', '2010227', '2010233',
+                           '2010234', '2010235', '2010236', '2010237',
+                           '2010238', '2010239', '2010252', '2010253',
+                           '2010254', '2010255', '2010291', '2010331',
+                           '2010332', '2010333', '2010335', '2010336',
+                           '2010337', '2010338', '2010401', '2010402',
+                           '2012000', '2012400', '2012500', '2014000'));
+
 ALTER TABLE ref_book ENABLE CONSTRAINT ref_book_fk_region;
 
 ---------------------------------------------------------------------------------------------------
@@ -193,7 +210,8 @@ UPDATE ref_book_attribute SET is_unique=1 WHERE id = 415;
 UPDATE ref_book_attribute SET is_unique=1 WHERE id = 418;
 UPDATE ref_book_attribute SET is_unique=1 WHERE id = 417;
 ---------------------------------------------------------------------------------------------------
--- http://jira.aplana.com/browse/SBRFACCTAX-8906: Справочник "Параметры подразделений по налогу на имущество"
+-- http://jira.aplana.com/browse/SBRFACCTAX-8906: Справочник "Параметры подразделений по налогу на имущество",
+-- включая изменения http://jira.aplana.com/browse/SBRFACCTAX-9038 
 
 MERGE INTO ref_book tgt USING
   (SELECT 99 AS id,'Параметры подразделения по налогу на имущество' AS name, 0 AS visible, 0 TYPE, 0 read_only FROM dual) src 
@@ -201,24 +219,29 @@ ON (tgt.id=src.id)
 WHEN matched THEN UPDATE SET tgt.name = src.name, tgt.visible = src.visible, tgt.TYPE = src.TYPE, tgt.read_only = src.read_only 
 WHEN NOT matched THEN INSERT (tgt.id, tgt.name, tgt.visible, tgt.type, tgt.read_only) VALUES (src.id, src.name, src.visible, src.type, src.read_only);
 
-INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length, is_table) VALUES ( 950, 99,'ИНН','INN', 1, 1,null,null, 1,null, 10, 0, 0,null,null, 0, 10, 0);
-INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length, is_table) VALUES ( 951, 99,'Код налогового органа','TAX_ORGAN_CODE', 1, 2,null,null, 1,null, 10, 0, 1,null,null, 0, 4, 1);
-INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length, is_table) VALUES ( 952, 99,'КПП','KPP', 1, 3,null,null, 1,null, 10, 0, 1,null,null, 0, 9, 1);
-INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length, is_table) VALUES ( 953, 99,'Код по месту нахождения (учета)','TAX_PLACE_TYPE_CODE', 4, 4, 2, 3, 1,null, 10, 0, 0,null,null, 0,null, 1);
-INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length, is_table) VALUES ( 954, 99,'Наименование (налогоплательщик)','NAME', 1, 5,null,null, 1,null, 100, 0, 0,null,null, 0, 1000, 1);
-INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length, is_table) VALUES ( 955, 99,'ОКВЭД','OKVED_CODE', 4, 6, 34, 210, 1,null, 10, 0, 0,null,null, 0,null, 1);
-INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length, is_table) VALUES ( 956, 99,'Номер контактного телефона','PHONE', 1, 7,null,null, 1,null, 10, 0, 0,null,null, 0, 20, 1);
-INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length, is_table) VALUES ( 957, 99,'Код формы реорганизации и ликвидации','REORG_FORM_CODE', 4, 8, 5, 13, 1,null, 10, 0, 0,null,null, 0,null, 1);
-INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length, is_table) VALUES ( 958, 99,'ИНН реорг. организации','REORG_INN', 1, 9,null,null, 1,null, 10, 0, 0,null,null, 0, 10, 1);
-INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length, is_table) VALUES ( 959, 99,'КПП реорг. организации','REORG_KPP', 1, 10,null,null, 1,null, 10, 0, 0,null,null, 0, 9, 1);
-INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length, is_table) VALUES ( 960, 99,'Признак лица, подписавшего документ','SIGNATORY_ID', 4, 11, 35, 212, 1,null, 10, 0, 0,null,null, 0,null, 1);
-INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length, is_table) VALUES ( 961, 99,'Фамилия','SIGNATORY_SURNAME', 1, 12,null,null, 1,null, 20, 0, 0,null,null, 0, 60, 1);
-INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length, is_table) VALUES ( 962, 99,'Имя','SIGNATORY_FIRSTNAME', 1, 13,null,null, 1,null, 20, 0, 0,null,null, 0, 60, 1);
-INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length, is_table) VALUES ( 963, 99,'Отчество','SIGNATORY_LASTNAME', 1, 14,null,null, 1,null, 20, 0, 0,null,null, 0, 60, 1);
-INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length, is_table) VALUES ( 964, 99,'Наименование документа представителя','APPROVE_DOC_NAME', 1, 15,null,null, 1,null, 100, 0, 0,null,null, 0, 120, 1);
-INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length, is_table) VALUES ( 965, 99,'Наименование организации представителя','APPROVE_ORG_NAME', 1, 16,null,null, 1,null, 100, 0, 0,null,null, 0, 100, 1);
-INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length, is_table) VALUES ( 966, 99,'Версия формата декларации','FORMAT_VERSION', 1, 17,null,null, 1,null, 5, 0, 0,null,null, 0, 5, 0);
-INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length, is_table) VALUES ( 967, 99,'Версия формата расчета по авансовому платежу','PREPAYMENT_VERSION', 1, 18,null,null, 1,null, 5, 0, 0,null,null, 0, 5, 0);
+INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES ( 950, 99,'ИНН','INN', 1, 1,null,null, 1,null, 10, 0, 0,null,null, 0, 10);
+INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES ( 966, 99,'Версия формата декларации','FORMAT_VERSION', 1, 17,null,null, 1,null, 5, 0, 0,null,null, 0, 5);
+INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES ( 967, 99,'Версия формата расчета по авансовому платежу','PREPAYMENT_VERSION', 1, 18,null,null, 1,null, 5, 0, 0,null,null, 0, 5);
+INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES ( 968, 99,'Код подразделения','DEPARTMENT_ID', 4, 0,30,161, 1,null, 10, 1, 0,null,null, 0, null);
+
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (206,'Параметры подразделения по налогу на имущество (таблица)',0,0,0,null);
+INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES ( 2060, 206,'Ссылка на родительскую запись','LINK', 4, 0, 99, 950, 0, null, 10, 1, 0,null,null, 0, null);
+INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES ( 2061, 206,'Порядок следования','ROW_ORD', 2, 1,null,null, 0, 0, 10, 1, 0, null, null, 0, 4);
+INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES ( 951, 206,'Код налогового органа','TAX_ORGAN_CODE', 1, 2,null,null, 1,null, 10, 0, 1,null,null, 0, 4);
+INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES ( 952, 206,'КПП','KPP', 1, 3,null,null, 1,null, 10, 0, 1,null,null, 0, 9);
+INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES ( 953, 206,'Код по месту нахождения (учета)','TAX_PLACE_TYPE_CODE', 4, 4, 2, 3, 1,null, 10, 0, 0,null,null, 0,null);
+INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES ( 954, 206,'Наименование (налогоплательщик)','NAME', 1, 5,null,null, 1,null, 100, 0, 0,null,null, 0, 1000);
+INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES ( 955, 206,'ОКВЭД','OKVED_CODE', 4, 6, 34, 210, 1,null, 10, 0, 0,null,null, 0,null);
+INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES ( 956, 206,'Номер контактного телефона','PHONE', 1, 7,null,null, 1,null, 10, 0, 0,null,null, 0, 20);
+INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES ( 957, 206,'Код формы реорганизации и ликвидации','REORG_FORM_CODE', 4, 8, 5, 13, 1,null, 10, 0, 0,null,null, 0,null);
+INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES ( 958, 206,'ИНН реорг. организации','REORG_INN', 1, 9,null,null, 1,null, 10, 0, 0,null,null, 0, 10);
+INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES ( 959, 206,'КПП реорг. организации','REORG_KPP', 1, 10,null,null, 1,null, 10, 0, 0,null,null, 0, 9);
+INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES ( 960, 206,'Признак лица, подписавшего документ','SIGNATORY_ID', 4, 11, 35, 212, 1,null, 10, 0, 0,null,null, 0,null);
+INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES ( 961, 206,'Фамилия','SIGNATORY_SURNAME', 1, 12,null,null, 1,null, 20, 0, 0,null,null, 0, 60);
+INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES ( 962, 206,'Имя','SIGNATORY_FIRSTNAME', 1, 13,null,null, 1,null, 20, 0, 0,null,null, 0, 60);
+INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES ( 963, 206,'Отчество','SIGNATORY_LASTNAME', 1, 14,null,null, 1,null, 20, 0, 0,null,null, 0, 60);
+INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES ( 964, 206,'Наименование документа представителя','APPROVE_DOC_NAME', 1, 15,null,null, 1,null, 100, 0, 0,null,null, 0, 120);
+INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES ( 965, 206,'Наименование организации представителя','APPROVE_ORG_NAME', 1, 16,null,null, 1,null, 100, 0, 0,null,null, 0, 100);
 
 ---------------------------------------------------------------------------------------------------
 COMMIT;
