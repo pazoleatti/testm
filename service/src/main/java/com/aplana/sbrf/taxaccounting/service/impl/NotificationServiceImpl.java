@@ -77,13 +77,4 @@ public class NotificationServiceImpl implements NotificationService {
     public void deleteAll(List<Long> notificationIds) {
         notificationDao.deleteAll(notificationIds);
     }
-
-    @Override
-    public List<Long> getAllowedNotifications(TAUser user, List<Long> notificationIds) {
-        if (user.hasRole(TARole.ROLE_CONTROL_NS)) {
-            return notificationDao.getAllowedNotifications(notificationIds, user.getId());
-        } else {
-            return notificationIds;
-        }
-    }
 }

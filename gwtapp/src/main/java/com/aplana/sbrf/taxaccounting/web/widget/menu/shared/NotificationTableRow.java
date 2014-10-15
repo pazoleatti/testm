@@ -9,6 +9,7 @@ public class NotificationTableRow implements Serializable {
     private Long id;
     private Date date;
     private String msg;
+    private Boolean canDelete;
 
 	public Date getDate() {
 		return date;
@@ -32,5 +33,13 @@ public class NotificationTableRow implements Serializable {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Boolean getCanDelete() {
+        return canDelete;
+    }
+
+    public void setCanDelete(Boolean canDelete) {
+        this.canDelete = canDelete;
     }
 }
