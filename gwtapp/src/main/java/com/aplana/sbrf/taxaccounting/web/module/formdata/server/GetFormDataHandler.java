@@ -69,7 +69,6 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
     private final static String CORRECTION_ERROR_MESSAGE = "Нельзя открыть налоговую форму, созданную в периоде, не являющемся корректирующим в режиме представления «Корректировка»!";
     private final static String PREVIOUS_FORM_NOT_FOUND_MESSAGE = "Не найдена ранее созданная форма в текущем периоде. Данные о различиях не сформированы.";
     private final static String SUCCESS_CORRECTION_MESSAGE = "Корректировка отображена в результате сравнения с данными формы в периоде %s %s%s.";
-    private final static String MANUAL_USED_MESSAGE = "Для формирования декларации в корректируемом периоде используются данные версии ручного ввода, созданной в форме «%s», %s, «%s»!";
 
 	public GetFormDataHandler() {
 		super(GetFormDataAction.class);
@@ -176,9 +175,8 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
         result.setExistManual(formDataService.existManual(action.getFormDataId()));
 
         // Если клиент запросил режим сравнения НФ, то нужно заполнить временный срез результатом сравнения
-        FormData prevFormData = null;
         if (action.isCorrectionDiff()) {
-            prevFormData = fillDiffData(formData, departmentReportPeriod, logger);
+            fillDiffData(formData, departmentReportPeriod, logger);
         }
 
         //Является ли форма последней перед декларацией
@@ -188,17 +186,13 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
                 departmentReportPeriod.getReportPeriod().getEndDate());
         result.setCanCreatedManual(formData.getState() == WorkflowState.ACCEPTED
                 && (formData.getKind().equals(FormDataKind.CONSOLIDATED) || formData.getKind().equals(FormDataKind.SUMMARY))
-                && !declarationDestinations.isEmpty());
-        // Если декларация является приемником и есть форма ручного ввода в корректируемом периоде
-        if (action.isCorrectionDiff() && !declarationDestinations.isEmpty() && prevFormData != null && formDataService.existManual(prevFormData.getId())) {
-            logger.info(String.format(MANUAL_USED_MESSAGE, formData.getFormType().getName(), formData.getKind().getName(), result.getDepartmentName()));
-        }
+                && !declarationDestinations.isEmpty() && departmentReportPeriod.getCorrectionDate() == null);
 	}
 
     /**
      * Заполнение временного среза результатом сравнения
      */
-    private FormData fillDiffData(FormData formData, DepartmentReportPeriod departmentReportPeriod, Logger logger) throws ActionException {
+    private void fillDiffData(FormData formData, DepartmentReportPeriod departmentReportPeriod, Logger logger) throws ActionException {
         // Если период не является корректирующим
         if (departmentReportPeriod.getCorrectionDate() == null) {
             throw new ActionException(CORRECTION_ERROR_MESSAGE);
@@ -229,7 +223,7 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
         if (prevFormData == null) {
             logger.error(PREVIOUS_FORM_NOT_FOUND_MESSAGE);
             dataRowService.saveRows(formData, new ArrayList<DataRow<Cell>>(0));
-            return prevFormData;
+            return;
         }
 
         // Шаблон НФ
@@ -249,7 +243,6 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
 
         // Сохранение результата сравнения во временном срезе
         dataRowService.saveRows(formData, diffRows);
-        return prevFormData;
     }
 
     /**
