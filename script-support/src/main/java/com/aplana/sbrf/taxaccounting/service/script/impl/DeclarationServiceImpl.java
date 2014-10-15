@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -82,6 +83,9 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     private PeriodService periodService;
 
     @Autowired
+    private DepartmentReportPeriodDao departmentReportPeriodDao;
+
+    @Autowired
     BlobDataService blobDataService;
 
     @Autowired
@@ -104,7 +108,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     }
 
     @Override
-	public String generateXmlFileId(int declarationTypeId, int departmentId, int reportPeriodId) {
+	public String generateXmlFileId(int declarationTypeId, int departmentReportPeriodId, String taxOrganCode, String kpp) {
 
         DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
 
@@ -112,25 +116,41 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
         String declarationPrefix = getDeclarationPrefix(declarationTypeId, declarationTaxType);
 		StringBuilder stringBuilder = new StringBuilder(declarationPrefix);
 
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(departmentReportPeriodId);
+
 		RefBookDataProvider tmp = factory.getDataProvider(TAX_TYPE_TO_REF_BOOK_MAP.get(declarationTaxType));
-        Date startDate = periodService.getEndDate(reportPeriodId).getTime();
-        List<Map<String, RefBookValue>> departmentParams = tmp.getRecords(addDayToDate(startDate, -1), null, String.format("DEPARTMENT_ID = %d", departmentId), null);
+        Date endDate = periodService.getEndDate(departmentReportPeriod.getReportPeriod().getId()).getTime();
+        List<Map<String, RefBookValue>> departmentParams = tmp.getRecords(addDayToDate(endDate, -1), null, String.format("DEPARTMENT_ID = %d", departmentReportPeriod.getDepartmentId()), null);
 
         if (departmentParams != null && !departmentParams.isEmpty()) {
             Map<String, RefBookValue> departmentParam = departmentParams.get(0);
 
             Calendar calendar = Calendar.getInstance();
-            stringBuilder.append('_').
-                    append(departmentParam.get("TAX_ORGAN_CODE").toString()).
-                    append('_').
-                    append(departmentParam.get("TAX_ORGAN_CODE").toString()).
-                    append('_').
-                    append(departmentParam.get("INN").toString()).
-                    append(departmentParam.get("KPP").toString()).
-                    append('_').
-                    append(dateFormat.format(calendar.getTime())).
-                    append('_').
-                    append(UUID.randomUUID().toString().toUpperCase());
+            if (declarationTaxType == TaxType.PROPERTY) {
+                stringBuilder.append('_').
+                        append(taxOrganCode).
+                        append('_').
+                        append(taxOrganCode).
+                        append('_').
+                        append(departmentParam.get("INN").toString()).
+                        append(kpp).
+                        append('_').
+                        append(dateFormat.format(calendar.getTime())).
+                        append('_').
+                        append(UUID.randomUUID().toString().toUpperCase());
+            } else {
+                stringBuilder.append('_').
+                        append(departmentParam.get("TAX_ORGAN_CODE").toString()).
+                        append('_').
+                        append(departmentParam.get("TAX_ORGAN_CODE").toString()).
+                        append('_').
+                        append(departmentParam.get("INN").toString()).
+                        append(departmentParam.get("KPP").toString()).
+                        append('_').
+                        append(dateFormat.format(calendar.getTime())).
+                        append('_').
+                        append(UUID.randomUUID().toString().toUpperCase());
+            }
 
             return stringBuilder.toString();
         }

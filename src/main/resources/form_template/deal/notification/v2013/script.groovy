@@ -96,7 +96,7 @@ void generateXML() {
     }
 
     builder.Файл(
-            ИдФайл: declarationService.generateXmlFileId(notificationType, departmentId, declarationData.reportPeriodId),
+            ИдФайл: declarationService.generateXmlFileId(notificationType, declarationData.departmentReportPeriodId, declarationData.taxOrganCode, declarationData.kpp),
             ВерсПрог: applicationVersion,
             ВерсФорм: departmentParam.FORMAT_VERSION.stringValue) {
         Документ(
