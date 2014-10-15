@@ -182,18 +182,6 @@ ALTER TABLE lock_data_subscribers ADD CONSTRAINT lock_data_subscr_fk_lock_data F
 ALTER TABLE lock_data_subscribers ADD CONSTRAINT lock_data_subscr_fk_sec_user FOREIGN KEY (user_id) REFERENCES sec_user(id) ON DELETE CASCADE;
 
 ---------------------------------------------------------------------------------------------------
--- http://jira.aplana.com/browse/SBRFACCTAX-8895 - Изменения в структуре REF_BOOK_ATTRIBUTE/REF_BOOK_VALUE
-ALTER TABLE ref_book_attribute ADD is_table NUMBER(1) DEFAULT 0 NOT NULL;
-ALTER TABLE ref_book_attribute ADD CONSTRAINT ref_book_attr_chk_istable CHECK (is_table IN (0, 1));
-COMMENT ON COLUMN ref_book_attribute.is_table IS 'Признак табличного атрибута';
-
-ALTER TABLE ref_book_value ADD row_num NUMBER(9) DEFAULT 0 NOT NULL;
-ALTER TABLE ref_book_value DROP CONSTRAINT REF_BOOK_VALUE_PK;
-DROP INDEX REF_BOOK_VALUE_PK;
-ALTER TABLE ref_book_value ADD CONSTRAINT REF_BOOK_VALUE_PK primary key (record_id, attribute_id, row_num);
-COMMENT ON COLUMN ref_book_value.row_num IS 'Номер строки в табличной части справочника';
-
----------------------------------------------------------------------------------------------------
 -- http://jira.aplana.com/browse/SBRFACCTAX-8809: Новые связи для form_data и declaration_data с department_report_period
 
 ALTER TABLE form_data ADD department_report_period_id number(18);
