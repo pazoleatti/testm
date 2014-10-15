@@ -20,11 +20,13 @@ public interface DeclarationService {
 	/**
 	 * Создает идентификатор xml файла для декларации.
 	 * @param declarationTypeId идентификатор типа декларации
-	 * @param departmentId идентификатор {@link com.aplana.sbrf.taxaccounting.model.Department подразделения}
-	 * @return идентификатор xml файла
+	 * @param departmentReportPeriodId идентификатор {@link com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod периода подразделения}
+	 * @param taxOrganCode код налогового органа
+     * @param kpp кпп
+     * @return идентификатор xml файла
 	 */
-	String generateXmlFileId(int declarationTypeId, int departmentId, int reportPeriodId);
-	
+	String generateXmlFileId(int declarationTypeId, int departmentReportPeriodId, String taxOrganCode, String kpp);
+
 	/**
 	 * Возвращает список налоговых форм, являющихся источником для указанной декларации и находящихся в статусе
 	 * "Принята"
