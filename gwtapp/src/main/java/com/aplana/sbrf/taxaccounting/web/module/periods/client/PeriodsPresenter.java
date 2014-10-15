@@ -279,28 +279,10 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 				new DialogHandler() {
 					@Override
 					public void yes() {
-						checkAndRemovePeriod();
+                        removeReportPeriod();
 					}
 				}
 				);
-	}
-
-	private void checkAndRemovePeriod() {
-		CanRemovePeriodAction action = new CanRemovePeriodAction();
-		action.setReportPeriodId((int)getView().getSelectedRow().getReportPeriodId());
-        action.setTaxType(taxType);
-		dispatcher.execute(action, CallbackUtils
-				.defaultCallback(new AbstractCallback<CanRemovePeriodResult>() {
-					@Override
-					public void onSuccess(CanRemovePeriodResult result) {
-						if (result.isCanRemove()) {
-							removeReportPeriod();
-						} else {
-                            LogAddEvent.fire(PeriodsPresenter.this, result.getUuid());
-                            Dialog.errorMessage("Удаление периода", "Удаление периода невозможно!");
-						}
-					}
-				}, PeriodsPresenter.this));
 	}
 
 	private void removeReportPeriod() {
@@ -314,6 +296,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 						find();
 						LogAddEvent.fire(PeriodsPresenter.this, result.getUuid());
                         getView().clearSelection();
+                        Dialog.errorMessage("Удаление периода", "Удаление периода невозможно!");
 					}
 				}, PeriodsPresenter.this));
 	}
