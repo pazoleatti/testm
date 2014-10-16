@@ -193,9 +193,6 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
      * Заполнение временного среза результатом сравнения
      */
     private void fillDiffData(FormData formData, DepartmentReportPeriod departmentReportPeriod, Logger logger) throws ActionException {
-        // TODO Левыкин: Код для замеров и оптимизации. Потом откатить изменения.
-        long start = System.currentTimeMillis();
-
         // Если период не является корректирующим
         if (departmentReportPeriod.getCorrectionDate() == null) {
             throw new ActionException(CORRECTION_ERROR_MESSAGE);
@@ -240,29 +237,12 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
         }
         logger.info(String.format(SUCCESS_CORRECTION_MESSAGE, prevReportPeriod.getName(), prevReportPeriod.getTaxPeriod().getYear(), correctionString));
 
-        long prepareComplete = System.currentTimeMillis();
-        logger.info("Поиск предыдущего экземпляра НФ (исходная НФ): " + (prepareComplete - start) / 1000);
-
         List<DataRow<Cell>> original = dataRowService.getSavedRows(prevFormData);
-
-        long get1 = System.currentTimeMillis();
-        logger.info("Получение строк исходной НФ: " + (get1 - prepareComplete) / 1000 + " строк " + original.size());
-
         List<DataRow<Cell>> revised = dataRowService.getSavedRows(formData);
-
-        long get2 = System.currentTimeMillis();
-        logger.info("Получение строк измененной НФ: " + (get2 - get1) / 1000 + " строк " + revised.size());
-
         List<DataRow<Cell>> diffRows = diffService.getDiff(original, revised);
-
-        long diff = System.currentTimeMillis();
-        logger.info("Сравнение: " + (diff - get2) / 1000);
 
         // Сохранение результата сравнения во временном срезе
         dataRowService.saveRows(formData, diffRows);
-
-        long save = System.currentTimeMillis();
-        logger.info("Сохранение: " + (save - diff) / 1000);
     }
 
     /**
