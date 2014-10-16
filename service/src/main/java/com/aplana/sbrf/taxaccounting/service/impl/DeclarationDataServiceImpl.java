@@ -278,7 +278,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	@Override
 	public String getXmlData(long declarationId, TAUserInfo userInfo) {
 		declarationDataAccessService.checkEvents(userInfo, declarationId, FormDataEvent.GET_LEVEL1);
-        return reportService.getDec(userInfo, declarationId, ReportType.XML_DEC);
+        String xmlUuid = reportService.getDec(userInfo, declarationId, ReportType.XML_DEC);
+        return new String(getBytesFromInputstream(xmlUuid));
 	}
 
     @Override
@@ -435,9 +436,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     private Document getDocument(long declarationDataId) {
         try {
-            String xmlUuid = getXmlData(declarationDataId, taUserService.getSystemUserInfo());// declarationDataDao.get(declarationDataId).getXmlDataUuid();
-            if (xmlUuid == null) return null;
-            String xml = new String(getBytesFromInputstream(xmlUuid));
+            String xml = getXmlData(declarationDataId, taUserService.getSystemUserInfo());// declarationDataDao.get(declarationDataId).getXmlDataUuid();
             InputSource inputSource = new InputSource(new StringReader(xml));
 
             return DocumentBuilderFactory.newInstance().newDocumentBuilder()
