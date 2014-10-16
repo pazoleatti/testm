@@ -36,7 +36,6 @@ public class TestXmlGeneratorAsyncTaskSpring extends AbstractAsyncTask {
 
     @Override
     protected void executeBusinessLogic(Map<String, Object> params) {
-        System.out.println("XmlGeneratorAsyncTask.params: " + params.toString());
         Date docDate = (Date)params.get("docDate");
         long declarationDataId = (Long)params.get("declarationDataId");
         int userId = (Integer)params.get(USER_ID.name());

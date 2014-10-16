@@ -170,6 +170,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.CALCULATE);
         DeclarationData declarationData = declarationDataDao.get(id);
 
+        deleteReport(id, false);
+
         setDeclarationBlobs(logger, declarationData, docDate, userInfo);
 
         logBusinessService.add(null, id, userInfo, FormDataEvent.SAVE, null);
