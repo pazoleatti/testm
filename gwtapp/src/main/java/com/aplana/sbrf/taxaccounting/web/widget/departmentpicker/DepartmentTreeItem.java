@@ -40,7 +40,7 @@ public class DepartmentTreeItem extends MultiSelectTreeItem {
      * Добавляет звездочку к названию неактивного итема
      */
     public void deactivate() {
-        String markedName = DepartmentTreeWidget.RED_STAR_SPAN + getName();
+        String markedName = DepartmentTreeWidget.RED_STAR_SPAN + getText();
         label.getElement().setInnerHTML(markedName);
         DOM.getChild(checkBox.getElement(), 1).setInnerHTML(markedName);
         DOM.getChild(radioButton.getElement(), 1).setInnerHTML(markedName);

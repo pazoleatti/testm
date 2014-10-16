@@ -98,7 +98,7 @@ public class MultiSelectTreeItem extends TreeItem implements HasClickHandlers,
     @Override
     public void highLightText(String textToHighLight) {
         if(textToHighLight!= null && !textToHighLight.isEmpty()) {
-            String highLightedString = RegExp.compile(textToHighLight, "gi").replace(getName(), "<span style=\"color: #ff0000;\">$&</span>");
+            String highLightedString = RegExp.compile(textToHighLight, "gi").replace(getText(), "<span style=\"color: #ff0000;\">$&</span>");
             label.getElement().setInnerHTML(highLightedString);
             DOM.getChild(checkBox.getElement(), 1).setInnerHTML(highLightedString);
             DOM.getChild(radioButton.getElement(), 1).setInnerHTML(highLightedString);
@@ -113,13 +113,15 @@ public class MultiSelectTreeItem extends TreeItem implements HasClickHandlers,
         this.id = id;
     }
 
-    public void setName(String name){
-        label.setText(name);
-        checkBox.setText(name);
-        radioButton.setText(name);
+    @Override
+    public void setText(String text) {
+        label.setText(text);
+        checkBox.setText(text);
+        radioButton.setText(text);
     }
 
-    public String getName() {
+    @Override
+    public String getText() {
         if (multiSelection == null) {
             return label.getText();
         } else {
