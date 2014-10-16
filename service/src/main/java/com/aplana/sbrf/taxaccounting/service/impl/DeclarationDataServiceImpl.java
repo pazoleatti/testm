@@ -436,7 +436,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     private Document getDocument(long declarationDataId) {
         try {
-            String xml = getXmlData(declarationDataId, taUserService.getSystemUserInfo());// declarationDataDao.get(declarationDataId).getXmlDataUuid();
+            String xml = getXmlData(declarationDataId, taUserService.getSystemUserInfo());
+            if (xml == null) return null;
             InputSource inputSource = new InputSource(new StringReader(xml));
 
             return DocumentBuilderFactory.newInstance().newDocumentBuilder()
