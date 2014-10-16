@@ -61,8 +61,7 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
         if (lockData == null) {
             try {
                 Logger logger = new Logger();
-                //declarationDataService.calculate(logger, action.getDeclarationId(), userInfo, action.getDocDate());
-                String key = LockData.LOCK_OBJECTS.DECLARATION_DATA.name() + "_" + action.getDeclarationId() + "_" + ReportType.XML_DEC.getName();
+                String key = declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), ReportType.XML_DEC);
                 Map<String, Object> params = new HashMap<String, Object>();
                 params.put("declarationDataId", action.getDeclarationId());
                 params.put("docDate", action.getDocDate());
@@ -81,7 +80,7 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
                 }
                 try {
                     // отменяем задания на формирование XLSX
-                    lockDataService.unlock(LockData.LOCK_OBJECTS.DECLARATION_DATA.name() + "_" + action.getDeclarationId() + "_" + ReportType.EXCEL_DEC.getName(), 0, true);
+                    lockDataService.unlock(declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), ReportType.EXCEL_DEC), 0, true);
                     // ставим задачу в очередь
                     params.put(AsyncTask.RequiredParams.LOCK_DATE_END.name(), lockDataService.getLock(key).getDateBefore());
                     lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());

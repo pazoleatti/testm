@@ -448,15 +448,16 @@ public abstract class MultiSelectTree<H extends List, T extends MultiSelectTreeI
      */
     public void filter(String filter) {
         String lowerFilter = filter.toLowerCase();
-        if (filter == null || "".equals(filter)) {
+        if ("".equals(filter)) {
             for (T item : getItems()) {
                 item.setVisible(true);
+                item.setText(item.getText());//снимаем подсветку
             }
             return;
         }
         for (T item : getItems()) {
             item.highLightText(filter);
-            String itemValue = item.getName().toLowerCase();
+            String itemValue = item.getText().toLowerCase();
             if (itemValue.contains(lowerFilter)) {
                 item.setVisible(true);
                 T parent = (T) item.getParentItem();

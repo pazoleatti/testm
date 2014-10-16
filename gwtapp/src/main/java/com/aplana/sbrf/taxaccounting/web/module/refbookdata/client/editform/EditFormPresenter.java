@@ -44,7 +44,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
     /** Идентификатор справочника */
     private Long currentRefBookId;
     /** Уникальный идентификатор версии записи справочника */
-    private Long currentUniqueRecordId;
+    Long currentUniqueRecordId;
     /** Идентификатор записи справочника без учета версий */
     private Long recordId;
     /** Признак того, что форма используется для работы с версиями записей справочника */
@@ -251,7 +251,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                         setIsFormModified(false);
                                         Long newId = result.getNewIds() != null && !result.getNewIds().isEmpty() ? result.getNewIds().get(0) : null;
                                         recordChanges.setId(newId);
-
+                                        currentUniqueRecordId = newId;
                                         UpdateForm.fire(EditFormPresenter.this, true, recordChanges);
                                     }
                                 }, this));
