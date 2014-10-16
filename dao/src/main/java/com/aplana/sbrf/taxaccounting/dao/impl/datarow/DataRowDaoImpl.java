@@ -692,6 +692,9 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
         // Очистка временного среза НФ-приемника
         getJdbcTemplate().update("delete from data_row where form_data_id = ? and type <> 0 and manual = 0",
                 new Object[]{formDataDestinationId}, new int[]{Types.NUMERIC});
+        // Строки постоянного среза отмечаются как удаленные
+        getJdbcTemplate().update("update data_row set type = -1 where form_data_id = ? and type = 0 and manual = 0",
+                new Object[]{formDataDestinationId}, new int[]{Types.NUMERIC});
         // Добавление пустых строк во временный срез из НФ-источника
         getJdbcTemplate().update("insert into data_row (id, form_data_id, alias, ord, type, manual) " +
                 "select seq_data_row.nextval, ?, alias, ord, 1, 0 " +
@@ -707,7 +710,9 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
                 "where rws.ord = rwd.ord " +
                 "and rws.form_data_id = ? " +
                 "and rwd.form_data_id = ? " +
-                "and dc.row_id = rws.id",
+                "and dc.row_id = rws.id " +
+                "and rws.manual = 0 and rws.type = 0 " +
+                "and rwd.manual = 0 and rwd.type = 1",
                 new Object[]{formDataSourceId, formDataDestinationId}, new int[]{Types.NUMERIC, Types.NUMERIC});
     }
 }

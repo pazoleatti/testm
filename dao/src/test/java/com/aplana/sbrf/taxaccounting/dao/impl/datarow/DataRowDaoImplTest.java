@@ -709,5 +709,24 @@ public class DataRowDaoImplTest extends Assert {
 
         Assert.assertEquals("str", rows2t.get(0).getCell("stringColumn").getValue());
         Assert.assertEquals(BigDecimal.valueOf(1.33d), rows2t.get(0).getCell("numericColumn").getValue());
+
+        // Перенос в постоянный срез
+        dataRowDao.commit(fd2.getId());
+
+        // Копирование
+        dataRowDao.copyRows(fd1.getId(), fd2.getId());
+
+        rows1s = dataRowDao.getSavedRows(fd1, null);
+        rows1t = dataRowDao.getRows(fd1, null);
+        rows2s = dataRowDao.getSavedRows(fd2, null);
+        rows2t = dataRowDao.getRows(fd2, null);
+
+        Assert.assertEquals(1, rows1s.size());
+        Assert.assertEquals(1, rows1t.size());
+        Assert.assertEquals(1, rows2s.size());
+        Assert.assertEquals(1, rows2t.size());
+
+        Assert.assertEquals("str", rows2t.get(0).getCell("stringColumn").getValue());
+        Assert.assertEquals(BigDecimal.valueOf(1.33d), rows2t.get(0).getCell("numericColumn").getValue());
     }
 }
