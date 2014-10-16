@@ -67,7 +67,7 @@ public class EmailServiceImpl implements EmailService {
             transport.close();
             return true;
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            logger.error("Авторизация с указанными параметрами не выполнена!");
             e.printStackTrace();
         }
         return false;
