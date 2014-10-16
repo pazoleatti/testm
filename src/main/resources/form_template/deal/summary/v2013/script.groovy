@@ -111,12 +111,13 @@ switch (formDataEvent) {
         break
 }
 
-// Кэш провайдеров
+//// Кэши и константы
 @Field
 def providerCache = [:]
-// Кэш id записей справочника
 @Field
 def recordCache = [:]
+@Field
+def refBookCache = [:]
 
 // Дата окончания отчетного периода
 @Field
@@ -145,11 +146,16 @@ def getRecordIdImport(def Long refBookId, def String alias, def String value, de
             reportPeriodEndDate, rowIndex, colIndex, logger, required)
 }
 
+// Разыменование записи справочника
+def getRefBookValue(def long refBookId, def Long recordId) {
+    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
+}
+
 // Проверка при создании формы
 void checkCreation() {
     def findForm = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
     if (findForm != null) {
-        logger.error('Формирование содного отчета невозможно, т.к. отчет с указанными параметрами уже сформирован!')
+        logger.error('Формирование сводного отчета невозможно, т.к. отчет с указанными параметрами уже сформирован!')
     }
 }
 
@@ -1726,6 +1732,8 @@ void addData(def xml, int headRowCount) {
         if (row.cell[0].text() == null || row.cell[0].text() == "") {
             continue
         }
+
+        emptyRow = false
 
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
