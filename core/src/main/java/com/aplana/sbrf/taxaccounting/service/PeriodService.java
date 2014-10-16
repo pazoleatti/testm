@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -147,7 +148,7 @@ public interface PeriodService {
 	 * @param logs логер, при необходимости
 	 * @param user пользователь, который выполняет действие
 	 */
-	void removeReportPeriod(TaxType taxType, int drpId, List<LogEntry> logs, TAUserInfo user);
+	void removeReportPeriod(TaxType taxType, int drpId, Logger logger, TAUserInfo user);
 
     /**
      *
