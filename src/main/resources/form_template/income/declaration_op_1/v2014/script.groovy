@@ -236,7 +236,7 @@ void generateXML(def xmlBankData) {
 
     def xmlbuilder = new MarkupBuilder(xml)
     xmlbuilder.Файл(
-            ИдФайл : declarationService.generateXmlFileId(5, declarationData.departmentId, declarationData.reportPeriodId),
+            ИдФайл : declarationService.generateXmlFileId(5, declarationData.departmentReportPeriodId, declarationData.taxOrganCode, declarationData.kpp),
             ВерсПрог : applicationVersion,
             ВерсФорм : formatVersion) {
 

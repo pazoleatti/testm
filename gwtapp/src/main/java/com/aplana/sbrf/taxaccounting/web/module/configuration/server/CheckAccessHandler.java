@@ -59,6 +59,7 @@ public class CheckAccessHandler extends AbstractActionHandler<CheckAccessAction,
                 uuid = logEntryService.save(logger.getEntries());
             } else {
                 boolean success = emailService.testAuth(model.get(ConfigurationParam.EMAIL_SERVER, 0).get(0),
+                        model.get(ConfigurationParam.EMAIL_PORT, 0).get(0),
                         model.get(ConfigurationParam.EMAIL_LOGIN, 0).get(0),
                         model.get(ConfigurationParam.EMAIL_PASSWORD, 0).get(0), logger);
                 if (!success) {

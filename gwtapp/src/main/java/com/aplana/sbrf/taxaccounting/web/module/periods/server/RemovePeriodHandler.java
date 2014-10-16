@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.server;
 
-import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -12,9 +12,6 @@ import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 @Service
@@ -33,10 +30,10 @@ public class RemovePeriodHandler extends AbstractActionHandler<RemovePeriodActio
 
 	@Override
 	public RemovePeriodResult execute(RemovePeriodAction removePeriodAction, ExecutionContext executionContext) throws ActionException {
-		List<LogEntry> logs = new ArrayList<LogEntry>();
-		periodService.removeReportPeriod(removePeriodAction.getTaxType(), removePeriodAction.getDepartmentReportPeriodId(), logs, securityService.currentUserInfo());
+        Logger logger = new Logger();
+		periodService.removeReportPeriod(removePeriodAction.getTaxType(), removePeriodAction.getDepartmentReportPeriodId(), logger, securityService.currentUserInfo());
 		RemovePeriodResult result = new RemovePeriodResult();
-		result.setUuid(logEntryService.save(logs));
+		result.setUuid(logEntryService.save(logger.getEntries()));
 		return result;
 	}
 

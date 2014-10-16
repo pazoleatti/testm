@@ -53,7 +53,7 @@ public class TimerReportDeclarationHandler extends AbstractActionHandler<TimerRe
     public TimerReportResult execute(TimerReportAction action, ExecutionContext executionContext) throws ActionException {
         TimerReportResult result = new TimerReportResult();
         TAUserInfo userInfo = securityService.currentUserInfo();
-        String key = LockData.LOCK_OBJECTS.DECLARATION_DATA.name() + "_" + action.getDeclarationDataId() + "_" + action.getType().getName();
+        String key = declarationDataService.generateAsyncTaskKey(action.getDeclarationDataId(), action.getType());
         if (!lockDataService.isLockExists(key)) {
             String uuid = reportService.getDec(userInfo, action.getDeclarationDataId(), action.getType());
             if (uuid == null) {

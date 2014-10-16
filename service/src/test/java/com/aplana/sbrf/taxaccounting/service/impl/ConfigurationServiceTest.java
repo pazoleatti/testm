@@ -105,6 +105,7 @@ public class ConfigurationServiceTest {
 
         // Заполнение параметров отправки почты
         model.put(ConfigurationParam.EMAIL_SERVER, 0, asList("server"));
+        model.put(ConfigurationParam.EMAIL_PORT, 0, asList("25"));
         model.put(ConfigurationParam.EMAIL_LOGIN, 0, asList("login"));
         model.put(ConfigurationParam.EMAIL_PASSWORD, 0, asList("password"));
 
@@ -224,9 +225,9 @@ public class ConfigurationServiceTest {
         model.put(ConfigurationParam.KEY_FILE, 0, Arrays.asList(sb.toString(), sb.toString(), ""));
         service.saveAllConfig(getUser(), model, logger);
 
-        // необязательно указывать все общие параметры, поэтому будет 5 ошибок (из них 3 у параметров отправки почты)
+        // необязательно указывать все общие параметры, поэтому будет 6 ошибок (из них 4 у параметров отправки почты)
         // на превышение длины выше 500 символов
-        Assert.assertEquals(5, logger.getEntries().size());
+        Assert.assertEquals(6, logger.getEntries().size());
         Assert.assertTrue(logger.getEntries().get(0).getMessage().contains("(" + length + ")"));
         Assert.assertTrue(logger.getEntries().get(1).getMessage().contains("(" + length + ")"));
     }

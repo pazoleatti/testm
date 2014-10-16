@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -30,6 +31,12 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
 	@Autowired
 	private DepartmentReportPeriodService departmentReportPeriodService;
 
+    @Autowired
+    private DepartmentService departmentService;
+
+    @Autowired
+    private FormTypeService formTypeService;
+
 	@Autowired
 	FormTemplateService formTemplateService;
 
@@ -44,6 +51,7 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
     private static final String ERROR_SELECT_FORM_DATA_KIND = "Тип налоговой формы не выбран!";
     private static final String ERROR_SELECT_FORM_DATA_TYPE = "Вид налоговой формы не выбран!";
     private static final String ERROR_DEPARTMENT_REPORT_PERIOD_NOT_FOUND = "Не определен отчетный период подразделения!";
+    private final static String MANUAL_USED_MESSAGE = "Для формирования декларации в корректируемом периоде используются данные версии ручного ввода, созданной в форме «%s», %s, «%s»!";
 
     public CreateFormDataHandler() {
 		super(CreateFormData.class);
@@ -90,6 +98,17 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
         int templateId = formTemplateService.getActiveFormTemplateId(formDataTypeId, departmentReportPeriod.getReportPeriod().getId());
         long formDataId = formDataService.createFormData(logger, userInfo, templateId, departmentReportPeriod.getId(),
                 kind, action.getMonthId());
+
+        // Если декларация является приемником и есть форма ручного ввода в корректируемом периоде
+        List<FormData> manualInputForms = formDataService.getManualInputForms(
+                Arrays.asList(departmentReportPeriod.getDepartmentId()),
+                departmentReportPeriod.getReportPeriod().getId(),
+                departmentReportPeriod.getReportPeriod().getTaxPeriod().getTaxType(), kind);
+        if (departmentReportPeriod.getCorrectionDate() != null && !declarationDestinations.isEmpty() && !manualInputForms.isEmpty()) {
+            Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
+            FormType formType = formTypeService.get(formDataTypeId);
+            logger.info(String.format(MANUAL_USED_MESSAGE, formType.getName(), kind.getName(), department.getName()));
+        }
 
         result.setFormDataId(formDataId);
 

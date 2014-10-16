@@ -1,10 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.widget.menu.client.notificationswindow;
 
-import com.aplana.gwt.client.dialog.Dialog;
-import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.NotificationsFilterData;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.CurrentAssign;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.NotificationTableRow;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericCellTable;
@@ -28,9 +25,6 @@ import com.google.gwt.view.client.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.PopupViewWithUiHandlers;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static com.google.gwt.view.client.DefaultSelectionEventManager.createCustomManager;
 
@@ -208,4 +202,9 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
     public NotificationsFilterData.SortColumn getSortColumn(){
         return sortColumn;
 	}
+
+    @Override
+    public void clearSelected() {
+        notificationTableSM.clear();
+    }
 }

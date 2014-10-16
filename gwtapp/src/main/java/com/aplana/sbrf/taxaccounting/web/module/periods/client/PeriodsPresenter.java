@@ -234,7 +234,6 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 			Dialog.errorMessage("Указание параметров поиска","Интервал периода поиска указан неверно!");
 		} else {
 			find();
-            getView().clearSelection();
 		}
 	}
 
@@ -279,28 +278,10 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 				new DialogHandler() {
 					@Override
 					public void yes() {
-						checkAndRemovePeriod();
+                        removeReportPeriod();
 					}
 				}
 				);
-	}
-
-	private void checkAndRemovePeriod() {
-		CanRemovePeriodAction action = new CanRemovePeriodAction();
-		action.setReportPeriodId((int)getView().getSelectedRow().getReportPeriodId());
-        action.setTaxType(taxType);
-		dispatcher.execute(action, CallbackUtils
-				.defaultCallback(new AbstractCallback<CanRemovePeriodResult>() {
-					@Override
-					public void onSuccess(CanRemovePeriodResult result) {
-						if (result.isCanRemove()) {
-							removeReportPeriod();
-						} else {
-                            LogAddEvent.fire(PeriodsPresenter.this, result.getUuid());
-                            Dialog.errorMessage("Удаление периода", "Удаление периода невозможно!");
-						}
-					}
-				}, PeriodsPresenter.this));
 	}
 
 	private void removeReportPeriod() {
@@ -314,6 +295,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 						find();
 						LogAddEvent.fire(PeriodsPresenter.this, result.getUuid());
                         getView().clearSelection();
+                        Dialog.errorMessage("Удаление периода", "Удаление периода невозможно!");
 					}
 				}, PeriodsPresenter.this));
 	}
@@ -397,7 +379,6 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 		super.prepareFromRequest(request);
         LogCleanEvent.fire(this);
         LogShowEvent.fire(this, false);
-        getView().clearSelection();
 
 		PeriodsGetFilterData getFilterData = new PeriodsGetFilterData();
 		getFilterData.setTaxType(TaxType.valueOf(request.getParameter("nType", "")));

@@ -301,6 +301,8 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 
     @Override
     public void clearSelection() {
-        selectionModel.clear();
+        if (selectionModel != null && selectionModel.getSelectedObject() != null) {
+            selectionModel.clear();
+        }
     }
 }

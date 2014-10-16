@@ -112,7 +112,7 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
     if (!declarationData.isAccepted()) {
         def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
         builder.Файл(
-                ИдФайл: declarationService.generateXmlFileId(1, departmentId, declarationData.getReportPeriodId()),
+                ИдФайл: declarationService.generateXmlFileId(1, declarationData.departmentReportPeriodId, declarationData.taxOrganCode, declarationData.kpp),
                 ВерсПрог: applicationVersion,
                 ВерсФорм: departmentParamTransport.FORMAT_VERSION) {
             Документ(

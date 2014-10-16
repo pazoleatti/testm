@@ -4,15 +4,12 @@ import com.aplana.sbrf.taxaccounting.service.NotificationService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.DeleteNotificationAction;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.DeleteNotificationResult;
-import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.GetNotificationCountAction;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 @PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS', 'ROLE_OPER')")
@@ -30,11 +27,7 @@ public class DeleteNotificationHandler extends AbstractActionHandler<DeleteNotif
     @Override
     public DeleteNotificationResult execute(DeleteNotificationAction action, ExecutionContext context) throws ActionException {
         DeleteNotificationResult result = new DeleteNotificationResult();
-        if (action.isDeleteWithoutCheck()) {
-            notificationService.deleteAll(action.getNotificationIds());
-        } else {
-            result.setAllowedNotifications(notificationService.getAllowedNotifications(securityService.currentUserInfo().getUser(), action.getNotificationIds()));
-        }
+        notificationService.deleteAll(action.getNotificationIds());
         return result;
     }
 

@@ -20,10 +20,11 @@ public interface EmailService {
     /**
      * Проверка авторизации с заданными параметрами
      * @param server хост
+     * @param port порт
      * @param login логин
      * @param password пароль
      * @param logger логгер для вывода ошибок
      * @return true - если авторизация прошла успешно, иначе false
      */
-    public boolean testAuth(String server, String login, String password, Logger logger);
+     boolean testAuth(String server, String port, String login, String password, Logger logger);
 }

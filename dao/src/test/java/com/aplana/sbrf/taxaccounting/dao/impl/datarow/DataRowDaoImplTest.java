@@ -19,6 +19,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -664,5 +665,68 @@ public class DataRowDaoImplTest extends Assert {
         Assert.assertTrue(Integer.valueOf(rows.get(2).get("autoNumerationColumn").toString()).equals(7));
         Assert.assertTrue(Integer.valueOf(rows.get(3).get("autoNumerationColumn").toString()).equals(8));
         Assert.assertNull(rows.get(4).get("autoNumerationColumn"));
+    }
+
+    @Test
+    public void copyRowsTest() {
+        FormData fd1 = formDataDao.get(11, false);
+        FormData fd2 = formDataDao.get(12, false);
+
+        List<DataRow<Cell>> rows1s = dataRowDao.getSavedRows(fd1, null);
+        List<DataRow<Cell>> rows1t = dataRowDao.getRows(fd1, null);
+        List<DataRow<Cell>> rows2s = dataRowDao.getSavedRows(fd2, null);
+        List<DataRow<Cell>> rows2t = dataRowDao.getRows(fd2, null);
+
+        // Изначально временные срезы и постоянные срезы НФ должны быть пустыми
+        Assert.assertEquals(0, rows1s.size());
+        Assert.assertEquals(0, rows1t.size());
+        Assert.assertEquals(0, rows2s.size());
+        Assert.assertEquals(0, rows2t.size());
+
+        // Заполнение постоянного среза ф1
+        List<DataRow<Cell>> rows = new LinkedList<DataRow<Cell>>();
+        DataRow<Cell> row = fd1.createDataRow();
+
+        row.getCell("stringColumn").setStringValue("str");
+        row.getCell("numericColumn").setNumericValue(BigDecimal.valueOf(1.33d));
+        rows.add(row);
+
+        dataRowDao.saveRows(fd1, rows);
+        dataRowDao.commit(fd1.getId());
+
+        // Копирование
+        dataRowDao.copyRows(fd1.getId(), fd2.getId());
+
+        rows1s = dataRowDao.getSavedRows(fd1, null);
+        rows1t = dataRowDao.getRows(fd1, null);
+        rows2s = dataRowDao.getSavedRows(fd2, null);
+        rows2t = dataRowDao.getRows(fd2, null);
+
+        Assert.assertEquals(1, rows1s.size());
+        Assert.assertEquals(1, rows1t.size());
+        Assert.assertEquals(0, rows2s.size());
+        Assert.assertEquals(1, rows2t.size());
+
+        Assert.assertEquals("str", rows2t.get(0).getCell("stringColumn").getValue());
+        Assert.assertEquals(BigDecimal.valueOf(1.33d), rows2t.get(0).getCell("numericColumn").getValue());
+
+        // Перенос в постоянный срез
+        dataRowDao.commit(fd2.getId());
+
+        // Копирование
+        dataRowDao.copyRows(fd1.getId(), fd2.getId());
+
+        rows1s = dataRowDao.getSavedRows(fd1, null);
+        rows1t = dataRowDao.getRows(fd1, null);
+        rows2s = dataRowDao.getSavedRows(fd2, null);
+        rows2t = dataRowDao.getRows(fd2, null);
+
+        Assert.assertEquals(1, rows1s.size());
+        Assert.assertEquals(1, rows1t.size());
+        Assert.assertEquals(1, rows2s.size());
+        Assert.assertEquals(1, rows2t.size());
+
+        Assert.assertEquals("str", rows2t.get(0).getCell("stringColumn").getValue());
+        Assert.assertEquals(BigDecimal.valueOf(1.33d), rows2t.get(0).getCell("numericColumn").getValue());
     }
 }
