@@ -8,13 +8,13 @@ import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.ReportService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CreateReportAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CreateReportResult;
 import com.aplana.sbrf.taxaccounting.web.service.PropertyLoader;
-import com.google.gwt.core.shared.GWT;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
@@ -40,6 +40,9 @@ public class CreateReportDeclarationHandler extends AbstractActionHandler<Create
     private AsyncManager asyncManager;
 
     @Autowired
+    private DeclarationDataService declarationDataService;
+
+    @Autowired
     private ReportService reportService;
 
     @Autowired
@@ -56,7 +59,7 @@ public class CreateReportDeclarationHandler extends AbstractActionHandler<Create
     public CreateReportResult execute(CreateReportAction action, ExecutionContext executionContext) throws ActionException {
         CreateReportResult result = new CreateReportResult();
         Map<String, Object> params = new HashMap<String, Object>();
-        String key = LockData.LOCK_OBJECTS.DECLARATION_DATA.name() + "_" + action.getDeclarationDataId() + "_" + action.getType().getName();
+        String key = declarationDataService.generateAsyncTaskKey(action.getDeclarationDataId(), action.getType());
         TAUserInfo userInfo = securityService.currentUserInfo();
         params.put("declarationDataId", action.getDeclarationDataId());
         params.put(AsyncTask.RequiredParams.USER_ID.name(), userInfo.getUser().getId());
